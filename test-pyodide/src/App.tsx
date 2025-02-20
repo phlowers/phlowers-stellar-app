@@ -10,6 +10,7 @@ import {
 const initPyodide = async () => {
   return loadPyodide({
     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/",
+    // packages: [""]
   });
 };
 
@@ -62,10 +63,30 @@ const runPython = (pyodide: PyodideAPI) => {
     # Display figure
     fig = go.Figure()
     frame.plot.line3d(fig)
-    fig.show()
+    # fig.show()
+
+    import js
+    plot_output = js.document.getElementById('plotly-output1')
+    fig_html = fig.to_html(
+        include_plotlyjs=False,
+        full_html=False,
+        default_height='350px',
+        div_id='plotly-output',
+    )
+    print("fig_html", fig_html)
+    print("plot_output", plot_output)
+    plot_output.innerHTML = fig_html
+
     `,
     {},
   );
+  var ele = document.getElementById("plotly-output1");
+  console.log("ele", ele);
+  var codes = ele?.getElementsByTagName("script") || [];
+  console.log("codes", codes);
+  for (var i = 0; i < codes.length; i++) {
+    eval(codes[i].text);
+  }
 
   // result = response1.map((v: number) => v);
 
@@ -168,6 +189,8 @@ const PyodideInit = ({}: {}) => {
 function App() {
   const pyodoide = initPyodide();
   console.log("pyodoide", pyodoide);
+  //@ts-ignorewindow
+  console.log("Plotly", window.Plotly);
 
   // useEffect(async () => {
   //   loadPyodide({
@@ -184,6 +207,7 @@ function App() {
       <div>
         <PyodideInit />
       </div>
+      <div id="plotly-output1"></div>
     </QueryClientProvider>
   );
 }
