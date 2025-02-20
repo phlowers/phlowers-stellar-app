@@ -10,7 +10,7 @@ import {
 const initPyodide = async () => {
   return loadPyodide({
     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/",
-    // packages: [""]
+    packages: ["micropip"],
   });
 };
 
@@ -181,7 +181,10 @@ const PyodideInit = ({}: {}) => {
   return (
     <div>
       <div>Pyodide is loaded ! Time to load {(now2 - now1) / 1000}s</div>
-      <MicropipInit pyodide={pyodide} />
+      <MechaphlowersInit
+        pyodide={pyodide}
+        micropip={pyodide?.pyimport("micropip")}
+      />
     </div>
   );
 };
