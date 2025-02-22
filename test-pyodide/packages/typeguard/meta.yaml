@@ -1,0 +1,16 @@
+package:
+  name: typeguard
+  version: 4.4.2
+  top-level:
+    - typeguard
+source:
+  url: https://files.pythonhosted.org/packages/cf/4b/9a77dc721aa0b7f74440a42e4ef6f9a4fae7324e17f64f88b96f4c25cc05/typeguard-4.4.2-py3-none-any.whl
+  sha256: 77a78f11f09777aeae7fa08585f33b5f4ef0e7335af40005b0c422ed398ff48c
+about:
+  home: null
+  PyPI: https://pypi.org/project/typeguard
+  summary: Run-time type checker for Python
+  license: MIT
+extra:
+  recipe-maintainers:
+    - PUT_YOUR_GITHUB_USERNAME_HERE

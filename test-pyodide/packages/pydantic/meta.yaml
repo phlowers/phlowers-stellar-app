@@ -1,0 +1,16 @@
+package:
+  name: pydantic
+  version: 2.10.5
+  top-level:
+    - pydantic
+source:
+  url: https://files.pythonhosted.org/packages/58/26/82663c79010b28eddf29dcdd0ea723439535fa917fce5905885c0e9ba562/pydantic-2.10.5-py3-none-any.whl
+  sha256: 4dd4e322dbe55472cb7ca7e73f4b63574eecccf2835ffa2af9021ce113c83c53
+about:
+  home: null
+  PyPI: https://pypi.org/project/pydantic
+  summary: Data validation using Python type hints
+  license: null
+extra:
+  recipe-maintainers:
+    - PUT_YOUR_GITHUB_USERNAME_HERE

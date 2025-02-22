@@ -1,0 +1,16 @@
+package:
+  name: mechaphlowers
+  version: 0.2.0
+  top-level:
+    - mechaphlowers
+source:
+  url: https://files.pythonhosted.org/packages/4a/bb/855c2bd07b0043b5bfed0691432500a5414223c546d812e51f7224ac3ccb/mechaphlowers-0.2.0-py3-none-any.whl
+  sha256: d9c6d3e60d1a8e2a4d457ed615124b9cd193292d98b53b08768515bc9efaa9d1
+about:
+  home: null
+  PyPI: https://pypi.org/project/mechaphlowers
+  summary: Physical calculation package for the mechanics and geometry of power lines
+  license: null
+extra:
+  recipe-maintainers:
+    - PUT_YOUR_GITHUB_USERNAME_HERE
