@@ -13,7 +13,7 @@ const myPlugin = () => ({
         req.originalUrl.includes("example.py")
       ) {
         res.setHeader("Cache-Control", "max-age=3600");
-        res.setHeader("content-type", "application/octet-stream");
+        res.setHeader("content-type", "application/wasm");
       }
       next();
     });
