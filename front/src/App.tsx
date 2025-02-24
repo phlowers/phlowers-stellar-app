@@ -29,7 +29,6 @@ function App() {
   const [runTime, setRunTime] = useState<number>(0);
   useLayoutEffect(() => {
     const start = performance.now();
-    console.log("im in useLayoutEffect");
     initPyodide().then((pyodide) => {
       setPyodide(pyodide);
       setLoadingTime(performance.now() - start);
