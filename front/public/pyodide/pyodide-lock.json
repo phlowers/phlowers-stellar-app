@@ -61,6 +61,7 @@
         "mypy-extensions",
         "pydantic",
         "packaging",
+        "multimethod",
         "typeguard",
         "wrapt"
       ],
@@ -69,7 +70,7 @@
       "install_dir": "site",
       "name": "mechaphlowers",
       "package_type": "package",
-      "sha256": "1a398eb640dd3097ac908935f50596ba5f52edd74e595eb28a0dd6429de34024",
+      "sha256": "e8c7ebb66643135b752e581117f25ddda010dfd4a28a19ad456113a7f72809bf",
       "unvendored_tests": false,
       "version": "0.2.0"
     },
