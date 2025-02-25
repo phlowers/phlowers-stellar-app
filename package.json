@@ -1,0 +1,14 @@
+{
+  "name": "phlowers-stellar-app",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "engines": {
+    "node": "=23",
+    "yarn": "=4.6.0"
+  },
+  "packageManager": "yarn@4.6.0"
+}
