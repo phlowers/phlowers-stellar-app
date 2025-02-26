@@ -1,0 +1,58 @@
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+name: PR
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CI: true
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  install-dependencies:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "23"
+          cache: "yarn"
+      - name: Install JS dependencies
+        run: yarn install --immutable
+
+  build_apps:
+    name: Build Apps
+    needs: [install-dependencies]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      APP_PATH: app-${{ matrix.APP_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: "recursive"
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+      - name: Install JS dependencies
+        run: yarn install --immutable
+      - name: Run build
+        run: yarn build
+        working-directory: packages/front
+      - name: lint
+        run: yarn lint
+      # - uses: browser-actions/setup-chrome@v1
+      - name: tests
+        run: yarn test:ci
+        working-directory: packages/front
