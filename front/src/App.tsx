@@ -2,7 +2,12 @@ import { useEffect, useState, useLayoutEffect } from "react";
 import "./App.css";
 import { loadPyodide } from "../public/pyodide/pyodide.mjs";
 import pythonScript from "./python/example.py";
+// import listReactFiles from 'list-react-files'
 // const pythonScript = require("./python/python_script.py");
+
+// listReactFiles(__dirname + "../public/test").then(files => console.log(files))
+
+const wheels = [];
 
 const initPyodide = async () => {
   return loadPyodide({
