@@ -19,7 +19,7 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
+# wheels/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -169,3 +169,5 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+.venv

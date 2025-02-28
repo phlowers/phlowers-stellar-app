@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "set-up-mechaphlowers": "python3 scripts/set_up_mechaphlowers.py"
+  }
+}

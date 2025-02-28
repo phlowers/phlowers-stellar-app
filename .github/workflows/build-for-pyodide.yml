@@ -1,0 +1,42 @@
+name: Build and Upload Wheel For pyodide
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.12" # Specify the Python version
+
+      - name: ⚙️ Install uv and Set up Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          # Install a specific version of uv.
+          version: "0.5.24"
+          python-version: "3.12" # Specify the Python version
+
+      - name: ⚙️ Install dependencies
+        run: |
+          uv sync --group all
+
+      - name: 🛠️ Build wheel
+        run: |
+          uv build
+
+      - name: Build wheels
+        run: |
+          pip wheel -w dist -r requirements.txt
+
+      # - name: Upload wheel files
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: wheel-files
+      #     path: dist/*.whl
