@@ -1,21 +1,19 @@
 {
-  "name": "test-pyodide",
-  "private": true,
+  "name": "front",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "set-up-mechaphlowers": "uv run scripts/set_up_mechaphlowers.py",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.66.8",
     "@types/node": "^22.13.5",
     "pyodide": "0.27.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-query": "^3.39.3",
     "vite-raw-plugin": "^1.0.2"
   },
   "devDependencies": {

@@ -2,20 +2,20 @@ import { useEffect, useState, useLayoutEffect } from "react";
 import "./App.css";
 import { loadPyodide } from "pyodide";
 import pythonScript from "./python/example.py";
-import wheels from "../wheels.json";
+// import wheels from "../wheels.json";
 // import listReactFiles from 'list-react-files'
 // const pythonScript = require("./python/python_script.py");
 
 // listReactFiles(__dirname + "../public/test").then(files => console.log(files))
-const packages = wheels.map((wheel) => {
-  return window.location.origin + "/wheels/" + wheel;
-});
-packages.push("scipy");
+// const packages = wheels.map((wheel) => {
+//   return window.location.origin + "/wheels/" + wheel;
+// });
+// packages.push("scipy");
 const initPyodide = async () => {
   return loadPyodide({
-    indexURL: window.location.origin + "/pyodide/",
+    indexURL: window.location.origin + "/stellar-perso/pyodide/",
     // indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.3/full",
-    lockFileURL: window.location.origin + "/pyodide-lock.json",
+    lockFileURL: window.location.origin + "/stellar-perso/pyodide-lock.json",
     // indexURL: window.location.origin + "/pyodide/",
     // indexURL: "localhost:8003/",
     // packages: ["scipy"],

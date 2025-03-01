@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["requests", "pip", "pyodide-build"]
+# dependencies = ["requests == 2.32.3", "pip == 24.3.1", "pyodide-build == 0.29.3"]
 # ///
 
 
@@ -19,9 +19,8 @@ PYODIDE_VERSION = "0.27.3"
 MECHAPHLOWERS_VERSION = "0.2.0"
 PYODIDE_URL = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full"
 PYODIDE_LOCK_URL = f"{PYODIDE_URL}/pyodide-lock.json"
-PYODIDE_DIRECTORY_PATH = "./front/public/pyodide"
-PACKAGES_JSON_PATH = "./front/wheels.json"
-PYODIDE_LOCK_PATH = "./front/public/pyodide-lock.json"
+PYODIDE_DIRECTORY_PATH = "./public/pyodide"
+PYODIDE_LOCK_PATH = "./public/pyodide-lock.json"
 NEEDED_PYODIDE_SOURCE_FILES = [
     "pyodide.asm.wasm", "pyodide.asm.js", "python_stdlib.zip"]
 
@@ -82,8 +81,6 @@ if __name__ == "__main__":
     # packages to fetch from pyodide are the ones we can find in the pyodide-lock.json
     packages_to_fetch_from_pyodide = [
         val["file_name"] for val in pyodide_lock_content["packages"].values() if val["name"] in all_packages_with_depends]
-
-    # print("Packages to fetch from pyodide:", packages_to_fetch_from_pyodide)
 
     # download the wheel files for the packages we need from pyodide
     for package in packages_to_fetch_from_pyodide:

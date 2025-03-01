@@ -171,3 +171,7 @@ cython_debug/
 .pypirc
 
 .venv
+
+node_modules
+.yarn/install-state.gz
+.DS_Store

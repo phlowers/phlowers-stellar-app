@@ -25,6 +25,11 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["@rollup/browser", "pyodide"],
   },
+  // build: {
+  //   outDir: "dist",
+  //   assetsDir: "assets",
+  // },
+  base: "/stellar-perso/",
   plugins: [
     myPlugin(),
     react(),
