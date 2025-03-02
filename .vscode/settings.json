@@ -5,5 +5,12 @@
     "activityBar.background": "#412815",
     "titleBar.activeBackground": "#5B371D",
     "titleBar.activeForeground": "#FDFAF8"
+  },
+  "pylint.args": ["--rcfile=${workspaceFolder}/.pylintrc"],
+  "mypy.runUsingActiveInterpreter": true,
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
   }
 }

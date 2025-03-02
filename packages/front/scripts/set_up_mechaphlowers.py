@@ -4,16 +4,15 @@
 # ///
 
 
-import pip
-from pip._internal.utils.misc import read_chunks
-from base64 import urlsafe_b64encode
-import os
-import requests
-import json
-from pathlib import Path
 import hashlib
+import json
+import os
 import shutil
-from pyodide_build.cli.py_compile import main as pyodide_build
+from pathlib import Path
+
+import pip
+import requests
+from pyodide_build.cli.py_compile import main as pyodide_build  # type: ignore
 
 PYODIDE_VERSION = "0.27.3"
 MECHAPHLOWERS_VERSION = "0.2.0"
@@ -38,7 +37,7 @@ def get_all_file_names_in_directory(direct):
 
 
 def download_file_in_directory(url, directory):
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()  # Raise an exception for HTTP errors
     name = os.path.join(directory, url.split("/")[-1])
     with open(name, "wb") as file:
@@ -66,21 +65,22 @@ if __name__ == "__main__":
     # compile the wheel file to pyc
     pyodide_build(Path(PYODIDE_DIRECTORY_PATH), False, False, 6, "")
 
-    pyodide_lock_content = requests.get(PYODIDE_LOCK_URL).json()
+    pyodide_lock_content = requests.get(PYODIDE_LOCK_URL, timeout=10).json()
 
     wheel_names = get_all_file_names_in_directory(PYODIDE_DIRECTORY_PATH)
     packages_names = [name.split("-")[0] for name in wheel_names]
 
-    all_packages_with_depends = []
+    # list the packages and their dependencies
+    all_packages = []
     for package_name in packages_names:
-        all_packages_with_depends.append(package_name)
+        all_packages.append(package_name)
         if package_name in pyodide_lock_content["packages"]:
-            all_packages_with_depends.extend(
+            all_packages.extend(
                 pyodide_lock_content["packages"][package_name]["depends"])
 
     # packages to fetch from pyodide are the ones we can find in the pyodide-lock.json
     packages_to_fetch_from_pyodide = [
-        val["file_name"] for val in pyodide_lock_content["packages"].values() if val["name"] in all_packages_with_depends]
+        val["file_name"] for val in pyodide_lock_content["packages"].values() if val["name"] in all_packages]
 
     # download the wheel files for the packages we need from pyodide
     for package in packages_to_fetch_from_pyodide:

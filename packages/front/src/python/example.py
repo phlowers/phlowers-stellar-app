@@ -1,7 +1,10 @@
-import numpy as np
-import pandas as pd
+# mypy: ignore-errors
+# pylint: skip-file
+
 # import plotly.graph_objects as go
 import js
+import numpy as np
+import pandas as pd
 from mechaphlowers import SectionDataFrame
 from mechaphlowers.entities.arrays import SectionArray
 
