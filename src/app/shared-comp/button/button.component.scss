@@ -1,0 +1,21 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  border-style: none;
+  background-color: #0f65a7;
+  color: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-decoration: none;
+  transition: background-color .3s ease-in-out;
+
+  &:hover {
+    background-color: #0a385a;
+  }
+
+  &:focus-visible {
+    outline-offset: 0;
+    outline: 3px solid #000;
+  }
+}

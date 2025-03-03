@@ -1,0 +1,16 @@
+<div class="center-stuff">
+  <app-line-drawing [coordinates]="testLine()" />
+
+  <form>
+    @for (item of testLine(); track item.x; let i = $index) {
+    <div>
+      <input type="number" [attr.value]="item.x" (input)="updateTestLine(item, 'x', $event)"
+        [attr.placeholder]="'coordonnée X point ' + i" [attr.aria-label]="'coordonnée X point ' + i">
+      <input type="number" [attr.value]="item.y" (input)="updateTestLine(item, 'y', $event)"
+        [attr.placeholder]="'coordonnée y point ' + i" [attr.aria-label]="'coordonnée y point ' + i">
+      <input type="number" [attr.value]="item.z" (input)="updateTestLine(item, 'z', $event)"
+        [attr.placeholder]="'coordonnée z point ' + i" [attr.aria-label]="'coordonnée z point ' + i">
+    </div>
+    }
+  </form>
+</div>

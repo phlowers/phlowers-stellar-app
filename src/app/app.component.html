@@ -1,8 +1,18 @@
 <!-- <app-canvas-container /> -->
+<nav>
+  <ul>
+    <li>
+      <a app-button routerLink="/threejs-test" routerLinkActive="active" ariaCurrentWhenActive="page"
+        [btnLabel]="'test three JS'" [btnIcon]="'🥽'"></a>
+    </li>
+    <li>
+      <a app-button routerLink="/plotly-test" routerLinkActive="active" ariaCurrentWhenActive="page"
+        [btnLabel]="'test Plotly'" [btnIcon]="'📈'"></a>
+    </li>
+  </ul>
+</nav>
 
-<div class="center-stuff">
-  <app-line-drawing [coordinates]="testLine" />
-</div>
+<router-outlet></router-outlet>
 
 <!-- <div>
     <button app-button [btnLabel]="'label de bouton'" [btnIcon]="'▷'"></button>

@@ -6,3 +6,22 @@ body {
 body {
     margin: 0;
 }
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+
+  li {
+    &::marker {
+      font-size: 0;
+    }
+  }
+}
+
+.center-stuff {
+  display: flex;
+  min-height: calc(100% - 55px);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
