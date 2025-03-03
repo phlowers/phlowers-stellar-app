@@ -29,7 +29,7 @@ export default defineConfig({
   //   outDir: "dist",
   //   assetsDir: "assets",
   // },
-  base: "/stellar-perso/",
+  base: "/phlowers-stellar-app/",
   plugins: [
     myPlugin(),
     react(),

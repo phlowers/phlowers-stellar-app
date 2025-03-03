@@ -2,10 +2,9 @@
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
-  #   push:
-  #     branches: ["main"]
-
+  #Runs on pushes targeting the default branch
+  push:
+    branches: ["poc/deploy/from_main"]
   workflow_dispatch:
 
 permissions:

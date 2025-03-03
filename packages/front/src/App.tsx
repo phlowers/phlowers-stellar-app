@@ -34,6 +34,8 @@ const runPython = (pyodide: PyodideAPI) => {
   }
 };
 
+console.log("hello");
+
 function App() {
   const [pyodide, setPyodide] = useState<PyodideAPI>();
   const [loadingTime, setLoadingTime] = useState<number>(0);
