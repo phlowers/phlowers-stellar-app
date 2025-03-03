@@ -12,10 +12,12 @@ import pythonScript from "./python/example.py";
 // });
 // packages.push("scipy");
 const initPyodide = async () => {
+  const repoName = window.location.href.split("/")[3];
+  const root = window.location.origin + "/" + repoName;
   return loadPyodide({
-    indexURL: window.location.origin + "/stellar-perso/pyodide/",
+    indexURL: root + "/pyodide/",
     // indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.3/full",
-    lockFileURL: window.location.origin + "/stellar-perso/pyodide-lock.json",
+    lockFileURL: root + "/pyodide-lock.json",
     // indexURL: window.location.origin + "/pyodide/",
     // indexURL: "localhost:8003/",
     // packages: ["scipy"],
@@ -33,8 +35,6 @@ const runPython = (pyodide: PyodideAPI) => {
     eval(codes[i].text);
   }
 };
-
-console.log("hello3");
 
 function App() {
   const [pyodide, setPyodide] = useState<PyodideAPI>();
