@@ -1,0 +1,10 @@
+{
+  "packageManager": "yarn@4.6.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "prettier": "3.5.1",
+    "typescript": "~5.7.2"
+  }
+}

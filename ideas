@@ -1,0 +1,6 @@
+sudo ./run_docker
+make py-compile
+PYODIDE_MINIMAL=true
+pyodide py-compile
+pip install pyodide-cli
+pip install pyodide-build
