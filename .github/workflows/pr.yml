@@ -1,0 +1,166 @@
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+name: PR
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ADMIN }}
+  CI: true
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Get modified packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      library_names: ${{ steps.get-project-changes.outputs.library_names }}
+      app_ids: ${{ steps.get-project-changes.outputs.app_ids }}
+      no_package_changed: ${{ steps.get-project-changes.outputs.no_package_changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN_ADMIN }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: "recursive"
+      - name: Get project changes
+        id: get-project-changes
+        uses: ./.github/actions/get-project-changes
+
+  install-dependencies:
+    name: Install dependencies
+    needs: changes
+    runs-on: ubuntu-latest
+    if: needs.changes.outputs.no_package_changed == 'false'
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN_ADMIN }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: "recursive"
+      - name: Install & cache node dependencies
+        uses: ./.github/actions/install-node-deps
+
+  app-lint-and-tests:
+    name: App Tests
+    needs: [install-dependencies, changes]
+    runs-on: ubuntu-latest
+    if: join(fromJson(needs.changes.outputs.app_ids)) != ''
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        APP_ID: ${{ fromJson(needs.changes.outputs.app_ids) }}
+    env:
+      APP_PATH: app-${{ matrix.APP_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN_ADMIN }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: "recursive"
+      - name: Run tests
+        uses: ./.github/actions/lint-and-tests
+        with:
+          path: packages/${{ env.APP_PATH }}
+
+  build_apps:
+    name: Build Apps
+    needs: [install-dependencies, changes, delete_bundle_guessr_label]
+    runs-on: ubuntu-latest
+    if: needs.changes.outputs.no_package_changed == 'false'
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        APP_ID: ${{ fromJson(needs.changes.outputs.app_ids) }}
+    env:
+      APP_PATH: app-${{ matrix.APP_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN_ADMIN }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: "recursive"
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+      - name: Use project dependencies
+        uses: ./.github/actions/cache-project-dependencies
+      - name: Use cached next cache folder
+        uses: ./.github/actions/cache-next-cache
+        with:
+          app_id: ${{ env.APP_PATH }}
+      - name: Run build
+        run: yarn build
+        working-directory: packages/${{ env.APP_PATH }}
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CDC_AZURE_SP_CREDENTIALS_FRONTENDECO_ASSETS }}
+      - name: Change Azure Subscription
+        run: az account set --subscription bbff3279-073a-4995-bba3-16f96a085427
+      - name: BundleGuessr - download reference json from azure
+        uses: azure/CLI@v2
+        with:
+          azcliversion: ${{ vars.AZCLI_VERSION }}
+          inlineScript: az storage blob download --container-name first-load-stats --file  packages/${{ env.APP_PATH }}/first-load-stats-next.json --name first-load-stats-${{ env.APP_PATH }}.json
+        env:
+          AZURE_STORAGE_ACCOUNT: frontendecoassets
+      - name: BundleGuessr - generate json
+        run: yarn bundleguessr:generate-json
+        working-directory: packages/${{ env.APP_PATH }}
+      - name: Danger
+        run: yarn run -B -T danger ci --dangerfile .dangerfile.ts --id BundleGuessr:${{ env.APP_PATH }}
+        working-directory: packages/${{ env.APP_PATH }}
+
+  conclusion:
+    name: Conclusion
+    runs-on: ubuntu-latest
+    needs: [
+        changes,
+        install-dependencies,
+        app-lint-and-tests,
+        library-lint-and-tests,
+        build_apps,
+        #docker-build-scan-wiz,
+      ]
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          changes_result: ${{ needs.changes.result }}
+          install_dependencies_result: ${{ needs.install-dependencies.result }}
+          app_lint_and_tests_result: ${{ needs.app-lint-and-tests.result }}
+          library_lint_and_tests_result: ${{ needs.library-lint-and-tests.result }}
+          build_apps_result: ${{ needs.build_apps.result }}
+          #docker_build_scan_wiz_result: ${{ needs.docker-build-scan-wiz.result }}
+        with:
+          script: |
+            const {
+              changes_result,
+              install_dependencies_result,
+              app_lint_and_tests_result,
+              library_lint_and_tests_result,
+              build_apps_result,
+              //docker_build_scan_wiz_result,
+            } = process.env;
+
+            if (
+              changes_result === 'failure' ||
+              install_dependencies_result === 'failure' ||
+              app_lint_and_tests_result === 'failure' ||
+              library_lint_and_tests_result === 'failure' ||
+              build_apps_result === 'failure'
+              //|| docker_build_scan_wiz_result === 'failure'
+            )
+              process.exit(1);
+            else
+              process.exit(0);
