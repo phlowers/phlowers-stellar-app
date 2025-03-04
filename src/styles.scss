@@ -1,3 +1,11 @@
+* {
+  &,
+  &::before,
+  &::after {
+    box-sizing: border-box;
+  }
+}
+
 html,
 body {
     height: 100%;
@@ -5,6 +13,14 @@ body {
 
 body {
     margin: 0;
+    font-family: sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
 }
 
 ul, ol {

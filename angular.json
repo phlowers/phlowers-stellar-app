@@ -34,7 +34,9 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "./public/js/plotly-3.0.0.min.js"
+            ]
           },
           "configurations": {
             "production": {
