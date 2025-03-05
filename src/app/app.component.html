@@ -10,18 +10,18 @@
 <style></style>
 
 <main class="main">
-  <div [hidden]="pyodideLoadTime" class="content">Mechaphlowers loading...</div>
-  <div [hidden]="!pyodideLoadTime" class="content">
-    Mechaphlowers loaded in {{ pyodideLoadTime / 1000 }}s
+  <div *ngIf="!loadTime" class="content">Mechaphlowers loading...</div>
+  <div *ngIf="loadTime" class="content">
+    Mechaphlowers loaded in {{ loadTime / 1000 }}s
   </div>
-  <div [hidden]="importTime" class="content">Mechaphlowers importing...</div>
-  <div [hidden]="!importTime" class="content">
+  <div *ngIf="loadTime && !importTime" class="content">
+    Mechaphlowers importing...
+  </div>
+  <div *ngIf="importTime" class="content">
     Mechaphlowers importing in {{ importTime / 1000 }}s
   </div>
-  <button (click)="run()">Run</button>
-  <div [hidden]="!runTime" class="content">
-    Mechaphlowers ran in {{ runTime / 1000 }}s
-  </div>
+  <button *ngIf="importTime" (click)="run()">Run</button>
+  <div *ngIf="runTime">Mechaphlowers ran in {{ runTime / 1000 }}s</div>
 </main>
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->

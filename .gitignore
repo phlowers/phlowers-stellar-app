@@ -45,3 +45,4 @@ public/pyodide/*
 .vscode/settings.json
 certificates
 # src/python-packages.json
+src/python-packages.json

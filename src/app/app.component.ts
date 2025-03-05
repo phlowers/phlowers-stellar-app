@@ -5,22 +5,7 @@ import pythonScript from "./python/example.py";
 import importScript from "./python/imports.py";
 import { CommonModule } from "@angular/common";
 
-const initPyodide = async () => {
-  console.log("Loading Pyodide...");
-  let root = window.location.origin;
-  // if (root.includes("github.io") || root.includes("localhost")) {
-  const repoName = window.location.href.split("/")[3];
-  root = window.location.origin + "/" + repoName;
-  // }
-  console.log("indexURL:", root + "/pyodide");
-  return loadPyodide({
-    indexURL: root + "/pyodide/",
-    // lockFileURL: root + "/pyodide/pyodide-lock.json",
-    packages: ["mechaphlowers"],
-  });
-};
-
-type PyodideAPI = Awaited<ReturnType<typeof initPyodide>>;
+type PyodideAPI = Awaited<ReturnType<any>>;
 
 @Component({
   selector: "app-root",
@@ -30,22 +15,34 @@ type PyodideAPI = Awaited<ReturnType<typeof initPyodide>>;
 })
 export class AppComponent implements OnInit {
   title = "phlowers-stellar-app";
-  pyodideLoadTime = 0;
+  loadTime = 0;
   importTime = 0;
   runTime = 0;
-  pyodide: PyodideAPI | null = null;
+  pythonWorker: Worker | null = null;
+
+  constructor() {
+    this.pythonWorker = this.setupWorker();
+  }
+
+  setupWorker() {
+    const worker = new Worker(new URL("./app.worker", import.meta.url), {
+      name: window.location.href,
+    });
+    worker.onmessage = ({ data }) => {
+      if (data.loadTime) {
+        this.loadTime = data.loadTime;
+      } else if (data.importTime) {
+        this.importTime = data.importTime;
+      } else if (data.runTime) {
+        this.runTime = data.runTime;
+      }
+    };
+    return worker;
+  }
 
   run() {
-    const start = performance.now();
-    this.pyodide?.runPython(pythonScript, {});
-    this.runTime = performance.now() - start;
+    this.pythonWorker?.postMessage(4);
   }
 
-  async ngOnInit() {
-    const start = performance.now();
-    this.pyodide = await initPyodide();
-    this.pyodideLoadTime = performance.now() - start;
-    this.pyodide.runPython(importScript, {});
-    this.importTime = performance.now() - this.pyodideLoadTime;
-  }
+  async ngOnInit() {}
 }
