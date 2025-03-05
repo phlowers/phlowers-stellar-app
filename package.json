@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --optimization=false",
+    "build": "ng build --optimization=true",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "set-up-mechaphlowers": "uv run ./src/scripts/set_up_mechaphlowers.py"

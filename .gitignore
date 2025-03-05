@@ -44,3 +44,4 @@ Thumbs.db
 public/pyodide/*
 
 .vscode/settings.json
+src/python-packages.json
