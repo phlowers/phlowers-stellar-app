@@ -22,6 +22,7 @@ export class WorkerService {
 
   setupWorker() {
     this.worker = new Worker(new URL('./worker', import.meta.url), {
+      /* @vite-ignore */
       name: window.location.href
     });
     this.worker.onmessage = ({ data }) => {
