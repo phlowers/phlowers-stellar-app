@@ -40,7 +40,7 @@ jobs:
       - name: Set up mechaphlowers
         run: npm run set-up-mechaphlowers
       - name: Build
-        run: npm run build
+        run: npm run build -- --configuration production,githubPage
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact

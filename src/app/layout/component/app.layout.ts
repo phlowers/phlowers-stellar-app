@@ -23,10 +23,6 @@ import { LayoutService } from '../service/layout.service';
 export class AppLayout {
   menuOutsideClickListener: any;
 
-  @ViewChild(AppSidebar) appSidebar!: AppSidebar;
-
-  @ViewChild(AppTopbar) appTopBar!: AppTopbar;
-
   constructor(
     public layoutService: LayoutService,
     public renderer: Renderer2,
