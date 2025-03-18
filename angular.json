@@ -72,6 +72,14 @@
         },
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
+          "options": {
+            "sslKey": "./certificates/localhost-key.pem",
+            "sslCert": "./certificates/localhost.pem",
+            "headers": {
+              "Cross-Origin-Opener-Policy": "same-origin",
+              "Cross-Origin-Embedder-Policy": "require-corp"
+            }
+          },
           "configurations": {
             "production": {
               "buildTarget": "phlowers-stellar-app:build:production"

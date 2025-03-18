@@ -19,17 +19,17 @@ async function loadPyodideAndPackages() {
       .filter(Boolean)
   ];
   const start = performance.now();
-  pyodide = await loadPyodide({
-    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full',
-    packages: ['scipy', 'numpy', 'pandas', 'pydantic', 'packaging', 'wrapt', ...localPythonPackages]
-  });
-  const loadEnd = performance.now();
-  console.log('loadEnd is', loadEnd);
-  postMessage({ loadTime: loadEnd - start });
-  await pyodide.runPython(importScript);
-  const importEnd = performance.now();
-  console.log('importEnd is', importEnd - loadEnd);
-  postMessage({ importTime: importEnd - loadEnd });
+  // pyodide = await loadPyodide({
+  //   indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full',
+  //   packages: ['scipy', 'numpy', 'pandas', 'pydantic', 'packaging', 'wrapt', ...localPythonPackages]
+  // });
+  // const loadEnd = performance.now();
+  // console.log('loadEnd is', loadEnd);
+  // postMessage({ loadTime: loadEnd - start });
+  // await pyodide.runPython(importScript);
+  // const importEnd = performance.now();
+  // console.log('importEnd is', importEnd - loadEnd);
+  // postMessage({ importTime: importEnd - loadEnd });
 }
 
 loadPyodideAndPackages();

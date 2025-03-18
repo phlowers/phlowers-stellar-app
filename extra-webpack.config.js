@@ -9,6 +9,13 @@ module.exports = {
       }
     ]
   },
+  // experiments: {
+  //   outputModule: true
+  // },
+  // output: {
+  //   module: true,
+  //   libraryTarget: 'module'
+  // },
   plugins: [new PyodidePlugin()],
   externals: {
     'node:fs': '{}',
