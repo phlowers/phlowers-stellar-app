@@ -1,0 +1,15 @@
+// :host {
+  // display: block;
+  // max-width: 1200px;
+  // height: 400px;
+// }
+
+.range-container {
+  display: flex;
+  justify-content: center;
+  padding: 1.125rem .5rem;
+
+  [type="range"] {
+    width: 80%;
+  }
+}

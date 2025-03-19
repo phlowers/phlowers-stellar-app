@@ -1,3 +1,6 @@
 <div #plotlyLine></div>
-
+<div class="range-container">
+  <input type="range" [attr.min]="setMinLineRangeZ()" [attr.max]="setMaxLineRangeZ()" step="0.1"
+    aria-label="modifier la hauteur de la ligne" [attr.value]="getMiddleLineRangeZ()">
+</div>
 <!-- <input type="range" id="slider" min="0" max="10" step="0.1" value="5" oninput="updatePlot(this.value)"> -->

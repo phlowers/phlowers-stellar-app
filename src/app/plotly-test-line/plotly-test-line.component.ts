@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, viewChild } from '@angular/core';
+import { AfterViewInit, Component, computed, ElementRef, input, signal, viewChild } from '@angular/core';
+import { PlotlyLine } from './plotly-line.model';
 
 declare const Plotly: any;
 
@@ -8,35 +9,71 @@ declare const Plotly: any;
   templateUrl: './plotly-test-line.component.html',
   styleUrl: './plotly-test-line.component.scss'
 })
-export class PlotlyTestLineComponent implements OnInit {
+export class PlotlyTestLineComponent implements AfterViewInit {
   plotlyLineContainer = viewChild<ElementRef<HTMLDivElement>>('plotlyLine');
 
-  ngOnInit(): void {
-    // Plot the initial chart
-    Plotly.newPlot(this.plotlyLineContainer()?.nativeElement, this.data);
+  // Have to initiate data for input since it can't be a required input for some reason
+  // (this way comp' will receive data, otherwize it won't...)
+  lineTrace = input<PlotlyLine>({
+    x: [],
+    z: [],
+    y: []
+  });
 
-    // Plotly.newPlot(this.plotlyLineContainer()?.nativeElement, [{
-    //   x: [1, 2, 3, 4, 5],
-    //   y: [1, 2, 4, 8, 16]
-    // }],
-    //   { margin: { t: 0 } });
+  trace1 = computed(() => ({
+    x: this.lineTrace().x,
+    z: this.lineTrace().z,
+    y: this.lineTrace().y,
+    'line': {'color': 'red', 'width': 3},
+    type: 'scatter3d',
+    mode: 'lines'
+  }));
+
+  initialLineTrace = this.lineTrace();
+  trace2 = computed(() => ({
+    x: this.initialLineTrace.x,
+    z: this.initialLineTrace.z,
+    y: this.initialLineTrace.y,
+    'line': {'color': 'green', 'width': 4},
+    type: 'scatter3d',
+    mode: 'lines'
+  }));
+
+  data = computed(() => [this.trace1(), this.trace2()]);
+
+  // AfterViewInit since we're listening to a DOM el in template
+  ngAfterViewInit() {
+    if (this.lineTrace()) {
+      Plotly.newPlot(this.plotlyLineContainer()?.nativeElement, this.data(), this.layout, this.config);
+    }
   }
 
-//     { x:0,  y:16.8, z:5 },
-  //   { x:50, y:3.00890769, z:5 },
-  //   { x:100,y:-5.65382853, z:5 },
-  //   { x:150,y:-9.27490824, z:5 },
-  //   { x:200,y:-7.8905724, z:5 },
-  //   { x:250,y:-1.48696614, z:5 },
-  //   { x:300, y:10, z:5 },
+  layout = {
+    showlegend: false,
+    width: 1200,
+    height: 400,
+    scene: {
+      aspectmode: "data",
+      // aspectratio: {
+      //   x: 1,
+      //   y: 1,
+      //   z: 1
+      // },
+      camera: {
+        eye: {
+          x: 0,
+          y: -5,
+          z: 0
+        }
+      }
+    }
+  }
 
-  trace1 = {
-    x: [0, 50, 100, 150, 200, 250, 300],
-    z: [16.8, 3.00890769, -5.65382853, -9.27490824, -7.8905724, -1.48696614, 10],
-    y: [5, 5, 5, 5, 5, 5, 5],
-    type: 'scatter3d'
-  };
-  data = [this.trace1];
+  config = {
+    // displayModeBar: false
+    displaylogo: false,
+    responsive: true,
+  }
 
   // Function to update y-values
 
@@ -47,4 +84,15 @@ export class PlotlyTestLineComponent implements OnInit {
   // Example: Add 5 to each y-value
   // this.updateYValues(5);
 
+  // named Z but in reality Y axis in plotly is Z axis. Go figure!
+  arbitraryValueToUpdateMinMaxZ = 10;
+  setMinLineRangeZ() {
+    return Math.min(...this.lineTrace().z) - this.arbitraryValueToUpdateMinMaxZ
+  }
+  setMaxLineRangeZ() {
+    return Math.max(...this.lineTrace().z) + this.arbitraryValueToUpdateMinMaxZ
+  }
+  getMiddleLineRangeZ() {
+    return (this.setMaxLineRangeZ() + this.setMinLineRangeZ()) / 2;
+  }
 }
