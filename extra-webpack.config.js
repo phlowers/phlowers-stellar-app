@@ -2,6 +2,11 @@ const { PyodidePlugin } = require('@pyodide/webpack-plugin');
 
 module.exports = {
   module: {
+    parser: {
+      javascript: {
+        // importMeta: false,
+        url: true 
+    },
     rules: [
       {
         test: /\.py$/i,
@@ -9,6 +14,14 @@ module.exports = {
       }
     ]
   },
+  // experiments: {
+  //   asyncWebAssembly: true,
+  //   topLevelAwait: true
+  // },
+  // output: {
+  //   module: true,
+  //   libraryTarget: 'module'
+  // },
   plugins: [new PyodidePlugin()],
   externals: {
     'node:fs': '{}',

@@ -50,7 +50,8 @@ describe('AppMenu', () => {
         label: 'Home',
         items: [
           { label: 'Studies', icon: 'pi pi-fw pi-share-alt', routerLink: ['/'] },
-          { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] }
+          { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
+          { label: 'Storage POC', icon: 'pi pi-fw pi-cog', routerLink: ['/offline-storage-poc'] }
         ]
       }
     ]);

@@ -4,9 +4,9 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { LayoutService } from '../service/layout.service';
-import { OnlineService } from '../../pages/service/online.service';
 import { Subscription } from 'rxjs';
-import { WorkerService } from '../../pages/service/worker.service';
+import { WorkerService } from '../../core/engine/worker/worker.service';
+import { OnlineService } from '../../core/api/services/online.service';
 
 @Component({
   selector: 'app-topbar',
@@ -26,7 +26,7 @@ import { WorkerService } from '../../pages/service/worker.service';
       <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
         <i class="pi pi-ellipsis-v"></i>
       </button>
-      <div class="layout-topbar-online" [ngStyle]="{ color: !workerReady ? 'red' : 'green' }">{{ workerReady === false ? 'WORKER LOADING' : 'WORKER LOADED' }}</div>
+      <div class="layout-topbar-online" [ngStyle]="{ color: !workerReady ? 'red' : 'green' }">{{ workerReady === false ? 'ENGINE LOADING' : 'ENGINE READY' }}</div>
       <div>|</div>
       <div class="layout-topbar-online" [ngStyle]="{ color: offline ? 'red' : 'green' }">{{ offline === false ? 'ONLINE' : 'OFFLINE' }}</div>
       <div>|</div>
@@ -60,7 +60,7 @@ export class AppTopbar implements OnInit {
     public layoutService: LayoutService,
     private onlineService: OnlineService,
     private workerService: WorkerService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Process online status changes

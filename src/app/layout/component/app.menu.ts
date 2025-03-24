@@ -24,7 +24,8 @@ export class AppMenu {
         label: 'Home',
         items: [
           { label: 'Studies', icon: 'pi pi-fw pi-share-alt', routerLink: ['/'] },
-          { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] }
+          { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
+          { label: 'test', icon: 'pi pi-fw pi-database', routerLink: ['/offline-storage-poc'] }
         ]
       }
     ];

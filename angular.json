@@ -15,14 +15,28 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-builders/custom-esbuild:application",
           "options": {
-            "customWebpackConfig": {
-              "path": "./extra-webpack.config.js"
+            "allowedCommonJsDependencies": [
+              "node:url"
+            ],
+            "loader": {
+              ".py": "text"
             },
+            "browser": "./src/main.ts",
+            "externalDependencies": [
+              "node:url",
+              "node:fs",
+              "node:vm",
+              "node:path",
+              "node:crypto",
+              "node:child_process"
+            ],
+            "plugins": [
+              "./esbuild/plugins.ts"
+            ],
             "outputPath": "dist/phlowers-stellar-app",
             "index": "src/index.html",
-            "main": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -32,7 +46,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"],
+            "styles": [
+              "src/app/styles/styles.scss"
+            ],
             "scripts": [],
             "webWorkerTsConfig": "tsconfig.worker.json"
           },
@@ -71,7 +87,8 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
+          "builder": "@angular-builders/custom-esbuild:dev-server",
+          "options": {},
           "configurations": {
             "production": {
               "buildTarget": "phlowers-stellar-app:build:production"
@@ -97,7 +114,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"],
+            "styles": [
+              "src/styles.scss"
+            ],
             "scripts": [],
             "webWorkerTsConfig": "tsconfig.worker.json"
           }
