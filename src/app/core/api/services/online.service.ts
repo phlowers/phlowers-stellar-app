@@ -1,7 +1,14 @@
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, distinctUntilChanged, fromEvent, map, merge, startWith, tap } from 'rxjs';
 import { timeout } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 
 enum ServerStatus {
   LOADING = 'LOADING',
@@ -17,7 +24,7 @@ export class OnlineService {
   constructor(private httpClient: HttpClient) {
     console.log('Online service started');
     this.httpClient
-      .get('http://localhost:8080', { observe: 'response' })
+      .get(environment.apiUrl, { observe: 'response' })
       .pipe(timeout(2000))
       .subscribe({
         next: (res) => {

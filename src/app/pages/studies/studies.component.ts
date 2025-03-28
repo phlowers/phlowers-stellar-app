@@ -1,5 +1,12 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+import { Component, inject, input, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { isEqual } from 'lodash';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +18,8 @@ import { RatingModule } from 'primeng/rating';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
+import { AvatarModule } from 'primeng/avatar';
+
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
@@ -19,36 +28,43 @@ import { RouterModule } from '@angular/router';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { StudyService } from '../service/study.service';
 import { v4 as uuid } from 'uuid';
-import { StorageService } from '../service/storage.service';
-import { Study } from '../database/db';
+import { StorageService } from '../../core/store/storage.service';
+import { StudyService } from '../../core/api/services/study.service';
+import { StudyModelLocal } from '../../core/store/models/study.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ImportStudyModalComponent } from './components/import-study-modal.component';
 
 interface Column {
   title: string;
   dataKey: string;
 }
 
-const newStudy = () => {
+const newStudy = (): StudyModelLocal => {
   return {
-    name: '',
+    title: '',
     description: '',
-    uuid: ''
+    uuid: '',
+    author_email: '',
+    created_at_offline: '',
+    updated_at_offline: '',
+    saved: false
   };
 };
 
 const columns = [
   { dataKey: 'uuid', title: 'Uuid' },
-  { dataKey: 'name', title: 'Name' },
+  { dataKey: 'title', title: 'Name' },
   { dataKey: 'description', title: 'Description' },
+  { dataKey: 'author_email', title: 'Author' },
   { dataKey: 'saved', title: 'Saved remotely' }
 ];
 
 @Component({
-  selector: 'app-dashboard',
   standalone: true,
   imports: [
     RouterModule,
+    AvatarModule,
     CommonModule,
     TableModule,
     FormsModule,
@@ -66,19 +82,21 @@ const columns = [
     TagModule,
     InputIconModule,
     IconFieldModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    ImportStudyModalComponent
   ],
   template: `
     <p-toast position="top-center"></p-toast>
     <p-toolbar styleClass="mb-6">
       <ng-template #start>
         <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button label="Import from database" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openImportStudyModal()" />
         <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedStudies()" [disabled]="!selectedStudies || !selectedStudies.length" />
       </ng-template>
 
-      <ng-template #end>
+      <!-- <ng-template #end>
         <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-      </ng-template>
+      </ng-template> -->
     </p-toolbar>
 
     <p-table
@@ -87,7 +105,7 @@ const columns = [
       [rows]="10"
       [columns]="columns"
       [paginator]="true"
-      [globalFilterFields]="['name']"
+      [globalFilterFields]="['title']"
       [tableStyle]="{ 'min-width': '75rem' }"
       [(selection)]="selectedStudies"
       [rowHover]="true"
@@ -111,43 +129,55 @@ const columns = [
           <th style="width: 3rem">
             <p-tableHeaderCheckbox />
           </th>
-          <th style="width: 12rem; max-width: 12rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Uuid</th>
-          <th pSortableColumn="name" style="min-width:16rem">
+          <th style="width: 6rem; max-width: 6rem;">Uuid</th>
+          <th pSortableColumn="title" style="min-width:16rem">
             Name
-            <p-sortIcon field="name" />
+            <p-sortIcon field="title" />
           </th>
           <th pSortableColumn="description" style="min-width:16rem">
             Description
             <p-sortIcon field="description" />
           </th>
-          <th pSortableColumn="saved" style="min-width:16rem">
-            Saved remotely
-            <p-sortIcon field="saved" />
+          <th pSortableColumn="author_email" style="display: flex; justify-content: center; min-width:16rem">
+            Author
+            <p-sortIcon field="author_email" />
           </th>
           <th style="min-width: 12rem"></th>
           <th style="min-width: 2rem"></th>
+          <th style="min-width: 6rem"></th>
         </tr>
       </ng-template>
       <ng-template #body let-study>
-        <tr>
-          <td style="width: 3rem">
-            <p-tableCheckbox [value]="study" />
-          </td>
-          <td style="width: 12rem; max-width: 12rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ study.uuid }}</td>
-          <td style="min-width: 16rem">{{ study.name }}</td>
-          <td style="min-width: 16rem">{{ study.description }}</td>
-          <td style="min-width: 12rem">{{ study.saved }}</td>
-          <td style="text-align: end;">
-            <p-button icon="pi pi-upload" severity="help" class="mr-2" [rounded]="true" [outlined]="false" (click)="deleteStudy(study)" />
-            <p-button icon="pi pi-copy" severity="warn" class="mr-2" [rounded]="true" [outlined]="false" (click)="duplicateStudy(study)" />
-            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="false" (click)="editStudy(study)" />
-            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="false" (click)="deleteStudy(study)" />
-          </td>
-          <td>
-            <!-- <a href="/study/{{study.uuid}}"></a>   -->
-            <p-button label="OPEN" [routerLink]="['/study', study.uuid]" severity="contrast" [rounded]="false" [outlined]="false" />
-          </td>
-        </tr>
+        <!-- trick to get type safety -->
+        @if (identity(study); as typedStudy) {
+          <tr>
+            <td style="width: 3rem">
+              <p-tableCheckbox [value]="typedStudy" />
+            </td>
+            <td style="width: 6rem; max-width: 6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ typedStudy.uuid }}</td>
+            <td style="min-width: 16rem">{{ typedStudy.title }}</td>
+            <td style="min-width: 16rem">{{ typedStudy.description }}</td>
+            <td style="min-width: 16rem">{{ typedStudy.author_email }}</td>
+            <td style="min-width: 12rem" style="display:flex; justify-content:center;">
+              @if (typedStudy.saved) {
+                <!-- <p-avatar icon="pi pi-check" [style]="{ 'background-color': 'transparent', color: 'green' }" class="mr-2" size="normal" shape="circle" /> -->
+
+                <p-button icon="pi pi-check" [style]="{ 'background-color': 'transparent', color: 'green' }" disabled="true" severity="secondary" class="mr-2" [rounded]="true" [outlined]="false" />
+              } @else {
+                <p-button icon="pi pi-upload" severity="help" class="mr-2" [rounded]="true" [outlined]="false" (click)="saveStudyRemotely(typedStudy)" />
+              }
+            </td>
+            <td style="text-align: end;">
+              <p-button icon="pi pi-copy" severity="warn" class="mr-2" [rounded]="true" [outlined]="false" (click)="duplicateStudy(typedStudy)" />
+              <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="false" (click)="editStudy(typedStudy)" />
+              <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="false" (click)="deleteStudy(typedStudy)" />
+            </td>
+            <td>
+              <!-- <a href="/study/{{study.uuid}}"></a>   -->
+              <p-button label="OPEN" [routerLink]="['/study', typedStudy.uuid]" severity="contrast" [rounded]="false" [outlined]="false" />
+            </td>
+          </tr>
+        }
       </ng-template>
     </p-table>
 
@@ -155,9 +185,9 @@ const columns = [
       <ng-template #content>
         <div class="flex flex-col gap-6">
           <div>
-            <label for="name" class="block font-bold mb-3">Name</label>
-            <input type="text" pInputText id="name" [(ngModel)]="study.name" required autofocus fluid />
-            <small class="text-red-500" *ngIf="submitted && !study!.name">Name is required.</small>
+            <label for="title" class="block font-bold mb-3">Title</label>
+            <input type="text" pInputText id="title" [(ngModel)]="study.title" required autofocus fluid />
+            <small class="text-red-500" *ngIf="submitted && !study!.title">Title is required.</small>
           </div>
           <div>
             <label for="description" class="block font-bold mb-3">Description</label>
@@ -172,15 +202,18 @@ const columns = [
       </ng-template>
     </p-dialog>
 
+    <app-import-study-modal [(isOpen)]="isImportStudyModalOpen" (isOpenChange)="setIsImportStudyModalOpen($event)" />
+
     <p-confirmdialog [style]="{ width: '450px' }" />
   `,
-  providers: [MessageService, StudyService, ConfirmationService]
+  providers: [MessageService, ConfirmationService]
 })
-export class Dashboard implements OnInit {
+export class Studies implements OnInit {
   studyDialog: boolean = false;
-  studies = signal<Study[]>([]);
-  study: Study = newStudy();
-  selectedStudies!: Study[] | null;
+  isImportStudyModalOpen = false;
+  studies = signal<StudyModelLocal[]>([]);
+  study: StudyModelLocal = newStudy();
+  selectedStudies!: StudyModelLocal[] | null;
   submitted: boolean = false;
   @ViewChild('dt') dt!: Table;
   columns: Column[] = columns;
@@ -188,11 +221,21 @@ export class Dashboard implements OnInit {
   constructor(
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private studyService: StudyService
   ) {}
+
+  setIsImportStudyModalOpen(isOpen: boolean) {
+    console.log('isOpen', isOpen);
+    this.isImportStudyModalOpen = isOpen;
+  }
 
   exportCSV() {
     this.dt.exportCSV();
+  }
+
+  identity(study: StudyModelLocal): StudyModelLocal {
+    return study;
   }
 
   ngOnInit() {
@@ -219,7 +262,15 @@ export class Dashboard implements OnInit {
     this.studyDialog = true;
   }
 
-  editStudy(study: Study) {
+  openImportStudyModal() {
+    this.isImportStudyModalOpen = true;
+  }
+
+  importFromDatabase() {
+    this.isImportStudyModalOpen = true;
+  }
+
+  editStudy(study: StudyModelLocal) {
     this.study = { ...study };
     this.studyDialog = true;
   }
@@ -237,7 +288,7 @@ export class Dashboard implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
-          detail: studies.length === 1 ? 'Study Deleted' : 'Studies Deleted',
+          detail: studies.length === 1 ? 'StudyModelLocal Deleted' : 'Studies Deleted',
           life: 3000
         });
       }
@@ -249,11 +300,36 @@ export class Dashboard implements OnInit {
     this.submitted = false;
   }
 
-  saveStudyRemotely() {}
+  hideImportStudyModal() {
+    this.isImportStudyModalOpen = false;
+  }
 
-  deleteStudy(study: Study) {
+  saveStudyRemotely(study: StudyModelLocal) {
+    this.studyService.createStudy(study).subscribe({
+      next: async () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: 'Study successfully saved!',
+          life: 3000
+        });
+
+        await this.storageService.db?.studies.update(study.uuid, { ...study, updated_at_offline: new Date().toISOString(), saved: true });
+        this.studies.set((await this.storageService.db?.studies.toArray()) || []);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          life: 3000
+        });
+      }
+    });
+  }
+
+  deleteStudy(study: StudyModelLocal) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete ' + study.name + '?',
+      message: 'Are you sure you want to delete ' + study.title + '?',
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: async () => {
@@ -263,7 +339,7 @@ export class Dashboard implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
-          detail: 'Study Deleted',
+          detail: 'StudyModelLocal Deleted',
           life: 3000
         });
       }
@@ -286,45 +362,58 @@ export class Dashboard implements OnInit {
     return uuid();
   }
 
-  async duplicateStudy(study: Study) {
+  async duplicateStudy(study: StudyModelLocal) {
     const newStudy = { ...study };
     const uuid = this.createUuid();
-    await this.storageService.db?.studies.add({ ...newStudy, uuid });
+    await this.storageService.db?.studies.add({ ...newStudy, uuid, saved: false });
     this.studies.set((await this.storageService.db?.studies.toArray()) || []);
     this.messageService.add({
       severity: 'success',
       summary: 'Successful',
-      detail: 'Study Duplicated',
+      detail: 'Study successfully duplicated!',
       life: 3000
     });
   }
 
   async saveStudy() {
     this.submitted = true;
-    if (!this.study?.name) {
+    if (!this.study?.title) {
       return;
     }
     if (this.study?.uuid) {
-      await this.storageService.db?.studies.put({ ...this.study });
-      this.studies.set((await this.storageService.db?.studies.toArray()) || []);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Successful',
-        detail: 'Study Updated',
-        life: 3000
-      });
+      const study = await this.storageService.db?.studies.get(this.study.uuid);
+      if (study) {
+        const isThereDifference = !isEqual(study, this.study);
+        if (isThereDifference) {
+          await this.storageService.db?.studies.update(study.uuid, { ...this.study, updated_at_offline: new Date().toISOString(), saved: false });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Successful',
+            detail: 'Study updated!',
+            life: 3000
+          });
+        }
+      }
     } else {
       const uuid = this.createUuid();
-      await this.storageService.db?.studies.add({ ...this.study, uuid });
-      this.studies.set((await this.storageService.db?.studies.toArray()) || []);
+      const user = (await this.storageService.db?.users.toArray())?.[0];
+      await this.storageService.db?.studies.add({
+        ...this.study,
+        uuid,
+        author_email: user!.email,
+        created_at_offline: new Date().toISOString(),
+        updated_at_offline: new Date().toISOString(),
+        saved: false
+      });
       this.messageService.add({
         severity: 'success',
         summary: 'Successful',
-        detail: 'Study Created',
+        detail: 'StudyModelLocal Created',
         life: 3000
       });
     }
 
+    this.studies.set((await this.storageService.db?.studies.toArray()) || []);
     this.studyDialog = false;
     this.study = newStudy();
   }

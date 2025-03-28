@@ -17,6 +17,13 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "esnext",
+    // "useDefineForClassFields": true,
+    // "types": [
+    //   "node"
+    // ],
+    // "paths": {
+    //   "url": ["./node_modules/url-browserify"],
+    // }
     // "allowImportingTsExtensions": true
   },
   "angularCompilerOptions": {
@@ -24,5 +31,5 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
 }

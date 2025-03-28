@@ -1,9 +1,19 @@
-import { Component } from '@angular/core';
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ButtonModule } from 'primeng/button';
+import { FormsModule } from '@angular/forms'; // Import FormsModule
+import { TableModule } from 'primeng/table';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, ButtonModule, FormsModule, TableModule],
   template: `<div>admin page</div>`
 })
 export class Admin {}
