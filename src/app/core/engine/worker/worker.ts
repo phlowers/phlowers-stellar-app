@@ -1,32 +1,29 @@
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 /// <reference lib="webworker" />
 
 import { loadPyodide } from 'pyodide';
-import importScript from './python/imports.py';
-// import { Task } from '../../../worker/tasks';
-import pythonPackages from '../../../python-packages.json';
-// import { handleTask, PyodideAPI, Task } from './helpers/pyodide/tasks';
+import importScript from '../python-functions/imports.py';
+import pythonPackages from '../python-packages.json';
 
-export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
+export type PyodideAPI = Awaited<ReturnType<any>>;
 
 let pyodide: PyodideAPI;
 
-// const pythonPackages = {};
-
 async function loadPyodideAndPackages() {
+  const localPythonPackages = [
+    ...Object.values(pythonPackages)
+      .map((pkg: any) => (pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''))
+      .filter(Boolean)
+  ];
   const start = performance.now();
   pyodide = await loadPyodide({
     indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full',
-    packages: [
-      'scipy',
-      'numpy',
-      'pandas',
-      'pydantic',
-      'packaging',
-      'wrapt',
-      ...Object.values(pythonPackages)
-        .map((pkg: any) => (pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''))
-        .filter(Boolean)
-    ]
+    packages: ['scipy', 'numpy', 'pandas', 'pydantic', 'packaging', 'wrapt', ...localPythonPackages]
   });
   const loadEnd = performance.now();
   console.log('loadEnd is', loadEnd);

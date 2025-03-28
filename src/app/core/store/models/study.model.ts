@@ -4,11 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component } from '@angular/core';
+import { StudyModel } from '../../api/models/study.model';
 
-@Component({
-  standalone: true,
-  selector: 'app-footer',
-  template: `<div class="layout-footer">STELLAR by RTE</div>`
-})
-export class AppFooter {}
+export type StudyModelLocal = StudyModel & {
+  saved: boolean;
+};

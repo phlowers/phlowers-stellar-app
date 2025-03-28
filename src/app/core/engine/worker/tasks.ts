@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { loadPyodide } from 'pyodide';
+// import { loadPyodide } from 'pyodide';
 import pythonScript from './python/example.py';
 import testScript from './python/test.py';
 
@@ -13,7 +13,7 @@ export enum Task {
   runCode = 'runCode'
 }
 
-export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
+export type PyodideAPI = Awaited<ReturnType<any>>;
 
 async function runTests(pyodide: PyodideAPI, script: string) {
   await pyodide.loadPackage(['pytest']);
