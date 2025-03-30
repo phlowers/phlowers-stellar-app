@@ -10,7 +10,7 @@ import { BehaviorSubject, Observable, distinctUntilChanged, fromEvent, map, merg
 import { timeout } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
-enum ServerStatus {
+export enum ServerStatus {
   LOADING = 'LOADING',
   ONLINE = 'ONLINE',
   OFFLINE = 'OFFLINE'
@@ -22,18 +22,21 @@ export class OnlineService {
   public serverOnline$ = new BehaviorSubject<ServerStatus>(ServerStatus.LOADING);
 
   constructor(private httpClient: HttpClient) {
-    console.log('Online service started');
-    this.httpClient
-      .get(environment.apiUrl, { observe: 'response' })
-      .pipe(timeout(2000))
-      .subscribe({
-        next: (res) => {
-          this.serverOnline$.next(ServerStatus.ONLINE);
-        },
-        error: (err) => {
-          this.serverOnline$.next(ServerStatus.OFFLINE);
-        }
-      });
+    this.online$.subscribe((online) => {
+      if (online) {
+        this.httpClient
+          .get(environment.apiUrl, { observe: 'response' })
+          .pipe(timeout(2000))
+          .subscribe({
+            next: (res) => {
+              this.serverOnline$.next(ServerStatus.ONLINE);
+            },
+            error: (err) => {
+              this.serverOnline$.next(ServerStatus.OFFLINE);
+            }
+          });
+      }
+    })
   }
 
   private _online = merge(fromEvent(window, 'online'), fromEvent(window, 'offline')).pipe(
