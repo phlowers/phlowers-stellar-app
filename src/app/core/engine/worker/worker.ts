@@ -9,6 +9,7 @@
 import { loadPyodide } from 'pyodide';
 import importScript from '../python-functions/imports.py';
 import pythonPackages from '../python-packages.json';
+import { handleTask } from './tasks';
 
 export type PyodideAPI = Awaited<ReturnType<any>>;
 
@@ -38,8 +39,8 @@ loadPyodideAndPackages();
 
 addEventListener('message', ({ data }: { data: { task: any } }) => {
   console.log('data in worker is', data);
-  //   handleTask(pyodide, data.task).then((result) => {
-  //     console.log('result in worker is', result);
-  //     postMessage(result);
-  //   });
+  handleTask(pyodide, data.task).then((result) => {
+    console.log('result in worker is', result);
+    postMessage(result);
+  });
 });

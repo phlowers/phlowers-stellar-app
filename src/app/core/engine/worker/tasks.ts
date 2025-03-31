@@ -5,12 +5,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { loadPyodide } from 'pyodide';
-import pythonScript from './python/example.py';
-import testScript from './python/test.py';
+import pythonScript from '../python-functions/example.py';
+import testScript from '../python-functions/test.py';
+// import runPythonScript from '../python-functions/run_python.py';
 
 export enum Task {
   runTests = 'runTests',
-  runCode = 'runCode'
+  runCode = 'runCode',
+  runPython = 'runPython'
 }
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
@@ -32,12 +34,20 @@ async function runcode(pyodide: PyodideAPI, script: string) {
   return { runTime: performance.now() - start };
 }
 
+async function runPython(pyodide: PyodideAPI, script: string) {
+  const start = performance.now();
+  await pyodide.runPythonAsync(script);
+  return { runTime: performance.now() - start };
+}
+
 export async function handleTask(pyodide: PyodideAPI, task: Task) {
   switch (task) {
     case Task.runTests:
       return await runTests(pyodide, testScript);
     case Task.runCode:
       return await runcode(pyodide, pythonScript);
+    case Task.runPython:
+      return await runPython(pyodide, pythonScript);
     default:
       console.error('Unknown task:', task);
   }

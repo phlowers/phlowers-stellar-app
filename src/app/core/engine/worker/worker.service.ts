@@ -8,6 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Task } from './tasks';
 // import { AppDB } from '../database/db';
 
 @Injectable({
@@ -43,6 +44,10 @@ export class WorkerService {
       }
     };
     // return worker;
+  }
+
+  async runTask(task: Task) {
+    this.worker?.postMessage({ task });
   }
 
   //   async createDatabase(): Promise<void> {

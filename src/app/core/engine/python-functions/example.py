@@ -1,8 +1,8 @@
 # mypy: ignore-errors
 # pylint: skip-file
 
-# import plotly.graph_objects as go
-# import js
+import plotly.graph_objects as go
+import js
 import numpy as np
 import pandas as pd
 from mechaphlowers import SectionDataFrame
@@ -30,15 +30,17 @@ frame = SectionDataFrame(section)
 print(frame)
 
 # Display figure
-# fig = go.Figure()
+fig = go.Figure()
 # frame.plot.line3d(fig)
 # fig.show()
-
-# plot_output = js.document.getElementById('plotly-output1')
-# fig_html = fig.to_html(
-#     include_plotlyjs=False,
-#     full_html=False,
-#     default_height='350px',
-#     div_id='plotly-output',
-# )
-# plot_output.innerHTML = fig_html
+print("fig is", fig)
+print("js is", js)
+plot_output = js.document.getElementById('plotly-output1')
+print("plot_output is", plot_output)
+fig_html = fig.to_html(
+    include_plotlyjs=False,
+    full_html=False,
+    default_height='350px',
+    div_id='plotly-output',
+)
+plot_output.innerHTML = fig_html
