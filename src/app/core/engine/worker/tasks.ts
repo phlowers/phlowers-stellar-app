@@ -47,7 +47,11 @@ export async function handleTask(pyodide: PyodideAPI, task: Task) {
     case Task.runCode:
       return await runcode(pyodide, pythonScript);
     case Task.runPython:
-      return await runPython(pyodide, pythonScript);
+      await runPython(pyodide, pythonScript);
+      //@ts-ignore
+      const result = pyodide.globals.get('result');
+      console.log('result is', result);
+      return { result };
     default:
       console.error('Unknown task:', task);
   }

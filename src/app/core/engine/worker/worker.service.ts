@@ -41,6 +41,16 @@ export class WorkerService {
         this._ready.next(true);
       } else if (data.runTime) {
         this.runTime = data.runTime;
+      } else if (data.result) {
+        const div = document.getElementById('plotly-output1');
+        if (div) {
+          div.innerHTML = data.result;
+          const ele = document.getElementById('plotly-output1');
+          const codes = ele?.getElementsByTagName('script') || [];
+          for (let i = 0; i < codes.length; i++) {
+            eval(codes[i].text);
+          }
+        }
       }
     };
     // return worker;
