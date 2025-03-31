@@ -33,6 +33,7 @@
         "@angular/platform-browser": "^19.0.0",
         "@angular/platform-browser-dynamic": "^19.0.0",
         "@angular/router": "^19.0.0",
+        "@angular/service-worker": "^19.2.4",
         "@primeng/themes": "^19.0.5",
         "chart.js": "4.4.2",
         "dexie": "^4.0.11",
