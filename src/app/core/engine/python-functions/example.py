@@ -29,18 +29,40 @@ section.sagging_temperature = 15
 frame = SectionDataFrame(section)
 print(frame)
 
+layout = {
+    'height': 800,
+    # 'width': 1000,
+    # 'width': 500,
+    'autosize': True,
+}
+
 # Display figure
-fig = go.Figure()
-# frame.plot.line3d(fig)
+fig = go.Figure(layout=layout)
+frame.plot.line3d(fig)
+
+camera = dict(
+    up=dict(x=0, y=0, z=1),
+    center=dict(x=0, y=0, z=0),
+    eye=dict(x=1.25, y=1.25, z=1.25)
+)
+
+fig.update_layout(
+    # scene_camera=camera,
+    scene=dict(
+        aspectmode='manual',  # Makes the axes scale proportionally to the data
+        aspectratio=dict(x=15, y=0.5, z=7),  # Equal scaling for all axes
+    )
+)
 # fig.show()
 print("fig is", fig)
 # print("js is", js)
 # plot_output = js.document.getElementById('plotly-output1')
 # print("plot_output is", plot_output)
 result = fig.to_html(
-    include_plotlyjs=False,
+    include_plotlyjs=True,
     full_html=False,
-    default_height='350px',
+    default_height='800px',
+    default_width='100%',
     # div_id='plotly-output',
 )
 # plot_output.innerHTML = fig_html
