@@ -56,8 +56,8 @@ export class WorkerService {
     // return worker;
   }
 
-  async runTask(task: Task) {
-    this.worker?.postMessage({ task });
+  async runTask(task: Task, data: any) {
+    this.worker?.postMessage({ task, data });
   }
 
   //   async createDatabase(): Promise<void> {

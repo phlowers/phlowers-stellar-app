@@ -34,20 +34,23 @@ async function runcode(pyodide: PyodideAPI, script: string) {
   return { runTime: performance.now() - start };
 }
 
-async function runPython(pyodide: PyodideAPI, script: string) {
+async function runPython(pyodide: PyodideAPI, script: string, data: any) {
   const start = performance.now();
+  // pyodide.registerJsModule('my_js_namespace', { data1: data });
+  //@ts-ignore
+  pyodide.globals.set('data1', data);
   await pyodide.runPythonAsync(script);
   return { runTime: performance.now() - start };
 }
 
-export async function handleTask(pyodide: PyodideAPI, task: Task) {
+export async function handleTask(pyodide: PyodideAPI, task: Task, data: any) {
   switch (task) {
     case Task.runTests:
       return await runTests(pyodide, testScript);
     case Task.runCode:
       return await runcode(pyodide, pythonScript);
     case Task.runPython:
-      await runPython(pyodide, pythonScript);
+      await runPython(pyodide, pythonScript, data);
       //@ts-ignore
       const result = pyodide.globals.get('result');
       console.log('result is', result);
