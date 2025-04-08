@@ -12,7 +12,7 @@
     transition:
         transform var(--layout-section-transition-duration),
         left var(--layout-section-transition-duration);
-    background-color: var(--surface-overlay);
+    background-color: var(--p-blue-950);
     border-radius: var(--content-border-radius);
     padding: 0.5rem;
 }
@@ -64,7 +64,7 @@
             align-items: center;
             position: relative;
             outline: 0 none;
-            color: var(--text-color);
+            color: white;
             cursor: pointer;
             padding: 0.75rem 1rem;
             border-radius: var(--content-border-radius);
@@ -89,6 +89,7 @@
 
             &:hover {
                 background-color: var(--surface-hover);
+                color: var(--text-color);
             }
 
             &:focus {

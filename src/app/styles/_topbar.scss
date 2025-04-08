@@ -8,7 +8,7 @@
     top: 0;
     width: 100%;
     padding: 0 2rem;
-    background-color: var(--surface-card);
+    background-color: var(--p-blue-950);
     transition: left var(--layout-section-transition-duration);
     display: flex;
     align-items: center;
@@ -24,7 +24,7 @@
         align-items: center;
         font-size: 1.5rem;
         border-radius: var(--content-border-radius);
-        color: var(--text-color);
+        color: white;
         font-weight: 500;
         gap: 0.5rem;
 
@@ -45,7 +45,7 @@
         border-radius: 50%;
         width: 2.5rem;
         height: 2.5rem;
-        color: var(--text-color);
+        color: white;
         transition: background-color var(--element-transition-duration);
         cursor: pointer;
 
