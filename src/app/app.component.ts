@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -19,9 +25,9 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { MessageModule } from 'primeng/message';
-import { StorageService } from './app/pages/service/storage.service';
-import { WorkerService } from './app/pages/service/worker.service';
-import { OnlineService } from './app/pages/service/online.service';
+import { OnlineService } from './core/api/services/online.service';
+import { WorkerService } from './core/engine/worker/worker.service';
+import { StorageService } from './core/store/storage.service';
 
 const validateEmail = (email: string) => {
   return String(email)
