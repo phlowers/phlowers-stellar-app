@@ -5,19 +5,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AppFooter } from './app.footer';
+import { AppFooterComponent } from './app.footer';
 import { By } from '@angular/platform-browser';
 
-describe('AppFooter Component', () => {
-  let fixture: ComponentFixture<AppFooter>;
-  let component: AppFooter;
+describe('AppFooterComponent Component', () => {
+  let fixture: ComponentFixture<AppFooterComponent>;
+  let component: AppFooterComponent;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // declarations: [AppFooter]
+      // declarations: [AppFooterComponent]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AppFooter);
+    fixture = TestBed.createComponent(AppFooterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges(); // Trigger initial change detection
   });

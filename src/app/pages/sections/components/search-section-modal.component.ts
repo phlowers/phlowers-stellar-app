@@ -34,34 +34,52 @@ const newSection = (): SectionModel => {
         <div style="display: flex; flex-direction: column; height: 100%;">
           <div>
             <div class="flex flex-row gap-6">
-              <span>
-                <label for="sectionName" class="block font-bold mb-3">Name contains:</label>
-                <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-              </span>
-              <span>
-                <label for="sectionName" class="block font-bold mb-3">Section CUR contains:</label>
-                <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-              </span>
-              <span>
-                <label for="sectionName" class="block font-bold mb-3">Section Short name contains:</label>
-                <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-              </span>
-              <span>
-                <label for="sectionName" class="block font-bold mb-3">Section name contains:</label>
-                <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-              </span>
-              <span>
-                <label for="sectionName" class="block font-bold mb-3">Cable short name contains:</label>
-                <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-              </span>
-              <span>
-                <label for="sectionName" class="block font-bold mb-3">Cable name contains:</label>
-                <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-              </span>
-              <span>
-                <label for="sectionName" class="block font-bold mb-3">Section type:</label>
-                <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-              </span>
+              <div class="grid grid-cols-6 gap-4">
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Section CUR:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Section Short name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Section name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Cable short name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Cable name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Section type:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Link name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Branch name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Transit link name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+                <div>
+                  <label for="sectionName" class="block font-bold mb-3">Voltage name:</label>
+                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
+                </div>
+              </div>
             </div>
             <div class="flex flex-row gap-6 mt-3">
               <p-button label="Search" (click)="searchStudies()" />
