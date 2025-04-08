@@ -5,18 +5,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { Component, Renderer2, ViewChild } from '@angular/core';
+import { Component, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
-import { filter, Subscription } from 'rxjs';
-import { AppTopbar } from './app.topbar';
-import { AppSidebar } from './app.sidebar';
+import { Router, RouterModule } from '@angular/router';
+import { AppTopbarComponent } from './app.topbar';
+import { AppSidebarComponent } from './app.sidebar';
 import { LayoutService } from '../service/layout.service';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, AppTopbar, AppSidebar, RouterModule],
+  imports: [CommonModule, AppTopbarComponent, AppSidebarComponent, RouterModule],
   template: `<div class="layout-wrapper" [ngClass]="containerClass">
     <app-topbar></app-topbar>
     <app-sidebar></app-sidebar>
@@ -27,7 +26,7 @@ import { LayoutService } from '../service/layout.service';
     </div>
   </div> `
 })
-export class AppLayout {
+export class AppLayoutComponent {
   menuOutsideClickListener: any;
 
   constructor(

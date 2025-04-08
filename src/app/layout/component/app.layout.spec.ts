@@ -6,50 +6,44 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Router, NavigationEnd } from '@angular/router';
-import { of, Subject } from 'rxjs';
-import { AppLayout } from './app.layout';
-import { AppTopbar } from './app.topbar';
-import { AppSidebar } from './app.sidebar';
+import { AppLayoutComponent } from './app.layout';
+import { AppTopbarComponent } from './app.topbar';
+import { AppSidebarComponent } from './app.sidebar';
 import { LayoutService } from '../service/layout.service';
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Renderer2 } from '@angular/core';
-import { expect, jest, test } from '@jest/globals';
+import { expect, jest } from '@jest/globals';
 
 @Component({ selector: 'app-topbar', template: '' })
-class MockAppTopbar {}
+class MockAppTopbarComponent {}
 
 @Component({ selector: 'app-sidebar', template: '' })
-class MockAppSidebar {}
+class MockAppSidebarComponent {}
 
 describe('AppLayout', () => {
-  let component: AppLayout;
-  let fixture: ComponentFixture<AppLayout>;
+  let component: AppLayoutComponent;
+  let fixture: ComponentFixture<AppLayoutComponent>;
   let layoutService: LayoutService;
-  let router: Router;
-  let renderer: Renderer2;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule, CommonModule],
       declarations: [],
-      providers: [LayoutService, { provide: AppTopbar, useClass: MockAppTopbar }, { provide: AppSidebar, useClass: MockAppSidebar }, Renderer2]
+      providers: [LayoutService, { provide: AppTopbarComponent, useClass: MockAppTopbarComponent }, { provide: AppSidebarComponent, useClass: MockAppSidebarComponent }, Renderer2]
       // standalone: true
     })
-      .overrideComponent(AppLayout, {
+      .overrideComponent(AppLayoutComponent, {
         set: {
-          imports: [CommonModule, MockAppTopbar, MockAppSidebar, RouterTestingModule]
+          imports: [CommonModule, MockAppTopbarComponent, MockAppSidebarComponent, RouterTestingModule]
           // declarations: []
         }
       })
       .compileComponents();
 
-    fixture = TestBed.createComponent(AppLayout);
+    fixture = TestBed.createComponent(AppLayoutComponent);
     component = fixture.componentInstance;
     layoutService = TestBed.inject(LayoutService);
-    router = TestBed.inject(Router);
-    renderer = TestBed.inject(Renderer2);
     fixture.detectChanges();
   });
 

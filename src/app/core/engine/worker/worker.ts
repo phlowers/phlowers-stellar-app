@@ -9,6 +9,7 @@
 import { loadPyodide } from 'pyodide';
 import importScript from '../python-functions/imports.py';
 import pythonPackages from '../python-packages.json';
+import { handleTask } from './tasks';
 
 export type PyodideAPI = Awaited<ReturnType<any>>;
 
@@ -22,7 +23,7 @@ async function loadPyodideAndPackages() {
   ];
   const start = performance.now();
   pyodide = await loadPyodide({
-    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full',
+    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
     packages: ['scipy', 'numpy', 'pandas', 'pydantic', 'packaging', 'wrapt', ...localPythonPackages]
   });
   const loadEnd = performance.now();
@@ -36,10 +37,10 @@ async function loadPyodideAndPackages() {
 
 loadPyodideAndPackages();
 
-addEventListener('message', ({ data }: { data: { task: any } }) => {
+addEventListener('message', ({ data }: { data: { task: any; data: any } }) => {
   console.log('data in worker is', data);
-  //   handleTask(pyodide, data.task).then((result) => {
-  //     console.log('result in worker is', result);
-  //     postMessage(result);
-  //   });
+  handleTask(pyodide, data.task, data.data).then((result) => {
+    console.log('result in worker is', result);
+    postMessage(result);
+  });
 });

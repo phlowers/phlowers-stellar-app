@@ -6,23 +6,22 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { AppMenu } from './app.menu';
-import { AppMenuitem } from './app.menuitem';
+import { AppMenuComponent } from './app.menu';
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 
 @Component({ selector: 'app-menuitem', template: '' })
-class MockAppMenuitem {
+class MockAppMenuitemComponent {
   item: MenuItem | undefined;
   index: number | undefined;
   root: boolean | undefined;
 }
 
 describe('AppMenu', () => {
-  let component: AppMenu;
-  let fixture: ComponentFixture<AppMenu>;
+  let component: AppMenuComponent;
+  let fixture: ComponentFixture<AppMenuComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -31,15 +30,15 @@ describe('AppMenu', () => {
       providers: []
       // standalone: true
     })
-      .overrideComponent(AppMenu, {
+      .overrideComponent(AppMenuComponent, {
         set: {
-          imports: [CommonModule, MockAppMenuitem, RouterModule]
+          imports: [CommonModule, MockAppMenuitemComponent, RouterModule]
           // declarations: []
         }
       })
       .compileComponents();
 
-    fixture = TestBed.createComponent(AppMenu);
+    fixture = TestBed.createComponent(AppMenuComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

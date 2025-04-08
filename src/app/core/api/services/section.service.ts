@@ -7,7 +7,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { StudyModel, ModifyStudyModel, SearchStudyModel } from '../models/study.model';
 import { environment } from '../../../../environments/environment.development';
 import { ModifySectionModel, SearchSectionModel, SectionModel } from '../models/section.model';
 
