@@ -5,23 +5,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Routes } from '@angular/router';
-import { AppLayout } from './layout/component/app.layout';
-import { Studies } from './pages/studies/studies.component';
-import { Admin } from './pages/admin/admin';
-import { Study } from './pages/study/study.component';
+import { AppLayoutComponent } from './layout/component/app.layout';
+import { StudiesComponent } from './pages/studies/studies.component';
+import { AdminComponent } from './pages/admin/admin';
+import { StudyComponent } from './pages/study/study.component';
 // import { OfflineStoragePoc } from './pages/offline-storage-poc/offline-storage-poc.component';
-import { Sections } from './pages/sections/sections.component';
+import { SectionsComponent } from './pages/sections/sections.component';
 
 export const appRoutes: Routes = [
   {
     path: '',
-    component: AppLayout,
+    component: AppLayoutComponent,
     children: [
-      { path: '', component: Studies },
-      { path: 'admin', component: Admin },
+      { path: '', component: StudiesComponent },
+      { path: 'admin', component: AdminComponent },
       // { path: 'offline-storage-poc', component: OfflineStoragePoc },
-      { path: 'study/:uuid', component: Study },
-      { path: 'sections', component: Sections }
+      { path: 'study/:uuid', component: StudyComponent },
+      { path: 'sections', component: SectionsComponent }
     ]
   }
   // { path: 'notfound', component: Notfound },

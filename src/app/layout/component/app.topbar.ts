@@ -41,7 +41,7 @@ import { OnlineService } from '../../core/api/services/online.service';
     </div>
   </div>`
 })
-export class AppTopbar implements OnInit {
+export class AppTopbarComponent implements OnInit {
   items!: MenuItem[];
   subscriptions = new Subscription();
   offline = true;

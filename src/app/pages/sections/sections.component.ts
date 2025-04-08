@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -49,7 +49,7 @@ import { SearchSectionModalComponent } from './components/search-section-modal.c
   `,
   providers: [MessageService, ConfirmationService]
 })
-export class Sections {
+export class SectionsComponent {
   submitted = false;
   isSearchSectionModalOpen = false;
 

@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { TableModule } from 'primeng/table';
@@ -16,4 +16,4 @@ import { TableModule } from 'primeng/table';
   imports: [CommonModule, ButtonModule, FormsModule, TableModule],
   template: `<div>admin page</div>`
 })
-export class Admin {}
+export class AdminComponent {}

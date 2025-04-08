@@ -11,4 +11,4 @@ import { Component } from '@angular/core';
   selector: 'app-footer',
   template: `<div class="layout-footer">STELLAR by RTE</div>`
 })
-export class AppFooter {}
+export class AppFooterComponent {}

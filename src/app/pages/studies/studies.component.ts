@@ -4,12 +4,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, inject, input, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { isEqual } from 'lodash';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TooltipModule } from 'primeng/tooltip';
+
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
@@ -32,8 +34,9 @@ import { v4 as uuid } from 'uuid';
 import { StorageService } from '../../core/store/storage.service';
 import { StudyService } from '../../core/api/services/study.service';
 import { StudyModelLocal } from '../../core/store/models/study.model';
-import { HttpErrorResponse } from '@angular/common/http';
 import { ImportStudyModalComponent } from './components/import-study-modal.component';
+import { Subscription } from 'rxjs';
+import { OnlineService, ServerStatus } from '../../core/api/services/online.service';
 
 interface Column {
   title: string;
@@ -74,6 +77,7 @@ const columns = [
     ToolbarModule,
     RatingModule,
     InputTextModule,
+    TooltipModule,
     TextareaModule,
     SelectModule,
     RadioButtonModule,
@@ -89,8 +93,8 @@ const columns = [
     <p-toast position="top-center"></p-toast>
     <p-toolbar styleClass="mb-6">
       <ng-template #start>
-        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-        <p-button label="Import from database" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openImportStudyModal()" />
+        <p-button label="New study" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button disabled="{{ !serverOnline }}" label="Import from database" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openImportStudyModal()" />
         <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedStudies()" [disabled]="!selectedStudies || !selectedStudies.length" />
       </ng-template>
 
@@ -164,13 +168,23 @@ const columns = [
 
                 <p-button icon="pi pi-check" [style]="{ 'background-color': 'transparent', color: 'green' }" disabled="true" severity="secondary" class="mr-2" [rounded]="true" [outlined]="false" />
               } @else {
-                <p-button icon="pi pi-upload" severity="help" class="mr-2" [rounded]="true" [outlined]="false" (click)="saveStudyRemotely(typedStudy)" />
+                <p-button
+                  icon="pi pi-upload"
+                  disabled="{{ !serverOnline }}"
+                  pTooltip="{{ serverOnline ? 'Save in distant database' : 'Cannot save. Server is offline' }}"
+                  tooltipPosition="top"
+                  severity="help"
+                  class="mr-2"
+                  [rounded]="true"
+                  [outlined]="true"
+                  (click)="saveStudyRemotely(typedStudy)"
+                />
               }
             </td>
             <td style="text-align: end;">
-              <p-button icon="pi pi-copy" severity="warn" class="mr-2" [rounded]="true" [outlined]="false" (click)="duplicateStudy(typedStudy)" />
-              <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="false" (click)="editStudy(typedStudy)" />
-              <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="false" (click)="deleteStudy(typedStudy)" />
+              <p-button icon="pi pi-copy" pTooltip="Duplicate" tooltipPosition="top" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="duplicateStudy(typedStudy)" />
+              <p-button icon="pi pi-pencil" pTooltip="Edit" tooltipPosition="top" class="mr-2" [rounded]="true" [outlined]="true" (click)="editStudy(typedStudy)" />
+              <p-button icon="pi pi-trash" pTooltip="Delete" tooltipPosition="top" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteStudy(typedStudy)" />
             </td>
             <td>
               <!-- <a href="/study/{{study.uuid}}"></a>   -->
@@ -186,7 +200,7 @@ const columns = [
         <div class="flex flex-col gap-6">
           <div>
             <label for="title" class="block font-bold mb-3">Title</label>
-            <input type="text" pInputText id="title" [(ngModel)]="study.title" required autofocus fluid />
+            <input type="text" pInputText id="title" [(ngModel)]="study.title" required fluid />
             <small class="text-red-500" *ngIf="submitted && !study!.title">Title is required.</small>
           </div>
           <div>
@@ -208,19 +222,22 @@ const columns = [
   `,
   providers: [MessageService, ConfirmationService]
 })
-export class Studies implements OnInit {
-  studyDialog: boolean = false;
+export class StudiesComponent implements OnInit {
+  studyDialog = false;
   isImportStudyModalOpen = false;
   studies = signal<StudyModelLocal[]>([]);
   study: StudyModelLocal = newStudy();
   selectedStudies!: StudyModelLocal[] | null;
-  submitted: boolean = false;
+  submitted = false;
   @ViewChild('dt') dt!: Table;
   columns: Column[] = columns;
+  subscriptions = new Subscription();
+  serverOnline = false;
 
   constructor(
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private onlineService: OnlineService,
     private storageService: StorageService,
     private studyService: StudyService
   ) {}
@@ -244,6 +261,16 @@ export class Studies implements OnInit {
         this.loadStudies();
       }
     });
+
+    this.subscriptions.add(
+      this.onlineService.serverOnline$.subscribe((serverOnline) => {
+        this.serverOnline = serverOnline === ServerStatus.ONLINE;
+      })
+      // this.onlineService.online$.subscribe((online) => {
+      //   console.log("online is", online);
+      //   this.offline = !online;
+      // })
+    );
   }
 
   loadStudies() {
@@ -288,7 +315,7 @@ export class Studies implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
-          detail: studies.length === 1 ? 'StudyModelLocal Deleted' : 'Studies Deleted',
+          detail: studies.length === 1 ? 'Study Deleted' : 'Studies Deleted',
           life: 3000
         });
       }
@@ -317,7 +344,7 @@ export class Studies implements OnInit {
         await this.storageService.db?.studies.update(study.uuid, { ...study, updated_at_offline: new Date().toISOString(), saved: true });
         this.studies.set((await this.storageService.db?.studies.toArray()) || []);
       },
-      error: (error: HttpErrorResponse) => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -339,7 +366,7 @@ export class Studies implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
-          detail: 'StudyModelLocal Deleted',
+          detail: 'Study Deleted',
           life: 3000
         });
       }
@@ -408,7 +435,7 @@ export class Studies implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Successful',
-        detail: 'StudyModelLocal Created',
+        detail: 'Study Created',
         life: 3000
       });
     }

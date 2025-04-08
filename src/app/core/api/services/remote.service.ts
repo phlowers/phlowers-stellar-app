@@ -6,8 +6,6 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { timeout } from 'rxjs/operators';
 
 const url = 'http://localhost:8080';
 
@@ -22,7 +20,7 @@ export class RemoteService {
       next: (res) => {
         console.log('Studies saved', res);
       },
-      error: (err) => {
+      error: () => {
         console.log('Error saving studies');
       }
     });

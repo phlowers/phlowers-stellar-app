@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable, effect, signal, computed } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 export interface layoutConfig {
   preset?: string;
@@ -20,11 +20,6 @@ interface LayoutState {
   configSidebarVisible?: boolean;
   staticMenuMobileActive?: boolean;
   menuHoverActive?: boolean;
-}
-
-interface MenuChangeEvent {
-  key: string;
-  routeEvent?: boolean;
 }
 
 @Injectable({

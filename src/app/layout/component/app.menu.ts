@@ -1,14 +1,15 @@
-import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
+/* ngtsc:disable */
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
-import { AppMenuitem } from './app.menuitem';
+import { AppMenuitemComponent } from './app.menuitem';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
   // schemas: [NO_ERRORS_SCHEMA],
-  imports: [CommonModule, AppMenuitem, RouterModule],
+  imports: [CommonModule, AppMenuitemComponent, RouterModule],
   template: `<ul class="layout-menu">
     <ng-container *ngFor="let item of model; let i = index">
       <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
@@ -16,7 +17,7 @@ import { AppMenuitem } from './app.menuitem';
     </ng-container>
   </ul> `
 })
-export class AppMenu {
+export class AppMenuComponent {
   model: MenuItem[] = [];
   /**
    * Copyright (c) 2025, RTE (http://www.rte-france.com)

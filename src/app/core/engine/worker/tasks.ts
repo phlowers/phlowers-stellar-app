@@ -4,40 +4,53 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-// import { loadPyodide } from 'pyodide';
-import pythonScript from './python/example.py';
-import testScript from './python/test.py';
+import { loadPyodide } from 'pyodide';
+import pythonScript from '../python-functions/example.py';
+import testScript from '../python-functions/test.py';
+// import runPythonScript from '../python-functions/run_python.py';
 
 export enum Task {
   runTests = 'runTests',
-  runCode = 'runCode'
+  runCode = 'runCode',
+  runPython = 'runPython'
 }
 
-export type PyodideAPI = Awaited<ReturnType<any>>;
+export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 
-async function runTests(pyodide: PyodideAPI, script: string) {
+async function runTests(pyodide: PyodideAPI) {
   await pyodide.loadPackage(['pytest']);
   await pyodide.runPythonAsync(testScript);
-  const results = pyodide.globals
-    //@ts-ignore
-    .get('results')
-    .toJs({ dict_converter: Object.fromEntries });
+  const results = pyodide.globals.get('results').toJs({ dict_converter: Object.fromEntries });
   console.log('tests ran', results);
   return results;
 }
 
-async function runcode(pyodide: PyodideAPI, script: string) {
+async function runcode(pyodide: PyodideAPI) {
   const start = performance.now();
-  let results = await pyodide.runPythonAsync(pythonScript);
+  await pyodide.runPythonAsync(pythonScript);
   return { runTime: performance.now() - start };
 }
 
-export async function handleTask(pyodide: PyodideAPI, task: Task) {
+async function runPython(pyodide: PyodideAPI, script: string, data: any) {
+  const start = performance.now();
+  // pyodide.registerJsModule('my_js_namespace', { data1: data });
+  pyodide.globals.set('data1', data);
+  await pyodide.runPythonAsync(script);
+  return { runTime: performance.now() - start };
+}
+
+export async function handleTask(pyodide: PyodideAPI, task: Task, data: any) {
   switch (task) {
     case Task.runTests:
-      return await runTests(pyodide, testScript);
+      return await runTests(pyodide);
     case Task.runCode:
-      return await runcode(pyodide, pythonScript);
+      return await runcode(pyodide);
+    case Task.runPython: {
+      await runPython(pyodide, pythonScript, data);
+      const result = pyodide.globals.get('result');
+      console.log('result is', result);
+      return { result };
+    }
     default:
       console.error('Unknown task:', task);
   }
