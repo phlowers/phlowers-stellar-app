@@ -14,6 +14,7 @@ import { LayoutService } from '../service/layout.service';
 import { Subscription } from 'rxjs';
 import { WorkerService } from '../../core/engine/worker/worker.service';
 import { OnlineService } from '../../core/api/services/online.service';
+import { UpdateService } from '../../core/update/update.service';
 
 @Component({
   selector: 'app-topbar',
@@ -33,9 +34,11 @@ import { OnlineService } from '../../core/api/services/online.service';
       <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
         <i class="pi pi-ellipsis-v"></i>
       </button>
-      <div class="layout-topbar-online" [ngStyle]="{ color: !workerReady ? 'red' : 'green' }">{{ workerReady === false ? 'ENGINE LOADING' : 'ENGINE READY' }}</div>
+      <div *ngIf="updateService.needUpdate" class="layout-topbar-online" [ngStyle]="{ color: 'orange' }">UPDATE AVAILABLE</div>
       <div>|</div>
-      <div class="layout-topbar-online" [ngStyle]="{ color: offline ? 'red' : 'green' }">{{ offline === false ? 'ONLINE' : 'OFFLINE' }}</div>
+      <div class="layout-topbar-online" [ngStyle]="{ color: !workerReady ? 'red' : 'white' }">{{ workerReady === false ? 'ENGINE LOADING' : 'ENGINE READY' }}</div>
+      <div>|</div>
+      <div class="layout-topbar-online" [ngStyle]="{ color: offline ? 'red' : 'white' }">{{ offline === false ? 'ONLINE' : 'OFFLINE' }}</div>
       <div>|</div>
       <div class="layout-topbar-online" [ngStyle]="{ color: serverOnlineMap[serverOnline].color }">{{ serverOnlineMap[serverOnline].text }}</div>
     </div>
@@ -50,7 +53,7 @@ export class AppTopbarComponent implements OnInit {
 
   serverOnlineMap: Record<string, { color: string; text: string }> = {
     ONLINE: {
-      color: 'green',
+      color: 'white',
       text: 'SERVER REACHABLE'
     },
     OFFLINE: {
@@ -66,7 +69,8 @@ export class AppTopbarComponent implements OnInit {
   constructor(
     public layoutService: LayoutService,
     private onlineService: OnlineService,
-    private workerService: WorkerService
+    private workerService: WorkerService,
+    public updateService: UpdateService
   ) {}
 
   ngOnInit() {

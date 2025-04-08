@@ -55,11 +55,11 @@ const newStudy = (): StudyModelLocal => {
             </div>
           </div>
           <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-top: 10px; height: 100%;">
-            <p-table [loading]="isLoading" [value]="studies" [tableStyle]="{ 'min-width': '50rem', height: '100%' }">
+            <p-table [loading]="isLoading" [value]="studies" [(selection)]="selectedStudies" dataKey="uuid" [tableStyle]="{ 'min-width': '50rem', height: '100%' }">
               <ng-template #header>
                 <tr>
                   <td style="width: 3rem">
-                    <p-tableCheckbox [value]="selectedStudies" />
+                    <p-tableHeaderCheckbox />
                   </td>
                   <th>UUID</th>
                   <th>Title</th>
@@ -71,7 +71,7 @@ const newStudy = (): StudyModelLocal => {
               <ng-template #body let-study>
                 <tr>
                   <td style="width: 3rem">
-                    <p-tableCheckbox [value]="selectedStudies" />
+                    <p-tableCheckbox [value]="study" />
                   </td>
                   <td>{{ study.uuid }}</td>
                   <td>{{ study.title }}</td>
@@ -86,7 +86,7 @@ const newStudy = (): StudyModelLocal => {
       </ng-template>
       <ng-template #footer>
         <p-button type="button" label="Cancel" (click)="closeModal()"></p-button>
-        <p-button type="button" label="Import" (click)="closeModal()"></p-button>
+        <!-- <p-button type="button" label="Import" (click)="closeModal()"></p-button> -->
       </ng-template>
       <!-- </div> -->
     </p-dialog>
@@ -100,7 +100,7 @@ export class ImportStudyModalComponent {
   @Output() isOpenChange = new EventEmitter<boolean>();
   isLoading = false;
   studies: StudyModel[] = [];
-  selectedStudies: StudyModel[] = [];
+  selectedStudies!: StudyModel;
   constructor(private studyService: StudyService) {
     this.studyToSearch = newStudy();
   }
