@@ -17,8 +17,6 @@ export class StorageService {
   private _ready = new BehaviorSubject<boolean>(false);
   public db?: AppDB;
 
-  constructor() {}
-
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
   }

@@ -1,5 +1,5 @@
 // import presets from 'jest-preset-angular/presets';
-import { type JestConfigWithTsJest, pathsToModuleNameMapper } from 'ts-jest';
+import { type JestConfigWithTsJest } from 'ts-jest';
 
 // import { compilerOptions } from './tsconfig.json';
 const config = {

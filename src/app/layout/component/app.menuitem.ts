@@ -12,7 +12,7 @@ import { MenuItem } from 'primeng/api';
 import { LayoutService } from '../service/layout.service';
 
 @Component({
-  selector: '[app-menuitem]',
+  selector: '[app-menuitem]', //eslint-disable-line
   imports: [CommonModule, RouterModule, RippleModule],
   template: `
     <ng-container>
@@ -32,7 +32,7 @@ import { LayoutService } from '../service/layout.service';
   animations: [],
   providers: [LayoutService]
 })
-export class AppMenuitem {
+export class AppMenuitemComponent {
   @Input() item!: MenuItem;
 
   @Input() index!: number;
@@ -41,7 +41,7 @@ export class AppMenuitem {
 
   @Input() parentKey!: string;
 
-  key: string = '';
+  key = '';
 
   constructor(public router: Router) {}
 }

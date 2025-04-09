@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -105,7 +105,6 @@ export class AppComponent implements OnInit {
     workerService.ready$.subscribe((ready) => {
       console.log('Worker ready', ready);
     });
-    // storageService.createDatabase();
   }
 
   async saveUser() {
