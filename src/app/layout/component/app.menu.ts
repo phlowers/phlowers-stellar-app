@@ -35,7 +35,8 @@ export class AppMenuComponent {
           { label: 'Sections', icon: 'pi pi-fw pi-bolt', routerLink: ['/sections'] },
           { label: 'Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/tools'] },
           { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
-          { label: 'test', icon: 'pi pi-fw pi-database', routerLink: ['/offline-storage-poc'] }
+          { label: 'test', icon: 'pi pi-fw pi-database', routerLink: ['/offline-storage-poc'] },
+          { label: 'plotly', icon: 'pi pi-fw pi-chart-line', routerLink: ['/plotly'] }
         ]
       }
     ];

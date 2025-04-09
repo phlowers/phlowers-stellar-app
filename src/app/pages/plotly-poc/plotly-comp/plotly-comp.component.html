@@ -1,0 +1,12 @@
+<div #plotlyLine></div>
+<div class="range-container">
+  <!-- <input type="range" [attr.min]="setMinLineRangeZ()" [attr.max]="setMaxLineRangeZ()" step="0.1"
+    aria-label="modifier la hauteur de la ligne" [attr.value]="getMiddleLineRangeZ()"> -->
+  <p-slider [(ngModel)]="middleLineRangeZ" [step]="0.1" [min]="setMinLineRangeZ()" [max]="setMaxLineRangeZ()"
+    [ariaLabel]="'modifier la hauteur de la ligne'">
+  </p-slider>
+
+  <p>
+    {{middleLineRangeZ()}}
+  </p>
+</div>
