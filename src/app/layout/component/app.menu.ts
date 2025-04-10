@@ -1,5 +1,5 @@
 /* ngtsc:disable */
-import { Component } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -8,7 +8,7 @@ import { AppMenuitemComponent } from './app.menuitem';
 @Component({
   selector: 'app-menu',
   standalone: true,
-  // schemas: [NO_ERRORS_SCHEMA],
+  schemas: [NO_ERRORS_SCHEMA],
   imports: [CommonModule, AppMenuitemComponent, RouterModule],
   template: `<ul class="layout-menu">
     <ng-container *ngFor="let item of model; let i = index">
@@ -17,7 +17,7 @@ import { AppMenuitemComponent } from './app.menuitem';
     </ng-container>
   </ul> `
 })
-export class AppMenuComponent {
+export class AppMenuComponent implements OnInit {
   model: MenuItem[] = [];
   /**
    * Copyright (c) 2025, RTE (http://www.rte-france.com)
@@ -31,11 +31,11 @@ export class AppMenuComponent {
       {
         label: 'Home',
         items: [
-          { label: 'Studies', icon: 'pi pi-fw pi-share-alt', routerLink: ['/'] },
-          { label: 'Sections', icon: 'pi pi-fw pi-bolt', routerLink: ['/sections'] },
-          { label: 'Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/tools'] },
-          { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
-          { label: 'test', icon: 'pi pi-fw pi-database', routerLink: ['/offline-storage-poc'] }
+          { label: $localize`Studies`, icon: 'pi pi-fw pi-share-alt', routerLink: ['/'] },
+          { label: $localize`Sections`, icon: 'pi pi-fw pi-bolt', routerLink: ['/sections'] },
+          { label: $localize`Tools`, icon: 'pi pi-fw pi-wrench', routerLink: ['/tools'] },
+          { label: $localize`Admin`, icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
+          { label: $localize`test`, icon: 'pi pi-fw pi-database', routerLink: ['/offline-storage-poc'] }
         ]
       }
     ];
