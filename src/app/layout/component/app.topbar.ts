@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 import { WorkerService } from '../../core/engine/worker/worker.service';
 import { OnlineService } from '../../core/api/services/online.service';
 import { UpdateService } from '../../core/update/update.service';
+// import '@angular/localize';
 
 @Component({
   selector: 'app-topbar',
@@ -26,7 +27,7 @@ import { UpdateService } from '../../core/update/update.service';
         <i class="pi pi-bars"></i>
       </button>
       <a class="layout-topbar-logo" routerLink="/">
-        <span>STELLAR</span>
+        <span i18n>STELLAR</span>
       </a>
     </div>
 
@@ -34,11 +35,13 @@ import { UpdateService } from '../../core/update/update.service';
       <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
         <i class="pi pi-ellipsis-v"></i>
       </button>
-      <div *ngIf="updateService.needUpdate" class="layout-topbar-online" [ngStyle]="{ color: 'orange' }">UPDATE AVAILABLE</div>
+      <div i18n *ngIf="updateService.needUpdate" class="layout-topbar-online" [ngStyle]="{ color: 'orange' }">UPDATE AVAILABLE</div>
       <div>|</div>
-      <div class="layout-topbar-online" [ngStyle]="{ color: !workerReady ? 'red' : 'white' }">{{ workerReady === false ? 'ENGINE LOADING' : 'ENGINE READY' }}</div>
+      <div *ngIf="workerReady" i18n class="layout-topbar-online" [ngStyle]="{ color: 'white' }">ENGINE READY</div>
+      <div *ngIf="!workerReady" i18n class="layout-topbar-online" [ngStyle]="{ color: 'orange' }">ENGINE LOADING</div>
       <div>|</div>
-      <div class="layout-topbar-online" [ngStyle]="{ color: offline ? 'red' : 'white' }">{{ offline === false ? 'ONLINE' : 'OFFLINE' }}</div>
+      <div *ngIf="offline" i18n class="layout-topbar-online" [ngStyle]="{ color: 'red' }">OFFLINE</div>
+      <div *ngIf="!offline" i18n class="layout-topbar-online" [ngStyle]="{ color: 'white' }">ONLINE</div>
       <div>|</div>
       <div class="layout-topbar-online" [ngStyle]="{ color: serverOnlineMap[serverOnline].color }">{{ serverOnlineMap[serverOnline].text }}</div>
     </div>
@@ -54,15 +57,15 @@ export class AppTopbarComponent implements OnInit {
   serverOnlineMap: Record<string, { color: string; text: string }> = {
     ONLINE: {
       color: 'white',
-      text: 'SERVER REACHABLE'
+      text: $localize`SERVER REACHABLE`
     },
     OFFLINE: {
       color: 'red',
-      text: 'SERVER UNREACHABLE'
+      text: $localize`SERVER UNREACHABLE`
     },
     LOADING: {
       color: 'orange',
-      text: 'REACHING SERVER'
+      text: $localize`REACHING SERVER`
     }
   };
 

@@ -36,54 +36,54 @@ const newSection = (): SectionModel => {
             <div class="flex flex-row gap-6">
               <div class="grid grid-cols-6 gap-4">
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Section CUR:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Section CUR:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Section Short name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Section Short name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Section name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Section name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Cable short name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Cable short name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Cable name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Cable name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Section type:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Section type:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Link name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Link name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Branch name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Branch name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Transit link name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Transit link name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
                 <div>
-                  <label for="sectionName" class="block font-bold mb-3">Voltage name:</label>
+                  <label i18n for="sectionName" class="block font-bold mb-3">Voltage name:</label>
                   <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
                 </div>
               </div>
             </div>
             <div class="flex flex-row gap-6 mt-3">
-              <p-button label="Search" (click)="searchStudies()" />
-              <p-button label="Reset fields" severity="secondary" (click)="resetFields()" />
+              <p-button i18n-label label="Search" (click)="searchStudies()" />
+              <p-button i18n-label label="Reset fields" severity="secondary" (click)="resetFields()" />
             </div>
           </div>
           <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-top: 10px; height: 100%;">
@@ -93,11 +93,11 @@ const newSection = (): SectionModel => {
                   <td style="width: 3rem">
                     <p-tableCheckbox [value]="selectedSections" />
                   </td>
-                  <th>UUID</th>
-                  <th>Title</th>
-                  <th>Author email</th>
-                  <th>Created at</th>
-                  <th>Updated at</th>
+                  <th i18n>UUID</th>
+                  <th i18n>Title</th>
+                  <th i18n>Author email</th>
+                  <th i18n>Created at</th>
+                  <th i18n>Updated at</th>
                 </tr>
               </ng-template>
               <ng-template #body let-section>
@@ -117,8 +117,8 @@ const newSection = (): SectionModel => {
         </div>
       </ng-template>
       <ng-template #footer>
-        <p-button type="button" label="Cancel" (click)="closeModal()"></p-button>
-        <p-button type="button" label="Import" (click)="closeModal()"></p-button>
+        <p-button type="button" i18n-label label="Cancel" (click)="closeModal()"></p-button>
+        <p-button type="button" i18n-label label="Import" (click)="closeModal()"></p-button>
       </ng-template>
       <!-- </div> -->
     </p-dialog>
@@ -143,7 +143,6 @@ export class SearchSectionModalComponent {
 
   searchStudies() {
     this.isLoading = true;
-    console.log('searchStudies');
     this.sectionService.searchSections(this.sectionToSearch).subscribe((sections) => {
       this.sections = sections;
       this.isLoading = false;
@@ -151,7 +150,6 @@ export class SearchSectionModalComponent {
   }
 
   closeModal() {
-    console.log('closeModal');
     this.isOpen = false;
     this.isOpenChange.emit(false);
   }

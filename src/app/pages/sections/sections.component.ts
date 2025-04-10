@@ -42,8 +42,8 @@ import { SearchSectionModalComponent } from './components/search-section-modal.c
   ],
   template: `
     <div>
-      <h1>Sections</h1>
-      <p-button label="Search" (click)="search()"></p-button>
+      <h1 i18n>Sections</h1>
+      <p-button i18n-label label="Search" (click)="search()"></p-button>
     </div>
     <app-search-section-modal [(isOpen)]="isSearchSectionModalOpen" (isOpenChange)="setIsSearchSectionModalOpen($event)" />
   `,
@@ -58,12 +58,10 @@ export class SectionsComponent {
     description: ''
   };
   search() {
-    console.log('search');
     this.isSearchSectionModalOpen = true;
   }
 
   setIsSearchSectionModalOpen(isOpen: boolean) {
-    console.log('isOpen', isOpen);
     this.isSearchSectionModalOpen = isOpen;
   }
 }

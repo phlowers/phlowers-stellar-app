@@ -8,7 +8,7 @@
 
 import { loadPyodide } from 'pyodide';
 import importScript from '../python-functions/imports.py';
-import pythonPackages from '../python-packages.json';
+import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks';
 
 export type PyodideAPI = Awaited<ReturnType<any>>;

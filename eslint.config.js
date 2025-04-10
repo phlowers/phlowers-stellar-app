@@ -3,6 +3,7 @@ const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 const tsParser = require('@typescript-eslint/parser');
+const angularTemplateEslintPlugin = require('@angular-eslint/eslint-plugin-template');
 
 module.exports = tseslint.config(
   {
@@ -13,6 +14,7 @@ module.exports = tseslint.config(
       }
     },
     files: ['**/*.ts'],
+    ignores: ['coverage/**', 'dist/**'],
     extends: [eslint.configs.recommended, ...tseslint.configs.recommended, ...tseslint.configs.stylistic, ...angular.configs.tsRecommended],
     processor: angular.processInlineTemplates,
     rules: {
@@ -37,7 +39,20 @@ module.exports = tseslint.config(
   },
   {
     files: ['**/*.html'],
+    ignores: ['coverage/**', 'dist/**'],
     extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
-    rules: {}
+    rules: {
+      '@angular-eslint/template/i18n': [
+        'warn',
+        {
+          checkText: true,
+          checkAttributes: false,
+          checkId: false
+        }
+      ]
+    },
+    plugins: {
+      angularTemplate: angularTemplateEslintPlugin
+    }
   }
 );

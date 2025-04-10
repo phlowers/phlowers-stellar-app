@@ -48,7 +48,6 @@ export async function handleTask(pyodide: PyodideAPI, task: Task, data: any) {
     case Task.runPython: {
       await runPython(pyodide, pythonScript, data);
       const result = pyodide.globals.get('result');
-      console.log('result is', result);
       return { result };
     }
     default:

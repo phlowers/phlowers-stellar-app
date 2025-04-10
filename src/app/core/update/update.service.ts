@@ -21,8 +21,6 @@ const mockLatestVersion: AppVersion = {
   build_datetime_utc: '0000-00-00T00:00:00.000000'
 };
 
-console.log('isdevmode', isDevMode());
-
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
   currentVersion: AppVersion | null = isDevMode() ? mockCurrentVersion : null;
