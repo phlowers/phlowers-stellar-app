@@ -29,8 +29,8 @@ import { OnlineService } from './core/api/services/online.service';
 import { WorkerService } from './core/engine/worker/worker.service';
 import { StorageService } from './core/store/storage.service';
 
-const validateEmail = (email: string) => {
-  return String(email)
+const validateEmail = (email: string): boolean => {
+  return !!String(email)
     .toLowerCase()
     .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 };
@@ -64,15 +64,15 @@ const modules = [
   providers: [MessageService, StorageService, WorkerService, OnlineService],
   template: `<router-outlet></router-outlet>
     <p-toast position="top-center"></p-toast>
-    <p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Set your user info" [closable]="false" [modal]="true">
+    <p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" i18n-header header="Set your user info" [closable]="false" [modal]="true">
       <ng-template #content>
-        <label for="description" class="block font-bold mb-3">Email</label>
+        <label i18n for="description" class="block font-bold mb-3">Email</label>
         <input type="text" pInputText type="email" #email="ngModel" email name="email" ngModel id="email" [(ngModel)]="user.email" required fluid />
         <!-- <div *ngIf="email.invalid && email.errors" class="alert">{{ console.log(email) }}</div> -->
-        <small class="text-red-500" *ngIf="submitted && !email.valid">Email is not valid.</small>
+        <small i18n class="text-red-500" *ngIf="submitted && !email.valid">Email is not valid.</small>
       </ng-template>
       <ng-template #footer>
-        <p-button label="Save" icon="pi pi-check" type="submit" (click)="saveUser()" />
+        <p-button i18n-label label="Save" icon="pi pi-check" type="submit" (click)="saveUser()" />
       </ng-template>
     </p-dialog>`
 })
@@ -98,12 +98,11 @@ export class AppComponent implements OnInit {
           if (users.length !== 1) {
             await this.storageService.db?.users.clear();
             this.userDialog = true;
+          } else {
+            this.userDialog = false;
           }
         });
       }
-    });
-    workerService.ready$.subscribe((ready) => {
-      console.log('Worker ready', ready);
     });
   }
 

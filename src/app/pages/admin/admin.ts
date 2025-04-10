@@ -20,27 +20,27 @@ import { MessageService } from 'primeng/api';
   imports: [CommonModule, ButtonModule, FormsModule, TableModule, CardModule, ToastModule],
   template: `
     <p-toast position="top-center"></p-toast>
-    <p-card header="App version">
+    <p-card i18n-header header="App version">
       <table class="my-2" style="width: 100%; border: 1px solid #ccc">
         <thead>
           <tr>
             <th></th>
-            <th>Current version</th>
-            <th>Latest version</th>
+            <th i18n>Current version</th>
+            <th i18n>Latest version</th>
           </tr>
         </thead>
         <tr>
-          <td>Build Hash</td>
+          <td i18n>Build Hash</td>
           <td>{{ updateService.currentVersion?.git_hash }}</td>
           <td>{{ updateService.latestVersion?.git_hash }}</td>
         </tr>
         <tr>
-          <td>Build datetime</td>
+          <td i18n>Build datetime</td>
           <td>{{ updateService.currentVersion?.build_datetime_utc }}</td>
           <td>{{ updateService.latestVersion?.build_datetime_utc }}</td>
         </tr>
       </table>
-      <p-button [loading]="updateService.updateLoading" *ngIf="updateService.needUpdate" (click)="updateService.update()">Update to latest version</p-button>
+      <p-button i18n [loading]="updateService.updateLoading" *ngIf="updateService.needUpdate" (click)="updateService.update()">Update to latest version</p-button>
     </p-card>
   `
 })

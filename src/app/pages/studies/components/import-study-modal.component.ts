@@ -37,21 +37,21 @@ const newStudy = (): StudyModelLocal => {
           <div>
             <div class="flex flex-row gap-6">
               <span>
-                <label for="studyName" class="block font-bold mb-3">UUID contains:</label>
+                <label i18n for="studyName" class="block font-bold mb-3">UUID contains:</label>
                 <input width="300px" id="studyName" type="text" pInputText [(ngModel)]="studyToSearch.uuid" required />
               </span>
               <span>
-                <label for="studyName" class="block font-bold mb-3">Title contains:</label>
+                <label i18n for="studyName" class="block font-bold mb-3">Title contains:</label>
                 <input width="300px" id="studyName" type="text" pInputText [(ngModel)]="studyToSearch.title" required />
               </span>
               <span>
-                <label for="studyName" class="block font-bold mb-3">Author email contains:</label>
+                <label i18n for="studyName" class="block font-bold mb-3">Author email contains:</label>
                 <input id="studyName" type="text" pInputText [(ngModel)]="studyToSearch.author_email" required />
               </span>
             </div>
             <div class="flex flex-row gap-6 mt-3">
-              <p-button label="Search" (click)="searchStudies()" />
-              <p-button label="Reset fields" severity="secondary" (click)="resetFields()" />
+              <p-button i18n-label label="Search" (click)="searchStudies()" />
+              <p-button i18n-label label="Reset fields" severity="secondary" (click)="resetFields()" />
             </div>
           </div>
           <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-top: 10px; height: 100%;">
@@ -61,11 +61,11 @@ const newStudy = (): StudyModelLocal => {
                   <td style="width: 3rem">
                     <p-tableHeaderCheckbox />
                   </td>
-                  <th>UUID</th>
-                  <th>Title</th>
-                  <th>Author email</th>
-                  <th>Created at</th>
-                  <th>Updated at</th>
+                  <th i18n>UUID</th>
+                  <th i18n>Title</th>
+                  <th i18n>Author email</th>
+                  <th i18n>Created at</th>
+                  <th i18n>Updated at</th>
                 </tr>
               </ng-template>
               <ng-template #body let-study>
