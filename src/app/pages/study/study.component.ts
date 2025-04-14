@@ -42,19 +42,19 @@ const initialDataObjects = initialData.name.map((name, index) => ({
   imports: [ButtonModule, ProgressSpinnerModule, CommonModule, TableModule, InputTextModule, FormsModule, CheckboxModule],
   template: `<div>
     <div class="pb-5">
-      <p-button [loading]="loading" (click)="runPython()">Run</p-button>
-      <p-button styleClass="ml-5" severity="info" (click)="addSupport()">Add support</p-button>
+      <p-button i18n [loading]="loading" (click)="runPython()">Run</p-button>
+      <p-button i18n styleClass="ml-5" severity="info" (click)="addSupport()">Add support</p-button>
     </div>
     <p-table [value]="dataToObject" [tableStyle]="{ 'min-width': '50rem' }">
       <ng-template #header>
         <tr>
-          <th>Name</th>
-          <th>Suspension</th>
-          <th>Conductor attachment altitude</th>
-          <th>Crossarm length</th>
-          <th>Line angle</th>
-          <th>Insulator length</th>
-          <th>Span length</th>
+          <th i18n>Name</th>
+          <th i18n>Suspension</th>
+          <th i18n>Conductor attachment altitude</th>
+          <th i18n>Crossarm length</th>
+          <th i18n>Line angle</th>
+          <th i18n>Insulator length</th>
+          <th i18n>Span length</th>
         </tr>
       </ng-template>
       <ng-template #body let-support let-editing="editing">

@@ -56,11 +56,11 @@ const newStudy = (): StudyModelLocal => {
 };
 
 const columns = [
-  { dataKey: 'uuid', title: 'Uuid' },
-  { dataKey: 'title', title: 'Name' },
-  { dataKey: 'description', title: 'Description' },
-  { dataKey: 'author_email', title: 'Author' },
-  { dataKey: 'saved', title: 'Saved remotely' }
+  { dataKey: 'uuid', title: $localize`Uuid` },
+  { dataKey: 'title', title: $localize`Name` },
+  { dataKey: 'description', title: $localize`Description` },
+  { dataKey: 'author_email', title: $localize`Author` },
+  { dataKey: 'saved', title: $localize`Saved remotely` }
 ];
 
 @Component({
@@ -93,9 +93,9 @@ const columns = [
     <p-toast position="top-center"></p-toast>
     <p-toolbar styleClass="mb-6">
       <ng-template #start>
-        <p-button label="New study" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-        <p-button disabled="{{ !serverOnline }}" label="Import from database" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openImportStudyModal()" />
-        <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedStudies()" [disabled]="!selectedStudies || !selectedStudies.length" />
+        <p-button i18n-label label="New study" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button i18n-label disabled="{{ !serverOnline }}" i18n-label label="Import from database" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openImportStudyModal()" />
+        <p-button i18n-label severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedStudies()" [disabled]="!selectedStudies || !selectedStudies.length" />
       </ng-template>
 
       <!-- <ng-template #end>
@@ -116,15 +116,16 @@ const columns = [
       dataKey="uuid"
       metaKeySelection="true"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} studies"
+      i18n-currentPageReportTemplate
       [showCurrentPageReport]="true"
       [rowsPerPageOptions]="[10, 20, 30]"
     >
       <ng-template #caption>
         <div class="flex items-center justify-between">
-          <h5 class="m-0">Studies</h5>
+          <h5 i18n class="m-0">Studies</h5>
           <p-iconfield>
             <p-inputicon styleClass="pi pi-search" />
-            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+            <input pInputText i18n-placeholder placeholder="Search..." type="text" (input)="onGlobalFilter(dt, $event)" />
           </p-iconfield>
         </div>
       </ng-template>
@@ -133,16 +134,16 @@ const columns = [
           <th style="width: 3rem">
             <p-tableHeaderCheckbox />
           </th>
-          <th style="width: 6rem; max-width: 6rem;">Uuid</th>
-          <th pSortableColumn="title" style="min-width:16rem">
+          <th i18n style="width: 6rem; max-width: 6rem;">Uuid</th>
+          <th i18n pSortableColumn="title" style="min-width:16rem">
             Name
             <p-sortIcon field="title" />
           </th>
-          <th pSortableColumn="description" style="min-width:16rem">
+          <th i18n pSortableColumn="description" style="min-width:16rem">
             Description
             <p-sortIcon field="description" />
           </th>
-          <th pSortableColumn="author_email" style="display: flex; justify-content: center; min-width:16rem">
+          <th i18n pSortableColumn="author_email" style="display: flex; justify-content: center; min-width:16rem">
             Author
             <p-sortIcon field="author_email" />
           </th>
@@ -171,7 +172,7 @@ const columns = [
                 <p-button
                   icon="pi pi-upload"
                   disabled="{{ !serverOnline }}"
-                  pTooltip="{{ serverOnline ? 'Save in distant database' : 'Cannot save. Server is offline' }}"
+                  pTooltip="{{ serverOnline ? saveOnlineText : saveOfflineText }}"
                   tooltipPosition="top"
                   severity="help"
                   class="mr-2"
@@ -182,37 +183,37 @@ const columns = [
               }
             </td>
             <td style="text-align: end;">
-              <p-button icon="pi pi-copy" pTooltip="Duplicate" tooltipPosition="top" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="duplicateStudy(typedStudy)" />
-              <p-button icon="pi pi-pencil" pTooltip="Edit" tooltipPosition="top" class="mr-2" [rounded]="true" [outlined]="true" (click)="editStudy(typedStudy)" />
-              <p-button icon="pi pi-trash" pTooltip="Delete" tooltipPosition="top" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteStudy(typedStudy)" />
+              <p-button i18n-pTooltip icon="pi pi-copy" pTooltip="Duplicate" tooltipPosition="top" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="duplicateStudy(typedStudy)" />
+              <p-button i18n-pTooltip icon="pi pi-pencil" pTooltip="Edit" tooltipPosition="top" class="mr-2" [rounded]="true" [outlined]="true" (click)="editStudy(typedStudy)" />
+              <p-button i18n-pTooltip icon="pi pi-trash" pTooltip="Delete" tooltipPosition="top" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteStudy(typedStudy)" />
             </td>
             <td>
               <!-- <a href="/study/{{study.uuid}}"></a>   -->
-              <p-button label="OPEN" [routerLink]="['/study', typedStudy.uuid]" severity="contrast" [rounded]="false" [outlined]="false" />
+              <p-button i18n-label label="OPEN" [routerLink]="['/study', typedStudy.uuid]" severity="contrast" [rounded]="false" [outlined]="false" />
             </td>
           </tr>
         }
       </ng-template>
     </p-table>
 
-    <p-dialog dismissableMask="true" [(visible)]="studyDialog" [style]="{ width: '450px' }" header="New study" [modal]="true">
+    <p-dialog dismissableMask="true" [(visible)]="studyDialog" [style]="{ width: '450px' }" i18n-header header="New study" [modal]="true">
       <ng-template #content>
         <div class="flex flex-col gap-6">
           <div>
-            <label for="title" class="block font-bold mb-3">Title</label>
+            <label i18n for="title" class="block font-bold mb-3">Title</label>
             <input type="text" pInputText id="title" [(ngModel)]="study.title" required fluid />
-            <small class="text-red-500" *ngIf="submitted && !study!.title">Title is required.</small>
+            <small i18n class="text-red-500" *ngIf="submitted && !study!.title">Title is required.</small>
           </div>
           <div>
-            <label for="description" class="block font-bold mb-3">Description</label>
+            <label i18n for="description" class="block font-bold mb-3">Description</label>
             <textarea id="description" pTextarea [(ngModel)]="study.description" required rows="3" cols="20" fluid></textarea>
           </div>
         </div>
       </ng-template>
 
       <ng-template #footer>
-        <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Save" icon="pi pi-check" (click)="saveStudy()" />
+        <p-button i18n-label label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button i18n-label label="Save" icon="pi pi-check" (click)="saveStudy()" />
       </ng-template>
     </p-dialog>
 
@@ -233,6 +234,8 @@ export class StudiesComponent implements OnInit {
   columns: Column[] = columns;
   subscriptions = new Subscription();
   serverOnline = false;
+  saveOnlineText = $localize`Save in distant database`;
+  saveOfflineText = $localize`Cannot save. Server is offline`;
 
   constructor(
     private messageService: MessageService,
@@ -304,8 +307,8 @@ export class StudiesComponent implements OnInit {
 
   deleteSelectedStudies() {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete the selected studies?',
-      header: 'Confirm',
+      message: $localize`Are you sure you want to delete the selected studies?`,
+      header: $localize`Confirm`,
       icon: 'pi pi-exclamation-triangle',
       accept: async () => {
         const studies = this.selectedStudies?.map((val) => val.uuid) || [];
@@ -314,8 +317,8 @@ export class StudiesComponent implements OnInit {
         this.selectedStudies = null;
         this.messageService.add({
           severity: 'success',
-          summary: 'Successful',
-          detail: studies.length === 1 ? 'Study Deleted' : 'Studies Deleted',
+          summary: $localize`Successful`,
+          detail: studies.length === 1 ? $localize`Study Deleted` : $localize`Studies Deleted`,
           life: 3000
         });
       }
@@ -336,8 +339,8 @@ export class StudiesComponent implements OnInit {
       next: async () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Successful',
-          detail: 'Study successfully saved!',
+          summary: $localize`Successful`,
+          detail: $localize`Study successfully saved!`,
           life: 3000
         });
 
@@ -347,7 +350,7 @@ export class StudiesComponent implements OnInit {
       error: () => {
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
+          summary: $localize`Error`,
           life: 3000
         });
       }
@@ -356,17 +359,19 @@ export class StudiesComponent implements OnInit {
 
   deleteStudy(study: StudyModelLocal) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete ' + study.title + '?',
-      header: 'Confirm',
+      message: $localize`Are you sure you want to delete: ${study.title}?`,
+      header: $localize`Confirm`,
       icon: 'pi pi-exclamation-triangle',
+      acceptLabel: $localize`Delete`,
+      rejectLabel: $localize`Cancel`,
       accept: async () => {
         await this.storageService.db?.studies.delete(study.uuid);
         this.studies.set((await this.storageService.db?.studies.toArray()) || []);
         this.study = newStudy();
         this.messageService.add({
           severity: 'success',
-          summary: 'Successful',
-          detail: 'Study Deleted',
+          summary: $localize`Successful`,
+          detail: $localize`Study Deleted`,
           life: 3000
         });
       }
@@ -396,8 +401,8 @@ export class StudiesComponent implements OnInit {
     this.studies.set((await this.storageService.db?.studies.toArray()) || []);
     this.messageService.add({
       severity: 'success',
-      summary: 'Successful',
-      detail: 'Study successfully duplicated!',
+      summary: $localize`Successful`,
+      detail: $localize`Study successfully duplicated!`,
       life: 3000
     });
   }
@@ -415,8 +420,8 @@ export class StudiesComponent implements OnInit {
           await this.storageService.db?.studies.update(study.uuid, { ...this.study, updated_at_offline: new Date().toISOString(), saved: false });
           this.messageService.add({
             severity: 'success',
-            summary: 'Successful',
-            detail: 'Study updated!',
+            summary: $localize`Successful`,
+            detail: $localize`Study updated!`,
             life: 3000
           });
         }
@@ -434,8 +439,8 @@ export class StudiesComponent implements OnInit {
       });
       this.messageService.add({
         severity: 'success',
-        summary: 'Successful',
-        detail: 'Study Created',
+        summary: $localize`Successful`,
+        detail: $localize`Study Created`,
         life: 3000
       });
     }

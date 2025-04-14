@@ -13,9 +13,22 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n": {
+        "sourceLocale": "en-US",
+        "locales": {
+          "fr": {
+            "translation": "assets/i18n/messages.fr.xlf",
+            "baseHref": "/"
+          },
+          "en": {
+            "translation": "assets/i18n/messages.xlf",
+            "baseHref": "/"
+          }
+        }
+      },
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-esbuild:application",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "allowedCommonJsDependencies": [
               "node:url"
@@ -32,13 +45,11 @@
               "node:crypto",
               "node:child_process"
             ],
-            "plugins": [
-              "./esbuild/plugins.ts"
-            ],
             "outputPath": "dist/phlowers-stellar-app",
             "index": "src/index.html",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -55,7 +66,16 @@
             "webWorkerTsConfig": "tsconfig.worker.json"
           },
           "configurations": {
+            "fr": {
+              "baseHref": "/",
+              "localize": ["fr"]
+            },
+            "en": {
+              "baseHref": "/",
+              "localize": ["en"]
+            },
             "production": {
+              "localize": ["fr"],
               "baseHref": "/",
               "extractLicenses": false,
               "budgets": [
@@ -107,7 +127,16 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n"
+          "builder": "ng-extract-i18n-merge:ng-extract-i18n-merge",
+          "options": {
+            "buildTarget": "phlowers-stellar-app:build",
+            "format": "xlf2",
+            "outputPath": "src/translations",
+            "targetFiles": [
+              "messages.fr.xlf",
+              "messages.xlf"
+            ]
+          }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
