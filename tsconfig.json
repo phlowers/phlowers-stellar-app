@@ -21,6 +21,10 @@
     // "types": [
     //   "node"
     // ],
+    "types": [
+      "@angular/localize",
+      "jest",
+    ],
     // "paths": {
     //   "url": ["./node_modules/url-browserify"],
     // }
