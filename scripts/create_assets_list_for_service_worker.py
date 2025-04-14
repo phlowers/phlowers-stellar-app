@@ -50,8 +50,8 @@ def list_files_recursively(directory):
     
     return file_list
 
-def main():
-    target_dir = "dist/phlowers-stellar-app/browser"
+def main(language):
+    target_dir = f"dist/phlowers-stellar-app/browser/{language}"
     
     print(f"Listing all files in '{target_dir}':")
     print("-" * 50)
@@ -71,7 +71,7 @@ def main():
     
     print("-" * 50)
     print(f"Total files: {len(files)}")
-    output_file = "dist/phlowers-stellar-app/browser/assets_list.json"
+    output_file = f"dist/phlowers-stellar-app/browser/{language}/assets_list.json"
     extra_assets_file = "scripts/external_assets.json"
     with open(extra_assets_file, 'r') as f:
         extra_assets = json.load(f)
@@ -87,4 +87,9 @@ def main():
     
 
 if __name__ == "__main__":
-    main()
+    args = sys.argv[1:]
+    if len(args) > 1 and args[0] == "--language":
+        language = args[1]
+    else:
+        raise ValueError("Language is required: --language en|fr")
+    main(language)
