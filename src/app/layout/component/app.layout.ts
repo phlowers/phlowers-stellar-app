@@ -33,7 +33,7 @@ export class AppLayoutComponent {
     public layoutService: LayoutService,
     public renderer: Renderer2,
     public router: Router
-  ) { }
+  ) {}
 
   get containerClass() {
     return {

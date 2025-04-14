@@ -9,8 +9,7 @@ describe('PlotlyPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PlotlyPageComponent]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PlotlyPageComponent);
     component = fixture.componentInstance;
