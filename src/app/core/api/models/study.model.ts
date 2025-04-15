@@ -10,6 +10,7 @@ export interface StudyModel {
   author_email: string;
   title: string;
   description?: string;
+  shareable: boolean;
   created_at_offline: string;
   updated_at_offline: string;
 }
