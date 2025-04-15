@@ -8,7 +8,8 @@
     "module": "esnext",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@angular/localize"
     ],
   },
   "include": [

@@ -30,6 +30,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "preserveSymlinks": true,
             "allowedCommonJsDependencies": [
               "node:url"
             ],

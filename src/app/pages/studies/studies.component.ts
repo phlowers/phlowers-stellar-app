@@ -36,6 +36,8 @@ import { StudyService } from '../../core/api/services/study.service';
 import { StudyModelLocal } from '../../core/store/models/study.model';
 import { ImportStudyModalComponent } from './components/import-study-modal.component';
 import { Subscription } from 'rxjs';
+import { CheckboxModule } from 'primeng/checkbox';
+
 import { OnlineService, ServerStatus } from '../../core/api/services/online.service';
 
 interface Column {
@@ -47,6 +49,7 @@ const newStudy = (): StudyModelLocal => {
   return {
     title: '',
     description: '',
+    shareable: false,
     uuid: '',
     author_email: '',
     created_at_offline: '',
@@ -74,6 +77,7 @@ const columns = [
     ButtonModule,
     RippleModule,
     ToastModule,
+    CheckboxModule,
     ToolbarModule,
     RatingModule,
     InputTextModule,
@@ -200,13 +204,17 @@ const columns = [
       <ng-template #content>
         <div class="flex flex-col gap-6">
           <div>
-            <label i18n for="title" class="block font-bold mb-3">Title</label>
+            <label i18n for="title" class="block font-bold mb-3">Title:</label>
             <input type="text" pInputText id="title" [(ngModel)]="study.title" required fluid />
             <small i18n class="text-red-500" *ngIf="submitted && !study!.title">Title is required.</small>
           </div>
           <div>
-            <label i18n for="description" class="block font-bold mb-3">Description</label>
+            <label i18n for="description" class="block font-bold mb-3">Description:</label>
             <textarea id="description" pTextarea [(ngModel)]="study.description" required rows="3" cols="20" fluid></textarea>
+          </div>
+          <div>
+            <label i18n for="shareable" class="block font-bold mb-3">Shareable to other users:</label>
+            <p-checkbox id="shareable" [binary]="true" [(ngModel)]="study.shareable" required rows="3" cols="20" fluid></p-checkbox>
           </div>
         </div>
       </ng-template>
@@ -246,7 +254,6 @@ export class StudiesComponent implements OnInit {
   ) {}
 
   setIsImportStudyModalOpen(isOpen: boolean) {
-    console.log('isOpen', isOpen);
     this.isImportStudyModalOpen = isOpen;
   }
 
