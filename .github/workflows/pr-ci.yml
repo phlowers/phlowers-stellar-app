@@ -1,4 +1,4 @@
-name: Pull Request CI
+name: ✔️ Pull Request CI
 
 on:
   push:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   install-dependencies:
-    name: Install dependencies
+    name: ⚙️ Install dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -33,11 +33,11 @@ jobs:
         with:
           node-version: "23"
           cache: "npm"
-      - name: Install JS dependencies
+      - name: ⚙️ Install JS dependencies
         run: npm install --frozen-lockfile
 
   checks:
-    name: run checks
+    name: Run checks
     needs: [install-dependencies]
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -47,33 +47,29 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha }}
           submodules: "recursive"
-      - name: Use Node.js
+      - name: ⚙️ Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "23"
           cache: "npm"
-      - name: Install JS dependencies
+      - name: ⚙️ Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.24"
+          python-version: "3.12"
+      - name: ⚙️ Install JS dependencies
         run: npm install --frozen-lockfile
-      - name: Run build
+      - name: 📃 Set up mechaphlowers
+        run: npm run set-up-mechaphlowers
+      - name: 🛠️ Run build
         run: npm run build
-      - name: Run lint check
+      - name: ✔️ Run lint check
         run: npm run lint-check
-      - name: Run prettier check
+      - name: ✔️ Run prettier check
         run: npm run prettier-check
-#   sonarqube:
-#     name: SonarQube
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-#       - name: SonarQube Scan
-#         uses: SonarSource/sonarqube-scan-action@v5
-#         env:
-#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Run coverage
+      - name: ✔️ Run coverage
         run: npm run coverage
-      - name: SonarCloud Analysis
+      - name: ✔️ SonarCloud Analysis
         uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v5.1.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN  }}
