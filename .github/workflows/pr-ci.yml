@@ -1,0 +1,76 @@
+name: ✔️ Pull Request CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CI: true
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  install-dependencies:
+    name: ⚙️ Install dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "23"
+          cache: "npm"
+      - name: ⚙️ Install JS dependencies
+        run: npm install --frozen-lockfile
+
+  checks:
+    name: ✔️ Run checks
+    needs: [install-dependencies]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: "recursive"
+      - name: ⚙️ Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "23"
+          cache: "npm"
+      - name: ⚙️ Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.24"
+          python-version: "3.12"
+      - name: ⚙️ Install JS dependencies
+        run: npm install --frozen-lockfile
+      - name: 📃 Set up mechaphlowers
+        run: npm run set-up-mechaphlowers
+      - name: 🛠️ Run build
+        run: npm run build
+      - name: ✔️ Run lint check
+        run: npm run lint-check
+      - name: ✔️ Run prettier check
+        run: npm run prettier-check
+      - name: ✔️ Run coverage
+        run: npm run coverage
+      - name: ✔️ SonarCloud Analysis
+        uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v5.1.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN  }}
