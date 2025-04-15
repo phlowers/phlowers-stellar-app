@@ -60,20 +60,20 @@ jobs:
         run: npm run lint-check
       - name: Run prettier check
         run: npm run prettier-check
-  sonarqube:
-    name: SonarQube
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+#   sonarqube:
+#     name: SonarQube
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+#       - name: SonarQube Scan
+#         uses: SonarSource/sonarqube-scan-action@v5
+#         env:
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Run coverage
+        run: npm run coverage
+      - name: SonarCloud Analysis
+        uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v5.1.0
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    #   - name: Run coverage
-    #     run: npm run coverage
-    #   - name: SonarCloud Analysis
-    #     uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v5.1.0
-    #     env:
-    #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN  }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN  }}
