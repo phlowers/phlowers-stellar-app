@@ -3,10 +3,10 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
-        logLevel:
-        description: 'Log level'     
-        required: true
-        default: 'warning'
+      logLevel:
+      description: 'Log level'     
+      required: true
+      default: 'warning'
 
 name: Pull request CI checks
 
