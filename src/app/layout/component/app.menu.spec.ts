@@ -67,7 +67,7 @@ describe('AppMenu', () => {
             routerLink: ['/offline-storage-poc']
           },
           {
-            label: 'plotly',
+            label: 'Plotly',
             icon: 'pi pi-fw pi-chart-line',
             routerLink: ['/plotly']
           }

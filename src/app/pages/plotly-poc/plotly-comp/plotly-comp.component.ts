@@ -69,7 +69,6 @@ export class PlotlyComponent implements AfterViewInit {
     scene: {
       aspectmode: 'manual', // if data is used here, aspect ratio will change on user modification with slider
       aspectratio: {
-        // magic numbers
         x: Number as any,
         y: Number as any, // will be 0.3 or a value close to 0 (but not O !)
         z: Number as any
@@ -100,6 +99,12 @@ export class PlotlyComponent implements AfterViewInit {
       const xValues = this.lineTrace().x;
       const yValues = this.lineTrace().y;
       const zValues = this.lineTrace().z;
+
+      if (xValues.length === 0 || yValues.length === 0 || zValues.length === 0) {
+        this.minSliderValue.set(0);
+        this.maxSliderValue.set(0);
+        return; // exit to avoid dividing by 0
+      }
 
       // find necessary axis sizes
       const xMin = Math.min(...xValues);
