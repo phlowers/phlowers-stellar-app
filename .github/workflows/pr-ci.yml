@@ -1,6 +1,12 @@
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+        logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
 
 name: Pull request CI checks
 
@@ -51,5 +57,9 @@ jobs:
         run: npm run lint-check
       - name: Run prettier check
         run: npm run prettier-check
-      - name: Run tests
-        run: npm run test
+      - name: Run coverage
+        run: npm run coverage
+      - name: SonarCloud Analysis
+        uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v5.1.0
+        env:
+          SONAR_TOKEN: ${{ secrets.sonar-token }}
