@@ -49,6 +49,7 @@
     "jest": "^29.7.0",
     "jest-preset-angular": "^14.5.3",
     "lodash": "^4.17.21",
+    "plotly.js-dist-min": "^3.0.1",
     "primeclt": "^0.1.5",
     "primeicons": "^7.0.0",
     "primeng": "^19.0.8",

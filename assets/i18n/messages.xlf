@@ -426,5 +426,15 @@
         <source>Reset fields</source>
       </segment>
     </unit>
+    <unit id="3407827478067561796">
+      <segment>
+        <source>Change line height</source>
+      </segment>
+    </unit>
+    <unit id="8892964333730306563">
+      <segment>
+        <source>Plotly</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
