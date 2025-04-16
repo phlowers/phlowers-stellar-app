@@ -20,6 +20,7 @@ const newStudy = (): StudyModelLocal => {
     title: '',
     description: '',
     uuid: '',
+    shareable: false,
     author_email: '',
     created_at_offline: '',
     updated_at_offline: '',

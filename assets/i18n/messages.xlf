@@ -426,5 +426,20 @@
         <source>Reset fields</source>
       </segment>
     </unit>
+    <unit id="2517309683610083249">
+      <segment>
+        <source>Title:</source>
+      </segment>
+    </unit>
+    <unit id="259021582922138864">
+      <segment>
+        <source>Shareable to other users:</source>
+      </segment>
+    </unit>
+    <unit id="6996799422725544865">
+      <segment>
+        <source>Description:</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

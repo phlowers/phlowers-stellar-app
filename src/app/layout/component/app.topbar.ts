@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
 import { WorkerService } from '../../core/engine/worker/worker.service';
 import { OnlineService } from '../../core/api/services/online.service';
 import { UpdateService } from '../../core/update/update.service';
-// import '@angular/localize';
 
 @Component({
   selector: 'app-topbar',
