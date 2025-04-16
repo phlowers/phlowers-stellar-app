@@ -32,7 +32,7 @@ import { StorageService } from './core/store/storage.service';
 const validateEmail = (email: string): boolean => {
   return !!String(email)
     .toLowerCase()
-    .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+    .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/); //NOSONAR
 };
 
 const modules = [
@@ -88,9 +88,9 @@ export class AppComponent implements OnInit {
   // pythonWorker: Worker | null = null;
 
   constructor(
-    private messageService: MessageService,
-    private storageService: StorageService,
-    private workerService: WorkerService
+    private readonly messageService: MessageService,
+    private readonly storageService: StorageService,
+    private readonly workerService: WorkerService
   ) {
     storageService.ready$.subscribe((ready) => {
       if (ready) {
@@ -123,7 +123,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  async ngOnInit() {
+  async setupWorker() {
     try {
       this.workerService.setupWorker();
       await this.storageService.setPersistentStorage();
@@ -131,5 +131,9 @@ export class AppComponent implements OnInit {
     } catch (err) {
       console.error('Error creating database', err);
     }
+  }
+
+  ngOnInit() {
+    this.setupWorker();
   }
 }

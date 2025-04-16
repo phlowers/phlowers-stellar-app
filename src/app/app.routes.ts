@@ -9,7 +9,6 @@ import { AppLayoutComponent } from './layout/component/app.layout';
 import { StudiesComponent } from './pages/studies/studies.component';
 import { AdminComponent } from './pages/admin/admin';
 import { StudyComponent } from './pages/study/study.component';
-// import { OfflineStoragePoc } from './pages/offline-storage-poc/offline-storage-poc.component';
 import { SectionsComponent } from './pages/sections/sections.component';
 import { PlotlyPageComponent } from './pages/plotly-poc/plotly-page/plotly-page.component';
 

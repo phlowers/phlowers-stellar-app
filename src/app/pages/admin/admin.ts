@@ -47,7 +47,7 @@ import { MessageService } from 'primeng/api';
 export class AdminComponent implements OnInit {
   constructor(
     public updateService: UpdateService,
-    private messageService: MessageService
+    private readonly messageService: MessageService
   ) {}
   updateAvailable = false;
   newVersion = '';

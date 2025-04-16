@@ -21,7 +21,7 @@ export enum ServerStatus {
 export class OnlineService {
   public serverOnline$ = new BehaviorSubject<ServerStatus>(ServerStatus.LOADING);
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private readonly httpClient: HttpClient) {
     this.online$.subscribe((online) => {
       if (online) {
         this.httpClient
@@ -39,7 +39,7 @@ export class OnlineService {
     });
   }
 
-  private _online = merge(fromEvent(window, 'online'), fromEvent(window, 'offline')).pipe(
+  private readonly _online = merge(fromEvent(window, 'online'), fromEvent(window, 'offline')).pipe(
     startWith(undefined),
     map(() => window.navigator.onLine)
   );

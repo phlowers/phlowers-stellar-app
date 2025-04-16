@@ -14,9 +14,9 @@ import { environment } from '../../../../environments/environment.development';
   providedIn: 'root'
 })
 export class StudyService {
-  private apiUrl = `${environment.apiUrl}/api/v1/studies`;
+  private readonly apiUrl = `${environment.apiUrl}/api/v1/studies`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Create a new study

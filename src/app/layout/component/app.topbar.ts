@@ -70,8 +70,8 @@ export class AppTopbarComponent implements OnInit {
 
   constructor(
     public layoutService: LayoutService,
-    private onlineService: OnlineService,
-    private workerService: WorkerService,
+    private readonly onlineService: OnlineService,
+    private readonly workerService: WorkerService,
     public updateService: UpdateService
   ) {}
 

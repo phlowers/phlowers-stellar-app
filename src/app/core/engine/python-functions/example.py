@@ -3,7 +3,6 @@
 import time
 start = time.time()
 import plotly.graph_objects as go
-# import js
 import numpy as np
 import pandas as pd
 from mechaphlowers import SectionDataFrame
@@ -55,24 +54,22 @@ camera = dict(
 )
 
 fig.update_layout(
-    # scene_camera=camera,
     scene=dict(
         aspectmode='manual',  # Makes the axes scale proportionally to the data
         aspectratio=dict(x=15, y=0.5, z=7),  # Equal scaling for all axes
     )
 )
 print(f"Time taken to update layout: {time.time() - end} seconds")
-# fig.show()
+# fig.show() # NOSONAR
 print("fig is", fig)
-# print("js is", js)
-# plot_output = js.document.getElementById('plotly-output1')
-# print("plot_output is", plot_output)
+# print("js is", js) # NOSONAR
+# plot_output = js.document.getElementById('plotly-output1') # NOSONAR
+# print("plot_output is", plot_output) # NOSONAR
 result = fig.to_html(
     include_plotlyjs=True,
     full_html=False,
     default_height='800px',
     default_width='100%',
-    # div_id='plotly-output',
+    # div_id='plotly-output', # NOSONAR
 )
 print(f"Time taken to create figure html: {time.time() - end} seconds")
-# plot_output.innerHTML = fig_html
