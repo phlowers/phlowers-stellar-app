@@ -12,6 +12,9 @@ declare const Plotly: any;
   styleUrl: './plotly-comp.component.scss'
 })
 export class PlotlyComponent implements AfterViewInit {
+  // localized texts
+  sliderAriaLabel = $localize`Change line height`;
+
   plotlyLineContainer = viewChild<ElementRef<HTMLDivElement>>('plotlyLine');
 
   plotElement = signal<HTMLDivElement | undefined>(undefined);

@@ -511,5 +511,17 @@
         <target>Réinitialiser les champs</target>
       </segment>
     </unit>
+    <unit id="8892964333730306563">
+      <segment state="initial">
+        <source>Plotly</source>
+        <target>Plotly</target>
+      </segment>
+    </unit>
+    <unit id="3407827478067561796">
+      <segment state="initial">
+        <source>Change line height</source>
+        <target>Modifier la hauteur de la ligne</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
