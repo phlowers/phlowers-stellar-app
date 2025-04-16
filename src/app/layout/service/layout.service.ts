@@ -6,10 +6,10 @@
  */
 import { Injectable, signal } from '@angular/core';
 
-export interface layoutConfig {
+export interface LayoutConfig {
   preset?: string;
   primary?: string;
-  surface?: string | undefined | null;
+  surface?: string | null;
   darkTheme?: boolean;
   menuMode?: string;
 }
@@ -26,7 +26,7 @@ interface LayoutState {
   providedIn: 'root'
 })
 export class LayoutService {
-  _config: layoutConfig = {
+  _config: LayoutConfig = {
     preset: 'Aura',
     primary: 'emerald',
     surface: null,
@@ -42,7 +42,7 @@ export class LayoutService {
     menuHoverActive: false
   };
 
-  layoutConfig = signal<layoutConfig>(this._config);
+  layoutConfig = signal<LayoutConfig>(this._config);
 
   layoutState = signal<LayoutState>(this._state);
 

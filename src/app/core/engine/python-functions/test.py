@@ -34,8 +34,6 @@ class ResultsCollector:
 
 collector = ResultsCollector()
 pytest.main(['-s', '--color', 'no', "--quiet", '--tb=line', '--pyargs', 'mechaphlowers'], plugins=[collector])
-# for report in collector.reports:
-#     print('id:', report.nodeid, 'outcome:', report.outcome)  # etc
 print('exit code:', collector.exitcode)
 print('passed:', collector.passed, 'failed:', collector.failed, 'xfailed:', collector.xfailed, 'skipped:', collector.skipped)
 print('total duration:', collector.total_duration)

@@ -102,7 +102,7 @@ export class ImportStudyModalComponent {
   isLoading = false;
   studies: StudyModel[] = [];
   selectedStudies!: StudyModel;
-  constructor(private studyService: StudyService) {
+  constructor(readonly studyService: StudyService) {
     this.studyToSearch = newStudy();
   }
 

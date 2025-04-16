@@ -14,9 +14,9 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = `${environment.apiUrl}/api/v1/users`;
+  readonly apiUrl = `${environment.apiUrl}/api/v1/users`;
 
-  constructor(private http: HttpClient) {}
+  constructor(readonly http: HttpClient) {}
 
   /**
    * Retrieve all users from the database

@@ -14,9 +14,9 @@ import { ModifySectionModel, SearchSectionModel, SectionModel } from '../models/
   providedIn: 'root'
 })
 export class SectionService {
-  private apiUrl = `${environment.apiUrl}/api/v1/sections`;
+  readonly apiUrl = `${environment.apiUrl}/api/v1/sections`;
 
-  constructor(private http: HttpClient) {}
+  constructor(readonly http: HttpClient) {}
 
   /**
    * Create a new section

@@ -8,8 +8,7 @@ declare const Plotly: any;
 @Component({
   selector: 'app-plotly-comp',
   imports: [FormsModule, SliderModule],
-  templateUrl: './plotly-comp.component.html',
-  styleUrl: './plotly-comp.component.scss'
+  templateUrl: './plotly-comp.component.html'
 })
 export class PlotlyComponent implements AfterViewInit {
   // localized texts
@@ -27,7 +26,7 @@ export class PlotlyComponent implements AfterViewInit {
 
   lineTraceChange = output<PlotlyLine>();
 
-  private initialLineTrace = signal<PlotlyLine>({
+  readonly initialLineTrace = signal<PlotlyLine>({
     x: [],
     z: [],
     y: []
