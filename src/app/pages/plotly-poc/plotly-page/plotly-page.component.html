@@ -1,0 +1,18 @@
+<p-card>
+  <ng-template #header>
+    <h1 class="text-center mb-0 px-5 py-7">Plotly</h1>
+  </ng-template>
+
+  <app-plotly-comp [lineTrace]="lineTest()" (lineTraceChange)="updateLineTest($event)" />
+
+  <dl>
+    <dt>x-axis values</dt>
+    <dd>{{ lineTest().x }}</dd>
+
+    <dt>y-axis values <em>written "z" in Plotly</em></dt>
+    <dd>{{ lineTest().z }}</dd>
+
+    <dt>z-axis values <em>written "y" in Plotly</em></dt>
+    <dd>{{ lineTest().y }}</dd>
+  </dl>
+</p-card>

@@ -11,6 +11,7 @@ import { AdminComponent } from './pages/admin/admin';
 import { StudyComponent } from './pages/study/study.component';
 // import { OfflineStoragePoc } from './pages/offline-storage-poc/offline-storage-poc.component';
 import { SectionsComponent } from './pages/sections/sections.component';
+import { PlotlyPageComponent } from './pages/plotly-poc/plotly-page/plotly-page.component';
 
 export const appRoutes: Routes = [
   {
@@ -21,7 +22,8 @@ export const appRoutes: Routes = [
       { path: 'admin', component: AdminComponent },
       // { path: 'offline-storage-poc', component: OfflineStoragePoc },
       { path: 'study/:uuid', component: StudyComponent },
-      { path: 'sections', component: SectionsComponent }
+      { path: 'sections', component: SectionsComponent },
+      { path: 'plotly', component: PlotlyPageComponent }
     ]
   }
   // { path: 'notfound', component: Notfound },
