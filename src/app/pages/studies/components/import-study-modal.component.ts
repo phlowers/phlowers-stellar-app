@@ -6,7 +6,7 @@
  */
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
-import { StudyModelLocal } from '../../../core/store/models/study.model';
+import { Study } from '../../../core/store/datatabase/interfaces/study';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -15,7 +15,7 @@ import { StudyService } from '../../../core/api/services/study.service';
 import { SearchStudyModel, StudyModel } from '../../../core/api/models/study.model';
 import { CommonModule } from '@angular/common';
 
-const newStudy = (): StudyModelLocal => {
+const newStudy = (): Study => {
   return {
     title: '',
     description: '',

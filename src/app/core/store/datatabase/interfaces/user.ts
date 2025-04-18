@@ -8,5 +8,5 @@
 import { UserModel as UserModelApi } from '../../../api/models/user.model';
 
 export interface User extends UserModelApi {
-  saved: boolean;
+  saved?: boolean;
 }

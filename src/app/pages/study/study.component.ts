@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { WorkerService } from '../../core/engine/worker/worker.service';
 import { Task } from '../../core/engine/worker/tasks';
@@ -15,6 +15,8 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { CheckboxModule } from 'primeng/checkbox';
+
+declare const Plotly: any;
 
 const initialData = {
   name: ['1', '2', 'three', 'support 4'],
@@ -134,7 +136,7 @@ const initialDataObjects = initialData.name.map((name, index) => ({
         </tr>
       </ng-template>
     </p-table>
-    <div id="plotly-output1"></div>
+    <div id="plotly-output"></div>
   </div>`
 })
 export class StudyComponent implements OnInit {
@@ -155,6 +157,15 @@ export class StudyComponent implements OnInit {
       })
     );
   }
+
+  readonly effect = effect(() => {
+    console.log('result in effect', this.workerService.result());
+    // create plotly from json
+    const result = this.workerService.result();
+    if (result) {
+      Plotly.newPlot('plotly-output', JSON.parse(result));
+    }
+  });
 
   addSupport() {
     this.dataToObject.push({
