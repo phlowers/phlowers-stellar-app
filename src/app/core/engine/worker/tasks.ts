@@ -7,7 +7,6 @@
 import { loadPyodide } from 'pyodide';
 import pythonScript from '../python-functions/example.py';
 import testScript from '../python-functions/test.py';
-// import runPythonScript from '../python-functions/run_python.py';
 
 export enum Task {
   runTests = 'runTests',
@@ -33,7 +32,6 @@ async function runcode(pyodide: PyodideAPI) {
 
 async function runPython(pyodide: PyodideAPI, script: string, data: any) {
   const start = performance.now();
-  // pyodide.registerJsModule('my_js_namespace', { data1: data });
   pyodide.globals.set('data1', data);
   await pyodide.runPythonAsync(script);
   return { runTime: performance.now() - start };

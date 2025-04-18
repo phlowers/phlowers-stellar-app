@@ -523,5 +523,23 @@
         <target>Modifier la hauteur de la ligne</target>
       </segment>
     </unit>
+    <unit id="2517309683610083249">
+      <segment state="initial">
+        <source>Title:</source>
+        <target>Titre:</target>
+      </segment>
+    </unit>
+    <unit id="6996799422725544865">
+      <segment state="initial">
+        <source>Description:</source>
+        <target>Description:</target>
+      </segment>
+    </unit>
+    <unit id="259021582922138864">
+      <segment state="initial">
+        <source>Shareable to other users:</source>
+        <target>Partageable aux autres utilisateurs:</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

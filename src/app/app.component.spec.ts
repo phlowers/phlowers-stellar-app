@@ -95,9 +95,9 @@ describe('AppComponent', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
   });
 
-  describe('ngOnInit', () => {
+  describe('setupWorker', () => {
     it('should setup worker and initialize database', async () => {
-      await component.ngOnInit();
+      await component.setupWorker();
 
       expect(mockWorkerService.setupWorker).toHaveBeenCalled();
       expect(mockStorageService.setPersistentStorage).toHaveBeenCalled();
@@ -109,7 +109,7 @@ describe('AppComponent', () => {
       const error = new Error('Database error');
       (mockStorageService.createDatabase as jest.Mock).mockRejectedValue(error);
 
-      await component.ngOnInit();
+      await component.setupWorker();
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating database', error);
       consoleErrorSpy.mockRestore();

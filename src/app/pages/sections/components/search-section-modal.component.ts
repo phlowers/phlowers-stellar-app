@@ -133,7 +133,7 @@ export class SearchSectionModalComponent {
   isLoading = false;
   sections: any[] = [];
   selectedSections: any[] = [];
-  constructor(private sectionService: SectionService) {
+  constructor(private readonly sectionService: SectionService) {
     this.sectionToSearch = newSection();
   }
 

@@ -13,7 +13,7 @@ const url = 'http://localhost:8080';
   providedIn: 'root'
 })
 export class RemoteService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(private readonly httpClient: HttpClient) {}
 
   saveStudies = (studies: any) => {
     this.httpClient.post(`${url}/studies`, studies).subscribe({
