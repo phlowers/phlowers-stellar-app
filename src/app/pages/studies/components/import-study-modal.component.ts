@@ -20,6 +20,7 @@ const newStudy = (): StudyModelLocal => {
     title: '',
     description: '',
     uuid: '',
+    shareable: false,
     author_email: '',
     created_at_offline: '',
     updated_at_offline: '',
@@ -101,7 +102,7 @@ export class ImportStudyModalComponent {
   isLoading = false;
   studies: StudyModel[] = [];
   selectedStudies!: StudyModel;
-  constructor(private studyService: StudyService) {
+  constructor(private readonly studyService: StudyService) {
     this.studyToSearch = newStudy();
   }
 

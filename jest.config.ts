@@ -12,6 +12,7 @@ const config = {
   snapshotSerializers: ['jest-preset-angular/build/serializers/html-comment', 'jest-preset-angular/build/serializers/ng-snapshot', 'jest-preset-angular/build/serializers/no-ng-attributes'],
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   transform: {
+    '^.+\\.py$': '<rootDir>/fileTransformer.js',
     '^.+\\.(ts|js|mjs|html|svg)$': [
       'jest-preset-angular',
       {

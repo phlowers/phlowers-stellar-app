@@ -142,7 +142,7 @@ export class StudyComponent implements OnInit {
   subscriptions = new Subscription();
   loading = true;
   dataToObject = initialDataObjects;
-  constructor(private workerService: WorkerService) {}
+  constructor(private readonly workerService: WorkerService) {}
 
   ngOnInit() {
     this.loading = true;
@@ -178,7 +178,6 @@ export class StudyComponent implements OnInit {
       insulator_length: this.dataToObject.map((item) => item.insulator_length),
       span_length: this.dataToObject.map((item) => item.span_length)
     };
-    console.log('data2 is', data);
 
     this.workerService.runTask(Task.runPython, data);
   }

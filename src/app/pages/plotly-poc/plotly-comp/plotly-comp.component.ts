@@ -8,8 +8,7 @@ declare const Plotly: any;
 @Component({
   selector: 'app-plotly-comp',
   imports: [FormsModule, SliderModule],
-  templateUrl: './plotly-comp.component.html',
-  styleUrl: './plotly-comp.component.scss'
+  templateUrl: './plotly-comp.component.html'
 })
 export class PlotlyComponent implements AfterViewInit {
   // localized texts

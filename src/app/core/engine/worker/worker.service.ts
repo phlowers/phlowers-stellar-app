@@ -8,13 +8,12 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Task } from './tasks';
-// import { AppDB } from '../database/db';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkerService {
-  private _ready = new BehaviorSubject<boolean>(false);
+  private readonly _ready = new BehaviorSubject<boolean>(false);
   public worker?: Worker;
   loadTime = 0;
   importTime = 0;
@@ -25,9 +24,6 @@ export class WorkerService {
   }
 
   setupWorker() {
-    //{
-    // name: window.location.href
-    // }
     this.worker = new Worker(new URL('./worker', import.meta.url));
     this.worker.onmessage = ({ data }) => {
       console.log('Worker message', data);
@@ -39,25 +35,12 @@ export class WorkerService {
       } else if (data.runTime) {
         this.runTime = data.runTime;
       } else if (data.result) {
-        const div = document.getElementById('plotly-output1');
-        if (div) {
-          div.innerHTML = data.result;
-          const ele = document.getElementById('plotly-output1');
-          const codes = ele?.getElementsByTagName('script') || [];
-          for (const code of codes) {
-            eval(code.text);
-          }
-        }
+        this._ready.next(true);
       }
     };
-    // return worker;
   }
 
   async runTask(task: Task, data: any) {
     this.worker?.postMessage({ task, data });
   }
-
-  //   async createDatabase(): Promise<void> {
-  //     this.worker = this.setupWorker();
-  //   }
 }

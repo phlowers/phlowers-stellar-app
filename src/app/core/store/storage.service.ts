@@ -13,7 +13,7 @@ import { AppDB } from './db';
   providedIn: 'root'
 })
 export class StorageService {
-  private _ready = new BehaviorSubject<boolean>(false);
+  private readonly _ready = new BehaviorSubject<boolean>(false);
   public db?: AppDB;
 
   get ready$(): Observable<boolean> {
@@ -26,7 +26,7 @@ export class StorageService {
    */
   async setPersistentStorage(): Promise<void> {
     // Request persistent storage for site
-    if (navigator.storage && navigator.storage.persist) {
+    if (navigator?.storage?.persist) {
       let isPersisted = await navigator.storage.persisted();
       if (!isPersisted) {
         isPersisted = await navigator.storage.persist();

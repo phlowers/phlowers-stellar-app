@@ -36,6 +36,8 @@ import { StudyService } from '../../core/api/services/study.service';
 import { StudyModelLocal } from '../../core/store/models/study.model';
 import { ImportStudyModalComponent } from './components/import-study-modal.component';
 import { Subscription } from 'rxjs';
+import { CheckboxModule } from 'primeng/checkbox';
+
 import { OnlineService, ServerStatus } from '../../core/api/services/online.service';
 
 interface Column {
@@ -47,6 +49,7 @@ const newStudy = (): StudyModelLocal => {
   return {
     title: '',
     description: '',
+    shareable: false,
     uuid: '',
     author_email: '',
     created_at_offline: '',
@@ -74,6 +77,7 @@ const columns = [
     ButtonModule,
     RippleModule,
     ToastModule,
+    CheckboxModule,
     ToolbarModule,
     RatingModule,
     InputTextModule,
@@ -97,10 +101,6 @@ const columns = [
         <p-button i18n-label disabled="{{ !serverOnline }}" i18n-label label="Import from database" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openImportStudyModal()" />
         <p-button i18n-label severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedStudies()" [disabled]="!selectedStudies || !selectedStudies.length" />
       </ng-template>
-
-      <!-- <ng-template #end>
-        <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-      </ng-template> -->
     </p-toolbar>
 
     <p-table
@@ -165,8 +165,6 @@ const columns = [
             <td style="min-width: 16rem">{{ typedStudy.author_email }}</td>
             <td style="min-width: 12rem" style="display:flex; justify-content:center;">
               @if (typedStudy.saved) {
-                <!-- <p-avatar icon="pi pi-check" [style]="{ 'background-color': 'transparent', color: 'green' }" class="mr-2" size="normal" shape="circle" /> -->
-
                 <p-button icon="pi pi-check" [style]="{ 'background-color': 'transparent', color: 'green' }" disabled="true" severity="secondary" class="mr-2" [rounded]="true" [outlined]="false" />
               } @else {
                 <p-button
@@ -200,13 +198,17 @@ const columns = [
       <ng-template #content>
         <div class="flex flex-col gap-6">
           <div>
-            <label i18n for="title" class="block font-bold mb-3">Title</label>
+            <label i18n for="title" class="block font-bold mb-3">Title:</label>
             <input type="text" pInputText id="title" [(ngModel)]="study.title" required fluid />
             <small i18n class="text-red-500" *ngIf="submitted && !study!.title">Title is required.</small>
           </div>
           <div>
-            <label i18n for="description" class="block font-bold mb-3">Description</label>
+            <label i18n for="description" class="block font-bold mb-3">Description:</label>
             <textarea id="description" pTextarea [(ngModel)]="study.description" required rows="3" cols="20" fluid></textarea>
+          </div>
+          <div>
+            <label i18n for="shareable" class="block font-bold mb-3">Shareable to other users:</label>
+            <p-checkbox id="shareable" [binary]="true" [(ngModel)]="study.shareable" required rows="3" cols="20" fluid></p-checkbox>
           </div>
         </div>
       </ng-template>
@@ -238,15 +240,14 @@ export class StudiesComponent implements OnInit {
   saveOfflineText = $localize`Cannot save. Server is offline`;
 
   constructor(
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService,
-    private onlineService: OnlineService,
-    private storageService: StorageService,
-    private studyService: StudyService
+    private readonly messageService: MessageService,
+    private readonly confirmationService: ConfirmationService,
+    private readonly onlineService: OnlineService,
+    private readonly storageService: StorageService,
+    private readonly studyService: StudyService
   ) {}
 
   setIsImportStudyModalOpen(isOpen: boolean) {
-    console.log('isOpen', isOpen);
     this.isImportStudyModalOpen = isOpen;
   }
 
@@ -269,10 +270,6 @@ export class StudiesComponent implements OnInit {
       this.onlineService.serverOnline$.subscribe((serverOnline) => {
         this.serverOnline = serverOnline === ServerStatus.ONLINE;
       })
-      // this.onlineService.online$.subscribe((online) => {
-      //   console.log("online is", online);
-      //   this.offline = !online;
-      // })
     );
   }
 
@@ -336,7 +333,7 @@ export class StudiesComponent implements OnInit {
 
   saveStudyRemotely(study: StudyModelLocal) {
     this.studyService.createStudy(study).subscribe({
-      next: async () => {
+      next: () => {
         this.messageService.add({
           severity: 'success',
           summary: $localize`Successful`,
@@ -344,8 +341,9 @@ export class StudiesComponent implements OnInit {
           life: 3000
         });
 
-        await this.storageService.db?.studies.update(study.uuid, { ...study, updated_at_offline: new Date().toISOString(), saved: true });
-        this.studies.set((await this.storageService.db?.studies.toArray()) || []);
+        this.storageService.db?.studies.update(study.uuid, { ...study, updated_at_offline: new Date().toISOString(), saved: true }).then(async () => {
+          this.studies.set((await this.storageService.db?.studies.toArray()) || []);
+        });
       },
       error: () => {
         this.messageService.add({
@@ -357,6 +355,18 @@ export class StudiesComponent implements OnInit {
     });
   }
 
+  async deleteStudyAccepted(study: StudyModelLocal) {
+    await this.storageService.db?.studies.delete(study.uuid);
+    this.studies.set((await this.storageService.db?.studies.toArray()) || []);
+    this.study = newStudy();
+    this.messageService.add({
+      severity: 'success',
+      summary: $localize`Successful`,
+      detail: $localize`Study Deleted`,
+      life: 3000
+    });
+  }
+
   deleteStudy(study: StudyModelLocal) {
     this.confirmationService.confirm({
       message: $localize`Are you sure you want to delete: ${study.title}?`,
@@ -365,15 +375,7 @@ export class StudiesComponent implements OnInit {
       acceptLabel: $localize`Delete`,
       rejectLabel: $localize`Cancel`,
       accept: async () => {
-        await this.storageService.db?.studies.delete(study.uuid);
-        this.studies.set((await this.storageService.db?.studies.toArray()) || []);
-        this.study = newStudy();
-        this.messageService.add({
-          severity: 'success',
-          summary: $localize`Successful`,
-          detail: $localize`Study Deleted`,
-          life: 3000
-        });
+        await this.deleteStudyAccepted(study);
       }
     });
   }

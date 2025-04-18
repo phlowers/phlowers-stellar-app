@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
 import { WorkerService } from '../../core/engine/worker/worker.service';
 import { OnlineService } from '../../core/api/services/online.service';
 import { UpdateService } from '../../core/update/update.service';
-// import '@angular/localize';
 
 @Component({
   selector: 'app-topbar',
@@ -71,8 +70,8 @@ export class AppTopbarComponent implements OnInit {
 
   constructor(
     public layoutService: LayoutService,
-    private onlineService: OnlineService,
-    private workerService: WorkerService,
+    private readonly onlineService: OnlineService,
+    private readonly workerService: WorkerService,
     public updateService: UpdateService
   ) {}
 
