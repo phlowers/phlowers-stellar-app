@@ -27,7 +27,7 @@ export class PlotlyComponent implements AfterViewInit {
 
   lineTraceChange = output<PlotlyLine>();
 
-  private initialLineTrace = signal<PlotlyLine>({
+  private readonly initialLineTrace = signal<PlotlyLine>({
     x: [],
     z: [],
     y: []
