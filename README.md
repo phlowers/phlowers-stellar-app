@@ -13,16 +13,7 @@ Stellar is the app based on mechaphlowers enables to perform offline every calcu
 Stellar is based on pyodide to enable execution of python in the browser.
 
 ## Installation
-
-### Prerequisites
-
-You need to install node/npm. We propose to use nvm to be precise on the version.
-- [For nvm](https://github.com/nvm-sh/nvm)
-- Set node version to 23 using `nvm install v23` and `nvm use 23`
-
-Then install angular v19 with `npm install -g @angular/cli@19`
-
-### Launching
+Installation process is described in the Developer guide/Installation section
 
 ### Development server  
 Run `ng serve` for a dev server. Navigate to `http://localhost:4201/`. The application will automatically reload if you change any of the source files.

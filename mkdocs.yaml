@@ -1,0 +1,117 @@
+site_name: Stellar
+site_url : http://phlowers.readthedocs.com
+repo_url: https://github.com/phlowers/phlowers-stellar-app
+copyright: Copyright &copy; 2025 RTE France. Unless otherwise indicated, content is licensed under CC-BY-4.0.
+
+theme:
+  name: "material"
+  logo: _static/stellar_ico.svg
+  favicon: _static/stellar_ico.svg
+  features:
+    - toc.integrate
+    - navigation.footer
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - search.highlight
+    - search.suggest
+    - toc.follow
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+  highlightjs: true
+  hljs_languages:
+    - yaml
+    - python
+    - typescript
+    - bash
+  palette: 
+    - primary: indigo
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Getting Started: home/home.md
+  # - User Guide: 
+  - Developer guide:
+    # - API Reference:
+      
+    # - Guidelines : developer_guide/guidelines.md
+    - Documentation : developer_guide/documentation.md
+
+
+
+plugins:
+  - search
+  - offline
+  - mkdocstrings:
+      default_handler: typescript
+        # See: https://mkdocstrings.github.io/python/usage/
+        # python:
+          # paths: [src]
+          # import:
+          #   - url: https://docs.python.org/3/objects.inv
+          #     domains: [py, std]
+          # options:
+          #   docstring_options:
+          #     ignore_init_summary: true
+          #   # docstring_section_style: list
+          #   filters: ["!^_"]
+          #   heading_level: 1
+          #   inherited_members: true
+          #   merge_init_into_class: true
+          #   parameter_headings: true
+          #   separate_signature: true
+          #   show_root_heading: true
+          #   show_root_full_path: false
+          #   show_signature_annotations: true
+          #   # show_source: false
+          #   show_symbol_type_heading: true
+          #   show_symbol_type_toc: true
+          #   signature_crossrefs: true
+            # summary: true
+
+markdown_extensions:
+  - admonition # https://squidfunk.github.io/mkdocs-material/reference/admonitions/#collapsible-blocks
+  # - tables
+  - pymdownx.extra
+  - pymdownx.highlight:
+      pygments_lang_class: true
+      linenums: true
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.arithmatex:
+      generic: true
+
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/phlowers
+      name: phlowers on Github
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/rte_france
+      name: RTE France on Twitter
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/user/myRTEtube
+      name: RTE France on Youtube
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/rte_245681
+      name: RTE France on LinkedIn
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/rte_france
+      name: RTE France on Instagram
+#   version:
+#     provider: mike
