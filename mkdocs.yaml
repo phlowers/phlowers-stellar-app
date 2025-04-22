@@ -25,6 +25,7 @@ theme:
     - typescript
     - bash
   palette: 
+    - primary: indigo
     # Palette toggle for light mode
     - scheme: default
       toggle:
