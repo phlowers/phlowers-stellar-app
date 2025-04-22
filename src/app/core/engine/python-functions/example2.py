@@ -6,7 +6,10 @@ from mechaphlowers import SectionDataFrame
 from mechaphlowers.entities.arrays import SectionArray
 from mechaphlowers.entities.arrays import CableArray, WeatherArray
 import mechaphlowers as mph
+from mechaphlowers import plotting as plt
 
+
+import plotly.express as px
 
 np.random.seed(142)
 
@@ -14,6 +17,9 @@ inputs = js_inputs.to_py()
 
 cable = inputs["cable"]
 sections = inputs["sections"]
+
+size_section = len(sections["name"])
+res = 100
 
 print("cable is", cable)
 print("sections is", sections)
@@ -60,9 +66,44 @@ print("sections is", sections)
 #     return pd.DataFrame(section_data)
 
 
+def get_canton(df, frame, shift_arm, shift_altitude, phase_name):
+    
+    save1 = frame.section_array._data.conductor_attachment_altitude
+    save2 = frame.section_array._data.crossarm_length
+    
+    frame.section_array._data.conductor_attachment_altitude += shift_altitude
+    frame.section_array._data.crossarm_length += shift_arm
+    frame.update()
+    line_points = frame.get_coordinates()
+
+    support_points = plt.plot.get_support_points(frame.data)
+
+    insulator_points = plt.plot.get_insulator_points(frame.data)
+    
+    spans = pd.DataFrame(line_points, columns=["x", "y", "z"])
+    spans["support"] = df.loc[0:size_section-2,"name"].repeat(res).values
+    spans["type"] = "span"
+    
+    supports = pd.DataFrame(support_points, columns=["x", "y", "z"])
+    supports["support"] = df.name.repeat(6).values
+    supports["type"] = "support"
+    
+    insulators = pd.DataFrame(insulator_points, columns=["x", "y", "z"])
+    insulators["support"] = df.name.repeat(3).values
+    insulators["type"] = "insulator"
+    
+    
+    pdf = pd.concat([spans,supports,insulators], ignore_index=True)
+    pdf["canton"] = phase_name
+    
+    frame.section_array._data.conductor_attachment_altitude = save1
+    frame.section_array._data.crossarm_length = save2
+    
+    return pdf
+
 def main():
-    size_multiple = 5
-    size_section = size_multiple*5
+    # size_multiple = 5
+    # size_section = size_multiple*5
     # df = generate_section_array(size_section)
     df = pd.DataFrame(sections)
     print(df)
@@ -100,16 +141,19 @@ def main():
     )
     frame.add_cable(cable_array)
 
-    # Display figure
-    fig = go.Figure()
-    frame.plot.line3d(fig, "analysis")
-    fig.update_layout(
-        width=1200,
-        height=800,
-        autosize=False,
-    )
-    result = fig.to_json()
-    # fig.show()
+    # fig = go.Figure()
+    # frame.plot.line3d(fig, "analysis")
+    # fig.update_layout(
+    #     width=600,
+    #     height=300,
+    #     autosize=False,
+    #     showlegend=False,
+    #     margin=dict(l=0, r=0, t=0, b=0)
+    # )
+    # result = fig.to_json()
+    canton_1 = get_canton(df, frame, 0, 0, "phase_1")
+
+    
     return result
 
 result = main()

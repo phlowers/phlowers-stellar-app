@@ -19,7 +19,7 @@ import { TabsModule } from 'primeng/tabs';
 import { DividerModule } from 'primeng/divider';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
-import Plotly from 'plotly.js';
+import Plotly from 'plotly.js-dist-min';
 
 // declare const Plotly: PlotlyTypes;
 
@@ -159,7 +159,7 @@ interface Data {
         </div>
       </ng-template>
     </p-dialog> -->
-    <p-tabs value="Obstacles">
+    <p-tabs value="Visualization">
       <p-tablist>
         <p-tab [value]="tab" *ngFor="let tab of tabs">{{ tab }}</p-tab>
       </p-tablist>
@@ -450,7 +450,7 @@ interface Data {
             </ng-template>
           </p-table>
         </p-tabpanel>
-        <p-tabpanel value="Visualisation">
+        <p-tabpanel value="Visualization">
           <div class="pb-5">
             <p-button [loading]="loading" i18n severity="info" (click)="runPython()">Run</p-button>
           </div>
@@ -507,7 +507,7 @@ export class StudyComponent implements OnInit {
     width: 0,
     length: 0
   };
-  tabs = ['General', 'Supports', 'Obstacles', 'Visualisation'];
+  tabs = ['General', 'Supports', 'Obstacles', 'Visualization'];
   currentTab = this.tabs[0];
   data: Data = {
     general: {
@@ -568,7 +568,25 @@ export class StudyComponent implements OnInit {
     // create plotly from json
     const result = this.workerService.result();
     if (result) {
-      Plotly.newPlot('plotly-output', JSON.parse(result));
+      console.log('result', result);
+      const parsed = JSON.parse(result);
+      parsed.config = {
+        displayModeBar: false
+      };
+      Plotly.newPlot('plotly-output', parsed, {
+        autosize: false,
+        width: 600,
+        height: 300,
+        margin: {
+          l: 0,
+          r: 0,
+          b: 0,
+          t: 0,
+          pad: 0
+        },
+        paper_bgcolor: '#7f7f7f',
+        plot_bgcolor: '#c7c7c7'
+      });
     }
   });
 
