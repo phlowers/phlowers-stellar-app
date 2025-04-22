@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { loadPyodide } from 'pyodide';
-import pythonScript from '../python-functions/example.py';
+import pythonScript from '../python-functions/example2.py';
 import testScript from '../python-functions/test.py';
 
 export enum Task {
@@ -32,7 +32,7 @@ async function runcode(pyodide: PyodideAPI) {
 
 async function runPython(pyodide: PyodideAPI, script: string, data: any) {
   const start = performance.now();
-  pyodide.globals.set('data1', data);
+  pyodide.globals.set('js_inputs', data);
   await pyodide.runPythonAsync(script);
   return { runTime: performance.now() - start };
 }
@@ -44,6 +44,7 @@ export async function handleTask(pyodide: PyodideAPI, task: Task, data: any) {
     case Task.runCode:
       return await runcode(pyodide);
     case Task.runPython: {
+      // pyodide.globals.get('inputs',);
       await runPython(pyodide, pythonScript, data);
       const result = pyodide.globals.get('result');
       return { result };

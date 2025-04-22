@@ -16,7 +16,8 @@
     "set-up-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers.py",
     "create-assets-list-for-service-worker:fr": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language fr",
     "create-assets-list-for-service-worker:en": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language en",
-    "extract-i18n": "ng extract-i18n --output-path assets/i18n --format=xlf2"
+    "extract-i18n": "ng extract-i18n --output-path assets/i18n --format=xlf2",
+    "typedoc": "typedoc --exclude **/*.spec.ts --out docs/typedoc src/app/pages/study/study.component.ts --tsconfig tsconfig.app.json"
   },
   "browser": {
     "child_process": false,
@@ -49,6 +50,7 @@
     "jest": "^29.7.0",
     "jest-preset-angular": "^14.5.3",
     "lodash": "^4.17.21",
+    "plotly.js": "^3.0.1",
     "plotly.js-dist-min": "^3.0.1",
     "primeclt": "^0.1.5",
     "primeicons": "^7.0.0",
@@ -75,6 +77,7 @@
     "@types/jasmine": "~5.1.0",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
+    "@types/plotly.js": "^2.35.5",
     "angular-eslint": "19.3.0",
     "autoprefixer": "^10.4.20",
     "esbuild-node-externals": "^1.18.0",
@@ -90,6 +93,7 @@
     "postcss": "^8.4.49",
     "prettier": "^3.0.0",
     "tailwindcss": "^3.4.17",
+    "typedoc": "^0.28.3",
     "typescript": "~5.6.2",
     "typescript-eslint": "8.27.0"
   }

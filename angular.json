@@ -49,6 +49,7 @@
             "outputPath": "dist/phlowers-stellar-app",
             "index": "src/index.html",
             "polyfills": [
+              "./polyfills.js",
               "zone.js",
               "@angular/localize/init"
             ],

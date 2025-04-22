@@ -16,7 +16,7 @@ import requests
 from pyodide_build.cli.py_compile import main as pyodide_build  # type: ignore
 
 PYODIDE_VERSION = "0.27.4"
-MECHAPHLOWERS_VERSION = "0.2.0"
+MECHAPHLOWERS_VERSION = "0.3.0"
 PYODIDE_URL = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full"
 PYODIDE_LOCK_URL = f"{PYODIDE_URL}/pyodide-lock.json"
 PYODIDE_DIRECTORY_PATH = "./public/pyodide"
