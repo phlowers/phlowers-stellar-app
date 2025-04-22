@@ -1,15 +1,43 @@
 # Stellar Documentation
 
-## Building documentation 
+## Generate documentation 
 
-### Serving documnentation
+### Building
 
-cf. README
+#### Setup python
 
-### Building documentation
+Mkdocs framework needs python to run. We propose to use uv to proceed.
+
+See [uv documentation](https://docs.astral.sh/uv/getting-started/installation/) to install it.
+
+
+You need a compatible python version. You may have to install it manually (e.g. with pyenv).
+Then you may create a virtualenv, install dependencies and activate the env:
+
+```console
+    uv venv --python 3.12
+    source .venv/bin/activate
+```
+
+!!! Tip
+
+    You would probably use an editor, make sure you configure it to use the same virtual environment you created (it will probably autodetect it) so that you can get autocompletion and inline errors. Here some links for [VSCode](https://code.visualstudio.com/docs/python/environments#_select-and-activate-an-environment) and [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html).  
+
+#### Install dependencies
+
+```python
+uv pip install -r docs/requirements.txt
+```
+
+### Serving
+
+```python
+uv run mkdocs serve
+```
 
 If you need to export, you can use the build command from mkdocs.
 See [https://www.mkdocs.org/](https://www.mkdocs.org/) for more informations.
+
 
 ## Adding documentation
 
