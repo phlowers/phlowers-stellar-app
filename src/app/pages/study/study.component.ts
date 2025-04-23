@@ -181,9 +181,9 @@ interface Data {
               <p-divider styleClass="!my-2" />
               <div class="flex flex-col gap-2">
                 <label for="username">Wind pressure</label>
-                <input styleClass="w-50" placeholder="Set pressure" pInputText id="username" aria-describedby="username-help" [(ngModel)]="data.general.sagging.temperature" />
+                <input styleClass="w-50" placeholder="Set pressure" pInputText id="username" aria-describedby="username-help" [(ngModel)]="data.general.weather.wind_pressure" />
                 <label for="username">Ice thickness</label>
-                <input styleClass="w-50" placeholder="Set ice thickness" pInputText id="username" aria-describedby="username-help" [(ngModel)]="data.general.sagging.temperature" />
+                <input styleClass="w-50" placeholder="Set ice thickness" pInputText id="username" aria-describedby="username-help" [(ngModel)]="data.general.weather.ice_thickness" />
               </div>
             </p-card>
             <p-card class="col-span-2" [style]="{ overflow: 'hidden', boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px' }" role="region">
@@ -454,32 +454,26 @@ interface Data {
           <div class="pb-5">
             <p-button [loading]="loading" i18n severity="info" (click)="runPython()">Run</p-button>
           </div>
-          <div class="grid grid-cols-2 gap-5">
-            <p-card class="col-span-2" [style]="{ overflow: 'hidden', boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px' }">
+          <div class="grid grid-cols-3 gap-5">
+            <p-card class="col-span-3" [style]="{ overflow: 'hidden', boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px' }">
               <ng-template #title><h6 [style]="{ marginBottom: '0' }">Global view</h6></ng-template>
               <p-divider styleClass="!my-2" />
               <ng-template #content>
-                <div id="plotly-output">
-                  <!-- <img src="https://placehold.co/300x300" crossorigin="anonymous" alt="plotly" /> -->
-                </div>
+                <div style="height: 500px; width: 100%" id="plotly-output"></div>
               </ng-template>
             </p-card>
-            <p-card [style]="{ overflow: 'hidden', boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px' }">
+            <p-card class="col-span-2" [style]="{ overflow: 'hidden', boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px' }">
               <ng-template #title><h6 [style]="{ marginBottom: '0' }">Span view</h6></ng-template>
               <p-divider styleClass="!my-2" />
               <ng-template #content>
-                <div>
-                  <img src="https://placehold.co/300x300" crossorigin="anonymous" alt="plotly" />
-                </div>
+                <div style="min-height: 500px; width: 100%" id="plotly-output3"></div>
               </ng-template>
             </p-card>
             <p-card [style]="{ overflow: 'hidden', boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px' }">
               <ng-template #title><h6 [style]="{ marginBottom: '0' }">Support view</h6></ng-template>
               <p-divider styleClass="!my-2" />
               <ng-template #content>
-                <div>
-                  <img src="https://placehold.co/300x300" crossorigin="anonymous" alt="plotly" />
-                </div>
+                <div style="min-height: 500px; width: 100%" id="plotly-output2"></div>
               </ng-template>
             </p-card>
           </div>
@@ -512,8 +506,8 @@ export class StudyComponent implements OnInit {
   data: Data = {
     general: {
       sagging: {
-        temperature: null,
-        parameter: null
+        temperature: 15,
+        parameter: 800
       },
       cable: {
         section: 345.55,
@@ -534,8 +528,8 @@ export class StudyComponent implements OnInit {
         b4: 0
       },
       weather: {
-        wind_pressure: null,
-        ice_thickness: null
+        wind_pressure: 0.6,
+        ice_thickness: 0
       }
     },
     obstacles: initialObstaclesObjects,
@@ -570,23 +564,50 @@ export class StudyComponent implements OnInit {
     if (result) {
       console.log('result', result);
       const parsed = JSON.parse(result);
-      parsed.config = {
-        displayModeBar: false
+      const json_2d = JSON.parse(parsed.json_2d);
+      const json_support_2d = JSON.parse(parsed.json_support_2d);
+      const json_section_3d = JSON.parse(parsed.json_section_3d);
+      // const json_2d = JSON.parse(parsed.json_2d);
+      // const json_support_2d = JSON.parse(parsed.json_support_2d);
+      // const json_section_3d = JSON.parse(parsed.json_section_3d);
+      const margin = {
+        l: 0,
+        r: 0,
+        b: 0,
+        t: 0
       };
-      Plotly.newPlot('plotly-output', parsed, {
-        autosize: false,
-        width: 600,
-        height: 300,
+
+      const config = {
+        displayModeBar: false,
         margin: {
           l: 0,
           r: 0,
           b: 0,
-          t: 0,
-          pad: 0
-        },
-        paper_bgcolor: '#7f7f7f',
-        plot_bgcolor: '#c7c7c7'
-      });
+          t: 0
+        }
+      };
+      console.log('parsed', json_2d);
+      json_2d.layout.margin = margin;
+      const myElement = document.getElementById('plotly-output');
+      const widthJson2d = myElement?.clientWidth;
+      json_2d.layout.width = widthJson2d;
+      json_2d.layout.showlegend = false;
+      const myElement2 = document.getElementById('plotly-output2');
+      const widthJsonSupport2d = myElement2?.clientWidth;
+      json_support_2d.layout.width = widthJsonSupport2d;
+      const myElement3 = document.getElementById('plotly-output3');
+      const widthJsonSection3d = myElement3?.clientWidth;
+      json_section_3d.layout.width = widthJsonSection3d;
+      json_2d.config = config;
+      json_support_2d.layout.margin = margin;
+      json_support_2d.config = config;
+      json_support_2d.layout.showlegend = false;
+      json_section_3d.layout.margin = margin;
+      json_section_3d.layout.showlegend = false;
+      json_section_3d.config = config;
+      Plotly.newPlot('plotly-output', json_2d);
+      Plotly.newPlot('plotly-output2', json_support_2d);
+      Plotly.newPlot('plotly-output3', json_section_3d);
     }
   });
 
