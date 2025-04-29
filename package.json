@@ -14,6 +14,7 @@
     "test": "jest",
     "coverage": "jest --coverage --collectCoverageFrom 'src/**/*.ts'",
     "set-up-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers.py",
+    "create-mock-data": "uv run ./scripts/create_mock_data.py",
     "create-assets-list-for-service-worker:fr": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language fr",
     "create-assets-list-for-service-worker:en": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language en",
     "extract-i18n": "ng extract-i18n --output-path assets/i18n --format=xlf2"
