@@ -34,6 +34,7 @@
   "private": true,
   "dependencies": {
     "@angular-eslint/eslint-plugin-template": "19.3.0",
+    "@angular-slider/ngx-slider": "^19.0.0",
     "@angular/animations": "19.2.4",
     "@angular/common": "19.2.4",
     "@angular/compiler": "19.2.4",
@@ -43,6 +44,7 @@
     "@angular/platform-browser-dynamic": "19.2.4",
     "@angular/router": "19.2.4",
     "@primeng/themes": "19.0.10",
+    "@types/plotly.js-dist-min": "^2.3.4",
     "chart.js": "4.4.2",
     "dexie": "^4.0.11",
     "esbuild-plugin-polyfill-node": "^0.3.0",
@@ -76,6 +78,7 @@
     "@types/jasmine": "~5.1.0",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
+    "@types/plotly.js": "^2.35.5",
     "angular-eslint": "19.3.0",
     "autoprefixer": "^10.4.20",
     "esbuild-node-externals": "^1.18.0",
@@ -91,6 +94,7 @@
     "postcss": "^8.4.49",
     "prettier": "^3.0.0",
     "tailwindcss": "^3.4.17",
+    "typedoc": "^0.28.3",
     "typescript": "~5.6.2",
     "typescript-eslint": "8.27.0"
   }

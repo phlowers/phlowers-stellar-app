@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Task } from './tasks';
 
@@ -18,6 +18,7 @@ export class WorkerService {
   loadTime = 0;
   importTime = 0;
   runTime = 0;
+  result = signal<any>(null);
 
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
@@ -35,7 +36,7 @@ export class WorkerService {
       } else if (data.runTime) {
         this.runTime = data.runTime;
       } else if (data.result) {
-        this._ready.next(true);
+        this.result.set(data.result);
       }
     };
   }

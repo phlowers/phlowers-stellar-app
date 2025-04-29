@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -12,105 +12,256 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { SectionService } from '../../../core/api/services/section.service';
-import { SectionModel } from '../../../core/api/models/section.model';
+import { Section } from '../../../core/store/database/interfaces/section';
+import { StorageService } from '../../../core/store/storage.service';
+import { PopoverModule } from 'primeng/popover';
 
-const newSection = (): SectionModel => {
+const newSection = (): Partial<Section> => {
   return {
-    title: '',
-    description: '',
     uuid: '',
-    author_email: '',
-    created_at_offline: '',
-    updated_at_offline: ''
+    internal_id: '',
+    name: '',
+    short_name: '',
+    created_at: '',
+    updated_at: '',
+    internal_catalog_id: '',
+    type: '',
+    cable_name: '',
+    cable_short_name: '',
+    cables_amount: undefined,
+    optical_fibers_amount: undefined,
+    spans_amount: undefined,
+    begin_span_name: '',
+    last_span_name: '',
+    first_support_number: undefined,
+    last_support_number: undefined,
+    first_attachment_set: '',
+    last_attachment_set: ''
   };
 };
 
 @Component({
   selector: 'app-search-section-modal',
   template: `
-    <p-dialog dismissableMask="true" [style]="{ width: '80vw', height: '90vh' }" header="Search Section" [(visible)]="isOpen" (onHide)="closeModal()" [modal]="true">
+    <p-dialog dismissableMask="true" [style]="{ width: '80vw', minHeight: '80vh' }" header="Search Section" [(visible)]="isOpen" (onHide)="closeModal()" [modal]="true">
       <!-- <div> -->
       <ng-template #content>
         <div style="display: flex; flex-direction: column; height: 100%;">
           <div>
-            <div class="flex flex-row gap-6">
-              <div class="grid grid-cols-6 gap-4">
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Section CUR:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Section Short name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Section name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Cable short name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Cable name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Section type:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Link name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Branch name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Transit link name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
-                <div>
-                  <label i18n for="sectionName" class="block font-bold mb-3">Voltage name:</label>
-                  <input width="300px" id="sectionName" type="text" pInputText [(ngModel)]="sectionToSearch.title" required />
-                </div>
+            <div class="flex flex-wrap gap-3 w-full">
+              <div>
+                <label i18n for="uuid" class="block font-bold mb-3">UUID:</label>
+                <input width="400px" id="uuid" type="text" pInputText [(ngModel)]="sectionToSearch.uuid" required />
+              </div>
+              <div>
+                <label i18n for="internalId" class="block font-bold mb-3">Internal ID:</label>
+                <input width="400px" id="internalId" type="text" pInputText [(ngModel)]="sectionToSearch.internal_id" required />
+              </div>
+              <div>
+                <label i18n for="name" class="block font-bold mb-3">Name:</label>
+                <input width="400px" id="name" type="text" pInputText [(ngModel)]="sectionToSearch.name" required />
+              </div>
+              <div>
+                <label i18n for="shortName" class="block font-bold mb-3">Short Name:</label>
+                <input width="400px" id="shortName" type="text" pInputText [(ngModel)]="sectionToSearch.short_name" required />
+              </div>
+              <div>
+                <label i18n for="createdAt" class="block font-bold mb-3">Created At:</label>
+                <input width="400px" id="createdAt" type="text" pInputText [(ngModel)]="sectionToSearch.created_at" required />
+              </div>
+              <div>
+                <label i18n for="updatedAt" class="block font-bold mb-3">Updated At:</label>
+                <input width="400px" id="updatedAt" type="text" pInputText [(ngModel)]="sectionToSearch.updated_at" required />
+              </div>
+              <div>
+                <label i18n for="internalCatalogId" class="block font-bold mb-3">Internal Catalog ID:</label>
+                <input width="400px" id="internalCatalogId" type="text" pInputText [(ngModel)]="sectionToSearch.internal_catalog_id" required />
+              </div>
+              <div>
+                <label i18n for="type" class="block font-bold mb-3">Type:</label>
+                <input width="400px" id="type" type="text" pInputText [(ngModel)]="sectionToSearch.type" required />
+              </div>
+              <div>
+                <label i18n for="cableName" class="block font-bold mb-3">Cable Name:</label>
+                <input width="400px" id="cableName" type="text" pInputText [(ngModel)]="sectionToSearch.cable_name" required />
+              </div>
+              <div>
+                <label i18n for="cableShortName" class="block font-bold mb-3">Cable Short Name:</label>
+                <input width="400px" id="cableShortName" type="text" pInputText [(ngModel)]="sectionToSearch.cable_short_name" required />
+              </div>
+              <div>
+                <label i18n for="cablesAmount" class="block font-bold mb-3">Cables Amount:</label>
+                <input width="400px" id="cablesAmount" type="number" pInputText [(ngModel)]="sectionToSearch.cables_amount" required />
+              </div>
+              <div>
+                <label i18n for="opticalFibersAmount" class="block font-bold mb-3">Optical Fibers Amount:</label>
+                <input width="400px" id="opticalFibersAmount" type="number" pInputText [(ngModel)]="sectionToSearch.optical_fibers_amount" required />
+              </div>
+              <div>
+                <label i18n for="spansAmount" class="block font-bold mb-3">Spans Amount:</label>
+                <input width="400px" id="spansAmount" type="number" pInputText [(ngModel)]="sectionToSearch.spans_amount" required />
+              </div>
+              <div>
+                <label i18n for="beginSpanName" class="block font-bold mb-3">Begin Span Name:</label>
+                <input width="400px" id="beginSpanName" type="text" pInputText [(ngModel)]="sectionToSearch.begin_span_name" required />
+              </div>
+              <div>
+                <label i18n for="lastSpanName" class="block font-bold mb-3">Last Span Name:</label>
+                <input width="400px" id="lastSpanName" type="text" pInputText [(ngModel)]="sectionToSearch.last_span_name" required />
+              </div>
+              <div>
+                <label i18n for="firstSupportNumber" class="block font-bold mb-3">First Support Number:</label>
+                <input width="400px" id="firstSupportNumber" type="number" pInputText [(ngModel)]="sectionToSearch.first_support_number" required />
+              </div>
+              <div>
+                <label i18n for="lastSupportNumber" class="block font-bold mb-3">Last Support Number:</label>
+                <input width="400px" id="lastSupportNumber" type="number" pInputText [(ngModel)]="sectionToSearch.last_support_number" required />
+              </div>
+              <div>
+                <label i18n for="firstAttachmentSet" class="block font-bold mb-3">First Attachment Set:</label>
+                <input width="400px" id="firstAttachmentSet" type="text" pInputText [(ngModel)]="sectionToSearch.first_attachment_set" required />
+              </div>
+              <div>
+                <label i18n for="lastAttachmentSet" class="block font-bold mb-3">Last Attachment Set:</label>
+                <input width="400px" id="lastAttachmentSet" type="text" pInputText [(ngModel)]="sectionToSearch.last_attachment_set" required />
               </div>
             </div>
             <div class="flex flex-row gap-6 mt-3">
-              <p-button i18n-label label="Search" (click)="searchStudies()" />
+              <p-button i18n-label label="Search" (click)="searchSections()" />
               <p-button i18n-label label="Reset fields" severity="secondary" (click)="resetFields()" />
             </div>
           </div>
           <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-top: 10px; height: 100%;">
-            <p-table [loading]="isLoading" [value]="sections" [tableStyle]="{ 'min-width': '50rem', height: '100%' }">
+            <p-table
+              #dt
+              [value]="sections"
+              [rows]="10"
+              [paginator]="true"
+              [globalFilterFields]="['title']"
+              [tableStyle]="{ 'min-width': '75rem' }"
+              [rowHover]="true"
+              dataKey="uuid"
+              metaKeySelection="true"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} studies"
+              i18n-currentPageReportTemplate
+              [showCurrentPageReport]="true"
+              [rowsPerPageOptions]="[10, 20, 30]"
+            >
+              <ng-template #caption>
+                <div class="flex items-center justify-between">
+                  <h5 i18n class="m-0">Sections</h5>
+                </div>
+              </ng-template>
               <ng-template #header>
                 <tr>
-                  <td style="width: 3rem">
-                    <p-tableCheckbox [value]="selectedSections" />
-                  </td>
-                  <th i18n>UUID</th>
-                  <th i18n>Title</th>
-                  <th i18n>Author email</th>
-                  <th i18n>Created at</th>
-                  <th i18n>Updated at</th>
+                  <th style="width: 3rem"></th>
+                  <th i18n style="width: 10rem; max-width: 10rem;"></th>
+                  <th i18n style="width: 10rem; max-width: 10rem;"></th>
+                  <th i18n pSortableColumn="uuid" style="width: 6rem; max-width: 6rem;">
+                    Uuid
+                    <p-sortIcon field="uuid" />
+                  </th>
+                  <th i18n pSortableColumn="name" style="min-width:16rem">
+                    Name
+                    <p-sortIcon field="name" />
+                  </th>
+                  <th i18n pSortableColumn="internal_id" style="min-width:16rem">
+                    Internal ID
+                    <p-sortIcon field="internal_id" />
+                  </th>
+                  <th i18n pSortableColumn="short_name" style="min-width:16rem">
+                    Short Name
+                    <p-sortIcon field="short_name" />
+                  </th>
+                  <th i18n pSortableColumn="internal_catalog_id" style="min-width:16rem">
+                    Internal Catalog ID
+                    <p-sortIcon field="internal_catalog_id" />
+                  </th>
+                  <th i18n pSortableColumn="type" style="min-width:16rem">
+                    Type
+                    <p-sortIcon field="type" />
+                  </th>
+                  <th i18n pSortableColumn="cable_name" style="min-width:16rem">
+                    Cable Name
+                    <p-sortIcon field="cable_name" />
+                  </th>
+                  <th i18n pSortableColumn="cable_short_name" style="min-width:16rem">
+                    Cable Short Name
+                    <p-sortIcon field="cable_short_name" />
+                  </th>
+                  <th i18n pSortableColumn="cables_amount" style="min-width:16rem">
+                    Cables Amount
+                    <p-sortIcon field="cables_amount" />
+                  </th>
+                  <th i18n pSortableColumn="optical_fibers_amount" style="min-width:16rem">
+                    Optical Fibers Amount
+                    <p-sortIcon field="optical_fibers_amount" />
+                  </th>
+                  <th i18n pSortableColumn="spans_amount" style="min-width:16rem">
+                    Spans Amount
+                    <p-sortIcon field="spans_amount" />
+                  </th>
+                  <th i18n pSortableColumn="begin_span_name" style="min-width:16rem">
+                    Begin Span
+                    <p-sortIcon field="begin_span_name" />
+                  </th>
+                  <th i18n pSortableColumn="last_span_name" style="min-width:16rem">
+                    End Span
+                    <p-sortIcon field="last_span_name" />
+                  </th>
+                  <th i18n pSortableColumn="first_support_number" style="min-width:16rem">
+                    First Support Number
+                    <p-sortIcon field="first_support_number" />
+                  </th>
+                  <th i18n pSortableColumn="last_support_number" style="min-width:16rem">
+                    Last Support Number
+                    <p-sortIcon field="last_support_number" />
+                  </th>
+                  <th i18n pSortableColumn="first_attachment_set" style="min-width:16rem">
+                    First Attachment Set
+                    <p-sortIcon field="first_attachment_set" />
+                  </th>
+                  <th i18n pSortableColumn="last_attachment_set" style="min-width:16rem">
+                    Last Attachment Set
+                    <p-sortIcon field="last_attachment_set" />
+                  </th>
                 </tr>
               </ng-template>
               <ng-template #body let-section>
-                <tr>
-                  <td style="width: 3rem">
-                    <p-tableCheckbox [value]="selectedSections" />
-                  </td>
-                  <td>{{ section.uuid }}</td>
-                  <td>{{ section.title }}</td>
-                  <td>{{ section.author_email }}</td>
-                  <td>{{ section.created_at_offline | date: 'dd/MM/yyyy HH:mm' }}</td>
-                  <td>{{ section.updated_at_offline | date: 'dd/MM/yyyy HH:mm' }}</td>
-                </tr>
+                <!-- trick to get type safety -->
+                @if (identity(section); as typedSection) {
+                  <tr>
+                    <td><p-button severity="secondary" icon="pi pi-ellipsis-v" (onClick)="op.toggle($event)" /></td>
+                    <td style="min-width: 10rem;">
+                      <p-button i18n-label label="Create study" severity="secondary" (onClick)="createStudy(typedSection)" class="mr-2" />
+                    </td>
+                    <td style="min-width: 10rem;">
+                      <p-button i18n-label label="View 3d" severity="secondary" (onClick)="openThreeDModal()" class="mr-2" />
+                    </td>
+                    <td style="width: 6rem; max-width: 6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ typedSection.uuid }}</td>
+                    <td style="min-width: 16rem">{{ typedSection.name }}</td>
+                    <td>{{ typedSection.internal_id }}</td>
+                    <td>{{ typedSection.short_name }}</td>
+                    <td>{{ typedSection.internal_catalog_id }}</td>
+                    <td>{{ typedSection.type }}</td>
+                    <td>{{ typedSection.cable_name }}</td>
+                    <td>{{ typedSection.cable_short_name }}</td>
+                    <td>{{ typedSection.cables_amount }}</td>
+                    <td>{{ typedSection.optical_fibers_amount }}</td>
+                    <td>{{ typedSection.spans_amount }}</td>
+                    <td>{{ typedSection.begin_span_name }}</td>
+                    <td>{{ typedSection.last_span_name }}</td>
+                    <td>{{ typedSection.first_support_number }}</td>
+                    <td>{{ typedSection.last_support_number }}</td>
+                    <td>{{ typedSection.first_attachment_set }}</td>
+                    <td>{{ typedSection.last_attachment_set }}</td>
+                  </tr>
+                  <p-popover #op>
+                    <div class="flex flex-col gap-4">
+                      <p-button severity="secondary" label="Duplicate" />
+                    </div>
+                  </p-popover>
+                }
               </ng-template>
             </p-table>
           </div>
@@ -124,16 +275,21 @@ const newSection = (): SectionModel => {
     </p-dialog>
   `,
   standalone: true,
-  imports: [DialogModule, FormsModule, InputTextModule, ButtonModule, TableModule, CommonModule]
+  imports: [DialogModule, FormsModule, InputTextModule, ButtonModule, TableModule, CommonModule, PopoverModule]
 })
 export class SearchSectionModalComponent {
-  sectionToSearch: any = newSection();
+  sectionToSearch: Partial<Section> = newSection();
   @Input() isOpen!: boolean;
   @Output() isOpenChange = new EventEmitter<boolean>();
   isLoading = false;
-  sections: any[] = [];
-  selectedSections: any[] = [];
-  constructor(private readonly sectionService: SectionService) {
+  sections: Section[] = [];
+  selectedSections: Section[] = [];
+  searchedSections: Section[] = [];
+  threeDModalOpen = signal(false);
+  constructor(
+    private sectionService: SectionService,
+    private storageService: StorageService
+  ) {
     this.sectionToSearch = newSection();
   }
 
@@ -141,12 +297,35 @@ export class SearchSectionModalComponent {
     this.sectionToSearch = newSection();
   }
 
-  searchStudies() {
+  identity(section: Section): Section {
+    return section;
+  }
+
+  createStudy(section: Section) {
+    console.log('createStudy', section);
+  }
+
+  searchSections() {
     this.isLoading = true;
-    this.sectionService.searchSections(this.sectionToSearch).subscribe((sections) => {
-      this.sections = sections;
+    this.storageService.db.sections.toArray().then((sections) => {
+      this.sections = sections.filter((section) => {
+        return Object.keys(this.sectionToSearch).every((key) => {
+          if (this.sectionToSearch[key as keyof Section] === undefined || this.sectionToSearch[key as keyof Section] === '') {
+            return true;
+          }
+          return section[key as keyof Section] === this.sectionToSearch[key as keyof Section];
+        });
+      });
       this.isLoading = false;
     });
+    // this.sectionService.searchSections(this.sectionToSearch).subscribe((sections) => {
+    //   this.sections = sections;
+    //   this.isLoading = false;
+    // });
+  }
+
+  openThreeDModal() {
+    this.threeDModalOpen.set(true);
   }
 
   closeModal() {
