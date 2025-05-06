@@ -51,7 +51,7 @@ def list_files_recursively(directory):
     return file_list
 
 def main(language):
-    target_dir = f"dist/phlowers-stellar-app/browser/{language}"
+    target_dir = f"dist/{language}"
     
     print(f"Listing all files in '{target_dir}':")
     print("-" * 50)
@@ -71,7 +71,7 @@ def main(language):
     
     print("-" * 50)
     print(f"Total files: {len(files)}")
-    output_file = f"dist/phlowers-stellar-app/browser/{language}/assets_list.json"
+    output_file = f"dist/{language}/assets_list.json"
     extra_assets_file = "scripts/external_assets.json"
     with open(extra_assets_file, 'r') as f:
         extra_assets = json.load(f)
