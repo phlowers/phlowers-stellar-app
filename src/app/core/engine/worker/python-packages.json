@@ -99,6 +99,18 @@
         "name": "typing_inspect",
         "source": "local"
     },
+    "typing-extensions": {
+        "name": "typing-extensions",
+        "file_name": "typing_extensions-4.11.0-py3-none-any.whl",
+        "sha256": "fd294ddf4f66cf0e91dab84e982043360878915681eb890c0762b5e9fea990a8",
+        "source": "remote"
+    },
+    "packaging": {
+        "name": "packaging",
+        "file_name": "packaging-24.2-py3-none-any.whl",
+        "sha256": "90363038a93f8483d2d72ecf5ed43c4a51862c48d9fe43620769f93a6bcbc469",
+        "source": "remote"
+    },
     "typing-inspection": {
         "file_name": "typing_inspection-0.4.0-cp312-none-any.whl",
         "name": "typing_inspection",

@@ -78,6 +78,11 @@ describe('AppMenu', () => {
             label: 'Plotly',
             icon: 'pi pi-fw pi-chart-line',
             routerLink: ['/plotly']
+          },
+          {
+            label: '3D',
+            icon: 'pi pi-fw pi-chart-line',
+            routerLink: ['/3d']
           }
         ]
       }
