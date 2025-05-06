@@ -46,7 +46,10 @@
               "node:crypto",
               "node:child_process"
             ],
-            "outputPath": "dist/phlowers-stellar-app",
+            "outputPath": {
+              "base": "dist",
+              "browser": ""
+            },
             "index": "src/index.html",
             "polyfills": [
               "zone.js",
