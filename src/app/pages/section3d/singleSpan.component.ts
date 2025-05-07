@@ -47,28 +47,40 @@ import { InputNumberModule } from 'primeng/inputnumber';
     <div id="plotly-output-points">
       <div *ngFor="let point of points; let i = index">position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}</div>
     </div>
+    <div *ngIf="currentPosition2">
+      <div>Mouse Position2:</div>
+      <div>x: {{ currentPosition2.x }}, z: {{ currentPosition2.z }}</div>
+    </div>
     <div id="plotly-output-single-span-y" style="width: 500px; height: 500px;"></div>
+    <div id="plotly-output-points-2">
+      <div *ngFor="let point of points2; let i = index">position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}</div>
+    </div>
   </div>`
 })
 export class SingleSpanComponent {
   constructor(private readonly workerService: WorkerService) {}
   litData = input<any>(null);
   options = signal<Options>({});
-  plot = signal<PlotlyHTMLElement | null>(null);
+  plotFace = signal<PlotlyHTMLElement | null>(null);
+  plotProfile = signal<PlotlyHTMLElement | null>(null);
   phases = signal<string[]>(['all', 'phase_1', 'phase_2', 'phase_3', 'garde']);
   selectedSpan = signal<number>(0);
   points: { x: number; z: number }[] = [];
   currentPosition: { x: number; z: number } | null = null;
+  points2: { x: number; z: number }[] = [];
+  currentPosition2: { x: number; z: number } | null = null;
 
   readonly effect2 = effect(() => {
     console.log('effect2', this.selectedSpan());
-    this.createPlot(this.selectedSpan());
+    this.createPlot(this.selectedSpan(), 'face');
+    this.createPlot(this.selectedSpan(), 'profile');
   });
 
   readonly effect3 = effect(() => {
     this.litData();
     console.log('effect3 in single span', this.litData());
-    this.createPlot(this.selectedSpan());
+    this.createPlot(this.selectedSpan(), 'face');
+    this.createPlot(this.selectedSpan(), 'profile');
     // .then((lit: any) => {
     //   console.log('effect3 in single span', lit);
     // });
@@ -81,32 +93,32 @@ export class SingleSpanComponent {
     this.phases.set(['all', 'phase_1', 'phase_2', 'phase_3', 'garde']);
   }
 
-  getAllPhases(litXs: any, litYs: any, litZs: any, litCanton: any, litType: any, litSupports: any, uniqueSupports: any[], name: string): Data[] {
+  getAllPhases(litXs: any, litYs: any, litZs: any, litCanton: any, litType: any, litSupports: any, uniqueSupports: any[], name: string, type: 'face' | 'profile'): Data[] {
     // const selectedPhase = untracked(() => this.selectedPhase());
     // const dash = selectedPhase === 'all' || selectedPhase === name ? 'solid' : 'dash';
     return uniqueSupports.map((support) => {
       const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
       const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
       const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
-      return { x, z: y, y: z, type: 'scatter', mode: 'lines', line: { color: 'red', dash: 'solid' }, text: name };
+      return { x: type === 'face' ? y : x, z: y, y: z, type: 'scatter', mode: 'lines', line: { color: 'red', dash: 'solid' }, text: name };
     });
   }
 
-  getAllSupports(litXs: any, litYs: any, litZs: any, litTypes: any, litSupports: any, uniqueSupports: any[]): Data[] {
+  getAllSupports(litXs: any, litYs: any, litZs: any, litTypes: any, litSupports: any, uniqueSupports: any[], type: 'face' | 'profile'): Data[] {
     return uniqueSupports.map((support, index) => {
       const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
       const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
       const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
-      return { x, z: y, y: z, type: 'scatter', text: [support.replace('Section ', '')], textposition: 'inside', mode: 'text+lines', line: { color: 'blue' } };
+      return { x: type === 'face' ? y : x, z: y, y: z, type: 'scatter', text: [support.replace('Section ', '')], textposition: 'inside', mode: 'text+lines', line: { color: 'blue' } };
     });
   }
 
-  getAllInsulators(litXs: any, litYs: any, litZs: any, litTypes: any, litSupports: any, uniqueSupports: any[]): Data[] {
+  getAllInsulators(litXs: any, litYs: any, litZs: any, litTypes: any, litSupports: any, uniqueSupports: any[], type: 'face' | 'profile'): Data[] {
     return uniqueSupports.map((support) => {
       const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
       const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
       const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
-      return { x, z: y, y: z, type: 'scatter', mode: 'lines', line: { color: 'green' } };
+      return { x: type === 'face' ? y : x, z: type === 'face' ? y : x, y: z, type: 'scatter', mode: 'lines', line: { color: 'green' } };
     });
   }
 
@@ -118,7 +130,8 @@ export class SingleSpanComponent {
     console.log('gd', gd?._fullLayout);
   }
 
-  async createPlot(selectedSpan: number) {
+  async createPlot(selectedSpan: number, type: 'face' | 'profile') {
+    const plotId = type === 'face' ? 'plotly-output-single-span-y' : 'plotly-output-single-span';
     // console.log('selectedPhase', selectedPhase);
     const lit = untracked(() => this.litData());
     if (!lit) return;
@@ -130,19 +143,19 @@ export class SingleSpanComponent {
     const litTypes = Object.values(lit.type) as Datum[];
     const litCanton = Object.values(lit.canton) as Datum[];
     const litSupports = Object.values(lit.support) as Datum[];
-    const phase1 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_1');
-    const phase2 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_2');
-    const phase3 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_3');
-    const gard = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'garde');
-    const allSupports = this.getAllSupports(litXs, litYs, litZs, litTypes, litSupports, uniqueSupportsForSupports);
-    const allInsulators = this.getAllInsulators(litXs, litYs, litZs, litTypes, litSupports, uniqueSupportsForSupports);
-    const myElement = document.getElementById('plotly-output-single-span');
+    const phase1 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_1', type);
+    const phase2 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_2', type);
+    const phase3 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_3', type);
+    const gard = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'garde', type);
+    const allSupports = this.getAllSupports(litXs, litYs, litZs, litTypes, litSupports, uniqueSupportsForSupports, type);
+    const allInsulators = this.getAllInsulators(litXs, litYs, litZs, litTypes, litSupports, uniqueSupportsForSupports, type);
+    const myElement = document.getElementById(plotId);
     const width = myElement?.clientWidth;
     const data = [...phase1, ...phase2, ...phase3, ...gard, ...allSupports, ...allInsulators];
     const this2 = this;
-    var gd = document.getElementById('plotly-output-single-span');
+    var gd = document.getElementById(plotId);
 
-    function attach(stuff: any) {
+    function attach(stuff: any, type: 'face' | 'profile') {
       console.log('stuff', stuff);
       // @ts-ignore
       var xaxis = gd?._fullLayout.xaxis;
@@ -154,18 +167,18 @@ export class SingleSpanComponent {
       var t = gd?._fullLayout.margin.t;
 
       gd?.addEventListener('mousemove', function (evt) {
-        // console.log('gd', gd._fullLayout);
         //@ts-ignore
         if (gd && gd._fullLayout) {
           //@ts-ignore
           const layout = gd._fullLayout as any;
-
-          // var xInDataCoord = xaxis.p2c(evt.x - l);
-          // var yInDataCoord = yaxis.p2c(evt.y - t);
           const x = evt.layerX - layout.margin.l;
           const y = evt.layerY - layout.margin.t;
           console.log('mousemove', layout.xaxis.p2c(x), layout.yaxis.p2c(y));
-          this2.currentPosition = { x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) };
+          if (type === 'profile') {
+            this2.currentPosition = { x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) };
+          } else {
+            this2.currentPosition2 = { x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) };
+          }
         }
       });
 
@@ -174,18 +187,7 @@ export class SingleSpanComponent {
         var layout = gd?._fullLayout;
         var x = evt.layerX - layout.margin.l;
         var y = evt.layerY - layout.margin.t;
-        // console.log('layout', layout);
-        // console.log('click1', x, y);
-        // console.log('click2', evt.x, evt.y);
-        // console.log('click3', layout.xaxis.p2c(x), layout.yaxis.p2c(y));
-        // console.log('margins', layout.margin);
-        // console.log('evt', evt);
-
-        // const newX = json_2d.data[2].x;
-        // const newCustomData = json_2d.data[2].customdata;
-        // newX.push(6000);
-        // newCustomData.push(['Section 0']);
-        Plotly.addTraces('plotly-output-single-span', {
+        Plotly.addTraces(plotId, {
           x: [layout.xaxis.p2c(x)],
           y: [layout.yaxis.p2c(y)],
           name: 'Lines and Text',
@@ -196,12 +198,16 @@ export class SingleSpanComponent {
             color: 'red'
           }
         });
-        this2.points.push({ x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) });
+        if (type === 'profile') {
+          this2.points.push({ x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) });
+        } else {
+          this2.points2.push({ x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) });
+        }
       });
     }
 
     const plot = await Plotly.newPlot(
-      'plotly-output-single-span',
+      plotId,
       data,
       {
         // dragmode: 'pan',
@@ -243,9 +249,14 @@ export class SingleSpanComponent {
         autosizable: false
       }
     );
-    attach(plot);
-
-    this.plot.set(plot);
+    // attach(plot);
+    if (type === 'face') {
+      attach(plot, 'face');
+      this.plotFace.set(plot);
+    } else {
+      attach(plot, 'profile');
+      this.plotProfile.set(plot);
+    }
   }
 
   //   readonly effect = effect(async () => {
