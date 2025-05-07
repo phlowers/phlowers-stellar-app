@@ -15,7 +15,12 @@ module.exports = tseslint.config(
     },
     files: ['**/*.ts'],
     ignores: ['coverage/**', 'dist/**'],
-    extends: [eslint.configs.recommended, ...tseslint.configs.recommended, ...tseslint.configs.stylistic, ...angular.configs.tsRecommended],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...tseslint.configs.stylistic,
+      ...angular.configs.tsRecommended
+    ],
     processor: angular.processInlineTemplates,
     rules: {
       '@angular-eslint/directive-selector': [
@@ -40,7 +45,10 @@ module.exports = tseslint.config(
   {
     files: ['**/*.html'],
     ignores: ['coverage/**', 'dist/**'],
-    extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
+    extends: [
+      ...angular.configs.templateRecommended,
+      ...angular.configs.templateAccessibility
+    ],
     rules: {
       '@angular-eslint/template/i18n': [
         'warn',

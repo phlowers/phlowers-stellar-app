@@ -22,7 +22,10 @@ describe('AppTopbarComponent', () => {
   let component: AppTopbarComponent;
   let fixture: ComponentFixture<AppTopbarComponent>;
   let layoutServiceMock: { onMenuToggle: jest.Mock };
-  let onlineServiceMock: { online$: BehaviorSubject<boolean>; serverOnline$: BehaviorSubject<string> };
+  let onlineServiceMock: {
+    online$: BehaviorSubject<boolean>;
+    serverOnline$: BehaviorSubject<string>;
+  };
   let workerServiceMock: { ready$: BehaviorSubject<boolean> };
   let updateServiceMock: { needUpdate: boolean };
 
@@ -51,7 +54,13 @@ describe('AppTopbarComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [CommonModule, RouterModule, StyleClassModule, RouterTestingModule, AppTopbarComponent],
+      imports: [
+        CommonModule,
+        RouterModule,
+        StyleClassModule,
+        RouterTestingModule,
+        AppTopbarComponent
+      ],
       providers: [
         { provide: LayoutService, useValue: layoutServiceMock },
         { provide: OnlineService, useValue: onlineServiceMock },
@@ -115,7 +124,9 @@ describe('AppTopbarComponent', () => {
   });
 
   it('should call layoutService.onMenuToggle when menu button is clicked', () => {
-    const menuButton = fixture.debugElement.query(By.css('.layout-menu-button'));
+    const menuButton = fixture.debugElement.query(
+      By.css('.layout-menu-button')
+    );
     menuButton.triggerEventHandler('click', null);
 
     expect(layoutServiceMock.onMenuToggle).toHaveBeenCalled();
@@ -123,7 +134,9 @@ describe('AppTopbarComponent', () => {
 
   it('should display correct engine status based on workerReady', () => {
     // Initially not ready
-    let engineElement = fixture.debugElement.query(By.css('.layout-topbar-online[style*="orange"]'));
+    let engineElement = fixture.debugElement.query(
+      By.css('.layout-topbar-online[style*="orange"]')
+    );
     expect(engineElement).toBeTruthy();
     expect(engineElement.nativeElement.textContent).toContain('ENGINE LOADING');
 
@@ -131,7 +144,9 @@ describe('AppTopbarComponent', () => {
     workerReadySubject.next(true);
     fixture.detectChanges();
 
-    engineElement = fixture.debugElement.query(By.css('.layout-topbar-online[style*="white"]'));
+    engineElement = fixture.debugElement.query(
+      By.css('.layout-topbar-online[style*="white"]')
+    );
     expect(engineElement).toBeTruthy();
     expect(engineElement.nativeElement.textContent).toContain('ENGINE READY');
   });

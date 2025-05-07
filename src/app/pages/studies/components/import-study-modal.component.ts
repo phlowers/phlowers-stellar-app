@@ -12,7 +12,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { StudyService } from '../../../core/api/services/study.service';
-import { SearchStudyModel, StudyModel } from '../../../core/api/models/study.model';
+import {
+  SearchStudyModel,
+  StudyModel
+} from '../../../core/api/models/study.model';
 import { CommonModule } from '@angular/common';
 
 const newStudy = (): StudyModelLocal => {
@@ -31,32 +34,78 @@ const newStudy = (): StudyModelLocal => {
 @Component({
   selector: 'app-import-study-modal',
   template: `
-    <p-dialog dismissableMask="true" [style]="{ width: '80vw', height: '90vh' }" header="Import Study" [(visible)]="isOpen" (onHide)="closeModal()" [modal]="true">
+    <p-dialog
+      dismissableMask="true"
+      [style]="{ width: '80vw', height: '90vh' }"
+      header="Import Study"
+      [(visible)]="isOpen"
+      (onHide)="closeModal()"
+      [modal]="true"
+    >
       <!-- <div> -->
       <ng-template #content>
         <div style="display: flex; flex-direction: column; height: 100%;">
           <div>
             <div class="flex flex-row gap-6">
               <span>
-                <label i18n for="studyName" class="block font-bold mb-3">UUID contains:</label>
-                <input width="300px" id="studyName" type="text" pInputText [(ngModel)]="studyToSearch.uuid" required />
+                <label i18n for="studyName" class="block font-bold mb-3"
+                  >UUID contains:</label
+                >
+                <input
+                  width="300px"
+                  id="studyName"
+                  type="text"
+                  pInputText
+                  [(ngModel)]="studyToSearch.uuid"
+                  required
+                />
               </span>
               <span>
-                <label i18n for="studyName" class="block font-bold mb-3">Title contains:</label>
-                <input width="300px" id="studyName" type="text" pInputText [(ngModel)]="studyToSearch.title" required />
+                <label i18n for="studyName" class="block font-bold mb-3"
+                  >Title contains:</label
+                >
+                <input
+                  width="300px"
+                  id="studyName"
+                  type="text"
+                  pInputText
+                  [(ngModel)]="studyToSearch.title"
+                  required
+                />
               </span>
               <span>
-                <label i18n for="studyName" class="block font-bold mb-3">Author email contains:</label>
-                <input id="studyName" type="text" pInputText [(ngModel)]="studyToSearch.author_email" required />
+                <label i18n for="studyName" class="block font-bold mb-3"
+                  >Author email contains:</label
+                >
+                <input
+                  id="studyName"
+                  type="text"
+                  pInputText
+                  [(ngModel)]="studyToSearch.author_email"
+                  required
+                />
               </span>
             </div>
             <div class="flex flex-row gap-6 mt-3">
               <p-button i18n-label label="Search" (click)="searchStudies()" />
-              <p-button i18n-label label="Reset fields" severity="secondary" (click)="resetFields()" />
+              <p-button
+                i18n-label
+                label="Reset fields"
+                severity="secondary"
+                (click)="resetFields()"
+              />
             </div>
           </div>
-          <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-top: 10px; height: 100%;">
-            <p-table [loading]="isLoading" [value]="studies" [(selection)]="selectedStudies" dataKey="uuid" [tableStyle]="{ 'min-width': '50rem', height: '100%' }">
+          <div
+            style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-top: 10px; height: 100%;"
+          >
+            <p-table
+              [loading]="isLoading"
+              [value]="studies"
+              [(selection)]="selectedStudies"
+              dataKey="uuid"
+              [tableStyle]="{ 'min-width': '50rem', height: '100%' }"
+            >
               <ng-template #header>
                 <tr>
                   <td style="width: 3rem">
@@ -77,8 +126,12 @@ const newStudy = (): StudyModelLocal => {
                   <td>{{ study.uuid }}</td>
                   <td>{{ study.title }}</td>
                   <td>{{ study.author_email }}</td>
-                  <td>{{ study.created_at_offline | date: 'dd/MM/yyyy HH:mm' }}</td>
-                  <td>{{ study.updated_at_offline | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    {{ study.created_at_offline | date: 'dd/MM/yyyy HH:mm' }}
+                  </td>
+                  <td>
+                    {{ study.updated_at_offline | date: 'dd/MM/yyyy HH:mm' }}
+                  </td>
                 </tr>
               </ng-template>
             </p-table>
@@ -86,14 +139,25 @@ const newStudy = (): StudyModelLocal => {
         </div>
       </ng-template>
       <ng-template #footer>
-        <p-button type="button" label="Cancel" (click)="closeModal()"></p-button>
+        <p-button
+          type="button"
+          label="Cancel"
+          (click)="closeModal()"
+        ></p-button>
         <!-- <p-button type="button" label="Import" (click)="closeModal()"></p-button> -->
       </ng-template>
       <!-- </div> -->
     </p-dialog>
   `,
   standalone: true,
-  imports: [DialogModule, FormsModule, InputTextModule, ButtonModule, TableModule, CommonModule]
+  imports: [
+    DialogModule,
+    FormsModule,
+    InputTextModule,
+    ButtonModule,
+    TableModule,
+    CommonModule
+  ]
 })
 export class ImportStudyModalComponent {
   studyToSearch: SearchStudyModel = newStudy();

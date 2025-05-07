@@ -3,7 +3,10 @@
     <h1 class="text-center mb-0 px-5 py-7">Plotly</h1>
   </ng-template>
 
-  <app-plotly-comp [lineTrace]="lineTest()" (lineTraceChange)="updateLineTest($event)" />
+  <app-plotly-comp
+    [lineTrace]="lineTest()"
+    (lineTraceChange)="updateLineTest($event)"
+  />
 
   <dl>
     <dt>x-axis values</dt>

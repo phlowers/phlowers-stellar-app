@@ -47,6 +47,9 @@ export class LayoutService {
   layoutState = signal<LayoutState>(this._state);
 
   onMenuToggle() {
-    this.layoutState.update((prev) => ({ ...prev, staticMenuDesktopInactive: !this.layoutState().staticMenuDesktopInactive }));
+    this.layoutState.update((prev) => ({
+      ...prev,
+      staticMenuDesktopInactive: !this.layoutState().staticMenuDesktopInactive
+    }));
   }
 }

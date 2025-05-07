@@ -7,7 +7,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { StudyModel, ModifyStudyModel, SearchStudyModel } from '../models/study.model';
+import {
+  StudyModel,
+  ModifyStudyModel,
+  SearchStudyModel
+} from '../models/study.model';
 import { environment } from '../../../../environments/environment.development';
 
 @Injectable({
@@ -42,7 +46,10 @@ export class StudyService {
    * @param studyData The updated study data
    * @returns The updated StudyModel
    */
-  modifyStudy(studyUuid: string, studyData: ModifyStudyModel): Observable<StudyModel> {
+  modifyStudy(
+    studyUuid: string,
+    studyData: ModifyStudyModel
+  ): Observable<StudyModel> {
     return this.http.put<StudyModel>(`${this.apiUrl}/${studyUuid}`, studyData);
   }
 
@@ -52,7 +59,9 @@ export class StudyService {
    * @returns A response indicating success
    */
   deleteStudy(studyUuid: string): Observable<Record<string, number>> {
-    return this.http.delete<Record<string, number>>(`${this.apiUrl}/${studyUuid}`);
+    return this.http.delete<Record<string, number>>(
+      `${this.apiUrl}/${studyUuid}`
+    );
   }
 
   /**
@@ -61,6 +70,9 @@ export class StudyService {
    * @returns A list of matching StudyModel objects
    */
   searchStudies(searchCriteria: SearchStudyModel): Observable<StudyModel[]> {
-    return this.http.post<StudyModel[]>(`${this.apiUrl}/search`, searchCriteria);
+    return this.http.post<StudyModel[]>(
+      `${this.apiUrl}/search`,
+      searchCriteria
+    );
   }
 }

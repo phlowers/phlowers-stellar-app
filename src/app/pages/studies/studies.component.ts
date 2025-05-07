@@ -38,7 +38,10 @@ import { ImportStudyModalComponent } from './components/import-study-modal.compo
 import { Subscription } from 'rxjs';
 import { CheckboxModule } from 'primeng/checkbox';
 
-import { OnlineService, ServerStatus } from '../../core/api/services/online.service';
+import {
+  OnlineService,
+  ServerStatus
+} from '../../core/api/services/online.service';
 
 interface Column {
   title: string;
@@ -97,9 +100,33 @@ const columns = [
     <p-toast position="top-center"></p-toast>
     <p-toolbar styleClass="mb-6">
       <ng-template #start>
-        <p-button i18n-label label="New study" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-        <p-button i18n-label disabled="{{ !serverOnline }}" i18n-label label="Import from database" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openImportStudyModal()" />
-        <p-button i18n-label severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedStudies()" [disabled]="!selectedStudies || !selectedStudies.length" />
+        <p-button
+          i18n-label
+          label="New study"
+          icon="pi pi-plus"
+          severity="secondary"
+          class="mr-2"
+          (onClick)="openNew()"
+        />
+        <p-button
+          i18n-label
+          disabled="{{ !serverOnline }}"
+          i18n-label
+          label="Import from database"
+          icon="pi pi-plus"
+          severity="secondary"
+          class="mr-2"
+          (onClick)="openImportStudyModal()"
+        />
+        <p-button
+          i18n-label
+          severity="secondary"
+          label="Delete"
+          icon="pi pi-trash"
+          outlined
+          (onClick)="deleteSelectedStudies()"
+          [disabled]="!selectedStudies || !selectedStudies.length"
+        />
       </ng-template>
     </p-toolbar>
 
@@ -125,7 +152,13 @@ const columns = [
           <h5 i18n class="m-0">Studies</h5>
           <p-iconfield>
             <p-inputicon styleClass="pi pi-search" />
-            <input pInputText i18n-placeholder placeholder="Search..." type="text" (input)="onGlobalFilter(dt, $event)" />
+            <input
+              pInputText
+              i18n-placeholder
+              placeholder="Search..."
+              type="text"
+              (input)="onGlobalFilter(dt, $event)"
+            />
           </p-iconfield>
         </div>
       </ng-template>
@@ -143,7 +176,11 @@ const columns = [
             Description
             <p-sortIcon field="description" />
           </th>
-          <th i18n pSortableColumn="author_email" style="display: flex; justify-content: center; min-width:16rem">
+          <th
+            i18n
+            pSortableColumn="author_email"
+            style="display: flex; justify-content: center; min-width:16rem"
+          >
             Author
             <p-sortIcon field="author_email" />
           </th>
@@ -159,18 +196,38 @@ const columns = [
             <td style="width: 3rem">
               <p-tableCheckbox [value]="typedStudy" />
             </td>
-            <td style="width: 6rem; max-width: 6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ typedStudy.uuid }}</td>
+            <td
+              style="width: 6rem; max-width: 6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+            >
+              {{ typedStudy.uuid }}
+            </td>
             <td style="min-width: 16rem">{{ typedStudy.title }}</td>
             <td style="min-width: 16rem">{{ typedStudy.description }}</td>
             <td style="min-width: 16rem">{{ typedStudy.author_email }}</td>
-            <td style="min-width: 12rem" style="display:flex; justify-content:center;">
+            <td
+              style="min-width: 12rem"
+              style="display:flex; justify-content:center;"
+            >
               @if (typedStudy.saved) {
-                <p-button icon="pi pi-check" [style]="{ 'background-color': 'transparent', color: 'green' }" disabled="true" severity="secondary" class="mr-2" [rounded]="true" [outlined]="false" />
+                <p-button
+                  icon="pi pi-check"
+                  [style]="{
+                    'background-color': 'transparent',
+                    color: 'green'
+                  }"
+                  disabled="true"
+                  severity="secondary"
+                  class="mr-2"
+                  [rounded]="true"
+                  [outlined]="false"
+                />
               } @else {
                 <p-button
                   icon="pi pi-upload"
                   disabled="{{ !serverOnline }}"
-                  pTooltip="{{ serverOnline ? saveOnlineText : saveOfflineText }}"
+                  pTooltip="{{
+                    serverOnline ? saveOnlineText : saveOfflineText
+                  }}"
                   tooltipPosition="top"
                   severity="help"
                   class="mr-2"
@@ -181,45 +238,130 @@ const columns = [
               }
             </td>
             <td style="text-align: end;">
-              <p-button i18n-pTooltip icon="pi pi-copy" pTooltip="Duplicate" tooltipPosition="top" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="duplicateStudy(typedStudy)" />
-              <p-button i18n-pTooltip icon="pi pi-pencil" pTooltip="Edit" tooltipPosition="top" class="mr-2" [rounded]="true" [outlined]="true" (click)="editStudy(typedStudy)" />
-              <p-button i18n-pTooltip icon="pi pi-trash" pTooltip="Delete" tooltipPosition="top" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteStudy(typedStudy)" />
+              <p-button
+                i18n-pTooltip
+                icon="pi pi-copy"
+                pTooltip="Duplicate"
+                tooltipPosition="top"
+                severity="warn"
+                class="mr-2"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="duplicateStudy(typedStudy)"
+              />
+              <p-button
+                i18n-pTooltip
+                icon="pi pi-pencil"
+                pTooltip="Edit"
+                tooltipPosition="top"
+                class="mr-2"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="editStudy(typedStudy)"
+              />
+              <p-button
+                i18n-pTooltip
+                icon="pi pi-trash"
+                pTooltip="Delete"
+                tooltipPosition="top"
+                severity="danger"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="deleteStudy(typedStudy)"
+              />
             </td>
             <td>
               <!-- <a href="/study/{{study.uuid}}"></a>   -->
-              <p-button i18n-label label="OPEN" [routerLink]="['/study', typedStudy.uuid]" severity="contrast" [rounded]="false" [outlined]="false" />
+              <p-button
+                i18n-label
+                label="OPEN"
+                [routerLink]="['/study', typedStudy.uuid]"
+                severity="contrast"
+                [rounded]="false"
+                [outlined]="false"
+              />
             </td>
           </tr>
         }
       </ng-template>
     </p-table>
 
-    <p-dialog dismissableMask="true" [(visible)]="studyDialog" [style]="{ width: '450px' }" i18n-header header="New study" [modal]="true">
+    <p-dialog
+      dismissableMask="true"
+      [(visible)]="studyDialog"
+      [style]="{ width: '450px' }"
+      i18n-header
+      header="New study"
+      [modal]="true"
+    >
       <ng-template #content>
         <div class="flex flex-col gap-6">
           <div>
             <label i18n for="title" class="block font-bold mb-3">Title:</label>
-            <input type="text" pInputText id="title" [(ngModel)]="study.title" required fluid />
-            <small i18n class="text-red-500" *ngIf="submitted && !study!.title">Title is required.</small>
+            <input
+              type="text"
+              pInputText
+              id="title"
+              [(ngModel)]="study.title"
+              required
+              fluid
+            />
+            <small i18n class="text-red-500" *ngIf="submitted && !study!.title"
+              >Title is required.</small
+            >
           </div>
           <div>
-            <label i18n for="description" class="block font-bold mb-3">Description:</label>
-            <textarea id="description" pTextarea [(ngModel)]="study.description" required rows="3" cols="20" fluid></textarea>
+            <label i18n for="description" class="block font-bold mb-3"
+              >Description:</label
+            >
+            <textarea
+              id="description"
+              pTextarea
+              [(ngModel)]="study.description"
+              required
+              rows="3"
+              cols="20"
+              fluid
+            ></textarea>
           </div>
           <div>
-            <label i18n for="shareable" class="block font-bold mb-3">Shareable to other users:</label>
-            <p-checkbox id="shareable" [binary]="true" [(ngModel)]="study.shareable" required rows="3" cols="20" fluid></p-checkbox>
+            <label i18n for="shareable" class="block font-bold mb-3"
+              >Shareable to other users:</label
+            >
+            <p-checkbox
+              id="shareable"
+              [binary]="true"
+              [(ngModel)]="study.shareable"
+              required
+              rows="3"
+              cols="20"
+              fluid
+            ></p-checkbox>
           </div>
         </div>
       </ng-template>
 
       <ng-template #footer>
-        <p-button i18n-label label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button i18n-label label="Save" icon="pi pi-check" (click)="saveStudy()" />
+        <p-button
+          i18n-label
+          label="Cancel"
+          icon="pi pi-times"
+          text
+          (click)="hideDialog()"
+        />
+        <p-button
+          i18n-label
+          label="Save"
+          icon="pi pi-check"
+          (click)="saveStudy()"
+        />
       </ng-template>
     </p-dialog>
 
-    <app-import-study-modal [(isOpen)]="isImportStudyModalOpen" (isOpenChange)="setIsImportStudyModalOpen($event)" />
+    <app-import-study-modal
+      [(isOpen)]="isImportStudyModalOpen"
+      (isOpenChange)="setIsImportStudyModalOpen($event)"
+    />
 
     <p-confirmdialog [style]="{ width: '450px' }" />
   `,
@@ -310,12 +452,17 @@ export class StudiesComponent implements OnInit {
       accept: async () => {
         const studies = this.selectedStudies?.map((val) => val.uuid) || [];
         await this.storageService.db?.studies.bulkDelete(studies);
-        this.studies.set((await this.storageService.db?.studies.toArray()) || []);
+        this.studies.set(
+          (await this.storageService.db?.studies.toArray()) || []
+        );
         this.selectedStudies = null;
         this.messageService.add({
           severity: 'success',
           summary: $localize`Successful`,
-          detail: studies.length === 1 ? $localize`Study Deleted` : $localize`Studies Deleted`,
+          detail:
+            studies.length === 1
+              ? $localize`Study Deleted`
+              : $localize`Studies Deleted`,
           life: 3000
         });
       }
@@ -341,9 +488,17 @@ export class StudiesComponent implements OnInit {
           life: 3000
         });
 
-        this.storageService.db?.studies.update(study.uuid, { ...study, updated_at_offline: new Date().toISOString(), saved: true }).then(async () => {
-          this.studies.set((await this.storageService.db?.studies.toArray()) || []);
-        });
+        this.storageService.db?.studies
+          .update(study.uuid, {
+            ...study,
+            updated_at_offline: new Date().toISOString(),
+            saved: true
+          })
+          .then(async () => {
+            this.studies.set(
+              (await this.storageService.db?.studies.toArray()) || []
+            );
+          });
       },
       error: () => {
         this.messageService.add({
@@ -399,7 +554,11 @@ export class StudiesComponent implements OnInit {
   async duplicateStudy(study: StudyModelLocal) {
     const newStudy = { ...study };
     const uuid = this.createUuid();
-    await this.storageService.db?.studies.add({ ...newStudy, uuid, saved: false });
+    await this.storageService.db?.studies.add({
+      ...newStudy,
+      uuid,
+      saved: false
+    });
     this.studies.set((await this.storageService.db?.studies.toArray()) || []);
     this.messageService.add({
       severity: 'success',
@@ -419,7 +578,11 @@ export class StudiesComponent implements OnInit {
       if (study) {
         const isThereDifference = !isEqual(study, this.study);
         if (isThereDifference) {
-          await this.storageService.db?.studies.update(study.uuid, { ...this.study, updated_at_offline: new Date().toISOString(), saved: false });
+          await this.storageService.db?.studies.update(study.uuid, {
+            ...this.study,
+            updated_at_offline: new Date().toISOString(),
+            saved: false
+          });
           this.messageService.add({
             severity: 'success',
             summary: $localize`Successful`,

@@ -77,7 +77,12 @@ describe('AppComponent', () => {
     mockOnlineService = {} as OnlineService;
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, NoopAnimationsModule, RouterTestingModule, AppComponent]
+      imports: [
+        FormsModule,
+        NoopAnimationsModule,
+        RouterTestingModule,
+        AppComponent
+      ]
     }).compileComponents();
     TestBed.overrideProvider(WorkerService, { useValue: mockWorkerService });
     TestBed.overrideProvider(StorageService, { useValue: mockStorageService });
@@ -111,7 +116,10 @@ describe('AppComponent', () => {
 
       await component.setupWorker();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating database', error);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error creating database',
+        error
+      );
       consoleErrorSpy.mockRestore();
     });
   });
@@ -146,7 +154,9 @@ describe('AppComponent', () => {
       await component.saveUser();
 
       expect(component.submitted).toBe(true);
-      expect(mockDb.users.add).toHaveBeenCalledWith({ email: 'test@example.com' });
+      expect(mockDb.users.add).toHaveBeenCalledWith({
+        email: 'test@example.com'
+      });
       expect(component.userDialog).toBe(false);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
@@ -182,7 +192,9 @@ describe('AppComponent', () => {
       const validateEmail = (email: string) => {
         return String(email)
           .toLowerCase()
-          .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+          .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          );
       };
 
       expect(validateEmail('test@example.com')).toBeTruthy();

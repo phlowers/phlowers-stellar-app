@@ -12,7 +12,13 @@ import { AppMenuitemComponent } from './app.menuitem';
   imports: [CommonModule, AppMenuitemComponent, RouterModule],
   template: `<ul class="layout-menu">
     <ng-container *ngFor="let item of model; let i = index">
-      <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
+      <li
+        app-menuitem
+        *ngIf="!item.separator"
+        [item]="item"
+        [index]="i"
+        [root]="true"
+      ></li>
       <li *ngIf="item.separator" class="menu-separator"></li>
     </ng-container>
   </ul> `
@@ -31,12 +37,36 @@ export class AppMenuComponent implements OnInit {
       {
         label: 'Home',
         items: [
-          { label: $localize`Studies`, icon: 'pi pi-fw pi-share-alt', routerLink: ['/'] },
-          { label: $localize`Sections`, icon: 'pi pi-fw pi-bolt', routerLink: ['/sections'] },
-          { label: $localize`Tools`, icon: 'pi pi-fw pi-wrench', routerLink: ['/tools'] },
-          { label: $localize`Admin`, icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
-          { label: $localize`test`, icon: 'pi pi-fw pi-database', routerLink: ['/offline-storage-poc'] },
-          { label: $localize`Plotly`, icon: 'pi pi-fw pi-chart-line', routerLink: ['/plotly'] }
+          {
+            label: $localize`Studies`,
+            icon: 'pi pi-fw pi-share-alt',
+            routerLink: ['/']
+          },
+          {
+            label: $localize`Sections`,
+            icon: 'pi pi-fw pi-bolt',
+            routerLink: ['/sections']
+          },
+          {
+            label: $localize`Tools`,
+            icon: 'pi pi-fw pi-wrench',
+            routerLink: ['/tools']
+          },
+          {
+            label: $localize`Admin`,
+            icon: 'pi pi-fw pi-cog',
+            routerLink: ['/admin']
+          },
+          {
+            label: $localize`test`,
+            icon: 'pi pi-fw pi-database',
+            routerLink: ['/offline-storage-poc']
+          },
+          {
+            label: $localize`Plotly`,
+            icon: 'pi pi-fw pi-chart-line',
+            routerLink: ['/plotly']
+          }
         ]
       }
     ];

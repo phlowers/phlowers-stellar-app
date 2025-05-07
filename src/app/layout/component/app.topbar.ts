@@ -22,7 +22,10 @@ import { UpdateService } from '../../core/update/update.service';
   imports: [RouterModule, CommonModule, StyleClassModule],
   template: ` <div class="layout-topbar">
     <div class="layout-topbar-logo-container">
-      <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
+      <button
+        class="layout-menu-button layout-topbar-action"
+        (click)="layoutService.onMenuToggle()"
+      >
         <i class="pi pi-bars"></i>
       </button>
       <a class="layout-topbar-logo" routerLink="/">
@@ -31,18 +34,66 @@ import { UpdateService } from '../../core/update/update.service';
     </div>
 
     <div class="layout-topbar-actions">
-      <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
+      <button
+        class="layout-topbar-menu-button layout-topbar-action"
+        pStyleClass="@next"
+        enterFromClass="hidden"
+        enterActiveClass="animate-scalein"
+        leaveToClass="hidden"
+        leaveActiveClass="animate-fadeout"
+        [hideOnOutsideClick]="true"
+      >
         <i class="pi pi-ellipsis-v"></i>
       </button>
-      <div i18n *ngIf="updateService.needUpdate" class="layout-topbar-online" [ngStyle]="{ color: 'orange' }">UPDATE AVAILABLE</div>
+      <div
+        i18n
+        *ngIf="updateService.needUpdate"
+        class="layout-topbar-online"
+        [ngStyle]="{ color: 'orange' }"
+      >
+        UPDATE AVAILABLE
+      </div>
       <div>|</div>
-      <div *ngIf="workerReady" i18n class="layout-topbar-online" [ngStyle]="{ color: 'white' }">ENGINE READY</div>
-      <div *ngIf="!workerReady" i18n class="layout-topbar-online" [ngStyle]="{ color: 'orange' }">ENGINE LOADING</div>
+      <div
+        *ngIf="workerReady"
+        i18n
+        class="layout-topbar-online"
+        [ngStyle]="{ color: 'white' }"
+      >
+        ENGINE READY
+      </div>
+      <div
+        *ngIf="!workerReady"
+        i18n
+        class="layout-topbar-online"
+        [ngStyle]="{ color: 'orange' }"
+      >
+        ENGINE LOADING
+      </div>
       <div>|</div>
-      <div *ngIf="offline" i18n class="layout-topbar-online" [ngStyle]="{ color: 'red' }">OFFLINE</div>
-      <div *ngIf="!offline" i18n class="layout-topbar-online" [ngStyle]="{ color: 'white' }">ONLINE</div>
+      <div
+        *ngIf="offline"
+        i18n
+        class="layout-topbar-online"
+        [ngStyle]="{ color: 'red' }"
+      >
+        OFFLINE
+      </div>
+      <div
+        *ngIf="!offline"
+        i18n
+        class="layout-topbar-online"
+        [ngStyle]="{ color: 'white' }"
+      >
+        ONLINE
+      </div>
       <div>|</div>
-      <div class="layout-topbar-online" [ngStyle]="{ color: serverOnlineMap[serverOnline].color }">{{ serverOnlineMap[serverOnline].text }}</div>
+      <div
+        class="layout-topbar-online"
+        [ngStyle]="{ color: serverOnlineMap[serverOnline].color }"
+      >
+        {{ serverOnlineMap[serverOnline].text }}
+      </div>
     </div>
   </div>`
 })

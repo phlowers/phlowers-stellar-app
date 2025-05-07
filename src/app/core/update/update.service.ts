@@ -26,7 +26,12 @@ export class UpdateService {
   currentVersion: AppVersion | null = isDevMode() ? mockCurrentVersion : null;
   latestVersion: AppVersion | null = isDevMode() ? mockLatestVersion : null;
   updateLoading = false;
-  needUpdate = !!this.latestVersion && !!this.currentVersion && (this.latestVersion?.git_hash !== this.currentVersion?.git_hash || this.latestVersion?.build_datetime_utc !== this.currentVersion?.build_datetime_utc);
+  needUpdate =
+    !!this.latestVersion &&
+    !!this.currentVersion &&
+    (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
+      this.latestVersion?.build_datetime_utc !==
+        this.currentVersion?.build_datetime_utc);
   sucessFullUpdate = new Subject<void>();
 
   constructor() {
@@ -36,7 +41,11 @@ export class UpdateService {
         case 'update_complete':
           this.updateLoading = false;
           this.currentVersion = event.data.current_version;
-          this.needUpdate = !!this.latestVersion && (this.latestVersion?.git_hash !== this.currentVersion?.git_hash || this.latestVersion?.build_datetime_utc !== this.currentVersion?.build_datetime_utc);
+          this.needUpdate =
+            !!this.latestVersion &&
+            (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
+              this.latestVersion?.build_datetime_utc !==
+                this.currentVersion?.build_datetime_utc);
           this.sucessFullUpdate.next();
           // reload the page to apply the update
           setTimeout(() => {
@@ -47,7 +56,12 @@ export class UpdateService {
         case 'new_version':
           this.currentVersion = event.data.current_version;
           this.latestVersion = event.data.latest_version;
-          this.needUpdate = !!this.latestVersion && !!this.currentVersion && (this.latestVersion?.git_hash !== this.currentVersion?.git_hash || this.latestVersion?.build_datetime_utc !== this.currentVersion?.build_datetime_utc);
+          this.needUpdate =
+            !!this.latestVersion &&
+            !!this.currentVersion &&
+            (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
+              this.latestVersion?.build_datetime_utc !==
+                this.currentVersion?.build_datetime_utc);
           break;
         case 'install_complete':
           this.currentVersion = event.data.latest_version;
@@ -78,7 +92,12 @@ export class UpdateService {
         console.log('no current version in cache');
         this.currentVersion = null;
       }
-      this.needUpdate = !!this.latestVersion && !!this.currentVersion && (this.latestVersion?.git_hash !== this.currentVersion?.git_hash || this.latestVersion?.build_datetime_utc !== this.currentVersion?.build_datetime_utc);
+      this.needUpdate =
+        !!this.latestVersion &&
+        !!this.currentVersion &&
+        (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
+          this.latestVersion?.build_datetime_utc !==
+            this.currentVersion?.build_datetime_utc);
     } catch (error) {
       console.error('Error fetching asset list:', error);
     }

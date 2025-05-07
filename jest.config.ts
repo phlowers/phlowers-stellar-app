@@ -9,7 +9,11 @@ const config = {
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   moduleFileExtensions: ['ts', 'html', 'js', 'json', 'mjs'],
-  snapshotSerializers: ['jest-preset-angular/build/serializers/html-comment', 'jest-preset-angular/build/serializers/ng-snapshot', 'jest-preset-angular/build/serializers/no-ng-attributes'],
+  snapshotSerializers: [
+    'jest-preset-angular/build/serializers/html-comment',
+    'jest-preset-angular/build/serializers/ng-snapshot',
+    'jest-preset-angular/build/serializers/no-ng-attributes'
+  ],
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   transform: {
     '^.+\\.py$': '<rootDir>/fileTransformer.js',

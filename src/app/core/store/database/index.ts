@@ -68,7 +68,9 @@ export class AppDB extends Dexie {
         await this.branches.bulkPut(mockData.branches);
         await this.lines.bulkPut(mockData.lines);
         await this.maintenance_centers.bulkPut(mockData.maintenance_centers);
-        await this.regional_maintenance_centers.bulkPut(mockData.regional_maintenance_centers);
+        await this.regional_maintenance_centers.bulkPut(
+          mockData.regional_maintenance_centers
+        );
         await this.sections.bulkPut(mockData.sections);
         await this.spans.bulkPut(mockData.spans);
         await this.tensions.bulkPut(mockData.tensions);

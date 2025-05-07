@@ -65,14 +65,19 @@ describe('PlotlyComponent', () => {
 
       // Verify Plotly.newPlot was called with expected parameters
       expect(mockPlotly.newPlot).toHaveBeenCalledTimes(1);
-      expect(mockPlotly.newPlot.mock.calls[0][0]).toBe(mockElementRef.nativeElement);
+      expect(mockPlotly.newPlot.mock.calls[0][0]).toBe(
+        mockElementRef.nativeElement
+      );
       expect(mockPlotly.newPlot.mock.calls[0][1]).toEqual(component.data());
       expect(mockPlotly.newPlot.mock.calls[0][2]).toEqual(component.layout);
       expect(mockPlotly.newPlot.mock.calls[0][3]).toEqual(component.config);
     });
 
     it('should set initial line trace', () => {
-      const initialLineTraceSpy = jest.spyOn(component['initialLineTrace'], 'set');
+      const initialLineTraceSpy = jest.spyOn(
+        component['initialLineTrace'],
+        'set'
+      );
 
       component.ngAfterViewInit();
 
@@ -143,8 +148,12 @@ describe('PlotlyComponent', () => {
 
       // Check that Plotly.restyle was called with correct parameters
       expect(mockPlotly.restyle).toHaveBeenCalledTimes(1);
-      expect(mockPlotly.restyle.mock.calls[0][0]).toBe(mockElementRef.nativeElement);
-      expect(mockPlotly.restyle.mock.calls[0][1]).toEqual({ z: [expectedZValues] });
+      expect(mockPlotly.restyle.mock.calls[0][0]).toBe(
+        mockElementRef.nativeElement
+      );
+      expect(mockPlotly.restyle.mock.calls[0][1]).toEqual({
+        z: [expectedZValues]
+      });
       expect(mockPlotly.restyle.mock.calls[0][2]).toEqual([0]);
     });
 
@@ -156,7 +165,11 @@ describe('PlotlyComponent', () => {
       const expectedZValues = [-5, 5, 15, 25, 35]; // 10-15, 20-15, etc.
 
       // Check that Plotly.restyle was called with correct parameters
-      expect(mockPlotly.restyle).toHaveBeenCalledWith(mockElementRef.nativeElement, { z: [expectedZValues] }, [0]);
+      expect(mockPlotly.restyle).toHaveBeenCalledWith(
+        mockElementRef.nativeElement,
+        { z: [expectedZValues] },
+        [0]
+      );
     });
   });
 

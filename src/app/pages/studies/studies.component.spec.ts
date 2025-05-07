@@ -9,7 +9,10 @@ import { StudiesComponent } from './studies.component';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { StorageService } from '../../core/store/storage.service';
 import { StudyService } from '../../core/api/services/study.service';
-import { OnlineService, ServerStatus } from '../../core/api/services/online.service';
+import {
+  OnlineService,
+  ServerStatus
+} from '../../core/api/services/online.service';
 import { StudyModelLocal } from '../../core/store/models/study.model';
 import { of, Subject } from 'rxjs';
 import { Table } from 'primeng/table';
@@ -102,7 +105,9 @@ describe('StudiesComponent', () => {
     TestBed.overrideProvider(OnlineService, { useValue: mockOnlineService });
     TestBed.overrideProvider(StudyService, { useValue: mockStudyService });
     TestBed.overrideProvider(MessageService, { useValue: mockMessageService });
-    TestBed.overrideProvider(ConfirmationService, { useValue: mockConfirmationService });
+    TestBed.overrideProvider(ConfirmationService, {
+      useValue: mockConfirmationService
+    });
 
     fixture = TestBed.createComponent(StudiesComponent);
     component = fixture.componentInstance;
@@ -170,7 +175,10 @@ describe('StudiesComponent', () => {
     await component.deleteSelectedStudies();
     await new Promise((r) => setTimeout(r, 0));
 
-    expect(mockDb.studies.bulkDelete).toHaveBeenCalledWith(['study-1', 'study-2']);
+    expect(mockDb.studies.bulkDelete).toHaveBeenCalledWith([
+      'study-1',
+      'study-2'
+    ]);
     expect(mockDb.studies.toArray).toHaveBeenCalled();
     expect(component.selectedStudies).toBeNull();
     expect(mockMessageService.add).toHaveBeenCalled();
@@ -274,7 +282,10 @@ describe('StudiesComponent', () => {
 
     component.onGlobalFilter(mockTable, mockEvent);
 
-    expect(mockTable.filterGlobal).toHaveBeenCalledWith('search text', 'contains');
+    expect(mockTable.filterGlobal).toHaveBeenCalledWith(
+      'search text',
+      'contains'
+    );
   });
 
   it('should find index by id', () => {

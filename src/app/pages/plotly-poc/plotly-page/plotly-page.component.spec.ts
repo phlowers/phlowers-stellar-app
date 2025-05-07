@@ -62,7 +62,9 @@ describe('PlotlyPageComponent', () => {
   it('should initialize with default line data', () => {
     const expectedLineData: PlotlyLine = {
       x: [0, 50, 100, 150, 200, 250, 300],
-      z: [16.8, 3.00890769, -5.65382853, -9.27490824, -7.8905724, -1.48696614, 10],
+      z: [
+        16.8, 3.00890769, -5.65382853, -9.27490824, -7.8905724, -1.48696614, 10
+      ],
       y: [5, 5, 5, 5, 5, 5, 5]
     };
 
@@ -92,7 +94,9 @@ describe('PlotlyPageComponent', () => {
 
   describe('Component Integration', () => {
     it('should contain a PlotlyComponent', () => {
-      const plotlyComp = fixture.debugElement.query(By.directive(MockPlotlyComponent));
+      const plotlyComp = fixture.debugElement.query(
+        By.directive(MockPlotlyComponent)
+      );
       expect(plotlyComp).toBeTruthy();
     });
   });
@@ -132,10 +136,14 @@ describe('PlotlyPageComponent Integration', () => {
     hostFixture = TestBed.createComponent(TestHostComponent);
     hostFixture.detectChanges();
 
-    const pageComponentDebug = hostFixture.debugElement.query(By.directive(PlotlyPageComponent));
+    const pageComponentDebug = hostFixture.debugElement.query(
+      By.directive(PlotlyPageComponent)
+    );
     pageComponent = pageComponentDebug.componentInstance;
 
-    const plotlyElementDebug = hostFixture.debugElement.query(By.directive(MockPlotlyComponent));
+    const plotlyElementDebug = hostFixture.debugElement.query(
+      By.directive(MockPlotlyComponent)
+    );
     mockPlotlyComponent = plotlyElementDebug?.componentInstance;
   });
 

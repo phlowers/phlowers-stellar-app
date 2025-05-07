@@ -4,7 +4,7 @@ coverage
 dist
 out
 public
-styles
+# styles
 node_modules
 .vscode
 .angular

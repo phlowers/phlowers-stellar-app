@@ -27,7 +27,9 @@ describe('AppFooterComponent Component', () => {
   });
 
   it('should render the footer text correctly', () => {
-    const footerElement = fixture.debugElement.query(By.css('.layout-footer')).nativeElement;
+    const footerElement = fixture.debugElement.query(
+      By.css('.layout-footer')
+    ).nativeElement;
     expect(footerElement.textContent).toContain('STELLAR by RTE');
   });
 });
