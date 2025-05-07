@@ -12,7 +12,7 @@ import {
   withEnabledBlockingInitialNavigation,
   withInMemoryScrolling
 } from '@angular/router';
-import Aura from '@primeng/themes/aura';
+import Material from '@primeng/themes/material';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 
@@ -29,7 +29,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideAnimationsAsync(),
     providePrimeNG({
-      theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } }
+      theme: { preset: Material, options: { darkModeSelector: '.app-dark' } }
     })
   ]
 };

@@ -7,11 +7,14 @@ export default {
   plugins: [PrimeUI],
   theme: {
     screens: {
-      sm: '576px',
-      md: '768px',
-      lg: '992px',
-      xl: '1200px',
-      '2xl': '1920px'
+      sm: '36rem',
+      md: '48rem',
+      lg: '62rem',
+      xl: '75rem',
+      '2xl': '120rem'
     }
+    // colors: {
+    //   primary: {}
+    // }
   }
 };

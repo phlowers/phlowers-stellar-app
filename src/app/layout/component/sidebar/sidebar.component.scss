@@ -1,0 +1,204 @@
+$_sidebar-size--default-noJs: 12.5rem;
+$_sidebar-size--expanded: 14rem;
+$_sidebar-size--shrank: 4rem;
+$_animation-timing: 0.35s;
+$_animation-transition: cubic-bezier(1, 0.19, 0.23, 0.84);
+$_animation-type-timing: $_animation-timing $_animation-transition;
+
+body.has-sidebar {
+  padding-left: $_sidebar-size--default-noJs;
+  transition: padding-left $_animation-type-timing;
+
+  &--expanded {
+    padding-left: $_sidebar-size--expanded;
+  }
+
+  &--shrank {
+    padding-left: $_sidebar-size--shrank;
+  }
+}
+
+.stellar-sidebar {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1000; // TODO: remove this and manage z-indexes through a sass map and or custom properties
+  width: $_sidebar-size--default-noJs;
+  height: 100%;
+  background-color: var(--primary-950);
+  border-right: 1px solid var(--grey-150);
+  color: var(--grey-white);
+  transition:
+    width $_animation-type-timing,
+    padding $_animation-type-timing;
+
+  &--expanded {
+    width: $_sidebar-size--expanded;
+    padding: 1rem;
+  }
+
+  &--shrank {
+    width: $_sidebar-size--shrank;
+    padding: 0.5rem;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    line-height: 1;
+    background-color: var(--primary-950);
+    border-radius: 0.25rem;
+    appearance: none;
+    transition: all $_animation-type-timing;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0.25rem;
+      background-color: var(--primary-950);
+      transition: background-color $_animation-type-timing;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 0.25rem;
+      box-shadow: inset 0 0 0 1px var(--primary-950);
+      transition: box-shadow $_animation-type-timing;
+    }
+
+    &:hover {
+      background-color: var(--primary-800);
+      &::before {
+        background-color: var(--primary-800);
+      }
+    }
+
+    &:focus-visible {
+      outline: none;
+      &::after {
+        box-shadow: inset 0 0 0 1px var(--grey-white);
+      }
+    }
+
+    &:active {
+      background-color: var(--primary-600);
+      &::before {
+        background-color: var(--primary-600);
+      }
+    }
+
+    &.active {
+      &::before {
+        background-color: var(--primary-200);
+      }
+    }
+
+    .stellar-sidebar--expanded & {
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      margin: 0rem -0.5rem 0.25rem -0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+
+      .app-icon {
+        position: relative;
+        bottom: 0.125rem;
+      }
+    }
+
+    .stellar-sidebar--shrank & {
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.125rem;
+      padding: 0.125rem;
+      margin: 0 -0.25rem 0.5rem -0.25rem;
+      font-weight: 300;
+
+      .app-icon {
+        font-size: 1.25rem;
+      }
+    }
+  }
+
+  hr {
+    border-top-color: var(--grey-white);
+    margin: 0.6875rem 0;
+  }
+}
+
+.stelBar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 1rem 0rem;
+
+  .stellar-sidebar--expanded & {
+    justify-content: flex-start;
+  }
+
+  .stellar-sidebar--shrank & {
+    justify-content: center;
+  }
+
+  &__link {
+    background-color: rgb(255, 255, 255, 0);
+    transition: background-color $_animation-type-timing;
+
+    .stellar-sidebar--expanded & {
+      padding: 0.25rem;
+      background-color: var(--primary-300);
+      border-radius: 0.25rem;
+    }
+  }
+
+  &__version-display {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+}
+
+.stelBar-main {
+  flex-grow: 1;
+}
+
+.stelBar-footer {
+  button.stellar-sidebar__link {
+    margin-bottom: 0;
+
+    .app-icon {
+      transform-origin: 50%;
+      transition: transform $_animation-type-timing;
+    }
+
+    .stellar-sidebar--expanded & {
+      width: calc(100% + 1rem);
+
+      .app-icon {
+        transform: rotate(-180deg);
+      }
+    }
+
+    .stellar-sidebar--shrank & {
+      width: calc(100% + 0.5rem);
+
+      .app-icon {
+        transform: rotate(0deg);
+      }
+    }
+  }
+}

@@ -4,30 +4,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
-import { RippleModule } from 'primeng/ripple';
-import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { TagModule } from 'primeng/tag';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { MessageService } from 'primeng/api';
-import { MessageModule } from 'primeng/message';
 import { OnlineService } from './core/api/services/online.service';
 import { WorkerService } from './core/engine/worker/worker.service';
 import { StorageService } from './core/store/storage.service';
+import { SidebarComponent } from './layout/component/sidebar/sidebar.component';
+import { SidebarItem } from './layout/component/sidebar/sidebar.model';
+import { PrimeNgModules } from './primeng.module';
+import { MessageService } from 'primeng/api';
+import { TopbarComponent } from './layout/component/topbar/topbar.component';
 
 const validateEmail = (email: string): boolean => {
   return !!String(email)
@@ -38,72 +26,25 @@ const validateEmail = (email: string): boolean => {
 };
 
 const modules = [
-  MessageModule,
   RouterModule,
-  RippleModule,
   CommonModule,
   FormsModule,
-  ButtonModule,
-  ToastModule,
-  ToolbarModule,
-  RatingModule,
-  InputTextModule,
-  TextareaModule,
-  SelectModule,
-  RadioButtonModule,
-  InputNumberModule,
-  DialogModule,
-  TagModule,
-  InputIconModule,
-  IconFieldModule,
-  ConfirmDialogModule
+  PrimeNgModules,
+  SidebarComponent,
+  TopbarComponent
 ];
+
+interface SidebarNavigation {
+  main: SidebarItem[];
+  footer: SidebarItem[];
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: modules,
   providers: [MessageService, StorageService, WorkerService, OnlineService],
-  template: `<router-outlet></router-outlet>
-    <p-toast position="top-center"></p-toast>
-    <p-dialog
-      [(visible)]="userDialog"
-      [style]="{ width: '450px' }"
-      i18n-header
-      header="Set your user info"
-      [closable]="false"
-      [modal]="true"
-    >
-      <ng-template #content>
-        <label i18n for="description" class="block font-bold mb-3">Email</label>
-        <input
-          type="text"
-          pInputText
-          type="email"
-          #email="ngModel"
-          email
-          name="email"
-          ngModel
-          id="email"
-          [(ngModel)]="user.email"
-          required
-          fluid
-        />
-        <!-- <div *ngIf="email.invalid && email.errors" class="alert">{{ console.log(email) }}</div> -->
-        <small i18n class="text-red-500" *ngIf="submitted && !email.valid"
-          >Email is not valid.</small
-        >
-      </ng-template>
-      <ng-template #footer>
-        <p-button
-          i18n-label
-          label="Save"
-          icon="pi pi-check"
-          type="submit"
-          (click)="saveUser()"
-        />
-      </ng-template>
-    </p-dialog>`
+  templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
@@ -165,4 +106,55 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.setupWorker();
   }
+
+  public readonly sideBarNav = signal<SidebarNavigation>({
+    main: [
+      {
+        id: 'sideB-home',
+        label: $localize`Home`,
+        route: '/',
+        icon: 'home'
+      },
+      {
+        id: 'sideB-studies',
+        label: $localize`Studies`,
+        route: '/',
+        icon: 'folder'
+      },
+      {
+        id: 'sideB-section',
+        label: $localize`Sections`,
+        route: '/sections',
+        icon: 'timeline'
+      },
+      // {
+      //   id: 'sideB-tools',
+      //   label: $localize`Tools`,
+      //   route: '/tools',
+      //   icon: 'build'
+      // },
+      {
+        id: 'sideB-plotlyJs',
+        label: 'Plotly JS POC',
+        shortLabel: 'plot poc',
+        route: '/plotly',
+        icon: 'ssid_chart'
+      }
+      // {
+      //   id: 'sideB-plotly3D',
+      //   label: $localize`3D`,
+      //   route: '/3d',
+      //   icon: 'deployed_code'
+      // }
+    ],
+    footer: [
+      {
+        id: 'sideB-usrPref',
+        label: $localize`User preference`,
+        shortLabel: $localize`usr pref`,
+        route: '/admin',
+        icon: 'Account_circle_filled'
+      }
+    ]
+  });
 }

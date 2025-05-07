@@ -98,6 +98,7 @@
             },
             "development": {
               "baseHref": "/",
+              "localize": ["en"],
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,

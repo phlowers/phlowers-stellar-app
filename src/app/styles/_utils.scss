@@ -1,4 +1,20 @@
-/* Utils */
+@use 'sass:map';
+@use './abstracts/abstract.extracts' as stel;
+
+// *********************
+// ******* FONTS *******
+// *********************
+@each $name, $value in stel.$txt-heading {
+  .heading-#{$name} {
+    @extend %heading-#{$name};
+  }
+}
+
+@each $name, $value in stel.$text {
+  .text-#{$name} {
+    @extend %text-#{$name};
+  }
+}
 
 .card {
   background: var(--surface-card);

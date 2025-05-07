@@ -1,0 +1,98 @@
+<nav
+  class="stellar-sidebar"
+  [class]="{
+    'stellar-sidebar--expanded': expandedStatus() === true,
+    'stellar-sidebar--shrank': expandedStatus() === false
+  }"
+>
+  <header class="stelBar-header">
+    <a routerLink="/" class="stelBar-header__link">
+      @if (logoIconExpanded() && expandedStatus() === true) {
+        <img
+          [src]="appLogoRoot() + logoIconExpanded()"
+          [alt]="logoText()"
+          width="115"
+          height="26"
+        />
+      } @else {
+        <img
+          [src]="appLogoRoot() + logoIconShrank()"
+          [alt]="logoText()"
+          width="30"
+          height="20"
+        />
+      }
+      <span class="sr-only">{{ logoText() }}</span>
+    </a>
+    @if (appVersion() && appVersionDisplay() && expandedStatus() === true) {
+      <small class="stelBar-header__version-display">
+        v. {{ appVersion() }}
+      </small>
+    }
+  </header>
+
+  <main class="stelBar-main">
+    <ul>
+      @for (item of mainLinks(); track item.id) {
+        <li>
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            [id]="item.id"
+            class="stellar-sidebar__link"
+          >
+            <span class="app-icon">{{ item.icon }}</span>
+            <span>
+              @if (item.shortLabel && expandedStatus() === false) {
+                {{ item.shortLabel }}
+              } @else {
+                {{ item.label }}
+              }
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </main>
+
+  <hr />
+
+  <footer class="stelBar-footer">
+    <ul>
+      @for (item of footerLinks(); track item.id) {
+        <li>
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            [id]="item.id"
+            class="stellar-sidebar__link"
+          >
+            <span class="app-icon">{{ item.icon }}</span>
+            <span>
+              @if (item.shortLabel && expandedStatus() === false) {
+                {{ item.shortLabel }}
+              } @else {
+                {{ item.label }}
+              }
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <hr />
+
+    <button type="button" (click)="toggleMenu()" class="stellar-sidebar__link">
+      <span class="app-icon">keyboard_double_arrow_right</span>
+      @if (expandedStatus() === true) {
+        <span i18n>Shrink menu</span>
+      } @else {
+        <span i18n>Menu</span>
+      }
+    </button>
+  </footer>
+</nav>
