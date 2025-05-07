@@ -30,8 +30,11 @@ export class AppWrapperComponent {
 
   get containerClass() {
     return {
-      'app-wrapper-static': this.appWrapperService.appWrapperConfig().menuMode === 'static',
-      'app-wrapper-static-inactive': this.appWrapperService.appWrapperState().staticMenuDesktopInactive && this.appWrapperService.appWrapperConfig().menuMode === 'static'
+      'app-wrapper-static':
+        this.appWrapperService.appWrapperConfig().menuMode === 'static',
+      'app-wrapper-static-inactive':
+        this.appWrapperService.appWrapperState().staticMenuDesktopInactive &&
+        this.appWrapperService.appWrapperConfig().menuMode === 'static'
     };
   }
 }

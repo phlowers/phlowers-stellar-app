@@ -11,8 +11,8 @@ import { CommonModule } from '@angular/common';
 import { OnlineService } from './core/api/services/online.service';
 import { WorkerService } from './core/engine/worker/worker.service';
 import { StorageService } from './core/store/storage.service';
-import { SidebarComponent } from './layout/sidebar/sidebar.component';
-import { SidebarItem } from './layout/sidebar/sidebar.model';
+import { SidebarComponent } from './layout/component/sidebar/sidebar.component';
+import { SidebarItem } from './layout/component/sidebar/sidebar.model';
 import { PrimeNgModules } from './primeng.module';
 import { MessageService } from 'primeng/api';
 

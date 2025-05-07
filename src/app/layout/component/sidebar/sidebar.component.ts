@@ -1,8 +1,14 @@
-import { Component, input, OnInit, signal, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  input,
+  OnInit,
+  signal,
+  ViewEncapsulation
+} from '@angular/core';
 import { SidebarItem } from './sidebar.model';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-const { version: appVersion } = require('../../../../package.json');
+const { version: appVersion } = require('../../../../../package.json');
 
 @Component({
   selector: 'app-sidebar-bis',

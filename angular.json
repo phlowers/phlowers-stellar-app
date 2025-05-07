@@ -14,7 +14,7 @@
       "sourceRoot": "src",
       "prefix": "app",
       "i18n": {
-        "sourceLocale": "en-US",
+        "sourceLocale": "fr-FR",
         "locales": {
           "fr": {
             "translation": "assets/i18n/messages.fr.xlf",
@@ -98,6 +98,7 @@
             },
             "development": {
               "baseHref": "/",
+              "localize": ["fr"],
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
