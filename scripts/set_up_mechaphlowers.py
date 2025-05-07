@@ -1,6 +1,6 @@
 # /// script
-# requires-python = ">=3.12"
-# dependencies = ["requests == 2.32.3", "pip == 24.3.1", "pyodide-build == 0.29.3"]
+# requires-python = "==3.12"
+# dependencies = ["requests == 2.32.3", "pyodide-build == 0.29.3"]
 # ///
 
 
@@ -10,20 +10,20 @@ import os
 import shutil
 from pathlib import Path
 import subprocess
+import tarfile
+import tempfile
+import argparse
 
-import pip
 import requests
 from pyodide_build.cli.py_compile import main as pyodide_build  # type: ignore
 
 PYODIDE_VERSION = "0.27.4"
-MECHAPHLOWERS_VERSION = "0.3.0"
-PYODIDE_URL = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full"
-PYODIDE_LOCK_URL = f"{PYODIDE_URL}/pyodide-lock.json"
+MECHAPHLOWERS_VERSION = "0.2.0"
 PYODIDE_DIRECTORY_PATH = "./public/pyodide"
 PYODIDE_LOCK_PATH = "./public/pyodide/pyodide-lock.json"
 PYODIDE_PACKAGES_PATH = "./src/app/core/engine/worker/python-packages.json"
 NEEDED_PYODIDE_SOURCE_FILES = [
-    "pyodide.asm.wasm", "pyodide.asm.js", "python_stdlib.zip"]
+    "pyodide.asm.wasm", "pyodide.asm.js", "python_stdlib.zip", "pyodide-lock.json"]
 
 
 def recreate_directory(directory):
@@ -34,8 +34,8 @@ def recreate_directory(directory):
     print(f"Recreated directory: {directory}")
 
 
-def get_all_file_names_in_directory(direct):
-    return [f for f in os.listdir(direct) if os.path.isfile(os.path.join(direct, f))]
+def get_all_wheel_file_names_in_directory(directory):
+    return [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and f.endswith(".whl")]
 
 
 def download_file_in_directory(url, directory):
@@ -59,26 +59,86 @@ def delete_files_starting_with(directory, start_string):
             print(f"Deleted {name}")
 
 
+def download_and_extract_tgz(url, target_dir):
+    # Create a temporary directory to store the downloaded file
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Download the .tgz file
+        tgz_path = os.path.join(temp_dir, "pyodide.tgz")
+        response = requests.get(url, timeout=10, verify=False)
+        response.raise_for_status()
+        with open(tgz_path, "wb") as f:
+            f.write(response.content)
+        
+        # Extract the .tgz file
+        with tarfile.open(tgz_path, "r:gz") as tar:
+            tar.extractall(path=target_dir)
+        print(f"Downloaded and extracted {url} to {target_dir}")
+
+
+def keep_only_needed_files(directory, needed_files):
+    """Keep only the specified files in the directory and move them from package subdirectory."""
+    package_dir = os.path.join(directory, "package")
+    if not os.path.exists(package_dir):
+        print(f"Warning: package directory not found at {package_dir}")
+        return
+
+    # Move needed files from package directory to main directory
+    for filename in needed_files:
+        source_path = os.path.join(package_dir, filename)
+        if os.path.exists(source_path):
+            dest_path = os.path.join(directory, filename)
+            shutil.move(source_path, dest_path)
+            print(f"Moved {filename} to {directory}")
+
+    # Remove the package directory and all other files
+    shutil.rmtree(package_dir)
+    print(f"Removed package directory")
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--uv-index", type=str, default=None)
+    parser.add_argument("--npm-registry-url", type=str, default="https://registry.npmjs.org/")
+    args = parser.parse_args()
+
+    npm_registry_url = args.npm_registry_url
+    pyodide_url = f"{npm_registry_url}/pyodide/-/pyodide-{PYODIDE_VERSION}.tgz"
+    pyodide_lock_url = f"{pyodide_url}/pyodide-lock.json"
+    
+    uv_index = args.uv_index
     recreate_directory(PYODIDE_DIRECTORY_PATH)
     # delete the pyodide packages file if it exists
     if os.path.exists(PYODIDE_PACKAGES_PATH):
         os.remove(PYODIDE_PACKAGES_PATH)
+    
+    # Download and extract the pyodide .tgz file
+    print("i am downloading pyodide")
+    download_and_extract_tgz(pyodide_url, PYODIDE_DIRECTORY_PATH)
+    
+    # Keep only the needed files
+    keep_only_needed_files(PYODIDE_DIRECTORY_PATH, NEEDED_PYODIDE_SOURCE_FILES)
+    
+    print("Downloading mechaphlowers wheel files")
     # get the wheel file for mechaphlowers
-    subprocess.run(["pip", "wheel", f"mechaphlowers=={MECHAPHLOWERS_VERSION}", "-w", PYODIDE_DIRECTORY_PATH])
+    process_args = ["uvx", "--python", "3.12", "pip", "download", f"mechaphlowers=={MECHAPHLOWERS_VERSION}", "-d", PYODIDE_DIRECTORY_PATH]
+    if uv_index:
+        process_args.append(f"--index-url={uv_index}")
+    subprocess.run(process_args)
+    print("Building wheel files")
     # compile the wheel files to pyc
     pyodide_build(Path(PYODIDE_DIRECTORY_PATH), False, False, 6, "")
 
-    pyodide_lock_content = requests.get(PYODIDE_LOCK_URL, timeout=10).json()
+    with open(PYODIDE_LOCK_PATH) as f:
+        pyodide_lock_content = json.load(f)
+    # get the lock file for pyodide
 
-    wheel_names = get_all_file_names_in_directory(PYODIDE_DIRECTORY_PATH)
+    wheel_names = get_all_wheel_file_names_in_directory(PYODIDE_DIRECTORY_PATH)
     mechaphlowers_packages = {}
     for wheel in wheel_names:
         name = wheel.split("-")[0]
         mechaphlowers_packages[name.replace("_", "-")] = {
             "name": name,
             "file_name": wheel,
-            "sha256": sha256sum(os.path.join(PYODIDE_DIRECTORY_PATH, wheel)),
             "source": "local"
         }
     # print(f"mechaphlowers_packages: {mechaphlowers_packages}")
@@ -92,7 +152,6 @@ if __name__ == "__main__":
             all_packages[package_name] = {
                 "name": package_name,
                 "file_name": pyodide_lock_content["packages"][package_name]["file_name"],
-                "sha256": pyodide_lock_content["packages"][package_name]["sha256"],
                 "source": "remote"
             }
             # remove packages from PYODIDE_DIRECTORY_PATH because we don't need them as they are remote packages
@@ -104,13 +163,8 @@ if __name__ == "__main__":
                     all_packages[name_key] = {
                         "name": package,
                         "file_name": pyodide_lock_content["packages"][name_key]["file_name"],
-                        "sha256": pyodide_lock_content["packages"][name_key]["sha256"],
                         "source": "remote"
                     }
     # write to file
     with open(PYODIDE_PACKAGES_PATH, "w", encoding="utf-8") as pyodide_packages:
-        json.dump(all_packages, pyodide_packages, ensure_ascii=False, indent=4)
-    # download the pyodide source files
-    for pyodide_source_file in NEEDED_PYODIDE_SOURCE_FILES:
-        download_file_in_directory(
-            f"{PYODIDE_URL}/{pyodide_source_file}", PYODIDE_DIRECTORY_PATH)
+        json.dump(all_packages, pyodide_packages, ensure_ascii=False, indent=4, sort_keys=True)
