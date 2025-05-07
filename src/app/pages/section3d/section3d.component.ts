@@ -18,12 +18,13 @@ import Plotly, { Camera, Data, Datum, Layout, PlotlyHTMLElement } from 'plotly.j
 import { uniq } from 'lodash';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
+import { SingleSpanComponent } from './singleSpan.component';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   styleUrls: ['./section3d.component.scss'],
-  imports: [ButtonModule, ProgressSpinnerModule, CommonModule, TableModule, InputTextModule, FormsModule, CheckboxModule, NgxSliderModule, AutoCompleteModule, CheckboxModule],
+  imports: [ButtonModule, SingleSpanComponent, ProgressSpinnerModule, CommonModule, TableModule, InputTextModule, FormsModule, CheckboxModule, NgxSliderModule, AutoCompleteModule, CheckboxModule],
   template: `<div>
     <p-button label="Run Python" (onClick)="runPython()"></p-button>
     <!-- <p-button label="log" (onClick)="log()"></p-button> -->
@@ -40,6 +41,7 @@ import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocompl
         <ngx-slider [(value)]="minValue" [(highValue)]="maxValue" [options]="options()"></ngx-slider>
       </div>
     </div>
+    <app-single-span [litData]="litData()"></app-single-span>
   </div>`
 })
 export class Section3dComponent {
@@ -64,10 +66,12 @@ export class Section3dComponent {
   // }
 
   readonly effect2 = effect(() => {
-    console.log('effect2');
+    console.log('effect2', this.selectedPhase());
     // const plot = untracked(() => this.plot());
+    //@ts-ignore
+    console.log('this.plot()?._fullLayout', this.plot()?._fullLayout);
     // @ts-ignore
-    const currentCamera = this.plot()?._fullLayout.scene.camera;
+    const currentCamera = this.plot()?._fullLayout?.scene?.camera;
     console.log('currentCamera', currentCamera);
     this.createPlot(
       untracked(() => this.minValue()),
@@ -105,7 +109,7 @@ export class Section3dComponent {
       const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
       const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
       const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
-      return { x, y, z, type: 'scatter3d', mode: 'lines', line: { color: 'red', dash }, text: name };
+      return { x, z: y, y: z, type: 'scatter', mode: 'lines', line: { color: 'red', dash }, text: name };
     });
   }
 
@@ -114,7 +118,7 @@ export class Section3dComponent {
       const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
       const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
       const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
-      return { x, y, z, type: 'scatter3d', text: [support.replace('Section ', '')], textposition: 'inside', mode: 'text+lines', line: { color: 'blue' } };
+      return { x, z: y, y: z, type: 'scatter', text: [support.replace('Section ', '')], textposition: 'inside', mode: 'text+lines', line: { color: 'blue' } };
     });
   }
 
@@ -123,7 +127,7 @@ export class Section3dComponent {
       const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
       const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
       const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
-      return { x, y, z, type: 'scatter3d', mode: 'lines', line: { color: 'green' } };
+      return { x, z: y, y: z, type: 'scatter', mode: 'lines', line: { color: 'green' } };
     });
   }
 
@@ -136,6 +140,7 @@ export class Section3dComponent {
   }
 
   async createPlot(minValue: number, maxValue: number, selectedPhase: string, showOtherAsDashed: boolean, currentCamera: Camera | undefined) {
+    console.log('selectedPhase', selectedPhase);
     const lit = untracked(() => this.litData());
     if (!lit) return;
     const uniqueSupports = uniq(Object.values(lit.support)).slice(minValue, maxValue);
