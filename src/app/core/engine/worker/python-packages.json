@@ -1,140 +1,117 @@
 {
-    "numpy": {
-        "name": "numpy",
-        "file_name": "numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "sha256": "cbb1b42f54d4bead6972ffae8d2671a71842d2e7068ae86747a7ac50ddcf5dd6",
-        "source": "remote"
-    },
-    "pandas": {
-        "name": "pandas",
-        "file_name": "pandas-2.2.3-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "sha256": "d84157fb62c39f2a00b6bdb5830fd677c7771401288fc2321d464da1aa4a83be",
-        "source": "remote"
-    },
-    "python-dateutil": {
-        "name": "python-dateutil",
-        "file_name": "python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
-        "sha256": "ccd925cec432ddea1e2aeb1992be2222395162d61f764a75e3fc2d76d7ba8e61",
-        "source": "remote"
-    },
-    "pytz": {
-        "name": "pytz",
-        "file_name": "pytz-2024.1-py2.py3-none-any.whl",
-        "sha256": "9f86c2e5fcf6296fef2d3f4f273aeccc770ab69caf600743dbf4b93443c792c2",
-        "source": "remote"
-    },
-    "scipy": {
-        "name": "scipy",
-        "file_name": "scipy-1.14.1-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "sha256": "6ad7469805bf819d77cfe76cdb687fd726f2bfe3fbbcdd5ce58ade093199e76d",
-        "source": "remote"
-    },
-    "openblas": {
-        "name": "openblas",
-        "file_name": "openblas-0.3.26.zip",
-        "sha256": "8d78ec89ec7afe38d81c89b607c4d1807aaf4a5dfa177b2459eff6829fbd8318",
-        "source": "remote"
-    },
-    "pydantic-core": {
-        "name": "pydantic_core",
-        "file_name": "pydantic_core-2.27.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "sha256": "5604232aaa9b55e10d528e4f6cd35711d3b3b14832e2475f83d1326c9b8e2893",
-        "source": "remote"
-    },
-    "wrapt": {
-        "name": "wrapt",
-        "file_name": "wrapt-1.16.0-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "sha256": "063cff5974895a17595cd203d3e8470c060d6ec6de6acdf4c3a4d59db421caad",
+    "annotated-types": {
+        "file_name": "annotated_types-0.6.0-py3-none-any.whl",
+        "name": "annotated-types",
         "source": "remote"
     },
     "mechaphlowers": {
-        "name": "mechaphlowers",
         "file_name": "mechaphlowers-0.2.0-cp312-none-any.whl",
-        "sha256": "7b0d401a34e0fb95f855c3e982fef20bf433aab7159aaac9a579d153b3aef2c1",
+        "name": "mechaphlowers",
         "source": "local"
     },
     "multimethod": {
-        "name": "multimethod",
         "file_name": "multimethod-1.12-cp312-none-any.whl",
-        "sha256": "d80f37c451fdee5eadf272de4c1c64b57a637d8133569ffd1d7a5838a411dd20",
-        "source": "local"
-    },
-    "pandera": {
-        "name": "pandera",
-        "file_name": "pandera-0.21.1-cp312-none-any.whl",
-        "sha256": "e449488160eab4199db610ddd6e2830e456366ebe0b6241d6ab287c8a38afe9a",
-        "source": "local"
-    },
-    "plotly": {
-        "name": "plotly",
-        "file_name": "plotly-5.24.1-cp312-none-any.whl",
-        "sha256": "f70d66029a24090bc1c5f6e3538be92053e9ff820c091cedd5aac05e253cc7ab",
-        "source": "local"
-    },
-    "packaging": {
-        "name": "packaging",
-        "file_name": "packaging-24.2-py3-none-any.whl",
-        "sha256": "90363038a93f8483d2d72ecf5ed43c4a51862c48d9fe43620769f93a6bcbc469",
-        "source": "remote"
-    },
-    "six": {
-        "name": "six",
-        "file_name": "six-1.16.0-py2.py3-none-any.whl",
-        "sha256": "e333663e30239c6ea20ac6ed6ab770f7f395edee1e663043a0c34e119189d40b",
-        "source": "remote"
-    },
-    "tenacity": {
-        "name": "tenacity",
-        "file_name": "tenacity-9.1.2-cp312-none-any.whl",
-        "sha256": "d0a8a3c05d332a024d767e96a05f8b4ec82d1d4d1c56869a0abaa295d20b4779",
-        "source": "local"
-    },
-    "typing-inspect": {
-        "name": "typing_inspect",
-        "file_name": "typing_inspect-0.9.0-cp312-none-any.whl",
-        "sha256": "7fb320880084e2f263e21271ef2997074ea6501ba40e1f0a99b6595afcf06f7a",
-        "source": "local"
-    },
-    "tzdata": {
-        "name": "tzdata",
-        "file_name": "tzdata-2024.1-py2.py3-none-any.whl",
-        "sha256": "5fbeabe361ae1b43411849938d3772d0b5b05fcb304ecb49202daf3521889fcc",
-        "source": "remote"
-    },
-    "pydantic": {
-        "name": "pydantic",
-        "file_name": "pydantic-2.10.5-py3-none-any.whl",
-        "sha256": "59b9bb39968b8d2527678d0a1986f0647a148024b5ab99873a576fa1b9bf2b8b",
-        "source": "remote"
-    },
-    "typing-extensions": {
-        "name": "typing-extensions",
-        "file_name": "typing_extensions-4.11.0-py3-none-any.whl",
-        "sha256": "fd294ddf4f66cf0e91dab84e982043360878915681eb890c0762b5e9fea990a8",
-        "source": "remote"
-    },
-    "annotated-types": {
-        "name": "annotated-types",
-        "file_name": "annotated_types-0.6.0-py3-none-any.whl",
-        "sha256": "33a6272cb8fdf314437e5061db5301983193da0acd253dd0141511c766bc62b7",
-        "source": "remote"
-    },
-    "typeguard": {
-        "name": "typeguard",
-        "file_name": "typeguard-4.4.2-cp312-none-any.whl",
-        "sha256": "a4e333ea4d63c1320418b6e9cf117d23d387c3585674f08f0a165bb1e3be5795",
+        "name": "multimethod",
         "source": "local"
     },
     "mypy-extensions": {
+        "file_name": "mypy_extensions-1.1.0-cp312-none-any.whl",
         "name": "mypy_extensions",
-        "file_name": "mypy_extensions-1.0.0-cp312-none-any.whl",
-        "sha256": "9eba62eae1b8144dff2c5f48c75b58eb3b1577cc30d13193603cd15df8ff0cbe",
+        "source": "local"
+    },
+    "numpy": {
+        "file_name": "numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "name": "numpy",
+        "source": "remote"
+    },
+    "openblas": {
+        "file_name": "openblas-0.3.26.zip",
+        "name": "openblas",
+        "source": "remote"
+    },
+    "packaging": {
+        "file_name": "packaging-24.2-py3-none-any.whl",
+        "name": "packaging",
+        "source": "remote"
+    },
+    "pandas": {
+        "file_name": "pandas-2.2.3-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "name": "pandas",
+        "source": "remote"
+    },
+    "pandera": {
+        "file_name": "pandera-0.21.1-cp312-none-any.whl",
+        "name": "pandera",
+        "source": "local"
+    },
+    "plotly": {
+        "file_name": "plotly-5.24.1-cp312-none-any.whl",
+        "name": "plotly",
+        "source": "local"
+    },
+    "pydantic": {
+        "file_name": "pydantic-2.10.5-py3-none-any.whl",
+        "name": "pydantic",
+        "source": "remote"
+    },
+    "pydantic-core": {
+        "file_name": "pydantic_core-2.27.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "name": "pydantic_core",
+        "source": "remote"
+    },
+    "python-dateutil": {
+        "file_name": "python_dateutil-2.9.0.post0-cp312-none-any.whl",
+        "name": "python-dateutil",
+        "source": "remote"
+    },
+    "pytz": {
+        "file_name": "pytz-2024.1-py2.py3-none-any.whl",
+        "name": "pytz",
+        "source": "remote"
+    },
+    "scipy": {
+        "file_name": "scipy-1.14.1-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "name": "scipy",
+        "source": "remote"
+    },
+    "six": {
+        "file_name": "six-1.16.0-py2.py3-none-any.whl",
+        "name": "six",
+        "source": "remote"
+    },
+    "tenacity": {
+        "file_name": "tenacity-9.1.2-cp312-none-any.whl",
+        "name": "tenacity",
+        "source": "local"
+    },
+    "typeguard": {
+        "file_name": "typeguard-4.4.2-cp312-none-any.whl",
+        "name": "typeguard",
+        "source": "local"
+    },
+    "typing-extensions": {
+        "file_name": "typing_extensions-4.11.0-py3-none-any.whl",
+        "name": "typing-extensions",
+        "source": "remote"
+    },
+    "typing-inspect": {
+        "file_name": "typing_inspect-0.9.0-cp312-none-any.whl",
+        "name": "typing_inspect",
         "source": "local"
     },
     "typing-inspection": {
-        "name": "typing_inspection",
         "file_name": "typing_inspection-0.4.0-cp312-none-any.whl",
-        "sha256": "d00358f6b12a459de3de53482b1ea24a1f3e18e94d4be8078ea3fabb3bb13d6e",
+        "name": "typing_inspection",
         "source": "local"
+    },
+    "tzdata": {
+        "file_name": "tzdata-2024.1-py2.py3-none-any.whl",
+        "name": "tzdata",
+        "source": "remote"
+    },
+    "wrapt": {
+        "file_name": "wrapt-1.16.0-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "name": "wrapt",
+        "source": "remote"
     }
 }
