@@ -1,0 +1,187 @@
+@use 'sass:map';
+
+// purple primary
+$primary: (
+  0: #fcfbfd,
+  50: #f9f7fc,
+  100: #f3eff8,
+  200: #e6def0,
+  300: #d2c3e4,
+  400: #b89fd3,
+  500: #9979bc,
+  600: #7d5a9f,
+  700: #674883,
+  800: #563c6c,
+  900: #4a355a,
+  950: #2b1a38
+);
+// default primary use
+$main-primary: map.get($primary, 600);
+
+// cyan blue secondary
+$secondary: (
+  0: #f9feff,
+  50: #edfdfe,
+  100: #d1f9fc,
+  200: #a9f2f8,
+  300: #6ee6f2,
+  400: #2bd0e5,
+  500: #0fb3cb,
+  600: #108faa,
+  700: #14738a,
+  800: #195e71,
+  900: #1a4d5f,
+  950: #0c3949
+);
+// default secondary foreground use
+$main-secondary: map.get($secondary, 700);
+
+// Greyscale
+$grey: (
+  'white': #fff,
+  0: #f4f5f4,
+  50: #ebebea,
+  100: #e1e1e0,
+  150: #d7d6d5,
+  200: #cdcccb,
+  250: #c2c1c0,
+  300: #b7b7b6,
+  350: #acacab,
+  400: #a1a1a0,
+  450: #969695,
+  500: #8b8a8a,
+  550: #7f7e7e,
+  600: #737272,
+  650: #666665,
+  700: #595958,
+  750: #4c4c4b,
+  800: #3e3e3d,
+  850: #302f2f,
+  900: #201f1f,
+  950: #0d0c0c
+);
+// default grey
+$main-grey: map.get($grey, 500);
+// grey aliases
+$gray: $grey;
+$main-gray: $main-grey;
+
+// sucess message and infos
+$success: (
+  0: #f7fffb,
+  50: #effef6,
+  100: #d9ffec,
+  200: #b5fdd9,
+  300: #65f8b0,
+  400: #3cec96,
+  500: #12d577,
+  600: #09b05f,
+  700: #0b8a4d,
+  800: #0e6d40,
+  900: #0e5937,
+  950: #01321c
+);
+// default success
+$main-success: map.get($success, 300);
+
+// warning message and infos
+$warning: (
+  0: #fffbf7,
+  50: #fef7ec,
+  100: #fce7c9,
+  200: #f9ce8e,
+  300: #f6ab4d,
+  400: #f4922b,
+  500: #ed6e13,
+  600: #d24e0d,
+  700: #ae330f,
+  800: #8e2712,
+  900: #752112,
+  950: #430e05
+);
+// default warning
+$main-warning: map.get($warning, 300);
+
+// error message and infos
+$error: (
+  0: #fef8fa,
+  50: #fff1f2,
+  100: #ffe4e6,
+  200: #fdced4,
+  300: #fca5af,
+  400: #f97385,
+  500: #f14662,
+  600: #de2048,
+  700: #c81640,
+  800: #9d1439,
+  900: #861537,
+  950: #4b0618
+);
+// default error
+$main-error: map.get($error, 700);
+
+$bp: (
+  sm: '36rem',
+  md: '48rem',
+  lg: '62rem',
+  xl: '75rem',
+  2xl: '120rem'
+);
+
+$_font-family: 'Nunito', Arial, sans-serif;
+
+$txt-heading: (
+  5xl: (
+    font: 600 5rem/1.15 #{$_font-family},
+    letter-spacing: -0.0625rem
+  ),
+  4xl: (
+    font: 600 4.25rem/1.17647 #{$_font-family},
+    letter-spacing: -0.0625rem
+  ),
+  3xl: (
+    font: 600 3.5rem/1.14286 #{$_font-family},
+    letter-spacing: -0.0625rem
+  ),
+  2xl: (
+    font: 600 3rem/1.16667 #{$_font-family},
+    letter-spacing: -0.0625rem
+  ),
+  xl: (
+    font: 600 2.5rem/1.2 #{$_font-family},
+    letter-spacing: -0.0625rem
+  ),
+  l: (
+    font: 600 2rem/1.25 #{$_font-family},
+    letter-spacing: -0.0625rem
+  ),
+  m: (
+    font: 600 1.5rem/1.33333 #{$_font-family},
+    letter-spacing: -0.0313rem
+  ),
+  s: (
+    font: 600 1.25rem/1.4 #{$_font-family},
+    letter-spacing: -0.0313rem
+  ),
+  xs: (
+    font: 600 1rem/1.5 #{$_font-family},
+    letter-spacing: -0.0313rem
+  ),
+  2xs: (
+    font: 600 0.875rem/1.42857 #{$_font-family},
+    letter-spacing: 0rem
+  )
+);
+
+$text: (
+  xl-400: 400 1.25rem/1.4 #{$_font-family},
+  xl-600: 600 1.25rem/1.4 #{$_font-family},
+  l-400: 400 1rem/1.5 #{$_font-family},
+  l-600: 600 1rem/1.5 #{$_font-family},
+  m-400: 400 0.875rem/1.42857 #{$_font-family},
+  m-600: 600 0.875rem/1.42857 #{$_font-family},
+  s-400: 400 0.75rem/1.33333 #{$_font-family},
+  s-600: 600 0.75rem/1.33333 #{$_font-family},
+  xs-400: 400 0.625rem/1.4 #{$_font-family},
+  xs-600: 600 0.625rem/1.4 #{$_font-family}
+);

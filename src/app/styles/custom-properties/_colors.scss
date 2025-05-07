@@ -1,0 +1,22 @@
+@use '../abstracts/abstract.extracts' as stel;
+
+:root {
+  @each $key, $value in stel.$primary {
+    --primary-#{$key}: #{$value};
+  }
+  @each $key, $value in stel.$secondary {
+    --secondary-#{$key}: #{$value};
+  }
+  @each $key, $value in stel.$grey {
+    --grey-#{$key}: #{$value};
+  }
+  @each $key, $value in stel.$success {
+    --success-#{$key}: #{$value};
+  }
+  @each $key, $value in stel.$warning {
+    --warning-#{$key}: #{$value};
+  }
+  @each $key, $value in stel.$error {
+    --error-#{$key}: #{$value};
+  }
+}
