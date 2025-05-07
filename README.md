@@ -13,7 +13,7 @@ Stellar is the app based on mechaphlowers enables to perform offline every calcu
 Stellar is based on pyodide to enable execution of python in the browser.
 
 ## Installation
-[installation process](./docs/developer_install.md)
+Installation process is described in the Developer guide/Installation section
 
 ### Development server  
 Run `ng serve` or `npm run start` for a dev server.  
