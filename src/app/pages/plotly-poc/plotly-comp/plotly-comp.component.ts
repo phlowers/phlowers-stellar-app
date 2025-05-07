@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, computed, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  ElementRef,
+  input,
+  output,
+  signal,
+  viewChild
+} from '@angular/core';
 import { PlotlyLine } from '../plotly.model';
 import { SliderModule } from 'primeng/slider';
 import { FormsModule } from '@angular/forms';
@@ -102,7 +111,11 @@ export class PlotlyComponent implements AfterViewInit {
       const yValues = this.lineTrace().y;
       const zValues = this.lineTrace().z;
 
-      if (xValues.length === 0 || yValues.length === 0 || zValues.length === 0) {
+      if (
+        xValues.length === 0 ||
+        yValues.length === 0 ||
+        zValues.length === 0
+      ) {
         this.minSliderValue.set(0);
         this.maxSliderValue.set(0);
         return; // exit to avoid dividing by 0
@@ -137,7 +150,9 @@ export class PlotlyComponent implements AfterViewInit {
       this.initialLineTrace.set(this.lineTrace());
 
       // set min max value for slider
-      this.minSliderValue.set(-(zMax - zMin) / this.SCALE - this.Z_VALUEPADDING);
+      this.minSliderValue.set(
+        -(zMax - zMin) / this.SCALE - this.Z_VALUEPADDING
+      );
       this.maxSliderValue.set((zMax - zMin) / this.SCALE + this.Z_VALUEPADDING);
 
       this.plotElement.set(this.plotlyLineContainer()?.nativeElement);
@@ -149,7 +164,9 @@ export class PlotlyComponent implements AfterViewInit {
 
   // Handle slider change event
   onSliderChange(userSelectedValue: number): void {
-    const newZValues = this.initialLineTrace().z.map((z) => z + userSelectedValue);
+    const newZValues = this.initialLineTrace().z.map(
+      (z) => z + userSelectedValue
+    );
 
     const updatedLineTrace = {
       ...this.lineTrace(),

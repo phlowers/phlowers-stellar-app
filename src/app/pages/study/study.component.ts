@@ -29,7 +29,8 @@ const initialData = {
 const initialDataObjects = initialData.name.map((name, index) => ({
   name,
   suspension: initialData.suspension[index],
-  conductor_attachment_altitude: initialData.conductor_attachment_altitude[index],
+  conductor_attachment_altitude:
+    initialData.conductor_attachment_altitude[index],
   crossarm_length: initialData.crossarm_length[index],
   line_angle: initialData.line_angle[index],
   insulator_length: initialData.insulator_length[index],
@@ -39,11 +40,21 @@ const initialDataObjects = initialData.name.map((name, index) => ({
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [ButtonModule, ProgressSpinnerModule, CommonModule, TableModule, InputTextModule, FormsModule, CheckboxModule],
+  imports: [
+    ButtonModule,
+    ProgressSpinnerModule,
+    CommonModule,
+    TableModule,
+    InputTextModule,
+    FormsModule,
+    CheckboxModule
+  ],
   template: `<div>
     <div class="pb-5">
       <p-button i18n [loading]="loading" (click)="runPython()">Run</p-button>
-      <p-button i18n styleClass="ml-5" severity="info" (click)="addSupport()">Add support</p-button>
+      <p-button i18n styleClass="ml-5" severity="info" (click)="addSupport()"
+        >Add support</p-button
+      >
     </div>
     <p-table [value]="dataToObject" [tableStyle]="{ 'min-width': '50rem' }">
       <ng-template #header>
@@ -69,8 +80,17 @@ const initialDataObjects = initialData.name.map((name, index) => ({
               </ng-template>
             </p-cellEditor>
           </td>
-          <td [pEditableColumn]="support.suspension" pEditableColumnField="suspension">
-            <p-checkbox [(ngModel)]="support.suspension" [binary]="true" [value]="support.suspension" [falseValue]="false" [trueValue]="true" />
+          <td
+            [pEditableColumn]="support.suspension"
+            pEditableColumnField="suspension"
+          >
+            <p-checkbox
+              [(ngModel)]="support.suspension"
+              [binary]="true"
+              [value]="support.suspension"
+              [falseValue]="false"
+              [trueValue]="true"
+            />
 
             <!-- <p-cellEditor>
               <ng-template #input>
@@ -81,50 +101,85 @@ const initialDataObjects = initialData.name.map((name, index) => ({
               </ng-template>
             </p-cellEditor> -->
           </td>
-          <td [pEditableColumn]="support.conductor_attachment_altitude" pEditableColumnField="conductor_attachment_altitude">
+          <td
+            [pEditableColumn]="support.conductor_attachment_altitude"
+            pEditableColumnField="conductor_attachment_altitude"
+          >
             <p-cellEditor>
               <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="support.conductor_attachment_altitude" />
+                <input
+                  pInputText
+                  type="number"
+                  [(ngModel)]="support.conductor_attachment_altitude"
+                />
               </ng-template>
               <ng-template #output>
                 {{ support.conductor_attachment_altitude }}
               </ng-template>
             </p-cellEditor>
           </td>
-          <td [pEditableColumn]="support.crossarm_length" pEditableColumnField="crossarm_length">
+          <td
+            [pEditableColumn]="support.crossarm_length"
+            pEditableColumnField="crossarm_length"
+          >
             <p-cellEditor>
               <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="support.crossarm_length" />
+                <input
+                  pInputText
+                  type="number"
+                  [(ngModel)]="support.crossarm_length"
+                />
               </ng-template>
               <ng-template #output>
                 {{ support.crossarm_length }}
               </ng-template>
             </p-cellEditor>
           </td>
-          <td [pEditableColumn]="support.line_angle" pEditableColumnField="line_angle">
+          <td
+            [pEditableColumn]="support.line_angle"
+            pEditableColumnField="line_angle"
+          >
             <p-cellEditor>
               <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="support.line_angle" />
+                <input
+                  pInputText
+                  type="number"
+                  [(ngModel)]="support.line_angle"
+                />
               </ng-template>
               <ng-template #output>
                 {{ support.line_angle }}
               </ng-template>
             </p-cellEditor>
           </td>
-          <td [pEditableColumn]="support.insulator_length" pEditableColumnField="insulator_length">
+          <td
+            [pEditableColumn]="support.insulator_length"
+            pEditableColumnField="insulator_length"
+          >
             <p-cellEditor>
               <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="support.insulator_length" />
+                <input
+                  pInputText
+                  type="number"
+                  [(ngModel)]="support.insulator_length"
+                />
               </ng-template>
               <ng-template #output>
                 {{ support.insulator_length }}
               </ng-template>
             </p-cellEditor>
           </td>
-          <td [pEditableColumn]="support.span_length" pEditableColumnField="span_length">
+          <td
+            [pEditableColumn]="support.span_length"
+            pEditableColumnField="span_length"
+          >
             <p-cellEditor>
               <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="support.span_length" />
+                <input
+                  pInputText
+                  type="number"
+                  [(ngModel)]="support.span_length"
+                />
               </ng-template>
               <ng-template #output>
                 {{ support.span_length }}
@@ -172,7 +227,9 @@ export class StudyComponent implements OnInit {
     const data = {
       name: this.dataToObject.map((item) => item.name),
       suspension: this.dataToObject.map((item) => item.suspension),
-      conductor_attachment_altitude: this.dataToObject.map((item) => item.conductor_attachment_altitude),
+      conductor_attachment_altitude: this.dataToObject.map(
+        (item) => item.conductor_attachment_altitude
+      ),
       crossarm_length: this.dataToObject.map((item) => item.crossarm_length),
       line_angle: this.dataToObject.map((item) => item.line_angle),
       insulator_length: this.dataToObject.map((item) => item.insulator_length),

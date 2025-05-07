@@ -8,7 +8,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
-import { ModifySectionModel, SearchSectionModel, SectionModel } from '../models/section.model';
+import {
+  ModifySectionModel,
+  SearchSectionModel,
+  SectionModel
+} from '../models/section.model';
 
 @Injectable({
   providedIn: 'root'
@@ -42,8 +46,14 @@ export class SectionService {
    * @param sectionData The updated section data
    * @returns The updated SectionModel
    */
-  modifySection(sectionUuid: string, sectionData: ModifySectionModel): Observable<SectionModel> {
-    return this.http.put<SectionModel>(`${this.apiUrl}/${sectionUuid}`, sectionData);
+  modifySection(
+    sectionUuid: string,
+    sectionData: ModifySectionModel
+  ): Observable<SectionModel> {
+    return this.http.put<SectionModel>(
+      `${this.apiUrl}/${sectionUuid}`,
+      sectionData
+    );
   }
 
   /**
@@ -52,7 +62,9 @@ export class SectionService {
    * @returns A response indicating success
    */
   deleteSection(sectionUuid: string): Observable<Record<string, number>> {
-    return this.http.delete<Record<string, number>>(`${this.apiUrl}/${sectionUuid}`);
+    return this.http.delete<Record<string, number>>(
+      `${this.apiUrl}/${sectionUuid}`
+    );
   }
 
   /**
@@ -60,7 +72,12 @@ export class SectionService {
    * @param searchCriteria The search parameters
    * @returns A list of matching StudyModel objects
    */
-  searchSections(searchCriteria: SearchSectionModel): Observable<SectionModel[]> {
-    return this.http.post<SectionModel[]>(`${this.apiUrl}/search`, searchCriteria);
+  searchSections(
+    searchCriteria: SearchSectionModel
+  ): Observable<SectionModel[]> {
+    return this.http.post<SectionModel[]>(
+      `${this.apiUrl}/search`,
+      searchCriteria
+    );
   }
 }

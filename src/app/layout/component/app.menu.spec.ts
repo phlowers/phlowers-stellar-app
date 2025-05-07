@@ -53,13 +53,21 @@ describe('AppMenu', () => {
       {
         label: 'Home',
         items: [
-          { label: 'Studies', icon: 'pi pi-fw pi-share-alt', routerLink: ['/'] },
+          {
+            label: 'Studies',
+            icon: 'pi pi-fw pi-share-alt',
+            routerLink: ['/']
+          },
           {
             icon: 'pi pi-fw pi-bolt',
             label: 'Sections',
             routerLink: ['/sections']
           },
-          { label: 'Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/tools'] },
+          {
+            label: 'Tools',
+            icon: 'pi pi-fw pi-wrench',
+            routerLink: ['/tools']
+          },
           { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
           {
             icon: 'pi pi-fw pi-database',
@@ -87,7 +95,8 @@ describe('AppMenu', () => {
     component.model = [{ separator: true }];
     fixture.detectChanges();
 
-    const separator = fixture.debugElement.nativeElement.querySelector('.menu-separator');
+    const separator =
+      fixture.debugElement.nativeElement.querySelector('.menu-separator');
     expect(separator).toBeTruthy();
   });
 

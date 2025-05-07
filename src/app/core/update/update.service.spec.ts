@@ -71,7 +71,10 @@ describe('UpdateService', () => {
   });
 
   it('should register service worker event listener on initialization', () => {
-    expect(mockServiceWorker.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+    expect(mockServiceWorker.addEventListener).toHaveBeenCalledWith(
+      'message',
+      expect.any(Function)
+    );
   });
 
   describe('getAppVersion', () => {
@@ -136,7 +139,10 @@ describe('UpdateService', () => {
 
       await service.getAppVersion();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching asset list:', expect.any(Error));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error fetching asset list:',
+        expect.any(Error)
+      );
       expect(service.latestVersion).toBeNull();
       expect(service.currentVersion).toBeNull();
       expect(service.needUpdate).toBe(false);

@@ -17,7 +17,14 @@ import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, ButtonModule, FormsModule, TableModule, CardModule, ToastModule],
+  imports: [
+    CommonModule,
+    ButtonModule,
+    FormsModule,
+    TableModule,
+    CardModule,
+    ToastModule
+  ],
   template: `
     <p-toast position="top-center"></p-toast>
     <p-card i18n-header header="App version">
@@ -40,7 +47,13 @@ import { MessageService } from 'primeng/api';
           <td>{{ updateService.latestVersion?.build_datetime_utc }}</td>
         </tr>
       </table>
-      <p-button i18n [loading]="updateService.updateLoading" *ngIf="updateService.needUpdate" (click)="updateService.update()">Update to latest version</p-button>
+      <p-button
+        i18n
+        [loading]="updateService.updateLoading"
+        *ngIf="updateService.needUpdate"
+        (click)="updateService.update()"
+        >Update to latest version</p-button
+      >
     </p-card>
   `
 })
@@ -54,7 +67,11 @@ export class AdminComponent implements OnInit {
 
   ngOnInit() {
     this.updateService.sucessFullUpdate.subscribe(() => {
-      this.messageService.add({ severity: 'success', summary: 'Update successful', detail: 'The application has been updated to the latest version' });
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Update successful',
+        detail: 'The application has been updated to the latest version'
+      });
     });
   }
 }

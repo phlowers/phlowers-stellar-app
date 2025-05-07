@@ -19,7 +19,9 @@ export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 async function runTests(pyodide: PyodideAPI) {
   await pyodide.loadPackage(['pytest']);
   await pyodide.runPythonAsync(testScript);
-  const results = pyodide.globals.get('results').toJs({ dict_converter: Object.fromEntries });
+  const results = pyodide.globals
+    .get('results')
+    .toJs({ dict_converter: Object.fromEntries });
   console.log('tests ran', results);
   return results;
 }

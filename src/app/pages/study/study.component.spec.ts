@@ -67,9 +67,13 @@ describe('StudyComponent', () => {
     component.addSupport();
 
     expect(component.dataToObject.length).toBe(initialLength + 1);
-    expect(component.dataToObject[initialLength].name).toBe(`support ${initialLength + 1}`);
+    expect(component.dataToObject[initialLength].name).toBe(
+      `support ${initialLength + 1}`
+    );
     expect(component.dataToObject[initialLength].suspension).toBe(false);
-    expect(component.dataToObject[initialLength].conductor_attachment_altitude).toBe(30);
+    expect(
+      component.dataToObject[initialLength].conductor_attachment_altitude
+    ).toBe(30);
     expect(component.dataToObject[initialLength].crossarm_length).toBe(5);
     expect(component.dataToObject[initialLength].line_angle).toBe(0);
     expect(component.dataToObject[initialLength].insulator_length).toBe(0);
@@ -87,14 +91,23 @@ describe('StudyComponent', () => {
     const expectedData = {
       name: component.dataToObject.map((item) => item.name),
       suspension: component.dataToObject.map((item) => item.suspension),
-      conductor_attachment_altitude: component.dataToObject.map((item) => item.conductor_attachment_altitude),
-      crossarm_length: component.dataToObject.map((item) => item.crossarm_length),
+      conductor_attachment_altitude: component.dataToObject.map(
+        (item) => item.conductor_attachment_altitude
+      ),
+      crossarm_length: component.dataToObject.map(
+        (item) => item.crossarm_length
+      ),
       line_angle: component.dataToObject.map((item) => item.line_angle),
-      insulator_length: component.dataToObject.map((item) => item.insulator_length),
+      insulator_length: component.dataToObject.map(
+        (item) => item.insulator_length
+      ),
       span_length: component.dataToObject.map((item) => item.span_length)
     };
 
-    expect(workerServiceMock.runTask).toHaveBeenCalledWith(Task.runPython, expectedData);
+    expect(workerServiceMock.runTask).toHaveBeenCalledWith(
+      Task.runPython,
+      expectedData
+    );
   });
 
   // it('should properly unsubscribe when component is destroyed', () => {

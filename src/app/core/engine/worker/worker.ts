@@ -18,13 +18,23 @@ let pyodide: PyodideAPI;
 async function loadPyodideAndPackages() {
   const localPythonPackages = [
     ...Object.values(pythonPackages)
-      .map((pkg: any) => (pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''))
+      .map((pkg: any) =>
+        pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''
+      )
       .filter(Boolean)
   ];
   const start = performance.now();
   pyodide = await loadPyodide({
     indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
-    packages: ['scipy', 'numpy', 'pandas', 'pydantic', 'packaging', 'wrapt', ...localPythonPackages]
+    packages: [
+      'scipy',
+      'numpy',
+      'pandas',
+      'pydantic',
+      'packaging',
+      'wrapt',
+      ...localPythonPackages
+    ]
   });
   const loadEnd = performance.now();
   console.log('loadEnd is', loadEnd);

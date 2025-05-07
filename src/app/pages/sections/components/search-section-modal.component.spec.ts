@@ -99,7 +99,9 @@ describe('SearchSectionModalComponent', () => {
     component.searchStudies();
 
     // Assert
-    expect(sectionServiceMock.searchSections).toHaveBeenCalledWith(component.sectionToSearch);
+    expect(sectionServiceMock.searchSections).toHaveBeenCalledWith(
+      component.sectionToSearch
+    );
 
     // Wait for observable to complete
     fixture.detectChanges();

@@ -30,12 +30,22 @@ describe('AppLayout', () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule, CommonModule],
       declarations: [],
-      providers: [LayoutService, { provide: AppTopbarComponent, useClass: MockAppTopbarComponent }, { provide: AppSidebarComponent, useClass: MockAppSidebarComponent }, Renderer2]
+      providers: [
+        LayoutService,
+        { provide: AppTopbarComponent, useClass: MockAppTopbarComponent },
+        { provide: AppSidebarComponent, useClass: MockAppSidebarComponent },
+        Renderer2
+      ]
       // standalone: true
     })
       .overrideComponent(AppLayoutComponent, {
         set: {
-          imports: [CommonModule, MockAppTopbarComponent, MockAppSidebarComponent, RouterTestingModule]
+          imports: [
+            CommonModule,
+            MockAppTopbarComponent,
+            MockAppSidebarComponent,
+            RouterTestingModule
+          ]
           // declarations: []
         }
       })
@@ -52,22 +62,29 @@ describe('AppLayout', () => {
   });
 
   it('should have app-topbar and app-sidebar', () => {
-    const topbar = fixture.debugElement.nativeElement.querySelector('app-topbar');
-    const sidebar = fixture.debugElement.nativeElement.querySelector('app-sidebar');
+    const topbar =
+      fixture.debugElement.nativeElement.querySelector('app-topbar');
+    const sidebar =
+      fixture.debugElement.nativeElement.querySelector('app-sidebar');
     expect(topbar).toBeTruthy();
     expect(sidebar).toBeTruthy();
   });
 
   it('should have router-outlet', () => {
-    const routerOutlet = fixture.debugElement.nativeElement.querySelector('router-outlet');
+    const routerOutlet =
+      fixture.debugElement.nativeElement.querySelector('router-outlet');
     expect(routerOutlet).toBeTruthy();
   });
 
   it('should have correct containerClass for static menu', () => {
     // vi.spyOn(layoutService, 'layoutConfig').and.returnValue({ menuMode: 'static' });
-    jest.spyOn(layoutService, 'layoutConfig').mockImplementation(() => ({ menuMode: 'static' }));
+    jest
+      .spyOn(layoutService, 'layoutConfig')
+      .mockImplementation(() => ({ menuMode: 'static' }));
     // vi.spyOn(layoutService, 'layoutState').and.returnValue({ staticMenuDesktopInactive: false });
-    jest.spyOn(layoutService, 'layoutState').mockImplementation(() => ({ staticMenuDesktopInactive: false }));
+    jest
+      .spyOn(layoutService, 'layoutState')
+      .mockImplementation(() => ({ staticMenuDesktopInactive: false }));
 
     fixture.detectChanges();
 
@@ -79,9 +96,13 @@ describe('AppLayout', () => {
 
   it('should have correct containerClass for static menu with staticMenuDesktopInactive', () => {
     // vi.spyOn(layoutService, 'layoutConfig').and.returnValue({ menuMode: 'static' });
-    jest.spyOn(layoutService, 'layoutConfig').mockImplementation(() => ({ menuMode: 'static' }));
+    jest
+      .spyOn(layoutService, 'layoutConfig')
+      .mockImplementation(() => ({ menuMode: 'static' }));
     // vi.spyOn(layoutService, 'layoutState').and.returnValue({ staticMenuDesktopInactive: true });
-    jest.spyOn(layoutService, 'layoutState').mockImplementation(() => ({ staticMenuDesktopInactive: true }));
+    jest
+      .spyOn(layoutService, 'layoutState')
+      .mockImplementation(() => ({ staticMenuDesktopInactive: true }));
 
     fixture.detectChanges();
 
@@ -93,9 +114,13 @@ describe('AppLayout', () => {
 
   it('should have correct containerClass for other menu modes', () => {
     // vi.spyOn(layoutService, 'layoutConfig').and.returnValue({ menuMode: 'overlay' });
-    jest.spyOn(layoutService, 'layoutConfig').mockImplementation(() => ({ menuMode: 'overlay' }));
+    jest
+      .spyOn(layoutService, 'layoutConfig')
+      .mockImplementation(() => ({ menuMode: 'overlay' }));
     // vi.spyOn(layoutService, 'layoutState').and.returnValue({ staticMenuDesktopInactive: true });
-    jest.spyOn(layoutService, 'layoutState').mockImplementation(() => ({ staticMenuDesktopInactive: true }));
+    jest
+      .spyOn(layoutService, 'layoutState')
+      .mockImplementation(() => ({ staticMenuDesktopInactive: true }));
 
     fixture.detectChanges();
 

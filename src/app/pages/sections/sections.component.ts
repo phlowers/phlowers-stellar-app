@@ -45,7 +45,10 @@ import { SearchSectionModalComponent } from './components/search-section-modal.c
       <h1 i18n>Sections</h1>
       <p-button i18n-label label="Search" (click)="search()"></p-button>
     </div>
-    <app-search-section-modal [(isOpen)]="isSearchSectionModalOpen" (isOpenChange)="setIsSearchSectionModalOpen($event)" />
+    <app-search-section-modal
+      [(isOpen)]="isSearchSectionModalOpen"
+      (isOpenChange)="setIsSearchSectionModalOpen($event)"
+    />
   `,
   providers: [MessageService, ConfirmationService]
 })

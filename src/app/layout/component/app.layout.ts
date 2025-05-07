@@ -15,7 +15,12 @@ import { LayoutService } from '../service/layout.service';
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, AppTopbarComponent, AppSidebarComponent, RouterModule],
+  imports: [
+    CommonModule,
+    AppTopbarComponent,
+    AppSidebarComponent,
+    RouterModule
+  ],
   template: `<div class="layout-wrapper" [ngClass]="containerClass">
     <app-topbar></app-topbar>
     <app-sidebar></app-sidebar>
@@ -38,7 +43,9 @@ export class AppLayoutComponent {
   get containerClass() {
     return {
       'layout-static': this.layoutService.layoutConfig().menuMode === 'static',
-      'layout-static-inactive': this.layoutService.layoutState().staticMenuDesktopInactive && this.layoutService.layoutConfig().menuMode === 'static'
+      'layout-static-inactive':
+        this.layoutService.layoutState().staticMenuDesktopInactive &&
+        this.layoutService.layoutConfig().menuMode === 'static'
     };
   }
 }
