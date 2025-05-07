@@ -6,5 +6,6 @@
  */
 export const environment = {
   production: true,
-  apiUrl: process.env.API_URL
+  apiUrl: process.env.API_URL,
+  logLevel: process.env.LOG_LEVEL || 'info'
 };
