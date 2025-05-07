@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8080'
-};
+    production: true,
+    apiUrl: process.env.API_URL
+  };
+  
