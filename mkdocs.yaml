@@ -1,10 +1,10 @@
 site_name: Stellar
-site_url : http://phlowers.readthedocs.com
+site_url: http://phlowers.readthedocs.com
 repo_url: https://github.com/phlowers/phlowers-stellar-app
 copyright: Copyright &copy; 2025 RTE France. Unless otherwise indicated, content is licensed under CC-BY-4.0.
 
 theme:
-  name: "material"
+  name: 'material'
   logo: _static/stellar_ico.svg
   favicon: _static/stellar_ico.svg
   features:
@@ -24,12 +24,12 @@ theme:
     - python
     - typescript
     - bash
-  palette: 
+  palette:
     - primary: indigo
     # Palette toggle for light mode
     - scheme: default
       toggle:
-        icon: material/brightness-7 
+        icon: material/brightness-7
         name: Switch to dark mode
     # Palette toggle for dark mode
     - scheme: slate
@@ -40,44 +40,47 @@ theme:
 nav:
   - Home: index.md
   - Getting Started: home/home.md
-  # - User Guide: 
+  # - User Guide:
   - Developer guide:
-    # - API Reference:
-      
-    # - Guidelines : developer_guide/guidelines.md
-    - Documentation : developer_guide/documentation.md
+      # - API Reference:
 
-
+      # - Guidelines : developer_guide/guidelines.md
+      - Installation: developer_guide/developer_install.md
+      - Documentation: developer_guide/documentation.md
+      - Offline database: developer_guide/offline_database.md
+      - Engine worker: developer_guide/engine_worker.md
+      - Application update: developer_guide/application_update.md
 
 plugins:
   - search
   - offline
   - mkdocstrings:
-      default_handler: typescript
+      default_handler:
+        typescript
         # See: https://mkdocstrings.github.io/python/usage/
         # python:
-          # paths: [src]
-          # import:
-          #   - url: https://docs.python.org/3/objects.inv
-          #     domains: [py, std]
-          # options:
-          #   docstring_options:
-          #     ignore_init_summary: true
-          #   # docstring_section_style: list
-          #   filters: ["!^_"]
-          #   heading_level: 1
-          #   inherited_members: true
-          #   merge_init_into_class: true
-          #   parameter_headings: true
-          #   separate_signature: true
-          #   show_root_heading: true
-          #   show_root_full_path: false
-          #   show_signature_annotations: true
-          #   # show_source: false
-          #   show_symbol_type_heading: true
-          #   show_symbol_type_toc: true
-          #   signature_crossrefs: true
-            # summary: true
+        # paths: [src]
+        # import:
+        #   - url: https://docs.python.org/3/objects.inv
+        #     domains: [py, std]
+        # options:
+        #   docstring_options:
+        #     ignore_init_summary: true
+        #   # docstring_section_style: list
+        #   filters: ["!^_"]
+        #   heading_level: 1
+        #   inherited_members: true
+        #   merge_init_into_class: true
+        #   parameter_headings: true
+        #   separate_signature: true
+        #   show_root_heading: true
+        #   show_root_full_path: false
+        #   show_signature_annotations: true
+        #   # show_source: false
+        #   show_symbol_type_heading: true
+        #   show_symbol_type_toc: true
+        #   signature_crossrefs: true
+        # summary: true
 
 markdown_extensions:
   - admonition # https://squidfunk.github.io/mkdocs-material/reference/admonitions/#collapsible-blocks
@@ -94,7 +97,6 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.arithmatex:
       generic: true
-
 
 extra:
   social:
