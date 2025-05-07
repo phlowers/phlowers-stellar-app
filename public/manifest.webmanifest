@@ -1,8 +1,8 @@
 {
   "name": "Stellar",
   "short_name": "stellar",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "theme_color": "#7d5a9f",
+  "background_color": "#f4f5f4",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
@@ -54,6 +54,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-512x512.svg",
+      "sizes": "any",
+      "type": "image/svg",
+      "purpose": "any"
     }
   ]
 }
