@@ -23,8 +23,11 @@ RUN npm run build:$LANGUAGE
 FROM nginx:latest
 
 ARG DEFAULT_LANGUAGE
+ARG BACKEND_API_URL
 
 ENV LANGUAGE=${DEFAULT_LANGUAGE}
+
+ENV API_URL=${BACKEND_API_URL}
 
 COPY --from=build /usr/src/app/dist/$LANGUAGE /usr/share/nginx/html
 
