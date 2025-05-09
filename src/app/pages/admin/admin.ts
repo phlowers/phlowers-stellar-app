@@ -46,6 +46,11 @@ import { MessageService } from 'primeng/api';
           <td>{{ updateService.currentVersion?.build_datetime_utc }}</td>
           <td>{{ updateService.latestVersion?.build_datetime_utc }}</td>
         </tr>
+        <tr>
+          <td i18n>Build version</td>
+          <td>{{ updateService.currentVersion?.version }}</td>
+          <td>{{ updateService.latestVersion?.version }}</td>
+        </tr>
       </table>
       <p-button
         i18n

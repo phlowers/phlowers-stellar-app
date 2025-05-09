@@ -1,9 +1,11 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { Subject } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface AppVersion {
   git_hash: string;
   build_datetime_utc: string;
+  version: string;
 }
 
 export interface AssetList {
@@ -13,17 +15,25 @@ export interface AssetList {
 
 const mockCurrentVersion: AppVersion = {
   git_hash: '0000000000000000000000000000000000000000',
-  build_datetime_utc: '0000-00-00T00:00:00.000000'
+  build_datetime_utc: environment.buildTime,
+  version: environment.version
 };
 
 const mockLatestVersion: AppVersion = {
   git_hash: '1111111111111111111111111111111111111111',
-  build_datetime_utc: '0000-00-00T00:00:00.000000'
+  build_datetime_utc: '0000-00-00T00:00:00.000000',
+  version: '0.0.0'
 };
 
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
-  currentVersion: AppVersion | null = isDevMode() ? mockCurrentVersion : null;
+  currentVersion: AppVersion | null = isDevMode()
+    ? mockCurrentVersion
+    : {
+        git_hash: '',
+        build_datetime_utc: environment.buildTime,
+        version: environment.version
+      };
   latestVersion: AppVersion | null = isDevMode() ? mockLatestVersion : null;
   updateLoading = false;
   needUpdate =
