@@ -15,8 +15,14 @@ import { SectionService } from '../../../core/api/services/section.service';
 import { Section } from '../../../core/store/database/interfaces/section';
 import { StorageService } from '../../../core/store/storage.service';
 import { PopoverModule } from 'primeng/popover';
+import { SelectModule } from 'primeng/select';
 
-const newSection = (): Partial<Section> => {
+const newSection = (): Partial<
+  Section & {
+    regional_maintenance_center_name: string;
+    maintenance_center_name: string;
+  }
+> => {
   return {
     uuid: '',
     internal_id: '',
@@ -36,7 +42,9 @@ const newSection = (): Partial<Section> => {
     first_support_number: undefined,
     last_support_number: undefined,
     first_attachment_set: '',
-    last_attachment_set: ''
+    last_attachment_set: '',
+    regional_maintenance_center_name: '',
+    maintenance_center_name: ''
   };
 };
 
@@ -56,6 +64,37 @@ const newSection = (): Partial<Section> => {
         <div style="display: flex; flex-direction: column; height: 100%;">
           <div>
             <div class="flex flex-wrap gap-3 w-full">
+              <div>
+                <label
+                  i18n
+                  for="regionalMaintenanceCenters"
+                  class="block font-bold mb-3"
+                  >Regional Maintenance Center:</label
+                >
+                <p-select
+                  id="regionalMaintenanceCenters"
+                  [options]="regionalMaintenanceCenters()"
+                  [(ngModel)]="sectionToSearch.regional_maintenance_center_name"
+                  placeholder="View"
+                  class="w-full md:w-56"
+                  (onChange)="onRegionalMaintenanceCenterChange($event)"
+                />
+              </div>
+              <div>
+                <label
+                  i18n
+                  for="maintenanceCenters"
+                  class="block font-bold mb-3"
+                  >Maintenance Center:</label
+                >
+                <p-select
+                  id="maintenanceCenters"
+                  [options]="maintenanceCenters()"
+                  [(ngModel)]="sectionToSearch.maintenance_center_name"
+                  placeholder="View"
+                  class="w-full md:w-56"
+                />
+              </div>
               <div>
                 <label i18n for="uuid" class="block font-bold mb-3"
                   >UUID:</label
@@ -108,7 +147,7 @@ const newSection = (): Partial<Section> => {
                   required
                 />
               </div>
-              <div>
+              <!-- <div>
                 <label i18n for="createdAt" class="block font-bold mb-3"
                   >Created At:</label
                 >
@@ -120,8 +159,8 @@ const newSection = (): Partial<Section> => {
                   [(ngModel)]="sectionToSearch.created_at"
                   required
                 />
-              </div>
-              <div>
+              </div> -->
+              <!-- <div>
                 <label i18n for="updatedAt" class="block font-bold mb-3"
                   >Updated At:</label
                 >
@@ -133,7 +172,7 @@ const newSection = (): Partial<Section> => {
                   [(ngModel)]="sectionToSearch.updated_at"
                   required
                 />
-              </div>
+              </div> -->
               <div>
                 <label i18n for="internalCatalogId" class="block font-bold mb-3"
                   >Internal Catalog ID:</label
@@ -471,6 +510,20 @@ const newSection = (): Partial<Section> => {
                     Last Attachment Set
                     <p-sortIcon field="last_attachment_set" />
                   </th>
+                  <th
+                    i18n
+                    pSortableColumn="regional_maintenance_center_names"
+                    style="min-width:16rem"
+                  >
+                    Regional Maintenance Centers
+                  </th>
+                  <th
+                    i18n
+                    pSortableColumn="maintenance_center_names"
+                    style="min-width:16rem"
+                  >
+                    Maintenance Centers
+                  </th>
                 </tr>
               </ng-template>
               <ng-template #body let-section>
@@ -523,6 +576,28 @@ const newSection = (): Partial<Section> => {
                     <td>{{ typedSection.last_support_number }}</td>
                     <td>{{ typedSection.first_attachment_set }}</td>
                     <td>{{ typedSection.last_attachment_set }}</td>
+                    <td>
+                      <p-select
+                        [options]="
+                          typedSection.regional_maintenance_center_names
+                        "
+                        [ngModel]="
+                          typedSection.regional_maintenance_center_names[0]
+                        "
+                        appendTo="body"
+                        placeholder="View"
+                        class="w-full md:w-56"
+                      />
+                    </td>
+                    <td>
+                      <p-select
+                        [options]="typedSection.maintenance_center_names"
+                        [ngModel]="typedSection.maintenance_center_names[0]"
+                        appendTo="body"
+                        placeholder="View"
+                        class="w-full md:w-56"
+                      />
+                    </td>
                   </tr>
                   <p-popover #op>
                     <div class="flex flex-col gap-4">
@@ -535,20 +610,14 @@ const newSection = (): Partial<Section> => {
           </div>
         </div>
       </ng-template>
-      <ng-template #footer>
+      <!-- <ng-template #footer>
         <p-button
           type="button"
           i18n-label
           label="Cancel"
           (click)="closeModal()"
         ></p-button>
-        <p-button
-          type="button"
-          i18n-label
-          label="Import"
-          (click)="closeModal()"
-        ></p-button>
-      </ng-template>
+      </ng-template> -->
       <!-- </div> -->
     </p-dialog>
   `,
@@ -560,11 +629,17 @@ const newSection = (): Partial<Section> => {
     ButtonModule,
     TableModule,
     CommonModule,
-    PopoverModule
+    PopoverModule,
+    SelectModule
   ]
 })
 export class SearchSectionModalComponent {
-  sectionToSearch: Partial<Section> = newSection();
+  sectionToSearch: Partial<
+    Section & {
+      regional_maintenance_center_name: string;
+      maintenance_center_name: string;
+    }
+  > = newSection();
   @Input() isOpen!: boolean;
   @Output() isOpenChange = new EventEmitter<boolean>();
   isLoading = false;
@@ -572,6 +647,8 @@ export class SearchSectionModalComponent {
   selectedSections: Section[] = [];
   searchedSections: Section[] = [];
   threeDModalOpen = signal(false);
+  regionalMaintenanceCenters = signal<string[]>([]);
+  maintenanceCenters = signal<string[]>([]);
   constructor(
     private sectionService: SectionService,
     private storageService: StorageService
@@ -581,6 +658,7 @@ export class SearchSectionModalComponent {
 
   resetFields() {
     this.sectionToSearch = newSection();
+    this.resetRegionalMaintenanceCenter();
   }
 
   identity(section: Section): Section {
@@ -591,9 +669,59 @@ export class SearchSectionModalComponent {
     console.log('createStudy', section);
   }
 
+  async onRegionalMaintenanceCenterChange(event: any) {
+    console.log('onRegionalMaintenanceCenterChange', event);
+    const regionalMaintenanceCenter = (
+      await this.storageService.db.regional_maintenance_centers
+        .where('name')
+        .equals(event.value)
+        .toArray()
+    )[0];
+    this.maintenanceCenters.set(
+      regionalMaintenanceCenter.maintenance_center_names.sort((a, b) =>
+        a.localeCompare(b)
+      )
+    );
+    this.sectionToSearch.maintenance_center_name = '';
+  }
+
+  resetRegionalMaintenanceCenter() {
+    this.storageService.db.regional_maintenance_centers
+      .toArray()
+      .then((regionalMaintenanceCenters) => {
+        console.log('regionalMaintenanceCenters', regionalMaintenanceCenters);
+        this.regionalMaintenanceCenters.set(
+          regionalMaintenanceCenters
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((regionalMaintenanceCenter) => regionalMaintenanceCenter.name)
+        );
+      });
+    this.storageService.db.maintenance_centers
+      .toArray()
+      .then((maintenanceCenters) => {
+        this.maintenanceCenters.set(
+          maintenanceCenters
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((maintenanceCenter) => maintenanceCenter.name)
+        );
+      });
+  }
+
+  ngOnInit() {
+    console.log('ngOnInit');
+    this.storageService.ready$.subscribe(() => {
+      this.resetRegionalMaintenanceCenter();
+    });
+  }
+
   searchSections() {
     this.isLoading = true;
-    this.storageService.db.sections.toArray().then((sections) => {
+    this.storageService.db.sections.toArray().then(async (sections) => {
+      const regionalMaintenanceCenters =
+        await this.storageService.db.regional_maintenance_centers.toArray();
+      const maintenanceCenters =
+        await this.storageService.db.maintenance_centers.toArray();
+      console.log('sections to search', this.sectionToSearch);
       this.sections = sections.filter((section) => {
         return Object.keys(this.sectionToSearch).every((key) => {
           if (
@@ -602,10 +730,32 @@ export class SearchSectionModalComponent {
           ) {
             return true;
           }
-          return (
-            section[key as keyof Section] ===
-            this.sectionToSearch[key as keyof Section]
-          );
+          if (key === 'regional_maintenance_center_name') {
+            return section.regional_maintenance_center_names.includes(
+              regionalMaintenanceCenters.find(
+                (regionalMaintenanceCenter) =>
+                  regionalMaintenanceCenter.name ===
+                  this.sectionToSearch[key as keyof Section]
+              )?.name ?? ''
+            );
+          }
+          if (key === 'maintenance_center_name') {
+            return section.maintenance_center_names.includes(
+              maintenanceCenters.find(
+                (maintenanceCenter) =>
+                  maintenanceCenter.name ===
+                  this.sectionToSearch[key as keyof Section]
+              )?.name ?? ''
+            );
+          }
+          return section[key as keyof Section]
+            .toString()
+            .toLowerCase()
+            .includes(
+              this.sectionToSearch[key as keyof Section]
+                ?.toString()
+                .toLowerCase() || ''
+            );
         });
       });
       this.isLoading = false;

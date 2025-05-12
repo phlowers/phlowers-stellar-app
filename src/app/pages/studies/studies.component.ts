@@ -204,16 +204,19 @@ const columns = [
             <td style="min-width: 16rem">{{ typedStudy.title }}</td>
             <td style="min-width: 16rem">{{ typedStudy.description }}</td>
             <td style="min-width: 16rem">{{ typedStudy.author_email }}</td>
-            <td
-              style="min-width: 12rem"
-              style="display:flex; justify-content:center;"
-            >
+            <td style="min-width: 12rem" style="position: relative;">
               @if (typedStudy.saved) {
                 <p-button
                   icon="pi pi-check"
                   [style]="{
                     'background-color': 'transparent',
                     color: 'green'
+                  }"
+                  [style]="{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)'
                   }"
                   disabled="true"
                   severity="secondary"
@@ -228,6 +231,12 @@ const columns = [
                   pTooltip="{{
                     serverOnline ? saveOnlineText : saveOfflineText
                   }}"
+                  [style]="{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)'
+                  }"
                   tooltipPosition="top"
                   severity="help"
                   class="mr-2"

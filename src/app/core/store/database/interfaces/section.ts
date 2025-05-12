@@ -25,4 +25,6 @@ export interface Section {
   last_support_number: number;
   first_attachment_set: string;
   last_attachment_set: string;
+  regional_maintenance_center_names: string[];
+  maintenance_center_names: string[];
 }

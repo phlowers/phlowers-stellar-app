@@ -5,7 +5,7 @@
         "source": "remote"
     },
     "mechaphlowers": {
-        "file_name": "mechaphlowers-0.2.0-cp312-none-any.whl",
+        "file_name": "mechaphlowers-0.3.0-cp312-none-any.whl",
         "name": "mechaphlowers",
         "source": "local"
     },
@@ -22,11 +22,6 @@
     "numpy": {
         "file_name": "numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
         "name": "numpy",
-        "source": "remote"
-    },
-    "openblas": {
-        "file_name": "openblas-0.3.26.zip",
-        "name": "openblas",
         "source": "remote"
     },
     "packaging": {
@@ -69,11 +64,6 @@
         "name": "pytz",
         "source": "remote"
     },
-    "scipy": {
-        "file_name": "scipy-1.14.1-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "scipy",
-        "source": "remote"
-    },
     "six": {
         "file_name": "six-1.16.0-py2.py3-none-any.whl",
         "name": "six",
@@ -98,18 +88,6 @@
         "file_name": "typing_inspect-0.9.0-cp312-none-any.whl",
         "name": "typing_inspect",
         "source": "local"
-    },
-    "typing-extensions": {
-        "name": "typing-extensions",
-        "file_name": "typing_extensions-4.11.0-py3-none-any.whl",
-        "sha256": "fd294ddf4f66cf0e91dab84e982043360878915681eb890c0762b5e9fea990a8",
-        "source": "remote"
-    },
-    "packaging": {
-        "name": "packaging",
-        "file_name": "packaging-24.2-py3-none-any.whl",
-        "sha256": "90363038a93f8483d2d72ecf5ed43c4a51862c48d9fe43620769f93a6bcbc469",
-        "source": "remote"
     },
     "typing-inspection": {
         "file_name": "typing_inspection-0.4.0-cp312-none-any.whl",

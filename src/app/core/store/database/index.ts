@@ -57,24 +57,39 @@ export class AppDB extends Dexie {
       ...userTable
     });
     //fill the database with mock data
-    this.fillDatabaseWithMockData();
+    // this.fillDatabaseWithMockData();
+  }
+
+  // async loadMockDataFromFile(file: File) {
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => {
+  //     const jsonContent = e.target?.result as string;
+  //     const mockData = JSON.parse(jsonContent);
+  //     this.loadMockDataFromJson(mockData);
+  //   };
+  //   reader.readAsText(file);
+  // }
+
+  async loadMockDataFromJson(jsonContent: any) {
+    const mockData = jsonContent;
+    await this.attachments.bulkPut(mockData.attachments);
+    await this.branches.bulkPut(mockData.branches);
+    await this.lines.bulkPut(mockData.lines);
+    await this.maintenance_centers.bulkPut(mockData.maintenance_centers);
+    await this.regional_maintenance_centers.bulkPut(
+      mockData.regional_maintenance_centers
+    );
+    await this.sections.bulkPut(mockData.sections);
+    await this.spans.bulkPut(mockData.spans);
+    await this.tensions.bulkPut(mockData.tensions);
+    await this.transit_links.bulkPut(mockData.transit_links);
   }
 
   async fillDatabaseWithMockData() {
     try {
       if ((await this.attachments.count()) === 0) {
         const mockData = require('./mock_data.json'); //eslint-disable-line
-        await this.attachments.bulkPut(mockData.attachments);
-        await this.branches.bulkPut(mockData.branches);
-        await this.lines.bulkPut(mockData.lines);
-        await this.maintenance_centers.bulkPut(mockData.maintenance_centers);
-        await this.regional_maintenance_centers.bulkPut(
-          mockData.regional_maintenance_centers
-        );
-        await this.sections.bulkPut(mockData.sections);
-        await this.spans.bulkPut(mockData.spans);
-        await this.tensions.bulkPut(mockData.tensions);
-        await this.transit_links.bulkPut(mockData.transit_links);
+        await this.loadMockDataFromJson(mockData);
       }
     } catch (error) {
       console.error('Error filling database with mock data', error);

@@ -22,6 +22,7 @@ import { SearchSectionComponent } from './components/search-section.component';
 import { ThreeDModalComponent } from './components/three-d-modal.component';
 import { PopoverModule } from 'primeng/popover';
 import { CreateSectionComponent } from './components/create-section.component';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   standalone: true,
@@ -38,7 +39,8 @@ import { CreateSectionComponent } from './components/create-section.component';
     InputNumberModule,
     DialogModule,
     TableModule,
-    ToolbarModule
+    ToolbarModule,
+    SelectModule
   ],
   template: `
     <app-create-section
@@ -76,6 +78,14 @@ import { CreateSectionComponent } from './components/create-section.component';
             (onClick)="openCreateSectionDialog()"
           />
         </div>
+      </ng-template>
+      <ng-template #end>
+        <p-button
+          label="Load from file"
+          icon="pi pi-upload"
+          severity="secondary"
+          (onClick)="loadFromFile()"
+        />
       </ng-template>
     </p-toolbar>
     <p-table
@@ -195,6 +205,20 @@ import { CreateSectionComponent } from './components/create-section.component';
             Last Attachment Set
             <p-sortIcon field="last_attachment_set" />
           </th>
+          <th
+            i18n
+            pSortableColumn="regional_maintenance_center_names"
+            style="min-width:16rem"
+          >
+            Regional Maintenance Center
+          </th>
+          <th
+            i18n
+            pSortableColumn="maintenance_center_names"
+            style="min-width:16rem"
+          >
+            Maintenance Center
+          </th>
         </tr>
       </ng-template>
       <ng-template #body let-section>
@@ -247,6 +271,20 @@ import { CreateSectionComponent } from './components/create-section.component';
             <td>{{ typedSection.last_support_number }}</td>
             <td>{{ typedSection.first_attachment_set }}</td>
             <td>{{ typedSection.last_attachment_set }}</td>
+            <td>
+              <p-select
+                [options]="typedSection.regional_maintenance_center_names"
+                placeholder="View"
+                class="w-full md:w-56"
+              />
+            </td>
+            <td>
+              <p-select
+                [options]="typedSection.maintenance_center_names"
+                placeholder="View"
+                class="w-full md:w-56"
+              />
+            </td>
           </tr>
           <p-popover #op>
             <div class="flex flex-col gap-4">
@@ -267,6 +305,7 @@ export class SectionsComponent implements OnInit {
   isSearchSectionModalOpen = false;
   sections = signal<Section[]>([]);
   threeDModalOpen = signal(false);
+  test = ['1', '2', '3', '4', '5', '6', '7'];
 
   section = {
     title: '',
@@ -274,6 +313,27 @@ export class SectionsComponent implements OnInit {
   };
 
   constructor(private storageService: StorageService) {}
+
+  loadFromFile() {
+    const file = document.createElement('input');
+    file.type = 'file';
+    file.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const jsonContent = e.target?.result as string;
+          console.log('jsonContent', jsonContent);
+          await this.storageService.db.loadMockDataFromJson(
+            JSON.parse(jsonContent)
+          );
+          this.sections.set(await this.storageService.db.sections.toArray());
+        };
+        reader.readAsText(file);
+      }
+    };
+    file.click();
+  }
 
   closeThreeDModal() {
     this.threeDModalOpen.set(false);
