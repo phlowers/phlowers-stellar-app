@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, effect, signal, untracked } from '@angular/core';
+import { Component, effect, OnInit, signal, untracked } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { CommonModule } from '@angular/common';
@@ -27,10 +27,12 @@ import {
   AutoCompleteCompleteEvent,
   AutoCompleteModule
 } from 'primeng/autocomplete';
-import { SingleSpanComponent } from './singleSpan.component';
+import { SingleSpanComponent } from './single-span.component';
+import { TabsModule } from 'primeng/tabs';
+import { GlobalViewComponent } from './global-view.component';
 
 @Component({
-  selector: 'app-admin',
+  selector: 'app-section-3d',
   standalone: true,
   styleUrls: ['./section-3d.component.scss'],
   imports: [
@@ -44,43 +46,28 @@ import { SingleSpanComponent } from './singleSpan.component';
     CheckboxModule,
     NgxSliderModule,
     AutoCompleteModule,
-    CheckboxModule
+    CheckboxModule,
+    TabsModule,
+    GlobalViewComponent
   ],
-  template: `<div>
-    <p-button label="Run Python" (onClick)="runPython()"></p-button>
-    <!-- <p-button label="log" (onClick)="log()"></p-button> -->
-    <div class="my-5">
-      <p-autocomplete
-        [(ngModel)]="selectedPhase"
-        [dropdown]="true"
-        [suggestions]="phases()"
-        (completeMethod)="search($event)"
-      />
-    </div>
-    <div class="flex items-center my-5">
-      <p-checkbox
-        inputId="showOtherAsDashed"
-        [binary]="true"
-        [(ngModel)]="showOtherAsDashed"
-      ></p-checkbox>
-      <label for="showOtherAsDashed" class="ml-2"
-        >Show other phases as dashed</label
-      >
-    </div>
-    <div class="my-10">
-      <div id="plotly-output" style="width: 100%; height: 500px;"></div>
-      <div class="custom-slider my-5" *ngIf="litData()">
-        <ngx-slider
-          [(value)]="minValue"
-          [(highValue)]="maxValue"
-          [options]="options()"
-        ></ngx-slider>
-      </div>
-    </div>
-    <app-single-span [litData]="litData()"></app-single-span>
-  </div>`
+  template: `
+    <p-tabs value="global">
+      <p-tablist>
+        <p-tab value="global">Global view</p-tab>
+        <p-tab value="span">Span view</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="global">
+          <app-global-view></app-global-view>
+        </p-tabpanel>
+        <p-tabpanel value="span">
+          <app-single-span [litData]="litData()"></app-single-span>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  `
 })
-export class Section3dComponent {
+export class Section3dComponent implements OnInit {
   constructor(private readonly workerService: WorkerService) {}
   litData = signal<any>(null);
   minValue = signal(0);
@@ -100,6 +87,15 @@ export class Section3dComponent {
   //   console.log('updateDash');
   //   this.showOtherAsDashed.set(!this.showOtherAsDashed());
   // }
+  ngOnInit() {
+    // if (this.workerService.ready$) {
+    //   this.runPython();
+    // } else {
+    this.workerService.ready$.subscribe(() => {
+      this.runPython();
+    });
+    // }
+  }
 
   readonly effect2 = effect(() => {
     console.log('effect2', this.selectedPhase());

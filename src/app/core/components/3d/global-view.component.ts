@@ -28,8 +28,9 @@ import {
   AutoCompleteModule
 } from 'primeng/autocomplete';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
 @Component({
-  selector: 'app-single-span',
+  selector: 'app-global-view',
   standalone: true,
   //   styleUrls: ['./section3d.component.scss'],
   imports: [
@@ -43,86 +44,117 @@ import { InputNumberModule } from 'primeng/inputnumber';
     CheckboxModule,
     NgxSliderModule,
     AutoCompleteModule,
-    CheckboxModule
+    CheckboxModule,
+    SelectModule
   ],
   template: `<div>
     <!-- <p-button label="Run Python" (onClick)="runPython()"></p-button> -->
     <!-- <p-button label="log" (onClick)="log()"></p-button> -->
     <div class="my-5">
-      <label for="vertical" class="mr-2">Span Number:</label>
-      <p-inputnumber
-        [(ngModel)]="selectedSpan"
-        [showButtons]="true"
-        buttonLayout="horizontal"
-        spinnerMode="vertical"
-        inputId="vertical"
-        [inputStyle]="{ width: '3rem' }"
+      <div class="flex flex-row gap-2">
+        <div class="flex flex-col gap-2">
+          <label class="font-bold" for="selectedPhase">Selected Phase</label>
+          <p-autocomplete
+            [(ngModel)]="selectedPhase"
+            inputId="selectedPhase"
+            [dropdown]="true"
+            [suggestions]="phases()"
+            (completeMethod)="search($event)"
+          />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="font-bold" for="selectedPhase">View</label>
+          <p-select
+            [(ngModel)]="selectedView"
+            inputId="selectedView"
+            [options]="views()"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center my-5">
+      <p-checkbox
+        inputId="showOtherAsDashed"
+        [binary]="true"
+        [(ngModel)]="showOtherAsDashed"
+      ></p-checkbox>
+      <label for="showOtherAsDashed" class="ml-2"
+        >Show other phases as dashed</label
       >
-        <ng-template #incrementbuttonicon>
-          <span class="pi pi-plus"></span>
-        </ng-template>
-        <ng-template #decrementbuttonicon>
-          <span class="pi pi-minus"></span>
-        </ng-template>
-      </p-inputnumber>
-      <div *ngIf="currentPosition">
-        <div>Mouse Position:</div>
-        <div>x: {{ currentPosition.x }}, z: {{ currentPosition.z }}</div>
-      </div>
     </div>
-    <div
-      id="plotly-output-single-span"
-      style="width: 100%; height: 500px;"
-    ></div>
-
-    <div id="plotly-output-points">
-      <div *ngFor="let point of points; let i = index">
-        position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}
-      </div>
-    </div>
-    <div *ngIf="currentPosition2">
-      <div>Mouse Position2:</div>
-      <div>x: {{ currentPosition2.x }}, z: {{ currentPosition2.z }}</div>
-    </div>
-    <div
-      id="plotly-output-single-span-y"
-      style="width: 500px; height: 500px;"
-    ></div>
-    <div id="plotly-output-points-2">
-      <div *ngFor="let point of points2; let i = index">
-        position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}
+    <div class="my-10">
+      <div id="plotly-output" style="width: 100%; height: 500px;"></div>
+      <div class="custom-slider my-5" *ngIf="litData()">
+        <ngx-slider
+          [(value)]="minValue"
+          [(highValue)]="maxValue"
+          [options]="options()"
+        ></ngx-slider>
       </div>
     </div>
   </div>`
 })
-export class SingleSpanComponent {
+export class GlobalViewComponent {
   constructor(private readonly workerService: WorkerService) {}
-  litData = input<any>(null);
+  litData = signal<any>(null);
+  minValue = signal(0);
+  maxValue = signal(14);
   options = signal<Options>({});
-  plotFace = signal<PlotlyHTMLElement | null>(null);
-  plotProfile = signal<PlotlyHTMLElement | null>(null);
+  plot = signal<PlotlyHTMLElement | null>(null);
   phases = signal<string[]>(['all', 'phase_1', 'phase_2', 'phase_3', 'garde']);
-  selectedSpan = signal<number>(0);
-  points: { x: number; z: number }[] = [];
-  currentPosition: { x: number; z: number } | null = null;
-  points2: { x: number; z: number }[] = [];
-  currentPosition2: { x: number; z: number } | null = null;
+  selectedPhase = signal<string>('all');
+  showOtherAsDashed = signal(false);
+  views = signal<string[]>(['3d', '2d']);
+  selectedView = signal<string>('3d');
+  // ngOnInit() {
+  //   this.workerService.getSection3d().subscribe((data) => {
+  //     console.log(data);
+  //   });
+  // }
+
+  // updateDash() {
+  //   console.log('updateDash');
+  //   this.showOtherAsDashed.set(!this.showOtherAsDashed());
+  // }
+  ngOnInit() {
+    // if (this.workerService.ready$) {
+    //   this.runPython();
+    // } else {
+    this.workerService.ready$.subscribe(() => {
+      this.runPython();
+    });
+    // }
+  }
 
   readonly effect2 = effect(() => {
-    console.log('effect2', this.selectedSpan());
-    this.createPlot(this.selectedSpan(), 'face');
-    this.createPlot(this.selectedSpan(), 'profile');
+    console.log('effect2', this.selectedPhase());
+    // const plot = untracked(() => this.plot());
+    //@ts-ignore
+    console.log('this.plot()?._fullLayout', this.plot()?._fullLayout);
+    // @ts-ignore
+    const currentCamera = this.plot()?._fullLayout?.scene?.camera;
+    console.log('currentCamera', currentCamera);
+    this.createPlot(
+      untracked(() => this.minValue()),
+      untracked(() => this.maxValue()),
+      this.selectedPhase(),
+      this.showOtherAsDashed(),
+      currentCamera
+    );
   });
 
   readonly effect3 = effect(() => {
-    this.litData();
-    console.log('effect3 in single span', this.litData());
-    this.createPlot(this.selectedSpan(), 'face');
-    this.createPlot(this.selectedSpan(), 'profile');
-    // .then((lit: any) => {
-    //   console.log('effect3 in single span', lit);
-    // });
-    // console.log('effect3', this.plot());
+    console.log('effect3');
+    // const plot = untracked(() => this.plot());
+    // // @ts-ignore
+    // const currentCamera = plot?._fullLayout.scene.camera;
+    this.createPlot(
+      this.minValue(),
+      this.maxValue(),
+      untracked(() => this.selectedPhase()),
+      untracked(() => this.showOtherAsDashed()),
+      undefined
+    );
   });
 
   search(event: any) {
@@ -141,11 +173,11 @@ export class SingleSpanComponent {
     litType: any,
     litSupports: any,
     uniqueSupports: any[],
-    name: string,
-    type: 'face' | 'profile'
+    name: string
   ): Data[] {
-    // const selectedPhase = untracked(() => this.selectedPhase());
-    // const dash = selectedPhase === 'all' || selectedPhase === name ? 'solid' : 'dash';
+    const selectedPhase = untracked(() => this.selectedPhase());
+    const dash =
+      selectedPhase === 'all' || selectedPhase === name ? 'solid' : 'dash';
     return uniqueSupports.map((support) => {
       const x = litXs.filter(
         (x: any, index: number) =>
@@ -166,12 +198,12 @@ export class SingleSpanComponent {
           litType[index] === 'span'
       );
       return {
-        x: type === 'face' ? y : x,
+        x,
         z: y,
         y: z,
         type: 'scatter',
         mode: 'lines',
-        line: { color: 'red', dash: 'solid' },
+        line: { color: 'red', dash },
         text: name
       };
     });
@@ -183,8 +215,7 @@ export class SingleSpanComponent {
     litZs: any,
     litTypes: any,
     litSupports: any,
-    uniqueSupports: any[],
-    type: 'face' | 'profile'
+    uniqueSupports: any[]
   ): Data[] {
     return uniqueSupports.map((support, index) => {
       const x = litXs.filter(
@@ -200,7 +231,7 @@ export class SingleSpanComponent {
           litSupports[index] === support && litTypes[index] === 'support'
       );
       return {
-        x: type === 'face' ? y : x,
+        x,
         z: y,
         y: z,
         type: 'scatter',
@@ -218,8 +249,7 @@ export class SingleSpanComponent {
     litZs: any,
     litTypes: any,
     litSupports: any,
-    uniqueSupports: any[],
-    type: 'face' | 'profile'
+    uniqueSupports: any[]
   ): Data[] {
     return uniqueSupports.map((support) => {
       const x = litXs.filter(
@@ -235,8 +265,8 @@ export class SingleSpanComponent {
           litSupports[index] === support && litTypes[index] === 'insulator'
       );
       return {
-        x: type === 'face' ? y : x,
-        z: type === 'face' ? y : x,
+        x,
+        z: y,
         y: z,
         type: 'scatter',
         mode: 'lines',
@@ -248,26 +278,28 @@ export class SingleSpanComponent {
   log() {
     // console.log('litData', this.litData());
     // console.log('plot', this.plot()?._fullLayout);
-    var gd = document.getElementById('plotly-output-single-span');
+    var gd = document.getElementById('plotly-output');
     // @ts-ignore
     console.log('gd', gd?._fullLayout);
   }
 
-  async createPlot(selectedSpan: number, type: 'face' | 'profile') {
-    const plotId =
-      type === 'face'
-        ? 'plotly-output-single-span-y'
-        : 'plotly-output-single-span';
-    // console.log('selectedPhase', selectedPhase);
+  async createPlot(
+    minValue: number,
+    maxValue: number,
+    selectedPhase: string,
+    showOtherAsDashed: boolean,
+    currentCamera: Camera | undefined
+  ) {
+    console.log('selectedPhase', selectedPhase);
     const lit = untracked(() => this.litData());
     if (!lit) return;
     const uniqueSupports = uniq(Object.values(lit.support)).slice(
-      selectedSpan,
-      selectedSpan + 1
+      minValue,
+      maxValue
     );
     const uniqueSupportsForSupports = uniq(Object.values(lit.support)).slice(
-      selectedSpan,
-      selectedSpan + 2
+      minValue,
+      maxValue + 1
     );
     const litXs = Object.values(lit.x) as Datum[];
     const litYs = Object.values(lit.y) as Datum[];
@@ -275,58 +307,71 @@ export class SingleSpanComponent {
     const litTypes = Object.values(lit.type) as Datum[];
     const litCanton = Object.values(lit.canton) as Datum[];
     const litSupports = Object.values(lit.support) as Datum[];
-    const phase1 = this.getAllPhases(
-      litXs,
-      litYs,
-      litZs,
-      litCanton,
-      litTypes,
-      litSupports,
-      uniqueSupports,
-      'phase_1',
-      type
-    );
-    const phase2 = this.getAllPhases(
-      litXs,
-      litYs,
-      litZs,
-      litCanton,
-      litTypes,
-      litSupports,
-      uniqueSupports,
-      'phase_2',
-      type
-    );
-    const phase3 = this.getAllPhases(
-      litXs,
-      litYs,
-      litZs,
-      litCanton,
-      litTypes,
-      litSupports,
-      uniqueSupports,
-      'phase_3',
-      type
-    );
-    const gard = this.getAllPhases(
-      litXs,
-      litYs,
-      litZs,
-      litCanton,
-      litTypes,
-      litSupports,
-      uniqueSupports,
-      'garde',
-      type
-    );
+    const phase1 =
+      selectedPhase === 'all' ||
+      selectedPhase === 'phase_1' ||
+      showOtherAsDashed
+        ? this.getAllPhases(
+            litXs,
+            litYs,
+            litZs,
+            litCanton,
+            litTypes,
+            litSupports,
+            uniqueSupports,
+            'phase_1'
+          )
+        : [];
+    const phase2 =
+      selectedPhase === 'all' ||
+      selectedPhase === 'phase_2' ||
+      showOtherAsDashed
+        ? this.getAllPhases(
+            litXs,
+            litYs,
+            litZs,
+            litCanton,
+            litTypes,
+            litSupports,
+            uniqueSupports,
+            'phase_2'
+          )
+        : [];
+    const phase3 =
+      selectedPhase === 'all' ||
+      selectedPhase === 'phase_3' ||
+      showOtherAsDashed
+        ? this.getAllPhases(
+            litXs,
+            litYs,
+            litZs,
+            litCanton,
+            litTypes,
+            litSupports,
+            uniqueSupports,
+            'phase_3'
+          )
+        : [];
+    const gard =
+      selectedPhase === 'all' || selectedPhase === 'garde' || showOtherAsDashed
+        ? this.getAllPhases(
+            litXs,
+            litYs,
+            litZs,
+            litCanton,
+            litTypes,
+            litSupports,
+            uniqueSupports,
+            'garde'
+          )
+        : [];
     const allSupports = this.getAllSupports(
       litXs,
       litYs,
       litZs,
       litTypes,
       litSupports,
-      uniqueSupportsForSupports,
-      type
+      uniqueSupportsForSupports
     );
     const allInsulators = this.getAllInsulators(
       litXs,
@@ -334,10 +379,9 @@ export class SingleSpanComponent {
       litZs,
       litTypes,
       litSupports,
-      uniqueSupportsForSupports,
-      type
+      uniqueSupportsForSupports
     );
-    const myElement = document.getElementById(plotId);
+    const myElement = document.getElementById('plotly-output');
     const width = myElement?.clientWidth;
     const data = [
       ...phase1,
@@ -347,71 +391,8 @@ export class SingleSpanComponent {
       ...allSupports,
       ...allInsulators
     ];
-    const this2 = this;
-    var gd = document.getElementById(plotId);
-
-    function attach(stuff: any, type: 'face' | 'profile') {
-      console.log('stuff', stuff);
-      // @ts-ignore
-      var xaxis = gd?._fullLayout.xaxis;
-      // @ts-ignore
-      var yaxis = gd?._fullLayout.yaxis;
-      // @ts-ignore
-      var l = gd?._fullLayout.margin.l;
-      // @ts-ignore
-      var t = gd?._fullLayout.margin.t;
-
-      gd?.addEventListener('mousemove', function (evt) {
-        //@ts-ignore
-        if (gd && gd._fullLayout) {
-          //@ts-ignore
-          const layout = gd._fullLayout as any;
-          const x = evt.layerX - layout.margin.l;
-          const y = evt.layerY - layout.margin.t;
-          console.log('mousemove', layout.xaxis.p2c(x), layout.yaxis.p2c(y));
-          if (type === 'profile') {
-            this2.currentPosition = {
-              x: layout.xaxis.p2c(x),
-              z: layout.yaxis.p2c(y)
-            };
-          } else {
-            this2.currentPosition2 = {
-              x: layout.xaxis.p2c(x),
-              z: layout.yaxis.p2c(y)
-            };
-          }
-        }
-      });
-
-      gd?.addEventListener('click', function (evt) {
-        // @ts-ignore
-        var layout = gd?._fullLayout;
-        var x = evt.layerX - layout.margin.l;
-        var y = evt.layerY - layout.margin.t;
-        Plotly.addTraces(plotId, {
-          x: [layout.xaxis.p2c(x)],
-          y: [layout.yaxis.p2c(y)],
-          name: 'Lines and Text',
-          text: ['X'],
-          type: 'scatter',
-          mode: 'text',
-          marker: {
-            color: 'red'
-          }
-        });
-        if (type === 'profile') {
-          this2.points.push({ x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) });
-        } else {
-          this2.points2.push({
-            x: layout.xaxis.p2c(x),
-            z: layout.yaxis.p2c(y)
-          });
-        }
-      });
-    }
-
     const plot = await Plotly.newPlot(
-      plotId,
+      'plotly-output',
       data,
       {
         // dragmode: 'pan',
@@ -442,7 +423,8 @@ export class SingleSpanComponent {
               x: 0.02,
               y: -1.4,
               z: 0.2
-            }
+            },
+            ...(currentCamera || {})
           }
         }
       },
@@ -453,23 +435,25 @@ export class SingleSpanComponent {
         autosizable: false
       }
     );
-    // attach(plot);
-    if (type === 'face') {
-      attach(plot, 'face');
-      this.plotFace.set(plot);
-    } else {
-      attach(plot, 'profile');
-      this.plotProfile.set(plot);
-    }
+    this.plot.set(plot);
   }
 
-  //   readonly effect = effect(async () => {
-  //     console.log('effect');
-  //     const lit = this.workerService.result()?.lit;
-  //     if (!lit) return;
-  //     const uniqueSupports = uniq(Object.values(lit.support));
-  //     this.litData.set(lit);
-  //   });
+  readonly effect = effect(async () => {
+    console.log('effect');
+    const lit = this.workerService.result()?.lit;
+    if (!lit) return;
+    const uniqueSupports = uniq(Object.values(lit.support));
+    this.options.set({
+      floor: 0,
+      ceil: uniqueSupports.length - 1,
+      step: 1,
+      showTicks: true,
+      showTicksValues: true
+    });
+    this.maxValue.set(uniqueSupports.length);
+    this.litData.set(lit);
+    // this.createPlot(0, uniqueSupports.length, 'all', false);
+  });
 
   runPython() {
     this.workerService.runTask(Task.runPython2, {});

@@ -12,48 +12,88 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { CheckboxModule } from 'primeng/checkbox';
-import { WorkerService } from '../../core/engine/worker/worker.service';
-import { Task } from '../../core/engine/worker/tasks';
-import Plotly, { Camera, Data, Datum, Layout, PlotlyHTMLElement } from 'plotly.js-dist-min';
+import { WorkerService } from '../../engine/worker/worker.service';
+import { Task } from '../../engine/worker/tasks';
+import Plotly, {
+  Camera,
+  Data,
+  Datum,
+  Layout,
+  PlotlyHTMLElement
+} from 'plotly.js-dist-min';
 import { uniq } from 'lodash';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
+import {
+  AutoCompleteCompleteEvent,
+  AutoCompleteModule
+} from 'primeng/autocomplete';
 import { InputNumberModule } from 'primeng/inputnumber';
 @Component({
   selector: 'app-single-span',
   standalone: true,
   //   styleUrls: ['./section3d.component.scss'],
-  imports: [ButtonModule, InputNumberModule, ProgressSpinnerModule, CommonModule, TableModule, InputTextModule, FormsModule, CheckboxModule, NgxSliderModule, AutoCompleteModule, CheckboxModule],
+  imports: [
+    ButtonModule,
+    InputNumberModule,
+    ProgressSpinnerModule,
+    CommonModule,
+    TableModule,
+    InputTextModule,
+    FormsModule,
+    CheckboxModule,
+    NgxSliderModule,
+    AutoCompleteModule,
+    CheckboxModule
+  ],
   template: `<div>
     <!-- <p-button label="Run Python" (onClick)="runPython()"></p-button> -->
     <!-- <p-button label="log" (onClick)="log()"></p-button> -->
     <div class="my-5">
-      <label for="vertical" class="mr-2">Span Number:</label>
-      <p-inputnumber [(ngModel)]="selectedSpan" [showButtons]="true" buttonLayout="horizontal" spinnerMode="vertical" inputId="vertical" [inputStyle]="{ width: '3rem' }">
-        <ng-template #incrementbuttonicon>
-          <span class="pi pi-plus"></span>
-        </ng-template>
-        <ng-template #decrementbuttonicon>
-          <span class="pi pi-minus"></span>
-        </ng-template>
-      </p-inputnumber>
+      <div class="flex flex-col gap-2">
+        <label for="vertical" class="mr-2 font-bold">Span Number:</label>
+        <p-inputnumber
+          [(ngModel)]="selectedSpan"
+          [showButtons]="true"
+          buttonLayout="horizontal"
+          spinnerMode="vertical"
+          inputId="vertical"
+          [inputStyle]="{ maxWidth: '3rem' }"
+        >
+          <ng-template #incrementbuttonicon>
+            <span class="pi pi-plus"></span>
+          </ng-template>
+          <ng-template #decrementbuttonicon>
+            <span class="pi pi-minus"></span>
+          </ng-template>
+        </p-inputnumber>
+      </div>
       <div *ngIf="currentPosition">
         <div>Mouse Position:</div>
         <div>x: {{ currentPosition.x }}, z: {{ currentPosition.z }}</div>
       </div>
     </div>
-    <div id="plotly-output-single-span" style="width: 100%; height: 500px;"></div>
+    <div
+      id="plotly-output-single-span"
+      style="width: 100%; height: 500px;"
+    ></div>
 
     <div id="plotly-output-points">
-      <div *ngFor="let point of points; let i = index">position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}</div>
+      <div *ngFor="let point of points; let i = index">
+        position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}
+      </div>
     </div>
     <div *ngIf="currentPosition2">
       <div>Mouse Position2:</div>
       <div>x: {{ currentPosition2.x }}, z: {{ currentPosition2.z }}</div>
     </div>
-    <div id="plotly-output-single-span-y" style="width: 500px; height: 500px;"></div>
+    <div
+      id="plotly-output-single-span-y"
+      style="width: 500px; height: 500px;"
+    ></div>
     <div id="plotly-output-points-2">
-      <div *ngFor="let point of points2; let i = index">position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}</div>
+      <div *ngFor="let point of points2; let i = index">
+        position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}
+      </div>
     </div>
   </div>`
 })
@@ -89,36 +129,121 @@ export class SingleSpanComponent {
 
   search(event: any) {
     let _items = [...Array(10).keys()];
-    const filteredPhases = this.phases().filter((phase) => phase.includes(event.query));
+    const filteredPhases = this.phases().filter((phase) =>
+      phase.includes(event.query)
+    );
     this.phases.set(['all', 'phase_1', 'phase_2', 'phase_3', 'garde']);
   }
 
-  getAllPhases(litXs: any, litYs: any, litZs: any, litCanton: any, litType: any, litSupports: any, uniqueSupports: any[], name: string, type: 'face' | 'profile'): Data[] {
+  getAllPhases(
+    litXs: any,
+    litYs: any,
+    litZs: any,
+    litCanton: any,
+    litType: any,
+    litSupports: any,
+    uniqueSupports: any[],
+    name: string,
+    type: 'face' | 'profile'
+  ): Data[] {
     // const selectedPhase = untracked(() => this.selectedPhase());
     // const dash = selectedPhase === 'all' || selectedPhase === name ? 'solid' : 'dash';
     return uniqueSupports.map((support) => {
-      const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
-      const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
-      const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litCanton[index] === name && litType[index] === 'span');
-      return { x: type === 'face' ? y : x, z: y, y: z, type: 'scatter', mode: 'lines', line: { color: 'red', dash: 'solid' }, text: name };
+      const x = litXs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support &&
+          litCanton[index] === name &&
+          litType[index] === 'span'
+      );
+      const y = litYs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support &&
+          litCanton[index] === name &&
+          litType[index] === 'span'
+      );
+      const z = litZs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support &&
+          litCanton[index] === name &&
+          litType[index] === 'span'
+      );
+      return {
+        x: type === 'face' ? y : x,
+        z: y,
+        y: z,
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: 'red', dash: 'solid' },
+        text: name
+      };
     });
   }
 
-  getAllSupports(litXs: any, litYs: any, litZs: any, litTypes: any, litSupports: any, uniqueSupports: any[], type: 'face' | 'profile'): Data[] {
+  getAllSupports(
+    litXs: any,
+    litYs: any,
+    litZs: any,
+    litTypes: any,
+    litSupports: any,
+    uniqueSupports: any[],
+    type: 'face' | 'profile'
+  ): Data[] {
     return uniqueSupports.map((support, index) => {
-      const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
-      const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
-      const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'support');
-      return { x: type === 'face' ? y : x, z: y, y: z, type: 'scatter', text: [support.replace('Section ', '')], textposition: 'inside', mode: 'text+lines', line: { color: 'blue' } };
+      const x = litXs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support && litTypes[index] === 'support'
+      );
+      const y = litYs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support && litTypes[index] === 'support'
+      );
+      const z = litZs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support && litTypes[index] === 'support'
+      );
+      return {
+        x: type === 'face' ? y : x,
+        z: y,
+        y: z,
+        type: 'scatter',
+        text: [support.replace('Section ', '')],
+        textposition: 'inside',
+        mode: 'text+lines',
+        line: { color: 'blue' }
+      };
     });
   }
 
-  getAllInsulators(litXs: any, litYs: any, litZs: any, litTypes: any, litSupports: any, uniqueSupports: any[], type: 'face' | 'profile'): Data[] {
+  getAllInsulators(
+    litXs: any,
+    litYs: any,
+    litZs: any,
+    litTypes: any,
+    litSupports: any,
+    uniqueSupports: any[],
+    type: 'face' | 'profile'
+  ): Data[] {
     return uniqueSupports.map((support) => {
-      const x = litXs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
-      const y = litYs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
-      const z = litZs.filter((x: any, index: number) => litSupports[index] === support && litTypes[index] === 'insulator');
-      return { x: type === 'face' ? y : x, z: type === 'face' ? y : x, y: z, type: 'scatter', mode: 'lines', line: { color: 'green' } };
+      const x = litXs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support && litTypes[index] === 'insulator'
+      );
+      const y = litYs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support && litTypes[index] === 'insulator'
+      );
+      const z = litZs.filter(
+        (x: any, index: number) =>
+          litSupports[index] === support && litTypes[index] === 'insulator'
+      );
+      return {
+        x: type === 'face' ? y : x,
+        z: type === 'face' ? y : x,
+        y: z,
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: 'green' }
+      };
     });
   }
 
@@ -131,27 +256,99 @@ export class SingleSpanComponent {
   }
 
   async createPlot(selectedSpan: number, type: 'face' | 'profile') {
-    const plotId = type === 'face' ? 'plotly-output-single-span-y' : 'plotly-output-single-span';
+    const plotId =
+      type === 'face'
+        ? 'plotly-output-single-span-y'
+        : 'plotly-output-single-span';
     // console.log('selectedPhase', selectedPhase);
     const lit = untracked(() => this.litData());
     if (!lit) return;
-    const uniqueSupports = uniq(Object.values(lit.support)).slice(selectedSpan, selectedSpan + 1);
-    const uniqueSupportsForSupports = uniq(Object.values(lit.support)).slice(selectedSpan, selectedSpan + 2);
+    const uniqueSupports = uniq(Object.values(lit.support)).slice(
+      selectedSpan,
+      selectedSpan + 1
+    );
+    const uniqueSupportsForSupports = uniq(Object.values(lit.support)).slice(
+      selectedSpan,
+      selectedSpan + 2
+    );
     const litXs = Object.values(lit.x) as Datum[];
     const litYs = Object.values(lit.y) as Datum[];
     const litZs = Object.values(lit.z) as Datum[];
     const litTypes = Object.values(lit.type) as Datum[];
     const litCanton = Object.values(lit.canton) as Datum[];
     const litSupports = Object.values(lit.support) as Datum[];
-    const phase1 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_1', type);
-    const phase2 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_2', type);
-    const phase3 = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'phase_3', type);
-    const gard = this.getAllPhases(litXs, litYs, litZs, litCanton, litTypes, litSupports, uniqueSupports, 'garde', type);
-    const allSupports = this.getAllSupports(litXs, litYs, litZs, litTypes, litSupports, uniqueSupportsForSupports, type);
-    const allInsulators = this.getAllInsulators(litXs, litYs, litZs, litTypes, litSupports, uniqueSupportsForSupports, type);
+    const phase1 = this.getAllPhases(
+      litXs,
+      litYs,
+      litZs,
+      litCanton,
+      litTypes,
+      litSupports,
+      uniqueSupports,
+      'phase_1',
+      type
+    );
+    const phase2 = this.getAllPhases(
+      litXs,
+      litYs,
+      litZs,
+      litCanton,
+      litTypes,
+      litSupports,
+      uniqueSupports,
+      'phase_2',
+      type
+    );
+    const phase3 = this.getAllPhases(
+      litXs,
+      litYs,
+      litZs,
+      litCanton,
+      litTypes,
+      litSupports,
+      uniqueSupports,
+      'phase_3',
+      type
+    );
+    const gard = this.getAllPhases(
+      litXs,
+      litYs,
+      litZs,
+      litCanton,
+      litTypes,
+      litSupports,
+      uniqueSupports,
+      'garde',
+      type
+    );
+    const allSupports = this.getAllSupports(
+      litXs,
+      litYs,
+      litZs,
+      litTypes,
+      litSupports,
+      uniqueSupportsForSupports,
+      type
+    );
+    const allInsulators = this.getAllInsulators(
+      litXs,
+      litYs,
+      litZs,
+      litTypes,
+      litSupports,
+      uniqueSupportsForSupports,
+      type
+    );
     const myElement = document.getElementById(plotId);
     const width = myElement?.clientWidth;
-    const data = [...phase1, ...phase2, ...phase3, ...gard, ...allSupports, ...allInsulators];
+    const data = [
+      ...phase1,
+      ...phase2,
+      ...phase3,
+      ...gard,
+      ...allSupports,
+      ...allInsulators
+    ];
     const this2 = this;
     var gd = document.getElementById(plotId);
 
@@ -175,9 +372,15 @@ export class SingleSpanComponent {
           const y = evt.layerY - layout.margin.t;
           console.log('mousemove', layout.xaxis.p2c(x), layout.yaxis.p2c(y));
           if (type === 'profile') {
-            this2.currentPosition = { x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) };
+            this2.currentPosition = {
+              x: layout.xaxis.p2c(x),
+              z: layout.yaxis.p2c(y)
+            };
           } else {
-            this2.currentPosition2 = { x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) };
+            this2.currentPosition2 = {
+              x: layout.xaxis.p2c(x),
+              z: layout.yaxis.p2c(y)
+            };
           }
         }
       });
@@ -201,7 +404,10 @@ export class SingleSpanComponent {
         if (type === 'profile') {
           this2.points.push({ x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) });
         } else {
-          this2.points2.push({ x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) });
+          this2.points2.push({
+            x: layout.xaxis.p2c(x),
+            z: layout.yaxis.p2c(y)
+          });
         }
       });
     }

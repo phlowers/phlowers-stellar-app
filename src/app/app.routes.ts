@@ -11,7 +11,7 @@ import { AdminComponent } from './pages/admin/admin';
 import { StudyComponent } from './pages/study/study.component';
 import { SectionsComponent } from './pages/sections/sections.component';
 import { PlotlyPageComponent } from './pages/plotly-poc/plotly-page/plotly-page.component';
-import { Section3dComponent } from './pages/section3d/section3d.component';
+import { ThreeDPageComponent } from './pages/3d-page/3d-page.component';
 export const appRoutes: Routes = [
   {
     path: '',
@@ -23,7 +23,7 @@ export const appRoutes: Routes = [
       { path: 'study/:uuid', component: StudyComponent },
       { path: 'sections', component: SectionsComponent },
       { path: 'plotly', component: PlotlyPageComponent },
-      { path: '3d', component: Section3dComponent }
+      { path: '3d', component: ThreeDPageComponent }
     ]
   }
   // { path: 'notfound', component: Notfound },
