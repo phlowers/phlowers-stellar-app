@@ -120,7 +120,11 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
           ></app-obstacles-tab>
         </p-tabpanel>
         <p-tabpanel value="Visualization">
-          <app-visualization-tab></app-visualization-tab>
+          @defer (on viewport) {
+            <app-visualization-tab></app-visualization-tab>
+          } @placeholder {
+            <div></div>
+          }
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>
