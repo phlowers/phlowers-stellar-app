@@ -105,7 +105,7 @@ export class GlobalViewComponent {
   selectedPhase = signal<string>('all');
   showOtherAsDashed = signal(false);
   views = signal<string[]>(['3d', '2d']);
-  selectedView = signal<string>('3d');
+  selectedView = signal<'3d' | '2d'>('3d');
   // ngOnInit() {
   //   this.workerService.getSection3d().subscribe((data) => {
   //     console.log(data);
@@ -139,7 +139,8 @@ export class GlobalViewComponent {
       untracked(() => this.maxValue()),
       this.selectedPhase(),
       this.showOtherAsDashed(),
-      currentCamera
+      currentCamera,
+      this.selectedView()
     );
   });
 
@@ -153,7 +154,8 @@ export class GlobalViewComponent {
       this.maxValue(),
       untracked(() => this.selectedPhase()),
       untracked(() => this.showOtherAsDashed()),
-      undefined
+      undefined,
+      this.selectedView()
     );
   });
 
@@ -173,7 +175,8 @@ export class GlobalViewComponent {
     litType: any,
     litSupports: any,
     uniqueSupports: any[],
-    name: string
+    name: string,
+    view: '3d' | '2d'
   ): Data[] {
     const selectedPhase = untracked(() => this.selectedPhase());
     const dash =
@@ -201,7 +204,7 @@ export class GlobalViewComponent {
         x,
         z: y,
         y: z,
-        type: 'scatter',
+        type: view === '3d' ? 'scatter3d' : 'scatter',
         mode: 'lines',
         line: { color: 'red', dash },
         text: name
@@ -215,7 +218,8 @@ export class GlobalViewComponent {
     litZs: any,
     litTypes: any,
     litSupports: any,
-    uniqueSupports: any[]
+    uniqueSupports: any[],
+    view: '3d' | '2d' = '3d'
   ): Data[] {
     return uniqueSupports.map((support, index) => {
       const x = litXs.filter(
@@ -234,7 +238,7 @@ export class GlobalViewComponent {
         x,
         z: y,
         y: z,
-        type: 'scatter',
+        type: view === '3d' ? 'scatter3d' : 'scatter',
         text: [support.replace('Section ', '')],
         textposition: 'inside',
         mode: 'text+lines',
@@ -249,7 +253,8 @@ export class GlobalViewComponent {
     litZs: any,
     litTypes: any,
     litSupports: any,
-    uniqueSupports: any[]
+    uniqueSupports: any[],
+    view: '3d' | '2d' = '3d'
   ): Data[] {
     return uniqueSupports.map((support) => {
       const x = litXs.filter(
@@ -268,7 +273,7 @@ export class GlobalViewComponent {
         x,
         z: y,
         y: z,
-        type: 'scatter',
+        type: view === '3d' ? 'scatter3d' : 'scatter',
         mode: 'lines',
         line: { color: 'green' }
       };
@@ -288,7 +293,8 @@ export class GlobalViewComponent {
     maxValue: number,
     selectedPhase: string,
     showOtherAsDashed: boolean,
-    currentCamera: Camera | undefined
+    currentCamera: Camera | undefined,
+    view: '3d' | '2d'
   ) {
     console.log('selectedPhase', selectedPhase);
     const lit = untracked(() => this.litData());
@@ -319,7 +325,8 @@ export class GlobalViewComponent {
             litTypes,
             litSupports,
             uniqueSupports,
-            'phase_1'
+            'phase_1',
+            view
           )
         : [];
     const phase2 =
@@ -334,7 +341,8 @@ export class GlobalViewComponent {
             litTypes,
             litSupports,
             uniqueSupports,
-            'phase_2'
+            'phase_2',
+            view
           )
         : [];
     const phase3 =
@@ -349,7 +357,8 @@ export class GlobalViewComponent {
             litTypes,
             litSupports,
             uniqueSupports,
-            'phase_3'
+            'phase_3',
+            view
           )
         : [];
     const gard =
@@ -362,7 +371,8 @@ export class GlobalViewComponent {
             litTypes,
             litSupports,
             uniqueSupports,
-            'garde'
+            'garde',
+            view
           )
         : [];
     const allSupports = this.getAllSupports(
@@ -371,7 +381,8 @@ export class GlobalViewComponent {
       litZs,
       litTypes,
       litSupports,
-      uniqueSupportsForSupports
+      uniqueSupportsForSupports,
+      view
     );
     const allInsulators = this.getAllInsulators(
       litXs,
@@ -379,7 +390,8 @@ export class GlobalViewComponent {
       litZs,
       litTypes,
       litSupports,
-      uniqueSupportsForSupports
+      uniqueSupportsForSupports,
+      view
     );
     const myElement = document.getElementById('plotly-output');
     const width = myElement?.clientWidth;
