@@ -82,8 +82,12 @@ import { SelectModule } from 'primeng/select';
         >Show other phases as dashed</label
       >
     </div>
-    <div class="my-10">
-      <div id="plotly-output" style="width: 100%; height: 500px;"></div>
+    <div class="my-2">
+      <div
+        id="plotly-output"
+        class="border border-gray-300 rounded-md"
+        style="width: 100%; height: 500px; box-sizing: content-box;"
+      ></div>
       <div class="custom-slider my-5" *ngIf="litData()">
         <ngx-slider
           [(value)]="minValue"
@@ -96,7 +100,7 @@ import { SelectModule } from 'primeng/select';
 })
 export class GlobalViewComponent {
   constructor(private readonly workerService: WorkerService) {}
-  litData = signal<any>(null);
+  litData = input<any>(null);
   minValue = signal(0);
   maxValue = signal(14);
   options = signal<Options>({});
@@ -106,24 +110,11 @@ export class GlobalViewComponent {
   showOtherAsDashed = signal(false);
   views = signal<string[]>(['3d', '2d']);
   selectedView = signal<'3d' | '2d'>('3d');
-  // ngOnInit() {
-  //   this.workerService.getSection3d().subscribe((data) => {
-  //     console.log(data);
-  //   });
-  // }
 
-  // updateDash() {
-  //   console.log('updateDash');
-  //   this.showOtherAsDashed.set(!this.showOtherAsDashed());
-  // }
   ngOnInit() {
-    // if (this.workerService.ready$) {
-    //   this.runPython();
-    // } else {
     this.workerService.ready$.subscribe(() => {
       this.runPython();
     });
-    // }
   }
 
   readonly effect2 = effect(() => {
@@ -202,8 +193,8 @@ export class GlobalViewComponent {
       );
       return {
         x,
-        z: y,
-        y: z,
+        z: view === '3d' ? z : y,
+        y: view === '3d' ? y : z,
         type: view === '3d' ? 'scatter3d' : 'scatter',
         mode: 'lines',
         line: { color: 'red', dash },
@@ -236,8 +227,8 @@ export class GlobalViewComponent {
       );
       return {
         x,
-        z: y,
-        y: z,
+        z: view === '3d' ? z : y,
+        y: view === '3d' ? y : z,
         type: view === '3d' ? 'scatter3d' : 'scatter',
         text: [support.replace('Section ', '')],
         textposition: 'inside',
@@ -271,8 +262,8 @@ export class GlobalViewComponent {
       );
       return {
         x,
-        z: y,
-        y: z,
+        z: view === '3d' ? z : y,
+        y: view === '3d' ? y : z,
         type: view === '3d' ? 'scatter3d' : 'scatter',
         mode: 'lines',
         line: { color: 'green' }
@@ -403,12 +394,13 @@ export class GlobalViewComponent {
       ...allSupports,
       ...allInsulators
     ];
+    if (!width) return;
     const plot = await Plotly.newPlot(
       'plotly-output',
       data,
       {
         // dragmode: 'pan',
-        width: width,
+        width: width - 2,
         height: 500,
         autosize: false,
         showlegend: false,
@@ -441,7 +433,7 @@ export class GlobalViewComponent {
         }
       },
       {
-        displayModeBar: true,
+        displayModeBar: false,
         fillFrame: false,
         responsive: false,
         autosizable: false
@@ -452,18 +444,21 @@ export class GlobalViewComponent {
 
   readonly effect = effect(async () => {
     console.log('effect');
-    const lit = this.workerService.result()?.lit;
-    if (!lit) return;
+    // const lit = this.workerService.result()?.lit;
+    // if (!lit) return;
+    const lit = this.litData();
     const uniqueSupports = uniq(Object.values(lit.support));
     this.options.set({
       floor: 0,
       ceil: uniqueSupports.length - 1,
       step: 1,
       showTicks: true,
-      showTicksValues: true
+      showTicksValues: true,
+      animate: false,
+      animateOnMove: false
     });
     this.maxValue.set(uniqueSupports.length);
-    this.litData.set(lit);
+    // this.litData.set(lit);
     // this.createPlot(0, uniqueSupports.length, 'all', false);
   });
 

@@ -275,12 +275,14 @@ import { SelectModule } from 'primeng/select';
               <p-select
                 [options]="typedSection.regional_maintenance_center_names"
                 placeholder="View"
+                [ngModel]="typedSection.regional_maintenance_center_names[0]"
                 class="w-full md:w-56"
               />
             </td>
             <td>
               <p-select
                 [options]="typedSection.maintenance_center_names"
+                [ngModel]="typedSection.maintenance_center_names[0]"
                 placeholder="View"
                 class="w-full md:w-56"
               />

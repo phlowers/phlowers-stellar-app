@@ -13,7 +13,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { CheckboxModule } from 'primeng/checkbox';
 import { WorkerService } from '../../engine/worker/worker.service';
-import { Task } from '../../engine/worker/tasks';
 import Plotly, {
   Camera,
   Data,
@@ -48,8 +47,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
   template: `<div>
     <!-- <p-button label="Run Python" (onClick)="runPython()"></p-button> -->
     <!-- <p-button label="log" (onClick)="log()"></p-button> -->
-    <div class="my-5">
-      <div class="flex flex-col gap-2">
+    <div class="my-5 flex flex-row gap-2 items-end">
+      <div class="flex flex-col gap-2 ">
         <label for="vertical" class="mr-2 font-bold">Span Number:</label>
         <p-inputnumber
           [(ngModel)]="selectedSpan"
@@ -67,33 +66,47 @@ import { InputNumberModule } from 'primeng/inputnumber';
           </ng-template>
         </p-inputnumber>
       </div>
-      <div *ngIf="currentPosition">
-        <div>Mouse Position:</div>
-        <div>x: {{ currentPosition.x }}, z: {{ currentPosition.z }}</div>
-      </div>
     </div>
-    <div
-      id="plotly-output-single-span"
-      style="width: 100%; height: 500px;"
-    ></div>
+    <div class="flex flex-row gap-2">
+      <div style="width: 100%;">
+        <div>
+          <div>Mouse Position:</div>
+          <div>
+            x: {{ currentPosition?.x || 'N/A' }}, y:
+            {{ currentPosition?.z || 'N/A' }}
+          </div>
+        </div>
+        <div
+          id="plotly-output-single-span"
+          class="border border-gray-300 rounded-md"
+          style="height: 500px; box-sizing: content-box;"
+        ></div>
+      </div>
 
-    <div id="plotly-output-points">
-      <div *ngFor="let point of points; let i = index">
-        position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}
+      <div style="width: 300px;">
+        <div>
+          <div>Mouse Position:</div>
+          <div>
+            z: {{ currentPosition2?.x || 'N/A' }}, y:
+            {{ currentPosition2?.z || 'N/A' }}
+          </div>
+        </div>
+        <div
+          id="plotly-output-single-span-y"
+          class="border border-gray-300 rounded-md box-sizing"
+          style="height: 500px; box-sizing: content-box;"
+        ></div>
       </div>
-    </div>
-    <div *ngIf="currentPosition2">
-      <div>Mouse Position2:</div>
-      <div>x: {{ currentPosition2.x }}, z: {{ currentPosition2.z }}</div>
-    </div>
-    <div
-      id="plotly-output-single-span-y"
-      style="width: 500px; height: 500px;"
-    ></div>
-    <div id="plotly-output-points-2">
-      <div *ngFor="let point of points2; let i = index">
-        position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}
-      </div>
+      <!-- <div id="plotly-output-points">
+        <div *ngFor="let point of points; let i = index">
+          position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}
+        </div>
+      </div> -->
+      <!-- <div id="plotly-output-points-2">
+        <div *ngFor="let point of points2; let i = index">
+          position {{ i + 1 }} x: {{ point.x }}, z: {{ point.z }}
+        </div>
+      </div> -->
     </div>
   </div>`
 })
@@ -106,9 +119,9 @@ export class SingleSpanComponent {
   phases = signal<string[]>(['all', 'phase_1', 'phase_2', 'phase_3', 'garde']);
   selectedSpan = signal<number>(0);
   points: { x: number; z: number }[] = [];
-  currentPosition: { x: number; z: number } | null = null;
+  currentPosition: { x: string; z: string } | null = null;
   points2: { x: number; z: number }[] = [];
-  currentPosition2: { x: number; z: number } | null = null;
+  currentPosition2: { x: string; z: string } | null = null;
 
   readonly effect2 = effect(() => {
     console.log('effect2', this.selectedSpan());
@@ -373,13 +386,13 @@ export class SingleSpanComponent {
           console.log('mousemove', layout.xaxis.p2c(x), layout.yaxis.p2c(y));
           if (type === 'profile') {
             this2.currentPosition = {
-              x: layout.xaxis.p2c(x),
-              z: layout.yaxis.p2c(y)
+              x: Number(layout.xaxis.p2c(x)).toFixed(2),
+              z: Number(layout.yaxis.p2c(y)).toFixed(2)
             };
           } else {
             this2.currentPosition2 = {
-              x: layout.xaxis.p2c(x),
-              z: layout.yaxis.p2c(y)
+              x: Number(layout.xaxis.p2c(x)).toFixed(2),
+              z: Number(layout.yaxis.p2c(y)).toFixed(2)
             };
           }
         }
@@ -449,7 +462,7 @@ export class SingleSpanComponent {
         }
       },
       {
-        displayModeBar: true,
+        displayModeBar: false,
         fillFrame: false,
         responsive: false,
         autosizable: false
@@ -473,7 +486,7 @@ export class SingleSpanComponent {
   //     this.litData.set(lit);
   //   });
 
-  runPython() {
-    this.workerService.runTask(Task.runPython2, {});
-  }
+  // runPython() {
+  //   this.workerService.runTask(Task.runPython2, {});
+  // }
 }
