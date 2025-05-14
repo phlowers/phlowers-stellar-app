@@ -1,9 +1,6 @@
 <nav
   class="stellar-sidebar"
-  [class]="{
-    'stellar-sidebar--expanded': expandedStatus() === true,
-    'stellar-sidebar--shrank': expandedStatus() === false
-  }"
+  [class.stellar-sidebar--expanded]="expandedStatus() === true"
 >
   <header class="stelBar-header">
     <a routerLink="/" class="stelBar-header__link">
@@ -26,7 +23,7 @@
     </a>
     @if (appVersion() && appVersionDisplay() && expandedStatus() === true) {
       <small class="stelBar-header__version-display">
-        v. {{ appVersion() }}
+        v.{{ appVersion() }}
       </small>
     }
   </header>

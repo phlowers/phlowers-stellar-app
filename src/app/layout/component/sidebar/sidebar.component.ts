@@ -40,26 +40,27 @@ export class SidebarComponent implements OnInit {
 
       if (this.expandedStatus() === true) {
         this.bodyTag()!.classList.add('has-sidebar--expanded');
-      } else if (this.expandedStatus() === false) {
-        this.bodyTag()!.classList.add('has-sidebar--shrank');
       }
     }
   }
 
   toggleMenu(): void {
     this.expandedStatus.set(!this.expandedStatus());
+
     if (this.bodyTag()) {
       if (this.expandedStatus() === true) {
-        this.bodyTag()!.classList.remove('has-sidebar--shrank');
         this.bodyTag()!.classList.add('has-sidebar--expanded');
       } else if (this.expandedStatus() === false) {
         this.bodyTag()!.classList.remove('has-sidebar--expanded');
-        this.bodyTag()!.classList.add('has-sidebar--shrank');
       }
     }
   }
 
   constructor() {
-    this.appVersion.set(version);
+    if (version === '{BUILD_VERSION}') {
+      this.appVersion.set('0.0.00');
+    } else {
+      this.appVersion.set(version);
+    }
   }
 }

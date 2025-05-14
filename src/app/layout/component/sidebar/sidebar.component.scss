@@ -1,20 +1,13 @@
-$_sidebar-size--default-noJs: 12.5rem;
 $_sidebar-size--expanded: 14rem;
 $_sidebar-size--shrank: 4rem;
-$_animation-timing: 0.35s;
-$_animation-transition: cubic-bezier(1, 0.19, 0.23, 0.84);
-$_animation-type-timing: $_animation-timing $_animation-transition;
+$_animation-type-timing: 0.35s cubic-bezier(1, 0.19, 0.23, 0.84);
 
 body.has-sidebar {
-  padding-left: $_sidebar-size--default-noJs;
+  padding-left: $_sidebar-size--shrank;
   transition: padding-left $_animation-type-timing;
 
   &--expanded {
     padding-left: $_sidebar-size--expanded;
-  }
-
-  &--shrank {
-    padding-left: $_sidebar-size--shrank;
   }
 }
 
@@ -25,8 +18,9 @@ body.has-sidebar {
   left: 0;
   top: 0;
   z-index: 1000; // TODO: remove this and manage z-indexes through a sass map and or custom properties
-  width: $_sidebar-size--default-noJs;
+  width: $_sidebar-size--shrank;
   height: 100%;
+  padding: 0.5rem;
   background-color: var(--primary-950);
   border-right: 1px solid var(--grey-150);
   color: var(--grey-white);
@@ -39,21 +33,25 @@ body.has-sidebar {
     padding: 1rem;
   }
 
-  &--shrank {
-    width: $_sidebar-size--shrank;
-    padding: 0.5rem;
-  }
-
   &__link {
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
     position: relative;
     overflow: hidden;
+    padding: 0.125rem;
+    margin: 0 -0.25rem 0.5rem -0.25rem;
+    font-weight: 300;
     line-height: 1;
     background-color: var(--primary-950);
     border-radius: 0.25rem;
-    appearance: none;
     transition: all $_animation-type-timing;
+
+    .app-icon {
+      font-size: 1.25rem;
+    }
 
     &::before {
       content: '';
@@ -119,19 +117,6 @@ body.has-sidebar {
         bottom: 0.125rem;
       }
     }
-
-    .stellar-sidebar--shrank & {
-      flex-direction: column;
-      justify-content: center;
-      gap: 0.125rem;
-      padding: 0.125rem;
-      margin: 0 -0.25rem 0.5rem -0.25rem;
-      font-weight: 300;
-
-      .app-icon {
-        font-size: 1.25rem;
-      }
-    }
   }
 
   hr {
@@ -143,25 +128,25 @@ body.has-sidebar {
 .stelBar-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.625rem;
   padding: 1rem 0rem;
 
   .stellar-sidebar--expanded & {
     justify-content: flex-start;
-  }
-
-  .stellar-sidebar--shrank & {
-    justify-content: center;
+    flex-wrap: wrap;
   }
 
   &__link {
     background-color: rgb(255, 255, 255, 0);
     transition: background-color $_animation-type-timing;
+    min-width: 1.875rem;
 
     .stellar-sidebar--expanded & {
       padding: 0.25rem;
       background-color: var(--primary-300);
       border-radius: 0.25rem;
+      min-width: 7.1875rem;
     }
   }
 
@@ -179,9 +164,11 @@ body.has-sidebar {
 .stelBar-footer {
   button.stellar-sidebar__link {
     margin-bottom: 0;
+    width: calc(100% + 0.5rem);
 
     .app-icon {
       transform-origin: 50%;
+      transform: rotate(0deg);
       transition: transform $_animation-type-timing;
     }
 
@@ -190,14 +177,6 @@ body.has-sidebar {
 
       .app-icon {
         transform: rotate(-180deg);
-      }
-    }
-
-    .stellar-sidebar--shrank & {
-      width: calc(100% + 0.5rem);
-
-      .app-icon {
-        transform: rotate(0deg);
       }
     }
   }

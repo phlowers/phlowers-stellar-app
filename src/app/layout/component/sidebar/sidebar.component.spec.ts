@@ -1,216 +1,338 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { SidebarComponent } from './sidebar.component';
-import { signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, signal, ViewChild } from '@angular/core';
+import { SidebarComponent } from './sidebar.component';
+import { SidebarItem } from './sidebar.model';
 
-// Mock package.json version
-jest.mock('../../../../../package.json', () => ({
-  version: '1.0.0-test'
+// Mock environment
+jest.mock('../../../../environments/environment', () => ({
+  environment: {
+    version: '1.2.3'
+  }
 }));
 
+// Create a test host component to provide inputs to our component
+@Component({
+  standalone: true,
+  imports: [SidebarComponent, RouterLink, RouterLinkActive],
+  template: `
+    <app-sidebar
+      [logoIconExpanded]="logoIconExpanded"
+      [logoIconShrank]="logoIconShrank"
+      [logoText]="logoText"
+      [appVersionDisplay]="appVersionDisplay"
+      [mainLinks]="mainLinks"
+      [footerLinks]="footerLinks"
+      [expanded]="expanded"
+    >
+    </app-sidebar>
+  `
+})
+class TestHostComponent {
+  @ViewChild(SidebarComponent) sidebarComponent!: SidebarComponent;
+
+  logoIconExpanded = 'logo-large.svg';
+  logoIconShrank = 'logo-small.svg';
+  logoText = 'Test App';
+  appVersionDisplay = true;
+  expanded = true;
+
+  mainLinks: SidebarItem[] = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      shortLabel: 'Dash',
+      icon: 'home',
+      route: '/dashboard'
+    },
+    {
+      id: 'reports',
+      label: 'Reports',
+      shortLabel: 'Rep',
+      icon: 'analytics',
+      route: '/reports'
+    }
+  ];
+
+  footerLinks: SidebarItem[] = [
+    {
+      id: 'settings',
+      label: 'Settings',
+      shortLabel: 'Set',
+      icon: 'settings',
+      route: '/settings'
+    },
+    {
+      id: 'help',
+      label: 'Help',
+      shortLabel: 'Help',
+      icon: 'help',
+      route: '/help'
+    }
+  ];
+}
+
 describe('SidebarComponent', () => {
+  let hostComponent: TestHostComponent;
+  let hostFixture: ComponentFixture<TestHostComponent>;
   let component: SidebarComponent;
-  let fixture: ComponentFixture<SidebarComponent>;
-  let mockBodyElement: HTMLBodyElement;
+  let mockBodyClassList: { add: jest.Mock; remove: jest.Mock };
 
   beforeEach(async () => {
+    // Mock document.querySelector to return a mocked body element
+    mockBodyClassList = {
+      add: jest.fn(),
+      remove: jest.fn()
+    };
+
+    const mockBody = document.createElement('body');
+    mockBody.classList.add = mockBodyClassList.add;
+    mockBody.classList.remove = mockBodyClassList.remove;
+
+    jest.spyOn(document, 'querySelector').mockReturnValue(mockBody);
+
     await TestBed.configureTestingModule({
-      imports: [SidebarComponent],
-      providers: [provideRouter([])]
+      imports: [TestHostComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: () => 'test'
+              }
+            }
+          }
+        }
+      ]
     }).compileComponents();
 
-    // Create a mock body element
-    mockBodyElement = document.createElement('body');
-    jest.spyOn(document, 'querySelector').mockReturnValue(mockBodyElement);
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
+    hostFixture.detectChanges(); // This will trigger ngOnInit lifecycle
 
-    fixture = TestBed.createComponent(SidebarComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Get the SidebarComponent instance from the host
+    component = hostComponent.sidebarComponent;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Sidebar Template Rendering', () => {
-    it('should render expanded logo when expanded', () => {
-      expect(component.logoIconExpanded()).toBe('expanded-logo.svg');
-      component.expandedStatus.set(true);
-      fixture.detectChanges();
-      const logoImg = fixture.debugElement.query(By.css('img'));
-      expect(logoImg.nativeElement.src).toContain('expanded-logo.svg');
-    });
-
-    it('should render shrank logo when collapsed', () => {
-      expect(component.logoIconShrank()).toBe('shrank-logo.svg');
-      component.expandedStatus.set(false);
-      fixture.detectChanges();
-
-      const logoImg = fixture.debugElement.query(By.css('img'));
-      expect(logoImg.nativeElement.src).toContain('shrank-logo.svg');
-    });
-
-    it('should hide version when appVersionDisplay is false', () => {
-      expect(component.appVersionDisplay()).toBe(false);
-      component.expandedStatus.set(true);
-      fixture.detectChanges();
-
-      const versionElement = fixture.debugElement.query(
-        By.css('.stelBar-header__version-display')
-      );
-      expect(versionElement).toBeNull();
-    });
+  it('should initialize with proper sidebar classes', () => {
+    expect(mockBodyClassList.add).toHaveBeenCalledWith('has-sidebar');
+    expect(mockBodyClassList.add).toHaveBeenCalledWith('has-sidebar--expanded');
   });
 
-  describe('Event Handlers', () => {
-    it('should toggle menu and update body classes', () => {
-      const bodyElement = document.body;
-      component.toggleMenu();
-      fixture.detectChanges();
-
-      expect(component.expandedStatus()).toBe(false);
-      expect(
-        bodyElement.classList.contains('has-sidebar--shrank')
-      ).toBeTruthy();
-    });
+  it('should initialize with proper appVersion when environment version is set', () => {
+    expect(component.appVersion()).toBe('1.2.3');
   });
 
-  describe('ngOnInit', () => {
-    it('should add has-sidebar class to body', () => {
-      component.ngOnInit();
-      expect(mockBodyElement.classList.contains('has-sidebar')).toBeTruthy();
+  it('should initialize with fallback appVersion when environment version is not set', () => {
+    // Create a new instance with mocked environment
+    jest.resetModules();
+    jest.mock('../../../../environments/environment', () => ({
+      environment: {
+        version: '{BUILD_VERSION}'
+      }
+    }));
+
+    const tempModule = TestBed.configureTestingModule({
+      imports: [TestHostComponent]
     });
 
-    it('should add has-sidebar--expanded class when expanded', () => {
-      // Create a new component with a custom input
-      const customComponent = new SidebarComponent();
-      Object.defineProperty(customComponent, 'expanded', {
-        get: () => signal(true)
-      });
+    const tempFixture = TestBed.createComponent(TestHostComponent);
+    tempFixture.detectChanges();
 
-      // Mock querySelector again for this component instance
-      jest.spyOn(document, 'querySelector').mockReturnValue(mockBodyElement);
-
-      customComponent.ngOnInit();
-      expect(
-        mockBodyElement.classList.contains('has-sidebar--expanded')
-      ).toBeTruthy();
-    });
-
-    it('should add has-sidebar--shrank class when not expanded', () => {
-      // Create a new component with a custom input
-      const customComponent = new SidebarComponent();
-      Object.defineProperty(customComponent, 'expanded', {
-        get: () => signal(false)
-      });
-
-      // Mock querySelector again for this component instance
-      jest.spyOn(document, 'querySelector').mockReturnValue(mockBodyElement);
-
-      customComponent.ngOnInit();
-      expect(
-        mockBodyElement.classList.contains('has-sidebar--shrank')
-      ).toBeTruthy();
-    });
+    expect(tempFixture.componentInstance.sidebarComponent.appVersion()).toBe(
+      '0.0.00'
+    );
   });
 
-  describe('toggleMenu', () => {
-    it('should toggle expandedStatus', () => {
-      const initialStatus = component.expandedStatus();
-      component.toggleMenu();
-      expect(component.expandedStatus()).toBe(!initialStatus);
-    });
+  it('should toggle menu and update DOM classes correctly', () => {
+    // Initially set to expanded
+    expect(component.expandedStatus()).toBe(true);
+
+    // Toggle menu (to collapsed)
+    component.toggleMenu();
+    expect(component.expandedStatus()).toBe(false);
+    expect(mockBodyClassList.remove).toHaveBeenCalledWith(
+      'has-sidebar--expanded'
+    );
+
+    // Toggle menu again (back to expanded)
+    component.toggleMenu();
+    expect(component.expandedStatus()).toBe(true);
+    expect(mockBodyClassList.add).toHaveBeenCalledWith('has-sidebar--expanded');
   });
 
-  describe('constructor', () => {
-    it('should set app version from package.json', () => {
-      expect(component.appVersion()).toBe('1.0.0-test');
-    });
+  it('should display expanded logo when expanded', () => {
+    // Menu is expanded by default in our setup
+    hostFixture.detectChanges();
+
+    const img = hostFixture.debugElement.query(
+      By.css('.stelBar-header__link img')
+    );
+    expect(img.attributes['src']).toBe('in-app-logo/logo-large.svg');
+    expect(img.attributes['alt']).toBe('Test App');
   });
 
-  describe('input properties', () => {
-    it('should have correct default values', () => {
-      // Expanded input
-      expect(component.expanded()).toBe(true);
+  it('should display shrank logo when collapsed', () => {
+    component.expandedStatus.set(false);
+    hostFixture.detectChanges();
 
-      // Other inputs default to undefined or their set default
-      expect(component.logoIconExpanded()).toBeUndefined();
-      expect(component.appVersionDisplay()).toBe(true);
-    });
-
-    it('should allow checking input values', () => {
-      // Create test cases to verify input behavior
-      const testCases = [
-        {
-          input: 'logoIconExpanded',
-          value: 'custom-expanded-logo.svg'
-        },
-        {
-          input: 'logoIconShrank',
-          value: 'custom-shrank-logo.svg'
-        },
-        {
-          input: 'logoText',
-          value: 'Test Logo'
-        },
-        {
-          input: 'appVersionDisplay',
-          value: false
-        }
-      ];
-
-      testCases.forEach(({ input, value }) => {
-        // Create a new component
-        const testComponent = new SidebarComponent();
-
-        // Create a mock input signal with the test value
-        const mockSignal = signal(value);
-
-        // Override the input with the mock signal
-        Object.defineProperty(testComponent, input, {
-          get: () => mockSignal
-        });
-
-        // Verify the input value
-        expect(testComponent[input as keyof SidebarComponent]()).toBe(value);
-      });
-    });
+    const img = hostFixture.debugElement.query(
+      By.css('.stelBar-header__link img')
+    );
+    expect(img.attributes['src']).toBe('in-app-logo/logo-small.svg');
+    expect(img.attributes['alt']).toBe('Test App');
   });
 
-  describe('initial signals', () => {
-    it('should have correct initial signal values', () => {
-      expect(component.expandedStatus()).toBe(true);
-      expect(component.appLogoRoot()).toBe('in-app-logo/');
-    });
+  it('should show version when appVersionDisplay is true and sidebar is expanded', () => {
+    // Default setup: appVersionDisplay=true, expanded=true
+    hostFixture.detectChanges();
+
+    const versionEl = hostFixture.debugElement.query(
+      By.css('.stelBar-header__version-display')
+    );
+    expect(versionEl).toBeTruthy();
+    expect(versionEl.nativeElement.textContent.trim()).toBe('v.1.2.3');
   });
 
-  describe('Accessibility and Routing', () => {
-    it('should have correct aria attributes on links', () => {
-      const links = fixture.debugElement.queryAll(
-        By.css('.stellar-sidebar__link')
-      );
-      links.forEach((link) => {
-        expect(link.attributes['ariaCurrentWhenActive']).toBe('page');
-      });
-    });
+  it('should not show version when appVersionDisplay is false', () => {
+    hostComponent.appVersionDisplay = false;
+    hostFixture.detectChanges();
 
-    it('should generate correct router links', () => {
-      expect(component.mainLinks()).toBe([
-        {
-          id: 'home',
-          route: '/home',
-          label: 'Home',
-          shortLabel: 'H',
-          icon: 'home'
-        }
-      ]);
-      fixture.detectChanges();
+    const versionEl = hostFixture.debugElement.query(
+      By.css('.stelBar-header__version-display')
+    );
+    expect(versionEl).toBeFalsy();
+  });
 
-      const homeLink = fixture.debugElement.query(
-        By.css('[routerLink="/home"]')
-      );
-      expect(homeLink).toBeTruthy();
-    });
+  it('should not show version when sidebar is collapsed', () => {
+    component.expandedStatus.set(false);
+    hostFixture.detectChanges();
+
+    const versionEl = hostFixture.debugElement.query(
+      By.css('.stelBar-header__version-display')
+    );
+    expect(versionEl).toBeFalsy();
+  });
+
+  it('should render main links correctly', () => {
+    hostFixture.detectChanges();
+    const mainLinks = hostFixture.debugElement.queryAll(
+      By.css('.stelBar-main li a')
+    );
+    expect(mainLinks.length).toBe(hostComponent.mainLinks.length);
+
+    expect(mainLinks[0].attributes['id']).toBe('dashboard');
+    expect(mainLinks[0].attributes['routerLink']).toBe('/dashboard');
+
+    expect(mainLinks[1].attributes['id']).toBe('reports');
+    expect(mainLinks[1].attributes['routerLink']).toBe('/reports');
+  });
+
+  it('should render footer links correctly', () => {
+    hostFixture.detectChanges();
+    const footerLinks = hostFixture.debugElement.queryAll(
+      By.css('.stelBar-footer ul li a')
+    );
+    expect(footerLinks.length).toBe(hostComponent.footerLinks.length);
+
+    expect(footerLinks[0].attributes['id']).toBe('settings');
+    expect(footerLinks[0].attributes['routerLink']).toBe('/settings');
+
+    expect(footerLinks[1].attributes['id']).toBe('help');
+    expect(footerLinks[1].attributes['routerLink']).toBe('/help');
+  });
+
+  it('should display full labels when expanded', () => {
+    // Default setup is expanded
+    hostFixture.detectChanges();
+
+    const mainLinkLabels = hostFixture.debugElement.queryAll(
+      By.css('.stelBar-main li a span:not(.app-icon)')
+    );
+    expect(mainLinkLabels[0].nativeElement.textContent.trim()).toBe(
+      'Dashboard'
+    );
+    expect(mainLinkLabels[1].nativeElement.textContent.trim()).toBe('Reports');
+  });
+
+  it('should display short labels when collapsed', () => {
+    component.expandedStatus.set(false);
+    hostFixture.detectChanges();
+
+    const mainLinkLabels = hostFixture.debugElement.queryAll(
+      By.css('.stelBar-main li a span:not(.app-icon)')
+    );
+    expect(mainLinkLabels[0].nativeElement.textContent.trim()).toBe('Dash');
+    expect(mainLinkLabels[1].nativeElement.textContent.trim()).toBe('Rep');
+  });
+
+  it('should display "Shrink menu" text when expanded', () => {
+    // Default setup is expanded
+    hostFixture.detectChanges();
+
+    const toggleButton = hostFixture.debugElement.query(
+      By.css('button.stellar-sidebar__link span:not(.app-icon)')
+    );
+    expect(toggleButton.nativeElement.textContent.trim()).toBe('Shrink menu');
+  });
+
+  it('should display "Menu" text when collapsed', () => {
+    component.expandedStatus.set(false);
+    hostFixture.detectChanges();
+
+    const toggleButton = hostFixture.debugElement.query(
+      By.css('button.stellar-sidebar__link span:not(.app-icon)')
+    );
+    expect(toggleButton.nativeElement.textContent.trim()).toBe('Menu');
+  });
+
+  it('should toggle menu when button is clicked', () => {
+    jest.spyOn(component, 'toggleMenu');
+    const toggleButton = hostFixture.debugElement.query(
+      By.css('button.stellar-sidebar__link')
+    );
+
+    toggleButton.triggerEventHandler('click', null);
+    expect(component.toggleMenu).toHaveBeenCalled();
+  });
+
+  // Additional tests to verify input binding changes
+  it('should respond to changes in input properties', () => {
+    // Change the logo text
+    hostComponent.logoText = 'New App Name';
+    hostFixture.detectChanges();
+
+    const logoSr = hostFixture.debugElement.query(
+      By.css('.stelBar-header__link .sr-only')
+    );
+    expect(logoSr.nativeElement.textContent.trim()).toBe('New App Name');
+  });
+
+  it('should update displayed links when input links change', () => {
+    // Add a new link to mainLinks
+    hostComponent.mainLinks = [
+      ...hostComponent.mainLinks,
+      {
+        id: 'new-link',
+        label: 'New Link',
+        shortLabel: 'New',
+        icon: 'add',
+        route: '/new'
+      }
+    ];
+    hostFixture.detectChanges();
+
+    const mainLinks = hostFixture.debugElement.queryAll(
+      By.css('.stelBar-main li a')
+    );
+    expect(mainLinks.length).toBe(3);
+    expect(mainLinks[2].attributes['id']).toBe('new-link');
   });
 });
