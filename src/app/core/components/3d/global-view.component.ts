@@ -88,12 +88,17 @@ import { SelectModule } from 'primeng/select';
         class="border border-gray-300 rounded-md"
         style="width: 100%; height: 500px; box-sizing: content-box;"
       ></div>
-      <div class="custom-slider my-5" *ngIf="litData()">
-        <ngx-slider
-          [(value)]="minValue"
-          [(highValue)]="maxValue"
-          [options]="options()"
-        ></ngx-slider>
+      <div class="custom-slider my-5 w-full" *ngIf="maxValue() && litData()">
+        @defer (on viewport) {
+          <ngx-slider
+            [(value)]="minValue"
+            [(highValue)]="maxValue"
+            [options]="options()"
+            class="w-full"
+          ></ngx-slider>
+        } @placeholder (minimum 500ms) {
+          <div></div>
+        }
       </div>
     </div>
   </div>`
@@ -102,7 +107,7 @@ export class GlobalViewComponent {
   constructor(private readonly workerService: WorkerService) {}
   litData = input<any>(null);
   minValue = signal(0);
-  maxValue = signal(14);
+  maxValue = signal(0);
   options = signal<Options>({});
   plot = signal<PlotlyHTMLElement | null>(null);
   phases = signal<string[]>(['all', 'phase_1', 'phase_2', 'phase_3', 'garde']);
@@ -111,32 +116,35 @@ export class GlobalViewComponent {
   views = signal<string[]>(['3d', '2d']);
   selectedView = signal<'3d' | '2d'>('3d');
 
-  ngOnInit() {
-    this.workerService.ready$.subscribe(() => {
-      this.runPython();
-    });
+  // ngOnInit() {
+  //   this.workerService.ready$.subscribe(() => {
+  //     this.runPython();
+  //   });
+  // }
+
+  ngAfterViewInit() {
+    console.log('ngAfterViewInit');
+  }
+
+  ngOnDestroy() {
+    console.log('ngOnDestroy');
   }
 
   readonly effect2 = effect(() => {
-    console.log('effect2', this.selectedPhase());
-    // const plot = untracked(() => this.plot());
-    //@ts-ignore
-    console.log('this.plot()?._fullLayout', this.plot()?._fullLayout);
-    // @ts-ignore
-    const currentCamera = this.plot()?._fullLayout?.scene?.camera;
-    console.log('currentCamera', currentCamera);
+    console.log('effect2 global view, will create plot');
     this.createPlot(
       untracked(() => this.minValue()),
       untracked(() => this.maxValue()),
       this.selectedPhase(),
       this.showOtherAsDashed(),
-      currentCamera,
+      // @ts-ignore
+      this.plot()?._fullLayout?.scene?.camera,
       this.selectedView()
     );
   });
 
   readonly effect3 = effect(() => {
-    console.log('effect3');
+    console.log('effect3 global view, will create plot');
     // const plot = untracked(() => this.plot());
     // // @ts-ignore
     // const currentCamera = plot?._fullLayout.scene.camera;
@@ -287,7 +295,7 @@ export class GlobalViewComponent {
     currentCamera: Camera | undefined,
     view: '3d' | '2d'
   ) {
-    console.log('selectedPhase', selectedPhase);
+    console.log('creating plot');
     const lit = untracked(() => this.litData());
     if (!lit) return;
     const uniqueSupports = uniq(Object.values(lit.support)).slice(
@@ -444,9 +452,8 @@ export class GlobalViewComponent {
 
   readonly effect = effect(async () => {
     console.log('effect');
-    // const lit = this.workerService.result()?.lit;
-    // if (!lit) return;
     const lit = this.litData();
+    if (!lit) return;
     const uniqueSupports = uniq(Object.values(lit.support));
     this.options.set({
       floor: 0,
@@ -458,8 +465,6 @@ export class GlobalViewComponent {
       animateOnMove: false
     });
     this.maxValue.set(uniqueSupports.length);
-    // this.litData.set(lit);
-    // this.createPlot(0, uniqueSupports.length, 'all', false);
   });
 
   runPython() {

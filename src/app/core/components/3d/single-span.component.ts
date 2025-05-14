@@ -49,7 +49,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     <!-- <p-button label="log" (onClick)="log()"></p-button> -->
     <div class="my-5 flex flex-row gap-2 items-end">
       <div class="flex flex-col gap-2 ">
-        <label for="vertical" class="mr-2 font-bold">Span Number:</label>
+        <label for="vertical" class="mr-2 font-bold">Select span:</label>
         <p-inputnumber
           [(ngModel)]="selectedSpan"
           [showButtons]="true"
@@ -477,16 +477,4 @@ export class SingleSpanComponent {
       this.plotProfile.set(plot);
     }
   }
-
-  //   readonly effect = effect(async () => {
-  //     console.log('effect');
-  //     const lit = this.workerService.result()?.lit;
-  //     if (!lit) return;
-  //     const uniqueSupports = uniq(Object.values(lit.support));
-  //     this.litData.set(lit);
-  //   });
-
-  // runPython() {
-  //   this.workerService.runTask(Task.runPython2, {});
-  // }
 }

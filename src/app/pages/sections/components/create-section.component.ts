@@ -196,7 +196,6 @@ interface Section {
                 <p-dropdown
                   id="regional_maintenance_center_name"
                   [options]="regionalMaintenanceCenters()"
-                  formControlName="regional_maintenance_center_name"
                   (onChange)="onRegionalMaintenanceCenterChange($event)"
                   placeholder="Select a regional maintenance center name"
                   [showClear]="true"
@@ -482,7 +481,6 @@ export class CreateSectionComponent implements OnInit {
   ) {}
 
   async onRegionalMaintenanceCenterChange(event: any) {
-    console.log('onRegionalMaintenanceCenterChange', event);
     const regionalMaintenanceCenter = (
       await this.storageService.db.regional_maintenance_centers
         .where('name')
@@ -503,7 +501,6 @@ export class CreateSectionComponent implements OnInit {
     this.storageService.db.regional_maintenance_centers
       .toArray()
       .then((regionalMaintenanceCenters) => {
-        console.log('regionalMaintenanceCenters', regionalMaintenanceCenters);
         this.regionalMaintenanceCenters.set(
           regionalMaintenanceCenters
             .sort((a, b) => a.name.localeCompare(b.name))
@@ -523,8 +520,10 @@ export class CreateSectionComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.initForm();
-    this.storageService.ready$.subscribe(() => {
-      this.resetRegionalMaintenanceCenter();
+    this.storageService.ready$.subscribe((ready) => {
+      if (ready) {
+        this.resetRegionalMaintenanceCenter();
+      }
     });
   }
 

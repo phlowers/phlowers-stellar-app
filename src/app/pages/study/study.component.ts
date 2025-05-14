@@ -63,7 +63,10 @@ const initialObstaclesObjects: Obstacle[] = initialObstacles.name.map(
     name,
     type: initialObstacles.type[index],
     support: initialObstacles.support[index],
-    position: initialObstacles.position[index],
+    positions: [
+      initialObstacles.position[index],
+      initialObstacles.position[index]
+    ],
     height: initialObstacles.height[index],
     width: initialObstacles.width[index],
     length: initialObstacles.length[index]

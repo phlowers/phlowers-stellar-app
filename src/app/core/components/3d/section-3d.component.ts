@@ -63,7 +63,7 @@ import { GlobalViewComponent } from './global-view.component';
         <p-tabpanel value="span">
           @defer (on viewport) {
             <app-single-span [litData]="litData()"></app-single-span>
-          } @placeholder {
+          } @placeholder (minimum 500ms) {
             <div></div>
           }
         </p-tabpanel>
@@ -89,10 +89,9 @@ export class Section3dComponent implements OnInit {
   }
 
   readonly effect = effect(async () => {
-    console.log('effect');
+    console.log('effect to get lit data from worker');
     const lit = this.workerService.result()?.lit;
     if (!lit) return;
-    // const lit = this.litData();
     this.litData.set(lit);
   });
 

@@ -10,6 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { v4 as uuidV4 } from 'uuid';
+
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
@@ -18,16 +20,32 @@ import { TableModule } from 'primeng/table';
 import { Section } from '../../core/store/database/interfaces/section';
 import { ToolbarModule } from 'primeng/toolbar';
 import { StorageService } from '../../core/store/storage.service';
-import { SearchSectionComponent } from './components/search-section.component';
-import { ThreeDModalComponent } from './components/three-d-modal.component';
 import { PopoverModule } from 'primeng/popover';
 import { CreateSectionComponent } from './components/create-section.component';
 import { SelectModule } from 'primeng/select';
+import { Section3dComponent } from '../../core/components/3d/section-3d.component';
+import { Study } from '../../core/store/database/interfaces/study';
+import { NewStudyDialogComponent } from '../../core/components/new-study-dialog/new-study-dialog.component';
+import { isEqual } from 'lodash';
+import { Router } from '@angular/router';
+
+const newStudy = (): Study => {
+  return {
+    title: '',
+    description: '',
+    shareable: false,
+    uuid: '',
+    author_email: '',
+    created_at_offline: '',
+    updated_at_offline: '',
+    saved: false
+  };
+};
 
 @Component({
   standalone: true,
   imports: [
-    ThreeDModalComponent,
+    Section3dComponent,
     CreateSectionComponent,
     SearchSectionModalComponent,
     PopoverModule,
@@ -40,7 +58,8 @@ import { SelectModule } from 'primeng/select';
     DialogModule,
     TableModule,
     ToolbarModule,
-    SelectModule
+    SelectModule,
+    NewStudyDialogComponent
   ],
   template: `
     <app-create-section
@@ -48,15 +67,27 @@ import { SelectModule } from 'primeng/select';
       (cancel)="onCancelSection()"
     ></app-create-section>
 
+    <app-new-study-dialog
+      [(open)]="studyDialogOpen"
+      [study]="study"
+      [saveStudy]="saveStudy.bind(this)"
+      [submitted]="submitted"
+    />
+
     <p-dialog
       dismissableMask="true"
       [style]="{ width: '80vw', height: '90vh' }"
       header="3D View"
       [(visible)]="threeDModalOpen"
       (onHide)="closeThreeDModal()"
+      [keepInViewport]="false"
       [modal]="true"
     >
-      <app-three-d-modal />
+      <!-- @defer (on viewport) { -->
+      <app-section-3d *ngIf="threeDModalOpen()" />
+      <!-- } @placeholder {
+        <div></div>
+      } -->
     </p-dialog>
     <app-search-section-modal
       [isOpen]="isSearchSectionModalOpen"
@@ -113,6 +144,20 @@ import { SelectModule } from 'primeng/select';
           <th style="width: 3rem"></th>
           <th i18n style="width: 10rem; max-width: 10rem;"></th>
           <th i18n style="width: 10rem; max-width: 10rem;"></th>
+          <th
+            i18n
+            pSortableColumn="regional_maintenance_center_names"
+            style="min-width:16rem"
+          >
+            Regional Maintenance Center
+          </th>
+          <th
+            i18n
+            pSortableColumn="maintenance_center_names"
+            style="min-width:16rem"
+          >
+            Maintenance Center
+          </th>
           <th i18n pSortableColumn="uuid" style="width: 6rem; max-width: 6rem;">
             Uuid
             <p-sortIcon field="uuid" />
@@ -205,20 +250,6 @@ import { SelectModule } from 'primeng/select';
             Last Attachment Set
             <p-sortIcon field="last_attachment_set" />
           </th>
-          <th
-            i18n
-            pSortableColumn="regional_maintenance_center_names"
-            style="min-width:16rem"
-          >
-            Regional Maintenance Center
-          </th>
-          <th
-            i18n
-            pSortableColumn="maintenance_center_names"
-            style="min-width:16rem"
-          >
-            Maintenance Center
-          </th>
         </tr>
       </ng-template>
       <ng-template #body let-section>
@@ -250,6 +281,22 @@ import { SelectModule } from 'primeng/select';
                 class="mr-2"
               />
             </td>
+            <td>
+              <p-select
+                [options]="typedSection.regional_maintenance_center_names"
+                placeholder="View"
+                [ngModel]="typedSection.regional_maintenance_center_names[0]"
+                class="w-full md:w-56"
+              />
+            </td>
+            <td>
+              <p-select
+                [options]="typedSection.maintenance_center_names"
+                [ngModel]="typedSection.maintenance_center_names[0]"
+                placeholder="View"
+                class="w-full md:w-56"
+              />
+            </td>
             <td
               style="width: 6rem; max-width: 6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
             >
@@ -271,22 +318,6 @@ import { SelectModule } from 'primeng/select';
             <td>{{ typedSection.last_support_number }}</td>
             <td>{{ typedSection.first_attachment_set }}</td>
             <td>{{ typedSection.last_attachment_set }}</td>
-            <td>
-              <p-select
-                [options]="typedSection.regional_maintenance_center_names"
-                placeholder="View"
-                [ngModel]="typedSection.regional_maintenance_center_names[0]"
-                class="w-full md:w-56"
-              />
-            </td>
-            <td>
-              <p-select
-                [options]="typedSection.maintenance_center_names"
-                [ngModel]="typedSection.maintenance_center_names[0]"
-                placeholder="View"
-                class="w-full md:w-56"
-              />
-            </td>
           </tr>
           <p-popover #op>
             <div class="flex flex-col gap-4">
@@ -302,11 +333,12 @@ import { SelectModule } from 'primeng/select';
 export class SectionsComponent implements OnInit {
   @ViewChild(CreateSectionComponent)
   createSectionDialog!: CreateSectionComponent;
-
+  study: Study = newStudy();
   submitted = false;
   isSearchSectionModalOpen = false;
   sections = signal<Section[]>([]);
   threeDModalOpen = signal(false);
+  studyDialogOpen = signal(false);
   test = ['1', '2', '3', '4', '5', '6', '7'];
 
   section = {
@@ -314,7 +346,11 @@ export class SectionsComponent implements OnInit {
     description: ''
   };
 
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private messageService: MessageService,
+    private router: Router
+  ) {}
 
   loadFromFile() {
     const file = document.createElement('input');
@@ -367,7 +403,7 @@ export class SectionsComponent implements OnInit {
   }
 
   createStudy(section: Section) {
-    console.log('createStudy', section);
+    this.studyDialogOpen.set(true);
   }
 
   onSaveSection(section: any): void {
@@ -383,11 +419,40 @@ export class SectionsComponent implements OnInit {
     this.createSectionDialog.show();
   }
 
+  async saveStudy() {
+    this.submitted = true;
+    if (!this.study?.title) {
+      return;
+    }
+    const uuid = uuidV4();
+    const user = (await this.storageService.db?.users.toArray())?.[0];
+    await this.storageService.db?.studies.add({
+      ...this.study,
+      uuid,
+      author_email: user!.email,
+      created_at_offline: new Date().toISOString(),
+      updated_at_offline: new Date().toISOString(),
+      saved: false
+    });
+    this.messageService.add({
+      severity: 'success',
+      summary: $localize`Successful`,
+      detail: $localize`Study Created`,
+      life: 3000
+    });
+
+    // this.studies.set((await this.storageService.db?.studies.toArray()) || []);
+    this.studyDialogOpen.set(false);
+    this.study = newStudy();
+    this.router.navigate(['/study', uuid]);
+  }
+
   async ngOnInit() {
-    this.storageService.ready$.subscribe(async () => {
-      const sections = await this.storageService.db.sections.toArray();
-      console.log('sections', sections);
-      this.sections.set(sections);
+    this.storageService.ready$.subscribe(async (ready) => {
+      if (ready) {
+        const sections = await this.storageService.db.sections.toArray();
+        this.sections.set(sections);
+      }
     });
   }
 }

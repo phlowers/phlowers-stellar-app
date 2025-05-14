@@ -16,6 +16,7 @@ import { Section } from '../../../core/store/database/interfaces/section';
 import { StorageService } from '../../../core/store/storage.service';
 import { PopoverModule } from 'primeng/popover';
 import { SelectModule } from 'primeng/select';
+import { Section3dComponent } from '../../../core/components/3d/section-3d.component';
 
 const newSection = (): Partial<
   Section & {
@@ -51,6 +52,21 @@ const newSection = (): Partial<
 @Component({
   selector: 'app-search-section-modal',
   template: `
+    <p-dialog
+      dismissableMask="true"
+      [style]="{ width: '80vw', height: '90vh' }"
+      header="3D View"
+      [(visible)]="threeDModalOpen"
+      [keepInViewport]="false"
+      (onHide)="closeThreeDModal()"
+      [modal]="true"
+    >
+      <!-- @defer (on viewport) { -->
+      <app-section-3d *ngIf="threeDModalOpen()" />
+      <!-- } @placeholder (minimum 2s) {
+        <div></div>
+      } -->
+    </p-dialog>
     <p-dialog
       dismissableMask="true"
       [style]="{ width: '80vw', height: '90vh' }"
@@ -392,6 +408,20 @@ const newSection = (): Partial<
                   <th i18n style="width: 10rem; max-width: 10rem;"></th>
                   <th
                     i18n
+                    pSortableColumn="regional_maintenance_center_names"
+                    style="min-width:16rem"
+                  >
+                    Regional Maintenance Centers
+                  </th>
+                  <th
+                    i18n
+                    pSortableColumn="maintenance_center_names"
+                    style="min-width:16rem"
+                  >
+                    Maintenance Centers
+                  </th>
+                  <th
+                    i18n
                     pSortableColumn="uuid"
                     style="width: 6rem; max-width: 6rem;"
                   >
@@ -510,20 +540,6 @@ const newSection = (): Partial<
                     Last Attachment Set
                     <p-sortIcon field="last_attachment_set" />
                   </th>
-                  <th
-                    i18n
-                    pSortableColumn="regional_maintenance_center_names"
-                    style="min-width:16rem"
-                  >
-                    Regional Maintenance Centers
-                  </th>
-                  <th
-                    i18n
-                    pSortableColumn="maintenance_center_names"
-                    style="min-width:16rem"
-                  >
-                    Maintenance Centers
-                  </th>
                 </tr>
               </ng-template>
               <ng-template #body let-section>
@@ -555,27 +571,6 @@ const newSection = (): Partial<
                         class="mr-2"
                       />
                     </td>
-                    <td
-                      style="width: 6rem; max-width: 6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                    >
-                      {{ typedSection.uuid }}
-                    </td>
-                    <td style="min-width: 16rem">{{ typedSection.name }}</td>
-                    <td>{{ typedSection.internal_id }}</td>
-                    <td>{{ typedSection.short_name }}</td>
-                    <td>{{ typedSection.internal_catalog_id }}</td>
-                    <td>{{ typedSection.type }}</td>
-                    <td>{{ typedSection.cable_name }}</td>
-                    <td>{{ typedSection.cable_short_name }}</td>
-                    <td>{{ typedSection.cables_amount }}</td>
-                    <td>{{ typedSection.optical_fibers_amount }}</td>
-                    <td>{{ typedSection.spans_amount }}</td>
-                    <td>{{ typedSection.begin_span_name }}</td>
-                    <td>{{ typedSection.last_span_name }}</td>
-                    <td>{{ typedSection.first_support_number }}</td>
-                    <td>{{ typedSection.last_support_number }}</td>
-                    <td>{{ typedSection.first_attachment_set }}</td>
-                    <td>{{ typedSection.last_attachment_set }}</td>
                     <td>
                       <p-select
                         [options]="
@@ -598,6 +593,27 @@ const newSection = (): Partial<
                         class="w-full md:w-56"
                       />
                     </td>
+                    <td
+                      style="width: 6rem; max-width: 6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                    >
+                      {{ typedSection.uuid }}
+                    </td>
+                    <td style="min-width: 16rem">{{ typedSection.name }}</td>
+                    <td>{{ typedSection.internal_id }}</td>
+                    <td>{{ typedSection.short_name }}</td>
+                    <td>{{ typedSection.internal_catalog_id }}</td>
+                    <td>{{ typedSection.type }}</td>
+                    <td>{{ typedSection.cable_name }}</td>
+                    <td>{{ typedSection.cable_short_name }}</td>
+                    <td>{{ typedSection.cables_amount }}</td>
+                    <td>{{ typedSection.optical_fibers_amount }}</td>
+                    <td>{{ typedSection.spans_amount }}</td>
+                    <td>{{ typedSection.begin_span_name }}</td>
+                    <td>{{ typedSection.last_span_name }}</td>
+                    <td>{{ typedSection.first_support_number }}</td>
+                    <td>{{ typedSection.last_support_number }}</td>
+                    <td>{{ typedSection.first_attachment_set }}</td>
+                    <td>{{ typedSection.last_attachment_set }}</td>
                   </tr>
                   <p-popover #op>
                     <div class="flex flex-col gap-4">
@@ -630,6 +646,7 @@ const newSection = (): Partial<
     TableModule,
     CommonModule,
     PopoverModule,
+    Section3dComponent,
     SelectModule
   ]
 })
@@ -656,6 +673,10 @@ export class SearchSectionModalComponent {
     this.sectionToSearch = newSection();
   }
 
+  closeThreeDModal() {
+    this.threeDModalOpen.set(false);
+  }
+
   resetFields() {
     this.sectionToSearch = newSection();
     this.resetRegionalMaintenanceCenter();
@@ -670,7 +691,6 @@ export class SearchSectionModalComponent {
   }
 
   async onRegionalMaintenanceCenterChange(event: any) {
-    console.log('onRegionalMaintenanceCenterChange', event);
     const regionalMaintenanceCenter = (
       await this.storageService.db.regional_maintenance_centers
         .where('name')
@@ -689,7 +709,6 @@ export class SearchSectionModalComponent {
     this.storageService.db.regional_maintenance_centers
       .toArray()
       .then((regionalMaintenanceCenters) => {
-        console.log('regionalMaintenanceCenters', regionalMaintenanceCenters);
         this.regionalMaintenanceCenters.set(
           regionalMaintenanceCenters
             .sort((a, b) => a.name.localeCompare(b.name))
@@ -708,9 +727,10 @@ export class SearchSectionModalComponent {
   }
 
   ngOnInit() {
-    console.log('ngOnInit');
-    this.storageService.ready$.subscribe(() => {
-      this.resetRegionalMaintenanceCenter();
+    this.storageService.ready$.subscribe((ready) => {
+      if (ready) {
+        this.resetRegionalMaintenanceCenter();
+      }
     });
   }
 

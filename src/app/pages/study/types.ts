@@ -2,13 +2,19 @@ export interface Obstacle {
   name: string;
   type: string;
   support: string;
-  position: {
-    x: number;
-    y: number;
-  };
-  height: number;
-  width: number;
-  length: number;
+  positions: [
+    {
+      x: number;
+      y: number;
+    },
+    {
+      x: number;
+      y: number;
+    }
+  ];
+  // height: number;
+  // width: number;
+  // length: number;
 }
 
 export interface Support {

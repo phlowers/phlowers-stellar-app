@@ -42,7 +42,7 @@ import {
   OnlineService,
   ServerStatus
 } from '../../core/api/services/online.service';
-
+import { NewStudyDialogComponent } from '../../core/components/new-study-dialog/new-study-dialog.component';
 interface Column {
   title: string;
   dataKey: string;
@@ -94,7 +94,8 @@ const columns = [
     InputIconModule,
     IconFieldModule,
     ConfirmDialogModule,
-    ImportStudyModalComponent
+    ImportStudyModalComponent,
+    NewStudyDialogComponent
   ],
   template: `
     <p-toast position="top-center"></p-toast>
@@ -295,77 +296,12 @@ const columns = [
       </ng-template>
     </p-table>
 
-    <p-dialog
-      dismissableMask="true"
-      [(visible)]="studyDialog"
-      [style]="{ width: '450px' }"
-      i18n-header
-      header="New study"
-      [modal]="true"
-    >
-      <ng-template #content>
-        <div class="flex flex-col gap-6">
-          <div>
-            <label i18n for="title" class="block font-bold mb-3">Title:</label>
-            <input
-              type="text"
-              pInputText
-              id="title"
-              [(ngModel)]="study.title"
-              required
-              fluid
-            />
-            <small i18n class="text-red-500" *ngIf="submitted && !study!.title"
-              >Title is required.</small
-            >
-          </div>
-          <div>
-            <label i18n for="description" class="block font-bold mb-3"
-              >Description:</label
-            >
-            <textarea
-              id="description"
-              pTextarea
-              [(ngModel)]="study.description"
-              required
-              rows="3"
-              cols="20"
-              fluid
-            ></textarea>
-          </div>
-          <div>
-            <label i18n for="shareable" class="block font-bold mb-3"
-              >Shareable to other users:</label
-            >
-            <p-checkbox
-              id="shareable"
-              [binary]="true"
-              [(ngModel)]="study.shareable"
-              required
-              rows="3"
-              cols="20"
-              fluid
-            ></p-checkbox>
-          </div>
-        </div>
-      </ng-template>
-
-      <ng-template #footer>
-        <p-button
-          i18n-label
-          label="Cancel"
-          icon="pi pi-times"
-          text
-          (click)="hideDialog()"
-        />
-        <p-button
-          i18n-label
-          label="Save"
-          icon="pi pi-check"
-          (click)="saveStudy()"
-        />
-      </ng-template>
-    </p-dialog>
+    <app-new-study-dialog
+      [(open)]="studyDialogOpen"
+      [study]="study"
+      [saveStudy]="saveStudy.bind(this)"
+      [submitted]="submitted"
+    />
 
     <app-import-study-modal
       [(isOpen)]="isImportStudyModalOpen"
@@ -377,7 +313,7 @@ const columns = [
   providers: [MessageService, ConfirmationService]
 })
 export class StudiesComponent implements OnInit {
-  studyDialog = false;
+  studyDialogOpen = false;
   isImportStudyModalOpen = false;
   studies = signal<Study[]>([]);
   study: Study = newStudy();
@@ -437,7 +373,7 @@ export class StudiesComponent implements OnInit {
   openNew() {
     this.study = newStudy();
     this.submitted = false;
-    this.studyDialog = true;
+    this.studyDialogOpen = true;
   }
 
   openImportStudyModal() {
@@ -450,7 +386,7 @@ export class StudiesComponent implements OnInit {
 
   editStudy(study: Study) {
     this.study = { ...study };
-    this.studyDialog = true;
+    this.studyDialogOpen = true;
   }
 
   deleteSelectedStudies() {
@@ -479,7 +415,7 @@ export class StudiesComponent implements OnInit {
   }
 
   hideDialog() {
-    this.studyDialog = false;
+    this.studyDialogOpen = false;
     this.submitted = false;
   }
 
@@ -542,18 +478,6 @@ export class StudiesComponent implements OnInit {
         await this.deleteStudyAccepted(study);
       }
     });
-  }
-
-  findIndexById(uuid: string): number {
-    let index = -1;
-    for (let i = 0; i < this.studies().length; i++) {
-      if (this.studies()[i].uuid === uuid) {
-        index = i;
-        break;
-      }
-    }
-
-    return index;
   }
 
   createUuid(): string {
@@ -620,7 +544,7 @@ export class StudiesComponent implements OnInit {
     }
 
     this.studies.set((await this.storageService.db?.studies.toArray()) || []);
-    this.studyDialog = false;
+    this.studyDialogOpen = false;
     this.study = newStudy();
   }
 }

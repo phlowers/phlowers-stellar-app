@@ -15,22 +15,43 @@ import { Obstacle } from '../types';
 @Component({
   selector: 'app-obstacles-tab',
   standalone: true,
-  imports: [ButtonModule, ProgressSpinnerModule, CommonModule, TableModule, InputTextModule, FormsModule, CheckboxModule, TabsModule, CardModule, DividerModule, DialogModule],
+  imports: [
+    ButtonModule,
+    ProgressSpinnerModule,
+    CommonModule,
+    TableModule,
+    InputTextModule,
+    FormsModule,
+    CheckboxModule,
+    TabsModule,
+    CardModule,
+    DividerModule,
+    DialogModule
+  ],
   template: `<div>
     <div class="pb-5">
-      <p-button i18n severity="info" (click)="addObstacle()">Add Obstacle</p-button>
+      <p-button i18n severity="info" (click)="addObstacle()"
+        >Add Obstacle</p-button
+      >
     </div>
-    <p-table [paginator]="true" [alwaysShowPaginator]="true" [showCurrentPageReport]="true" [rows]="10" [rowsPerPageOptions]="[10, 20, 30]" [value]="obstacles" [tableStyle]="{ 'min-width': '50rem' }">
+    <p-table
+      [paginator]="true"
+      [alwaysShowPaginator]="true"
+      [showCurrentPageReport]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 20, 30]"
+      [value]="obstacles"
+      [tableStyle]="{ 'min-width': '50rem' }"
+    >
       <ng-template #header>
         <tr>
           <th i18n>Name</th>
           <th i18n>Type</th>
           <th i18n>Support</th>
-          <th i18n>Position X</th>
-          <th i18n>Position Y</th>
-          <th i18n>Height</th>
-          <th i18n>Width</th>
-          <th i18n>Length</th>
+          <th i18n>First Position X</th>
+          <th i18n>First Position Y</th>
+          <th i18n>Second Position X</th>
+          <th i18n>Second Position Y</th>
         </tr>
       </ng-template>
       <ng-template #body let-obstacle let-editing="editing">
@@ -55,7 +76,10 @@ import { Obstacle } from '../types';
               </ng-template>
             </p-cellEditor>
           </td>
-          <td [pEditableColumn]="obstacle.support" pEditableColumnField="support">
+          <td
+            [pEditableColumn]="obstacle.support"
+            pEditableColumnField="support"
+          >
             <p-cellEditor>
               <ng-template #input>
                 <input pInputText type="text" [(ngModel)]="obstacle.support" />
@@ -65,53 +89,37 @@ import { Obstacle } from '../types';
               </ng-template>
             </p-cellEditor>
           </td>
-          <td [pEditableColumn]="obstacle.position.x" pEditableColumnField="position">
+          <td
+            [pEditableColumn]="obstacle.positions[0].x"
+            pEditableColumnField="position"
+          >
             <p-cellEditor>
               <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="obstacle.position.x" />
+                <input
+                  pInputText
+                  type="number"
+                  [(ngModel)]="obstacle.positions[0].x"
+                />
               </ng-template>
               <ng-template #output>
-                {{ obstacle.position.x }}
+                {{ obstacle.positions[0].x }}
               </ng-template>
             </p-cellEditor>
           </td>
-          <td [pEditableColumn]="obstacle.position.y" pEditableColumnField="position">
+          <td
+            [pEditableColumn]="obstacle.positions[1].y"
+            pEditableColumnField="position"
+          >
             <p-cellEditor>
               <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="obstacle.position.y" />
+                <input
+                  pInputText
+                  type="number"
+                  [(ngModel)]="obstacle.positions[1].y"
+                />
               </ng-template>
               <ng-template #output>
-                {{ obstacle.position.y }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-          <td [pEditableColumn]="obstacle.height" pEditableColumnField="height">
-            <p-cellEditor>
-              <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="obstacle.height" />
-              </ng-template>
-              <ng-template #output>
-                {{ obstacle.height }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-          <td [pEditableColumn]="obstacle.width" pEditableColumnField="width">
-            <p-cellEditor>
-              <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="obstacle.width" />
-              </ng-template>
-              <ng-template #output>
-                {{ obstacle.width }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-          <td [pEditableColumn]="obstacle.length" pEditableColumnField="length">
-            <p-cellEditor>
-              <ng-template #input>
-                <input pInputText type="number" [(ngModel)]="obstacle.length" />
-              </ng-template>
-              <ng-template #output>
-                {{ obstacle.length }}
+                {{ obstacle.positions[1].y }}
               </ng-template>
             </p-cellEditor>
           </td>
@@ -135,14 +143,20 @@ export class ObstaclesTabComponent implements OnInit {
     const newObstacle: Obstacle = {
       name: `obstacle ${this.obstacles.length + 1}`,
       type: 'cylinder',
-      position: {
-        x: 0,
-        y: 0
-      },
-      support: '',
-      height: 10,
-      width: 10,
-      length: 10
+      positions: [
+        {
+          x: 0,
+          y: 0
+        },
+        {
+          x: 0,
+          y: 0
+        }
+      ],
+      support: ''
+      // height: 10,
+      // width: 10,
+      // length: 10
     };
 
     this.obstacles.push(newObstacle);
