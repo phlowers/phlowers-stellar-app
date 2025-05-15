@@ -50,6 +50,7 @@ nav:
       - Offline database: developer_guide/offline_database.md
       - Engine worker: developer_guide/engine_worker.md
       - Application update: developer_guide/application_update.md
+      - Theme styles: developer_guide/theme_styles.md
 
 plugins:
   - search
