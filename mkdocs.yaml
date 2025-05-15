@@ -6,7 +6,7 @@ copyright: Copyright &copy; 2025 RTE France. Unless otherwise indicated, content
 theme:
   name: 'material'
   logo: _static/stellar_ico.svg
-  favicon: _static/stellar_ico.svg
+  favicon: _static/favicon.ico
   features:
     - toc.integrate
     - navigation.footer
