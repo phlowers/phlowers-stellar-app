@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Component, signal, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { SidebarComponent } from './sidebar.component';
 import { SidebarItem } from './sidebar.model';
 
@@ -138,10 +138,6 @@ describe('SidebarComponent', () => {
         version: '{BUILD_VERSION}'
       }
     }));
-
-    const tempModule = TestBed.configureTestingModule({
-      imports: [TestHostComponent]
-    });
 
     const tempFixture = TestBed.createComponent(TestHostComponent);
     tempFixture.detectChanges();
