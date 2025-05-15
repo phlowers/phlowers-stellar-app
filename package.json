@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve --port 4200",
     "build": "ng build --configuration=production",
-    "build:fr": "npm run set-version-and-build-time && ng build --output-mode=static --configuration=production,fr",
+    "build:fr": "npm run set-version-and-build-time && ng build --output-mode=static --configuration=production,fr && uv run --no-cache ./scripts/create_assets_list_for_service_worker.py --language fr",
     "build:en": "npm run set-version-and-build-time && ng build --output-mode=static --configuration=production,en && uv run --no-cache ./scripts/create_assets_list_for_service_worker.py --language en",
     "watch": "ng build --watch --configuration development",
     "format": "prettier --write \"**/*.{js,mjs,ts,mts,d.ts,html}\" --cache",
