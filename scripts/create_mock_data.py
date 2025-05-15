@@ -673,13 +673,13 @@ def generate_attachment(index: int) -> Attachment:
         "line_angle": random.uniform(0, 45),
         "support_ground_z": random.uniform(100, 500),
         "support_ground_x": random.uniform(-1000, 1000),
-        "support_ground_y": random.uniform(-1000, 1000),
+        "support_ground_y": 0,
         "attachment_type": random.choice(["Suspension", "Tension", "Anchor"]),
         "attachment_set": f"AS-{random.randint(100, 999)}",
         "attachment_set_z": random.uniform(20, 50),
         "attachment_set_x": random.uniform(-10, 10),
-        "attachment_set_y": random.uniform(-10, 10),
-        "cross_arm_relative_altitude": random.uniform(0, 5),
+        "attachment_set_y": 0,
+        "cross_arm_relative_altitude": random.uniform(20, 80),
         "cross_arm_length": random.uniform(2, 8),
         "chain_drn_catalog_internal_id": f"CDRN-{random.randint(1000, 9999)}",
         "chain_drn_internal_id": f"CDRN-{random.randint(100, 999)}",
@@ -839,7 +839,9 @@ def generate_mock_data(count: int = 10):
 
 if __name__ == "__main__":
     # Generate mock data
+    print("Generating mock data...")
     mock_data = generate_mock_data(50)
+    print("Mock data generated")
     
     # Save to JSON file relative to the current file create file if it doesn't exist
     file_path = os.path.join(os.path.dirname(__file__), "../src/app/core/store/database/mock_data.json")
