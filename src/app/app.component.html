@@ -43,13 +43,9 @@
     </small>
   </ng-template>
   <ng-template #footer>
-    <p-button
-      i18n-label
-      label="Save"
-      icon="pi pi-check"
-      type="submit"
-      (click)="saveUser()"
-      (keyup)="saveUser()"
-    />
+    <button pButton pRipple type="submit" (click)="saveUser()">
+      <i class="pi pi-check"></i>
+      <span pButtonLabel i18n>Save</span>
+    </button>
   </ng-template>
 </p-dialog>
