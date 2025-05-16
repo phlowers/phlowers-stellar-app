@@ -45,41 +45,43 @@ export class UpdateService {
   sucessFullUpdate = new Subject<void>();
 
   constructor() {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      console.log(`Message from service worker:`, event.data);
-      switch (event.data.message) {
-        case 'update_complete':
-          this.updateLoading = false;
-          this.currentVersion = event.data.current_version;
-          this.needUpdate =
-            !!this.latestVersion &&
-            (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
-              this.latestVersion?.build_datetime_utc !==
-                this.currentVersion?.build_datetime_utc);
-          this.sucessFullUpdate.next();
-          // reload the page to apply the update
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 1000);
-          break;
-        case 'no_new_version':
-        case 'new_version':
-          this.currentVersion = event.data.current_version;
-          this.latestVersion = event.data.latest_version;
-          this.needUpdate =
-            !!this.latestVersion &&
-            !!this.currentVersion &&
-            (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
-              this.latestVersion?.build_datetime_utc !==
-                this.currentVersion?.build_datetime_utc);
-          break;
-        case 'install_complete':
-          this.currentVersion = event.data.latest_version;
-          this.latestVersion = event.data.latest_version;
-          this.needUpdate = false;
-          break;
-      }
-    });
+    if (typeof navigator !== 'undefined' && navigator.serviceWorker) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        console.log(`Message from service worker:`, event.data);
+        switch (event.data.message) {
+          case 'update_complete':
+            this.updateLoading = false;
+            this.currentVersion = event.data.current_version;
+            this.needUpdate =
+              !!this.latestVersion &&
+              (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
+                this.latestVersion?.build_datetime_utc !==
+                  this.currentVersion?.build_datetime_utc);
+            this.sucessFullUpdate.next();
+            // reload the page to apply the update
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 1000);
+            break;
+          case 'no_new_version':
+          case 'new_version':
+            this.currentVersion = event.data.current_version;
+            this.latestVersion = event.data.latest_version;
+            this.needUpdate =
+              !!this.latestVersion &&
+              !!this.currentVersion &&
+              (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
+                this.latestVersion?.build_datetime_utc !==
+                  this.currentVersion?.build_datetime_utc);
+            break;
+          case 'install_complete':
+            this.currentVersion = event.data.latest_version;
+            this.latestVersion = event.data.latest_version;
+            this.needUpdate = false;
+            break;
+        }
+      });
+    }
   }
 
   async getAppVersion() {
