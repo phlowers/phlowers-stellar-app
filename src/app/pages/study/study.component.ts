@@ -24,6 +24,7 @@ import { VisualizationTabComponent } from './visualization/visualizationTab.comp
 import { Support } from './types';
 import { Data, Obstacle } from './types';
 import { WeatherTabComponent } from './weather/weather.component';
+import { CalculationsTabComponent } from './calculations/calculationsTab.component';
 
 // declare const Plotly: PlotlyTypes;
 
@@ -107,7 +108,8 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
     CardModule,
     DividerModule,
     DialogModule,
-    WeatherTabComponent
+    WeatherTabComponent,
+    CalculationsTabComponent
   ],
   template: `<div>
     <p-tabs value="Obstacles">
@@ -136,6 +138,9 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
             <div></div>
           }
         </p-tabpanel>
+        <p-tabpanel value="Calculations">
+          <app-calculations-tab [data]="data"></app-calculations-tab>
+        </p-tabpanel>
       </p-tabpanels>
     </p-tabs>
   </div>`
@@ -143,7 +148,14 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
 export class StudyComponent {
   loading = true;
   dataToObject = initialDataObjects;
-  tabs = ['General', 'Supports', 'Obstacles', 'Weather', 'Visualization'];
+  tabs = [
+    'General',
+    'Supports',
+    'Obstacles',
+    'Weather',
+    'Visualization',
+    'Calculations'
+  ];
   currentTab = this.tabs[0];
   data: Data = {
     general: {

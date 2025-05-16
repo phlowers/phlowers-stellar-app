@@ -62,7 +62,10 @@ import { GlobalViewComponent } from './global-view.component';
         </p-tabpanel>
         <p-tabpanel value="span">
           @defer (on viewport) {
-            <app-single-span [litData]="litData()"></app-single-span>
+            <app-single-span
+              [obstacleMode]="false"
+              [litData]="litData()"
+            ></app-single-span>
           } @placeholder (minimum 500ms) {
             <div></div>
           }
