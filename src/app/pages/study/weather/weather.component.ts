@@ -4,24 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import {
-  Component,
-  Input,
-  OnInit,
-  OnDestroy,
-  effect,
-  input
-} from '@angular/core';
-import { Subscription } from 'rxjs';
-import { ButtonModule } from 'primeng/button';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { CommonModule } from '@angular/common';
+import { Component, input } from '@angular/core';
 import { CardModule } from 'primeng/card';
-import { DividerModule } from 'primeng/divider';
-import Plotly from 'plotly.js-dist-min';
-import { WorkerService } from '../../../core/engine/worker/worker.service';
-import { Task } from '../../../core/engine/worker/tasks';
-import { Section3dComponent } from '../../../core/components/3d/section-3d.component';
 import { Data } from '../types';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';

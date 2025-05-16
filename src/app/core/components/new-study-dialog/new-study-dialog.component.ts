@@ -8,50 +8,24 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnInit,
-  output,
   Output,
-  signal,
   ViewChild
 } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { isEqual } from 'lodash';
-import { Table, TableModule } from 'primeng/table';
+import { Table } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TooltipModule } from 'primeng/tooltip';
 
 import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
-import { AvatarModule } from 'primeng/avatar';
 
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
-import { TagModule } from 'primeng/tag';
-import { RouterModule } from '@angular/router';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { v4 as uuid } from 'uuid';
 import { StorageService } from '../../store/storage.service';
-import { StudyService } from '../../api/services/study.service';
 import { Study } from '../../store/database/interfaces/study';
-import { Subscription } from 'rxjs';
 import { CheckboxModule } from 'primeng/checkbox';
-
-import { OnlineService, ServerStatus } from '../../api/services/online.service';
-
-interface Column {
-  title: string;
-  dataKey: string;
-}
 
 const newStudy = (): Study => {
   return {
@@ -62,17 +36,10 @@ const newStudy = (): Study => {
     author_email: '',
     created_at_offline: '',
     updated_at_offline: '',
-    saved: false
+    saved: false,
+    section_uuid: ''
   };
 };
-
-const columns = [
-  { dataKey: 'uuid', title: $localize`Uuid` },
-  { dataKey: 'title', title: $localize`Name` },
-  { dataKey: 'description', title: $localize`Description` },
-  { dataKey: 'author_email', title: $localize`Author` },
-  { dataKey: 'saved', title: $localize`Saved remotely` }
-];
 
 @Component({
   selector: 'app-new-study-dialog',

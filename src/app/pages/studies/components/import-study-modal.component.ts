@@ -27,7 +27,8 @@ const newStudy = (): Study => {
     author_email: '',
     created_at_offline: '',
     updated_at_offline: '',
-    saved: false
+    saved: false,
+    section_uuid: ''
   };
 };
 

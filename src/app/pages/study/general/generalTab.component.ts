@@ -24,6 +24,9 @@ interface Data {
       temperature: number | null;
       parameter: number | null;
     };
+    section: {
+      uuid: string;
+    };
     cable: {
       section: number | null;
       diameter: number | null;
@@ -364,6 +367,30 @@ interface Data {
           </div>
         </div>
       </p-card>
+      <p-card
+        [style]="{
+          overflow: 'hidden',
+          boxShadow:
+            'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px'
+        }"
+        class="col-span-2"
+      >
+        <ng-template #title
+          ><h6 [style]="{ marginBottom: '0' }">Section</h6></ng-template
+        >
+        <p-divider styleClass="!my-2" />
+        <div class="flex flex-col gap-2">
+          <label for="section_uuid">Section UUID</label>
+          <input
+            styleClass="w-50"
+            placeholder="Set section UUID"
+            pInputText
+            id="section_uuid"
+            aria-describedby="section_uuid-help"
+            [(ngModel)]="data.general.section.uuid"
+          />
+        </div>
+      </p-card>
     </div>
   `
 })
@@ -379,6 +406,9 @@ export class GeneralTabComponent {
       sagging: {
         temperature: 15,
         parameter: 800
+      },
+      section: {
+        uuid: '17d9f185-a89d-45d3-a901-7f049a980b3c'
       },
       cable: {
         section: 345.55,

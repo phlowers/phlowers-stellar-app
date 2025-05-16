@@ -26,7 +26,6 @@ import { SelectModule } from 'primeng/select';
 import { Section3dComponent } from '../../core/components/3d/section-3d.component';
 import { Study } from '../../core/store/database/interfaces/study';
 import { NewStudyDialogComponent } from '../../core/components/new-study-dialog/new-study-dialog.component';
-import { isEqual } from 'lodash';
 import { Router } from '@angular/router';
 
 const newStudy = (): Study => {
@@ -38,7 +37,8 @@ const newStudy = (): Study => {
     author_email: '',
     created_at_offline: '',
     updated_at_offline: '',
-    saved: false
+    saved: false,
+    section_uuid: ''
   };
 };
 
@@ -268,7 +268,7 @@ const newStudy = (): Study => {
                 i18n-label
                 label="Create study"
                 severity="secondary"
-                (onClick)="createStudy(typedSection)"
+                (onClick)="createStudy()"
                 class="mr-2"
               />
             </td>
@@ -402,7 +402,7 @@ export class SectionsComponent implements OnInit {
     this.storageService.db.sections.add(section);
   }
 
-  createStudy(section: Section) {
+  createStudy() {
     this.studyDialogOpen.set(true);
   }
 

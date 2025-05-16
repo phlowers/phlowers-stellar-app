@@ -27,6 +27,8 @@ import { Line } from './interfaces/line';
 import { Span } from './interfaces/span';
 import { Tension } from './interfaces/tension';
 import { TransitLink } from './interfaces/transitLink';
+import { Cable } from './interfaces/cable';
+import { cableTable } from './tables/cable';
 
 export class AppDB extends Dexie {
   users!: Table<User, number>;
@@ -40,6 +42,7 @@ export class AppDB extends Dexie {
   spans!: Table<Span, string>;
   tensions!: Table<Tension, string>;
   transit_links!: Table<TransitLink, string>;
+  cables!: Table<Cable, string>;
 
   constructor() {
     super('stellar-db');
@@ -54,7 +57,8 @@ export class AppDB extends Dexie {
       ...studyTable,
       ...tensionTable,
       ...transitLinkTable,
-      ...userTable
+      ...userTable,
+      ...cableTable
     });
     //fill the database with mock data
     // this.fillDatabaseWithMockData();
@@ -83,6 +87,7 @@ export class AppDB extends Dexie {
     await this.spans.bulkPut(mockData.spans);
     await this.tensions.bulkPut(mockData.tensions);
     await this.transit_links.bulkPut(mockData.transit_links);
+    await this.cables.bulkPut(mockData.cables);
   }
 
   async fillDatabaseWithMockData() {

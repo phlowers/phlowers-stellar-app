@@ -30,26 +30,7 @@ import { InputTextModule } from 'primeng/inputtext';
   selector: 'app-calculations-tab',
   standalone: true,
   imports: [CardModule, FormsModule, InputTextModule],
-  template: `<div class="flex flex-col gap-2">
-    <label for="temperature">Wind Pressure</label>
-    <input
-      placeholder="Set wind pressure"
-      pInputText
-      class="w-48"
-      id="wind_pressure"
-      aria-describedby="wind_pressure-help"
-      [ngModel]="data().general.weather.wind_pressure"
-    />
-    <label for="temperature">Ice Thickness</label>
-    <input
-      placeholder="Set ice thickness"
-      pInputText
-      class="w-48"
-      id="ice_thickness"
-      aria-describedby="ice_thickness-help"
-      [ngModel]="data().general.weather.ice_thickness"
-    />
-  </div>`
+  template: `<div class="flex flex-col gap-2"></div>`
 })
 export class CalculationsTabComponent {
   data = input.required<Data>();

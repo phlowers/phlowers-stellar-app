@@ -112,7 +112,7 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
     CalculationsTabComponent
   ],
   template: `<div>
-    <p-tabs value="Obstacles">
+    <p-tabs value="General">
       <p-tablist>
         <p-tab [value]="tab" *ngFor="let tab of tabs">{{ tab }}</p-tab>
       </p-tablist>
