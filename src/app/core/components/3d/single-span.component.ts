@@ -4,7 +4,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, effect, input, signal, untracked } from '@angular/core';
+import {
+  Component,
+  effect,
+  input,
+  output,
+  signal,
+  untracked
+} from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { CommonModule } from '@angular/common';
@@ -18,7 +25,8 @@ import Plotly, {
   Data,
   Datum,
   Layout,
-  PlotlyHTMLElement
+  PlotlyHTMLElement,
+  Shape
 } from 'plotly.js-dist-min';
 import { uniq } from 'lodash';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
@@ -112,6 +120,21 @@ import { InputNumberModule } from 'primeng/inputnumber';
 })
 export class SingleSpanComponent {
   constructor(private readonly workerService: WorkerService) {}
+  obstacleMode = input.required<boolean>();
+  obstacle = input<{
+    x: number | null;
+    y: number | null;
+    z: number | null;
+  }>({
+    x: null,
+    y: null,
+    z: null
+  });
+  obstacleChange = output<{
+    x: number | null;
+    y: number | null;
+    z: number | null;
+  }>();
   litData = input<any>(null);
   options = signal<Options>({});
   plotFace = signal<PlotlyHTMLElement | null>(null);
@@ -366,7 +389,6 @@ export class SingleSpanComponent {
     var gd = document.getElementById(plotId);
 
     function attach(stuff: any, type: 'face' | 'profile') {
-      console.log('stuff', stuff);
       // @ts-ignore
       var xaxis = gd?._fullLayout.xaxis;
       // @ts-ignore
@@ -376,14 +398,75 @@ export class SingleSpanComponent {
       // @ts-ignore
       var t = gd?._fullLayout.margin.t;
 
-      gd?.addEventListener('mousemove', function (evt) {
+      gd?.addEventListener('mousemove', async function (evt) {
         //@ts-ignore
         if (gd && gd._fullLayout) {
           //@ts-ignore
           const layout = gd._fullLayout as any;
           const x = evt.layerX - layout.margin.l;
           const y = evt.layerY - layout.margin.t;
-          console.log('mousemove', layout.xaxis.p2c(x), layout.yaxis.p2c(y));
+          // console.log('mousemove', layout.xaxis.p2c(x), layout.yaxis.p2c(y));
+          // Plotly.addTraces(plotId, {
+          //   x: [layout.xaxis.p2c(x)],
+          //   y: [layout.yaxis.p2c(y)],
+          //   name: 'Lines and Text',
+          //   text: ['X'],
+          //   // type: 'line',
+          //   type: 'scatter',
+          //   mode: 'text',
+          //   marker: {
+          //     color: 'red'
+          //   }
+          // });
+          // console.log('i relayout', layout.xaxis.p2c(x), layout.yaxis.p2c(y));
+          if (this2.obstacleMode()) {
+            const shapes: Array<Partial<Shape>> = [];
+            shapes.push({
+              name: 'line2',
+              type: 'line' as const,
+              x0: layout.xaxis.p2c(x),
+              y0: layout.yaxis.p2c(y) - 1000,
+              x1: layout.xaxis.p2c(x),
+              y1: layout.yaxis.p2c(y) + 1000,
+              line: {
+                color: 'green'
+                // dash: 'dash'
+              }
+            });
+            if (type === 'profile') {
+              shapes.push({
+                name: 'line1',
+                type: 'line' as const,
+                x0: layout.xaxis.p2c(x) - 1000,
+                y0: layout.yaxis.p2c(y),
+                x1: layout.xaxis.p2c(x) + 1000,
+                y1: layout.yaxis.p2c(y),
+                line: {
+                  color: 'green'
+                  // dash: 'dash'
+                }
+              });
+            }
+            let condition = false;
+            console.log('type of', type);
+            if (type === 'profile') {
+              if (
+                this2.obstacle()?.x === null &&
+                this2.obstacle()?.z === null
+              ) {
+                condition = true;
+              }
+            } else {
+              if (this2.obstacle()?.y === null) {
+                condition = true;
+              }
+            }
+            if (condition) {
+              await Plotly.relayout(plotId, {
+                shapes: shapes
+              });
+            }
+          }
           if (type === 'profile') {
             this2.currentPosition = {
               x: Number(layout.xaxis.p2c(x)).toFixed(2),
@@ -399,28 +482,45 @@ export class SingleSpanComponent {
       });
 
       gd?.addEventListener('click', function (evt) {
+        if (!this2.obstacleMode()) return;
         // @ts-ignore
         var layout = gd?._fullLayout;
         var x = evt.layerX - layout.margin.l;
         var y = evt.layerY - layout.margin.t;
-        Plotly.addTraces(plotId, {
-          x: [layout.xaxis.p2c(x)],
-          y: [layout.yaxis.p2c(y)],
-          name: 'Lines and Text',
-          text: ['X'],
-          type: 'scatter',
-          mode: 'text',
-          marker: {
-            color: 'red'
+        // Plotly.addTraces(plotId, {
+        //   x: [layout.xaxis.p2c(x)],
+        //   y: [layout.yaxis.p2c(y)],
+        //   name: 'Lines and Text',
+        //   text: ['X'],
+        //   type: 'scatter',
+        //   mode: 'text',
+        //   marker: {
+        //     color: 'red'
+        //   }
+        // });
+        // if (type === 'profile') {
+        //   this2.points.push({ x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) });
+        // } else {
+        //   this2.points2.push({
+        //     x: layout.xaxis.p2c(x),
+        //     z: layout.yaxis.p2c(y)
+        //   });
+        // }
+        if (this2.obstacleMode()) {
+          console.log('obstacle', this2.obstacle());
+          if (type === 'profile') {
+            this2.obstacleChange.emit({
+              x: layout.xaxis.p2c(x),
+              y: this2.obstacle()?.y,
+              z: layout.yaxis.p2c(y)
+            });
+          } else {
+            this2.obstacleChange.emit({
+              x: this2.obstacle()?.x,
+              y: layout.yaxis.p2c(y),
+              z: this2.obstacle()?.z
+            });
           }
-        });
-        if (type === 'profile') {
-          this2.points.push({ x: layout.xaxis.p2c(x), z: layout.yaxis.p2c(y) });
-        } else {
-          this2.points2.push({
-            x: layout.xaxis.p2c(x),
-            z: layout.yaxis.p2c(y)
-          });
         }
       });
     }

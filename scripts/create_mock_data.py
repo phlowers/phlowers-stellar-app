@@ -10,6 +10,89 @@ import json
 import os
 from faker import Faker
 
+cables = [
+  {
+    "name": "ASTER600",
+    "data_source": "fictive",
+    "section": 600.4,
+    "diameter": 31.86,
+    "young_modulus": 60000,
+    "linear_weight": 1.8,
+    "dilatation_coefficient": 0.000023,
+    "temperature_reference": 15,
+    "stress_strain_a0": 0,
+    "stress_strain_a1": 60000,
+    "stress_strain_a2": 0,
+    "stress_strain_a3": 0,
+    "stress_strain_a4": 0,
+    "stress_strain_b0": 0,
+    "stress_strain_b1": 0,
+    "stress_strain_b2": 0,
+    "stress_strain_b3": 0,
+    "stress_strain_b4": 0
+  },
+  {
+    "name": "CROCUS400",
+    "data_source": "fictive",
+    "section": 400.9,
+    "diameter": 26.16,
+    "young_modulus": 72000,
+    "linear_weight": 1.6,
+    "dilatation_coefficient": 0.0000176,
+    "temperature_reference": 15,
+    "stress_strain_a0": 0,
+    "stress_strain_a1": 72000,
+    "stress_strain_a2": 0,
+    "stress_strain_a3": 0,
+    "stress_strain_a4": 0,
+    "stress_strain_b0": 0,
+    "stress_strain_b1": 0,
+    "stress_strain_b2": 0,
+    "stress_strain_b3": 0,
+    "stress_strain_b4": 0
+  },
+  {
+    "name": "NARCISSE600G",
+    "data_source": "fictive",
+    "section": 600.4,
+    "diameter": 29.56,
+    "young_modulus": 75565,
+    "linear_weight": 2.2,
+    "dilatation_coefficient": 0.0000177,
+    "temperature_reference": 15,
+    "stress_strain_a0": 0,
+    "stress_strain_a1": 27804,
+    "stress_strain_a2": -6590391,
+    "stress_strain_a3": 672009160,
+    "stress_strain_a4": -24561975349,
+    "stress_strain_b0": 0,
+    "stress_strain_b1": 33140,
+    "stress_strain_b2": 0,
+    "stress_strain_b3": 0,
+    "stress_strain_b4": 0
+  },
+  {
+    "name": "PETUNIA600",
+    "data_source": "fictive",
+    "section": 599.7,
+    "diameter": 31.66,
+    "young_modulus": 70000,
+    "linear_weight": 2.3,
+    "dilatation_coefficient": 0.0000182,
+    "temperature_reference": 15,
+    "stress_strain_a0": 0,
+    "stress_strain_a1": 70000,
+    "stress_strain_a2": 0,
+    "stress_strain_a3": 0,
+    "stress_strain_a4": 0,
+    "stress_strain_b0": 0,
+    "stress_strain_b1": 0,
+    "stress_strain_b2": 0,
+    "stress_strain_b3": 0,
+    "stress_strain_b4": 0
+  }
+]
+
 french_departments = [
   {
     "num_dep": "01",
@@ -520,6 +603,26 @@ french_departments = [
 
 french_regions = list(set(dep["region_name"] for dep in french_departments))
 
+class Cable(TypedDict):
+    name: str
+    data_source: str
+    section: float
+    diameter: float
+    young_modulus: float
+    linear_weight: float
+    dilatation_coefficient: float
+    temperature_reference: float
+    stress_strain_a0: float
+    stress_strain_a1: float
+    stress_strain_a2: float
+    stress_strain_a3: float
+    stress_strain_a4: float
+    stress_strain_b0: float
+    stress_strain_b1: float
+    stress_strain_b2: float
+    stress_strain_b3: float
+    stress_strain_b4: float
+
 class Attachment(TypedDict):
     uuid: str
     updated_at: str
@@ -834,6 +937,7 @@ def generate_mock_data(count: int = 10):
         "lines": [generate_line(i) for i in range(count)],
         "maintenance_centers": maintenance_centers,
         "regional_maintenance_centers": regional_maintenance_centers,
+        "cables": cables,
     }
     return data
 

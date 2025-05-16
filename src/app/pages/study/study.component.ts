@@ -9,6 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
+import { v4 as uuidv4 } from 'uuid';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -22,6 +23,7 @@ import { ObstaclesTabComponent } from './obstacles/obstaclesTab.component';
 import { VisualizationTabComponent } from './visualization/visualizationTab.component';
 import { Support } from './types';
 import { Data, Obstacle } from './types';
+import { WeatherTabComponent } from './weather/weather.component';
 
 // declare const Plotly: PlotlyTypes;
 
@@ -48,10 +50,10 @@ const initialObstacles = {
   type: ['tree', 'pole', 'building', 'other'],
   support: ['support 1', 'support 2', 'support 3', 'support 4'],
   position: [
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 }
+    { x: 0, y: 0, z: 0 },
+    { x: 0, y: 0, z: 0 },
+    { x: 0, y: 0, z: 0 },
+    { x: 0, y: 0, z: 0 }
   ],
   height: [10, 10, 10, 10],
   width: [10, 10, 10, 10],
@@ -60,12 +62,13 @@ const initialObstacles = {
 
 const initialObstaclesObjects: Obstacle[] = initialObstacles.name.map(
   (name, index) => ({
+    uuid: uuidv4(),
     name,
     type: initialObstacles.type[index],
     support: initialObstacles.support[index],
     positions: [
-      initialObstacles.position[index],
       initialObstacles.position[index]
+      // initialObstacles.position[index]
     ],
     height: initialObstacles.height[index],
     width: initialObstacles.width[index],
@@ -103,10 +106,11 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
     TabsModule,
     CardModule,
     DividerModule,
-    DialogModule
+    DialogModule,
+    WeatherTabComponent
   ],
   template: `<div>
-    <p-tabs value="General">
+    <p-tabs value="Obstacles">
       <p-tablist>
         <p-tab [value]="tab" *ngFor="let tab of tabs">{{ tab }}</p-tab>
       </p-tablist>
@@ -122,6 +126,9 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
             [initialObstaclesObjects]="data.obstacles"
           ></app-obstacles-tab>
         </p-tabpanel>
+        <p-tabpanel value="Weather">
+          <app-weather-tab [data]="data"></app-weather-tab>
+        </p-tabpanel>
         <p-tabpanel value="Visualization">
           @defer (on viewport) {
             <app-visualization-tab></app-visualization-tab>
@@ -136,7 +143,7 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
 export class StudyComponent {
   loading = true;
   dataToObject = initialDataObjects;
-  tabs = ['General', 'Supports', 'Obstacles', 'Visualization'];
+  tabs = ['General', 'Supports', 'Obstacles', 'Weather', 'Visualization'];
   currentTab = this.tabs[0];
   data: Data = {
     general: {

@@ -1,4 +1,5 @@
 export interface Obstacle {
+  uuid: string;
   name: string;
   type: string;
   support: string;
@@ -6,11 +7,13 @@ export interface Obstacle {
     {
       x: number;
       y: number;
-    },
-    {
-      x: number;
-      y: number;
+      z: number;
     }
+    // {
+    //   x: number;
+    //   y: number;
+    //   z: number;
+    // }
   ];
   // height: number;
   // width: number;

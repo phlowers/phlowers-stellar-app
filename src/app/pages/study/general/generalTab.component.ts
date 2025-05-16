@@ -76,7 +76,7 @@ interface Data {
         >
         <p-divider styleClass="!my-2" />
         <div class="grid grid-cols-2 gap-5">
-          <div class="flex flex-col gap-2">
+          <!-- <div class="flex flex-col gap-2">
             <label for="uuid">UUID</label>
             <input
               styleClass="w-50"
@@ -86,7 +86,7 @@ interface Data {
               aria-describedby="uuid-help"
               [(ngModel)]="data.general.uuid"
             />
-          </div>
+          </div> -->
           <div class="flex flex-col gap-2">
             <label for="author_email">Author email</label>
             <input
