@@ -155,11 +155,13 @@ describe('UpdateService', () => {
     it('should set updateLoading to true and send message to service worker', async () => {
       const mockCurrentVersion = {
         git_hash: 'def456',
-        build_datetime_utc: '2022-12-31T00:00:00.000000'
+        build_datetime_utc: '2022-12-31T00:00:00.000000',
+        version: '1.0.0'
       };
       const mockLatestVersion = {
         git_hash: 'abc123',
-        build_datetime_utc: '2023-01-01T00:00:00.000000'
+        build_datetime_utc: '2023-01-01T00:00:00.000000',
+        version: '1.0.1'
       };
 
       service.currentVersion = mockCurrentVersion;
