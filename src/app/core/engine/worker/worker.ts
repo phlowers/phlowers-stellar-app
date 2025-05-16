@@ -48,7 +48,7 @@ async function loadPyodideAndPackages() {
 loadPyodideAndPackages();
 
 addEventListener('message', ({ data }: { data: { task: any; data: any } }) => {
-  console.log('data in worker is', data);
+  console.log('data in worker is1', data);
   handleTask(pyodide, data.task, data.data).then((result) => {
     console.log('result in worker is', result);
     postMessage(result);
