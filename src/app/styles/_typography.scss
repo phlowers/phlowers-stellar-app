@@ -34,7 +34,7 @@
   src: url(../../../public/fonts/material-symbols-rounded.woff2) format('woff2');
 }
 .app-icon {
-  font-family: 'Material Symbols Rounded';
+  font-family: 'Material Symbols Rounded', sans-serif; // sonarQube requirment
   font-weight: normal;
   font-style: normal;
   font-size: 1.375rem;
