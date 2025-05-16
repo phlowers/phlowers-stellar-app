@@ -100,6 +100,18 @@ describe('AppComponent', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
   });
 
+  it('should have topbar, sidebar and router-outlet', () => {
+    const topbar =
+      fixture.debugElement.nativeElement.querySelector('app-topbar');
+    const sidebar =
+      fixture.debugElement.nativeElement.querySelector('app-sidebar');
+    const routerOutlet =
+      fixture.debugElement.nativeElement.querySelector('router-outlet');
+    expect(topbar).toBeTruthy();
+    expect(sidebar).toBeTruthy();
+    expect(routerOutlet).toBeTruthy();
+  });
+
   describe('setupWorker', () => {
     it('should setup worker and initialize database', async () => {
       await component.setupWorker();

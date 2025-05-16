@@ -96,8 +96,7 @@ const columns = [
     ConfirmDialogModule,
     ImportStudyModalComponent
   ],
-  template: `
-    <p-toast position="top-center"></p-toast>
+  template: `<p-toast position="top-center"></p-toast>
     <p-toolbar styleClass="mb-6">
       <ng-template #start>
         <p-button
@@ -137,7 +136,6 @@ const columns = [
       [columns]="columns"
       [paginator]="true"
       [globalFilterFields]="['title']"
-      [tableStyle]="{ 'min-width': '75rem' }"
       [(selection)]="selectedStudies"
       [rowHover]="true"
       dataKey="uuid"
@@ -164,29 +162,25 @@ const columns = [
       </ng-template>
       <ng-template #header>
         <tr>
-          <th style="width: 3rem">
+          <th>
             <p-tableHeaderCheckbox />
           </th>
           <th i18n style="width: 6rem; max-width: 6rem;">Uuid</th>
-          <th i18n pSortableColumn="title" style="min-width:16rem">
+          <th i18n pSortableColumn="title">
             Name
             <p-sortIcon field="title" />
           </th>
-          <th i18n pSortableColumn="description" style="min-width:16rem">
+          <th i18n pSortableColumn="description">
             Description
             <p-sortIcon field="description" />
           </th>
-          <th
-            i18n
-            pSortableColumn="author_email"
-            style="display: flex; justify-content: center; min-width:16rem"
-          >
+          <th i18n pSortableColumn="author_email" style="text-align:center">
             Author
             <p-sortIcon field="author_email" />
           </th>
-          <th style="min-width: 12rem"></th>
-          <th style="min-width: 2rem"></th>
-          <th style="min-width: 6rem"></th>
+          <th></th>
+          <th></th>
+          <th></th>
         </tr>
       </ng-template>
       <ng-template #body let-study>
@@ -201,13 +195,10 @@ const columns = [
             >
               {{ typedStudy.uuid }}
             </td>
-            <td style="min-width: 16rem">{{ typedStudy.title }}</td>
-            <td style="min-width: 16rem">{{ typedStudy.description }}</td>
-            <td style="min-width: 16rem">{{ typedStudy.author_email }}</td>
-            <td
-              style="min-width: 12rem"
-              style="display:flex; justify-content:center;"
-            >
+            <td>{{ typedStudy.title }}</td>
+            <td>{{ typedStudy.description }}</td>
+            <td style="text-align: center;">{{ typedStudy.author_email }}</td>
+            <td style="text-align: center;">
               @if (typedStudy.saved) {
                 <p-button
                   icon="pi pi-check"
@@ -363,8 +354,7 @@ const columns = [
       (isOpenChange)="setIsImportStudyModalOpen($event)"
     />
 
-    <p-confirmdialog [style]="{ width: '450px' }" />
-  `,
+    <p-confirmdialog [style]="{ width: '450px' }" /> `,
   providers: [MessageService, ConfirmationService]
 })
 export class StudiesComponent implements OnInit {

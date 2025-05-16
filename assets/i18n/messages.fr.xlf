@@ -7,40 +7,10 @@
         <target>Email</target>
       </segment>
     </unit>
-    <unit id="4744897149268098869">
+    <unit id="4552549213637309982">
       <segment>
-        <source>Email is not valid.</source>
-        <target>L&apos;email n&apos;est pas valide.</target>
-      </segment>
-    </unit>
-    <unit id="2538982915795016676">
-      <segment>
-        <source>STELLAR</source>
-        <target>STELLAR</target>
-      </segment>
-    </unit>
-    <unit id="1027281205052566407">
-      <segment>
-        <source>UPDATE AVAILABLE</source>
-        <target>Mise à jour disponible</target>
-      </segment>
-    </unit>
-    <unit id="5024752563746311100">
-      <segment>
-        <source>SERVER REACHABLE</source>
-        <target>SERVEUR DISPONIBLE</target>
-      </segment>
-    </unit>
-    <unit id="7329852281226155501">
-      <segment>
-        <source>SERVER UNREACHABLE</source>
-        <target>SERVEUR INDISPONIBLE</target>
-      </segment>
-    </unit>
-    <unit id="3619431313457349805">
-      <segment>
-        <source>REACHING SERVER</source>
-        <target>APPEL DU SERVEUR</target>
+        <source> Email is not valid. </source>
+        <target> L&apos;email n&apos;est pas valide. </target>
       </segment>
     </unit>
     <unit id="7884682505577720946">
@@ -184,7 +154,7 @@
     <unit id="2471229163174544608">
       <segment>
         <source>Sections</source>
-        <target>Sections</target>
+        <target>Cantons</target>
       </segment>
     </unit>
     <unit id="4580988005648117665">
@@ -325,18 +295,6 @@
         <target>Outils</target>
       </segment>
     </unit>
-    <unit id="5041354590769758251">
-      <segment state="initial">
-        <source>Admin</source>
-        <target>Admin</target>
-      </segment>
-    </unit>
-    <unit id="4677175911030006427">
-      <segment state="initial">
-        <source>test</source>
-        <target>test</target>
-      </segment>
-    </unit>
     <unit id="5514355339805433365">
       <segment state="initial">
         <source>New study</source>
@@ -389,30 +347,6 @@
       <segment state="initial">
         <source>Save</source>
         <target>Enregistrer</target>
-      </segment>
-    </unit>
-    <unit id="4472533983620148440">
-      <segment state="initial">
-        <source>ENGINE READY</source>
-        <target>CALCULATEUR PRÊT</target>
-      </segment>
-    </unit>
-    <unit id="6044475970947805811">
-      <segment state="initial">
-        <source>ENGINE LOADING</source>
-        <target>CHARGEMENT DU CALCULATEUR</target>
-      </segment>
-    </unit>
-    <unit id="802273028390736200">
-      <segment state="initial">
-        <source>OFFLINE</source>
-        <target>HORS LIGNE</target>
-      </segment>
-    </unit>
-    <unit id="548892186034088208">
-      <segment state="initial">
-        <source>ONLINE</source>
-        <target>EN LIGNE</target>
       </segment>
     </unit>
     <unit id="2768616509008493478">
@@ -511,12 +445,6 @@
         <target>Réinitialiser les champs</target>
       </segment>
     </unit>
-    <unit id="8892964333730306563">
-      <segment state="initial">
-        <source>Plotly</source>
-        <target>Plotly</target>
-      </segment>
-    </unit>
     <unit id="3407827478067561796">
       <segment state="initial">
         <source>Change line height</source>
@@ -539,6 +467,90 @@
       <segment state="initial">
         <source>Shareable to other users:</source>
         <target>Partageable aux autres utilisateurs:</target>
+      </segment>
+    </unit>
+    <unit id="2202835179714153957">
+      <segment state="initial">
+        <source>User preference</source>
+        <target>Préférences utilisateur</target>
+      </segment>
+    </unit>
+    <unit id="633450215070869903">
+      <segment state="initial">
+        <source>usr pref</source>
+        <target>Pref. Utr</target>
+      </segment>
+    </unit>
+    <unit id="1614612576043079687">
+      <segment state="initial">
+        <source>Shrink menu</source>
+        <target>Réduire le menu</target>
+      </segment>
+    </unit>
+    <unit id="2102825898069375693">
+      <segment state="initial">
+        <source>Menu</source>
+        <target>Menu</target>
+      </segment>
+    </unit>
+    <unit id="2821179408673282599">
+      <segment state="initial">
+        <source>Home</source>
+        <target>Accueil</target>
+      </segment>
+    </unit>
+    <unit id="2538982915795016676">
+      <segment state="initial">
+        <source>STELLAR</source>
+        <target>STELLAR</target>
+      </segment>
+    </unit>
+    <unit id="7892492460421880567">
+      <segment state="initial">
+        <source> UPDATE AVAILABLE </source>
+        <target> Mise à jour disponible </target>
+      </segment>
+    </unit>
+    <unit id="3337057979798844436">
+      <segment state="initial">
+        <source> ENGINE READY </source>
+        <target> Calculateur prêt </target>
+      </segment>
+    </unit>
+    <unit id="2506324167175418886">
+      <segment state="initial">
+        <source> ENGINE LOADING </source>
+        <target> Calculateur en chargement </target>
+      </segment>
+    </unit>
+    <unit id="2264573519256545601">
+      <segment state="initial">
+        <source> OFFLINE </source>
+        <target> Hors ligne </target>
+      </segment>
+    </unit>
+    <unit id="570980415261850603">
+      <segment state="initial">
+        <source> ONLINE </source>
+        <target> En ligne </target>
+      </segment>
+    </unit>
+    <unit id="5024752563746311100">
+      <segment state="initial">
+        <source>SERVER REACHABLE</source>
+        <target>Server disponible</target>
+      </segment>
+    </unit>
+    <unit id="7329852281226155501">
+      <segment state="initial">
+        <source>SERVER UNREACHABLE</source>
+        <target>Server indisponible</target>
+      </segment>
+    </unit>
+    <unit id="3619431313457349805">
+      <segment state="initial">
+        <source>REACHING SERVER</source>
+        <target>Appel du server</target>
       </segment>
     </unit>
   </file>
