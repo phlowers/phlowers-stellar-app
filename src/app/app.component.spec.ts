@@ -100,6 +100,12 @@ describe('AppComponent', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
   });
 
+  it('should have router-outlet', () => {
+    const routerOutlet =
+      fixture.debugElement.nativeElement.querySelector('router-outlet');
+    expect(routerOutlet).toBeTruthy();
+  });
+
   describe('setupWorker', () => {
     it('should setup worker and initialize database', async () => {
       await component.setupWorker();
