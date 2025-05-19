@@ -13,7 +13,6 @@ import { LayoutService } from '../service/layout.service';
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Renderer2 } from '@angular/core';
-import { expect, jest } from '@jest/globals';
 
 @Component({ selector: 'app-topbar', template: '' })
 class MockAppTopbarComponent {}

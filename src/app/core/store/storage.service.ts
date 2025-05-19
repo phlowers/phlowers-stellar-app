@@ -7,14 +7,14 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AppDB } from './db';
+import { AppDB } from './database';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
-  public db?: AppDB;
+  public db!: AppDB;
 
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();

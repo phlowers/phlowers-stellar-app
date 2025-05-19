@@ -63,16 +63,26 @@ describe('AppMenu', () => {
             label: 'Sections',
             routerLink: ['/sections']
           },
+          // {
+          //   label: 'Tools',
+          //   icon: 'pi pi-fw pi-wrench',
+          //   routerLink: ['/tools']
+          // },
+          // { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
+          // {
+          //   icon: 'pi pi-fw pi-database',
+          //   label: 'test',
+          //   routerLink: ['/offline-storage-poc']
+          // },
+          // {
+          //   label: 'Plotly',
+          //   icon: 'pi pi-fw pi-chart-line',
+          //   routerLink: ['/plotly']
+          // },
           {
-            label: 'Tools',
-            icon: 'pi pi-fw pi-wrench',
-            routerLink: ['/tools']
-          },
-          { label: 'Admin', icon: 'pi pi-fw pi-cog', routerLink: ['/admin'] },
-          {
-            icon: 'pi pi-fw pi-database',
-            label: 'test',
-            routerLink: ['/offline-storage-poc']
+            icon: 'pi pi-fw pi-cog',
+            label: 'Admin',
+            routerLink: ['/admin']
           },
           {
             label: 'Plotly',

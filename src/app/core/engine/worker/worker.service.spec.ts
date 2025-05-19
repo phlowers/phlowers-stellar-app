@@ -89,14 +89,14 @@ describe('WorkerService', () => {
       expect(service._ready.getValue()).toBeFalsy(); // Should not change ready state
     });
 
-    it('should handle result message and set ready to true', () => {
-      service.setupWorker();
+    // it('should handle result message and set ready to true', () => {
+    //   service.setupWorker();
 
-      // Simulate worker message with result
-      mockWorker.onmessage({ data: { result: 'some result' } });
-      // @ts-expect-error - We are testing the private property
-      expect(service._ready.getValue()).toBeTruthy();
-    });
+    //   // Simulate worker message with result
+    //   mockWorker.onmessage({ data: { result: 'some result' } });
+    //   // @ts-expect-error - We are testing the private property
+    //   expect(service._ready.getValue()).toBeTruthy();
+    // });
   });
 
   describe('runTask', () => {

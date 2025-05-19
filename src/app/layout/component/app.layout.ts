@@ -5,12 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { Component, Renderer2 } from '@angular/core';
+import { Component, Renderer2, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { ResolveEnd, Router, RouterModule } from '@angular/router';
 import { AppTopbarComponent } from './app.topbar';
 import { AppSidebarComponent } from './app.sidebar';
 import { LayoutService } from '../service/layout.service';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 @Component({
   selector: 'app-layout',
@@ -19,20 +20,45 @@ import { LayoutService } from '../service/layout.service';
     CommonModule,
     AppTopbarComponent,
     AppSidebarComponent,
-    RouterModule
+    RouterModule,
+    BreadcrumbModule
   ],
   template: `<div class="layout-wrapper" [ngClass]="containerClass">
     <app-topbar></app-topbar>
     <app-sidebar></app-sidebar>
     <div class="layout-main-container">
       <main class="layout-main">
+        <p class="text-4xl">{{ currentRoute }}</p>
         <router-outlet></router-outlet>
       </main>
     </div>
   </div> `
 })
-export class AppLayoutComponent {
+export class AppLayoutComponent implements OnInit {
   menuOutsideClickListener: any;
+  items = [
+    { label: 'Studies', route: '' },
+    { label: 'Admin', route: 'admin' },
+    { label: 'Sections', route: 'sections' },
+    { label: 'Plotly', route: 'plotly' },
+    { label: 'Study', route: 'study' }
+  ];
+
+  currentRoute = '';
+
+  ngOnInit() {
+    this.router.events.subscribe((event: any) => {
+      if (event instanceof ResolveEnd || event.routerEvent) {
+        const urlAfterRedirects =
+          event.urlAfterRedirects ?? event.routerEvent.urlAfterRedirects;
+        const route = urlAfterRedirects.split('/')?.[1];
+        this.currentRoute =
+          this.items.find((item) => {
+            return item.route === route;
+          })?.label ?? '';
+      }
+    });
+  }
 
   constructor(
     public layoutService: LayoutService,

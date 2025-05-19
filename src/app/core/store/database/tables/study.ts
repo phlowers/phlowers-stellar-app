@@ -17,5 +17,6 @@ export const studyTable = {
     created_at_offline,
     updated_at_offline,
     created_at_database,
-    updated_at_database`
+    updated_at_database,
+    section_uuid`
 };

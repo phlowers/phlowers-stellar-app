@@ -7,6 +7,6 @@
 export const environment = {
   production: true,
   apiUrl: 'http://localhost:8080',
-  version: '{BUILD_VERSION}',
-  buildTime: '{BUILD_TIME}'
+  version: '0.0.0',
+  buildTime: '2025-05-14T02:20:46.200198'
 };

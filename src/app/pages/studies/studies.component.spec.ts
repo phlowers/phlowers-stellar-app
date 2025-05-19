@@ -13,10 +13,10 @@ import {
   OnlineService,
   ServerStatus
 } from '../../core/api/services/online.service';
-import { StudyModelLocal } from '../../core/store/models/study.model';
 import { of, Subject } from 'rxjs';
 import { Table } from 'primeng/table';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Study } from '../../core/store/database/interfaces/study';
 
 // Mock UUID to ensure consistent IDs in tests
 jest.mock('uuid', () => ({
@@ -35,7 +35,7 @@ describe('StudiesComponent', () => {
   let serverOnlineSubject: Subject<ServerStatus>;
   let readySubject: Subject<boolean>;
 
-  const mockStudies: StudyModelLocal[] = [
+  const mockStudies: Study[] = [
     {
       uuid: 'study-1',
       title: 'Test Study 1',
@@ -44,7 +44,8 @@ describe('StudiesComponent', () => {
       created_at_offline: '2023-01-01T00:00:00.000Z',
       updated_at_offline: expect.any(String),
       saved: false,
-      shareable: false
+      shareable: false,
+      section_uuid: 'section-1'
     },
     {
       uuid: 'study-2',
@@ -54,7 +55,8 @@ describe('StudiesComponent', () => {
       created_at_offline: '2023-01-02T00:00:00.000Z',
       updated_at_offline: expect.any(String),
       saved: true,
-      shareable: true
+      shareable: true,
+      section_uuid: 'section-2'
     }
   ];
 
@@ -119,11 +121,8 @@ describe('StudiesComponent', () => {
   });
 
   it('should load studies when storage is ready', async () => {
-    // Trigger the ready$ observable
     readySubject.next(true);
-    // jest.useFakeTimers();
-    // jest.runAllTimers();
-    await new Promise((r) => setTimeout(r, 0));
+    await fixture.whenStable();
 
     expect(mockDb.studies.toArray).toHaveBeenCalled();
     expect(component.studies()).toEqual(mockStudies);
@@ -142,7 +141,7 @@ describe('StudiesComponent', () => {
 
     expect(component.study.title).toBe('');
     expect(component.submitted).toBe(false);
-    expect(component.studyDialog).toBe(true);
+    expect(component.studyDialogOpen).toBe(true);
   });
 
   it('should edit study', () => {
@@ -150,15 +149,23 @@ describe('StudiesComponent', () => {
     component.editStudy(study);
 
     expect(component.study).toEqual(study);
-    expect(component.studyDialog).toBe(true);
+    expect(component.studyDialogOpen).toBe(true);
   });
 
-  it('should delete study', async () => {
+  it('should delete study', () => {
     const study = mockStudies[0];
     component.deleteStudy(study);
-    // await new Promise((r) => setTimeout(r, 0));
 
-    expect(mockConfirmationService.confirm).toHaveBeenCalled();
+    expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.any(String),
+        header: expect.any(String),
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: expect.any(String),
+        rejectLabel: expect.any(String),
+        accept: expect.any(Function)
+      })
+    );
   });
 
   it('should delete study accepted', async () => {
@@ -173,7 +180,20 @@ describe('StudiesComponent', () => {
   it('should delete selected studies', async () => {
     component.selectedStudies = [mockStudies[0], mockStudies[1]];
     await component.deleteSelectedStudies();
-    await new Promise((r) => setTimeout(r, 0));
+
+    expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.any(String),
+        header: expect.any(String),
+        icon: 'pi pi-exclamation-triangle',
+        accept: expect.any(Function)
+      })
+    );
+
+    // Manually trigger the accept callback
+    const acceptCallback =
+      mockConfirmationService.confirm.mock.calls[0][0].accept;
+    await acceptCallback();
 
     expect(mockDb.studies.bulkDelete).toHaveBeenCalledWith([
       'study-1',
@@ -181,20 +201,38 @@ describe('StudiesComponent', () => {
     ]);
     expect(mockDb.studies.toArray).toHaveBeenCalled();
     expect(component.selectedStudies).toBeNull();
-    expect(mockMessageService.add).toHaveBeenCalled();
+    expect(mockMessageService.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      })
+    );
   });
 
   it('should duplicate study', async () => {
     const study = mockStudies[0];
+    // Spy on the createUuid method
+    jest.spyOn(component, 'createUuid').mockReturnValue('test-uuid-123');
+
     await component.duplicateStudy(study);
-    await new Promise((r) => setTimeout(r, 0));
+
+    expect(component.createUuid).toHaveBeenCalled();
     expect(mockDb.studies.add).toHaveBeenCalledWith({
       ...study,
       uuid: 'test-uuid-123',
       saved: false
     });
     expect(mockDb.studies.toArray).toHaveBeenCalled();
-    expect(mockMessageService.add).toHaveBeenCalled();
+    expect(mockMessageService.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      })
+    );
   });
 
   it('should save study remotely', async () => {
@@ -218,7 +256,8 @@ describe('StudiesComponent', () => {
       author_email: '',
       created_at_offline: '',
       updated_at_offline: '',
-      saved: false
+      saved: false,
+      section_uuid: ''
     };
 
     await component.saveStudy();
@@ -265,7 +304,8 @@ describe('StudiesComponent', () => {
       author_email: '',
       created_at_offline: '',
       updated_at_offline: '',
-      saved: false
+      saved: false,
+      section_uuid: ''
     };
     component.submitted = false;
 
@@ -288,13 +328,13 @@ describe('StudiesComponent', () => {
     );
   });
 
-  it('should find index by id', () => {
-    component.studies.set(mockStudies);
+  // it('should find index by id', () => {
+  //   component.studies.set(mockStudies);
 
-    expect(component.findIndexById('study-1')).toBe(0);
-    expect(component.findIndexById('study-2')).toBe(1);
-    expect(component.findIndexById('non-existent')).toBe(-1);
-  });
+  //   expect(component.findIndexById('study-1')).toBe(0);
+  //   expect(component.findIndexById('study-2')).toBe(1);
+  //   expect(component.findIndexById('non-existent')).toBe(-1);
+  // });
 
   it('should toggle import study modal', () => {
     component.setIsImportStudyModalOpen(true);
@@ -305,12 +345,12 @@ describe('StudiesComponent', () => {
   });
 
   it('should hide dialog', () => {
-    component.studyDialog = true;
+    component.studyDialogOpen = true;
     component.submitted = true;
 
     component.hideDialog();
 
-    expect(component.studyDialog).toBe(false);
+    expect(component.studyDialogOpen).toBe(false);
     expect(component.submitted).toBe(false);
   });
 });

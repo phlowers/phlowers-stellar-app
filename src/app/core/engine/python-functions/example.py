@@ -65,11 +65,13 @@ print("fig is", fig)
 # print("js is", js) # NOSONAR
 # plot_output = js.document.getElementById('plotly-output1') # NOSONAR
 # print("plot_output is", plot_output) # NOSONAR
-result = fig.to_html(
-    include_plotlyjs=True,
-    full_html=False,
-    default_height='800px',
-    default_width='100%',
-    # div_id='plotly-output', # NOSONAR
-)
+# result = fig.to_html(
+#     include_plotlyjs=True,
+#     full_html=False,
+#     default_height='800px',
+#     default_width='100%',
+#     # div_id='plotly-output', # NOSONAR
+# )
+result = fig.to_json()
 print(f"Time taken to create figure html: {time.time() - end} seconds")
+print("result is", result)

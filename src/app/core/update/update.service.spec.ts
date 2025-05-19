@@ -225,11 +225,13 @@ describe('UpdateService', () => {
     it('should handle new_version message', () => {
       const mockCurrentVersion = {
         git_hash: 'def456',
-        build_datetime_utc: '2022-12-31T00:00:00.000000'
+        build_datetime_utc: '2022-12-31T00:00:00.000000',
+        version: '1.0.0'
       };
       const mockLatestVersion = {
         git_hash: 'abc123',
-        build_datetime_utc: '2023-01-01T00:00:00.000000'
+        build_datetime_utc: '2023-01-01T00:00:00.000000',
+        version: '1.0.1'
       };
 
       messageHandler({
@@ -248,7 +250,8 @@ describe('UpdateService', () => {
     it('should handle no_new_version message', () => {
       const mockVersion = {
         git_hash: 'abc123',
-        build_datetime_utc: '2023-01-01T00:00:00.000000'
+        build_datetime_utc: '2023-01-01T00:00:00.000000',
+        version: '0.0.0'
       };
 
       messageHandler({

@@ -4,15 +4,23 @@ Script to recursively list all files in the dist/phlowers-stellar-app directory 
 The JSON file is used to create the asset list for the service worker to precache.
 """
 
-def get_git_revision_hash() -> str:
-    return subprocess.check_output(['git', 'rev-parse',  'HEAD']).decode('ascii').strip()
-
 import subprocess
 import os
 import sys
 import json
 from datetime import datetime
 from pathlib import Path
+
+def get_git_revision_hash() -> str:
+    """Get the git revision hash from environment variable or git command"""
+    # First check if hash is available in environment variable
+    env_hash = os.environ.get('GIT_HASH')
+    if env_hash:
+        return env_hash
+    
+    # Fall back to git command if environment variable is not set
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+
 
 blacklist = [
     "service-worker.js",

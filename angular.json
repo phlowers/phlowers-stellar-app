@@ -66,9 +66,6 @@
             "styles": [
               "src/app/styles/styles.scss"
             ],
-            "scripts": [
-              "./node_modules/plotly.js-dist-min/plotly.min.js"
-            ],
             "webWorkerTsConfig": "tsconfig.worker.json"
           },
           "configurations": {

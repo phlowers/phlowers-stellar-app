@@ -4,29 +4,74 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { WorkerService } from '../../core/engine/worker/worker.service';
-import { Task } from '../../core/engine/worker/tasks';
+import { Component } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
+import { v4 as uuidv4 } from 'uuid';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { CheckboxModule } from 'primeng/checkbox';
+import { TabsModule } from 'primeng/tabs';
+import { DividerModule } from 'primeng/divider';
+import { CardModule } from 'primeng/card';
+import { DialogModule } from 'primeng/dialog';
+import { GeneralTabComponent } from './general/generalTab.component';
+import { SupportsTabComponent } from './supports/supportsTab.component';
+import { ObstaclesTabComponent } from './obstacles/obstaclesTab.component';
+import { VisualizationTabComponent } from './visualization/visualizationTab.component';
+import { Support, Obstacle, Data } from './types';
+import { WeatherTabComponent } from './weather/weather.component';
+import { CalculationsTabComponent } from './calculations/calculationsTab.component';
 
 const initialData = {
-  name: ['1', '2', 'three', 'support 4'],
-  suspension: [false, true, true, false],
-  conductor_attachment_altitude: [50.0, 40.0, 20.0, 10.0],
-  crossarm_length: [5.0, 5.0, 5.0, 5.0],
-  line_angle: [0.0, 0.0, 0.0, 0.0],
-  insulator_length: [0, 4, 3.2, 0],
-  span_length: [100, 200, 300, 0]
+  name: [
+    'support 1',
+    'support 2',
+    'support 3',
+    'support 4',
+    'support 5',
+    'support 6',
+    'support 7'
+  ],
+  suspension: [false, true, true, false, true, true, true],
+  conductor_attachment_altitude: [50.0, 40.0, 20.0, 10.0, 10.0, 10.0, 10.0],
+  crossarm_length: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0],
+  line_angle: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+  insulator_length: [0, 4, 3.2, 0, 0, 0, 0],
+  span_length: [100, 200, 300, 300, 300, 300, 0]
 };
 
-const initialDataObjects = initialData.name.map((name, index) => ({
+const initialObstacles = {
+  name: ['obstacle 1', 'obstacle 2', 'obstacle 3', 'obstacle 4'],
+  type: ['tree', 'pole', 'building', 'other'],
+  support: ['support 1', 'support 2', 'support 3', 'support 4'],
+  position: [
+    { x: 0, y: 0, z: 0 },
+    { x: 0, y: 0, z: 0 },
+    { x: 0, y: 0, z: 0 },
+    { x: 0, y: 0, z: 0 }
+  ],
+  height: [10, 10, 10, 10],
+  width: [10, 10, 10, 10],
+  length: [10, 10, 10, 10]
+};
+
+const initialObstaclesObjects: Obstacle[] = initialObstacles.name.map(
+  (name, index) => ({
+    uuid: uuidv4(),
+    name,
+    type: initialObstacles.type[index],
+    support: initialObstacles.support[index],
+    positions: [initialObstacles.position[index]],
+    height: initialObstacles.height[index],
+    width: initialObstacles.width[index],
+    length: initialObstacles.length[index]
+  })
+);
+
+const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
   name,
   suspension: initialData.suspension[index],
   conductor_attachment_altitude:
@@ -41,201 +86,101 @@ const initialDataObjects = initialData.name.map((name, index) => ({
   selector: 'app-admin',
   standalone: true,
   imports: [
+    GeneralTabComponent,
+    VisualizationTabComponent,
+    SupportsTabComponent,
+    ObstaclesTabComponent,
     ButtonModule,
     ProgressSpinnerModule,
+    CommonModule,
     CommonModule,
     TableModule,
     InputTextModule,
     FormsModule,
-    CheckboxModule
+    CheckboxModule,
+    TabsModule,
+    CardModule,
+    DividerModule,
+    DialogModule,
+    WeatherTabComponent,
+    CalculationsTabComponent
   ],
   template: `<div>
-    <div class="pb-5">
-      <p-button i18n [loading]="loading" (click)="runPython()">Run</p-button>
-      <p-button i18n styleClass="ml-5" severity="info" (click)="addSupport()"
-        >Add support</p-button
-      >
-    </div>
-    <p-table [value]="dataToObject" [tableStyle]="{ 'min-width': '50rem' }">
-      <ng-template #header>
-        <tr>
-          <th i18n>Name</th>
-          <th i18n>Suspension</th>
-          <th i18n>Conductor attachment altitude</th>
-          <th i18n>Crossarm length</th>
-          <th i18n>Line angle</th>
-          <th i18n>Insulator length</th>
-          <th i18n>Span length</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-support let-editing="editing">
-        <tr>
-          <td [pEditableColumn]="support.name" pEditableColumnField="name">
-            <p-cellEditor>
-              <ng-template #input>
-                <input pInputText type="text" [(ngModel)]="support.name" />
-              </ng-template>
-              <ng-template #output>
-                {{ support.name }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-          <td
-            [pEditableColumn]="support.suspension"
-            pEditableColumnField="suspension"
-          >
-            <p-checkbox
-              [(ngModel)]="support.suspension"
-              [binary]="true"
-              [value]="support.suspension"
-              [falseValue]="false"
-              [trueValue]="true"
-            />
-
-            <!-- <p-cellEditor>
-              <ng-template #input>
-                <p-checkbox [(ngModel)]="support.suspension" [binary]="true" [value]="support.suspension" [falseValue]="false" [trueValue]="true" />
-              </ng-template>
-              <ng-template #output>
-                <p-checkbox [(ngModel)]="support.suspension" [binary]="true" [value]="support.suspension" [falseValue]="false" [trueValue]="true" />
-              </ng-template>
-            </p-cellEditor> -->
-          </td>
-          <td
-            [pEditableColumn]="support.conductor_attachment_altitude"
-            pEditableColumnField="conductor_attachment_altitude"
-          >
-            <p-cellEditor>
-              <ng-template #input>
-                <input
-                  pInputText
-                  type="number"
-                  [(ngModel)]="support.conductor_attachment_altitude"
-                />
-              </ng-template>
-              <ng-template #output>
-                {{ support.conductor_attachment_altitude }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-          <td
-            [pEditableColumn]="support.crossarm_length"
-            pEditableColumnField="crossarm_length"
-          >
-            <p-cellEditor>
-              <ng-template #input>
-                <input
-                  pInputText
-                  type="number"
-                  [(ngModel)]="support.crossarm_length"
-                />
-              </ng-template>
-              <ng-template #output>
-                {{ support.crossarm_length }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-          <td
-            [pEditableColumn]="support.line_angle"
-            pEditableColumnField="line_angle"
-          >
-            <p-cellEditor>
-              <ng-template #input>
-                <input
-                  pInputText
-                  type="number"
-                  [(ngModel)]="support.line_angle"
-                />
-              </ng-template>
-              <ng-template #output>
-                {{ support.line_angle }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-          <td
-            [pEditableColumn]="support.insulator_length"
-            pEditableColumnField="insulator_length"
-          >
-            <p-cellEditor>
-              <ng-template #input>
-                <input
-                  pInputText
-                  type="number"
-                  [(ngModel)]="support.insulator_length"
-                />
-              </ng-template>
-              <ng-template #output>
-                {{ support.insulator_length }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-          <td
-            [pEditableColumn]="support.span_length"
-            pEditableColumnField="span_length"
-          >
-            <p-cellEditor>
-              <ng-template #input>
-                <input
-                  pInputText
-                  type="number"
-                  [(ngModel)]="support.span_length"
-                />
-              </ng-template>
-              <ng-template #output>
-                {{ support.span_length }}
-              </ng-template>
-            </p-cellEditor>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-    <div id="plotly-output1"></div>
+    <p-tabs value="General">
+      <p-tablist>
+        <p-tab [value]="tab" *ngFor="let tab of tabs">{{ tab }}</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="General">
+          <app-general-tab></app-general-tab>
+        </p-tabpanel>
+        <p-tabpanel value="Supports">
+          <app-supports-tab [supports]="data.supports"></app-supports-tab>
+        </p-tabpanel>
+        <p-tabpanel value="Obstacles">
+          <app-obstacles-tab
+            [initialObstaclesObjects]="data.obstacles"
+          ></app-obstacles-tab>
+        </p-tabpanel>
+        <p-tabpanel value="Weather">
+          <app-weather-tab [data]="data"></app-weather-tab>
+        </p-tabpanel>
+        <p-tabpanel value="Visualization">
+          @defer (on viewport) {
+            <app-visualization-tab></app-visualization-tab>
+          } @placeholder {
+            <div></div>
+          }
+        </p-tabpanel>
+        <p-tabpanel value="Calculations">
+          <app-calculations-tab [data]="data"></app-calculations-tab>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
   </div>`
 })
-export class StudyComponent implements OnInit {
-  workerReady = false;
-  subscriptions = new Subscription();
+export class StudyComponent {
   loading = true;
   dataToObject = initialDataObjects;
-  constructor(private readonly workerService: WorkerService) {}
-
-  ngOnInit() {
-    this.loading = true;
-    this.subscriptions.add(
-      this.workerService.ready$.subscribe((workerReady) => {
-        this.workerReady = workerReady;
-        if (workerReady) {
-          this.loading = false;
-        }
-      })
-    );
-  }
-
-  addSupport() {
-    this.dataToObject.push({
-      name: `support ${this.dataToObject.length + 1}`,
-      suspension: false,
-      conductor_attachment_altitude: 30,
-      crossarm_length: 5,
-      line_angle: 0,
-      insulator_length: 0,
-      span_length: 0
-    });
-  }
-
-  runPython() {
-    const data = {
-      name: this.dataToObject.map((item) => item.name),
-      suspension: this.dataToObject.map((item) => item.suspension),
-      conductor_attachment_altitude: this.dataToObject.map(
-        (item) => item.conductor_attachment_altitude
-      ),
-      crossarm_length: this.dataToObject.map((item) => item.crossarm_length),
-      line_angle: this.dataToObject.map((item) => item.line_angle),
-      insulator_length: this.dataToObject.map((item) => item.insulator_length),
-      span_length: this.dataToObject.map((item) => item.span_length)
-    };
-
-    this.workerService.runTask(Task.runPython, data);
-  }
+  tabs = [
+    'General',
+    'Supports',
+    'Obstacles',
+    'Weather',
+    'Visualization',
+    'Calculations'
+  ];
+  currentTab = this.tabs[0];
+  data: Data = {
+    general: {
+      sagging: {
+        temperature: 15,
+        parameter: 800
+      },
+      cable: {
+        section: 345.55,
+        diameter: 22.4,
+        linear_weight: 9.55494,
+        young_modulus: 59,
+        dilatation_coefficient: 23,
+        temperature_reference: 15,
+        a0: 0,
+        a1: 59,
+        a2: 0,
+        a3: 0,
+        a4: 0,
+        b0: 0,
+        b1: 0,
+        b2: 0,
+        b3: 0,
+        b4: 0
+      },
+      weather: {
+        wind_pressure: 0.6,
+        ice_thickness: 0
+      }
+    },
+    obstacles: initialObstaclesObjects,
+    supports: initialDataObjects
+  };
 }

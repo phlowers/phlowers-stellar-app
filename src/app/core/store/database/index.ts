@@ -27,6 +27,8 @@ import { Line } from './interfaces/line';
 import { Span } from './interfaces/span';
 import { Tension } from './interfaces/tension';
 import { TransitLink } from './interfaces/transitLink';
+import { Cable } from './interfaces/cable';
+import { cableTable } from './tables/cable';
 
 export class AppDB extends Dexie {
   users!: Table<User, number>;
@@ -40,6 +42,7 @@ export class AppDB extends Dexie {
   spans!: Table<Span, string>;
   tensions!: Table<Tension, string>;
   transit_links!: Table<TransitLink, string>;
+  cables!: Table<Cable, string>;
 
   constructor() {
     super('stellar-db');
@@ -54,27 +57,44 @@ export class AppDB extends Dexie {
       ...studyTable,
       ...tensionTable,
       ...transitLinkTable,
-      ...userTable
+      ...userTable,
+      ...cableTable
     });
     //fill the database with mock data
-    this.fillDatabaseWithMockData();
+    // this.fillDatabaseWithMockData();
+  }
+
+  // async loadMockDataFromFile(file: File) {
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => {
+  //     const jsonContent = e.target?.result as string;
+  //     const mockData = JSON.parse(jsonContent);
+  //     this.loadMockDataFromJson(mockData);
+  //   };
+  //   reader.readAsText(file);
+  // }
+
+  async loadMockDataFromJson(jsonContent: any) {
+    const mockData = jsonContent;
+    await this.attachments.bulkPut(mockData.attachments);
+    await this.branches.bulkPut(mockData.branches);
+    await this.lines.bulkPut(mockData.lines);
+    await this.maintenance_centers.bulkPut(mockData.maintenance_centers);
+    await this.regional_maintenance_centers.bulkPut(
+      mockData.regional_maintenance_centers
+    );
+    await this.sections.bulkPut(mockData.sections);
+    await this.spans.bulkPut(mockData.spans);
+    await this.tensions.bulkPut(mockData.tensions);
+    await this.transit_links.bulkPut(mockData.transit_links);
+    await this.cables.bulkPut(mockData.cables);
   }
 
   async fillDatabaseWithMockData() {
     try {
       if ((await this.attachments.count()) === 0) {
         const mockData = require('./mock_data.json'); //eslint-disable-line
-        await this.attachments.bulkPut(mockData.attachments);
-        await this.branches.bulkPut(mockData.branches);
-        await this.lines.bulkPut(mockData.lines);
-        await this.maintenance_centers.bulkPut(mockData.maintenance_centers);
-        await this.regional_maintenance_centers.bulkPut(
-          mockData.regional_maintenance_centers
-        );
-        await this.sections.bulkPut(mockData.sections);
-        await this.spans.bulkPut(mockData.spans);
-        await this.tensions.bulkPut(mockData.tensions);
-        await this.transit_links.bulkPut(mockData.transit_links);
+        await this.loadMockDataFromJson(mockData);
       }
     } catch (error) {
       console.error('Error filling database with mock data', error);

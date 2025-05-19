@@ -46,3 +46,7 @@ public/pyodide/*
 .vscode/settings.json
 certificates
 # src/python-packages.json
+
+mock_data.json
+
+*.ipynb
