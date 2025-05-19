@@ -4,18 +4,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { OnlineService } from './core/api/services/online.service';
 import { WorkerService } from './core/engine/worker/worker.service';
 import { StorageService } from './core/store/storage.service';
-import { SidebarComponent } from './layout/component/sidebar/sidebar.component';
-import { SidebarItem } from './layout/component/sidebar/sidebar.model';
 import { PrimeNgModules } from './primeng.module';
 import { MessageService } from 'primeng/api';
-import { TopbarComponent } from './layout/component/topbar/topbar.component';
 
 const validateEmail = (email: string): boolean => {
   return !!String(email)
@@ -25,19 +22,7 @@ const validateEmail = (email: string): boolean => {
     ); //NOSONAR
 };
 
-const modules = [
-  RouterModule,
-  CommonModule,
-  FormsModule,
-  PrimeNgModules,
-  SidebarComponent,
-  TopbarComponent
-];
-
-interface SidebarNavigation {
-  main: SidebarItem[];
-  footer: SidebarItem[];
-}
+const modules = [RouterModule, CommonModule, FormsModule, PrimeNgModules];
 
 @Component({
   selector: 'app-root',
@@ -106,55 +91,4 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.setupWorker();
   }
-
-  public readonly sideBarNav = signal<SidebarNavigation>({
-    main: [
-      {
-        id: 'sideB-home',
-        label: $localize`Home`,
-        route: '/',
-        icon: 'home'
-      },
-      {
-        id: 'sideB-studies',
-        label: $localize`Studies`,
-        route: '/',
-        icon: 'folder'
-      },
-      {
-        id: 'sideB-section',
-        label: $localize`Sections`,
-        route: '/sections',
-        icon: 'timeline'
-      },
-      // {
-      //   id: 'sideB-tools',
-      //   label: $localize`Tools`,
-      //   route: '/tools',
-      //   icon: 'build'
-      // },
-      {
-        id: 'sideB-plotlyJs',
-        label: 'Plotly JS POC',
-        shortLabel: 'plot poc',
-        route: '/plotly',
-        icon: 'ssid_chart'
-      }
-      // {
-      //   id: 'sideB-plotly3D',
-      //   label: $localize`3D`,
-      //   route: '/3d',
-      //   icon: 'deployed_code'
-      // }
-    ],
-    footer: [
-      {
-        id: 'sideB-usrPref',
-        label: $localize`User preference`,
-        shortLabel: $localize`usr pref`,
-        route: '/admin',
-        icon: 'Account_circle_filled'
-      }
-    ]
-  });
 }

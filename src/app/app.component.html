@@ -1,16 +1,4 @@
-<app-topbar></app-topbar>
-
-<app-sidebar
-  [logoIconExpanded]="'stellar-logo-expanded.svg'"
-  [logoIconShrank]="'stellar-logo-shrank.svg'"
-  [logoText]="'Stellar'"
-  [mainLinks]="sideBarNav().main"
-  [footerLinks]="sideBarNav().footer"
-/>
-
-<main>
-  <router-outlet></router-outlet>
-</main>
+<router-outlet></router-outlet>
 
 <p-toast position="top-center"></p-toast>
 
