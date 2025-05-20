@@ -18,13 +18,28 @@ export const appRoutes: Routes = [
     path: '',
     component: LoggedLayoutComponent,
     children: [
-      { path: '', component: HomeComponent },
-      { path: 'studies', component: StudiesComponent },
-      { path: 'admin', component: AdminComponent },
-      // { path: 'offline-storage-poc', component: OfflineStoragePoc },
-      { path: 'study/:uuid', component: StudyComponent },
-      { path: 'sections', component: SectionsComponent },
-      { path: 'plotly', component: PlotlyPageComponent }
+      { path: '', title: $localize`Home`, component: HomeComponent },
+      {
+        path: 'studies',
+        title: $localize`Studies`,
+        component: StudiesComponent
+      },
+      { path: 'admin', title: $localize`Admin`, component: AdminComponent },
+      {
+        path: 'study/:uuid',
+        title: $localize`Study`,
+        component: StudyComponent
+      },
+      {
+        path: 'sections',
+        title: $localize`Cantons`,
+        component: SectionsComponent
+      },
+      {
+        path: 'plotly',
+        title: $localize`Plotly`,
+        component: PlotlyPageComponent
+      }
     ]
   },
   { path: '**', redirectTo: '' }

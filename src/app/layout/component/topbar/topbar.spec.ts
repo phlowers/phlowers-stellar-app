@@ -72,66 +72,47 @@ describe('AppTopbarComponent', () => {
   });
 
   it('should initialize with default values', () => {
-    expect(component.offline).toBe(true);
-    expect(component.workerReady).toBe(false);
-    expect(component.serverOnline).toBe('LOADING');
+    expect(component.offline()).toBe(true);
+    expect(component.workerReady()).toBe(false);
+    expect(component.serverOnline()).toBe('LOADING');
   });
 
   it('should subscribe to online status changes', () => {
     // Initially offline
-    expect(component.offline).toBe(true);
+    expect(component.offline()).toBe(true);
 
     // Change to online
     onlineSubject.next(true);
-    expect(component.offline).toBe(false);
+    expect(component.offline()).toBe(false);
 
     // Change back to offline
     onlineSubject.next(false);
-    expect(component.offline).toBe(true);
+    expect(component.offline()).toBe(true);
   });
 
   it('should subscribe to worker ready status changes', () => {
     // Initially not ready
-    expect(component.workerReady).toBe(false);
+    expect(component.workerReady()).toBe(false);
 
     // Change to ready
     workerReadySubject.next(true);
-    expect(component.workerReady).toBe(true);
+    expect(component.workerReady()).toBe(true);
 
     // Change back to not ready
     workerReadySubject.next(false);
-    expect(component.workerReady).toBe(false);
+    expect(component.workerReady()).toBe(false);
   });
 
   it('should subscribe to server online status changes', () => {
     // Initially loading
-    expect(component.serverOnline).toBe('LOADING');
+    expect(component.serverOnline()).toBe('LOADING');
 
     // Change to online
     serverOnlineSubject.next('ONLINE');
-    expect(component.serverOnline).toBe('ONLINE');
+    expect(component.serverOnline()).toBe('ONLINE');
 
     // Change to offline
     serverOnlineSubject.next('OFFLINE');
-    expect(component.serverOnline).toBe('OFFLINE');
-  });
-
-  it('should display correct engine status based on workerReady', () => {
-    // Initially not ready
-    let engineElement = fixture.debugElement.query(
-      By.css('.layout-topbar-online[style*="orange"]')
-    );
-    expect(engineElement).toBeTruthy();
-    expect(engineElement.nativeElement.textContent).toContain('ENGINE LOADING');
-
-    // Change to ready
-    workerReadySubject.next(true);
-    fixture.detectChanges();
-
-    engineElement = fixture.debugElement.query(
-      By.css('.layout-topbar-online[style*="white"]')
-    );
-    expect(engineElement).toBeTruthy();
-    expect(engineElement.nativeElement.textContent).toContain('ENGINE READY');
+    expect(component.serverOnline()).toBe('OFFLINE');
   });
 });

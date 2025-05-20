@@ -1,70 +1,47 @@
-<div class="layout-topbar">
-  <div class="layout-topbar-logo-container">
-    <a class="layout-topbar-logo" routerLink="/">
-      <span i18n>STELLAR</span>
-    </a>
-  </div>
+<header>
+  <p class="text-l-600" style="color: grey(750)">{{ currentPageTitle() }}</p>
 
-  <div class="layout-topbar-actions">
-    <button
-      class="layout-topbar-menu-button layout-topbar-action"
-      pStyleClass="@next"
-      enterFromClass="hidden"
-      enterActiveClass="animate-scalein"
-      leaveToClass="hidden"
-      leaveActiveClass="animate-fadeout"
-      [hideOnOutsideClick]="true"
+  <section>
+    @if (updateService.needUpdate) {
+      <p i18n class="status status--warning">Update available</p>
+    }
+
+    <p
+      class="status"
+      [class]="{
+        'status--warning': !workerReady,
+        'status--success': workerReady
+      }"
     >
-      <i class="pi pi-ellipsis-v"></i>
-    </button>
-    <div
-      i18n
-      *ngIf="updateService.needUpdate"
-      class="layout-topbar-online"
-      [ngStyle]="{ color: 'orange' }"
+      <span i18n [class.show]="!workerReady()">Engine loading</span>
+      <span i18n [class.show]="workerReady()">Engine ready</span>
+    </p>
+
+    <p
+      class="status"
+      [class]="{ 'status--error': offline, 'status--success': !offline }"
     >
-      UPDATE AVAILABLE
-    </div>
-    <div>|</div>
-    <div
-      *ngIf="workerReady"
-      i18n
-      class="layout-topbar-online"
-      [ngStyle]="{ color: 'white' }"
+      <span i18n [class.show]="offline()">Offline</span>
+      <span i18n [class.show]="!offline()">Online</span>
+    </p>
+
+    <p
+      class="status"
+      [class]="{
+        'status--error': serverOnline() === 'OFFLINE',
+        'status--warning': serverOnline() === 'LOADING',
+        'status--success': serverOnline() === 'ONLINE'
+      }"
     >
-      ENGINE READY
-    </div>
-    <div
-      *ngIf="!workerReady"
-      i18n
-      class="layout-topbar-online"
-      [ngStyle]="{ color: 'orange' }"
-    >
-      ENGINE LOADING
-    </div>
-    <div>|</div>
-    <div
-      *ngIf="offline"
-      i18n
-      class="layout-topbar-online"
-      [ngStyle]="{ color: 'red' }"
-    >
-      OFFLINE
-    </div>
-    <div
-      *ngIf="!offline"
-      i18n
-      class="layout-topbar-online"
-      [ngStyle]="{ color: 'white' }"
-    >
-      ONLINE
-    </div>
-    <div>|</div>
-    <div
-      class="layout-topbar-online"
-      [ngStyle]="{ color: serverOnlineMap[serverOnline].color }"
-    >
-      {{ serverOnlineMap[serverOnline].text }}
-    </div>
-  </div>
-</div>
+      <span i18n [class.show]="serverOnline() === 'OFFLINE'">
+        Server unreachable
+      </span>
+      <span i18n [class.show]="serverOnline() === 'LOADING'">
+        Reaching server
+      </span>
+      <span i18n [class.show]="serverOnline() === 'ONLINE'">
+        Server reachable
+      </span>
+    </p>
+  </section>
+</header>

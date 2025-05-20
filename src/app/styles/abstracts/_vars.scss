@@ -82,7 +82,7 @@ $success: (
   950: #01321c
 );
 // default success
-$main-success: map.get($success, 300);
+$main-success: map.get($success, 600);
 
 // warning message and infos
 $warning: (
@@ -100,7 +100,7 @@ $warning: (
   950: #430e05
 );
 // default warning
-$main-warning: map.get($warning, 300);
+$main-warning: map.get($warning, 500);
 
 // error message and infos
 $error: (
