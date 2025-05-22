@@ -3,7 +3,9 @@
 
   <section>
     @if (updateService.needUpdate) {
-      <p i18n class="status status--warning">Update available</p>
+      <p i18n class="status status--warning" id="topbar-update">
+        Update available
+      </p>
     }
 
     <p
@@ -12,6 +14,7 @@
         'status--warning': !workerReady,
         'status--success': workerReady
       }"
+      id="topbar-engine"
     >
       <span i18n [class.show]="!workerReady()">Engine loading</span>
       <span i18n [class.show]="workerReady()">Engine ready</span>
@@ -20,6 +23,7 @@
     <p
       class="status"
       [class]="{ 'status--error': offline, 'status--success': !offline }"
+      id="topbar-internet"
     >
       <span i18n [class.show]="offline()">Offline</span>
       <span i18n [class.show]="!offline()">Online</span>
@@ -32,6 +36,7 @@
         'status--warning': serverOnline() === 'LOADING',
         'status--success': serverOnline() === 'ONLINE'
       }"
+      id="topbar-server"
     >
       <span i18n [class.show]="serverOnline() === 'OFFLINE'">
         Server unreachable

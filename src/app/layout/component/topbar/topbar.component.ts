@@ -38,7 +38,6 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.pageTitleService.pageTitle$.subscribe((title) => {
         this.currentPageTitle.set(title);
-        console.log('Page title updated:', title);
       })
     );
     // Process online status changes

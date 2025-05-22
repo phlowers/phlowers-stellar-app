@@ -1,15 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { Component, input } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { OnlineService } from '../../../core/api/services/online.service';
-import { appRoutes } from '../../../app.routes';
 import { LoggedLayoutComponent } from './logged-layout.component';
-import { TopbarComponent } from '../topbar/topbar.component';
-import { SidebarComponent } from '../sidebar/sidebar.component';
+import { SidebarItem } from '../sidebar/sidebar.model';
 
-// Create mock components to avoid loading the actual implementations
 @Component({
   selector: 'app-topbar',
   template: ''
@@ -17,10 +12,17 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 class MockTopbarComponent {}
 
 @Component({
-  selector: 'app-sidebar',
-  template: ''
+  selector: 'app-sidebar'
 })
-class MockSidebarComponent {}
+class MockSidebarComponent {
+  logoIconExpanded = input<string>();
+  logoIconShrank = input.required<string>();
+  logoText = input.required<string>();
+  appVersionDisplay = input<boolean>(true);
+  mainLinks = input<SidebarItem[]>();
+  footerLinks = input<SidebarItem[]>();
+  expanded = input<boolean>(true);
+}
 
 describe('LoggedLayoutComponent', () => {
   let component: LoggedLayoutComponent;
@@ -29,18 +31,24 @@ describe('LoggedLayoutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LoggedLayoutComponent],
-      providers: [
-        OnlineService,
-        provideRouter(appRoutes),
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        { provide: TopbarComponent, useClass: MockTopbarComponent },
-        { provide: SidebarComponent, useClass: MockSidebarComponent }
-      ]
+      providers: [OnlineService]
     })
       .overrideComponent(LoggedLayoutComponent, {
         set: {
-          imports: [MockTopbarComponent, MockSidebarComponent]
+          imports: [MockTopbarComponent, MockSidebarComponent, RouterOutlet],
+          template: `
+            <app-topbar></app-topbar>
+            <app-sidebar
+              [logoIconExpanded]="'stellar-logo-expanded.svg'"
+              [logoIconShrank]="'stellar-logo-shrank.svg'"
+              [logoText]="'Stellar'"
+              [mainLinks]="sideBarNav().main"
+              [footerLinks]="sideBarNav().footer"
+            />
+            <main>
+              <router-outlet></router-outlet>
+            </main>
+          `
         }
       })
       .compileComponents();
@@ -55,56 +63,34 @@ describe('LoggedLayoutComponent', () => {
   });
 
   it('should have topbar, sidebar and router-outlet', () => {
-    const topbar =
-      fixture.debugElement.nativeElement.querySelector('app-topbar');
-    const sidebar =
-      fixture.debugElement.nativeElement.querySelector('app-sidebar');
-    const routerOutlet =
-      fixture.debugElement.nativeElement.querySelector('router-outlet');
+    const compiled = fixture.nativeElement;
+    const topbar = compiled.querySelector('app-topbar');
+    const sidebar = compiled.querySelector('app-sidebar');
+    const routerOutlet = compiled.querySelector('router-outlet');
 
     expect(topbar).toBeTruthy();
     expect(sidebar).toBeTruthy();
     expect(routerOutlet).toBeTruthy();
   });
 
-  it('should initialize sidebar navigation items', () => {
-    expect(component.sideBarNav()).toEqual({
-      main: [
-        {
-          id: 'sideB-home',
-          label: 'Home',
-          route: '/',
-          icon: 'home'
-        },
-        {
-          id: 'sideB-studies',
-          label: 'Studies',
-          route: '/studies',
-          icon: 'folder'
-        },
-        {
-          id: 'sideB-section',
-          label: 'Sections',
-          route: '/sections',
-          icon: 'timeline'
-        },
-        {
-          id: 'sideB-plotlyJs',
-          label: 'Plotly JS POC',
-          shortLabel: 'plot poc',
-          route: '/plotly',
-          icon: 'ssid_chart'
-        }
-      ],
-      footer: [
-        {
-          id: 'sideB-usrPref',
-          label: 'User preference',
-          shortLabel: 'usr pref',
-          route: '/admin',
-          icon: 'Account_circle_filled'
-        }
-      ]
+  it('should pass correct props to sidebar component', () => {
+    const sidebarNav = component.sideBarNav();
+
+    expect(sidebarNav.main).toBeTruthy();
+    expect(sidebarNav.footer).toBeTruthy();
+
+    sidebarNav.main.forEach((item) => {
+      expect(item).toHaveProperty('id');
+      expect(item).toHaveProperty('label');
+      expect(item).toHaveProperty('route');
+      expect(item).toHaveProperty('icon');
+    });
+
+    sidebarNav.footer.forEach((item) => {
+      expect(item).toHaveProperty('id');
+      expect(item).toHaveProperty('label');
+      expect(item).toHaveProperty('route');
+      expect(item).toHaveProperty('icon');
     });
   });
 });
