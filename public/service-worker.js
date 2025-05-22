@@ -132,6 +132,8 @@ self.addEventListener('fetch', event => {
           return fetch(event.request.clone());
         })
     );
+  } else if (url.includes("celesteback")) {
+    event.respondWith(fetch(event.request.clone()));
   } else {
     event.respondWith(
       caches.match(event.request)

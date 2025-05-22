@@ -23,11 +23,10 @@ export interface Support {
 }
 
 export interface Data {
-  general: {
-    sagging: {
-      temperature: number | null;
-      parameter: number | null;
-    };
+  section: {
+    uuid: string;
+    name: string;
+    internalId: string;
     cable: {
       section: number | null;
       diameter: number | null;
@@ -46,9 +45,30 @@ export interface Data {
       b3: number | null;
       b4: number | null;
     };
+  };
+  general: {
+    name: string;
+    uuid: string;
+    author_email: string;
+    created_at_offline: string;
+    updated_at_offline: string;
+    saved: boolean;
+    sagging: {
+      temperature: number | null;
+      parameter: number | null;
+    };
     weather: {
       wind_pressure: number | null;
       ice_thickness: number | null;
+    };
+  };
+  initial_parameters: {
+    sagging: {
+      temperature: number | null;
+      parameter: number | null;
+    };
+    cable: {
+      temperature: number | null;
     };
   };
   obstacles: Obstacle[];

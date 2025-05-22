@@ -491,7 +491,8 @@ export class StudiesComponent implements OnInit {
     await this.storageService.db?.studies.add({
       ...newStudy,
       uuid,
-      saved: false
+      saved: false,
+      title: `${newStudy.title} (Copy)`
     });
     this.studies.set((await this.storageService.db?.studies.toArray()) || []);
     this.messageService.add({

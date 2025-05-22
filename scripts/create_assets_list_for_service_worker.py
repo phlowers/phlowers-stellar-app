@@ -14,7 +14,7 @@ from pathlib import Path
 def get_git_revision_hash() -> str:
     """Get the git revision hash from environment variable or git command"""
     # First check if hash is available in environment variable
-    env_hash = os.environ.get('GIT_HASH')
+    env_hash = os.environ.get('CI_COMMIT_SHA')
     if env_hash:
         return env_hash
     

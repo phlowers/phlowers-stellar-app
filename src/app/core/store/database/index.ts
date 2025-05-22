@@ -29,6 +29,7 @@ import { Tension } from './interfaces/tension';
 import { TransitLink } from './interfaces/transitLink';
 import { Cable } from './interfaces/cable';
 import { cableTable } from './tables/cable';
+import mockData from './mock_data.json';
 
 export class AppDB extends Dexie {
   users!: Table<User, number>;
@@ -93,7 +94,6 @@ export class AppDB extends Dexie {
   async fillDatabaseWithMockData() {
     try {
       if ((await this.attachments.count()) === 0) {
-        const mockData = require('./mock_data.json'); //eslint-disable-line
         await this.loadMockDataFromJson(mockData);
       }
     } catch (error) {

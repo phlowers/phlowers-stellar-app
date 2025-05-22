@@ -47,6 +47,4 @@ public/pyodide/*
 certificates
 # src/python-packages.json
 
-mock_data.json
-
 *.ipynb

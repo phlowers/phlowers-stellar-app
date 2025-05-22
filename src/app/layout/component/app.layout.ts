@@ -37,11 +37,11 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 export class AppLayoutComponent implements OnInit {
   menuOutsideClickListener: any;
   items = [
-    { label: 'Studies', route: '' },
-    { label: 'Admin', route: 'admin' },
-    { label: 'Sections', route: 'sections' },
-    { label: 'Plotly', route: 'plotly' },
-    { label: 'Study', route: 'study' }
+    { label: $localize`Studies`, route: '' },
+    { label: $localize`Admin`, route: 'admin' },
+    { label: $localize`Sections`, route: 'sections' },
+    { label: $localize`Plotly`, route: 'plotly' },
+    { label: $localize`Study`, route: 'study' }
   ];
 
   currentRoute = '';

@@ -12,11 +12,22 @@ import { DialogModule } from 'primeng/dialog';
 import { Task } from '../../../core/engine/worker/tasks';
 import { WorkerService } from '../../../core/engine/worker/worker.service';
 import { ButtonModule } from 'primeng/button';
-
+import { TagModule } from 'primeng/tag';
+import { InputTextModule } from 'primeng/inputtext';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-modify-position-modal',
   standalone: true,
-  imports: [DialogModule, SingleSpanComponent, ButtonModule],
+  imports: [
+    DialogModule,
+    SingleSpanComponent,
+    ButtonModule,
+    TagModule,
+    InputTextModule,
+    FloatLabelModule,
+    FormsModule
+  ],
   template: `
     <p-dialog
       [style]="{ width: '80vw', height: '90vh' }"
@@ -37,10 +48,34 @@ import { ButtonModule } from 'primeng/button';
         [obstacle]="position()"
         (obstacleChange)="onPositionChange($event)"
       ></app-single-span>
-      <div>
-        <div i18n class="flex gap-2 text-lg">x: {{ position().x }}</div>
-        <div i18n class="flex gap-2 text-lg">y: {{ position().y }}</div>
-        <div i18n class="flex gap-2 text-lg">z: {{ position().z }}</div>
+      <div class="flex flex-row gap-2 my-2">
+        <p-floatlabel variant="in">
+          <input
+            pInputText
+            id="in_label"
+            [(ngModel)]="position().x"
+            autocomplete="off"
+          />
+          <label for="in_label">X</label>
+        </p-floatlabel>
+        <p-floatlabel variant="in">
+          <input
+            pInputText
+            id="in_label"
+            [(ngModel)]="position().y"
+            autocomplete="off"
+          />
+          <label for="in_label">Y</label>
+        </p-floatlabel>
+        <p-floatlabel variant="in">
+          <input
+            pInputText
+            id="in_label"
+            [(ngModel)]="position().z"
+            autocomplete="off"
+          />
+          <label for="in_label">Z</label>
+        </p-floatlabel>
       </div>
       <div class="flex gap-2">
         <p-button label="Validate" (onClick)="onValidate()"></p-button>

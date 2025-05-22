@@ -21,19 +21,9 @@
         <source>Sections</source>
       </segment>
     </unit>
-    <unit id="1684734235599362204">
-      <segment>
-        <source>Tools</source>
-      </segment>
-    </unit>
     <unit id="5041354590769758251">
       <segment>
         <source>Admin</source>
-      </segment>
-    </unit>
-    <unit id="4677175911030006427">
-      <segment>
-        <source>test</source>
       </segment>
     </unit>
     <unit id="2538982915795016676">
@@ -41,9 +31,9 @@
         <source>STELLAR</source>
       </segment>
     </unit>
-    <unit id="1027281205052566407">
+    <unit id="7892492460421880567">
       <segment>
-        <source>UPDATE AVAILABLE</source>
+        <source> UPDATE AVAILABLE </source>
       </segment>
     </unit>
     <unit id="5024752563746311100">
@@ -91,54 +81,14 @@
         <source>Name:</source>
       </segment>
     </unit>
-    <unit id="6919207328705792165">
+    <unit id="291583105102257369">
       <segment>
-        <source>Section CUR:</source>
+        <source>Cable Short Name:</source>
       </segment>
     </unit>
-    <unit id="1843028621431865126">
+    <unit id="5320289969627251540">
       <segment>
-        <source>Section Short name:</source>
-      </segment>
-    </unit>
-    <unit id="5502261281300289989">
-      <segment>
-        <source>Section name:</source>
-      </segment>
-    </unit>
-    <unit id="2681129456719834482">
-      <segment>
-        <source>Cable short name:</source>
-      </segment>
-    </unit>
-    <unit id="6115903835147878111">
-      <segment>
-        <source>Cable name:</source>
-      </segment>
-    </unit>
-    <unit id="7052646852891832055">
-      <segment>
-        <source>Section type:</source>
-      </segment>
-    </unit>
-    <unit id="3136844473693708275">
-      <segment>
-        <source>Link name:</source>
-      </segment>
-    </unit>
-    <unit id="3738692095093251722">
-      <segment>
-        <source>Branch name:</source>
-      </segment>
-    </unit>
-    <unit id="1533968084549174775">
-      <segment>
-        <source>Transit link name:</source>
-      </segment>
-    </unit>
-    <unit id="6238568029904268206">
-      <segment>
-        <source>Voltage name:</source>
+        <source>Cable Name:</source>
       </segment>
     </unit>
     <unit id="7716208024960184784">
@@ -169,11 +119,6 @@
     <unit id="2159130950882492111">
       <segment>
         <source>Cancel</source>
-      </segment>
-    </unit>
-    <unit id="1071721880474488785">
-      <segment>
-        <source>Import</source>
       </segment>
     </unit>
     <unit id="4580988005648117665">
@@ -243,7 +188,7 @@
     </unit>
     <unit id="4400683222290877455">
       <segment>
-        <source> Name <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;title&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;title&quot; /&gt;"/></source>
+        <source> Name <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;name&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;name&quot; /&gt;"/></source>
       </segment>
     </unit>
     <unit id="8784816491170389323">
@@ -274,11 +219,6 @@
     <unit id="6952242034697821025">
       <segment>
         <source>Title is required.</source>
-      </segment>
-    </unit>
-    <unit id="3759965007855499397">
-      <segment>
-        <source>Run</source>
       </segment>
     </unit>
     <unit id="7553683770113292299">
@@ -321,24 +261,24 @@
         <source>Save</source>
       </segment>
     </unit>
-    <unit id="4472533983620148440">
+    <unit id="3337057979798844436">
       <segment>
-        <source>ENGINE READY</source>
+        <source> ENGINE READY </source>
       </segment>
     </unit>
-    <unit id="548892186034088208">
+    <unit id="570980415261850603">
       <segment>
-        <source>ONLINE</source>
+        <source> ONLINE </source>
       </segment>
     </unit>
-    <unit id="6044475970947805811">
+    <unit id="2506324167175418886">
       <segment>
-        <source>ENGINE LOADING</source>
+        <source> ENGINE LOADING </source>
       </segment>
     </unit>
-    <unit id="802273028390736200">
+    <unit id="2264573519256545601">
       <segment>
-        <source>OFFLINE</source>
+        <source> OFFLINE </source>
       </segment>
     </unit>
     <unit id="9090564883233759848">
@@ -434,6 +374,8 @@
     <unit id="8892964333730306563">
       <segment>
         <source>Plotly</source>
+      </segment>
+    </unit>
     <unit id="2517309683610083249">
       <segment>
         <source>Title:</source>
@@ -447,6 +389,611 @@
     <unit id="6996799422725544865">
       <segment>
         <source>Description:</source>
+      </segment>
+    </unit>
+    <unit id="1036752691957241775">
+      <segment>
+        <source>Select span:</source>
+      </segment>
+    </unit>
+    <unit id="1110077426389422888">
+      <segment>
+        <source>Short Name*</source>
+      </segment>
+    </unit>
+    <unit id="1183601349925746054">
+      <segment>
+        <source>Parameter</source>
+      </segment>
+    </unit>
+    <unit id="1329085486735308185">
+      <segment>
+        <source>Add Obstacle</source>
+      </segment>
+    </unit>
+    <unit id="1401479758712751177">
+      <segment>
+        <source> Regional Maintenance Centers </source>
+      </segment>
+    </unit>
+    <unit id="1476817352383606037">
+      <segment>
+        <source> Cable Name <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;cable_name&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;cable_name&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="1660398945917025633">
+      <segment>
+        <source>Show other phases as dashed</source>
+      </segment>
+    </unit>
+    <unit id="1714844508372930404">
+      <segment>
+        <source>Optical Fibers Amount:</source>
+      </segment>
+    </unit>
+    <unit id="1833846729161767866">
+      <segment>
+        <source> Internal ID <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;internal_id&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;internal_id&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="18656598646103884">
+      <segment>
+        <source>Begin Span Name:</source>
+      </segment>
+    </unit>
+    <unit id="1869945450341875228">
+      <segment>
+        <source> z: <ph id="0" equiv="INTERPOLATION" disp="{{ currentPosition2?.x || &apos;N/A&apos; }}"/>, y: <ph id="1" equiv="INTERPOLATION_1" disp="{{ currentPosition2?.z || &apos;N/A&apos; }}"/> </source>
+      </segment>
+    </unit>
+    <unit id="1896796589107953434">
+      <segment>
+        <source>b2</source>
+      </segment>
+    </unit>
+    <unit id="2003166938903005799">
+      <segment>
+        <source>First Attachment Set</source>
+      </segment>
+    </unit>
+    <unit id="2068957950340623731">
+      <segment>
+        <source>Last Support Number</source>
+      </segment>
+    </unit>
+    <unit id="2137275480523502836">
+      <segment>
+        <source> Short name is required </source>
+      </segment>
+    </unit>
+    <unit id="2139306506260817455">
+      <segment>
+        <source> Begin Span <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;begin_span_name&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;begin_span_name&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="2152228686814513488">
+      <segment>
+        <source> Span Information </source>
+      </segment>
+    </unit>
+    <unit id="220806271592537934">
+      <segment>
+        <source> Uuid <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;uuid&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;uuid&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="2244653904207248318">
+      <segment>
+        <source>Selected Phase</source>
+      </segment>
+    </unit>
+    <unit id="2288513108450439427">
+      <segment>
+        <source>Support</source>
+      </segment>
+    </unit>
+    <unit id="2317721129554630455">
+      <segment>
+        <source>Dilatation coefficient</source>
+      </segment>
+    </unit>
+    <unit id="2403667619057852526">
+      <segment>
+        <source>Mouse Position:</source>
+      </segment>
+    </unit>
+    <unit id="2509141182388535183">
+      <segment>
+        <source>View</source>
+      </segment>
+    </unit>
+    <unit id="2592368582911584624">
+      <segment>
+        <source>Temperature</source>
+      </segment>
+    </unit>
+    <unit id="2593007815199532062">
+      <segment>
+        <source>Section</source>
+      </segment>
+    </unit>
+    <unit id="2736556170366900089">
+      <segment>
+        <source>Type:</source>
+      </segment>
+    </unit>
+    <unit id="2740945129027687494">
+      <segment>
+        <source>x-axis values</source>
+      </segment>
+    </unit>
+    <unit id="2816235352987214400">
+      <segment>
+        <source>Linear weight</source>
+      </segment>
+    </unit>
+    <unit id="284314666621919197">
+      <segment>
+        <source>Span view</source>
+      </segment>
+    </unit>
+    <unit id="2844932226094575658">
+      <segment>
+        <source>Created at offline</source>
+      </segment>
+    </unit>
+    <unit id="3020262502360958610">
+      <segment>
+        <source> Optical Fibers Amount <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;optical_fibers_amount&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;optical_fibers_amount&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="3109389357959089173">
+      <segment>
+        <source>Young modulus</source>
+      </segment>
+    </unit>
+    <unit id="3229176691797994267">
+      <segment>
+        <source>Spans Amount:</source>
+      </segment>
+    </unit>
+    <unit id="3245216817487215662">
+      <segment>
+        <source>Parameter: <ph id="0" equiv="INTERPOLATION" disp="{{ result.parameters | json }}"/></source>
+      </segment>
+    </unit>
+    <unit id="3271240058703011384">
+      <segment>
+        <source>b1</source>
+      </segment>
+    </unit>
+    <unit id="3561388128637067293">
+      <segment>
+        <source>written &quot;y&quot; in Plotly</source>
+      </segment>
+    </unit>
+    <unit id="3604098809905852856">
+      <segment>
+        <source> First Attachment Set <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;first_attachment_set&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;first_attachment_set&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="3662001539189132487">
+      <segment>
+        <source> Cables Amount <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;cables_amount&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;cables_amount&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="367151338479502918">
+      <segment>
+        <source> Cable Short Name <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;cable_short_name&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;cable_short_name&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="3875159225449820825">
+      <segment>
+        <source>Short Name:</source>
+      </segment>
+    </unit>
+    <unit id="4042902315677630519">
+      <segment>
+        <source> Name is required </source>
+      </segment>
+    </unit>
+    <unit id="4154311661203608699">
+      <segment>
+        <source>Updated at offline</source>
+      </segment>
+    </unit>
+    <unit id="4163014893453263062">
+      <segment>
+        <source>Cable</source>
+      </segment>
+    </unit>
+    <unit id="4171240732201595169">
+      <segment>
+        <source>b0</source>
+      </segment>
+    </unit>
+    <unit id="4275130815956264001">
+      <segment>
+        <source>Begin Span Name</source>
+      </segment>
+    </unit>
+    <unit id="4281893169256786080">
+      <segment>
+        <source> Short Name <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;short_name&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;short_name&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="4285720230821779161">
+      <segment>
+        <source>Position X</source>
+      </segment>
+    </unit>
+    <unit id="4362247818522843134">
+      <segment>
+        <source> First Support Number <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;first_support_number&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;first_support_number&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="4512288865650359016">
+      <segment>
+        <source>Last Span Name:</source>
+      </segment>
+    </unit>
+    <unit id="4664936012872833457">
+      <segment>
+        <source>Length: <ph id="0" equiv="INTERPOLATION" disp="{{ result.lengths | json }}"/></source>
+      </segment>
+    </unit>
+    <unit id="4690783273775808909">
+      <segment>
+        <source>Cables Amount:</source>
+      </segment>
+    </unit>
+    <unit id="4720069176510987726">
+      <segment>
+        <source>Temperature reference</source>
+      </segment>
+    </unit>
+    <unit id="4865483609520535639">
+      <segment>
+        <source>Cable Temperature</source>
+      </segment>
+    </unit>
+    <unit id="5110651533881923898">
+      <segment>
+        <source>Position Y</source>
+      </segment>
+    </unit>
+    <unit id="5389579318247645484">
+      <segment>
+        <source>Last Span Name</source>
+      </segment>
+    </unit>
+    <unit id="5390395784984657321">
+      <segment>
+        <source>Create study</source>
+      </segment>
+    </unit>
+    <unit id="541599275301077517">
+      <segment>
+        <source> Regional Maintenance Center </source>
+      </segment>
+    </unit>
+    <unit id="551994446236445654">
+      <segment>
+        <source> Maintenance Centers </source>
+      </segment>
+    </unit>
+    <unit id="5536574191302391469">
+      <segment>
+        <source>Result <ph id="0" equiv="INTERPOLATION" disp="{{ i }}"/></source>
+      </segment>
+    </unit>
+    <unit id="5561909626996553930">
+      <segment>
+        <source> Attachment Information </source>
+      </segment>
+    </unit>
+    <unit id="5567595061783150810">
+      <segment>
+        <source>Diameter</source>
+      </segment>
+    </unit>
+    <unit id="5575834729726652904">
+      <segment>
+        <source> Maintenance Center </source>
+      </segment>
+    </unit>
+    <unit id="5664499048376999496">
+      <segment>
+        <source>b3</source>
+      </segment>
+    </unit>
+    <unit id="5688619008736308160">
+      <segment>
+        <source>View 3d</source>
+      </segment>
+    </unit>
+    <unit id="5842122374976434009">
+      <segment>
+        <source>b4</source>
+      </segment>
+    </unit>
+    <unit id="5876554333850676335">
+      <segment>
+        <source> Type <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;type&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;type&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="5877262911198501056">
+      <segment>
+        <source>a1</source>
+      </segment>
+    </unit>
+    <unit id="5892133104645613764">
+      <segment>
+        <source>Regional Maintenance Center Name</source>
+      </segment>
+    </unit>
+    <unit id="5973804183311747421">
+      <segment>
+        <source>Global view</source>
+      </segment>
+    </unit>
+    <unit id="6005232337254919222">
+      <segment>
+        <source> Type is required </source>
+      </segment>
+    </unit>
+    <unit id="6363734922156748851">
+      <segment>
+        <source>Last Attachment Set</source>
+      </segment>
+    </unit>
+    <unit id="6400621965385663212">
+      <segment>
+        <source>Maintenance Center:</source>
+      </segment>
+    </unit>
+    <unit id="6403017402214377823">
+      <segment>
+        <source>Sagging</source>
+      </segment>
+    </unit>
+    <unit id="6415655027270906050">
+      <segment>
+        <source>Optical Fibers Amount</source>
+      </segment>
+    </unit>
+    <unit id="643746431923925117">
+      <segment>
+        <source>a3</source>
+      </segment>
+    </unit>
+    <unit id="6602969492493380277">
+      <segment>
+        <source> Last Support Number <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;last_support_number&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;last_support_number&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="6613300769068333223">
+      <segment>
+        <source>Wind Pressure</source>
+      </segment>
+    </unit>
+    <unit id="6713690242020777174">
+      <segment>
+        <source>Build version</source>
+      </segment>
+    </unit>
+    <unit id="6920230833466335855">
+      <segment>
+        <source> Last Attachment Set <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;last_attachment_set&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;last_attachment_set&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="7019503939878893795">
+      <segment>
+        <source>Cable Name</source>
+      </segment>
+    </unit>
+    <unit id="7096961839516409506">
+      <segment>
+        <source>UUID:</source>
+      </segment>
+    </unit>
+    <unit id="7104494482991512904">
+      <segment>
+        <source>a2</source>
+      </segment>
+    </unit>
+    <unit id="7192180218239105105">
+      <segment>
+        <source>Spans Amount</source>
+      </segment>
+    </unit>
+    <unit id="7302091294051042522">
+      <segment>
+        <source>written &quot;z&quot; in Plotly</source>
+      </segment>
+    </unit>
+    <unit id="7366074452725431395">
+      <segment>
+        <source> General Information </source>
+      </segment>
+    </unit>
+    <unit id="7436442038389550214">
+      <segment>
+        <source>Last Attachment Set:</source>
+      </segment>
+    </unit>
+    <unit id="7503788950975715918">
+      <segment>
+        <source>Position Z</source>
+      </segment>
+    </unit>
+    <unit id="7518286354914239538">
+      <segment>
+        <source>First Attachment Set:</source>
+      </segment>
+    </unit>
+    <unit id="7593725061694772536">
+      <segment>
+        <source> Spans Amount <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;spans_amount&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;spans_amount&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="7609748400763849959">
+      <segment>
+        <source>Name*</source>
+      </segment>
+    </unit>
+    <unit id="7636046577727088373">
+      <segment>
+        <source>Cables Amount</source>
+      </segment>
+    </unit>
+    <unit id="7719228873079776139">
+      <segment>
+        <source> x: <ph id="0" equiv="INTERPOLATION" disp="{{ currentPosition?.x || &apos;N/A&apos; }}"/>, y: <ph id="1" equiv="INTERPOLATION_1" disp="{{ currentPosition?.z || &apos;N/A&apos; }}"/> </source>
+      </segment>
+    </unit>
+    <unit id="7759085860356625835">
+      <segment>
+        <source>Cable Short Name</source>
+      </segment>
+    </unit>
+    <unit id="7786470021852710273">
+      <segment>
+        <source>Internal Catalog ID:</source>
+      </segment>
+    </unit>
+    <unit id="7859775086470009662">
+      <segment>
+        <source> Internal Catalog ID <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;internal_catalog_id&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;internal_catalog_id&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="7938448396125243160">
+      <segment>
+        <source> Cable Information </source>
+      </segment>
+    </unit>
+    <unit id="7945644172611050184">
+      <segment>
+        <source>Internal ID:</source>
+      </segment>
+    </unit>
+    <unit id="8016230946790632582">
+      <segment>
+        <source> End Span <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;last_span_name&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;last_span_name&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="8053112597838974707">
+      <segment>
+        <source> Information </source>
+      </segment>
+    </unit>
+    <unit id="8154552685293485063">
+      <segment>
+        <source>a4</source>
+      </segment>
+    </unit>
+    <unit id="8204555453748282582">
+      <segment>
+        <source>Ice Thickness</source>
+      </segment>
+    </unit>
+    <unit id="8229552393196244761">
+      <segment>
+        <source> Created At <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;created_at&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;created_at&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="8495539109473309619">
+      <segment>
+        <source> Support Information </source>
+      </segment>
+    </unit>
+    <unit id="8564913282459376934">
+      <segment>
+        <source>Last Support Number:</source>
+      </segment>
+    </unit>
+    <unit id="8650499415827640724">
+      <segment>
+        <source>Type</source>
+      </segment>
+    </unit>
+    <unit id="8911626523490337854">
+      <segment>
+        <source>First Support Number</source>
+      </segment>
+    </unit>
+    <unit id="8943633470366001182">
+      <segment>
+        <source>First Support Number:</source>
+      </segment>
+    </unit>
+    <unit id="9006402977855722062">
+      <segment>
+        <source>Type*</source>
+      </segment>
+    </unit>
+    <unit id="9146860062991641762">
+      <segment>
+        <source>Regional Maintenance Center:</source>
+      </segment>
+    </unit>
+    <unit id="9182315751510285384">
+      <segment>
+        <source>a0</source>
+      </segment>
+    </unit>
+    <unit id="1315831962170544808">
+      <segment>
+        <source>Internal ID</source>
+      </segment>
+    </unit>
+    <unit id="1715866221564635584">
+      <segment>
+        <source>Supports</source>
+      </segment>
+    </unit>
+    <unit id="1995462320428563005">
+      <segment>
+        <source>Charges</source>
+      </segment>
+    </unit>
+    <unit id="2250155903065806087">
+      <segment>
+        <source>Study</source>
+      </segment>
+    </unit>
+    <unit id="2265227758067782673">
+      <segment>
+        <source>Calculations</source>
+      </segment>
+    </unit>
+    <unit id="3228612487814937552">
+      <segment>
+        <source>Obstacles</source>
+      </segment>
+    </unit>
+    <unit id="5148916028088347449">
+      <segment>
+        <source>Informations</source>
+      </segment>
+    </unit>
+    <unit id="5653202483299129380">
+      <segment>
+        <source>Weather</source>
+      </segment>
+    </unit>
+    <unit id="6439365426343089851">
+      <segment>
+        <source>General</source>
+      </segment>
+    </unit>
+    <unit id="671835755815348106">
+      <segment>
+        <source>Initial parameters</source>
+      </segment>
+    </unit>
+    <unit id="9098712055524516876">
+      <segment>
+        <source>Visualization</source>
       </segment>
     </unit>
   </file>

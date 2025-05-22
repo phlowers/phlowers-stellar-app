@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, input } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { CommonModule } from '@angular/common';
@@ -16,6 +16,7 @@ import { TabsModule } from 'primeng/tabs';
 import { DividerModule } from 'primeng/divider';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
+import { Data } from '../types';
 
 interface Support {
   name: string;
@@ -55,7 +56,7 @@ interface Support {
       [showCurrentPageReport]="true"
       [rows]="10"
       [rowsPerPageOptions]="[10, 20, 30]"
-      [value]="supports"
+      [value]="data().supports"
       [tableStyle]="{ 'min-width': '50rem' }"
     >
       <ng-template #header>
@@ -184,7 +185,7 @@ interface Support {
   </div>`
 })
 export class SupportsTabComponent {
-  @Input() supports: Support[] = [];
+  data = input.required<Data>();
   @Output() supportsChange = new EventEmitter<Support[]>();
 
   // ngOnInit() {
@@ -194,13 +195,13 @@ export class SupportsTabComponent {
   // }
 
   addSupport() {
-    const lastSupport = this.supports[this.supports.length - 1];
+    const lastSupport = this.data().supports[this.data().supports.length - 1];
     if (lastSupport && lastSupport.span_length === 0) {
       lastSupport.span_length = 300;
     }
 
     const newSupport: Support = {
-      name: `support ${this.supports.length + 1}`,
+      name: `support ${this.data().supports.length + 1}`,
       suspension: false,
       conductor_attachment_altitude: 30,
       crossarm_length: 5,
@@ -209,7 +210,7 @@ export class SupportsTabComponent {
       span_length: 0
     };
 
-    this.supports.push(newSupport);
-    this.supportsChange.emit(this.supports);
+    this.data().supports.push(newSupport);
+    // this.supportsChange.emit(this.data().supports);
   }
 }

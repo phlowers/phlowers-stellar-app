@@ -184,16 +184,26 @@ const targetIcon = `<?xml version="1.0" encoding="iso-8859-1"?>
               </ng-template>
             </p-cellEditor>
           </td>
-          <td>
+          <td class="flex gap-2">
             <p-button
               icon="pi pi-bullseye"
               i18n
               size="large"
               severity="secondary"
+              outlined="true"
               (click)="openModifyPositionModal(obstacle.uuid)"
             >
               <!-- <i class="fa-solid fa-crosshairs"></i> -->
               <!-- <fa-icon [icon]="faCoffee"></fa-icon> -->
+            </p-button>
+            <p-button
+              icon="pi pi-trash"
+              i18n
+              size="large"
+              severity="danger"
+              outlined="true"
+              (click)="deleteObstacle(obstacle.uuid)"
+            >
             </p-button>
           </td>
         </tr>
@@ -265,5 +275,12 @@ export class ObstaclesTabComponent implements OnInit {
 
     this.obstacles.push(newObstacle);
     this.obstaclesChange.emit(this.obstacles);
+  }
+
+  deleteObstacle(uuid: string) {
+    this.obstacles = this.obstacles.filter(
+      (obstacle) => obstacle.uuid !== uuid
+    );
+    // this.obstaclesChange.emit(this.obstacles);
   }
 }

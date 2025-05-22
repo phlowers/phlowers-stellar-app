@@ -18,12 +18,13 @@ import { DividerModule } from 'primeng/divider';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { GeneralTabComponent } from './general/generalTab.component';
-import { SupportsTabComponent } from './supports/supportsTab.component';
 import { ObstaclesTabComponent } from './obstacles/obstaclesTab.component';
 import { VisualizationTabComponent } from './visualization/visualizationTab.component';
 import { Support, Obstacle, Data } from './types';
-import { WeatherTabComponent } from './weather/weather.component';
+import { ChargesTabComponent } from './charges/charges.component';
 import { CalculationsTabComponent } from './calculations/calculationsTab.component';
+import { SectionTabComponent } from './section/sectionTab.component';
+import { InitialParametersTabComponent } from './initial_parameters/initialParameters.component';
 
 const initialData = {
   name: [
@@ -88,7 +89,6 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
   imports: [
     GeneralTabComponent,
     VisualizationTabComponent,
-    SupportsTabComponent,
     ObstaclesTabComponent,
     ButtonModule,
     ProgressSpinnerModule,
@@ -102,8 +102,10 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
     CardModule,
     DividerModule,
     DialogModule,
-    WeatherTabComponent,
-    CalculationsTabComponent
+    ChargesTabComponent,
+    CalculationsTabComponent,
+    SectionTabComponent,
+    InitialParametersTabComponent
   ],
   template: `<div>
     <p-tabs value="General">
@@ -114,16 +116,24 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
         <p-tabpanel value="General">
           <app-general-tab></app-general-tab>
         </p-tabpanel>
-        <p-tabpanel value="Supports">
-          <app-supports-tab [supports]="data.supports"></app-supports-tab>
+        <p-tabpanel value="Section">
+          <app-section-tab [data]="data"></app-section-tab>
         </p-tabpanel>
+        <!-- <p-tabpanel value="Supports">
+          <app-supports-tab [data]="data"></app-supports-tab>
+        </p-tabpanel> -->
         <p-tabpanel value="Obstacles">
           <app-obstacles-tab
             [initialObstaclesObjects]="data.obstacles"
           ></app-obstacles-tab>
         </p-tabpanel>
-        <p-tabpanel value="Weather">
-          <app-weather-tab [data]="data"></app-weather-tab>
+        <p-tabpanel value="Charges">
+          <app-charges-tab [data]="data"></app-charges-tab>
+        </p-tabpanel>
+        <p-tabpanel value="Initial parameters">
+          <app-initial-parameters-tab
+            [data]="data"
+          ></app-initial-parameters-tab>
         </p-tabpanel>
         <p-tabpanel value="Visualization">
           @defer (on viewport) {
@@ -143,20 +153,30 @@ export class StudyComponent {
   loading = true;
   dataToObject = initialDataObjects;
   tabs = [
-    'General',
-    'Supports',
-    'Obstacles',
-    'Weather',
-    'Visualization',
-    'Calculations'
+    $localize`General`,
+    $localize`Section`,
+    // $localize`Supports`,
+    $localize`Obstacles`,
+    $localize`Charges`,
+    $localize`Initial parameters`,
+    $localize`Visualization`,
+    $localize`Calculations`
   ];
   currentTab = this.tabs[0];
   data: Data = {
-    general: {
+    initial_parameters: {
       sagging: {
         temperature: 15,
         parameter: 800
       },
+      cable: {
+        temperature: 15
+      }
+    },
+    section: {
+      uuid: uuidv4(),
+      name: 'Section 1',
+      internalId: '1',
       cable: {
         section: 345.55,
         diameter: 22.4,
@@ -174,7 +194,20 @@ export class StudyComponent {
         b2: 0,
         b3: 0,
         b4: 0
+      }
+    },
+    general: {
+      name: 'Study 1',
+      uuid: uuidv4(),
+      author_email: 'test@test.com',
+      created_at_offline: new Date().toISOString(),
+      updated_at_offline: new Date().toISOString(),
+      saved: false,
+      sagging: {
+        temperature: 15,
+        parameter: 800
       },
+
       weather: {
         wind_pressure: 0.6,
         ice_thickness: 0
