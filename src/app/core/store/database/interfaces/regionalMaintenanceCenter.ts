@@ -9,6 +9,7 @@ export interface RegionalMaintenanceCenter {
   uuid: string;
   internal_id: string;
   name: string;
+  maintenance_center_names: string[];
   created_at: string;
   updated_at: string;
 }

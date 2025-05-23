@@ -6,7 +6,6 @@
  */
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
-import { StudyModelLocal } from '../../../core/store/models/study.model';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -17,8 +16,10 @@ import {
   StudyModel
 } from '../../../core/api/models/study.model';
 import { CommonModule } from '@angular/common';
+import { Study } from '../../../core/store/database/interfaces/study';
+import { StorageService } from '../../../core/store/storage.service';
 
-const newStudy = (): StudyModelLocal => {
+const newStudy = (): Study => {
   return {
     title: '',
     description: '',
@@ -27,7 +28,8 @@ const newStudy = (): StudyModelLocal => {
     author_email: '',
     created_at_offline: '',
     updated_at_offline: '',
-    saved: false
+    saved: false,
+    section_uuid: ''
   };
 };
 
@@ -166,7 +168,10 @@ export class ImportStudyModalComponent {
   isLoading = false;
   studies: StudyModel[] = [];
   selectedStudies!: StudyModel;
-  constructor(private readonly studyService: StudyService) {
+  constructor(
+    private readonly studyService: StudyService,
+    private readonly storageService: StorageService
+  ) {
     this.studyToSearch = newStudy();
   }
 
@@ -177,9 +182,14 @@ export class ImportStudyModalComponent {
   searchStudies() {
     this.isLoading = true;
     console.log('searchStudies');
-    this.studyService.searchStudies(this.studyToSearch).subscribe((studies) => {
-      this.studies = studies;
-      this.isLoading = false;
+    this.storageService.db?.users.toArray().then((users) => {
+      const email = users[0].email;
+      this.studyService
+        .searchStudies(this.studyToSearch, email)
+        .subscribe((studies) => {
+          this.studies = studies;
+          this.isLoading = false;
+        });
     });
   }
 

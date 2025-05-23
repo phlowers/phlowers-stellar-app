@@ -69,9 +69,12 @@ export class StudyService {
    * @param searchCriteria The search parameters
    * @returns A list of matching StudyModel objects
    */
-  searchStudies(searchCriteria: SearchStudyModel): Observable<StudyModel[]> {
+  searchStudies(
+    searchCriteria: SearchStudyModel,
+    email: string
+  ): Observable<StudyModel[]> {
     return this.http.post<StudyModel[]>(
-      `${this.apiUrl}/search`,
+      `${this.apiUrl}/search/${email}`,
       searchCriteria
     );
   }

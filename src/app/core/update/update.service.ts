@@ -64,7 +64,11 @@ export class UpdateService {
           break;
         case 'no_new_version':
         case 'new_version':
-          this.currentVersion = event.data.current_version;
+          this.currentVersion = {
+            build_datetime_utc: environment.buildTime,
+            version: environment.version,
+            ...event.data.current_version
+          };
           this.latestVersion = event.data.latest_version;
           this.needUpdate =
             !!this.latestVersion &&

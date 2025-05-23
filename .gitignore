@@ -46,3 +46,5 @@ public/pyodide/*
 .vscode/settings.json
 certificates
 # src/python-packages.json
+
+*.ipynb

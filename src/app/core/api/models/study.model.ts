@@ -13,6 +13,7 @@ export interface StudyModel {
   shareable: boolean;
   created_at_offline: string;
   updated_at_offline: string;
+  section_uuid: string;
 }
 
 export interface ModifyStudyModel {
@@ -21,6 +22,7 @@ export interface ModifyStudyModel {
   description?: string | null;
   created_at_offline?: string | null;
   updated_at_offline?: string | null;
+  section_uuid?: string | null;
 }
 
 export interface SearchStudyModel {
@@ -30,4 +32,5 @@ export interface SearchStudyModel {
   description?: string | null;
   created_after?: string | null;
   created_before?: string | null;
+  section_uuid?: string | null;
 }

@@ -1,0 +1,12 @@
+---
+description: for tests. Run in all .spec.ts files
+globs: *.spec.ts
+---
+
+ONLY USE JEST, NOT JASMINE.
+
+Use these files as examples in order to write tests:
+[app.footer.spec.ts](mdc:src/app/layout/component/app.footer.spec.ts)
+[app.topbar.spec.ts](mdc:src/app/layout/component/app.topbar.spec.ts)
+[search-section-modal.component.spec.ts](mdc:src/app/pages/sections/components/search-section-modal.component.spec.ts)
+[global-view.component.spec.ts](mdc:src/app/core/components/3d/global-view.component.spec.ts)

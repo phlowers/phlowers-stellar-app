@@ -17,6 +17,7 @@ import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-admin',
   standalone: true,
+  styleUrls: ['./admin.scss'],
   imports: [
     CommonModule,
     ButtonModule,
@@ -28,7 +29,7 @@ import { MessageService } from 'primeng/api';
   template: `
     <p-toast position="top-center"></p-toast>
     <p-card i18n-header header="App version">
-      <table class="my-2" style="width: 100%; border: 1px solid #ccc">
+      <table class="my-2" style="width: 100%;">
         <thead>
           <tr>
             <th></th>

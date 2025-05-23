@@ -27,5 +27,7 @@ export const sectionTable = {
     first_support_number,
     last_support_number,
     first_attachment_set,
-    last_attachment_set`
+    last_attachment_set,
+    regional_maintenance_center_names,
+    maintenance_center_names`
 };

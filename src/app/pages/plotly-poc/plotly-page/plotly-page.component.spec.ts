@@ -18,7 +18,7 @@ const mockPlotly = {
 // Create a mock for PlotlyComponent that uses signals
 @Component({
   selector: 'app-plotly-comp',
-  template: '<div>Mock Plotly Component</div>',
+  template: '<div i18n>Mock Plotly Component</div>',
   standalone: true
 })
 class MockPlotlyComponent {

@@ -47,26 +47,27 @@ export class AppMenuComponent implements OnInit {
             icon: 'pi pi-fw pi-bolt',
             routerLink: ['/sections']
           },
-          {
-            label: $localize`Tools`,
-            icon: 'pi pi-fw pi-wrench',
-            routerLink: ['/tools']
-          },
+          // {
+          //   label: $localize`Tools`,
+          //   icon: 'pi pi-fw pi-wrench',
+          //   routerLink: ['/tools']
+          // },
           {
             label: $localize`Admin`,
             icon: 'pi pi-fw pi-cog',
             routerLink: ['/admin']
           },
-          {
-            label: $localize`test`,
-            icon: 'pi pi-fw pi-database',
-            routerLink: ['/offline-storage-poc']
-          },
+          // {
+          //   label: $localize`test`,
+          //   icon: 'pi pi-fw pi-database',
+          //   routerLink: ['/offline-storage-poc']
+          // },
           {
             label: $localize`Plotly`,
             icon: 'pi pi-fw pi-chart-line',
             routerLink: ['/plotly']
           }
+          // { label: $localize`3D`, icon: 'pi pi-fw pi-box', routerLink: ['/3d'] }
         ]
       }
     ];
