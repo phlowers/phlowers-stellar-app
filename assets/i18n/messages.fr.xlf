@@ -1195,5 +1195,23 @@
         <target>Calculs</target>
       </segment>
     </unit>
+    <unit id="5674286808255988565">
+      <segment state="initial">
+        <source>Create</source>
+        <target>Creation</target>
+      </segment>
+    </unit>
+    <unit id="5764567194256419340">
+      <segment state="initial">
+        <source>Load dummy data</source>
+        <target>Charger des données fictives</target>
+      </segment>
+    </unit>
+    <unit id="5739514820435544016">
+      <segment state="initial">
+        <source>Load from file</source>
+        <target>Charger depuis un fichier</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

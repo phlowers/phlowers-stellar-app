@@ -98,12 +98,14 @@ const newStudy = (): Study => {
         <div class="flex flex-row gap-2">
           <p-button
             label="Search"
+            i18n-label
             icon="pi pi-search"
             severity="secondary"
             (onClick)="search()"
           />
           <p-button
             label="Create"
+            i18n-label
             icon="pi pi-plus"
             severity="secondary"
             (onClick)="openCreateSectionDialog()"
@@ -114,12 +116,14 @@ const newStudy = (): Study => {
         <div class="flex flex-row gap-2">
           <p-button
             label="Load dummy data"
+            i18n-label
             icon="pi pi-upload"
             severity="secondary"
             (onClick)="loadDummyData()"
           />
           <p-button
             label="Load from file"
+            i18n-label
             icon="pi pi-upload"
             severity="secondary"
             (onClick)="loadFromFile()"
@@ -334,7 +338,12 @@ const newStudy = (): Study => {
           </tr>
           <p-popover #op>
             <div class="flex flex-col gap-4">
-              <p-button severity="secondary" label="Duplicate" />
+              <p-button
+                severity="secondary"
+                i18n-label
+                label="Duplicate"
+                (onClick)="duplicate(typedSection)"
+              />
             </div>
           </p-popover>
         }

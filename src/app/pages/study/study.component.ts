@@ -110,7 +110,9 @@ const initialDataObjects: Support[] = initialData.name.map((name, index) => ({
   template: `<div>
     <p-tabs value="General">
       <p-tablist>
-        <p-tab [value]="tab" *ngFor="let tab of tabs">{{ tab }}</p-tab>
+        <p-tab [value]="tab.value" *ngFor="let tab of tabs">
+          {{ tab.label }}
+        </p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="General">
@@ -153,14 +155,14 @@ export class StudyComponent {
   loading = true;
   dataToObject = initialDataObjects;
   tabs = [
-    $localize`General`,
-    $localize`Section`,
+    { label: $localize`General`, value: 'General' },
+    { label: $localize`Section`, value: 'Section' },
     // $localize`Supports`,
-    $localize`Obstacles`,
-    $localize`Charges`,
-    $localize`Initial parameters`,
-    $localize`Visualization`,
-    $localize`Calculations`
+    { label: $localize`Obstacles`, value: 'Obstacles' },
+    { label: $localize`Charges`, value: 'Charges' },
+    { label: $localize`Initial parameters`, value: 'Initial parameters' },
+    { label: $localize`Visualization`, value: 'Visualization' },
+    { label: $localize`Calculations`, value: 'Calculations' }
   ];
   currentTab = this.tabs[0];
   data: Data = {

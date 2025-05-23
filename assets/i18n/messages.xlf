@@ -996,5 +996,20 @@
         <source>Visualization</source>
       </segment>
     </unit>
+    <unit id="5674286808255988565">
+      <segment>
+        <source>Create</source>
+      </segment>
+    </unit>
+    <unit id="5739514820435544016">
+      <segment>
+        <source>Load from file</source>
+      </segment>
+    </unit>
+    <unit id="5764567194256419340">
+      <segment>
+        <source>Load dummy data</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
