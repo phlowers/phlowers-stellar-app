@@ -36,7 +36,11 @@ import { Data } from '../types';
       [(ngModel)]="cableTemperature"
       placeholder="Cable Temperature"
     />
-    <p-button label="Run State Change" (onClick)="runStateChange()" />
+    <p-button
+      i18n-label
+      label="Run State Change"
+      (onClick)="runStateChange()"
+    />
     <div *ngFor="let result of results(); let i = index">
       <p i18n>Result {{ i }}</p>
       <p i18n>Length: {{ result.lengths | json }}</p>

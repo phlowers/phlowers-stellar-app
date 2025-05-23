@@ -130,7 +130,7 @@
     <unit id="2471229163174544608">
       <segment>
         <source>Sections</source>
-        <target>Sections</target>
+        <target>Cantons</target>
       </segment>
     </unit>
     <unit id="4580988005648117665">
@@ -478,7 +478,7 @@
     <unit id="2509141182388535183">
       <segment state="initial">
         <source>View</source>
-        <target>Voir</target>
+        <target>Vue</target>
       </segment>
     </unit>
     <unit id="1660398945917025633">
@@ -988,7 +988,7 @@
     <unit id="2593007815199532062">
       <segment state="initial">
         <source>Section</source>
-        <target>Section</target>
+        <target>Canton</target>
       </segment>
     </unit>
     <unit id="5567595061783150810">
@@ -1211,6 +1211,12 @@
       <segment state="initial">
         <source>Load from file</source>
         <target>Charger depuis un fichier</target>
+      </segment>
+    </unit>
+    <unit id="6583410840883347385">
+      <segment state="initial">
+        <source>Run State Change</source>
+        <target>Run State Change</target>
       </segment>
     </unit>
   </file>
