@@ -11,7 +11,9 @@ import { UpdateService } from '../../../core/update/update.service';
 
 // Mock services
 class MockPageTitleService {
-  private pageTitleSubject = new BehaviorSubject<string>('Test Page Title');
+  private readonly pageTitleSubject = new BehaviorSubject<string>(
+    'Test Page Title'
+  );
   pageTitle$ = this.pageTitleSubject.asObservable();
 
   setTitle(title: string) {
@@ -20,8 +22,8 @@ class MockPageTitleService {
 }
 
 class MockOnlineService {
-  private onlineSubject = new BehaviorSubject<boolean>(true);
-  private serverOnlineSubject = new BehaviorSubject<ServerStatus>(
+  private readonly onlineSubject = new BehaviorSubject<boolean>(true);
+  private readonly serverOnlineSubject = new BehaviorSubject<ServerStatus>(
     ServerStatus.ONLINE
   );
 
@@ -38,7 +40,7 @@ class MockOnlineService {
 }
 
 class MockWorkerService {
-  private readySubject = new BehaviorSubject<boolean>(false);
+  private readonly readySubject = new BehaviorSubject<boolean>(false);
   ready$ = this.readySubject.asObservable();
 
   setReady(ready: boolean) {

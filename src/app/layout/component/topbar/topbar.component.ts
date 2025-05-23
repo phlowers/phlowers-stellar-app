@@ -20,16 +20,16 @@ import { PageTitleService } from '../../../core/api/services/page-title.service'
   styleUrl: './topbar.component.scss'
 })
 export class TopbarComponent implements OnInit, OnDestroy {
-  private subscriptions = new Subscription();
+  private readonly subscriptions = new Subscription();
   public currentPageTitle = signal<string>('');
   public offline = signal<boolean>(true);
   public workerReady = signal<boolean>(false);
   public serverOnline = signal<string>('Loading');
 
   constructor(
-    private pageTitleService: PageTitleService,
-    private onlineService: OnlineService,
-    private workerService: WorkerService,
+    private readonly pageTitleService: PageTitleService,
+    private readonly onlineService: OnlineService,
+    private readonly workerService: WorkerService,
     public updateService: UpdateService
   ) {}
 

@@ -27,7 +27,7 @@ export class SidebarComponent implements OnInit {
   footerLinks = input<SidebarItem[]>();
   expanded = input<boolean>(true);
 
-  private bodyTag = signal<HTMLBodyElement | null>(null);
+  private readonly bodyTag = signal<HTMLBodyElement | null>(null);
   public expandedStatus = signal<boolean>(this.expanded());
   public appVersion = signal<string>('');
   public appLogoRoot = signal<string>('in-app-logo/');
