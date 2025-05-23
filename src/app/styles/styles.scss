@@ -1,4 +1,8 @@
-/* You can add global styles to this file, and also import other style files */
-@forward './layout.extracts';
-@import 'primeicons/primeicons.css';
+@forward './abstracts/abstract.extracts.scss';
+@forward './custom-properties/custom-properties.extracts';
+@forward './vendor-extension/vendor-extension.extract.scss';
+@forward './typography';
+@forward './utils';
+
 @import './tailwind.css';
+@import 'primeicons/primeicons.css';
