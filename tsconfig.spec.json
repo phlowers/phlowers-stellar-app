@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    // "module": "CommonJS",
+    "isolatedModules": false,
+    "target": "esnext",
+    "module": "esnext",
+    "types": [
+      "jest",
+      "node",
+      "@angular/localize"
+    ],
+  },
+  "include": [
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

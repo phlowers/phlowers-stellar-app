@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
+  <file id="ngi18n" original="ng.template">
+    <unit id="4768749765465246664">
+      <segment>
+        <source>Email</source>
+      </segment>
+    </unit>
+    <unit id="4744897149268098869">
+      <segment>
+        <source>Email is not valid.</source>
+      </segment>
+    </unit>
+    <unit id="8846437459005249553">
+      <segment>
+        <source>Studies</source>
+      </segment>
+    </unit>
+    <unit id="2471229163174544608">
+      <segment>
+        <source>Sections</source>
+      </segment>
+    </unit>
+    <unit id="1684734235599362204">
+      <segment>
+        <source>Tools</source>
+      </segment>
+    </unit>
+    <unit id="5041354590769758251">
+      <segment>
+        <source>Admin</source>
+      </segment>
+    </unit>
+    <unit id="4677175911030006427">
+      <segment>
+        <source>test</source>
+      </segment>
+    </unit>
+    <unit id="2538982915795016676">
+      <segment>
+        <source>STELLAR</source>
+      </segment>
+    </unit>
+    <unit id="1027281205052566407">
+      <segment>
+        <source>UPDATE AVAILABLE</source>
+      </segment>
+    </unit>
+    <unit id="5024752563746311100">
+      <segment>
+        <source>SERVER REACHABLE</source>
+      </segment>
+    </unit>
+    <unit id="7329852281226155501">
+      <segment>
+        <source>SERVER UNREACHABLE</source>
+      </segment>
+    </unit>
+    <unit id="3619431313457349805">
+      <segment>
+        <source>REACHING SERVER</source>
+      </segment>
+    </unit>
+    <unit id="7884682505577720946">
+      <segment>
+        <source>Current version</source>
+      </segment>
+    </unit>
+    <unit id="1354376805041038577">
+      <segment>
+        <source>Latest version</source>
+      </segment>
+    </unit>
+    <unit id="7971756555133484892">
+      <segment>
+        <source>Build Hash</source>
+      </segment>
+    </unit>
+    <unit id="2891008338883840095">
+      <segment>
+        <source>Build datetime</source>
+      </segment>
+    </unit>
+    <unit id="5895227359304793999">
+      <segment>
+        <source>Update to latest version</source>
+      </segment>
+    </unit>
+    <unit id="7658402240953727096">
+      <segment>
+        <source>Name:</source>
+      </segment>
+    </unit>
+    <unit id="6919207328705792165">
+      <segment>
+        <source>Section CUR:</source>
+      </segment>
+    </unit>
+    <unit id="1843028621431865126">
+      <segment>
+        <source>Section Short name:</source>
+      </segment>
+    </unit>
+    <unit id="5502261281300289989">
+      <segment>
+        <source>Section name:</source>
+      </segment>
+    </unit>
+    <unit id="2681129456719834482">
+      <segment>
+        <source>Cable short name:</source>
+      </segment>
+    </unit>
+    <unit id="6115903835147878111">
+      <segment>
+        <source>Cable name:</source>
+      </segment>
+    </unit>
+    <unit id="7052646852891832055">
+      <segment>
+        <source>Section type:</source>
+      </segment>
+    </unit>
+    <unit id="3136844473693708275">
+      <segment>
+        <source>Link name:</source>
+      </segment>
+    </unit>
+    <unit id="3738692095093251722">
+      <segment>
+        <source>Branch name:</source>
+      </segment>
+    </unit>
+    <unit id="1533968084549174775">
+      <segment>
+        <source>Transit link name:</source>
+      </segment>
+    </unit>
+    <unit id="6238568029904268206">
+      <segment>
+        <source>Voltage name:</source>
+      </segment>
+    </unit>
+    <unit id="7716208024960184784">
+      <segment>
+        <source>UUID</source>
+      </segment>
+    </unit>
+    <unit id="5701618810648052610">
+      <segment>
+        <source>Title</source>
+      </segment>
+    </unit>
+    <unit id="1733264802646111587">
+      <segment>
+        <source>Author email</source>
+      </segment>
+    </unit>
+    <unit id="1520049505561836231">
+      <segment>
+        <source>Created at</source>
+      </segment>
+    </unit>
+    <unit id="7447022493696033106">
+      <segment>
+        <source>Updated at</source>
+      </segment>
+    </unit>
+    <unit id="2159130950882492111">
+      <segment>
+        <source>Cancel</source>
+      </segment>
+    </unit>
+    <unit id="1071721880474488785">
+      <segment>
+        <source>Import</source>
+      </segment>
+    </unit>
+    <unit id="4580988005648117665">
+      <segment>
+        <source>Search</source>
+      </segment>
+    </unit>
+    <unit id="1747922970241457826">
+      <segment>
+        <source>UUID contains:</source>
+      </segment>
+    </unit>
+    <unit id="5209212849370069445">
+      <segment>
+        <source>Title contains:</source>
+      </segment>
+    </unit>
+    <unit id="8703570382789536408">
+      <segment>
+        <source>Author email contains:</source>
+      </segment>
+    </unit>
+    <unit id="3160778630868662456">
+      <segment>
+        <source>Uuid</source>
+      </segment>
+    </unit>
+    <unit id="8953033926734869941">
+      <segment>
+        <source>Name</source>
+      </segment>
+    </unit>
+    <unit id="4902817035128594900">
+      <segment>
+        <source>Description</source>
+      </segment>
+    </unit>
+    <unit id="7071470734400948493">
+      <segment>
+        <source>Author</source>
+      </segment>
+    </unit>
+    <unit id="7137602962411642632">
+      <segment>
+        <source>Saved remotely</source>
+      </segment>
+    </unit>
+    <unit id="5514355339805433365">
+      <segment>
+        <source>New study</source>
+      </segment>
+    </unit>
+    <unit id="9077188342801483033">
+      <segment>
+        <source>Import from database</source>
+      </segment>
+    </unit>
+    <unit id="7022070615528435141">
+      <segment>
+        <source>Delete</source>
+      </segment>
+    </unit>
+    <unit id="8854094932942190741">
+      <segment>
+        <source>Search...</source>
+      </segment>
+    </unit>
+    <unit id="4400683222290877455">
+      <segment>
+        <source> Name <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;title&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;title&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="8784816491170389323">
+      <segment>
+        <source> Description <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;description&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;description&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="7792172361652784876">
+      <segment>
+        <source> Author <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;author_email&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;author_email&quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="6621329748219109148">
+      <segment>
+        <source>Duplicate</source>
+      </segment>
+    </unit>
+    <unit id="7585826646011739428">
+      <segment>
+        <source>Edit</source>
+      </segment>
+    </unit>
+    <unit id="3489370051886148217">
+      <segment>
+        <source>OPEN</source>
+      </segment>
+    </unit>
+    <unit id="6952242034697821025">
+      <segment>
+        <source>Title is required.</source>
+      </segment>
+    </unit>
+    <unit id="3759965007855499397">
+      <segment>
+        <source>Run</source>
+      </segment>
+    </unit>
+    <unit id="7553683770113292299">
+      <segment>
+        <source>Add support</source>
+      </segment>
+    </unit>
+    <unit id="7695209021302072052">
+      <segment>
+        <source>Suspension</source>
+      </segment>
+    </unit>
+    <unit id="787244273790277180">
+      <segment>
+        <source>Conductor attachment altitude</source>
+      </segment>
+    </unit>
+    <unit id="8257635859590113233">
+      <segment>
+        <source>Crossarm length</source>
+      </segment>
+    </unit>
+    <unit id="4191953958037120723">
+      <segment>
+        <source>Line angle</source>
+      </segment>
+    </unit>
+    <unit id="2463828940731995931">
+      <segment>
+        <source>Insulator length</source>
+      </segment>
+    </unit>
+    <unit id="3021969710728198812">
+      <segment>
+        <source>Span length</source>
+      </segment>
+    </unit>
+    <unit id="3768927257183755959">
+      <segment>
+        <source>Save</source>
+      </segment>
+    </unit>
+    <unit id="4472533983620148440">
+      <segment>
+        <source>ENGINE READY</source>
+      </segment>
+    </unit>
+    <unit id="548892186034088208">
+      <segment>
+        <source>ONLINE</source>
+      </segment>
+    </unit>
+    <unit id="6044475970947805811">
+      <segment>
+        <source>ENGINE LOADING</source>
+      </segment>
+    </unit>
+    <unit id="802273028390736200">
+      <segment>
+        <source>OFFLINE</source>
+      </segment>
+    </unit>
+    <unit id="9090564883233759848">
+      <segment>
+        <source>Set your user info</source>
+      </segment>
+    </unit>
+    <unit id="1164341367002159735">
+      <segment>
+        <source>Studies Deleted</source>
+      </segment>
+    </unit>
+    <unit id="1519954996184640001">
+      <segment>
+        <source>Error</source>
+      </segment>
+    </unit>
+    <unit id="203032665652027525">
+      <segment>
+        <source>Study updated!</source>
+      </segment>
+    </unit>
+    <unit id="2123259929228064837">
+      <segment>
+        <source>Study Created</source>
+      </segment>
+    </unit>
+    <unit id="2236995168348965832">
+      <segment>
+        <source>Study successfully saved!</source>
+      </segment>
+    </unit>
+    <unit id="2613487543128349385">
+      <segment>
+        <source>Study Deleted</source>
+      </segment>
+    </unit>
+    <unit id="2768616509008493478">
+      <segment>
+        <source>Showing {first} to {last} of {totalRecords} studies</source>
+      </segment>
+    </unit>
+    <unit id="3521084103654700903">
+      <segment>
+        <source>Successful</source>
+      </segment>
+    </unit>
+    <unit id="550103923187080945">
+      <segment>
+        <source>Are you sure you want to delete: <ph id="0" equiv="PH" disp="study.title"/>?</source>
+      </segment>
+    </unit>
+    <unit id="5968163108193434832">
+      <segment>
+        <source>Are you sure you want to delete the selected studies?</source>
+      </segment>
+    </unit>
+    <unit id="7534605730266431294">
+      <segment>
+        <source>Study successfully duplicated!</source>
+      </segment>
+    </unit>
+    <unit id="89777724248264638">
+      <segment>
+        <source>Cannot save. Server is offline</source>
+      </segment>
+    </unit>
+    <unit id="8980576479674263137">
+      <segment>
+        <source>Save in distant database</source>
+      </segment>
+    </unit>
+    <unit id="9178182467454450952">
+      <segment>
+        <source>Confirm</source>
+      </segment>
+    </unit>
+    <unit id="3676810969871565173">
+      <segment>
+        <source>App version</source>
+      </segment>
+    </unit>
+    <unit id="8835813397293521026">
+      <segment>
+        <source>Reset fields</source>
+      </segment>
+    </unit>
+    <unit id="3407827478067561796">
+      <segment>
+        <source>Change line height</source>
+      </segment>
+    </unit>
+    <unit id="8892964333730306563">
+      <segment>
+        <source>Plotly</source>
+    <unit id="2517309683610083249">
+      <segment>
+        <source>Title:</source>
+      </segment>
+    </unit>
+    <unit id="259021582922138864">
+      <segment>
+        <source>Shareable to other users:</source>
+      </segment>
+    </unit>
+    <unit id="6996799422725544865">
+      <segment>
+        <source>Description:</source>
+      </segment>
+    </unit>
+  </file>
+</xliff>
