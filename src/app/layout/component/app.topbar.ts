@@ -15,7 +15,7 @@ import { Subscription } from 'rxjs';
 import { WorkerService } from '../../core/engine/worker/worker.service';
 import { OnlineService } from '../../core/api/services/online.service';
 import { UpdateService } from '../../core/update/update.service';
-
+import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-topbar',
   standalone: true,
@@ -29,7 +29,7 @@ import { UpdateService } from '../../core/update/update.service';
         <i class="pi pi-bars"></i>
       </button>
       <a class="layout-topbar-logo" routerLink="/">
-        <span i18n>STELLAR</span>
+        <span i18n>{{ appName }}</span>
       </a>
     </div>
 
@@ -103,7 +103,7 @@ export class AppTopbarComponent implements OnInit {
   offline = true;
   workerReady = false;
   serverOnline = 'LOADING';
-
+  appName = environment.appName;
   serverOnlineMap: Record<string, { color: string; text: string }> = {
     ONLINE: {
       color: 'white',

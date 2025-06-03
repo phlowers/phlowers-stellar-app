@@ -8,5 +8,6 @@ export const environment = {
   production: true,
   apiUrl: 'http://localhost:8080',
   version: '0.0.0',
-  buildTime: '2025-05-14T02:20:46.200198'
+  buildTime: '2025-05-14T02:20:46.200198',
+  appName: 'STELLAR'
 };

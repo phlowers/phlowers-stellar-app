@@ -488,11 +488,17 @@ export class StudiesComponent implements OnInit {
   async duplicateStudy(study: Study) {
     const newStudy = { ...study };
     const uuid = this.createUuid();
+    const allStudies = await this.storageService.db?.studies.toArray();
+    const allStudyTitles = allStudies?.map((study) => study.title);
+    let copyIndex = 1;
+    while (allStudyTitles?.includes(`${newStudy.title} (Copy ${copyIndex})`)) {
+      copyIndex++;
+    }
     await this.storageService.db?.studies.add({
       ...newStudy,
       uuid,
       saved: false,
-      title: `${newStudy.title} (Copy)`
+      title: `${newStudy.title} (Copy ${copyIndex})`
     });
     this.studies.set((await this.storageService.db?.studies.toArray()) || []);
     this.messageService.add({

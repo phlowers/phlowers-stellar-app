@@ -22,6 +22,7 @@ import { Obstacle } from '../types';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faCrosshairs } from '@fortawesome/free-solid-svg-icons';
 import { ModifyPositionModalComponent } from './modify-position-modal';
+import { SelectModule } from 'primeng/select';
 
 const targetIcon = `<?xml version="1.0" encoding="iso-8859-1"?>
 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
@@ -68,7 +69,8 @@ const targetIcon = `<?xml version="1.0" encoding="iso-8859-1"?>
     DividerModule,
     DialogModule,
     FontAwesomeModule,
-    ModifyPositionModalComponent
+    ModifyPositionModalComponent,
+    SelectModule
   ],
   template: `<div>
     <div class="pb-5">
@@ -111,27 +113,34 @@ const targetIcon = `<?xml version="1.0" encoding="iso-8859-1"?>
             </p-cellEditor>
           </td>
           <td [pEditableColumn]="obstacle.type" pEditableColumnField="type">
-            <p-cellEditor>
-              <ng-template #input>
-                <input pInputText type="text" [(ngModel)]="obstacle.type" />
-              </ng-template>
-              <ng-template #output>
-                {{ obstacle.type }}
-              </ng-template>
-            </p-cellEditor>
+            <p-select
+              [appendTo]="'body'"
+              [(ngModel)]="obstacle.type"
+              [options]="['tree', 'pole', 'building', 'other']"
+            >
+            </p-select>
+            <!-- <p-cellEditor> -->
+            <!-- </p-cellEditor> -->
           </td>
           <td
             [pEditableColumn]="obstacle.support"
             pEditableColumnField="support"
           >
-            <p-cellEditor>
+            <p-select
+              [appendTo]="'body'"
+              [(ngModel)]="obstacle.support"
+              [options]="['support 1', 'support 2', 'support 3', 'support 4']"
+            >
+            </p-select>
+
+            <!-- <p-cellEditor>
               <ng-template #input>
                 <input pInputText type="text" [(ngModel)]="obstacle.support" />
               </ng-template>
               <ng-template #output>
                 {{ obstacle.support }}
               </ng-template>
-            </p-cellEditor>
+            </p-cellEditor> -->
           </td>
           <td
             [pEditableColumn]="obstacle.positions[0].x"
@@ -176,7 +185,7 @@ const targetIcon = `<?xml version="1.0" encoding="iso-8859-1"?>
                 <input
                   pInputText
                   type="number"
-                  [(ngModel)]="obstacle.positions[0].y"
+                  [(ngModel)]="obstacle.positions[0].z"
                 />
               </ng-template>
               <ng-template #output>

@@ -79,7 +79,10 @@ export class UpdateService {
           break;
         case 'install_complete':
           this.currentVersion = event.data.latest_version;
-          this.latestVersion = event.data.latest_version;
+          this.latestVersion = {
+            ...(event.data.latest_version || {}),
+            version: environment.version
+          };
           this.needUpdate = false;
           break;
       }
@@ -91,7 +94,10 @@ export class UpdateService {
       const response = await fetch('/assets_list.json');
       const data: AssetList = await response.json();
       console.log('latest version is', data.app_version);
-      this.latestVersion = data.app_version;
+      this.latestVersion = {
+        ...(data.app_version || {}),
+        version: environment.version
+      };
     } catch (error) {
       console.error('Error fetching asset list:', error);
     }

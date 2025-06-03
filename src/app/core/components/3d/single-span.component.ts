@@ -94,7 +94,7 @@ interface CreatePhasesParams {
         <div>
           <div i18n>Mouse Position:</div>
           <div i18n>
-            x: {{ currentPosition?.x || 'N/A' }}, y:
+            x: {{ currentPosition?.x || 'N/A' }}, z:
             {{ currentPosition?.z || 'N/A' }}
           </div>
         </div>
@@ -108,10 +108,7 @@ interface CreatePhasesParams {
       <div style="width: 300px;">
         <div>
           <div i18n>Mouse Position:</div>
-          <div i18n>
-            z: {{ currentPosition2?.x || 'N/A' }}, y:
-            {{ currentPosition2?.z || 'N/A' }}
-          </div>
+          <div i18n>y: {{ currentPosition2?.x || 'N/A' }}</div>
         </div>
         <div
           id="plotly-output-single-span-y"

@@ -5,10 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Component } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
   selector: 'app-footer',
-  template: `<div i18n class="layout-footer">STELLAR by RTE</div>`
+  template: `<div i18n class="layout-footer">{{ appName }} by RTE</div>`
 })
-export class AppFooterComponent {}
+export class AppFooterComponent {
+  appName = environment.appName;
+}
