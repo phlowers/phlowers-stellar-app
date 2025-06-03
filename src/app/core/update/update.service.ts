@@ -69,7 +69,10 @@ export class UpdateService {
             version: environment.version,
             ...event.data.current_version
           };
-          this.latestVersion = event.data.latest_version;
+          this.latestVersion = {
+            ...(event.data.latest_version || {}),
+            version: environment.version
+          };
           this.needUpdate =
             !!this.latestVersion &&
             !!this.currentVersion &&
