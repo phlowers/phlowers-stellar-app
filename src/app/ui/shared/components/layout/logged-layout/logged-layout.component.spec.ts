@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, input } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { OnlineService } from '@core/api/services/online.service';
+import { OnlineService } from '@core/services/online/online.service';
 import { LoggedLayoutComponent } from './logged-layout.component';
 import { SidebarItem } from '../sidebar/sidebar.model';
 

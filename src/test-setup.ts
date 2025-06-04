@@ -7,4 +7,12 @@
 import '@angular/localize/init';
 import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
 
+window.ResizeObserver =
+  window.ResizeObserver ||
+  jest.fn().mockImplementation(() => ({
+    disconnect: jest.fn(),
+    observe: jest.fn(),
+    unobserve: jest.fn()
+  }));
+
 setupZoneTestEnv();

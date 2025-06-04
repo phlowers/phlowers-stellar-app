@@ -1,10 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { TopbarComponent } from './topbar.component';
-import { PageTitleService } from '@core/api/services/page-title.service';
-import { OnlineService, ServerStatus } from '@core/api/services/online.service';
-import { WorkerService } from '@core/engine/worker/worker.service';
-import { UpdateService } from '@core/update/update.service';
+import { PageTitleService } from '@core/services/page-title/page-title.service';
+import {
+  OnlineService,
+  ServerStatus
+} from '@core/services/online/online.service';
+import { WorkerService } from '@core/services/worker_python/worker_python.service';
+import { UpdateService } from '@core/services/worker_update/worker_update.service';
 
 // Mock services
 class MockPageTitleService {

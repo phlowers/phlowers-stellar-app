@@ -11,8 +11,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
-import { SectionService } from '@core/api/services/section.service';
-import { SectionModel } from '@core/api/models/section.model';
+import { SectionService } from '@core/services/section/section.service';
+import { SectionModel } from '@core/data/models/section.model';
 
 const newSection = (): SectionModel => {
   return {

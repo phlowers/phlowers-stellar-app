@@ -64,7 +64,7 @@
               }
             ],
             "styles": [
-              "src/app/core/ui/styles/styles.scss"
+              "src/app/ui/styles/styles.scss"
             ],
             "scripts": [
               "./node_modules/plotly.js-dist-min/plotly.min.js"

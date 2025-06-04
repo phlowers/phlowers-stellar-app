@@ -1,6 +1,6 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { Subject } from 'rxjs';
-import { environment } from '@environments/environment';
+import { environment } from '@src/environments/environment';
 
 interface AppVersion {
   git_hash: string;

@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { SidebarItem } from './sidebar.model';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { environment } from '@environments  /environment';
+import { environment } from '@src/environments/environment';
 
 const version = environment.version;
 

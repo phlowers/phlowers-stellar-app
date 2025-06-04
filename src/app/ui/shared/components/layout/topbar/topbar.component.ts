@@ -4,14 +4,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { WorkerService } from '@core/engine/worker/worker.service';
-import { OnlineService } from '@core/api/services/online.service';
-import { UpdateService } from '@core/update/update.service';
-import { PageTitleService } from '@core/api/services/page-title.service';
+import { OnlineService } from '@core/services/online/online.service';
+import { WorkerService } from '@core/services/worker_python/worker_python.service';
+import { UpdateService } from '@core/services/worker_update/worker_update.service';
+import { PageTitleService } from '@core/services/page-title/page-title.service';
 
 @Component({
   selector: 'app-topbar',

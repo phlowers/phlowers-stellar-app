@@ -31,21 +31,24 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { v4 as uuid } from 'uuid';
-import { StorageService } from '@core/store/storage.service';
-import { StudyService } from '@core/api/services/study.service';
-import { StudyModelLocal } from '@core/store/models/study.model';
+import { StorageService } from '@core/services/storage/storage.service';
+import { StudyService } from '@core/services/study/study.service';
+import { StudyModel } from '@core/data/models/study.model';
 import { ImportStudyModalComponent } from './components/import-study-modal.component';
 import { Subscription } from 'rxjs';
 import { CheckboxModule } from 'primeng/checkbox';
 
-import { OnlineService, ServerStatus } from '@core/api/services/online.service';
+import {
+  OnlineService,
+  ServerStatus
+} from '@core/services/online/online.service';
 
 interface Column {
   title: string;
   dataKey: string;
 }
 
-const newStudy = (): StudyModelLocal => {
+const newStudy = (): StudyModel => {
   return {
     title: '',
     description: '',
@@ -357,9 +360,9 @@ const columns = [
 export class StudiesComponent implements OnInit {
   studyDialog = false;
   isImportStudyModalOpen = false;
-  studies = signal<StudyModelLocal[]>([]);
-  study: StudyModelLocal = newStudy();
-  selectedStudies!: StudyModelLocal[] | null;
+  studies = signal<StudyModel[]>([]);
+  study: StudyModel = newStudy();
+  selectedStudies!: StudyModel[] | null;
   submitted = false;
   @ViewChild('dt') dt!: Table;
   columns: Column[] = columns;
@@ -384,7 +387,7 @@ export class StudiesComponent implements OnInit {
     this.dt.exportCSV();
   }
 
-  identity(study: StudyModelLocal): StudyModelLocal {
+  identity(study: StudyModel): StudyModel {
     return study;
   }
 
@@ -426,7 +429,7 @@ export class StudiesComponent implements OnInit {
     this.isImportStudyModalOpen = true;
   }
 
-  editStudy(study: StudyModelLocal) {
+  editStudy(study: StudyModel) {
     this.study = { ...study };
     this.studyDialog = true;
   }
@@ -465,7 +468,7 @@ export class StudiesComponent implements OnInit {
     this.isImportStudyModalOpen = false;
   }
 
-  saveStudyRemotely(study: StudyModelLocal) {
+  saveStudyRemotely(study: StudyModel) {
     this.studyService.createStudy(study).subscribe({
       next: () => {
         this.messageService.add({
@@ -497,7 +500,7 @@ export class StudiesComponent implements OnInit {
     });
   }
 
-  async deleteStudyAccepted(study: StudyModelLocal) {
+  async deleteStudyAccepted(study: StudyModel) {
     await this.storageService.db?.studies.delete(study.uuid);
     this.studies.set((await this.storageService.db?.studies.toArray()) || []);
     this.study = newStudy();
@@ -509,7 +512,7 @@ export class StudiesComponent implements OnInit {
     });
   }
 
-  deleteStudy(study: StudyModelLocal) {
+  deleteStudy(study: StudyModel) {
     this.confirmationService.confirm({
       message: $localize`Are you sure you want to delete: ${study.title}?`,
       header: $localize`Confirm`,
@@ -538,7 +541,7 @@ export class StudiesComponent implements OnInit {
     return uuid();
   }
 
-  async duplicateStudy(study: StudyModelLocal) {
+  async duplicateStudy(study: StudyModel) {
     const newStudy = { ...study };
     const uuid = this.createUuid();
     await this.storageService.db?.studies.add({

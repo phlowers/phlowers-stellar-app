@@ -6,8 +6,8 @@
  */
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { WorkerService } from '@core/engine/worker/worker.service';
-import { Task } from '@core/engine/worker/tasks';
+import { WorkerService } from '@core/services/worker_python/worker_python.service';
+import { Task } from '@core/services/worker_python/tasks';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { CommonModule } from '@angular/common';

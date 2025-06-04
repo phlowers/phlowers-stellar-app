@@ -6,8 +6,8 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StudyComponent } from './study.component';
-import { WorkerService } from '@core/engine/worker/worker.service';
-import { Task } from '@core/engine/worker/tasks';
+import { WorkerService } from '@core/services/worker_python/worker_python.service';
+import { Task } from '@core/services/worker_python/tasks';
 import { BehaviorSubject } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';

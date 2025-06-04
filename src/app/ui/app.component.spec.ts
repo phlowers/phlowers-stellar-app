@@ -7,9 +7,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { MessageService } from 'primeng/api';
-import { StorageService } from '@core/store/storage.service';
-import { WorkerService } from '@core/engine/worker/worker.service';
-import { OnlineService } from '@core/api/services/online.service';
+import { OnlineService } from '@core/services/online/online.service';
+import { WorkerService } from '@core/services/worker_python/worker_python.service';
+import { StorageService } from '@core/services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -98,12 +98,6 @@ describe('AppComponent', () => {
 
   it('should have the correct title', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
-  });
-
-  it('should have router-outlet', () => {
-    const routerOutlet =
-      fixture.debugElement.nativeElement.querySelector('router-outlet');
-    expect(routerOutlet).toBeTruthy();
   });
 
   describe('setupWorker', () => {

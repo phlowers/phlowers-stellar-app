@@ -34,7 +34,6 @@
       "@ui/*": ["./src/app/ui/*"],
       "@plugins/*": ["./src/app/plugins/*"],
       "@adapters/*": ["./src/app/adapters/*"],
-      "@environments": ["./src/environments/*"]
     },
     // "allowImportingTsExtensions": true
   },
