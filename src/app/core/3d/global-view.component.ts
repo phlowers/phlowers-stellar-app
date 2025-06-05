@@ -136,14 +136,15 @@ export class GlobalViewComponent implements AfterViewInit, OnDestroy {
 
   readonly effect2 = effect(() => {
     console.log('effect2 global view, will create plot');
-    // this.createPlot(
-    //   untracked(() => this.minValue()),
-    //   untracked(() => this.maxValue()),
-    //   this.selectedPhase(),
-    //   this.showOtherAsDashed(),
-    //   this.plot()?._fullLayout?.scene?.camera,
-    //   this.selectedView()
-    // );
+    this.createPlot(
+      untracked(() => this.minValue()),
+      untracked(() => this.maxValue()),
+      this.selectedPhase(),
+      this.showOtherAsDashed(),
+      // @ts-expect-error camera is not defined
+      this.plot()?._fullLayout?.scene?.camera,
+      this.selectedView()
+    );
   });
 
   readonly effect3 = effect(() => {
