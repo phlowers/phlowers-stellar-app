@@ -10,7 +10,7 @@ import { StorageService } from './storage.service';
 import { AppDB } from '@core/data/database';
 
 // Mock AppDB
-jest.mock('./database', () => {
+jest.mock('@core/data/database', () => {
   return {
     AppDB: jest.fn().mockImplementation(() => {
       return {};

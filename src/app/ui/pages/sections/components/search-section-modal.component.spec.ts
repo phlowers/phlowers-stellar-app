@@ -6,10 +6,10 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SearchSectionModalComponent } from './search-section-modal.component';
-import { SectionService } from '@core/api/services/section.service';
 import { of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { SectionModel } from '@core/api/models/section.model';
+import { SectionService } from '@src/app/core/services/section/section.service';
+import { SectionModel } from '@src/app/core/data/models/section.model';
 
 describe('SearchSectionModalComponent', () => {
   let component: SearchSectionModalComponent;

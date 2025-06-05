@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GlobalViewComponent } from './global-view.component';
-import { WorkerService } from '../../engine/worker/worker.service';
 import { FormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ButtonModule } from 'primeng/button';
@@ -22,6 +21,7 @@ jest.mock('plotly.js-dist-min', () => ({
 
 // Import the mocked module
 import * as Plotly from 'plotly.js-dist-min';
+import { WorkerService } from '../services/worker_python/worker_python.service';
 
 // Add mock data for tests at the top level
 const mockLitData = {

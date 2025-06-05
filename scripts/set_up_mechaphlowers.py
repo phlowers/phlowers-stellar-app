@@ -19,7 +19,7 @@ PYODIDE_VERSION = "0.27.4"
 MECHAPHLOWERS_VERSION = "0.2.0"
 PYODIDE_DIRECTORY_PATH = "./public/pyodide"
 PYODIDE_LOCK_PATH = "./public/pyodide/pyodide-lock.json"
-PYODIDE_PACKAGES_PATH = "./src/app/core/engine/worker/python-packages.json"
+PYODIDE_PACKAGES_PATH = "./src/app/core/services/worker_python/python-packages.json"
 NEEDED_PYODIDE_SOURCE_FILES = [
     "pyodide.asm.wasm", "pyodide.asm.js", "python_stdlib.zip", "pyodide-lock.json"]
 

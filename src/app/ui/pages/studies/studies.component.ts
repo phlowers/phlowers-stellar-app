@@ -587,7 +587,7 @@ export class StudiesComponent implements OnInit {
       await this.storageService.db?.studies.add({
         ...this.study,
         uuid,
-        author_email: user!.email,
+        author_email: user.email,
         created_at_offline: new Date().toISOString(),
         updated_at_offline: new Date().toISOString(),
         saved: false

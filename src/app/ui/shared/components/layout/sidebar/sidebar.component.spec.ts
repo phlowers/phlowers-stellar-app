@@ -7,7 +7,7 @@ import { SidebarComponent } from './sidebar.component';
 import { SidebarItem } from './sidebar.model';
 
 // Mock environment
-jest.mock('@environments/environment', () => ({
+jest.mock('@src/environments/environment', () => ({
   environment: {
     version: '1.2.3'
   }

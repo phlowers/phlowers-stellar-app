@@ -38,9 +38,6 @@ p {
       display: block;
       opacity: 1;
 
-      @starting-style {
-        opacity: 0;
-      }
     }
   }
 
@@ -62,12 +59,15 @@ p {
       transition: background-color 0.3s ease-in-out;
     }
   }
+
   &--error::before {
     background-color: var(--main-error);
   }
+
   &--warning::before {
     background-color: var(--main-warning);
   }
+
   &--success::before {
     background-color: var(--main-success);
   }

@@ -7,13 +7,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StudiesComponent } from './studies.component';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { StorageService } from '@core/store/storage.service';
-import { StudyService } from '@core/api/services/study.service';
-import { OnlineService, ServerStatus } from '@core/api/services/online.service';
-import { StudyModelLocal } from '@core/store/models/study.model';
+// import { StorageService } from '@core/store/storage.service';
+// import { StudyService } from '@core/api/services/study.service';
+// import { OnlineService, ServerStatus } from '@core/api/services/online.service';
+// import { StudyModelLocal } from '@core/store/models/study.model';
 import { of, Subject } from 'rxjs';
 import { Table } from 'primeng/table';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {
+  OnlineService,
+  ServerStatus
+} from '@src/app/core/services/online/online.service';
+import { StorageService } from '@src/app/core/services/storage/storage.service';
+import { StudyService } from '@src/app/core/services/study/study.service';
+import { StudyModel } from '@src/app/core/data/models/study.model';
 
 // Mock UUID to ensure consistent IDs in tests
 jest.mock('uuid', () => ({
@@ -32,7 +39,7 @@ describe('StudiesComponent', () => {
   let serverOnlineSubject: Subject<ServerStatus>;
   let readySubject: Subject<boolean>;
 
-  const mockStudies: StudyModelLocal[] = [
+  const mockStudies: StudyModel[] = [
     {
       uuid: 'study-1',
       title: 'Test Study 1',

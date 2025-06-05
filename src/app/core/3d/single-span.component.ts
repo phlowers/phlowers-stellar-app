@@ -423,7 +423,9 @@ export class SingleSpanComponent {
     const gd = document.getElementById(plotId);
 
     function attach() {
+      // NOSONAR
       gd?.addEventListener('mousemove', async function (evt) {
+        // NOSONAR
         //@ts-expect-error gd is not defined
         const layout = gd?._fullLayout as any;
         if (layout) {
