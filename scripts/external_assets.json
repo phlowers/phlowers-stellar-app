@@ -16,12 +16,6 @@
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.asm.js",
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide-lock.json",
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.asm.wasm",
-        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/python_stdlib.zip",
-        "https://fonts.cdnfonts.com/s/14882/Lato-SemiBold.woff",
-        "https://fonts.cdnfonts.com/s/14882/Lato-Bold.woff",
-        "https://fonts.cdnfonts.com/s/14882/Lato-Medium.woff",
-        "https://fonts.cdnfonts.com/s/14882/Lato-Regular.woff",
-        "https://fonts.cdnfonts.com/css/lato",
-        "https://cdn.plot.ly/plotly-3.0.0.min.js"
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/python_stdlib.zip"
     ]
 }

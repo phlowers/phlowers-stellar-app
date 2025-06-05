@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { TopbarComponent } from './topbar.component';
-import { PageTitleService } from '@core/services/page-title/page-title.service';
+import { PageTitleService } from '@ui/shared/service/page-title/page-title.service';
 import {
   OnlineService,
   ServerStatus

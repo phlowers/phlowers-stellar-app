@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 import { OnlineService } from '@core/services/online/online.service';
 import { WorkerService } from '@core/services/worker_python/worker_python.service';
 import { UpdateService } from '@core/services/worker_update/worker_update.service';
-import { PageTitleService } from '@core/services/page-title/page-title.service';
+import { PageTitleService } from '@ui/shared/service/page-title/page-title.service';
 
 @Component({
   selector: 'app-topbar',

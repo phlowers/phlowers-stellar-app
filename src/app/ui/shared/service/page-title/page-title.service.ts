@@ -8,13 +8,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class PageTitleService {
-  private pageTitleSubject = new BehaviorSubject<string>('');
+  private readonly pageTitleSubject = new BehaviorSubject<string>('');
   public pageTitle$: Observable<string> = this.pageTitleSubject.asObservable();
 
   constructor(
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private titleService: Title
+    private readonly router: Router,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly titleService: Title
   ) {
     this.router.events
       .pipe(
@@ -35,7 +35,7 @@ export class PageTitleService {
       )
       .subscribe((title) => {
         if (title) {
-          const titleString = title as string;
+          const titleString = title;
           this.pageTitleSubject.next(titleString);
           this.titleService.setTitle(titleString);
         }
