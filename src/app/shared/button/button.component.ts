@@ -1,0 +1,28 @@
+import { Component, computed, input, ViewEncapsulation } from '@angular/core';
+
+@Component({
+  selector: `button[appBtn], button[appButton], button[app-btn], button[app-button],
+    a[appBtn], a[appButton], a[app-btn], a[app-button]`,
+  imports: [],
+  templateUrl: './button.component.html',
+  styleUrl: './button.component.scss',
+  encapsulation: ViewEncapsulation.None,
+  host: {
+    class: 'app-btn',
+    '[class]': 'classesList()'
+  }
+})
+export class ButtonComponent {
+  btnSize = input<'s' | 'm' | 'l'>('m');
+  btnStyle = input<'base' | 'outlined' | 'text'>('base');
+
+  classesList = computed(() => {
+    const classes: string[] = [];
+
+    classes.push(`app-btn-${this.btnSize()}`);
+    classes.push(`app-btn-${this.btnStyle()}`);
+    // classes.push(`btn-${}`);
+
+    return classes.join(' ');
+  });
+}
