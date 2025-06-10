@@ -9,11 +9,13 @@
 # Node
 /node_modules
 npm-debug.log
+yarn-error.log
 
 # IDEs and editors
 .idea/
 .project
 .classpath
+.cursor/
 .c9/
 *.launch
 .settings/
@@ -41,7 +43,3 @@ testem.log
 Thumbs.db
 
 public/pyodide/*
-
-.vscode/settings.json
-certificates
-# src/python-packages.json

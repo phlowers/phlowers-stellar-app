@@ -1,0 +1,52 @@
+<header>
+  <p class="text-l-600" style="color: grey(750)">{{ currentPageTitle() }}</p>
+
+  <section>
+    @if (updateService.needUpdate) {
+      <p i18n class="status status--warning" id="topbar-update">
+        Update available
+      </p>
+    }
+
+    <p
+      class="status"
+      [class]="{
+        'status--warning': !workerReady,
+        'status--success': workerReady
+      }"
+      id="topbar-engine"
+    >
+      <span i18n [class.show]="!workerReady()">Engine loading</span>
+      <span i18n [class.show]="workerReady()">Engine ready</span>
+    </p>
+
+    <p
+      class="status"
+      [class]="{ 'status--error': offline, 'status--success': !offline }"
+      id="topbar-internet"
+    >
+      <span i18n [class.show]="offline()">Offline</span>
+      <span i18n [class.show]="!offline()">Online</span>
+    </p>
+
+    <p
+      class="status"
+      [class]="{
+        'status--error': serverOnline() === 'OFFLINE',
+        'status--warning': serverOnline() === 'LOADING',
+        'status--success': serverOnline() === 'ONLINE'
+      }"
+      id="topbar-server"
+    >
+      <span i18n [class.show]="serverOnline() === 'OFFLINE'">
+        Server unreachable
+      </span>
+      <span i18n [class.show]="serverOnline() === 'LOADING'">
+        Reaching server
+      </span>
+      <span i18n [class.show]="serverOnline() === 'ONLINE'">
+        Server reachable
+      </span>
+    </p>
+  </section>
+</header>

@@ -1,0 +1,38 @@
+<router-outlet></router-outlet>
+
+<p-toast position="top-center"></p-toast>
+
+<p-dialog
+  [(visible)]="userDialog"
+  [style]="{ width: '450px' }"
+  i18n-header
+  header="Set your user info"
+  [closable]="false"
+  [modal]="true"
+>
+  <ng-template #content>
+    <label i18n for="description" class="block font-bold mb-3">Email</label>
+    <input
+      type="text"
+      pInputText
+      type="email"
+      #email="ngModel"
+      email
+      name="email"
+      ngModel
+      id="email"
+      [(ngModel)]="user.email"
+      required
+      fluid
+    />
+    <small i18n class="text-red-500" *ngIf="submitted && !email.valid">
+      Email is not valid.
+    </small>
+  </ng-template>
+  <ng-template #footer>
+    <button pButton pRipple type="submit" (click)="saveUser()">
+      <i class="pi pi-check"></i>
+      <span pButtonLabel i18n>Save</span>
+    </button>
+  </ng-template>
+</p-dialog>
