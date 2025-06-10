@@ -1,0 +1,63 @@
+@use 'sass:map';
+@use './vars' as stel;
+
+// ***************************
+// ** common focused styles **
+// ***************************
+// TODO : change this for a placeholder
+@mixin focused() {
+  outline-width: var(--focus-ring-width);
+  outline-style: var(--focus-ring-style);
+  outline-color: var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: var(--focus-ring-shadow);
+  transition:
+    box-shadow var(--transition-duration),
+    outline-color var(--transition-duration);
+}
+// TODO : change this for a placeholder
+@mixin focused-inset() {
+  outline-offset: -1px;
+  box-shadow: inset var(--focus-ring-shadow);
+}
+
+// ***************************
+// **** breakpoint mixins ****
+// ***************************
+// min-width
+@mixin min-bp($size) {
+  @if map.has-key(stel.$bp, $size) {
+    @media (min-width: map.get(stel.$bp, $size)) {
+      @content;
+    }
+  } @else {
+    @error "Invalid breakpoint with min-bp mixin '#{$size}'. Available breakpoints are: #{map.keys(stel.$bp)}";
+  }
+}
+// max-width
+@mixin max-bp($size) {
+  @if map.has-key(stel.$bp, $size) {
+    @media (max-width: map.get(stel.$bp, $size)) {
+      @content;
+    }
+  } @else {
+    @error "Invalid breakpoint with max-bp mixin '#{$size}'. Available breakpoints are: #{map.keys(stel.$bp)}";
+  }
+}
+
+// ***************************
+// **** texts placeholder ****
+// ***************************
+// headings texts
+@each $name, $value in stel.$txt-heading {
+  %heading-#{$name} {
+    font: map.get($value, font);
+    letter-spacing: map.get($value, letter-spacing);
+  }
+}
+// common texts
+@each $name, $value in stel.$text {
+  %text-#{$name} {
+    font: $value;
+  }
+}
