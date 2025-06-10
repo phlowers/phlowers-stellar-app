@@ -1,0 +1,74 @@
+@use '../../../../styles/abstracts/abstract.extracts' as stel;
+
+header,
+section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+header {
+  padding: 1rem 1.5rem;
+  min-height: 4rem;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+section {
+  justify-content: flex-end;
+  flex-grow: 1;
+}
+
+p {
+  margin: 0;
+}
+
+.status {
+  @extend %text-m-600;
+  color: var(--primary-900);
+
+  span {
+    display: none;
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+    transition-behavior: allow-discrete;
+
+    &.show {
+      display: block;
+      opacity: 1;
+
+    }
+  }
+
+  &--error,
+  &--warning,
+  &--success {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &::before {
+      $_status-sz: 1rem;
+
+      content: '';
+      display: block;
+      width: $_status-sz;
+      height: $_status-sz;
+      border-radius: $_status-sz;
+      transition: background-color 0.3s ease-in-out;
+    }
+  }
+
+  &--error::before {
+    background-color: var(--main-error);
+  }
+
+  &--warning::before {
+    background-color: var(--main-warning);
+  }
+
+  &--success::before {
+    background-color: var(--main-success);
+  }
+}

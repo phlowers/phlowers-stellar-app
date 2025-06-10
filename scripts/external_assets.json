@@ -1,0 +1,21 @@
+{
+    "files": [
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/wrapt-1.16.0-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/packaging-24.2-py3-none-any.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/annotated_types-0.6.0-py3-none-any.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pydantic_core-2.27.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pydantic-2.10.5-py3-none-any.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pytz-2024.1-py2.py3-none-any.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/six-1.16.0-py2.py3-none-any.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pandas-2.2.3-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/openblas-0.3.26.zip",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/scipy-1.14.1-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/typing_extensions-4.11.0-py3-none-any.whl",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.asm.js",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide-lock.json",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.asm.wasm",
+        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/python_stdlib.zip"
+    ]
+}
