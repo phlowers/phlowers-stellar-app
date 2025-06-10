@@ -38,6 +38,9 @@ p {
       display: block;
       opacity: 1;
 
+      @starting-style {
+        opacity: 0;
+      }
     }
   }
 

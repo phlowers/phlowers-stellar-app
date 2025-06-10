@@ -21,7 +21,6 @@ export class ButtonComponent {
 
     classes.push(`app-btn-${this.btnSize()}`);
     classes.push(`app-btn-${this.btnStyle()}`);
-    // classes.push(`btn-${}`);
 
     return classes.join(' ');
   });
