@@ -12,7 +12,7 @@ class MockIconComponent {}
   standalone: true,
   imports: [ButtonComponent, MockIconComponent],
   template: `
-    <button appBtn [btnSize]="size" [btnStyle]="style">
+    <button app-btn [btnSize]="size" [btnStyle]="style">
       <app-icon class="app-icon">Left Icon</app-icon>
       Button Text
       <app-icon class="app-icon" iconRight>Right Icon</app-icon>
@@ -164,7 +164,7 @@ describe('ButtonComponent', () => {
 
   describe('Selector Variants', () => {
     it('should work with different selector variants', async () => {
-      const selectors = ['appBtn', 'appButton', 'app-btn', 'app-button'];
+      const selectors = ['app-btn', 'app-button'];
 
       for (const selector of selectors) {
         @Component({

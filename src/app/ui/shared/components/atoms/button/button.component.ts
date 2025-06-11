@@ -1,8 +1,7 @@
 import { Component, computed, input, ViewEncapsulation } from '@angular/core';
 
 @Component({
-  selector: `button[appBtn], button[appButton], button[app-btn], button[app-button],
-    a[appBtn], a[appButton], a[app-btn], a[app-button]`,
+  selector: `button[app-btn], button[app-button], a[app-btn], a[app-button]`,
   imports: [],
   templateUrl: './button.component.html',
   styleUrl: './button.component.scss',

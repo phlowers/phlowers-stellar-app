@@ -1,21 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
 import { IconComponent } from './icon.component';
 import { PossibleIconNames, ALL_ICONS } from './icon.model';
-
-@Component({
-  imports: [IconComponent],
-  template: `<app-icon [icon]="iconName" />`
-})
-class TestHostComponent {
-  iconName: PossibleIconNames = 'home';
-}
 
 describe('IconComponent', () => {
   let component: IconComponent;
   let fixture: ComponentFixture<IconComponent>;
-  let hostComponent: TestHostComponent;
-  let hostFixture: ComponentFixture<TestHostComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

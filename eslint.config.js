@@ -34,7 +34,7 @@ module.exports = tseslint.config(
       '@angular-eslint/component-selector': [
         'error',
         {
-          type: 'element',
+          type: ['attribute', 'element'],
           prefix: 'app',
           style: 'kebab-case'
         }
