@@ -128,60 +128,60 @@ $bp: (
   2xl: '120rem'
 );
 
-$_font-family: 'Nunito', Arial, sans-serif;
+$font-family: 'Nunito', Arial, sans-serif;
 
 $txt-heading: (
   5xl: (
-    font: 600 5rem/1.15 #{$_font-family},
+    font: 600 5rem/1.15 #{$font-family},
     letter-spacing: -0.0625rem
   ),
   4xl: (
-    font: 600 4.25rem/1.17647 #{$_font-family},
+    font: 600 4.25rem/1.17647 #{$font-family},
     letter-spacing: -0.0625rem
   ),
   3xl: (
-    font: 600 3.5rem/1.14286 #{$_font-family},
+    font: 600 3.5rem/1.14286 #{$font-family},
     letter-spacing: -0.0625rem
   ),
   2xl: (
-    font: 600 3rem/1.16667 #{$_font-family},
+    font: 600 3rem/1.16667 #{$font-family},
     letter-spacing: -0.0625rem
   ),
   xl: (
-    font: 600 2.5rem/1.2 #{$_font-family},
+    font: 600 2.5rem/1.2 #{$font-family},
     letter-spacing: -0.0625rem
   ),
   l: (
-    font: 600 2rem/1.25 #{$_font-family},
+    font: 600 2rem/1.25 #{$font-family},
     letter-spacing: -0.0625rem
   ),
   m: (
-    font: 600 1.5rem/1.33333 #{$_font-family},
+    font: 600 1.5rem/1.33333 #{$font-family},
     letter-spacing: -0.0313rem
   ),
   s: (
-    font: 600 1.25rem/1.4 #{$_font-family},
+    font: 600 1.25rem/1.4 #{$font-family},
     letter-spacing: -0.0313rem
   ),
   xs: (
-    font: 600 1rem/1.5 #{$_font-family},
+    font: 600 1rem/1.5 #{$font-family},
     letter-spacing: -0.0313rem
   ),
   2xs: (
-    font: 600 0.875rem/1.42857 #{$_font-family},
+    font: 600 0.875rem/1.42857 #{$font-family},
     letter-spacing: 0rem
   )
 );
 
 $text: (
-  xl-400: 400 1.25rem/1.4 #{$_font-family},
-  xl-600: 600 1.25rem/1.4 #{$_font-family},
-  l-400: 400 1rem/1.5 #{$_font-family},
-  l-600: 600 1rem/1.5 #{$_font-family},
-  m-400: 400 0.875rem/1.42857 #{$_font-family},
-  m-600: 600 0.875rem/1.42857 #{$_font-family},
-  s-400: 400 0.75rem/1.33333 #{$_font-family},
-  s-600: 600 0.75rem/1.33333 #{$_font-family},
-  xs-400: 400 0.625rem/1.4 #{$_font-family},
-  xs-600: 600 0.625rem/1.4 #{$_font-family}
+  xl-400: 400 1.25rem/1.4 #{$font-family},
+  xl-600: 600 1.25rem/1.4 #{$font-family},
+  l-400: 400 1rem/1.5 #{$font-family},
+  l-600: 600 1rem/1.5 #{$font-family},
+  m-400: 400 0.875rem/1.42857 #{$font-family},
+  m-600: 600 0.875rem/1.42857 #{$font-family},
+  s-400: 400 0.75rem/1.33333 #{$font-family},
+  s-600: 600 0.75rem/1.33333 #{$font-family},
+  xs-400: 400 0.625rem/1.4 #{$font-family},
+  xs-600: 600 0.625rem/1.4 #{$font-family}
 );
