@@ -1,4 +1,4 @@
-import { Component, input, OnInit, signal } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 @Component({
   selector: 'app-card',
@@ -7,17 +7,14 @@ import { Component, input, OnInit, signal } from '@angular/core';
   styleUrl: './card.component.scss',
   host: {
     '[role]': 'role()',
-    '[tabindex]': 'focusable ? "0" : null'
+    '[attr.tabindex]': 'tabIndexValue()'
   }
 })
-export class CardComponent implements OnInit {
+export class CardComponent {
   role = input.required<string>();
 
-  focusable = signal<boolean>(false);
-
-  ngOnInit(): void {
-    if (this.role() === 'button' || this.role() === 'link') {
-      this.focusable.set(true);
-    }
-  }
+  tabIndexValue = computed(() => {
+    const roleValue = this.role();
+    return roleValue === 'button' || roleValue === 'link' ? '0' : null;
+  });
 }
