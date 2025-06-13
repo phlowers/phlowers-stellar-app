@@ -23,7 +23,9 @@
   <h2 class="heading-m">card component</h2>
 
   <div class="cards-wrapper">
-    <app-card role="button" (click)="alertClick()">I'm a button</app-card>
+    <app-card role="button" (click)="alertClick()" (keyup)="alertClick()">
+      I'm a button
+    </app-card>
 
     <app-card role="article">article card</app-card>
   </div>
