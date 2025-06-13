@@ -1,4 +1,5 @@
 @use 'sass:map';
+@use 'sass:string';
 
 // purple primary
 $primary: (
@@ -184,4 +185,24 @@ $text: (
   s-600: 600 0.75rem/1.33333 #{$font-family},
   xs-400: 400 0.625rem/1.4 #{$font-family},
   xs-600: 600 0.625rem/1.4 #{$font-family}
+);
+
+$_shadow-key: rgb(0, 0, 0, 0.14);
+$_shadow-ambiant: rgb(0, 0, 0, 0.12);
+$_spread1: 0rem 0rem 0.125rem #{$_shadow-ambiant};
+$_spread2: 0rem 0rem 0.5rem #{$_shadow-ambiant};
+$elevation: (
+  neutral-inner: inset 0rem 0.0625rem 0.25rem #{$_shadow-key},
+  neutral-1: string.unquote(
+      '0rem 0.0625rem 0.125rem #{$_shadow-key}, #{$_spread1}'
+    ),
+  neutral-2: string.unquote(
+      '0rem 0.125rem 0.25rem #{$_shadow-key}, #{$_spread1}'
+    ),
+  neutral-3: string.unquote('0rem 0.25rem 0.5rem #{$_shadow-key}, #{$_spread1}'),
+  neutral-4: string.unquote('0rem 0.5rem 1rem #{$_shadow-key}, #{$_spread1}'),
+  neutral-5: string.unquote(
+      '0rem 0.875rem 1.75rem #{$_shadow-key}, #{$_spread2}'
+    ),
+  neutral-6: string.unquote('0rem 2rem 4rem #{$_shadow-key}, #{$_spread2}')
 );

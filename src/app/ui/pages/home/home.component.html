@@ -1,2 +1,30 @@
 <h1>home page</h1>
 <p class="text-center text-xl-600">home is <em>empty</em> for now !</p>
+
+<section>
+  <h2 class="heading-m">button component with &lt;button></h2>
+
+  <button app-btn>
+    <app-icon [icon]="'monorail'" iconRight />
+    Zut
+  </button>
+</section>
+
+<section>
+  <h2 class="heading-m">button component with &lt;a></h2>
+
+  <a href="#" app-btn>
+    <app-icon [icon]="'pregnant_woman'" />
+    Pas zut
+  </a>
+</section>
+
+<section>
+  <h2 class="heading-m">card component</h2>
+
+  <div class="cards-wrapper">
+    <app-card role="button" (click)="alertClick()">I'm a button</app-card>
+
+    <app-card role="article">article card</app-card>
+  </div>
+</section>
