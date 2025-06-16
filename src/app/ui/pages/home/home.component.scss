@@ -1,4 +1,13 @@
-.cards-wrapper {
+.btn-wrapper {
   display: flex;
-  gap: 1rem;
+  align-items: flex-end;
+  padding: 1rem 0rem 1.5rem;
+
+  &:first-of-type {
+    padding: 1.5rem 0rem;
+  }
+
+  &:last-of-type {
+    padding-bottom: 0rem;
+  }
 }

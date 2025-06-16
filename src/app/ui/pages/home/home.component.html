@@ -1,36 +1,6 @@
-<h1>home page</h1>
-<p class="text-center text-xl-600">Components debug and tests for now</p>
-
-<section>
-  <h2 class="heading-m">button component with &lt;button></h2>
-
-  <button app-btn>
-    <app-icon [icon]="'monorail'" iconRight />
-    Zut
-  </button>
-</section>
-
-<section>
-  <h2 class="heading-m">button component with &lt;a></h2>
-
-  <a href="#" app-btn>
-    <app-icon [icon]="'pregnant_woman'" />
-    Pas zut
+<section class="btn-wrapper">
+  <a routerLink="/studies" app-btn i18n>
+    <app-icon icon="add" />
+    Create a new study
   </a>
-</section>
-
-<section>
-  <h2 class="heading-m">card component</h2>
-
-  <div class="cards-wrapper">
-    <app-card role="button" (click)="alertClick()" (keyup)="EnterKey($event)">
-      I'm a button
-    </app-card>
-
-    <app-card role="article">article card</app-card>
-
-    <app-card role="button" (click)="alertClick()" (keyup)="EnterKey($event)">
-      I'm a second button
-    </app-card>
-  </div>
 </section>
