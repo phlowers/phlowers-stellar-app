@@ -13,4 +13,9 @@ export class HomeComponent {
   alertClick() {
     alert('element clicked');
   }
+  EnterKey(e: any) {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      this.alertClick();
+    }
+  }
 }

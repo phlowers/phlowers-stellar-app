@@ -1,5 +1,5 @@
 <h1>home page</h1>
-<p class="text-center text-xl-600">home is <em>empty</em> for now !</p>
+<p class="text-center text-xl-600">Components debug and tests for now</p>
 
 <section>
   <h2 class="heading-m">button component with &lt;button></h2>
@@ -23,10 +23,14 @@
   <h2 class="heading-m">card component</h2>
 
   <div class="cards-wrapper">
-    <app-card role="button" (click)="alertClick()" (keyup)="alertClick()">
+    <app-card role="button" (click)="alertClick()" (keyup)="EnterKey($event)">
       I'm a button
     </app-card>
 
     <app-card role="article">article card</app-card>
+
+    <app-card role="button" (click)="alertClick()" (keyup)="EnterKey($event)">
+      I'm a second button
+    </app-card>
   </div>
 </section>

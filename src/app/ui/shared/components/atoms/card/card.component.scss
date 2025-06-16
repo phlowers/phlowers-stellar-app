@@ -15,5 +15,10 @@
     &:hover {
       background-color: var(--primary-100);
     }
+
+    &:focus-visible {
+      outline: 0.0625rem solid var(--primary-900);
+      outline-offset: 0.25rem;
+    }
   }
 }
