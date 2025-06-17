@@ -30,6 +30,7 @@ import { TransitLink } from './interfaces/transitLink';
 import { Cable } from './interfaces/cable';
 import { cableTable } from './tables/cable';
 import mockData from './mock_data.json';
+import { createStudiesMockData } from './helpers/createMocks';
 
 export class AppDB extends Dexie {
   users!: Table<User, number>;
@@ -61,6 +62,7 @@ export class AppDB extends Dexie {
       ...userTable,
       ...cableTable
     });
+    // console.log('i am setting stores', this);
     //fill the database with mock data
     // this.fillDatabaseWithMockData();
   }
@@ -91,11 +93,19 @@ export class AppDB extends Dexie {
     await this.cables.bulkPut(mockData.cables);
   }
 
-  async fillDatabaseWithMockData() {
+  async fillDatabaseWithSectionsMockData() {
     try {
       if ((await this.attachments.count()) === 0) {
         await this.loadMockDataFromJson(mockData);
       }
+    } catch (error) {
+      console.error('Error filling database with mock data', error);
+    }
+  }
+
+  async fillDatabaseWithStudiesMockData() {
+    try {
+      await this.studies.bulkPut(createStudiesMockData());
     } catch (error) {
       console.error('Error filling database with mock data', error);
     }
