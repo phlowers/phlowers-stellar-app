@@ -129,44 +129,6 @@ describe('SidebarComponent', () => {
     expect(component.appVersion()).toBe('1.2.3');
   });
 
-  // it('should initialize with fallback appVersion when environment version is not set', () => {
-  //   // Reset the mock module for this specific test
-  //   jest.resetModules();
-
-  //   // Create a new mock for this test only
-  //   jest.doMock('@environments/environment', () => ({
-  //     environment: {
-  //       version: '{BUILD_VERSION}'
-  //     }
-  //   }));
-
-  //   // Create a new TestBed for this test
-  //   TestBed.resetTestingModule();
-  //   TestBed.configureTestingModule({
-  //     imports: [TestHostComponent],
-  //     providers: [
-  //       {
-  //         provide: ActivatedRoute,
-  //         useValue: {
-  //           snapshot: {
-  //             paramMap: {
-  //               get: () => 'test'
-  //             }
-  //           }
-  //         }
-  //       }
-  //     ]
-  //   }).compileComponents();
-
-  //   // Create a new instance with the modified mock
-  //   const tempFixture = TestBed.createComponent(TestHostComponent);
-  //   tempFixture.detectChanges();
-  //   const tempComponent = tempFixture.componentInstance.sidebarComponent;
-
-  //   // Check the fallback version
-  //   expect(tempComponent.appVersion()).toBe('0.0.00');
-  // });
-
   it('should toggle menu and update DOM classes correctly', () => {
     // Initially set to expanded
     expect(component.expandedStatus()).toBe(true);
