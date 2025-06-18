@@ -1,0 +1,24 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+:host {
+  display: inline-block;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--grey-white);
+  box-shadow: map.get(app.$elevation, neutral-3);
+
+  &[role='button'],
+  &[role='link'] {
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+      background-color: var(--primary-100);
+    }
+
+    &:focus-visible {
+      outline: 0.0625rem solid var(--primary-900);
+      outline-offset: 0.25rem;
+    }
+  }
+}
