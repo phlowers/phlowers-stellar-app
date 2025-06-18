@@ -62,7 +62,7 @@ export class LoggedLayoutComponent {
         label: $localize`User preference`,
         shortLabel: $localize`usr pref`,
         route: '/admin',
-        icon: 'Account_circle_filled'
+        icon: 'account_circle'
       }
     ]
   });

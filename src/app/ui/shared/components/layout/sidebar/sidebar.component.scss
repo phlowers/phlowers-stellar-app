@@ -4,10 +4,13 @@ $_animation-type-timing: 0.35s cubic-bezier(1, 0.19, 0.23, 0.84);
 
 body.has-sidebar {
   padding-left: $_sidebar-size--shrank;
-  transition: padding-left $_animation-type-timing;
 
   &--expanded {
     padding-left: $_sidebar-size--expanded;
+  }
+
+  &--animation {
+    transition: padding-left $_animation-type-timing;
   }
 }
 
