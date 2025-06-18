@@ -40,7 +40,7 @@
             [id]="item.id"
             class="stellar-sidebar__link"
           >
-            <span class="app-icon">{{ item.icon }}</span>
+            <app-icon [icon]="item.icon" />
             <span>
               @if (item.shortLabel && expandedStatus() === false) {
                 {{ item.shortLabel }}
@@ -68,7 +68,7 @@
             [id]="item.id"
             class="stellar-sidebar__link"
           >
-            <span class="app-icon">{{ item.icon }}</span>
+            <app-icon [icon]="item.icon" />
             <span>
               @if (item.shortLabel && expandedStatus() === false) {
                 {{ item.shortLabel }}
@@ -84,7 +84,7 @@
     <hr />
 
     <button type="button" (click)="toggleMenu()" class="stellar-sidebar__link">
-      <span class="app-icon">keyboard_double_arrow_right</span>
+      <app-icon icon="keyboard_double_arrow_right" />
       @if (expandedStatus() === true) {
         <span i18n>Shrink menu</span>
       } @else {

@@ -1,6 +1,5 @@
 export const ALL_ICONS = [
   'search',
-  'search',
   'home',
   'menu',
   'close',
@@ -771,7 +770,6 @@ export const ALL_ICONS = [
   'siren_question',
   'acupuncture',
   'shield_watch',
-  'account_circle',
   'account_circle',
   'info',
   'visibility',
