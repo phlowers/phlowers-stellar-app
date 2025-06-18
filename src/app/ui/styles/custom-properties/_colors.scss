@@ -1,33 +1,33 @@
-@use '../abstracts/abstract.extracts' as stel;
+@use 'abstract.extracts' as app;
 
 :root {
-  @each $key, $value in stel.$primary {
+  @each $key, $value in app.$primary {
     --primary-#{$key}: #{$value};
   }
-  --main-primary: #{stel.$main-primary};
+  --main-primary: #{app.$main-primary};
 
-  @each $key, $value in stel.$secondary {
+  @each $key, $value in app.$secondary {
     --secondary-#{$key}: #{$value};
   }
-  --main-secondary: #{stel.$main-secondary};
+  --main-secondary: #{app.$main-secondary};
 
-  @each $key, $value in stel.$grey {
+  @each $key, $value in app.$grey {
     --grey-#{$key}: #{$value};
   }
-  --main-grey: #{stel.$main-grey};
+  --main-grey: #{app.$main-grey};
 
-  @each $key, $value in stel.$success {
+  @each $key, $value in app.$success {
     --success-#{$key}: #{$value};
   }
-  --main-success: #{stel.$main-success};
+  --main-success: #{app.$main-success};
 
-  @each $key, $value in stel.$warning {
+  @each $key, $value in app.$warning {
     --warning-#{$key}: #{$value};
   }
-  --main-warning: #{stel.$main-warning};
+  --main-warning: #{app.$main-warning};
 
-  @each $key, $value in stel.$error {
+  @each $key, $value in app.$error {
     --error-#{$key}: #{$value};
   }
-  --main-error: #{stel.$main-error};
+  --main-error: #{app.$main-error};
 }

@@ -66,6 +66,11 @@
             "styles": [
               "src/app/ui/styles/styles.scss"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/app/ui/styles/abstracts"
+              ]
+            },
             "scripts": [
               "./node_modules/plotly.js-dist-min/plotly.min.js"
             ],

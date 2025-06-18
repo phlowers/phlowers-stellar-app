@@ -1,16 +1,16 @@
 @use 'sass:map';
-@use './abstracts/abstract.extracts' as stel;
+@use 'abstract.extracts' as app;
 
 // *********************
 // ******* FONTS *******
 // *********************
-@each $name, $value in stel.$txt-heading {
+@each $name, $value in app.$txt-heading {
   .heading-#{$name} {
     @extend %heading-#{$name};
   }
 }
 
-@each $name, $value in stel.$text {
+@each $name, $value in app.$text {
   .text-#{$name} {
     @extend %text-#{$name};
   }
