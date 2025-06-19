@@ -1,0 +1,88 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+$_accordion-bdrd: 0.25rem;
+$_header-icon-size: 1.25rem;
+$_header-pt: 0.5625rem;
+$_header-pr: 1rem;
+
+.app-icon {
+  font-size: $_header-icon-size;
+}
+
+.p-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.p-accordionpanel {
+  border-radius: $_accordion-bdrd;
+  box-shadow: var(--elevation-neutral-3);
+
+  --p-accordion-panel-border-width: 0;
+}
+
+.p-accordionheader {
+  // ensure higher specificity
+  &#{&} {
+    position: relative;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    font: map.get(app.$text, l-600);
+    line-height: 1;
+    border-radius: $_accordion-bdrd $_accordion-bdrd 0 0 !important;
+    transition:
+      border-radius 0.3s ease-in,
+      background-color 0.3s ease-in-out;
+
+    &[aria-expanded='false'] {
+      border-radius: $_accordion-bdrd !important;
+    }
+  }
+
+  --p-accordion-header-padding: #{$_header-pt} #{$_header-pr +
+    $_header-icon-size} 0.5625rem 1rem;
+  --p-accordion-header-last-bottom-border-radius: 0;
+  --p-accordion-header-first-top-border-radius: 0;
+  --p-accordion-header-background: var(--primary-900);
+  --p-accordion-header-color: var(--grey-white);
+  --p-accordion-header-hover-background: var(--primary-700);
+  --p-accordion-header-hover-color: var(--p-accordion-header-color);
+  --p-accordion-header-active-background: var(--p-accordion-header-background);
+  --p-accordion-header-active-hover-background: var(
+    --p-accordion-header-hover-background
+  );
+  --p-accordion-header-active-color: var(--p-accordion-header-color);
+  --p-accordion-header-active-hover-color: var(--p-accordion-header-color);
+  --p-accordion-header-focus-ring-color: var(--primary-900);
+  --p-accordion-header-focus-ring-offset: 0.25rem;
+
+  .accordion-arrow {
+    position: absolute;
+    top: $_header-pt;
+    right: $_header-pr;
+  }
+}
+
+// crude override for app-accordion-header
+.p-accordionpanel:not(.p-disabled)
+  app-accordion-header
+  .p-accordionheader:hover {
+  background-color: var(--p-accordion-header-hover-background);
+  color: var(--p-accordion-header-color);
+}
+
+.p-accordioncontent {
+  border-radius: 0 0 $_accordion-bdrd $_accordion-bdrd;
+  --p-accordion-content-padding: 0rem 1rem;
+
+  &[data-p-active='true'] {
+    --p-accordion-content-padding: 1rem;
+  }
+
+  &-content {
+    transition: padding 0.5s ease-in-out;
+  }
+}
