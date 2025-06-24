@@ -5,6 +5,9 @@ import { IconComponent } from '../icon/icon.component';
 @Component({
   selector: 'app-accordion-header',
   imports: [AccordionModule, IconComponent],
-  templateUrl: './accordion-header.component.html'
+  templateUrl: './accordion-header.component.html',
+  host: {
+    class: 'app-accordion-header'
+  }
 })
 export class AccordionHeaderComponent {}
