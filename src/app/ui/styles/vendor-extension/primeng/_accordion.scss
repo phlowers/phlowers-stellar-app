@@ -1,0 +1,96 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+$_accordion-bdrd: 0.25rem;
+$_header-icon-size: 1.25rem;
+$_header-py: 0.6875rem;
+$_header-pr: 1rem;
+
+.app-icon {
+  font-size: $_header-icon-size;
+}
+
+.p-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.p-accordionpanel {
+  border-radius: $_accordion-bdrd;
+  box-shadow: var(--elevation-neutral-3);
+
+  --p-accordion-panel-border-width: 0;
+
+  // ensure specifity for override
+  &#{&} {
+    .p-accordionheader.p-accordionheader {
+      border-start-start-radius: $_accordion-bdrd;
+      border-start-end-radius: $_accordion-bdrd;
+    }
+  }
+  // ! ensure specifity for override
+
+  .p-accordionheader {
+    --p-accordion-header-padding: #{$_header-py} #{$_header-pr +
+      $_header-icon-size} #{$_header-py} 1rem;
+    --p-accordion-header-background: var(--primary-900);
+    --p-accordion-header-color: var(--grey-white);
+    --p-accordion-header-hover-background: var(--primary-700);
+    --p-accordion-header-hover-color: var(--p-accordion-header-color);
+    --p-accordion-header-active-background: var(
+      --p-accordion-header-background
+    );
+    --p-accordion-header-active-hover-background: var(
+      --p-accordion-header-hover-background
+    );
+    --p-accordion-header-active-color: var(--p-accordion-header-color);
+    --p-accordion-header-active-hover-color: var(--p-accordion-header-color);
+    --p-accordion-header-focus-ring-color: var(--primary-900);
+    --p-accordion-header-focus-ring-offset: 0.25rem;
+
+    &.p-accordionheader {
+      position: relative;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      font: map.get(app.$text, l-600);
+      line-height: 1;
+      transition:
+        border-radius 0.3s ease-in,
+        background-color 0.3s ease-in-out;
+
+      &[aria-expanded='false'] {
+        border-end-start-radius: $_accordion-bdrd;
+        border-end-end-radius: $_accordion-bdrd;
+      }
+    }
+
+    .accordion-arrow {
+      position: absolute;
+      top: $_header-py - 0.125rem; // magic calculation to compensate icon misalignment
+      right: $_header-pr;
+    }
+  }
+
+  .p-accordioncontent {
+    --p-accordion-content-padding: 0rem 1rem;
+    border-end-start-radius: $_accordion-bdrd;
+    border-end-end-radius: $_accordion-bdrd;
+
+    &[data-p-active='true'] {
+      --p-accordion-content-padding: 1rem;
+
+      .p-accordioncontent-content {
+        transition: padding 0.45s 0.2s linear;
+      }
+    }
+
+    &-content {
+      @starting-style {
+        padding-top: 0;
+      }
+      transition: padding 0.4s ease-in;
+    }
+  }
+}
