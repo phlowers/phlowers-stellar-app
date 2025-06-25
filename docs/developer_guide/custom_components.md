@@ -1,6 +1,6 @@
 # Custom components
 We're using PrimeNG library for our base components and not RTE's latest design system since we're ahead of it's release.  
-However we do have to respect it's design to date (and to a degree). Therefore we had to create some custom atomic components for design or feature purpose.
+However we do have to respect it's design to date (and to a degree). Therefore we had to create some custom atomic components for design or feature purpose and some interface component to pre-initialize some PrimeNG components.
 
 ## Icons
 - selector: app-icon
@@ -59,4 +59,32 @@ implementation ex:
 
   <main>article card</main>
 </app-card>
+```
+
+## Accordion
+Accordion is fully from PrimeNG but we had to use built-in mecanics to change header's chevron icons. 
+This change is integrated in app-accordion-header component so you should use it instead of p-accordion-header.  
+Content is projected inside p-accordion-header so feel free to inject whatever you need.
+
+```HTML
+<p-accordion value="0">
+  <p-accordion-panel value="0">
+    <app-accordion-header>
+      <app-icon icon="search" />
+      Header title
+    </app-accordion-header>
+
+    <p-accordion-content>
+      <p class="m-0">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+        minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+        aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+        culpa qui officia deserunt mollit anim id est laborum.
+      </p>
+    </p-accordion-content>
+  </p-accordion-panel>
+</p-accordion>
 ```
