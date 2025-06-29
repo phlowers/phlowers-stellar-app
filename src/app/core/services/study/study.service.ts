@@ -12,7 +12,7 @@ import {
   ModifyStudyModel,
   SearchStudyModel
 } from '@core/data/models/study.model';
-import { environment } from '@src/environments/environment.development';
+import { environment } from '@src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
