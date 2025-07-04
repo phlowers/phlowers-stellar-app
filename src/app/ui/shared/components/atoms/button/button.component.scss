@@ -85,7 +85,7 @@ a.app-btn {
 .app-btn-base {
   background-color: var(--primary-600);
   color: var(--grey-white);
-  box-shadow: 0 0 0 rgb(255, 255, 255, 0);
+  box-shadow: 0 0 0 rgb(from var(--grey-white) r g b / 0);
   transition:
     background-color 0.3s ease-in-out,
     box-shadow 0.3s ease-in-out;
@@ -139,7 +139,7 @@ a.app-btn {
 }
 
 .app-btn-text {
-  background-color: var(--grey-white);
+  background-color: rgb(from var(--grey-white) r g b / 0);
   color: var(--primary-600);
   transition:
     background-color 0.3s ease-in-out,

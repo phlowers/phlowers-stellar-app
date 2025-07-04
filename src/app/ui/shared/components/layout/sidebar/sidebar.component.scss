@@ -141,7 +141,7 @@ body.has-sidebar {
   }
 
   &__link {
-    background-color: rgb(255, 255, 255, 0);
+    background-color: rgb(from var(--grey-white) r g b / 0);
     transition: background-color $_animation-type-timing;
     min-width: 1.875rem;
 

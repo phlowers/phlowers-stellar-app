@@ -11,6 +11,16 @@
   }
   --main-secondary: #{app.$main-secondary};
 
+  @each $key, $value in app.$tertiary {
+    --tertiary-#{$key}: #{$value};
+  }
+  --main-tertiary: #{app.$main-tertiary};
+
+  @each $key, $value in app.$rte-blue {
+    --rte-#{$key}: #{$value};
+  }
+  --main-rte: #{app.$main-rte-blue};
+
   @each $key, $value in app.$grey {
     --grey-#{$key}: #{$value};
   }

@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { PossibleIconNames } from '../../../model/icons/icon.model';
+import { PossibleIconNames } from '../../../model/icon.model';
 
 @Component({
   selector: 'app-icon',
@@ -12,5 +12,5 @@ import { PossibleIconNames } from '../../../model/icons/icon.model';
   }
 })
 export class IconComponent {
-  icon = input.required<PossibleIconNames>();
+  icon = input.required<PossibleIconNames | undefined>();
 }

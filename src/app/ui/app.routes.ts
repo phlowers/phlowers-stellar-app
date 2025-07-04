@@ -13,6 +13,7 @@ import { PlotlyPageComponent } from './pages/plotly-poc/plotly-page/plotly-page.
 import { ThreeDPageComponent } from './pages/3d-page/3d-page.component';
 import { LoggedLayoutComponent } from './shared/components/layout/logged-layout/logged-layout.component';
 import { HomeComponent } from './pages/home/home.component';
+import { NewsComponent } from './pages/news/news.component';
 
 export const appRoutes: Routes = [
   {
@@ -45,6 +46,11 @@ export const appRoutes: Routes = [
         path: '3d',
         title: $localize`3d`,
         component: ThreeDPageComponent
+      },
+      {
+        path: 'news',
+        title: $localize`News`,
+        component: NewsComponent
       }
     ]
   },
