@@ -46,6 +46,8 @@
   word-wrap: normal;
   direction: ltr;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
   font-variation-settings:
     // "fill": wether or not the icon is filled or stroked. Value is 0 or 1
     'FILL' 0,
