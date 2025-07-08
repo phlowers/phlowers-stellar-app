@@ -32,12 +32,15 @@
   font-style: normal;
   font-weight: 100 700;
   src: url(@src/../public/fonts/material-symbols-rounded.woff2) format('woff2');
+  font-display: block;
 }
 .app-icon {
   font-family: 'Material Symbols Rounded', sans-serif; // sonarQube requirment
   font-weight: normal;
   font-style: normal;
   font-size: 1.375rem;
+  width: 1em; // force icon size when icon is still rendering (icon's text is visible otherwise)
+  height: 1em;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -60,6 +63,37 @@
     // Value should not change across icons and must be between 20 and 48.
     // learn more about DP: https://m2.material.io/design/layout/pixel-density.html#pixel-density
     'opsz' 20;
+
+  &.symbols-loading {
+    position: relative;
+    text-indent: -999rem; // another security to ensure
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0rem;
+      right: 0rem;
+      width: 1em;
+      height: 1em;
+      border-radius: 0.25rem;
+      background-color: rgb(from var(--primary-200) r g b / 0.4);
+      background-image: linear-gradient(
+        140deg,
+        rgb(from var(--grey-white) r g b / 0) 40%,
+        rgb(from var(--grey-white) r g b / 0.5) 50%,
+        rgba(from var(--grey-white) r g b / 0) 60%
+      );
+      background-size: 200% 100%;
+      background-position-x: 100%;
+      animation: 1s loading ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes loading {
+  to {
+    background-position-x: -100%;
+  }
 }
 
 body {
