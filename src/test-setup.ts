@@ -15,4 +15,12 @@ window.ResizeObserver =
     unobserve: jest.fn()
   }));
 
+Object.defineProperty(document, 'fonts', {
+  value: {
+    check: jest.fn().mockReturnValue(true),
+    load: jest.fn().mockResolvedValue(undefined)
+  },
+  writable: true
+});
+
 setupZoneTestEnv();
