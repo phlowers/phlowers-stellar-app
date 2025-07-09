@@ -1,0 +1,35 @@
+<article>
+  <h3>
+    {{ title() }}
+  </h3>
+
+  <dl>
+    <dt>
+      <app-icon icon="person" />
+      <span i18n>Author:</span>
+      <!-- i18n Auteur : -->
+    </dt>
+    <dd>
+      {{ authorMail() }}
+    </dd>
+
+    <dt>
+      <app-icon icon="history" />
+      <span i18n>Last changed:</span>
+      <!-- i18n Modifié le :-->
+    </dt>
+    <dd>
+      {{ modificationDate() }}
+    </dd>
+  </dl>
+
+  @if (tagList()) {
+    <ul>
+      @for (tag of tagList(); track $index) {
+        <li>
+          <app-tag [text]="tag.text" [type]="tag.color" />
+        </li>
+      }
+    </ul>
+  }
+</article>

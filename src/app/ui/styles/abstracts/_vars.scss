@@ -37,6 +37,40 @@ $secondary: (
 // default secondary foreground use
 $main-secondary: map.get($secondary, 700);
 
+// Iceberg blue tertiary
+$tertiary: (
+  0: #f9fbfd,
+  50: #f3f6fc,
+  100: #e6eef8,
+  200: #c7dbf0,
+  300: #96bde3,
+  400: #5e9ad2,
+  500: #397ebe,
+  600: #2964a0,
+  700: #225082,
+  800: #214770,
+  900: #1f3b5b,
+  950: #15253c
+);
+$main-tertiary: map.get($tertiary, 600);
+
+// RTE blue color
+$rte-blue: (
+  0: #f8fdff,
+  50: #f0fbff,
+  100: #e0f5fe,
+  200: #b9edfe,
+  300: #7ce1fd,
+  400: #36d3fa,
+  500: #0cbdeb,
+  600: #00a6d9,
+  700: #017aa3,
+  800: #066686,
+  900: #0b556f,
+  950: #07364a
+);
+$main-rte-blue: map.get($rte-blue, 600);
+
 // Greyscale
 $grey: (
   'white': #fff,
@@ -187,8 +221,8 @@ $text: (
   xs-600: 600 0.625rem/1.4 #{$font-family}
 );
 
-$_shadow-key: rgb(0, 0, 0, 0.14);
-$_shadow-ambiant: rgb(0, 0, 0, 0.12);
+$_shadow-key: rgb(from #{map.get($grey, 950)} r g b / 0.14);
+$_shadow-ambiant: rgb(from #{map.get($grey, 950)} r g b / 0.12);
 $_spread1: 0rem 0rem 0.125rem #{$_shadow-ambiant};
 $_spread2: 0rem 0rem 0.5rem #{$_shadow-ambiant};
 $elevation: (
