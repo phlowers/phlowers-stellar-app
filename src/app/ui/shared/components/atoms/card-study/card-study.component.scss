@@ -1,0 +1,58 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+:host {
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+article {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--grey-white);
+  box-shadow:
+    map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3);
+}
+
+h3 {
+  @extend %heading-xs;
+  color: var(--grey-950);
+  margin-bottom: 0.5rem;
+}
+
+dl {
+  overflow: hidden;
+  flex-grow: 1;
+  color: var(--grey-700);
+}
+
+dt,
+dd {
+  float: left;
+  margin-bottom: 0.5rem;
+}
+
+dt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  clear: left;
+
+  app-icon {
+    font-size: 1rem;
+  }
+}
+
+dd {
+  margin-left: 0.25rem;
+}
+
+ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

@@ -7,52 +7,27 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { OnlineService } from '@core/services/online/online.service';
-import { WorkerService } from '@core/services/worker_python/worker_python.service';
-import { UpdateService } from '@core/services/worker_update/worker_update.service';
 import { PageTitleService } from '@ui/shared/service/page-title/page-title.service';
+import { IconComponent } from '../../atoms/icon/icon.component';
 
 @Component({
   selector: 'app-topbar',
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss'
 })
 export class TopbarComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
   public currentPageTitle = signal<string>('');
-  public offline = signal<boolean>(true);
-  public workerReady = signal<boolean>(false);
-  public serverOnline = signal<string>('Loading');
+  public workerReady = signal<boolean>(true);
+  public readonly workerError = signal<boolean>(false);
 
-  constructor(
-    private readonly pageTitleService: PageTitleService,
-    private readonly onlineService: OnlineService,
-    private readonly workerService: WorkerService,
-    public updateService: UpdateService
-  ) {}
+  constructor(private readonly pageTitleService: PageTitleService) {}
 
   ngOnInit() {
-    // Subscribe to page title
     this.subscriptions.add(
       this.pageTitleService.pageTitle$.subscribe((title) => {
         this.currentPageTitle.set(title);
-      })
-    );
-    // Process online status changes
-    this.subscriptions.add(
-      this.onlineService.online$.subscribe((online) => {
-        this.offline.set(!online);
-      })
-    );
-    this.subscriptions.add(
-      this.workerService.ready$.subscribe((workerReady) => {
-        this.workerReady.set(workerReady);
-      })
-    );
-    this.subscriptions.add(
-      this.onlineService.serverOnline$.subscribe((serverOnline) => {
-        this.serverOnline.set(serverOnline);
       })
     );
   }

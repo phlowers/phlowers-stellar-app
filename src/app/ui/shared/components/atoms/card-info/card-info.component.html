@@ -1,0 +1,26 @@
+<article [class]="computedClass()" class="info-card">
+  <header class="info-card__header">
+    <h2>{{ title() }}</h2>
+  </header>
+
+  <main class="info-card__main">
+    <p [class]="">{{ text() }}</p>
+  </main>
+
+  @if (linkText() && linkRoute()) {
+    <footer class="info-card__footer">
+      <a
+        [routerLink]="linkRoute()"
+        [attr.aria-label]="linkAriaLabel()"
+        app-btn
+        btnSize="s"
+        btnStyle="text"
+      >
+        {{ linkText() }}
+        <app-icon icon="keyboard_arrow_right" iconRight />
+      </a>
+    </footer>
+  }
+
+  <ng-content select="svg.server-status" />
+</article>

@@ -1,0 +1,48 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.p-dialog.p-dialog {
+  --p-dialog-border-radius: 0.25rem;
+  --p-dialog-shadow:
+    #{map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3)};
+  --p-dialog-color: var(--grey-850);
+
+  --p-dialog-header-padding: 1rem;
+  --p-dialog-content-padding: 1rem 1rem 1.625rem;
+  --p-dialog-footer-padding: 1rem;
+  --p-dialog-footer-gap: 1rem;
+
+  border-width: 0rem;
+  overflow: hidden;
+
+  .p-dialog-header {
+    background-color: var(--grey-0);
+    border-bottom: 1px solid var(--grey-200);
+  }
+
+  .p-dialog-footer {
+    border-top: 1px solid var(--primary-300);
+  }
+}
+
+.p-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: var(--p-dialog-header-padding);
+}
+
+.p-dialog-content {
+  overflow-y: auto;
+  padding: var(--p-dialog-content-padding);
+  flex-grow: 1;
+}
+
+.p-dialog-footer {
+  flex-shrink: 0;
+  padding: var(--p-dialog-footer-padding);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--p-dialog-footer-gap);
+}

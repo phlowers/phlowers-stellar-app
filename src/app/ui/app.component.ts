@@ -9,25 +9,14 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
-import { RippleModule } from 'primeng/ripple';
-import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { TagModule } from 'primeng/tag';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
-import { MessageModule } from 'primeng/message';
 import { OnlineService } from '@core/services/online/online.service';
 import { WorkerService } from '@core/services/worker_python/worker_python.service';
 import { StorageService } from '@core/services/storage/storage.service';
+import { IconComponent } from './shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from './shared/components/atoms/button/button.component';
 
 const validateEmail = (email: string): boolean => {
   const emailRegex =
@@ -37,25 +26,14 @@ const validateEmail = (email: string): boolean => {
 };
 
 const modules = [
-  MessageModule,
   RouterModule,
-  RippleModule,
   CommonModule,
   FormsModule,
-  ButtonModule,
   ToastModule,
-  ToolbarModule,
-  RatingModule,
   InputTextModule,
-  TextareaModule,
-  SelectModule,
-  RadioButtonModule,
-  InputNumberModule,
   DialogModule,
-  TagModule,
-  InputIconModule,
-  IconFieldModule,
-  ConfirmDialogModule
+  ButtonComponent,
+  IconComponent
 ];
 
 @Component({
@@ -63,46 +41,8 @@ const modules = [
   standalone: true,
   imports: modules,
   providers: [MessageService, StorageService, WorkerService, OnlineService],
-  template: `<router-outlet></router-outlet>
-    <p-toast position="top-center"></p-toast>
-    <p-dialog
-      [(visible)]="userDialog"
-      [style]="{ width: '450px' }"
-      i18n-header
-      header="Set your user info"
-      [closable]="false"
-      [modal]="true"
-    >
-      <ng-template #content>
-        <label i18n for="description" class="block font-bold mb-3">Email</label>
-        <input
-          type="text"
-          pInputText
-          type="email"
-          #email="ngModel"
-          email
-          name="email"
-          ngModel
-          id="email"
-          [(ngModel)]="user.email"
-          required
-          fluid
-        />
-        <!-- <div *ngIf="email.invalid && email.errors" class="alert">{{ console.log(email) }}</div> -->
-        <small i18n class="text-red-500" *ngIf="submitted && !email.valid"
-          >Email is not valid.</small
-        >
-      </ng-template>
-      <ng-template #footer>
-        <p-button
-          i18n-label
-          label="Save"
-          icon="pi pi-check"
-          type="submit"
-          (click)="saveUser()"
-        />
-      </ng-template>
-    </p-dialog>`
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
@@ -113,7 +53,6 @@ export class AppComponent implements OnInit {
     email: ''
   };
   submitted = false;
-  // pythonWorker: Worker | null = null;
 
   constructor(
     private readonly messageService: MessageService,

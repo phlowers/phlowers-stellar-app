@@ -1,0 +1,48 @@
+@use 'abstract.extracts' as app;
+
+:host {
+  display: inline-block;
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+  background-color: var(--tertiary-100);
+  padding: 0.5rem 1rem 0.75rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+
+    h2 {
+      @extend %heading-s;
+      flex-grow: 1;
+      margin: 0rem;
+    }
+  }
+
+  &__main {
+    @extend %text-s-400;
+    flex-grow: 1;
+  }
+
+  &__footer {
+    padding-top: 0.25rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__decorative-svg {
+    position: absolute;
+    z-index: -1;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+}

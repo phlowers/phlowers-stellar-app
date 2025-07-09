@@ -6,15 +6,15 @@ $_header-icon-size: 1.25rem;
 $_header-py: 0.6875rem;
 $_header-pr: 1rem;
 
-.app-icon {
-  font-size: $_header-icon-size;
-}
-
 .p-accordion {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+
+  .app-icon {
+    font-size: $_header-icon-size;
+  }
 }
 
 .p-accordionpanel {
@@ -87,10 +87,11 @@ $_header-pr: 1rem;
     }
 
     &-content {
+      transition: padding 0.4s ease-in;
+
       @starting-style {
         padding-top: 0;
       }
-      transition: padding 0.4s ease-in;
     }
   }
 }

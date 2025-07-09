@@ -1,18 +1,35 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IconComponent } from './icon.component';
-import { PossibleIconNames, ALL_ICONS } from '../../../model/icons/icon.model';
+import { PossibleIconNames, ALL_ICONS } from '@ui/shared/model/icon.model';
 
 describe('IconComponent', () => {
   let component: IconComponent;
   let fixture: ComponentFixture<IconComponent>;
+  let mockDocumentFonts: any;
 
   beforeEach(async () => {
+    mockDocumentFonts = {
+      check: jest.fn(),
+      load: jest.fn()
+    };
+
+    Object.defineProperty(document, 'fonts', {
+      value: mockDocumentFonts,
+      writable: true
+    });
+
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
+
     await TestBed.configureTestingModule({
       imports: [IconComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(IconComponent);
     component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('Component Creation', () => {
@@ -102,15 +119,16 @@ describe('IconComponent', () => {
   describe('Host Bindings', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('icon', 'home');
-      fixture.detectChanges();
     });
 
     it('should have aria-label attribute with icon name', () => {
+      fixture.detectChanges();
       const element = fixture.nativeElement;
       expect(element.getAttribute('aria-label')).toBe('home');
     });
 
     it('should update aria-label when icon changes', () => {
+      fixture.detectChanges();
       const element = fixture.nativeElement;
 
       fixture.componentRef.setInput('icon', 'search');
@@ -120,6 +138,98 @@ describe('IconComponent', () => {
       fixture.componentRef.setInput('icon', 'settings');
       fixture.detectChanges();
       expect(element.getAttribute('aria-label')).toBe('settings');
+    });
+  });
+
+  describe('Font Loading', () => {
+    it('should initialize symbolsReady as false', () => {
+      expect(component.symbolsReady()).toBe(false);
+    });
+
+    it('should set symbolsReady to true when font is already loaded', async () => {
+      mockDocumentFonts.check.mockReturnValue(true);
+
+      fixture.componentRef.setInput('icon', 'home');
+      fixture.detectChanges();
+
+      await fixture.whenStable();
+
+      expect(component.symbolsReady()).toBe(true);
+    });
+
+    it('should call document.fonts.check with correct parameters', () => {
+      mockDocumentFonts.check.mockReturnValue(false);
+      mockDocumentFonts.load.mockReturnValue(Promise.resolve());
+
+      fixture.componentRef.setInput('icon', 'home');
+      fixture.detectChanges();
+
+      expect(mockDocumentFonts.check).toHaveBeenCalledWith(
+        '1em "Material Symbols Rounded"'
+      );
+    });
+
+    it('should set symbolsReady to true after font loads successfully', async () => {
+      mockDocumentFonts.check.mockReturnValue(false);
+      mockDocumentFonts.load.mockReturnValue(Promise.resolve());
+
+      fixture.componentRef.setInput('icon', 'home');
+      fixture.detectChanges();
+
+      await fixture.whenStable();
+
+      expect(mockDocumentFonts.load).toHaveBeenCalledWith(
+        '1em "Material Symbols Rounded"'
+      );
+      expect(component.symbolsReady()).toBe(true);
+    });
+
+    it('should handle font loading failure gracefully', async () => {
+      mockDocumentFonts.check.mockReturnValue(false);
+      mockDocumentFonts.load.mockRejectedValue(
+        new Error('Font loading failed')
+      );
+
+      fixture.componentRef.setInput('icon', 'home');
+      fixture.detectChanges();
+
+      await fixture.whenStable();
+
+      expect(console.warn).toHaveBeenCalledWith(
+        'Material Symbols Rounded font failed to load:',
+        expect.any(Error)
+      );
+      expect(component.symbolsReady()).toBe(false);
+    });
+
+    it('should update symbolsReady signal when font state changes', async () => {
+      mockDocumentFonts.check.mockReturnValue(false);
+      mockDocumentFonts.load.mockReturnValue(Promise.resolve());
+
+      fixture.componentRef.setInput('icon', 'home');
+      fixture.detectChanges();
+
+      expect(component.symbolsReady()).toBe(false);
+
+      await fixture.whenStable();
+
+      expect(component.symbolsReady()).toBe(true);
+    });
+  });
+
+  describe('ngOnInit', () => {
+    it('should call isSymbolsReady on initialization', () => {
+      const isSymbolsReadySpy = jest.spyOn(component as any, 'isSymbolsReady');
+
+      fixture.componentRef.setInput('icon', 'home');
+      fixture.detectChanges();
+
+      expect(isSymbolsReadySpy).toHaveBeenCalled();
+    });
+
+    it('should not be async and return void', () => {
+      const result = component.ngOnInit();
+      expect(result).toBeUndefined();
     });
   });
 });

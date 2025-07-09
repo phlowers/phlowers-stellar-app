@@ -1,4 +1,4 @@
-import { PossibleIconNames } from '../../../model/icons/icon.model';
+import { PossibleIconNames } from '../../../model/icon.model';
 
 export interface SidebarItem {
   id: string;

@@ -4,3 +4,72 @@
     Create a new study
   </a>
 </section>
+
+<article class="info-cards">
+  <app-card-info
+    [title]="homeText().newsTitle"
+    [text]="homeText().newsText"
+    [linkText]="homeText().newsLinkText"
+    linkRoute="/news"
+  />
+
+  <app-card-info
+    [title]="homeText().updateTitle"
+    [text]="homeText().updateText"
+    [linkText]="homeText().updateLinkText"
+    [linkAriaLabel]="homeText().updateLinkExplicitText"
+    linkRoute="admin"
+    additionalClass="card-update"
+    [statusState]="updateStatus()"
+  />
+
+  <app-card-info
+    [title]="homeText().serverTitle"
+    [text]="homeText().serverText"
+    additionalClass="card-server"
+    [statusState]="serverStatus()"
+  >
+    <svg
+      class="server-status"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 224 100"
+    >
+      <path
+        class="background"
+        d="M202.1224854,85.8006134c-7.0115204,0-12.776123-4.6714935-22.9023438-4.6714935-10.1273193,0-12.3861389,4.6714935-22.9024048,4.6714935-10.5171814,0-13.5549927-11.5227356-22.9023438-11.5227356-9.3483276,0-12.776062,10.5888748-22.9033203,10.5888748-10.1262817,0-14.4109497-6.2293625-22.590416-6.2293625s-12.0743866,6.2293625-22.5908432,6.2293625-14.8008156-20.8667526-23.525589-20.8667526-13.9427223,14.5903931-21.9027214,13.0895844C12.7494538,75.7417679,10.7822487,71.403862.000005,70.5378036v29.4621964h223.9999981v-23.4720001c-7.7986298.7189789-15.1608887,9.2726135-21.8775177,9.2726135Z"
+      />
+      <path
+        class="middleground"
+        d="M224.0000031,78.8954163c-5.2501678,3.4006958-12.9644012,6.1863403-20.5026093,4.3524933-8.5534058-2.0807648-16.714798-17.2481308-25.1092224-17.2481308s-12.7420654,11.4987564-22.8613281,11.4987564c-10.1182861,0-17.2387543-5.7493744-25.1092224-5.7493744-7.8704071,0-16.1279144,15.4983215-26.2341385,15.4983215h-20.9865875c-7.8945923,0-13.4915848,4.9994583-23.610363,4.9994583-10.1187172,0-8.9944725-4.2495422-16.1150513-4.2495422s-13.8664341,2.2497559-20.6122265,2.2497559-9.743989-7.7491608-17.614151-7.7491608C2.923981,82.4979935,1.2292788,84.0862579-.0000031,86.4306107v13.5693893h224.0000062v-21.1045837Z"
+      />
+      <path
+        class="foreground"
+        d="M204.6892579,89.7292023c-8.5183716-3.3296585-9.7962952-9.7309418-18.2276306-9.7309418-8.4313965,0-17.6917877,8.9620361-27.8540192,8.9620361-10.163269,0-12.7980957-4.0966034-20.7025452-4.0966034-7.9044037,0-10.4342499,8.1941223-20.2205276,8.1941223s-15.9148712-3.3286209-24.9482193-3.3286209c-9.0336533,0-21.0786819,6.1453323-31.2415276,6.1453323-10.1629639,0-12.0449104-4.6094818-21.831562-4.6094818-9.7864666,0-10.1628418,1.7927704-16.9381733,1.7927704-6.7752695,0-10.1629648-6.9142303-18.0674267-6.9142303C2.7349131,86.1435852,1.2062755,87.4410553.0000026,89.2663574v10.7336349h224.0000005v-12.3619385c-4.115921,2.4941788-12.231781,4.8576279-19.3107452,2.0911484Z"
+      />
+    </svg>
+  </app-card-info>
+</article>
+
+<article>
+  <header>
+    <h2 i18n class="text-xl-400 underline-text">My last studies</h2>
+  </header>
+
+  <main class="study-cards">
+    @for (lastStudy of lastStudiesMock(); track lastStudy.uuid) {
+      <app-card-study
+        [title]="lastStudy.title"
+        [authorMail]="lastStudy.authorMail"
+        [modificationDate]="lastStudy.modificationDate"
+        [tagList]="lastStudy.tagList"
+      />
+    }
+  </main>
+
+  <footer class="btn-wrapper">
+    <a routerLink="/studies" app-btn btnStyle="text" btnSize="m" i18n>
+      Go to my studies
+      <app-icon icon="keyboard_arrow_right" iconRight />
+    </a>
+  </footer>
+</article>
