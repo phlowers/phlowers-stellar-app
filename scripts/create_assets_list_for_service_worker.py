@@ -12,7 +12,14 @@ from pathlib import Path
 
 
 def get_git_revision_hash() -> str:
-    return subprocess.check_output(['git', 'rev-parse',  'HEAD']).decode('ascii').strip()
+    """Get the git revision hash from environment variable or git command"""
+    # First check if hash is available in environment variable
+    env_hash = os.environ.get('CI_COMMIT_SHA')
+    if env_hash:
+        return env_hash
+    
+    # Fall back to git command if environment variable is not set
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
 
 
 blacklist = [
