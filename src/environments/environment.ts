@@ -6,7 +6,8 @@
  */
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8080',
+  apiUrl: '{API_URL}',
   version: '{BUILD_VERSION}',
-  buildTime: '{BUILD_TIME}'
+  buildTime: '{BUILD_TIME}',
+  appName: '{APP_NAME}'
 };

@@ -79,16 +79,27 @@
           "configurations": {
             "fr": {
               "baseHref": "/",
-              "localize": ["fr"]
+              "localize": [
+                "fr"
+              ]
             },
             "en": {
               "baseHref": "/",
-              "localize": ["en"]
+              "localize": [
+                "en"
+              ]
             },
             "production": {
-              "localize": ["fr"],
+              "localize": [
+                "fr"
+              ],
               "baseHref": "/",
               "extractLicenses": false,
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": false
+              },
               "budgets": [
                 {
                   "type": "initial",

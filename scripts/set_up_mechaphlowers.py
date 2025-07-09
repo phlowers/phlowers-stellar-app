@@ -1,5 +1,5 @@
 # /// script
-# requires-python = "==3.12"
+# requires-python = ">=3.12,<3.13"
 # dependencies = ["requests == 2.32.3", "pyodide-build == 0.29.3"]
 # ///
 import hashlib
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     
     print("Downloading mechaphlowers wheel files")
     # get the wheel file for mechaphlowers
-    process_args = ["uvx", "--python", "3.12", "pip", "download", f"mechaphlowers=={MECHAPHLOWERS_VERSION}", "-d", PYODIDE_DIRECTORY_PATH]
+    process_args = ["uvx", "--python", ">=3.12,<3.13", "pip", "download", f"mechaphlowers=={MECHAPHLOWERS_VERSION}", "-d", PYODIDE_DIRECTORY_PATH]
     if uv_index:
         process_args.append(f"--index-url={uv_index}")
     subprocess.run(process_args)
