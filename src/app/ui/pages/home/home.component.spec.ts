@@ -11,12 +11,14 @@ import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ActivatedRoute } from '@angular/router';
+import { StudiesService } from '@src/app/core/services/studies/studies.service';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let mockUpdateService: jest.Mocked<UpdateService>;
   let mockOnlineService: jest.Mocked<OnlineService>;
+  let mockStudiesService: jest.Mocked<StudiesService>;
   let onlineSubject: BehaviorSubject<boolean>;
   let serverOnlineSubject: BehaviorSubject<ServerStatus>;
 
@@ -34,6 +36,13 @@ describe('HomeComponent', () => {
       online$: onlineSubject.asObservable(),
       serverOnline$: serverOnlineSubject.asObservable()
     } as jest.Mocked<OnlineService>;
+
+    mockStudiesService = {
+      getStudies: jest.fn().mockResolvedValue([]),
+      ready: new BehaviorSubject(true),
+      createStudy: jest.fn(),
+      getLatestStudies: jest.fn()
+    } as unknown as jest.Mocked<StudiesService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -75,7 +84,8 @@ describe('HomeComponent', () => {
 
       const newComponent = new HomeComponent(
         mockUpdateServiceWithUpdate,
-        mockOnlineService
+        mockOnlineService,
+        mockStudiesService
       );
 
       expect(newComponent.updateStatus()).toBe('warning');
@@ -88,7 +98,8 @@ describe('HomeComponent', () => {
 
       const newComponent = new HomeComponent(
         mockUpdateServiceNoUpdate,
-        mockOnlineService
+        mockOnlineService,
+        mockStudiesService
       );
 
       expect(newComponent.updateStatus()).toBe('unknown');
