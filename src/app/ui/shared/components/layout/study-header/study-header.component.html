@@ -1,0 +1,70 @@
+<section class="study-header">
+  <h1 class="study-header__title">study name</h1>
+
+  <button app-btn btnSize="s" btnStyle="text" aria-label="modify">
+    <app-icon icon="edit" />
+  </button>
+
+  <hr class="study-header__separator" />
+
+  <button
+    i18n
+    app-btn
+    btnSize="s"
+    btnStyle="text"
+    (click)="toggleActiveDetail()"
+    class="study-header__accodion-btn"
+    [class.study-header__accodion-btn--open]="isDetailOpen()"
+  >
+    Details
+    <app-icon icon="keyboard_arrow_down" iconRight />
+  </button>
+
+  <hr class="study-header__separator" />
+
+  <p class="study-header__author">
+    <app-icon icon="person" />
+    john.doe
+  </p>
+
+  <time datetime="2025-03-17T16:00:45.1234" class="study-header__time">
+    <app-icon icon="schedule" />
+    17/03/2025 à 16:00 H
+  </time>
+
+  <hr class="study-header__separator" />
+
+  <app-tag text="Partagé" type="error" />
+
+  <hr class="study-header__separator" />
+
+  <button i18n app-btn btnSize="s" btnStyle="text">
+    <app-icon icon="content_copy" />
+    Dupliquer
+  </button>
+
+  <button i18n app-btn btnSize="s" btnStyle="text">
+    <app-icon icon="public" />
+    Publier
+  </button>
+
+  <p-accordion
+    [(value)]="activeDetail"
+    class="study-header__accordion"
+    [class.study-header__accordion--open]="isDetailOpen()"
+  >
+    <p-accordion-panel value="0">
+      <p-accordion-content>
+        <div class="study-header__accordion__content">
+          <app-icon icon="description" />
+          <p>
+            Egestas morbi commodo senectus est id. Facilisi egestas etiam sit
+            nulla dictum elementum eleifend. Sit interdum in convallis posuere.
+            Eu arcu magna sed et odio congue nec velit. Integer in ut vivamus
+            nullam cursus sed morbi nibh ullamcorper.
+          </p>
+        </div>
+      </p-accordion-content>
+    </p-accordion-panel>
+  </p-accordion>
+</section>
