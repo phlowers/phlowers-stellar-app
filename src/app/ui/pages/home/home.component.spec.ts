@@ -12,11 +12,17 @@ import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-
 import { CardInfoComponent } from '@src/app/ui/shared/components/atoms/card-info/card-info.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+<<<<<<< HEAD
 import { RouterTestingModule } from '@angular/router/testing';
+=======
+import { ActivatedRoute } from '@angular/router';
+import { StudiesService } from '@src/app/core/services/studies/studies.service';
+>>>>>>> cc6c46e (feat: create add study modal)
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
+<<<<<<< HEAD
   let updateServiceMock: jest.Mocked<UpdateService>;
   let onlineServiceMock: jest.Mocked<OnlineService>;
   let studiesServiceMock: jest.Mocked<StudiesService>;
@@ -41,6 +47,13 @@ describe('HomeComponent', () => {
       saved: false
     }
   ];
+=======
+  let mockUpdateService: jest.Mocked<UpdateService>;
+  let mockOnlineService: jest.Mocked<OnlineService>;
+  let mockStudiesService: jest.Mocked<StudiesService>;
+  let onlineSubject: BehaviorSubject<boolean>;
+  let serverOnlineSubject: BehaviorSubject<ServerStatus>;
+>>>>>>> cc6c46e (feat: create add study modal)
 
   beforeEach(async () => {
     updateServiceMock = {
@@ -55,6 +68,13 @@ describe('HomeComponent', () => {
     studiesServiceMock = {
       ready: new BehaviorSubject<boolean>(false),
       getLatestStudies: jest.fn().mockResolvedValue(mockStudies)
+    } as unknown as jest.Mocked<StudiesService>;
+
+    mockStudiesService = {
+      getStudies: jest.fn().mockResolvedValue([]),
+      ready: new BehaviorSubject(true),
+      createStudy: jest.fn(),
+      getLatestStudies: jest.fn()
     } as unknown as jest.Mocked<StudiesService>;
 
     await TestBed.configureTestingModule({
@@ -86,6 +106,7 @@ describe('HomeComponent', () => {
       expect(component).toBeTruthy();
     });
 
+<<<<<<< HEAD
     it('should initialize with default values', () => {
       expect(component.latestStudies()).toEqual([]);
       expect(component.updateStatus()).toBe('unknown');
@@ -107,6 +128,13 @@ describe('HomeComponent', () => {
 
       const newFixture = TestBed.createComponent(HomeComponent);
       const newComponent = newFixture.componentInstance;
+=======
+      const newComponent = new HomeComponent(
+        mockUpdateServiceWithUpdate,
+        mockOnlineService,
+        mockStudiesService
+      );
+>>>>>>> cc6c46e (feat: create add study modal)
 
       expect(newComponent.updateStatus()).toBe('warning');
     });
@@ -114,7 +142,17 @@ describe('HomeComponent', () => {
     it('should not change update status when no update is needed', () => {
       updateServiceMock.needUpdate = false;
 
+<<<<<<< HEAD
       expect(component.updateStatus()).toBe('unknown');
+=======
+      const newComponent = new HomeComponent(
+        mockUpdateServiceNoUpdate,
+        mockOnlineService,
+        mockStudiesService
+      );
+
+      expect(newComponent.updateStatus()).toBe('unknown');
+>>>>>>> cc6c46e (feat: create add study modal)
     });
   });
 

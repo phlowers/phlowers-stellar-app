@@ -13,6 +13,7 @@ import { CardState } from '@ui/shared/model/card-info.model';
 import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { StudyModel } from '@src/app/core/data/models/study.model';
+<<<<<<< HEAD
 import TimeAgo from 'javascript-time-ago';
 import fr from 'javascript-time-ago/locale/fr';
 import en from 'javascript-time-ago/locale/en';
@@ -24,6 +25,8 @@ if (navigator.language.includes('fr')) {
 }
 
 const timeAgo = new TimeAgo(navigator.language);
+=======
+>>>>>>> cc6c46e (feat: create add study modal)
 
 interface HomeTexts {
   newsTitle: string;
@@ -116,6 +119,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       })
     );
     this.studiesService.ready.subscribe(async (value) => {
+<<<<<<< HEAD
       if (value) {
         const studies = await this.studiesService.getLatestStudies();
         this.latestStudies.set(
@@ -126,6 +130,12 @@ export class HomeComponent implements OnInit, OnDestroy {
             )
           }))
         );
+=======
+      console.log('studies are ready', value);
+      if (value) {
+        const studies = await this.studiesService.getLatestStudies();
+        this.latestStudies.set(studies);
+>>>>>>> cc6c46e (feat: create add study modal)
       }
     });
   }

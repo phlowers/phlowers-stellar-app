@@ -117,6 +117,7 @@ export const primengPreset = definePreset(Aura, {
             padding: 16px;
           }
         `
+<<<<<<< HEAD
     },
     tabs: {
       css: () => `
@@ -129,6 +130,8 @@ export const primengPreset = definePreset(Aura, {
           font-size: 1rem;
         }
       `
+=======
+>>>>>>> cc6c46e (feat: create add study modal)
     }
   }
 });
