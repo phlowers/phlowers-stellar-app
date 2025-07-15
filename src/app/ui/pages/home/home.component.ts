@@ -11,7 +11,8 @@ import {
 import { Subscription, combineLatest } from 'rxjs';
 import { CardState } from '@ui/shared/model/card-info.model';
 import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
-import { TagList } from '@ui//shared/model/card-study.model';
+import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { StudyModel } from '@src/app/core/data/models/study.model';
 
 interface HomeTexts {
   newsTitle: string;
@@ -27,14 +28,6 @@ interface HomeTexts {
 
 type ServerStates = CardState;
 
-interface MockStudyCard {
-  uuid: string;
-  title: string;
-  authorMail: string;
-  modificationDate: string;
-  tagList?: TagList[];
-}
-
 @Component({
   selector: 'app-home',
   imports: [
@@ -49,6 +42,7 @@ interface MockStudyCard {
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
+  public latestStudies = signal<StudyModel[]>([]);
 
   public homeText = signal<HomeTexts>({
     newsTitle: $localize`News`, // i18n Actualités
@@ -86,7 +80,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly updateService: UpdateService,
-    private readonly onlineService: OnlineService
+    private readonly onlineService: OnlineService,
+    private readonly studiesService: StudiesService
   ) {
     if (this.updateService.needUpdate) {
       this.updateStatus.set('warning');
@@ -109,6 +104,13 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.updateServerText(finalStatus);
       })
     );
+    this.studiesService.ready.subscribe(async (value) => {
+      console.log('studies are ready', value);
+      if (value) {
+        const studies = await this.studiesService.getLatestStudies();
+        this.latestStudies.set(studies);
+      }
+    });
   }
 
   private getConnectivityStatus(
@@ -157,59 +159,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         break;
     }
   }
-
-  lastStudiesMock = signal<MockStudyCard[]>([
-    {
-      uuid: '1',
-      title: 'Nom étude à écrire sur deux lignes',
-      authorMail: 'prenom.nom@mail.com',
-      modificationDate: 'XX/XX/20XX à XX:XXh',
-      tagList: [
-        {
-          text: 'Publier',
-          color: 'success'
-        },
-        {
-          text: 'Partagé',
-          color: 'error'
-        }
-      ]
-    },
-    {
-      uuid: '2',
-      title: 'Nom étude à écrire sur deux lignes',
-      authorMail: 'prenom.nom@mail.com',
-      modificationDate: 'XX/XX/20XX à XX:XXh'
-    },
-    {
-      uuid: '3',
-      title: 'Nom étude à écrire sur deux lignes',
-      authorMail: 'prenom.nom@mail.com',
-      modificationDate: 'XX/XX/20XX à XX:XXh',
-      tagList: [
-        {
-          text: 'Publier',
-          color: 'success'
-        }
-      ]
-    },
-    {
-      uuid: '4',
-      title: 'Nom étude à écrire sur deux lignes',
-      authorMail: 'prenom.nom@mail.com',
-      modificationDate: 'XX/XX/20XX à XX:XXh',
-      tagList: [
-        {
-          text: 'Publier',
-          color: 'success'
-        },
-        {
-          text: 'Partagé',
-          color: 'error'
-        }
-      ]
-    }
-  ]);
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

@@ -9,6 +9,9 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { PageTitleService } from '@ui/shared/service/page-title/page-title.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
+import { UserService } from '@src/app/core/services/user/user.service';
+import { UserModel } from '@src/app/core/data/models/user.model';
+import { WorkerService } from '@src/app/core/services/worker_python/worker_python.service';
 
 @Component({
   selector: 'app-topbar',
@@ -21,13 +24,28 @@ export class TopbarComponent implements OnInit, OnDestroy {
   public currentPageTitle = signal<string>('');
   public workerReady = signal<boolean>(true);
   public readonly workerError = signal<boolean>(false);
+  public user = signal<UserModel | null>(null);
 
-  constructor(private readonly pageTitleService: PageTitleService) {}
+  constructor(
+    private readonly pageTitleService: PageTitleService,
+    private readonly userService: UserService,
+    private readonly workerService: WorkerService
+  ) {}
 
   ngOnInit() {
     this.subscriptions.add(
       this.pageTitleService.pageTitle$.subscribe((title) => {
         this.currentPageTitle.set(title);
+      })
+    );
+    this.subscriptions.add(
+      this.userService.user$.subscribe((user) => {
+        this.user.set(user);
+      })
+    );
+    this.subscriptions.add(
+      this.workerService.ready$.subscribe((ready) => {
+        this.workerReady.set(ready);
       })
     );
   }

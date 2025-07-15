@@ -17,7 +17,7 @@ import { environment } from '@src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
-export class StudyService {
+export class RemoteStudiesService {
   private readonly apiUrl = `${environment.apiUrl}/api/v1/studies`;
 
   constructor(private readonly http: HttpClient) {}

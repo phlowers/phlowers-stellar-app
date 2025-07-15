@@ -1,5 +1,5 @@
 <section class="btn-wrapper">
-  <a routerLink="/studies" app-btn i18n>
+  <a routerLink="/studies" [queryParams]="{ create: 'true' }" app-btn i18n>
     <app-icon icon="add" />
     Create a new study
   </a>
@@ -56,12 +56,12 @@
   </header>
 
   <main class="study-cards">
-    @for (lastStudy of lastStudiesMock(); track lastStudy.uuid) {
+    @for (study of latestStudies(); track study.uuid) {
       <app-card-study
-        [title]="lastStudy.title"
-        [authorMail]="lastStudy.authorMail"
-        [modificationDate]="lastStudy.modificationDate"
-        [tagList]="lastStudy.tagList"
+        [title]="study.title"
+        [authorMail]="study.author_email"
+        [modificationDate]="study.updated_at_offline"
+        [tagList]="[]"
       />
     }
   </main>

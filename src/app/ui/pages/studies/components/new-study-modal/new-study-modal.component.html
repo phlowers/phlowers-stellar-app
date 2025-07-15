@@ -1,0 +1,80 @@
+<p-toast position="top-center"></p-toast>
+<p-dialog
+  dismissableMask="true"
+  [visible]="isOpen()"
+  (visibleChange)="isOpenChange.emit(false)"
+  i18n-header
+  header="New study"
+  [style]="{ width: '496px' }"
+  [modal]="true"
+>
+  <ng-template #content>
+    <form class="flex flex-col gap-6">
+      <div class="field">
+        <legend class="label-container">
+          <label i18n for="title" class="label"
+            >Study name <span class="red-star">*</span></label
+          >
+          <span class="input-length">{{ titleLength() }}/100</span>
+        </legend>
+        <input
+          type="text"
+          pInputText
+          id="title"
+          name="title"
+          maxlength="100"
+          placeholder="Study name"
+          [ngModel]="newStudy().title"
+          (ngModelChange)="updateTitle($event)"
+          required
+          aria-describedby="title-description"
+          fluid
+        />
+        <small id="title-description" i18n>Give a name to your study</small>
+      </div>
+      <div class="field">
+        <legend class="label-container">
+          <label i18n for="description" class="label">Description</label>
+          <span class="input-length">{{ descriptionLength() }}/240</span>
+        </legend>
+        <textarea
+          id="description"
+          name="description"
+          placeholder="Enter description"
+          aria-describedby="description-description"
+          class="block"
+          pTextarea
+          [ngModel]="newStudy().description"
+          (ngModelChange)="updateDescription($event)"
+          maxlength="240"
+          rows="3"
+          cols="20"
+          fluid
+        ></textarea>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <button
+      app-btn
+      type="submit"
+      btnSize="m"
+      btnStyle="outlined"
+      (click)="isOpenChange.emit(false)"
+    >
+      <app-icon icon="close" />
+      <span i18n>Cancel</span>
+    </button>
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      (click)="onSubmit()"
+      [disabled]="titleLength() === 0"
+    >
+      <app-icon icon="check" />
+      <span i18n>Validate</span>
+    </button>
+  </ng-template>
+</p-dialog>

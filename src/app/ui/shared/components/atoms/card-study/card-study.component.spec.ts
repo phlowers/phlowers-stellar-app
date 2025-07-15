@@ -24,7 +24,7 @@ describe('CardStudyComponent', () => {
   it('should accept and display required inputs', () => {
     const title = 'Test Study';
     const authorMail = 'test@example.com';
-    const modificationDate = '2025-01-01';
+    const modificationDate = '1/1/2025 1:00:00 AM';
 
     fixture.componentRef.setInput('title', title);
     fixture.componentRef.setInput('authorMail', authorMail);

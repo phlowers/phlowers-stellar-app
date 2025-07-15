@@ -21,7 +21,8 @@ export class PageTitleService {
         startWith({} as NavigationEnd),
         filter(
           (event) =>
-            event instanceof NavigationEnd || Object.keys(event).length === 0
+            event instanceof NavigationEnd ||
+            Object.keys(event || {}).length === 0
         ),
         map(() => {
           let route = this.activatedRoute;
