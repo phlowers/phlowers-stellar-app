@@ -17,13 +17,8 @@ import { WorkerService } from '@core/services/worker_python/worker_python.servic
 import { StorageService } from '@core/services/storage/storage.service';
 import { IconComponent } from './shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from './shared/components/atoms/button/button.component';
-
-const validateEmail = (email: string): boolean => {
-  const emailRegex =
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //NOSONAR
-
-  return emailRegex.exec(String(email).toLowerCase()) !== null;
-};
+import { UserService } from '@core/services/user/user.service';
+import { StudiesService } from '../core/services/studies/studies.service';
 
 const modules = [
   RouterModule,
@@ -40,7 +35,14 @@ const modules = [
   selector: 'app-root',
   standalone: true,
   imports: modules,
-  providers: [MessageService, StorageService, WorkerService, OnlineService],
+  providers: [
+    MessageService,
+    StorageService,
+    WorkerService,
+    OnlineService,
+    UserService,
+    StudiesService
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -57,13 +59,13 @@ export class AppComponent implements OnInit {
   constructor(
     private readonly messageService: MessageService,
     private readonly storageService: StorageService,
-    private readonly workerService: WorkerService
+    private readonly workerService: WorkerService,
+    private readonly userService: UserService
   ) {
     storageService.ready$.subscribe((ready) => {
       if (ready) {
-        this.storageService.db?.users.toArray().then(async (users) => {
-          if (users.length !== 1) {
-            await this.storageService.db?.users.clear();
+        this.userService.getUser().then((user) => {
+          if (!user) {
             this.userDialog = true;
           } else {
             this.userDialog = false;
@@ -75,19 +77,22 @@ export class AppComponent implements OnInit {
 
   async saveUser() {
     this.submitted = true;
-    if (this.user.email) {
-      if (validateEmail(this.user.email)) {
-        await this.storageService.db?.users.add({ ...this.user });
-        this.userDialog = false;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: 'User info set',
-          life: 3000
-        });
-        this.userDialog = false;
-      }
-    }
+    await this.userService.createUser(this.user).catch((err) => {
+      console.error('Error creating user', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'error creating user',
+        life: 3000
+      });
+    });
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Successful',
+      detail: 'User info set',
+      life: 3000
+    });
+    this.userDialog = false;
   }
 
   async setupWorker() {

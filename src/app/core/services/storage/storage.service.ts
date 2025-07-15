@@ -38,7 +38,12 @@ export class StorageService {
   }
 
   async createDatabase(): Promise<void> {
-    this.db = new AppDB();
-    this._ready.next(true);
+    try {
+      this.db = new AppDB();
+      this._ready.next(true);
+    } catch (error) {
+      console.error('StorageService createDatabase - error:', error);
+      throw error;
+    }
   }
 }
