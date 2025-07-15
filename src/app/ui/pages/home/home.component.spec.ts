@@ -5,66 +5,71 @@ import {
   OnlineService,
   ServerStatus
 } from '@src/app/core/services/online/online.service';
+import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { StudyModel } from '@src/app/core/data/models/study.model';
 import { BehaviorSubject } from 'rxjs';
-import { CardInfoComponent } from '@ui/shared/components/atoms/card-info/card-info.component';
 import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
+import { CardInfoComponent } from '@src/app/ui/shared/components/atoms/card-info/card-info.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { ActivatedRoute } from '@angular/router';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let mockUpdateService: jest.Mocked<UpdateService>;
-  let mockOnlineService: jest.Mocked<OnlineService>;
-  let mockStudiesService: jest.Mocked<StudiesService>;
-  let onlineSubject: BehaviorSubject<boolean>;
-  let serverOnlineSubject: BehaviorSubject<ServerStatus>;
+  let updateServiceMock: jest.Mocked<UpdateService>;
+  let onlineServiceMock: jest.Mocked<OnlineService>;
+  let studiesServiceMock: jest.Mocked<StudiesService>;
+
+  const mockStudies: StudyModel[] = [
+    {
+      uuid: '1',
+      title: 'Test Study 1',
+      author_email: 'test1@example.com',
+      created_at_offline: new Date('2024-01-01').toISOString(),
+      updated_at_offline: new Date('2024-01-02').toISOString(),
+      shareable: false,
+      saved: true
+    },
+    {
+      uuid: '2',
+      title: 'Test Study 2',
+      author_email: 'test2@example.com',
+      created_at_offline: new Date('2024-01-03').toISOString(),
+      updated_at_offline: new Date('2024-01-04').toISOString(),
+      shareable: true,
+      saved: false
+    }
+  ];
 
   beforeEach(async () => {
-    onlineSubject = new BehaviorSubject<boolean>(true);
-    serverOnlineSubject = new BehaviorSubject<ServerStatus>(
-      ServerStatus.LOADING
-    );
-
-    mockUpdateService = {
+    updateServiceMock = {
       needUpdate: false
     } as jest.Mocked<UpdateService>;
 
-    mockOnlineService = {
-      online$: onlineSubject.asObservable(),
-      serverOnline$: serverOnlineSubject.asObservable()
-    } as jest.Mocked<OnlineService>;
+    onlineServiceMock = {
+      online$: new BehaviorSubject<boolean>(true),
+      serverOnline$: new BehaviorSubject<ServerStatus>(ServerStatus.ONLINE)
+    } as unknown as jest.Mocked<OnlineService>;
 
-    mockStudiesService = {
-      getStudies: jest.fn().mockResolvedValue([]),
-      ready: new BehaviorSubject(true),
-      createStudy: jest.fn(),
-      getLatestStudies: jest.fn()
+    studiesServiceMock = {
+      ready: new BehaviorSubject<boolean>(false),
+      getLatestStudies: jest.fn().mockResolvedValue(mockStudies)
     } as unknown as jest.Mocked<StudiesService>;
 
     await TestBed.configureTestingModule({
       imports: [
         HomeComponent,
-        CardInfoComponent,
         CardStudyComponent,
+        CardInfoComponent,
         ButtonComponent,
-        IconComponent
+        IconComponent,
+        RouterTestingModule
       ],
       providers: [
-        { provide: UpdateService, useValue: mockUpdateService },
-        { provide: OnlineService, useValue: mockOnlineService },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              paramMap: {
-                get: () => 'test'
-              }
-            }
-          }
-        }
+        { provide: UpdateService, useValue: updateServiceMock },
+        { provide: OnlineService, useValue: onlineServiceMock },
+        { provide: StudiesService, useValue: studiesServiceMock }
       ]
     }).compileComponents();
 
@@ -72,125 +77,200 @@ describe('HomeComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe('constructor', () => {
-    it('should set updateStatus to warning when update is needed', () => {
-      const mockUpdateServiceWithUpdate = {
-        needUpdate: true
-      } as jest.Mocked<UpdateService>;
+  describe('Component Creation', () => {
+    it('should create', () => {
+      expect(component).toBeTruthy();
+    });
 
-      const newComponent = new HomeComponent(
-        mockUpdateServiceWithUpdate,
-        mockOnlineService,
-        mockStudiesService
-      );
+    it('should initialize with default values', () => {
+      expect(component.latestStudies()).toEqual([]);
+      expect(component.updateStatus()).toBe('unknown');
+      expect(component.serverStatus()).toBe('unknown');
+    });
+
+    it('should initialize homeText with correct default values', () => {
+      const homeText = component.homeText();
+      expect(homeText.newsTitle).toBe('News');
+      expect(homeText.newsText).toContain('Welcome to Celeste');
+      expect(homeText.updateTitle).toBe('Changelogs');
+      expect(homeText.serverTitle).toBe('Server state');
+    });
+  });
+
+  describe('Constructor Behavior', () => {
+    it('should set update status to warning when update is needed', () => {
+      updateServiceMock.needUpdate = true;
+
+      const newFixture = TestBed.createComponent(HomeComponent);
+      const newComponent = newFixture.componentInstance;
 
       expect(newComponent.updateStatus()).toBe('warning');
     });
 
-    it('should keep updateStatus as unknown when no update is needed', () => {
-      const mockUpdateServiceNoUpdate = {
-        needUpdate: false
-      } as jest.Mocked<UpdateService>;
+    it('should not change update status when no update is needed', () => {
+      updateServiceMock.needUpdate = false;
 
-      const newComponent = new HomeComponent(
-        mockUpdateServiceNoUpdate,
-        mockOnlineService,
-        mockStudiesService
-      );
-
-      expect(newComponent.updateStatus()).toBe('unknown');
+      expect(component.updateStatus()).toBe('unknown');
     });
   });
 
-  describe('connectivity status', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
+  describe('ngOnInit', () => {
+    it('should subscribe to online and server status changes', () => {
+      const onlineSpy = jest.spyOn(onlineServiceMock.online$, 'subscribe');
+      const serverSpy = jest.spyOn(
+        onlineServiceMock.serverOnline$,
+        'subscribe'
+      );
+
+      component.ngOnInit();
+
+      expect(onlineSpy).toHaveBeenCalled();
+      expect(serverSpy).toHaveBeenCalled();
     });
 
-    it('should set serverStatus to unknown when offline', () => {
-      onlineSubject.next(false);
-      serverOnlineSubject.next(ServerStatus.ONLINE);
+    it('should subscribe to studies service ready state', () => {
+      const readySpy = jest.spyOn(studiesServiceMock.ready, 'subscribe');
+
+      component.ngOnInit();
+
+      expect(readySpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('Connectivity Status Logic', () => {
+    beforeEach(() => {
+      component.ngOnInit();
+    });
+
+    it('should set server status to unknown when offline', () => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
 
       expect(component.serverStatus()).toBe('unknown');
     });
 
-    it('should set serverStatus to warning when server is loading', () => {
-      onlineSubject.next(true);
-      serverOnlineSubject.next(ServerStatus.LOADING);
+    it('should set server status to success when online and server is online', () => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.ONLINE
+      );
+
+      expect(component.serverStatus()).toBe('success');
+    });
+
+    it('should set server status to warning when online and server is loading', () => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.LOADING
+      );
 
       expect(component.serverStatus()).toBe('warning');
     });
 
-    it('should set serverStatus to error when server is offline', () => {
-      onlineSubject.next(true);
-      serverOnlineSubject.next(ServerStatus.OFFLINE);
+    it('should set server status to error when online and server is offline', () => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.OFFLINE
+      );
 
       expect(component.serverStatus()).toBe('error');
     });
-
-    it('should set serverStatus to success when server is online', () => {
-      onlineSubject.next(true);
-      serverOnlineSubject.next(ServerStatus.ONLINE);
-
-      expect(component.serverStatus()).toBe('success');
-    });
   });
 
-  it('should update server text based on status', () => {
-    fixture.detectChanges();
-
-    // Test unknown status
-    onlineSubject.next(false);
-    expect(component.homeText().serverText).toContain('Cannot reach data');
-
-    // Test warning status
-    onlineSubject.next(true);
-    serverOnlineSubject.next(ServerStatus.LOADING);
-    expect(component.homeText().serverText).toContain('Trying to reach');
-
-    // Test error status
-    serverOnlineSubject.next(ServerStatus.OFFLINE);
-    expect(component.homeText().serverText).toContain('error occured');
-
-    // Test success status
-    serverOnlineSubject.next(ServerStatus.ONLINE);
-    expect(component.homeText().serverText).toContain('connexion success');
-  });
-
-  describe('mock data', () => {
-    it('should have lastStudiesMock with 4 studies', () => {
-      expect(component.lastStudiesMock().length).toBe(4);
+  describe('Server Text Updates', () => {
+    beforeEach(() => {
+      component.ngOnInit();
     });
 
-    it('should have studies with required properties', () => {
-      const studies = component.lastStudiesMock();
+    it('should update server text for unknown status', () => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
 
-      studies.forEach((study) => {
-        expect(study.uuid).toBeDefined();
-        expect(study.title).toBeDefined();
-        expect(study.authorMail).toBeDefined();
-        expect(study.modificationDate).toBeDefined();
-      });
+      expect(component.homeText().serverText).toContain('Cannot reach data');
     });
 
-    it('should have some studies with tagList and some without', () => {
-      const studies = component.lastStudiesMock();
-      const studiesWithTags = studies.filter(
-        (study) => study.tagList && study.tagList.length > 0
+    it('should update server text for warning status', () => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.LOADING
       );
-      const studiesWithoutTags = studies.filter((study) => !study.tagList);
 
-      expect(studiesWithTags.length).toBeGreaterThan(0);
-      expect(studiesWithoutTags.length).toBeGreaterThan(0);
+      expect(component.homeText().serverText).toContain(
+        'Trying to reach the servers'
+      );
+    });
+
+    it('should update server text for error status', () => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.OFFLINE
+      );
+
+      expect(component.homeText().serverText).toContain('An error occured');
+    });
+
+    it('should update server text for success status', () => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.ONLINE
+      );
+
+      expect(component.homeText().serverText).toContain(
+        'Server connexion success'
+      );
+    });
+  });
+
+  describe('Studies Loading', () => {
+    beforeEach(() => {
+      component.ngOnInit();
+    });
+
+    it('should load latest studies when studies service is ready', async () => {
+      (studiesServiceMock.ready as BehaviorSubject<boolean>).next(true);
+
+      // Wait for async operation
+      await fixture.whenStable();
+
+      expect(studiesServiceMock.getLatestStudies).toHaveBeenCalled();
+      expect(component.latestStudies()).toEqual(mockStudies);
+    });
+
+    it('should not load studies when studies service is not ready', () => {
+      (studiesServiceMock.ready as BehaviorSubject<boolean>).next(false);
+
+      expect(studiesServiceMock.getLatestStudies).not.toHaveBeenCalled();
+      expect(component.latestStudies()).toEqual([]);
+    });
+  });
+
+  describe('Text Update Methods', () => {
+    it('should update specific text fields correctly', () => {
+      const originalText = component.homeText().newsTitle;
+
+      // Access private method through component instance
+      (component as any).updateText('newsTitle', 'Updated Title');
+
+      expect(component.homeText().newsTitle).toBe('Updated Title');
+      expect(component.homeText().newsTitle).not.toBe(originalText);
+    });
+
+    it('should preserve other text fields when updating one', () => {
+      const originalNewsText = component.homeText().newsText;
+      const originalUpdateTitle = component.homeText().updateTitle;
+
+      (component as any).updateText('serverTitle', 'New Server Title');
+
+      expect(component.homeText().newsText).toBe(originalNewsText);
+      expect(component.homeText().updateTitle).toBe(originalUpdateTitle);
+      expect(component.homeText().serverTitle).toBe('New Server Title');
     });
   });
 
   describe('ngOnDestroy', () => {
-    it('should unsubscribe from subscriptions', () => {
+    it('should unsubscribe from all subscriptions', () => {
       const unsubscribeSpy = jest.spyOn(
         component['subscriptions'],
         'unsubscribe'
@@ -199,6 +279,74 @@ describe('HomeComponent', () => {
       component.ngOnDestroy();
 
       expect(unsubscribeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('Template Integration', () => {
+    it('should display latest studies in template', () => {
+      component.latestStudies.set(mockStudies);
+      fixture.detectChanges();
+
+      const studyElements =
+        fixture.nativeElement.querySelectorAll('app-card-study');
+      expect(studyElements.length).toBe(mockStudies.length);
+    });
+
+    it('should display correct server status in template', () => {
+      component.serverStatus.set('success');
+      fixture.detectChanges();
+
+      const cardInfoElement =
+        fixture.nativeElement.querySelector('app-card-info');
+      expect(cardInfoElement).toBeTruthy();
+    });
+
+    it('should display update warning when update is available', () => {
+      component.updateStatus.set('warning');
+      fixture.detectChanges();
+
+      const updateElements =
+        fixture.nativeElement.querySelectorAll('app-card-info');
+      expect(updateElements.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle multiple rapid status changes', () => {
+      component.ngOnInit();
+
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.ONLINE
+      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.OFFLINE
+      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
+        ServerStatus.LOADING
+      );
+
+      expect(component.serverStatus()).toBe('warning');
+    });
+
+    it('should handle studies service returning empty array', async () => {
+      studiesServiceMock.getLatestStudies.mockResolvedValue([]);
+      component.ngOnInit();
+
+      (studiesServiceMock.ready as BehaviorSubject<boolean>).next(true);
+      await fixture.whenStable();
+
+      expect(component.latestStudies()).toEqual([]);
+    });
+
+    it('should handle null or undefined study data', async () => {
+      studiesServiceMock.getLatestStudies.mockResolvedValue(null as any);
+      component.ngOnInit();
+
+      (studiesServiceMock.ready as BehaviorSubject<boolean>).next(true);
+      await fixture.whenStable();
+
+      expect(component.latestStudies()).toEqual(null);
     });
   });
 });
