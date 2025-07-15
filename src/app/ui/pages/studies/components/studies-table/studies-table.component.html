@@ -1,0 +1,166 @@
+<p-table
+  [paginator]="true"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  (onSort)="onSort($event)"
+  [value]="studies()"
+  [showCurrentPageReport]="true"
+  [currentPageReportTemplate]="'Object {first} to {last} of {totalRecords}'"
+  [tableStyle]="{ 'min-width': '50rem' }"
+>
+  <ng-template #header>
+    <tr>
+      <th id="checkbox">
+        <div class="flex items-center gap-2"></div>
+      </th>
+      <th id="title" pSortableColumn="title">
+        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+          Title
+          <app-icon
+            [icon]="
+              $any(
+                sortField() === 'title'
+                  ? sortOrder() === 1
+                    ? 'arrow_upward'
+                    : 'arrow_downward'
+                  : 'swap_vert'
+              )
+            "
+          />
+        </div>
+      </th>
+      <th id="author_email" pSortableColumn="author_email">
+        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+          Author
+          <app-icon
+            [icon]="
+              $any(
+                sortField() === 'author_email'
+                  ? sortOrder() === 1
+                    ? 'arrow_upward'
+                    : 'arrow_downward'
+                  : 'swap_vert'
+              )
+            "
+          />
+        </div>
+      </th>
+      <th id="created_at_offline" pSortableColumn="created_at_offline">
+        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+          Creation date
+          <app-icon
+            [icon]="
+              $any(
+                sortField() === 'created_at_offline'
+                  ? sortOrder() === 1
+                    ? 'arrow_upward'
+                    : 'arrow_downward'
+                  : 'swap_vert'
+              )
+            "
+          />
+        </div>
+      </th>
+      <th id="updated_at_offline" pSortableColumn="updated_at_offline">
+        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+          Modification date
+          <app-icon
+            [icon]="
+              $any(
+                sortField() === 'updated_at_offline'
+                  ? sortOrder() === 1
+                    ? 'arrow_upward'
+                    : 'arrow_downward'
+                  : 'swap_vert'
+              )
+            "
+          />
+        </div>
+      </th>
+      <th id="lit_code" pSortableColumn="lit_code">
+        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+          LIT code
+          <app-icon
+            [icon]="
+              $any(
+                sortField() === 'lit_code'
+                  ? sortOrder() === 1
+                    ? 'arrow_upward'
+                    : 'arrow_downward'
+                  : 'swap_vert'
+              )
+            "
+          />
+        </div>
+      </th>
+      <th id="shareable" pSortableColumn="shareable">
+        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+          Shared
+          <app-icon
+            [icon]="
+              $any(
+                sortField() === 'shareable'
+                  ? sortOrder() === 1
+                    ? 'arrow_upward'
+                    : 'arrow_downward'
+                  : 'swap_vert'
+              )
+            "
+          />
+        </div>
+      </th>
+      <th id="actions">
+        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+          Actions
+        </div>
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-study>
+    <tr>
+      <td>
+        <p-checkbox [binary]="true" />
+      </td>
+      <td>{{ study.title }}</td>
+      <td>{{ study.author_email }}</td>
+      <td>{{ study.created_at_offline | date: 'medium' }}</td>
+      <td>{{ study.updated_at_offline | date: 'medium' }}</td>
+      <td>{{ study.quantity }}</td>
+      <td>{{ study.quantity }}</td>
+      <td>
+        <button
+          (click)="popover.toggle($event)"
+          app-btn
+          btnSize="s"
+          btnStyle="text"
+        >
+          <span class="pi pi-ellipsis-h"></span>
+        </button>
+        <p-popover #popover>
+          <ng-template pTemplate="content">
+            <div class="flex flex-col gap-2">
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                (click)="duplicateStudy.emit(study.uuid)"
+              >
+                <app-icon icon="content_copy" />
+                <span i18n>Duplicate</span>
+              </button>
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                (click)="deleteStudy.emit(study.uuid)"
+              >
+                <app-icon icon="delete" />
+                <span i18n>Delete</span>
+              </button>
+            </div>
+          </ng-template>
+        </p-popover>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

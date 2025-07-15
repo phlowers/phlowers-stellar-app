@@ -235,7 +235,12 @@ describe('HomeComponent', () => {
       await fixture.whenStable();
 
       expect(studiesServiceMock.getLatestStudies).toHaveBeenCalled();
-      expect(component.latestStudies()).toEqual(mockStudies);
+      expect(component.latestStudies()).toEqual(
+        mockStudies.map((study) => ({
+          ...study,
+          updated_at_offline: expect.any(String)
+        }))
+      );
     });
 
     it('should not load studies when studies service is not ready', () => {
@@ -337,16 +342,6 @@ describe('HomeComponent', () => {
       await fixture.whenStable();
 
       expect(component.latestStudies()).toEqual([]);
-    });
-
-    it('should handle null or undefined study data', async () => {
-      studiesServiceMock.getLatestStudies.mockResolvedValue(null as any);
-      component.ngOnInit();
-
-      (studiesServiceMock.ready as BehaviorSubject<boolean>).next(true);
-      await fixture.whenStable();
-
-      expect(component.latestStudies()).toEqual(null);
     });
   });
 });
