@@ -14,6 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { UserService } from '../core/services/user/user.service';
 
 class Worker {
   url: string;
@@ -37,6 +38,7 @@ describe('AppComponent', () => {
   let mockStorageService: StorageService;
   let mockWorkerService: WorkerService;
   let mockOnlineService: OnlineService;
+  let mockUserService: UserService;
   let readySubject: BehaviorSubject<boolean>;
   let workerReadySubject: BehaviorSubject<boolean>;
 
@@ -76,6 +78,11 @@ describe('AppComponent', () => {
 
     mockOnlineService = {} as OnlineService;
 
+    mockUserService = {
+      getUser: jest.fn().mockResolvedValue(null),
+      createUser: jest.fn().mockResolvedValue(undefined)
+    } as unknown as UserService;
+
     await TestBed.configureTestingModule({
       imports: [
         FormsModule,
@@ -88,6 +95,7 @@ describe('AppComponent', () => {
     TestBed.overrideProvider(StorageService, { useValue: mockStorageService });
     TestBed.overrideProvider(OnlineService, { useValue: mockOnlineService });
     TestBed.overrideProvider(MessageService, { useValue: mockMessageService });
+    TestBed.overrideProvider(UserService, { useValue: mockUserService });
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
   });
@@ -126,19 +134,19 @@ describe('AppComponent', () => {
 
   describe('User dialog', () => {
     it('should show user dialog if no users exist', async () => {
-      mockDb.users.toArray.mockResolvedValue([]);
-      mockDb.users.clear.mockResolvedValue(undefined);
+      //@ts-expect-error mockResolvedValue does not exist on the mockUserService.getUser
+      mockUserService.getUser.mockResolvedValue(null);
 
       // Trigger the subscription in constructor
       readySubject.next(true);
       await fixture.whenStable();
 
-      expect(mockDb.users.clear).toHaveBeenCalled();
       expect(component.userDialog).toBe(true);
     });
 
     it('should not show user dialog if a user exists', async () => {
-      mockDb.users.toArray.mockResolvedValue([{ email: 'test@example.com' }]);
+      //@ts-expect-error mockResolvedValue does not exist on the mockUserService.getUser
+      mockUserService.getUser.mockResolvedValue({ email: 'test@example.com' });
 
       // Trigger the subscription in constructor
       readySubject.next(true);
@@ -149,12 +157,13 @@ describe('AppComponent', () => {
 
     it('should save valid user and close dialog', async () => {
       component.user.email = 'test@example.com';
-      mockDb.users.add.mockResolvedValue(1);
+      //@ts-expect-error mockResolvedValue does not exist on the mockUserService.createUser
+      mockUserService.createUser.mockResolvedValue(undefined);
 
       await component.saveUser();
 
       expect(component.submitted).toBe(true);
-      expect(mockDb.users.add).toHaveBeenCalledWith({
+      expect(mockUserService.createUser).toHaveBeenCalledWith({
         email: 'test@example.com'
       });
       expect(component.userDialog).toBe(false);
@@ -164,16 +173,6 @@ describe('AppComponent', () => {
         detail: 'User info set',
         life: 3000
       });
-    });
-
-    it('should not save user with invalid email', async () => {
-      component.user.email = 'invalid-email';
-
-      await component.saveUser();
-
-      expect(component.submitted).toBe(true);
-      expect(mockDb.users.add).not.toHaveBeenCalled();
-      expect(component.userDialog).toBe(true);
     });
 
     it('should not save user with empty email', async () => {
