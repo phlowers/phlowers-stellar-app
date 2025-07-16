@@ -11,7 +11,6 @@ import { NewStudyModalComponent } from './components/new-study-modal/new-study-m
 import { ButtonModule } from 'primeng/button';
 import { ButtonComponent } from 'src/app/ui/shared/components/atoms/button/button.component';
 import { IconComponent } from 'src/app/ui/shared/components/atoms/icon/icon.component';
-<<<<<<< HEAD
 import { TableModule } from 'primeng/table';
 
 import { TabsModule } from 'primeng/tabs';
@@ -22,8 +21,6 @@ import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { CommonModule } from '@angular/common';
 import { StudiesTableComponent } from './components/studies-table/studies-table.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-=======
->>>>>>> cc6c46e (feat: create add study modal)
 
 @Component({
   standalone: true,
@@ -31,7 +28,6 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     NewStudyModalComponent,
     ButtonModule,
     ButtonComponent,
-<<<<<<< HEAD
     IconComponent,
     TabsModule,
     TableModule,
@@ -40,16 +36,12 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     CommonModule,
     StudiesTableComponent,
     ConfirmDialogModule
-=======
-    IconComponent
->>>>>>> cc6c46e (feat: create add study modal)
   ],
   templateUrl: './studies.component.html',
   providers: [MessageService, ConfirmationService]
 })
 export class StudiesComponent implements OnInit {
   isNewStudyModalOpen = false;
-<<<<<<< HEAD
   studies: Study[] = [];
 
   constructor(
@@ -61,15 +53,10 @@ export class StudiesComponent implements OnInit {
       this.studies = studies;
     });
   }
-=======
-
-  constructor(private readonly route: ActivatedRoute) {}
->>>>>>> cc6c46e (feat: create add study modal)
 
   ngOnInit(): void {
     this.isNewStudyModalOpen =
       this.route.snapshot.queryParams['create'] === 'true';
-<<<<<<< HEAD
     this.studiesService.ready.subscribe((ready) => {
       if (ready) {
         this.studiesService.getStudies().then((studies) => {
@@ -92,7 +79,5 @@ export class StudiesComponent implements OnInit {
         this.studiesService.deleteStudy(uuid);
       }
     });
-=======
->>>>>>> cc6c46e (feat: create add study modal)
   }
 }

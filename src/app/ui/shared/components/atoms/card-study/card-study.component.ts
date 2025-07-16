@@ -14,19 +14,6 @@ const currentLocale = navigator.language;
 export class CardStudyComponent {
   title = input.required<string>();
   authorMail = input.required<string>();
-<<<<<<< HEAD
   modificationDate = input.required<string>();
-=======
-  modificationDate = input.required<string, string>({
-    transform: (value: string) => {
-      const date = new Date(value);
-      return (
-        date.toLocaleDateString(currentLocale) +
-        ' ' +
-        date.toLocaleTimeString(currentLocale)
-      );
-    }
-  });
->>>>>>> cc6c46e (feat: create add study modal)
   tagList = input<TagList[]>();
 }
