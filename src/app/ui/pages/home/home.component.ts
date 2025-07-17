@@ -13,6 +13,17 @@ import { CardState } from '@ui/shared/model/card-info.model';
 import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { StudyModel } from '@src/app/core/data/models/study.model';
+import TimeAgo from 'javascript-time-ago';
+import fr from 'javascript-time-ago/locale/fr';
+import en from 'javascript-time-ago/locale/en';
+
+if (navigator.language.includes('fr')) {
+  TimeAgo.addLocale(fr);
+} else {
+  TimeAgo.addLocale(en);
+}
+
+const timeAgo = new TimeAgo(navigator.language);
 
 interface HomeTexts {
   newsTitle: string;
@@ -105,10 +116,16 @@ export class HomeComponent implements OnInit, OnDestroy {
       })
     );
     this.studiesService.ready.subscribe(async (value) => {
-      console.log('studies are ready', value);
       if (value) {
         const studies = await this.studiesService.getLatestStudies();
-        this.latestStudies.set(studies);
+        this.latestStudies.set(
+          studies?.map((study) => ({
+            ...study,
+            updated_at_offline: timeAgo.format(
+              new Date(study.updated_at_offline)
+            )
+          }))
+        );
       }
     });
   }

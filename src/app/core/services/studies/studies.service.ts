@@ -9,12 +9,15 @@ import { StudyModel } from '../../data/models/study.model';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
+import { Study } from '../../data/database/interfaces/study';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StudiesService {
   public readonly ready = new BehaviorSubject<boolean>(false);
+
+  public readonly studies = new BehaviorSubject<Study[]>([]);
 
   constructor(private readonly storageService: StorageService) {
     this.storageService.ready$.subscribe((value) => {
@@ -37,12 +40,53 @@ export class StudiesService {
       updated_at_offline: new Date().toISOString(),
       saved: false
     });
+    const studies = await this.getStudies();
+    this.studies.next(studies);
   }
 
+  /**
+   * Get all studies
+   * @returns The studies
+   */
   getStudies() {
     return this.storageService.db?.studies.toArray();
   }
 
+  /**
+   * Duplicate a study
+   * @param uuid The uuid of the study to duplicate
+   */
+  async duplicateStudy(uuid: string) {
+    const study = await this.storageService.db?.studies.get(uuid);
+    if (!study) {
+      return;
+    }
+    const newStudy = {
+      ...study,
+      uuid: uuidv4(),
+      created_at_offline: new Date().toISOString(),
+      updated_at_offline: new Date().toISOString(),
+      saved: false
+    };
+    await this.storageService.db?.studies.add(newStudy);
+    const studies = await this.getStudies();
+    this.studies.next(studies);
+  }
+
+  /**
+   * Delete a study
+   * @param uuid The uuid of the study to delete
+   */
+  async deleteStudy(uuid: string) {
+    await this.storageService.db?.studies.delete(uuid);
+    const studies = await this.getStudies();
+    this.studies.next(studies);
+  }
+
+  /**
+   * Get the latest studies
+   * @returns The latest studies
+   */
   getLatestStudies() {
     return this.storageService.db?.studies
       .orderBy('created_at_offline')

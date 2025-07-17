@@ -71,6 +71,33 @@ export const primengPreset = definePreset(Aura, {
     }
   },
   components: {
+    datatable: {
+      css: () => `
+        .p-datatable-table {
+          border-collapse: unset;
+        }
+        .p-datatable-thead > tr > th {
+          border-width: 1px 0 1px 0;
+        }
+        .p-paginator-rpp-dropdown {
+          order: 1;
+        }
+        .p-ripple {
+          order: 2;
+        }
+        .p-paginator-pages {
+          order: 2;
+        }
+        .p-paginator {
+          justify-content: end !important;
+        }
+        .p-paginator-current {
+          order: 2;
+          margin-right: 30px;
+          margin-left: 30px;
+        }
+      `
+    },
     dialog: {
       extend: {
         header: {
@@ -90,6 +117,18 @@ export const primengPreset = definePreset(Aura, {
             padding: 16px;
           }
         `
+    },
+    tabs: {
+      css: () => `
+        :root {
+          --p-tabs-tab-border-width: 0;
+          --p-tabs-active-bar-height: 4px;
+          --p-tabs-tab-active-background: #F9FAFA;
+        }
+        .p-tab {
+          font-size: 1rem;
+        }
+      `
     }
   }
 });
