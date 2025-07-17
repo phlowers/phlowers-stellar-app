@@ -1,3 +1,4 @@
+<p-confirmdialog key="positionDialog" [position]="'center'" />
 <section>
   <app-new-study-modal [(isOpen)]="isNewStudyModalOpen" />
   <div class="flex justify-between items-start">
@@ -13,3 +14,21 @@
     </button>
   </div>
 </section>
+<p-tabs value="myStudies">
+  <p-tablist>
+    <p-tab value="myStudies" i18n>My last studies</p-tab>
+    <p-tab value="searchStudy" i18n>Search a study</p-tab>
+    <p-tab value="importStudy" i18n>Import a study</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="myStudies"
+      ><app-studies-table
+        [studies]="studies"
+        (deleteStudy)="deleteStudy($event)"
+        (duplicateStudy)="duplicateStudy($event)"
+      />
+    </p-tabpanel>
+    <p-tabpanel value="searchStudy"> </p-tabpanel>
+    <p-tabpanel value="importStudy"> </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>
