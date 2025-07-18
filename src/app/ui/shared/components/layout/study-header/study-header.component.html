@@ -1,5 +1,5 @@
 <section class="study-header">
-  <h1 class="study-header__title">study name</h1>
+  <h1 class="study-header__title">{{ study()?.title }}</h1>
 
   <button app-btn btnSize="s" btnStyle="text" aria-label="modify">
     <app-icon icon="edit" />
@@ -24,28 +24,37 @@
 
   <p class="study-header__author">
     <app-icon icon="person" />
-    john.doe
+    {{ study()?.author_email }}
   </p>
 
-  <time datetime="2025-03-17T16:00:45.1234" class="study-header__time">
+  <time
+    [attr.datetime]="study()?.created_at_offline"
+    class="study-header__time"
+  >
     <app-icon icon="schedule" />
-    17/03/2025 à 16:00 H
+    {{ study()?.created_at_offline | date: 'dd/MM/yyyy à HH:mm' }}
   </time>
 
   <hr class="study-header__separator" />
 
-  <app-tag text="Partagé" type="error" />
+  <app-tag text="Shared" type="error" />
 
   <hr class="study-header__separator" />
 
-  <button i18n app-btn btnSize="s" btnStyle="text">
+  <button
+    i18n
+    app-btn
+    btnSize="s"
+    btnStyle="text"
+    (click)="duplicateStudy.emit(study()?.uuid!)"
+  >
     <app-icon icon="content_copy" />
-    Dupliquer
+    Duplicate
   </button>
 
   <button i18n app-btn btnSize="s" btnStyle="text">
     <app-icon icon="public" />
-    Publier
+    Publish
   </button>
 
   <p-accordion
@@ -58,10 +67,7 @@
         <div class="study-header__accordion__content">
           <app-icon icon="description" />
           <p>
-            Egestas morbi commodo senectus est id. Facilisi egestas etiam sit
-            nulla dictum elementum eleifend. Sit interdum in convallis posuere.
-            Eu arcu magna sed et odio congue nec velit. Integer in ut vivamus
-            nullam cursus sed morbi nibh ullamcorper.
+            {{ study()?.description }}
           </p>
         </div>
       </p-accordion-content>

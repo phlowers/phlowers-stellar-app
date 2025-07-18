@@ -1,0 +1,100 @@
+<p-stepper [value]="1" class="basis-[50rem]">
+  <div class="flex justify-center">
+    <p-step-list [style]="{ width: '500px' }">
+      <p-step i18n [value]="1">General</p-step>
+      <p-step i18n [value]="2">Supports</p-step>
+    </p-step-list>
+  </div>
+  <p-step-panels>
+    <p-step-panel [value]="1">
+      <ng-template #content let-activateCallback="activateCallback">
+        <div class="section-form-part">
+          <h3 class="title-underline" i18n>Section</h3>
+          <div class="section-form-part-grid">
+            <div class="flex flex-col">
+              <label for="sectionName" class="ml-2" i18n>Section name</label>
+              <input type="text" pInputText [(ngModel)]="sectionName" />
+            </div>
+            <div class="flex flex-col">
+              <label for="sectionType" class="ml-2" i18n>Section type</label>
+              <p-dropdown
+                [options]="sectionTypes"
+                [(ngModel)]="section.type"
+                optionLabel="name"
+                optionValue="code"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label for="cableAmount" class="ml-2" i18n>Cable amount</label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="section.cables_amount"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label for="cableName" class="ml-2" i18n>Cable name</label>
+              <input type="text" pInputText [(ngModel)]="section.cable_name" />
+            </div>
+            <div class="flex flex-col">
+              <label for="supportsAmount" class="ml-2" i18n
+                >Supports amount</label
+              >
+              <input type="number" pInputText [(ngModel)]="supportsAmount" />
+            </div>
+          </div>
+        </div>
+        <div class="section-form-part">
+          <h3 class="title-underline" i18n>Maintenance</h3>
+          <div class="section-form-part-grid">
+            <div class="flex flex-col">
+              <label for="sectionName" class="ml-2" i18n>CM</label>
+              <input type="text" pInputText [(ngModel)]="section.cm" />
+            </div>
+            <div class="flex flex-col">
+              <label for="sectionName" class="ml-2" i18n>GMR</label>
+              <input type="text" pInputText [(ngModel)]="section.gmr" />
+            </div>
+            <div class="flex flex-col">
+              <label for="sectionName" class="ml-2" i18n>EEL</label>
+              <input type="text" pInputText [(ngModel)]="section.eel" />
+            </div>
+          </div>
+        </div>
+        <div class="section-form-part">
+          <h3 class="title-underline" i18n>Link</h3>
+          <div class="section-form-part-grid">
+            <div class="flex flex-col">
+              <label for="sectionName" class="ml-2" i18n
+                >Electric tension level</label
+              >
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="section.electric_tension_level"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label for="sectionName" class="ml-2" i18n>Link name</label>
+              <input type="text" pInputText [(ngModel)]="section.link_name" />
+            </div>
+            <div class="flex flex-col">
+              <label for="sectionName" class="ml-2" i18n>LIT</label>
+              <input type="text" pInputText [(ngModel)]="section.lit" />
+            </div>
+            <div class="flex flex-col">
+              <label for="sectionName" class="ml-2" i18n>Branch name</label>
+              <input type="text" pInputText [(ngModel)]="section.branch_name" />
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </p-step-panel>
+
+    <p-step-panel [value]="2">
+      <ng-template #content let-activateCallback="activateCallback">
+        <app-supports-table />
+      </ng-template>
+    </p-step-panel>
+  </p-step-panels>
+</p-stepper>

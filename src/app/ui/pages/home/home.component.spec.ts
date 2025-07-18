@@ -57,13 +57,6 @@ describe('HomeComponent', () => {
       getLatestStudies: jest.fn().mockResolvedValue(mockStudies)
     } as unknown as jest.Mocked<StudiesService>;
 
-    mockStudiesService = {
-      getStudies: jest.fn().mockResolvedValue([]),
-      ready: new BehaviorSubject(true),
-      createStudy: jest.fn(),
-      getLatestStudies: jest.fn()
-    } as unknown as jest.Mocked<StudiesService>;
-
     await TestBed.configureTestingModule({
       imports: [
         HomeComponent,

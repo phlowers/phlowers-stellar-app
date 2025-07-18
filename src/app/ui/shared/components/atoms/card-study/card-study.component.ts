@@ -2,8 +2,7 @@ import { Component, input } from '@angular/core';
 import { TagComponent } from '@ui/shared/components/atoms/tag/tag.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TagList } from '@ui/shared/model/card-study.model';
-
-const currentLocale = navigator.language;
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-card-study',
@@ -16,4 +15,11 @@ export class CardStudyComponent {
   authorMail = input.required<string>();
   modificationDate = input.required<string>();
   tagList = input<TagList[]>();
+  uuid = input.required<string>();
+
+  constructor(private readonly router: Router) {}
+
+  onCardClick() {
+    this.router.navigate(['/study', this.uuid()]);
+  }
 }

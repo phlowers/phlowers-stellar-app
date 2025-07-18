@@ -6,25 +6,32 @@
  */
 
 export interface Section {
-  uuid: string;
-  internal_id: string;
+  uuid?: string;
+  internal_id?: string;
   name: string;
-  short_name: string;
-  created_at: string;
-  updated_at: string;
-  internal_catalog_id: string;
-  type: string;
+  short_name?: string;
+  created_at?: string;
+  updated_at?: string;
+  internal_catalog_id?: string;
+  type?: string;
   cable_name: string;
-  cable_short_name: string;
-  cables_amount: number;
-  optical_fibers_amount: number;
-  spans_amount: number;
-  begin_span_name: string;
-  last_span_name: string;
-  first_support_number: number;
-  last_support_number: number;
-  first_attachment_set: string;
-  last_attachment_set: string;
-  regional_maintenance_center_names: string[];
-  maintenance_center_names: string[];
+  cable_short_name?: string;
+  cables_amount?: number;
+  optical_fibers_amount?: number;
+  spans_amount?: number;
+  begin_span_name?: string;
+  last_span_name?: string;
+  first_support_number?: number;
+  last_support_number?: number;
+  first_attachment_set?: string;
+  last_attachment_set?: string;
+  regional_maintenance_center_names?: string[];
+  maintenance_center_names?: string[];
+  gmr?: string;
+  eel?: string;
+  cm?: string;
+  link_name?: string;
+  lit?: string;
+  branch_name?: string;
+  electric_tension_level?: string;
 }

@@ -26,6 +26,7 @@
   &:disabled,
   &.disabled,
   &[disabled] {
+
     .app-btn-label,
     .app-icon {
       color: var(--grey-200);
