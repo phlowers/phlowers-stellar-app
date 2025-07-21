@@ -13,6 +13,9 @@
       <th id="checkbox">
         <div class="flex items-center gap-2"></div>
       </th>
+      <th id="space">
+        <div class="flex items-center gap-2"></div>
+      </th>
       <th id="title" pSortableColumn="title">
         <div i18n style="font-size: 14px" class="flex items-center gap-2">
           Title
@@ -120,6 +123,17 @@
     <tr>
       <td>
         <p-checkbox [binary]="true" />
+      </td>
+      <td>
+        <a
+          [routerLink]="'/study/' + study.uuid"
+          app-btn
+          btnStyle="base"
+          btnSize="s"
+          i18n
+        >
+          Open
+        </a>
       </td>
       <td>{{ study.title }}</td>
       <td>{{ study.author_email }}</td>

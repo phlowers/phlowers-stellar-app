@@ -1,0 +1,16 @@
+h3 {
+    text-underline-offset: 8px;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--p-primary-600);
+    font-weight: 400;
+    text-decoration-line: underline;
+    font-size: 1rem;
+}
+
+.section-form-part {
+    @apply mt-4;
+}
+
+.section-form-part-grid {
+    @apply grid grid-cols-3 gap-x-10 gap-y-4;
+}

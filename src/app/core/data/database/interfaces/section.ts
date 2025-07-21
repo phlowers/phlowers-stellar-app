@@ -27,4 +27,11 @@ export interface Section {
   last_attachment_set: string;
   regional_maintenance_center_names: string[];
   maintenance_center_names: string[];
+  gmr: string;
+  eel: string;
+  cm: string;
+  link_name: string;
+  lit: string;
+  branch_name: string;
+  electric_tension_level: string;
 }

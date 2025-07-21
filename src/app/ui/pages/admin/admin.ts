@@ -17,6 +17,7 @@ import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-admin',
   standalone: true,
+  styleUrls: ['./admin.scss'],
   imports: [
     CommonModule,
     ButtonModule,
