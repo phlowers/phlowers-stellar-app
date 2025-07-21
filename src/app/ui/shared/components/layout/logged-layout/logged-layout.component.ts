@@ -35,26 +35,7 @@ export class LoggedLayoutComponent {
         label: $localize`Sections`,
         route: '/sections',
         icon: 'timeline'
-      },
-      // {
-      //   id: 'sideB-tools',
-      //   label: $localize`Tools`,
-      //   route: '/tools',
-      //   icon: 'build'
-      // },
-      {
-        id: 'sideB-plotlyJs',
-        label: 'Plotly JS POC',
-        shortLabel: 'plot poc',
-        route: '/plotly',
-        icon: 'ssid_chart'
       }
-      // {
-      //   id: 'sideB-plotly3D',
-      //   label: $localize`3D`,
-      //   route: '/3d',
-      //   icon: 'deployed_code'
-      // }
     ],
     footer: [
       {

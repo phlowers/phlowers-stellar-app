@@ -53,16 +53,35 @@ export class StudiesService {
   }
 
   /**
+   * Get a study by uuid
+   * @param uuid The uuid of the study to get
+   * @returns The study
+   */
+  getStudy(uuid: string) {
+    return this.storageService.db?.studies.get(uuid);
+  }
+
+  /**
    * Duplicate a study
    * @param uuid The uuid of the study to duplicate
    */
-  async duplicateStudy(uuid: string) {
+  async duplicateStudy(uuid: string): Promise<Study | null> {
     const study = await this.storageService.db?.studies.get(uuid);
     if (!study) {
-      return;
+      return null;
+    }
+    const allStudies = await this.storageService.db?.studies.toArray();
+    const allStudyTitles = allStudies?.map((study) => study.title);
+    const titleWithoutCopy = study.title.replace(/\s*\(Copy\s*\d+\)/, ''); //NOSONAR
+    let copyIndex = 1;
+    while (
+      allStudyTitles?.includes(`${titleWithoutCopy} (Copy ${copyIndex})`)
+    ) {
+      copyIndex++;
     }
     const newStudy = {
       ...study,
+      title: `${titleWithoutCopy} (Copy ${copyIndex})`,
       uuid: uuidv4(),
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
@@ -71,6 +90,7 @@ export class StudiesService {
     await this.storageService.db?.studies.add(newStudy);
     const studies = await this.getStudies();
     this.studies.next(studies);
+    return newStudy;
   }
 
   /**

@@ -174,7 +174,8 @@ describe('StudiesService', () => {
         uuid: 'mock-uuid-123',
         created_at_offline: expect.any(String),
         updated_at_offline: expect.any(String),
-        saved: false
+        saved: false,
+        title: 'Test Study (Copy 1)'
       });
       expect(mockDb.studies.toArray).toHaveBeenCalled();
       expect(studiesSpy).toHaveBeenCalledWith(mockDuplicatedStudies);

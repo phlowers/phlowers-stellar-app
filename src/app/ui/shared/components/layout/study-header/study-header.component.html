@@ -1,0 +1,76 @@
+<section class="study-header">
+  <h1 class="study-header__title">{{ study()?.title }}</h1>
+
+  <button app-btn btnSize="s" btnStyle="text" aria-label="modify">
+    <app-icon icon="edit" />
+  </button>
+
+  <hr class="study-header__separator" />
+
+  <button
+    i18n
+    app-btn
+    btnSize="s"
+    btnStyle="text"
+    (click)="toggleActiveDetail()"
+    class="study-header__accodion-btn"
+    [class.study-header__accodion-btn--open]="isDetailOpen()"
+  >
+    Details
+    <app-icon icon="keyboard_arrow_down" iconRight />
+  </button>
+
+  <hr class="study-header__separator" />
+
+  <p class="study-header__author">
+    <app-icon icon="person" />
+    {{ study()?.author_email }}
+  </p>
+
+  <time
+    [attr.datetime]="study()?.created_at_offline"
+    class="study-header__time"
+  >
+    <app-icon icon="schedule" />
+    {{ study()?.created_at_offline | date: 'dd/MM/yyyy à HH:mm' }}
+  </time>
+
+  <hr class="study-header__separator" />
+
+  <app-tag text="Shared" type="error" />
+
+  <hr class="study-header__separator" />
+
+  <button
+    i18n
+    app-btn
+    btnSize="s"
+    btnStyle="text"
+    (click)="duplicateStudy.emit(study()?.uuid!)"
+  >
+    <app-icon icon="content_copy" />
+    Duplicate
+  </button>
+
+  <button i18n app-btn btnSize="s" btnStyle="text">
+    <app-icon icon="public" />
+    Publish
+  </button>
+
+  <p-accordion
+    [(value)]="activeDetail"
+    class="study-header__accordion"
+    [class.study-header__accordion--open]="isDetailOpen()"
+  >
+    <p-accordion-panel value="0">
+      <p-accordion-content>
+        <div class="study-header__accordion__content">
+          <app-icon icon="description" />
+          <p>
+            {{ study()?.description }}
+          </p>
+        </div>
+      </p-accordion-content>
+    </p-accordion-panel>
+  </p-accordion>
+</section>
