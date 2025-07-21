@@ -98,6 +98,13 @@ export const primengPreset = definePreset(Aura, {
         }
       `
     },
+    divider: {
+      css: () => `
+        :root {
+          --p-divider-horizontal-margin: 2rem 0;
+        }
+      `
+    },
     dialog: {
       extend: {
         header: {
@@ -116,6 +123,15 @@ export const primengPreset = definePreset(Aura, {
           .p-dialog-content {
             padding: 16px;
           }
+          .p-stepper-separator {
+          background: repeating-linear-gradient(
+            90deg,
+            #fff,
+            #fff 5px,
+            #cdcccb 5px,
+            #cdcccb 10px
+          ) !important;
+          }
         `
     },
     tabs: {
@@ -124,9 +140,42 @@ export const primengPreset = definePreset(Aura, {
           --p-tabs-tab-border-width: 0;
           --p-tabs-active-bar-height: 4px;
           --p-tabs-tab-active-background: #F9FAFA;
+          --p-tabs-tabpanel-padding: 0px;
         }
         .p-tab {
           font-size: 1rem;
+        }
+      `
+    },
+    stepper: {
+      css: ({ dt }: { dt: (key: string) => string }) => `
+        :root {
+          --p-stepper-active-bar-height: 4px;
+          --p-stepper-step-gap: 0px;
+          --p-stepper-step-number-active-background: ${dt('primary.600')};
+          --p-stepper-step-number-active-color: white;
+        }
+        .p-step-header {
+          flex-direction: column;
+        }
+        .p-step {
+          padding: 0px;
+        }
+        .p-stepper-separator {
+          transform: translateY(-12px);
+        }
+        .p-step-active .p-step-title {
+          font-weight: bold;
+        }
+      `
+    },
+    radiobutton: {
+      css: ({ dt }: { dt: (key: string) => string }) => `
+        :root {
+          --p-radiobutton-icon-checked-color: ${dt('primary.600')};
+          --p-radiobutton-icon-checked-hover-color: ${dt('primary.600')};
+          --p-radiobutton-checked-background: white;
+          --p-radiobutton-checked-hover-background: white;
         }
       `
     }

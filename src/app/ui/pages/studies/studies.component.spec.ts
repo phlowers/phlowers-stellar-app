@@ -162,7 +162,7 @@ describe('StudiesComponent', () => {
   describe('duplicateStudy', () => {
     it('should call studies service duplicateStudy method with correct uuid', () => {
       const testUuid = 'test-uuid-123';
-      mockStudiesService.duplicateStudy.mockResolvedValue(undefined);
+      mockStudiesService.duplicateStudy.mockResolvedValue(null);
 
       component.duplicateStudy(testUuid);
 

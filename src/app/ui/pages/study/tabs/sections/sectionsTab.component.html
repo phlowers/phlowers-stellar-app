@@ -1,0 +1,20 @@
+<app-new-section-modal
+  [isOpen]="isNewSectionModalOpen()"
+  (isOpenChange)="onModalOpenChange($event)"
+/>
+<div
+  *ngIf="sections().length === 0"
+  class="flex flex-col gap-4 items-center justify-center"
+>
+  <div class="mt-10 no-section-text" i18n>No existing section</div>
+  <button
+    i18n
+    app-btn
+    btnStyle="base"
+    btnSize="l"
+    (click)="openNewSectionModal()"
+  >
+    <app-icon icon="add" />
+    Add a section
+  </button>
+</div>

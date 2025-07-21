@@ -95,3 +95,14 @@ $_header-pr: 1rem;
     }
   }
 }
+
+// specif for study header
+.study-header__accordion {
+  .p-accordionpanel {
+    box-shadow: none;
+  }
+  .p-accordioncontent-content {
+    padding: 0rem;
+    background-color: rgb(from var(--grey-white) r g b / 0);
+  }
+}

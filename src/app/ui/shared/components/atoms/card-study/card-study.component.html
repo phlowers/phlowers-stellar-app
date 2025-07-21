@@ -1,4 +1,9 @@
-<article>
+<article
+  class="cursor-pointer"
+  (click)="onCardClick()"
+  tabindex="0"
+  (keydown)="onCardClick()"
+>
   <h3>
     {{ title() }}
   </h3>

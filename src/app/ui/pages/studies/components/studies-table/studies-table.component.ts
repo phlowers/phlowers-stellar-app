@@ -16,6 +16,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { CommonModule, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -29,7 +30,8 @@ import { CommonModule, DatePipe } from '@angular/common';
     CheckboxModule,
     PopoverModule,
     DatePipe,
-    CommonModule
+    CommonModule,
+    RouterLink
   ],
   templateUrl: './studies-table.component.html',
   providers: []

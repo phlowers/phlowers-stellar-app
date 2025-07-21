@@ -13,6 +13,7 @@
     U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
     U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+
 // Nunito latin
 @font-face {
   font-family: 'Nunito';
@@ -34,6 +35,7 @@
   src: url(@src/../public/fonts/material-symbols-rounded.woff2) format('woff2');
   font-display: block;
 }
+
 .app-icon {
   font-family: 'Material Symbols Rounded', sans-serif; // sonarQube requirment
   font-weight: normal;
@@ -77,12 +79,10 @@
       height: 1em;
       border-radius: 0.25rem;
       background-color: rgb(from var(--primary-200) r g b / 0.4);
-      background-image: linear-gradient(
-        140deg,
-        rgb(from var(--grey-white) r g b / 0) 40%,
-        rgb(from var(--grey-white) r g b / 0.5) 50%,
-        rgba(from var(--grey-white) r g b / 0) 60%
-      );
+      background-image: linear-gradient(140deg,
+          rgb(from var(--grey-white) r g b / 0) 40%,
+          rgb(from var(--grey-white) r g b / 0.5) 50%,
+          rgba(from var(--grey-white) r g b / 0) 60%);
       background-size: 200% 100%;
       background-position-x: 100%;
       animation: 1s loading ease-in-out infinite;
@@ -109,18 +109,23 @@ textarea {
 h1 {
   @extend %heading-xl;
 }
+
 h2 {
   @extend %heading-l;
 }
+
 h3 {
   @extend %heading-m;
 }
+
 h4 {
   @extend %heading-s;
 }
+
 h5 {
   @extend %heading-xs;
 }
+
 h6 {
   @extend %heading-2xs;
 }
@@ -163,4 +168,14 @@ p {
   &:last-child {
     margin-bottom: 0;
   }
+}
+
+.title-underline {
+  @apply underline;
+  text-underline-offset: 8px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--p-primary-600);
+  font-weight: 400;
+  text-decoration-line: underline;
+  font-size: 1rem;
 }

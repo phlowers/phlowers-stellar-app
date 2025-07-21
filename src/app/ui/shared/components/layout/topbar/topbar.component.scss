@@ -10,6 +10,7 @@ header {
   gap: 1.5rem;
   padding: 1rem 1.5rem;
   min-height: 4rem;
+  height: 4rem;
   color: var(--grey-750);
   border-bottom: 1px solid var(--grey-200);
 }
@@ -83,6 +84,7 @@ header {
     from {
       transform: rotate(0deg);
     }
+
     to {
       transform: rotate(360deg);
     }

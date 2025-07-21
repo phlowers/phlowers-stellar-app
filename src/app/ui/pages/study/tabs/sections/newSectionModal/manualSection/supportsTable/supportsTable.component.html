@@ -1,0 +1,14 @@
+<p-table
+  [value]="supports"
+  [paginator]="true"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 20, 50]"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th id="support_type" i18n>Support type</th>
+      <th id="support_name" i18n>Support name</th>
+      <th id="support_position" i18n>Support position</th>
+    </tr>
+  </ng-template>
+</p-table>

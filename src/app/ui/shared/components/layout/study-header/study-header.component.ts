@@ -1,0 +1,36 @@
+import { Component, input, output, signal } from '@angular/core';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { TagComponent } from '@ui/shared/components/atoms/tag/tag.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { AccordionModule } from 'primeng/accordion';
+import { Study } from '@src/app/core/data/database/interfaces/study';
+import { DatePipe } from '@angular/common';
+
+@Component({
+  selector: 'app-study-header',
+  imports: [
+    ButtonComponent,
+    IconComponent,
+    TagComponent,
+    AccordionModule,
+    DatePipe
+  ],
+  templateUrl: './study-header.component.html',
+  styleUrl: './study-header.component.scss'
+})
+export class StudyHeaderComponent {
+  public isDetailOpen = signal<boolean>(false);
+
+  public activeDetail = signal<string>('');
+  public study = input.required<Study | null>();
+  public duplicateStudy = output<string>();
+
+  toggleActiveDetail() {
+    this.isDetailOpen.set(!this.isDetailOpen());
+    if (this.isDetailOpen()) {
+      this.activeDetail.set('0');
+    } else {
+      this.activeDetail.set('');
+    }
+  }
+}
