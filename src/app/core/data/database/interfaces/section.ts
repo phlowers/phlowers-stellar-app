@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { Support } from './support';
+
 export interface Section {
   uuid: string;
   internal_id: string;
@@ -34,4 +36,5 @@ export interface Section {
   lit: string;
   branch_name: string;
   electric_tension_level: string;
+  supports: Support[];
 }

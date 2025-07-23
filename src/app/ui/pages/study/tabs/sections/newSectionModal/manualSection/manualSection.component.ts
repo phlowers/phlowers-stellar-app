@@ -11,7 +11,25 @@ import { DividerModule } from 'primeng/divider';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { DropdownModule } from 'primeng/dropdown';
 import { SupportsTableComponent } from './supportsTable/supportsTable.component';
+import { Support } from '@src/app/core/data/database/interfaces/support';
 import { v4 as uuidv4 } from 'uuid';
+
+const createSupport = (): Support => {
+  return {
+    uuid: uuidv4(),
+    number: null,
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentHeight: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null
+  };
+};
 
 const createSection = (): Section => {
   return {
@@ -23,6 +41,7 @@ const createSection = (): Section => {
     gmr: '',
     eel: '',
     cm: '',
+    supports: [],
     internal_id: '',
     short_name: '',
     created_at: '',
@@ -76,9 +95,54 @@ export class ManualSectionComponent {
     { name: 'Phase', code: 'phase' }
   ];
 
+  onSupportsAmountChange(event: any) {
+    const amount = Number(event.target.value);
+    const currentSupports = this.section.supports || [];
+    if (amount === currentSupports.length) {
+      return;
+    }
+    if (amount > currentSupports.length) {
+      this.section.supports = [
+        ...currentSupports,
+        ...Array.from(
+          { length: amount - currentSupports.length },
+          createSupport
+        )
+      ];
+    } else {
+      this.section.supports = currentSupports.slice(0, amount);
+    }
+  }
+
   onVisibleChange(visible: boolean) {
     if (!visible) {
       this.isOpenChange.emit(false);
+    }
+  }
+
+  addSupport(index: number, position: 'before' | 'after') {
+    const newSupport = createSupport();
+    console.log('index is', index);
+    console.log('position is', position);
+    if (position === 'before') {
+      this.section.supports?.splice(index, 0, newSupport);
+    } else {
+      this.section.supports?.splice(index + 1, 0, newSupport);
+    }
+    this.supportsAmount = this.section.supports?.length || 0;
+  }
+
+  deleteSupport(uuid: string) {
+    this.section.supports = this.section.supports?.filter(
+      (support) => support.uuid !== uuid
+    );
+    this.supportsAmount = this.section.supports?.length || 0;
+  }
+
+  onSupportChange(change: { uuid: string; field: keyof Support; value: any }) {
+    const support = this.section.supports?.find((s) => s.uuid === change.uuid);
+    if (support) {
+      (support as any)[change.field] = change.value;
     }
   }
 }
