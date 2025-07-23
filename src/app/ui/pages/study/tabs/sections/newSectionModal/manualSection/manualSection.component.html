@@ -40,7 +40,12 @@
               <label for="supportsAmount" class="ml-2" i18n
                 >Supports amount</label
               >
-              <input type="number" pInputText [(ngModel)]="supportsAmount" />
+              <input
+                type="number"
+                pInputText
+                [(ngModel)]="supportsAmount"
+                (change)="onSupportsAmountChange($event)"
+              />
             </div>
           </div>
         </div>
@@ -93,7 +98,12 @@
 
     <p-step-panel [value]="2">
       <ng-template #content let-activateCallback="activateCallback">
-        <app-supports-table />
+        <app-supports-table
+          [supports]="section.supports || []"
+          (addSupport)="addSupport($event.index, $event.position)"
+          (deleteSupport)="deleteSupport($event)"
+          (supportChange)="onSupportChange($event)"
+        />
       </ng-template>
     </p-step-panel>
   </p-step-panels>
