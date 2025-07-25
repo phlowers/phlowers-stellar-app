@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { Section } from '../database/interfaces/section';
+
 export interface StudyModel {
   uuid: string;
   author_email: string;
@@ -14,6 +16,7 @@ export interface StudyModel {
   created_at_offline: string;
   updated_at_offline: string;
   saved: boolean;
+  sections: Section[];
 }
 
 export interface ModifyStudyModel {
