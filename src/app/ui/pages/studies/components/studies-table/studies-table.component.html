@@ -13,9 +13,7 @@
       <th id="checkbox">
         <div class="flex items-center gap-2"></div>
       </th>
-      <th id="space">
-        <div class="flex items-center gap-2"></div>
-      </th>
+
       <th id="title" pSortableColumn="title">
         <div i18n style="font-size: 14px" class="flex items-center gap-2">
           Title
@@ -112,6 +110,9 @@
           />
         </div>
       </th>
+      <th id="space">
+        <div class="flex items-center gap-2"></div>
+      </th>
       <th id="actions">
         <div i18n style="font-size: 14px" class="flex items-center gap-2">
           Actions
@@ -124,6 +125,12 @@
       <td>
         <p-checkbox [binary]="true" />
       </td>
+      <td>{{ study.title }}</td>
+      <td>{{ study.author_email }}</td>
+      <td>{{ study.created_at_offline | date: 'medium' }}</td>
+      <td>{{ study.updated_at_offline | date: 'medium' }}</td>
+      <td>{{ study.quantity }}</td>
+      <td>{{ study.quantity }}</td>
       <td>
         <a
           [routerLink]="'/study/' + study.uuid"
@@ -135,12 +142,6 @@
           Open
         </a>
       </td>
-      <td>{{ study.title }}</td>
-      <td>{{ study.author_email }}</td>
-      <td>{{ study.created_at_offline | date: 'medium' }}</td>
-      <td>{{ study.updated_at_offline | date: 'medium' }}</td>
-      <td>{{ study.quantity }}</td>
-      <td>{{ study.quantity }}</td>
       <td>
         <button
           (click)="popover.toggle($event)"

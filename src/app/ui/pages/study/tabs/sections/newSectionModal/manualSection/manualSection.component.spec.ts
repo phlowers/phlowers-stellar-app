@@ -61,7 +61,8 @@ describe('ManualSectionComponent', () => {
       branch_name: '',
       electric_tension_level: '',
       supports: [],
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      initial_conditions: []
     };
 
     await TestBed.configureTestingModule({

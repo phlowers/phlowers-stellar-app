@@ -1,4 +1,11 @@
-import { Component, input, output, computed, signal } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  computed,
+  signal,
+  effect
+} from '@angular/core';
 import { StudyModel } from '@src/app/core/data/models/study.model';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
@@ -48,29 +55,64 @@ const newStudy = (): StudyModel => {
 export class NewStudyModalComponent {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
+  mode = input<'new' | 'modify'>('new');
+  studyUuid = input<string>('');
+  titleInput = input<string>('');
+  descriptionInput = input<string>('');
+  title = signal<string>('');
+  description = signal<string>('');
+  refreshStudy = output<string>();
 
-  newStudy = signal(newStudy());
-
-  titleLength = computed(() => this.newStudy().title.length ?? 0);
-  descriptionLength = computed(() => this.newStudy().description?.length ?? 0);
+  titleLength = computed(() => this.title().length ?? 0);
+  descriptionLength = computed(() => this.description().length ?? 0);
 
   updateTitle(title: string) {
-    this.newStudy.update((study) => ({ ...study, title }));
+    this.title.set(title);
   }
 
   updateDescription(description: string) {
-    this.newStudy.update((study) => ({ ...study, description }));
+    this.description.set(description);
   }
 
   constructor(
     private readonly messageService: MessageService,
     private readonly studiesService: StudiesService,
     private readonly router: Router
-  ) {}
+  ) {
+    effect(() => {
+      if (this.isOpen() && this.mode() === 'modify') {
+        this.title.set(this.titleInput());
+        this.description.set(this.descriptionInput());
+      }
+    });
+  }
 
   async onSubmit() {
-    await this.studiesService.createStudy(this.newStudy());
-    this.router.navigate(['/study', this.newStudy().uuid]);
+    if (this.mode() === 'new') {
+      const uuid = await this.studiesService.createStudy({
+        ...newStudy(),
+        title: this.title(),
+        description: this.description()
+      });
+      this.router.navigate(['/study', uuid]);
+      this.messageService.add({
+        severity: 'success',
+        summary: $localize`Study created`,
+        detail: $localize`Study created successfully`
+      });
+    } else {
+      await this.studiesService.updateStudy({
+        uuid: this.studyUuid(),
+        title: this.title(),
+        description: this.description()
+      });
+      this.refreshStudy.emit(this.studyUuid());
+      this.messageService.add({
+        severity: 'success',
+        summary: $localize`Study updated`,
+        detail: $localize`Study updated successfully`
+      });
+    }
     this.isOpenChange.emit(false);
   }
 }

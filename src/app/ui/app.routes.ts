@@ -13,6 +13,7 @@ import { PlotlyPageComponent } from './pages/plotly-poc/plotly-page/plotly-page.
 import { LoggedLayoutComponent } from './shared/components/layout/logged-layout/logged-layout.component';
 import { HomeComponent } from './pages/home/home.component';
 import { NewsComponent } from './pages/news/news.component';
+import { NotFoundComponent } from './pages/404/404.component';
 
 export const appRoutes: Routes = [
   {
@@ -26,6 +27,10 @@ export const appRoutes: Routes = [
         component: StudiesComponent
       },
       { path: 'admin', title: $localize`Admin`, component: AdminComponent },
+      // {
+      //   path: 'study',
+      //   component: NotFoundComponent
+      // },
       {
         path: 'study/:uuid',
         title: $localize`Study`,
@@ -48,5 +53,5 @@ export const appRoutes: Routes = [
       }
     ]
   },
-  { path: '**', redirectTo: '' }
+  { path: '**', component: NotFoundComponent }
 ];

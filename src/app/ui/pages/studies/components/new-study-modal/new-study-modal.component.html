@@ -1,10 +1,9 @@
-<p-toast position="top-center"></p-toast>
 <p-dialog
   dismissableMask="true"
   [visible]="isOpen()"
   (visibleChange)="isOpenChange.emit(false)"
   i18n-header
-  header="New study"
+  [header]="mode() === 'new' ? 'New study' : 'Modify study'"
   [style]="{ width: '496px' }"
   [modal]="true"
 >
@@ -24,7 +23,7 @@
           name="title"
           maxlength="100"
           placeholder="Study name"
-          [ngModel]="newStudy().title"
+          [ngModel]="title()"
           (ngModelChange)="updateTitle($event)"
           required
           aria-describedby="title-description"
@@ -44,7 +43,7 @@
           aria-describedby="description-description"
           class="block"
           pTextarea
-          [ngModel]="newStudy().description"
+          [ngModel]="description()"
           (ngModelChange)="updateDescription($event)"
           maxlength="240"
           rows="3"
