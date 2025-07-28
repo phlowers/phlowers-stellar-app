@@ -37,4 +37,5 @@ export interface Section {
   branch_name: string;
   electric_tension_level: string;
   supports: Support[];
+  updatedAt: Date;
 }

@@ -1,9 +1,49 @@
-import { Component, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { NewSectionModalComponent } from './newSectionModal/newSectionModal.component';
+import { CardComponent } from '@src/app/ui/shared/components/atoms/card/card.component';
+import { PopoverModule } from 'primeng/popover';
+import { v4 as uuidv4 } from 'uuid';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+
+const createSection = (): Section => {
+  return {
+    uuid: uuidv4(),
+    name: '',
+    type: '',
+    cables_amount: 0,
+    cable_name: '',
+    gmr: '',
+    eel: '',
+    cm: '',
+    supports: [],
+    internal_id: '',
+    short_name: '',
+    created_at: '',
+    updated_at: '',
+    internal_catalog_id: '',
+    cable_short_name: '',
+    optical_fibers_amount: 0,
+    spans_amount: 0,
+    begin_span_name: '',
+    last_span_name: '',
+    first_support_number: 0,
+    last_support_number: 0,
+    first_attachment_set: '',
+    last_attachment_set: '',
+    regional_maintenance_center_names: [],
+    maintenance_center_names: [],
+    link_name: '',
+    lit: '',
+    branch_name: '',
+    electric_tension_level: '',
+    updatedAt: new Date()
+  };
+};
 
 @Component({
   selector: 'app-sections-tab',
@@ -11,24 +51,40 @@ import { NewSectionModalComponent } from './newSectionModal/newSectionModal.comp
     CommonModule,
     ButtonComponent,
     IconComponent,
-    NewSectionModalComponent
+    NewSectionModalComponent,
+    CardComponent,
+    PopoverModule,
+    SelectModule,
+    FormsModule
   ],
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss'
 })
 export class SectionsTabComponent {
-  sections = signal<Section[]>([]);
-  isNewSectionModalOpen = signal<boolean>(true);
+  sections = input<Section[]>([]);
+  createOrUpdateSection = output<Section>();
+  deleteSection = output<Section>();
+  duplicateSection = output<Section>();
+  currentSection = signal<Section>(createSection());
+  isNewSectionModalOpen = signal<boolean>(false);
+  isInitialConditionModalOpen = signal<boolean>(false);
 
-  addSection() {
-    // empty
+  editSection(section: Section) {
+    this.currentSection.set(section);
+    this.isNewSectionModalOpen.set(true);
   }
 
   openNewSectionModal() {
+    this.currentSection.set(createSection());
     this.isNewSectionModalOpen.set(true);
   }
 
   onModalOpenChange(isOpen: boolean) {
     this.isNewSectionModalOpen.set(isOpen);
+  }
+
+  openInitialConditionModal(section: Section) {
+    this.currentSection.set(section);
+    this.isInitialConditionModalOpen.set(true);
   }
 }

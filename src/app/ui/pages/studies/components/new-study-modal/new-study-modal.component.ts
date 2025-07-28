@@ -12,6 +12,7 @@ import { ToastModule } from 'primeng/toast';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { Router } from '@angular/router';
 
 const newStudy = (): StudyModel => {
   return {
@@ -22,7 +23,8 @@ const newStudy = (): StudyModel => {
     author_email: '',
     created_at_offline: '',
     updated_at_offline: '',
-    saved: false
+    saved: false,
+    sections: []
   };
 };
 
@@ -62,18 +64,13 @@ export class NewStudyModalComponent {
 
   constructor(
     private readonly messageService: MessageService,
-    private readonly studiesService: StudiesService
+    private readonly studiesService: StudiesService,
+    private readonly router: Router
   ) {}
 
   async onSubmit() {
     await this.studiesService.createStudy(this.newStudy());
+    this.router.navigate(['/study', this.newStudy().uuid]);
     this.isOpenChange.emit(false);
-    this.newStudy.set(newStudy());
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Study Created`,
-      life: 3000
-    });
   }
 }

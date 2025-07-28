@@ -36,7 +36,8 @@ describe('StudiesService', () => {
     shareable: true,
     created_at_offline: '',
     updated_at_offline: '',
-    saved: false
+    saved: false,
+    sections: []
   };
 
   const mockStudyFromDb: Study = {

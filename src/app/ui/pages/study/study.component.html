@@ -3,14 +3,18 @@
   <p-tabs value="sections">
     <p-tablist>
       <p-tab value="sections" i18n>Study sections</p-tab>
-      <p-tab value="initialState" i18n>Initial state</p-tab>
-      <p-tab value="studyState" i18n>Study state</p-tab>
+      <p-tab value="studyStates" i18n>Study states</p-tab>
       <p-tab value="measurements" i18n>Measurements</p-tab>
       <p-tab value="groundAndObstacles" i18n>Ground and obstacles</p-tab>
     </p-tablist>
     <p-tabpanels class="px-0">
       <p-tabpanel value="sections">
-        <app-sections-tab />
+        <app-sections-tab
+          [sections]="study?.sections ?? []"
+          (createOrUpdateSection)="createOrUpdateSection($event)"
+          (deleteSection)="deleteSection($event)"
+          (duplicateSection)="duplicateSection($event)"
+        />
       </p-tabpanel>
       <p-tabpanel value="initialState"> </p-tabpanel>
       <p-tabpanel value="studyState"> </p-tabpanel>

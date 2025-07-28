@@ -1,34 +1,84 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ManualSectionComponent } from './manualSection.component';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SupportsTableComponent } from './supportsTable/supportsTable.component';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Section } from '@src/app/core/data/database/interfaces/section';
+import { Support } from '@src/app/core/data/database/interfaces/support';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-jest.mock('uuid', () => ({ v4: jest.fn(() => 'mock-uuid') }));
+// Mock child component
+@Component({
+  selector: 'app-supports-table',
+  template: ''
+})
+class MockSupportsTableComponent {
+  @Input() supports: Support[] = [];
+  @Output() addSupport = new EventEmitter<{
+    index: number;
+    position: 'before' | 'after';
+  }>();
+  @Output() deleteSupport = new EventEmitter<string>();
+  @Output() supportChange = new EventEmitter<{
+    uuid: string;
+    field: keyof Support;
+    value: any;
+  }>();
+}
 
 describe('ManualSectionComponent', () => {
   let component: ManualSectionComponent;
   let fixture: ComponentFixture<ManualSectionComponent>;
+  let mockSection: Section;
 
   beforeEach(async () => {
+    mockSection = {
+      uuid: '1',
+      internal_id: 'int1',
+      name: 'Section 1',
+      short_name: 'S1',
+      created_at: '',
+      updated_at: '',
+      internal_catalog_id: '',
+      type: 'guard',
+      cable_name: '',
+      cable_short_name: '',
+      cables_amount: 1,
+      optical_fibers_amount: 0,
+      spans_amount: 0,
+      begin_span_name: '',
+      last_span_name: '',
+      first_support_number: 1,
+      last_support_number: 2,
+      first_attachment_set: '',
+      last_attachment_set: '',
+      regional_maintenance_center_names: [],
+      maintenance_center_names: [],
+      gmr: '',
+      eel: '',
+      cm: '',
+      link_name: '',
+      lit: '',
+      branch_name: '',
+      electric_tension_level: '',
+      supports: [],
+      updatedAt: new Date()
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         FormsModule,
         ManualSectionComponent,
-        SupportsTableComponent,
+        MockSupportsTableComponent,
         NoopAnimationsModule
-      ],
-      schemas: [NO_ERRORS_SCHEMA]
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ManualSectionComponent);
     component = fixture.componentInstance;
+    // Patch the input() API for test
+    (component.section as any) = () => mockSection;
+    component.sectionChange = { emit: jest.fn() } as any;
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('should create', () => {
@@ -37,79 +87,92 @@ describe('ManualSectionComponent', () => {
 
   describe('onSupportsAmountChange', () => {
     it('should do nothing if amount equals current supports length', () => {
-      component.section.supports = [{ uuid: '1' } as any, { uuid: '2' } as any];
+      mockSection.supports = [createSupportMock()];
+      component.supportsAmount = 1;
+      const event = { target: { value: '1' } };
+      component.onSupportsAmountChange(event);
+      expect(mockSection.supports.length).toBe(1);
+    });
+
+    it('should add supports if amount increases', () => {
+      mockSection.supports = [];
       const event = { target: { value: '2' } };
       component.onSupportsAmountChange(event);
-      expect(component.section.supports.length).toBe(2);
+      expect(mockSection.supports.length).toBe(2);
     });
 
-    it('should add supports if amount is greater', () => {
-      component.section.supports = [{ uuid: '1' } as any];
-      const event = { target: { value: '3' } };
-      component.onSupportsAmountChange(event);
-      expect(component.section.supports.length).toBe(3);
-      expect(component.section.supports[1].uuid).toBe('mock-uuid');
-      expect(component.section.supports[2].uuid).toBe('mock-uuid');
-    });
-
-    it('should remove supports if amount is less', () => {
-      component.section.supports = [
-        { uuid: '1' } as any,
-        { uuid: '2' } as any,
-        { uuid: '3' } as any
+    it('should remove supports if amount decreases', () => {
+      mockSection.supports = [
+        createSupportMock(),
+        createSupportMock(),
+        createSupportMock()
       ];
       const event = { target: { value: '2' } };
       component.onSupportsAmountChange(event);
-      expect(component.section.supports.length).toBe(2);
+      expect(mockSection.supports.length).toBe(2);
     });
   });
 
   describe('addSupport', () => {
     it('should add a support before the given index', () => {
-      component.section.supports = [{ uuid: '1' } as any, { uuid: '2' } as any];
+      mockSection.supports = [createSupportMock(), createSupportMock()];
+      component.supportsAmount = 2;
       component.addSupport(1, 'before');
-      expect(component.section.supports.length).toBe(3);
-      expect(component.section.supports[1].uuid).toBe('mock-uuid');
+      expect(mockSection.supports.length).toBe(3);
     });
-
     it('should add a support after the given index', () => {
-      component.section.supports = [{ uuid: '1' } as any, { uuid: '2' } as any];
+      mockSection.supports = [createSupportMock(), createSupportMock()];
+      component.supportsAmount = 2;
       component.addSupport(0, 'after');
-      expect(component.section.supports.length).toBe(3);
-      expect(component.section.supports[1].uuid).toBe('mock-uuid');
+      expect(mockSection.supports.length).toBe(3);
     });
   });
 
   describe('deleteSupport', () => {
     it('should delete a support by uuid', () => {
-      component.section.supports = [{ uuid: '1' } as any, { uuid: '2' } as any];
-      component.deleteSupport('1');
-      expect(component.section.supports.length).toBe(1);
-      expect(component.section.supports[0].uuid).toBe('2');
+      const s1 = createSupportMock();
+      const s2 = createSupportMock();
+      mockSection.supports = [s1, s2];
+      component.deleteSupport(s1.uuid);
+      expect(mockSection.supports.length).toBe(1);
+      expect(mockSection.supports[0].uuid).toBe(s2.uuid);
     });
   });
 
   describe('onSupportChange', () => {
-    it('should update the field of the correct support', () => {
-      component.section.supports = [
-        { uuid: '1', name: 'A' } as any,
-        { uuid: '2', name: 'B' } as any
-      ];
-      component.onSupportChange({ uuid: '2', field: 'name', value: 'C' });
-      expect(component.section.supports[1].name).toBe('C');
+    it('should update the correct field of a support', () => {
+      const s1 = createSupportMock();
+      mockSection.supports = [s1];
+      component.onSupportChange({
+        uuid: s1.uuid,
+        field: 'name',
+        value: { name: 'newName' } as Support
+      });
+      expect(mockSection.supports[0].name).toMatchObject({ name: 'newName' });
     });
   });
 
-  describe('onVisibleChange', () => {
-    it('should emit false when visible is false', () => {
-      const emitSpy = jest.spyOn(component.isOpenChange, 'emit');
-      component.onVisibleChange(false);
-      expect(emitSpy).toHaveBeenCalledWith(false);
-    });
-    it('should not emit when visible is true', () => {
-      const emitSpy = jest.spyOn(component.isOpenChange, 'emit');
-      component.onVisibleChange(true);
-      expect(emitSpy).not.toHaveBeenCalled();
+  describe('onSectionChange', () => {
+    it('should emit sectionChange with the section', () => {
+      component.onSectionChange();
+      expect(component.sectionChange.emit).toHaveBeenCalledWith(mockSection);
     });
   });
 });
+
+function createSupportMock(): Support {
+  return {
+    uuid: Math.random().toString(36).substring(2),
+    number: null,
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentHeight: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null
+  };
+}
