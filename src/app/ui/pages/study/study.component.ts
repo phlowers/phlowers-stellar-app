@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudyHeaderComponent } from '../../shared/components/layout/study-header/study-header.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
@@ -11,6 +11,10 @@ import { ButtonModule } from 'primeng/button';
 import { StepperModule } from 'primeng/stepper';
 import { InputTextModule } from 'primeng/inputtext';
 import { SectionsTabComponent } from './tabs/sections/sectionsTab.component';
+import { Section } from '@src/app/core/data/database/interfaces/section';
+import { v4 as uuidv4 } from 'uuid';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-study',
@@ -23,22 +27,20 @@ import { SectionsTabComponent } from './tabs/sections/sectionsTab.component';
     ButtonModule,
     StepperModule,
     InputTextModule,
-    SectionsTabComponent
+    SectionsTabComponent,
+    ToastModule
   ],
   templateUrl: './study.component.html',
   styleUrl: './study.component.scss'
 })
 export class StudyComponent implements OnInit {
   study: Study | null = null;
-  sectionSource = signal<string>('manual');
-  sectionSources = signal<string[]>(['manual', 'import']);
-  source!: string;
-  sectionName = signal<string>('');
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly studiesService: StudiesService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -54,7 +56,7 @@ export class StudyComponent implements OnInit {
     });
     this.route.params.subscribe((params) => {
       const uuid = params['uuid'];
-      if (uuid) {
+      if (uuid && this.studiesService.ready.value) {
         this.studiesService.getStudy(uuid).then((study) => {
           if (study) {
             this.study = study;
@@ -70,5 +72,61 @@ export class StudyComponent implements OnInit {
         this.router.navigate(['/study', study.uuid]);
       }
     });
+    this.messageService.add({
+      severity: 'success',
+      summary: $localize`Successful`,
+      detail: $localize`Study Duplicated`,
+      life: 3000
+    });
+  }
+
+  createOrUpdateSection(section: Section) {
+    if (!this.study) {
+      return;
+    }
+    const existingSection = this.study?.sections.find(
+      (s) => s.uuid === section.uuid
+    );
+    if (existingSection) {
+      this.study.sections = this.study.sections.map((s) =>
+        s.uuid === section.uuid ? section : s
+      );
+      this.messageService.add({
+        severity: 'success',
+        summary: $localize`Successful`,
+        detail: $localize`Section Updated`,
+        life: 3000
+      });
+    } else {
+      this.study.sections = [...this.study.sections, section];
+      this.studiesService.updateStudy(this.study);
+      this.messageService.add({
+        severity: 'success',
+        summary: $localize`Successful`,
+        detail: $localize`Section Created`,
+        life: 3000
+      });
+    }
+  }
+
+  deleteSection(section: Section) {
+    if (!this.study) {
+      return;
+    }
+    this.study.sections = this.study.sections.filter(
+      (s) => s.uuid !== section.uuid
+    );
+    this.studiesService.updateStudy(this.study);
+  }
+
+  duplicateSection(section: Section) {
+    if (!this.study) {
+      return;
+    }
+    this.study.sections = [
+      ...this.study.sections,
+      { ...section, uuid: uuidv4() }
+    ];
+    this.studiesService.updateStudy(this.study);
   }
 }
