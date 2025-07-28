@@ -37,8 +37,10 @@ export const createStudiesMockData = (): Study[] => {
         Math.floor(
           Math.random() * (Date.now() - new Date('2020-01-01').getTime()) //NOSONAR
         ) + new Date('2020-01-01').getTime()
-      ).toISOString()
+      ).toISOString(),
+      sections: []
     });
   }
+
   return studies;
 };

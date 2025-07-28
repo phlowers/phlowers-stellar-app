@@ -3,3 +3,33 @@
   font-size: 20px;
   color: #6F767B
 }
+
+.section-card-title {
+  font-size: .875rem;
+  color: #999FA1;
+}
+
+.section-card-value {
+  font-size: 0.875rem;
+  color: #11161a;
+}
+
+.sections-container {
+  @apply flex flex-col gap-4 mt-4;
+}
+
+.card {
+  @apply w-full rounded-none;
+}
+
+.section-container {
+  @apply flex flex-row gap-4;
+}
+
+.section-field {
+  @apply flex flex-col gap-2;
+}
+
+.section-value {
+  @apply pt-1
+}

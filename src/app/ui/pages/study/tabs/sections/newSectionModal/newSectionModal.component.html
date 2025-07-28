@@ -56,7 +56,11 @@
   </div>
   <div>
     <p-divider class="my-10" />
-    <app-manual-section *ngIf="source === 'manual'" />
+    <app-manual-section
+      *ngIf="source === 'manual'"
+      [section]="section()"
+      (sectionChange)="onSectionChange($event)"
+    />
   </div>
   <ng-template #footer>
     <p-button
@@ -65,6 +69,11 @@
       icon="pi pi-times"
       (onClick)="onVisibleChange(false)"
     />
-    <p-button label="Validate" severity="primary" icon="pi pi-check" />
+    <p-button
+      label="Validate"
+      (onClick)="onValidate()"
+      severity="primary"
+      icon="pi pi-check"
+    />
   </ng-template>
 </p-dialog>

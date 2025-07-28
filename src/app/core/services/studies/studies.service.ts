@@ -114,4 +114,12 @@ export class StudiesService {
       .limit(4)
       .toArray();
   }
+
+  /**
+   * Update a study
+   * @param study The study to update
+   */
+  async updateStudy(study: Study) {
+    await this.storageService.db?.studies.put(study);
+  }
 }

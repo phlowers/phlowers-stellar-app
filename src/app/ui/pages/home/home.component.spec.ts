@@ -29,7 +29,8 @@ describe('HomeComponent', () => {
       created_at_offline: new Date('2024-01-01').toISOString(),
       updated_at_offline: new Date('2024-01-02').toISOString(),
       shareable: false,
-      saved: true
+      saved: true,
+      sections: []
     },
     {
       uuid: '2',
@@ -38,7 +39,8 @@ describe('HomeComponent', () => {
       created_at_offline: new Date('2024-01-03').toISOString(),
       updated_at_offline: new Date('2024-01-04').toISOString(),
       shareable: true,
-      saved: false
+      saved: false,
+      sections: []
     }
   ];
 

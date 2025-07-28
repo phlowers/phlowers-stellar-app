@@ -29,7 +29,8 @@ describe('StudiesComponent', () => {
     shareable: true,
     created_at_offline: '2025-01-01T00:00:00.000Z',
     updated_at_offline: '2025-01-01T00:00:00.000Z',
-    saved: true
+    saved: true,
+    sections: []
   };
 
   const mockStudy2: Study = {
@@ -40,7 +41,8 @@ describe('StudiesComponent', () => {
     shareable: false,
     created_at_offline: '2025-01-02T00:00:00.000Z',
     updated_at_offline: '2025-01-02T00:00:00.000Z',
-    saved: false
+    saved: false,
+    sections: []
   };
 
   beforeEach(async () => {
