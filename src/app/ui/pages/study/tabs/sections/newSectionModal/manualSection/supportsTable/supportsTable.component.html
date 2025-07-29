@@ -6,7 +6,7 @@
 >
   <ng-template pTemplate="header">
     <tr>
-      <th id="support_number" i18n>Position</th>
+      <th class="sticky-left" id="support_number" i18n>Position</th>
       <th id="support_number" i18n>Number</th>
       <th id="support_name" i18n>Name</th>
       <th id="span_length" i18n>Span length (m)</th>
@@ -18,12 +18,14 @@
       <th id="chain_length" i18n>Chain length (m)</th>
       <th id="chain_weight" i18n>Chain weight (kg)</th>
       <th id="chain_v" i18n>Chain V</th>
-      <th id="actions" i18n>Actions</th>
+      <th class="sticky-right" id="actions" i18n>Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-support let-index="index" let-rowIndex="rowIndex">
     <tr>
-      <td>{{ rowIndex + 1 }}</td>
+      <td class="sticky-left">
+        {{ rowIndex + 1 }}
+      </td>
       <td>
         <input
           pInputText
@@ -134,7 +136,7 @@
           (ngModelChange)="onSupportFieldChange(support.uuid, 'chainV', $event)"
         />
       </td>
-      <td>
+      <td class="sticky-right">
         <button
           app-btn
           btnSize="s"

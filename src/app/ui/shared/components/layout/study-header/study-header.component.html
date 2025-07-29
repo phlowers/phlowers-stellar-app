@@ -1,7 +1,13 @@
 <section class="study-header">
   <h1 class="study-header__title">{{ study()?.title }}</h1>
 
-  <button app-btn btnSize="s" btnStyle="text" aria-label="modify">
+  <button
+    (click)="openModifyStudyModal.emit()"
+    app-btn
+    btnSize="s"
+    btnStyle="text"
+    aria-label="modify"
+  >
     <app-icon icon="edit" />
   </button>
 
@@ -35,9 +41,9 @@
     {{ study()?.created_at_offline | date: 'dd/MM/yyyy à HH:mm' }}
   </time>
 
-  <hr class="study-header__separator" />
+  <hr *ngIf="study()?.shareable" class="study-header__separator" />
 
-  <app-tag text="Shared" type="error" />
+  <app-tag *ngIf="study()?.shareable" text="Shared" type="error" />
 
   <hr class="study-header__separator" />
 
