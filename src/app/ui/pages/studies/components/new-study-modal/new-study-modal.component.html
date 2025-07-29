@@ -3,7 +3,7 @@
   [visible]="isOpen()"
   (visibleChange)="isOpenChange.emit(false)"
   i18n-header
-  [header]="mode() === 'new' ? 'New study' : 'Modify study'"
+  [header]="mode() === 'new' ? newStudyTitle : modifyStudyTitle"
   [style]="{ width: '496px' }"
   [modal]="true"
 >

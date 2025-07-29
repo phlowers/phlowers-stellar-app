@@ -37,11 +37,3 @@
 .initial-condition-name {
   @apply w-24 max-w-24 whitespace-nowrap inline-block overflow-hidden overflow-ellipsis;
 }
-
-:host ::ng-deep {
-  .p-select-option:not(.p-select-option-selected):not(.p-disabled).p-focus {
-    background: unset;
-    color: unset;
-    cursor: auto;
-  }
-}

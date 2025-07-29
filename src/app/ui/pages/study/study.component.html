@@ -3,15 +3,16 @@
   (duplicateStudy)="duplicateStudy($event)"
   (openModifyStudyModal)="openModifyStudyModal()"
 />
-<app-new-study-modal
-  *ngIf="study"
-  [(isOpen)]="isNewStudyModalOpen"
-  mode="modify"
-  [studyUuid]="study!.uuid"
-  [titleInput]="study!.title"
-  [descriptionInput]="study!.description ?? ''"
-  (refreshStudy)="refreshStudy($event)"
-/>
+@if (study) {
+  <app-new-study-modal
+    [(isOpen)]="isNewStudyModalOpen"
+    mode="modify"
+    [studyUuid]="study!.uuid"
+    [titleInput]="study!.title"
+    [descriptionInput]="study!.description ?? ''"
+    (refreshStudy)="refreshStudy($event)"
+  />
+}
 <div class="mt-6">
   <p-tabs value="sections">
     <p-tablist>

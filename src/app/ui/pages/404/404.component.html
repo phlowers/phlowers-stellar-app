@@ -1,4 +1,14 @@
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-4xl font-bold">404</h1>
-  <p class="text-2xl">Page not found</p>
+  <p class="text-2xl" i18n>Page not found</p>
+  <button
+    app-btn
+    type="button"
+    btnSize="l"
+    btnStyle="base"
+    i18n
+    (click)="goToHome()"
+  >
+    Go to home page
+  </button>
 </div>

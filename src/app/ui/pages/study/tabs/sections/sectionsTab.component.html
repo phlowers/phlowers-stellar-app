@@ -12,22 +12,21 @@
   (addInitialCondition)="addInitialCondition.emit($event)"
 />
 
-<div
-  *ngIf="sections().length === 0"
-  class="flex flex-col gap-4 items-center justify-center"
->
-  <div class="mt-10 no-section-text" i18n>No existing section</div>
-  <button
-    i18n
-    app-btn
-    btnStyle="base"
-    btnSize="l"
-    (click)="openNewSectionModal()"
-  >
-    <app-icon icon="add" />
-    Add a section
-  </button>
-</div>
+@if (sections().length > 0) {
+  <div class="flex flex-col gap-4 items-center justify-center">
+    <div class="mt-10 no-section-text" i18n>No existing section</div>
+    <button
+      i18n
+      app-btn
+      btnStyle="base"
+      btnSize="l"
+      (click)="openNewSectionModal()"
+    >
+      <app-icon icon="add" />
+      Add a section
+    </button>
+  </div>
+}
 
 <div class="sections-container">
   <div *ngFor="let section of sections()">
@@ -79,6 +78,9 @@
               [options]="section.initial_conditions"
               placeholder="View initial conditions"
               class="w-full md:w-56"
+              appendTo="body"
+              panelStyleClass="select-panel"
+              [panelStyle]="{ right: '0', left: 'unset' }"
             >
               <ng-template #selectedItem i18n>
                 View initial conditions

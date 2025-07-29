@@ -66,6 +66,9 @@ export class NewStudyModalComponent {
   titleLength = computed(() => this.title().length ?? 0);
   descriptionLength = computed(() => this.description().length ?? 0);
 
+  newStudyTitle = $localize`New study`;
+  modifyStudyTitle = $localize`Modify study`;
+
   updateTitle(title: string) {
     this.title.set(title);
   }
