@@ -147,6 +147,15 @@ export const primengPreset = definePreset(Aura, {
         }
       `
     },
+    select: {
+      css: () => `
+        .select-panel .p-select-option:not(.p-select-option-selected):not(.p-disabled).p-focus {
+          background: unset;
+          color: unset;
+          cursor: auto;
+        }
+      `
+    },
     stepper: {
       css: ({ dt }: { dt: (key: string) => string }) => `
         :root {

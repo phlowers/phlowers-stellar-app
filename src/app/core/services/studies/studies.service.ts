@@ -29,7 +29,7 @@ export class StudiesService {
    * Create a new study
    * @param study The study to create
    */
-  async createStudy(study: StudyModel) {
+  async createStudy(study: StudyModel): Promise<string> {
     const uuid = uuidv4();
     const user = (await this.storageService.db?.users.toArray())?.[0];
     await this.storageService.db?.studies.add({
@@ -42,6 +42,7 @@ export class StudiesService {
     });
     const studies = await this.getStudies();
     this.studies.next(studies);
+    return uuid;
   }
 
   /**
@@ -119,7 +120,10 @@ export class StudiesService {
    * Update a study
    * @param study The study to update
    */
-  async updateStudy(study: Study) {
-    await this.storageService.db?.studies.put(study);
+  async updateStudy(study: { uuid: string } & Partial<Study>) {
+    await this.storageService.db?.studies.update(study.uuid, {
+      ...study,
+      updated_at_offline: new Date().toISOString()
+    });
   }
 }

@@ -1,0 +1,96 @@
+<p-dialog
+  dismissableMask="true"
+  [visible]="isOpen()"
+  (visibleChange)="onVisibleChange($event)"
+  i18n-header
+  header="Create an initial condition"
+  [style]="{ width: '50vw' }"
+  [modal]="true"
+>
+  <form class="flex flex-row gap-2 w-full" action="">
+    <div class="flex flex-col gap-2 w-full">
+      <div class="flex flex-col gap-2">
+        <label for="initial-condition-name" i18n>Section name</label>
+        <input
+          type="text"
+          readonly
+          id="section-name"
+          pInputText
+          [value]="section().name"
+        />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="initial-condition-name" i18n>Cable name</label>
+        <input
+          type="text"
+          readonly
+          id="cable-name"
+          pInputText
+          [value]="section().cable_name"
+        />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="initial-condition-name" i18n>Cables amount</label>
+        <input
+          type="text"
+          readonly
+          id="cables-amount"
+          pInputText
+          [value]="section().cables_amount"
+        />
+      </div>
+    </div>
+    <p-divider layout="vertical" />
+    <div class="flex flex-col gap-2 w-full">
+      <div class="flex flex-col gap-2">
+        <label for="initial-condition-name" i18n>Initial condition name</label>
+        <input
+          name="initial-condition-name"
+          required
+          type="text"
+          id="initial-condition-base-parameter"
+          pInputText
+          [(ngModel)]="initialCondition().name"
+        />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="initial-condition-name" i18n>Base parameter</label>
+        <input
+          name="initial-condition-base-parameter"
+          required
+          type="text"
+          id="initial-condition-base-parameter"
+          pInputText
+          [(ngModel)]="initialCondition().base_parameters"
+        />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="initial-condition-name" i18n>Base temperature (°C)</label>
+        <input
+          name="initial-condition-base-temperature"
+          required
+          type="number"
+          id="initial-condition-base-temperature"
+          pInputText
+          [(ngModel)]="initialCondition().base_temperature"
+        />
+      </div>
+    </div>
+  </form>
+  <ng-template #footer>
+    <button
+      app-btn
+      type="submit"
+      btnSize="m"
+      btnStyle="outlined"
+      (click)="isOpenChange.emit(false)"
+    >
+      <app-icon icon="close" />
+      <span i18n>Cancel</span>
+    </button>
+    <button app-btn type="button" btnSize="m" (click)="onSubmit()">
+      <app-icon icon="check" />
+      <span i18n>Validate</span>
+    </button>
+  </ng-template>
+</p-dialog>

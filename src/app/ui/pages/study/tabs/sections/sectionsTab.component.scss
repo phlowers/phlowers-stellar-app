@@ -33,3 +33,7 @@
 .section-value {
   @apply pt-1
 }
+
+.initial-condition-name {
+  @apply w-24 max-w-24 whitespace-nowrap inline-block overflow-hidden overflow-ellipsis;
+}
