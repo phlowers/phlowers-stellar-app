@@ -5,6 +5,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { AccordionModule } from 'primeng/accordion';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-study-header',
@@ -13,7 +14,8 @@ import { DatePipe } from '@angular/common';
     IconComponent,
     TagComponent,
     AccordionModule,
-    DatePipe
+    DatePipe,
+    CommonModule
   ],
   templateUrl: './study-header.component.html',
   styleUrl: './study-header.component.scss'
@@ -24,6 +26,7 @@ export class StudyHeaderComponent {
   public activeDetail = signal<string>('');
   public study = input.required<Study | null>();
   public duplicateStudy = output<string>();
+  public openModifyStudyModal = output<void>();
 
   toggleActiveDetail() {
     this.isDetailOpen.set(!this.isDetailOpen());

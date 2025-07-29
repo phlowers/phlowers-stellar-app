@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudyHeaderComponent } from '../../shared/components/layout/study-header/study-header.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
@@ -15,6 +15,9 @@ import { Section } from '@src/app/core/data/database/interfaces/section';
 import { v4 as uuidv4 } from 'uuid';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { NewStudyModalComponent } from '../studies/components/new-study-modal/new-study-modal.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-study',
@@ -28,13 +31,16 @@ import { ToastModule } from 'primeng/toast';
     StepperModule,
     InputTextModule,
     SectionsTabComponent,
-    ToastModule
+    ToastModule,
+    CommonModule,
+    NewStudyModalComponent
   ],
   templateUrl: './study.component.html',
   styleUrl: './study.component.scss'
 })
 export class StudyComponent implements OnInit {
   study: Study | null = null;
+  isNewStudyModalOpen = signal<boolean>(false);
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -45,6 +51,9 @@ export class StudyComponent implements OnInit {
 
   ngOnInit(): void {
     const uuid = this.route.snapshot.paramMap.get('uuid');
+    if (!uuid) {
+      this.router.navigate(['/studies']);
+    }
     this.studiesService.ready.subscribe((ready) => {
       if (ready && uuid) {
         this.studiesService.getStudy(uuid).then((study) => {
@@ -56,20 +65,30 @@ export class StudyComponent implements OnInit {
     });
     this.route.params.subscribe((params) => {
       const uuid = params['uuid'];
-      if (uuid && this.studiesService.ready.value) {
-        this.studiesService.getStudy(uuid).then((study) => {
-          if (study) {
-            this.study = study;
-          }
-        });
+      if (uuid) {
+        this.refreshStudy(uuid);
       }
     });
+  }
+
+  refreshStudy(uuid: string) {
+    if (uuid && this.studiesService.ready.value) {
+      this.studiesService.getStudy(uuid).then((study) => {
+        if (study) {
+          this.study = study;
+        }
+      });
+    }
+  }
+
+  openModifyStudyModal() {
+    this.isNewStudyModalOpen.set(true);
   }
 
   duplicateStudy(uuid: string) {
     this.studiesService.duplicateStudy(uuid).then((study) => {
       if (study) {
-        this.router.navigate(['/study', study.uuid]);
+        this.router.navigate(['/study', study?.uuid]);
       }
     });
     this.messageService.add({
@@ -85,12 +104,13 @@ export class StudyComponent implements OnInit {
       return;
     }
     const existingSection = this.study?.sections.find(
-      (s) => s.uuid === section.uuid
+      (s) => s?.uuid === section?.uuid
     );
     if (existingSection) {
       this.study.sections = this.study.sections.map((s) =>
-        s.uuid === section.uuid ? section : s
+        s?.uuid === section?.uuid ? section : s
       );
+      this.studiesService.updateStudy(this.study);
       this.messageService.add({
         severity: 'success',
         summary: $localize`Successful`,
@@ -114,7 +134,7 @@ export class StudyComponent implements OnInit {
       return;
     }
     this.study.sections = this.study.sections.filter(
-      (s) => s.uuid !== section.uuid
+      (s) => s?.uuid !== section?.uuid
     );
     this.studiesService.updateStudy(this.study);
   }
@@ -127,6 +147,53 @@ export class StudyComponent implements OnInit {
       ...this.study.sections,
       { ...section, uuid: uuidv4() }
     ];
+    this.studiesService.updateStudy(this.study);
+  }
+
+  addInitialCondition({
+    section,
+    initialCondition
+  }: {
+    section: Section;
+    initialCondition: InitialCondition;
+  }) {
+    if (!this.study) {
+      return;
+    }
+    this.study.sections = this.study.sections.map((s) =>
+      s?.uuid === section?.uuid
+        ? {
+            ...s,
+            initial_conditions: [
+              ...(s.initial_conditions || []),
+              initialCondition
+            ]
+          }
+        : s
+    );
+    this.studiesService.updateStudy(this.study);
+  }
+
+  deleteInitialCondition({
+    section,
+    initialCondition
+  }: {
+    section: Section;
+    initialCondition: InitialCondition;
+  }) {
+    if (!this.study) {
+      return;
+    }
+    this.study.sections = this.study.sections.map((s) =>
+      s?.uuid === section?.uuid
+        ? {
+            ...s,
+            initial_conditions: s.initial_conditions?.filter(
+              (ic) => ic?.uuid !== initialCondition?.uuid
+            )
+          }
+        : s
+    );
     this.studiesService.updateStudy(this.study);
   }
 }

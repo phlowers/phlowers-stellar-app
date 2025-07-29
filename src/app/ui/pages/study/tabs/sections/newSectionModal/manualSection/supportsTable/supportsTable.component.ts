@@ -17,7 +17,8 @@ import { Support } from 'src/app/core/data/database/interfaces/support';
     ButtonComponent,
     IconComponent
   ],
-  templateUrl: './supportsTable.component.html'
+  templateUrl: './supportsTable.component.html',
+  styleUrls: ['./supportsTable.component.scss']
 })
 export class SupportsTableComponent {
   supports = input<Support[]>([]);

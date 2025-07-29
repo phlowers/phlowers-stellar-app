@@ -9,6 +9,9 @@ import { PopoverModule } from 'primeng/popover';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
+import { InitialConditionModalComponent } from './initialConditionModal/initialConditionModal.component';
+import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { DividerModule } from 'primeng/divider';
 
 const createSection = (): Section => {
   return {
@@ -41,7 +44,8 @@ const createSection = (): Section => {
     lit: '',
     branch_name: '',
     electric_tension_level: '',
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    initial_conditions: []
   };
 };
 
@@ -55,7 +59,9 @@ const createSection = (): Section => {
     CardComponent,
     PopoverModule,
     SelectModule,
-    FormsModule
+    FormsModule,
+    InitialConditionModalComponent,
+    DividerModule
   ],
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss'
@@ -65,6 +71,14 @@ export class SectionsTabComponent {
   createOrUpdateSection = output<Section>();
   deleteSection = output<Section>();
   duplicateSection = output<Section>();
+  addInitialCondition = output<{
+    section: Section;
+    initialCondition: InitialCondition;
+  }>();
+  deleteInitialCondition = output<{
+    section: Section;
+    initialCondition: InitialCondition;
+  }>();
   currentSection = signal<Section>(createSection());
   isNewSectionModalOpen = signal<boolean>(false);
   isInitialConditionModalOpen = signal<boolean>(false);
@@ -86,5 +100,9 @@ export class SectionsTabComponent {
   openInitialConditionModal(section: Section) {
     this.currentSection.set(section);
     this.isInitialConditionModalOpen.set(true);
+  }
+
+  onInitialConditionModalOpenChange(isOpen: boolean) {
+    this.isInitialConditionModalOpen.set(isOpen);
   }
 }

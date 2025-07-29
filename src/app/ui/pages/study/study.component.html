@@ -1,4 +1,18 @@
-<app-study-header [study]="study" (duplicateStudy)="duplicateStudy($event)" />
+<app-study-header
+  [study]="study"
+  (duplicateStudy)="duplicateStudy($event)"
+  (openModifyStudyModal)="openModifyStudyModal()"
+/>
+@if (study) {
+  <app-new-study-modal
+    [(isOpen)]="isNewStudyModalOpen"
+    mode="modify"
+    [studyUuid]="study!.uuid"
+    [titleInput]="study!.title"
+    [descriptionInput]="study!.description ?? ''"
+    (refreshStudy)="refreshStudy($event)"
+  />
+}
 <div class="mt-6">
   <p-tabs value="sections">
     <p-tablist>
@@ -14,6 +28,8 @@
           (createOrUpdateSection)="createOrUpdateSection($event)"
           (deleteSection)="deleteSection($event)"
           (duplicateSection)="duplicateSection($event)"
+          (addInitialCondition)="addInitialCondition($event)"
+          (deleteInitialCondition)="deleteInitialCondition($event)"
         />
       </p-tabpanel>
       <p-tabpanel value="initialState"> </p-tabpanel>

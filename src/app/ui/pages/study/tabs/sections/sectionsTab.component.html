@@ -4,22 +4,29 @@
   (outputSection)="createOrUpdateSection.emit($event)"
   [section]="currentSection()"
 />
-<div
-  *ngIf="sections().length === 0"
-  class="flex flex-col gap-4 items-center justify-center"
->
-  <div class="mt-10 no-section-text" i18n>No existing section</div>
-  <button
-    i18n
-    app-btn
-    btnStyle="base"
-    btnSize="l"
-    (click)="openNewSectionModal()"
-  >
-    <app-icon icon="add" />
-    Add a section
-  </button>
-</div>
+
+<app-initial-condition-modal
+  [isOpen]="isInitialConditionModalOpen()"
+  (isOpenChange)="onInitialConditionModalOpenChange($event)"
+  [section]="currentSection()"
+  (addInitialCondition)="addInitialCondition.emit($event)"
+/>
+
+@if (sections().length > 0) {
+  <div class="flex flex-col gap-4 items-center justify-center">
+    <div class="mt-10 no-section-text" i18n>No existing section</div>
+    <button
+      i18n
+      app-btn
+      btnStyle="base"
+      btnSize="l"
+      (click)="openNewSectionModal()"
+    >
+      <app-icon icon="add" />
+      Add a section
+    </button>
+  </div>
+}
 
 <div class="sections-container">
   <div *ngFor="let section of sections()">
@@ -45,7 +52,12 @@
         </div>
         <div class="section-field w-1/4">
           <span i18n class="section-card-title">Initial conditions</span>
-          <span>
+          <span
+            *ngIf="
+              !section.initial_conditions ||
+              section.initial_conditions.length === 0
+            "
+          >
             <button
               (click)="openInitialConditionModal(section)"
               app-btn
@@ -55,25 +67,72 @@
               <app-icon icon="add" />
               <span i18n>Add initial condition</span>
             </button>
-            <!-- <p-select
-              [options]="groupedCities"
-              [(ngModel)]="selectedCity"
-              placeholder="Select a City"
-              [group]="true"
+          </span>
+          <span
+            *ngIf="
+              section.initial_conditions &&
+              section.initial_conditions.length > 0
+            "
+          >
+            <p-select
+              [options]="section.initial_conditions"
+              placeholder="View initial conditions"
               class="w-full md:w-56"
+              appendTo="body"
+              panelStyleClass="select-panel"
+              [panelStyle]="{ right: '0', left: 'unset' }"
             >
-              <ng-template let-group #group>
-                <div class="flex items-center">
-                  <img
-                    alt="flag"
-                    src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png"
-                    [class]="'mr-2 flag flag-' + group.value"
-                    style="width: 20px"
-                  />
-                  <span>{{ group.label }}</span>
+              <ng-template #selectedItem i18n>
+                View initial conditions
+              </ng-template>
+              <ng-template let-initialCondition let-index="index" #item>
+                <div
+                  (click)="$event.stopPropagation(); $event.preventDefault()"
+                  (keydown)="$event.stopPropagation(); $event.preventDefault()"
+                  [tabindex]="index"
+                  class="flex flex-row gap-2 items-center"
+                >
+                  <span class="initial-condition-name">{{
+                    initialCondition.name
+                  }}</span>
+                  <p-divider layout="vertical" class="!m-0" />
+                  <button
+                    app-btn
+                    btnSize="l"
+                    btnStyle="text"
+                    (click)="
+                      openInitialConditionModal(section);
+                      $event.stopPropagation();
+                      $event.preventDefault()
+                    "
+                  >
+                    <app-icon icon="eye_tracking" />
+                  </button>
+                  <p-divider layout="vertical" class="!m-0" />
+                  <button app-btn btnSize="l" btnStyle="text">
+                    <app-icon icon="edit" />
+                  </button>
+                  <p-divider layout="vertical" class="!m-0" />
+                  <button app-btn btnSize="l" btnStyle="text">
+                    <app-icon icon="content_copy" />
+                  </button>
+                  <p-divider layout="vertical" class="!m-0" />
+                  <button
+                    (click)="
+                      deleteInitialCondition.emit({
+                        section,
+                        initialCondition: initialCondition
+                      })
+                    "
+                    app-btn
+                    btnSize="l"
+                    btnStyle="text"
+                  >
+                    <app-icon icon="delete" />
+                  </button>
                 </div>
               </ng-template>
-            </p-select> -->
+            </p-select>
           </span>
         </div>
         <div class="section-field ml-auto">
@@ -97,6 +156,15 @@
                 >
                   <app-icon icon="edit" />
                   <span i18n>Edit</span>
+                </button>
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  (click)="openInitialConditionModal(section)"
+                >
+                  <app-icon icon="add_circle" />
+                  <span i18n>Add an initial condition</span>
                 </button>
                 <button
                   app-btn
