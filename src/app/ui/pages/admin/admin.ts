@@ -24,6 +24,7 @@ const CACHE_NAME = 'app-assets';
   selector: 'app-admin',
   standalone: true,
   styleUrls: ['./admin.scss'],
+  templateUrl: './admin.html',
   imports: [
     CommonModule,
     ButtonModule,
@@ -33,58 +34,7 @@ const CACHE_NAME = 'app-assets';
     ToastModule,
     ConfirmDialogModule,
     ButtonComponent
-  ],
-  template: `
-    <p-confirmdialog />
-    <div class="flex flex-col gap-4">
-      <p-card i18n-header header="App version">
-        <table class="my-2" style="width: 100%; border: 1px solid #ccc">
-          <thead>
-            <tr>
-              <th></th>
-              <th i18n>Current version</th>
-              <th i18n>Latest version</th>
-            </tr>
-          </thead>
-          <tr>
-            <td i18n>Build Hash</td>
-            <td>{{ updateService.currentVersion?.git_hash }}</td>
-            <td>{{ updateService.latestVersion?.git_hash }}</td>
-          </tr>
-          <tr>
-            <td i18n>Build datetime</td>
-            <td>{{ updateService.currentVersion?.build_datetime_utc }}</td>
-            <td>{{ updateService.latestVersion?.build_datetime_utc }}</td>
-          </tr>
-          <tr>
-            <td i18n>Build version</td>
-            <td>{{ updateService.currentVersion?.version }}</td>
-            <td>{{ updateService.latestVersion?.version }}</td>
-          </tr>
-        </table>
-        <p-button
-          i18n
-          [loading]="updateService.updateLoading"
-          *ngIf="updateService.needUpdate"
-          (click)="updateService.update()"
-          >Update to latest version</p-button
-        >
-      </p-card>
-      <p-card i18n-header header="Danger zone">
-        <div class="flex flex-row gap-2">
-          <button app-btn i18n class="danger-btn" (click)="deleteAllStudies()">
-            Delete all studies
-          </button>
-          <button app-btn i18n class="danger-btn" (click)="resetDatabase()">
-            Reset database
-          </button>
-          <button app-btn i18n class="danger-btn" (click)="deleteCache()">
-            Delete app cache
-          </button>
-        </div>
-      </p-card>
-    </div>
-  `
+  ]
 })
 export class AdminComponent implements OnInit {
   constructor(
@@ -101,15 +51,15 @@ export class AdminComponent implements OnInit {
     this.updateService.sucessFullUpdate.subscribe(() => {
       this.messageService.add({
         severity: 'success',
-        summary: 'Update successful',
-        detail: 'The application has been updated to the latest version'
+        summary: $localize`Update successful`,
+        detail: $localize`The application has been updated to the latest version`
       });
     });
   }
 
   deleteAllStudies() {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete all studies?',
+      message: $localize`Are you sure you want to delete all studies?`,
       accept: () => {
         this.studyService.deleteAllStudies();
         this.messageService.add({
@@ -123,7 +73,7 @@ export class AdminComponent implements OnInit {
 
   resetDatabase() {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to reset the database?',
+      message: $localize`Are you sure you want to reset the database?`,
       accept: () => {
         this.storageService.resetDatabase();
         this.messageService.add({
@@ -137,7 +87,7 @@ export class AdminComponent implements OnInit {
 
   deleteCache() {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to reset the app?',
+      message: $localize`Are you sure you want to reset the app?`,
       accept: () => {
         caches.delete(CACHE_NAME).then(() => {
           this.messageService.add({

@@ -1,11 +1,6 @@
 table td,
 table th {
-  border: 1px solid grey;
+  border: .0625rem solid var(--grey-300);
   border-collapse: collapse;
   padding: 0.5rem;
-}
-
-.danger-btn {
-  background-color: red;
-  color: white;
 }
