@@ -13,7 +13,7 @@ import { Component, computed, input, ViewEncapsulation } from '@angular/core';
 })
 export class ButtonComponent {
   btnSize = input<'s' | 'm' | 'l'>('m');
-  btnStyle = input<'base' | 'outlined' | 'text'>('base');
+  btnStyle = input<'base' | 'outlined' | 'text' | 'danger'>('base');
 
   classesList = computed(() => {
     const classes: string[] = [];

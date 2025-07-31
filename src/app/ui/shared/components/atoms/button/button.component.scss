@@ -177,3 +177,21 @@ a.app-btn {
 
   // disabled design inherited from common styles
 }
+
+.app-btn-danger {
+  background-color: var(--error-600);
+  color: var(--grey-white);
+
+  &:hover {
+    background-color: var(--error-700);
+  }
+
+  &:active {
+    background-color: var(--error-800);
+  }
+
+  &:focus-visible {
+    outline: 0.0625rem solid var(--error-900);
+    outline-offset: 0.25rem;
+  }
+}

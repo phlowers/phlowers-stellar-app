@@ -46,4 +46,12 @@ export class StorageService {
       throw error;
     }
   }
+
+  /**
+   * Reset the database
+   */
+  async resetDatabase() {
+    await this.db?.delete();
+    await this.createDatabase();
+  }
 }
