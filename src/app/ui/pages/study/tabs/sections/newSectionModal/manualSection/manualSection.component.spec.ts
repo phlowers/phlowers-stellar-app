@@ -78,6 +78,7 @@ describe('ManualSectionComponent', () => {
     component = fixture.componentInstance;
     // Patch the input() API for test
     (component.section as any) = () => mockSection;
+    (component.mode as any) = () => 'create';
     component.sectionChange = { emit: jest.fn() } as any;
     fixture.detectChanges();
   });
@@ -90,15 +91,15 @@ describe('ManualSectionComponent', () => {
     it('should do nothing if amount equals current supports length', () => {
       mockSection.supports = [createSupportMock()];
       component.supportsAmount = 1;
-      const event = { target: { value: '1' } };
-      component.onSupportsAmountChange(event);
+      const event = { originalEvent: { type: 'mousedown' }, value: 1 };
+      component.onSupportsAmountChangeInput(event);
       expect(mockSection.supports.length).toBe(1);
     });
 
     it('should add supports if amount increases', () => {
       mockSection.supports = [];
-      const event = { target: { value: '2' } };
-      component.onSupportsAmountChange(event);
+      const event = { originalEvent: { type: 'mousedown' }, value: 2 };
+      component.onSupportsAmountChangeInput(event);
       expect(mockSection.supports.length).toBe(2);
     });
 
@@ -108,9 +109,17 @@ describe('ManualSectionComponent', () => {
         createSupportMock(),
         createSupportMock()
       ];
-      const event = { target: { value: '2' } };
-      component.onSupportsAmountChange(event);
+      const event = { originalEvent: { type: 'mousedown' }, value: 2 };
+      component.onSupportsAmountChangeInput(event);
       expect(mockSection.supports.length).toBe(2);
+    });
+
+    it('should not update supports if event type is not mousedown', () => {
+      mockSection.supports = [createSupportMock()];
+      component.supportsAmount = 1;
+      const event = { originalEvent: { type: 'keydown' }, value: 2 };
+      component.onSupportsAmountChangeInput(event);
+      expect(mockSection.supports.length).toBe(1);
     });
   });
 
