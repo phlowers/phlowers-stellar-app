@@ -105,6 +105,15 @@ export class StudiesService {
   }
 
   /**
+   * Delete all studies
+   */
+  async deleteAllStudies() {
+    await this.storageService.db?.studies.clear();
+    const studies = await this.getStudies();
+    this.studies.next(studies);
+  }
+
+  /**
    * Get the latest studies
    * @returns The latest studies
    */
