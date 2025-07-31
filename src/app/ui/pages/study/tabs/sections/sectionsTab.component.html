@@ -17,8 +17,8 @@
 />
 
 @if (sections().length <= 0) {
-  <div class="flex flex-col gap-4 items-center justify-center">
-    <div class="mt-10 no-section-text" i18n>No existing section</div>
+  <section class="flex flex-col gap-4 items-center justify-center">
+    <h1 class="mt-10 no-section-text" i18n>No existing section</h1>
     <button
       i18n
       app-btn
@@ -29,39 +29,43 @@
       <app-icon icon="add" />
       Add a section
     </button>
-  </div>
+  </section>
 }
 
-<div class="sections-container">
-  <div *ngFor="let section of sections()">
-    <app-card class="card" role="div">
+<article class="sections-container">
+  @for (section of sections(); track section.uuid) {
+    <app-card class="card" role="article">
       <div class="flex flex-row gap-4">
         <div class="section-field w-1/4">
           <span i18n class="section-card-title">Section Name</span>
           <span class="section-value">{{ section.name }}</span>
         </div>
+
         <div class="section-field w-1/8">
           <span i18n class="section-card-title">Section type</span>
           <span class="section-value">{{ section.type }}</span>
         </div>
+
         <div class="section-field w-1/6">
           <span i18n class="section-card-title">LIT</span>
           <span class="section-value">{{ section.lit }}</span>
         </div>
+
         <div class="section-field w-1/6">
           <span i18n class="section-card-title">Last modified</span>
+
           <span class="section-value">{{
             section.updatedAt | date: 'dd/MM/yyyy HH:mm'
           }}</span>
         </div>
+
         <div class="section-field w-1/4">
           <span i18n class="section-card-title">Initial conditions</span>
-          <span
-            *ngIf="
-              !section.initial_conditions ||
-              section.initial_conditions.length === 0
-            "
-          >
+
+          @if (
+            !section.initial_conditions ||
+            section.initial_conditions.length === 0
+          ) {
             <button
               (click)="
                 openInitialConditionModal(
@@ -77,24 +81,22 @@
               <app-icon icon="add" />
               <span i18n>Add initial condition</span>
             </button>
-          </span>
-          <span
-            *ngIf="
-              section.initial_conditions &&
-              section.initial_conditions.length > 0
-            "
-          >
+          }
+
+          @if (
+            section.initial_conditions && section.initial_conditions.length > 0
+          ) {
             <p-select
               [options]="section.initial_conditions"
               placeholder="View initial conditions"
-              class="w-full md:w-56"
               appendTo="body"
-              panelStyleClass="select-panel"
+              panelStyleClass="initial-condition-select"
               [panelStyle]="{ right: '0', left: 'unset' }"
             >
               <ng-template #selectedItem i18n>
                 View initial conditions
               </ng-template>
+
               <ng-template let-initialCondition let-index="index" #item>
                 <div
                   (click)="$event.stopPropagation(); $event.preventDefault()"
@@ -102,10 +104,12 @@
                   [tabindex]="index"
                   class="flex flex-row gap-2 items-center"
                 >
-                  <span class="initial-condition-name">{{
-                    initialCondition.name
-                  }}</span>
+                  <span class="initial-condition-name">
+                    {{ initialCondition.name }}
+                  </span>
+
                   <p-divider layout="vertical" class="!m-0" />
+
                   <button
                     app-btn
                     btnSize="l"
@@ -122,6 +126,7 @@
                   >
                     <app-icon icon="eye_tracking" />
                   </button>
+
                   <p-divider layout="vertical" class="!m-0" />
                   <button
                     app-btn
@@ -139,6 +144,7 @@
                   >
                     <app-icon icon="edit" />
                   </button>
+
                   <p-divider layout="vertical" class="!m-0" />
                   <button
                     app-btn
@@ -155,7 +161,9 @@
                   >
                     <app-icon icon="content_copy" />
                   </button>
+
                   <p-divider layout="vertical" class="!m-0" />
+
                   <button
                     (click)="
                       deleteInitialCondition.emit({
@@ -172,18 +180,21 @@
                 </div>
               </ng-template>
             </p-select>
-          </span>
+          }
         </div>
-        <div class="section-field ml-auto">
+
+        <div class="section-field section-field--actions ml-auto">
           <span i18n class="section-card-title">Actions</span>
+
           <button
             (click)="popover.toggle($event)"
             app-btn
-            btnSize="s"
+            btnSize="l"
             btnStyle="text"
           >
-            <span class="pi pi-ellipsis-h"></span>
+            <app-icon icon="more_horiz" />
           </button>
+
           <p-popover #popover>
             <ng-template pTemplate="content">
               <div class="section-field">
@@ -205,6 +216,7 @@
                   <app-icon icon="edit" />
                   <span i18n>Edit</span>
                 </button>
+
                 <button
                   app-btn
                   btnSize="s"
@@ -220,6 +232,7 @@
                   <app-icon icon="add_circle" />
                   <span i18n>Add an initial condition</span>
                 </button>
+
                 <button
                   app-btn
                   btnSize="s"
@@ -229,6 +242,7 @@
                   <app-icon icon="content_copy" />
                   <span i18n>Duplicate</span>
                 </button>
+
                 <button
                   app-btn
                   btnSize="s"
@@ -244,20 +258,20 @@
         </div>
       </div>
     </app-card>
+  }
+</article>
+
+@if (sections().length > 0) {
+  <div class="flex justify-end mt-4 sticky bottom-0">
+    <button
+      i18n
+      app-btn
+      btnStyle="outlined"
+      btnSize="m"
+      (click)="openNewSectionModalCreate()"
+    >
+      <app-icon icon="add" />
+      Add a section
+    </button>
   </div>
-</div>
-<div
-  *ngIf="sections().length > 0"
-  class="flex justify-end mt-4 sticky bottom-0"
->
-  <button
-    i18n
-    app-btn
-    btnStyle="outlined"
-    btnSize="m"
-    (click)="openNewSectionModalCreate()"
-  >
-    <app-icon icon="add" />
-    Add a section
-  </button>
-</div>
+}

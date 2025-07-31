@@ -1,0 +1,8 @@
+// specific override for initial condition select list in study section tab (page study)
+.initial-condition-select.initial-condition-select {
+  .p-select-option.p-select-option.p-focus {
+    background: unset;
+    color: unset;
+    cursor: auto;
+  }
+}

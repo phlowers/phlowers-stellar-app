@@ -1,0 +1,22 @@
+.p-datatable.p-datatable {
+  .p-datatable-table {
+    border-collapse: unset;
+
+    .p-datatable-thead > tr > th {
+      border-width: 0.0625rem 0rem 0.0625rem 0rem;
+    }
+  }
+
+  .p-paginator-rpp-dropdown {
+    order: -1;
+  }
+
+  .p-paginator {
+    justify-content: end;
+  }
+
+  .p-paginator-current {
+    margin-right: 1.875rem;
+    margin-left: 1.875rem;
+  }
+}
