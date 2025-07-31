@@ -11,7 +11,7 @@ import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { OnlineService } from '@core/services/online/online.service';
 import { WorkerService } from '@core/services/worker_python/worker_python.service';
 import { StorageService } from '@core/services/storage/storage.service';
@@ -41,7 +41,8 @@ const modules = [
     WorkerService,
     OnlineService,
     UserService,
-    StudiesService
+    StudiesService,
+    ConfirmationService
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

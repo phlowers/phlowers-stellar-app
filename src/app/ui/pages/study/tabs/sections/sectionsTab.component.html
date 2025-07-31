@@ -12,7 +12,7 @@
   (addInitialCondition)="addInitialCondition.emit($event)"
 />
 
-@if (sections().length > 0) {
+@if (sections().length <= 0) {
   <div class="flex flex-col gap-4 items-center justify-center">
     <div class="mt-10 no-section-text" i18n>No existing section</div>
     <button
