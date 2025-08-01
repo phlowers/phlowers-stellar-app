@@ -1,153 +1,204 @@
-<p-stepper [value]="1" class="basis-[50rem]">
-  <div class="flex justify-center">
-    <p-step-list [style]="{ width: '500px' }">
-      <p-step i18n [value]="1">General</p-step>
-      <p-step i18n [value]="2">Supports</p-step>
-    </p-step-list>
-  </div>
-  <p-step-panels>
-    <p-step-panel [value]="1">
-      <ng-template #content let-activateCallback="activateCallback">
-        <div class="section-form-part">
-          <h3 class="title-underline" i18n>Section</h3>
-          <div class="section-form-part-grid">
-            <div class="flex flex-col">
-              <label for="sectionName" class="ml-2" i18n>Section name</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().name"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="sectionType" class="ml-2" i18n>Section type</label>
-              <p-dropdown
-                [options]="sectionTypes"
-                [(ngModel)]="section().type"
-                optionLabel="name"
-                optionValue="code"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="cableAmount" class="ml-2" i18n>Cable amount</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().cables_amount"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="cableName" class="ml-2" i18n>Cable name</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().cable_name"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="supportsAmount" class="ml-2" i18n
-                >Supports amount</label
-              >
-              <input
-                type="number"
-                pInputText
-                [(ngModel)]="supportsAmount"
-                (change)="onSupportsAmountChange($event)"
-              />
-            </div>
+<p-tabs
+  value="1"
+  class="basis-[50rem] {{ mode() === 'view' ? 'mt-0' : 'mt-4' }}"
+>
+  <p-tablist>
+    <p-tab value="1" i18n>General</p-tab>
+    <p-tab value="2" i18n>Supports</p-tab>
+    @if (mode() === 'view') {
+      <p-tab value="3" i18n>Graphical view</p-tab>
+    }
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="1">
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Section</h3>
+        <div class="section-form-part-grid">
+          <div class="flex flex-col">
+            <label for="sectionName" class="ml-2" i18n
+              >Section name
+              <span class="red-star">*</span>
+            </label>
+            <input
+              type="text"
+              pInputText
+              id="sectionName"
+              [disabled]="mode() === 'view'"
+              required
+              [(ngModel)]="section().name"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="sectionType" class="ml-2" i18n
+              >Section type <span class="red-star">*</span></label
+            >
+            <p-select
+              inputId="sectionType"
+              [options]="sectionTypes"
+              [(ngModel)]="section().type"
+              optionLabel="name"
+              optionValue="code"
+              [disabled]="mode() === 'view'"
+              required
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="cableAmount" class="ml-2" i18n
+              >Cable amount <span class="red-star">*</span></label
+            >
+            <input
+              id="cableAmount"
+              type="number"
+              min="0"
+              pInputText
+              [disabled]="mode() === 'view'"
+              required
+              [(ngModel)]="section().cables_amount"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="cableName" class="ml-2" i18n
+              >Cable name <span class="red-star">*</span></label
+            >
+            <input
+              type="text"
+              id="cableName"
+              pInputText
+              [disabled]="mode() === 'view'"
+              required
+              [(ngModel)]="section().cable_name"
+              (ngModelChange)="onSectionChange()"
+            />
           </div>
         </div>
-        <div class="section-form-part">
-          <h3 class="title-underline" i18n>Maintenance</h3>
-          <div class="section-form-part-grid">
-            <div class="flex flex-col">
-              <label for="sectionName" class="ml-2" i18n>CM</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().cm"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="sectionName" class="ml-2" i18n>GMR</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().gmr"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="sectionName" class="ml-2" i18n>EEL</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().eel"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
+      </div>
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Maintenance</h3>
+        <div class="section-form-part-grid">
+          <div class="flex flex-col">
+            <label for="maintCm" class="ml-2" i18n>CM</label>
+            <input
+              type="text"
+              pInputText
+              id="maintCm"
+              [disabled]="mode() === 'view'"
+              [(ngModel)]="section().cm"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="maintGmr" class="ml-2" i18n>GMR</label>
+            <input
+              type="text"
+              pInputText
+              id="maintGmr"
+              [disabled]="mode() === 'view'"
+              [(ngModel)]="section().gmr"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="maintEel" class="ml-2" i18n>EEL</label>
+            <input
+              type="text"
+              pInputText
+              id="maintEel"
+              [disabled]="mode() === 'view'"
+              [(ngModel)]="section().eel"
+              (ngModelChange)="onSectionChange()"
+            />
           </div>
         </div>
-        <div class="section-form-part">
-          <h3 class="title-underline" i18n>Link</h3>
-          <div class="section-form-part-grid">
-            <div class="flex flex-col">
-              <label for="sectionName" class="ml-2" i18n
-                >Electric tension level</label
-              >
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().electric_tension_level"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="sectionName" class="ml-2" i18n>Link name</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().link_name"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="sectionName" class="ml-2" i18n>LIT</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().lit"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label for="sectionName" class="ml-2" i18n>Branch name</label>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="section().branch_name"
-                (ngModelChange)="onSectionChange()"
-              />
-            </div>
+      </div>
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Link</h3>
+        <div class="section-form-part-grid">
+          <div class="flex flex-col">
+            <label for="linkEtl" class="ml-2" i18n
+              >Electric tension level</label
+            >
+            <input
+              type="text"
+              pInputText
+              id="linkEtl"
+              [disabled]="mode() === 'view'"
+              [(ngModel)]="section().electric_tension_level"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="linkName" class="ml-2" i18n>Link name</label>
+            <input
+              type="text"
+              pInputText
+              id="linkName"
+              [disabled]="mode() === 'view'"
+              [(ngModel)]="section().link_name"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="linkLit" class="ml-2" i18n>LIT</label>
+            <input
+              type="text"
+              pInputText
+              id="linkLit"
+              [disabled]="mode() === 'view'"
+              [(ngModel)]="section().lit"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="linkBm" class="ml-2" i18n>Branch name</label>
+            <input
+              type="text"
+              pInputText
+              id="linkBm"
+              [disabled]="mode() === 'view'"
+              [(ngModel)]="section().branch_name"
+              (ngModelChange)="onSectionChange()"
+            />
           </div>
         </div>
-      </ng-template>
-    </p-step-panel>
+      </div>
+    </p-tabpanel>
 
-    <p-step-panel [value]="2">
-      <ng-template #content let-activateCallback="activateCallback">
+    <p-tabpanel value="2">
+      <div class="flex flex-col gap-4 mt-2">
+        <div class="flex flex-col">
+          <label for="supportsAmount" class="ml-2" i18n>Supports amount</label>
+          <p-inputnumber
+            class="w-32"
+            min="0"
+            [ngModel]="supportsAmount"
+            [showButtons]="true"
+            buttonLayout="horizontal"
+            inputId="supportsAmount"
+            spinnerMode="horizontal"
+            (onBlur)="onSupportsAmountChangeBlur($event)"
+            (onInput)="onSupportsAmountChangeInput($event)"
+          >
+            <ng-template #incrementbuttonicon>
+              <app-icon icon="add" />
+            </ng-template>
+            <ng-template #decrementbuttonicon>
+              <app-icon icon="remove" />
+            </ng-template>
+          </p-inputnumber>
+        </div>
         <app-supports-table
           [supports]="section().supports || []"
           (addSupport)="addSupport($event.index, $event.position)"
           (deleteSupport)="deleteSupport($event)"
           (supportChange)="onSupportChange($event)"
         />
-      </ng-template>
-    </p-step-panel>
-  </p-step-panels>
-</p-stepper>
+      </div>
+    </p-tabpanel>
+    @if (mode() === 'view') {
+      <p-tabpanel value="3"> </p-tabpanel>
+    }
+  </p-tabpanels>
+</p-tabs>
