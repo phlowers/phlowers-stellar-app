@@ -3,6 +3,7 @@
   (isOpenChange)="onModalOpenChange($event)"
   (outputSection)="createOrUpdateSection.emit($event)"
   [section]="currentSection()"
+  [mode]="newSectionModalMode()"
 />
 
 <app-initial-condition-modal
@@ -10,6 +11,9 @@
   (isOpenChange)="onInitialConditionModalOpenChange($event)"
   [section]="currentSection()"
   (addInitialCondition)="addInitialCondition.emit($event)"
+  (updateInitialCondition)="updateInitialCondition.emit($event)"
+  [mode]="initialConditionModalMode()"
+  [initialConditionInput]="currentInitialCondition()"
 />
 
 @if (sections().length <= 0) {
@@ -20,7 +24,7 @@
       app-btn
       btnStyle="base"
       btnSize="l"
-      (click)="openNewSectionModal()"
+      (click)="openNewSectionModalCreate()"
     >
       <app-icon icon="add" />
       Add a section
@@ -59,7 +63,13 @@
             "
           >
             <button
-              (click)="openInitialConditionModal(section)"
+              (click)="
+                openInitialConditionModal(
+                  section,
+                  createInitialCondition(),
+                  'create'
+                )
+              "
               app-btn
               btnSize="s"
               btnStyle="outlined"
@@ -101,7 +111,11 @@
                     btnSize="l"
                     btnStyle="text"
                     (click)="
-                      openInitialConditionModal(section);
+                      openInitialConditionModal(
+                        section,
+                        initialCondition,
+                        'view'
+                      );
                       $event.stopPropagation();
                       $event.preventDefault()
                     "
@@ -109,11 +123,36 @@
                     <app-icon icon="eye_tracking" />
                   </button>
                   <p-divider layout="vertical" class="!m-0" />
-                  <button app-btn btnSize="l" btnStyle="text">
+                  <button
+                    app-btn
+                    btnSize="l"
+                    btnStyle="text"
+                    (click)="
+                      openInitialConditionModal(
+                        section,
+                        initialCondition,
+                        'edit'
+                      );
+                      $event.stopPropagation();
+                      $event.preventDefault()
+                    "
+                  >
                     <app-icon icon="edit" />
                   </button>
                   <p-divider layout="vertical" class="!m-0" />
-                  <button app-btn btnSize="l" btnStyle="text">
+                  <button
+                    app-btn
+                    btnSize="l"
+                    btnStyle="text"
+                    (click)="
+                      duplicateInitialCondition.emit({
+                        section,
+                        initialCondition: initialCondition
+                      });
+                      $event.stopPropagation();
+                      $event.preventDefault()
+                    "
+                  >
                     <app-icon icon="content_copy" />
                   </button>
                   <p-divider layout="vertical" class="!m-0" />
@@ -152,6 +191,15 @@
                   app-btn
                   btnSize="s"
                   btnStyle="text"
+                  (click)="viewSection(section)"
+                >
+                  <app-icon icon="eye_tracking" />
+                  <span i18n>View</span>
+                </button>
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
                   (click)="editSection(section)"
                 >
                   <app-icon icon="edit" />
@@ -161,7 +209,13 @@
                   app-btn
                   btnSize="s"
                   btnStyle="text"
-                  (click)="openInitialConditionModal(section)"
+                  (click)="
+                    openInitialConditionModal(
+                      section,
+                      createInitialCondition(),
+                      'create'
+                    )
+                  "
                 >
                   <app-icon icon="add_circle" />
                   <span i18n>Add an initial condition</span>
@@ -201,7 +255,7 @@
     app-btn
     btnStyle="outlined"
     btnSize="m"
-    (click)="openNewSectionModal()"
+    (click)="openNewSectionModalCreate()"
   >
     <app-icon icon="add" />
     Add a section

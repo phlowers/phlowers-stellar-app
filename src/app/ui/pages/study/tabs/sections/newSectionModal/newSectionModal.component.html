@@ -7,73 +7,90 @@
   [style]="{ width: '90vw', height: '95vh' }"
   [modal]="true"
 >
-  <div class="section-form-part">
+  @if (mode() === 'create') {
     <div class="section-form-part">
-      <h3 class="title-underline" i18n>Section source</h3>
-      <div class="card flex justify-center">
-        <div class="flex flex-wrap gap-4">
-          <div class="flex items-center">
-            <p-radiobutton
-              name="source"
-              value="manual"
-              [(ngModel)]="source"
-              inputId="manual"
-            />
-            <label for="manual" class="ml-2" i18n>Manual</label>
-          </div>
-          <div class="flex items-center">
-            <p-radiobutton
-              name="source"
-              value="referencial"
-              [(ngModel)]="source"
-              inputId="referencial"
-            />
-            <label for="referencial" class="ml-2" i18n>From referencial</label>
-          </div>
-          <div class="flex items-center">
-            <p-radiobutton
-              name="source"
-              value="distantReferencial"
-              [(ngModel)]="source"
-              inputId="distantReferencial"
-            />
-            <label for="distantReferencial" class="ml-2" i18n
-              >From distant referencial</label
-            >
-          </div>
-          <div class="flex items-center">
-            <p-radiobutton
-              name="source"
-              value="extraction"
-              [(ngModel)]="source"
-              inputId="extraction"
-            />
-            <label for="ingredient2" class="ml-2" i18n>From extraction</label>
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Section source</h3>
+        <div class="card flex justify-center">
+          <div class="flex flex-wrap gap-6">
+            <div class="flex items-center">
+              <p-radiobutton
+                name="source"
+                value="manual"
+                [(ngModel)]="source"
+                inputId="manual"
+              />
+              <label for="manual" class="ml-2" i18n>Manual</label>
+              <app-icon icon="info" />
+            </div>
+            <div class="flex items-center">
+              <p-radiobutton
+                name="source"
+                value="referencial"
+                [(ngModel)]="source"
+                inputId="referencial"
+              />
+              <label for="referencial" class="ml-2" i18n
+                >From referencial</label
+              >
+              <app-icon icon="info" />
+            </div>
+            <div class="flex items-center">
+              <p-radiobutton
+                name="source"
+                value="distantReferencial"
+                [(ngModel)]="source"
+                inputId="distantReferencial"
+              />
+              <label for="distantReferencial" class="ml-2" i18n
+                >From distant referencial</label
+              >
+              <app-icon icon="info" />
+            </div>
+            <div class="flex items-center">
+              <p-radiobutton
+                name="source"
+                value="extraction"
+                [(ngModel)]="source"
+                inputId="extraction"
+              />
+              <label for="extraction" class="ml-2" i18n>From extraction</label>
+              <app-icon icon="info" />
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  }
   <div>
-    <p-divider class="my-10" />
-    <app-manual-section
-      *ngIf="source === 'manual'"
-      [section]="section()"
-      (sectionChange)="onSectionChange($event)"
-    />
+    @if (source === 'manual' && isOpen()) {
+      <app-manual-section
+        [mode]="mode()"
+        [section]="section()"
+        (sectionChange)="onSectionChange($event)"
+      />
+    }
   </div>
   <ng-template #footer>
-    <p-button
-      label="Close"
-      severity="secondary"
-      icon="pi pi-times"
-      (onClick)="onVisibleChange(false)"
-    />
-    <p-button
-      label="Validate"
-      (onClick)="onValidate()"
-      severity="primary"
-      icon="pi pi-check"
-    />
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      btnStyle="outlined"
+      (click)="onVisibleChange(false)"
+    >
+      <app-icon icon="close" />
+      <span i18n>Cancel</span>
+    </button>
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      (click)="onValidate()"
+      [disabled]="!areAllRequiredFieldsFilled()"
+    >
+      <app-icon icon="check" />
+      <span i18n>Validate</span>
+    </button>
   </ng-template>
 </p-dialog>

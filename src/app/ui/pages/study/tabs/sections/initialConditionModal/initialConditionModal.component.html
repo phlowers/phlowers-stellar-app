@@ -10,7 +10,7 @@
   <form class="flex flex-row gap-2 w-full" action="">
     <div class="flex flex-col gap-2 w-full">
       <div class="flex flex-col gap-2">
-        <label for="initial-condition-name" i18n>Section name</label>
+        <label for="section-name" i18n>Section name</label>
         <input
           type="text"
           readonly
@@ -20,7 +20,7 @@
         />
       </div>
       <div class="flex flex-col gap-2">
-        <label for="initial-condition-name" i18n>Cable name</label>
+        <label for="cable-name" i18n>Cable name</label>
         <input
           type="text"
           readonly
@@ -30,7 +30,7 @@
         />
       </div>
       <div class="flex flex-col gap-2">
-        <label for="initial-condition-name" i18n>Cables amount</label>
+        <label for="cables-amount" i18n>Cables amount</label>
         <input
           type="text"
           readonly
@@ -48,13 +48,16 @@
           name="initial-condition-name"
           required
           type="text"
-          id="initial-condition-base-parameter"
+          id="initial-condition-name"
           pInputText
           [(ngModel)]="initialCondition().name"
+          [readonly]="mode() === 'view'"
         />
       </div>
       <div class="flex flex-col gap-2">
-        <label for="initial-condition-name" i18n>Base parameter</label>
+        <label for="initial-condition-base-parameter" i18n
+          >Base parameter</label
+        >
         <input
           name="initial-condition-base-parameter"
           required
@@ -62,10 +65,13 @@
           id="initial-condition-base-parameter"
           pInputText
           [(ngModel)]="initialCondition().base_parameters"
+          [readonly]="mode() === 'view'"
         />
       </div>
       <div class="flex flex-col gap-2">
-        <label for="initial-condition-name" i18n>Base temperature (°C)</label>
+        <label for="initial-condition-base-temperature" i18n
+          >Base temperature (°C)</label
+        >
         <input
           name="initial-condition-base-temperature"
           required
@@ -73,6 +79,7 @@
           id="initial-condition-base-temperature"
           pInputText
           [(ngModel)]="initialCondition().base_temperature"
+          [readonly]="mode() === 'view'"
         />
       </div>
     </div>

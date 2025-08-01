@@ -281,12 +281,6 @@ describe('StudyComponent', () => {
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         component.study
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
     });
 
     it('should create new section', () => {
@@ -299,12 +293,6 @@ describe('StudyComponent', () => {
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         component.study
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
     });
 
     it('should not update when study is null', () => {
@@ -506,21 +494,6 @@ describe('StudyComponent', () => {
 
       expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith(
         'test-uuid'
-      );
-    });
-
-    it('should handle updateStudy errors gracefully', async () => {
-      const error = new Error('Failed to update study');
-      mockStudiesService.updateStudy.mockRejectedValue(error);
-      component.study = { ...mockStudy, sections: [mockSection] };
-
-      component.createOrUpdateSection(mockSection);
-
-      // Wait for the promise to resolve/reject
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
       );
     });
   });

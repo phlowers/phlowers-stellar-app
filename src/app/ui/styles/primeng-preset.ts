@@ -148,7 +148,9 @@ export const primengPreset = definePreset(Aura, {
       `
     },
     select: {
-      css: () => `
+      css: () =>
+        // we need to override the style of the select of the sections tab
+        `
         .select-panel .p-select-option:not(.p-select-option-selected):not(.p-disabled).p-focus {
           background: unset;
           color: unset;
