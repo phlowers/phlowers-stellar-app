@@ -1,18 +1,19 @@
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
-import { StepperModule } from 'primeng/stepper';
 import { TabsModule } from 'primeng/tabs';
 import { DialogModule } from 'primeng/dialog';
 import { DividerModule } from 'primeng/divider';
 import { Section } from '@src/app/core/data/database/interfaces/section';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { SupportsTableComponent } from './supportsTable/supportsTable.component';
 import { Support } from '@src/app/core/data/database/interfaces/support';
 import { v4 as uuidv4 } from 'uuid';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { CreateEditView } from '@src/app/ui/shared/types';
 
 const createSupport = (): Support => {
   return {
@@ -35,21 +36,22 @@ const createSupport = (): Support => {
   selector: 'app-manual-section',
   imports: [
     TabsModule,
-    AccordionModule,
     RadioButtonModule,
     FormsModule,
     ButtonModule,
-    StepperModule,
     InputTextModule,
     DialogModule,
     DividerModule,
-    DropdownModule,
-    SupportsTableComponent
+    SelectModule,
+    SupportsTableComponent,
+    InputNumberModule,
+    IconComponent
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'
 })
 export class ManualSectionComponent {
+  mode = input.required<CreateEditView>();
   section = input.required<Section>();
   sectionChange = output<any>();
   supportsAmount = 0;
@@ -58,8 +60,7 @@ export class ManualSectionComponent {
     { name: 'Phase', code: 'phase' }
   ];
 
-  onSupportsAmountChange(event: any) {
-    const amount = Number(event.target.value);
+  updateSupportsAmount(amount: number) {
     const currentSupports = this.section().supports || [];
     if (amount === currentSupports.length) {
       return;
@@ -75,6 +76,16 @@ export class ManualSectionComponent {
     } else {
       this.section().supports = currentSupports.slice(0, amount);
     }
+  }
+
+  onSupportsAmountChangeInput(event: any) {
+    if (event.originalEvent.type === 'mousedown') {
+      this.updateSupportsAmount(event.value);
+    }
+  }
+
+  onSupportsAmountChangeBlur(event: any) {
+    this.updateSupportsAmount(event.target.value);
   }
 
   addSupport(index: number, position: 'before' | 'after') {

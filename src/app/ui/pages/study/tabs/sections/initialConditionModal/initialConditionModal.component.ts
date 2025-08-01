@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, effect, input, output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
@@ -8,7 +8,7 @@ import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.com
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
-import { v4 as uuidv4 } from 'uuid';
+import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
 
 @Component({
   selector: 'app-initial-condition-modal',
@@ -27,18 +27,22 @@ export class InitialConditionModalComponent {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
   section = input.required<Section>();
-  addInitialCondition = output<{
-    section: Section;
-    initialCondition: InitialCondition;
-  }>();
+  mode = input.required<'view' | 'edit' | 'create'>();
+  addInitialCondition = output<InitialConditionFunctionsInput>();
+  updateInitialCondition = output<InitialConditionFunctionsInput>();
+  initialConditionInput = input.required<InitialCondition>();
   initialCondition = signal<InitialCondition>({
-    uuid: uuidv4(),
+    uuid: '',
     name: '',
     base_parameters: '',
     base_temperature: 0
   });
 
-  constructor(private messageService: MessageService) {}
+  constructor(private messageService: MessageService) {
+    effect(() => {
+      this.initialCondition.set(this.initialConditionInput());
+    });
+  }
 
   onVisibleChange(visible: boolean) {
     if (!visible) {
@@ -48,15 +52,18 @@ export class InitialConditionModalComponent {
 
   onSubmit() {
     this.isOpenChange.emit(false);
-    this.addInitialCondition.emit({
-      section: this.section(),
-      initialCondition: this.initialCondition()
-    });
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Initial condition added successfully`,
-      life: 3000
-    });
+    if (this.mode() === 'create') {
+      this.addInitialCondition.emit({
+        section: this.section(),
+        initialCondition: this.initialCondition()
+      });
+    } else if (this.mode() === 'edit') {
+      this.updateInitialCondition.emit({
+        section: this.section(),
+        initialCondition: this.initialCondition()
+      });
+    } else if (this.mode() === 'view') {
+      // do nothing
+    }
   }
 }

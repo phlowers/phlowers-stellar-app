@@ -12,12 +12,14 @@ import { FormsModule } from '@angular/forms';
 import { InitialConditionModalComponent } from './initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { DividerModule } from 'primeng/divider';
+import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
+import { CreateEditView } from '@src/app/ui/shared/types';
 
 const createSection = (): Section => {
   return {
     uuid: uuidv4(),
     name: '',
-    type: '',
+    type: 'phase',
     cables_amount: 0,
     cable_name: '',
     gmr: '',
@@ -71,25 +73,43 @@ export class SectionsTabComponent {
   createOrUpdateSection = output<Section>();
   deleteSection = output<Section>();
   duplicateSection = output<Section>();
-  addInitialCondition = output<{
-    section: Section;
-    initialCondition: InitialCondition;
-  }>();
-  deleteInitialCondition = output<{
-    section: Section;
-    initialCondition: InitialCondition;
-  }>();
+  addInitialCondition = output<InitialConditionFunctionsInput>();
+  updateInitialCondition = output<InitialConditionFunctionsInput>();
+  deleteInitialCondition = output<InitialConditionFunctionsInput>();
+  duplicateInitialCondition = output<InitialConditionFunctionsInput>();
   currentSection = signal<Section>(createSection());
+  currentInitialCondition = signal<InitialCondition>(
+    this.createInitialCondition()
+  );
   isNewSectionModalOpen = signal<boolean>(false);
+  newSectionModalMode = signal<CreateEditView>('create');
   isInitialConditionModalOpen = signal<boolean>(false);
+  initialConditionModalMode = signal<CreateEditView>('create');
+
+  createInitialCondition(): InitialCondition {
+    return {
+      uuid: uuidv4(),
+      name: '',
+      base_parameters: '',
+      base_temperature: 0
+    };
+  }
 
   editSection(section: Section) {
     this.currentSection.set(section);
+    this.newSectionModalMode.set('edit');
     this.isNewSectionModalOpen.set(true);
   }
 
-  openNewSectionModal() {
+  viewSection(section: Section) {
+    this.currentSection.set(section);
+    this.newSectionModalMode.set('view');
+    this.isNewSectionModalOpen.set(true);
+  }
+
+  openNewSectionModalCreate() {
     this.currentSection.set(createSection());
+    this.newSectionModalMode.set('create');
     this.isNewSectionModalOpen.set(true);
   }
 
@@ -97,8 +117,14 @@ export class SectionsTabComponent {
     this.isNewSectionModalOpen.set(isOpen);
   }
 
-  openInitialConditionModal(section: Section) {
+  openInitialConditionModal(
+    section: Section,
+    initialCondition: InitialCondition,
+    mode: CreateEditView
+  ) {
     this.currentSection.set(section);
+    this.currentInitialCondition.set(initialCondition);
+    this.initialConditionModalMode.set(mode);
     this.isInitialConditionModalOpen.set(true);
   }
 
