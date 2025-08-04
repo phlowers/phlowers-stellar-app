@@ -19,6 +19,7 @@ import { IconComponent } from './shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from './shared/components/atoms/button/button.component';
 import { UserService } from '@core/services/user/user.service';
 import { StudiesService } from '../core/services/studies/studies.service';
+import { SectionService } from '@src/app/core/services/sections/section.service';
 
 const modules = [
   RouterModule,
@@ -42,6 +43,7 @@ const modules = [
     OnlineService,
     UserService,
     StudiesService,
+    SectionService,
     ConfirmationService
   ],
   templateUrl: './app.component.html',

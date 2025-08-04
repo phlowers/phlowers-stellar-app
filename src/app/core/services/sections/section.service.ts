@@ -27,11 +27,14 @@ export class SectionService {
       (s) => s?.uuid === section?.uuid
     );
 
+    const nowDate = new Date().toISOString();
+    section.updated_at = nowDate;
     if (existingSection) {
       study.sections = study.sections.map((s) =>
         s?.uuid === section?.uuid ? section : s
       );
     } else {
+      section.created_at = nowDate;
       study.sections = [...study.sections, section];
     }
 

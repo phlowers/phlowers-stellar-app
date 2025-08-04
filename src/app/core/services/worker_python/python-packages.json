@@ -85,7 +85,7 @@
         "source": "local"
     },
     "typeguard": {
-        "file_name": "typeguard-4.4.3-cp312-none-any.whl",
+        "file_name": "typeguard-4.4.4-cp312-none-any.whl",
         "name": "typeguard",
         "source": "local"
     },
