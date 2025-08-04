@@ -1,12 +1,12 @@
 .no-section-text {
   font-weight: 400;
   font-size: 20px;
-  color: #6F767B
+  color: #6f767b;
 }
 
 .section-card-title {
-  font-size: .875rem;
-  color: #999FA1;
+  font-size: 0.875rem;
+  color: #999fa1;
 }
 
 .section-card-value {
@@ -28,10 +28,14 @@
 
 .section-field {
   @apply flex flex-col gap-2;
+
+  &--actions {
+    align-items: center;
+  }
 }
 
 .section-value {
-  @apply pt-1
+  @apply pt-1;
 }
 
 .initial-condition-name {
