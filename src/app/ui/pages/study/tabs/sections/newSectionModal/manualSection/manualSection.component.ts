@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@src/app/ui/shared/types';
+import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.component';
 
 const createSupport = (): Support => {
   return {
@@ -45,7 +46,8 @@ const createSupport = (): Support => {
     SelectModule,
     SupportsTableComponent,
     InputNumberModule,
-    IconComponent
+    IconComponent,
+    StudioComponent
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'

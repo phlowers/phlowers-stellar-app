@@ -198,7 +198,11 @@
       </div>
     </p-tabpanel>
     @if (mode() === 'view') {
-      <p-tabpanel value="3"> </p-tabpanel>
+      <p-tabpanel value="3">
+        <div class="mt-2">
+          <app-studio></app-studio>
+        </div>
+      </p-tabpanel>
     }
   </p-tabpanels>
 </p-tabs>

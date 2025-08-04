@@ -6,7 +6,7 @@
  */
 
 import { loadPyodide } from 'pyodide';
-import { handleTask } from './tasks';
+import { handleTask } from './tasks/handle-task';
 // import importScript from './python-functions/imports.py';
 import pythonPackages from './python-packages.json';
 
@@ -77,7 +77,7 @@ describe('Worker', () => {
   describe('loadPyodideAndPackages', () => {
     it('should load Pyodide with correct configuration', async () => {
       // Import the worker to trigger the initialization
-      await import('./worker');
+      await import('./worker-python');
 
       // Verify loadPyodide was called with correct parameters
       expect(loadPyodide).toHaveBeenCalledWith({

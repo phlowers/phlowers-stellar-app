@@ -6,12 +6,12 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { WorkerService } from './worker_python.service';
-import { Task } from './tasks';
+import { WorkerPythonService } from './worker-python.service';
+import { Task } from './tasks/types';
 import { firstValueFrom } from 'rxjs';
 
 describe('WorkerService', () => {
-  let service: WorkerService;
+  let service: WorkerPythonService;
   let mockWorker: any;
   let postMessageSpy: jest.SpyInstance;
 
@@ -29,7 +29,7 @@ describe('WorkerService', () => {
     (global as any).URL = jest.fn().mockImplementation(() => 'mocked-url');
 
     TestBed.configureTestingModule({});
-    service = TestBed.inject(WorkerService);
+    service = TestBed.inject(WorkerPythonService);
 
     // Spy on worker's postMessage
     postMessageSpy = jest.spyOn(mockWorker, 'postMessage');
@@ -44,53 +44,53 @@ describe('WorkerService', () => {
     expect(service._ready.getValue()).toBeFalsy();
   });
 
-  describe('setupWorker', () => {
+  describe('setup', () => {
     it('should create a new worker', () => {
-      service.setupWorker();
+      service.setup();
       expect(global.Worker).toHaveBeenCalled();
       expect(service.worker).toBeDefined();
     });
 
     it('should set up onmessage handler', () => {
-      service.setupWorker();
+      service.setup();
       expect(mockWorker.onmessage).toBeDefined();
     });
 
     it('should handle loadTime message', () => {
-      service.setupWorker();
+      service.setup();
 
       // Simulate worker message with loadTime
       mockWorker.onmessage({ data: { loadTime: 100 } });
 
-      expect(service.loadTime).toBe(100);
+      expect(service.times().loadTime).toBe(100);
       // @ts-expect-error - We are testing the private property
       expect(service._ready.getValue()).toBeFalsy(); // Should not change ready state
     });
 
     it('should handle importTime message and set ready to true', () => {
-      service.setupWorker();
+      service.setup();
 
       // Simulate worker message with importTime
       mockWorker.onmessage({ data: { importTime: 200 } });
 
-      expect(service.importTime).toBe(200);
+      expect(service.times().importTime).toBe(200);
       // @ts-expect-error - We are testing the private property
       expect(service._ready.getValue()).toBeTruthy();
     });
 
     it('should handle runTime message', () => {
-      service.setupWorker();
+      service.setup();
 
       // Simulate worker message with runTime
       mockWorker.onmessage({ data: { runTime: 300 } });
 
-      expect(service.runTime).toBe(300);
+      expect(service.times().runTime).toBe(300);
       // @ts-expect-error - We are testing the private property
       expect(service._ready.getValue()).toBeFalsy(); // Should not change ready state
     });
 
     // it('should handle result message and set ready to true', () => {
-    //   service.setupWorker();
+    //   service.setup();
 
     //   // Simulate worker message with result
     //   mockWorker.onmessage({ data: { result: 'some result' } });
@@ -101,23 +101,21 @@ describe('WorkerService', () => {
 
   describe('runTask', () => {
     it('should post message to worker with task and data', async () => {
-      service.setupWorker();
+      service.setup();
 
       const task = Task.runTests; // Replace with an actual Task enum value
-      const data = { someKey: 'someValue' };
 
-      await service.runTask(task, data);
+      await service.runTask(task, undefined);
 
-      expect(postMessageSpy).toHaveBeenCalledWith({ task, data });
+      expect(postMessageSpy).toHaveBeenCalledWith({ task, inputs: undefined });
     });
 
     it('should not throw if worker is undefined', async () => {
       service.worker = undefined;
 
-      const task = Task.runPython; // Replace with an actual Task enum value
-      const data = { someKey: 'someValue' };
+      const task = Task.runTests; // Replace with an actual Task enum value
 
-      await expect(service.runTask(task, data)).resolves.not.toThrow();
+      await expect(service.runTask(task, undefined)).resolves.not.toThrow();
     });
   });
 
