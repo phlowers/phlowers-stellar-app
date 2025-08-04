@@ -6,7 +6,6 @@
  */
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { TableModule } from 'primeng/table';
 import { UpdateService } from '@core/services/worker_update/worker_update.service';
@@ -27,7 +26,6 @@ const CACHE_NAME = 'app-assets';
   templateUrl: './admin.html',
   imports: [
     CommonModule,
-    ButtonModule,
     FormsModule,
     TableModule,
     CardModule,
