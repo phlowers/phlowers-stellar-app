@@ -13,13 +13,14 @@ import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { OnlineService } from '@core/services/online/online.service';
-import { WorkerService } from '@core/services/worker_python/worker_python.service';
 import { StorageService } from '@core/services/storage/storage.service';
 import { IconComponent } from './shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from './shared/components/atoms/button/button.component';
 import { UserService } from '@core/services/user/user.service';
 import { StudiesService } from '../core/services/studies/studies.service';
 import { SectionService } from '@src/app/core/services/sections/section.service';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { InitialConditionService } from '../core/services/initial-conditions/initial-condition.service';
 
 const modules = [
   RouterModule,
@@ -39,11 +40,12 @@ const modules = [
   providers: [
     MessageService,
     StorageService,
-    WorkerService,
+    WorkerPythonService,
     OnlineService,
     UserService,
     StudiesService,
     SectionService,
+    InitialConditionService,
     ConfirmationService
   ],
   templateUrl: './app.component.html',
@@ -62,7 +64,7 @@ export class AppComponent implements OnInit {
   constructor(
     private readonly messageService: MessageService,
     private readonly storageService: StorageService,
-    private readonly workerService: WorkerService,
+    private readonly workerService: WorkerPythonService,
     private readonly userService: UserService
   ) {
     storageService.ready$.subscribe((ready) => {
@@ -100,7 +102,7 @@ export class AppComponent implements OnInit {
 
   async setupWorker() {
     try {
-      this.workerService.setupWorker();
+      this.workerService.setup();
       await this.storageService.setPersistentStorage();
       await this.storageService.createDatabase();
     } catch (err) {

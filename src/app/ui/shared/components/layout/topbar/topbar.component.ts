@@ -11,7 +11,7 @@ import { PageTitleService } from '@ui/shared/service/page-title/page-title.servi
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { UserService } from '@src/app/core/services/user/user.service';
 import { UserModel } from '@src/app/core/data/models/user.model';
-import { WorkerService } from '@src/app/core/services/worker_python/worker_python.service';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 
 @Component({
   selector: 'app-topbar',
@@ -29,7 +29,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   constructor(
     private readonly pageTitleService: PageTitleService,
     private readonly userService: UserService,
-    private readonly workerService: WorkerService
+    private readonly workerPythonService: WorkerPythonService
   ) {}
 
   ngOnInit() {
@@ -44,7 +44,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
       })
     );
     this.subscriptions.add(
-      this.workerService.ready$.subscribe((ready) => {
+      this.workerPythonService.ready$.subscribe((ready) => {
         this.workerReady.set(ready);
       })
     );
