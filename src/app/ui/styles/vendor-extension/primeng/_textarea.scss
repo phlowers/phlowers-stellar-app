@@ -1,0 +1,42 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.p-textarea.p-textarea {
+  --p-form-field-placeholder-color: var(--grey-450);
+  --p-textarea-shadow: #{map.get(app.$elevation, neutral-inner)};
+  --p-textarea-focus-ring-shadow: var(--p-textarea-shadow);
+  --p-textarea-border-radius: 0.5rem 0.5rem 0.25rem 0.5rem;
+  --p-textarea-border-color: var(--grey-400);
+  --p-textarea-focus-border-color: var(--p-textarea-border-color);
+  --p-textarea-color: var(--grey-900);
+  --p-textarea-hover-border-color: var(--grey-600);
+  --p-textarea-disabled-background: var(--grey-0);
+  --p-textarea-disabled-color: var(--grey-400);
+  --p-textarea-invalid-border-color: var(--error-600);
+
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+
+  &:enabled:focus-visible {
+    border-color: var(--primary-600);
+    outline: 0.0625rem solid var(--primary-600);
+  }
+
+  &:enabled:read-only,
+  &:disabled {
+    border-color: var(--grey-200);
+  }
+
+  &:enabled:read-only {
+    background-color: var(--p-textarea-disabled-background);
+    color: var(--grey-800);
+  }
+
+  &::placeholder {
+    color: var(--p-form-field-placeholder-color);
+  }
+
+  &.ng-invalid.ng-dirty {
+    outline: 0.0625rem solid var(--p-textarea-invalid-border-color);
+    color: var(--grey-800);
+  }
+}

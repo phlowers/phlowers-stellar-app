@@ -1,0 +1,21 @@
+.form {
+  @apply flex-row;
+
+  &,
+  &__col {
+    @apply flex gap-4;
+  }
+
+  &__col {
+    @apply flex-col;
+    flex-grow: 1;
+
+    &--right {
+      flex: 0 0 43%;
+    }
+  }
+
+  input {
+    @apply block w-full;
+  }
+}

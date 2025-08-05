@@ -1,0 +1,51 @@
+.p-checkbox.p-checkbox {
+  --p-checkbox-width: 1rem;
+  --p-checkbox-height: var(--p-checkbox-width);
+  --p-checkbox-border-radius: 0.125rem;
+  --p-checkbox-border-color: var(--grey-600);
+  --p-checkbox-hover-border-color: var(--p-checkbox-border-color);
+  --p-checkbox-focus-border-color: var(--p-checkbox-border-color);
+  --p-checkbox-focus-ring-color: var(--primary-900);
+  --p-checkbox-focus-ring-offset: 0.25rem;
+  --p-checkbox-icon-size: 0.5rem;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2rem;
+    border-radius: 2rem;
+    aspect-ratio: 1;
+    background-color: rgb(from var(--grey-50) r g b / 0.5);
+    transform: translate(-50%, -50%) scale(0);
+    transition:
+      transform 0.3s ease-out,
+      background-color 0.3s ease-in;
+  }
+
+  &:hover {
+    &::after {
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  &.p-checkbox-checked {
+    &::after {
+      background-color: rgb(from var(--primary-700) r g b / 0.2);
+    }
+  }
+
+  .p-checkbox-box {
+    position: relative;
+    z-index: 1;
+  }
+
+  .p-checkbox-input {
+    z-index: 2;
+  }
+
+  .p-checkbox-icon {
+    stroke: var(--grey-white); // cheat for icon to get a bit thiccer
+  }
+}

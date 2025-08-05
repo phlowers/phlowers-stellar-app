@@ -2,14 +2,19 @@
   dismissableMask="true"
   [visible]="isOpen()"
   (visibleChange)="onVisibleChange($event)"
-  i18n-header
-  header="Create an initial condition"
-  [style]="{ width: '50vw' }"
+  [style]="{ 'min-width': '50vw', 'max-width': '40.625rem' }"
   [modal]="true"
 >
-  <form class="flex flex-row gap-2 w-full" action="">
-    <div class="flex flex-col gap-2 w-full">
-      <div class="flex flex-col gap-2">
+  <ng-template #header>
+    <p class="text-l-600 mb-0 flex gap-2">
+      <app-icon icon="edit" />
+      <span i18n>Create an initial condition</span>
+    </p>
+  </ng-template>
+
+  <form class="form" action="">
+    <div class="form__col">
+      <div>
         <label for="section-name" i18n>Section name</label>
         <input
           type="text"
@@ -19,7 +24,7 @@
           [value]="section().name"
         />
       </div>
-      <div class="flex flex-col gap-2">
+      <div>
         <label for="cable-name" i18n>Cable name</label>
         <input
           type="text"
@@ -29,7 +34,7 @@
           [value]="section().cable_name"
         />
       </div>
-      <div class="flex flex-col gap-2">
+      <div>
         <label for="cables-amount" i18n>Cables amount</label>
         <input
           type="text"
@@ -40,9 +45,11 @@
         />
       </div>
     </div>
+
     <p-divider layout="vertical" />
-    <div class="flex flex-col gap-2 w-full">
-      <div class="flex flex-col gap-2">
+
+    <div class="form__col form__col--right">
+      <div>
         <label for="initial-condition-name" i18n>Initial condition name</label>
         <input
           name="initial-condition-name"
@@ -54,10 +61,10 @@
           [readonly]="mode() === 'view'"
         />
       </div>
-      <div class="flex flex-col gap-2">
-        <label for="initial-condition-base-parameter" i18n
-          >Base parameter</label
-        >
+      <div>
+        <label for="initial-condition-base-parameter" i18n>
+          Base parameter
+        </label>
         <input
           name="initial-condition-base-parameter"
           required
@@ -68,10 +75,10 @@
           [readonly]="mode() === 'view'"
         />
       </div>
-      <div class="flex flex-col gap-2">
-        <label for="initial-condition-base-temperature" i18n
-          >Base temperature (°C)</label
-        >
+      <div>
+        <label for="initial-condition-base-temperature" i18n>
+          Base temperature (°C)
+        </label>
         <input
           name="initial-condition-base-temperature"
           required
@@ -84,6 +91,7 @@
       </div>
     </div>
   </form>
+
   <ng-template #footer>
     <button
       app-btn

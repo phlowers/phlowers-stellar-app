@@ -6,14 +6,14 @@
   [value]="studies()"
   [showCurrentPageReport]="true"
   [currentPageReportTemplate]="'Object {first} to {last} of {totalRecords}'"
-  [tableStyle]="{ 'min-width': '50rem' }"
+  [tableStyleClass]="'w-full mt-6'"
 >
   <ng-template #header>
     <tr>
       <th id="checkbox"></th>
 
       <th id="title" pSortableColumn="title">
-        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+        <div i18n class="flex items-center gap-2">
           Title
           <app-icon
             [icon]="
@@ -29,7 +29,7 @@
         </div>
       </th>
       <th id="author_email" pSortableColumn="author_email">
-        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+        <div i18n class="flex items-center gap-2">
           Author
           <app-icon
             [icon]="
@@ -45,7 +45,7 @@
         </div>
       </th>
       <th id="created_at_offline" pSortableColumn="created_at_offline">
-        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+        <div i18n class="flex items-center gap-2">
           Creation date
           <app-icon
             [icon]="
@@ -61,7 +61,7 @@
         </div>
       </th>
       <th id="updated_at_offline" pSortableColumn="updated_at_offline">
-        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+        <div i18n class="flex items-center gap-2">
           Modification date
           <app-icon
             [icon]="
@@ -77,7 +77,7 @@
         </div>
       </th>
       <th id="lit_code" pSortableColumn="lit_code">
-        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+        <div i18n class="flex items-center gap-2">
           LIT code
           <app-icon
             [icon]="
@@ -93,7 +93,7 @@
         </div>
       </th>
       <th id="shareable" pSortableColumn="shareable">
-        <div i18n style="font-size: 14px" class="flex items-center gap-2">
+        <div i18n class="flex items-center gap-2">
           Shared
           <app-icon
             [icon]="
@@ -110,9 +110,7 @@
       </th>
       <th id="space"></th>
       <th id="actions">
-        <div i18n style="font-size: 14px" class="flex items-center gap-2">
-          Actions
-        </div>
+        <div i18n class="flex items-center gap-2">Actions</div>
       </th>
     </tr>
   </ng-template>
@@ -142,33 +140,32 @@
         <button
           (click)="popover.toggle($event)"
           app-btn
-          btnSize="s"
+          btnSize="l"
           btnStyle="text"
         >
-          <span class="pi pi-ellipsis-h"></span>
+          <app-icon icon="more_horiz" />
         </button>
         <p-popover #popover>
           <ng-template pTemplate="content">
-            <div class="flex flex-col gap-2">
-              <button
-                app-btn
-                btnSize="s"
-                btnStyle="text"
-                (click)="duplicateStudy.emit(study.uuid)"
-              >
-                <app-icon icon="content_copy" />
-                <span i18n>Duplicate</span>
-              </button>
-              <button
-                app-btn
-                btnSize="s"
-                btnStyle="text"
-                (click)="deleteStudy.emit(study.uuid)"
-              >
-                <app-icon icon="delete" />
-                <span i18n>Delete</span>
-              </button>
-            </div>
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              (click)="duplicateStudy.emit(study.uuid)"
+            >
+              <app-icon icon="content_copy" />
+              <span i18n>Duplicate</span>
+            </button>
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              class="erase-btn"
+              (click)="deleteStudy.emit(study.uuid)"
+            >
+              <app-icon icon="delete" />
+              <span i18n>Delete</span>
+            </button>
           </ng-template>
         </p-popover>
       </td>
