@@ -1,16 +1,23 @@
 <p-tabs
-  value="1"
+  [value]="tabValue()"
+  (valueChange)="tabValueChange($event)"
   class="basis-[50rem] {{ mode() === 'view' ? 'mt-0' : 'mt-4' }}"
 >
   <p-tablist>
-    <p-tab value="1" i18n>General</p-tab>
-    <p-tab value="2" i18n>Supports</p-tab>
+    <p-tab (onSelect)="tabValue.set('general')" value="general" i18n
+      >General</p-tab
+    >
+    <p-tab (onSelect)="tabValue.set('supports')" value="supports" i18n
+      >Supports</p-tab
+    >
     @if (mode() === 'view') {
-      <p-tab value="3" i18n>Graphical view</p-tab>
+      <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n
+        >Graphical view</p-tab
+      >
     }
   </p-tablist>
   <p-tabpanels>
-    <p-tabpanel value="1">
+    <p-tabpanel value="general">
       <div class="section-form-part">
         <h3 class="title-underline" i18n>Section</h3>
         <div class="section-form-part-grid">
@@ -166,13 +173,14 @@
       </div>
     </p-tabpanel>
 
-    <p-tabpanel value="2">
+    <p-tabpanel value="supports">
       <div class="flex flex-col gap-4 mt-2">
         <div class="flex flex-col">
           <label for="supportsAmount" class="ml-2" i18n>Supports amount</label>
           <p-inputnumber
             class="w-32"
             min="0"
+            [disabled]="mode() === 'view'"
             [ngModel]="supportsAmount"
             [showButtons]="true"
             buttonLayout="horizontal"
@@ -198,7 +206,11 @@
       </div>
     </p-tabpanel>
     @if (mode() === 'view') {
-      <p-tabpanel value="3"> </p-tabpanel>
+      <p-tabpanel value="graphical">
+        <div class="mt-2">
+          <app-studio></app-studio>
+        </div>
+      </p-tabpanel>
     }
   </p-tabpanels>
 </p-tabs>

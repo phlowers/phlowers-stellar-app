@@ -1,3 +1,28 @@
+// Mock plotly.js-dist-min
+jest.mock('plotly.js-dist-min', () => ({
+  newPlot: jest.fn(),
+  update: jest.fn(),
+  purge: jest.fn(),
+  relayout: jest.fn(),
+  restyle: jest.fn(),
+  react: jest.fn(),
+  redraw: jest.fn(),
+  toImage: jest.fn(),
+  downloadImage: jest.fn(),
+  extendTraces: jest.fn(),
+  prependTraces: jest.fn(),
+  addTraces: jest.fn(),
+  deleteTraces: jest.fn(),
+  moveTraces: jest.fn(),
+  animate: jest.fn(),
+  setPlotConfig: jest.fn(),
+  validate: jest.fn(),
+  d3: {
+    select: jest.fn(),
+    selectAll: jest.fn()
+  }
+}));
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ManualSectionComponent } from './manualSection.component';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
