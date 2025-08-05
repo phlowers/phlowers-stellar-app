@@ -5,7 +5,7 @@
         "source": "remote"
     },
     "mechaphlowers": {
-        "file_name": "mechaphlowers-0.2.0-cp312-none-any.whl",
+        "file_name": "mechaphlowers-0.3.0-cp312-none-any.whl",
         "name": "mechaphlowers",
         "source": "local"
     },
@@ -22,11 +22,6 @@
     "numpy": {
         "file_name": "numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
         "name": "numpy",
-        "source": "remote"
-    },
-    "openblas": {
-        "file_name": "openblas-0.3.26.zip",
-        "name": "openblas",
         "source": "remote"
     },
     "packaging": {
@@ -67,11 +62,6 @@
     "pytz": {
         "file_name": "pytz-2024.1-py2.py3-none-any.whl",
         "name": "pytz",
-        "source": "remote"
-    },
-    "scipy": {
-        "file_name": "scipy-1.14.1-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "scipy",
         "source": "remote"
     },
     "six": {

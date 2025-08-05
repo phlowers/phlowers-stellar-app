@@ -38,7 +38,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'sections',
-        title: $localize`Cantons`,
+        title: $localize`Sections`,
         component: SectionsComponent
       },
       {

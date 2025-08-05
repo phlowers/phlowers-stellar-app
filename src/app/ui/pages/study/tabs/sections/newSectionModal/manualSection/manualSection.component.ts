@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@src/app/ui/shared/types';
+import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.component';
 
 const createSupport = (): Support => {
   return {
@@ -45,12 +46,14 @@ const createSupport = (): Support => {
     SelectModule,
     SupportsTableComponent,
     InputNumberModule,
-    IconComponent
+    IconComponent,
+    StudioComponent
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'
 })
 export class ManualSectionComponent {
+  tabValue = signal<string>('general');
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
   sectionChange = output<any>();
@@ -59,6 +62,13 @@ export class ManualSectionComponent {
     { name: 'Guard', code: 'guard' },
     { name: 'Phase', code: 'phase' }
   ];
+  studio = viewChild(StudioComponent);
+
+  tabValueChange = (event: any) => {
+    if (event === 'graphical') {
+      this.studio()?.refreshStudio();
+    }
+  };
 
   updateSupportsAmount(amount: number) {
     const currentSupports = this.section().supports || [];

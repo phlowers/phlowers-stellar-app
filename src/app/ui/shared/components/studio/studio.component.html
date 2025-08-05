@@ -1,0 +1,9 @@
+<div class="flex flex-col">
+  @if (loading()) {
+    <div class="flex justify-center items-center h-80">
+      <p-progress-spinner ariaLabel="loading" />
+    </div>
+  } @else {
+    <app-section [litData]="litData()"></app-section>
+  }
+</div>

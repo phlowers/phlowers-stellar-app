@@ -7,18 +7,18 @@
 /// <reference lib="webworker" />
 
 import { loadPyodide } from 'pyodide';
-import importScript from './python-functions/imports.py';
+import importScript from './tasks/python-scripts/imports.py';
 import pythonPackages from './python-packages.json';
-import { handleTask } from './tasks';
+import { handleTask } from './tasks/handle-task';
+import { Task, TaskInputs } from './tasks/types';
 
-export type PyodideAPI = Awaited<ReturnType<any>>;
-
+export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;
 
 async function loadPyodideAndPackages() {
   const localPythonPackages = [
     ...Object.values(pythonPackages)
-      .map((pkg: any) =>
+      .map((pkg) =>
         pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''
       )
       .filter(Boolean)
@@ -37,24 +37,27 @@ async function loadPyodideAndPackages() {
     ]
   });
   const loadEnd = performance.now();
-  console.log('loadEnd is', loadEnd);
   postMessage({ loadTime: loadEnd - start });
   await pyodide.runPython(importScript);
   const importEnd = performance.now();
-  console.log('importEnd is', importEnd - loadEnd);
   postMessage({ importTime: importEnd - loadEnd });
 }
 
-loadPyodideAndPackages();
-
-addEventListener('message', ({ data }: { data: { task: any; data: any } }) => {
-  console.log('data in worker is', data);
-  if (pyodide) {
-    handleTask(pyodide, data.task, data.data).then((result) => {
-      console.log('result in worker is', result);
-      postMessage(result);
-    });
-  } else {
-    console.log('pyodide is not loaded');
+addEventListener(
+  'message',
+  ({
+    data
+  }: {
+    data: { task: Task; inputs: TaskInputs[Task]; id: string };
+  }) => {
+    if (pyodide) {
+      handleTask(pyodide, data.task, data.inputs).then((result) => {
+        postMessage({ result: result.result, id: data.id });
+      });
+    } else {
+      console.error('pyodide is not loaded, cannot handle task ' + data.task);
+    }
   }
-});
+);
+
+loadPyodideAndPackages();

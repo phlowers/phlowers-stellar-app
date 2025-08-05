@@ -24,3 +24,14 @@ Object.defineProperty(document, 'fonts', {
 });
 
 setupZoneTestEnv();
+
+// Mock URL.createObjectURL
+Object.defineProperty(window.URL, 'createObjectURL', {
+  value: jest.fn().mockReturnValue('mock-url')
+});
+
+// Mock Plotly
+jest.mock('plotly.js-dist-min', () => ({
+  newPlot: jest.fn().mockResolvedValue({}),
+  Data: jest.fn()
+}));
