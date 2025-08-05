@@ -1,4 +1,4 @@
-import { Dash, Data } from 'plotly.js-dist-min';
+import { Dash, Data, PlotData } from 'plotly.js-dist-min';
 import { GetAllPhasesParams, PlotObjectType } from './types';
 
 const getColor = (
@@ -7,31 +7,19 @@ const getColor = (
   color: string;
   dash: Dash;
 } => {
-  if (type === 'span') return { color: 'red', dash: 'solid' };
-  if (type === 'support') return { color: 'blue', dash: 'solid' };
-  if (type === 'insulator') return { color: 'green', dash: 'solid' };
-  return { color: 'black', dash: 'solid' };
+  switch (type) {
+    case 'span':
+      return { color: 'red', dash: 'solid' };
+    case 'support':
+      return { color: 'blue', dash: 'solid' };
+    case 'insulator':
+      return { color: 'green', dash: 'solid' };
+    default:
+      return { color: 'black', dash: 'solid' };
+  }
 };
 
-const getMode = (
-  type: PlotObjectType
-):
-  | 'number'
-  | 'text'
-  | 'delta'
-  | 'gauge'
-  | 'none'
-  | 'lines'
-  | 'markers'
-  | 'lines+markers'
-  | 'text+markers'
-  | 'text+lines'
-  | 'text+lines+markers'
-  | 'number+delta'
-  | 'gauge+number'
-  | 'gauge+number+delta'
-  | 'gauge+delta'
-  | undefined => {
+const getMode = (type: PlotObjectType): PlotData['mode'] => {
   if (type === 'support') return 'text+lines';
   return 'lines';
 };
@@ -42,7 +30,7 @@ export const createDataObject = (params: GetAllPhasesParams): Data[] => {
     litYs,
     litZs,
     litSection,
-    litType,
+    litTypes,
     litSupports,
     uniqueSupports,
     name,
@@ -56,8 +44,8 @@ export const createDataObject = (params: GetAllPhasesParams): Data[] => {
     return coordinates.filter(
       (_, index: number) =>
         litSupports[index] === support &&
-        (litType[index] === 'span' ? litSection[index] === name : true) &&
-        litType[index] === type
+        (litTypes[index] === 'span' ? litSection[index] === name : true) &&
+        litTypes[index] === type
     );
   };
   return uniqueSupports.map((support) => {

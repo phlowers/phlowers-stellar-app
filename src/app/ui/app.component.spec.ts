@@ -8,7 +8,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { MessageService } from 'primeng/api';
 import { OnlineService } from '@core/services/online/online.service';
-import { WorkerService } from '@core/services/worker_python/worker_python.service';
+import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import { StorageService } from '@core/services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -36,7 +36,7 @@ describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
   let mockMessageService: MessageService;
   let mockStorageService: StorageService;
-  let mockWorkerService: WorkerService;
+  let mockWorkerService: WorkerPythonService;
   let mockOnlineService: OnlineService;
   let mockUserService: UserService;
   let readySubject: BehaviorSubject<boolean>;
@@ -72,9 +72,9 @@ describe('AppComponent', () => {
     } as unknown as StorageService;
 
     mockWorkerService = {
-      setupWorker: jest.fn(),
+      setup: jest.fn(),
       ready$: workerReadySubject
-    } as unknown as WorkerService;
+    } as unknown as WorkerPythonService;
 
     mockOnlineService = {} as OnlineService;
 
@@ -91,7 +91,9 @@ describe('AppComponent', () => {
         AppComponent
       ]
     }).compileComponents();
-    TestBed.overrideProvider(WorkerService, { useValue: mockWorkerService });
+    TestBed.overrideProvider(WorkerPythonService, {
+      useValue: mockWorkerService
+    });
     TestBed.overrideProvider(StorageService, { useValue: mockStorageService });
     TestBed.overrideProvider(OnlineService, { useValue: mockOnlineService });
     TestBed.overrideProvider(MessageService, { useValue: mockMessageService });
@@ -112,7 +114,7 @@ describe('AppComponent', () => {
     it('should setup worker and initialize database', async () => {
       await component.setupWorker();
 
-      expect(mockWorkerService.setupWorker).toHaveBeenCalled();
+      expect(mockWorkerService.setup).toHaveBeenCalled();
       expect(mockStorageService.setPersistentStorage).toHaveBeenCalled();
       expect(mockStorageService.createDatabase).toHaveBeenCalled();
     });

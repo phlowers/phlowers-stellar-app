@@ -1,19 +1,6 @@
 export type PlotObjectType = 'support' | 'insulator' | 'span';
 
-export interface GetAllPhasesParams {
-  litXs: (number | null)[];
-  litYs: (number | null)[];
-  litZs: (number | null)[];
-  litSection: string[];
-  litType: string[];
-  litSupports: string[];
-  uniqueSupports: string[];
-  name: string;
-  side: 'face' | 'profile';
-  type: PlotObjectType;
-}
-
-export interface CreateDataForPlotParams {
+interface BaseParams {
   litXs: (number | null)[];
   litYs: (number | null)[];
   litZs: (number | null)[];
@@ -21,6 +8,12 @@ export interface CreateDataForPlotParams {
   litTypes: string[];
   litSupports: string[];
   uniqueSupports: string[];
-  uniqueSupportsForSupports: string[];
   side: 'face' | 'profile';
+}
+export interface GetAllPhasesParams extends BaseParams {
+  name: string;
+  type: PlotObjectType;
+}
+export interface CreateDataForPlotParams extends BaseParams {
+  uniqueSupportsForSupports: string[];
 }

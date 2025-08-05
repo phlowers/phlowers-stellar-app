@@ -15,7 +15,7 @@ jest.mock('pyodide', () => ({
   loadPyodide: jest.fn()
 }));
 
-jest.mock('./tasks', () => ({
+jest.mock('./tasks/handle-task', () => ({
   handleTask: jest.fn()
 }));
 

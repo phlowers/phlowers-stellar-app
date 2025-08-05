@@ -4,8 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { handleTask, Task, PyodideAPI } from './handle-task';
-import testScript from './python-functions/test.py';
+import { handleTask, PyodideAPI } from './handle-task';
+import testsScript from './python-scripts/tests.py';
+import getLitScript from './python-scripts/get_lit.py';
+import { Task } from './types';
 
 // Mock the pyodide module
 jest.mock('pyodide', () => ({
@@ -13,16 +15,8 @@ jest.mock('pyodide', () => ({
 }));
 
 // Mock the python scripts
-jest.mock('./python-functions/example.py', () => 'mock python script');
-jest.mock('./python-functions/example2.py', () => 'example2.py');
-jest.mock('./python-functions/test.py', () => 'mock test script');
-jest.mock('./python-functions/example3.py', () => 'mock example3 script');
-
-// Add mock for state-change.py
-jest.mock(
-  './python-functions/state-change.py',
-  () => 'mock state-change script'
-);
+jest.mock('./python-scripts/tests.py', () => 'mock tests script');
+jest.mock('./python-scripts/get_lit.py', () => 'mock get_lit script');
 
 describe('Task handlers', () => {
   let mockPyodide: jest.Mocked<PyodideAPI>;
@@ -45,126 +39,69 @@ describe('Task handlers', () => {
   describe('handleTask', () => {
     it('should handle runTests task', async () => {
       // Setup
-      const mockResults = { passed: 5, failed: 0 };
-      mockPyodide.globals.get.mockReturnValue({
-        toJs: jest.fn().mockReturnValue(mockResults)
-      });
-
-      // Execute
-      const result = await handleTask(mockPyodide, Task.runTests, null);
-
-      // Verify
-      expect(mockPyodide.loadPackage).toHaveBeenCalledWith(['pytest']);
-      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith(testScript);
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('results');
-      expect(result).toEqual(mockResults);
-    });
-
-    it('should handle runCode task', async () => {
-      // Setup
+      const mockResult = { passed: 5, failed: 0 };
       jest
         .spyOn(performance, 'now')
         .mockReturnValueOnce(1000) // Start time
         .mockReturnValueOnce(1500); // End time
 
-      // Execute
-      const result = await handleTask(mockPyodide, Task.runCode, null);
-
-      // Verify
-      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith('example2.py');
-      expect(result).toEqual({ runTime: 500 });
-    });
-
-    it('should handle runPython task', async () => {
-      // Setup
-      const mockData = { input: 'test data' };
-      const mockResult = { output: 'test result' };
-      jest
-        .spyOn(performance, 'now')
-        .mockReturnValueOnce(1000) // Start time
-        .mockReturnValueOnce(1200); // End time
-      mockPyodide.globals.get.mockReturnValue(mockResult);
-
-      // Execute
-      const result = await handleTask(mockPyodide, Task.runPython, mockData);
-
-      // Verify
-      expect(mockPyodide.globals.set).toHaveBeenCalledWith(
-        'js_inputs',
-        mockData
-      );
-      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith('example2.py');
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('result');
-      expect(result).toEqual({ result: mockResult });
-    });
-
-    it('should handle runPython2 task', async () => {
-      // Setup
-      const mockData = { input: 'test data' };
-      const mockJsResult = { output: 'converted result' };
-      jest
-        .spyOn(performance, 'now')
-        .mockReturnValueOnce(1000) // Start time
-        .mockReturnValueOnce(1200); // End time
-
-      const mockToJs = jest.fn().mockReturnValue(mockJsResult);
+      const mockToJs = jest.fn().mockReturnValue(mockResult);
       mockPyodide.globals.get.mockReturnValue({
         toJs: mockToJs
       });
 
       // Execute
-      const result = await handleTask(mockPyodide, Task.runPython2, mockData);
+      const result = await handleTask(mockPyodide, Task.runTests, undefined);
 
       // Verify
       expect(mockPyodide.globals.set).toHaveBeenCalledWith(
         'js_inputs',
-        mockData
+        undefined
       );
-      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith(
-        'mock example3 script'
-      );
+      expect(mockPyodide.loadPackage).toHaveBeenCalledWith(['pytest']);
+      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith(testsScript);
       expect(mockPyodide.globals.get).toHaveBeenCalledWith('result');
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockJsResult });
+      expect(result).toEqual({ result: mockResult, runTime: 500 });
     });
 
-    it('should handle runStateChange task', async () => {
+    it('should handle getLit task', async () => {
       // Setup
-      const mockData = { state: 'initial', action: 'transform' };
-      const mockJsResult = { newState: 'transformed' };
+      const mockResult = {
+        x: { key1: 1, key2: 2 },
+        y: { key1: 10, key2: 20 },
+        z: { key1: 100, key2: 200 },
+        support: { key1: 'support1', key2: 'support2' },
+        type: { key1: 'type1', key2: 'type2' },
+        section: { key1: 'section1', key2: 'section2' },
+        color_select: { key1: 'color1', key2: 'color2' }
+      };
       jest
         .spyOn(performance, 'now')
         .mockReturnValueOnce(1000) // Start time
-        .mockReturnValueOnce(1300); // End time
+        .mockReturnValueOnce(1200); // End time
 
-      const mockToJs = jest.fn().mockReturnValue(mockJsResult);
+      const mockToJs = jest.fn().mockReturnValue(mockResult);
       mockPyodide.globals.get.mockReturnValue({
         toJs: mockToJs
       });
 
       // Execute
-      const result = await handleTask(
-        mockPyodide,
-        Task.runStateChange,
-        mockData
-      );
+      const result = await handleTask(mockPyodide, Task.getLit, undefined);
 
       // Verify
-      expect(mockPyodide.globals.set).toHaveBeenCalledWith('inputs', mockData);
       expect(mockPyodide.globals.set).toHaveBeenCalledWith(
         'js_inputs',
-        mockData
+        undefined
       );
-      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith(
-        'mock state-change script'
-      );
+      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith(getLitScript);
       expect(mockPyodide.globals.get).toHaveBeenCalledWith('result');
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockJsResult });
+      expect(result).toEqual({ result: mockResult, runTime: 200 });
     });
 
     it('should handle unknown task', async () => {
@@ -173,11 +110,15 @@ describe('Task handlers', () => {
       const unknownTask = 'unknownTask' as Task;
 
       // Execute
-      const result = await handleTask(mockPyodide, unknownTask, null);
+      try {
+        await handleTask(mockPyodide, unknownTask, undefined);
+      } catch (error) {
+        // Expected to throw since the task doesn't exist in the tasks object
+        expect(error).toBeDefined();
+      }
 
       // Verify
-      expect(consoleSpy).toHaveBeenCalledWith('Unknown task:', unknownTask);
-      expect(result).toBeUndefined();
+      expect(consoleSpy).not.toHaveBeenCalled();
     });
   });
 });

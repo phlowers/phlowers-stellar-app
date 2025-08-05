@@ -78,44 +78,99 @@ describe('WorkerService', () => {
       expect(service._ready.getValue()).toBeTruthy();
     });
 
-    it('should handle runTime message', () => {
+    it('should handle task result message with id', () => {
       service.setup();
 
-      // Simulate worker message with runTime
-      mockWorker.onmessage({ data: { runTime: 300 } });
+      const mockId = 'test-id-123';
+      const mockResult = { test: 'data' };
 
-      expect(service.times().runTime).toBe(300);
-      // @ts-expect-error - We are testing the private property
-      expect(service._ready.getValue()).toBeFalsy(); // Should not change ready state
+      // Set up a handler for the test id
+      service.handlerMap[mockId] = jest.fn();
+
+      // Simulate worker message with id and result
+      mockWorker.onmessage({ data: { id: mockId, result: mockResult } });
+
+      expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult);
     });
-
-    // it('should handle result message and set ready to true', () => {
-    //   service.setup();
-
-    //   // Simulate worker message with result
-    //   mockWorker.onmessage({ data: { result: 'some result' } });
-    //   // @ts-expect-error - We are testing the private property
-    //   expect(service._ready.getValue()).toBeTruthy();
-    // });
   });
 
   describe('runTask', () => {
-    it('should post message to worker with task and data', async () => {
+    it('should post message to worker with task, inputs and id', async () => {
       service.setup();
 
-      const task = Task.runTests; // Replace with an actual Task enum value
+      const task = Task.runTests;
+      const inputs = undefined;
 
-      await service.runTask(task, undefined);
+      const promise = service.runTask(task, inputs);
 
-      expect(postMessageSpy).toHaveBeenCalledWith({ task, inputs: undefined });
+      // Verify the message was posted with the expected structure
+      expect(postMessageSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          task,
+          inputs,
+          id: expect.any(String)
+        })
+      );
+
+      // Simulate the response to resolve the promise
+      const messageCall = postMessageSpy.mock.calls[0][0];
+      const id = messageCall.id;
+      mockWorker.onmessage({ data: { id, result: undefined } });
+
+      await promise;
     });
 
-    it('should not throw if worker is undefined', async () => {
-      service.worker = undefined;
+    it('should post message to worker with getLit task', async () => {
+      service.setup();
 
-      const task = Task.runTests; // Replace with an actual Task enum value
+      const task = Task.getLit;
+      const inputs = undefined;
 
-      await expect(service.runTask(task, undefined)).resolves.not.toThrow();
+      const promise = service.runTask(task, inputs);
+
+      expect(postMessageSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          task,
+          inputs,
+          id: expect.any(String)
+        })
+      );
+
+      // Simulate the response to resolve the promise
+      const messageCall = postMessageSpy.mock.calls[0][0];
+      const id = messageCall.id;
+      const mockResult = {
+        x: {},
+        y: {},
+        z: {},
+        support: {},
+        type: {},
+        section: {},
+        color_select: {}
+      };
+      mockWorker.onmessage({ data: { id, result: mockResult } });
+
+      const result = await promise;
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should generate unique id for each task', async () => {
+      service.setup();
+
+      const task = Task.runTests;
+      const promise1 = service.runTask(task, undefined);
+      const promise2 = service.runTask(task, undefined);
+
+      const call1 = postMessageSpy.mock.calls[0][0];
+      const call2 = postMessageSpy.mock.calls[1][0];
+
+      expect(call1.id).not.toBe(call2.id);
+
+      // Resolve both promises
+      mockWorker.onmessage({ data: { id: call1.id, result: undefined } });
+      mockWorker.onmessage({ data: { id: call2.id, result: undefined } });
+
+      await Promise.all([promise1, promise2]);
     });
   });
 
@@ -129,6 +184,17 @@ describe('WorkerService', () => {
 
       const updatedReadyState = await firstValueFrom(service.ready$);
       expect(updatedReadyState).toBeTruthy();
+    });
+  });
+
+  describe('ready getter', () => {
+    it('should return current ready state', () => {
+      expect(service.ready).toBeFalsy();
+
+      // @ts-expect-error - We are testing the private property
+      service._ready.next(true);
+
+      expect(service.ready).toBeTruthy();
     });
   });
 });

@@ -2,7 +2,7 @@ import { Data } from 'plotly.js-dist-min';
 import { CreateDataForPlotParams, PlotObjectType } from './types';
 import { createDataObject } from './createPlotDataObject';
 
-const objects: {
+const PLOT_OBJECTS: {
   name: string;
   type: PlotObjectType;
 }[] = [
@@ -44,20 +44,20 @@ export const createPlotData = (params: CreateDataForPlotParams): Data[] => {
     uniqueSupportsForSupports,
     side
   } = params;
-  const data = objects.map((object) => {
+  const data = PLOT_OBJECTS.map((plotObject) => {
     return createDataObject({
       litXs,
       litYs,
       litZs,
       litSection,
-      litType: litTypes,
+      litTypes,
       litSupports,
       uniqueSupports:
-        object.type === 'support' || object.type === 'insulator'
+        plotObject.type === 'support' || plotObject.type === 'insulator'
           ? uniqueSupportsForSupports
           : uniqueSupports,
-      name: object.name,
-      type: object.type,
+      name: plotObject.name,
+      type: plotObject.type,
       side
     });
   });

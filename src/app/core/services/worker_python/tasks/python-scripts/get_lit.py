@@ -151,7 +151,6 @@ def main():
     lit = pd.concat([section_0, section_1, section_2, section_3], ignore_index=True)
     globals()["test_frame"] = frame
     globals()["test_weather"] = weather
-    print("globals are", globals())
 
     lit["color_select"] = lit.section + lit.type
 

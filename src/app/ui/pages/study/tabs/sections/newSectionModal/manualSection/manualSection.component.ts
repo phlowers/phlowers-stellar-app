@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -53,6 +53,7 @@ const createSupport = (): Support => {
   styleUrl: './manualSection.component.scss'
 })
 export class ManualSectionComponent {
+  tabValue = signal<string>('general');
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
   sectionChange = output<any>();
@@ -61,6 +62,13 @@ export class ManualSectionComponent {
     { name: 'Guard', code: 'guard' },
     { name: 'Phase', code: 'phase' }
   ];
+  studio = viewChild(StudioComponent);
+
+  tabValueChange = (event: any) => {
+    if (event === 'graphical') {
+      this.studio()?.refreshStudio();
+    }
+  };
 
   updateSupportsAmount(amount: number) {
     const currentSupports = this.section().supports || [];

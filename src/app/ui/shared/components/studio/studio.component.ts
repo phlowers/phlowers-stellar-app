@@ -16,13 +16,17 @@ export class StudioComponent {
   litData = signal<GetSectionOutput | null>(null);
   loading = signal<boolean>(true);
   constructor(private readonly workerPythonService: WorkerPythonService) {
-    workerPythonService.ready$.subscribe((ready) => {
-      if (ready) {
-        this.workerPythonService.runTask(Task.getLit).then((result) => {
-          this.litData.set(result);
-          this.loading.set(false);
-        });
-      }
-    });
+    workerPythonService.ready$.subscribe(() => this.refreshStudio());
   }
+
+  refreshStudio = () => {
+    if (!this.workerPythonService.ready) {
+      return;
+    }
+    this.loading.set(true);
+    this.workerPythonService.runTask(Task.getLit).then((result) => {
+      this.litData.set(result);
+      this.loading.set(false);
+    });
+  };
 }

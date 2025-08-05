@@ -31,6 +31,10 @@ export class WorkerPythonService {
     return this._ready.asObservable();
   }
 
+  get ready() {
+    return this._ready.value;
+  }
+
   setup() {
     this.worker = new Worker(new URL('./worker-python', import.meta.url));
     this.worker.onmessage = ({ data }) => {

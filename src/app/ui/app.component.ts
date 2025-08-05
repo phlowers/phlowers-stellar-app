@@ -20,6 +20,7 @@ import { UserService } from '@core/services/user/user.service';
 import { StudiesService } from '../core/services/studies/studies.service';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { InitialConditionService } from '../core/services/initial-conditions/initial-condition.service';
 
 const modules = [
   RouterModule,
@@ -44,6 +45,7 @@ const modules = [
     UserService,
     StudiesService,
     SectionService,
+    InitialConditionService,
     ConfirmationService
   ],
   templateUrl: './app.component.html',
