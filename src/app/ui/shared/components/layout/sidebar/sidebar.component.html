@@ -1,7 +1,4 @@
-<nav
-  class="stellar-sidebar"
-  [class.stellar-sidebar--expanded]="expandedStatus() === true"
->
+<nav class=" {{ sidebarClass() }}">
   <header class="stelBar-header">
     <a routerLink="/" class="stelBar-header__link">
       @if (logoIconExpanded() && expandedStatus() === true) {
