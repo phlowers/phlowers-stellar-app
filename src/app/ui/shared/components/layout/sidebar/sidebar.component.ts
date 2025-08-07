@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   input,
   OnInit,
   signal,
@@ -32,6 +33,12 @@ export class SidebarComponent implements OnInit {
   public expandedStatus = signal<boolean>(this.getInitialExpandedStatus());
   public appVersion = signal<string>('');
   public appLogoRoot = signal<string>('in-app-logo/');
+
+  sidebarClass = computed(() => {
+    return this.expandedStatus()
+      ? 'stellar-sidebar stellar-sidebar--expanded'
+      : 'stellar-sidebar';
+  });
 
   private getInitialExpandedStatus(): boolean {
     const storedSidebarStatus = localStorage.getItem('expandedStatus');
