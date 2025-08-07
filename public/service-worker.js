@@ -50,7 +50,7 @@ self.addEventListener("message", (event) => {
       log(serviceWorkerLogPrefix + "updating service worker with manifest", manifest);
       const cache = await caches.open(CACHE_NAME);
       for (const file of files) {
-        if (file.startsWith("http") || file.startsWith("/pyodide")) {
+        if (file.startsWith("/pyodide")) {
           if (await cache.match(file)) {
             log(serviceWorkerLogPrefix + "file already in cache, skipping", file);
           } else {

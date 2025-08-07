@@ -48,6 +48,11 @@ export class TopbarComponent implements OnInit, OnDestroy {
         this.workerReady.set(ready);
       })
     );
+    this.subscriptions.add(
+      this.workerPythonService.pyodideLoadError$.subscribe((error) => {
+        this.workerError.set(error);
+      })
+    );
   }
 
   ngOnDestroy() {

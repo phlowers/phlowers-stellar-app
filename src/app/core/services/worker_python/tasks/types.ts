@@ -3,6 +3,10 @@ export enum Task {
   getLit = 'getLit'
 }
 
+export enum TaskError {
+  PYODIDE_LOAD_ERROR = 'PYODIDE_LOAD_ERROR'
+}
+
 export interface GetSectionOutput {
   x: Record<string, number | null>;
   y: Record<string, number | null>;
