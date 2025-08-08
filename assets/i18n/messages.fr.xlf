@@ -7,40 +7,10 @@
         <target>Email</target>
       </segment>
     </unit>
-    <unit id="4744897149268098869">
+    <unit id="4552549213637309982">
       <segment>
-        <source>Email is not valid.</source>
-        <target>L&apos;email n&apos;est pas valide.</target>
-      </segment>
-    </unit>
-    <unit id="2538982915795016676">
-      <segment>
-        <source>STELLAR</source>
-        <target>STELLAR</target>
-      </segment>
-    </unit>
-    <unit id="1027281205052566407">
-      <segment>
-        <source>UPDATE AVAILABLE</source>
-        <target>Mise à jour disponible</target>
-      </segment>
-    </unit>
-    <unit id="5024752563746311100">
-      <segment>
-        <source>SERVER REACHABLE</source>
-        <target>SERVEUR DISPONIBLE</target>
-      </segment>
-    </unit>
-    <unit id="7329852281226155501">
-      <segment>
-        <source>SERVER UNREACHABLE</source>
-        <target>SERVEUR INDISPONIBLE</target>
-      </segment>
-    </unit>
-    <unit id="3619431313457349805">
-      <segment>
-        <source>REACHING SERVER</source>
-        <target>APPEL DU SERVEUR</target>
+        <source> Email is not valid. </source>
+        <target> L&apos;email n&apos;est pas valide. </target>
       </segment>
     </unit>
     <unit id="7884682505577720946">
@@ -67,10 +37,10 @@
         <target>DATE ET HEURE DE BUILD</target>
       </segment>
     </unit>
-    <unit id="5895227359304793999">
+    <unit id="2846632067702923194">
       <segment>
-        <source>Update to latest version</source>
-        <target>Mettre à jour vers la version la plus récente</target>
+        <source> Update to latest version</source>
+        <target> Mettre à jour vers la version la plus récente</target>
       </segment>
     </unit>
     <unit id="7658402240953727096">
@@ -193,30 +163,6 @@
         <target>Rechercher</target>
       </segment>
     </unit>
-    <unit id="1747922970241457826">
-      <segment>
-        <source>UUID contains:</source>
-        <target>L&apos;UUID contient:</target>
-      </segment>
-    </unit>
-    <unit id="5209212849370069445">
-      <segment>
-        <source>Title contains:</source>
-        <target>Le titre contient:</target>
-      </segment>
-    </unit>
-    <unit id="8703570382789536408">
-      <segment>
-        <source>Author email contains:</source>
-        <target>L&apos;email de l&apos;auteur contient:</target>
-      </segment>
-    </unit>
-    <unit id="3160778630868662456">
-      <segment>
-        <source>Uuid</source>
-        <target>UUID</target>
-      </segment>
-    </unit>
     <unit id="8953033926734869941">
       <segment>
         <source>Name</source>
@@ -229,16 +175,10 @@
         <target>Description</target>
       </segment>
     </unit>
-    <unit id="7071470734400948493">
-      <segment>
-        <source>Author</source>
+    <unit id="305142716106924307">
+      <segment state="initial">
+        <source>Author:</source>
         <target>Auteur</target>
-      </segment>
-    </unit>
-    <unit id="7137602962411642632">
-      <segment>
-        <source>Saved remotely</source>
-        <target>Enregistré à distance</target>
       </segment>
     </unit>
     <unit id="8846437459005249553">
@@ -247,82 +187,10 @@
         <target>Études</target>
       </segment>
     </unit>
-    <unit id="4400683222290877455">
-      <segment>
-        <source> Name <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;title&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;title&quot; /&gt;"/></source>
-        <target> Nom </target>
-      </segment>
-    </unit>
-    <unit id="8784816491170389323">
-      <segment>
-        <source> Description <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;description&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;description&quot; /&gt;"/></source>
-        <target> Description </target>
-      </segment>
-    </unit>
-    <unit id="7792172361652784876">
-      <segment>
-        <source> Author <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON" type="other" dispStart="&lt;p-sortIcon field=&quot;author_email&quot; /&gt;" dispEnd="&lt;p-sortIcon field=&quot;author_email&quot; /&gt;"/></source>
-        <target> Auteur </target>
-      </segment>
-    </unit>
-    <unit id="6952242034697821025">
-      <segment>
-        <source>Title is required.</source>
-        <target>Le titre est requis.</target>
-      </segment>
-    </unit>
-    <unit id="3759965007855499397">
-      <segment>
-        <source>Run</source>
-        <target>Exécuter</target>
-      </segment>
-    </unit>
-    <unit id="7553683770113292299">
-      <segment>
-        <source>Add support</source>
-        <target>Ajouter un support</target>
-      </segment>
-    </unit>
-    <unit id="7695209021302072052">
-      <segment>
-        <source>Suspension</source>
-        <target>Suspension</target>
-      </segment>
-    </unit>
-    <unit id="787244273790277180">
-      <segment>
-        <source>Conductor attachment altitude</source>
-        <target>Altitude d&apos;attachement du conducteur</target>
-      </segment>
-    </unit>
-    <unit id="8257635859590113233">
-      <segment>
-        <source>Crossarm length</source>
-        <target>Longueur de la traverse</target>
-      </segment>
-    </unit>
-    <unit id="4191953958037120723">
-      <segment>
-        <source>Line angle</source>
-        <target>Angle de la ligne</target>
-      </segment>
-    </unit>
-    <unit id="2463828940731995931">
-      <segment>
-        <source>Insulator length</source>
-        <target>Longueur de l&apos;isolateur</target>
-      </segment>
-    </unit>
-    <unit id="3021969710728198812">
-      <segment>
-        <source>Span length</source>
-        <target>Longueur de la portée</target>
-      </segment>
-    </unit>
-    <unit id="1684734235599362204">
+    <unit id="9103840363725224885">
       <segment state="initial">
-        <source>Tools</source>
-        <target>Outils</target>
+        <source>End support</source>
+        <target>Ajouter un support</target>
       </segment>
     </unit>
     <unit id="5041354590769758251">
@@ -331,34 +199,16 @@
         <target>Admin</target>
       </segment>
     </unit>
-    <unit id="4677175911030006427">
-      <segment state="initial">
-        <source>test</source>
-        <target>test</target>
-      </segment>
-    </unit>
     <unit id="5514355339805433365">
       <segment state="initial">
         <source>New study</source>
         <target>Nouvelle étude</target>
       </segment>
     </unit>
-    <unit id="9077188342801483033">
-      <segment state="initial">
-        <source>Import from database</source>
-        <target>Importer depuis la base de données</target>
-      </segment>
-    </unit>
     <unit id="7022070615528435141">
       <segment state="initial">
         <source>Delete</source>
         <target>Supprimer</target>
-      </segment>
-    </unit>
-    <unit id="8854094932942190741">
-      <segment state="initial">
-        <source>Search...</source>
-        <target>Rechercher...</target>
       </segment>
     </unit>
     <unit id="6621329748219109148">
@@ -373,76 +223,10 @@
         <target>Modifier</target>
       </segment>
     </unit>
-    <unit id="3489370051886148217">
-      <segment state="initial">
-        <source>OPEN</source>
-        <target>OUVRIR</target>
-      </segment>
-    </unit>
-    <unit id="9090564883233759848">
-      <segment state="initial">
-        <source>Set your user info</source>
-        <target>Configurer vos informations utilisateur</target>
-      </segment>
-    </unit>
     <unit id="3768927257183755959">
       <segment state="initial">
         <source>Save</source>
         <target>Enregistrer</target>
-      </segment>
-    </unit>
-    <unit id="4472533983620148440">
-      <segment state="initial">
-        <source>ENGINE READY</source>
-        <target>CALCULATEUR PRÊT</target>
-      </segment>
-    </unit>
-    <unit id="6044475970947805811">
-      <segment state="initial">
-        <source>ENGINE LOADING</source>
-        <target>CHARGEMENT DU CALCULATEUR</target>
-      </segment>
-    </unit>
-    <unit id="802273028390736200">
-      <segment state="initial">
-        <source>OFFLINE</source>
-        <target>HORS LIGNE</target>
-      </segment>
-    </unit>
-    <unit id="548892186034088208">
-      <segment state="initial">
-        <source>ONLINE</source>
-        <target>EN LIGNE</target>
-      </segment>
-    </unit>
-    <unit id="2768616509008493478">
-      <segment state="initial">
-        <source>Showing {first} to {last} of {totalRecords} studies</source>
-        <target>Afficher {first} à {last} sur {totalRecords} études</target>
-      </segment>
-    </unit>
-    <unit id="8980576479674263137">
-      <segment state="initial">
-        <source>Save in distant database</source>
-        <target>Enregistrer dans la base de données distante</target>
-      </segment>
-    </unit>
-    <unit id="89777724248264638">
-      <segment state="initial">
-        <source>Cannot save. Server is offline</source>
-        <target>Impossible d&apos;enregistrer. Le serveur est hors ligne</target>
-      </segment>
-    </unit>
-    <unit id="5968163108193434832">
-      <segment state="initial">
-        <source>Are you sure you want to delete the selected studies?</source>
-        <target>Êtes-vous sûr de vouloir supprimer les études sélectionnées?</target>
-      </segment>
-    </unit>
-    <unit id="9178182467454450952">
-      <segment state="initial">
-        <source>Confirm</source>
-        <target>Confirmer</target>
       </segment>
     </unit>
     <unit id="3521084103654700903">
@@ -451,51 +235,27 @@
         <target>Succès</target>
       </segment>
     </unit>
-    <unit id="2613487543128349385">
+    <unit id="3317759112793075512">
       <segment state="initial">
-        <source>Study Deleted</source>
-        <target>Étude supprimée</target>
-      </segment>
-    </unit>
-    <unit id="1164341367002159735">
-      <segment state="initial">
-        <source>Studies Deleted</source>
+        <source>Studies deleted</source>
         <target>Études supprimées</target>
       </segment>
     </unit>
-    <unit id="2236995168348965832">
+    <unit id="6536020395223120161">
       <segment state="initial">
-        <source>Study successfully saved!</source>
-        <target>Étude enregistrée avec succès!</target>
+        <source> Error </source>
+        <target> Erreur </target>
       </segment>
     </unit>
-    <unit id="1519954996184640001">
+    <unit id="6202213245388240559">
       <segment state="initial">
-        <source>Error</source>
-        <target>Erreur</target>
-      </segment>
-    </unit>
-    <unit id="550103923187080945">
-      <segment state="initial">
-        <source>Are you sure you want to delete: <ph id="0" equiv="PH" disp="study.title"/>?</source>
-        <target>Êtes-vous sûr de vouloir supprimer: <ph id="0" equiv="PH" disp="study.title"/>?</target>
-      </segment>
-    </unit>
-    <unit id="7534605730266431294">
-      <segment state="initial">
-        <source>Study successfully duplicated!</source>
-        <target>Étude dupliquée avec succès!</target>
-      </segment>
-    </unit>
-    <unit id="203032665652027525">
-      <segment state="initial">
-        <source>Study updated!</source>
+        <source>Study updated</source>
         <target>Étude mise à jour!</target>
       </segment>
     </unit>
-    <unit id="2123259929228064837">
+    <unit id="8337097439903063887">
       <segment state="initial">
-        <source>Study Created</source>
+        <source>Study created</source>
         <target>Étude créée</target>
       </segment>
     </unit>
@@ -523,22 +283,844 @@
         <target>Modifier la hauteur de la ligne</target>
       </segment>
     </unit>
-    <unit id="2517309683610083249">
+    <unit id="2821179408673282599">
       <segment state="initial">
-        <source>Title:</source>
-        <target>Titre:</target>
+        <source>Home</source>
+        <target>Accueil</target>
       </segment>
     </unit>
-    <unit id="6996799422725544865">
+    <unit id="2250155903065806087">
       <segment state="initial">
-        <source>Description:</source>
-        <target>Description:</target>
+        <source>Study</source>
+        <target>Étude</target>
       </segment>
     </unit>
-    <unit id="259021582922138864">
+    <unit id="841934696444961534">
       <segment state="initial">
-        <source>Shareable to other users:</source>
-        <target>Partageable aux autres utilisateurs:</target>
+        <source>News</source>
+        <target>Actualités</target>
+      </segment>
+    </unit>
+    <unit id="2275328567992347600">
+      <segment state="initial">
+        <source>Page not found</source>
+        <target>Page non trouvée</target>
+      </segment>
+    </unit>
+    <unit id="7601213978629574297">
+      <segment state="initial">
+        <source> Go to home page </source>
+        <target> Aller à la page d'accueil </target>
+      </segment>
+    </unit>
+    <unit id="6713690242020777174">
+      <segment state="initial">
+        <source>Build version</source>
+        <target>Version de la build</target>
+      </segment>
+    </unit>
+    <unit id="2547571169649786686">
+      <segment state="initial">
+        <source>Danger zone</source>
+        <target>Zone Danger</target>
+      </segment>
+    </unit>
+    <unit id="1267728769006543252">
+      <segment state="initial">
+        <source> Delete all studies </source>
+        <target> Supprimer toutes les études </target>
+      </segment>
+    </unit>
+    <unit id="2398619245085086844">
+      <segment state="initial">
+        <source> Reset database </source>
+        <target> Réinitialiser la base de données </target>
+      </segment>
+    </unit>
+    <unit id="6341476329368350089">
+      <segment state="initial">
+        <source> Delete app cache </source>
+        <target> Supprimer le cache de l'application </target>
+      </segment>
+    </unit>
+    <unit id="4238708305594970843">
+      <segment state="initial">
+        <source>Update successful</source>
+        <target>Mise à jour réussie</target>
+      </segment>
+    </unit>
+    <unit id="8439372668099146162">
+      <segment state="initial">
+        <source>The application has been updated to the latest version</source>
+        <target>L'application a été mise à jour vers la dernière version</target>
+      </segment>
+    </unit>
+    <unit id="797001286432919577">
+      <segment state="initial">
+        <source>Are you sure you want to delete all studies?</source>
+        <target>Êtes-vous sûr de vouloir supprimer toutes les études?</target>
+      </segment>
+    </unit>
+    <unit id="7628479102589681060">
+      <segment state="initial">
+        <source>All studies have been deleted</source>
+        <target>Toutes les études ont été supprimées</target>
+      </segment>
+    </unit>
+    <unit id="5255221529688423139">
+      <segment state="initial">
+        <source>Are you sure you want to reset the database?</source>
+        <target>Êtes-vous sûr de vouloir réinitialiser la base de données?</target>
+      </segment>
+    </unit>
+    <unit id="367434070679684080">
+      <segment state="initial">
+        <source>Database reset</source>
+        <target>Réinitialisation de la base de données</target>
+      </segment>
+    </unit>
+    <unit id="2426063357414126636">
+      <segment state="initial">
+        <source>The database has been reset</source>
+        <target>La base de données a été réinitialisée</target>
+      </segment>
+    </unit>
+    <unit id="5281579610433386344">
+      <segment state="initial">
+        <source>Are you sure you want to reset the app?</source>
+        <target>Êtes-vous sûr de vouloir réinitialiser l'application?</target>
+      </segment>
+    </unit>
+    <unit id="4125361306674691550">
+      <segment state="initial">
+        <source>App reset</source>
+        <target>Réinitialisation de l'application</target>
+      </segment>
+    </unit>
+    <unit id="5994109586105591631">
+      <segment state="initial">
+        <source>The app has been reset</source>
+        <target>L'application a été réinitialisée</target>
+      </segment>
+    </unit>
+    <unit id="8283592065951885988">
+      <segment state="initial">
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a new study </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Créer une nouvelle étude </target>
+      </segment>
+    </unit>
+    <unit id="983324339375029355">
+      <segment state="initial">
+        <source>My last studies</source>
+        <target>Mes dernières études</target>
+      </segment>
+    </unit>
+    <unit id="5455631818675024639">
+      <segment state="initial">
+        <source>No recent studies</source>
+        <target>Aucune étude récente</target>
+      </segment>
+    </unit>
+    <unit id="6016428309492185040">
+      <segment state="initial">
+        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></source>
+        <target> Aller à mes études <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="4141865830196614938">
+      <segment state="initial">
+        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!</source>
+        <target>Bienvenue sur Celeste! Nous sommes ravis de vous présenter cette nouvelle application. Veuillez nous contacter pour partager vos idées et vos retours pour nous aider à améliorer cette application!</target>
+      </segment>
+    </unit>
+    <unit id="1444333919089743258">
+      <segment state="initial">
+        <source>View all news</source>
+        <target>Voir toutes les actualités</target>
+      </segment>
+    </unit>
+    <unit id="4667659558738672926">
+      <segment state="initial">
+        <source>Changelogs</source>
+        <target>Journal des modifications</target>
+      </segment>
+    </unit>
+    <unit id="3878398159737749263">
+      <segment state="initial">
+        <source>View latest updates.</source>
+        <target>Voir les dernières mises à jour.</target>
+      </segment>
+    </unit>
+    <unit id="819996403327805209">
+      <segment state="initial">
+        <source>Learn more</source>
+        <target>En savoir plus</target>
+      </segment>
+    </unit>
+    <unit id="2668751339669907539">
+      <segment state="initial">
+        <source>Learn more about latest updates</source>
+        <target>En savoir plus sur les dernières mises à jour</target>
+      </segment>
+    </unit>
+    <unit id="8436059801222132475">
+      <segment state="initial">
+        <source>Server state</source>
+        <target>État du serveur</target>
+      </segment>
+    </unit>
+    <unit id="5799777256002258190">
+      <segment state="initial">
+        <source>Trying to reach the servers!</source>
+        <target>Tentative de connexion au serveur!</target>
+      </segment>
+    </unit>
+    <unit id="509090351011426949">
+      <segment state="initial">
+        <source>Update available</source>
+        <target>Mise à jour disponible</target>
+      </segment>
+    </unit>
+    <unit id="2269840927612671406">
+      <segment state="initial">
+        <source>A new application update is available!</source>
+        <target>Une nouvelle mise à jour de l'application est disponible!</target>
+      </segment>
+    </unit>
+    <unit id="5078151248323604568">
+      <segment state="initial">
+        <source>Cannot reach data. Please check your internet connectivity.</source>
+        <target>Impossible de récupérer les données. Veuillez vérifier votre connexion internet.</target>
+      </segment>
+    </unit>
+    <unit id="3510960524643312912">
+      <segment state="initial">
+        <source>Trying to reach the servers.</source>
+        <target>Tentative de connexion au serveur.</target>
+      </segment>
+    </unit>
+    <unit id="5955728908893282532">
+      <segment state="initial">
+        <source>An error occured while trying to reach servers.</source>
+        <target>Une erreur est survenue lors de la tentative de connexion au serveur.</target>
+      </segment>
+    </unit>
+    <unit id="3159332545494825825">
+      <segment state="initial">
+        <source>Server connexion success!</source>
+        <target>Connexion au serveur réussie!</target>
+      </segment>
+    </unit>
+    <unit id="8159722776036849437">
+      <segment state="initial">
+        <source>Study name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <target>Nom de l'étude <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="8616180516716294384">
+      <segment state="initial">
+        <source>Give a name to your study</source>
+        <target>Donnez un nom à votre étude</target>
+      </segment>
+    </unit>
+    <unit id="6057281094654962766">
+      <segment state="initial">
+        <source>Validate</source>
+        <target>Valider</target>
+      </segment>
+    </unit>
+    <unit id="4116724826865372994">
+      <segment state="initial">
+        <source>Modify study</source>
+        <target>Modifier l'étude</target>
+      </segment>
+    </unit>
+    <unit id="5519001504653726625">
+      <segment state="initial">
+        <source>Study created successfully</source>
+        <target>Étude créée avec succès</target>
+      </segment>
+    </unit>
+    <unit id="1653305415865364716">
+      <segment state="initial">
+        <source>Study updated successfully</source>
+        <target>Étude mise à jour avec succès</target>
+      </segment>
+    </unit>
+    <unit id="1386766078260547788">
+      <segment state="initial">
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Tire <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="7282804341793038828">
+      <segment state="initial">
+        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Auteur <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="6045024918689189924">
+      <segment state="initial">
+        <source> Creation date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Date de création <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="5375905790663497716">
+      <segment state="initial">
+        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Date de modification <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="4665164818576576044">
+      <segment state="initial">
+        <source> LIT code <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> code LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="2463238050344760316">
+      <segment state="initial">
+        <source> Shared <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Partagée <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="4360239040231802726">
+      <segment state="initial">
+        <source> Actions </source>
+        <target> Actions </target>
+      </segment>
+    </unit>
+    <unit id="3799093232488965923">
+      <segment state="initial">
+        <source> Open </source>
+        <target> Ouvrir </target>
+      </segment>
+    </unit>
+    <unit id="8109561878775602635">
+      <segment state="initial">
+        <source>Create a new study</source>
+        <target>Créer une nouvelle étude</target>
+      </segment>
+    </unit>
+    <unit id="3922504333199040096">
+      <segment state="initial">
+        <source>Search a study</source>
+        <target>Rechercher une étude</target>
+      </segment>
+    </unit>
+    <unit id="7128845509017303174">
+      <segment state="initial">
+        <source>Import a study</source>
+        <target>Importer une étude</target>
+      </segment>
+    </unit>
+    <unit id="862393570495704117">
+      <segment state="initial">
+        <source>Study sections</source>
+        <target>Cantons de l'étude</target>
+      </segment>
+    </unit>
+    <unit id="504426626920824980">
+      <segment state="initial">
+        <source>Study states</source>
+        <target>États de l'étude</target>
+      </segment>
+    </unit>
+    <unit id="5361585538695040272">
+      <segment state="initial">
+        <source>Measurements</source>
+        <target>Mesures</target>
+      </segment>
+    </unit>
+    <unit id="7915195931257031161">
+      <segment state="initial">
+        <source>Ground and obstacles</source>
+        <target>Sol et obstacles</target>
+      </segment>
+    </unit>
+    <unit id="3533138925800017240">
+      <segment state="initial">
+        <source>Study Duplicated</source>
+        <target>Étude dupliquée</target>
+      </segment>
+    </unit>
+    <unit id="6600961151364207736">
+      <segment state="initial">
+        <source>Section Updated</source>
+        <target>Canton mis à jour</target>
+      </segment>
+    </unit>
+    <unit id="4167548029405227892">
+      <segment state="initial">
+        <source>Section Created</source>
+        <target>Canton créé</target>
+      </segment>
+    </unit>
+    <unit id="128932358295516526">
+      <segment state="initial">
+        <source>Section Deleted</source>
+        <target>Canton supprimé</target>
+      </segment>
+    </unit>
+    <unit id="7697593277738514956">
+      <segment state="initial">
+        <source>Section Duplicated</source>
+        <target>Canton dupliqué</target>
+      </segment>
+    </unit>
+    <unit id="8157568719212294147">
+      <segment state="initial">
+        <source>Initial Condition Updated</source>
+        <target>Condition initiale mise à jour</target>
+      </segment>
+    </unit>
+    <unit id="3049551355280538164">
+      <segment state="initial">
+        <source>Initial Condition Added</source>
+        <target>Condition initiale ajoutée</target>
+      </segment>
+    </unit>
+    <unit id="5722345326918734257">
+      <segment state="initial">
+        <source>Initial Condition Deleted</source>
+        <target>Condition initiale supprimée</target>
+      </segment>
+    </unit>
+    <unit id="7937931707186931727">
+      <segment state="initial">
+        <source>Initial Condition Duplicated</source>
+        <target>Condition initiale dupliquée</target>
+      </segment>
+    </unit>
+    <unit id="6083227782927355534">
+      <segment state="initial">
+        <source>Create an initial condition</source>
+        <target>Créer une condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="5437172145642680301">
+      <segment state="initial">
+        <source>Section name</source>
+        <target>Nom de la section</target>
+      </segment>
+    </unit>
+    <unit id="4408679057911996366">
+      <segment state="initial">
+        <source>Cable name</source>
+        <target>Nom du câble</target>
+      </segment>
+    </unit>
+    <unit id="4052831009850155733">
+      <segment state="initial">
+        <source>Cables amount</source>
+        <target>Nombre de câbles</target>
+      </segment>
+    </unit>
+    <unit id="2638469548137871317">
+      <segment state="initial">
+        <source>Initial condition name</source>
+        <target>Nom de la condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="3228248733549149448">
+      <segment state="initial">
+        <source>Base parameter</source>
+        <target>Paramètre de base</target>
+      </segment>
+    </unit>
+    <unit id="5280610039017327422">
+      <segment state="initial">
+        <source>Base temperature (°C)</source>
+        <target>Température de base (°C)</target>
+      </segment>
+    </unit>
+    <unit id="6439365426343089851">
+      <segment state="initial">
+        <source>General</source>
+        <target>Général</target>
+      </segment>
+    </unit>
+    <unit id="1715866221564635584">
+      <segment state="initial">
+        <source>Supports</source>
+        <target>Supports</target>
+      </segment>
+    </unit>
+    <unit id="6626934443702250379">
+      <segment state="initial">
+        <source>Graphical view</source>
+        <target>Vue graphique</target>
+      </segment>
+    </unit>
+    <unit id="2593007815199532062">
+      <segment state="initial">
+        <source>Section</source>
+        <target>Section</target>
+      </segment>
+    </unit>
+    <unit id="1553627416533983831">
+      <segment state="initial">
+        <source>Section name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <target>Nom de la section <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="7029096918733367423">
+      <segment state="initial">
+        <source>Section type <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <target>Type de section <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="5426507602553467529">
+      <segment state="initial">
+        <source>Cable amount <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <target>Nombre de câbles <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="1280422441143770406">
+      <segment state="initial">
+        <source>Cable name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <target>Nom du câble <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="3465942650835858981">
+      <segment state="initial">
+        <source>Maintenance</source>
+        <target>Maintenance</target>
+      </segment>
+    </unit>
+    <unit id="3099536771768294227">
+      <segment state="initial">
+        <source>CM</source>
+        <target>CM</target>
+      </segment>
+    </unit>
+    <unit id="8039268900393010928">
+      <segment state="initial">
+        <source>GMR</source>
+        <target>GMR</target>
+      </segment>
+    </unit>
+    <unit id="4486647169102354749">
+      <segment state="initial">
+        <source>EEL</source>
+        <target>EEL</target>
+      </segment>
+    </unit>
+    <unit id="2981219928115418649">
+      <segment state="initial">
+        <source>Link</source>
+        <target>Lien</target>
+      </segment>
+    </unit>
+    <unit id="5330590276782069905">
+      <segment state="initial">
+        <source>Electric tension level</source>
+        <target>Niveau de tension électrique</target>
+      </segment>
+    </unit>
+    <unit id="6963570697110110448">
+      <segment state="initial">
+        <source>Link name</source>
+        <target>Nom du lien</target>
+      </segment>
+    </unit>
+    <unit id="8569561572681353162">
+      <segment state="initial">
+        <source>LIT</source>
+        <target>LIT</target>
+      </segment>
+    </unit>
+    <unit id="1255388649183074058">
+      <segment state="initial">
+        <source>Branch name</source>
+        <target>Nom de la branche</target>
+      </segment>
+    </unit>
+    <unit id="5798603970967359521">
+      <segment state="initial">
+        <source>Supports amount</source>
+        <target>Nombre de supports</target>
+      </segment>
+    </unit>
+    <unit id="1172866303261737245">
+      <segment state="initial">
+        <source>Position</source>
+        <target>Position</target>
+      </segment>
+    </unit>
+    <unit id="6370642728789544052">
+      <segment state="initial">
+        <source>Number</source>
+        <target>Numéro</target>
+      </segment>
+    </unit>
+    <unit id="7497893791400342599">
+      <segment state="initial">
+        <source>Span length (m)</source>
+        <target>Longueur de la portée (m)</target>
+      </segment>
+    </unit>
+    <unit id="3337781493803072719">
+      <segment state="initial">
+        <source>Span angle (Gr)</source>
+        <target>Angle de la portée (Gr)</target>
+      </segment>
+    </unit>
+    <unit id="1772495502731751754">
+      <segment state="initial">
+        <source>Attachment height (m)</source>
+        <target>Hauteur d'attachement (m)</target>
+      </segment>
+    </unit>
+    <unit id="5280768007794245227">
+      <segment state="initial">
+        <source>Cable (NGF)</source>
+        <target>Câble (NGF)</target>
+      </segment>
+    </unit>
+    <unit id="6621067415830629818">
+      <segment state="initial">
+        <source>Arm length (m)</source>
+        <target>Longueur de l'armature (m)</target>
+      </segment>
+    </unit>
+    <unit id="5513122358899972896">
+      <segment state="initial">
+        <source>Chain name</source>
+        <target>Nom de la chaine</target>
+      </segment>
+    </unit>
+    <unit id="6543536815504799118">
+      <segment state="initial">
+        <source>Chain length (m)</source>
+        <target>Longueur de la chaine (m)</target>
+      </segment>
+    </unit>
+    <unit id="7270261397893681192">
+      <segment state="initial">
+        <source>Chain weight (kg)</source>
+        <target>Poids de la chaine (kg)</target>
+      </segment>
+    </unit>
+    <unit id="3154787560331051884">
+      <segment state="initial">
+        <source>Chain V</source>
+        <target>Chaine V</target>
+      </segment>
+    </unit>
+    <unit id="3193976279273491157">
+      <segment state="initial">
+        <source>Actions</source>
+        <target>Actions</target>
+      </segment>
+    </unit>
+    <unit id="8609810939352282595">
+      <segment state="initial">
+        <source>Add support before</source>
+        <target>Ajouter un support avant</target>
+      </segment>
+    </unit>
+    <unit id="1599802675385906175">
+      <segment state="initial">
+        <source>Add support after</source>
+        <target>Ajouter un support après</target>
+      </segment>
+    </unit>
+    <unit id="7434521647283704814">
+      <segment state="initial">
+        <source>Delete support</source>
+        <target>Supprimer le support</target>
+      </segment>
+    </unit>
+    <unit id="1170667643695316061">
+      <segment state="initial">
+        <source>Create a study section</source>
+        <target>Créer une section d'étude</target>
+      </segment>
+    </unit>
+    <unit id="3689220712977179060">
+      <segment state="initial">
+        <source>Section source</source>
+        <target>Source de la section</target>
+      </segment>
+    </unit>
+    <unit id="2233560223291461480">
+      <segment state="initial">
+        <source>Manual</source>
+        <target>Manuel</target>
+      </segment>
+    </unit>
+    <unit id="7315024664317918263">
+      <segment state="initial">
+        <source>From referencial</source>
+        <target>À partir du référentiel</target>
+      </segment>
+    </unit>
+    <unit id="513031718637117901">
+      <segment state="initial">
+        <source>From distant referencial</source>
+        <target>À partir du référentiel distant</target>
+      </segment>
+    </unit>
+    <unit id="6707260083636271016">
+      <segment state="initial">
+        <source>From extraction</source>
+        <target>À partir de l'extraction</target>
+      </segment>
+    </unit>
+    <unit id="8833276229402617730">
+      <segment state="initial">
+        <source>No existing section</source>
+        <target>Aucune section existante</target>
+      </segment>
+    </unit>
+    <unit id="6173209146841926976">
+      <segment state="initial">
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Add a section </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Ajouter une section </target>
+      </segment>
+    </unit>
+    <unit id="1949800506879332767">
+      <segment state="initial">
+        <source>Section Name</source>
+        <target>Nom de la section</target>
+      </segment>
+    </unit>
+    <unit id="1289308098980826210">
+      <segment state="initial">
+        <source>Section type</source>
+        <target>Type de section</target>
+      </segment>
+    </unit>
+    <unit id="2925129304308690882">
+      <segment state="initial">
+        <source>Last modified</source>
+        <target>Dernière modification</target>
+      </segment>
+    </unit>
+    <unit id="2346064433794006768">
+      <segment state="initial">
+        <source>Initial conditions</source>
+        <target>Conditions initiales</target>
+      </segment>
+    </unit>
+    <unit id="8214037487031019515">
+      <segment state="initial">
+        <source>Add initial condition</source>
+        <target>Ajouter une condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="6801360463490683535">
+      <segment state="initial">
+        <source> View initial conditions </source>
+        <target> Vue des conditions initiales </target>
+      </segment>
+    </unit>
+    <unit id="2509141182388535183">
+      <segment state="initial">
+        <source>View</source>
+        <target>Vue</target>
+      </segment>
+    </unit>
+    <unit id="6598075623864682368">
+      <segment state="initial">
+        <source>Add an initial condition</source>
+        <target>Ajouter une condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="7372608945282781808">
+      <segment state="initial">
+        <source>Last changed:</source>
+        <target>Dernière modification:</target>
+      </segment>
+    </unit>
+    <unit id="2202835179714153957">
+      <segment state="initial">
+        <source>User preference</source>
+        <target>Préférences utilisateur</target>
+      </segment>
+    </unit>
+    <unit id="633450215070869903">
+      <segment state="initial">
+        <source>usr pref</source>
+        <target>pref usr</target>
+      </segment>
+    </unit>
+    <unit id="1614612576043079687">
+      <segment state="initial">
+        <source>Shrink menu</source>
+        <target>Réduire le menu</target>
+      </segment>
+    </unit>
+    <unit id="2102825898069375693">
+      <segment state="initial">
+        <source>Menu</source>
+        <target>Menu</target>
+      </segment>
+    </unit>
+    <unit id="794617384648959179">
+      <segment state="initial">
+        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></source>
+        <target> Détails <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="4973351383154508059">
+      <segment state="initial">
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;content_copy&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;content_copy&quot; /&gt;"/> Duplicate </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;content_copy&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;content_copy&quot; /&gt;"/> Dupliquer </target>
+      </segment>
+    </unit>
+    <unit id="159395379410071627">
+      <segment state="initial">
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;public&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;public&quot; /&gt;"/> Publish </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;public&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;public&quot; /&gt;"/> Publier </target>
+      </segment>
+    </unit>
+    <unit id="3102779920122732727">
+      <segment state="initial">
+        <source> Loading </source>
+        <target> Chargement </target>
+      </segment>
+    </unit>
+    <unit id="7215759904460573154">
+      <segment state="initial">
+        <source> Ready </source>
+        <target> Prêt </target>
+      </segment>
+    </unit>
+    <unit id="791950660812381145">
+      <segment state="initial">
+        <source>Side</source>
+        <target>Côté</target>
+      </segment>
+    </unit>
+    <unit id="1997818395374468661">
+      <segment state="initial">
+        <source>Start support</source>
+        <target>Support de début</target>
+      </segment>
+    </unit>
+    <unit id="2172902003676402663">
+      <segment state="initial">
+        <source> Refresh </source>
+        <target> Rafraîchir </target>
+      </segment>
+    </unit>
+    <unit id="3931780727974941210">
+      <segment state="initial">
+        <source>Error: start &gt;= end</source>
+        <target>Erreur: début &gt;= fin</target>
+      </segment>
+    </unit>
+    <unit id="3808511518924568636">
+      <segment state="initial">
+        <source>Error: start not in list</source>
+        <target>Erreur: début pas dans la liste</target>
+      </segment>
+    </unit>
+    <unit id="6480514970774430660">
+      <segment state="initial">
+        <source>Error: end not in list</source>
+        <target>Erreur: fin pas dans la liste</target>
       </segment>
     </unit>
   </file>

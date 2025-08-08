@@ -10,37 +10,42 @@ import { loadPyodide } from 'pyodide';
 import importScript from './tasks/python-scripts/imports.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
-import { Task, TaskInputs } from './tasks/types';
+import { Task, TaskError, TaskInputs } from './tasks/types';
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;
 
 async function loadPyodideAndPackages() {
-  const localPythonPackages = [
-    ...Object.values(pythonPackages)
-      .map((pkg) =>
-        pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''
-      )
-      .filter(Boolean)
-  ];
-  const start = performance.now();
-  pyodide = await loadPyodide({
-    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
-    packages: [
-      'scipy',
-      'numpy',
-      'pandas',
-      'pydantic',
-      'packaging',
-      'wrapt',
-      ...localPythonPackages
-    ]
-  });
-  const loadEnd = performance.now();
-  postMessage({ loadTime: loadEnd - start });
-  await pyodide.runPython(importScript);
-  const importEnd = performance.now();
-  postMessage({ importTime: importEnd - loadEnd });
+  try {
+    const localPythonPackages = [
+      ...Object.values(pythonPackages)
+        .map((pkg) =>
+          pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''
+        )
+        .filter(Boolean)
+    ];
+    const start = performance.now();
+    pyodide = await loadPyodide({
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
+      packages: [
+        'scipy',
+        'numpy',
+        'pandas',
+        'pydantic',
+        'packaging',
+        'wrapt',
+        ...localPythonPackages
+      ]
+    });
+    const loadEnd = performance.now();
+    postMessage({ loadTime: loadEnd - start });
+    await pyodide.runPython(importScript);
+    const importEnd = performance.now();
+    postMessage({ importTime: importEnd - loadEnd });
+  } catch (error) {
+    console.error('Error loading pyodide', error);
+    postMessage({ error: TaskError.PYODIDE_LOAD_ERROR });
+  }
 }
 
 addEventListener(

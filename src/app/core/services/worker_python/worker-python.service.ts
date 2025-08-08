@@ -15,6 +15,7 @@ import { Task, TaskInputs, TaskOutputs } from './tasks/types';
 })
 export class WorkerPythonService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
+  readonly pyodideLoadError$ = new BehaviorSubject<boolean>(false);
   public worker?: Worker;
   times = signal<{
     loadTime: number;
@@ -45,6 +46,8 @@ export class WorkerPythonService {
         this._ready.next(true);
       } else if (data.id) {
         this.handlerMap[data.id](data.result);
+      } else if (data.error) {
+        this.pyodideLoadError$.next(true);
       }
     };
   }

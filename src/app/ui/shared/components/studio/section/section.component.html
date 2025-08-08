@@ -1,1 +1,74 @@
-<div id="plotly-output"></div>
+<div class="flex flex-row gap-2">
+  <div class="w-48">
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-1">
+        <label for="view" i18n>View</label>
+        <p-select
+          id="view"
+          [options]="[{ view: '2d' }, { view: '3d' }]"
+          [(ngModel)]="options().view"
+          optionLabel="view"
+          optionValue="view"
+        />
+      </div>
+      @if (options().view === '2d') {
+        <div class="flex flex-col gap-1">
+          <label for="side" i18n>Side</label>
+          <p-select
+            id="side"
+            [options]="[{ side: 'profile' }, { side: 'face' }]"
+            [(ngModel)]="options().side"
+            optionLabel="side"
+            optionValue="side"
+          />
+        </div>
+      }
+      <div class="flex flex-col gap-1">
+        <label for="startSpan" i18n>Start support</label>
+        <p-select
+          inputId="startSpan"
+          [editable]="true"
+          pattern="^[0-9]+$"
+          appendTo="body"
+          [options]="supports()"
+          [ngModel]="options().startSupport"
+          optionLabel="item"
+          optionValue="item"
+          (onChange)="searchSupport($event, 'start')"
+        />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="endSpan" i18n>End support</label>
+        <p-select
+          inputId="endSpan"
+          [editable]="true"
+          pattern="^[0-9]+$"
+          appendTo="body"
+          [ngModel]="options().endSupport"
+          pKeyFilter="int"
+          [options]="supports()"
+          optionLabel="item"
+          optionValue="item"
+          (onChange)="searchSupport($event, 'end')"
+        />
+      </div>
+      @if (errorMessage()) {
+        <p-message
+          severity="error"
+          size="small"
+          [text]="errorMessage()"
+        ></p-message>
+      }
+      <button
+        class="mt-2"
+        [disabled]="errorMessage()"
+        (click)="refreshSection(litData())"
+        app-btn
+        i18n
+      >
+        Refresh
+      </button>
+    </div>
+  </div>
+  <div class="w-full h-full" id="plotly-output"></div>
+</div>
