@@ -82,15 +82,17 @@
       <app-icon icon="close" />
       <span i18n>Cancel</span>
     </button>
-    <button
-      app-btn
-      type="button"
-      btnSize="m"
-      (click)="onValidate()"
-      [disabled]="!areAllRequiredFieldsFilled()"
-    >
-      <app-icon icon="check" />
-      <span i18n>Validate</span>
-    </button>
+    @if (mode() !== 'view') {
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        (click)="onValidate()"
+        [disabled]="!areAllRequiredFieldsFilled()"
+      >
+        <app-icon icon="check" />
+        <span i18n>Validate</span>
+      </button>
+    }
   </ng-template>
 </p-dialog>

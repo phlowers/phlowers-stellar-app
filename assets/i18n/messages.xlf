@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
   <file id="ngi18n" original="ng.template">
     <unit id="4768749765465246664">
@@ -6,9 +6,9 @@
         <source>Email</source>
       </segment>
     </unit>
-    <unit id="4744897149268098869">
+    <unit id="4552549213637309982">
       <segment>
-        <source>Email is not valid.</source>
+        <source> Email is not valid. </source>
       </segment>
     </unit>
     <unit id="8846437459005249553">
@@ -21,44 +21,9 @@
         <source>Sections</source>
       </segment>
     </unit>
-    <unit id="1684734235599362204">
-      <segment>
-        <source>Tools</source>
-      </segment>
-    </unit>
     <unit id="5041354590769758251">
       <segment>
         <source>Admin</source>
-      </segment>
-    </unit>
-    <unit id="4677175911030006427">
-      <segment>
-        <source>test</source>
-      </segment>
-    </unit>
-    <unit id="2538982915795016676">
-      <segment>
-        <source>STELLAR</source>
-      </segment>
-    </unit>
-    <unit id="1027281205052566407">
-      <segment>
-        <source>UPDATE AVAILABLE</source>
-      </segment>
-    </unit>
-    <unit id="5024752563746311100">
-      <segment>
-        <source>SERVER REACHABLE</source>
-      </segment>
-    </unit>
-    <unit id="7329852281226155501">
-      <segment>
-        <source>SERVER UNREACHABLE</source>
-      </segment>
-    </unit>
-    <unit id="3619431313457349805">
-      <segment>
-        <source>REACHING SERVER</source>
       </segment>
     </unit>
     <unit id="7884682505577720946">
@@ -81,9 +46,9 @@
         <source>Build datetime</source>
       </segment>
     </unit>
-    <unit id="5895227359304793999">
+    <unit id="2846632067702923194">
       <segment>
-        <source>Update to latest version</source>
+        <source> Update to latest version</source>
       </segment>
     </unit>
     <unit id="7658402240953727096">
@@ -181,26 +146,6 @@
         <source>Search</source>
       </segment>
     </unit>
-    <unit id="1747922970241457826">
-      <segment>
-        <source>UUID contains:</source>
-      </segment>
-    </unit>
-    <unit id="5209212849370069445">
-      <segment>
-        <source>Title contains:</source>
-      </segment>
-    </unit>
-    <unit id="8703570382789536408">
-      <segment>
-        <source>Author email contains:</source>
-      </segment>
-    </unit>
-    <unit id="3160778630868662456">
-      <segment>
-        <source>Uuid</source>
-      </segment>
-    </unit>
     <unit id="8953033926734869941">
       <segment>
         <source>Name</source>
@@ -211,14 +156,9 @@
         <source>Description</source>
       </segment>
     </unit>
-    <unit id="7071470734400948493">
+    <unit id="305142716106924307">
       <segment>
-        <source>Author</source>
-      </segment>
-    </unit>
-    <unit id="7137602962411642632">
-      <segment>
-        <source>Saved remotely</source>
+        <source>Author:</source>
       </segment>
     </unit>
     <unit id="5514355339805433365">
@@ -226,41 +166,9 @@
         <source>New study</source>
       </segment>
     </unit>
-    <unit id="9077188342801483033">
-      <segment>
-        <source>Import from database</source>
-      </segment>
-    </unit>
     <unit id="7022070615528435141">
       <segment>
         <source>Delete</source>
-      </segment>
-    </unit>
-    <unit id="8854094932942190741">
-      <segment>
-        <source>Search...</source>
-      </segment>
-    </unit>
-    <unit id="4400683222290877455">
-      <segment>
-        <source> Name <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON"
-            type="other" dispStart="&lt;p-sortIcon field=&quot;title&quot; /&gt;"
-            dispEnd="&lt;p-sortIcon field=&quot;title&quot; /&gt;" /></source>
-      </segment>
-    </unit>
-    <unit id="8784816491170389323">
-      <segment>
-        <source> Description <pc id="0" equivStart="START_TAG_P_SORTICON"
-            equivEnd="CLOSE_TAG_P_SORTICON" type="other"
-            dispStart="&lt;p-sortIcon field=&quot;description&quot; /&gt;"
-            dispEnd="&lt;p-sortIcon field=&quot;description&quot; /&gt;" /></source>
-      </segment>
-    </unit>
-    <unit id="7792172361652784876">
-      <segment>
-        <source> Author <pc id="0" equivStart="START_TAG_P_SORTICON" equivEnd="CLOSE_TAG_P_SORTICON"
-            type="other" dispStart="&lt;p-sortIcon field=&quot;author_email&quot; /&gt;"
-            dispEnd="&lt;p-sortIcon field=&quot;author_email&quot; /&gt;" /></source>
       </segment>
     </unit>
     <unit id="6621329748219109148">
@@ -273,54 +181,9 @@
         <source>Edit</source>
       </segment>
     </unit>
-    <unit id="3489370051886148217">
+    <unit id="9103840363725224885">
       <segment>
-        <source>OPEN</source>
-      </segment>
-    </unit>
-    <unit id="6952242034697821025">
-      <segment>
-        <source>Title is required.</source>
-      </segment>
-    </unit>
-    <unit id="3759965007855499397">
-      <segment>
-        <source>Run</source>
-      </segment>
-    </unit>
-    <unit id="7553683770113292299">
-      <segment>
-        <source>Add support</source>
-      </segment>
-    </unit>
-    <unit id="7695209021302072052">
-      <segment>
-        <source>Suspension</source>
-      </segment>
-    </unit>
-    <unit id="787244273790277180">
-      <segment>
-        <source>Conductor attachment altitude</source>
-      </segment>
-    </unit>
-    <unit id="8257635859590113233">
-      <segment>
-        <source>Crossarm length</source>
-      </segment>
-    </unit>
-    <unit id="4191953958037120723">
-      <segment>
-        <source>Line angle</source>
-      </segment>
-    </unit>
-    <unit id="2463828940731995931">
-      <segment>
-        <source>Insulator length</source>
-      </segment>
-    </unit>
-    <unit id="3021969710728198812">
-      <segment>
-        <source>Span length</source>
+        <source>End support</source>
       </segment>
     </unit>
     <unit id="3768927257183755959">
@@ -328,99 +191,29 @@
         <source>Save</source>
       </segment>
     </unit>
-    <unit id="4472533983620148440">
+    <unit id="3317759112793075512">
       <segment>
-        <source>ENGINE READY</source>
+        <source>Studies deleted</source>
       </segment>
     </unit>
-    <unit id="548892186034088208">
+    <unit id="6536020395223120161">
       <segment>
-        <source>ONLINE</source>
+        <source> Error </source>
       </segment>
     </unit>
-    <unit id="6044475970947805811">
+    <unit id="6202213245388240559">
       <segment>
-        <source>ENGINE LOADING</source>
+        <source>Study updated</source>
       </segment>
     </unit>
-    <unit id="802273028390736200">
+    <unit id="8337097439903063887">
       <segment>
-        <source>OFFLINE</source>
-      </segment>
-    </unit>
-    <unit id="9090564883233759848">
-      <segment>
-        <source>Set your user info</source>
-      </segment>
-    </unit>
-    <unit id="1164341367002159735">
-      <segment>
-        <source>Studies Deleted</source>
-      </segment>
-    </unit>
-    <unit id="1519954996184640001">
-      <segment>
-        <source>Error</source>
-      </segment>
-    </unit>
-    <unit id="203032665652027525">
-      <segment>
-        <source>Study updated!</source>
-      </segment>
-    </unit>
-    <unit id="2123259929228064837">
-      <segment>
-        <source>Study Created</source>
-      </segment>
-    </unit>
-    <unit id="2236995168348965832">
-      <segment>
-        <source>Study successfully saved!</source>
-      </segment>
-    </unit>
-    <unit id="2613487543128349385">
-      <segment>
-        <source>Study Deleted</source>
-      </segment>
-    </unit>
-    <unit id="2768616509008493478">
-      <segment>
-        <source>Showing {first} to {last} of {totalRecords} studies</source>
+        <source>Study created</source>
       </segment>
     </unit>
     <unit id="3521084103654700903">
       <segment>
         <source>Successful</source>
-      </segment>
-    </unit>
-    <unit id="550103923187080945">
-      <segment>
-        <source>Are you sure you want to delete: <ph id="0" equiv="PH" disp="study.title" />?</source>
-      </segment>
-    </unit>
-    <unit id="5968163108193434832">
-      <segment>
-        <source>Are you sure you want to delete the selected studies?</source>
-      </segment>
-    </unit>
-    <unit id="7534605730266431294">
-      <segment>
-        <source>Study successfully duplicated!</source>
-      </segment>
-    </unit>
-    <unit id="89777724248264638">
-      <segment>
-        <source>Cannot save. Server is offline</source>
-      </segment>
-    </unit>
-    <unit id="8980576479674263137">
-      <segment>
-        <source>Save in distant database</source>
-      </segment>
-    </unit>
-    <unit id="9178182467454450952">
-      <segment>
-        <source>Confirm</source>
       </segment>
     </unit>
     <unit id="3676810969871565173">
@@ -443,19 +236,704 @@
         <source>Plotly</source>
       </segment>
     </unit>
-    <unit id="2517309683610083249">
+    <unit id="1170667643695316061">
       <segment>
-        <source>Title:</source>
+        <source>Create a study section</source>
       </segment>
     </unit>
-    <unit id="259021582922138864">
+    <unit id="1172866303261737245">
       <segment>
-        <source>Shareable to other users:</source>
+        <source>Position</source>
       </segment>
     </unit>
-    <unit id="6996799422725544865">
+    <unit id="1255388649183074058">
       <segment>
-        <source>Description:</source>
+        <source>Branch name</source>
+      </segment>
+    </unit>
+    <unit id="1267728769006543252">
+      <segment>
+        <source> Delete all studies </source>
+      </segment>
+    </unit>
+    <unit id="1280422441143770406">
+      <segment>
+        <source>Cable name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+      </segment>
+    </unit>
+    <unit id="1289308098980826210">
+      <segment>
+        <source>Section type</source>
+      </segment>
+    </unit>
+    <unit id="128932358295516526">
+      <segment>
+        <source>Section Deleted</source>
+      </segment>
+    </unit>
+    <unit id="1386766078260547788">
+      <segment>
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="1444333919089743258">
+      <segment>
+        <source>View all news</source>
+      </segment>
+    </unit>
+    <unit id="1553627416533983831">
+      <segment>
+        <source>Section name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+      </segment>
+    </unit>
+    <unit id="159395379410071627">
+      <segment>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;public&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;public&quot; /&gt;"/> Publish </source>
+      </segment>
+    </unit>
+    <unit id="1599802675385906175">
+      <segment>
+        <source>Add support after</source>
+      </segment>
+    </unit>
+    <unit id="1614612576043079687">
+      <segment>
+        <source>Shrink menu</source>
+      </segment>
+    </unit>
+    <unit id="1653305415865364716">
+      <segment>
+        <source>Study updated successfully</source>
+      </segment>
+    </unit>
+    <unit id="1715866221564635584">
+      <segment>
+        <source>Supports</source>
+      </segment>
+    </unit>
+    <unit id="1772495502731751754">
+      <segment>
+        <source>Attachment height (m)</source>
+      </segment>
+    </unit>
+    <unit id="1949800506879332767">
+      <segment>
+        <source>Section Name</source>
+      </segment>
+    </unit>
+    <unit id="1997818395374468661">
+      <segment>
+        <source>Start support</source>
+      </segment>
+    </unit>
+    <unit id="2102825898069375693">
+      <segment>
+        <source>Menu</source>
+      </segment>
+    </unit>
+    <unit id="2172902003676402663">
+      <segment>
+        <source> Refresh </source>
+      </segment>
+    </unit>
+    <unit id="2202835179714153957">
+      <segment>
+        <source>User preference</source>
+      </segment>
+    </unit>
+    <unit id="2233560223291461480">
+      <segment>
+        <source>Manual</source>
+      </segment>
+    </unit>
+    <unit id="2250155903065806087">
+      <segment>
+        <source>Study</source>
+      </segment>
+    </unit>
+    <unit id="2269840927612671406">
+      <segment>
+        <source>A new application update is available!</source>
+      </segment>
+    </unit>
+    <unit id="2275328567992347600">
+      <segment>
+        <source>Page not found</source>
+      </segment>
+    </unit>
+    <unit id="2346064433794006768">
+      <segment>
+        <source>Initial conditions</source>
+      </segment>
+    </unit>
+    <unit id="2398619245085086844">
+      <segment>
+        <source> Reset database </source>
+      </segment>
+    </unit>
+    <unit id="2426063357414126636">
+      <segment>
+        <source>The database has been reset</source>
+      </segment>
+    </unit>
+    <unit id="2463238050344760316">
+      <segment>
+        <source> Shared <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="2509141182388535183">
+      <segment>
+        <source>View</source>
+      </segment>
+    </unit>
+    <unit id="2547571169649786686">
+      <segment>
+        <source>Danger zone</source>
+      </segment>
+    </unit>
+    <unit id="2593007815199532062">
+      <segment>
+        <source>Section</source>
+      </segment>
+    </unit>
+    <unit id="2638469548137871317">
+      <segment>
+        <source>Initial condition name</source>
+      </segment>
+    </unit>
+    <unit id="2668751339669907539">
+      <segment>
+        <source>Learn more about latest updates</source>
+      </segment>
+    </unit>
+    <unit id="2821179408673282599">
+      <segment>
+        <source>Home</source>
+      </segment>
+    </unit>
+    <unit id="2925129304308690882">
+      <segment>
+        <source>Last modified</source>
+      </segment>
+    </unit>
+    <unit id="2981219928115418649">
+      <segment>
+        <source>Link</source>
+      </segment>
+    </unit>
+    <unit id="3049551355280538164">
+      <segment>
+        <source>Initial Condition Added</source>
+      </segment>
+    </unit>
+    <unit id="3099536771768294227">
+      <segment>
+        <source>CM</source>
+      </segment>
+    </unit>
+    <unit id="3102779920122732727">
+      <segment>
+        <source> Loading </source>
+      </segment>
+    </unit>
+    <unit id="3154787560331051884">
+      <segment>
+        <source>Chain V</source>
+      </segment>
+    </unit>
+    <unit id="3159332545494825825">
+      <segment>
+        <source>Server connexion success!</source>
+      </segment>
+    </unit>
+    <unit id="3193976279273491157">
+      <segment>
+        <source>Actions</source>
+      </segment>
+    </unit>
+    <unit id="3228248733549149448">
+      <segment>
+        <source>Base parameter</source>
+      </segment>
+    </unit>
+    <unit id="3337781493803072719">
+      <segment>
+        <source>Span angle (Gr)</source>
+      </segment>
+    </unit>
+    <unit id="3465942650835858981">
+      <segment>
+        <source>Maintenance</source>
+      </segment>
+    </unit>
+    <unit id="3510960524643312912">
+      <segment>
+        <source>Trying to reach the servers.</source>
+      </segment>
+    </unit>
+    <unit id="3533138925800017240">
+      <segment>
+        <source>Study Duplicated</source>
+      </segment>
+    </unit>
+    <unit id="367434070679684080">
+      <segment>
+        <source>Database reset</source>
+      </segment>
+    </unit>
+    <unit id="3689220712977179060">
+      <segment>
+        <source>Section source</source>
+      </segment>
+    </unit>
+    <unit id="3799093232488965923">
+      <segment>
+        <source> Open </source>
+      </segment>
+    </unit>
+    <unit id="3808511518924568636">
+      <segment>
+        <source>Error: start not in list</source>
+      </segment>
+    </unit>
+    <unit id="3878398159737749263">
+      <segment>
+        <source>View latest updates.</source>
+      </segment>
+    </unit>
+    <unit id="3922504333199040096">
+      <segment>
+        <source>Search a study</source>
+      </segment>
+    </unit>
+    <unit id="3931780727974941210">
+      <segment>
+        <source>Error: start &gt;= end</source>
+      </segment>
+    </unit>
+    <unit id="4052831009850155733">
+      <segment>
+        <source>Cables amount</source>
+      </segment>
+    </unit>
+    <unit id="4116724826865372994">
+      <segment>
+        <source>Modify study</source>
+      </segment>
+    </unit>
+    <unit id="4125361306674691550">
+      <segment>
+        <source>App reset</source>
+      </segment>
+    </unit>
+    <unit id="4141865830196614938">
+      <segment>
+        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!</source>
+      </segment>
+    </unit>
+    <unit id="4167548029405227892">
+      <segment>
+        <source>Section Created</source>
+      </segment>
+    </unit>
+    <unit id="4238708305594970843">
+      <segment>
+        <source>Update successful</source>
+      </segment>
+    </unit>
+    <unit id="4360239040231802726">
+      <segment>
+        <source> Actions </source>
+      </segment>
+    </unit>
+    <unit id="4408679057911996366">
+      <segment>
+        <source>Cable name</source>
+      </segment>
+    </unit>
+    <unit id="4486647169102354749">
+      <segment>
+        <source>EEL</source>
+      </segment>
+    </unit>
+    <unit id="4665164818576576044">
+      <segment>
+        <source> LIT code <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="4667659558738672926">
+      <segment>
+        <source>Changelogs</source>
+      </segment>
+    </unit>
+    <unit id="4973351383154508059">
+      <segment>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;content_copy&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;content_copy&quot; /&gt;"/> Duplicate </source>
+      </segment>
+    </unit>
+    <unit id="504426626920824980">
+      <segment>
+        <source>Study states</source>
+      </segment>
+    </unit>
+    <unit id="5078151248323604568">
+      <segment>
+        <source>Cannot reach data. Please check your internet connectivity.</source>
+      </segment>
+    </unit>
+    <unit id="509090351011426949">
+      <segment>
+        <source>Update available</source>
+      </segment>
+    </unit>
+    <unit id="513031718637117901">
+      <segment>
+        <source>From distant referencial</source>
+      </segment>
+    </unit>
+    <unit id="5255221529688423139">
+      <segment>
+        <source>Are you sure you want to reset the database?</source>
+      </segment>
+    </unit>
+    <unit id="5280610039017327422">
+      <segment>
+        <source>Base temperature (°C)</source>
+      </segment>
+    </unit>
+    <unit id="5280768007794245227">
+      <segment>
+        <source>Cable (NGF)</source>
+      </segment>
+    </unit>
+    <unit id="5281579610433386344">
+      <segment>
+        <source>Are you sure you want to reset the app?</source>
+      </segment>
+    </unit>
+    <unit id="5330590276782069905">
+      <segment>
+        <source>Electric tension level</source>
+      </segment>
+    </unit>
+    <unit id="5361585538695040272">
+      <segment>
+        <source>Measurements</source>
+      </segment>
+    </unit>
+    <unit id="5375905790663497716">
+      <segment>
+        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="5426507602553467529">
+      <segment>
+        <source>Cable amount <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+      </segment>
+    </unit>
+    <unit id="5437172145642680301">
+      <segment>
+        <source>Section name</source>
+      </segment>
+    </unit>
+    <unit id="5455631818675024639">
+      <segment>
+        <source>No recent studies</source>
+      </segment>
+    </unit>
+    <unit id="5513122358899972896">
+      <segment>
+        <source>Chain name</source>
+      </segment>
+    </unit>
+    <unit id="5519001504653726625">
+      <segment>
+        <source>Study created successfully</source>
+      </segment>
+    </unit>
+    <unit id="5722345326918734257">
+      <segment>
+        <source>Initial Condition Deleted</source>
+      </segment>
+    </unit>
+    <unit id="5798603970967359521">
+      <segment>
+        <source>Supports amount</source>
+      </segment>
+    </unit>
+    <unit id="5799777256002258190">
+      <segment>
+        <source>Trying to reach the servers!</source>
+      </segment>
+    </unit>
+    <unit id="5955728908893282532">
+      <segment>
+        <source>An error occured while trying to reach servers.</source>
+      </segment>
+    </unit>
+    <unit id="5994109586105591631">
+      <segment>
+        <source>The app has been reset</source>
+      </segment>
+    </unit>
+    <unit id="6016428309492185040">
+      <segment>
+        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="6045024918689189924">
+      <segment>
+        <source> Creation date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="6057281094654962766">
+      <segment>
+        <source>Validate</source>
+      </segment>
+    </unit>
+    <unit id="6083227782927355534">
+      <segment>
+        <source>Create an initial condition</source>
+      </segment>
+    </unit>
+    <unit id="6173209146841926976">
+      <segment>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Add a section </source>
+      </segment>
+    </unit>
+    <unit id="633450215070869903">
+      <segment>
+        <source>usr pref</source>
+      </segment>
+    </unit>
+    <unit id="6341476329368350089">
+      <segment>
+        <source> Delete app cache </source>
+      </segment>
+    </unit>
+    <unit id="6370642728789544052">
+      <segment>
+        <source>Number</source>
+      </segment>
+    </unit>
+    <unit id="6439365426343089851">
+      <segment>
+        <source>General</source>
+      </segment>
+    </unit>
+    <unit id="6480514970774430660">
+      <segment>
+        <source>Error: end not in list</source>
+      </segment>
+    </unit>
+    <unit id="6543536815504799118">
+      <segment>
+        <source>Chain length (m)</source>
+      </segment>
+    </unit>
+    <unit id="6598075623864682368">
+      <segment>
+        <source>Add an initial condition</source>
+      </segment>
+    </unit>
+    <unit id="6600961151364207736">
+      <segment>
+        <source>Section Updated</source>
+      </segment>
+    </unit>
+    <unit id="6621067415830629818">
+      <segment>
+        <source>Arm length (m)</source>
+      </segment>
+    </unit>
+    <unit id="6626934443702250379">
+      <segment>
+        <source>Graphical view</source>
+      </segment>
+    </unit>
+    <unit id="6707260083636271016">
+      <segment>
+        <source>From extraction</source>
+      </segment>
+    </unit>
+    <unit id="6713690242020777174">
+      <segment>
+        <source>Build version</source>
+      </segment>
+    </unit>
+    <unit id="6801360463490683535">
+      <segment>
+        <source> View initial conditions </source>
+      </segment>
+    </unit>
+    <unit id="6963570697110110448">
+      <segment>
+        <source>Link name</source>
+      </segment>
+    </unit>
+    <unit id="7029096918733367423">
+      <segment>
+        <source>Section type <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+      </segment>
+    </unit>
+    <unit id="7128845509017303174">
+      <segment>
+        <source>Import a study</source>
+      </segment>
+    </unit>
+    <unit id="7215759904460573154">
+      <segment>
+        <source> Ready </source>
+      </segment>
+    </unit>
+    <unit id="7270261397893681192">
+      <segment>
+        <source>Chain weight (kg)</source>
+      </segment>
+    </unit>
+    <unit id="7282804341793038828">
+      <segment>
+        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="7315024664317918263">
+      <segment>
+        <source>From referencial</source>
+      </segment>
+    </unit>
+    <unit id="7372608945282781808">
+      <segment>
+        <source>Last changed:</source>
+      </segment>
+    </unit>
+    <unit id="7434521647283704814">
+      <segment>
+        <source>Delete support</source>
+      </segment>
+    </unit>
+    <unit id="7497893791400342599">
+      <segment>
+        <source>Span length (m)</source>
+      </segment>
+    </unit>
+    <unit id="7601213978629574297">
+      <segment>
+        <source> Go to home page </source>
+      </segment>
+    </unit>
+    <unit id="7628479102589681060">
+      <segment>
+        <source>All studies have been deleted</source>
+      </segment>
+    </unit>
+    <unit id="7697593277738514956">
+      <segment>
+        <source>Section Duplicated</source>
+      </segment>
+    </unit>
+    <unit id="7915195931257031161">
+      <segment>
+        <source>Ground and obstacles</source>
+      </segment>
+    </unit>
+    <unit id="791950660812381145">
+      <segment>
+        <source>Side</source>
+      </segment>
+    </unit>
+    <unit id="7937931707186931727">
+      <segment>
+        <source>Initial Condition Duplicated</source>
+      </segment>
+    </unit>
+    <unit id="794617384648959179">
+      <segment>
+        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="797001286432919577">
+      <segment>
+        <source>Are you sure you want to delete all studies?</source>
+      </segment>
+    </unit>
+    <unit id="8039268900393010928">
+      <segment>
+        <source>GMR</source>
+      </segment>
+    </unit>
+    <unit id="8109561878775602635">
+      <segment>
+        <source>Create a new study</source>
+      </segment>
+    </unit>
+    <unit id="8157568719212294147">
+      <segment>
+        <source>Initial Condition Updated</source>
+      </segment>
+    </unit>
+    <unit id="8159722776036849437">
+      <segment>
+        <source>Study name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+      </segment>
+    </unit>
+    <unit id="819996403327805209">
+      <segment>
+        <source>Learn more</source>
+      </segment>
+    </unit>
+    <unit id="8214037487031019515">
+      <segment>
+        <source>Add initial condition</source>
+      </segment>
+    </unit>
+    <unit id="8283592065951885988">
+      <segment>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a new study </source>
+      </segment>
+    </unit>
+    <unit id="841934696444961534">
+      <segment>
+        <source>News</source>
+      </segment>
+    </unit>
+    <unit id="8436059801222132475">
+      <segment>
+        <source>Server state</source>
+      </segment>
+    </unit>
+    <unit id="8439372668099146162">
+      <segment>
+        <source>The application has been updated to the latest version</source>
+      </segment>
+    </unit>
+    <unit id="8569561572681353162">
+      <segment>
+        <source>LIT</source>
+      </segment>
+    </unit>
+    <unit id="8609810939352282595">
+      <segment>
+        <source>Add support before</source>
+      </segment>
+    </unit>
+    <unit id="8616180516716294384">
+      <segment>
+        <source>Give a name to your study</source>
+      </segment>
+    </unit>
+    <unit id="862393570495704117">
+      <segment>
+        <source>Study sections</source>
+      </segment>
+    </unit>
+    <unit id="8833276229402617730">
+      <segment>
+        <source>No existing section</source>
+      </segment>
+    </unit>
+    <unit id="983324339375029355">
+      <segment>
+        <source>My last studies</source>
       </segment>
     </unit>
   </file>

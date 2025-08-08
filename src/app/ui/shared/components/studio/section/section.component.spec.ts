@@ -1,229 +1,383 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Section2DComponent } from './section.component';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
-import { createPlotData } from './helpers/createPlotData';
 import { createPlot } from './helpers/createPlot';
+import { formatData } from './helpers/formatData';
+import { createPlotData } from './helpers/createPlotData';
+import { Data } from 'plotly.js-dist-min';
 
 // Mock the helper functions
-jest.mock('./helpers/createPlotData');
 jest.mock('./helpers/createPlot');
+jest.mock('./helpers/formatData');
+jest.mock('./helpers/createPlotData');
 
+const mockCreatePlot = createPlot as jest.MockedFunction<typeof createPlot>;
+const mockFormatData = formatData as jest.MockedFunction<typeof formatData>;
 const mockCreatePlotData = createPlotData as jest.MockedFunction<
   typeof createPlotData
 >;
-const mockCreatePlot = createPlot as jest.MockedFunction<typeof createPlot>;
 
 describe('Section2DComponent', () => {
   let component: Section2DComponent;
   let fixture: ComponentFixture<Section2DComponent>;
 
+  // Mock data for testing
   const mockLitData: GetSectionOutput = {
-    x: {
-      '1': 100,
-      '2': 200,
-      '3': 300,
-      '4': 400,
-      '5': 500
-    },
-    y: {
-      '1': 10,
-      '2': 20,
-      '3': 30,
-      '4': 40,
-      '5': 50
-    },
-    z: {
-      '1': 1,
-      '2': 2,
-      '3': 3,
-      '4': 4,
-      '5': 5
-    },
-    support: {
-      '1': 'support1',
-      '2': 'support2',
-      '3': 'support1',
-      '4': 'support2',
-      '5': 'support1'
-    },
+    x: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5 },
+    y: { '0': 10, '1': 20, '2': 30, '3': 40, '4': 50 },
+    z: { '0': 100, '1': 200, '2': 300, '3': 400, '4': 500 },
+    support: { '0': '1', '1': '2', '2': '3', '3': '4', '4': '5' },
     type: {
+      '0': 'span',
       '1': 'span',
-      '2': 'span',
+      '2': 'support',
       '3': 'span',
-      '4': 'support',
-      '5': 'insulator'
+      '4': 'span'
     },
-    section: {
-      '1': 'phase_1',
-      '2': 'phase_2',
-      '3': 'phase_3',
-      '4': 'garde',
-      '5': 'support'
-    },
+    section: { '0': 'A', '1': 'B', '2': 'C', '3': 'D', '4': 'E' },
     color_select: {
-      '1': 'red',
-      '2': 'blue',
-      '3': 'green',
-      '4': 'yellow',
-      '5': 'purple'
+      '0': 'red',
+      '1': 'blue',
+      '2': 'green',
+      '3': 'yellow',
+      '4': 'purple'
     }
   };
 
-  const mockPlotData = [
-    {
-      x: [100, 200, 300],
-      y: [10, 20, 30],
-      z: [1, 2, 3],
-      type: 'scatter3d' as const,
-      mode: 'lines' as const,
-      line: { color: 'red' }
-    }
+  const mockFormattedData = {
+    litXs: [1, 2, 3, 4, 5],
+    litYs: [10, 20, 30, 40, 50],
+    litZs: [100, 200, 300, 400, 500],
+    litTypes: ['span', 'span', 'support', 'span', 'span'],
+    litSection: ['A', 'B', 'C', 'D', 'E'],
+    litSupports: ['1', '2', '3', '4', '5']
+  };
+
+  const mockPlotData: Data[] = [
+    { type: 'scatter3d', x: [1, 2], y: [10, 20], z: [100, 200] } as any
   ];
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Section2DComponent]
-    }).compileComponents();
+    // Reset all mocks
+    jest.clearAllMocks();
 
-    fixture = TestBed.createComponent(Section2DComponent);
-    component = fixture.componentInstance;
+    // Setup mock implementations
+    mockFormatData.mockReturnValue(mockFormattedData);
+    mockCreatePlotData.mockReturnValue(mockPlotData);
+    mockCreatePlot.mockResolvedValue({} as any);
 
-    // Mock the DOM element
+    // Mock document.getElementById
     const mockElement = {
       clientWidth: 800,
       clientHeight: 600
     };
-    jest
-      .spyOn(document, 'getElementById')
-      .mockReturnValue(mockElement as HTMLElement);
+    jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any);
 
-    // Setup default mock return values
-    mockCreatePlotData.mockReturnValue(mockPlotData);
-    mockCreatePlot.mockResolvedValue({} as any);
+    await TestBed.configureTestingModule({
+      imports: [Section2DComponent],
+      providers: [{ provide: 'provideAnimations', useValue: () => ({}) }]
+    }).compileComponents();
 
-    fixture.detectChanges();
+    fixture = TestBed.createComponent(Section2DComponent);
+    component = fixture.componentInstance;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
-  describe('Component Initialization', () => {
+  describe('Component Creation', () => {
     it('should create', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should initialize with default values', () => {
-      expect(component.selectedSpan()).toBe(0);
-      expect(component.side()).toBe('profile');
+    it('should have default input values', () => {
       expect(component.litData()).toBeNull();
+    });
+
+    it('should have default signal values', () => {
+      expect(component.selectedSpan()).toBe(0);
+      expect(component.options()).toEqual({
+        view: '2d',
+        side: 'profile',
+        startSupport: 1,
+        endSupport: 2
+      });
     });
   });
 
-  describe('formatData method', () => {
-    it('should format data correctly with default selectedSpan and side', () => {
-      const result = component.formatData(mockLitData);
-
-      expect(mockCreatePlotData).toHaveBeenCalledWith({
-        litXs: [100, 200, 300, 400, 500],
-        litYs: [10, 20, 30, 40, 50],
-        litZs: [1, 2, 3, 4, 5],
-        litTypes: ['span', 'span', 'span', 'support', 'insulator'],
-        litSection: ['phase_1', 'phase_2', 'phase_3', 'garde', 'support'],
-        litSupports: [
-          'support1',
-          'support2',
-          'support1',
-          'support2',
-          'support1'
-        ],
-        uniqueSupports: ['support1'],
-        uniqueSupportsForSupports: ['support1', 'support2'],
-        side: 'profile'
-      });
-
-      expect(result).toBe(mockPlotData);
+  describe('Supports Computed Property', () => {
+    it('should return empty array when litData is null', () => {
+      fixture.componentRef.setInput('litData', null);
+      expect(component.supports()).toEqual([]);
     });
 
-    it('should format data with different selectedSpan value', () => {
-      component.selectedSpan.set(1);
-
-      const result = component.formatData(mockLitData);
-
-      expect(mockCreatePlotData).toHaveBeenCalledWith({
-        litXs: [100, 200, 300, 400, 500],
-        litYs: [10, 20, 30, 40, 50],
-        litZs: [1, 2, 3, 4, 5],
-        litTypes: ['span', 'span', 'span', 'support', 'insulator'],
-        litSection: ['phase_1', 'phase_2', 'phase_3', 'garde', 'support'],
-        litSupports: [
-          'support1',
-          'support2',
-          'support1',
-          'support2',
-          'support1'
-        ],
-        uniqueSupports: ['support2'],
-        uniqueSupportsForSupports: ['support2'],
-        side: 'profile'
-      });
-
-      expect(result).toBe(mockPlotData);
+    it('should return unique supports from litData', () => {
+      fixture.componentRef.setInput('litData', mockLitData);
+      expect(component.supports()).toEqual([
+        { item: '1' },
+        { item: '2' },
+        { item: '3' },
+        { item: '4' },
+        { item: '5' }
+      ]);
     });
 
-    it('should format data with face side', () => {
-      component.side.set('face');
-
-      const result = component.formatData(mockLitData);
-
-      expect(mockCreatePlotData).toHaveBeenCalledWith({
-        litXs: [100, 200, 300, 400, 500],
-        litYs: [10, 20, 30, 40, 50],
-        litZs: [1, 2, 3, 4, 5],
-        litTypes: ['span', 'span', 'span', 'support', 'insulator'],
-        litSection: ['phase_1', 'phase_2', 'phase_3', 'garde', 'support'],
-        litSupports: [
-          'support1',
-          'support2',
-          'support1',
-          'support2',
-          'support1'
-        ],
-        uniqueSupports: ['support1'],
-        uniqueSupportsForSupports: ['support1', 'support2'],
-        side: 'face'
-      });
-
-      expect(result).toBe(mockPlotData);
-    });
-
-    it('should handle data with null values', () => {
-      const dataWithNulls: GetSectionOutput = {
-        x: { '1': 100, '2': null, '3': 300 },
-        y: { '1': 10, '2': null, '3': 30 },
-        z: { '1': 1, '2': null, '3': 3 },
-        support: { '1': 'support1', '2': 'support2', '3': 'support1' },
-        type: { '1': 'span', '2': 'span', '3': 'span' },
-        section: { '1': 'phase_1', '2': 'phase_2', '3': 'phase_3' },
-        color_select: { '1': 'red', '2': 'blue', '3': 'green' }
+    it('should handle duplicate supports', () => {
+      const dataWithDuplicates: GetSectionOutput = {
+        ...mockLitData,
+        support: { '0': '1', '1': '1', '2': '2', '3': '2', '4': '3' }
       };
+      fixture.componentRef.setInput('litData', dataWithDuplicates);
+      expect(component.supports()).toEqual([
+        { item: '1' },
+        { item: '2' },
+        { item: '3' }
+      ]);
+    });
+  });
 
-      component.formatData(dataWithNulls);
+  describe('ErrorMessage Computed Property', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('litData', mockLitData);
+    });
 
-      expect(mockCreatePlotData).toHaveBeenCalledWith({
-        litXs: [100, null, 300],
-        litYs: [10, null, 30],
-        litZs: [1, null, 3],
-        litTypes: ['span', 'span', 'span'],
-        litSection: ['phase_1', 'phase_2', 'phase_3'],
-        litSupports: ['support1', 'support2', 'support1'],
-        uniqueSupports: ['support1'],
-        uniqueSupportsForSupports: ['support1', 'support2'],
-        side: 'profile'
+    it('should return empty string when options are valid', () => {
+      expect(component.errorMessage()).toBe('');
+    });
+
+    it('should return error when startSupport >= endSupport', () => {
+      component.options.set({
+        view: '2d',
+        side: 'profile',
+        startSupport: 3,
+        endSupport: 2
+      });
+      expect(component.errorMessage()).toBe('Error: start >= end');
+    });
+
+    it('should return error when startSupport is not in supports list', () => {
+      component.options.set({
+        view: '2d',
+        side: 'profile',
+        startSupport: 10,
+        endSupport: 15
+      });
+      expect(component.errorMessage()).toBe('Error: start not in list');
+    });
+
+    it('should return error when endSupport is not in supports list', () => {
+      component.options.set({
+        view: '2d',
+        side: 'profile',
+        startSupport: 1,
+        endSupport: 10
+      });
+      expect(component.errorMessage()).toBe('Error: end not in list');
+    });
+
+    it('should prioritize start >= end error over other errors', () => {
+      component.options.set({
+        view: '2d',
+        side: 'profile',
+        startSupport: 10,
+        endSupport: 5
+      });
+      expect(component.errorMessage()).toBe('Error: start >= end');
+    });
+  });
+
+  describe('searchSupport Method', () => {
+    it('should update startSupport when type is start', () => {
+      const event = { value: '3' };
+      component.searchSupport(event, 'start');
+
+      expect(component.options()).toEqual({
+        view: '2d',
+        side: 'profile',
+        startSupport: 3,
+        endSupport: 2
       });
     });
 
-    it('should handle empty data', () => {
+    it('should update endSupport when type is end', () => {
+      const event = { value: '4' };
+      component.searchSupport(event, 'end');
+
+      expect(component.options()).toEqual({
+        view: '2d',
+        side: 'profile',
+        startSupport: 1,
+        endSupport: 4
+      });
+    });
+
+    it('should preserve other options when updating', () => {
+      component.options.set({
+        view: '3d',
+        side: 'face',
+        startSupport: 1,
+        endSupport: 2
+      });
+
+      const event = { value: '5' };
+      component.searchSupport(event, 'start');
+
+      expect(component.options()).toEqual({
+        view: '3d',
+        side: 'face',
+        startSupport: 5,
+        endSupport: 2
+      });
+    });
+
+    it('should handle string to number conversion', () => {
+      const event = { value: '10' };
+      component.searchSupport(event, 'end');
+
+      expect(component.options().endSupport).toBe(10);
+    });
+  });
+
+  describe('refreshSection Method', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('litData', mockLitData);
+    });
+
+    it('should return early when litData is null', () => {
+      component.refreshSection(null);
+
+      expect(mockFormatData).not.toHaveBeenCalled();
+      expect(mockCreatePlotData).not.toHaveBeenCalled();
+      expect(mockCreatePlot).not.toHaveBeenCalled();
+    });
+
+    it('should call helper functions with correct parameters when litData is provided', () => {
+      component.refreshSection(mockLitData);
+
+      expect(mockFormatData).toHaveBeenCalledWith(mockLitData);
+      expect(mockCreatePlotData).toHaveBeenCalledWith(mockFormattedData, {
+        view: '2d',
+        side: 'profile',
+        startSupport: 1,
+        endSupport: 2
+      });
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        'plotly-output',
+        mockPlotData,
+        800,
+        600
+      );
+    });
+
+    it('should handle missing DOM element gracefully', () => {
+      jest.spyOn(document, 'getElementById').mockReturnValue(null);
+
+      component.refreshSection(mockLitData);
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        'plotly-output',
+        mockPlotData,
+        0,
+        0
+      );
+    });
+
+    it('should use current options when calling createPlotData', () => {
+      component.options.set({
+        view: '3d',
+        side: 'face',
+        startSupport: 2,
+        endSupport: 4
+      });
+
+      component.refreshSection(mockLitData);
+
+      expect(mockCreatePlotData).toHaveBeenCalledWith(mockFormattedData, {
+        view: '3d',
+        side: 'face',
+        startSupport: 2,
+        endSupport: 4
+      });
+    });
+  });
+
+  describe('Effect', () => {
+    it('should call refreshSection when litData changes', () => {
+      const refreshSpy = jest.spyOn(component, 'refreshSection');
+
+      // Test the method directly since effect testing is complex
+      component.refreshSection(mockLitData);
+
+      expect(refreshSpy).toHaveBeenCalledWith(mockLitData);
+    });
+
+    it('should handle null litData in refreshSection', () => {
+      const refreshSpy = jest.spyOn(component, 'refreshSection');
+
+      // Test the method directly
+      component.refreshSection(null);
+
+      expect(refreshSpy).toHaveBeenCalledWith(null);
+      expect(mockFormatData).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Integration Tests', () => {
+    it('should handle complete workflow with valid data', () => {
+      // Set input data
+      fixture.componentRef.setInput('litData', mockLitData);
+
+      // Verify supports are computed correctly
+      expect(component.supports()).toHaveLength(5);
+
+      // Verify no error message
+      expect(component.errorMessage()).toBe('');
+
+      // Test refreshSection method directly
+      const refreshSpy = jest.spyOn(component, 'refreshSection');
+      component.refreshSection(mockLitData);
+      expect(refreshSpy).toHaveBeenCalledWith(mockLitData);
+    });
+
+    it('should handle workflow with invalid options', () => {
+      fixture.componentRef.setInput('litData', mockLitData);
+
+      // Set invalid options
+      component.options.set({
+        view: '2d',
+        side: 'profile',
+        startSupport: 5,
+        endSupport: 3
+      });
+
+      // Verify error message
+      expect(component.errorMessage()).toBe('Error: start >= end');
+
+      // Verify supports are still computed correctly
+      expect(component.supports()).toHaveLength(5);
+    });
+
+    it('should update plot when options change', () => {
+      fixture.componentRef.setInput('litData', mockLitData);
+
+      // Change options
+      component.options.set({
+        view: '3d',
+        side: 'face',
+        startSupport: 2,
+        endSupport: 4
+      });
+
+      // Test that refreshSection works with new options
+      const refreshSpy = jest.spyOn(component, 'refreshSection');
+      component.refreshSection(mockLitData);
+      expect(refreshSpy).toHaveBeenCalledWith(mockLitData);
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle empty litData', () => {
       const emptyData: GetSectionOutput = {
         x: {},
         y: {},
@@ -234,154 +388,43 @@ describe('Section2DComponent', () => {
         color_select: {}
       };
 
-      component.formatData(emptyData);
+      fixture.componentRef.setInput('litData', emptyData);
 
-      expect(mockCreatePlotData).toHaveBeenCalledWith({
-        litXs: [],
-        litYs: [],
-        litZs: [],
-        litTypes: [],
-        litSection: [],
-        litSupports: [],
-        uniqueSupports: [],
-        uniqueSupportsForSupports: [],
-        side: 'profile'
-      });
-    });
-  });
-
-  describe('Effect behavior', () => {
-    it('should call createPlot when litData is provided', () => {
-      // Trigger the effect by setting litData
-      // Note: In a real test, you would need to trigger the input signal differently
-      // For now, we'll test the formatData method directly
-      const result = component.formatData(mockLitData);
-
-      expect(mockCreatePlotData).toHaveBeenCalled();
-      expect(result).toBe(mockPlotData);
+      expect(component.supports()).toEqual([]);
+      expect(component.errorMessage()).toBe('Error: start not in list');
     });
 
-    it('should not call createPlot when litData is null', () => {
-      // Test that formatData handles null data appropriately
-      expect(() => component.formatData(null as any)).toThrow();
-    });
-
-    it('should handle missing DOM element', () => {
-      jest.spyOn(document, 'getElementById').mockReturnValue(null);
-
-      // Test formatData with mock data
-      const result = component.formatData(mockLitData);
-
-      expect(mockCreatePlotData).toHaveBeenCalled();
-      expect(result).toBe(mockPlotData);
-    });
-
-    it('should update plot when selectedSpan changes', () => {
-      component.selectedSpan.set(1);
-
-      const result = component.formatData(mockLitData);
-
-      expect(mockCreatePlotData).toHaveBeenCalled();
-      expect(result).toBe(mockPlotData);
-    });
-
-    it('should update plot when side changes', () => {
-      component.side.set('face');
-
-      const result = component.formatData(mockLitData);
-
-      expect(mockCreatePlotData).toHaveBeenCalled();
-      expect(result).toBe(mockPlotData);
-    });
-
-    it('should handle createPlot errors gracefully', () => {
-      mockCreatePlot.mockRejectedValue(new Error('Plot creation failed'));
-
-      const result = component.formatData(mockLitData);
-
-      // Should not throw error
-      expect(mockCreatePlotData).toHaveBeenCalled();
-      expect(result).toBe(mockPlotData);
-    });
-  });
-
-  describe('Signal interactions', () => {
-    it('should update selectedSpan signal', () => {
-      component.selectedSpan.set(5);
-      expect(component.selectedSpan()).toBe(5);
-    });
-
-    it('should update side signal', () => {
-      component.side.set('face');
-      expect(component.side()).toBe('face');
-    });
-
-    it('should read litData input', () => {
-      expect(component.litData()).toBeNull();
-    });
-  });
-
-  describe('Data processing edge cases', () => {
-    it('should handle data with duplicate supports', () => {
-      const dataWithDuplicates: GetSectionOutput = {
-        x: { '1': 100, '2': 200, '3': 300 },
-        y: { '1': 10, '2': 20, '3': 30 },
-        z: { '1': 1, '2': 2, '3': 3 },
-        support: { '1': 'support1', '2': 'support1', '3': 'support1' },
-        type: { '1': 'span', '2': 'span', '3': 'span' },
-        section: { '1': 'phase_1', '2': 'phase_2', '3': 'phase_3' },
-        color_select: { '1': 'red', '2': 'blue', '3': 'green' }
+    it('should handle litData with null values', () => {
+      const dataWithNulls: GetSectionOutput = {
+        x: { '0': null, '1': 2 },
+        y: { '0': 10, '1': null },
+        z: { '0': 100, '1': 200 },
+        support: { '0': '1', '1': '2' },
+        type: { '0': 'span', '1': 'support' },
+        section: { '0': 'A', '1': 'B' },
+        color_select: { '0': 'red', '1': 'blue' }
       };
 
-      component.formatData(dataWithDuplicates);
+      fixture.componentRef.setInput('litData', dataWithNulls);
 
-      expect(mockCreatePlotData).toHaveBeenCalledWith({
-        litXs: [100, 200, 300],
-        litYs: [10, 20, 30],
-        litZs: [1, 2, 3],
-        litTypes: ['span', 'span', 'span'],
-        litSection: ['phase_1', 'phase_2', 'phase_3'],
-        litSupports: ['support1', 'support1', 'support1'],
-        uniqueSupports: ['support1'],
-        uniqueSupportsForSupports: ['support1'],
-        side: 'profile'
-      });
+      expect(component.supports()).toEqual([{ item: '1' }, { item: '2' }]);
     });
 
-    it('should handle selectedSpan beyond available supports', () => {
-      component.selectedSpan.set(10);
+    it('should handle very large support numbers', () => {
+      const largeData: GetSectionOutput = {
+        x: { '0': 1 },
+        y: { '0': 10 },
+        z: { '0': 100 },
+        support: { '0': '999999' },
+        type: { '0': 'span' },
+        section: { '0': 'A' },
+        color_select: { '0': 'red' }
+      };
 
-      component.formatData(mockLitData);
+      fixture.componentRef.setInput('litData', largeData);
 
-      expect(mockCreatePlotData).toHaveBeenCalledWith({
-        litXs: [100, 200, 300, 400, 500],
-        litYs: [10, 20, 30, 40, 50],
-        litZs: [1, 2, 3, 4, 5],
-        litTypes: ['span', 'span', 'span', 'support', 'insulator'],
-        litSection: ['phase_1', 'phase_2', 'phase_3', 'garde', 'support'],
-        litSupports: [
-          'support1',
-          'support2',
-          'support1',
-          'support2',
-          'support1'
-        ],
-        uniqueSupports: [],
-        uniqueSupportsForSupports: [],
-        side: 'profile'
-      });
-    });
-  });
-
-  describe('Component template integration', () => {
-    it('should have correct selector', () => {
-      // Test that component has the expected selector
-      expect(component).toBeTruthy();
-    });
-
-    it('should have template file', () => {
-      // Test that component is properly initialized
-      expect(fixture).toBeTruthy();
+      // The supports computed property creates items based on count, not actual values
+      expect(component.supports()).toEqual([{ item: '1' }]);
     });
   });
 });

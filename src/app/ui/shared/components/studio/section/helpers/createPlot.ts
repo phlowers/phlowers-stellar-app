@@ -15,41 +15,46 @@ const scene = {
     },
     eye: {
       x: 0.02,
-      y: -1.4,
+      y: -2,
       z: 0.2
     }
   }
 };
 
-const options = {
-  displayModeBar: false,
+const config = {
+  displayModeBar: true,
+  displaylogo: false,
   fillFrame: false,
   responsive: false,
   autosizable: false
 };
 
+const layout = {
+  autosize: false,
+  showlegend: false,
+  margin: {
+    l: 0,
+    r: 0,
+    t: 0,
+    b: 0
+  },
+  scene
+};
+
 export const createPlot = (
   plotId: string,
-  finalData: Data[],
+  data: Data[],
   width: number,
   height: number
 ) => {
   return Plotly.newPlot(
     plotId,
-    finalData,
+    data,
     {
+      ...layout,
       width: width,
-      height: height,
-      autosize: false,
-      showlegend: false,
-      margin: {
-        l: 0,
-        r: 0,
-        t: 0,
-        b: 0
-      },
-      scene
+      height: height
     },
-    options
+    config
   );
 };
