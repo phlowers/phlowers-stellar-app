@@ -1,5 +1,5 @@
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
-import { GetAllPhasesParams, PlotObjectType } from './types';
+import { CreateDataObjectPlotParams, PlotObjectType } from './types';
 
 const getColor = (
   type: PlotObjectType
@@ -24,7 +24,9 @@ const getMode = (type: PlotObjectType): PlotData['mode'] => {
   return 'lines';
 };
 
-export const createDataObject = (params: GetAllPhasesParams): Data[] => {
+export const createDataObject = (
+  params: CreateDataObjectPlotParams
+): Data[] => {
   const {
     litXs,
     litYs,
@@ -35,7 +37,8 @@ export const createDataObject = (params: GetAllPhasesParams): Data[] => {
     uniqueSupports,
     name,
     side,
-    type
+    type,
+    view
   } = params;
   const filterCoordinates = (
     coordinates: (number | null)[],
@@ -53,10 +56,10 @@ export const createDataObject = (params: GetAllPhasesParams): Data[] => {
     const y = filterCoordinates(litYs, support);
     const z = filterCoordinates(litZs, support);
     return {
-      x: side === 'face' ? y : x,
-      z: y,
-      y: z,
-      type: 'scatter',
+      x: side === 'face' && view === '2d' ? y : x,
+      z: view === '3d' ? z : y,
+      y: view === '3d' ? y : z,
+      type: view === '3d' ? 'scatter3d' : 'scatter',
       mode: getMode(type),
       line: getColor(type),
       textposition: 'inside',

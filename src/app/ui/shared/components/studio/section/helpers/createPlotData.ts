@@ -1,6 +1,7 @@
 import { Data } from 'plotly.js-dist-min';
-import { CreateDataForPlotParams, PlotObjectType } from './types';
+import { CreateDataForPlotParams, PlotObjectType, PlotOptions } from './types';
 import { createDataObject } from './createPlotDataObject';
+import { uniq } from 'lodash';
 
 const PLOT_OBJECTS: {
   name: string;
@@ -32,18 +33,19 @@ const PLOT_OBJECTS: {
   }
 ];
 
-export const createPlotData = (params: CreateDataForPlotParams): Data[] => {
-  const {
-    litXs,
-    litYs,
-    litZs,
-    litSection,
-    litTypes,
-    litSupports,
-    uniqueSupports,
-    uniqueSupportsForSupports,
-    side
-  } = params;
+export const createPlotData = (
+  params: CreateDataForPlotParams,
+  options: PlotOptions
+): Data[] => {
+  const { litXs, litYs, litZs, litSection, litTypes, litSupports } = params;
+  const uniqueSupports = uniq(litSupports).slice(
+    options.startSupport,
+    options.endSupport
+  );
+  const uniqueSupportsForSupports = uniq(litSupports).slice(
+    options.startSupport,
+    options.endSupport + 1
+  );
   const data = PLOT_OBJECTS.map((plotObject) => {
     return createDataObject({
       litXs,
@@ -58,7 +60,8 @@ export const createPlotData = (params: CreateDataForPlotParams): Data[] => {
           : uniqueSupports,
       name: plotObject.name,
       type: plotObject.type,
-      side
+      side: options.side,
+      view: options.view
     });
   });
 
