@@ -20,7 +20,7 @@ const createSection = (): Section => {
     uuid: uuidv4(),
     name: '',
     type: 'phase',
-    cables_amount: 0,
+    cables_amount: undefined,
     cable_name: '',
     gmr: '',
     eel: '',

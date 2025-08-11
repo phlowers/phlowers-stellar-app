@@ -19,7 +19,7 @@ export interface Section {
   type: string;
   cable_name: string;
   cable_short_name: string;
-  cables_amount: number;
+  cables_amount: number | undefined;
   optical_fibers_amount: number;
   spans_amount: number;
   begin_span_name: string;
