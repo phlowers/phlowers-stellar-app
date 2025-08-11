@@ -5,3 +5,7 @@
 .section-form-part-grid {
     @apply grid grid-cols-3 gap-x-10 gap-y-4;
 }
+
+.red-star {
+    color: var(--error-500);
+}
