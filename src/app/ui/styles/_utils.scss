@@ -28,3 +28,10 @@
     margin-top: 0.125rem;
   }
 }
+
+sup.mandatory {
+  color: var(--error-700);
+  font-size: 1em;
+  line-height: 1;
+  top: -0.0625rem;
+}

@@ -3,19 +3,30 @@
   [visible]="isOpen()"
   (visibleChange)="isOpenChange.emit(false)"
   i18n-header
-  [header]="mode() === 'new' ? newStudyTitle : modifyStudyTitle"
   [style]="{ width: '496px' }"
   [modal]="true"
 >
+  <ng-template #header>
+    <p class="text-l-600 mb-0 flex gap-2">
+      <app-icon icon="edit" />
+      @if (mode() === 'new') {
+        <span i18n>Create a new study</span>
+      } @else {
+        <span i18n>Modify my study</span>
+      }
+    </p>
+  </ng-template>
+
   <ng-template #content>
     <form class="flex flex-col gap-6">
-      <div class="field">
-        <legend class="label-container">
-          <label i18n for="title" class="label"
-            >Study name <span class="red-star">*</span></label
-          >
+      <div>
+        <div class="label-container">
+          <label i18n for="title" class="label">
+            Study name
+            <sup class="mandatory">*</sup>
+          </label>
           <span class="input-length">{{ titleLength() }}/100</span>
-        </legend>
+        </div>
         <input
           type="text"
           pInputText
@@ -29,13 +40,15 @@
           aria-describedby="title-description"
           fluid
         />
-        <small id="title-description" i18n>Give a name to your study</small>
+        <small id="title-description" class="text-s-600 ml-1" i18n>
+          Give a name to your study
+        </small>
       </div>
-      <div class="field">
-        <legend class="label-container">
+      <div>
+        <div class="label-container">
           <label i18n for="description" class="label">Description</label>
           <span class="input-length">{{ descriptionLength() }}/240</span>
-        </legend>
+        </div>
         <textarea
           id="description"
           name="description"
@@ -59,7 +72,7 @@
       app-btn
       type="submit"
       btnSize="m"
-      btnStyle="outlined"
+      btnStyle="text"
       (click)="isOpenChange.emit(false)"
     >
       <app-icon icon="close" />

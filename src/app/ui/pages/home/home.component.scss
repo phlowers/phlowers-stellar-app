@@ -1,3 +1,5 @@
+@use 'abstract.extracts' as app;
+
 .btn-wrapper {
   display: flex;
   justify-content: flex-end;
@@ -12,18 +14,16 @@
   margin: 1.5rem 0;
 }
 
-.study-cards {
+.study-cards:has(article) {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-gap: 1rem;
   margin: 1rem 0;
 }
 
-.no-studies {
-  font-weight: 400;
-  font-size: 1rem;
+.study-empty {
+  @extend %text-l-400;
   text-align: center;
-  vertical-align: middle;
-  color: #6F767B;
-  height: 5rem;
+  margin: 1rem 0 2rem;
+  color: var(--grey-600);
 }

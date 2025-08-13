@@ -1,3 +1,39 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.p-select.p-select {
+  --p-select-disabled-background: var(--grey-200);
+
+  --p-select-border-color: var(--grey-400);
+  --p-select-hover-border-color: var(--grey-600);
+  --p-select-invalid-border-color: var(--error-600);
+  --p-select-focus-border-color: var(--primary-600);
+
+  --p-select-color: var(--grey-900);
+  --p-select-disabled-color: var(--grey-500);
+
+  --p-select-shadow: #{map.get(app.$elevation, neutral-inner)};
+
+  --p-select-padding-y: 0.375rem;
+  --p-select-padding-x: 1rem;
+
+  --p-select-border-radius: 0.25rem;
+
+  --p-select-focus-ring-width: 0.0625rem;
+  --p-select-focus-ring-style: solid;
+  --p-select-focus-ring-color: var(--p-select-focus-border-color);
+
+  --p-select-option-focus-background: var(--primary-50);
+  --p-select-option-selected-background: var(--secondary-50);
+  --p-select-option-selected-focus-background: var(--tertiary-50);
+  --p-select-option-color: --p-select-color;
+  --p-select-option-focus-color: var(--p-select-option-color);
+  --p-select-option-selected-color: var(--p-select-option-color);
+  --p-select-option-selected-focus-color: var(--p-select-option-color);
+
+  @extend %text-m-400;
+}
+
 // specific override for initial condition select list in study section tab (page study)
 .initial-condition-select.initial-condition-select {
   .p-select-option.p-select-option.p-focus {

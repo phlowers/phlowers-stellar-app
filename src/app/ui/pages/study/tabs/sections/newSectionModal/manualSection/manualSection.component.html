@@ -22,9 +22,9 @@
         <h3 class="title-underline" i18n>Section</h3>
         <div class="section-form-part-grid">
           <div class="flex flex-col">
-            <label for="sectionName" class="ml-2" i18n
-              >Section name
-              <span class="red-star">*</span>
+            <label for="sectionName" class="ml-2" i18n>
+              Section name
+              <sup class="mandatory">*</sup>
             </label>
             <input
               type="text"
@@ -37,9 +37,10 @@
             />
           </div>
           <div class="flex flex-col">
-            <label for="sectionType" class="ml-2" i18n
-              >Section type <span class="red-star">*</span></label
-            >
+            <label for="sectionType" class="ml-2" i18n>
+              Section type
+              <sup class="mandatory">*</sup>
+            </label>
             <p-select
               inputId="sectionType"
               [options]="sectionTypes"
@@ -52,9 +53,10 @@
             />
           </div>
           <div class="flex flex-col">
-            <label for="cableAmount" class="ml-2" i18n
-              >Cable amount <span class="red-star">*</span></label
-            >
+            <label for="cableAmount" class="ml-2" i18n>
+              Cable amount
+              <sup class="mandatory">*</sup>
+            </label>
             <input
               id="cableAmount"
               type="number"
@@ -67,9 +69,10 @@
             />
           </div>
           <div class="flex flex-col">
-            <label for="cableName" class="ml-2" i18n
-              >Cable name <span class="red-star">*</span></label
-            >
+            <label for="cableName" class="ml-2" i18n>
+              Cable name
+              <sup class="mandatory">*</sup>
+            </label>
             <input
               type="text"
               id="cableName"

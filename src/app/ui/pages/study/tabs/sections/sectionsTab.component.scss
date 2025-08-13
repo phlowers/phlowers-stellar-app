@@ -1,43 +1,103 @@
+@use 'abstract.extracts' as app;
+
 .no-section-text {
-  font-weight: 400;
-  font-size: 20px;
-  color: #6f767b;
-}
-
-.section-card-title {
-  font-size: 0.875rem;
-  color: #999fa1;
-}
-
-.section-card-value {
-  font-size: 0.875rem;
-  color: #11161a;
+  color: var(--grey-600);
+  margin: 2.5rem 0 1rem;
 }
 
 .sections-container {
-  @apply flex flex-col gap-4 mt-4;
+  @apply flex flex-col gap-6 mt-6;
 }
 
-.card {
-  @apply w-full rounded-none;
-}
+.section {
+  display: grid;
+  grid-template-columns:
+    min-content
+    2fr
+    auto
+    1fr
+    1fr
+    2fr
+    2fr
+    min-content;
+  grid-template-rows: repeat(2, auto);
+  grid-template-areas:
+    'selector nameTitle typeTitle litTitle modifiedTitle initTitle . actionTitle'
+    'selector nameContent typeContent litContent modifiedContent initContent . actionContent';
+  justify-items: start;
+  align-items: start;
+  gap: 0.25rem 1rem;
 
-.section-container {
-  @apply flex flex-row gap-4;
-}
-
-.section-field {
-  @apply flex flex-col gap-2;
-
-  &--actions {
-    align-items: center;
+  dl {
+    display: contents;
   }
-}
 
-.section-value {
-  @apply pt-1;
+  &__selector {
+    grid-area: selector;
+    justify-self: center;
+    align-self: center;
+  }
+  &__title-name {
+    grid-area: nameTitle;
+  }
+  &__title-type {
+    grid-area: typeTitle;
+  }
+  &__title-lit {
+    grid-area: litTitle;
+  }
+  &__title-date {
+    grid-area: modifiedTitle;
+  }
+  &__title-init {
+    grid-area: initTitle;
+  }
+  &__title-action {
+    grid-area: actionTitle;
+    justify-self: center;
+  }
+
+  &__text-name {
+    grid-area: nameContent;
+  }
+  &__text-type {
+    grid-area: typeContent;
+  }
+  &__text-lit {
+    grid-area: litContent;
+  }
+  &__text-date {
+    grid-area: modifiedContent;
+  }
+  &__content-init {
+    grid-area: initContent;
+  }
+  &__content-action {
+    grid-area: actionContent;
+    justify-self: center;
+  }
+
+  dt,
+  &__title-init,
+  &__title-action {
+    @extend %text-s-400;
+    color: var(--grey-700);
+  }
+
+  dd {
+    @extend %text-m-400;
+    color: var(--grey-900);
+  }
 }
 
 .initial-condition-name {
   @apply w-24 max-w-24 whitespace-nowrap inline-block overflow-hidden overflow-ellipsis;
+}
+
+.sticky-btn-wrapper {
+  @apply sticky text-right p-6 -bottom-6 -inset-x-6 -mx-6;
+  background-image: linear-gradient(
+    rgb(from var(--grey-white) r g b / 0),
+    rgb(from var(--grey-white) r g b / 0.9) 70%
+  );
 }
