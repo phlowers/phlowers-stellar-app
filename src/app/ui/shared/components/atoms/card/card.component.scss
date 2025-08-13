@@ -4,7 +4,8 @@
 :host {
   display: inline-block;
   padding: 1rem;
-  border-radius: 0.5rem;
+  border-radius: 0.125rem;
+  border: 0.0625rem solid var(--grey-100);
   background-color: var(--grey-white);
   box-shadow: map.get(app.$elevation, neutral-3);
 

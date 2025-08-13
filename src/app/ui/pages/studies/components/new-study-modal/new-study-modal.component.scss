@@ -1,21 +1,17 @@
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: .125rem;
+@use './abstract.extracts' as app;
+
+.title {
+  @extend %text-l-600;
 }
 
 .label-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
 }
 
 .input-length {
-    font-size: 0.75rem;
-    color: var(--grey-500);
-}
-
-.red-star {
-    color: var(--error-500);
+  font-size: 0.75rem;
+  color: var(--grey-500);
 }

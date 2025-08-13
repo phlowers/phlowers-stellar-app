@@ -1,9 +1,23 @@
+@use 'abstract.extracts' as app;
+
 .p-datatable.p-datatable {
+  --p-datatable-border-color: var(--grey-150);
+  --p-datatable-header-cell-padding: 1rem 0.5rem;
+  --p-datatable-body-cell-padding: 0.375rem 0.5rem;
+  --p-datatable-header-cell-color: var(--grey-850);
+  --p-datatable-row-color: var(--p-datatable-header-cell-color);
+  --p-datatable-header-cell-hover-background: var(--primary-100);
+
   .p-datatable-table {
     border-collapse: unset;
 
-    .p-datatable-thead > tr > th {
+    .p-datatable-thead th {
       border-width: 0.0625rem 0rem 0.0625rem 0rem;
+      @extend %text-m-600;
+    }
+
+    .p-datatable-tbody {
+      @extend %text-m-400;
     }
   }
 

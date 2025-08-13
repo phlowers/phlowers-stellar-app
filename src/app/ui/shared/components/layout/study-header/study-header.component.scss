@@ -28,7 +28,10 @@
   }
 
   &__accodion-btn {
+    color: var(--secondary-900);
+
     app-icon {
+      color: var(--grey-950);
       transition: transform 0.15s ease-out;
     }
 

@@ -14,6 +14,7 @@ import { InitialCondition } from '@src/app/core/data/database/interfaces/initial
 import { DividerModule } from 'primeng/divider';
 import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
 import { CreateEditView } from '@src/app/ui/shared/types';
+import { CheckboxModule } from 'primeng/checkbox';
 
 const createSection = (): Section => {
   return {
@@ -63,7 +64,8 @@ const createSection = (): Section => {
     SelectModule,
     FormsModule,
     InitialConditionModalComponent,
-    DividerModule
+    DividerModule,
+    CheckboxModule
   ],
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss'

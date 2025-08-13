@@ -65,10 +65,11 @@
         [uuid]="study.uuid"
       />
     }
+
+    @if (latestStudies().length === 0) {
+      <p i18n class="study-empty">No recent studies</p>
+    }
   </main>
-  <div *ngIf="latestStudies().length === 0" class="no-studies">
-    <span i18n>No recent studies</span>
-  </div>
 
   <footer class="btn-wrapper">
     <a routerLink="/studies" app-btn btnStyle="text" btnSize="m" i18n>

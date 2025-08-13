@@ -17,8 +17,8 @@
 />
 
 @if (sections().length <= 0) {
-  <section class="mt-10 flex flex-col gap-4 items-center justify-center">
-    <h1 class="no-section-text" i18n>No existing section</h1>
+  <section class="text-center">
+    <h1 class="no-section-text text-xl-400" i18n>No existing section</h1>
     <button
       i18n
       app-btn
@@ -32,41 +32,200 @@
   </section>
 }
 
-<article class="sections-container">
-  @for (section of sections(); track section.uuid) {
-    <app-card class="card" role="article">
-      <div class="flex flex-row gap-4">
-        <div class="section-field w-1/4">
-          <span i18n class="section-card-title">Section Name</span>
-          <span class="section-value">{{ section.name }}</span>
-        </div>
+@if (sections().length > 0) {
+  <article class="sections-container">
+    @for (section of sections(); track section.uuid) {
+      <app-card class="section" role="article">
+        <p-checkbox
+          ariaLabel="select this study's section"
+          i18n-ariaLabel
+          class="section__selector"
+          [binary]="true"
+        />
 
-        <div class="section-field w-1/8">
-          <span i18n class="section-card-title">Section type</span>
-          <span class="section-value">{{ section.type }}</span>
-        </div>
+        <dl>
+          <dt i18n class="section__title-name">Section Name</dt>
+          <dd class="section__text-name">{{ section.name }}</dd>
+        </dl>
 
-        <div class="section-field w-1/6">
-          <span i18n class="section-card-title">LIT</span>
-          <span class="section-value">{{ section.lit }}</span>
-        </div>
+        <dl>
+          <dt i18n class="section__title-type">Section type</dt>
+          <dd class="section__text-type">{{ section.type }}</dd>
+        </dl>
 
-        <div class="section-field w-1/6">
-          <span i18n class="section-card-title">Last modified</span>
+        <dl>
+          <dt i18n class="section__title-lit">LIT</dt>
+          <dd class="section__text-lit">{{ section.lit }}</dd>
+        </dl>
 
-          <span class="section-value">{{
-            section.updatedAt | date: 'dd/MM/yyyy HH:mm'
-          }}</span>
-        </div>
+        <dl>
+          <dt i18n class="section__title-date">Last modified</dt>
+          <dd class="section__text-date">
+            {{ section.updatedAt | date: 'dd MMMM yyyy HH:mm' }}
+          </dd>
+        </dl>
 
-        <div class="section-field w-1/4">
-          <span i18n class="section-card-title">Initial conditions</span>
+        <p i18n class="mb-0 section__title-init">Initial conditions</p>
 
-          @if (
-            !section.initial_conditions ||
-            section.initial_conditions.length === 0
-          ) {
+        @if (
+          !section.initial_conditions || section.initial_conditions.length === 0
+        ) {
+          <button
+            (click)="
+              openInitialConditionModal(
+                section,
+                createInitialCondition(),
+                'create'
+              )
+            "
+            app-btn
+            btnSize="s"
+            btnStyle="outlined"
+            class="section__content-init"
+          >
+            <app-icon icon="add" />
+            <span i18n>Add initial condition</span>
+          </button>
+        } @else if (
+          section.initial_conditions && section.initial_conditions.length > 0
+        ) {
+          <p-select
+            [options]="section.initial_conditions"
+            placeholder="View initial conditions"
+            i18n-placeholder
+            appendTo="body"
+            panelStyleClass="initial-condition-select"
+            [panelStyle]="{ right: '0', left: 'unset' }"
+            class="section__content-init"
+          >
+            <ng-template #selectedItem i18n>
+              View initial conditions
+            </ng-template>
+
+            <ng-template let-initialCondition let-index="index" #item>
+              <div
+                (click)="$event.stopPropagation(); $event.preventDefault()"
+                (keydown)="$event.stopPropagation(); $event.preventDefault()"
+                [tabindex]="index"
+                class="flex flex-row gap-2 items-center"
+              >
+                <span class="initial-condition-name">
+                  {{ initialCondition.name }}
+                </span>
+
+                <p-divider layout="vertical" />
+
+                <button
+                  app-btn
+                  btnSize="l"
+                  btnStyle="text"
+                  (click)="
+                    openInitialConditionModal(
+                      section,
+                      initialCondition,
+                      'view'
+                    );
+                    $event.stopPropagation();
+                    $event.preventDefault()
+                  "
+                >
+                  <app-icon icon="eye_tracking" />
+                </button>
+
+                <p-divider layout="vertical" />
+
+                <button
+                  app-btn
+                  btnSize="l"
+                  btnStyle="text"
+                  (click)="
+                    openInitialConditionModal(
+                      section,
+                      initialCondition,
+                      'edit'
+                    );
+                    $event.stopPropagation();
+                    $event.preventDefault()
+                  "
+                >
+                  <app-icon icon="edit" />
+                </button>
+
+                <p-divider layout="vertical" />
+
+                <button
+                  app-btn
+                  btnSize="l"
+                  btnStyle="text"
+                  (click)="
+                    duplicateInitialCondition.emit({
+                      section,
+                      initialCondition: initialCondition
+                    });
+                    $event.stopPropagation();
+                    $event.preventDefault()
+                  "
+                >
+                  <app-icon icon="content_copy" />
+                </button>
+
+                <p-divider layout="vertical" />
+
+                <button
+                  (click)="
+                    deleteInitialCondition.emit({
+                      section,
+                      initialCondition: initialCondition
+                    })
+                  "
+                  app-btn
+                  btnSize="l"
+                  btnStyle="text"
+                >
+                  <app-icon icon="delete" />
+                </button>
+              </div>
+            </ng-template>
+          </p-select>
+        }
+
+        <p i18n class="mb-0 section__title-action">Actions</p>
+
+        <button
+          (click)="popover.toggle($event)"
+          app-btn
+          btnSize="l"
+          btnStyle="text"
+          class="section__content-action"
+        >
+          <app-icon icon="more_horiz" />
+        </button>
+
+        <p-popover #popover>
+          <ng-template pTemplate="content">
             <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              (click)="viewSection(section)"
+            >
+              <app-icon icon="eye_tracking" />
+              <span i18n>View</span>
+            </button>
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              (click)="editSection(section)"
+            >
+              <app-icon icon="edit" />
+              <span i18n>Edit</span>
+            </button>
+
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
               (click)="
                 openInitialConditionModal(
                   section,
@@ -74,196 +233,38 @@
                   'create'
                 )
               "
+            >
+              <app-icon icon="add_circle" />
+              <span i18n>Add an initial condition</span>
+            </button>
+
+            <button
               app-btn
               btnSize="s"
-              btnStyle="outlined"
+              btnStyle="text"
+              (click)="duplicateSection.emit(section)"
             >
-              <app-icon icon="add" />
-              <span i18n>Add initial condition</span>
+              <app-icon icon="content_copy" />
+              <span i18n>Duplicate</span>
             </button>
-          }
 
-          @if (
-            section.initial_conditions && section.initial_conditions.length > 0
-          ) {
-            <p-select
-              [options]="section.initial_conditions"
-              placeholder="View initial conditions"
-              i18n-placeholder
-              appendTo="body"
-              panelStyleClass="initial-condition-select"
-              [panelStyle]="{ right: '0', left: 'unset' }"
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              class="erase-btn"
+              (click)="deleteSection.emit(section)"
             >
-              <ng-template #selectedItem i18n>
-                View initial conditions
-              </ng-template>
+              <app-icon icon="delete" />
+              <span i18n>Delete</span>
+            </button>
+          </ng-template>
+        </p-popover>
+      </app-card>
+    }
+  </article>
 
-              <ng-template let-initialCondition let-index="index" #item>
-                <div
-                  (click)="$event.stopPropagation(); $event.preventDefault()"
-                  (keydown)="$event.stopPropagation(); $event.preventDefault()"
-                  [tabindex]="index"
-                  class="flex flex-row gap-2 items-center"
-                >
-                  <span class="initial-condition-name">
-                    {{ initialCondition.name }}
-                  </span>
-
-                  <p-divider layout="vertical" class="!m-0" />
-
-                  <button
-                    app-btn
-                    btnSize="l"
-                    btnStyle="text"
-                    (click)="
-                      openInitialConditionModal(
-                        section,
-                        initialCondition,
-                        'view'
-                      );
-                      $event.stopPropagation();
-                      $event.preventDefault()
-                    "
-                  >
-                    <app-icon icon="eye_tracking" />
-                  </button>
-
-                  <p-divider layout="vertical" class="!m-0" />
-                  <button
-                    app-btn
-                    btnSize="l"
-                    btnStyle="text"
-                    (click)="
-                      openInitialConditionModal(
-                        section,
-                        initialCondition,
-                        'edit'
-                      );
-                      $event.stopPropagation();
-                      $event.preventDefault()
-                    "
-                  >
-                    <app-icon icon="edit" />
-                  </button>
-
-                  <p-divider layout="vertical" class="!m-0" />
-                  <button
-                    app-btn
-                    btnSize="l"
-                    btnStyle="text"
-                    (click)="
-                      duplicateInitialCondition.emit({
-                        section,
-                        initialCondition: initialCondition
-                      });
-                      $event.stopPropagation();
-                      $event.preventDefault()
-                    "
-                  >
-                    <app-icon icon="content_copy" />
-                  </button>
-
-                  <p-divider layout="vertical" class="!m-0" />
-
-                  <button
-                    (click)="
-                      deleteInitialCondition.emit({
-                        section,
-                        initialCondition: initialCondition
-                      })
-                    "
-                    app-btn
-                    btnSize="l"
-                    btnStyle="text"
-                  >
-                    <app-icon icon="delete" />
-                  </button>
-                </div>
-              </ng-template>
-            </p-select>
-          }
-        </div>
-
-        <div class="section-field section-field--actions ml-auto">
-          <span i18n class="section-card-title">Actions</span>
-
-          <button
-            (click)="popover.toggle($event)"
-            app-btn
-            btnSize="l"
-            btnStyle="text"
-          >
-            <app-icon icon="more_horiz" />
-          </button>
-
-          <p-popover #popover>
-            <ng-template pTemplate="content">
-              <div class="section-field">
-                <button
-                  app-btn
-                  btnSize="s"
-                  btnStyle="text"
-                  (click)="viewSection(section)"
-                >
-                  <app-icon icon="eye_tracking" />
-                  <span i18n>View</span>
-                </button>
-                <button
-                  app-btn
-                  btnSize="s"
-                  btnStyle="text"
-                  (click)="editSection(section)"
-                >
-                  <app-icon icon="edit" />
-                  <span i18n>Edit</span>
-                </button>
-
-                <button
-                  app-btn
-                  btnSize="s"
-                  btnStyle="text"
-                  (click)="
-                    openInitialConditionModal(
-                      section,
-                      createInitialCondition(),
-                      'create'
-                    )
-                  "
-                >
-                  <app-icon icon="add_circle" />
-                  <span i18n>Add an initial condition</span>
-                </button>
-
-                <button
-                  app-btn
-                  btnSize="s"
-                  btnStyle="text"
-                  (click)="duplicateSection.emit(section)"
-                >
-                  <app-icon icon="content_copy" />
-                  <span i18n>Duplicate</span>
-                </button>
-
-                <button
-                  app-btn
-                  btnSize="s"
-                  btnStyle="text"
-                  (click)="deleteSection.emit(section)"
-                >
-                  <app-icon icon="delete" />
-                  <span i18n>Delete</span>
-                </button>
-              </div>
-            </ng-template>
-          </p-popover>
-        </div>
-      </div>
-    </app-card>
-  }
-</article>
-
-@if (sections().length > 0) {
-  <div class="flex justify-end mt-4 sticky bottom-0">
+  <div class="sticky-btn-wrapper">
     <button
       i18n
       app-btn
