@@ -21,7 +21,8 @@ implementation ex:
   - a[app-button]
 - inputs:
   - btnSize = `input<'s' | 'm' | 'l'>('m')` // defines button sizings
-  - btnStyle = `input<'base' | 'outlined' | 'text'>('base')` // defines button aspect
+  - btnStyle = `input<'base' | 'outlined' | 'text' | 'danger'>('base')` // defines button aspect
+  - btnLoading = `input<boolean>(false)` // disable click, add disabled look and a loading spinner to the button
 
 All It's content is projected.  
 Icons used through `<app-icon>` component or the OOCSS `.app-icon` will go on the right of the text with attribute `iconRight`.  
