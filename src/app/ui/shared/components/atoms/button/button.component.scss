@@ -26,6 +26,8 @@
   &:disabled,
   &.disabled,
   &[disabled] {
+    pointer-events: none;
+    cursor: default;
 
     .app-btn-label,
     .app-icon {
@@ -39,8 +41,6 @@ a.app-btn {
 
   &.disabled,
   &[disabled] {
-    pointer-events: none;
-    cursor: default;
     background-color: inherit;
   }
 }
@@ -193,5 +193,17 @@ a.app-btn {
   &:focus-visible {
     outline: 0.0625rem solid var(--error-900);
     outline-offset: 0.25rem;
+  }
+}
+
+.app-btn-loading {
+  .app-icon {
+    animation: loading 0.6s linear infinite;
+  }
+}
+
+@keyframes loading {
+  to {
+    transform: rotate(360deg);
   }
 }
