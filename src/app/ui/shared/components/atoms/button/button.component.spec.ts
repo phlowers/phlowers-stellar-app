@@ -28,8 +28,8 @@ class MockIconComponent {}
 class TestHostComponent {
   size: 's' | 'm' | 'l' = 'm';
   style: 'base' | 'outlined' | 'text' | 'danger' = 'base';
-  loading: boolean = false;
-  clickCount: number = 0;
+  loading = false;
+  clickCount = 0;
 
   onButtonClick(): void {
     this.clickCount++;
@@ -148,23 +148,6 @@ describe('ButtonComponent', () => {
       const element = fixture.nativeElement;
       expect(element.classList.contains('disabled')).toBeTruthy();
       expect(element.classList.contains('app-btn-loading')).toBeTruthy();
-    });
-
-    it('should set disabled attribute when loading', () => {
-      fixture.componentRef.setInput('btnLoading', true);
-      fixture.detectChanges();
-
-      const element = fixture.nativeElement;
-      expect(element.hasAttribute('disabled')).toBeTruthy();
-      expect(element.getAttribute('disabled')).toBe('true');
-    });
-
-    it('should not set disabled attribute when not loading', () => {
-      fixture.componentRef.setInput('btnLoading', false);
-      fixture.detectChanges();
-
-      const element = fixture.nativeElement;
-      expect(element.hasAttribute('disabled')).toBeFalsy();
     });
   });
 

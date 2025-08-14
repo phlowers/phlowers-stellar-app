@@ -17,8 +17,7 @@ import { IconComponent } from '../icon/icon.component';
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'app-btn',
-    '[class]': 'classesList()',
-    '[attr.disabled]': 'btnLoading() ? true : null'
+    '[class]': 'classesList()'
   }
 })
 export class ButtonComponent implements OnInit, OnDestroy {
