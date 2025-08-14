@@ -18,7 +18,6 @@ import { IconComponent } from '../icon/icon.component';
   host: {
     class: 'app-btn',
     '[class]': 'classesList()',
-    '(click)': 'onHostClick($event, true)',
     '[attr.disabled]': 'btnLoading() ? true : null'
   }
 })

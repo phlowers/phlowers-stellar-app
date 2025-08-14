@@ -38,11 +38,6 @@
 
 a.app-btn {
   text-decoration: none;
-
-  &.disabled,
-  &[disabled] {
-    background-color: inherit;
-  }
 }
 
 .app-btn-s {
