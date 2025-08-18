@@ -98,92 +98,98 @@
             [panelStyle]="{ right: '0', left: 'unset' }"
             class="section__content-init"
           >
-            <ng-template #selectedItem i18n>
-              View initial conditions
+            <ng-template #selectedItem let-selectedOption>
+              @if (selectedOption) {
+                {{ selectedOption.name }}
+              }
             </ng-template>
 
             <ng-template let-initialCondition let-index="index" #item>
-              <div
-                (click)="$event.stopPropagation(); $event.preventDefault()"
-                (keydown)="$event.stopPropagation(); $event.preventDefault()"
-                [tabindex]="index"
-                class="flex flex-row gap-2 items-center"
-              >
-                <span class="initial-condition-name">
-                  {{ initialCondition.name }}
-                </span>
+              <div [tabindex]="index" class="select-dropdown">
+                <p class="select-dropdown__select">
+                  <span>
+                    {{ initialCondition.name }}
+                  </span>
+                </p>
 
-                <p-divider layout="vertical" />
-
-                <button
-                  app-btn
-                  btnSize="l"
-                  btnStyle="text"
-                  (click)="
-                    openInitialConditionModal(
-                      section,
-                      initialCondition,
-                      'view'
-                    );
-                    $event.stopPropagation();
-                    $event.preventDefault()
-                  "
+                <div
+                  class="select-dropdown__actions"
+                  (click)="$event.stopPropagation(); $event.preventDefault()"
+                  (keydown)="$event.stopPropagation(); $event.preventDefault()"
                 >
-                  <app-icon icon="eye_tracking" />
-                </button>
+                  <p-divider layout="vertical" />
 
-                <p-divider layout="vertical" />
+                  <button
+                    app-btn
+                    btnSize="l"
+                    btnStyle="text"
+                    (click)="
+                      openInitialConditionModal(
+                        section,
+                        initialCondition,
+                        'view'
+                      );
+                      $event.stopPropagation();
+                      $event.preventDefault()
+                    "
+                  >
+                    <app-icon icon="eye_tracking" />
+                  </button>
 
-                <button
-                  app-btn
-                  btnSize="l"
-                  btnStyle="text"
-                  (click)="
-                    openInitialConditionModal(
-                      section,
-                      initialCondition,
-                      'edit'
-                    );
-                    $event.stopPropagation();
-                    $event.preventDefault()
-                  "
-                >
-                  <app-icon icon="edit" />
-                </button>
+                  <p-divider layout="vertical" />
 
-                <p-divider layout="vertical" />
+                  <button
+                    app-btn
+                    btnSize="l"
+                    btnStyle="text"
+                    (click)="
+                      openInitialConditionModal(
+                        section,
+                        initialCondition,
+                        'edit'
+                      );
+                      $event.stopPropagation();
+                      $event.preventDefault()
+                    "
+                  >
+                    <app-icon icon="edit" />
+                  </button>
 
-                <button
-                  app-btn
-                  btnSize="l"
-                  btnStyle="text"
-                  (click)="
-                    duplicateInitialCondition.emit({
-                      section,
-                      initialCondition: initialCondition
-                    });
-                    $event.stopPropagation();
-                    $event.preventDefault()
-                  "
-                >
-                  <app-icon icon="content_copy" />
-                </button>
+                  <p-divider layout="vertical" />
 
-                <p-divider layout="vertical" />
+                  <button
+                    app-btn
+                    btnSize="l"
+                    btnStyle="text"
+                    (click)="
+                      duplicateInitialCondition.emit({
+                        section,
+                        initialCondition: initialCondition
+                      });
+                      $event.stopPropagation();
+                      $event.preventDefault()
+                    "
+                  >
+                    <app-icon icon="content_copy" />
+                  </button>
 
-                <button
-                  (click)="
-                    deleteInitialCondition.emit({
-                      section,
-                      initialCondition: initialCondition
-                    })
-                  "
-                  app-btn
-                  btnSize="l"
-                  btnStyle="text"
-                >
-                  <app-icon icon="delete" />
-                </button>
+                  <p-divider layout="vertical" />
+
+                  <button
+                    (click)="
+                      deleteInitialCondition.emit({
+                        section,
+                        initialCondition: initialCondition
+                      })
+                    "
+                    app-btn
+                    btnSize="l"
+                    btnStyle="text"
+                    class="erase-btn"
+                  >
+                    <app-icon icon="delete" />
+                  </button>
+                </div>
               </div>
             </ng-template>
           </p-select>

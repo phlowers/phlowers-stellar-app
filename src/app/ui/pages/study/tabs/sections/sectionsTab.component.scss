@@ -90,8 +90,39 @@
   }
 }
 
-.initial-condition-name {
-  @apply w-24 max-w-24 whitespace-nowrap inline-block overflow-hidden overflow-ellipsis;
+.select-dropdown {
+  &,
+  &__actions {
+    @apply flex flex-row gap-2;
+  }
+
+  & {
+    @apply items-stretch;
+  }
+
+  &__select {
+    @apply flex items-center w-24 min-w-0 max-w-24 mb-0 pl-2;
+    @extend %text-m-400;
+
+    &:hover {
+      cursor: pointer;
+      background-color: var(--primary-100);
+    }
+
+    span {
+      @apply whitespace-nowrap overflow-hidden overflow-ellipsis;
+    }
+  }
+
+  &__actions {
+    @apply items-center;
+    padding: 0.5rem 0.5rem 0.5rem 0rem;
+    background-color: var(--grey-white);
+  }
+}
+
+.erase-btn {
+  color: var(--error-600);
 }
 
 .sticky-btn-wrapper {
