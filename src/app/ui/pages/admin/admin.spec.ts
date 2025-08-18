@@ -11,7 +11,7 @@ import { MessageService } from 'primeng/api';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { StorageService } from '@src/app/core/services/storage/storage.service';
 import { ConfirmationService } from 'primeng/api';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -19,6 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../shared/components/atoms/button/button.component';
+import { OnlineService } from '@src/app/core/services/online/online.service';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
@@ -28,6 +29,7 @@ describe('AdminComponent', () => {
   let studiesServiceMock: jest.Mocked<StudiesService>;
   let storageServiceMock: jest.Mocked<StorageService>;
   let confirmationServiceMock: jest.Mocked<ConfirmationService>;
+  let onlineServiceMock: jest.Mocked<OnlineService>;
 
   const mockCurrentVersion = {
     git_hash: 'abc123',
@@ -72,6 +74,10 @@ describe('AdminComponent', () => {
       }
     } as unknown as jest.Mocked<ConfirmationService>;
 
+    onlineServiceMock = {
+      online$: new BehaviorSubject<boolean>(true)
+    } as unknown as jest.Mocked<OnlineService>;
+
     await TestBed.configureTestingModule({
       imports: [
         AdminComponent,
@@ -88,7 +94,8 @@ describe('AdminComponent', () => {
         { provide: MessageService, useValue: messageServiceMock },
         { provide: StudiesService, useValue: studiesServiceMock },
         { provide: StorageService, useValue: storageServiceMock },
-        { provide: ConfirmationService, useValue: confirmationServiceMock }
+        { provide: ConfirmationService, useValue: confirmationServiceMock },
+        { provide: OnlineService, useValue: onlineServiceMock }
       ]
     }).compileComponents();
 
@@ -116,42 +123,6 @@ describe('AdminComponent', () => {
       expect(component['studyService']).toBe(studiesServiceMock);
       expect(component['storageService']).toBe(storageServiceMock);
       expect(component['confirmationService']).toBe(confirmationServiceMock);
-    });
-  });
-
-  describe('ngOnInit', () => {
-    it('should subscribe to update service success event', () => {
-      const subscribeSpy = jest.spyOn(
-        updateServiceMock.sucessFullUpdate,
-        'subscribe'
-      );
-
-      component.ngOnInit();
-
-      expect(subscribeSpy).toHaveBeenCalled();
-    });
-
-    it('should show success message when update is successful', () => {
-      component.ngOnInit();
-
-      // Trigger the success event
-      (updateServiceMock.sucessFullUpdate as Subject<void>).next();
-
-      expect(messageServiceMock.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String), // $localize returns a string
-        detail: expect.any(String)
-      });
-    });
-
-    it('should handle multiple successful updates', () => {
-      component.ngOnInit();
-
-      // Trigger multiple success events
-      (updateServiceMock.sucessFullUpdate as Subject<void>).next();
-      (updateServiceMock.sucessFullUpdate as Subject<void>).next();
-
-      expect(messageServiceMock.add).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -231,7 +202,7 @@ describe('AdminComponent', () => {
     });
   });
 
-  describe('deleteCache', () => {
+  describe('resetApp', () => {
     beforeEach(() => {
       // Mock the caches API
       Object.defineProperty(window, 'caches', {
@@ -241,17 +212,29 @@ describe('AdminComponent', () => {
         writable: true
       });
 
-      // Mock window.location.reload
+      // Mock window.location
       Object.defineProperty(window, 'location', {
         value: {
-          reload: jest.fn()
+          href: ''
+        },
+        writable: true
+      });
+
+      // Mock navigator.serviceWorker
+      Object.defineProperty(navigator, 'serviceWorker', {
+        value: {
+          getRegistrations: jest.fn().mockResolvedValue([
+            {
+              unregister: jest.fn().mockResolvedValue(true)
+            }
+          ])
         },
         writable: true
       });
     });
 
     it('should show confirmation dialog when called', () => {
-      component.deleteCache();
+      component.resetApp();
 
       expect(confirmationServiceMock.confirm).toHaveBeenCalledWith({
         message: expect.any(String),
@@ -260,7 +243,7 @@ describe('AdminComponent', () => {
     });
 
     it('should delete cache and reload when confirmed', async () => {
-      component.deleteCache();
+      component.resetApp();
 
       // Get the accept callback from the confirmation call
       const confirmCall = confirmationServiceMock.confirm.mock.calls[0][0];
@@ -275,17 +258,21 @@ describe('AdminComponent', () => {
         summary: expect.any(String),
         detail: expect.any(String)
       });
-      expect(window.location.reload).toHaveBeenCalled();
+
+      // Wait for the setTimeout to execute
+      await new Promise((resolve) => setTimeout(resolve, 2100));
+
+      expect(window.location.href).toBe('/');
     });
 
     it('should not delete cache when confirmation is cancelled', () => {
-      component.deleteCache();
+      component.resetApp();
 
       // Don't call the accept callback
 
       expect(window.caches.delete).not.toHaveBeenCalled();
       expect(messageServiceMock.add).not.toHaveBeenCalled();
-      expect(window.location.reload).not.toHaveBeenCalled();
+      expect(window.location.href).toBe('');
     });
   });
 });

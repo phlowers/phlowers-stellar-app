@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -21,6 +21,8 @@ import { StudiesService } from '../core/services/studies/studies.service';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { InitialConditionService } from '../core/services/initial-conditions/initial-condition.service';
+import { UpdateService } from '../core/services/worker_update/worker_update.service';
+import { Subscription } from 'rxjs';
 
 const modules = [
   RouterModule,
@@ -46,12 +48,13 @@ const modules = [
     StudiesService,
     SectionService,
     InitialConditionService,
-    ConfirmationService
+    ConfirmationService,
+    UpdateService
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'phlowers-stellar-app';
   userDialog = false;
   user: {
@@ -60,24 +63,39 @@ export class AppComponent implements OnInit {
     email: ''
   };
   submitted = false;
-
+  private readonly subscriptions = new Subscription();
   constructor(
     private readonly messageService: MessageService,
     private readonly storageService: StorageService,
     private readonly workerService: WorkerPythonService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly onlineService: OnlineService,
+    private readonly updateService: UpdateService
   ) {
-    storageService.ready$.subscribe((ready) => {
-      if (ready) {
-        this.userService.getUser().then((user) => {
-          if (!user) {
-            this.userDialog = true;
-          } else {
-            this.userDialog = false;
-          }
-        });
-      }
-    });
+    this.subscriptions.add(
+      this.onlineService.online$.subscribe((online) => {
+        if (online) {
+          this.updateService.checkAppVersion();
+        }
+      })
+    );
+    this.subscriptions.add(
+      storageService.ready$.subscribe((ready) => {
+        if (ready) {
+          this.userService.getUser().then((user) => {
+            if (!user) {
+              this.userDialog = true;
+            } else {
+              this.userDialog = false;
+            }
+          });
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   async saveUser() {
