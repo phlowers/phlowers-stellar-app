@@ -26,6 +26,27 @@ if (navigator.language.includes('fr')) {
 
 const timeAgo = new TimeAgo(navigator.language);
 
+const defaultTexts = {
+  newsTitle: $localize`News`, // i18n Actualités
+  newsText: $localize`Welcome to Celeste! We are glad to present this new tool made with you.
+  Please contact us to share your ideas and feedbacks to help us upgrade this application!`,
+  /*
+  i18n
+  Bienvenue sur Céleste ! Nous sommes ravis de vous présenter cette nouvelle
+  version de l'outil co-construite avec vous. N'hésitez pas à contacter l'équipe Céleste pour nous
+  faire part de vos idées d'améliorations !
+  */
+  newsLinkText: $localize`View all news`, // i18n Consulter toutes les actualités
+
+  updateTitle: $localize`Changelogs`, // i18n Notes de mise à jour
+  updateText: $localize`View latest updates.`, // i18n Consulter les dernières mises à jour de l'application.
+  updateLinkText: $localize`Learn more`, // i18n Découvrir
+  updateLinkExplicitText: $localize`Learn more about latest updates`, // i18n Découvrir les dernières notes de mise à jour
+
+  serverTitle: $localize`Server state`, // i18n État des serveurs
+  serverText: $localize`Trying to reach the servers!` // i18n Nous essayons de contacter les serveurs
+};
+
 interface HomeTexts {
   newsTitle: string;
   newsText: string;
@@ -57,26 +78,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
   public latestStudies = signal<StudyModel[]>([]);
 
-  public homeText = signal<HomeTexts>({
-    newsTitle: $localize`News`, // i18n Actualités
-    newsText: $localize`Welcome to Celeste! We are glad to present this new tool made with you.
-    Please contact us to share your ideas and feedbacks to help us upgrade this application!`,
-    /*
-    i18n
-    Bienvenue sur Céleste ! Nous sommes ravis de vous présenter cette nouvelle
-    version de l'outil co-construite avec vous. N'hésitez pas à contacter l'équipe Céleste pour nous
-    faire part de vos idées d'améliorations !
-    */
-    newsLinkText: $localize`View all news`, // i18n Consulter toutes les actualités
-
-    updateTitle: $localize`Changelogs`, // i18n Notes de mise à jour
-    updateText: $localize`View latest updates.`, // i18n Consulter les dernières mises à jour de l'application.
-    updateLinkText: $localize`Learn more`, // i18n Découvrir
-    updateLinkExplicitText: $localize`Learn more about latest updates`, // i18n Découvrir les dernières notes de mise à jour
-
-    serverTitle: $localize`Server state`, // i18n État des serveurs
-    serverText: $localize`Trying to reach the servers!` // i18n Nous essayons de contacter les serveurs
-  });
+  public homeText = signal<HomeTexts>(defaultTexts);
 
   private updateText(key: keyof HomeTexts, value: string) {
     this.homeText.update((current) => ({
@@ -96,14 +98,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     private readonly onlineService: OnlineService,
     private readonly studiesService: StudiesService
   ) {
-    if (this.updateService.needUpdate) {
-      this.updateStatus.set('warning');
-      this.updateText('updateTitle', $localize`Update available`); // i18n Mise à jour disponible !
-      this.updateText(
-        'updateText',
-        $localize`A new application update is available!`
-      ); // i18n Une nouvelle mise à jour de votre application est disponible !
-    }
+    this.updateService.needUpdate$.subscribe((needUpdate) => {
+      if (needUpdate) {
+        this.updateStatus.set('warning');
+        this.updateText('updateTitle', $localize`Update available`); // i18n Mise à jour disponible !
+        this.updateText(
+          'updateText',
+          $localize`A new application update is available!`
+        ); // i18n Une nouvelle mise à jour de votre application est disponible !
+      } else {
+        this.updateStatus.set('unknown');
+        this.updateText('updateTitle', defaultTexts.updateTitle);
+        this.updateText('updateText', defaultTexts.updateText);
+      }
+    });
   }
 
   ngOnInit(): void {

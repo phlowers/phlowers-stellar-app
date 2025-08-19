@@ -1,6 +1,15 @@
 <p-confirmdialog />
 <div class="flex flex-col gap-4">
   <p-card i18n-header header="App version">
+    @if (onlineService.online$ | async) {<button
+      app-btn
+      i18n
+      (click)="updateService.checkAppVersion()"
+      [disabled]="updateService.updateLoading()"
+    >
+      Check app version
+    </button>
+    }
     <table class="my-2 w-full">
       <thead>
         <tr>
@@ -11,30 +20,29 @@
       </thead>
       <tr>
         <td i18n>Build Hash</td>
-        <td>{{ updateService.currentVersion?.git_hash }}</td>
-        <td>{{ updateService.latestVersion?.git_hash }}</td>
+        <td>{{ updateService.currentVersion()?.git_hash }}</td>
+        <td>{{ updateService.latestVersion()?.git_hash }}</td>
       </tr>
       <tr>
         <td i18n>Build datetime</td>
-        <td>{{ updateService.currentVersion?.build_datetime_utc }}</td>
-        <td>{{ updateService.latestVersion?.build_datetime_utc }}</td>
+        <td>{{ updateService.currentVersion()?.build_datetime_utc }}</td>
+        <td>{{ updateService.latestVersion()?.build_datetime_utc }}</td>
       </tr>
       <tr>
         <td i18n>Build version</td>
-        <td>{{ updateService.currentVersion?.version }}</td>
-        <td>{{ updateService.latestVersion?.version }}</td>
+        <td>{{ updateService.currentVersion()?.version }}</td>
+        <td>{{ updateService.latestVersion()?.version }}</td>
       </tr>
     </table>
-    @if (updateService.needUpdate) {
+    @if (updateService.needUpdate$ | async) {
     <button
       app-btn
       i18n
       (click)="updateService.update()"
-      [btnLoading]="updateService.updateLoading"
+      [disabled]="updateService.updateLoading()"
     >
-      Update to latest version
-    </button>
-    }
+      Update to latest version</button
+    >}
   </p-card>
   <p-card i18n-header header="Danger zone">
     <div class="flex flex-row gap-2">
@@ -44,8 +52,8 @@
       <button app-btn i18n btnStyle="danger" (click)="resetDatabase()">
         Reset database
       </button>
-      <button app-btn i18n btnStyle="danger" (click)="deleteCache()">
-        Delete app cache
+      <button app-btn i18n btnStyle="danger" (click)="resetApp()">
+        Reset the app
       </button>
     </div>
   </p-card>

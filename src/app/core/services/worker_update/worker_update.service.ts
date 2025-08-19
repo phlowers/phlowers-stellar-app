@@ -1,6 +1,8 @@
-import { Injectable, isDevMode } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Injectable, isDevMode, signal } from '@angular/core';
 import { environment } from '@src/environments/environment';
+import { isEqual } from 'lodash';
+import { MessageService } from 'primeng/api';
+import { BehaviorSubject } from 'rxjs';
 
 interface AppVersion {
   git_hash: string;
@@ -27,101 +29,97 @@ const mockLatestVersion: AppVersion = {
 
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
-  currentVersion: AppVersion | null = isDevMode()
-    ? mockCurrentVersion
-    : {
-        git_hash: '',
-        build_datetime_utc: environment.buildTime,
-        version: environment.version
-      };
-  latestVersion: AppVersion | null = isDevMode() ? mockLatestVersion : null;
-  updateLoading = false;
-  needUpdate =
-    !!this.latestVersion &&
-    !!this.currentVersion &&
-    (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
-      this.latestVersion?.build_datetime_utc !==
-        this.currentVersion?.build_datetime_utc);
-  sucessFullUpdate = new Subject<void>();
+  currentVersion = signal<AppVersion | null>(
+    isDevMode() ? mockCurrentVersion : null
+  );
+  latestVersion = signal<AppVersion | null>(
+    isDevMode() ? mockLatestVersion : null
+  );
+  updateLoading = signal(false);
+  needUpdate$ = new BehaviorSubject<boolean>(false);
 
-  constructor() {
-    navigator.serviceWorker.addEventListener('message', (event) => {
+  constructor(private readonly messageService: MessageService) {
+    navigator.serviceWorker.addEventListener('message', async (event) => {
       console.log(`Message from service worker:`, event.data);
-      switch (event.data.message) {
-        case 'update_complete':
-          this.updateLoading = false;
-          this.currentVersion = event.data.current_version;
-          this.needUpdate =
-            !!this.latestVersion &&
-            (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
-              this.latestVersion?.build_datetime_utc !==
-                this.currentVersion?.build_datetime_utc);
-          this.sucessFullUpdate.next();
-          // reload the page to apply the update
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 1000);
-          break;
-        case 'no_new_version':
-        case 'new_version':
-          this.currentVersion = event.data.current_version;
-          this.latestVersion = event.data.latest_version;
-          this.needUpdate =
-            !!this.latestVersion &&
-            !!this.currentVersion &&
-            (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
-              this.latestVersion?.build_datetime_utc !==
-                this.currentVersion?.build_datetime_utc);
-          break;
-        case 'install_complete':
-          this.currentVersion = event.data.latest_version;
-          this.latestVersion = event.data.latest_version;
-          this.needUpdate = false;
-          break;
+      if (event.data.message) {
+        switch (event.data.message) {
+          case 'worker_ready':
+            await this.checkAppVersion();
+            break;
+          case 'update_complete':
+            await this.checkAppVersion();
+            this.updateLoading.set(false);
+            this.messageService.add({
+              severity: 'success',
+              summary: $localize`Update successful`,
+              detail: $localize`The application has been updated to the latest version`
+            });
+            break;
+          case 'install_complete':
+            await this.checkAppVersion();
+            this.updateLoading.set(false);
+            this.messageService.add({
+              severity: 'success',
+              summary: $localize`Install successful`,
+              detail: $localize`The application has been installed`
+            });
+            break;
+        }
       }
     });
   }
 
-  async getAppVersion() {
-    try {
-      const response = await fetch('/assets_list.json');
+  async getCurrentVersion() {
+    const cache = await caches.open('app-assets');
+    const cachedResponse = await cache.match('/app_version');
+    if (cachedResponse) {
+      const version = await cachedResponse.json();
+      console.log('current version is', version);
+      return version;
+    } else {
+      return null;
+    }
+  }
+
+  async getLatestVersion() {
+    const response = await fetch('/assets_list.json');
+    if (response) {
       const data: AssetList = await response.json();
       console.log('latest version is', data.app_version);
-      this.latestVersion = data.app_version;
-    } catch (error) {
-      console.error('Error fetching asset list:', error);
+      return data.app_version;
+    } else {
+      return null;
     }
-    try {
-      const cache = await caches.open('app-assets');
-      const cachedResponse = await cache.match('/app_version');
-      if (cachedResponse) {
-        const version = await cachedResponse.json();
-        console.log('current version in cache', version);
-        this.currentVersion = version;
-      } else {
-        console.log('no current version in cache');
-        this.currentVersion = null;
-      }
-      this.needUpdate =
-        !!this.latestVersion &&
-        !!this.currentVersion &&
-        (this.latestVersion?.git_hash !== this.currentVersion?.git_hash ||
-          this.latestVersion?.build_datetime_utc !==
-            this.currentVersion?.build_datetime_utc);
-    } catch (error) {
-      console.error('Error fetching asset list:', error);
+  }
+
+  async checkAppVersion() {
+    console.log('checking app version');
+    const currentVersion = await this.getCurrentVersion();
+    const latestVersion = await this.getLatestVersion();
+    this.currentVersion.set(currentVersion);
+    this.latestVersion.set(latestVersion);
+    if (!isEqual(currentVersion, latestVersion)) {
+      this.needUpdate$.next(true);
+    } else {
+      this.needUpdate$.next(false);
     }
   }
 
   async update() {
-    this.updateLoading = true;
+    this.updateLoading.set(true);
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.active?.postMessage({
-        type: 'update',
-        currentVersion: this.currentVersion,
-        latestVersion: this.latestVersion
+        type: 'update'
       });
+    }
+  }
+
+  async install() {
+    this.updateLoading.set(true);
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration) {
+      registration.active?.postMessage({ type: 'install' });
     }
   }
 }

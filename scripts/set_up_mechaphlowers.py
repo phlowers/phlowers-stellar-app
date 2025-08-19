@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.12,<3.13"
-# dependencies = ["requests == 2.32.3", "pyodide-build == 0.29.3"]
+# dependencies = ["requests == 2.32.3", "pyodide-build == 0.30.6"]
 # ///
 import hashlib
 import json
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         os.remove(PYODIDE_PACKAGES_PATH)
 
     # Download and extract the pyodide .tgz file
-    print("i am downloading pyodide")
+    print("Downloading pyodide")
     download_and_extract_tgz(pyodide_url, PYODIDE_DIRECTORY_PATH)
 
     # Keep only the needed files

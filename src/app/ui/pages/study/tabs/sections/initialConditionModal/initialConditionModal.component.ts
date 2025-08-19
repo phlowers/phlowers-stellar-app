@@ -7,7 +7,6 @@ import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/butt
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
 import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
 
 @Component({
@@ -38,7 +37,7 @@ export class InitialConditionModalComponent {
     base_temperature: 0
   });
 
-  constructor(private messageService: MessageService) {
+  constructor() {
     effect(() => {
       this.initialCondition.set(this.initialConditionInput());
     });

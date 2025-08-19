@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { TableModule } from 'primeng/table';
 import { UpdateService } from '@core/services/worker_update/worker_update.service';
@@ -16,6 +16,7 @@ import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { StorageService } from '@src/app/core/services/storage/storage.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonComponent } from '../../shared/components/atoms/button/button.component';
+import { OnlineService } from '@src/app/core/services/online/online.service';
 
 const CACHE_NAME = 'app-assets';
 
@@ -34,9 +35,10 @@ const CACHE_NAME = 'app-assets';
     ButtonComponent
   ]
 })
-export class AdminComponent implements OnInit {
+export class AdminComponent {
   constructor(
     public updateService: UpdateService,
+    public onlineService: OnlineService,
     private readonly messageService: MessageService,
     private readonly studyService: StudiesService,
     private readonly storageService: StorageService,
@@ -44,16 +46,6 @@ export class AdminComponent implements OnInit {
   ) {}
   updateAvailable = false;
   newVersion = '';
-
-  ngOnInit() {
-    this.updateService.sucessFullUpdate.subscribe(() => {
-      this.messageService.add({
-        severity: 'success',
-        summary: $localize`Update successful`,
-        detail: $localize`The application has been updated to the latest version`
-      });
-    });
-  }
 
   deleteAllStudies() {
     this.confirmationService.confirm({
@@ -83,18 +75,24 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  deleteCache() {
+  resetApp() {
     this.confirmationService.confirm({
       message: $localize`Are you sure you want to reset the app?`,
-      accept: () => {
-        caches.delete(CACHE_NAME).then(() => {
-          this.messageService.add({
-            severity: 'success',
-            summary: $localize`App reset`,
-            detail: $localize`The app has been reset`
-          });
-          window.location.reload();
+      accept: async () => {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          console.log('registration is', registration);
+          await registration.unregister();
+        }
+        await caches.delete(CACHE_NAME);
+        this.messageService.add({
+          severity: 'success',
+          summary: $localize`App reset`,
+          detail: $localize`The app has been reset`
         });
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
       }
     });
   }

@@ -43,6 +43,7 @@ testem.log
 Thumbs.db
 
 public/pyodide/*
+public/service-worker.js
 
 .vscode/settings.json
 
