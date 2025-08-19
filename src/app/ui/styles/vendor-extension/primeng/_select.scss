@@ -46,4 +46,12 @@
     color: unset;
     cursor: auto;
   }
+
+  .select-dropdown__select {
+    .app-btn-label {
+      @apply whitespace-nowrap overflow-hidden overflow-ellipsis px-1;
+      @extend %text-m-400;
+      color: var(--grey-750);
+    }
+  }
 }
