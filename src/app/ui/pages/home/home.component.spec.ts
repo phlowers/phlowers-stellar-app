@@ -46,7 +46,7 @@ describe('HomeComponent', () => {
 
   beforeEach(async () => {
     updateServiceMock = {
-      needUpdate: false
+      needUpdate$: new BehaviorSubject<boolean>(false)
     } as jest.Mocked<UpdateService>;
 
     onlineServiceMock = {
@@ -105,7 +105,7 @@ describe('HomeComponent', () => {
 
   describe('Constructor Behavior', () => {
     it('should set update status to warning when update is needed', () => {
-      updateServiceMock.needUpdate = true;
+      updateServiceMock.needUpdate$.next(true);
 
       const newFixture = TestBed.createComponent(HomeComponent);
       const newComponent = newFixture.componentInstance;
@@ -114,7 +114,7 @@ describe('HomeComponent', () => {
     });
 
     it('should not change update status when no update is needed', () => {
-      updateServiceMock.needUpdate = false;
+      updateServiceMock.needUpdate$.next(false);
 
       expect(component.updateStatus()).toBe('unknown');
     });

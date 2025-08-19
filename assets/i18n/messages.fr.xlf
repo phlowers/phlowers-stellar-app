@@ -16,25 +16,25 @@
     <unit id="7884682505577720946">
       <segment>
         <source>Current version</source>
-        <target>VERSION ACTUELLE</target>
+        <target>Version actuelle</target>
       </segment>
     </unit>
     <unit id="1354376805041038577">
       <segment>
         <source>Latest version</source>
-        <target>VERSION LA PLUS RECENTE</target>
+        <target>Version la plus récente</target>
       </segment>
     </unit>
     <unit id="7971756555133484892">
       <segment>
         <source>Build Hash</source>
-        <target>HASH DE BUILD</target>
+        <target>Hash du build</target>
       </segment>
     </unit>
     <unit id="2891008338883840095">
       <segment>
         <source>Build datetime</source>
-        <target>DATE ET HEURE DE BUILD</target>
+        <target>Date et heure du build</target>
       </segment>
     </unit>
     <unit id="2846632067702923194">
@@ -310,13 +310,13 @@
     <unit id="7601213978629574297">
       <segment state="initial">
         <source> Go to home page </source>
-        <target> Aller à la page d'accueil </target>
+        <target> Aller à la page d&apos;accueil </target>
       </segment>
     </unit>
     <unit id="6713690242020777174">
       <segment state="initial">
         <source>Build version</source>
-        <target>Version de la build</target>
+        <target>Version du build</target>
       </segment>
     </unit>
     <unit id="2547571169649786686">
@@ -337,10 +337,10 @@
         <target> Réinitialiser la base de données </target>
       </segment>
     </unit>
-    <unit id="6341476329368350089">
+    <unit id="5684312348614575469">
       <segment state="initial">
-        <source> Delete app cache </source>
-        <target> Supprimer le cache de l'application </target>
+        <source> Reset the app </source>
+        <target> Réinitialiser l&apos;application </target>
       </segment>
     </unit>
     <unit id="4238708305594970843">
@@ -352,7 +352,7 @@
     <unit id="8439372668099146162">
       <segment state="initial">
         <source>The application has been updated to the latest version</source>
-        <target>L'application a été mise à jour vers la dernière version</target>
+        <target>L&apos;application a été mise à jour vers la dernière version</target>
       </segment>
     </unit>
     <unit id="797001286432919577">
@@ -388,19 +388,19 @@
     <unit id="5281579610433386344">
       <segment state="initial">
         <source>Are you sure you want to reset the app?</source>
-        <target>Êtes-vous sûr de vouloir réinitialiser l'application?</target>
+        <target>Êtes-vous sûr de vouloir réinitialiser l&apos;application?</target>
       </segment>
     </unit>
     <unit id="4125361306674691550">
       <segment state="initial">
         <source>App reset</source>
-        <target>Réinitialisation de l'application</target>
+        <target>Réinitialisation de l&apos;application</target>
       </segment>
     </unit>
     <unit id="5994109586105591631">
       <segment state="initial">
         <source>The app has been reset</source>
-        <target>L'application a été réinitialisée</target>
+        <target>L&apos;application a été réinitialisée</target>
       </segment>
     </unit>
     <unit id="8283592065951885988">
@@ -427,7 +427,7 @@
         <target> Aller à mes études <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></target>
       </segment>
     </unit>
-    <unit id="4141865830196614938">
+    <unit id="2640561782983672481">
       <segment state="initial">
         <source>Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!</source>
         <target>Bienvenue sur Celeste! Nous sommes ravis de vous présenter cette nouvelle application. Veuillez nous contacter pour partager vos idées et vos retours pour nous aider à améliorer cette application!</target>
@@ -484,7 +484,7 @@
     <unit id="2269840927612671406">
       <segment state="initial">
         <source>A new application update is available!</source>
-        <target>Une nouvelle mise à jour de l'application est disponible!</target>
+        <target>Une nouvelle mise à jour de l&apos;application est disponible!</target>
       </segment>
     </unit>
     <unit id="5078151248323604568">
@@ -514,7 +514,7 @@
     <unit id="8159722776036849437">
       <segment state="initial">
         <source>Study name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
-        <target>Nom de l'étude <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+        <target>Nom de l&apos;étude <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
       </segment>
     </unit>
     <unit id="8616180516716294384">
@@ -532,7 +532,7 @@
     <unit id="4116724826865372994">
       <segment state="initial">
         <source>Modify study</source>
-        <target>Modifier l'étude</target>
+        <target>Modifier l&apos;étude</target>
       </segment>
     </unit>
     <unit id="5519001504653726625">
@@ -616,13 +616,13 @@
     <unit id="862393570495704117">
       <segment state="initial">
         <source>Study sections</source>
-        <target>Cantons de l'étude</target>
+        <target>Cantons de l&apos;étude</target>
       </segment>
     </unit>
     <unit id="504426626920824980">
       <segment state="initial">
         <source>Study states</source>
-        <target>États de l'étude</target>
+        <target>États de l&apos;étude</target>
       </segment>
     </unit>
     <unit id="5361585538695040272">
@@ -868,7 +868,7 @@
     <unit id="1772495502731751754">
       <segment state="initial">
         <source>Attachment height (m)</source>
-        <target>Hauteur d'attachement (m)</target>
+        <target>Hauteur d&apos;attachement (m)</target>
       </segment>
     </unit>
     <unit id="5280768007794245227">
@@ -880,7 +880,7 @@
     <unit id="6621067415830629818">
       <segment state="initial">
         <source>Arm length (m)</source>
-        <target>Longueur de l'armature (m)</target>
+        <target>Longueur de l&apos;armature (m)</target>
       </segment>
     </unit>
     <unit id="5513122358899972896">
@@ -934,7 +934,7 @@
     <unit id="1170667643695316061">
       <segment state="initial">
         <source>Create a study section</source>
-        <target>Créer une section d'étude</target>
+        <target>Créer une section d&apos;étude</target>
       </segment>
     </unit>
     <unit id="3689220712977179060">
@@ -964,7 +964,7 @@
     <unit id="6707260083636271016">
       <segment state="initial">
         <source>From extraction</source>
-        <target>À partir de l'extraction</target>
+        <target>À partir de l&apos;extraction</target>
       </segment>
     </unit>
     <unit id="8833276229402617730">
@@ -1121,6 +1121,24 @@
       <segment state="initial">
         <source>Error: end not in list</source>
         <target>Erreur: fin pas dans la liste</target>
+      </segment>
+    </unit>
+    <unit id="5323835340256603340">
+      <segment state="initial">
+        <source>View initial conditions</source>
+        <target>Vue des conditions initiales</target>
+      </segment>
+    </unit>
+    <unit id="6558234134180056546">
+      <segment state="initial">
+        <source>Install successful</source>
+        <target>Installation réussie</target>
+      </segment>
+    </unit>
+    <unit id="7951447255685596650">
+      <segment state="initial">
+        <source>The application has been installed</source>
+        <target>L&apos;application a été installée</target>
       </segment>
     </unit>
   </file>

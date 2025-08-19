@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { UserService } from '../core/services/user/user.service';
+import { UpdateService } from '../core/services/worker_update/worker_update.service';
 
 class Worker {
   url: string;
@@ -39,6 +40,7 @@ describe('AppComponent', () => {
   let mockWorkerService: WorkerPythonService;
   let mockOnlineService: OnlineService;
   let mockUserService: UserService;
+  let mockUpdateService: UpdateService;
   let readySubject: BehaviorSubject<boolean>;
   let workerReadySubject: BehaviorSubject<boolean>;
 
@@ -76,12 +78,18 @@ describe('AppComponent', () => {
       ready$: workerReadySubject
     } as unknown as WorkerPythonService;
 
-    mockOnlineService = {} as OnlineService;
+    mockOnlineService = {
+      online$: new BehaviorSubject<boolean>(true)
+    } as unknown as OnlineService;
 
     mockUserService = {
       getUser: jest.fn().mockResolvedValue(null),
       createUser: jest.fn().mockResolvedValue(undefined)
     } as unknown as UserService;
+
+    mockUpdateService = {
+      checkAppVersion: jest.fn()
+    } as unknown as UpdateService;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -98,6 +106,7 @@ describe('AppComponent', () => {
     TestBed.overrideProvider(OnlineService, { useValue: mockOnlineService });
     TestBed.overrideProvider(MessageService, { useValue: mockMessageService });
     TestBed.overrideProvider(UserService, { useValue: mockUserService });
+    TestBed.overrideProvider(UpdateService, { useValue: mockUpdateService });
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
   });
