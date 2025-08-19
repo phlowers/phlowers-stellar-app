@@ -526,7 +526,7 @@
         <source>App reset</source>
       </segment>
     </unit>
-    <unit id="4141865830196614938">
+    <unit id="2640561782983672481">
       <segment>
         <source>Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!</source>
       </segment>
@@ -706,9 +706,9 @@
         <source>usr pref</source>
       </segment>
     </unit>
-    <unit id="6341476329368350089">
+    <unit id="5684312348614575469">
       <segment>
-        <source> Delete app cache </source>
+        <source> Reset the app </source>
       </segment>
     </unit>
     <unit id="6370642728789544052">
@@ -934,6 +934,21 @@
     <unit id="983324339375029355">
       <segment>
         <source>My last studies</source>
+      </segment>
+    </unit>
+    <unit id="5323835340256603340">
+      <segment>
+        <source>View initial conditions</source>
+      </segment>
+    </unit>
+    <unit id="6558234134180056546">
+      <segment>
+        <source>Install successful</source>
+      </segment>
+    </unit>
+    <unit id="7951447255685596650">
+      <segment>
+        <source>The application has been installed</source>
       </segment>
     </unit>
   </file>

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { UpdateService } from './worker_update.service';
+import { MessageService } from 'primeng/api';
 
 describe('UpdateService', () => {
   let service: UpdateService;
@@ -10,8 +11,12 @@ describe('UpdateService', () => {
   let originalServiceWorker: any;
   let originalCaches: any;
   let originalFetch: any;
+  let mockMessageService: MessageService;
 
   beforeEach(() => {
+    mockMessageService = {
+      add: jest.fn()
+    } as unknown as MessageService;
     // Mock service worker
     mockServiceWorker = {
       addEventListener: jest.fn(),
@@ -46,11 +51,14 @@ describe('UpdateService', () => {
     window.fetch = mockFetch;
 
     TestBed.configureTestingModule({
-      providers: [UpdateService]
+      providers: [
+        UpdateService,
+        { provide: MessageService, useValue: mockMessageService }
+      ]
     });
     service = TestBed.inject(UpdateService);
-    service.latestVersion = null;
-    service.currentVersion = null;
+    service.latestVersion.set(null);
+    service.currentVersion.set(null);
   });
 
   afterEach(() => {
@@ -94,12 +102,12 @@ describe('UpdateService', () => {
 
       mockCache.match.mockResolvedValueOnce(null);
 
-      await service.getAppVersion();
+      await service.checkAppVersion();
 
       expect(mockFetch).toHaveBeenCalledWith('/assets_list.json');
-      expect(service.latestVersion).toEqual(mockLatestVersion);
-      expect(service.currentVersion).toBeNull();
-      expect(service.needUpdate).toBe(false);
+      expect(service.latestVersion()).toEqual(mockLatestVersion);
+      expect(service.currentVersion()).toBeNull();
+      expect(service.needUpdate$.value).toBe(true);
     });
 
     it('should get current version from cache', async () => {
@@ -123,31 +131,20 @@ describe('UpdateService', () => {
         json: jest.fn().mockResolvedValueOnce(mockCurrentVersion)
       });
 
-      await service.getAppVersion();
+      await service.checkAppVersion();
 
       expect(mockCaches.open).toHaveBeenCalledWith('app-assets');
       expect(mockCache.match).toHaveBeenCalledWith('/app_version');
-      expect(service.currentVersion).toEqual(mockCurrentVersion);
-      expect(service.latestVersion).toEqual(mockLatestVersion);
-      expect(service.needUpdate).toBe(true);
+      expect(service.currentVersion()).toEqual(mockCurrentVersion);
+      expect(service.latestVersion()).toEqual(mockLatestVersion);
+      expect(service.needUpdate$.value).toBe(true);
     });
 
     it('should handle fetch errors gracefully', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
       mockCache.match.mockResolvedValueOnce(null);
 
-      await service.getAppVersion();
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error fetching asset list:',
-        expect.any(Error)
-      );
-      expect(service.latestVersion).toBeNull();
-      expect(service.currentVersion).toBeNull();
-      expect(service.needUpdate).toBe(false);
-
-      consoleErrorSpy.mockRestore();
+      await expect(service.checkAppVersion()).rejects.toThrow('Network error');
     });
   });
 
@@ -164,8 +161,8 @@ describe('UpdateService', () => {
         version: '1.0.1'
       };
 
-      service.currentVersion = mockCurrentVersion;
-      service.latestVersion = mockLatestVersion;
+      service.currentVersion.set(mockCurrentVersion);
+      service.latestVersion.set(mockLatestVersion);
 
       const mockPostMessage = jest.fn();
       mockServiceWorker.getRegistration.mockResolvedValueOnce({
@@ -176,12 +173,10 @@ describe('UpdateService', () => {
 
       await service.update();
 
-      expect(service.updateLoading).toBe(true);
+      expect(service.updateLoading()).toBe(true);
       expect(mockServiceWorker.getRegistration).toHaveBeenCalled();
       expect(mockPostMessage).toHaveBeenCalledWith({
-        type: 'update',
-        currentVersion: mockCurrentVersion,
-        latestVersion: mockLatestVersion
+        type: 'update'
       });
     });
   });
@@ -194,92 +189,66 @@ describe('UpdateService', () => {
       messageHandler = mockServiceWorker.addEventListener.mock.calls[0][1];
     });
 
-    it('should handle update_complete message', () => {
-      jest.useFakeTimers();
-
+    it('should handle update_complete message', async () => {
       const mockCurrentVersion = {
         git_hash: 'abc123',
         build_datetime_utc: '2023-01-01T00:00:00.000000'
       };
 
-      const sucessFullUpdateSpy = jest.spyOn(service.sucessFullUpdate, 'next');
+      mockFetch.mockResolvedValueOnce({
+        json: jest.fn().mockResolvedValueOnce({
+          app_version: mockCurrentVersion,
+          files: ['file1.js', 'file2.css']
+        })
+      });
 
-      service.updateLoading = true;
+      mockCache.match.mockResolvedValueOnce({
+        json: jest.fn().mockResolvedValueOnce(mockCurrentVersion)
+      });
 
-      messageHandler({
+      service.updateLoading.set(true);
+
+      await messageHandler({
         data: {
           message: 'update_complete',
           current_version: mockCurrentVersion
         }
       });
 
-      expect(service.updateLoading).toBe(false);
-      expect(service.currentVersion).toEqual(mockCurrentVersion);
-      expect(sucessFullUpdateSpy).toHaveBeenCalled();
-
-      jest.advanceTimersByTime(1000);
-
-      jest.useRealTimers();
+      expect(service.updateLoading()).toBe(false);
+      expect(service.currentVersion()).toEqual(mockCurrentVersion);
     });
 
-    it('should handle new_version message', () => {
-      const mockCurrentVersion = {
-        git_hash: 'def456',
-        build_datetime_utc: '2022-12-31T00:00:00.000000'
-      };
-      const mockLatestVersion = {
-        git_hash: 'abc123',
-        build_datetime_utc: '2023-01-01T00:00:00.000000'
-      };
-
-      messageHandler({
-        data: {
-          message: 'new_version',
-          current_version: mockCurrentVersion,
-          latest_version: mockLatestVersion
-        }
-      });
-
-      expect(service.currentVersion).toEqual(mockCurrentVersion);
-      expect(service.latestVersion).toEqual(mockLatestVersion);
-      expect(service.needUpdate).toBe(true);
-    });
-
-    it('should handle no_new_version message', () => {
+    it('should handle install_complete message', async () => {
       const mockVersion = {
         git_hash: 'abc123',
         build_datetime_utc: '2023-01-01T00:00:00.000000'
       };
 
-      messageHandler({
-        data: {
-          message: 'no_new_version',
-          current_version: mockVersion,
-          latest_version: mockVersion
-        }
+      mockFetch.mockResolvedValueOnce({
+        json: jest.fn().mockResolvedValueOnce({
+          app_version: mockVersion,
+          files: ['file1.js', 'file2.css']
+        })
       });
 
-      expect(service.currentVersion).toEqual(mockVersion);
-      expect(service.latestVersion).toEqual(mockVersion);
-      expect(service.needUpdate).toBe(false);
-    });
+      mockCache.match.mockResolvedValueOnce({
+        json: jest.fn().mockResolvedValueOnce(mockVersion)
+      });
 
-    it('should handle install_complete message', () => {
-      const mockVersion = {
-        git_hash: 'abc123',
-        build_datetime_utc: '2023-01-01T00:00:00.000000'
-      };
+      service.updateLoading.set(true);
 
-      messageHandler({
+      await messageHandler({
         data: {
           message: 'install_complete',
           latest_version: mockVersion
         }
       });
 
-      expect(service.currentVersion).toEqual(mockVersion);
-      expect(service.latestVersion).toEqual(mockVersion);
-      expect(service.needUpdate).toBe(false);
+      expect(service.updateLoading()).toBe(false);
+      expect(service.currentVersion()).toEqual(mockVersion);
+      expect(service.latestVersion()).toEqual(mockVersion);
+      expect(service.needUpdate$.value).toBe(false);
     });
   });
 });
