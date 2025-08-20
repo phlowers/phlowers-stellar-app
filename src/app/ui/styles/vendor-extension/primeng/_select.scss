@@ -36,9 +36,22 @@
 
 // specific override for initial condition select list in study section tab (page study)
 .initial-condition-select.initial-condition-select {
+  .p-select-list,
+  .p-select-option {
+    padding: 0rem;
+  }
+
   .p-select-option.p-select-option.p-focus {
     background: unset;
     color: unset;
     cursor: auto;
+  }
+
+  .select-dropdown__select {
+    .app-btn-label {
+      @apply whitespace-nowrap overflow-hidden overflow-ellipsis px-1;
+      @extend %text-m-400;
+      color: var(--grey-750);
+    }
   }
 }

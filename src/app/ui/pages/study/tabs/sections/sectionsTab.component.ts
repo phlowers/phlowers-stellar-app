@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal, ViewChild } from '@angular/core';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
@@ -7,7 +7,7 @@ import { NewSectionModalComponent } from './newSectionModal/newSectionModal.comp
 import { CardComponent } from '@src/app/ui/shared/components/atoms/card/card.component';
 import { PopoverModule } from 'primeng/popover';
 import { v4 as uuidv4 } from 'uuid';
-import { SelectModule } from 'primeng/select';
+import { Select, SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { InitialConditionModalComponent } from './initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
@@ -71,6 +71,9 @@ const createSection = (): Section => {
   styleUrl: './sectionsTab.component.scss'
 })
 export class SectionsTabComponent {
+  @ViewChild('initialConditionSelect') selectComponent!: Select;
+  selectedInitialCondition = null;
+
   sections = input<Section[]>([]);
   createOrUpdateSection = output<Section>();
   deleteSection = output<Section>();
@@ -95,6 +98,15 @@ export class SectionsTabComponent {
       base_parameters: '',
       base_temperature: 0
     };
+  }
+
+  selectItem(item: any, event: Event) {
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    this.selectedInitialCondition = item;
+
+    this.selectComponent.hide();
   }
 
   editSection(section: Section) {
