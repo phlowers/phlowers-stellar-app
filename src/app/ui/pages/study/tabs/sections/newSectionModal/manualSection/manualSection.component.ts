@@ -57,7 +57,6 @@ export class ManualSectionComponent {
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
   sectionChange = output<any>();
-  supportsAmount = 0;
   sectionTypes = [
     { name: 'Guard', code: 'guard' },
     { name: 'Phase', code: 'phase' }
@@ -107,14 +106,12 @@ export class ManualSectionComponent {
     } else {
       this.section().supports?.splice(index + 1, 0, newSupport);
     }
-    this.supportsAmount = this.section().supports?.length || 0;
   }
 
   deleteSupport(uuid: string) {
     this.section().supports = this.section().supports?.filter(
       (support) => support.uuid !== uuid
     );
-    this.supportsAmount = this.section().supports?.length || 0;
   }
 
   onSupportChange(change: {

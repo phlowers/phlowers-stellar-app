@@ -115,7 +115,6 @@ describe('ManualSectionComponent', () => {
   describe('onSupportsAmountChange', () => {
     it('should do nothing if amount equals current supports length', () => {
       mockSection.supports = [createSupportMock()];
-      component.supportsAmount = 1;
       const event = { originalEvent: { type: 'mousedown' }, value: 1 };
       component.onSupportsAmountChangeInput(event);
       expect(mockSection.supports.length).toBe(1);
@@ -141,7 +140,6 @@ describe('ManualSectionComponent', () => {
 
     it('should not update supports if event type is not mousedown', () => {
       mockSection.supports = [createSupportMock()];
-      component.supportsAmount = 1;
       const event = { originalEvent: { type: 'keydown' }, value: 2 };
       component.onSupportsAmountChangeInput(event);
       expect(mockSection.supports.length).toBe(1);
@@ -151,13 +149,11 @@ describe('ManualSectionComponent', () => {
   describe('addSupport', () => {
     it('should add a support before the given index', () => {
       mockSection.supports = [createSupportMock(), createSupportMock()];
-      component.supportsAmount = 2;
       component.addSupport(1, 'before');
       expect(mockSection.supports.length).toBe(3);
     });
     it('should add a support after the given index', () => {
       mockSection.supports = [createSupportMock(), createSupportMock()];
-      component.supportsAmount = 2;
       component.addSupport(0, 'after');
       expect(mockSection.supports.length).toBe(3);
     });
