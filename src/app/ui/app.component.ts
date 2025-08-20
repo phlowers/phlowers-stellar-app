@@ -6,7 +6,13 @@
  */
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
@@ -24,6 +30,8 @@ import { InitialConditionService } from '../core/services/initial-conditions/ini
 import { UpdateService } from '../core/services/worker_update/worker_update.service';
 import { Subscription } from 'rxjs';
 
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 const modules = [
   RouterModule,
   CommonModule,
@@ -32,7 +40,8 @@ const modules = [
   InputTextModule,
   DialogModule,
   ButtonComponent,
-  IconComponent
+  IconComponent,
+  ReactiveFormsModule
 ];
 
 @Component({
@@ -57,11 +66,10 @@ const modules = [
 export class AppComponent implements OnInit, OnDestroy {
   title = 'phlowers-stellar-app';
   userDialog = false;
-  user: {
-    email: string;
-  } = {
-    email: ''
-  };
+  form: FormGroup<{
+    email: FormControl<string | null>;
+  }>;
+
   submitted = false;
   private readonly subscriptions = new Subscription();
   constructor(
@@ -72,6 +80,12 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly onlineService: OnlineService,
     private readonly updateService: UpdateService
   ) {
+    this.form = new FormGroup({
+      email: new FormControl<string>('', [
+        Validators.required,
+        Validators.pattern(emailRegex)
+      ])
+    });
     this.subscriptions.add(
       this.onlineService.online$.subscribe((online) => {
         if (online) {
@@ -100,22 +114,26 @@ export class AppComponent implements OnInit, OnDestroy {
 
   async saveUser() {
     this.submitted = true;
-    await this.userService.createUser(this.user).catch((err) => {
-      console.error('Error creating user', err);
+    if (this.form.valid) {
+      await this.userService
+        .createUser({ email: this.form.value.email! })
+        .catch((err) => {
+          console.error('Error creating user', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'error creating user',
+            life: 3000
+          });
+        });
       this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'error creating user',
+        severity: 'success',
+        summary: 'Successful',
+        detail: 'User info set',
         life: 3000
       });
-    });
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Successful',
-      detail: 'User info set',
-      life: 3000
-    });
-    this.userDialog = false;
+      this.userDialog = false;
+    }
   }
 
   async setupWorker() {
@@ -130,5 +148,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.setupWorker();
+  }
+
+  isInvalid(controlName: string) {
+    const control = this.form.get(controlName);
+    return control?.invalid && control.touched;
   }
 }

@@ -167,7 +167,7 @@ describe('AppComponent', () => {
     });
 
     it('should save valid user and close dialog', async () => {
-      component.user.email = 'test@example.com';
+      component.form.setValue({ email: 'test@example.com' });
       //@ts-expect-error mockResolvedValue does not exist on the mockUserService.createUser
       mockUserService.createUser.mockResolvedValue(undefined);
 
@@ -187,7 +187,7 @@ describe('AppComponent', () => {
     });
 
     it('should not save user with empty email', async () => {
-      component.user.email = '';
+      component.form.setValue({ email: '' });
 
       await component.saveUser();
 
