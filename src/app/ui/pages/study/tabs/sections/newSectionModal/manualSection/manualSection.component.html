@@ -184,7 +184,7 @@
             class="w-32"
             min="0"
             [disabled]="mode() === 'view'"
-            [ngModel]="supportsAmount"
+            [ngModel]="section().supports.length || 0"
             [showButtons]="true"
             buttonLayout="horizontal"
             inputId="supportsAmount"
@@ -201,6 +201,7 @@
           </p-inputnumber>
         </div>
         <app-supports-table
+          [mode]="mode()"
           [supports]="section().supports || []"
           (addSupport)="addSupport($event.index, $event.position)"
           (deleteSupport)="deleteSupport($event)"

@@ -13,39 +13,27 @@
   <ng-template #header>
     <div class="login-header">
       <app-icon icon="person" />
-      <p class="heading-s">Log in</p>
+      <p class="heading-s" i18n>Log in</p>
     </div>
   </ng-template>
-
   <ng-template #content>
-    <label i18n for="email">Email</label>
-    <input
-      type="text"
-      pInputText
-      type="email"
-      #email="ngModel"
-      email
-      name="email"
-      ngModel
-      id="email"
-      [(ngModel)]="user.email"
-      required
-      fluid
-      [attr.aria-invalid]="submitted && !email.valid ? 'true' : null"
-      [attr.aria-errormessage]="submitted && !email.valid ? 'emailError' : null"
-    />
-    <small
-      i18n
-      class="input-error-message"
-      *ngIf="submitted && !email.valid"
-      id="emailError"
-    >
-      Email is not valid.
-    </small>
+    <form [formGroup]="form" (ngSubmit)="saveUser()">
+      <label i18n for="email">Email</label>
+      <input
+        type="text"
+        pInputText
+        type="email"
+        name="email"
+        id="email"
+        formControlName="email"
+        required
+        fluid
+      />
+    </form>
   </ng-template>
 
   <ng-template #footer>
-    <button app-btn type="submit" (click)="saveUser()">
+    <button app-btn type="submit" [disabled]="!form.valid" (click)="saveUser()">
       <app-icon icon="login" />
       <span i18n>Save</span>
     </button>
