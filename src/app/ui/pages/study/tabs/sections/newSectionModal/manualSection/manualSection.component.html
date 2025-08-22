@@ -4,25 +4,26 @@
   class="basis-[50rem] {{ mode() === 'view' ? 'mt-0' : 'mt-4' }}"
 >
   <p-tablist>
-    <p-tab (onSelect)="tabValue.set('general')" value="general" i18n
-      >General</p-tab
-    >
-    <p-tab (onSelect)="tabValue.set('supports')" value="supports" i18n
-      >Supports</p-tab
-    >
+    <p-tab (onSelect)="tabValue.set('general')" value="general" i18n>
+      General
+    </p-tab>
+    <p-tab (onSelect)="tabValue.set('supports')" value="supports" i18n>
+      Supports
+    </p-tab>
     @if (mode() === 'view') {
-      <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n
-        >Graphical view</p-tab
-      >
+      <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n>
+        Graphical view
+      </p-tab>
     }
   </p-tablist>
+
   <p-tabpanels>
     <p-tabpanel value="general">
       <div class="section-form-part">
         <h3 class="title-underline" i18n>Section</h3>
         <div class="section-form-part-grid">
-          <div class="flex flex-col">
-            <label for="sectionName" class="ml-2" i18n>
+          <div class="flex flex-col col-span-2">
+            <label for="sectionName" i18n>
               Section name
               <sup class="mandatory">*</sup>
             </label>
@@ -36,24 +37,57 @@
               (ngModelChange)="onSectionChange()"
             />
           </div>
+
           <div class="flex flex-col">
-            <label for="sectionType" class="ml-2" i18n>
+            <label for="sectionType" i18n>
               Section type
               <sup class="mandatory">*</sup>
             </label>
             <p-select
               inputId="sectionType"
-              [options]="sectionTypes"
+              [options]="sectionMock.sectionTypes"
               [(ngModel)]="section().type"
               optionLabel="name"
               optionValue="code"
               [disabled]="mode() === 'view'"
               required
               (ngModelChange)="onSectionChange()"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="name"
             />
           </div>
+
           <div class="flex flex-col">
-            <label for="cableAmount" class="ml-2" i18n>
+            <label for="epn" i18n>Electric phase number</label>
+            <input
+              id="epn"
+              type="number"
+              pInputText
+              [disabled]="mode() === 'view'"
+              [(ngModel)]="section().electric_phase_number"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+
+          <div class="flex flex-col">
+            <label for="cableName" i18n>
+              Cable name
+              <sup class="mandatory">*</sup>
+            </label>
+            <input
+              type="text"
+              id="cableName"
+              pInputText
+              [disabled]="mode() === 'view'"
+              required
+              [(ngModel)]="section().cable_name"
+              (ngModelChange)="onSectionChange()"
+            />
+          </div>
+
+          <div class="flex flex-col">
+            <label for="cableAmount" i18n>
               Cable amount
               <sup class="mandatory">*</sup>
             </label>
@@ -68,90 +102,99 @@
               (ngModelChange)="onSectionChange()"
             />
           </div>
-          <div class="flex flex-col">
-            <label for="cableName" class="ml-2" i18n>
-              Cable name
-              <sup class="mandatory">*</sup>
-            </label>
-            <input
-              type="text"
-              id="cableName"
-              pInputText
-              [disabled]="mode() === 'view'"
-              required
-              [(ngModel)]="section().cable_name"
-              (ngModelChange)="onSectionChange()"
-            />
-          </div>
         </div>
       </div>
+
       <div class="section-form-part">
         <h3 class="title-underline" i18n>Maintenance</h3>
         <div class="section-form-part-grid">
           <div class="flex flex-col">
-            <label for="maintCm" class="ml-2" i18n>CM</label>
-            <input
-              type="text"
-              pInputText
-              id="maintCm"
-              [disabled]="mode() === 'view'"
+            <label for="maintCm" i18n>CM</label>
+            <p-select
+              inputId="sectionType"
+              [options]="sectionMock.sectionCm"
               [(ngModel)]="section().cm"
+              optionLabel="name"
+              optionValue="code"
+              [disabled]="mode() === 'view'"
               (ngModelChange)="onSectionChange()"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="name"
             />
           </div>
+
           <div class="flex flex-col">
-            <label for="maintGmr" class="ml-2" i18n>GMR</label>
-            <input
-              type="text"
-              pInputText
-              id="maintGmr"
-              [disabled]="mode() === 'view'"
+            <label for="maintGmr" i18n>GMR</label>
+            <p-select
+              inputId="maintGmr"
+              [options]="sectionMock.sectionGmr"
               [(ngModel)]="section().gmr"
+              optionLabel="name"
+              optionValue="code"
+              [disabled]="mode() === 'view'"
               (ngModelChange)="onSectionChange()"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="name"
             />
           </div>
+
           <div class="flex flex-col">
-            <label for="maintEel" class="ml-2" i18n>EEL</label>
-            <input
-              type="text"
-              pInputText
-              id="maintEel"
-              [disabled]="mode() === 'view'"
+            <label for="maintEel" i18n>EEL</label>
+            <p-select
+              inputId="maintEel"
+              [options]="sectionMock.sectionEel"
               [(ngModel)]="section().eel"
+              optionLabel="name"
+              optionValue="code"
+              [disabled]="mode() === 'view'"
               (ngModelChange)="onSectionChange()"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="name"
             />
           </div>
         </div>
       </div>
+
       <div class="section-form-part">
         <h3 class="title-underline" i18n>Link</h3>
         <div class="section-form-part-grid">
           <div class="flex flex-col">
-            <label for="linkEtl" class="ml-2" i18n
-              >Electric tension level</label
-            >
-            <input
-              type="text"
-              pInputText
-              id="linkEtl"
-              [disabled]="mode() === 'view'"
+            <label for="linkEtl" i18n>Electric tension level</label>
+            <p-select
+              inputId="linkEtl"
+              [options]="sectionMock.sectionEtl"
               [(ngModel)]="section().electric_tension_level"
-              (ngModelChange)="onSectionChange()"
-            />
-          </div>
-          <div class="flex flex-col">
-            <label for="linkName" class="ml-2" i18n>Link name</label>
-            <input
-              type="text"
-              pInputText
-              id="linkName"
+              optionLabel="name"
+              optionValue="code"
               [disabled]="mode() === 'view'"
-              [(ngModel)]="section().link_name"
               (ngModelChange)="onSectionChange()"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="name"
             />
           </div>
+
           <div class="flex flex-col">
-            <label for="linkLit" class="ml-2" i18n>LIT</label>
+            <label for="linkName" i18n>Link name</label>
+            <p-select
+              inputId="linkName"
+              [options]="sectionMock.sectionLinkname"
+              [(ngModel)]="section().link_name"
+              optionLabel="name"
+              optionValue="code"
+              [disabled]="mode() === 'view'"
+              (ngModelChange)="onSectionChange()"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="name"
+            />
+          </div>
+
+          <div class="flex flex-col">
+            <label for="linkLit" i18n>LIT</label>
             <input
               type="text"
               pInputText
@@ -161,8 +204,9 @@
               (ngModelChange)="onSectionChange()"
             />
           </div>
+
           <div class="flex flex-col">
-            <label for="linkBm" class="ml-2" i18n>Branch name</label>
+            <label for="linkBm" i18n>Branch name</label>
             <input
               type="text"
               pInputText
@@ -174,12 +218,26 @@
           </div>
         </div>
       </div>
+
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Comment</h3>
+        <div class="flex flex-col">
+          <label for="comment" i18n>Electric tension level</label>
+          <textarea
+            pTextarea
+            id="comment"
+            [(ngModel)]="section().comment"
+            (ngModelChange)="onSectionChange()"
+            [disabled]="mode() === 'view'"
+          ></textarea>
+        </div>
+      </div>
     </p-tabpanel>
 
     <p-tabpanel value="supports">
       <div class="flex flex-col gap-4 mt-2">
         <div class="flex flex-col">
-          <label for="supportsAmount" class="ml-2" i18n>Supports amount</label>
+          <label for="supportsAmount" i18n>Supports amount</label>
           <p-inputnumber
             class="w-32"
             min="0"

@@ -15,6 +15,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@src/app/ui/shared/types';
 import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.component';
+import { sectionMock } from './section-mock';
+import { TextareaModule } from 'primeng/textarea';
 
 const createSupport = (): Support => {
   return {
@@ -47,7 +49,8 @@ const createSupport = (): Support => {
     SupportsTableComponent,
     InputNumberModule,
     IconComponent,
-    StudioComponent
+    StudioComponent,
+    TextareaModule
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'
@@ -57,11 +60,9 @@ export class ManualSectionComponent {
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
   sectionChange = output<any>();
-  sectionTypes = [
-    { name: 'Guard', code: 'guard' },
-    { name: 'Phase', code: 'phase' }
-  ];
   studio = viewChild(StudioComponent);
+
+  public sectionMock = sectionMock;
 
   tabValueChange = (event: any) => {
     if (event === 'graphical') {
