@@ -315,27 +315,34 @@
 
     <p-tabpanel value="supports">
       <div class="flex flex-col gap-4 mt-2">
-        <div class="flex flex-col">
-          <label for="supportsAmount" i18n>Supports amount</label>
-          <p-inputnumber
-            class="w-32"
-            min="0"
-            [ngModel]="section().supports.length || 0"
-            [showButtons]="true"
-            buttonLayout="horizontal"
-            inputId="supportsAmount"
-            spinnerMode="horizontal"
-            (onBlur)="onSupportsAmountChangeBlur($event)"
-            (onInput)="onSupportsAmountChangeInput($event)"
-          >
-            <ng-template #incrementbuttonicon>
-              <app-icon icon="add" />
-            </ng-template>
-            <ng-template #decrementbuttonicon>
-              <app-icon icon="remove" />
-            </ng-template>
-          </p-inputnumber>
-        </div>
+        @if (mode() === 'create' || mode() === 'edit') {
+          <div class="flex flex-col">
+            <label for="supportsAmount" i18n>Supports amount</label>
+            <p-inputnumber
+              class="w-32"
+              min="0"
+              [ngModel]="section().supports.length || 0"
+              [showButtons]="true"
+              buttonLayout="horizontal"
+              inputId="supportsAmount"
+              spinnerMode="horizontal"
+              (onBlur)="onSupportsAmountChangeBlur($event)"
+              (onInput)="onSupportsAmountChangeInput($event)"
+            >
+              <ng-template #incrementbuttonicon>
+                <app-icon icon="add" />
+              </ng-template>
+              <ng-template #decrementbuttonicon>
+                <app-icon icon="remove" />
+              </ng-template>
+            </p-inputnumber>
+          </div>
+        } @else if (mode() === 'view') {
+          <dl>
+            <dt i18n>Supports amount</dt>
+            <dd class="read-only-info">{{ section().supports.length }}</dd>
+          </dl>
+        }
         <app-supports-table
           [mode]="mode()"
           [supports]="section().supports || []"
