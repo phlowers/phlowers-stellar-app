@@ -46,8 +46,8 @@ const createSection = (): Section => {
     maintenance_center_names: [],
     electric_tension_level: undefined,
     link_name: undefined,
-    lit: '',
-    branch_name: '',
+    lit: undefined,
+    branch_name: undefined,
     comment: undefined,
     updatedAt: new Date(),
     initial_conditions: []

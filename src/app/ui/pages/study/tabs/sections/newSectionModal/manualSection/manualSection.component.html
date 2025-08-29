@@ -45,7 +45,7 @@
             </label>
             <p-select
               inputId="sectionType"
-              [options]="sectionMock.sectionTypes"
+              [options]="sectionTypes"
               [(ngModel)]="section().type"
               optionLabel="name"
               optionValue="code"
@@ -112,7 +112,7 @@
             <label for="maintCm" i18n>CM</label>
             <p-select
               inputId="sectionType"
-              [options]="sectionMock.sectionCm"
+              [options]="maintenanceSelectCm"
               [(ngModel)]="section().cm"
               optionLabel="name"
               optionValue="code"
@@ -128,7 +128,7 @@
             <label for="maintGmr" i18n>GMR</label>
             <p-select
               inputId="maintGmr"
-              [options]="sectionMock.sectionGmr"
+              [options]="maintenanceSelectGmr"
               [(ngModel)]="section().gmr"
               optionLabel="name"
               optionValue="code"
@@ -144,7 +144,7 @@
             <label for="maintEel" i18n>EEL</label>
             <p-select
               inputId="maintEel"
-              [options]="sectionMock.sectionEel"
+              [options]="maintenanceSelect.eel"
               [(ngModel)]="section().eel"
               optionLabel="name"
               optionValue="code"
@@ -165,7 +165,7 @@
             <label for="linkEtl" i18n>Electric tension level</label>
             <p-select
               inputId="linkEtl"
-              [options]="sectionMock.sectionEtl"
+              [options]="linkSelect.tensionLevel"
               [(ngModel)]="section().electric_tension_level"
               optionLabel="name"
               optionValue="code"
@@ -181,7 +181,7 @@
             <label for="linkName" i18n>Link name</label>
             <p-select
               inputId="linkName"
-              [options]="sectionMock.sectionLinkname"
+              [options]="linkSelectName"
               [(ngModel)]="section().link_name"
               optionLabel="name"
               optionValue="code"
@@ -190,30 +190,41 @@
               [showClear]="true"
               [filter]="true"
               filterBy="name"
+              [editable]="true"
             />
           </div>
 
           <div class="flex flex-col">
             <label for="linkLit" i18n>LIT</label>
-            <input
-              type="text"
-              pInputText
-              id="linkLit"
-              [disabled]="mode() === 'view'"
+            <p-select
+              inputId="linkLit"
+              [options]="linkSelectLit"
               [(ngModel)]="section().lit"
+              optionLabel="name"
+              optionValue="code"
+              [disabled]="mode() === 'view'"
               (ngModelChange)="onSectionChange()"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="name"
+              [editable]="true"
             />
           </div>
 
           <div class="flex flex-col">
             <label for="linkBm" i18n>Branch name</label>
-            <input
-              type="text"
-              pInputText
-              id="linkBm"
-              [disabled]="mode() === 'view'"
+            <p-select
+              inputId="linkBm"
+              [options]="linkSelectBranch"
               [(ngModel)]="section().branch_name"
+              optionLabel="name"
+              optionValue="code"
+              [disabled]="mode() === 'view'"
               (ngModelChange)="onSectionChange()"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="name"
+              [editable]="true"
             />
           </div>
         </div>
