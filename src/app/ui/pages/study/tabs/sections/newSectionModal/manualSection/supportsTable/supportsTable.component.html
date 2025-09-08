@@ -22,7 +22,9 @@
       <th id="chain_length" i18n>Chain length (m)</th>
       <th id="chain_weight" i18n>Chain weight (kg)</th>
       <th id="chain_v" i18n>Chain V</th>
-      <th class="sticky-right" id="actions" i18n>Actions</th>
+      @if (mode() === 'create' || mode() === 'edit') {
+        <th class="sticky-right" id="actions" i18n>Actions</th>
+      }
     </tr>
   </ng-template>
   <ng-template #body let-support let-index="index" let-rowIndex="rowIndex">
@@ -31,177 +33,212 @@
         {{ rowIndex + 1 }}
       </td>
       <td>
-        <input
-          pInputText
-          type="number"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.number"
-          (ngModelChange)="onSupportFieldChange(support.uuid, 'number', $event)"
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            [ngModel]="support.number"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'number', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.number }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="text"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.name"
-          (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="text"
+            [ngModel]="support.name"
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
+          />
+        } @else {
+          <p class="read-only_info">{{ support.name }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="number"
-          step="0.01"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.spanLength"
-          (ngModelChange)="
-            onSupportFieldChange(support.uuid, 'spanLength', $event)
-          "
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            step="0.01"
+            [ngModel]="support.spanLength"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'spanLength', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.spanLength }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="number"
-          step="0.01"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.spanAngle"
-          (ngModelChange)="
-            onSupportFieldChange(support.uuid, 'spanAngle', $event)
-          "
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            step="0.01"
+            [ngModel]="support.spanAngle"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'spanAngle', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.spanAngle }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="number"
-          step="0.01"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.attachmentHeight"
-          (ngModelChange)="
-            onSupportFieldChange(support.uuid, 'attachmentHeight', $event)
-          "
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            step="0.01"
+            [ngModel]="support.attachmentHeight"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'attachmentHeight', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.attachmentHeight }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="text"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.cableType"
-          (ngModelChange)="
-            onSupportFieldChange(support.uuid, 'cableType', $event)
-          "
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="text"
+            [ngModel]="support.cableType"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'cableType', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.cableType }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="number"
-          step="0.01"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.armLength"
-          (ngModelChange)="
-            onSupportFieldChange(support.uuid, 'armLength', $event)
-          "
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            step="0.01"
+            [ngModel]="support.armLength"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'armLength', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.armLength }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="text"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.chainName"
-          (ngModelChange)="
-            onSupportFieldChange(support.uuid, 'chainName', $event)
-          "
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="text"
+            [ngModel]="support.chainName"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'chainName', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.chainName }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="number"
-          step="0.01"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.chainLength"
-          (ngModelChange)="
-            onSupportFieldChange(support.uuid, 'chainLength', $event)
-          "
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            step="0.01"
+            [ngModel]="support.chainLength"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'chainLength', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.chainLength }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="number"
-          step="0.01"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.chainWeight"
-          (ngModelChange)="
-            onSupportFieldChange(support.uuid, 'chainWeight', $event)
-          "
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            step="0.01"
+            [ngModel]="support.chainWeight"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'chainWeight', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.chainWeight }}</p>
+        }
       </td>
       <td>
-        <input
-          pInputText
-          type="text"
-          [disabled]="mode() === 'view'"
-          [ngModel]="support.chainV"
-          (ngModelChange)="onSupportFieldChange(support.uuid, 'chainV', $event)"
-        />
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="text"
+            [ngModel]="support.chainV"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'chainV', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.chainV }}</p>
+        }
       </td>
-      <td class="sticky-right">
-        <button
-          [disabled]="mode() === 'view'"
-          app-btn
-          btnSize="s"
-          btnStyle="text"
-          (click)="popover.toggle($event)"
-        >
-          <span class="pi pi-ellipsis-h"></span>
-        </button>
-        <p-popover #popover>
-          <ng-template pTemplate="content">
-            <div class="flex flex-col gap-2">
-              <button
-                [disabled]="mode() === 'view'"
-                app-btn
-                btnSize="s"
-                btnStyle="text"
-                (click)="
-                  addSupport.emit({ index: rowIndex, position: 'before' })
-                "
-              >
-                <app-icon icon="add" />
-                <span i18n>Add support before</span>
-              </button>
-              <button
-                [disabled]="mode() === 'view'"
-                app-btn
-                btnSize="s"
-                btnStyle="text"
-                (click)="
-                  addSupport.emit({ index: rowIndex, position: 'after' })
-                "
-              >
-                <app-icon icon="add" />
-                <span i18n>Add support after</span>
-              </button>
-              <button
-                [disabled]="mode() === 'view'"
-                app-btn
-                btnSize="s"
-                btnStyle="text"
-                (click)="deleteSupport.emit(support.uuid)"
-              >
-                <app-icon icon="delete" />
-                <span i18n>Delete support</span>
-              </button>
-            </div>
-          </ng-template>
-        </p-popover>
-      </td>
+      @if (mode() === 'edit' || mode() === 'create') {
+        <td class="sticky-right">
+          <button
+            app-btn
+            btnSize="s"
+            btnStyle="text"
+            (click)="popover.toggle($event)"
+          >
+            <span class="pi pi-ellipsis-h"></span>
+          </button>
+          <p-popover #popover>
+            <ng-template pTemplate="content">
+              <div class="flex flex-col gap-2">
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  (click)="
+                    addSupport.emit({ index: rowIndex, position: 'before' })
+                  "
+                >
+                  <app-icon icon="add" />
+                  <span i18n>Add support before</span>
+                </button>
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  (click)="
+                    addSupport.emit({ index: rowIndex, position: 'after' })
+                  "
+                >
+                  <app-icon icon="add" />
+                  <span i18n>Add support after</span>
+                </button>
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  (click)="deleteSupport.emit(support.uuid)"
+                >
+                  <app-icon icon="delete" />
+                  <span i18n>Delete support</span>
+                </button>
+              </div>
+            </ng-template>
+          </p-popover>
+        </td>
+      }
     </tr>
   </ng-template>
 </p-table>
