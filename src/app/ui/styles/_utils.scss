@@ -35,3 +35,9 @@ sup.mandatory {
   line-height: 1;
   top: -0.0625rem;
 }
+
+.read-only-info {
+  @extend %text-m-400;
+  color: var(--grey-900);
+  padding: 0.4375rem 0.5rem 0.4375rem 0.625rem;
+}

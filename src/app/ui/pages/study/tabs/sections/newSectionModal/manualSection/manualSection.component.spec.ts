@@ -65,6 +65,7 @@ describe('ManualSectionComponent', () => {
       updated_at: '',
       internal_catalog_id: '',
       type: 'guard',
+      electric_phase_number: 0,
       cable_name: '',
       cable_short_name: '',
       cables_amount: 1,
@@ -85,6 +86,7 @@ describe('ManualSectionComponent', () => {
       lit: '',
       branch_name: '',
       electric_tension_level: '',
+      comment: '',
       supports: [],
       updatedAt: new Date(),
       initial_conditions: []

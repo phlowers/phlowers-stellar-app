@@ -3,61 +3,66 @@
   [visible]="isOpen()"
   (visibleChange)="onVisibleChange($event)"
   i18n-header
-  header="Create a study section"
   [style]="{ width: '90vw', height: '95vh' }"
   [modal]="true"
 >
+  <ng-template #header>
+    <p class="text-l-600 mb-0 flex gap-2">
+      @if (mode() === 'create') {
+        <app-icon icon="edit" />
+        <span i18n>Create a section</span>
+      } @else {
+        <app-icon icon="description" />
+        <span>{{ section().name }}</span>
+      }
+    </p>
+  </ng-template>
+
   @if (mode() === 'create') {
     <div class="section-form-part">
-      <div class="section-form-part">
-        <h3 class="title-underline" i18n>Section source</h3>
-        <div class="card flex justify-center">
-          <div class="flex flex-wrap gap-6">
-            <div class="flex items-center">
-              <p-radiobutton
-                name="source"
-                value="manual"
-                [(ngModel)]="source"
-                inputId="manual"
-              />
-              <label for="manual" class="ml-2" i18n>Manual</label>
-              <app-icon icon="info" />
-            </div>
-            <div class="flex items-center">
-              <p-radiobutton
-                name="source"
-                value="referencial"
-                [(ngModel)]="source"
-                inputId="referencial"
-              />
-              <label for="referencial" class="ml-2" i18n
-                >From referencial</label
-              >
-              <app-icon icon="info" />
-            </div>
-            <div class="flex items-center">
-              <p-radiobutton
-                name="source"
-                value="distantReferencial"
-                [(ngModel)]="source"
-                inputId="distantReferencial"
-              />
-              <label for="distantReferencial" class="ml-2" i18n
-                >From distant referencial</label
-              >
-              <app-icon icon="info" />
-            </div>
-            <div class="flex items-center">
-              <p-radiobutton
-                name="source"
-                value="extraction"
-                [(ngModel)]="source"
-                inputId="extraction"
-              />
-              <label for="extraction" class="ml-2" i18n>From extraction</label>
-              <app-icon icon="info" />
-            </div>
-          </div>
+      <h3 class="title-underline" i18n>Section source</h3>
+      <div class="flex flex-wrap gap-6">
+        <div class="flex items-center">
+          <p-radiobutton
+            name="source"
+            value="manual"
+            [(ngModel)]="source"
+            inputId="manual"
+          />
+          <label for="manual" class="ml-2" i18n>Manual</label>
+          <app-icon icon="info" />
+        </div>
+        <div class="flex items-center">
+          <p-radiobutton
+            name="source"
+            value="referencial"
+            [(ngModel)]="source"
+            inputId="referencial"
+          />
+          <label for="referencial" class="ml-2" i18n>From referencial</label>
+          <app-icon icon="info" />
+        </div>
+        <div class="flex items-center">
+          <p-radiobutton
+            name="source"
+            value="distantReferencial"
+            [(ngModel)]="source"
+            inputId="distantReferencial"
+          />
+          <label for="distantReferencial" class="ml-2" i18n
+            >From distant referencial</label
+          >
+          <app-icon icon="info" />
+        </div>
+        <div class="flex items-center">
+          <p-radiobutton
+            name="source"
+            value="extraction"
+            [(ngModel)]="source"
+            inputId="extraction"
+          />
+          <label for="extraction" class="ml-2" i18n>From extraction</label>
+          <app-icon icon="info" />
         </div>
       </div>
     </div>
@@ -90,8 +95,8 @@
         (click)="onValidate()"
         [disabled]="!areAllRequiredFieldsFilled()"
       >
-        <app-icon icon="check" />
-        <span i18n>Validate</span>
+        <app-icon icon="save" />
+        <span i18n>Create section</span>
       </button>
     }
   </ng-template>

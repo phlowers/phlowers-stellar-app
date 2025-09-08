@@ -1,11 +1,20 @@
+@use 'abstract.extracts' as app;
+
 .section-form-part {
-    @apply mt-4;
+  @apply mt-4;
 }
 
 .section-form-part-grid {
-    @apply grid grid-cols-3 gap-x-10 gap-y-4;
+  @apply grid grid-cols-4 gap-x-8 gap-y-4;
+  padding-right: 20%;
 }
 
-.red-star {
-    color: var(--error-500);
+label,
+dt {
+  @extend %text-s-400;
+  color: var(--grey-700);
+}
+
+dt {
+  @extend %label-spacing;
 }

@@ -11,7 +11,7 @@ body {
 
 label {
   @extend %text-m-400;
+  @extend %label-spacing;
   display: inline-block;
-  margin: 0.125rem 0.5rem;
   color: var(--grey-800);
 }
