@@ -12,85 +12,91 @@
     </p>
   </ng-template>
 
-  <form class="form" action="">
-    <div class="form__col">
+  <div class="form">
+    <dl class="form__col">
       <div>
-        <label for="section-name" i18n>Section name</label>
-        <input
-          type="text"
-          readonly
-          id="section-name"
-          pInputText
-          [value]="section().name"
-        />
+        <dt i18n>Section name</dt>
+        <dd class="read-only-info test">{{ section().name }}</dd>
       </div>
+
       <div>
-        <label for="cable-name" i18n>Cable name</label>
-        <input
-          type="text"
-          readonly
-          id="cable-name"
-          pInputText
-          [value]="section().cable_name"
-        />
+        <dt i18n>Cable name</dt>
+        <dd class="read-only-info test">{{ section().cable_name }}</dd>
       </div>
+
       <div>
-        <label for="cables-amount" i18n>Cables amount</label>
-        <input
-          type="text"
-          readonly
-          id="cables-amount"
-          pInputText
-          [value]="section().cables_amount"
-        />
+        <dt i18n>Cables amount</dt>
+        <dd class="read-only-info test">{{ section().cables_amount }}</dd>
       </div>
-    </div>
+    </dl>
 
     <p-divider layout="vertical" />
 
-    <div class="form__col form__col--right">
-      <div>
-        <label for="initial-condition-name" i18n>Initial condition name</label>
-        <input
-          name="initial-condition-name"
-          required
-          type="text"
-          id="initial-condition-name"
-          pInputText
-          [(ngModel)]="initialCondition().name"
-          [readonly]="mode() === 'view'"
-        />
+    @if (mode() === 'create' || mode() === 'edit') {
+      <div class="form__col form__col--right">
+        <div>
+          <label for="initial-condition-name" i18n
+            >Initial condition name</label
+          >
+          <input
+            name="initial-condition-name"
+            required
+            type="text"
+            id="initial-condition-name"
+            pInputText
+            [(ngModel)]="initialCondition().name"
+          />
+        </div>
+        <div>
+          <label for="initial-condition-base-parameter" i18n>
+            Base parameter
+          </label>
+          <input
+            name="initial-condition-base-parameter"
+            required
+            type="text"
+            id="initial-condition-base-parameter"
+            pInputText
+            [(ngModel)]="initialCondition().base_parameters"
+          />
+        </div>
+        <div>
+          <label for="initial-condition-base-temperature" i18n>
+            Base temperature (°C)
+          </label>
+          <input
+            name="initial-condition-base-temperature"
+            required
+            type="number"
+            id="initial-condition-base-temperature"
+            pInputText
+            [(ngModel)]="initialCondition().base_temperature"
+          />
+        </div>
       </div>
-      <div>
-        <label for="initial-condition-base-parameter" i18n>
-          Base parameter
-        </label>
-        <input
-          name="initial-condition-base-parameter"
-          required
-          type="text"
-          id="initial-condition-base-parameter"
-          pInputText
-          [(ngModel)]="initialCondition().base_parameters"
-          [readonly]="mode() === 'view'"
-        />
-      </div>
-      <div>
-        <label for="initial-condition-base-temperature" i18n>
-          Base temperature (°C)
-        </label>
-        <input
-          name="initial-condition-base-temperature"
-          required
-          type="number"
-          id="initial-condition-base-temperature"
-          pInputText
-          [(ngModel)]="initialCondition().base_temperature"
-          [readonly]="mode() === 'view'"
-        />
-      </div>
-    </div>
-  </form>
+    } @else if (mode() === 'view') {
+      <dl class="form__col form__col--right">
+        <div>
+          <dt i18n>Initial condition name</dt>
+          <dd class="read-only-info test">{{ initialCondition().name }}</dd>
+        </div>
+
+        <div>
+          <dt i18n>Base parameter</dt>
+          <dd class="read-only-info test">
+            {{ initialCondition().base_parameters }}
+          </dd>
+        </div>
+
+        <div>
+          <dt i18n>Base temperature (°C)</dt>
+          <dd class="read-only-info test">
+            {{ initialCondition().base_temperature }}
+          </dd>
+        </div>
+      </dl>
+    }
+  </div>
 
   <ng-template #footer>
     <button

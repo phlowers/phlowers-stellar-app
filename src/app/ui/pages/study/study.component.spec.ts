@@ -69,6 +69,7 @@ describe('StudyComponent', () => {
     updated_at: '2025-01-01T00:00:00.000Z',
     internal_catalog_id: 'CAT-001',
     type: 'phase',
+    electric_phase_number: 1,
     cable_name: 'Test Cable',
     cable_short_name: 'TC',
     cables_amount: 3,
@@ -89,6 +90,7 @@ describe('StudyComponent', () => {
     lit: 'LIT-001',
     branch_name: 'Branch 1',
     electric_tension_level: '400kV',
+    comment: 'random comment',
     supports: [],
     updatedAt: new Date(),
     initial_conditions: []
