@@ -14,6 +14,7 @@ import { LoggedLayoutComponent } from './shared/components/layout/logged-layout/
 import { HomeComponent } from './pages/home/home.component';
 import { NewsComponent } from './pages/news/news.component';
 import { NotFoundComponent } from './pages/404/404.component';
+import { StudioPageComponent } from './pages/studio/studio.component';
 
 export const appRoutes: Routes = [
   {
@@ -50,6 +51,11 @@ export const appRoutes: Routes = [
         path: 'news',
         title: $localize`News`,
         component: NewsComponent
+      },
+      {
+        path: 'studio',
+        title: $localize`Studio`,
+        component: StudioPageComponent
       }
     ]
   },
