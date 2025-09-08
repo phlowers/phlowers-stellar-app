@@ -10,6 +10,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 import { Study } from '../../data/database/interfaces/study';
+import {
+  ProtoV4Parameters,
+  ProtoV4Support
+} from '../../data/database/interfaces/protoV4';
+import {
+  createEmptySection,
+  createEmptySupport
+} from '../sections/section.service';
+import { Support } from '../../data/database/interfaces/support';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +38,9 @@ export class StudiesService {
    * Create a new study
    * @param study The study to create
    */
-  async createStudy(study: StudyModel): Promise<string> {
+  async createStudy(
+    study: Pick<StudyModel, 'title' | 'description' | 'shareable' | 'sections'>
+  ): Promise<string> {
     const uuid = uuidv4();
     const user = (await this.storageService.db?.users.toArray())?.[0];
     await this.storageService.db?.studies.add({
@@ -134,5 +145,44 @@ export class StudiesService {
       ...study,
       updated_at_offline: new Date().toISOString()
     });
+  }
+
+  /**
+   * Create a study from a proto v4 project
+   * @param protoV4Supports The supports of the proto v4 project
+   * @param parameters The parameters of the proto v4 project
+   * @returns The study
+   */
+  createStudyFromProtoV4(
+    protoV4Supports: ProtoV4Support[],
+    parameters: ProtoV4Parameters
+  ): Pick<StudyModel, 'sections' | 'shareable'> {
+    const section = createEmptySection();
+    section.name = parameters.project_name;
+    section.type = 'phase';
+    section.cables_amount = parameters.cable_amount;
+    section.cable_name = parameters.conductor;
+    const supports: Support[] = protoV4Supports.map((support) => {
+      return {
+        ...createEmptySupport(),
+        uuid: uuidv4(),
+        number: support.num,
+        name: support.nom,
+        spanLength: support.portée,
+        spanAngle: support.angle_ligne,
+        attachmentHeight: support.alt_acc,
+        cableType: parameters.conductor,
+        armLength: support.long_bras,
+        chainName: support.suspension ? 'suspension' : 'chain',
+        chainLength: support.long_ch,
+        chainWeight: support.ctr_poids,
+        chainV: support.ch_en_V
+      };
+    });
+    section.supports = supports;
+    return {
+      sections: [section],
+      shareable: false
+    };
   }
 }

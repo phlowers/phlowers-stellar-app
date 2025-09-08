@@ -1,0 +1,71 @@
+// We need to use ::ng-deep to overcome view encapsulation
+::ng-deep {
+    .custom-slider .ngx-slider .ngx-slider-bar {
+        background: #E6DEF0;
+        height: 4px;
+    }
+
+    .custom-slider .ngx-slider .ngx-slider-selection {
+        background: #7D5A9F;
+    }
+
+    .custom-slider .ngx-slider .ngx-slider-pointer {
+        // width: 16px;
+        // height: 16px;
+        // top: -6px;
+        // // bottom: auto;
+        // background-color: #7D5A9F;
+        // border-radius: 50%;
+        //make a triangle
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 8px solid #7D5A9F;
+        background-color: white;
+        border-radius: 0%;
+        transform: rotate(90deg);
+    }
+
+    .custom-slider .ngx-slider-pointer-max {
+        transform: rotate(-90deg) !important;
+    }
+
+    .custom-slider .ngx-slider-pointer-min {
+        transform: rotate(90deg) !important;
+    }
+
+    .custom-slider .ngx-slider .ngx-slider-pointer:after {
+        // display: none;
+        content: '';
+        border-right: 14px solid #7D5A9F;
+        border-radius: 0%;
+        width: 14px;
+        height: 1px;
+        top: 0px;
+        left: -7px;
+        transform: rotate(0deg) !important;
+    }
+
+    .custom-slider .ngx-slider .ngx-slider-bubble {
+        bottom: 14px;
+    }
+
+    .custom-slider .ngx-slider .ngx-slider-bubble.ngx-slider-limit {
+        font-weight: bold;
+        color: #7D5A9F;
+    }
+
+    .custom-slider .ngx-slider .ngx-slider-tick {
+        width: 16px;
+        height: 16px;
+        top: -6px;
+        // bottom: auto;
+        background-color: #E6DEF0;
+        border-radius: 50%;
+    }
+
+    .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
+        background: #7D5A9F;
+    }
+}

@@ -15,44 +15,7 @@ import { DividerModule } from 'primeng/divider';
 import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
 import { CreateEditView } from '@src/app/ui/shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
-
-const createSection = (): Section => {
-  return {
-    uuid: uuidv4(),
-    name: '',
-    type: 'phase',
-    electric_phase_number: 0,
-    cables_amount: 0,
-    cable_name: '',
-    gmr: undefined,
-    eel: undefined,
-    cm: undefined,
-    supports: [],
-    internal_id: '',
-    short_name: '',
-    created_at: '',
-    updated_at: '',
-    internal_catalog_id: '',
-    cable_short_name: '',
-    optical_fibers_amount: 0,
-    spans_amount: 0,
-    begin_span_name: '',
-    last_span_name: '',
-    first_support_number: 0,
-    last_support_number: 0,
-    first_attachment_set: '',
-    last_attachment_set: '',
-    regional_maintenance_center_names: [],
-    maintenance_center_names: [],
-    electric_tension_level: undefined,
-    link_name: undefined,
-    lit: undefined,
-    branch_name: undefined,
-    comment: undefined,
-    updatedAt: new Date(),
-    initial_conditions: []
-  };
-};
+import { createEmptySection } from '@src/app/core/services/sections/section.service';
 
 @Component({
   selector: 'app-sections-tab',
@@ -84,7 +47,7 @@ export class SectionsTabComponent {
   updateInitialCondition = output<InitialConditionFunctionsInput>();
   deleteInitialCondition = output<InitialConditionFunctionsInput>();
   duplicateInitialCondition = output<InitialConditionFunctionsInput>();
-  currentSection = signal<Section>(createSection());
+  currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(
     this.createInitialCondition()
   );
@@ -124,7 +87,7 @@ export class SectionsTabComponent {
   }
 
   openNewSectionModalCreate() {
-    this.currentSection.set(createSection());
+    this.currentSection.set(createEmptySection());
     this.newSectionModalMode.set('create');
     this.isNewSectionModalOpen.set(true);
   }

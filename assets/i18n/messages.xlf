@@ -6,11 +6,6 @@
         <source>Email</source>
       </segment>
     </unit>
-    <unit id="4552549213637309982">
-      <segment>
-        <source> Email is not valid. </source>
-      </segment>
-    </unit>
     <unit id="8846437459005249553">
       <segment>
         <source>Studies</source>
@@ -161,11 +156,6 @@
         <source>Author:</source>
       </segment>
     </unit>
-    <unit id="5514355339805433365">
-      <segment>
-        <source>New study</source>
-      </segment>
-    </unit>
     <unit id="7022070615528435141">
       <segment>
         <source>Delete</source>
@@ -179,11 +169,6 @@
     <unit id="7585826646011739428">
       <segment>
         <source>Edit</source>
-      </segment>
-    </unit>
-    <unit id="9103840363725224885">
-      <segment>
-        <source>End support</source>
       </segment>
     </unit>
     <unit id="3768927257183755959">
@@ -256,9 +241,9 @@
         <source> Delete all studies </source>
       </segment>
     </unit>
-    <unit id="1280422441143770406">
+    <unit id="928951684182090210">
       <segment>
-        <source>Cable name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
     <unit id="1289308098980826210">
@@ -281,9 +266,9 @@
         <source>View all news</source>
       </segment>
     </unit>
-    <unit id="1553627416533983831">
+    <unit id="3569799587833040802">
       <segment>
-        <source>Section name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
     <unit id="159395379410071627">
@@ -306,9 +291,9 @@
         <source>Study updated successfully</source>
       </segment>
     </unit>
-    <unit id="1715866221564635584">
+    <unit id="6133358799424876162">
       <segment>
-        <source>Supports</source>
+        <source> Supports </source>
       </segment>
     </unit>
     <unit id="1772495502731751754">
@@ -321,19 +306,9 @@
         <source>Section Name</source>
       </segment>
     </unit>
-    <unit id="1997818395374468661">
-      <segment>
-        <source>Start support</source>
-      </segment>
-    </unit>
     <unit id="2102825898069375693">
       <segment>
         <source>Menu</source>
-      </segment>
-    </unit>
-    <unit id="2172902003676402663">
-      <segment>
-        <source> Refresh </source>
       </segment>
     </unit>
     <unit id="2202835179714153957">
@@ -451,19 +426,14 @@
         <source>Actions</source>
       </segment>
     </unit>
-    <unit id="3228248733549149448">
+    <unit id="8155429097661917791">
       <segment>
-        <source>Base parameter</source>
+        <source> Base parameter </source>
       </segment>
     </unit>
     <unit id="3337781493803072719">
       <segment>
         <source>Span angle (Gr)</source>
-      </segment>
-    </unit>
-    <unit id="3465942650835858981">
-      <segment>
-        <source>Maintenance</source>
       </segment>
     </unit>
     <unit id="3510960524643312912">
@@ -516,11 +486,6 @@
         <source>Cables amount</source>
       </segment>
     </unit>
-    <unit id="4116724826865372994">
-      <segment>
-        <source>Modify study</source>
-      </segment>
-    </unit>
     <unit id="4125361306674691550">
       <segment>
         <source>App reset</source>
@@ -539,11 +504,6 @@
     <unit id="4238708305594970843">
       <segment>
         <source>Update successful</source>
-      </segment>
-    </unit>
-    <unit id="4360239040231802726">
-      <segment>
-        <source> Actions </source>
       </segment>
     </unit>
     <unit id="4408679057911996366">
@@ -596,9 +556,9 @@
         <source>Are you sure you want to reset the database?</source>
       </segment>
     </unit>
-    <unit id="5280610039017327422">
+    <unit id="8581729683001364052">
       <segment>
-        <source>Base temperature (°C)</source>
+        <source> Base temperature (°C) </source>
       </segment>
     </unit>
     <unit id="5280768007794245227">
@@ -626,9 +586,9 @@
         <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
       </segment>
     </unit>
-    <unit id="5426507602553467529">
+    <unit id="2715728438895385250">
       <segment>
-        <source>Cable amount <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
     <unit id="5437172145642680301">
@@ -716,9 +676,9 @@
         <source>Number</source>
       </segment>
     </unit>
-    <unit id="6439365426343089851">
+    <unit id="836321179652220398">
       <segment>
-        <source>General</source>
+        <source> General </source>
       </segment>
     </unit>
     <unit id="6480514970774430660">
@@ -746,9 +706,9 @@
         <source>Arm length (m)</source>
       </segment>
     </unit>
-    <unit id="6626934443702250379">
+    <unit id="976888794834775617">
       <segment>
-        <source>Graphical view</source>
+        <source> Graphical view </source>
       </segment>
     </unit>
     <unit id="6707260083636271016">
@@ -761,19 +721,14 @@
         <source>Build version</source>
       </segment>
     </unit>
-    <unit id="6801360463490683535">
-      <segment>
-        <source> View initial conditions </source>
-      </segment>
-    </unit>
     <unit id="6963570697110110448">
       <segment>
         <source>Link name</source>
       </segment>
     </unit>
-    <unit id="7029096918733367423">
+    <unit id="6414866325880172359">
       <segment>
-        <source>Section type <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
     <unit id="7128845509017303174">
@@ -836,11 +791,6 @@
         <source>Ground and obstacles</source>
       </segment>
     </unit>
-    <unit id="791950660812381145">
-      <segment>
-        <source>Side</source>
-      </segment>
-    </unit>
     <unit id="7937931707186931727">
       <segment>
         <source>Initial Condition Duplicated</source>
@@ -871,9 +821,9 @@
         <source>Initial Condition Updated</source>
       </segment>
     </unit>
-    <unit id="8159722776036849437">
+    <unit id="5231861831935768001">
       <segment>
-        <source>Study name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
+        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
     <unit id="819996403327805209">
@@ -916,9 +866,9 @@
         <source>Add support before</source>
       </segment>
     </unit>
-    <unit id="8616180516716294384">
+    <unit id="5712660129975085658">
       <segment>
-        <source>Give a name to your study</source>
+        <source> Give a name to your study </source>
       </segment>
     </unit>
     <unit id="862393570495704117">
@@ -949,6 +899,106 @@
     <unit id="7951447255685596650">
       <segment>
         <source>The application has been installed</source>
+      </segment>
+    </unit>
+    <unit id="1724907302012419507">
+      <segment>
+        <source>There is no study description</source>
+      </segment>
+    </unit>
+    <unit id="2143900724975264499">
+      <segment>
+        <source>View a study section</source>
+      </segment>
+    </unit>
+    <unit id="2336550011721758066">
+      <segment>
+        <source>Log in</source>
+      </segment>
+    </unit>
+    <unit id="3249058349487812759">
+      <segment>
+        <source>Modify my study</source>
+      </segment>
+    </unit>
+    <unit id="3411835502741534903">
+      <segment>
+        <source>loading</source>
+      </segment>
+    </unit>
+    <unit id="3501835423208116051">
+      <segment>
+        <source>select this study&apos;s section</source>
+      </segment>
+    </unit>
+    <unit id="5329466797434154908">
+      <segment>
+        <source>Modify a study section</source>
+      </segment>
+    </unit>
+    <unit id="5662040103831344720">
+      <segment>
+        <source> Check app version </source>
+      </segment>
+    </unit>
+    <unit id="6075058653504686022">
+      <segment>
+        <source>Load from provoV4 file</source>
+      </segment>
+    </unit>
+    <unit id="6389312883797462351">
+      <segment>
+        <source>Studio</source>
+      </segment>
+    </unit>
+    <unit id="5551874320378862200">
+      <segment>
+        <source>Enter description</source>
+      </segment>
+    </unit>
+    <unit id="927660422911816633">
+      <segment>
+        <source>Study name</source>
+      </segment>
+    </unit>
+    <unit id="2662644497259948010">
+      <segment>
+        <source>Comment</source>
+      </segment>
+    </unit>
+    <unit id="2942231991688386110">
+      <segment>
+        <source>Line maintenance team</source>
+      </segment>
+    </unit>
+    <unit id="3228248733549149448">
+      <segment>
+        <source>Base parameter</source>
+      </segment>
+    </unit>
+    <unit id="5145287154773357101">
+      <segment>
+        <source>Create section</source>
+      </segment>
+    </unit>
+    <unit id="5280610039017327422">
+      <segment>
+        <source>Base temperature (°C)</source>
+      </segment>
+    </unit>
+    <unit id="5532577047370657996">
+      <segment>
+        <source>Electric phase number</source>
+      </segment>
+    </unit>
+    <unit id="6816078733546230354">
+      <segment>
+        <source>Cable amount</source>
+      </segment>
+    </unit>
+    <unit id="8536672882452926308">
+      <segment>
+        <source>Create a section</source>
       </segment>
     </unit>
   </file>

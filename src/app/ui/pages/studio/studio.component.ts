@@ -13,7 +13,7 @@ export class StudioPageComponent {
   maxValue = signal(0);
   options = signal<Options>({
     floor: 0,
-    ceil: 1,
+    ceil: 20,
     step: 1,
     showTicks: true,
     showTicksValues: true,
