@@ -22,3 +22,24 @@ You should match global and local project CLI by watching current version in `pa
 2. Setup mechaflowers using local script `npm run set-up-mechaphlowers`
 
 3. Launch local server with `ng serve` or `npm run start`
+
+## Import lines and maintenance data
+
+1. lines data should be put inside a `public/lines.csv` file with the following columns:
+    - LIAISON_IDR
+    - LIT_IDR
+    - LIT_ADR
+    - BRANCHE_IDR
+    - BRANCHE_ADR
+    - TENSION_ELECTRIQUE_IDR
+    - TENSION_ELECTRIQUE_ADR
+
+2. maintenance data should be put inside a `public/maintenance-teams.csv` file with the following columns:
+    - CM_CUR
+    - CM_DESIGNATION
+    - GMR_CUR
+    - GMR_DESIGNATION
+    - EEL_CUR
+    - EEL_DESIGNATION
+
+At startup, the application will import the data from the csv files and store it in the database.

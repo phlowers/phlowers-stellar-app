@@ -16,6 +16,9 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { UserService } from '../core/services/user/user.service';
 import { UpdateService } from '../core/services/worker_update/worker_update.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MaintenanceService } from '../core/services/maintenance/maintenance.service';
+import { LinesService } from '../core/services/lines/lines.service';
 
 class Worker {
   url: string;
@@ -41,6 +44,8 @@ describe('AppComponent', () => {
   let mockOnlineService: OnlineService;
   let mockUserService: UserService;
   let mockUpdateService: UpdateService;
+  let mockMaintenanceService: MaintenanceService;
+  let mockLinesService: LinesService;
   let readySubject: BehaviorSubject<boolean>;
   let workerReadySubject: BehaviorSubject<boolean>;
 
@@ -49,6 +54,16 @@ describe('AppComponent', () => {
       toArray: jest.fn(),
       add: jest.fn(),
       clear: jest.fn()
+    },
+    maintenance: {
+      toArray: jest.fn(),
+      clear: jest.fn(),
+      bulkAdd: jest.fn()
+    },
+    lines: {
+      count: jest.fn(),
+      toArray: jest.fn(),
+      bulkAdd: jest.fn()
     }
   };
 
@@ -91,11 +106,25 @@ describe('AppComponent', () => {
       checkAppVersion: jest.fn()
     } as unknown as UpdateService;
 
+    mockMaintenanceService = {
+      getMaintenance: jest.fn().mockResolvedValue([]),
+      importFromFile: jest.fn().mockResolvedValue(undefined),
+      ready: new BehaviorSubject<boolean>(true)
+    } as unknown as MaintenanceService;
+
+    mockLinesService = {
+      getLinesCount: jest.fn().mockResolvedValue(0),
+      getLines: jest.fn().mockResolvedValue([]),
+      importFromFile: jest.fn().mockResolvedValue(undefined),
+      ready: new BehaviorSubject<boolean>(true)
+    } as unknown as LinesService;
+
     await TestBed.configureTestingModule({
       imports: [
         FormsModule,
         NoopAnimationsModule,
         RouterTestingModule,
+        HttpClientTestingModule,
         AppComponent
       ]
     }).compileComponents();
@@ -107,6 +136,10 @@ describe('AppComponent', () => {
     TestBed.overrideProvider(MessageService, { useValue: mockMessageService });
     TestBed.overrideProvider(UserService, { useValue: mockUserService });
     TestBed.overrideProvider(UpdateService, { useValue: mockUpdateService });
+    TestBed.overrideProvider(MaintenanceService, {
+      useValue: mockMaintenanceService
+    });
+    TestBed.overrideProvider(LinesService, { useValue: mockLinesService });
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
   });

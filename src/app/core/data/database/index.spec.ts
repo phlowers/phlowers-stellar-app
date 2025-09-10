@@ -132,12 +132,6 @@ describe('AppDB', () => {
         mockJsonContent.branches
       );
       expect(db.lines.bulkPut).toHaveBeenCalledWith(mockJsonContent.lines);
-      expect(db.maintenance_centers.bulkPut).toHaveBeenCalledWith(
-        mockJsonContent.maintenance_centers
-      );
-      expect(db.regional_maintenance_centers.bulkPut).toHaveBeenCalledWith(
-        mockJsonContent.regional_maintenance_centers
-      );
       expect(db.sections.bulkPut).toHaveBeenCalledWith(
         mockJsonContent.sections
       );
