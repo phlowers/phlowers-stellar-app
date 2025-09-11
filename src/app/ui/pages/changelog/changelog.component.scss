@@ -1,0 +1,18 @@
+@use 'abstract.extracts' as app;
+
+::ng-deep {
+  .markdown {
+    ul {
+      list-style-type: disc;
+      margin-left: 1rem;
+    }
+
+    h1 {
+      @extend %heading-m;
+    }
+
+    h2 {
+      @extend %heading-s;
+    }
+  }
+}

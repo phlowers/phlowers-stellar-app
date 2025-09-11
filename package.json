@@ -60,6 +60,8 @@
     "jest": "^29.7.0",
     "jest-preset-angular": "^14.5.3",
     "lodash": "^4.17.21",
+    "marked": "15.0.12",
+    "ngx-markdown": "19.1.1",
     "papaparse": "5.5.3",
     "plotly.js-dist-min": "^3.0.1",
     "primeclt": "^0.1.5",

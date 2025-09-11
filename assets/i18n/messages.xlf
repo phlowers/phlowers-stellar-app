@@ -1021,5 +1021,20 @@
         <source>End support</source>
       </segment>
     </unit>
+    <unit id="4768592761478998496">
+      <segment>
+        <source>You are offline</source>
+      </segment>
+    </unit>
+    <unit id="7096169249854506812">
+      <segment>
+        <source>No changelogs found</source>
+      </segment>
+    </unit>
+    <unit id="7136888919962092730">
+      <segment>
+        <source>Changelog</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
