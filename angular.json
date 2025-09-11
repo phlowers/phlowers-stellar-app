@@ -79,26 +79,30 @@
           "configurations": {
             "fr": {
               "baseHref": "/",
-              "localize": [
-                "fr"
-              ]
+              "localize": ["fr"],
+              "optimization": {
+                  "scripts": true,
+                  "styles": true,
+                  "fonts": false
+              }
             },
             "en": {
               "baseHref": "/",
-              "localize": [
-                "en"
-              ]
+              "localize": ["en"],
+              "optimization": {
+                  "scripts": true,
+                  "styles": true,
+                  "fonts": false
+              }
             },
             "production": {
-              "localize": [
-                "fr"
-              ],
+              "localize": ["fr"],
               "baseHref": "/",
               "extractLicenses": false,
               "optimization": {
-                "scripts": true,
-                "styles": true,
-                "fonts": false
+                  "scripts": true,
+                  "styles": true,
+                  "fonts": false
               },
               "budgets": [
                 {
