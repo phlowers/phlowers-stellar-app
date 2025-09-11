@@ -88,13 +88,11 @@
                 Cable amount
                 <sup class="mandatory">*</sup>
               </label>
-              <input
-                id="cableAmount"
-                type="number"
-                min="0"
-                pInputText
-                required
+              <p-select
+                inputId="cableAmount"
+                [options]="[1, 2, 3, 4]"
                 [(ngModel)]="section().cables_amount"
+                required
                 (ngModelChange)="onSectionChange()"
               />
             </div>

@@ -11,6 +11,10 @@ import { StorageService } from '../storage/storage.service';
 import { StudyModel } from '../../data/models/study.model';
 import { Study } from '../../data/database/interfaces/study';
 import { BehaviorSubject } from 'rxjs';
+import {
+  ProtoV4Support,
+  ProtoV4Parameters
+} from '../../data/database/interfaces/protoV4';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -20,7 +24,20 @@ jest.mock('uuid', () => ({
 describe('StudiesService', () => {
   let service: StudiesService;
   let mockStorageService: jest.Mocked<StorageService>;
-  let mockDb: any;
+  let mockDb: {
+    users: {
+      toArray: jest.Mock;
+    };
+    studies: {
+      add: jest.Mock;
+      toArray: jest.Mock;
+      get: jest.Mock;
+      delete: jest.Mock;
+      orderBy: jest.Mock;
+      reverse: jest.Mock;
+      limit: jest.Mock;
+    };
+  };
   let readySubject: BehaviorSubject<boolean>;
 
   const mockUser = {
@@ -150,7 +167,7 @@ describe('StudiesService', () => {
     });
 
     it('should return undefined when database is not available', async () => {
-      (mockStorageService as any).db = undefined;
+      (mockStorageService as unknown as { db: undefined }).db = undefined;
 
       const result = await service.getStudies();
 
@@ -250,7 +267,7 @@ describe('StudiesService', () => {
     });
 
     it('should return undefined when database is not available', async () => {
-      (mockStorageService as any).db = undefined;
+      (mockStorageService as unknown as { db: undefined }).db = undefined;
 
       const result = await service.getLatestStudies();
 
@@ -293,6 +310,221 @@ describe('StudiesService', () => {
       await service.deleteStudy('existing-uuid-123');
 
       expect(studiesEmissionSpy).toHaveBeenCalledWith(mockStudies);
+    });
+  });
+
+  describe('createStudyFromProtoV4', () => {
+    const mockProtoV4Parameters: ProtoV4Parameters = {
+      conductor: 'ACSR-240',
+      cable_amount: 3,
+      temperature_reference: 20,
+      parameter: 1.2,
+      cra: 0.5,
+      temp_load: 15,
+      wind_load: 10,
+      frost_load: 5,
+      project_name: 'Test Project'
+    };
+
+    const mockProtoV4Support: ProtoV4Support = {
+      alt_acc: 12.5,
+      angle_ligne: 45,
+      ch_en_V: true,
+      ctr_poids: 2.5,
+      long_bras: 3.0,
+      long_ch: 1.5,
+      nom: 'Support 1',
+      num: 1,
+      pds_ch: 1.2,
+      portée: 200,
+      surf_ch: 0.8,
+      suspension: true
+    };
+
+    it('should create a study from proto v4 with valid inputs', () => {
+      const result = service.createStudyFromProtoV4(
+        [mockProtoV4Support],
+        mockProtoV4Parameters
+      );
+
+      expect(result).toEqual({
+        sections: [
+          expect.objectContaining({
+            name: 'Test Project',
+            type: 'phase',
+            cables_amount: 3,
+            cable_name: 'ACSR-240',
+            supports: [
+              expect.objectContaining({
+                uuid: 'mock-uuid-123',
+                number: 1,
+                name: 'Support 1',
+                spanLength: 200,
+                spanAngle: 45,
+                attachmentHeight: 12.5,
+                cableType: 'ACSR-240',
+                armLength: 3.0,
+                chainName: 'suspension',
+                chainLength: 1.5,
+                chainWeight: 2.5,
+                chainV: true
+              })
+            ]
+          })
+        ],
+        shareable: false
+      });
+    });
+
+    it('should create a study from proto v4 with empty supports array', () => {
+      const result = service.createStudyFromProtoV4([], mockProtoV4Parameters);
+
+      expect(result).toEqual({
+        sections: [
+          expect.objectContaining({
+            name: 'Test Project',
+            type: 'phase',
+            cables_amount: 3,
+            cable_name: 'ACSR-240',
+            supports: []
+          })
+        ],
+        shareable: false
+      });
+    });
+
+    it('should create a study from proto v4 with multiple supports', () => {
+      const mockSupport2: ProtoV4Support = {
+        ...mockProtoV4Support,
+        num: 2,
+        nom: 'Support 2',
+        suspension: false,
+        portée: 150,
+        alt_acc: 10.0
+      };
+
+      const result = service.createStudyFromProtoV4(
+        [mockProtoV4Support, mockSupport2],
+        mockProtoV4Parameters
+      );
+
+      expect(result.sections[0].supports).toHaveLength(2);
+      expect(result.sections[0].supports[0]).toEqual(
+        expect.objectContaining({
+          number: 1,
+          name: 'Support 1',
+          chainName: 'suspension',
+          spanLength: 200,
+          attachmentHeight: 12.5
+        })
+      );
+      expect(result.sections[0].supports[1]).toEqual(
+        expect.objectContaining({
+          number: 2,
+          name: 'Support 2',
+          chainName: 'chain',
+          spanLength: 150,
+          attachmentHeight: 10.0
+        })
+      );
+    });
+
+    it('should correctly map suspension and chain supports', () => {
+      const suspensionSupport: ProtoV4Support = {
+        ...mockProtoV4Support,
+        suspension: true
+      };
+
+      const chainSupport: ProtoV4Support = {
+        ...mockProtoV4Support,
+        num: 2,
+        suspension: false
+      };
+
+      const result = service.createStudyFromProtoV4(
+        [suspensionSupport, chainSupport],
+        mockProtoV4Parameters
+      );
+
+      expect(result.sections[0].supports[0].chainName).toBe('suspension');
+      expect(result.sections[0].supports[1].chainName).toBe('chain');
+    });
+
+    it('should return correct structure with sections and shareable properties', () => {
+      const result = service.createStudyFromProtoV4(
+        [mockProtoV4Support],
+        mockProtoV4Parameters
+      );
+
+      expect(result).toHaveProperty('sections');
+      expect(result).toHaveProperty('shareable');
+      expect(Array.isArray(result.sections)).toBe(true);
+      expect(result.sections).toHaveLength(1);
+      expect(result.shareable).toBe(false);
+    });
+
+    it('should generate unique UUIDs for each support', () => {
+      const mockSupport2: ProtoV4Support = {
+        ...mockProtoV4Support,
+        num: 2,
+        nom: 'Support 2'
+      };
+
+      // Mock uuid to return different values for each call
+      const uuidMock = jest.requireMock('uuid').v4;
+      uuidMock
+        .mockReturnValueOnce('uuid-1')
+        .mockReturnValueOnce('uuid-2')
+        .mockReturnValueOnce('uuid-3');
+
+      const result = service.createStudyFromProtoV4(
+        [mockProtoV4Support, mockSupport2],
+        mockProtoV4Parameters
+      );
+
+      // Verify that all UUIDs are unique and different from each other
+      const sectionUuid = result.sections[0].uuid;
+      const support1Uuid = result.sections[0].supports[0].uuid;
+      const support2Uuid = result.sections[0].supports[1].uuid;
+
+      expect(sectionUuid).toBeDefined();
+      expect(support1Uuid).toBeDefined();
+      expect(support2Uuid).toBeDefined();
+      expect(sectionUuid).not.toBe(support1Uuid);
+      expect(sectionUuid).not.toBe(support2Uuid);
+      expect(support1Uuid).not.toBe(support2Uuid);
+    });
+
+    it('should map all ProtoV4 support properties correctly', () => {
+      const result = service.createStudyFromProtoV4(
+        [mockProtoV4Support],
+        mockProtoV4Parameters
+      );
+      const support = result.sections[0].supports[0];
+
+      expect(support.number).toBe(mockProtoV4Support.num);
+      expect(support.name).toBe(mockProtoV4Support.nom);
+      expect(support.spanLength).toBe(mockProtoV4Support.portée);
+      expect(support.spanAngle).toBe(mockProtoV4Support.angle_ligne);
+      expect(support.attachmentHeight).toBe(mockProtoV4Support.alt_acc);
+      expect(support.cableType).toBe(mockProtoV4Parameters.conductor);
+      expect(support.armLength).toBe(mockProtoV4Support.long_bras);
+      expect(support.chainLength).toBe(mockProtoV4Support.long_ch);
+      expect(support.chainWeight).toBe(mockProtoV4Support.ctr_poids);
+      expect(support.chainV).toBe(mockProtoV4Support.ch_en_V);
+    });
+
+    it('should set section properties from parameters', () => {
+      const result = service.createStudyFromProtoV4(
+        [mockProtoV4Support],
+        mockProtoV4Parameters
+      );
+      const section = result.sections[0];
+
+      expect(section.name).toBe(mockProtoV4Parameters.project_name);
+      expect(section.type).toBe('phase');
+      expect(section.cables_amount).toBe(mockProtoV4Parameters.cable_amount);
+      expect(section.cable_name).toBe(mockProtoV4Parameters.conductor);
     });
   });
 });
