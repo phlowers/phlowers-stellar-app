@@ -40,7 +40,6 @@ describe('NewSectionModalComponent (Jest)', () => {
     electric_tension_level: undefined,
     comment: undefined,
     supports: [],
-    updatedAt: new Date(),
     initial_conditions: []
   };
 
