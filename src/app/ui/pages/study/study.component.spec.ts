@@ -92,7 +92,6 @@ describe('StudyComponent', () => {
     electric_tension_level: '400kV',
     comment: 'random comment',
     supports: [],
-    updatedAt: new Date(),
     initial_conditions: []
   };
 

@@ -17,5 +17,5 @@ export interface Support {
   chainName: string | null;
   chainLength: number | null;
   chainWeight: number | null;
-  chainV: number | null;
+  chainV: boolean | null;
 }

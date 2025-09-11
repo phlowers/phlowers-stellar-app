@@ -88,7 +88,6 @@ describe('ManualSectionComponent', () => {
       electric_tension_level: '',
       comment: '',
       supports: [],
-      updatedAt: new Date(),
       initial_conditions: []
     };
 

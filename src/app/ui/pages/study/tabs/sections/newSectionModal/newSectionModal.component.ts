@@ -1,4 +1,11 @@
-import { Component, effect, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  output,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
@@ -55,6 +62,15 @@ export class NewSectionModalComponent {
   mode = input.required<'create' | 'edit' | 'view'>();
 
   areAllRequiredFieldsFilled = signal<boolean>(false);
+
+  headerTitle = computed(() => {
+    if (this.mode() === 'view') {
+      return $localize`View a study section`;
+    } else if (this.mode() === 'edit') {
+      return $localize`Modify a study section`;
+    }
+    return $localize`Create a study section`;
+  });
 
   constructor() {
     effect(() => {
