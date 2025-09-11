@@ -40,6 +40,5 @@ export interface Section {
   electric_tension_level: string | undefined;
   comment: string | undefined;
   supports: Support[];
-  updatedAt: Date;
   initial_conditions: InitialCondition[];
 }

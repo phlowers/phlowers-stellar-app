@@ -7,12 +7,6 @@
         <target>Email</target>
       </segment>
     </unit>
-    <unit id="4552549213637309982">
-      <segment>
-        <source> Email is not valid. </source>
-        <target> L&apos;email n&apos;est pas valide. </target>
-      </segment>
-    </unit>
     <unit id="7884682505577720946">
       <segment>
         <source>Current version</source>
@@ -64,7 +58,7 @@
     <unit id="5502261281300289989">
       <segment>
         <source>Section name:</source>
-        <target>Nom de la section:</target>
+        <target>Nom du canton:</target>
       </segment>
     </unit>
     <unit id="2681129456719834482">
@@ -82,7 +76,7 @@
     <unit id="7052646852891832055">
       <segment>
         <source>Section type:</source>
-        <target>Type de section:</target>
+        <target>Type de canton:</target>
       </segment>
     </unit>
     <unit id="3136844473693708275">
@@ -187,22 +181,10 @@
         <target>Études</target>
       </segment>
     </unit>
-    <unit id="9103840363725224885">
-      <segment state="initial">
-        <source>End support</source>
-        <target>Support de fin</target>
-      </segment>
-    </unit>
     <unit id="5041354590769758251">
       <segment state="initial">
         <source>Admin</source>
         <target>Admin</target>
-      </segment>
-    </unit>
-    <unit id="5514355339805433365">
-      <segment state="initial">
-        <source>New study</source>
-        <target>Nouvelle étude</target>
       </segment>
     </unit>
     <unit id="7022070615528435141">
@@ -511,28 +493,22 @@
         <target>Connexion au serveur réussie!</target>
       </segment>
     </unit>
-    <unit id="8159722776036849437">
+    <unit id="5231861831935768001">
       <segment state="initial">
-        <source>Study name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
-        <target>Nom de l&apos;étude <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom de l&apos;étude <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
-    <unit id="8616180516716294384">
+    <unit id="5712660129975085658">
       <segment state="initial">
-        <source>Give a name to your study</source>
-        <target>Donnez un nom à votre étude</target>
+        <source> Give a name to your study </source>
+        <target> Donnez un nom à votre étude </target>
       </segment>
     </unit>
     <unit id="6057281094654962766">
       <segment state="initial">
         <source>Validate</source>
         <target>Valider</target>
-      </segment>
-    </unit>
-    <unit id="4116724826865372994">
-      <segment state="initial">
-        <source>Modify study</source>
-        <target>Modifier l&apos;étude</target>
       </segment>
     </unit>
     <unit id="5519001504653726625">
@@ -581,12 +557,6 @@
       <segment state="initial">
         <source> Shared <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
         <target> Partagée <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
-      </segment>
-    </unit>
-    <unit id="4360239040231802726">
-      <segment state="initial">
-        <source> Actions </source>
-        <target> Actions </target>
       </segment>
     </unit>
     <unit id="3799093232488965923">
@@ -700,7 +670,7 @@
     <unit id="5437172145642680301">
       <segment state="initial">
         <source>Section name</source>
-        <target>Nom de la section</target>
+        <target>Nom du canton</target>
       </segment>
     </unit>
     <unit id="4408679057911996366">
@@ -721,34 +691,34 @@
         <target>Nom de la condition initiale</target>
       </segment>
     </unit>
-    <unit id="3228248733549149448">
+    <unit id="8155429097661917791">
       <segment state="initial">
-        <source>Base parameter</source>
-        <target>Paramètre de base</target>
+        <source> Base parameter </source>
+        <target> Paramètre de base </target>
       </segment>
     </unit>
-    <unit id="5280610039017327422">
+    <unit id="8581729683001364052">
       <segment state="initial">
-        <source>Base temperature (°C)</source>
-        <target>Température de base (°C)</target>
+        <source> Base temperature (°C) </source>
+        <target> Température de base (°C) </target>
       </segment>
     </unit>
-    <unit id="6439365426343089851">
+    <unit id="836321179652220398">
       <segment state="initial">
-        <source>General</source>
-        <target>Général</target>
+        <source> General </source>
+        <target> Général </target>
       </segment>
     </unit>
-    <unit id="1715866221564635584">
+    <unit id="6133358799424876162">
       <segment state="initial">
-        <source>Supports</source>
-        <target>Supports</target>
+        <source> Supports </source>
+        <target> Supports </target>
       </segment>
     </unit>
-    <unit id="6626934443702250379">
+    <unit id="976888794834775617">
       <segment state="initial">
-        <source>Graphical view</source>
-        <target>Vue graphique</target>
+        <source> Graphical view </source>
+        <target> Vue graphique </target>
       </segment>
     </unit>
     <unit id="2593007815199532062">
@@ -757,34 +727,28 @@
         <target>Section</target>
       </segment>
     </unit>
-    <unit id="1553627416533983831">
+    <unit id="3569799587833040802">
       <segment state="initial">
-        <source>Section name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
-        <target>Nom de la section <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom du canton <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
-    <unit id="7029096918733367423">
+    <unit id="6414866325880172359">
       <segment state="initial">
-        <source>Section type <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
-        <target>Type de section <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Type de canton <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
-    <unit id="5426507602553467529">
+    <unit id="2715728438895385250">
       <segment state="initial">
-        <source>Cable amount <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
-        <target>Nombre de câbles <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
+        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nombre de câbles <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
-    <unit id="1280422441143770406">
+    <unit id="928951684182090210">
       <segment state="initial">
-        <source>Cable name <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></source>
-        <target>Nom du câble <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;red-star&quot;&gt;" dispEnd="&lt;/span&gt;">*</pc></target>
-      </segment>
-    </unit>
-    <unit id="3465942650835858981">
-      <segment state="initial">
-        <source>Maintenance</source>
-        <target>Maintenance</target>
+        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom du câble <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
     <unit id="3099536771768294227">
@@ -934,13 +898,13 @@
     <unit id="1170667643695316061">
       <segment state="initial">
         <source>Create a study section</source>
-        <target>Créer une section d&apos;étude</target>
+        <target>Créer un canton d&apos;étude</target>
       </segment>
     </unit>
     <unit id="3689220712977179060">
       <segment state="initial">
         <source>Section source</source>
-        <target>Source de la section</target>
+        <target>Source du canton</target>
       </segment>
     </unit>
     <unit id="2233560223291461480">
@@ -970,25 +934,25 @@
     <unit id="8833276229402617730">
       <segment state="initial">
         <source>No existing section</source>
-        <target>Aucune section existante</target>
+        <target>Aucun canton existant</target>
       </segment>
     </unit>
     <unit id="6173209146841926976">
       <segment state="initial">
         <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Add a section </source>
-        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Ajouter une section </target>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Ajouter un canton </target>
       </segment>
     </unit>
     <unit id="1949800506879332767">
       <segment state="initial">
         <source>Section Name</source>
-        <target>Nom de la section</target>
+        <target>Nom du canton</target>
       </segment>
     </unit>
     <unit id="1289308098980826210">
       <segment state="initial">
         <source>Section type</source>
-        <target>Type de section</target>
+        <target>Type de canton</target>
       </segment>
     </unit>
     <unit id="2925129304308690882">
@@ -1007,12 +971,6 @@
       <segment state="initial">
         <source>Add initial condition</source>
         <target>Ajouter une condition initiale</target>
-      </segment>
-    </unit>
-    <unit id="6801360463490683535">
-      <segment state="initial">
-        <source> View initial conditions </source>
-        <target> Vue des conditions initiales </target>
       </segment>
     </unit>
     <unit id="2509141182388535183">
@@ -1087,24 +1045,6 @@
         <target> Prêt </target>
       </segment>
     </unit>
-    <unit id="791950660812381145">
-      <segment state="initial">
-        <source>Side</source>
-        <target>Côté</target>
-      </segment>
-    </unit>
-    <unit id="1997818395374468661">
-      <segment state="initial">
-        <source>Start support</source>
-        <target>Support de début</target>
-      </segment>
-    </unit>
-    <unit id="2172902003676402663">
-      <segment state="initial">
-        <source> Refresh </source>
-        <target> Rafraîchir </target>
-      </segment>
-    </unit>
     <unit id="3931780727974941210">
       <segment state="initial">
         <source>Error: start &gt;= end</source>
@@ -1139,6 +1079,150 @@
       <segment state="initial">
         <source>The application has been installed</source>
         <target>L&apos;application a été installée</target>
+      </segment>
+    </unit>
+    <unit id="2336550011721758066">
+      <segment state="initial">
+        <source>Log in</source>
+        <target>Se connecter</target>
+      </segment>
+    </unit>
+    <unit id="5662040103831344720">
+      <segment state="initial">
+        <source> Check app version </source>
+        <target> Vérifier la version de l&apos;application </target>
+      </segment>
+    </unit>
+    <unit id="3249058349487812759">
+      <segment state="initial">
+        <source>Modify my study</source>
+        <target>Modifier mon étude</target>
+      </segment>
+    </unit>
+    <unit id="6075058653504686022">
+      <segment state="initial">
+        <source>Load from provoV4 file</source>
+        <target>Charger à partir du fichier provoV4</target>
+      </segment>
+    </unit>
+    <unit id="2143900724975264499">
+      <segment state="initial">
+        <source>View a study section</source>
+        <target>Voir un canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="5329466797434154908">
+      <segment state="initial">
+        <source>Modify a study section</source>
+        <target>Modifier un canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="3501835423208116051">
+      <segment state="initial">
+        <source>select this study&apos;s section</source>
+        <target>sélectionner ce canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="3411835502741534903">
+      <segment state="initial">
+        <source>loading</source>
+        <target>chargement</target>
+      </segment>
+    </unit>
+    <unit id="1724907302012419507">
+      <segment state="initial">
+        <source>There is no study description</source>
+        <target>Il n&apos;y a pas de description d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="927660422911816633">
+      <segment state="initial">
+        <source>Study name</source>
+        <target>Nom de l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="5551874320378862200">
+      <segment state="initial">
+        <source>Enter description</source>
+        <target>Entrer la description</target>
+      </segment>
+    </unit>
+    <unit id="3228248733549149448">
+      <segment state="initial">
+        <source>Base parameter</source>
+        <target>Paramètre de base</target>
+      </segment>
+    </unit>
+    <unit id="5280610039017327422">
+      <segment state="initial">
+        <source>Base temperature (°C)</source>
+        <target>Température de base (°C)</target>
+      </segment>
+    </unit>
+    <unit id="5532577047370657996">
+      <segment state="initial">
+        <source>Electric phase number</source>
+        <target>Numéro de phase électrique</target>
+      </segment>
+    </unit>
+    <unit id="6816078733546230354">
+      <segment state="initial">
+        <source>Cable amount</source>
+        <target>Nombre de câbles</target>
+      </segment>
+    </unit>
+    <unit id="2942231991688386110">
+      <segment state="initial">
+        <source>Line maintenance team</source>
+        <target>Équipe de maintenance de la ligne</target>
+      </segment>
+    </unit>
+    <unit id="2662644497259948010">
+      <segment state="initial">
+        <source>Comment</source>
+        <target>Commentaire</target>
+      </segment>
+    </unit>
+    <unit id="8536672882452926308">
+      <segment state="initial">
+        <source>Create a section</source>
+        <target>Créer un canton</target>
+      </segment>
+    </unit>
+    <unit id="5145287154773357101">
+      <segment state="initial">
+        <source>Create section</source>
+        <target>Créer un canton</target>
+      </segment>
+    </unit>
+    <unit id="4040362203515657781">
+      <segment state="initial">
+        <source>Update section</source>
+        <target>Mettre à jour le canton</target>
+      </segment>
+    </unit>
+    <unit id="791950660812381145">
+      <segment state="initial">
+        <source>Side</source>
+        <target>Côté</target>
+      </segment>
+    </unit>
+    <unit id="1997818395374468661">
+      <segment state="initial">
+        <source>Start support</source>
+        <target>Support de départ</target>
+      </segment>
+    </unit>
+    <unit id="9103840363725224885">
+      <segment state="initial">
+        <source>End support</source>
+        <target>Support de fin</target>
+      </segment>
+    </unit>
+    <unit id="2172902003676402663">
+      <segment state="initial">
+        <source> Refresh </source>
+        <target> Rafraîchir </target>
       </segment>
     </unit>
   </file>

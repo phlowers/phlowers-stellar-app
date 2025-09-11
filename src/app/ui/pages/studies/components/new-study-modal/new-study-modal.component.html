@@ -33,6 +33,7 @@
           id="title"
           name="title"
           maxlength="100"
+          i18n-placeholder
           placeholder="Study name"
           [ngModel]="title()"
           (ngModelChange)="updateTitle($event)"
@@ -52,6 +53,7 @@
         <textarea
           id="description"
           name="description"
+          i18n-placeholder
           placeholder="Enter description"
           aria-describedby="description-description"
           class="block"
@@ -64,6 +66,22 @@
           fluid
         ></textarea>
       </div>
+      @if (mode() === 'new') {
+        <div>
+          <div class="label-container">
+            <label i18n for="shareable" class="label"
+              >Load from provoV4 file</label
+            >
+          </div>
+          <input
+            id="file"
+            #file
+            name="file"
+            type="file"
+            (change)="loadProtoV4File($event)"
+          />
+        </div>
+      }
     </form>
   </ng-template>
 

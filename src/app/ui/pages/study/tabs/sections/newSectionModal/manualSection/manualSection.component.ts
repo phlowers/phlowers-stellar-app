@@ -18,29 +18,11 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { SupportsTableComponent } from './supportsTable/supportsTable.component';
 import { Support } from '@src/app/core/data/database/interfaces/support';
-import { v4 as uuidv4 } from 'uuid';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { CreateEditView } from '@ui/shared/types';
-import { StudioComponent } from '@ui/shared/components/studio/studio.component';
-
+import { CreateEditView } from '@src/app/ui/shared/types';
+import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.component';
+import { createEmptySupport } from '@src/app/core/services/sections/helpers';
 import { sectionTypes, maintenanceSelect, linkSelect } from './section-mock';
-
-const createSupport = (): Support => {
-  return {
-    uuid: uuidv4(),
-    number: null,
-    name: null,
-    spanLength: null,
-    spanAngle: null,
-    attachmentHeight: null,
-    cableType: null,
-    armLength: null,
-    chainName: null,
-    chainLength: null,
-    chainWeight: null,
-    chainV: null
-  };
-};
 
 const getAllSelectOptions = (
   obj: any,
@@ -133,9 +115,9 @@ export class ManualSectionComponent implements OnInit {
         ...currentSupports,
         ...Array.from(
           { length: amount - currentSupports.length },
-          createSupport
+          createEmptySupport
         )
-      ];
+      ] as Support[];
     } else {
       this.section().supports = currentSupports.slice(0, amount);
     }
@@ -152,9 +134,7 @@ export class ManualSectionComponent implements OnInit {
   }
 
   addSupport(index: number, position: 'before' | 'after') {
-    const newSupport = createSupport();
-    console.log('index is', index);
-    console.log('position is', position);
+    const newSupport = createEmptySupport();
     if (position === 'before') {
       this.section().supports?.splice(index, 0, newSupport);
     } else {
