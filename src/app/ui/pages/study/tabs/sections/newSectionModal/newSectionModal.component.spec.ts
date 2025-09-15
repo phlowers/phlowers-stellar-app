@@ -1,8 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
-import { Section } from '@src/app/core/data/database/interfaces/section';
+import { Section } from '@core/data/database/interfaces/section';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
+import { LinesService } from '@core/services/lines/lines.service';
+
+class MockMaintenanceService {
+  ready = { next: jest.fn() };
+  getMaintenance = jest.fn().mockResolvedValue([]);
+  importFromFile = jest.fn().mockResolvedValue(undefined);
+}
+
+class MockLinesService {
+  ready = { next: jest.fn() };
+  getLinesCount = jest.fn().mockResolvedValue(0);
+  getLines = jest.fn().mockResolvedValue([]);
+  importFromFile = jest.fn().mockResolvedValue(undefined);
+}
 
 describe('NewSectionModalComponent (Jest)', () => {
   let component: NewSectionModalComponent;
@@ -46,7 +61,11 @@ describe('NewSectionModalComponent (Jest)', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NewSectionModalComponent],
-      providers: [provideNoopAnimations()]
+      providers: [
+        provideNoopAnimations(),
+        { provide: MaintenanceService, useClass: MockMaintenanceService },
+        { provide: LinesService, useClass: MockLinesService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(NewSectionModalComponent);

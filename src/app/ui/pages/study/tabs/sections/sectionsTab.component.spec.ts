@@ -2,8 +2,23 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SectionsTabComponent } from './sectionsTab.component';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { Section } from '@core/data/database/interfaces/section';
+import { InitialCondition } from '@core/data/database/interfaces/initialCondition';
+import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
+import { LinesService } from '@core/services/lines/lines.service';
+
+class MockMaintenanceService {
+  ready = { next: jest.fn() };
+  getMaintenance = jest.fn().mockResolvedValue([]);
+  importFromFile = jest.fn().mockResolvedValue(undefined);
+}
+
+class MockLinesService {
+  ready = { next: jest.fn() };
+  getLinesCount = jest.fn().mockResolvedValue(0);
+  getLines = jest.fn().mockResolvedValue([]);
+  importFromFile = jest.fn().mockResolvedValue(undefined);
+}
 
 describe('SectionsTabComponent', () => {
   let component: SectionsTabComponent;
@@ -84,7 +99,11 @@ describe('SectionsTabComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SectionsTabComponent, NoopAnimationsModule]
+      imports: [SectionsTabComponent, NoopAnimationsModule],
+      providers: [
+        { provide: MaintenanceService, useClass: MockMaintenanceService },
+        { provide: LinesService, useClass: MockLinesService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SectionsTabComponent);
@@ -213,75 +232,4 @@ describe('SectionsTabComponent', () => {
 
     expect(component.duplicateSection.emit).toHaveBeenCalledWith(mockSection);
   });
-
-  // Cannot make it work
-  // it('should emit duplicateInitialCondition when clicking duplicate inside dropdown', () => {
-  //   fixture.componentRef.setInput('sections', [mockSection]);
-  //   fixture.detectChanges();
-
-  //   const dropdownTrigger = fixture.nativeElement.querySelector(
-  //     'p-select.section__content-init'
-  //   ) as HTMLElement;
-  //   expect(dropdownTrigger).toBeTruthy();
-
-  //   dropdownTrigger.click();
-  //   fixture.detectChanges();
-
-  //   const overlay = document.body.querySelector(
-  //     '.p-select-overlay'
-  //   ) as HTMLElement;
-  //   expect(overlay).toBeTruthy();
-
-  //   const options = Array.from(
-  //     overlay.querySelectorAll('.select-dropdown button')
-  //   );
-  //   const duplicateOption = options.find((opt) =>
-  //     opt.textContent?.includes('Duplicate')
-  //   ) as HTMLElement;
-
-  //   expect(duplicateOption).toBeTruthy();
-
-  //   duplicateOption.click();
-  //   fixture.detectChanges();
-
-  //   expect(component.duplicateInitialCondition.emit).toHaveBeenCalledWith({
-  //     section: mockSection,
-  //     initialCondition: mockSection.initial_conditions[0]
-  //   });
-  // });
-
-  // it('should emit deleteInitialCondition when clicking delete inside dropdown', () => {
-  //   fixture.componentRef.setInput('sections', [mockSection]);
-  //   fixture.detectChanges();
-
-  //   const dropdownTrigger = fixture.nativeElement.querySelector(
-  //     'p-select.section__content-init'
-  //   ) as HTMLElement;
-  //   expect(dropdownTrigger).toBeTruthy();
-
-  //   dropdownTrigger.click();
-  //   fixture.detectChanges();
-
-  //   const overlay = document.body.querySelector(
-  //     '.p-select-overlay'
-  //   ) as HTMLElement;
-  //   expect(overlay).toBeTruthy();
-
-  //   const options = Array.from(
-  //     overlay.querySelectorAll('.select-dropdown button')
-  //   );
-  //   const deleteOption = options.find((opt) =>
-  //     opt.textContent?.includes('Delete')
-  //   ) as HTMLElement;
-
-  //   expect(deleteOption).toBeTruthy();
-
-  //   deleteOption.click();
-  //   fixture.detectChanges();
-
-  //   expect(component.deleteInitialCondition.emit).toHaveBeenCalledWith({
-  //     section: mockSection,
-  //     initialCondition: mockSection.initial_conditions[0]
-  //   });
-  // });
 });
