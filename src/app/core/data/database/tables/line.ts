@@ -9,10 +9,14 @@
  */
 
 export const lineTable = {
-  lines: `&uuid,
-    internal_id,
-    name,
-    short_name,
-    created_at,
-    updated_at`
+  lines: `
+  &uuid,
+  link_idr,
+   line_adr,
+   lit_idr,
+   lit_adr,
+   branch_idr,
+   branch_adr,
+   electric_tension_level_idr,
+   electric_tension_level_adr`
 };
