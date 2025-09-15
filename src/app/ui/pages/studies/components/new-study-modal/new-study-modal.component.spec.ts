@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NewStudyModalComponent } from './new-study-modal.component';
@@ -194,6 +194,98 @@ describe('NewStudyModalComponent', () => {
           done();
         }, 100);
       }, 10);
+    });
+  });
+
+  it('should update title and description via setters', () => {
+    component.updateTitle('My new title');
+    component.updateDescription('Some description');
+
+    expect(component.title()).toBe('My new title');
+    expect(component.description()).toBe('Some description');
+  });
+
+  it('should initialize title and description in modify mode when opened', () => {
+    fixture.componentRef.setInput('mode', 'modify');
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('titleInput', 'Preset title');
+    fixture.componentRef.setInput('descriptionInput', 'Preset description');
+
+    fixture.detectChanges();
+
+    expect(component.title()).toBe('Preset title');
+    expect(component.description()).toBe('Preset description');
+  });
+
+  describe('onSubmit', () => {
+    let messageService: MessageService;
+    let router: Router;
+
+    beforeEach(() => {
+      messageService = TestBed.inject(MessageService);
+      router = TestBed.inject(Router);
+
+      jest.spyOn(router, 'navigate').mockResolvedValue(true as any);
+    });
+
+    it('should create a new study and navigate', async () => {
+      const mockUuid = 'uuid-123';
+      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(mockUuid);
+
+      component.updateTitle('My Title');
+      component.updateDescription('My Description');
+
+      await component.onSubmit();
+
+      expect(studiesServiceMock.createStudy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'My Title',
+          description: 'My Description'
+        })
+      );
+      expect(router.navigate).toHaveBeenCalledWith(['/study', mockUuid]);
+      expect(messageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'success',
+          summary: expect.stringContaining('Study created')
+        })
+      );
+    });
+
+    it('should update an existing study in modify mode', async () => {
+      const refreshSpy = jest.spyOn(component.refreshStudy, 'emit');
+      studiesServiceMock.updateStudy = jest.fn().mockResolvedValue(undefined);
+
+      fixture.componentRef.setInput('mode', 'modify');
+      fixture.componentRef.setInput('studyUuid', 'abc-123');
+      fixture.detectChanges();
+
+      component.updateTitle('Updated title');
+      component.updateDescription('Updated description');
+
+      await component.onSubmit();
+
+      expect(studiesServiceMock.updateStudy).toHaveBeenCalledWith({
+        uuid: 'abc-123',
+        title: 'Updated title',
+        description: 'Updated description'
+      });
+      expect(refreshSpy).toHaveBeenCalledWith('abc-123');
+      expect(messageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'success',
+          summary: expect.stringContaining('Study updated')
+        })
+      );
+    });
+
+    it('should always emit isOpenChange(false) after submit', async () => {
+      const spy = jest.spyOn(component.isOpenChange, 'emit');
+      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('id-xyz');
+
+      await component.onSubmit();
+
+      expect(spy).toHaveBeenCalledWith(false);
     });
   });
 });
