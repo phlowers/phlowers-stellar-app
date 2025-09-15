@@ -29,6 +29,8 @@ import { WorkerPythonService } from '@src/app/core/services/worker_python/worker
 import { InitialConditionService } from '../core/services/initial-conditions/initial-condition.service';
 import { UpdateService } from '../core/services/worker_update/worker_update.service';
 import { Subscription } from 'rxjs';
+import { MaintenanceService } from '../core/services/maintenance/maintenance.service';
+import { LinesService } from '../core/services/lines/lines.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -54,6 +56,8 @@ const modules = [
     WorkerPythonService,
     OnlineService,
     UserService,
+    MaintenanceService,
+    LinesService,
     StudiesService,
     SectionService,
     InitialConditionService,
@@ -78,7 +82,9 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly workerService: WorkerPythonService,
     private readonly userService: UserService,
     private readonly onlineService: OnlineService,
-    private readonly updateService: UpdateService
+    private readonly updateService: UpdateService,
+    private readonly maintenanceService: MaintenanceService,
+    private readonly linesService: LinesService
   ) {
     this.form = new FormGroup({
       email: new FormControl<string>('', [
@@ -94,7 +100,7 @@ export class AppComponent implements OnInit, OnDestroy {
       })
     );
     this.subscriptions.add(
-      storageService.ready$.subscribe((ready) => {
+      storageService.ready$.subscribe(async (ready) => {
         if (ready) {
           this.userService.getUser().then((user) => {
             if (!user) {
@@ -103,9 +109,21 @@ export class AppComponent implements OnInit, OnDestroy {
               this.userDialog = false;
             }
           });
+          this.setupData();
         }
       })
     );
+  }
+
+  async setupData() {
+    const maintenance = await this.maintenanceService.getMaintenance();
+    if (!maintenance || maintenance.length === 0) {
+      await this.maintenanceService.importFromFile();
+    }
+    const lines = await this.linesService.getLinesCount();
+    if (!lines) {
+      await this.linesService.importFromFile();
+    }
   }
 
   ngOnDestroy(): void {
