@@ -9,8 +9,6 @@ import { userTable } from './tables/user';
 import { studyTable } from './tables/study';
 import { branchTable } from './tables/branch';
 import { lineTable } from './tables/line';
-import { regionalMaintenanceCenterTable } from './tables/regionalMaintenanceCenter';
-import { maintenanceCenterTable } from './tables/maintenanceCenter';
 import { tensionTable } from './tables/tension';
 import { transitLinkTable } from './tables/transitLink';
 import { Study } from './interfaces/study';
@@ -20,9 +18,7 @@ import { sectionTable } from './tables/section';
 import { spanTable } from './tables/span';
 import { Attachment } from './interfaces/attachment';
 import { Branch } from './interfaces/branch';
-import { MaintenanceCenter } from './interfaces/maintenanceCenter';
 import { Section } from './interfaces/section';
-import { RegionalMaintenanceCenter } from './interfaces/regionalMaintenanceCenter';
 import { Line } from './interfaces/line';
 import { Span } from './interfaces/span';
 import { Tension } from './interfaces/tension';
@@ -31,6 +27,8 @@ import { Cable } from './interfaces/cable';
 import { cableTable } from './tables/cable';
 import mockData from './mock_data.json';
 import { createStudiesMockData } from './helpers/createMocks';
+import { MaintenanceData } from './interfaces/maintenance';
+import { maintenance } from './tables/maintenance';
 
 export class AppDB extends Dexie {
   users!: Table<User, number>;
@@ -38,8 +36,7 @@ export class AppDB extends Dexie {
   attachments!: Table<Attachment, string>;
   branches!: Table<Branch, string>;
   lines!: Table<Line, string>;
-  maintenance_centers!: Table<MaintenanceCenter, string>;
-  regional_maintenance_centers!: Table<RegionalMaintenanceCenter, string>;
+  maintenance!: Table<MaintenanceData, string>;
   sections!: Table<Section, string>;
   spans!: Table<Span, string>;
   tensions!: Table<Tension, string>;
@@ -52,8 +49,7 @@ export class AppDB extends Dexie {
       ...attachmentTable,
       ...branchTable,
       ...lineTable,
-      ...maintenanceCenterTable,
-      ...regionalMaintenanceCenterTable,
+      ...maintenance,
       ...sectionTable,
       ...spanTable,
       ...studyTable,
@@ -62,7 +58,6 @@ export class AppDB extends Dexie {
       ...userTable,
       ...cableTable
     });
-    // console.log('i am setting stores', this);
     //fill the database with mock data
     // this.fillDatabaseWithMockData();
   }
@@ -82,10 +77,6 @@ export class AppDB extends Dexie {
     await this.attachments.bulkPut(mockData.attachments);
     await this.branches.bulkPut(mockData.branches);
     await this.lines.bulkPut(mockData.lines);
-    await this.maintenance_centers.bulkPut(mockData.maintenance_centers);
-    await this.regional_maintenance_centers.bulkPut(
-      mockData.regional_maintenance_centers
-    );
     await this.sections.bulkPut(mockData.sections);
     await this.spans.bulkPut(mockData.spans);
     await this.tensions.bulkPut(mockData.tensions);

@@ -8,10 +8,13 @@
     You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export const regionalMaintenanceCenterTable = {
-  regional_maintenance_centers: `&uuid,
-    internal_id,
-    name,
-    created_at,
-    updated_at`
+export const maintenance = {
+  maintenance: `
+   eel_id,
+   eel_name,
+   cm_id,
+   cm_name,
+   gmr_id,
+   gmr_name
+  `
 };

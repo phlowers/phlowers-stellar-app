@@ -137,14 +137,16 @@
               <label for="maintCm" i18n>CM</label>
               <p-select
                 inputId="sectionType"
-                [options]="maintenanceSelectCm"
+                [options]="maintenanceFilterTable() | unique: 'cm_id'"
                 [(ngModel)]="section().cm"
-                optionLabel="name"
-                optionValue="code"
+                appendTo="body"
+                optionLabel="cm_name"
+                optionValue="cm_id"
+                (onChange)="onMaintenanceSelect($event, 'cm')"
                 (ngModelChange)="onSectionChange()"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="name"
+                filterBy="cm_name"
               />
             </div>
 
@@ -152,14 +154,16 @@
               <label for="maintGmr" i18n>GMR</label>
               <p-select
                 inputId="maintGmr"
-                [options]="maintenanceSelectGmr"
+                [options]="maintenanceFilterTable() | unique: 'gmr_id'"
                 [(ngModel)]="section().gmr"
-                optionLabel="name"
-                optionValue="code"
+                appendTo="body"
+                optionLabel="gmr_name"
+                optionValue="gmr_id"
+                (onChange)="onMaintenanceSelect($event, 'gmr')"
                 (ngModelChange)="onSectionChange()"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="name"
+                filterBy="gmr_name"
               />
             </div>
 
@@ -167,14 +171,16 @@
               <label for="maintEel" i18n>EEL</label>
               <p-select
                 inputId="maintEel"
-                [options]="maintenanceSelect.eel"
+                [options]="maintenanceFilterTable() | unique: 'eel_id'"
                 [(ngModel)]="section().eel"
-                optionLabel="name"
-                optionValue="code"
+                appendTo="body"
+                optionLabel="eel_name"
+                optionValue="eel_id"
+                (onChange)="onMaintenanceSelect($event, 'eel')"
                 (ngModelChange)="onSectionChange()"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="name"
+                filterBy="eel_name"
               />
             </div>
           </div>
@@ -207,14 +213,20 @@
               <label for="linkEtl" i18n>Electric tension level</label>
               <p-select
                 inputId="linkEtl"
-                [options]="linkSelect.tensionLevel"
+                [options]="
+                  linesFilterTable() | unique: 'electric_tension_level_adr'
+                "
                 [(ngModel)]="section().electric_tension_level"
-                optionLabel="name"
-                optionValue="code"
+                optionLabel="electric_tension_level_adr"
+                optionValue="electric_tension_level_adr"
+                appendTo="body"
                 (ngModelChange)="onSectionChange()"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                (onChange)="onLinesSelect($event, 'electric_tension_level_adr')"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="name"
+                filterBy="electric_tension_level_adr"
               />
             </div>
 
@@ -222,15 +234,18 @@
               <label for="linkName" i18n>Link name</label>
               <p-select
                 inputId="linkName"
-                [options]="linkSelectName"
+                [options]="linesFilterTable()"
                 [(ngModel)]="section().link_name"
-                optionLabel="name"
-                optionValue="code"
+                optionLabel="link_idr"
+                optionValue="link_idr"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
                 (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'link_idr')"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="name"
-                [editable]="true"
+                filterBy="link_idr"
               />
             </div>
 
@@ -238,15 +253,18 @@
               <label for="linkLit" i18n>LIT</label>
               <p-select
                 inputId="linkLit"
-                [options]="linkSelectLit"
+                [options]="linesFilterTable()"
                 [(ngModel)]="section().lit"
-                optionLabel="name"
-                optionValue="code"
+                optionLabel="lit_adr"
+                optionValue="lit_adr"
                 (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'lit_adr')"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="name"
-                [editable]="true"
+                filterBy="lit_adr"
               />
             </div>
 
@@ -254,15 +272,18 @@
               <label for="linkBm" i18n>Branch name</label>
               <p-select
                 inputId="linkBm"
-                [options]="linkSelectBranch"
+                [options]="linesFilterTable()"
                 [(ngModel)]="section().branch_name"
-                optionLabel="name"
-                optionValue="code"
+                optionLabel="branch_adr"
+                optionValue="branch_adr"
+                (onChange)="onLinesSelect($event, 'branch_adr')"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                appendTo="body"
                 (ngModelChange)="onSectionChange()"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="name"
-                [editable]="true"
+                filterBy="branch_adr"
               />
             </div>
           </div>

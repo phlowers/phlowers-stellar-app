@@ -7,9 +7,21 @@
 
 export interface Line {
   uuid: string;
-  internal_id: string;
-  name: string;
-  short_name: string;
-  created_at: string;
-  updated_at: string;
+  link_idr: string;
+  lit_idr: string;
+  lit_adr: string;
+  branch_idr: string;
+  branch_adr: string;
+  electric_tension_level_idr: string;
+  electric_tension_level_adr: string;
+}
+
+export interface RteLinesCsvFile {
+  LIAISON_IDR: string;
+  LIT_ADR: string;
+  LIT_IDR: string;
+  BRANCHE_IDR: string;
+  BRANCHE_ADR: string;
+  TENSION_ELECTRIQUE_IDR: string;
+  TENSION_ELECTRIQUE_ADR: string;
 }

@@ -48,3 +48,6 @@ public/service-worker.js
 .vscode/settings.json
 
 *.ipynb
+
+public/maintenance-teams.csv
+public/lines.csv
