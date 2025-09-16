@@ -66,22 +66,6 @@
           fluid
         ></textarea>
       </div>
-      @if (mode() === 'new') {
-        <div>
-          <div class="label-container">
-            <label i18n for="shareable" class="label"
-              >Load from provoV4 file</label
-            >
-          </div>
-          <input
-            id="file"
-            #file
-            name="file"
-            type="file"
-            (change)="loadProtoV4File($event)"
-          />
-        </div>
-      }
     </form>
   </ng-template>
 
