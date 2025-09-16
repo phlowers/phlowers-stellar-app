@@ -1,0 +1,13 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.p-panel.p-panel {
+  .p-panel-title {
+    @extend %heading-xs;
+  }
+
+  border-radius: 0.125rem;
+  border: 0.0625rem solid var(--grey-100);
+  background-color: var(--grey-white);
+  box-shadow: map.get(app.$elevation, neutral-3);
+}
