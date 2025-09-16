@@ -15,12 +15,48 @@ describe('StudyHeader', () => {
 
     fixture = TestBed.createComponent(StudyHeaderComponent);
     component = fixture.componentInstance;
-    // Provide required input value
     fixture.componentRef.setInput('study', null);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('toggleActiveDetail', () => {
+    it('should open detail when initially closed', () => {
+      expect(component.isDetailOpen()).toBe(false);
+      expect(component.activeDetail()).toBe('');
+
+      component.toggleActiveDetail();
+
+      expect(component.isDetailOpen()).toBe(true);
+      expect(component.activeDetail()).toBe('0');
+    });
+
+    it('should close detail when already open', () => {
+      component.isDetailOpen.set(true);
+      component.activeDetail.set('0');
+
+      component.toggleActiveDetail();
+      expect(component.isDetailOpen()).toBe(false);
+      expect(component.activeDetail()).toBe('');
+    });
+  });
+
+  describe('outputs', () => {
+    it('should emit duplicateStudy', () => {
+      const spy = jest.spyOn(component.duplicateStudy, 'emit');
+
+      component.duplicateStudy.emit('uuid-123');
+      expect(spy).toHaveBeenCalledWith('uuid-123');
+    });
+
+    it('should emit openModifyStudyModal', () => {
+      const spy = jest.spyOn(component.openModifyStudyModal, 'emit');
+
+      component.openModifyStudyModal.emit();
+      expect(spy).toHaveBeenCalled();
+    });
   });
 });
