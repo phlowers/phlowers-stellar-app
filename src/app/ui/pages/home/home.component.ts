@@ -99,7 +99,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private readonly studiesService: StudiesService
   ) {
     this.updateService.needUpdate$.subscribe((needUpdate) => {
-      if (needUpdate) {
+      // prettier-ignore
+      if (needUpdate) { //NOSONAR
         this.updateStatus.set('warning');
         this.updateText('updateTitle', $localize`Update available`); // i18n Mise à jour disponible !
         this.updateText(

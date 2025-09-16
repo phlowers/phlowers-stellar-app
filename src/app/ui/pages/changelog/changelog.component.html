@@ -1,0 +1,33 @@
+<h1 class="title" i18n>Changelog</h1>
+
+@if (!isOnline()) {
+  <p i18n>You are offline</p>
+} @else {
+  @if (isLoading()) {
+    <div class="flex justify-center items-center h-full">
+      <p-progress-spinner ariaLabel="loading" />
+    </div>
+  } @else {
+    @if (changelogs.length > 0) {
+      <div>
+        @for (changelog of changelogs; track $index) {
+          <div class="mb-4">
+            <p-panel
+              header="{{ changelog.name }} - {{
+                changelog.published_at | date: 'dd/MM/yyyy HH:mm'
+              }}"
+              [toggleable]="true"
+              [collapsed]="true"
+            >
+              <markdown class="markdown" ngPreserveWhitespaces>
+                {{ changelog.body }}
+              </markdown>
+            </p-panel>
+          </div>
+        }
+      </div>
+    } @else {
+      <p i18n>No changelogs found</p>
+    }
+  }
+}

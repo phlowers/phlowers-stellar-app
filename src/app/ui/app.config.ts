@@ -15,6 +15,7 @@ import {
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import { primengPreset } from './styles/primeng-preset';
+import { provideMarkdown } from 'ngx-markdown';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,6 +34,7 @@ export const appConfig: ApplicationConfig = {
         preset: primengPreset,
         options: { darkModeSelector: '.app-dark' }
       }
-    })
+    }),
+    provideMarkdown()
   ]
 };

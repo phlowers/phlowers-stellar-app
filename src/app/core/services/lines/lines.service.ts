@@ -37,11 +37,25 @@ export class LinesService {
   }
 
   async importFromFile() {
-    const linesFile = await this.http.get<string>(
+    const linesFile = this.http.get<string>(
       `${window.location.origin}/lines.csv`,
       { responseType: 'text' as any }
     );
-    console.log('lines', linesFile);
+
+    const mapData = (data: RteLinesCsvFile[]) => {
+      return data
+        .map((item) => ({
+          uuid: uuidv4(),
+          link_idr: item.LIAISON_IDR || '',
+          lit_idr: item.LIT_IDR || '',
+          lit_adr: item.LIT_ADR || '',
+          branch_idr: item.BRANCHE_IDR || '',
+          branch_adr: item.BRANCHE_ADR || '',
+          electric_tension_level_idr: item.TENSION_ELECTRIQUE_IDR || '',
+          electric_tension_level_adr: item.TENSION_ELECTRIQUE_ADR || ''
+        }))
+        .filter((item) => item.link_idr);
+    };
     await new Promise<void>((resolve) => {
       linesFile.subscribe(async (linesDataCsv) => {
         Papa.parse(linesDataCsv, {
@@ -54,21 +68,7 @@ export class LinesService {
               return;
             }
             await this.storageService.db?.maintenance.clear();
-            const table: Line[] = [];
-            data.forEach((item) => {
-              if (item.LIAISON_IDR) {
-                table.push({
-                  uuid: uuidv4(),
-                  link_idr: item.LIAISON_IDR || '',
-                  lit_idr: item.LIT_IDR || '',
-                  lit_adr: item.LIT_ADR || '',
-                  branch_idr: item.BRANCHE_IDR || '',
-                  branch_adr: item.BRANCHE_ADR || '',
-                  electric_tension_level_idr: item.TENSION_ELECTRIQUE_IDR || '',
-                  electric_tension_level_adr: item.TENSION_ELECTRIQUE_ADR || ''
-                });
-              }
-            });
+            const table: Line[] = mapData(data);
             await this.storageService.db?.lines.bulkAdd(
               sortBy(table, 'electric_tension_level_adr')
             );

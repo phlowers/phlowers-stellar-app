@@ -34,10 +34,24 @@ export class MaintenanceService {
   }
 
   async importFromFile() {
-    const maintenanceTeams = await this.http.get<string>(
+    const maintenanceTeams = this.http.get<string>(
       `${window.location.origin}/maintenance-teams.csv`,
       { responseType: 'text' as any }
     );
+
+    const mapData = (data: RteMaintenanceTeamsCsvFile[]) => {
+      return data
+        .map((item) => ({
+          cm_id: item.CM_CUR,
+          cm_name: item.CM_DESIGNATION,
+          gmr_id: item.GMR_CUR,
+          gmr_name: item.GMR_DESIGNATION,
+          eel_id: item.EEL_CUR,
+          eel_name: item.EEL_DESIGNATION
+        }))
+        .filter((item) => item.eel_id);
+    };
+
     await new Promise<void>((resolve) => {
       maintenanceTeams.subscribe(async (maintenanceTeams) => {
         Papa.parse(maintenanceTeams, {
@@ -52,19 +66,7 @@ export class MaintenanceService {
               return;
             }
             await this.storageService.db?.maintenance.clear();
-            const maintenanceTable: MaintenanceData[] = [];
-            data.forEach((item) => {
-              if (item.EEL_CUR) {
-                maintenanceTable.push({
-                  cm_id: item.CM_CUR,
-                  cm_name: item.CM_DESIGNATION,
-                  gmr_id: item.GMR_CUR,
-                  gmr_name: item.GMR_DESIGNATION,
-                  eel_id: item.EEL_CUR,
-                  eel_name: item.EEL_DESIGNATION
-                });
-              }
-            });
+            const maintenanceTable: MaintenanceData[] = mapData(data);
             await this.storageService.db?.maintenance.bulkAdd(maintenanceTable);
             resolve();
           }) as (
