@@ -9,5 +9,6 @@ export const environment = {
   apiUrl: '{API_URL}',
   version: '{BUILD_VERSION}',
   buildTime: '{BUILD_TIME}',
-  appName: '{APP_NAME}'
+  appName: '{APP_NAME}',
+  changelogUrl: 'https://api.github.com/repos/phlowers/mechaphlowers/releases'
 };

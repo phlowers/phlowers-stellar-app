@@ -1225,5 +1225,23 @@
         <target> Rafraîchir </target>
       </segment>
     </unit>
+    <unit id="7136888919962092730">
+      <segment state="initial">
+        <source>Changelog</source>
+        <target>Changelog</target>
+      </segment>
+    </unit>
+    <unit id="4768592761478998496">
+      <segment state="initial">
+        <source>You are offline</source>
+        <target>Vous êtes hors ligne</target>
+      </segment>
+    </unit>
+    <unit id="7096169249854506812">
+      <segment state="initial">
+        <source>No changelogs found</source>
+        <target>Aucun changelog trouvé</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
