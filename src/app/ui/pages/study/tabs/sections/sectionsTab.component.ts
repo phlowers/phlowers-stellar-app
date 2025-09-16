@@ -49,17 +49,21 @@ export class SectionsTabComponent {
   duplicateInitialCondition = output<InitialConditionFunctionsInput>();
   currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(
-    this.createInitialCondition()
+    this.createInitialCondition(this.currentSection())
   );
   isNewSectionModalOpen = signal<boolean>(false);
   newSectionModalMode = signal<CreateEditView>('create');
   isInitialConditionModalOpen = signal<boolean>(false);
   initialConditionModalMode = signal<CreateEditView>('create');
 
-  createInitialCondition(): InitialCondition {
+  createInitialCondition(section: Section): InitialCondition {
+    const currentInitialConditions = section.initial_conditions;
     return {
       uuid: uuidv4(),
-      name: '',
+      name:
+        $localize`Initial Condition` +
+        ' ' +
+        (currentInitialConditions.length + 1),
       base_parameters: '',
       base_temperature: 0
     };

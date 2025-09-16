@@ -363,7 +363,9 @@ describe('StudyComponent', () => {
 
       expect(component.study?.sections).toHaveLength(2);
       expect(component.study?.sections[1].uuid).toBe('mock-uuid-123');
-      expect(component.study?.sections[1].name).toBe(mockSection.name);
+      expect(component.study?.sections[1].name).toBe(
+        mockSection.name + ' (Copy 1)'
+      );
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         component.study
       );

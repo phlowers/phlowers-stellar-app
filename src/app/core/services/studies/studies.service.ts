@@ -16,6 +16,7 @@ import {
 } from '../../data/database/interfaces/protoV4';
 import { createEmptySection, createEmptySupport } from '../sections/helpers';
 import { Support } from '../../data/database/interfaces/support';
+import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 
 @Injectable({
   providedIn: 'root'
@@ -81,16 +82,10 @@ export class StudiesService {
     }
     const allStudies = await this.storageService.db?.studies.toArray();
     const allStudyTitles = allStudies?.map((study) => study.title);
-    const titleWithoutCopy = study.title.replace(/\s*\(Copy\s*\d+\)/, ''); //NOSONAR
-    let copyIndex = 1;
-    while (
-      allStudyTitles?.includes(`${titleWithoutCopy} (Copy ${copyIndex})`)
-    ) {
-      copyIndex++;
-    }
+    const duplicateTitle = findDuplicateTitle(allStudyTitles, study.title);
     const newStudy = {
       ...study,
-      title: `${titleWithoutCopy} (Copy ${copyIndex})`,
+      title: duplicateTitle,
       uuid: uuidv4(),
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
@@ -150,10 +145,10 @@ export class StudiesService {
    * @param parameters The parameters of the proto v4 project
    * @returns The study
    */
-  createStudyFromProtoV4(
+  async createStudyFromProtoV4(
     protoV4Supports: ProtoV4Support[],
     parameters: ProtoV4Parameters
-  ): Pick<StudyModel, 'sections' | 'shareable'> {
+  ): Promise<StudyModel> {
     const section = createEmptySection();
     section.name = parameters.project_name;
     section.type = 'phase';
@@ -177,9 +172,13 @@ export class StudiesService {
       };
     });
     section.supports = supports;
-    return {
-      sections: [section],
-      shareable: false
-    };
+    const uuid = await this.createStudy({
+      title: parameters.project_name,
+      description: $localize`Study imported from protoV4`,
+      shareable: false,
+      sections: [section]
+    });
+    const study = await this.getStudy(uuid);
+    return study as StudyModel;
   }
 }

@@ -35,9 +35,9 @@
     @if (mode() === 'create' || mode() === 'edit') {
       <div class="form__col form__col--right">
         <div>
-          <label for="initial-condition-name" i18n>
-            Initial condition name
-          </label>
+          <label for="initial-condition-name" i18n
+            >Initial condition name <sup class="mandatory">*</sup></label
+          >
           <input
             name="initial-condition-name"
             required
@@ -110,7 +110,13 @@
       <span i18n>Cancel</span>
     </button>
     @if (mode() !== 'view') {
-      <button app-btn type="button" btnSize="m" (click)="onSubmit()">
+      <button
+        app-btn
+        type="button"
+        [disabled]="!this.initialCondition().name"
+        btnSize="m"
+        (click)="onSubmit()"
+      >
         <app-icon icon="check" />
         <span i18n>Validate</span>
       </button>

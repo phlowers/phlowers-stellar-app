@@ -10,6 +10,7 @@ import { Study } from '../../data/database/interfaces/study';
 import { InitialCondition } from '../../data/database/interfaces/initialCondition';
 import { StudiesService } from '../studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
+import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 
 export interface InitialConditionFunctionsInput {
   section: Section;
@@ -116,7 +117,14 @@ export class InitialConditionService {
             ...s,
             initial_conditions: [
               ...(s.initial_conditions || []),
-              { ...initialCondition, uuid: uuidv4() }
+              {
+                ...initialCondition,
+                uuid: uuidv4(),
+                name: findDuplicateTitle(
+                  s.initial_conditions?.map((ic) => ic.name),
+                  initialCondition.name
+                )
+              }
             ]
           }
         : s

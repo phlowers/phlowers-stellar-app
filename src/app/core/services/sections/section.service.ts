@@ -9,6 +9,7 @@ import { Section } from '../../data/database/interfaces/section';
 import { Study } from '../../data/database/interfaces/study';
 import { StudiesService } from '../studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
+import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 
 @Injectable({
   providedIn: 'root'
@@ -64,6 +65,10 @@ export class SectionService {
       {
         ...section,
         uuid: uuidv4(),
+        name: findDuplicateTitle(
+          study.sections.map((s) => s.name),
+          section.name
+        ),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
