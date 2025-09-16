@@ -10,8 +10,7 @@ import { OnlineService } from '@src/app/core/services/online/online.service';
 @Component({
   selector: 'app-changelog',
   imports: [ProgressSpinnerModule, MarkdownModule, DatePipe, PanelModule],
-  templateUrl: './changelog.component.html',
-  styleUrl: './changelog.component.scss'
+  templateUrl: './changelog.component.html'
 })
 export class ChangelogComponent implements OnInit {
   changelogs: ChangelogItem[] = [];
