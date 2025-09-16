@@ -21,6 +21,7 @@ import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { CommonModule } from '@angular/common';
 import { StudiesTableComponent } from './components/studies-table/studies-table.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ImportStudyComponent } from './components/import-study/import-study.component';
 
 @Component({
   standalone: true,
@@ -35,7 +36,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     PopoverModule,
     CommonModule,
     StudiesTableComponent,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    ImportStudyComponent
   ],
   templateUrl: './studies.component.html',
   providers: [MessageService, ConfirmationService]
