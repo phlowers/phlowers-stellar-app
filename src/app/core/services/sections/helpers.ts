@@ -26,7 +26,7 @@ export const createEmptySection = (): Section => {
     type: 'phase',
     electric_phase_number: 0,
     cables_amount: 0,
-    cable_name: '',
+    cable_name: undefined,
     gmr: undefined,
     eel: undefined,
     cm: undefined,

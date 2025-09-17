@@ -49,5 +49,6 @@ public/service-worker.js
 
 *.ipynb
 
+public/cables.csv
 public/maintenance-teams.csv
 public/lines.csv

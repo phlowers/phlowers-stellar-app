@@ -25,3 +25,24 @@ export interface Cable {
   stress_strain_b3: number;
   stress_strain_b4: number;
 }
+
+export interface RteCablesCsvFile {
+  name: string;
+  data_source: string;
+  section: number;
+  diameter: number;
+  young_modulus: number;
+  linear_weight: number;
+  dilatation_coefficient: number;
+  temperature_reference: number;
+  stress_strain_a0: number;
+  stress_strain_a1: number;
+  stress_strain_a2: number;
+  stress_strain_a3: number;
+  stress_strain_a4: number;
+  stress_strain_b0: number;
+  stress_strain_b1: number;
+  stress_strain_b2: number;
+  stress_strain_b3: number;
+  stress_strain_b4: number;
+}

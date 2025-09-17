@@ -18,7 +18,7 @@ export interface Section {
   internal_catalog_id: string;
   type: string;
   electric_phase_number: number | undefined;
-  cable_name: string;
+  cable_name: string | undefined;
   cable_short_name: string;
   cables_amount: number;
   optical_fibers_amount: number;

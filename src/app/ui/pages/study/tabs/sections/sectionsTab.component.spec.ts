@@ -6,6 +6,7 @@ import { Section } from '@core/data/database/interfaces/section';
 import { InitialCondition } from '@core/data/database/interfaces/initialCondition';
 import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
 import { LinesService } from '@core/services/lines/lines.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -99,7 +100,11 @@ describe('SectionsTabComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SectionsTabComponent, NoopAnimationsModule],
+      imports: [
+        SectionsTabComponent,
+        NoopAnimationsModule,
+        HttpClientTestingModule
+      ],
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService }

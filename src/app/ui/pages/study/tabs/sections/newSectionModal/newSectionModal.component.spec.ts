@@ -5,6 +5,7 @@ import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
 import { LinesService } from '@core/services/lines/lines.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -60,7 +61,7 @@ describe('NewSectionModalComponent (Jest)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NewSectionModalComponent],
+      imports: [NewSectionModalComponent, HttpClientTestingModule],
       providers: [
         provideNoopAnimations(),
         { provide: MaintenanceService, useClass: MockMaintenanceService },
