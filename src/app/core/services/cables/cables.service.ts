@@ -6,7 +6,7 @@
  */
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, catchError, of } from 'rxjs';
 import { Cable, RteCablesCsvFile } from '../../data/database/interfaces/cable';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
@@ -31,10 +31,16 @@ export class CablesService {
   }
 
   async importFromFile() {
-    const cables = this.http.get<string>(
-      `${window.location.origin}/cables.csv`,
-      { responseType: 'text' as any }
-    );
+    const cables = this.http
+      .get<string>(`${window.location.origin}/cables.csv`, {
+        responseType: 'text' as any
+      })
+      .pipe(
+        catchError((error) => {
+          console.error('Error importing cables', error);
+          return of('');
+        })
+      );
 
     const mapData = (data: RteCablesCsvFile[]) => {
       return data

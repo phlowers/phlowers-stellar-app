@@ -134,10 +134,13 @@
       </td>
       <td>
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="text"
+          <p-select
+            class="w-[200px]"
+            [options]="chains()"
             [ngModel]="support.chainName"
+            optionLabel="name"
+            optionValue="name"
+            appendTo="body"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'chainName', $event)
             "

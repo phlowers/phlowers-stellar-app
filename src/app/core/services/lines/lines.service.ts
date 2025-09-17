@@ -6,7 +6,7 @@
  */
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { Line, RteLinesCsvFile } from '../../data/database/interfaces/line';
@@ -37,10 +37,16 @@ export class LinesService {
   }
 
   async importFromFile() {
-    const linesFile = this.http.get<string>(
-      `${window.location.origin}/lines.csv`,
-      { responseType: 'text' as any }
-    );
+    const linesFile = this.http
+      .get<string>(`${window.location.origin}/lines.csv`, {
+        responseType: 'text' as any
+      })
+      .pipe(
+        catchError((error) => {
+          console.error('Error importing lines', error);
+          return of('');
+        })
+      );
 
     const mapData = (data: RteLinesCsvFile[]) => {
       return data

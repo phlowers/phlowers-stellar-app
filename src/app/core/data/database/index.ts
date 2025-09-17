@@ -29,6 +29,8 @@ import mockData from './mock_data.json';
 import { createStudiesMockData } from './helpers/createMocks';
 import { MaintenanceData } from './interfaces/maintenance';
 import { maintenance } from './tables/maintenance';
+import { Chain } from './interfaces/chain';
+import { chainTable } from './tables/chain';
 
 export class AppDB extends Dexie {
   users!: Table<User, number>;
@@ -42,10 +44,12 @@ export class AppDB extends Dexie {
   tensions!: Table<Tension, string>;
   transit_links!: Table<TransitLink, string>;
   cables!: Table<Cable, string>;
+  chains!: Table<Chain, string>;
 
   constructor() {
     super('stellar-db');
     this.version(1).stores({
+      ...chainTable,
       ...attachmentTable,
       ...branchTable,
       ...lineTable,
@@ -58,19 +62,7 @@ export class AppDB extends Dexie {
       ...userTable,
       ...cableTable
     });
-    //fill the database with mock data
-    // this.fillDatabaseWithMockData();
   }
-
-  // async loadMockDataFromFile(file: File) {
-  //   const reader = new FileReader();
-  //   reader.onload = (e) => {
-  //     const jsonContent = e.target?.result as string;
-  //     const mockData = JSON.parse(jsonContent);
-  //     this.loadMockDataFromJson(mockData);
-  //   };
-  //   reader.readAsText(file);
-  // }
 
   async loadMockDataFromJson(jsonContent: any) {
     const mockData = jsonContent;
