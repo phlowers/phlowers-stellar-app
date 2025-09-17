@@ -7,17 +7,14 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import {
-  MaintenanceData,
-  RteMaintenanceTeamsCsvFile
-} from '../../data/database/interfaces/maintenance';
+import { Chain, RteChainsCsvFile } from '../../data/database/interfaces/chain';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
-export class MaintenanceService {
+export class ChainsService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   constructor(
@@ -29,55 +26,53 @@ export class MaintenanceService {
     });
   }
 
-  async getMaintenance() {
-    return this.storageService.db?.maintenance.toArray();
+  async getChains() {
+    return this.storageService.db?.chains?.toArray();
   }
 
   async importFromFile() {
-    const maintenanceTeams = this.http
-      .get<string>(`${window.location.origin}/maintenance-teams.csv`, {
+    const chains = this.http
+      .get<string>(`${window.location.origin}/chains.csv`, {
         responseType: 'text' as any
       })
       .pipe(
         catchError((error) => {
-          console.error('Error importing maintenance teams', error);
+          console.error('Error importing chains', error);
           return of('');
         })
       );
-
-    const mapData = (data: RteMaintenanceTeamsCsvFile[]) => {
+    console.log('chains are', chains);
+    const mapData = (data: RteChainsCsvFile[]) => {
       return data
         .map((item) => ({
-          cm_id: item.CM_CUR,
-          cm_name: item.CM_DESIGNATION,
-          gmr_id: item.GMR_CUR,
-          gmr_name: item.GMR_DESIGNATION,
-          eel_id: item.EEL_CUR,
-          eel_name: item.EEL_DESIGNATION
+          name: item.name,
+          length: Number(item.length.replace(',', '.')),
+          weight: Number(item.weight.replace(',', '.'))
+          // length: item.length,
+          // weight: item.weight
         }))
-        .filter((item) => item.eel_id);
+        .filter((item) => item.name);
     };
 
     await new Promise<void>((resolve) => {
-      maintenanceTeams.subscribe(async (maintenanceTeams) => {
-        Papa.parse(maintenanceTeams, {
+      chains.subscribe(async (chains) => {
+        console.log('chains2 are', chains);
+        Papa.parse(chains, {
           header: true,
           skipEmptyLines: true,
           complete: (async (
-            jsonResults: Papa.ParseResult<RteMaintenanceTeamsCsvFile>
+            jsonResults: Papa.ParseResult<RteChainsCsvFile>
           ) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
               return;
             }
-            await this.storageService.db?.maintenance.clear();
-            const maintenanceTable: MaintenanceData[] = mapData(data);
-            await this.storageService.db?.maintenance.bulkAdd(maintenanceTable);
+            await this.storageService.db?.chains.clear();
+            const chainsTable: Chain[] = mapData(data);
+            await this.storageService.db?.chains.bulkAdd(chainsTable);
             resolve();
-          }) as (
-            jsonResults: Papa.ParseResult<RteMaintenanceTeamsCsvFile>
-          ) => void
+          }) as (jsonResults: Papa.ParseResult<RteChainsCsvFile>) => void
         });
       });
     });
