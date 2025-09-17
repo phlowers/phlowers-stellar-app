@@ -42,4 +42,24 @@ You should match global and local project CLI by watching current version in `pa
     - EEL_CUR
     - EEL_DESIGNATION
 
+3. cables data should be put inside a `public/cables.csv` file with the following columns:
+    - name
+    - data_source
+    - section
+    - diameter
+    - young_modulus
+    - linear_weight
+    - dilatation_coefficient
+    - temperature_reference
+    - stress_strain_a0
+    - stress_strain_a1
+    - stress_strain_a2
+    - stress_strain_a3
+    - stress_strain_a4
+    - stress_strain_b0
+    - stress_strain_b1
+    - stress_strain_b2
+    - stress_strain_b3
+    - stress_strain_b4
+
 At startup, the application will import the data from the csv files and store it in the database.

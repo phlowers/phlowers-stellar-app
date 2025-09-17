@@ -31,6 +31,7 @@ import { UpdateService } from '../core/services/worker_update/worker_update.serv
 import { Subscription } from 'rxjs';
 import { MaintenanceService } from '../core/services/maintenance/maintenance.service';
 import { LinesService } from '../core/services/lines/lines.service';
+import { CablesService } from '../core/services/cables/cables.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -62,7 +63,8 @@ const modules = [
     SectionService,
     InitialConditionService,
     ConfirmationService,
-    UpdateService
+    UpdateService,
+    CablesService
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -84,7 +86,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly onlineService: OnlineService,
     private readonly updateService: UpdateService,
     private readonly maintenanceService: MaintenanceService,
-    private readonly linesService: LinesService
+    private readonly linesService: LinesService,
+    private readonly cablesService: CablesService
   ) {
     this.form = new FormGroup({
       email: new FormControl<string>('', [
@@ -123,6 +126,10 @@ export class AppComponent implements OnInit, OnDestroy {
     const lines = await this.linesService.getLinesCount();
     if (!lines) {
       await this.linesService.importFromFile();
+    }
+    const cables = await this.cablesService.getCables();
+    if (!cables || cables.length === 0) {
+      await this.cablesService.importFromFile();
     }
   }
 

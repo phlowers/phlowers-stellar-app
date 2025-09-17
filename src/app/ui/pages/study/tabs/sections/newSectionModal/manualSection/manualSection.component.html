@@ -73,13 +73,19 @@
                 Cable name
                 <sup class="mandatory">*</sup>
               </label>
-              <input
-                type="text"
-                id="cableName"
-                pInputText
-                required
+              <p-select
+                inputId="cableName"
+                [options]="cablesFilterTable() | unique: 'name'"
                 [(ngModel)]="section().cable_name"
+                optionLabel="name"
+                optionValue="name"
+                appendTo="body"
                 (ngModelChange)="onSectionChange()"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="name"
               />
             </div>
 
