@@ -29,6 +29,8 @@ import { sortBy, uniqBy } from 'lodash';
 import { UniquePipe } from '@src/app/ui/shared/service/autocomplete/unique.pipe';
 import { Line } from '@src/app/core/data/database/interfaces/line';
 import { LinesService } from '@src/app/core/services/lines/lines.service';
+import { Cable } from '@src/app/core/data/database/interfaces/cable';
+import { CablesService } from '@src/app/core/services/cables/cables.service';
 
 const sortLines = (lines: Line[]) => {
   return lines.sort((a, b) => {
@@ -67,11 +69,13 @@ export class ManualSectionComponent implements OnInit {
   section = input.required<Section>();
   sectionChange = output<any>();
   studio = viewChild(StudioComponent);
+  cablesFilterTable = signal<Cable[]>([]);
   public sectionTypes = sectionTypes;
 
   constructor(
     private readonly maintenanceService: MaintenanceService,
-    private readonly linesService: LinesService
+    private readonly linesService: LinesService,
+    private readonly cablesService: CablesService
   ) {}
 
   maintenanceFilterTable = signal<MaintenanceData[]>([]);
@@ -82,6 +86,8 @@ export class ManualSectionComponent implements OnInit {
     this.maintenanceFilterTable.set(sortBy(table, 'eel_name'));
     const linesTable = await this.linesService.getLines();
     this.linesFilterTable.set(sortLines(linesTable));
+    const cablesTable = await this.cablesService.getCables();
+    this.cablesFilterTable.set(sortBy(cablesTable, 'name'));
   }
 
   ngOnInit() {
