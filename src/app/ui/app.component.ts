@@ -32,6 +32,7 @@ import { Subscription } from 'rxjs';
 import { MaintenanceService } from '../core/services/maintenance/maintenance.service';
 import { LinesService } from '../core/services/lines/lines.service';
 import { CablesService } from '../core/services/cables/cables.service';
+import { ChainsService } from '../core/services/chains/chains.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -59,6 +60,7 @@ const modules = [
     UserService,
     MaintenanceService,
     LinesService,
+    ChainsService,
     StudiesService,
     SectionService,
     InitialConditionService,
@@ -87,7 +89,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly updateService: UpdateService,
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,
-    private readonly cablesService: CablesService
+    private readonly cablesService: CablesService,
+    private readonly chainsService: ChainsService
   ) {
     this.form = new FormGroup({
       email: new FormControl<string>('', [
@@ -130,6 +133,10 @@ export class AppComponent implements OnInit, OnDestroy {
     const cables = await this.cablesService.getCables();
     if (!cables || cables.length === 0) {
       await this.cablesService.importFromFile();
+    }
+    const chains = await this.chainsService.getChains();
+    if (!chains || chains.length === 0) {
+      await this.chainsService.importFromFile();
     }
   }
 

@@ -62,4 +62,9 @@ You should match global and local project CLI by watching current version in `pa
     - stress_strain_b3
     - stress_strain_b4
 
+4. chains data should be put inside a `public/chains.csv` file with the following columns:
+    - name
+    - length
+    - weight
+
 At startup, the application will import the data from the csv files and store it in the database.
