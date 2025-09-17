@@ -24,10 +24,10 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 
 const areAllRequiredFieldsFilled = (section: Section) => {
   return (
-    section.name !== '' &&
-    section.type !== '' &&
+    !!section.name &&
+    !!section.type &&
     !!section.cables_amount &&
-    section.cable_name !== ''
+    !!section.cable_name
   );
 };
 
