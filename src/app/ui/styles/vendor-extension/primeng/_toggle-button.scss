@@ -1,0 +1,12 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+
+.p-togglebutton.p-togglebutton {
+    --p-togglebutton-padding: 0;
+}
+
+.p-togglebutton.p-togglebutton.p-togglebutton-checked {
+    box-shadow: map.get(app.$elevation, neutral-2);
+    border-radius: var(--p-togglebutton-border-radius);
+}

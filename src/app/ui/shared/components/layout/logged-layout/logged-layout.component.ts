@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { SidebarItem } from '../sidebar/sidebar.model';
+import { filter } from 'rxjs/operators';
 
 interface SidebarNavigation {
   main: SidebarItem[];
@@ -15,7 +16,18 @@ interface SidebarNavigation {
   templateUrl: './logged-layout.component.html',
   styleUrl: './logged-layout.component.scss'
 })
-export class LoggedLayoutComponent {
+export class LoggedLayoutComponent implements OnInit {
+  currentRoute = window.location.pathname;
+
+  constructor(private readonly router: Router) {}
+
+  ngOnInit(): void {
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.currentRoute = event.url;
+      });
+  }
   public readonly sideBarNav = signal<SidebarNavigation>({
     main: [
       {
