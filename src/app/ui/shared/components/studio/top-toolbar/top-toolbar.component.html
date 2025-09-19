@@ -1,0 +1,34 @@
+<div
+  class="flex flex-row gap-2 items-center border border-[#E6DEF0] bg-[#FCFBFD]"
+>
+  <p-selectbutton
+    class="p-2"
+    [options]="threeDOptions()"
+    [(ngModel)]="threeDChecked"
+    optionLabel="label"
+    optionValue="value"
+    aria-labelledby="basic"
+  />
+  <!-- TODO: Change to hr -->
+  <div class="self-stretch bg-[#D2D4D5] w-[1px] my-1"></div>
+  <label for="side" class="text-xl" i18n>Side:</label>
+  <p-selectbutton
+    class="p-2"
+    inputId="side"
+    [options]="sideOptions()"
+    [(ngModel)]="sideChecked"
+    optionLabel="label"
+    optionValue="value"
+    aria-labelledby="basic"
+  />
+  <!-- TODO: Change to hr -->
+  <div class="self-stretch bg-[#D2D4D5] w-[1px] my-1"></div>
+  <div class="flex flex-row gap-2 items-center">
+    <label for="invert" class="text-xl" i18n>Invert:</label>
+    <p-toggleswitch
+      class="flex items-centers"
+      inputId="invert"
+      [(ngModel)]="toggleInvert"
+    />
+  </div>
+</div>

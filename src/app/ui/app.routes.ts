@@ -15,6 +15,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { NewsComponent } from './pages/news/news.component';
 import { NotFoundComponent } from './pages/404/404.component';
 import { ChangelogComponent } from './pages/changelog/changelog.component';
+import { StudioPageComponent } from './pages/studio/studio-page.component';
 
 export const appRoutes: Routes = [
   {
@@ -56,6 +57,11 @@ export const appRoutes: Routes = [
         path: 'changelog',
         title: $localize`Changelog`,
         component: ChangelogComponent
+      },
+      {
+        path: 'studio',
+        title: $localize`Studio`,
+        component: StudioPageComponent
       }
     ]
   },
