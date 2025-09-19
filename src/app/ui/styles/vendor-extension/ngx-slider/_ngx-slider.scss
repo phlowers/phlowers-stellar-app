@@ -1,0 +1,61 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+$_unselected-color: map.get(app.$primary, 200);
+$_selected-color: var(--main-primary);
+
+
+.ngx-slider.ngx-slider .ngx-slider-selection {
+    background: $_selected-color;
+}
+
+.ngx-slider.ngx-slider .ngx-slider-pointer {
+    top: -0.3125rem;
+    width: 0;
+    height: 0;
+    border-left: .5rem solid transparent;
+    border-right: .5rem solid transparent;
+    border-bottom: .875rem solid $_selected-color;
+    background-color: white;
+    border-radius: 0%;
+}
+
+.ngx-slider.ngx-slider .ngx-slider-pointer-max {
+    transform: rotate(-90deg) !important;
+}
+
+.ngx-slider.ngx-slider .ngx-slider-pointer-min {
+    transform: rotate(90deg) translateY(8px) !important;
+}
+
+.ngx-slider.ngx-slider .ngx-slider-pointer:after {
+    content: '';
+    border-right: 1rem solid $_selected-color;
+    border-radius: 0%;
+    width: 1rem;
+    height: .0625rem;
+    top: 0px;
+    left: -0.5rem;
+    transform: rotate(0deg) !important;
+}
+
+.ngx-slider.ngx-slider .ngx-slider-tick {
+    width: .5rem;
+    height: .5rem;
+    margin-left: 0px;
+    top: .0625rem;
+    background-color: $_unselected-color;
+    border-radius: 50%;
+}
+
+.ngx-slider.ngx-slider .ngx-slider-tick.ngx-slider-selected {
+    background: $_selected-color;
+}
+
+:nth-child(-n + 1 of .ngx-slider-selected) {
+    background-color: transparent !important;
+}
+
+.ngx-slider-selected:not(:has(+ .ngx-slider-selected)) {
+    background-color: transparent !important;
+}

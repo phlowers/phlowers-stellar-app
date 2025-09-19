@@ -3,6 +3,7 @@ import {
   computed,
   effect,
   input,
+  output,
   signal,
   untracked
 } from '@angular/core';
@@ -12,7 +13,6 @@ import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
-import { ButtonComponent } from '../../atoms/button/button.component';
 import { formatData } from './helpers/formatData';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
@@ -25,23 +25,18 @@ interface SearchSupportEvent {
 @Component({
   selector: 'app-section',
   templateUrl: './section.component.html',
-  imports: [
-    SelectModule,
-    FormsModule,
-    KeyFilterModule,
-    MessageModule,
-    ButtonComponent
-  ]
+  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
 })
 export class Section2DComponent {
   litData = input<GetSectionOutput | null>(null);
   selectedSpan = signal<number>(0);
-  options = signal<PlotOptions>({
+  plotlyOptions = input<PlotOptions>({
     view: '2d',
     side: 'profile',
     startSupport: 1,
     endSupport: 2
   });
+  plotlyOptionsChange = output<PlotOptions>();
 
   supports = computed(() => {
     const supportsAmount = uniq(
@@ -53,20 +48,20 @@ export class Section2DComponent {
   });
 
   errorMessage = computed(() => {
-    if (this.options().startSupport >= this.options().endSupport) {
+    if (this.plotlyOptions().startSupport >= this.plotlyOptions().endSupport) {
       return $localize`Error: start >= end`;
     }
     if (
       !this.supports()
         .map((s) => s.item)
-        .includes(this.options().startSupport.toString())
+        .includes(this.plotlyOptions().startSupport.toString())
     ) {
       return $localize`Error: start not in list`;
     }
     if (
       !this.supports()
         .map((s) => s.item)
-        .includes(this.options().endSupport.toString())
+        .includes(this.plotlyOptions().endSupport.toString())
     ) {
       return $localize`Error: end not in list`;
     }
@@ -76,13 +71,13 @@ export class Section2DComponent {
   searchSupport(event: SearchSupportEvent, type: 'start' | 'end') {
     const numberValue = Number(event.value);
     if (type === 'start') {
-      this.options.set({
-        ...this.options(),
+      this.plotlyOptionsChange.emit({
+        ...this.plotlyOptions(),
         startSupport: numberValue
       });
     } else {
-      this.options.set({
-        ...this.options(),
+      this.plotlyOptionsChange.emit({
+        ...this.plotlyOptions(),
         endSupport: numberValue
       });
     }
@@ -96,7 +91,10 @@ export class Section2DComponent {
     const width = myElement?.clientWidth ?? 0;
     const height = myElement?.clientHeight ?? 0;
     const formattedData = formatData(litData);
-    const plotData = createPlotData(formattedData, untracked(this.options));
+    const plotData = createPlotData(
+      formattedData,
+      untracked(this.plotlyOptions)
+    );
     createPlot('plotly-output', plotData, width, height);
   }
 
