@@ -17,6 +17,7 @@ import { StorageService } from '@src/app/core/services/storage/storage.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonComponent } from '../../shared/components/atoms/button/button.component';
 import { OnlineService } from '@src/app/core/services/online/online.service';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 const CACHE_NAME = 'app-assets';
 
@@ -32,7 +33,8 @@ const CACHE_NAME = 'app-assets';
     CardModule,
     ToastModule,
     ConfirmDialogModule,
-    ButtonComponent
+    ButtonComponent,
+    ProgressSpinnerModule
   ]
 })
 export class AdminComponent {

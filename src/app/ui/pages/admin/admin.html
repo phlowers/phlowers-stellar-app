@@ -4,6 +4,7 @@
     @if (onlineService.online$ | async) {<button
       app-btn
       i18n
+      [btnLoading]="updateService.updateLoading()"
       (click)="updateService.checkAppVersion()"
       [disabled]="updateService.updateLoading()"
     >
@@ -37,12 +38,14 @@
     @if (updateService.needUpdate$ | async) {
     <button
       app-btn
+      [btnLoading]="updateService.updateLoading()"
       i18n
       (click)="updateService.update()"
       [disabled]="updateService.updateLoading()"
     >
-      Update to latest version</button
-    >}
+      Update to latest version
+    </button>
+    }
   </p-card>
   <p-card i18n-header header="Danger zone">
     <div class="flex flex-row gap-2">

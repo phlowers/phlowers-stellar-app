@@ -6,10 +6,12 @@ import Papa from 'papaparse';
 import { ProtoV4Support } from '@src/app/core/data/database/interfaces/protoV4';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
+import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-import-study',
-  imports: [IconComponent, DividerModule],
+  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent],
   templateUrl: './import-study.component.html'
 })
 export class ImportStudyComponent {

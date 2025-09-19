@@ -31,10 +31,10 @@
         <target>Date et heure du build</target>
       </segment>
     </unit>
-    <unit id="2846632067702923194">
+    <unit id="3139759594550656304">
       <segment>
-        <source> Update to latest version</source>
-        <target> Mettre à jour vers la version la plus récente</target>
+        <source> Update to latest version </source>
+        <target> Mettre à jour vers la version la plus récente </target>
       </segment>
     </unit>
     <unit id="7658402240953727096">
@@ -1099,12 +1099,6 @@
         <target>Modifier mon étude</target>
       </segment>
     </unit>
-    <unit id="6075058653504686022">
-      <segment state="initial">
-        <source>Load from provoV4 file</source>
-        <target>Charger à partir du fichier provoV4</target>
-      </segment>
-    </unit>
     <unit id="2143900724975264499">
       <segment state="initial">
         <source>View a study section</source>
@@ -1241,6 +1235,42 @@
       <segment state="initial">
         <source>No changelogs found</source>
         <target>Aucun changelog trouvé</target>
+      </segment>
+    </unit>
+    <unit id="2622453688077092594">
+      <segment state="initial">
+        <source>Study imported from protoV4</source>
+        <target>Study imported from protoV4</target>
+      </segment>
+    </unit>
+    <unit id="1690240850123989028">
+      <segment state="initial">
+        <source>No news found</source>
+        <target>No news found</target>
+      </segment>
+    </unit>
+    <unit id="2932152767120246098">
+      <segment state="initial">
+        <source> Upload one or multiple protoV4 files </source>
+        <target>  Charger à partir d'un fichier protoV4 </target>
+      </segment>
+    </unit>
+    <unit id="804672747272219962">
+      <segment state="initial">
+        <source> Imported studies: <pc id="0" equivStart="START_BLOCK_FOR" equivEnd="CLOSE_BLOCK_FOR" type="other" dispStart="@for (study of this.newStudies(); track study) {" dispEnd="}"><pc id="1" equivStart="START_LIST_ITEM" equivEnd="CLOSE_LIST_ITEM" type="other" dispStart="&lt;li class=&quot;flex flex-col gap-2&quot;&gt;" dispEnd="&lt;/li&gt;"><pc id="2" equivStart="START_TAG_DIV_2" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;items-center flex justify-between&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="3" equivStart="START_TAG_DIV" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;text-lg items-center flex gap-2&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="4" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;check&quot; class=&quot;text-green-500&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;"/> <ph id="5" equiv="INTERPOLATION" disp="{{ study.title }}"/> </pc><pc id="6" equivStart="START_TAG_DIV_1" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;flex flex-row gap-2&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="7" equivStart="START_LINK" equivEnd="CLOSE_LINK" type="link" dispStart="&lt;a [routerLink]=&quot;&apos;/study/&apos; + study.uuid&quot; app-btn btnStyle=&quot;base&quot; btnSize=&quot;s&quot; &gt;" dispEnd="&lt;/a&gt;"> Open </pc><pc id="8" equivStart="START_TAG_BUTTON" equivEnd="CLOSE_TAG_BUTTON" type="other" dispStart="&lt;button app-btn btnSize=&quot;m&quot; btnStyle=&quot;text&quot; (click)=&quot;deleteStudy(study.uuid)&quot; &gt;" dispEnd="&lt;/button&gt;"><pc id="9" equivStart="START_TAG_APP_ICON_1" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;"/></pc></pc></pc><pc id="10" equivStart="START_TAG_P_DIVIDER" equivEnd="CLOSE_TAG_P_DIVIDER" type="other" dispStart="&lt;p-divider class=&quot;!my-1&quot; /&gt;" dispEnd="&lt;p-divider class=&quot;!my-1&quot; /&gt;"/></pc></pc></source>
+        <target> Etudes importées: <pc id="0" equivStart="START_BLOCK_FOR" equivEnd="CLOSE_BLOCK_FOR" type="other" dispStart="@for (study of this.newStudies(); track study) {" dispEnd="}"><pc id="1" equivStart="START_LIST_ITEM" equivEnd="CLOSE_LIST_ITEM" type="other" dispStart="&lt;li class=&quot;flex flex-col gap-2&quot;&gt;" dispEnd="&lt;/li&gt;"><pc id="2" equivStart="START_TAG_DIV_2" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;items-center flex justify-between&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="3" equivStart="START_TAG_DIV" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;text-lg items-center flex gap-2&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="4" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;check&quot; class=&quot;text-green-500&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;"/> <ph id="5" equiv="INTERPOLATION" disp="{{ study.title }}"/> </pc><pc id="6" equivStart="START_TAG_DIV_1" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;flex flex-row gap-2&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="7" equivStart="START_LINK" equivEnd="CLOSE_LINK" type="link" dispStart="&lt;a [routerLink]=&quot;&apos;/study/&apos; + study.uuid&quot; app-btn btnStyle=&quot;base&quot; btnSize=&quot;s&quot; &gt;" dispEnd="&lt;/a&gt;"> Open </pc><pc id="8" equivStart="START_TAG_BUTTON" equivEnd="CLOSE_TAG_BUTTON" type="other" dispStart="&lt;button app-btn btnSize=&quot;m&quot; btnStyle=&quot;text&quot; (click)=&quot;deleteStudy(study.uuid)&quot; &gt;" dispEnd="&lt;/button&gt;"><pc id="9" equivStart="START_TAG_APP_ICON_1" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;"/></pc></pc></pc><pc id="10" equivStart="START_TAG_P_DIVIDER" equivEnd="CLOSE_TAG_P_DIVIDER" type="other" dispStart="&lt;p-divider class=&quot;!my-1&quot; /&gt;" dispEnd="&lt;p-divider class=&quot;!my-1&quot; /&gt;"/></pc></pc></target>
+      </segment>
+    </unit>
+    <unit id="8141621982961645591">
+      <segment state="initial">
+        <source>Initial condition name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target>Nom de la condition initiale <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="2112772949826062259">
+      <segment state="initial">
+        <source>Initial Condition</source>
+        <target>Condition initiale</target>
       </segment>
     </unit>
   </file>

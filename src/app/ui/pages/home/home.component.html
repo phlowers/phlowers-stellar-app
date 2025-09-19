@@ -18,7 +18,7 @@
     [text]="homeText().updateText"
     [linkText]="homeText().updateLinkText"
     [linkAriaLabel]="homeText().updateLinkExplicitText"
-    linkRoute="changelog"
+    [linkRoute]="updateStatus() === 'warning' ? 'changelog' : 'news'"
     additionalClass="card-update"
     [statusState]="updateStatus()"
   />
