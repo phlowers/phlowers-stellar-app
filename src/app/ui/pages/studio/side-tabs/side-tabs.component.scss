@@ -1,0 +1,164 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.side-tab {
+  @apply flex h-full;
+
+  $_btn-overlap-size: 0.875rem;
+  $_btn-px: 2.25rem;
+
+  &__header {
+    @apply inline-flex flex-col shrink-0;
+
+    &__btn {
+      @extend %text-s-600;
+      text-transform: uppercase;
+      writing-mode: sideways-lr;
+      position: relative;
+      padding: $_btn-px 0.6875rem;
+      min-height: 8.1875rem;
+
+      &:not(:first-child) {
+        margin-top: -$_btn-overlap-size;
+        padding-top: $_btn-px + $_btn-overlap-size;
+      }
+
+      &:first-child {
+        &::before {
+          height: 100%;
+        }
+      }
+
+      &,
+      &__bxsh,
+      &::after {
+        border-bottom-left-radius: 10px;
+      }
+
+      &,
+      &::after {
+        background-color: var(--primary-100);
+      }
+
+      &::before,
+      &::after {
+        content: '';
+        position: absolute;
+      }
+
+      &::before {
+        width: 10px;
+        right: 0px;
+        bottom: 0;
+        height: calc(100% - #{$_btn-overlap-size});
+        background-color: var(--grey-white);
+        z-index: 4;
+        opacity: 0;
+      }
+
+      &::after {
+        z-index: 2;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: $_btn-overlap-size + 0.25rem;
+      }
+
+      &.active {
+        &,
+        &::after {
+          background-color: var(--grey-white);
+        }
+
+        &::before {
+          opacity: 1;
+        }
+
+        &:hover {
+          &,
+          &::before,
+          &::after {
+            background-color: var(--grey-50);
+          }
+        }
+      }
+
+      &:not(.active):hover {
+        &,
+        &::after {
+          background-color: var(--primary-200);
+        }
+      }
+
+      &__bxsh {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        z-index: 1;
+        top: 0;
+        height: 100%;
+        box-shadow: map.get(app.$elevation, neutral-3);
+      }
+
+      &__label {
+        position: relative;
+        z-index: 6;
+      }
+    }
+  }
+
+  // Bit complicated. Permits drop shadow to go over active button,
+  // but hide it as much as possible in it's previous button
+  .side-tab__header__btn:has(+ .side-tab__header__btn.active) {
+    .side-tab__header__btn__bxsh {
+      z-index: 5;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: -0.25rem;
+        left: 0;
+        width: 100%;
+        height: $_btn-overlap-size + 0.25rem;
+        border-bottom-left-radius: 10px;
+        background-image: linear-gradient(
+          to right,
+          var(--primary-100) 80%,
+          rgb(from var(--primary-100) r g b / 0)
+        );
+      }
+    }
+  }
+
+  .side-tab__header__btn:hover
+    + .side-tab__header__btn
+    .side-tab__header__btn__bxsh::before {
+    background-image: linear-gradient(
+      to right,
+      var(--primary-200) 80%,
+      rgb(from var(--primary-200) r g b / 0)
+    );
+  }
+
+  &__main {
+    @apply relative h-full overflow-hidden;
+    z-index: 3;
+    background-color: var(--grey-white);
+    transition: width 0.3s ease-in;
+
+    &:has(.side-tab__main__section.active) {
+      box-shadow: map.get(app.$elevation, neutral-4);
+    }
+
+    &__section {
+      @apply absolute top-0 left-0 opacity-0;
+      transition: opacity 0.3s 0.3s ease-out;
+
+      &.active {
+        @apply opacity-100 h-full;
+        background: #fff;
+        transition: opacity 0.3s ease-out;
+      }
+    }
+  }
+}

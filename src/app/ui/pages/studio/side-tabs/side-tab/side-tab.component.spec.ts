@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SideTab } from './side-tab';
+import { SideTabComponent } from './side-tab.component';
 
 describe('SideTab', () => {
-  let component: SideTab;
-  let fixture: ComponentFixture<SideTab>;
+  let component: SideTabComponent;
+  let fixture: ComponentFixture<SideTabComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SideTab]
-    })
-    .compileComponents();
+      imports: [SideTabComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(SideTab);
+    fixture = TestBed.createComponent(SideTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

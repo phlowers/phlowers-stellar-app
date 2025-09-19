@@ -1,0 +1,36 @@
+<aside class="side-tab">
+  <header class="side-tab__header">
+    @for (tab of tabs; track $index) {
+      <button
+        #btnRef
+        class="side-tab__header__btn"
+        [class.active]="isOpen($index)"
+        (click)="toggleTab($index)"
+        [id]="getButtonId($index)"
+        [attr.aria-expanded]="isOpen($index)"
+        [attr.aria-controls]="getPanelId($index)"
+      >
+        <span class="side-tab__header__btn__bxsh"></span>
+        <span class="side-tab__header__btn__label">
+          {{ tab.label() }}
+        </span>
+      </button>
+    }
+  </header>
+
+  <main class="side-tab__main" [style.width]="panelWidth()">
+    @for (tab of tabs; track $index) {
+      <section
+        #panelRef
+        tabindex="-1"
+        class="side-tab__main__section"
+        [class.active]="isOpen($index)"
+        [id]="getPanelId($index)"
+        [attr.aria-labelledby]="getButtonId($index)"
+        (focusout)="handlePanelBlur($event, $index)"
+      >
+        <ng-container *ngTemplateOutlet="tab.template" />
+      </section>
+    }
+  </main>
+</aside>
