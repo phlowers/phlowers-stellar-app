@@ -90,6 +90,12 @@
         }
       }
 
+      &:focus-visible {
+        outline: 0.0625rem solid var(--primary-900);
+        outline-offset: 0.25rem;
+        z-index: 7;
+      }
+
       &__bxsh {
         position: absolute;
         left: 0;
@@ -132,6 +138,8 @@
 
   .side-tab__header__btn:hover
     + .side-tab__header__btn
+    .side-tab__header__btn__bxsh::before,
+  .side-tab__header__btn:first-child:hover
     .side-tab__header__btn__bxsh::before {
     background-image: linear-gradient(
       to right,

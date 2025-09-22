@@ -3,9 +3,12 @@
     @for (tab of tabs; track $index) {
       <button
         #btnRef
+        type="button"
+        role="tab"
         class="side-tab__header__btn"
         [class.active]="isOpen($index)"
         (click)="toggleTab($index)"
+        (keydown)="handleKeyDown($event, $index)"
         [id]="getButtonId($index)"
         [attr.aria-expanded]="isOpen($index)"
         [attr.aria-controls]="getPanelId($index)"
@@ -22,12 +25,14 @@
     @for (tab of tabs; track $index) {
       <section
         #panelRef
+        role="tabpanel"
         tabindex="-1"
         class="side-tab__main__section"
         [class.active]="isOpen($index)"
         [id]="getPanelId($index)"
         [attr.aria-labelledby]="getButtonId($index)"
-        (focusout)="handlePanelBlur($event, $index)"
+        (focusout)="handlePanelFocusOut($event, $index)"
+        [hidden]="!isOpen($index)"
       >
         <ng-container *ngTemplateOutlet="tab.template" />
       </section>

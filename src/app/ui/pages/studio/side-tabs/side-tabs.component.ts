@@ -1,5 +1,4 @@
 import {
-  afterNextRender,
   Component,
   ContentChildren,
   ElementRef,
@@ -24,8 +23,31 @@ export class SideTabsComponent {
   public sideTabs = signal<number | string>('');
   public panelWidth = signal<string>('0px');
 
-  constructor() {
-    afterNextRender(() => this.updateWidth());
+  private updateWidth() {
+    const idx = this.sideTabs();
+    if (idx === '') {
+      this.panelWidth.set('0px');
+      return;
+    }
+
+    setTimeout(() => {
+      const el = this.panels.toArray()[idx as number]?.nativeElement;
+      if (el) {
+        this.panelWidth.set(`${el.offsetWidth}px`);
+      }
+    });
+  }
+
+  private focusPanel(i: number) {
+    setTimeout(() => {
+      const el = this.panels.toArray()[i]?.nativeElement;
+      el?.focus();
+    });
+  }
+
+  private focusButton(i: number) {
+    const btn = this.btns.toArray()[i]?.nativeElement;
+    btn?.focus();
   }
 
   toggleTab(i: number) {
@@ -50,37 +72,40 @@ export class SideTabsComponent {
     return `side-tab-panel-${i}`;
   }
 
-  handlePanelBlur(event: FocusEvent, i: number) {
-    const panel = this.panels.toArray()[i]?.nativeElement;
-    const related = event.relatedTarget as HTMLElement | null;
+  handleKeyDown(event: KeyboardEvent, i: number) {
+    const count = this.btns.length;
+    let newIndex = i;
 
-    if (panel && related && !panel.contains(related)) {
-      this.focusButton(i);
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowRight':
+        newIndex = (i + 1) % count;
+        this.focusButton(newIndex);
+        break;
+      case 'ArrowUp':
+      case 'ArrowLeft':
+        newIndex = (i - 1 + count) % count;
+        this.focusButton(newIndex);
+        break;
+      case 'Escape':
+        if (this.sideTabs() !== '') {
+          this.sideTabs.set('');
+          this.panelWidth.set('0px');
+          this.focusButton(i);
+        }
+        event.preventDefault();
+        break;
     }
   }
 
-  private updateWidth() {
-    queueMicrotask(() => {
-      const idx = this.sideTabs();
-      if (idx === '') {
-        this.panelWidth.set('0px');
-        return;
-      }
+  handlePanelFocusOut(event: FocusEvent, i: number) {
+    const panel = this.panels.toArray()[i]?.nativeElement;
+    const next = event.relatedTarget as HTMLElement | null;
 
-      const el = this.panels.toArray()[idx as number]?.nativeElement;
-      if (el) {
-        this.panelWidth.set(`${el.offsetWidth}px`);
-      }
-    });
-  }
+    if (panel && next && panel.contains(next)) {
+      return;
+    }
 
-  private focusPanel(i: number) {
-    const el = this.panels.toArray()[i]?.nativeElement;
-    el?.focus();
-  }
-
-  private focusButton(i: number) {
-    const btn = this.btns.toArray()[i]?.nativeElement;
-    btn?.focus();
+    this.focusButton(i);
   }
 }
