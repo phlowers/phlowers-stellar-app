@@ -12,17 +12,17 @@ import { SideTabComponent } from './side-tab/side-tab.component';
   imports: [SideTabsComponent, SideTabComponent],
   standalone: true
 })
-class TestHost {}
+class TestHostComponent {}
 
 describe('SideTabsComponent', () => {
-  let fixture: ComponentFixture<TestHost>;
+  let fixture: ComponentFixture<TestHostComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TestHost]
+      imports: [TestHostComponent]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TestHost);
+    fixture = TestBed.createComponent(TestHostComponent);
     fixture.detectChanges();
   });
 
