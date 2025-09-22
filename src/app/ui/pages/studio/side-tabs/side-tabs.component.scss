@@ -160,12 +160,19 @@
 
     &__section {
       @apply absolute top-0 left-0 opacity-0;
-      transition: opacity 0.3s 0.3s ease-out;
+      transition:
+        opacity 0.3s ease-out,
+        display 0.3s ease-out;
+      transition-behavior: allow-discrete;
 
       &.active {
         @apply opacity-100 h-full;
         background: #fff;
         transition: opacity 0.3s ease-out;
+
+        @starting-style {
+          opacity: 0;
+        }
       }
     }
   }
