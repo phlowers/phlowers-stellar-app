@@ -26,8 +26,8 @@
   </div>
   @if (this.newStudies().length > 0) {
     <div class="flex justify-center mt-4">
-      <ul i18n class="flex flex-col gap-4 w-[40rem]">
-        Imported studies:
+      <ul class="flex flex-col gap-4 w-[40rem]">
+        <ng-container i18n>Imported studies:</ng-container>
         @for (study of this.newStudies(); track study) {
           <li class="flex flex-col gap-2">
             <div class="items-center flex justify-between">

@@ -1,0 +1,174 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.side-tab {
+  @apply flex h-full;
+
+  $_btn-overlap-size: 0.875rem;
+  $_btn-px: 2.25rem;
+  $_default-btn-bgc: var(--primary-100);
+  $_active-btn-bgc: var(--grey-white);
+  $_hover-btn-bgc: var(--primary-200);
+  $_panel-transition-timing: 0.3s;
+  $_panel-transition-effect: ease-out;
+
+  %_btn-bblr {
+    border-bottom-left-radius: 0.5rem;
+  }
+
+  &__header {
+    @apply inline-flex flex-col shrink-0;
+
+    &__btn {
+      @apply uppercase relative;
+      @extend %text-s-600;
+      @extend %_btn-bblr;
+      writing-mode: sideways-lr;
+      padding: $_btn-px 0.6875rem;
+      min-height: 8.1875rem;
+      background-color: $_default-btn-bgc;
+
+      &:not(:first-child) {
+        margin-top: -$_btn-overlap-size;
+        padding-top: $_btn-px + $_btn-overlap-size;
+      }
+
+      &::before,
+      &::after {
+        @apply absolute;
+        content: '';
+      }
+
+      &::before {
+        @apply right-0 bottom-0 opacity-0;
+        width: 0.625rem;
+        height: calc(100% - #{$_btn-overlap-size});
+        background-color: $_active-btn-bgc;
+        z-index: 4;
+      }
+
+      &:first-child {
+        &::before {
+          @apply h-full;
+        }
+      }
+
+      &::after {
+        @apply bottom-0 left-0 w-full;
+        @extend %_btn-bblr;
+        z-index: 2;
+        height: $_btn-overlap-size + 0.25rem;
+        background-color: $_default-btn-bgc;
+      }
+
+      &.active {
+        &,
+        &::after {
+          background-color: $_active-btn-bgc;
+        }
+
+        &::before {
+          @apply opacity-100;
+        }
+
+        &:hover {
+          &,
+          &::before,
+          &::after {
+            background-color: var(--grey-50);
+          }
+        }
+      }
+
+      &:not(.active):hover {
+        &,
+        &::after {
+          background-color: $_hover-btn-bgc;
+        }
+      }
+
+      &:focus-visible {
+        outline: 0.0625rem solid var(--primary-900);
+        outline-offset: 0.25rem;
+        z-index: 7;
+      }
+
+      &__bxsh {
+        @apply absolute left-0 top-0 w-full h-full;
+        @extend %_btn-bblr;
+        z-index: 1;
+        box-shadow: map.get(app.$elevation, neutral-3);
+      }
+
+      &__label {
+        @apply relative;
+        z-index: 6;
+      }
+
+      // Permits drop shadow to go over active button.
+      // but not over it's previous button (before pseudo el act as a mask for box-shadow. Tricky z-index issue)
+      // Proceed with caution on changes here
+      &:has(+ &.active) &__bxsh {
+        z-index: 5;
+
+        &::before {
+          @apply absolute left-0 w-full;
+          @extend %_btn-bblr;
+          content: '';
+          top: -0.25rem;
+          height: $_btn-overlap-size + 0.25rem;
+          background-image: linear-gradient(
+            to right,
+            $_default-btn-bgc 80%,
+            rgb(from #{$_default-btn-bgc} r g b / 0)
+          );
+        }
+      }
+
+      // ensure masks are the correct bgc for themselves and their sibling hover state.
+      // Proceed with caution on changes here
+      &:hover + & &__bxsh::before,
+      &:first-child:hover &__bxsh::before {
+        background-image: linear-gradient(
+          to right,
+          $_hover-btn-bgc 80%,
+          rgb(from #{$_hover-btn-bgc} r g b / 0)
+        );
+      }
+    }
+  }
+
+  &__main {
+    @apply relative h-full overflow-hidden;
+    z-index: 3;
+    background-color: $_active-btn-bgc;
+    transition: width $_panel-transition-timing ease-in;
+
+    &:has(.side-tab__main__section.active) {
+      box-shadow: map.get(app.$elevation, neutral-4);
+    }
+
+    &__section {
+      @apply absolute top-0 left-0 opacity-0;
+      transition:
+        opacity $_panel-transition-timing $_panel-transition-effect,
+        display $_panel-transition-timing $_panel-transition-effect;
+      transition-behavior: allow-discrete;
+
+      &.active {
+        @apply opacity-100 h-full;
+        background: $_active-btn-bgc;
+        transition: opacity $_panel-transition-timing $_panel-transition-timing
+          $_panel-transition-effect;
+
+        @starting-style {
+          opacity: 0;
+        }
+      }
+
+      &__header {
+        padding: 0.875rem 0.5rem 0.375rem;
+      }
+    }
+  }
+}
