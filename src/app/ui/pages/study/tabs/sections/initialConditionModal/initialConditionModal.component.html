@@ -35,9 +35,10 @@
     @if (mode() === 'create' || mode() === 'edit') {
       <div class="form__col form__col--right">
         <div>
-          <label for="initial-condition-name" i18n
-            >Initial condition name <sup class="mandatory">*</sup></label
-          >
+          <label for="initial-condition-name">
+            <ng-container i18n>Initial condition name </ng-container>
+            <sup class="mandatory">*</sup>
+          </label>
           <input
             name="initial-condition-name"
             required

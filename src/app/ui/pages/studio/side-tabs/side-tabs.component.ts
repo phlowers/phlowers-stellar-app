@@ -8,10 +8,12 @@ import {
 } from '@angular/core';
 import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 
 @Component({
   selector: 'app-side-tabs',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, ButtonComponent, IconComponent],
   templateUrl: './side-tabs.component.html',
   styleUrl: './side-tabs.component.scss'
 })
