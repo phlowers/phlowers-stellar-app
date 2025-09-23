@@ -28,7 +28,7 @@ describe('SideTabsComponent', () => {
 
   function getButtons(): HTMLButtonElement[] {
     return fixture.debugElement
-      .queryAll(By.css('button'))
+      .queryAll(By.css('button.side-tab__header__btn'))
       .map((b) => b.nativeElement);
   }
 
