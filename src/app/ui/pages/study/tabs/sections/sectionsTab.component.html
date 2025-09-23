@@ -41,6 +41,8 @@
           i18n-ariaLabel
           class="section__selector"
           [binary]="true"
+          [ngModel]="selectedSection() === section.uuid"
+          (onChange)="selectSection(section)"
         />
 
         <dl>
@@ -269,7 +271,13 @@
     }
   </article>
 
-  <div class="sticky-btn-wrapper">
+  <div class="sticky-btn-wrapper flex gap-2 justify-end">
+    @if (selectedSection()) {
+      <a app-btn btnStyle="base" btnSize="m" href="/studio">
+        <app-icon icon="play_circle" />
+        <span i18n>Generate an initial state</span>
+      </a>
+    }
     <button
       i18n
       app-btn

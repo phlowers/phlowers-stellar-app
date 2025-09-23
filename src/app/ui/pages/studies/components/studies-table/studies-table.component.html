@@ -160,6 +160,15 @@
               app-btn
               btnSize="s"
               btnStyle="text"
+              (click)="exportStudy.emit(study.uuid)"
+            >
+              <app-icon icon="download" />
+              <span i18n>Export</span>
+            </button>
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
               class="erase-btn"
               (click)="deleteStudy.emit(study.uuid)"
             >

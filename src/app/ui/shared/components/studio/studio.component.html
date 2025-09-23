@@ -1,9 +1,14 @@
-<div class="flex flex-col">
+<div class="h-full relative">
   @if (loading()) {
-    <div class="h-[450px] flex justify-center items-center h-80">
+    <div
+      class="absolute top-0 left-0 w-full h-full flex justify-center items-center"
+    >
       <p-progress-spinner ariaLabel="loading" />
     </div>
-  } @else {
-    <app-section [litData]="litData()"></app-section>
   }
+  <app-section
+    class="h-full"
+    [litData]="litData()"
+    [isSupportZoom]="isSupportZoom()"
+  ></app-section>
 </div>

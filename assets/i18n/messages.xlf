@@ -141,11 +141,6 @@
         <source>Search</source>
       </segment>
     </unit>
-    <unit id="8953033926734869941">
-      <segment>
-        <source>Name</source>
-      </segment>
-    </unit>
     <unit id="4902817035128594900">
       <segment>
         <source>Description</source>
@@ -296,9 +291,9 @@
         <source> Supports </source>
       </segment>
     </unit>
-    <unit id="1772495502731751754">
+    <unit id="7760196930365705954">
       <segment>
-        <source>Attachment height (m)</source>
+        <source> Attachment height (m) </source>
       </segment>
     </unit>
     <unit id="1949800506879332767">
@@ -411,9 +406,9 @@
         <source> Loading </source>
       </segment>
     </unit>
-    <unit id="3154787560331051884">
+    <unit id="5758842248880389182">
       <segment>
-        <source>Chain V</source>
+        <source> Chain V </source>
       </segment>
     </unit>
     <unit id="3159332545494825825">
@@ -431,9 +426,9 @@
         <source> Base parameter </source>
       </segment>
     </unit>
-    <unit id="3337781493803072719">
+    <unit id="844419370454903604">
       <segment>
-        <source>Span angle (Gr)</source>
+        <source> Span angle (Gr) </source>
       </segment>
     </unit>
     <unit id="3510960524643312912">
@@ -561,11 +556,6 @@
         <source> Base temperature (°C) </source>
       </segment>
     </unit>
-    <unit id="5280768007794245227">
-      <segment>
-        <source>Cable (NGF)</source>
-      </segment>
-    </unit>
     <unit id="5281579610433386344">
       <segment>
         <source>Are you sure you want to reset the app?</source>
@@ -601,9 +591,9 @@
         <source>No recent studies</source>
       </segment>
     </unit>
-    <unit id="5513122358899972896">
+    <unit id="5027494160802883894">
       <segment>
-        <source>Chain name</source>
+        <source> Chain name </source>
       </segment>
     </unit>
     <unit id="5519001504653726625">
@@ -671,9 +661,9 @@
         <source> Reset the app </source>
       </segment>
     </unit>
-    <unit id="6370642728789544052">
+    <unit id="3109247660283861099">
       <segment>
-        <source>Number</source>
+        <source> Number </source>
       </segment>
     </unit>
     <unit id="836321179652220398">
@@ -686,9 +676,9 @@
         <source>Error: end not in list</source>
       </segment>
     </unit>
-    <unit id="6543536815504799118">
+    <unit id="6458039984683283908">
       <segment>
-        <source>Chain length (m)</source>
+        <source> Chain length (m) </source>
       </segment>
     </unit>
     <unit id="6598075623864682368">
@@ -741,9 +731,9 @@
         <source> Ready </source>
       </segment>
     </unit>
-    <unit id="7270261397893681192">
+    <unit id="3170243429374159395">
       <segment>
-        <source>Chain weight (kg)</source>
+        <source> Chain weight (kg) </source>
       </segment>
     </unit>
     <unit id="7282804341793038828">
@@ -766,9 +756,9 @@
         <source>Delete support</source>
       </segment>
     </unit>
-    <unit id="7497893791400342599">
+    <unit id="3071505366920262036">
       <segment>
-        <source>Span length (m)</source>
+        <source> Span length (m) </source>
       </segment>
     </unit>
     <unit id="7601213978629574297">
@@ -1011,11 +1001,6 @@
         <source>Changelog</source>
       </segment>
     </unit>
-    <unit id="1035207489563002235">
-      <segment>
-        <source> fold back </source>
-      </segment>
-    </unit>
     <unit id="1690240850123989028">
       <segment>
         <source>No news found</source>
@@ -1029,11 +1014,6 @@
     <unit id="2622453688077092594">
       <segment>
         <source>Study imported from protoV4</source>
-      </segment>
-    </unit>
-    <unit id="2932152767120246098">
-      <segment>
-        <source> Upload one or multiple protoV4 files </source>
       </segment>
     </unit>
     <unit id="278935170538178235">
@@ -1059,6 +1039,61 @@
     <unit id="6389312883797462351">
       <segment>
         <source>Studio</source>
+      </segment>
+    </unit>
+    <unit id="1005793920710327844">
+      <segment>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;"/> Double click on a column to copy the value to all supports </source>
+      </segment>
+    </unit>
+    <unit id="2901943060312328653">
+      <segment>
+        <source> Support name </source>
+      </segment>
+    </unit>
+    <unit id="3177037057474396347">
+      <segment>
+        <source> Upload one or multiple files </source>
+      </segment>
+    </unit>
+    <unit id="361983614534909005">
+      <segment>
+        <source>Height below console (m)</source>
+      </segment>
+    </unit>
+    <unit id="419149014255896698">
+      <segment>
+        <source>Support name</source>
+      </segment>
+    </unit>
+    <unit id="5249740663925942907">
+      <segment>
+        <source> Arm length (m) </source>
+      </segment>
+    </unit>
+    <unit id="6120722023223731581">
+      <segment>
+        <source>Generate an initial state</source>
+      </segment>
+    </unit>
+    <unit id="7462301153729425254">
+      <segment>
+        <source>Export</source>
+      </segment>
+    </unit>
+    <unit id="755168724826424878">
+      <segment>
+        <source> The attachment set number and the arm length value will be automatically filled in the table. </source>
+      </segment>
+    </unit>
+    <unit id="7584732332123203553">
+      <segment>
+        <source>Attachment set</source>
+      </segment>
+    </unit>
+    <unit id="8455284935734906867">
+      <segment>
+        <source> Attachment set </source>
       </segment>
     </unit>
   </file>

@@ -97,7 +97,7 @@ describe('Section2DComponent', () => {
 
     it('should have default signal values', () => {
       expect(component.selectedSpan()).toBe(0);
-      expect(component.plotlyOptions()).toEqual({
+      expect(component.plotOptions()).toEqual({
         view: '2d',
         side: 'profile',
         startSupport: 1,
@@ -142,12 +142,12 @@ describe('Section2DComponent', () => {
       fixture.componentRef.setInput('litData', mockLitData);
     });
 
-    it('should return empty string when plotlyOptions are valid', () => {
+    it('should return empty string when plotOptions are valid', () => {
       expect(component.errorMessage()).toBe('');
     });
 
     it('should return error when startSupport >= endSupport', () => {
-      fixture.componentRef.setInput('plotlyOptions', {
+      fixture.componentRef.setInput('plotOptions', {
         view: '2d',
         side: 'profile',
         startSupport: 3,
@@ -157,7 +157,7 @@ describe('Section2DComponent', () => {
     });
 
     it('should return error when startSupport is not in supports list', () => {
-      fixture.componentRef.setInput('plotlyOptions', {
+      fixture.componentRef.setInput('plotOptions', {
         view: '2d',
         side: 'profile',
         startSupport: 10,
@@ -167,7 +167,7 @@ describe('Section2DComponent', () => {
     });
 
     it('should return error when endSupport is not in supports list', () => {
-      fixture.componentRef.setInput('plotlyOptions', {
+      fixture.componentRef.setInput('plotOptions', {
         view: '2d',
         side: 'profile',
         startSupport: 1,
@@ -177,7 +177,7 @@ describe('Section2DComponent', () => {
     });
 
     it('should prioritize start >= end error over other errors', () => {
-      fixture.componentRef.setInput('plotlyOptions', {
+      fixture.componentRef.setInput('plotOptions', {
         view: '2d',
         side: 'profile',
         startSupport: 10,
@@ -231,8 +231,8 @@ describe('Section2DComponent', () => {
       );
     });
 
-    it('should use current plotlyOptions when calling createPlotData', () => {
-      fixture.componentRef.setInput('plotlyOptions', {
+    it('should use current plotOptions when calling createPlotData', () => {
+      fixture.componentRef.setInput('plotOptions', {
         view: '3d',
         side: 'face',
         startSupport: 2,
@@ -288,11 +288,11 @@ describe('Section2DComponent', () => {
       expect(refreshSpy).toHaveBeenCalledWith(mockLitData);
     });
 
-    it('should handle workflow with invalid plotlyOptions', () => {
+    it('should handle workflow with invalid plotOptions', () => {
       fixture.componentRef.setInput('litData', mockLitData);
 
-      // Set invalid plotlyOptions
-      fixture.componentRef.setInput('plotlyOptions', {
+      // Set invalid plotOptions
+      fixture.componentRef.setInput('plotOptions', {
         view: '2d',
         side: 'profile',
         startSupport: 5,
@@ -306,18 +306,18 @@ describe('Section2DComponent', () => {
       expect(component.supports()).toHaveLength(5);
     });
 
-    it('should update plot when plotlyOptions change', () => {
+    it('should update plot when plotOptions change', () => {
       fixture.componentRef.setInput('litData', mockLitData);
 
-      // Change plotlyOptions
-      fixture.componentRef.setInput('plotlyOptions', {
+      // Change plotOptions
+      fixture.componentRef.setInput('plotOptions', {
         view: '3d',
         side: 'face',
         startSupport: 2,
         endSupport: 4
       });
 
-      // Test that refreshSection works with new plotlyOptions
+      // Test that refreshSection works with new plotOptions
       const refreshSpy = jest.spyOn(component, 'refreshSection');
       component.refreshSection(mockLitData);
       expect(refreshSpy).toHaveBeenCalledWith(mockLitData);

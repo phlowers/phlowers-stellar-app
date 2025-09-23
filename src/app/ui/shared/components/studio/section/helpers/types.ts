@@ -26,4 +26,5 @@ export interface PlotOptions {
   side: Side;
   startSupport: number;
   endSupport: number;
+  invert: boolean;
 }

@@ -148,7 +148,7 @@ export class StudiesService {
   async createStudyFromProtoV4(
     protoV4Supports: ProtoV4Support[],
     parameters: ProtoV4Parameters
-  ): Promise<StudyModel> {
+  ): Promise<Study> {
     const section = createEmptySection();
     section.name = parameters.project_name;
     section.type = 'phase';
@@ -179,6 +179,28 @@ export class StudiesService {
       sections: [section]
     });
     const study = await this.getStudy(uuid);
-    return study as StudyModel;
+    return study!;
+  }
+
+  /**
+   * Export a study
+   * @param uuid The uuid of the study to export
+   */
+  async exportStudy(uuid: string) {
+    const study = await this.getStudy(uuid);
+    if (!study) {
+      return;
+    }
+    // download file in json
+    const blob = new Blob([JSON.stringify(study)], {
+      type: 'application/json'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${study.title}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    return;
   }
 }

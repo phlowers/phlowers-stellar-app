@@ -1,0 +1,84 @@
+<p-dialog
+  dismissableMask="true"
+  [visible]="isOpen()"
+  (visibleChange)="onVisibleChange($event)"
+  keepInViewport="false"
+  i18n-header
+  [style]="{ width: '600px', height: '500px' }"
+  [modal]="true"
+>
+  <ng-template #header>
+    <span i18n>Attachment set</span>
+  </ng-template>
+  <ng-template #content>
+    <div class="flex flex-row gap-2 h-full">
+      <div class="w-[300px] flex flex-col gap-2">
+        <span i18n>
+          The attachment set number and the arm length value will be
+          automatically filled in the table.
+        </span>
+        <div class="flex flex-col gap-1">
+          <label for="supportName" i18n>Support name</label>
+          <p-select
+            [showClear]="true"
+            inputId="supportName"
+            [options]="attachmentFilterTable() | unique: 'support_name'"
+            optionLabel="support_name"
+            optionValue="support_name"
+            [(ngModel)]="supportName"
+            (onChange)="onAttachnementSelect($event, 'support_name')"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="attachmentSet" i18n>Attachment set</label>
+          <p-select
+            [showClear]="true"
+            inputId="attachmentSet"
+            [disabled]="!supportName()"
+            [options]="attachmentFilterTable() | unique: 'attachment_set'"
+            optionLabel="attachment_set"
+            optionValue="attachment_set"
+            [(ngModel)]="attachmentSet"
+            (onChange)="onAttachnementSelect($event, 'attachment_set')"
+          />
+        </div>
+        <p-divider class="!my-2" />
+        <div class="flex flex-row gap-2">
+          <div>
+            <label for="armLength" i18n>Arm length (m)</label>
+            <span class="ml-2">{{ armLength() || '-' }}</span>
+          </div>
+          <div>
+            <label for="armLength" i18n>Height below console (m)</label>
+            <span class="ml-2">{{ heightBelowConsole() || '-' }}</span>
+          </div>
+        </div>
+      </div>
+      <app-studio class="w-[300px]" [isSupportZoom]="true"></app-studio>
+    </div>
+  </ng-template>
+
+  <ng-template #footer>
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      btnStyle="outlined"
+      (click)="onVisibleChange(false)"
+    >
+      <app-icon icon="close" />
+      <ng-container i18n>Cancel</ng-container>
+    </button>
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      btnStyle="base"
+      [disabled]="!supportName() || !attachmentSet()"
+      (click)="validate()"
+    >
+      <app-icon icon="check" />
+      <ng-container i18n>Validate</ng-container>
+    </button>
+  </ng-template>
+</p-dialog>

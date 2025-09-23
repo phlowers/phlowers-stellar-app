@@ -3,6 +3,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule } from '@angular/forms';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { PlotService } from '@src/app/ui/pages/studio/plot.service';
 
 @Component({
   selector: 'app-studio-top-toolbar',
@@ -11,6 +12,7 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
   imports: [SelectButtonModule, FormsModule, DividerModule, ToggleSwitchModule]
 })
 export class StudioTopToolbarComponent {
+  constructor(public readonly plotService: PlotService) {}
   threeDOptions = signal<
     {
       label: string;
@@ -20,7 +22,6 @@ export class StudioTopToolbarComponent {
     { label: '2D', value: '2d' },
     { label: '3D', value: '3d' }
   ]);
-  threeDChecked = signal<string>('2d');
   sideOptions = signal<
     {
       label: string;
@@ -30,6 +31,4 @@ export class StudioTopToolbarComponent {
     { label: 'Profile', value: 'profile' },
     { label: 'Face', value: 'face' }
   ]);
-  sideChecked = signal<string>('profile');
-  toggleInvert = signal<boolean>(false);
 }

@@ -1,0 +1,133 @@
+import {
+  Component,
+  effect,
+  input,
+  OnInit,
+  output,
+  signal
+} from '@angular/core';
+import { DialogModule } from 'primeng/dialog';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { Select } from 'primeng/select';
+import { Attachment } from '@src/app/core/data/database/interfaces/attachment';
+import { DividerModule } from 'primeng/divider';
+import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.component';
+import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
+import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
+import { Support } from '@src/app/core/data/database/interfaces/support';
+import { FormsModule } from '@angular/forms';
+import { UniquePipe } from '@src/app/ui/shared/service/autocomplete/unique.pipe';
+@Component({
+  selector: 'app-attachment-set-modal',
+  imports: [
+    DialogModule,
+    IconComponent,
+    ButtonComponent,
+    Select,
+    DividerModule,
+    StudioComponent,
+    FormsModule,
+    UniquePipe
+  ],
+  templateUrl: './attachmentSetModal.component.html',
+  styleUrl: './attachmentSetModal.component.scss'
+})
+export class AttachmentSetModalComponent implements OnInit {
+  isOpen = input<boolean>(false);
+  isOpenChange = output<boolean>();
+  attachmentSet = signal<string | undefined>(undefined);
+  supportName = signal<string | undefined>(undefined);
+  armLength = signal<number | undefined>(undefined);
+  heightBelowConsole = signal<number | undefined>(undefined);
+  plotOptions = signal<PlotOptions>({
+    view: '2d',
+    side: 'profile',
+    startSupport: 0,
+    endSupport: 1,
+    invert: false
+  });
+  attachmentFilterTable = signal<Attachment[]>([]);
+  support = input<Support>();
+  validateForm = output<{
+    uuid: string;
+    supportName: string;
+    attachmentSet: string;
+    armLength: number;
+    heightBelowConsole: number;
+  }>();
+  onVisibleChange(visible: boolean) {
+    this.isOpenChange.emit(visible);
+  }
+
+  constructor(private readonly attachmentService: AttachmentService) {
+    effect(() => {
+      if (this.isOpen()) {
+        this.resetValues();
+      }
+    });
+  }
+
+  validate() {
+    this.validateForm.emit({
+      supportName: this.supportName() || '',
+      attachmentSet: this.attachmentSet() || '',
+      armLength: this.armLength() || 0,
+      heightBelowConsole: this.heightBelowConsole() || 0,
+      uuid: this.support()?.uuid || ''
+    });
+    this.onVisibleChange(false);
+  }
+
+  async getData() {
+    const attachments = await this.attachmentService.getAttachments();
+    this.attachmentFilterTable.set(
+      attachments.sort(
+        (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
+      ) || []
+    );
+  }
+
+  resetValues() {
+    this.armLength.set(undefined);
+    this.heightBelowConsole.set(undefined);
+    this.attachmentSet.set(undefined);
+    this.supportName.set(undefined);
+    this.getData();
+  }
+
+  ngOnInit() {
+    this.getData();
+  }
+
+  async onAttachnementSelect(event: any, key: keyof Attachment) {
+    if (!event.value) {
+      this.resetValues();
+      return;
+    }
+    if (key === 'support_name') {
+      const attachments = await this.attachmentService.getAttachments();
+      const items =
+        attachments
+          .filter((item) => item.support_name === event.value)
+          .sort(
+            (a, b) =>
+              a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
+          ) || [];
+      this.attachmentFilterTable.set(items);
+    }
+
+    if (key === 'attachment_set') {
+      const attachments = await this.attachmentService.getAttachments();
+      const items = attachments.filter(
+        (item) =>
+          item.attachment_set === event.value &&
+          item.support_name === this.supportName()
+      );
+      if (items[0]) {
+        this.armLength.set(items[0].cross_arm_length);
+        this.heightBelowConsole.set(items[0].attachment_altitude);
+      }
+    }
+  }
+}

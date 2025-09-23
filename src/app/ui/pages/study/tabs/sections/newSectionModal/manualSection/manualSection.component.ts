@@ -71,7 +71,6 @@ export class ManualSectionComponent implements OnInit {
   studio = viewChild(StudioComponent);
   cablesFilterTable = signal<Cable[]>([]);
   public sectionTypes = sectionTypes;
-
   constructor(
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,

@@ -10,6 +10,7 @@ import { Support } from 'src/app/core/data/database/interfaces/support';
 import { Chain } from '@src/app/core/data/database/interfaces/chain';
 import { ChainsService } from '@src/app/core/services/chains/chains.service';
 import { SelectModule } from 'primeng/select';
+import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 
 @Component({
   selector: 'app-supports-table',
@@ -20,7 +21,8 @@ import { SelectModule } from 'primeng/select';
     PopoverModule,
     ButtonComponent,
     IconComponent,
-    SelectModule
+    SelectModule,
+    AttachmentSetModalComponent
   ],
   templateUrl: './supportsTable.component.html',
   styleUrls: ['./supportsTable.component.scss']
@@ -32,13 +34,17 @@ export class SupportsTableComponent implements OnInit {
   deleteSupport = output<string>();
   supportChange = output<{ uuid: string; field: keyof Support; value: any }>();
   chains = signal<Chain[]>([]);
-
+  attachmentSetModalOpen = signal<boolean>(false);
+  supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   constructor(private readonly chainsService: ChainsService) {}
 
+  async getData() {
+    const chains = await this.chainsService.getChains();
+    this.chains.set(chains || []);
+  }
+
   ngOnInit() {
-    this.chainsService.getChains().then((chains) => {
-      this.chains.set(chains || []);
-    });
+    this.getData();
   }
 
   onSupportFieldChange(uuid: string, field: keyof Support, value: any) {
@@ -58,5 +64,59 @@ export class SupportsTableComponent implements OnInit {
       }
     }
     this.supportChange.emit({ uuid, field, value });
+  }
+
+  copyColumn(header: keyof Support) {
+    const firstSupport = this.supports()[0];
+    if (!firstSupport) return;
+    const isChainName = header === 'chainName';
+    for (const support of this.supports()) {
+      this.supportChange.emit({
+        uuid: support.uuid,
+        field: header,
+        value: firstSupport[header]
+      });
+      if (isChainName) {
+        this.supportChange.emit({
+          uuid: support.uuid,
+          field: 'chainLength',
+          value: firstSupport['chainLength']
+        });
+        this.supportChange.emit({
+          uuid: support.uuid,
+          field: 'chainWeight',
+          value: firstSupport['chainWeight']
+        });
+      }
+    }
+  }
+
+  onSupportNumberDoubleClick(header: keyof Support) {
+    this.copyColumn(header);
+  }
+
+  openAttachmentSetModal(uuid: string) {
+    this.supportForAttachmentSetModal.set(
+      this.supports().find((support) => support.uuid === uuid)
+    );
+    this.attachmentSetModalOpen.set(true);
+  }
+
+  onValidateFormAttachmentSetModal(event: {
+    uuid: string;
+    supportName: string;
+    attachmentSet: string;
+    armLength: number;
+    heightBelowConsole: number;
+  }) {
+    const support = this.supports().find(
+      (support) => support.uuid === event.uuid
+    );
+    if (support) {
+      support.name = event.supportName;
+      support.attachmentSet = event.attachmentSet;
+      support.armLength = event.armLength;
+      support.heightBelowConsole = event.heightBelowConsole;
+    }
   }
 }

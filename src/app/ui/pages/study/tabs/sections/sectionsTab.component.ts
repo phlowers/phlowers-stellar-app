@@ -55,6 +55,7 @@ export class SectionsTabComponent {
   newSectionModalMode = signal<CreateEditView>('create');
   isInitialConditionModalOpen = signal<boolean>(false);
   initialConditionModalMode = signal<CreateEditView>('create');
+  selectedSection = signal<string>('');
 
   createInitialCondition(section: Section): InitialCondition {
     const currentInitialConditions = section.initial_conditions;
@@ -67,6 +68,11 @@ export class SectionsTabComponent {
       base_parameters: '',
       base_temperature: 0
     };
+  }
+
+  selectSection(section: Section) {
+    console.log('section', section);
+    this.selectedSection.set(section.uuid);
   }
 
   selectItem(item: any, event: Event) {
