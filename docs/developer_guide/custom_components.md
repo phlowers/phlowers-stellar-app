@@ -67,6 +67,7 @@ Accordion is fully from PrimeNG but we had to use built-in mecanics to change he
 This change is integrated in app-accordion-header component so you should use it instead of p-accordion-header.  
 Content is projected inside p-accordion-header so feel free to inject whatever you need.
 
+implementation ex:
 ```HTML
 <p-accordion value="0">
   <p-accordion-panel value="0">
@@ -88,4 +89,33 @@ Content is projected inside p-accordion-header so feel free to inject whatever y
     </p-accordion-content>
   </p-accordion-panel>
 </p-accordion>
+```
+
+## side-tabs & side-tab
+Side-tabs component is an horizontal tabs like folders which toggle like an accordion.  
+Wrapper is side-tabs and all contents is injected with side-tab through input signal and templateRef
+
+### side-tabs
+- selector: app-side-tabs
+- no-input
+
+### side-tab
+- selector: app-side-tab
+- input: label = `input.required<string>()` // Defines the tab control button
+
+implementation ex:
+```HTML
+<app-side-tabs>
+  <app-side-tab label="button label 1">
+    <ng-template>
+      content is anything you want but must be in a ng-template
+    </ng-template>
+  </app-side-tab>
+
+  <app-side-tab label="button label 2">
+    <ng-template>
+      content is anything you want but must be in a ng-template
+    </ng-template>
+  </app-side-tab>
+</app-side-tabs>
 ```

@@ -4,8 +4,7 @@ import { TagComponent } from '@ui/shared/components/atoms/tag/tag.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { AccordionModule } from 'primeng/accordion';
 import { Study } from '@src/app/core/data/database/interfaces/study';
-import { DatePipe } from '@angular/common';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-study-header',
