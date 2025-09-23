@@ -1,0 +1,52 @@
+<aside class="side-tab">
+  <header class="side-tab__header">
+    @for (tab of tabs; track $index) {
+      <button
+        #btnRef
+        type="button"
+        role="tab"
+        class="side-tab__header__btn"
+        [class.active]="isOpen($index)"
+        (click)="toggleTab($index)"
+        (keydown)="handleKeyDown($event, $index)"
+        [id]="getButtonId($index)"
+        [attr.aria-expanded]="isOpen($index)"
+        [attr.aria-controls]="getPanelId($index)"
+      >
+        <span class="side-tab__header__btn__bxsh"></span>
+        <span class="side-tab__header__btn__label">
+          {{ tab.label() }}
+        </span>
+      </button>
+    }
+  </header>
+
+  <main class="side-tab__main" [style.width]="panelWidth()">
+    @for (tab of tabs; track $index) {
+      <section
+        #panelRef
+        role="tabpanel"
+        tabindex="-1"
+        class="side-tab__main__section"
+        [class.active]="isOpen($index)"
+        [id]="getPanelId($index)"
+        [attr.aria-labelledby]="getButtonId($index)"
+        (focusout)="handlePanelFocusOut($event, $index)"
+        [hidden]="!isOpen($index)"
+      >
+        <header class="side-tab__main__section__header">
+          <button
+            app-btn
+            btnStyle="text"
+            btnSize="s"
+            (click)="toggleTab($index)"
+          >
+            <app-icon icon="keyboard_arrow_right" />
+            <ng-container i18n> fold back </ng-container>
+          </button>
+        </header>
+        <ng-container *ngTemplateOutlet="tab.template" />
+      </section>
+    }
+  </main>
+</aside>

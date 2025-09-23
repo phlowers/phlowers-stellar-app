@@ -1195,30 +1195,6 @@
         <target>Mettre à jour le canton</target>
       </segment>
     </unit>
-    <unit id="791950660812381145">
-      <segment state="initial">
-        <source>Side</source>
-        <target>Côté</target>
-      </segment>
-    </unit>
-    <unit id="1997818395374468661">
-      <segment state="initial">
-        <source>Start support</source>
-        <target>Support de départ</target>
-      </segment>
-    </unit>
-    <unit id="9103840363725224885">
-      <segment state="initial">
-        <source>End support</source>
-        <target>Support de fin</target>
-      </segment>
-    </unit>
-    <unit id="2172902003676402663">
-      <segment state="initial">
-        <source> Refresh </source>
-        <target> Rafraîchir </target>
-      </segment>
-    </unit>
     <unit id="7136888919962092730">
       <segment state="initial">
         <source>Changelog</source>
@@ -1240,37 +1216,61 @@
     <unit id="2622453688077092594">
       <segment state="initial">
         <source>Study imported from protoV4</source>
-        <target>Study imported from protoV4</target>
+        <target>Étude importé depuis le protoV4</target>
       </segment>
     </unit>
     <unit id="1690240850123989028">
       <segment state="initial">
         <source>No news found</source>
-        <target>No news found</target>
+        <target>Aucune actualité</target>
+      </segment>
+    </unit>
+    <unit id="1035207489563002235">
+      <segment>
+        <source> fold back </source>
+        <target> Replier </target>
       </segment>
     </unit>
     <unit id="2932152767120246098">
       <segment state="initial">
         <source> Upload one or multiple protoV4 files </source>
-        <target>  Charger à partir d'un fichier protoV4 </target>
-      </segment>
-    </unit>
-    <unit id="804672747272219962">
-      <segment state="initial">
-        <source> Imported studies: <pc id="0" equivStart="START_BLOCK_FOR" equivEnd="CLOSE_BLOCK_FOR" type="other" dispStart="@for (study of this.newStudies(); track study) {" dispEnd="}"><pc id="1" equivStart="START_LIST_ITEM" equivEnd="CLOSE_LIST_ITEM" type="other" dispStart="&lt;li class=&quot;flex flex-col gap-2&quot;&gt;" dispEnd="&lt;/li&gt;"><pc id="2" equivStart="START_TAG_DIV_2" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;items-center flex justify-between&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="3" equivStart="START_TAG_DIV" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;text-lg items-center flex gap-2&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="4" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;check&quot; class=&quot;text-green-500&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;"/> <ph id="5" equiv="INTERPOLATION" disp="{{ study.title }}"/> </pc><pc id="6" equivStart="START_TAG_DIV_1" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;flex flex-row gap-2&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="7" equivStart="START_LINK" equivEnd="CLOSE_LINK" type="link" dispStart="&lt;a [routerLink]=&quot;&apos;/study/&apos; + study.uuid&quot; app-btn btnStyle=&quot;base&quot; btnSize=&quot;s&quot; &gt;" dispEnd="&lt;/a&gt;"> Open </pc><pc id="8" equivStart="START_TAG_BUTTON" equivEnd="CLOSE_TAG_BUTTON" type="other" dispStart="&lt;button app-btn btnSize=&quot;m&quot; btnStyle=&quot;text&quot; (click)=&quot;deleteStudy(study.uuid)&quot; &gt;" dispEnd="&lt;/button&gt;"><pc id="9" equivStart="START_TAG_APP_ICON_1" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;"/></pc></pc></pc><pc id="10" equivStart="START_TAG_P_DIVIDER" equivEnd="CLOSE_TAG_P_DIVIDER" type="other" dispStart="&lt;p-divider class=&quot;!my-1&quot; /&gt;" dispEnd="&lt;p-divider class=&quot;!my-1&quot; /&gt;"/></pc></pc></source>
-        <target> Etudes importées: <pc id="0" equivStart="START_BLOCK_FOR" equivEnd="CLOSE_BLOCK_FOR" type="other" dispStart="@for (study of this.newStudies(); track study) {" dispEnd="}"><pc id="1" equivStart="START_LIST_ITEM" equivEnd="CLOSE_LIST_ITEM" type="other" dispStart="&lt;li class=&quot;flex flex-col gap-2&quot;&gt;" dispEnd="&lt;/li&gt;"><pc id="2" equivStart="START_TAG_DIV_2" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;items-center flex justify-between&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="3" equivStart="START_TAG_DIV" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;text-lg items-center flex gap-2&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="4" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;check&quot; class=&quot;text-green-500&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;"/> <ph id="5" equiv="INTERPOLATION" disp="{{ study.title }}"/> </pc><pc id="6" equivStart="START_TAG_DIV_1" equivEnd="CLOSE_TAG_DIV" type="other" dispStart="&lt;div class=&quot;flex flex-row gap-2&quot;&gt;" dispEnd="&lt;/div&gt;"><pc id="7" equivStart="START_LINK" equivEnd="CLOSE_LINK" type="link" dispStart="&lt;a [routerLink]=&quot;&apos;/study/&apos; + study.uuid&quot; app-btn btnStyle=&quot;base&quot; btnSize=&quot;s&quot; &gt;" dispEnd="&lt;/a&gt;"> Open </pc><pc id="8" equivStart="START_TAG_BUTTON" equivEnd="CLOSE_TAG_BUTTON" type="other" dispStart="&lt;button app-btn btnSize=&quot;m&quot; btnStyle=&quot;text&quot; (click)=&quot;deleteStudy(study.uuid)&quot; &gt;" dispEnd="&lt;/button&gt;"><pc id="9" equivStart="START_TAG_APP_ICON_1" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;delete&quot; class=&quot;text-red-500&quot; /&gt;"/></pc></pc></pc><pc id="10" equivStart="START_TAG_P_DIVIDER" equivEnd="CLOSE_TAG_P_DIVIDER" type="other" dispStart="&lt;p-divider class=&quot;!my-1&quot; /&gt;" dispEnd="&lt;p-divider class=&quot;!my-1&quot; /&gt;"/></pc></pc></target>
-      </segment>
-    </unit>
-    <unit id="8141621982961645591">
-      <segment state="initial">
-        <source>Initial condition name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
-        <target>Nom de la condition initiale <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+        <target> Charger à partir d&apos;un ou plusieurs fichiers protoV4 </target>
       </segment>
     </unit>
     <unit id="2112772949826062259">
       <segment state="initial">
         <source>Initial Condition</source>
         <target>Condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="278935170538178235">
+      <segment state="initial">
+        <source>Imported studies:</source>
+        <target>Étude importé :</target>
+      </segment>
+    </unit>
+    <unit id="6389312883797462351">
+      <segment state="initial">
+        <source>Studio</source>
+        <target>Studio</target>
+      </segment>
+    </unit>
+    <unit id="5201756345475523940">
+      <segment state="initial">
+        <source>Initial condition name </source>
+        <target>Nom de condition initiale </target>
+      </segment>
+    </unit>
+    <unit id="1063780443229000887">
+      <segment state="initial">
+        <source>Side:</source>
+        <target>Sens :</target>
+      </segment>
+    </unit>
+    <unit id="3652243134148906527">
+      <segment state="initial">
+        <source>Invert:</source>
+        <target>Inverser le sens :</target>
       </segment>
     </unit>
   </file>

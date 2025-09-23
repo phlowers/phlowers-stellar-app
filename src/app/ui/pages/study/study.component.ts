@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { StudyHeaderComponent } from '../../shared/components/layout/study-header/study-header.component';
+import { StudyHeaderComponent } from '@ui/pages/study/study-header/study-header.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import {
