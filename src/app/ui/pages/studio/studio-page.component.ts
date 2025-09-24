@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { StudioTopToolbarComponent } from '../../shared/components/studio/top-toolbar/top-toolbar.component';
 import { SelectModule } from 'primeng/select';
 import { IconComponent } from '../../shared/components/atoms/icon/icon.component';
+import { PlotService } from './plot.service';
 
 @Component({
   selector: 'app-studio-page',
@@ -22,8 +23,7 @@ import { IconComponent } from '../../shared/components/atoms/icon/icon.component
   styleUrl: './studio-page.component.scss'
 })
 export class StudioPageComponent {
-  minValue = signal(0);
-  maxValue = signal(1);
+  constructor(public readonly plotService: PlotService) {}
   sidebarWidth = signal(300);
   sidebarOpen = signal(false);
   supports = signal<string>('single');

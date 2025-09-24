@@ -40,6 +40,7 @@ describe('createPlotData', () => {
     mockOptions = {
       view: '2d' as const,
       side: 'profile' as const,
+      invert: false,
       startSupport: 0,
       endSupport: 1
     };

@@ -1,7 +1,7 @@
-<div class="flex flex-row w-full">
-  <div class="w-full">
+<div class="flex flex-row w-full h-full">
+  <div class="w-full flex flex-col h-full">
     <app-studio-top-toolbar />
-    <app-studio />
+    <app-studio class="h-full" [isSupportZoom]="false" />
     <div class="flex flex-row gap-4 items-center">
       <div
         class="flex flex-row items-center border border-black rounded-md mx-2"
@@ -23,8 +23,12 @@
       </div>
       <div class="custom-slider w-full mx-2">
         <ngx-slider
-          [(value)]="minValue"
-          [(highValue)]="maxValue"
+          [(value)]="plotService.plotOptions().startSupport"
+          [(highValue)]="plotService.plotOptions().endSupport"
+          (valueChange)="plotService.plotOptionsChange('startSupport', $event)"
+          (highValueChange)="
+            plotService.plotOptionsChange('endSupport', $event)
+          "
           [options]="options()"
           class="w-full"
         ></ngx-slider>

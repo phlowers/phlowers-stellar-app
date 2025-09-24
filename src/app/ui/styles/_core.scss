@@ -15,3 +15,8 @@ label {
   display: inline-block;
   color: var(--grey-800);
 }
+
+router-outlet+* {
+  display: block;
+  height: 100%;
+}
