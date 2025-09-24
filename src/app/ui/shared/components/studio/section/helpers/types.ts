@@ -1,7 +1,7 @@
 export type PlotObjectType = 'support' | 'insulator' | 'span';
 
-type View = '2d' | '3d';
-type Side = 'profile' | 'face';
+export type View = '2d' | '3d';
+export type Side = 'profile' | 'face';
 
 interface BaseParams {
   litXs: (number | null)[];
@@ -26,4 +26,5 @@ export interface PlotOptions {
   side: Side;
   startSupport: number;
   endSupport: number;
+  invert: boolean;
 }
