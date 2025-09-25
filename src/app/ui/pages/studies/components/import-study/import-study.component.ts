@@ -1,9 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { StudyModel } from '@src/app/core/data/models/study.model';
-import { ProtoV4Parameters } from '@src/app/core/data/database/interfaces/protoV4';
+import {
+  ProtoV4Parameters,
+  ProtoV4Support
+} from '@src/app/core/data/database/interfaces/protoV4';
 import Papa from 'papaparse';
-import { ProtoV4Support } from '@src/app/core/data/database/interfaces/protoV4';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
@@ -12,7 +14,8 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-import-study',
   imports: [IconComponent, DividerModule, RouterLink, ButtonComponent],
-  templateUrl: './import-study.component.html'
+  templateUrl: './import-study.component.html',
+  styleUrl: './import-study.component.scss'
 })
 export class ImportStudyComponent {
   loading = signal<boolean>(false);
@@ -73,7 +76,7 @@ export class ImportStudyComponent {
             frost_load: convertToNumber(rawParameters[17]),
             project_name: rawParameters[19]
           };
-          Papa.parse(csvSupports as string, {
+          Papa.parse(csvSupports, {
             header: true,
             skipEmptyLines: true,
             complete: (async (
@@ -93,8 +96,8 @@ export class ImportStudyComponent {
                     pds_ch: convertToNumber(support.pds_ch),
                     surf_ch: convertToNumber(support.surf_ch),
                     alt_acc: convertToNumber(support.alt_acc),
-                    suspension: support.suspension === 'FAUX' ? false : true,
-                    ch_en_V: support.ch_en_V === 'FAUX' ? false : true
+                    suspension: support.suspension !== 'FAUX',
+                    ch_en_V: support.ch_en_V !== 'FAUX'
                   };
                 }
               );

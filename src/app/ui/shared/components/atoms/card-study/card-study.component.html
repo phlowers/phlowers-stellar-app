@@ -1,9 +1,4 @@
-<article
-  class="cursor-pointer"
-  (click)="onCardClick()"
-  tabindex="0"
-  (keydown)="onCardClick()"
->
+<article>
   <h3>
     {{ title() }}
   </h3>
@@ -12,7 +7,6 @@
     <dt>
       <app-icon icon="person" />
       <span i18n>Author:</span>
-      <!-- i18n Auteur : -->
     </dt>
     <dd>
       {{ authorMail() }}
@@ -21,7 +15,6 @@
     <dt>
       <app-icon icon="history" />
       <span i18n>Last changed:</span>
-      <!-- i18n Modifié le :-->
     </dt>
     <dd>
       {{ modificationDate() }}
@@ -37,4 +30,8 @@
       }
     </ul>
   }
+
+  <button (click)="onCardClick()">
+    <span i18n>Go to study {{ title() }}</span>
+  </button>
 </article>

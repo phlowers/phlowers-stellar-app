@@ -1,0 +1,72 @@
+@use 'abstract.extracts' as app;
+
+.import-study {
+  @apply flex flex-col items-center pt-6 px-6;
+
+  &__tool {
+    @apply relative flex flex-col items-center justify-center gap-4 min-w-72 min-h-48 max-w-full rounded border-2 border-dashed p-2;
+    border-color: var(--grey-150);
+    background-color: var(--grey-0);
+    transition: border-color 0.3s ease-in-out;
+
+    &:hover {
+      border-color: var(--primary-700);
+    }
+
+    &:focus-within {
+      @extend %focus-state;
+    }
+
+    &__icon {
+      font-size: 1.5rem;
+    }
+
+    &__txt {
+      @extend %text-l-400;
+      color: var(--grey-850);
+    }
+
+    &__input {
+      @apply absolute inset-0 cursor-pointer;
+      color: transparent;
+
+      &::file-selector-button {
+        color: transparent;
+        background-color: transparent;
+        border-color: transparent;
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+
+  &__list {
+    @apply w-full;
+
+    &__item {
+      @apply flex items-center justify-between pt-2 pb-1;
+      border-bottom: 0.0625rem solid var(--grey-150);
+    }
+
+    &__label {
+      @apply flex items-center gap-1 mb-0;
+      @extend %text-s-400;
+      color: var(--grey-750);
+    }
+
+    &__icon {
+      font-size: 1rem;
+      color: var(--success-700);
+    }
+
+    &__btns {
+      @apply flex gap-2;
+
+      &__erase-icon {
+        color: var(--main-error);
+      }
+    }
+  }
+}
