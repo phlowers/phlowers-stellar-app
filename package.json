@@ -19,7 +19,8 @@
     "create-mock-data": "uv run ./scripts/create_mock_data.py",
     "create-assets-list-for-service-worker:fr": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language fr",
     "create-assets-list-for-service-worker:en": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language en",
-    "extract-i18n": "ng extract-i18n --output-path assets/i18n --format=xlf2"
+    "extract-i18n": "ng extract-i18n --output-path assets/i18n --format=xlf2",
+    "cyclonedx": "npx @cyclonedx/cyclonedx-npm --output-file bom.xml  --output-format XML"
   },
   "browser": {
     "child_process": false,
@@ -93,6 +94,7 @@
     "@types/plotly.js": "^2.35.5",
     "angular-eslint": "19.3.0",
     "autoprefixer": "^10.4.20",
+    "@cyclonedx/cyclonedx-npm": "^3.0.0",
     "esbuild-node-externals": "^1.18.0",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^9.1.0",
