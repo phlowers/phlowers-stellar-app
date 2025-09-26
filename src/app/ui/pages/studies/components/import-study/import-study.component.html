@@ -7,8 +7,8 @@
     >
       <div class="flex flex-col gap-2 text-center items-center">
         <app-icon icon="upload" />
-        <span class="text-sm text-gray-500 cursor-pointer" i18n>
-          Upload one or multiple protoV4 files
+        <span class="text-sm text-gray-500" i18n>
+          Upload one or multiple files
         </span>
       </div>
       <input
@@ -20,7 +20,7 @@
         name="file"
         type="file"
         onclick="this.value = null"
-        (change)="loadProtoV4File($event)"
+        (change)="loadFiles($event)"
       />
     </label>
   </div>
