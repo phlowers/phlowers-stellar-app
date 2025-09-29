@@ -72,6 +72,10 @@ export class StudiesComponent implements OnInit {
     this.studiesService.duplicateStudy(uuid);
   }
 
+  downloadStudy(uuid: string) {
+    this.studiesService.downloadStudy(uuid);
+  }
+
   deleteStudy(uuid: string) {
     this.confirmationService.confirm({
       key: 'positionDialog',
