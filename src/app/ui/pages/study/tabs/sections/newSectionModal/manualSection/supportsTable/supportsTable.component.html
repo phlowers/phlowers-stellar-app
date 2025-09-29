@@ -17,19 +17,81 @@
   <ng-template pTemplate="header">
     <tr>
       <th class="sticky-left" id="support_number" i18n>Position</th>
-      <th id="support_number" i18n>Number</th>
-      <th id="span_length" i18n>Span length (m)</th>
-      <th id="span_angle" i18n>Span angle (Gr)</th>
-      <th id="chain_name" i18n>Chain name</th>
-      <th id="chain_length" i18n>Chain length (m)</th>
-      <th id="chain_weight" i18n>Chain weight (kg)</th>
-      <th id="support_name" i18n>Support name</th>
+      <th
+        id="support_number"
+        (dblclick)="onSupportNumberDoubleClick('number')"
+        i18n
+      >
+        Number
+      </th>
+      <th
+        id="span_length"
+        (dblclick)="onSupportNumberDoubleClick('spanLength')"
+        i18n
+      >
+        Span length (m)
+      </th>
+      <th
+        id="span_angle"
+        (dblclick)="onSupportNumberDoubleClick('spanAngle')"
+        i18n
+      >
+        Span angle (Gr)
+      </th>
+      <th
+        id="chain_name"
+        (dblclick)="onSupportNumberDoubleClick('chainName')"
+        i18n
+      >
+        Chain name
+      </th>
+      <th
+        id="chain_length"
+        (dblclick)="onSupportNumberDoubleClick('chainLength')"
+        i18n
+      >
+        Chain length (m)
+      </th>
+      <th
+        id="chain_weight"
+        (dblclick)="onSupportNumberDoubleClick('chainWeight')"
+        i18n
+      >
+        Chain weight (kg)
+      </th>
+      <th
+        id="support_name"
+        (dblclick)="onSupportNumberDoubleClick('name')"
+        i18n
+      >
+        Support name
+      </th>
 
-      <th id="attachment_set" i18n>Attachment set</th>
-      <th id="arm_length" i18n>Arm length (m)</th>
+      <th
+        id="attachment_set"
+        (dblclick)="onSupportNumberDoubleClick('attachmentSet')"
+        i18n
+      >
+        Attachment set
+      </th>
+      <th
+        id="arm_length"
+        (dblclick)="onSupportNumberDoubleClick('armLength')"
+        i18n
+      >
+        Arm length (m)
+      </th>
 
-      <th id="attachment_height" i18n>Attachment height (m)</th>
-      <th id="chain_v" i18n>Chain V</th>
+      <th
+        id="attachment_height"
+        (dblclick)="onSupportNumberDoubleClick('attachmentHeight')"
+        i18n
+      >
+        Attachment height (m)
+      </th>
+      <th id="chain_v" (dblclick)="onSupportNumberDoubleClick('chainV')" i18n>
+        Chain V
+      </th>
 
       @if (mode() === 'create' || mode() === 'edit') {
         <th class="sticky-right" id="actions" i18n>Actions</th>

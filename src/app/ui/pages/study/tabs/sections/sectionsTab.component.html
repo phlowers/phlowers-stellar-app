@@ -16,7 +16,7 @@
   [initialConditionInput]="currentInitialCondition()"
 />
 
-@if (sections().length === 0) {
+@if (!sections().length) {
   <section class="text-center">
     <h1 class="no-section-text text-xl-400" i18n>No existing section</h1>
     <button
@@ -271,7 +271,7 @@
     }
   </article>
 
-  <div class="sticky-btn-wrapper flex gap-2 justify-end">
+  <div class="sticky-btn-wrapper">
     <button
       i18n
       app-btn
