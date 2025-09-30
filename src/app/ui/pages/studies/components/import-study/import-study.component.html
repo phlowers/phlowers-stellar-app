@@ -1,63 +1,58 @@
-<div class="flex flex-col">
-  <div class="flex justify-center mt-10">
-    <label
-      tabindex="0"
-      for="study-file"
-      class="flex flex-col gap-4 border-2 border-gray-200 rounded-md p-4 bg-gray-50 w-[18rem] h-[12rem] items-center justify-center border-dashed cursor-pointer"
-    >
-      <div class="flex flex-col gap-2 text-center items-center">
-        <app-icon icon="upload" />
-        <span class="text-sm text-gray-500 cursor-pointer" i18n>
-          Upload one or multiple protoV4 files
-        </span>
-      </div>
-      <input
-        id="study-file"
-        form="file"
-        hidden
-        #file
-        multiple
-        name="file"
-        type="file"
-        onclick="this.value = null"
-        (change)="loadProtoV4File($event)"
-      />
-    </label>
-  </div>
+<div class="import-study">
+  <label for="study-file" class="import-study__tool">
+    <app-icon icon="upload" class="import-study__tool__icon" />
+
+    <span class="import-study__tool__txt" i18n>
+      Upload one or multiple protoV4 files
+    </span>
+
+    <input
+      id="study-file"
+      form="file"
+      multiple
+      name="file"
+      type="file"
+      onclick="this.value = null"
+      (change)="loadProtoV4File($event)"
+      class="import-study__tool__input"
+    />
+  </label>
+
   @if (this.newStudies().length > 0) {
-    <div class="flex justify-center mt-4">
-      <ul class="flex flex-col gap-4 w-[40rem]">
-        <ng-container i18n>Imported studies:</ng-container>
-        @for (study of this.newStudies(); track study) {
-          <li class="flex flex-col gap-2">
-            <div class="items-center flex justify-between">
-              <div class="text-lg items-center flex gap-2">
-                <app-icon icon="check" class="text-green-500" />
-                {{ study.title }}
-              </div>
-              <div class="flex flex-row gap-2">
-                <a
-                  [routerLink]="'/study/' + study.uuid"
-                  app-btn
-                  btnStyle="base"
-                  btnSize="s"
-                >
-                  Open
-                </a>
-                <button
-                  app-btn
-                  btnSize="m"
-                  btnStyle="text"
-                  (click)="deleteStudy(study.uuid)"
-                >
-                  <app-icon icon="delete" class="text-red-500" />
-                </button>
-              </div>
-            </div>
-            <p-divider class="!my-1" />
-          </li>
-        }
-      </ul>
-    </div>
+    <ul class="import-study__list">
+      @for (study of this.newStudies(); track study) {
+        <li class="import-study__list__item">
+          <p class="import-study__list__label">
+            <app-icon icon="check" class="import-study__list__icon" />
+            {{ study.title }}
+          </p>
+
+          <div class="import-study__list__btns">
+            <a
+              [routerLink]="'/study/' + study.uuid"
+              app-btn
+              btnStyle="base"
+              btnSize="s"
+            >
+              Open
+            </a>
+
+            <button
+              app-btn
+              btnSize="m"
+              btnStyle="text"
+              (click)="deleteStudy(study.uuid)"
+              i18n-attr.aria-label
+              aria-label="delete study"
+            >
+              <app-icon
+                icon="delete"
+                class="import-study__list__btns__erase-icon"
+              />
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
   }
 </div>

@@ -88,8 +88,7 @@
       }
 
       &:focus-visible {
-        outline: 0.0625rem solid var(--primary-900);
-        outline-offset: 0.25rem;
+        @extend %focus-state;
         z-index: 7;
       }
 

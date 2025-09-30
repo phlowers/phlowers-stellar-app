@@ -45,3 +45,8 @@
 %label-spacing {
   margin: 0.125rem 0.5rem;
 }
+
+%focus-state {
+  outline: 0.0625rem solid var(--primary-900);
+  outline-offset: 0.25rem;
+}

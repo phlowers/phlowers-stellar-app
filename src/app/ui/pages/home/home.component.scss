@@ -16,7 +16,11 @@
 
 .study-cards:has(article) {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns:
+    calc(25% - 0.75rem)
+    calc(25% - 0.75rem)
+    calc(25% - 0.75rem)
+    calc(25% - 0.75rem);
   grid-gap: 1rem;
   margin: 1rem 0;
 }
