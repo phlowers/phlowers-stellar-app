@@ -2,45 +2,44 @@
 @use 'abstract.extracts' as app;
 
 :host {
-  display: inline-flex;
-  align-items: stretch;
-  justify-content: stretch;
+  @apply inline-flex items-stretch justify-stretch;
 }
 
 article {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 1rem;
-  border-radius: 0.5rem;
+  @apply relative flex flex-col w-full p-4 rounded-lg overflow-hidden;
   background-color: var(--grey-white);
   box-shadow:
     map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3);
+  transition: background-color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: var(--grey-50);
+  }
+
+  &:focus-within {
+    @extend %focus-state;
+  }
 }
 
 h3 {
+  @apply mb-2;
   @extend %heading-xs;
   color: var(--grey-950);
-  margin-bottom: 0.5rem;
+  overflow-wrap: break-word;
 }
 
 dl {
-  overflow: hidden;
-  flex-grow: 1;
+  @apply overflow-hidden grow;
   color: var(--grey-700);
 }
 
 dt,
 dd {
-  float: left;
-  margin-bottom: 0.5rem;
+  @apply float-start mb-2;
 }
 
 dt {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  clear: left;
+  @apply flex items-center gap-2 clear-start;
 
   app-icon {
     font-size: 1rem;
@@ -48,11 +47,19 @@ dt {
 }
 
 dd {
-  margin-left: 0.25rem;
+  @apply ml-1;
 }
 
 ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  @apply flex flex-wrap gap-2;
+}
+
+button {
+  @apply h-0 w-0;
+  text-indent: -999rem;
+
+  &::after {
+    @apply absolute inset-0;
+    content: '';
+  }
 }
