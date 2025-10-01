@@ -4,8 +4,7 @@ import {
   effect,
   input,
   output,
-  signal,
-  untracked
+  signal
 } from '@angular/core';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
@@ -17,6 +16,7 @@ import { formatData } from './helpers/formatData';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
 import { uniq } from 'lodash';
+import { PlotService } from '@src/app/ui/pages/studio/plot.service';
 
 interface SearchSupportEvent {
   value: string;
@@ -30,13 +30,10 @@ interface SearchSupportEvent {
 export class Section2DComponent {
   litData = input<GetSectionOutput | null>(null);
   selectedSpan = signal<number>(0);
-  plotlyOptions = input<PlotOptions>({
-    view: '2d',
-    side: 'profile',
-    startSupport: 1,
-    endSupport: 2
-  });
-  plotlyOptionsChange = output<PlotOptions>();
+  plotOptionsChange = output<PlotOptions>();
+  isSupportZoom = input.required<boolean>();
+
+  constructor(public readonly plotService: PlotService) {}
 
   supports = computed(() => {
     const supportsAmount = uniq(
@@ -48,20 +45,23 @@ export class Section2DComponent {
   });
 
   errorMessage = computed(() => {
-    if (this.plotlyOptions().startSupport >= this.plotlyOptions().endSupport) {
+    if (
+      this.plotService.plotOptions().startSupport >=
+      this.plotService.plotOptions().endSupport
+    ) {
       return $localize`Error: start >= end`;
     }
     if (
       !this.supports()
         .map((s) => s.item)
-        .includes(this.plotlyOptions().startSupport.toString())
+        .includes(this.plotService.plotOptions().startSupport.toString())
     ) {
       return $localize`Error: start not in list`;
     }
     if (
       !this.supports()
         .map((s) => s.item)
-        .includes(this.plotlyOptions().endSupport.toString())
+        .includes(this.plotService.plotOptions().endSupport.toString())
     ) {
       return $localize`Error: end not in list`;
     }
@@ -71,19 +71,23 @@ export class Section2DComponent {
   searchSupport(event: SearchSupportEvent, type: 'start' | 'end') {
     const numberValue = Number(event.value);
     if (type === 'start') {
-      this.plotlyOptionsChange.emit({
-        ...this.plotlyOptions(),
+      this.plotOptionsChange.emit({
+        ...this.plotService.plotOptions(),
         startSupport: numberValue
       });
     } else {
-      this.plotlyOptionsChange.emit({
-        ...this.plotlyOptions(),
+      this.plotOptionsChange.emit({
+        ...this.plotService.plotOptions(),
         endSupport: numberValue
       });
     }
   }
 
-  refreshSection(litData: GetSectionOutput | null) {
+  async refreshSection(
+    litData: GetSectionOutput | null,
+    plotOptions: PlotOptions,
+    isSupportZoom: boolean
+  ) {
     if (!litData) {
       return;
     }
@@ -91,14 +95,21 @@ export class Section2DComponent {
     const width = myElement?.clientWidth ?? 0;
     const height = myElement?.clientHeight ?? 0;
     const formattedData = formatData(litData);
-    const plotData = createPlotData(
-      formattedData,
-      untracked(this.plotlyOptions)
+    const plotData = createPlotData(formattedData, plotOptions);
+    return await createPlot(
+      'plotly-output',
+      plotData,
+      width,
+      height,
+      isSupportZoom
     );
-    createPlot('plotly-output', plotData, width, height);
   }
 
   readonly effect = effect(() => {
-    this.refreshSection(this.litData());
+    this.refreshSection(
+      this.litData(),
+      this.plotService.plotOptions(),
+      this.isSupportZoom()
+    );
   });
 }

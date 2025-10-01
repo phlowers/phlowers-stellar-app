@@ -42,6 +42,7 @@ export class StudiesTableComponent {
   sortOrder = signal<number>(1);
   deleteStudy = output<string>();
   duplicateStudy = output<string>();
+  downloadStudy = output<string>();
 
   onSort(event: SortEvent) {
     this.sortField.set(event.field as string);

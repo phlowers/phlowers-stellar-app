@@ -16,6 +16,7 @@ import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-c
 import { CreateEditView } from '@src/app/ui/shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
 import { createEmptySection } from '@src/app/core/services/sections/helpers';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-sections-tab',
@@ -30,7 +31,8 @@ import { createEmptySection } from '@src/app/core/services/sections/helpers';
     FormsModule,
     InitialConditionModalComponent,
     DividerModule,
-    CheckboxModule
+    CheckboxModule,
+    RouterLink
   ],
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss'
@@ -55,6 +57,7 @@ export class SectionsTabComponent {
   newSectionModalMode = signal<CreateEditView>('create');
   isInitialConditionModalOpen = signal<boolean>(false);
   initialConditionModalMode = signal<CreateEditView>('create');
+  selectedSection = signal<string>('');
 
   createInitialCondition(section: Section): InitialCondition {
     const currentInitialConditions = section.initial_conditions;
@@ -67,6 +70,10 @@ export class SectionsTabComponent {
       base_parameters: '',
       base_temperature: 0
     };
+  }
+
+  selectSection(section: Section, event: any) {
+    this.selectedSection.set(event.checked ? section.uuid : '');
   }
 
   selectItem(item: any, event: Event) {

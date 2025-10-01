@@ -7,6 +7,7 @@ import { InitialCondition } from '@core/data/database/interfaces/initialConditio
 import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
 import { LinesService } from '@core/services/lines/lines.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ActivatedRoute } from '@angular/router';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -107,7 +108,8 @@ describe('SectionsTabComponent', () => {
       ],
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },
-        { provide: LinesService, useClass: MockLinesService }
+        { provide: LinesService, useClass: MockLinesService },
+        { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } }
       ]
     }).compileComponents();
 

@@ -4,7 +4,8 @@
   <p-selectbutton
     class="p-2"
     [options]="threeDOptions()"
-    [(ngModel)]="threeDChecked"
+    [(ngModel)]="plotService.plotOptions().view"
+    (onChange)="plotService.plotOptionsChange('view', $event.value)"
     optionLabel="label"
     optionValue="value"
     aria-labelledby="basic"
@@ -16,7 +17,8 @@
     class="p-2"
     inputId="side"
     [options]="sideOptions()"
-    [(ngModel)]="sideChecked"
+    [(ngModel)]="plotService.plotOptions().side"
+    (onChange)="plotService.plotOptionsChange('side', $event.value)"
     optionLabel="label"
     optionValue="value"
     aria-labelledby="basic"
@@ -28,7 +30,8 @@
     <p-toggleswitch
       class="flex items-centers"
       inputId="invert"
-      [(ngModel)]="toggleInvert"
+      [(ngModel)]="plotService.plotOptions().invert"
+      (onChange)="plotService.plotOptionsChange('invert', $event.checked)"
     />
   </div>
 </div>

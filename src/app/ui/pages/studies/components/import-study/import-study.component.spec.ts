@@ -62,9 +62,9 @@ describe('ImportStudyComponent', () => {
         }
       } as any;
 
-      component.loadProtoV4File(mockEvent);
+      component.loadFiles(mockEvent);
 
-      expect(component.loading()).toBe(true);
+      expect(component.loading()).toBe(false);
       expect(mockFileReader.readAsText).not.toHaveBeenCalled();
     });
 
@@ -75,9 +75,9 @@ describe('ImportStudyComponent', () => {
         }
       } as any;
 
-      component.loadProtoV4File(mockEvent);
+      component.loadFiles(mockEvent);
 
-      expect(component.loading()).toBe(true);
+      expect(component.loading()).toBe(false);
       expect(mockFileReader.readAsText).not.toHaveBeenCalled();
     });
 
@@ -90,9 +90,9 @@ describe('ImportStudyComponent', () => {
 
       expect(component.loading()).toBe(false);
 
-      component.loadProtoV4File(mockEvent);
+      component.loadFiles(mockEvent);
 
-      expect(component.loading()).toBe(true);
+      expect(component.loading()).toBe(false);
       expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
     });
 
@@ -103,10 +103,10 @@ describe('ImportStudyComponent', () => {
         }
       } as any;
 
-      component.loadProtoV4File(mockEvent);
+      component.loadFiles(mockEvent);
 
       expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
-      expect(component.loading()).toBe(true);
+      expect(component.loading()).toBe(false);
     });
 
     it('should process valid ProtoV4 file successfully', (done) => {
@@ -146,7 +146,7 @@ describe('ImportStudyComponent', () => {
         }
       } as any;
 
-      component.loadProtoV4File(mockEvent);
+      component.loadFiles(mockEvent);
 
       // Simulate FileReader onload
       setTimeout(() => {
