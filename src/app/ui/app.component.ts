@@ -33,6 +33,7 @@ import { MaintenanceService } from '../core/services/maintenance/maintenance.ser
 import { LinesService } from '../core/services/lines/lines.service';
 import { CablesService } from '../core/services/cables/cables.service';
 import { ChainsService } from '../core/services/chains/chains.service';
+import { PlotService } from './pages/studio/plot.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -66,7 +67,8 @@ const modules = [
     InitialConditionService,
     ConfirmationService,
     UpdateService,
-    CablesService
+    CablesService,
+    PlotService
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

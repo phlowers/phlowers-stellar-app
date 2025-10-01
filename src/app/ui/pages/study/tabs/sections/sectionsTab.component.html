@@ -41,6 +41,8 @@
           i18n-ariaLabel
           class="section__selector"
           [binary]="true"
+          [ngModel]="selectedSection() === section.uuid"
+          (onChange)="selectSection(section, $event)"
         />
 
         <dl>
@@ -280,5 +282,15 @@
       <app-icon icon="add" />
       Add a section
     </button>
+    <a
+      app-btn
+      [class.disabled]="!selectedSection()"
+      btnStyle="base"
+      btnSize="m"
+      [routerLink]="'/studio'"
+    >
+      <app-icon icon="play_circle" />
+      <span i18n>Generate an initial state</span>
+    </a>
   </div>
 }
