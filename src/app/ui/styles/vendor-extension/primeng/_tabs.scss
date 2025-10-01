@@ -1,3 +1,5 @@
+@use 'abstract.extracts' as app;
+
 .p-tabs.p-tabs {
   --p-tabs-tab-border-width: 0rem;
   --p-tabs-active-bar-height: 0.25rem;
@@ -7,5 +9,53 @@
 
   .p-tab {
     font-size: 1rem;
+  }
+}
+
+// Specific for studio load tabs in right side-tabs
+.p-tabs.p-tabs.load-tabs {
+  --p-tabs-tablist-border-color: transparent;
+  --p-tabs-tablist-border-width: 0rem;
+  --p-tabs-tab-background: var(--primary-100);
+  --p-tabs-tab-hover-background: var(--primary-200);
+  --p-tabs-tab-active-background: var(--grey-0);
+  --p-tabs-tab-color: var(--grey-750);
+  --p-tabs-tab-hover-color: var(--p-tabs-tab-color);
+  --p-tabs-tab-active-color: var(--grey-850);
+  --p-tabs-tab-padding: 0.625rem 0.75rem;
+  --p-tabs-tab-margin: 0rem;
+  --p-tabs-tabpanel-padding: 1rem;
+
+  .p-tablist-tab-list {
+    @apply grid;
+    grid-template-columns: calc(50% - 0.0625rem) calc(50% - 0.0625rem);
+    grid-gap: 0.125rem;
+    padding: 0.5rem 1rem 0rem;
+  }
+
+  .p-tab {
+    @apply rounded-sm;
+    @extend %text-s-600;
+    justify-content: center;
+
+    &:focus-visible {
+      @extend %focus-state;
+    }
+
+    &.p-tab-active {
+      @apply overflow-visible;
+
+      &::before {
+        @apply absolute inset-0 rounded-sm;
+        content: '';
+        box-shadow:
+          0rem 0rem 0rem 0.0625rem var(--grey-150),
+          0 0.125rem 0.375rem rgb(from var(--grey-950) r g b / 0.16);
+      }
+    }
+  }
+
+  .p-tablist-active-bar {
+    @apply hidden;
   }
 }
