@@ -1,16 +1,21 @@
+.graph-tools {
+  @apply flex;
+  height: calc(100% - 3.5rem);
+}
+
 .supports-select-buttons {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 1px;
-    height: 33px;
-    width: 33px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1px;
+  height: 33px;
+  width: 33px;
 }
 
 .supports-select-buttons-right {
-    border-left: 1px solid black;
+  border-left: 1px solid black;
 }
 
 .supports-select-buttons-left {
-    border-right: 1px solid black;
+  border-right: 1px solid black;
 }

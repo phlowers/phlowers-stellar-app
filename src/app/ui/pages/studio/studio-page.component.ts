@@ -1,17 +1,21 @@
 import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
-import { StudioComponent } from '../../shared/components/studio/studio.component';
+import { StudioComponent } from '@ui/shared/components/studio/studio.component';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
-import { StudioTopToolbarComponent } from '../../shared/components/studio/top-toolbar/top-toolbar.component';
+import { StudioTopToolbarComponent } from '@ui/shared/components/studio/top-toolbar/top-toolbar.component';
 import { SelectModule } from 'primeng/select';
-import { IconComponent } from '../../shared/components/atoms/icon/icon.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { PlotService } from './plot.service';
 import { StudioMenuBarComponent } from '@ui/shared/components/studio/menu-bar/menu-bar.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudiesService } from '@core/services/studies/studies.service';
 import { Subscription } from 'dexie';
 import { SectionPlotCardsComponent } from '@ui/shared/components/studio/section/cards/section-plot-cards.component';
+import { SideTabsComponent } from './side-tabs/side-tabs.component';
+import { SideTabComponent } from './side-tabs/side-tab/side-tab.component';
+import { TabsModule } from 'primeng/tabs';
+
 @Component({
   selector: 'app-studio-page',
   imports: [
@@ -23,7 +27,10 @@ import { SectionPlotCardsComponent } from '@ui/shared/components/studio/section/
     SelectModule,
     IconComponent,
     StudioMenuBarComponent,
-    SectionPlotCardsComponent
+    SectionPlotCardsComponent,
+    SideTabsComponent,
+    SideTabComponent,
+    TabsModule
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'

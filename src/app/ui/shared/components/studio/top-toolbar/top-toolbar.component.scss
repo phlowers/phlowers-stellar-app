@@ -1,0 +1,11 @@
+.toolbar {
+  @apply flex gap-4 items-center border-y px-6 py-1 h-14 max-h-14 overflow-hidden;
+  border-color: var(--primary-200);
+  background-color: var(--primary-50);
+
+  &__separator {
+    @apply h-full m-0 border-t-0;
+    width: 0.0625rem;
+    border-right: 0.0625rem solid var(--grey-150);
+  }
+}
