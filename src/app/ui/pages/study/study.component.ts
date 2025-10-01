@@ -64,6 +64,8 @@ export class StudyComponent implements OnInit {
         this.studiesService.getStudy(uuid).then((study) => {
           if (study) {
             this.study = study;
+          } else {
+            this.router.navigate(['/studies']);
           }
         });
       }
