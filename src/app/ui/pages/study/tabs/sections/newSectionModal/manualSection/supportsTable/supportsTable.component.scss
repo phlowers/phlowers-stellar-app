@@ -12,3 +12,19 @@
 .sticky-right {
   right: 0;
 }
+
+td {
+  $_txtInputW: 9.7rem;
+
+  >* {
+    width: 6.5rem;
+  }
+
+  >[type=text] {
+    width: $_txtInputW;
+  }
+
+  :has([type=text]) {
+    width: $_txtInputW;
+  }
+}

@@ -525,6 +525,8 @@ function createSupportMock(): Support {
     spanAngle: null,
     attachmentHeight: null,
     cableType: null,
+    attachmentSet: null,
+    heightBelowConsole: null,
     armLength: null,
     chainName: null,
     chainLength: null,

@@ -45,15 +45,13 @@ describe('StudiesService', () => {
     uuid: 'user-uuid-123'
   };
 
-  const mockStudy: StudyModel = {
-    uuid: '',
-    author_email: '',
+  const mockStudy: Pick<
+    StudyModel,
+    'title' | 'description' | 'shareable' | 'sections'
+  > = {
     title: 'Test Study',
     description: 'Test Description',
     shareable: true,
-    created_at_offline: '',
-    updated_at_offline: '',
-    saved: false,
     sections: []
   };
 
@@ -131,9 +129,9 @@ describe('StudiesService', () => {
 
       expect(mockDb.users.toArray).toHaveBeenCalled();
       expect(mockDb.studies.add).toHaveBeenCalledWith({
-        ...mockStudy,
-        uuid: 'mock-uuid-123',
         author_email: mockUser.email,
+        uuid: 'mock-uuid-123',
+        ...mockStudy,
         created_at_offline: expect.any(String),
         updated_at_offline: expect.any(String),
         saved: false

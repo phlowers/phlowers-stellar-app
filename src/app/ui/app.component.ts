@@ -34,6 +34,7 @@ import { LinesService } from '../core/services/lines/lines.service';
 import { CablesService } from '../core/services/cables/cables.service';
 import { ChainsService } from '../core/services/chains/chains.service';
 import { PlotService } from './pages/studio/plot.service';
+import { AttachmentService } from '../core/services/attachment/attachment.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -68,7 +69,8 @@ const modules = [
     ConfirmationService,
     UpdateService,
     CablesService,
-    PlotService
+    PlotService,
+    AttachmentService
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -92,7 +94,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,
     private readonly cablesService: CablesService,
-    private readonly chainsService: ChainsService
+    private readonly chainsService: ChainsService,
+    private readonly attachmentService: AttachmentService
   ) {
     this.form = new FormGroup({
       email: new FormControl<string>('', [
@@ -139,6 +142,10 @@ export class AppComponent implements OnInit, OnDestroy {
     const chains = await this.chainsService.getChains();
     if (!chains || chains.length === 0) {
       await this.chainsService.importFromFile();
+    }
+    const attachments = await this.attachmentService.getAttachments();
+    if (!attachments || attachments.length === 0) {
+      await this.attachmentService.importFromFile();
     }
   }
 
