@@ -101,6 +101,22 @@ $main-grey: map.get($grey, 500);
 $gray: $grey;
 $main-gray: $main-grey;
 
+$star-dust: (
+  0: #fcfcfc,
+  50: #f9fafa,
+  100: #f3f4f4,
+  200: #e6e7e8,
+  300: #d2d4d5,
+  400: #b6bbbc,
+  500: #999fa1,
+  600: #787f81,
+  700: #626769,
+  800: #515657,
+  900: #45494a,
+  950: #27292b,
+  1000: #111313
+);
+
 // sucess message and infos
 $success: (
   0: #f7fffb,
@@ -221,8 +237,8 @@ $text: (
   xs-600: 600 0.625rem/1.4 #{$font-family}
 );
 
-$_shadow-key: rgb(from #{map.get($grey, 950)} r g b / 0.14);
-$_shadow-ambiant: rgb(from #{map.get($grey, 950)} r g b / 0.12);
+$_shadow-key: rgb(from #{map.get($star-dust, 1000)} r g b / 0.14);
+$_shadow-ambiant: rgb(from #{map.get($star-dust, 1000)} r g b / 0.12);
 $_spread1: 0rem 0rem 0.125rem #{$_shadow-ambiant};
 $_spread2: 0rem 0rem 0.5rem #{$_shadow-ambiant};
 $elevation: (
