@@ -67,4 +67,12 @@ You should match global and local project CLI by watching current version in `pa
     - length
     - weight
 
+5. attachments data should be put inside a `public/attachments.csv` file with the following columns:
+    - support_family
+    - support_name
+    - set_number
+    - arm_length
+    - altitude
+
+
 At startup, the application will import the data from the csv files and store it in the database.

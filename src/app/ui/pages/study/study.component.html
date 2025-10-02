@@ -24,7 +24,7 @@
     <p-tabpanels class="px-0">
       <p-tabpanel value="sections">
         <app-sections-tab
-          [sections]="study?.sections ?? []"
+          [study]="study"
           (createOrUpdateSection)="createOrUpdateSection($event)"
           (deleteSection)="deleteSection($event)"
           (duplicateSection)="duplicateSection($event)"

@@ -141,11 +141,6 @@
         <source>Search</source>
       </segment>
     </unit>
-    <unit id="8953033926734869941">
-      <segment>
-        <source>Name</source>
-      </segment>
-    </unit>
     <unit id="4902817035128594900">
       <segment>
         <source>Description</source>
@@ -559,11 +554,6 @@
     <unit id="8581729683001364052">
       <segment>
         <source> Base temperature (°C) </source>
-      </segment>
-    </unit>
-    <unit id="5280768007794245227">
-      <segment>
-        <source>Cable (NGF)</source>
       </segment>
     </unit>
     <unit id="5281579610433386344">
@@ -1011,11 +1001,6 @@
         <source>Changelog</source>
       </segment>
     </unit>
-    <unit id="1035207489563002235">
-      <segment>
-        <source> fold back </source>
-      </segment>
-    </unit>
     <unit id="1690240850123989028">
       <segment>
         <source>No news found</source>
@@ -1029,11 +1014,6 @@
     <unit id="2622453688077092594">
       <segment>
         <source>Study imported from protoV4</source>
-      </segment>
-    </unit>
-    <unit id="2932152767120246098">
-      <segment>
-        <source> Upload one or multiple protoV4 files </source>
       </segment>
     </unit>
     <unit id="278935170538178235">
@@ -1059,6 +1039,41 @@
     <unit id="6389312883797462351">
       <segment>
         <source>Studio</source>
+      </segment>
+    </unit>
+    <unit id="3177037057474396347">
+      <segment>
+        <source> Upload one or multiple files </source>
+      </segment>
+    </unit>
+    <unit id="361983614534909005">
+      <segment>
+        <source>Height below console (m)</source>
+      </segment>
+    </unit>
+    <unit id="419149014255896698">
+      <segment>
+        <source>Support name</source>
+      </segment>
+    </unit>
+    <unit id="6120722023223731581">
+      <segment>
+        <source>Generate an initial state</source>
+      </segment>
+    </unit>
+    <unit id="7462301153729425254">
+      <segment>
+        <source>Export</source>
+      </segment>
+    </unit>
+    <unit id="755168724826424878">
+      <segment>
+        <source> The attachment set number and the arm length value will be automatically filled in the table. </source>
+      </segment>
+    </unit>
+    <unit id="7584732332123203553">
+      <segment>
+        <source>Attachment set</source>
       </segment>
     </unit>
   </file>

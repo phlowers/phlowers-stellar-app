@@ -8,6 +8,7 @@ import { MaintenanceService } from '@core/services/maintenance/maintenance.servi
 import { LinesService } from '@core/services/lines/lines.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -110,7 +111,8 @@ describe('SectionsTabComponent', () => {
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } }
-      ]
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SectionsTabComponent);
@@ -145,7 +147,7 @@ describe('SectionsTabComponent', () => {
     const sectionName = fixture.debugElement.query(
       By.css('.section__text-name')
     );
-    expect(sectionName.nativeElement.textContent).toContain('My Section');
+    expect(sectionName?.nativeElement?.textContent).toContain('My Section');
   });
 
   it('should open new section modal in create mode when clicking "Add a section"', () => {
@@ -205,14 +207,16 @@ describe('SectionsTabComponent', () => {
     fixture.componentRef.setInput('sections', [mockSection]);
     fixture.detectChanges();
 
-    const triggerBtn: HTMLButtonElement =
-      fixture.nativeElement.querySelector('.section__content-action button') ??
-      fixture.nativeElement.querySelector('.section__content-action');
+    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '.section__content-action'
+    );
+    expect(triggerBtn).toBeTruthy();
     triggerBtn.click();
     fixture.detectChanges();
 
     const deleteBtn: HTMLButtonElement =
       fixture.nativeElement.querySelector('.erase-btn');
+    expect(deleteBtn).toBeTruthy();
     deleteBtn.click();
     fixture.detectChanges();
 
@@ -223,9 +227,10 @@ describe('SectionsTabComponent', () => {
     fixture.componentRef.setInput('sections', [mockSection]);
     fixture.detectChanges();
 
-    const triggerBtn: HTMLButtonElement =
-      fixture.nativeElement.querySelector('.section__content-action button') ??
-      fixture.nativeElement.querySelector('.section__content-action');
+    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '.section__content-action'
+    );
+    expect(triggerBtn).toBeTruthy();
     triggerBtn.click();
     fixture.detectChanges();
 
@@ -233,6 +238,7 @@ describe('SectionsTabComponent', () => {
     const duplicateButton = Array.from(allBtns).find((btn) =>
       (btn as HTMLElement).textContent?.includes('Duplicate')
     ) as HTMLButtonElement;
+    expect(duplicateButton).toBeTruthy();
 
     duplicateButton.click();
     fixture.detectChanges();

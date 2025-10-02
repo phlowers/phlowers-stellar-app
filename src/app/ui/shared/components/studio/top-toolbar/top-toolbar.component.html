@@ -9,6 +9,7 @@
     optionLabel="label"
     optionValue="value"
     aria-labelledby="basic"
+    allowEmpty="false"
   />
   <!-- TODO: Change to hr -->
   <div class="self-stretch bg-[#D2D4D5] w-[1px] my-1"></div>
@@ -16,6 +17,7 @@
   <p-selectbutton
     class="p-2"
     inputId="side"
+    allowEmpty="false"
     [options]="sideOptions()"
     [(ngModel)]="plotService.plotOptions().side"
     (onChange)="plotService.plotOptionsChange('side', $event.value)"

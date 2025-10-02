@@ -17,6 +17,7 @@ import { CreateEditView } from '@src/app/ui/shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
 import { createEmptySection } from '@src/app/core/services/sections/helpers';
 import { RouterLink } from '@angular/router';
+import { Study } from '@src/app/core/data/database/interfaces/study';
 
 @Component({
   selector: 'app-sections-tab',
@@ -41,6 +42,7 @@ export class SectionsTabComponent {
   @ViewChild('initialConditionSelect') selectComponent!: Select;
   selectedInitialCondition = null;
 
+  study = input<Study | null>(null);
   sections = input<Section[]>([]);
   createOrUpdateSection = output<Section>();
   deleteSection = output<Section>();

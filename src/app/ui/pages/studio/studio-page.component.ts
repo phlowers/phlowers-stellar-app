@@ -35,7 +35,8 @@ export class StudioPageComponent {
     showTicks: true,
     showTicksValues: true,
     animate: false,
-    animateOnMove: false
+    animateOnMove: false,
+    rightToLeft: false
   });
   toggleSidebar() {
     this.sidebarOpen.set(!this.sidebarOpen());

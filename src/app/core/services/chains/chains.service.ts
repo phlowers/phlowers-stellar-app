@@ -41,7 +41,6 @@ export class ChainsService {
           return of('');
         })
       );
-    console.log('chains are', chains);
     const mapData = (data: RteChainsCsvFile[]) => {
       return data
         .map((item) => ({
@@ -56,7 +55,6 @@ export class ChainsService {
 
     await new Promise<void>((resolve) => {
       chains.subscribe(async (chains) => {
-        console.log('chains2 are', chains);
         Papa.parse(chains, {
           header: true,
           skipEmptyLines: true,

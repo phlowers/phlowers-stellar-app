@@ -42,9 +42,9 @@ export class StudiesService {
     const uuid = uuidv4();
     const user = (await this.storageService.db?.users.toArray())?.[0];
     await this.storageService.db?.studies.add({
-      ...study,
-      uuid,
       author_email: user.email,
+      uuid,
+      ...study,
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
       saved: false

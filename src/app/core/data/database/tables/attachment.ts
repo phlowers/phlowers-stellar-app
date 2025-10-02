@@ -28,6 +28,7 @@ export const attachmentTable = {
     attachment_set_z,
     attachment_set_x,
     attachment_set_y,
+    attachment_altitude,
     cross_arm_relative_altitude,
     cross_arm_length,
     chain_drn_catalog_internal_id,
