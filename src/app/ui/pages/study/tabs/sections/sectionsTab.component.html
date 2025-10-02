@@ -16,7 +16,7 @@
   [initialConditionInput]="currentInitialCondition()"
 />
 
-@if (sections().length <= 0) {
+@if (!sections().length) {
   <section class="text-center">
     <h1 class="no-section-text text-xl-400" i18n>No existing section</h1>
     <button
@@ -32,7 +32,7 @@
   </section>
 }
 
-@if (sections().length > 0) {
+@if (sections().length) {
   <article class="sections-container">
     @for (section of sections(); track section.uuid) {
       <app-card class="section" role="article">
@@ -290,7 +290,7 @@
       [routerLink]="'/studio'"
     >
       <app-icon icon="play_circle" />
-      <span i18n>Generate an initial state</span>
+      <ng-container i18n>Generate an initial state</ng-container>
     </a>
   </div>
 }

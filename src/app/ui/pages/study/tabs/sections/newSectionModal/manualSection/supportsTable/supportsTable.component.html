@@ -1,3 +1,9 @@
+<app-attachment-set-modal
+  [isOpen]="attachmentSetModalOpen()"
+  (isOpenChange)="attachmentSetModalOpen.set($event)"
+  [support]="supportForAttachmentSetModal()"
+  (validateForm)="onValidateFormAttachmentSetModal($event)"
+/>
 <p-table
   [value]="supports()"
   [paginator]="true"
@@ -12,16 +18,19 @@
     <tr>
       <th class="sticky-left" id="support_number" i18n>Position</th>
       <th id="support_number" i18n>Number</th>
-      <th id="support_name" i18n>Name</th>
       <th id="span_length" i18n>Span length (m)</th>
       <th id="span_angle" i18n>Span angle (Gr)</th>
-      <th id="attachment_height" i18n>Attachment height (m)</th>
-      <th id="cable_type" i18n>Cable (NGF)</th>
-      <th id="arm_length" i18n>Arm length (m)</th>
       <th id="chain_name" i18n>Chain name</th>
       <th id="chain_length" i18n>Chain length (m)</th>
       <th id="chain_weight" i18n>Chain weight (kg)</th>
+      <th id="support_name" i18n>Support name</th>
+
+      <th id="attachment_set" i18n>Attachment set</th>
+      <th id="arm_length" i18n>Arm length (m)</th>
+
+      <th id="attachment_height" i18n>Attachment height (m)</th>
       <th id="chain_v" i18n>Chain V</th>
+
       @if (mode() === 'create' || mode() === 'edit') {
         <th class="sticky-right" id="actions" i18n>Actions</th>
       }
@@ -37,6 +46,7 @@
           <input
             pInputText
             type="number"
+            min="0"
             [ngModel]="support.number"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'number', $event)
@@ -44,18 +54,6 @@
           />
         } @else {
           <p class="read-only_info">{{ support.number }}</p>
-        }
-      </td>
-      <td>
-        @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="text"
-            [ngModel]="support.name"
-            (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
-          />
-        } @else {
-          <p class="read-only_info">{{ support.name }}</p>
         }
       </td>
       <td>
@@ -78,6 +76,7 @@
           <input
             pInputText
             type="number"
+            min="0"
             step="0.01"
             [ngModel]="support.spanAngle"
             (ngModelChange)="
@@ -90,55 +89,12 @@
       </td>
       <td>
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            step="0.01"
-            [ngModel]="support.attachmentHeight"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'attachmentHeight', $event)
-            "
-          />
-        } @else {
-          <p class="read-only_info">{{ support.attachmentHeight }}</p>
-        }
-      </td>
-      <td>
-        @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="text"
-            [ngModel]="support.cableType"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'cableType', $event)
-            "
-          />
-        } @else {
-          <p class="read-only_info">{{ support.cableType }}</p>
-        }
-      </td>
-      <td>
-        @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            step="0.01"
-            [ngModel]="support.armLength"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'armLength', $event)
-            "
-          />
-        } @else {
-          <p class="read-only_info">{{ support.armLength }}</p>
-        }
-      </td>
-      <td>
-        @if (mode() !== 'view') {
           <p-select
-            class="w-[200px]"
+            class="w-[12.5rem]"
             [options]="chains()"
             [ngModel]="support.chainName"
             optionLabel="name"
+            type="text"
             optionValue="name"
             appendTo="body"
             (ngModelChange)="
@@ -154,6 +110,7 @@
           <input
             pInputText
             type="number"
+            min="0"
             step="0.01"
             [ngModel]="support.chainLength"
             (ngModelChange)="
@@ -169,6 +126,7 @@
           <input
             pInputText
             type="number"
+            min="0"
             step="0.01"
             [ngModel]="support.chainWeight"
             (ngModelChange)="
@@ -181,9 +139,82 @@
       </td>
       <td>
         @if (mode() !== 'view') {
+          <p-iconfield>
+            <input
+              class="w-full"
+              pInputText
+              type="text"
+              [ngModel]="support.name"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'name', $event)
+              "
+            />
+            <p-inputicon>
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                (click)="openAttachmentSetModal(support.uuid)"
+              >
+                <app-icon icon="visibility" />
+              </button>
+            </p-inputicon>
+          </p-iconfield>
+        } @else {
+          <p class="read-only_info">{{ support.name }}</p>
+        }
+      </td>
+      <td>
+        @if (mode() !== 'view') {
           <input
             pInputText
-            type="text"
+            [ngModel]="support.attachmentSet"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'attachmentSet', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.attachmentSet }}</p>
+        }
+      </td>
+      <td>
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            min="0"
+            step="0.01"
+            [ngModel]="support.armLength"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'armLength', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.armLength }}</p>
+        }
+      </td>
+      <td>
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            min="0"
+            step="0.01"
+            [ngModel]="support.attachmentHeight"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'attachmentHeight', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.attachmentHeight }}</p>
+        }
+      </td>
+
+      <td>
+        @if (mode() !== 'view') {
+          <p-select
+            [options]="[true, false]"
+            appendTo="body"
             [ngModel]="support.chainV"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'chainV', $event)
