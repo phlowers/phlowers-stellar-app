@@ -1,0 +1,69 @@
+<button app-btn type="button" (click)="resetForm()">
+  <ng-container i18n>reset</ng-container>
+</button>
+
+<label for="windPressure">Wind Pressure</label>
+<p-inputNumber
+  inputId="windPressure"
+  formControlName="windPressure"
+  mode="decimal"
+/>
+
+<label for="cableTemperature">Cable Temperature</label>
+<p-inputNumber
+  inputId="cableTemperature"
+  formControlName="cableTemperature"
+  mode="decimal"
+/>
+
+<label for="symmetryType">Symmetry Type</label>
+<p-select
+  inputId="symmetryType"
+  [options]="symmetryOptions"
+  formControlName="symmetryType"
+  optionLabel="label"
+  optionValue="value"
+/>
+
+@if (form.value.symmetryType === 'symmetric') {
+  <label for="iceThickness">Ice Thickness</label>
+  <p-inputNumber
+    inputId="iceThickness"
+    formControlName="iceThickness"
+    [showButtons]="true"
+    mode="decimal"
+  />
+} @else if (form.value.symmetryType === 'dis_symmetric') {
+  <label for="frontierSupportNumber">Frontier Support Number</label>
+  <p-select
+    inputId="frontierSupportNumber"
+    [options]="frontierSupportOptions"
+    formControlName="frontierSupportNumber"
+    optionLabel="label"
+    optionValue="value"
+  />
+
+  <label for="iceThicknessBefore">Ice Thickness (Before Frontier)</label>
+  <p-inputNumber
+    inputId="iceThicknessBefore"
+    formControlName="iceThicknessBefore"
+    [showButtons]="true"
+    mode="decimal"
+  />
+
+  <label for="iceThicknessAfter">Ice Thickness (After Frontier)</label>
+  <p-inputNumber
+    inputId="iceThicknessAfter"
+    formControlName="iceThicknessAfter"
+    [showButtons]="true"
+    mode="decimal"
+  />
+}
+
+<button app-btn type="button" (click)="calculForm()" [disabled]="isFormEmpty()">
+  <ng-container i18n>Calculate</ng-container>
+</button>
+
+<button app-btn type="submit" (click)="submitForm()" [disabled]="isFormEmpty()">
+  <ng-container i18n>Save</ng-container>
+</button>
