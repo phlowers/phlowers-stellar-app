@@ -12,7 +12,7 @@
   [modal]="true"
 >
   <ng-template #header>
-    <span i18n>Attachment set</span>
+    <p class="mb-0" i18n>Attachment set</p>
   </ng-template>
   <ng-template #content>
     <div class="flex flex-row gap-2 h-full">
@@ -48,11 +48,11 @@
         <p-divider class="!my-2" />
         <div class="flex flex-row gap-2">
           <div>
-            <label for="armLength" i18n>Arm length (m)</label>
+            <p class="label mb-0" i18n>Arm length (m)</p>
             <span class="ml-2">{{ armLength() || '-' }}</span>
           </div>
           <div>
-            <label for="armLength" i18n>Height below console (m)</label>
+            <p class="label mb-0" i18n>Height below console (m)</p>
             <span class="ml-2">{{ heightBelowConsole() || '-' }}</span>
           </div>
         </div>

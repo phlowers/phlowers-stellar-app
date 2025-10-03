@@ -109,6 +109,8 @@
             pInputText
             type="number"
             min="0"
+            aria-label="support number"
+            i18n-aria-label
             [ngModel]="support.number"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'number', $event)
@@ -124,6 +126,8 @@
             pInputText
             type="number"
             step="0.01"
+            aria-label="span length"
+            i18n-aria-label
             [ngModel]="support.spanLength"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'spanLength', $event)
@@ -140,6 +144,8 @@
             type="number"
             min="0"
             step="0.01"
+            aria-label="span angle"
+            i18n-aria-label
             [ngModel]="support.spanAngle"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'spanAngle', $event)
@@ -154,6 +160,8 @@
           <p-select
             class="w-[12.5rem]"
             [options]="chains()"
+            aria-label="chain name"
+            i18n-aria-label
             [ngModel]="support.chainName"
             optionLabel="name"
             type="text"
@@ -174,6 +182,8 @@
             type="number"
             min="0"
             step="0.01"
+            aria-label="chain length"
+            i18n-aria-label
             [ngModel]="support.chainLength"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'chainLength', $event)
@@ -190,6 +200,8 @@
             type="number"
             min="0"
             step="0.01"
+            aria-label="chain weight"
+            i18n-aria-label
             [ngModel]="support.chainWeight"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'chainWeight', $event)
@@ -206,6 +218,8 @@
               class="w-full"
               pInputText
               type="text"
+              aria-label="support name"
+              i18n-aria-label
               [ngModel]="support.name"
               (ngModelChange)="
                 onSupportFieldChange(support.uuid, 'name', $event)
@@ -216,6 +230,8 @@
                 app-btn
                 btnSize="s"
                 btnStyle="text"
+                aria-label="open attachment set modal"
+                i18n-aria-label
                 (click)="openAttachmentSetModal(support.uuid)"
               >
                 <app-icon icon="visibility" />
@@ -230,6 +246,8 @@
         @if (mode() !== 'view') {
           <input
             pInputText
+            aria-label="attachment set"
+            i18n-aria-label
             [ngModel]="support.attachmentSet"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'attachmentSet', $event)
@@ -246,6 +264,8 @@
             type="number"
             min="0"
             step="0.01"
+            aria-label="arm length"
+            i18n-aria-label
             [ngModel]="support.armLength"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'armLength', $event)
@@ -262,6 +282,8 @@
             type="number"
             min="0"
             step="0.01"
+            aria-label="attachment height"
+            i18n-aria-label
             [ngModel]="support.attachmentHeight"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'attachmentHeight', $event)
@@ -277,6 +299,8 @@
           <p-select
             [options]="[true, false]"
             appendTo="body"
+            aria-label="chain V"
+            i18n-aria-label
             [ngModel]="support.chainV"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'chainV', $event)

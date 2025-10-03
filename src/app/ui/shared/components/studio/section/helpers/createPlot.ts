@@ -15,6 +15,7 @@ const normalCamera = {
 
 const supportCamera = {
   up: { x: 0, y: 0, z: 1 },
+  // TODO: replace magic numbers
   center: {
     x: -0.97,
     y: -0.73,

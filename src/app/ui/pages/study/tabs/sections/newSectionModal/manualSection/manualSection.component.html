@@ -352,6 +352,8 @@
                 buttonLayout="horizontal"
                 inputId="supportsAmount"
                 spinnerMode="horizontal"
+                aria-label="supports amount"
+                i18n-aria-label
                 (onBlur)="onSupportsAmountChangeBlur($event)"
                 (onInput)="onSupportsAmountChangeInput($event)"
               >
@@ -362,10 +364,10 @@
                   <app-icon icon="remove" />
                 </ng-template>
               </p-inputnumber>
-              <span i18n class="flex flex-row gap-2 items-center">
+              <p i18n class="flex flex-row gap-2 items-center mb-0">
                 <app-icon icon="edit_arrow_down" />
                 Double click on a column to copy the value to all supports
-              </span>
+              </p>
             </div>
           </div>
         } @else if (mode() === 'view') {
