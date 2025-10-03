@@ -15,6 +15,7 @@ import { SectionPlotCardsComponent } from '@ui/shared/components/studio/section/
 import { SideTabsComponent } from './side-tabs/side-tabs.component';
 import { SideTabComponent } from './side-tabs/side-tab/side-tab.component';
 import { TabsModule } from 'primeng/tabs';
+import { ClimateComponent } from './loads/climate/climate.component';
 
 @Component({
   selector: 'app-studio-page',
@@ -30,7 +31,8 @@ import { TabsModule } from 'primeng/tabs';
     SectionPlotCardsComponent,
     SideTabsComponent,
     SideTabComponent,
-    TabsModule
+    TabsModule,
+    ClimateComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'

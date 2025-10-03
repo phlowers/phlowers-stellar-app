@@ -1,69 +1,137 @@
-<button app-btn type="button" (click)="resetForm()">
-  <ng-container i18n>reset</ng-container>
-</button>
+<form [formGroup]="form" class="climate">
+  <button
+    app-btn
+    type="button"
+    btnStyle="outlined"
+    btnSize="s"
+    (click)="resetForm()"
+    class="climate__reset"
+  >
+    <app-icon icon="refresh" />
+    <ng-container i18n>reset</ng-container>
+  </button>
 
-<label for="windPressure">Wind Pressure</label>
-<p-inputNumber
-  inputId="windPressure"
-  formControlName="windPressure"
-  mode="decimal"
-/>
+  <div class="climate__divided-line">
+    <div class="climate__form-item">
+      <label for="windPressure" class="wind">Wind Pressure</label>
+      <input
+        pInputText
+        type="number"
+        id="windPressure"
+        formControlName="windPressure"
+        class="wind"
+      />
+    </div>
 
-<label for="cableTemperature">Cable Temperature</label>
-<p-inputNumber
-  inputId="cableTemperature"
-  formControlName="cableTemperature"
-  mode="decimal"
-/>
+    <div class="climate__form-item">
+      <label for="cableTemperature" class="temp">Cable Temperature</label>
+      <input
+        pInputText
+        type="number"
+        id="cableTemperature"
+        formControlName="cableTemperature"
+        class="temp"
+      />
+    </div>
+  </div>
 
-<label for="symmetryType">Symmetry Type</label>
-<p-select
-  inputId="symmetryType"
-  [options]="symmetryOptions"
-  formControlName="symmetryType"
-  optionLabel="label"
-  optionValue="value"
-/>
+  <div class="climate__form-item">
+    <label for="symmetryType" class="symmetry">Symmetry Type</label>
+    <p-select
+      inputId="symmetryType"
+      [options]="symmetryOptions"
+      formControlName="symmetryType"
+      optionLabel="label"
+      optionValue="value"
+      class="symmetry"
+    />
+  </div>
 
-@if (form.value.symmetryType === 'symmetric') {
-  <label for="iceThickness">Ice Thickness</label>
-  <p-inputNumber
-    inputId="iceThickness"
-    formControlName="iceThickness"
-    [showButtons]="true"
-    mode="decimal"
-  />
-} @else if (form.value.symmetryType === 'dis_symmetric') {
-  <label for="frontierSupportNumber">Frontier Support Number</label>
-  <p-select
-    inputId="frontierSupportNumber"
-    [options]="frontierSupportOptions"
-    formControlName="frontierSupportNumber"
-    optionLabel="label"
-    optionValue="value"
-  />
+  @if (form.value.symmetryType === 'symmetric') {
+    <div class="climate__form-item">
+      <label for="iceThickness" class="ice">Ice Thickness</label>
+      <input
+        pInputText
+        type="number"
+        id="iceThickness"
+        formControlName="iceThickness"
+        class="ice"
+      />
+    </div>
+  } @else if (form.value.symmetryType === 'dis_symmetric') {
+    <div class="climate__form-item">
+      <label for="frontierSupportNumber" class="support-number"
+        >Frontier Support Number</label
+      >
+      <p-select
+        inputId="frontierSupportNumber"
+        [options]="frontierSupportOptions"
+        formControlName="frontierSupportNumber"
+        optionLabel="label"
+        optionValue="value"
+        class="support-number"
+      />
+    </div>
 
-  <label for="iceThicknessBefore">Ice Thickness (Before Frontier)</label>
-  <p-inputNumber
-    inputId="iceThicknessBefore"
-    formControlName="iceThicknessBefore"
-    [showButtons]="true"
-    mode="decimal"
-  />
+    <div class="climate__form-item">
+      <label for="iceThicknessBefore" class="ice-before">
+        Ice Thickness (Before Frontier)
+      </label>
+      <input
+        pInputText
+        type="number"
+        id="iceThicknessBefore"
+        formControlName="iceThicknessBefore"
+        class="ice-before"
+      />
+    </div>
 
-  <label for="iceThicknessAfter">Ice Thickness (After Frontier)</label>
-  <p-inputNumber
-    inputId="iceThicknessAfter"
-    formControlName="iceThicknessAfter"
-    [showButtons]="true"
-    mode="decimal"
-  />
-}
+    <div class="climate__form-item">
+      <label for="iceThicknessAfter" class="ice-after">
+        Ice Thickness (After Frontier)
+      </label>
+      <input
+        pInputText
+        type="number"
+        id="iceThicknessAfter"
+        formControlName="iceThicknessAfter"
+        class="ice-after"
+      />
+    </div>
+  }
 
-<button app-btn type="button" (click)="calculForm()" [disabled]="isFormEmpty()">
-  <ng-container i18n>Calculate</ng-container>
-</button>
+  <div class="climate__btn-wrapper">
+    <button
+      app-btn
+      btnStyle="danger"
+      type="button"
+      (click)="eraseForm()"
+      [disabled]="!isFormEmpty()"
+      aria-label="erase load case"
+      i18n-aria-label
+    >
+      <app-icon icon="delete" />
+    </button>
 
-<button app-btn type="submit" (click)="submitForm()" [disabled]="isFormEmpty()">
-  <ng-container i18n>Save</ng-container>
-</button>
+    <button
+      app-btn
+      type="submit"
+      btnStyle="outlined"
+      (click)="submitForm()"
+      [disabled]="isFormEmpty()"
+    >
+      <app-icon icon="save" />
+      <ng-container i18n>Save</ng-container>
+    </button>
+
+    <button
+      app-btn
+      type="button"
+      (click)="calculForm()"
+      [disabled]="isFormEmpty()"
+    >
+      <app-icon icon="rocket_launch" />
+      <ng-container i18n>Calculate</ng-container>
+    </button>
+  </div>
+</form>

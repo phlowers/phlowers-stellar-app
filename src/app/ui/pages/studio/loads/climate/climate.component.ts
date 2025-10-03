@@ -5,17 +5,19 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { InputText } from 'primeng/inputtext';
+import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 
 @Component({
   selector: 'app-climate',
   imports: [
     ReactiveFormsModule,
-    InputNumberModule,
+    InputText,
     SelectModule,
-    ButtonComponent
+    ButtonComponent,
+    IconComponent
   ],
   templateUrl: './climate.component.html',
   styleUrl: './climate.component.scss'
@@ -56,6 +58,10 @@ export class ClimateComponent {
       iceThicknessBefore: null,
       iceThicknessAfter: null
     });
+  }
+
+  eraseForm() {
+    alert('erase the load case!');
   }
 
   submitForm() {
