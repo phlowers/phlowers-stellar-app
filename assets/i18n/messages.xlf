@@ -291,9 +291,9 @@
         <source> Supports </source>
       </segment>
     </unit>
-    <unit id="1772495502731751754">
+    <unit id="7760196930365705954">
       <segment>
-        <source>Attachment height (m)</source>
+        <source> Attachment height (m) </source>
       </segment>
     </unit>
     <unit id="1949800506879332767">
@@ -406,9 +406,9 @@
         <source> Loading </source>
       </segment>
     </unit>
-    <unit id="3154787560331051884">
+    <unit id="5758842248880389182">
       <segment>
-        <source>Chain V</source>
+        <source> Chain V </source>
       </segment>
     </unit>
     <unit id="3159332545494825825">
@@ -426,9 +426,9 @@
         <source> Base parameter </source>
       </segment>
     </unit>
-    <unit id="3337781493803072719">
+    <unit id="844419370454903604">
       <segment>
-        <source>Span angle (Gr)</source>
+        <source> Span angle (Gr) </source>
       </segment>
     </unit>
     <unit id="3510960524643312912">
@@ -591,9 +591,9 @@
         <source>No recent studies</source>
       </segment>
     </unit>
-    <unit id="5513122358899972896">
+    <unit id="5027494160802883894">
       <segment>
-        <source>Chain name</source>
+        <source> Chain name </source>
       </segment>
     </unit>
     <unit id="5519001504653726625">
@@ -661,9 +661,9 @@
         <source> Reset the app </source>
       </segment>
     </unit>
-    <unit id="6370642728789544052">
+    <unit id="3109247660283861099">
       <segment>
-        <source>Number</source>
+        <source> Number </source>
       </segment>
     </unit>
     <unit id="836321179652220398">
@@ -676,9 +676,9 @@
         <source>Error: end not in list</source>
       </segment>
     </unit>
-    <unit id="6543536815504799118">
+    <unit id="6458039984683283908">
       <segment>
-        <source>Chain length (m)</source>
+        <source> Chain length (m) </source>
       </segment>
     </unit>
     <unit id="6598075623864682368">
@@ -731,9 +731,9 @@
         <source> Ready </source>
       </segment>
     </unit>
-    <unit id="7270261397893681192">
+    <unit id="3170243429374159395">
       <segment>
-        <source>Chain weight (kg)</source>
+        <source> Chain weight (kg) </source>
       </segment>
     </unit>
     <unit id="7282804341793038828">
@@ -756,9 +756,9 @@
         <source>Delete support</source>
       </segment>
     </unit>
-    <unit id="7497893791400342599">
+    <unit id="3071505366920262036">
       <segment>
-        <source>Span length (m)</source>
+        <source> Span length (m) </source>
       </segment>
     </unit>
     <unit id="7601213978629574297">
@@ -1074,6 +1074,26 @@
     <unit id="7584732332123203553">
       <segment>
         <source>Attachment set</source>
+      </segment>
+    </unit>
+    <unit id="1005793920710327844">
+      <segment>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;"/> Double click on a column to copy the value to all supports </source>
+      </segment>
+    </unit>
+    <unit id="2901943060312328653">
+      <segment>
+        <source> Support name </source>
+      </segment>
+    </unit>
+    <unit id="5249740663925942907">
+      <segment>
+        <source> Arm length (m) </source>
+      </segment>
+    </unit>
+    <unit id="8455284935734906867">
+      <segment>
+        <source> Attachment set </source>
       </segment>
     </unit>
   </file>

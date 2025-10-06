@@ -805,28 +805,28 @@
         <target>Position</target>
       </segment>
     </unit>
-    <unit id="6370642728789544052">
+    <unit id="3109247660283861099">
       <segment state="initial">
-        <source>Number</source>
-        <target>Numéro</target>
+        <source> Number </source>
+        <target> Numéro </target>
       </segment>
     </unit>
-    <unit id="7497893791400342599">
+    <unit id="3071505366920262036">
       <segment state="initial">
-        <source>Span length (m)</source>
-        <target>Longueur de la portée (m)</target>
+        <source> Span length (m) </source>
+        <target> Longueur de la portée (m) </target>
       </segment>
     </unit>
-    <unit id="3337781493803072719">
+    <unit id="844419370454903604">
       <segment state="initial">
-        <source>Span angle (Gr)</source>
-        <target>Angle de la portée (Gr)</target>
+        <source> Span angle (Gr) </source>
+        <target> Angle de la portée (Gr) </target>
       </segment>
     </unit>
-    <unit id="1772495502731751754">
+    <unit id="7760196930365705954">
       <segment state="initial">
-        <source>Attachment height (m)</source>
-        <target>Hauteur d&apos;attachement (m)</target>
+        <source> Attachment height (m) </source>
+        <target> Hauteur d&apos;attachement (m) </target>
       </segment>
     </unit>
     <unit id="6621067415830629818">
@@ -835,28 +835,28 @@
         <target>Longueur de l&apos;armature (m)</target>
       </segment>
     </unit>
-    <unit id="5513122358899972896">
+    <unit id="5027494160802883894">
       <segment state="initial">
-        <source>Chain name</source>
-        <target>Nom de la chaine</target>
+        <source> Chain name </source>
+        <target> Nom de la chaine </target>
       </segment>
     </unit>
-    <unit id="6543536815504799118">
+    <unit id="6458039984683283908">
       <segment state="initial">
-        <source>Chain length (m)</source>
-        <target>Longueur de la chaine (m)</target>
+        <source> Chain length (m) </source>
+        <target> Longueur de la chaine (m) </target>
       </segment>
     </unit>
-    <unit id="7270261397893681192">
+    <unit id="3170243429374159395">
       <segment state="initial">
-        <source>Chain weight (kg)</source>
-        <target>Poids de la chaine (kg)</target>
+        <source> Chain weight (kg) </source>
+        <target> Poids de la chaine (kg) </target>
       </segment>
     </unit>
-    <unit id="3154787560331051884">
+    <unit id="5758842248880389182">
       <segment state="initial">
-        <source>Chain V</source>
-        <target>Chaine V</target>
+        <source> Chain V </source>
+        <target> Chaine V </target>
       </segment>
     </unit>
     <unit id="3193976279273491157">
@@ -1289,6 +1289,30 @@
       <segment state="initial">
         <source>Generate an initial state</source>
         <target>Générer un état initial</target>
+      </segment>
+    </unit>
+    <unit id="1005793920710327844">
+      <segment state="initial">
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;"/> Double click on a column to copy the value to all supports </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;"/> Double click on a column to copy the value to all supports </target>
+      </segment>
+    </unit>
+    <unit id="2901943060312328653">
+      <segment state="initial">
+        <source> Support name </source>
+        <target> Support name </target>
+      </segment>
+    </unit>
+    <unit id="8455284935734906867">
+      <segment state="initial">
+        <source> Attachment set </source>
+        <target> Attachment set </target>
+      </segment>
+    </unit>
+    <unit id="5249740663925942907">
+      <segment state="initial">
+        <source> Arm length (m) </source>
+        <target> Arm length (m) </target>
       </segment>
     </unit>
   </file>
