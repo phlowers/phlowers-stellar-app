@@ -343,24 +343,32 @@
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="flex flex-col">
             <label for="supportsAmount" i18n>Supports amount</label>
-            <p-inputnumber
-              class="w-32"
-              min="0"
-              [ngModel]="section().supports.length || 0"
-              [showButtons]="true"
-              buttonLayout="horizontal"
-              inputId="supportsAmount"
-              spinnerMode="horizontal"
-              (onBlur)="onSupportsAmountChangeBlur($event)"
-              (onInput)="onSupportsAmountChangeInput($event)"
-            >
-              <ng-template #incrementbuttonicon>
-                <app-icon icon="add" />
-              </ng-template>
-              <ng-template #decrementbuttonicon>
-                <app-icon icon="remove" />
-              </ng-template>
-            </p-inputnumber>
+            <div class="flex flex-row gap-2 justify-between">
+              <p-inputnumber
+                class="w-32"
+                min="0"
+                [ngModel]="section().supports.length || 0"
+                [showButtons]="true"
+                buttonLayout="horizontal"
+                inputId="supportsAmount"
+                spinnerMode="horizontal"
+                aria-label="supports amount"
+                i18n-aria-label
+                (onBlur)="onSupportsAmountChangeBlur($event)"
+                (onInput)="onSupportsAmountChangeInput($event)"
+              >
+                <ng-template #incrementbuttonicon>
+                  <app-icon icon="add" />
+                </ng-template>
+                <ng-template #decrementbuttonicon>
+                  <app-icon icon="remove" />
+                </ng-template>
+              </p-inputnumber>
+              <p i18n class="flex flex-row gap-2 items-center mb-0">
+                <app-icon icon="edit_arrow_down" />
+                Double click on a column to copy the value to all supports
+              </p>
+            </div>
           </div>
         } @else if (mode() === 'view') {
           <dl>

@@ -76,6 +76,35 @@ export class SupportsTableComponent implements OnInit {
     this.supportChange.emit({ uuid, field, value });
   }
 
+  copyColumn(header: keyof Support) {
+    const firstSupport = this.supports()[0];
+    if (!firstSupport) return;
+    const isChainName = header === 'chainName';
+    for (const support of this.supports()) {
+      this.supportChange.emit({
+        uuid: support.uuid,
+        field: header,
+        value: firstSupport[header]
+      });
+      if (isChainName) {
+        this.supportChange.emit({
+          uuid: support.uuid,
+          field: 'chainLength',
+          value: firstSupport['chainLength']
+        });
+        this.supportChange.emit({
+          uuid: support.uuid,
+          field: 'chainWeight',
+          value: firstSupport['chainWeight']
+        });
+      }
+    }
+  }
+
+  onSupportNumberDoubleClick(header: keyof Support) {
+    this.copyColumn(header);
+  }
+
   openAttachmentSetModal(uuid: string) {
     console.log('openAttachmentSetModal', uuid);
     this.supportForAttachmentSetModal.set(
