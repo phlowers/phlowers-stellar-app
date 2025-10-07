@@ -41,8 +41,8 @@ export class ClimateComponent {
       windPressure: [0, Validators.required],
       cableTemperature: [15, Validators.required],
       symmetryType: ['symmetric', Validators.required],
-      iceThickness: [0], // for symmetric
-      frontierSupportNumber: [null], // for dis symmetric
+      iceThickness: [0],
+      frontierSupportNumber: [null],
       iceThicknessBefore: [null],
       iceThicknessAfter: [null]
     });
@@ -64,20 +64,44 @@ export class ClimateComponent {
     alert('erase the load case!');
   }
 
+  getVisibleFormValues(): Record<string, any> {
+    const symmetryType = this.form.value.symmetryType;
+
+    if (symmetryType === 'symmetric') {
+      return {
+        windPressure: this.form.value.windPressure,
+        cableTemperature: this.form.value.cableTemperature,
+        symmetryType,
+        iceThickness: this.form.value.iceThickness
+      };
+    } else if (symmetryType === 'dis_symmetric') {
+      return {
+        windPressure: this.form.value.windPressure,
+        cableTemperature: this.form.value.cableTemperature,
+        symmetryType,
+        frontierSupportNumber: this.form.value.frontierSupportNumber,
+        iceThicknessBefore: this.form.value.iceThicknessBefore,
+        iceThicknessAfter: this.form.value.iceThicknessAfter
+      };
+    }
+
+    // Fallback, should not happen
+    return this.form.value;
+  }
+
   submitForm() {
-    console.log('Submit (save):', this.form.value);
+    console.log('Submit (save):', this.getVisibleFormValues());
   }
 
   calculForm() {
     console.log('Calculus values:');
-    Object.entries(this.form.value).forEach(([key, val]) =>
+    Object.entries(this.getVisibleFormValues()).forEach(([key, val]) =>
       console.log(`${key}: ${val}`)
     );
   }
 
   isFormEmpty(): boolean {
-    const values = this.form.value;
-    return Object.values(values).every(
+    return Object.values(this.getVisibleFormValues()).some(
       (val) => val === null || val === undefined || val === ''
     );
   }
