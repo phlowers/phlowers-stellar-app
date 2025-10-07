@@ -103,6 +103,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "jasmine-core": "~5.4.0",
     "jest-raw-loader": "^1.0.1",
+    "jest-sonar-reporter": "^2.0.0",
     "jsdom": "^26.0.0",
     "ng-extract-i18n-merge": "^2.14.3",
     "postcss": "^8.4.49",
