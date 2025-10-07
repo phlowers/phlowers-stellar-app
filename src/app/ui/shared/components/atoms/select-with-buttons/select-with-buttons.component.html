@@ -7,10 +7,11 @@
   [ariaLabel]="ariaLabel()"
   class="select-with-buttons"
   panelStyleClass="select-with-buttons-panel"
-  model="selectedOption"
+  model="selectedOptionValue()"
+  [class.has-clear-btn]="selectedOptionValue() && showClear()"
 >
   <ng-template #selectedItem let-selectedOptionStuff>
-    @if (selectedOption()) {
+    @if (selectedOptionValue()) {
       {{ selectedOptionLabel() }}
     } @else {
       <span class="placeholder">{{ placeholder() }}</span>
@@ -99,3 +100,16 @@
     </div>
   </ng-template>
 </p-select>
+
+@if (selectedOptionValue() && showClear()) {
+  <button
+    app-btn
+    btnStyle="text"
+    ariaLabel="clear selection"
+    i18n-ariaLabel
+    (click)="clearSelectedOptionValue()"
+    class="clear-button"
+  >
+    <app-icon icon="close" />
+  </button>
+}

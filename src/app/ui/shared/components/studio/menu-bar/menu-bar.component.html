@@ -33,6 +33,7 @@
       ariaLabel="Select charge case"
       i18n-ariaLabel
       class="section__content-init"
+      [showClear]="true"
     />
   </div>
   <button
@@ -40,18 +41,21 @@
     i18n-aria-label
     app-btn
     btnStyle="outlined"
-    btnSize="m"
+    btnSize="s"
   >
     <app-icon icon="add_circle" />
   </button>
+
   <div class="vertical-divider"></div>
-  <span class="text-s-600 flex items-center gap-1" tabindex="0">
+
+  <p class="text-s-600 flex items-center gap-1 mb-0">
     <app-icon class="text-primary" icon="engineering" />
     @if (staffIsPresent()) {
       <ng-container i18n>Staff is present</ng-container>
     } @else {
       <ng-container i18n>Staff is absent</ng-container>
     }
-  </span>
+  </p>
+
   <div class="vertical-divider"></div>
 </div>
