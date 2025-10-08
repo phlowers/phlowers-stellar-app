@@ -1219,12 +1219,6 @@
         <target>Condition initiale</target>
       </segment>
     </unit>
-    <unit id="278935170538178235">
-      <segment state="initial">
-        <source>Imported studies:</source>
-        <target>Étude importé :</target>
-      </segment>
-    </unit>
     <unit id="6389312883797462351">
       <segment state="initial">
         <source>Studio</source>
@@ -1247,12 +1241,6 @@
       <segment state="initial">
         <source>Invert:</source>
         <target>Inverser le sens :</target>
-      </segment>
-    </unit>
-    <unit id="3177037057474396347">
-      <segment state="initial">
-        <source> Upload one or multiple files </source>
-        <target> Télécharger un ou plusieurs fichiers </target>
       </segment>
     </unit>
     <unit id="7462301153729425254">
@@ -1313,6 +1301,168 @@
       <segment state="initial">
         <source> Arm length (m) </source>
         <target> Arm length (m) </target>
+      </segment>
+    </unit>
+    <unit id="2932152767120246098">
+      <segment state="initial">
+        <source> Upload one or multiple protoV4 files </source>
+        <target> Charger un ou plusieurs fichiers protoV4 </target>
+      </segment>
+    </unit>
+    <unit id="4280648003561719483">
+      <segment state="initial">
+        <source>supports amount</source>
+        <target>nombre de supports</target>
+      </segment>
+    </unit>
+    <unit id="349300253783483450">
+      <segment state="initial">
+        <source>support number</source>
+        <target>numéro de support</target>
+      </segment>
+    </unit>
+    <unit id="3599249630457687633">
+      <segment state="initial">
+        <source>span length</source>
+        <target>longueur de portée</target>
+      </segment>
+    </unit>
+    <unit id="2045054298163856321">
+      <segment state="initial">
+        <source>span angle</source>
+        <target>angle de portée</target>
+      </segment>
+    </unit>
+    <unit id="9217388832996322692">
+      <segment state="initial">
+        <source>chain name</source>
+        <target>nom de la chaine</target>
+      </segment>
+    </unit>
+    <unit id="620478596918239347">
+      <segment state="initial">
+        <source>chain length</source>
+        <target>longueur de la chaine</target>
+      </segment>
+    </unit>
+    <unit id="6831440935794088973">
+      <segment state="initial">
+        <source>chain weight</source>
+        <target>poids de la chaine</target>
+      </segment>
+    </unit>
+    <unit id="6583469756054732335">
+      <segment state="initial">
+        <source>support name</source>
+        <target>nom du support</target>
+      </segment>
+    </unit>
+    <unit id="1855573221352568994">
+      <segment state="initial">
+        <source>open attachment set modal</source>
+        <target>ouvrir le modal de set d&apos;accroche</target>
+      </segment>
+    </unit>
+    <unit id="4240018243849737669">
+      <segment state="initial">
+        <source>attachment set</source>
+        <target>set d&apos;accroche</target>
+      </segment>
+    </unit>
+    <unit id="3973913981535334331">
+      <segment state="initial">
+        <source>arm length</source>
+        <target>longueur de bras</target>
+      </segment>
+    </unit>
+    <unit id="5452784528816163120">
+      <segment state="initial">
+        <source>attachment height</source>
+        <target>hauteur d&apos;accroche</target>
+      </segment>
+    </unit>
+    <unit id="2275797440786978301">
+      <segment state="initial">
+        <source>chain V</source>
+        <target>chaine V</target>
+      </segment>
+    </unit>
+    <unit id="69654202240409398">
+      <segment state="initial">
+        <source>Select initial conditions</source>
+        <target>Sélectionner les conditions initiales</target>
+      </segment>
+    </unit>
+    <unit id="2400362719050540518">
+      <segment state="initial">
+        <source>view</source>
+        <target>voir</target>
+      </segment>
+    </unit>
+    <unit id="9095134843628689709">
+      <segment state="initial">
+        <source>edit</source>
+        <target>modifier</target>
+      </segment>
+    </unit>
+    <unit id="6133338617402043535">
+      <segment state="initial">
+        <source>duplicate</source>
+        <target>dupliquer</target>
+      </segment>
+    </unit>
+    <unit id="2456043080471762298">
+      <segment state="initial">
+        <source>delete</source>
+        <target>supprimer</target>
+      </segment>
+    </unit>
+    <unit id="7249112263207864079">
+      <segment state="initial">
+        <source>Section :</source>
+        <target>Canton :</target>
+      </segment>
+    </unit>
+    <unit id="477906921630190891">
+      <segment state="initial">
+        <source>CI :</source>
+        <target>CI :</target>
+      </segment>
+    </unit>
+    <unit id="8735221513379114136">
+      <segment state="initial">
+        <source>CC :</source>
+        <target>CC :</target>
+      </segment>
+    </unit>
+    <unit id="3901869594843063192">
+      <segment state="initial">
+        <source>Select charge case</source>
+        <target>Sélectionner le cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="5638154401039870638">
+      <segment state="initial">
+        <source>Staff is present</source>
+        <target>Le personnel est présent</target>
+      </segment>
+    </unit>
+    <unit id="929550426768002309">
+      <segment state="initial">
+        <source>Staff is absent</source>
+        <target>Le personnel est absent</target>
+      </segment>
+    </unit>
+    <unit id="3778631527604022771">
+      <segment state="initial">
+        <source>Go to study</source>
+        <target>Aller à l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="6492147370027863408">
+      <segment state="initial">
+        <source>add charge case</source>
+        <target>Ajouter un cas de charge</target>
       </segment>
     </unit>
   </file>

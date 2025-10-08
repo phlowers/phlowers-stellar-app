@@ -16,7 +16,7 @@
   [initialConditionInput]="currentInitialCondition()"
 />
 
-@if (!sections().length) {
+@if (!study()?.sections?.length) {
   <section class="text-center">
     <h1 class="no-section-text text-xl-400" i18n>No existing section</h1>
     <button
@@ -32,9 +32,9 @@
   </section>
 }
 
-@if (sections().length) {
+@if (study()?.sections?.length) {
   <article class="sections-container">
-    @for (section of sections(); track section.uuid) {
+    @for (section of study()?.sections; track section.uuid) {
       <app-card class="section" role="article">
         <p-checkbox
           ariaLabel="select this study's section"
@@ -91,109 +91,47 @@
         } @else if (
           section.initial_conditions && section.initial_conditions.length > 0
         ) {
-          <p-select
-            #initialConditionSelect
+          <app-select-with-buttons
             [options]="section.initial_conditions"
+            [selectedOption]="section.selected_initial_condition_uuid"
+            ariaLabel="Select initial conditions"
+            i18n-ariaLabel
+            (selectOption)="
+              selectInitialConditionClick({
+                initialCondition: $event,
+                section: section
+              })
+            "
             placeholder="View initial conditions"
             i18n-placeholder
-            appendTo="body"
-            panelStyleClass="initial-condition-select"
-            [panelStyle]="{ right: '0', left: 'unset' }"
+            (viewOption)="
+              viewInitialConditionClick({
+                initialCondition: $event,
+                section: section
+              })
+            "
+            (editOption)="
+              editInitialConditionClick({
+                initialCondition: $event,
+                section: section
+              })
+            "
+            (duplicateOption)="
+              duplicateInitialConditionClick({
+                initialCondition: $event,
+                section: section
+              })
+            "
+            (deleteOption)="
+              deleteInitialConditionClick({
+                initialCondition: $event,
+                section: section
+              })
+            "
+            optionLabel="name"
+            optionValue="uuid"
             class="section__content-init"
-            [(ngModel)]="selectedInitialCondition"
-          >
-            <ng-template #selectedItem let-selectedOption>
-              @if (selectedOption) {
-                {{ selectedOption.name }}
-              }
-            </ng-template>
-
-            <ng-template let-initialCondition let-index="index" #item>
-              <div class="select-dropdown">
-                <button
-                  app-btn
-                  btnStyle="text"
-                  (click)="selectItem(initialCondition, $event)"
-                  class="select-dropdown__select"
-                >
-                  {{ initialCondition.name }}
-                </button>
-
-                <p-divider layout="vertical" />
-
-                <button
-                  app-btn
-                  btnSize="l"
-                  btnStyle="text"
-                  (click)="
-                    openInitialConditionModal(
-                      section,
-                      initialCondition,
-                      'view'
-                    );
-                    $event.stopPropagation();
-                    $event.preventDefault()
-                  "
-                >
-                  <app-icon icon="eye_tracking" />
-                </button>
-
-                <p-divider layout="vertical" />
-
-                <button
-                  app-btn
-                  btnSize="l"
-                  btnStyle="text"
-                  (click)="
-                    openInitialConditionModal(
-                      section,
-                      initialCondition,
-                      'edit'
-                    );
-                    $event.stopPropagation();
-                    $event.preventDefault()
-                  "
-                >
-                  <app-icon icon="edit" />
-                </button>
-
-                <p-divider layout="vertical" />
-
-                <button
-                  app-btn
-                  btnSize="l"
-                  btnStyle="text"
-                  (click)="
-                    duplicateInitialCondition.emit({
-                      section,
-                      initialCondition: initialCondition
-                    });
-                    $event.stopPropagation();
-                    $event.preventDefault()
-                  "
-                >
-                  <app-icon icon="content_copy" />
-                </button>
-
-                <p-divider layout="vertical" />
-
-                <button
-                  (click)="
-                    deleteInitialCondition.emit({
-                      section,
-                      initialCondition: initialCondition
-                    })
-                  "
-                  app-btn
-                  btnSize="l"
-                  btnStyle="text"
-                  class="erase-btn"
-                >
-                  <app-icon icon="delete" />
-                </button>
-              </div>
-            </ng-template>
-          </p-select>
+          />
         }
 
         <p i18n class="mb-0 section__title-action">Actions</p>
@@ -284,10 +222,11 @@
     </button>
     <a
       app-btn
-      [class.disabled]="!selectedSection()"
+      [class.disabled]="!getSelectedInitialConditionUuid()"
       btnStyle="base"
       btnSize="m"
-      [routerLink]="'/studio'"
+      [routerLink]="'/study/' + study()?.uuid + '/studio'"
+      [queryParams]="{ sectionUuid: selectedSection() }"
     >
       <app-icon icon="play_circle" />
       <ng-container i18n>Generate an initial state</ng-container>

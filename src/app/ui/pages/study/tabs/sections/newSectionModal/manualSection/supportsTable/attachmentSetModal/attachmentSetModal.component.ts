@@ -20,6 +20,7 @@ import { FormsModule } from '@angular/forms';
 import { UniquePipe } from '@ui/shared/service/autocomplete/unique.pipe';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { Section } from '@core/data/database/interfaces/section';
 
 @Component({
   selector: 'app-attachment-set-modal',
@@ -41,7 +42,7 @@ export class AttachmentSetModalComponent implements OnInit {
   isOpen = input<boolean>(false);
   support = input<Support>();
   isOpenChange = output<boolean>();
-
+  section = input.required<Section | null>();
   attachmentSet = signal<string | undefined>(undefined);
   supportName = signal<string | undefined>(undefined);
   armLength = signal<number | undefined>(undefined);

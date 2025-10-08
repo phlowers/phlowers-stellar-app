@@ -56,7 +56,8 @@ describe('NewSectionModalComponent (Jest)', () => {
     electric_tension_level: undefined,
     comment: undefined,
     supports: [],
-    initial_conditions: []
+    initial_conditions: [],
+    selected_initial_condition_uuid: undefined
   };
 
   beforeEach(async () => {

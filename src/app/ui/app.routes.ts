@@ -36,7 +36,18 @@ export const appRoutes: Routes = [
       {
         path: 'study/:uuid',
         title: $localize`Study`,
-        component: StudyComponent
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            component: StudyComponent
+          },
+          {
+            path: 'studio',
+            title: $localize`Studio`,
+            component: StudioPageComponent
+          }
+        ]
       },
       {
         path: 'sections',
