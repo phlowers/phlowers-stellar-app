@@ -1,3 +1,7 @@
+:host {
+  @apply block -m-6;
+}
+
 .graph-tools {
   @apply flex;
   height: calc(100% - 3.5rem);
