@@ -1,5 +1,4 @@
 // import presets from 'jest-preset-angular/presets';
-import { output } from '@angular/core';
 import { type JestConfigWithTsJest } from 'ts-jest';
 
 // import { compilerOptions } from './tsconfig.json';
