@@ -21,7 +21,16 @@ const config = {
     'jest-preset-angular/build/serializers/ng-snapshot',
     'jest-preset-angular/build/serializers/no-ng-attributes'
   ],
-  testResultsProcessor: 'jest-sonar-reporter',
+  reporters: [
+    'default',
+    [
+      'jest-sonar',
+      {
+        outputDirectory: '.',
+        outputName: 'report-task.txt'
+      }
+    ]
+  ],
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   transform: {
     '^.+\\.py$': '<rootDir>/fileTransformer.js',
