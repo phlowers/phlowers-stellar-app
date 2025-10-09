@@ -1,6 +1,6 @@
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 
-export const formatData = (litData: GetSectionOutput) => {
+export const formatLitData = (litData: GetSectionOutput) => {
   const litXs = Object.values(litData.x);
   const litYs = Object.values(litData.y);
   const litZs = Object.values(litData.z);

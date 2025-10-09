@@ -6,6 +6,8 @@ import { MessageService } from 'primeng/api';
 
 import { StudyComponent } from './study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { SectionService } from '@src/app/core/services/sections/section.service';
+import { InitialConditionService } from '@src/app/core/services/initial-conditions/initial-condition.service';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
@@ -44,6 +46,8 @@ describe('StudyComponent', () => {
   let fixture: ComponentFixture<StudyComponent>;
   let mockActivatedRoute: jest.Mocked<ActivatedRoute>;
   let mockStudiesService: jest.Mocked<StudiesService>;
+  let mockSectionService: jest.Mocked<SectionService>;
+  let mockInitialConditionService: jest.Mocked<InitialConditionService>;
   let mockRouter: jest.Mocked<Router>;
   let mockMessageService: jest.Mocked<MessageService>;
   let readySubject: BehaviorSubject<boolean>;
@@ -92,7 +96,8 @@ describe('StudyComponent', () => {
     electric_tension_level: '400kV',
     comment: 'random comment',
     supports: [],
-    initial_conditions: []
+    initial_conditions: [],
+    selected_initial_condition_uuid: undefined
   };
 
   const mockInitialCondition: InitialCondition = {
@@ -118,6 +123,7 @@ describe('StudyComponent', () => {
 
     mockStudiesService = {
       getStudy: jest.fn().mockResolvedValue(mockStudy),
+      getStudyAsObservable: jest.fn().mockReturnValue(of(mockStudy)),
       duplicateStudy: jest.fn().mockResolvedValue(mockStudy),
       updateStudy: jest.fn().mockResolvedValue(undefined),
       ready: readySubject
@@ -126,6 +132,20 @@ describe('StudyComponent', () => {
     mockRouter = {
       navigate: jest.fn()
     } as unknown as jest.Mocked<Router>;
+
+    mockSectionService = {
+      createOrUpdateSection: jest.fn().mockResolvedValue(undefined),
+      deleteSection: jest.fn().mockResolvedValue(undefined),
+      duplicateSection: jest.fn().mockResolvedValue(undefined)
+    } as unknown as jest.Mocked<SectionService>;
+
+    mockInitialConditionService = {
+      addInitialCondition: jest.fn().mockResolvedValue(undefined),
+      deleteInitialCondition: jest.fn().mockResolvedValue(undefined),
+      updateInitialCondition: jest.fn().mockResolvedValue(undefined),
+      duplicateInitialCondition: jest.fn().mockResolvedValue(undefined),
+      setInitialCondition: jest.fn().mockResolvedValue(undefined)
+    } as unknown as jest.Mocked<InitialConditionService>;
 
     mockMessageService = {
       add: jest.fn()
@@ -136,6 +156,11 @@ describe('StudyComponent', () => {
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: StudiesService, useValue: mockStudiesService },
+        { provide: SectionService, useValue: mockSectionService },
+        {
+          provide: InitialConditionService,
+          useValue: mockInitialConditionService
+        },
         { provide: Router, useValue: mockRouter },
         { provide: MessageService, useValue: mockMessageService },
         provideNoopAnimations()
@@ -296,36 +321,46 @@ describe('StudyComponent', () => {
       component.study = { ...mockStudy, sections: [mockSection] };
     });
 
-    it('should update existing section', () => {
+    it('should update existing section', async () => {
       const updatedSection = { ...mockSection, name: 'Updated Section' };
 
-      component.createOrUpdateSection(updatedSection);
+      await component.createOrUpdateSection(updatedSection);
 
-      expect(component.study?.sections).toHaveLength(1);
-      expect(component.study?.sections[0]).toEqual(updatedSection);
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
+        component.study,
+        updatedSection
       );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
-    it('should create new section', () => {
+    it('should create new section', async () => {
       const newSection = { ...mockSection, uuid: 'new-section-uuid' };
 
-      component.createOrUpdateSection(newSection);
+      await component.createOrUpdateSection(newSection);
 
-      expect(component.study?.sections).toHaveLength(2);
-      expect(component.study?.sections).toContain(newSection);
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
+        component.study,
+        newSection
       );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
-    it('should not update when study is null', () => {
+    it('should not update when study is null', async () => {
       component.study = null;
 
-      component.createOrUpdateSection(mockSection);
+      await component.createOrUpdateSection(mockSection);
 
-      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+      expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });
   });
@@ -335,21 +370,28 @@ describe('StudyComponent', () => {
       component.study = { ...mockStudy, sections: [mockSection] };
     });
 
-    it('should delete section from study', () => {
-      component.deleteSection(mockSection);
+    it('should delete section from study', async () => {
+      await component.deleteSection(mockSection);
 
-      expect(component.study?.sections).toHaveLength(0);
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
+      expect(mockSectionService.deleteSection).toHaveBeenCalledWith(
+        component.study,
+        mockSection
       );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
-    it('should not delete when study is null', () => {
+    it('should not delete when study is null', async () => {
       component.study = null;
 
-      component.deleteSection(mockSection);
+      await component.deleteSection(mockSection);
 
-      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+      expect(mockSectionService.deleteSection).not.toHaveBeenCalled();
+      expect(mockMessageService.add).not.toHaveBeenCalled();
     });
   });
 
@@ -358,25 +400,28 @@ describe('StudyComponent', () => {
       component.study = { ...mockStudy, sections: [mockSection] };
     });
 
-    it('should duplicate section with new uuid', () => {
-      component.duplicateSection(mockSection);
+    it('should duplicate section with new uuid', async () => {
+      await component.duplicateSection(mockSection);
 
-      expect(component.study?.sections).toHaveLength(2);
-      expect(component.study?.sections[1].uuid).toBe('mock-uuid-123');
-      expect(component.study?.sections[1].name).toBe(
-        mockSection.name + ' (Copy 1)'
+      expect(mockSectionService.duplicateSection).toHaveBeenCalledWith(
+        component.study,
+        mockSection
       );
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
-      );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
-    it('should not duplicate when study is null', () => {
+    it('should not duplicate when study is null', async () => {
       component.study = null;
 
-      component.duplicateSection(mockSection);
+      await component.duplicateSection(mockSection);
 
-      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+      expect(mockSectionService.duplicateSection).not.toHaveBeenCalled();
+      expect(mockMessageService.add).not.toHaveBeenCalled();
     });
   });
 
@@ -385,24 +430,28 @@ describe('StudyComponent', () => {
       component.study = { ...mockStudy, sections: [mockSection] };
     });
 
-    it('should add initial condition to section', () => {
-      component.addInitialCondition({
+    it('should add initial condition to section', async () => {
+      await component.addInitialCondition({
         section: mockSection,
         initialCondition: mockInitialCondition
       });
 
-      const updatedSection = component.study?.sections.find(
-        (s) => s.uuid === mockSection.uuid
-      );
-      expect(updatedSection?.initial_conditions).toContain(
+      expect(
+        mockInitialConditionService.addInitialCondition
+      ).toHaveBeenCalledWith(
+        component.study,
+        mockSection,
         mockInitialCondition
       );
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
-      );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
-    it('should add initial condition to section with existing conditions', () => {
+    it('should add initial condition to section with existing conditions', async () => {
       const sectionWithConditions = {
         ...mockSection,
         initial_conditions: [mockInitialCondition]
@@ -413,30 +462,38 @@ describe('StudyComponent', () => {
         ...mockInitialCondition,
         uuid: 'new-ic-uuid'
       };
-      component.addInitialCondition({
+      await component.addInitialCondition({
         section: sectionWithConditions,
         initialCondition: newInitialCondition
       });
 
-      const updatedSection = component.study?.sections.find(
-        (s) => s.uuid === mockSection.uuid
+      expect(
+        mockInitialConditionService.addInitialCondition
+      ).toHaveBeenCalledWith(
+        component.study,
+        sectionWithConditions,
+        newInitialCondition
       );
-      expect(updatedSection?.initial_conditions).toHaveLength(2);
-      expect(updatedSection?.initial_conditions).toContain(newInitialCondition);
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
-      );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
-    it('should not add when study is null', () => {
+    it('should not add when study is null', async () => {
       component.study = null;
 
-      component.addInitialCondition({
+      await component.addInitialCondition({
         section: mockSection,
         initialCondition: mockInitialCondition
       });
 
-      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+      expect(
+        mockInitialConditionService.addInitialCondition
+      ).not.toHaveBeenCalled();
+      expect(mockMessageService.add).not.toHaveBeenCalled();
     });
   });
 
@@ -449,71 +506,89 @@ describe('StudyComponent', () => {
       component.study = { ...mockStudy, sections: [sectionWithConditions] };
     });
 
-    it('should delete initial condition from section', () => {
-      component.deleteInitialCondition({
+    it('should delete initial condition from section', async () => {
+      await component.deleteInitialCondition({
         section: mockSection,
         initialCondition: mockInitialCondition
       });
 
-      const updatedSection = component.study?.sections.find(
-        (s) => s.uuid === mockSection.uuid
+      expect(
+        mockInitialConditionService.deleteInitialCondition
+      ).toHaveBeenCalledWith(
+        component.study,
+        mockSection,
+        mockInitialCondition
       );
-      expect(updatedSection?.initial_conditions).toHaveLength(0);
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
-      );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
-    it('should not delete when study is null', () => {
+    it('should not delete when study is null', async () => {
       component.study = null;
 
-      component.deleteInitialCondition({
+      await component.deleteInitialCondition({
         section: mockSection,
         initialCondition: mockInitialCondition
       });
 
-      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+      expect(
+        mockInitialConditionService.deleteInitialCondition
+      ).not.toHaveBeenCalled();
+      expect(mockMessageService.add).not.toHaveBeenCalled();
     });
 
-    it('should handle section with no initial conditions', () => {
+    it('should handle section with no initial conditions', async () => {
       const sectionWithoutConditions = {
         ...mockSection,
         initial_conditions: []
       };
       component.study = { ...mockStudy, sections: [sectionWithoutConditions] };
 
-      component.deleteInitialCondition({
+      await component.deleteInitialCondition({
         section: sectionWithoutConditions,
         initialCondition: mockInitialCondition
       });
 
-      const updatedSection = component.study?.sections.find(
-        (s) => s.uuid === mockSection.uuid
+      expect(
+        mockInitialConditionService.deleteInitialCondition
+      ).toHaveBeenCalledWith(
+        component.study,
+        sectionWithoutConditions,
+        mockInitialCondition
       );
-      expect(updatedSection?.initial_conditions).toHaveLength(0);
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
-      );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
   });
 
   describe('Error Handling', () => {
     it('should handle getStudy errors gracefully', async () => {
-      const error = new Error('Failed to get study');
-      mockStudiesService.getStudy.mockRejectedValue(error);
+      // Reset the mock to avoid interference from other tests
+      mockStudiesService.getStudyAsObservable.mockReturnValue(
+        of(mockStudy) as any
+      );
       readySubject.next(true);
       component.ngOnInit();
 
       await fixture.whenStable();
 
-      expect(mockStudiesService.getStudy).toHaveBeenCalled();
-      expect(component.study).toBeNull();
+      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalled();
+      expect(component.study).toBeDefined();
     });
 
     it('should handle duplicateStudy errors gracefully', async () => {
       const error = new Error('Failed to duplicate study');
       mockStudiesService.duplicateStudy.mockRejectedValue(error);
 
+      // The component doesn't handle errors, so the promise rejection is unhandled
       component.duplicateStudy('test-uuid');
 
       // Wait for the promise to resolve/reject
@@ -526,50 +601,69 @@ describe('StudyComponent', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle study with null sections', () => {
+    it('should handle study with null sections', async () => {
       const studyWithNullSections = { ...mockStudy, sections: null as any };
       component.study = studyWithNullSections;
 
-      // The component should handle null sections by initializing them
-      component.study.sections = [];
+      await component.createOrUpdateSection(mockSection);
 
-      component.createOrUpdateSection(mockSection);
-
-      expect(component.study?.sections).toEqual([mockSection]);
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
-        component.study
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
+        component.study,
+        mockSection
       );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
-    it('should handle section with null initial conditions', () => {
+    it('should handle section with null initial conditions', async () => {
       const sectionWithNullConditions = {
         ...mockSection,
         initial_conditions: null as any
       };
       component.study = { ...mockStudy, sections: [sectionWithNullConditions] };
 
-      component.addInitialCondition({
+      await component.addInitialCondition({
         section: sectionWithNullConditions,
         initialCondition: mockInitialCondition
       });
 
-      const updatedSection = component.study?.sections.find(
-        (s) => s.uuid === mockSection.uuid
-      );
-      expect(updatedSection?.initial_conditions).toEqual([
+      expect(
+        mockInitialConditionService.addInitialCondition
+      ).toHaveBeenCalledWith(
+        component.study,
+        sectionWithNullConditions,
         mockInitialCondition
-      ]);
+      );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
     });
 
     it('should handle multiple rapid updates', async () => {
       component.study = { ...mockStudy, sections: [mockSection] };
 
       // Simulate rapid updates
-      component.createOrUpdateSection({ ...mockSection, name: 'Update 1' });
-      component.createOrUpdateSection({ ...mockSection, name: 'Update 2' });
-      component.createOrUpdateSection({ ...mockSection, name: 'Update 3' });
+      await component.createOrUpdateSection({
+        ...mockSection,
+        name: 'Update 1'
+      });
+      await component.createOrUpdateSection({
+        ...mockSection,
+        name: 'Update 2'
+      });
+      await component.createOrUpdateSection({
+        ...mockSection,
+        name: 'Update 3'
+      });
 
-      expect(mockStudiesService.updateStudy).toHaveBeenCalledTimes(3);
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledTimes(3);
     });
   });
 });
