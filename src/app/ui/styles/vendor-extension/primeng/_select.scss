@@ -34,8 +34,9 @@
   @extend %text-m-400;
 }
 
-// specific override for initial condition select list in study section tab (page study)
-.initial-condition-select.initial-condition-select {
+// specific override for initial condition select list in study section tab (page study) and for charge case select list in studio menu bar
+.select-with-buttons-panel.select-with-buttons-panel {
+
   .p-select-list,
   .p-select-option {
     padding: 0rem;
@@ -47,11 +48,25 @@
     cursor: auto;
   }
 
-  .select-dropdown__select {
-    .app-btn-label {
-      @apply whitespace-nowrap overflow-hidden overflow-ellipsis px-1;
-      @extend %text-m-400;
-      color: var(--grey-750);
+  .select-dropdown {
+    @apply flex flex-row items-center gap-2 p-2;
+
+
+    &__select {
+      @apply w-32 max-w-32 px-0;
+      align-self: stretch;
+
+      .app-btn-label {
+        @apply whitespace-nowrap overflow-hidden overflow-ellipsis px-1;
+        @extend %text-m-400;
+        color: var(--grey-750);
+      }
     }
+
+
+    .erase-btn {
+      color: var(--error-600);
+    }
+
   }
 }

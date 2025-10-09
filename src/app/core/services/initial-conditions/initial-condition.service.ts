@@ -11,6 +11,7 @@ import { InitialCondition } from '../../data/database/interfaces/initialConditio
 import { StudiesService } from '../studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+import { cloneDeep } from 'lodash';
 
 export interface InitialConditionFunctionsInput {
   section: Section;
@@ -24,6 +25,21 @@ export class InitialConditionService {
   constructor(private readonly studiesService: StudiesService) {}
 
   /**
+   * Helper method to clone a study, apply modifications, and update it
+   * @param study The study to clone and update
+   * @param modifier Function that modifies the cloned study
+   * @returns Promise that resolves when the operation is complete
+   */
+  private async updateStudyWithModification(
+    study: Study,
+    modifier: (studyCopy: Study) => void
+  ): Promise<void> {
+    const studyCopy = cloneDeep(study);
+    modifier(studyCopy);
+    await this.studiesService.updateStudy(studyCopy);
+  }
+
+  /**
    * Update an initial condition in a section
    * @param study The study containing the section
    * @param section The section containing the initial condition
@@ -35,17 +51,18 @@ export class InitialConditionService {
     section: Section,
     initialCondition: InitialCondition
   ): Promise<void> {
-    study.sections = study.sections.map((s) =>
-      s?.uuid === section?.uuid
-        ? {
-            ...s,
-            initial_conditions: s.initial_conditions?.map((ic) =>
-              ic?.uuid === initialCondition?.uuid ? initialCondition : ic
-            )
-          }
-        : s
-    );
-    await this.studiesService.updateStudy(study);
+    await this.updateStudyWithModification(study, (studyCopy) => {
+      studyCopy.sections = study.sections.map((s) =>
+        s?.uuid === section?.uuid
+          ? {
+              ...s,
+              initial_conditions: s.initial_conditions?.map((ic) =>
+                ic?.uuid === initialCondition?.uuid ? initialCondition : ic
+              )
+            }
+          : s
+      );
+    });
   }
 
   /**
@@ -60,18 +77,19 @@ export class InitialConditionService {
     section: Section,
     initialCondition: InitialCondition
   ): Promise<void> {
-    study.sections = study.sections.map((s) =>
-      s?.uuid === section?.uuid
-        ? {
-            ...s,
-            initial_conditions: [
-              ...(s.initial_conditions || []),
-              initialCondition
-            ]
-          }
-        : s
-    );
-    await this.studiesService.updateStudy(study);
+    await this.updateStudyWithModification(study, (studyCopy) => {
+      studyCopy.sections = studyCopy.sections.map((s) =>
+        s?.uuid === section?.uuid
+          ? {
+              ...s,
+              initial_conditions: [
+                ...(s.initial_conditions || []),
+                initialCondition
+              ]
+            }
+          : s
+      );
+    });
   }
 
   /**
@@ -86,17 +104,22 @@ export class InitialConditionService {
     section: Section,
     initialCondition: InitialCondition
   ): Promise<void> {
-    study.sections = study.sections.map((s) =>
-      s?.uuid === section?.uuid
-        ? {
-            ...s,
-            initial_conditions: s.initial_conditions?.filter(
-              (ic) => ic?.uuid !== initialCondition?.uuid
-            )
-          }
-        : s
-    );
-    await this.studiesService.updateStudy(study);
+    await this.updateStudyWithModification(study, (studyCopy) => {
+      studyCopy.sections = study.sections.map((s) =>
+        s?.uuid === section?.uuid
+          ? {
+              ...s,
+              initial_conditions: s.initial_conditions?.filter(
+                (ic) => ic?.uuid !== initialCondition?.uuid
+              ),
+              selected_initial_condition_uuid:
+                s.selected_initial_condition_uuid === initialCondition?.uuid
+                  ? undefined
+                  : s.selected_initial_condition_uuid
+            }
+          : s
+      );
+    });
   }
 
   /**
@@ -111,24 +134,46 @@ export class InitialConditionService {
     section: Section,
     initialCondition: InitialCondition
   ): Promise<void> {
-    study.sections = study.sections.map((s) =>
-      s?.uuid === section?.uuid
-        ? {
-            ...s,
-            initial_conditions: [
-              ...(s.initial_conditions || []),
-              {
-                ...initialCondition,
-                uuid: uuidv4(),
-                name: findDuplicateTitle(
-                  s.initial_conditions?.map((ic) => ic.name),
-                  initialCondition.name
-                )
-              }
-            ]
-          }
-        : s
-    );
-    await this.studiesService.updateStudy(study);
+    await this.updateStudyWithModification(study, (studyCopy) => {
+      studyCopy.sections = study.sections.map((s) =>
+        s?.uuid === section?.uuid
+          ? {
+              ...s,
+              initial_conditions: [
+                ...(s.initial_conditions || []),
+                {
+                  ...initialCondition,
+                  uuid: uuidv4(),
+                  name: findDuplicateTitle(
+                    s.initial_conditions?.map((ic) => ic.name),
+                    initialCondition.name
+                  )
+                }
+              ]
+            }
+          : s
+      );
+    });
+  }
+
+  /**
+   * Set an initial condition as the selected initial condition in a section
+   * @param study The study containing the section
+   * @param section The section containing the initial condition
+   * @param initialCondition The initial condition to set as the selected initial condition
+   * @returns Promise that resolves when the operation is complete
+   */
+  async setInitialCondition(
+    study: Study,
+    section: Section,
+    initialCondition: InitialCondition
+  ): Promise<void> {
+    await this.updateStudyWithModification(study, (studyCopy) => {
+      studyCopy.sections = studyCopy.sections.map((s) =>
+        s?.uuid === section?.uuid
+          ? { ...s, selected_initial_condition_uuid: initialCondition.uuid }
+          : s
+      );
+    });
   }
 }

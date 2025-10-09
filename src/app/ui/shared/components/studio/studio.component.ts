@@ -1,5 +1,5 @@
 import { Component, input, signal } from '@angular/core';
-import { Section2DComponent } from './section/section.component';
+import { SectionPlotComponent } from './section/section-plot.component';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import {
   GetSectionOutput,
@@ -11,7 +11,7 @@ import { PlotService } from '@src/app/ui/pages/studio/plot.service';
 @Component({
   selector: 'app-studio',
   templateUrl: './studio.component.html',
-  imports: [Section2DComponent, ProgressSpinnerModule]
+  imports: [SectionPlotComponent, ProgressSpinnerModule]
 })
 export class StudioComponent {
   litData = signal<GetSectionOutput | null>(null);

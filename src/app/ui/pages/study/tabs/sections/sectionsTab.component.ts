@@ -1,4 +1,4 @@
-import { Component, input, output, signal, ViewChild } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
@@ -7,7 +7,7 @@ import { NewSectionModalComponent } from './newSectionModal/newSectionModal.comp
 import { CardComponent } from '@src/app/ui/shared/components/atoms/card/card.component';
 import { PopoverModule } from 'primeng/popover';
 import { v4 as uuidv4 } from 'uuid';
-import { Select, SelectModule } from 'primeng/select';
+import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { InitialConditionModalComponent } from './initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
@@ -18,6 +18,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { createEmptySection } from '@src/app/core/services/sections/helpers';
 import { RouterLink } from '@angular/router';
 import { Study } from '@src/app/core/data/database/interfaces/study';
+import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 
 @Component({
   selector: 'app-sections-tab',
@@ -33,17 +34,14 @@ import { Study } from '@src/app/core/data/database/interfaces/study';
     InitialConditionModalComponent,
     DividerModule,
     CheckboxModule,
-    RouterLink
+    RouterLink,
+    SelectWithButtonsComponent
   ],
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss'
 })
 export class SectionsTabComponent {
-  @ViewChild('initialConditionSelect') selectComponent!: Select;
-  selectedInitialCondition = null;
-
   study = input<Study | null>(null);
-  sections = input<Section[]>([]);
   createOrUpdateSection = output<Section>();
   deleteSection = output<Section>();
   duplicateSection = output<Section>();
@@ -51,6 +49,7 @@ export class SectionsTabComponent {
   updateInitialCondition = output<InitialConditionFunctionsInput>();
   deleteInitialCondition = output<InitialConditionFunctionsInput>();
   duplicateInitialCondition = output<InitialConditionFunctionsInput>();
+  setInitialCondition = output<InitialConditionFunctionsInput>();
   currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(
     this.createInitialCondition(this.currentSection())
@@ -76,15 +75,6 @@ export class SectionsTabComponent {
 
   selectSection(section: Section, event: any) {
     this.selectedSection.set(event.checked ? section.uuid : '');
-  }
-
-  selectItem(item: any, event: Event) {
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    this.selectedInitialCondition = item;
-
-    this.selectComponent.hide();
   }
 
   editSection(section: Section) {
@@ -123,4 +113,80 @@ export class SectionsTabComponent {
   onInitialConditionModalOpenChange(isOpen: boolean) {
     this.isInitialConditionModalOpen.set(isOpen);
   }
+
+  getSelectedInitialConditionUuid = computed(() => {
+    const section = this.study()?.sections.find(
+      (s) => s.uuid === this.selectedSection()
+    );
+    const selectedInitialConditionUuid =
+      section?.selected_initial_condition_uuid;
+    if (
+      selectedInitialConditionUuid &&
+      section?.initial_conditions
+        .map((ic) => ic.uuid)
+        .includes(selectedInitialConditionUuid)
+    ) {
+      return selectedInitialConditionUuid;
+    }
+    return undefined;
+  });
+
+  deleteInitialConditionClick = ({
+    initialCondition,
+    section
+  }: {
+    initialCondition: InitialCondition;
+    section: Section;
+  }) => {
+    return this.deleteInitialCondition.emit({
+      section,
+      initialCondition
+    });
+  };
+
+  viewInitialConditionClick = ({
+    initialCondition,
+    section
+  }: {
+    initialCondition: InitialCondition;
+    section: Section;
+  }) => {
+    this.openInitialConditionModal(section, initialCondition, 'view');
+  };
+
+  editInitialConditionClick = ({
+    initialCondition,
+    section
+  }: {
+    initialCondition: InitialCondition;
+    section: Section;
+  }) => {
+    this.openInitialConditionModal(section, initialCondition, 'edit');
+  };
+
+  duplicateInitialConditionClick = ({
+    initialCondition,
+    section
+  }: {
+    initialCondition: InitialCondition;
+    section: Section;
+  }) => {
+    return this.duplicateInitialCondition.emit({
+      section,
+      initialCondition
+    });
+  };
+
+  selectInitialConditionClick = ({
+    initialCondition,
+    section
+  }: {
+    initialCondition: InitialCondition;
+    section: Section;
+  }) => {
+    this.setInitialCondition.emit({
+      section: section,
+      initialCondition: initialCondition
+    });
+  };
 }

@@ -54,6 +54,7 @@ export const createEmptySection = (): Section => {
     lit: undefined,
     branch_name: undefined,
     comment: undefined,
-    initial_conditions: []
+    initial_conditions: [],
+    selected_initial_condition_uuid: undefined
   };
 };

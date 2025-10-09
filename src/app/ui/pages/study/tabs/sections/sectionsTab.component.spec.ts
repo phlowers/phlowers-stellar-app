@@ -90,7 +90,8 @@ describe('SectionsTabComponent', () => {
         base_parameters: 'Params',
         base_temperature: 20
       } as InitialCondition
-    ]
+    ],
+    selected_initial_condition_uuid: 'ic-1'
   };
 
   const mockInitialCondition: InitialCondition = {
@@ -130,7 +131,7 @@ describe('SectionsTabComponent', () => {
   });
 
   it('should display "No existing section" when sections is empty', () => {
-    fixture.componentRef.setInput('sections', []);
+    fixture.componentRef.setInput('study', { sections: [] });
     fixture.detectChanges();
 
     const noSectionMsg = fixture.debugElement.query(By.css('.no-section-text'));
@@ -141,7 +142,7 @@ describe('SectionsTabComponent', () => {
 
   it('should render a section when sections input has data', () => {
     const sectionWithName = { ...mockSection, name: 'My Section' };
-    fixture.componentRef.setInput('sections', [sectionWithName]);
+    fixture.componentRef.setInput('study', { sections: [sectionWithName] });
     fixture.detectChanges();
 
     const sectionName = fixture.debugElement.query(
@@ -188,23 +189,8 @@ describe('SectionsTabComponent', () => {
     expect(component.isInitialConditionModalOpen()).toBe(true);
   });
 
-  it('selectItem should update selectedInitialCondition and hide the select', () => {
-    const fakeEvent = {
-      stopPropagation: jest.fn(),
-      stopImmediatePropagation: jest.fn()
-    } as any;
-    const mockHide = jest.fn();
-    (component as any).selectComponent = { hide: mockHide };
-
-    component.selectItem(mockInitialCondition, fakeEvent);
-
-    expect(component.selectedInitialCondition).toEqual(mockInitialCondition);
-    expect(mockHide).toHaveBeenCalled();
-    expect(fakeEvent.stopPropagation).toHaveBeenCalled();
-  });
-
   it('should emit deleteSection when delete button clicked in popover', () => {
-    fixture.componentRef.setInput('sections', [mockSection]);
+    fixture.componentRef.setInput('study', { sections: [mockSection] });
     fixture.detectChanges();
 
     const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector(
@@ -224,7 +210,7 @@ describe('SectionsTabComponent', () => {
   });
 
   it('should emit duplicateSection when duplicate button clicked in popover', () => {
-    fixture.componentRef.setInput('sections', [mockSection]);
+    fixture.componentRef.setInput('study', { sections: [mockSection] });
     fixture.detectChanges();
 
     const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector(

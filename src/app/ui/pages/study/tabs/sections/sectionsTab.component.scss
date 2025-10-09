@@ -94,14 +94,6 @@
   }
 }
 
-.select-dropdown {
-  @apply flex flex-row items-center gap-2 p-2;
-
-  &__select {
-    @apply w-32 max-w-32 px-0;
-  }
-}
-
 .erase-btn {
   color: var(--error-600);
 }

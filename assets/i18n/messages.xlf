@@ -1016,11 +1016,6 @@
         <source>Study imported from protoV4</source>
       </segment>
     </unit>
-    <unit id="278935170538178235">
-      <segment>
-        <source>Imported studies:</source>
-      </segment>
-    </unit>
     <unit id="1063780443229000887">
       <segment>
         <source>Side:</source>
@@ -1039,11 +1034,6 @@
     <unit id="6389312883797462351">
       <segment>
         <source>Studio</source>
-      </segment>
-    </unit>
-    <unit id="3177037057474396347">
-      <segment>
-        <source> Upload one or multiple files </source>
       </segment>
     </unit>
     <unit id="361983614534909005">
@@ -1094,6 +1084,141 @@
     <unit id="8455284935734906867">
       <segment>
         <source> Attachment set </source>
+      </segment>
+    </unit>
+    <unit id="1855573221352568994">
+      <segment>
+        <source>open attachment set modal</source>
+      </segment>
+    </unit>
+    <unit id="2045054298163856321">
+      <segment>
+        <source>span angle</source>
+      </segment>
+    </unit>
+    <unit id="2275797440786978301">
+      <segment>
+        <source>chain V</source>
+      </segment>
+    </unit>
+    <unit id="2400362719050540518">
+      <segment>
+        <source>view</source>
+      </segment>
+    </unit>
+    <unit id="2456043080471762298">
+      <segment>
+        <source>delete</source>
+      </segment>
+    </unit>
+    <unit id="2932152767120246098">
+      <segment>
+        <source> Upload one or multiple protoV4 files </source>
+      </segment>
+    </unit>
+    <unit id="349300253783483450">
+      <segment>
+        <source>support number</source>
+      </segment>
+    </unit>
+    <unit id="3599249630457687633">
+      <segment>
+        <source>span length</source>
+      </segment>
+    </unit>
+    <unit id="3901869594843063192">
+      <segment>
+        <source>Select charge case</source>
+      </segment>
+    </unit>
+    <unit id="3973913981535334331">
+      <segment>
+        <source>arm length</source>
+      </segment>
+    </unit>
+    <unit id="4240018243849737669">
+      <segment>
+        <source>attachment set</source>
+      </segment>
+    </unit>
+    <unit id="4280648003561719483">
+      <segment>
+        <source>supports amount</source>
+      </segment>
+    </unit>
+    <unit id="477906921630190891">
+      <segment>
+        <source>CI :</source>
+      </segment>
+    </unit>
+    <unit id="5452784528816163120">
+      <segment>
+        <source>attachment height</source>
+      </segment>
+    </unit>
+    <unit id="5638154401039870638">
+      <segment>
+        <source>Staff is present</source>
+      </segment>
+    </unit>
+    <unit id="6133338617402043535">
+      <segment>
+        <source>duplicate</source>
+      </segment>
+    </unit>
+    <unit id="620478596918239347">
+      <segment>
+        <source>chain length</source>
+      </segment>
+    </unit>
+    <unit id="6583469756054732335">
+      <segment>
+        <source>support name</source>
+      </segment>
+    </unit>
+    <unit id="6831440935794088973">
+      <segment>
+        <source>chain weight</source>
+      </segment>
+    </unit>
+    <unit id="69654202240409398">
+      <segment>
+        <source>Select initial conditions</source>
+      </segment>
+    </unit>
+    <unit id="7249112263207864079">
+      <segment>
+        <source>Section :</source>
+      </segment>
+    </unit>
+    <unit id="8735221513379114136">
+      <segment>
+        <source>CC :</source>
+      </segment>
+    </unit>
+    <unit id="9095134843628689709">
+      <segment>
+        <source>edit</source>
+      </segment>
+    </unit>
+    <unit id="9217388832996322692">
+      <segment>
+        <source>chain name</source>
+      </segment>
+    </unit>
+    <unit id="929550426768002309">
+      <segment>
+        <source>Staff is absent</source>
+      </segment>
+    </unit>
+    <unit id="3778631527604022771">
+      <segment>
+        <source>Go to study</source>
+      </segment>
+    </unit>
+    <unit id="6492147370027863408">
+      <segment>
+        <source>add charge case</source>
       </segment>
     </unit>
   </file>

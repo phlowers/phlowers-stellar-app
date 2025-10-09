@@ -154,7 +154,8 @@ describe('ManualSectionComponent', () => {
       electric_tension_level: '',
       comment: '',
       supports: [],
-      initial_conditions: []
+      initial_conditions: [],
+      selected_initial_condition_uuid: undefined
     };
 
     await TestBed.configureTestingModule({

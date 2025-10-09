@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudyHeaderComponent } from '@ui/pages/study/study-header/study-header.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
@@ -21,6 +21,7 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { NewStudyModalComponent } from '../studies/components/new-study-modal/new-study-modal.component';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'dexie';
 
 @Component({
   selector: 'app-study',
@@ -41,9 +42,10 @@ import { CommonModule } from '@angular/common';
   templateUrl: './study.component.html',
   styleUrl: './study.component.scss'
 })
-export class StudyComponent implements OnInit {
+export class StudyComponent implements OnInit, OnDestroy {
   study: Study | null = null;
   isNewStudyModalOpen = signal<boolean>(false);
+  subscription: Subscription | null = null;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -61,13 +63,15 @@ export class StudyComponent implements OnInit {
     }
     this.studiesService.ready.subscribe((ready) => {
       if (ready && uuid) {
-        this.studiesService.getStudy(uuid).then((study) => {
-          if (study) {
-            this.study = study;
-          } else {
-            this.router.navigate(['/studies']);
-          }
-        });
+        this.subscription = this.studiesService
+          .getStudyAsObservable(uuid)
+          .subscribe((study: Study | undefined) => {
+            if (study) {
+              this.study = study;
+            } else {
+              this.router.navigate(['/studies']);
+            }
+          });
       }
     });
     this.route.params.subscribe((params) => {
@@ -76,6 +80,12 @@ export class StudyComponent implements OnInit {
         this.refreshStudy(uuid);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   refreshStudy(uuid: string) {
@@ -111,7 +121,12 @@ export class StudyComponent implements OnInit {
       return;
     }
 
-    const existingSection = this.study?.sections.find(
+    // Initialize sections array if it's null
+    if (!this.study.sections) {
+      this.study.sections = [];
+    }
+
+    const existingSection = this.study.sections.find(
       (s) => s?.uuid === section?.uuid
     );
 
@@ -243,5 +258,19 @@ export class StudyComponent implements OnInit {
       detail: $localize`Initial Condition Duplicated`,
       life: 3000
     });
+  }
+
+  async setInitialCondition({
+    section,
+    initialCondition
+  }: InitialConditionFunctionsInput) {
+    if (!this.study) {
+      return;
+    }
+    await this.initialConditionService.setInitialCondition(
+      this.study,
+      section,
+      initialCondition
+    );
   }
 }

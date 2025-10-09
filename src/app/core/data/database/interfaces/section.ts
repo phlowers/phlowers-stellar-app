@@ -41,4 +41,5 @@ export interface Section {
   comment: string | undefined;
   supports: Support[];
   initial_conditions: InitialCondition[];
+  selected_initial_condition_uuid: string | undefined;
 }

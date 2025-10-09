@@ -17,6 +17,7 @@ import {
 import { createEmptySection, createEmptySupport } from '../sections/helpers';
 import { Support } from '../../data/database/interfaces/support';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+import { liveQuery } from 'dexie';
 
 @Injectable({
   providedIn: 'root'
@@ -42,9 +43,9 @@ export class StudiesService {
     const uuid = uuidv4();
     const user = (await this.storageService.db?.users.toArray())?.[0];
     await this.storageService.db?.studies.add({
+      ...study,
       author_email: user.email,
       uuid,
-      ...study,
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
       saved: false
@@ -201,5 +202,14 @@ export class StudiesService {
     a.click();
     URL.revokeObjectURL(url);
     return;
+  }
+
+  /**
+   * Get a study as an observable
+   * @param uuid The uuid of the study to get
+   * @returns
+   */
+  getStudyAsObservable(uuid: string) {
+    return liveQuery(() => this.storageService.db?.studies.get(uuid));
   }
 }

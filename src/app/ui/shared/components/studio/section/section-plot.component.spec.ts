@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Section2DComponent } from './section.component';
+import { SectionPlotComponent } from './section-plot.component';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
-import { formatData } from './helpers/formatData';
+import { formatLitData } from './helpers/formatLitData';
 import { createPlotData } from './helpers/createPlotData';
 import { Data } from 'plotly.js-dist-min';
 import { Side, View } from './helpers/types';
@@ -10,11 +10,13 @@ import { PlotService } from '@src/app/ui/pages/studio/plot.service';
 
 // Mock the helper functions
 jest.mock('./helpers/createPlot');
-jest.mock('./helpers/formatData');
+jest.mock('./helpers/formatLitData');
 jest.mock('./helpers/createPlotData');
 
 const mockCreatePlot = createPlot as jest.MockedFunction<typeof createPlot>;
-const mockFormatData = formatData as jest.MockedFunction<typeof formatData>;
+const mockFormatData = formatLitData as jest.MockedFunction<
+  typeof formatLitData
+>;
 const mockCreatePlotData = createPlotData as jest.MockedFunction<
   typeof createPlotData
 >;
@@ -24,9 +26,9 @@ const mockPlotService = {
   plotOptions: jest.fn()
 };
 
-describe('Section2DComponent', () => {
-  let component: Section2DComponent;
-  let fixture: ComponentFixture<Section2DComponent>;
+describe('SectionPlotComponent', () => {
+  let component: SectionPlotComponent;
+  let fixture: ComponentFixture<SectionPlotComponent>;
 
   // Mock data for testing
   const mockLitData: GetSectionOutput = {
@@ -103,14 +105,14 @@ describe('Section2DComponent', () => {
       .mockReturnValue(mockElement as HTMLElement);
 
     await TestBed.configureTestingModule({
-      imports: [Section2DComponent],
+      imports: [SectionPlotComponent],
       providers: [
         { provide: 'provideAnimations', useValue: () => ({}) },
         { provide: PlotService, useValue: mockPlotService }
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Section2DComponent);
+    fixture = TestBed.createComponent(SectionPlotComponent);
     component = fixture.componentInstance;
   });
 

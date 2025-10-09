@@ -12,7 +12,7 @@ import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
-import { formatData } from './helpers/formatData';
+import { formatLitData } from './helpers/formatLitData';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
 import { uniq } from 'lodash';
@@ -23,11 +23,11 @@ interface SearchSupportEvent {
 }
 
 @Component({
-  selector: 'app-section',
-  templateUrl: './section.component.html',
+  selector: 'app-section-plot',
+  templateUrl: './section-plot.component.html',
   imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
 })
-export class Section2DComponent {
+export class SectionPlotComponent {
   litData = input<GetSectionOutput | null>(null);
   selectedSpan = signal<number>(0);
   plotOptionsChange = output<PlotOptions>();
@@ -94,7 +94,7 @@ export class Section2DComponent {
     const myElement = document.getElementById('plotly-output');
     const width = myElement?.clientWidth ?? 0;
     const height = myElement?.clientHeight ?? 0;
-    const formattedData = formatData(litData);
+    const formattedData = formatLitData(litData);
     const plotData = createPlotData(formattedData, plotOptions);
     return await createPlot(
       'plotly-output',
