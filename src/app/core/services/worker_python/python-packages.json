@@ -51,7 +51,7 @@
     },
     "pydantic-core": {
         "file_name": "pydantic_core-2.27.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "pydantic_core",
+        "name": "pydantic-core",
         "source": "remote"
     },
     "python-dateutil": {
@@ -90,7 +90,7 @@
         "source": "local"
     },
     "typing-inspection": {
-        "file_name": "typing_inspection-0.4.1-cp312-none-any.whl",
+        "file_name": "typing_inspection-0.4.2-cp312-none-any.whl",
         "name": "typing_inspection",
         "source": "local"
     },
