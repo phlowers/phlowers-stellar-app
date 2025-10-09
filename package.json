@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4200",
-    "build:service-worker": "tsc -p tsconfig.worker.json && sed -i 's/export //g' public/service-worker.js || echo 'ok'",
+    "build:service-worker": "tsc -p tsconfig.worker.json && sed -i 's/export //g' public/service-worker.js",
     "build": "npm run build:service-worker && ng build --configuration=production",
     "build:fr": "npm run build:service-worker && ng build --output-mode=static --configuration=production,fr && npm run set-env-variables && npm run create-assets-list-for-service-worker:fr",
     "build:en": "npm run build:service-worker && ng build --output-mode=static --configuration=production,en && npm run set-env-variables && npm run create-assets-list-for-service-worker:en",
