@@ -62,7 +62,30 @@ export class SelectWithButtonsComponent<T extends Record<string, any>>
     );
   });
 
+  onSelectionChange(value: string | undefined | null) {
+    this.selectedOptionValue.set(value);
+    if (value) {
+      const selectedItem = this.options().find(
+        (option) => option[this.optionValue()] === value
+      );
+      if (selectedItem) {
+        this.selectOption.emit(selectedItem);
+      }
+    }
+  }
+
   clearSelectedOptionValue() {
     this.selectedOptionValue.set(undefined);
+    this.selectOption.emit(undefined as any);
+    if (this.selectComponent) {
+      this.selectComponent.writeValue(null);
+      this.selectComponent.updateModel(null, null);
+    }
+  }
+
+  onSelectItem(item: T) {
+    this.selectedOptionValue.set(item[this.optionValue()]);
+    this.selectOption.emit(item);
+    this.selectComponent.hide();
   }
 }
