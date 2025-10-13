@@ -1,5 +1,9 @@
-import { Component, input, OnInit, signal } from '@angular/core';
-import { PossibleIconNames } from '../../../model/icon.model';
+import { Component, input, OnInit, signal, computed } from '@angular/core';
+import {
+  PossibleIconNames,
+  CustomSvgIconNames,
+  CUSTOM_SVG_ICONS
+} from '../../../model/icon.model';
 
 @Component({
   selector: 'app-icon',
@@ -16,6 +20,14 @@ export class IconComponent implements OnInit {
   icon = input.required<PossibleIconNames | undefined>();
 
   symbolsReady = signal(false);
+
+  isCustomSvgIcon = computed(() => {
+    return CUSTOM_SVG_ICONS.includes(this.icon() as CustomSvgIconNames);
+  });
+
+  customSvgContent = () => {
+    return `/icons/customs.svg#${this.icon()}`;
+  };
 
   ngOnInit() {
     this.isSymbolsReady();

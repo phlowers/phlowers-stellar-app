@@ -1,0 +1,8 @@
+<article class="flex flex-row gap-2 overflow-x-scroll pb-2">
+  @for (support of arraysOfSupports(); track $index) {
+    <app-section-plot-card [type]="'support'" [index]="support" />
+    @if ($index < arraysOfSupports().length - 1) {
+      <app-section-plot-card [type]="'span'" [index]="support" />
+    }
+  }
+</article>

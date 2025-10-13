@@ -1,6 +1,6 @@
 import Plotly, { Data } from 'plotly.js-dist-min';
 
-const normalCamera = {
+const normalCamera = (invert: boolean) => ({
   center: {
     x: 0,
     y: 0,
@@ -8,10 +8,10 @@ const normalCamera = {
   },
   eye: {
     x: 0.02,
-    y: -2,
+    y: invert ? 2 : -2,
     z: 0.2
   }
-};
+});
 
 const supportCamera = {
   up: { x: 0, y: 0, z: 1 },
@@ -29,7 +29,7 @@ const supportCamera = {
   projection: { type: 'perspective' }
 };
 
-const scene = (isSupportZoom: boolean) => ({
+const scene = (isSupportZoom: boolean, invert: boolean) => ({
   aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
   aspectratio: {
     x: 3,
@@ -37,7 +37,7 @@ const scene = (isSupportZoom: boolean) => ({
     z: 0.5
   },
   camera: {
-    ...(isSupportZoom ? supportCamera : normalCamera)
+    ...(isSupportZoom ? supportCamera : normalCamera(invert))
   }
 });
 
@@ -49,7 +49,7 @@ const config = {
   autosizable: false
 };
 
-const layout = (isSupportZoom: boolean) => ({
+const layout = (isSupportZoom: boolean, invert: boolean) => ({
   autosize: false,
   showlegend: false,
   margin: {
@@ -58,7 +58,7 @@ const layout = (isSupportZoom: boolean) => ({
     t: 0,
     b: 0
   },
-  scene: scene(isSupportZoom)
+  scene: scene(isSupportZoom, invert)
 });
 
 export const createPlot = (
@@ -66,15 +66,19 @@ export const createPlot = (
   data: Data[],
   width: number,
   height: number,
-  isSupportZoom: boolean
+  isSupportZoom: boolean,
+  invert: boolean
 ) => {
   return Plotly.newPlot(
     plotId,
     data,
     {
-      ...layout(isSupportZoom),
+      ...layout(isSupportZoom, invert),
       width: width,
-      height: height
+      height: height,
+      xaxis: {
+        autorange: invert ? 'reversed' : true
+      }
     },
     config
   );

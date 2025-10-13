@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { StudioComponent } from '../../shared/components/studio/studio.component';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -11,6 +11,7 @@ import { StudioMenuBarComponent } from '@ui/shared/components/studio/menu-bar/me
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudiesService } from '@core/services/studies/studies.service';
 import { Subscription } from 'dexie';
+import { SectionPlotCardsComponent } from '@ui/shared/components/studio/section/cards/section-plot-cards.component';
 @Component({
   selector: 'app-studio-page',
   imports: [
@@ -21,7 +22,8 @@ import { Subscription } from 'dexie';
     StudioTopToolbarComponent,
     SelectModule,
     IconComponent,
-    StudioMenuBarComponent
+    StudioMenuBarComponent,
+    SectionPlotCardsComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
@@ -32,15 +34,17 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   supports = signal<string>('single');
   supportsOptions = signal<string[]>(['single', 'double', 'all']);
   subscription: Subscription | null = null;
-  options = signal<Options>({
-    floor: 0,
-    ceil: 20,
-    step: 1,
-    showTicks: true,
-    showTicksValues: true,
-    animate: false,
-    animateOnMove: false,
-    rightToLeft: false
+  sliderOptions = computed<Options>(() => {
+    return {
+      floor: 0,
+      ceil: 20,
+      step: 1,
+      showTicks: true,
+      showTicksValues: true,
+      animate: false,
+      animateOnMove: false,
+      rightToLeft: this.plotService.plotOptions().invert
+    };
   });
   toggleSidebar() {
     this.sidebarOpen.set(!this.sidebarOpen());
