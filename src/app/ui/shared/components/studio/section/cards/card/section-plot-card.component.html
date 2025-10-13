@@ -37,10 +37,10 @@
         }
         <div [class]="section.indent ? 'pl-2' : ''">
           @for (field of section.fields; track $index) {
-            <div class="details">
+            <dl class="details">
               <dt>{{ field.label }}</dt>
               <dd>{{ field.value }}</dd>
-            </div>
+            </dl>
           }
         </div>
       }
@@ -53,10 +53,10 @@
           }
           <div [class]="section.indent ? 'pl-2' : ''">
             @for (field of section.fields; track $index) {
-              <div class="details">
+              <dl class="details">
                 <dt>{{ field.label }}</dt>
                 <dd>{{ field.value }}</dd>
-              </div>
+              </dl>
             }
           </div>
         }
@@ -66,19 +66,19 @@
     @if (type() === 'span') {
       <!-- Span Type Content -->
       @for (field of spanData(); track $index) {
-        <div class="details" [class]="$index === 0 ? '!p-0' : ''">
+        <dl class="details" [class]="$index === 0 ? '!p-0' : ''">
           <dt>{{ field.label }}</dt>
           <dd>{{ field.value }}</dd>
-        </div>
+        </dl>
       }
 
       <!-- Expanded Span Content -->
       @if (isExpanded()) {
         @for (field of spanExpandedData(); track $index) {
-          <div class="details">
+          <dl class="details">
             <dt>{{ field.label }}</dt>
             <dd>{{ field.value }}</dd>
-          </div>
+          </dl>
         }
       }
     }

@@ -21,24 +21,25 @@ $_selected-color: var(--main-primary);
 }
 
 // Mixin for pointer transforms to reduce repetition
-@mixin pointer-transform($rotation, $translateY: 0px) {
+@mixin _pointer-transform($rotation, $translateY: 0px) {
+    // we have to use !important to override inline styles
     transform: rotate(#{$rotation}deg) translateY(#{$translateY}) !important;
 }
 
 .ngx-slider.ngx-slider .ngx-slider-pointer-max {
-    @include pointer-transform(-90);
+    @include _pointer-transform(-90);
 }
 
 .ngx-slider.ngx-slider .ngx-slider-pointer-min {
-    @include pointer-transform(90, 8px);
+    @include _pointer-transform(90, .5rem);
 }
 
 .ngx-slider.ngx-slider.inverted .ngx-slider-pointer-max {
-    @include pointer-transform(90, 8px);
+    @include _pointer-transform(90, .5rem);
 }
 
 .ngx-slider.ngx-slider.inverted .ngx-slider-pointer-min {
-    @include pointer-transform(-90, 0px);
+    @include _pointer-transform(-90, 0px);
 }
 
 .ngx-slider.ngx-slider .ngx-slider-pointer:after {
