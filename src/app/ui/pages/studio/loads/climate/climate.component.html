@@ -13,7 +13,7 @@
 
   <div class="climate__divided-line">
     <div class="climate__form-item">
-      <label for="windPressure" class="wind">Wind Pressure</label>
+      <label for="windPressure" class="wind" i18n>Wind Pressure</label>
       <input
         pInputText
         type="number"
@@ -24,7 +24,9 @@
     </div>
 
     <div class="climate__form-item">
-      <label for="cableTemperature" class="temp">Cable Temperature</label>
+      <label for="cableTemperature" class="temp" i18n>
+        Cable Temperature
+      </label>
       <input
         pInputText
         type="number"
@@ -36,7 +38,7 @@
   </div>
 
   <div class="climate__form-item">
-    <label for="symmetryType" class="symmetry">Symmetry Type</label>
+    <label for="symmetryType" class="symmetry" i18n>Symmetry Type</label>
     <p-select
       inputId="symmetryType"
       [options]="symmetryOptions"
@@ -49,7 +51,7 @@
 
   @if (form.value.symmetryType === 'symmetric') {
     <div class="climate__form-item">
-      <label for="iceThickness" class="ice">Ice Thickness</label>
+      <label for="iceThickness" class="ice" i18n>Ice Thickness</label>
       <input
         pInputText
         type="number"
@@ -60,9 +62,9 @@
     </div>
   } @else if (form.value.symmetryType === 'dis_symmetric') {
     <div class="climate__form-item">
-      <label for="frontierSupportNumber" class="support-number"
-        >Frontier Support Number</label
-      >
+      <label for="frontierSupportNumber" class="support-number" i18n>
+        Frontier Support Number
+      </label>
       <p-select
         inputId="frontierSupportNumber"
         [options]="frontierSupportOptions"
@@ -74,7 +76,7 @@
     </div>
 
     <div class="climate__form-item">
-      <label for="iceThicknessBefore" class="ice-before">
+      <label for="iceThicknessBefore" class="ice-before" i18n>
         Ice Thickness (Before Frontier)
       </label>
       <input
@@ -87,7 +89,7 @@
     </div>
 
     <div class="climate__form-item">
-      <label for="iceThicknessAfter" class="ice-after">
+      <label for="iceThicknessAfter" class="ice-after" i18n>
         Ice Thickness (After Frontier)
       </label>
       <input
