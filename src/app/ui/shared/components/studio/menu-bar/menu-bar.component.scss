@@ -1,10 +1,15 @@
-// TODO : FP rework this to fit actual design
+.menubar {
+  @apply flex items-center gap-2 px-6 py-2 h-10 max-h-10;
+  background-color: var(--star-dust-100);
 
-.menu-bar-container {
-  @apply flex flex-row gap-2 border bg-[#F3F4F4] px-[1.5rem] py-[.5rem] items-center;
-  border-color: var(--primary-300);
-}
+  &,
+  &__back-arrow {
+    color: var(--star-dust-950);
+  }
 
-.vertical-divider {
-  @apply self-stretch bg-[#D2D4D5] w-[1px];
+  &__separator {
+    @apply h-full m-0 border-t-0;
+    width: 0.0625rem;
+    border-right: 0.0625rem solid var(--star-dust-300);
+  }
 }

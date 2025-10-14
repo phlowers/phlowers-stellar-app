@@ -1,26 +1,30 @@
-<div class="menu-bar-container">
+<div class="menubar">
   <a
     [routerLink]="'/study/' + study()?.uuid"
     app-btn
     aria-label="Go back to study"
     i18n-aria-label
     btnStyle="text"
-    btnSize="l"
-    class="!p-0"
+    btnSize="s"
   >
-    <app-icon class="text-black" icon="arrow_back" />
+    <app-icon class="menubar__back-arrow" icon="arrow_back" />
   </a>
+
   <p class="mb-0">
     <span class="text-s-600 pr-1" i18n>Section :</span>
     <span class="text-m-600">{{ section()?.name }}</span>
   </p>
-  <div class="vertical-divider"></div>
+
+  <hr class="menubar__separator" />
+
   <p class="mb-0">
     <span class="text-s-600 pr-1" i18n>CI :</span>
     <span class="text-m-400">{{ initialCondition()?.name }}</span>
   </p>
-  <div class="vertical-divider"></div>
-  <div class="flex flex-row items-center gap-1">
+
+  <hr class="menubar__separator" />
+
+  <div class="flex items-center gap-1">
     <p class="mb-0 text-s-600" i18n>CC :</p>
     <app-select-with-buttons
       [options]="chargeCases()"
@@ -32,10 +36,11 @@
       i18n-placeholder
       ariaLabel="Select charge case"
       i18n-ariaLabel
-      class="section__content-init"
+      class="menubar__select"
       [showClear]="true"
     />
   </div>
+
   <button
     aria-label="add charge case"
     i18n-aria-label
@@ -46,9 +51,7 @@
     <app-icon icon="add_circle" />
   </button>
 
-  <div class="vertical-divider"></div>
-
-  <p class="text-s-600 flex items-center gap-1 mb-0">
+  <p class="text-s-600 flex items-center gap-2 mb-0">
     <app-icon class="text-primary" icon="engineering" />
     @if (staffIsPresent()) {
       <ng-container i18n>Staff is present</ng-container>
@@ -57,5 +60,5 @@
     }
   </p>
 
-  <div class="vertical-divider"></div>
+  <hr class="menubar__separator" />
 </div>
