@@ -1,6 +1,9 @@
+@use 'abstract.extracts' as app;
+
 .menubar {
-  @apply flex items-center gap-2 px-6 py-2 h-10 max-h-10;
+  @apply flex items-center gap-2 px-6 py-2 border-b h-10 max-h-10;
   background-color: var(--star-dust-100);
+  border-color: var(--primary-200);
 
   &,
   &__back-arrow {
@@ -8,8 +11,6 @@
   }
 
   &__separator {
-    @apply h-full m-0 border-t-0;
-    width: 0.0625rem;
-    border-right: 0.0625rem solid var(--star-dust-300);
+    @extend %vertical-separator;
   }
 }

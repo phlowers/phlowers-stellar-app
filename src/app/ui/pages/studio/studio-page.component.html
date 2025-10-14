@@ -8,26 +8,65 @@
 <div class="graph-tools">
   <div class="grow pr-5">
     <app-studio class="block h-[36.625rem]" [isSupportZoom]="false" />
-    <div class="flex flex-row gap-4 items-center">
-      <div
-        class="flex flex-row items-center border border-black rounded-md mx-2"
-      >
-        <button class="supports-select-buttons supports-select-buttons-left">
+
+    <div class="quick-measures">
+      <div class="quick-measures__card">
+        <p>
+          <span class="quick-measures__title" i18n>Parameter (m)</span>
+          <span class="quick-measures__value">123</span>
+        </p>
+
+        <p>
+          <span class="quick-measures__title" i18n>Work load %</span>
+          <span class="quick-measures__value">123</span>
+        </p>
+
+        <hr class="quick-measures__separator" />
+
+        <p-select [disabled]="true" />
+
+        <p>
+          <span class="quick-measures__title" i18n>Oblique (m)</span>
+          <span class="quick-measures__value"></span>
+        </p>
+
+        <p>
+          <span class="quick-measures__title" i18n>Vertical (m)</span>
+          <span class="quick-measures__value"></span>
+        </p>
+
+        <p>
+          <span class="quick-measures__title" i18n>Horizontal (m)</span>
+          <span class="quick-measures__value"></span>
+        </p>
+      </div>
+    </div>
+
+    <hr />
+
+    <div class="flex gap-4 items-start">
+      <div class="supports-select">
+        <button class="supports-select__buttons supports-select__buttons--left">
           <app-icon icon="chevron_left" />
         </button>
+
         <p-select
           inputId="supports"
           appendTo="body"
-          class="w-[7.5rem] !rounded-none h-[2.0625rem] !border-0 !shadow-none"
+          class="supports-select__p-select w-[7.5rem] !rounded-none h-[2.0625rem] !border-0 !shadow-none"
           [options]="supportsOptions()"
           [ngModel]="supports()"
           (onChange)="supports.set($event.value)"
         />
-        <button class="supports-select-buttons supports-select-buttons-right">
+
+        <button
+          class="supports-select__buttons supports-select__buttons--right"
+        >
           <app-icon icon="chevron_right" />
         </button>
       </div>
-      <div class="custom-slider w-full mx-2">
+
+      <div class="custom-slider w-full">
         <ngx-slider
           [class.inverted]="plotService.plotOptions().invert"
           [(value)]="plotService.plotOptions().startSupport"
@@ -38,10 +77,12 @@
           "
           [options]="sliderOptions()"
           class="w-full"
-        ></ngx-slider>
+        >
+        </ngx-slider>
+
+        <app-section-plot-cards />
       </div>
     </div>
-    <app-section-plot-cards />
   </div>
 
   <app-side-tabs>

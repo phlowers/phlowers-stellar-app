@@ -50,3 +50,9 @@
   outline: 0.0625rem solid var(--primary-900);
   outline-offset: 0.25rem;
 }
+
+%vertical-separator {
+  @apply h-full m-0 border-t-0;
+  width: 0.0625rem;
+  border-right: 0.0625rem solid var(--star-dust-300);
+}

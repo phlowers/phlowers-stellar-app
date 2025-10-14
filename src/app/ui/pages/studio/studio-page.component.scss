@@ -1,10 +1,60 @@
+@use 'abstract.extracts' as app;
+
 :host {
   @apply block -m-6 h-full;
 }
 
 .graph-tools {
   @apply flex;
-  height: calc(100% - 3.5rem);
+  height: calc(100% - 3rem);
+}
+
+.quick-measures {
+  @apply flex justify-center py-8;
+
+  &__card {
+    @apply inline-flex items-start gap-2 p-2 h-12 max-h-12 rounded-sm;
+    box-shadow: var(--elevation-neutral-2);
+  }
+
+  &__title {
+    @apply block;
+    color: var(--star-dust-900);
+    @extend %text-s-400;
+  }
+
+  &__value {
+    color: var(--star-dust-950);
+    @extend %text-m-400;
+  }
+
+  &__separator {
+    @extend %vertical-separator;
+  }
+}
+
+.supports-select {
+  @apply border rounded-md overflow-hidden;
+  border-color: var(--star-dust-700);
+
+  &__p-select,
+  &__buttons {
+    @apply inline-block;
+  }
+
+  &__buttons {
+    border-color: var(--star-dust-300);
+    font-size: 1.25rem;
+    color: var(--star-dust-950);
+
+    &--right {
+      @apply border-l;
+    }
+
+    &--left {
+      @apply border-r;
+    }
+  }
 }
 
 .supports-select-buttons {
@@ -12,16 +62,6 @@
   align-items: center;
   justify-content: center;
   border-radius: 1px;
-  height: 33px;
-  width: 33px;
-}
-
-.supports-select-buttons-right {
-  border-left: 1px solid black;
-}
-
-.supports-select-buttons-left {
-  border-right: 1px solid black;
 }
 
 .load-tabs {
