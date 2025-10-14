@@ -20,12 +20,26 @@ $_selected-color: var(--main-primary);
     border-radius: 0%;
 }
 
+// Mixin for pointer transforms to reduce repetition
+@mixin _pointer-transform($rotation, $translateY: 0px) {
+    // we have to use !important to override inline styles
+    transform: rotate(#{$rotation}deg) translateY(#{$translateY}) !important;
+}
+
 .ngx-slider.ngx-slider .ngx-slider-pointer-max {
-    transform: rotate(-90deg) !important;
+    @include _pointer-transform(-90);
 }
 
 .ngx-slider.ngx-slider .ngx-slider-pointer-min {
-    transform: rotate(90deg) translateY(8px) !important;
+    @include _pointer-transform(90, .5rem);
+}
+
+.ngx-slider.ngx-slider.inverted .ngx-slider-pointer-max {
+    @include _pointer-transform(90, .5rem);
+}
+
+.ngx-slider.ngx-slider.inverted .ngx-slider-pointer-min {
+    @include _pointer-transform(-90, 0px);
 }
 
 .ngx-slider.ngx-slider .ngx-slider-pointer:after {
@@ -50,12 +64,4 @@ $_selected-color: var(--main-primary);
 
 .ngx-slider.ngx-slider .ngx-slider-tick.ngx-slider-selected {
     background: $_selected-color;
-}
-
-:nth-child(-n + 1 of .ngx-slider-selected) {
-    background-color: transparent !important;
-}
-
-.ngx-slider-selected:not(:has(+ .ngx-slider-selected)) {
-    background-color: transparent !important;
 }

@@ -1,3 +1,5 @@
+export const CUSTOM_SVG_ICONS = ['support', 'span'] as const;
+
 export const ALL_ICONS = [
   'search',
   'home',
@@ -3652,4 +3654,6 @@ export const ALL_ICONS = [
   'farsight_digital'
 ] as const;
 
-export type PossibleIconNames = (typeof ALL_ICONS)[number];
+export type CustomSvgIconNames = (typeof CUSTOM_SVG_ICONS)[number];
+export type MaterialIconNames = (typeof ALL_ICONS)[number];
+export type PossibleIconNames = MaterialIconNames | CustomSvgIconNames;

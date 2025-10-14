@@ -308,6 +308,7 @@ describe('SectionPlotComponent', () => {
         mockPlotData,
         800,
         600,
+        false,
         false
       );
     });
@@ -322,6 +323,7 @@ describe('SectionPlotComponent', () => {
         mockPlotData,
         0,
         0,
+        false,
         false
       );
     });
@@ -359,7 +361,8 @@ describe('SectionPlotComponent', () => {
         mockPlotData,
         800,
         600,
-        true
+        true,
+        false
       );
     });
   });
