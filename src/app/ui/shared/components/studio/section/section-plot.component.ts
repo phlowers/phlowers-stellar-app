@@ -91,16 +91,11 @@ export class SectionPlotComponent {
     if (!litData) {
       return;
     }
-    const myElement = document.getElementById('plotly-output');
-    const width = myElement?.clientWidth ?? 0;
-    const height = myElement?.clientHeight ?? 0;
     const formattedData = formatLitData(litData);
     const plotData = createPlotData(formattedData, plotOptions);
     return createPlot(
       'plotly-output',
       plotData,
-      width,
-      height,
       isSupportZoom,
       plotOptions.invert
     );

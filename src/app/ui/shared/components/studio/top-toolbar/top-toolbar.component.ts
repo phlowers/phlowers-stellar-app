@@ -19,8 +19,8 @@ export class StudioTopToolbarComponent {
       value: string;
     }[]
   >([
-    { label: '2D', value: '2d' },
-    { label: '3D', value: '3d' }
+    { label: '3D', value: '3d' },
+    { label: '2D', value: '2d' }
   ]);
   sideOptions = signal<
     {

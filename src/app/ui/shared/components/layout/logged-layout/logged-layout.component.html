@@ -9,10 +9,7 @@
     [footerLinks]="sideBarNav().footer"
   />
 
-  <main
-    class="overflow-y-auto"
-    class="{{ currentRoute === '/studio' ? 'p-0' : 'p-6' }}"
-  >
+  <main class="overflow-y-auto p-6">
     <router-outlet></router-outlet>
   </main>
 </div>

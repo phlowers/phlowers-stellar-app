@@ -1,39 +1,39 @@
-<div
-  class="flex flex-row gap-2 items-center border border-[#E6DEF0] bg-[#FCFBFD]"
->
+<div class="toolbar" role="menubar">
   <p-selectbutton
-    class="p-2"
     [options]="threeDOptions()"
     [(ngModel)]="plotService.plotOptions().view"
     (onChange)="plotService.plotOptionsChange('view', $event.value)"
     optionLabel="label"
     optionValue="value"
-    aria-labelledby="basic"
     allowEmpty="false"
+    ariaLabel="switch graph view"
+    i18n-ariaLabel
   />
-  <!-- TODO: Change to hr -->
-  <div class="self-stretch bg-[#D2D4D5] w-[1px] my-1"></div>
-  <label for="side" class="text-xl" i18n>Side:</label>
-  <p-selectbutton
-    class="p-2"
-    inputId="side"
-    allowEmpty="false"
-    [options]="sideOptions()"
-    [(ngModel)]="plotService.plotOptions().side"
-    (onChange)="plotService.plotOptionsChange('side', $event.value)"
-    optionLabel="label"
-    optionValue="value"
-    aria-labelledby="basic"
-  />
-  <!-- TODO: Change to hr -->
-  <div class="self-stretch bg-[#D2D4D5] w-[1px] my-1"></div>
-  <div class="flex flex-row gap-2 items-center">
-    <label for="invert" class="text-xl" i18n>Invert:</label>
+
+  <hr class="toolbar__separator" />
+
+  <div class="flex items-center gap-2">
+    <p id="side" class="text-l-600 m-0" i18n>Side:</p>
+    <p-selectbutton
+      [options]="sideOptions()"
+      [(ngModel)]="plotService.plotOptions().side"
+      (onChange)="plotService.plotOptionsChange('side', $event.value)"
+      optionLabel="label"
+      optionValue="value"
+      ariaLabelledBy="side"
+    />
+  </div>
+
+  <hr class="toolbar__separator" />
+
+  <div class="flex flex-col items-start">
+    <label for="invert" class="text-m-600 m-0" i18n>Invert:</label>
     <p-toggleswitch
-      class="flex items-centers"
       inputId="invert"
       [(ngModel)]="plotService.plotOptions().invert"
       (onChange)="plotService.plotOptionsChange('invert', $event.checked)"
     />
   </div>
+
+  <hr class="toolbar__separator" />
 </div>

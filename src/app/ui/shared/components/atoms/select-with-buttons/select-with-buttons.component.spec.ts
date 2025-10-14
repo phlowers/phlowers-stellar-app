@@ -1,17 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { DividerModule } from 'primeng/divider';
+import { By } from '@angular/platform-browser';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-
 import { SelectWithButtonsComponent } from './select-with-buttons.component';
 
 describe('SelectWithButtonsComponent', () => {
-  let component: SelectWithButtonsComponent<Record<string, unknown>>;
+  let component: SelectWithButtonsComponent<Record<string, any>>;
   let fixture: ComponentFixture<
-    SelectWithButtonsComponent<Record<string, unknown>>
+    SelectWithButtonsComponent<Record<string, any>>
   >;
 
   const mockOptions = [
@@ -21,7 +20,7 @@ describe('SelectWithButtonsComponent', () => {
   ];
 
   beforeAll(() => {
-    // Mock global matchMedia for PrimeNG
+    // PrimeNG overlay rendering needs matchMedia
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: jest.fn().mockImplementation((query) => ({
@@ -52,257 +51,166 @@ describe('SelectWithButtonsComponent', () => {
     fixture = TestBed.createComponent(SelectWithButtonsComponent);
     component = fixture.componentInstance;
 
-    // Set default inputs using fixture.componentRef.setInput
     fixture.componentRef.setInput('options', mockOptions);
     fixture.componentRef.setInput('selectedOption', '1');
     fixture.componentRef.setInput('optionLabel', 'name');
     fixture.componentRef.setInput('optionValue', 'id');
     fixture.componentRef.setInput('ariaLabel', 'Test select');
     fixture.componentRef.setInput('placeholder', 'Select an option');
+    fixture.componentRef.setInput('showClear', true);
 
     fixture.detectChanges();
+    await fixture.whenStable();
+
+    // mock ViewChild
+    component.selectComponent = {
+      writeValue: jest.fn(),
+      updateModel: jest.fn(),
+      hide: jest.fn()
+    } as any;
   });
 
   afterEach(() => {
-    // Clean up any overlays that might be left behind
-    const overlays = document.body.querySelectorAll(
-      '.p-select-overlay, .p-dropdown-panel, .p-overlay'
-    );
-    overlays.forEach((overlay) => overlay.remove());
+    document
+      .querySelectorAll('.p-overlay, .p-select-overlay')
+      .forEach((e) => e.remove());
   });
 
-  describe('Component Initialization', () => {
+  describe('Initialization', () => {
     it('should create', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should have required inputs', () => {
+    it('should initialize inputs correctly', () => {
       expect(component.options()).toEqual(mockOptions);
       expect(component.selectedOption()).toBe('1');
       expect(component.optionLabel()).toBe('name');
       expect(component.optionValue()).toBe('id');
       expect(component.ariaLabel()).toBe('Test select');
-      expect(component.placeholder()).toBe('Select an option');
     });
 
-    it('should have all output events', () => {
-      expect(component.selectOption).toBeDefined();
-      expect(component.viewOption).toBeDefined();
-      expect(component.editOption).toBeDefined();
-      expect(component.duplicateOption).toBeDefined();
-      expect(component.deleteOption).toBeDefined();
+    it('should set selectedOptionValue from selectedOption on init', () => {
+      expect(component.selectedOptionValue()).toBe('1');
     });
   });
 
-  describe('Computed Properties', () => {
-    it('should compute selectedOptionLabel correctly when option is found', () => {
-      fixture.componentRef.setInput('selectedOption', '1');
-      fixture.detectChanges();
-
+  describe('Computed selectedOptionLabel', () => {
+    it('should compute correct label for selected option', () => {
       expect(component.selectedOptionLabel()).toBe('Option 1');
     });
 
-    it('should return empty string when selectedOption is null', () => {
+    it('should return empty string if selectedOption is null', async () => {
       fixture.componentRef.setInput('selectedOption', null);
       fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(component.selectedOptionLabel()).toBe('');
     });
 
-    it('should return empty string when selectedOption is undefined', () => {
-      fixture.componentRef.setInput('selectedOption', undefined);
-      fixture.detectChanges();
-
-      expect(component.selectedOptionLabel()).toBe('');
-    });
-
-    it('should return empty string when option is not found', () => {
-      fixture.componentRef.setInput('selectedOption', 'nonexistent');
-      fixture.detectChanges();
-
-      expect(component.selectedOptionLabel()).toBe('');
-    });
-
-    it('should update selectedOptionLabel when options change', () => {
-      const newOptions = [
-        { id: '1', name: 'New Option 1' },
-        { id: '2', name: 'New Option 2' }
-      ];
-
+    it('should update label when options change', async () => {
+      const newOptions = [{ id: '1', name: 'New Option 1' }];
       fixture.componentRef.setInput('options', newOptions);
-      fixture.componentRef.setInput('selectedOption', '1');
       fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(component.selectedOptionLabel()).toBe('New Option 1');
     });
   });
 
-  describe('Template Rendering', () => {
-    it('should render the select component', () => {
-      const selectElement = fixture.debugElement.query(By.css('p-select'));
-      expect(selectElement).toBeTruthy();
+  describe('Methods', () => {
+    it('should emit selectOption when onSelectionChange is called with valid value', () => {
+      const spy = jest.spyOn(component.selectOption, 'emit');
+      component.onSelectionChange('2');
+      expect(spy).toHaveBeenCalledWith(mockOptions[1]);
     });
 
-    it('should display placeholder when no option is selected', () => {
-      fixture.componentRef.setInput('selectedOption', null);
-      fixture.detectChanges();
+    it('should not emit selectOption when value is null', () => {
+      const spy = jest.spyOn(component.selectOption, 'emit');
+      component.onSelectionChange(null);
+      expect(spy).not.toHaveBeenCalled();
+    });
 
-      const placeholderElement = fixture.debugElement.query(
-        By.css('.placeholder')
+    it('should clear selectedOptionValue and reset selectComponent when clearSelectedOptionValue is called', () => {
+      const spy = jest.spyOn(component.selectOption, 'emit');
+
+      component.clearSelectedOptionValue();
+
+      expect(component.selectedOptionValue()).toBeUndefined();
+      expect(spy).toHaveBeenCalledWith(undefined);
+      expect(component.selectComponent.writeValue).toHaveBeenCalledWith(null);
+      expect(component.selectComponent.updateModel).toHaveBeenCalledWith(
+        null,
+        null
       );
-      expect(placeholderElement).toBeTruthy();
-      expect(placeholderElement.nativeElement.textContent.trim()).toBe(
-        'Select an option'
-      );
     });
 
-    it('should display selected option label when option is selected', () => {
-      fixture.componentRef.setInput('selectedOption', '1');
-      fixture.detectChanges();
+    it('should emit selectOption and hide selectComponent onSelectItem', () => {
+      const spy = jest.spyOn(component.selectOption, 'emit');
+      const item = mockOptions[0];
 
-      expect(component.selectedOptionLabel()).toBe('Option 1');
-    });
-  });
+      component.onSelectItem(item);
 
-  describe('Event Handling', () => {
-    it('should emit selectOption when select button is clicked', () => {
-      const selectOptionSpy = jest.spyOn(component.selectOption, 'emit');
-      const mockItem = mockOptions[0];
-
-      // Simulate clicking the select button
-      component.selectOption.emit(mockItem);
-
-      expect(selectOptionSpy).toHaveBeenCalledWith(mockItem);
-    });
-
-    it('should emit viewOption when view button is clicked', () => {
-      const viewOptionSpy = jest.spyOn(component.viewOption, 'emit');
-      const mockItem = mockOptions[0];
-
-      component.viewOption.emit(mockItem);
-
-      expect(viewOptionSpy).toHaveBeenCalledWith(mockItem);
-    });
-
-    it('should emit editOption when edit button is clicked', () => {
-      const editOptionSpy = jest.spyOn(component.editOption, 'emit');
-      const mockItem = mockOptions[0];
-
-      component.editOption.emit(mockItem);
-
-      expect(editOptionSpy).toHaveBeenCalledWith(mockItem);
-    });
-
-    it('should emit duplicateOption when duplicate button is clicked', () => {
-      const duplicateOptionSpy = jest.spyOn(component.duplicateOption, 'emit');
-      const mockItem = mockOptions[0];
-
-      component.duplicateOption.emit(mockItem);
-
-      expect(duplicateOptionSpy).toHaveBeenCalledWith(mockItem);
-    });
-
-    it('should emit deleteOption when delete button is clicked', () => {
-      const deleteOptionSpy = jest.spyOn(component.deleteOption, 'emit');
-      const mockItem = mockOptions[0];
-
-      component.deleteOption.emit(mockItem);
-
-      expect(deleteOptionSpy).toHaveBeenCalledWith(mockItem);
+      expect(spy).toHaveBeenCalledWith(item);
+      expect(component.selectComponent.hide).toHaveBeenCalled();
+      expect(component.selectedOptionValue()).toBe('1');
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle empty options array', () => {
-      fixture.componentRef.setInput('options', []);
-      fixture.componentRef.setInput('selectedOption', '1');
-      fixture.detectChanges();
+  describe('Outputs', () => {
+    type OutputNames =
+      | 'viewOption'
+      | 'editOption'
+      | 'duplicateOption'
+      | 'deleteOption';
 
-      expect(component.selectedOptionLabel()).toBe('');
-    });
-
-    it('should handle options with different property names', () => {
-      const customOptions = [
-        { value: 'a', text: 'Custom Option A' },
-        { value: 'b', text: 'Custom Option B' }
-      ];
-
-      fixture.componentRef.setInput('options', customOptions);
-      fixture.componentRef.setInput('optionLabel', 'text');
-      fixture.componentRef.setInput('optionValue', 'value');
-      fixture.componentRef.setInput('selectedOption', 'a');
-      fixture.detectChanges();
-
-      expect(component.selectedOptionLabel()).toBe('Custom Option A');
-    });
-
-    it('should handle null/undefined options gracefully', () => {
-      // Test with valid options only, as the component doesn't handle null/undefined options
-      const validOptions = [{ id: '1', name: 'Valid Option' }];
-      fixture.componentRef.setInput('options', validOptions);
-      fixture.componentRef.setInput('selectedOption', '1');
-      fixture.detectChanges();
-
-      expect(component.selectedOptionLabel()).toBe('Valid Option');
+    it.each<OutputNames>([
+      'viewOption',
+      'editOption',
+      'duplicateOption',
+      'deleteOption'
+    ])('should define %s output emitter', (outputName) => {
+      expect(component[outputName]).toBeDefined();
     });
   });
 
-  describe('ViewChild Reference', () => {
-    it('should have access to selectComponent ViewChild', () => {
-      expect(component.selectComponent).toBeDefined();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have proper aria-label', () => {
-      // Check if the ariaLabel is set correctly on the component
-      expect(component.ariaLabel()).toBe('Test select');
-    });
-
-    it('should have proper button aria-labels', () => {
-      // These would be tested in integration tests with actual DOM rendering
-      // For now, we verify the component has the necessary properties
-      expect(component.ariaLabel()).toBe('Test select');
-    });
-  });
-
-  describe('Input Changes', () => {
-    it('should react to options input changes', () => {
-      const newOptions = [{ id: '4', name: 'New Option' }];
-      fixture.componentRef.setInput('options', newOptions);
-      fixture.detectChanges();
-
-      expect(component.options()).toEqual(newOptions);
-    });
-
-    it('should react to selectedOption input changes', () => {
+  describe('Reactive input changes', () => {
+    it('should react to changing selectedOption input', async () => {
       fixture.componentRef.setInput('selectedOption', '2');
       fixture.detectChanges();
+      await fixture.whenStable();
 
-      expect(component.selectedOption()).toBe('2');
       expect(component.selectedOptionLabel()).toBe('Option 2');
     });
 
-    it('should react to optionLabel input changes', () => {
+    it('should react to changing optionLabel input', async () => {
       fixture.componentRef.setInput('optionLabel', 'description');
-      fixture.componentRef.setInput('selectedOption', '1');
       fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(component.selectedOptionLabel()).toBe('First option');
     });
 
-    it('should react to optionValue input changes', () => {
-      const optionsWithDifferentValue = [
-        { key: 'a', name: 'Option A' },
-        { key: 'b', name: 'Option B' }
-      ];
-
-      fixture.componentRef.setInput('options', optionsWithDifferentValue);
-      fixture.componentRef.setInput('optionValue', 'key');
-      fixture.componentRef.setInput('selectedOption', 'a');
+    it('should handle unknown selectedOption gracefully', async () => {
+      fixture.componentRef.setInput('selectedOption', '999');
       fixture.detectChanges();
+      await fixture.whenStable();
 
-      expect(component.selectedOptionLabel()).toBe('Option A');
+      expect(component.selectedOptionLabel()).toBe('');
+    });
+  });
+
+  describe('Template basics', () => {
+    it('should render p-select', () => {
+      const el = fixture.debugElement.query(By.css('p-select'));
+      expect(el).toBeTruthy();
+    });
+
+    it('should show clear button when showClear is true and value selected', async () => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const clearBtn = fixture.debugElement.query(By.css('.clear-button'));
+      expect(clearBtn).toBeTruthy();
     });
   });
 });

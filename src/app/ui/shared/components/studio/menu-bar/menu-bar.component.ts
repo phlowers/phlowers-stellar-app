@@ -54,7 +54,7 @@ export class StudioMenuBarComponent {
   staffIsPresent = signal(false);
   constructor(public readonly plotService: PlotService) {}
 
-  selectChargeCase(chargeCase: { label: string; value: string }) {
-    this.selectedChargeCase.set(chargeCase.value);
+  selectChargeCase(chargeCase?: { label: string; value: string }) {
+    this.selectedChargeCase.set(chargeCase?.value ?? null);
   }
 }

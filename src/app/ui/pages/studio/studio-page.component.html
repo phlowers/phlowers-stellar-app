@@ -1,11 +1,13 @@
-<div class="flex flex-row w-full h-full">
-  <div class="w-full flex flex-col h-full">
-    <app-studio-menu-bar
-      [section]="plotService.section()"
-      [study]="plotService.study()"
-    ></app-studio-menu-bar>
-    <app-studio-top-toolbar />
-    <app-studio class="h-[36.625rem]" [isSupportZoom]="false" />
+<app-studio-menu-bar
+  [section]="plotService.section()"
+  [study]="plotService.study()"
+></app-studio-menu-bar>
+
+<app-studio-top-toolbar />
+
+<div class="graph-tools">
+  <div class="grow pr-5">
+    <app-studio class="block h-[36.625rem]" [isSupportZoom]="false" />
     <div class="flex flex-row gap-4 items-center">
       <div
         class="flex flex-row items-center border border-black rounded-md mx-2"
@@ -41,4 +43,88 @@
     </div>
     <app-section-plot-cards />
   </div>
+
+  <app-side-tabs>
+    <app-side-tab label="Charges">
+      <ng-template>
+        <p-tabs value="0" class="load-tabs">
+          <p-tablist>
+            <p-tab value="0">Condition climatique</p-tab>
+            <p-tab value="1">Chargement de portée</p-tab>
+            <p-tab value="2">Manip. câble au Supp.</p-tab>
+            <p-tab value="3">Manip. câble au portée</p-tab>
+          </p-tablist>
+
+          <p-tabpanels>
+            <p-tabpanel value="0">
+              <app-climate />
+            </p-tabpanel>
+
+            <p-tabpanel value="1">
+              <p class="m-0">
+                Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+                accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
+                quae ab illo inventore veritatis et quasi architecto beatae
+                vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia
+                voluptas sit aspernatur aut odit aut fugit, sed quia
+                consequuntur magni dolores eos qui ratione voluptatem sequi
+                nesciunt. Consectetur, adipisci velit, sed quia non numquam eius
+                modi.
+              </p>
+            </p-tabpanel>
+
+            <p-tabpanel value="2">
+              <p class="m-0">
+                At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                blanditiis praesentium voluptatum deleniti atque corrupti quos
+                dolores et quas molestias excepturi sint occaecati cupiditate
+                non provident, similique sunt in culpa qui officia deserunt
+                mollitia animi, id est laborum et dolorum fuga. Et harum quidem
+                rerum facilis est et expedita distinctio. Nam libero tempore,
+                cum soluta nobis est eligendi optio cumque nihil impedit quo
+                minus.
+              </p>
+            </p-tabpanel>
+
+            <p-tabpanel value="3">
+              <p class="m-0">
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cumque
+                consequuntur vero, iste ducimus ipsam soluta ab libero maxime,
+                excepturi quia, veniam nostrum. Debitis necessitatibus veritatis
+                mollitia numquam? Optio, minus cum.
+              </p>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
+      </ng-template>
+    </app-side-tab>
+
+    <app-side-tab label="Obstacles">
+      <ng-template
+        ><div style="width: 300px">
+          coucou contenu onglet "obstacles"
+          <br /><br />
+          <button app-btn>bouton pour tests focus</button>
+        </div></ng-template
+      >
+    </app-side-tab>
+
+    <app-side-tab label="Sol">
+      <ng-template
+        ><div style="width: 400px">
+          coucou contenu onglet "sol"<br /><br />
+          <button app-btn>bouton pour tests focus</button>
+        </div></ng-template
+      >
+    </app-side-tab>
+
+    <app-side-tab label="Estimations">
+      <ng-template
+        ><div style="width: 500px">
+          coucou contenu onglet "estimations"<br /><br />
+          <button app-btn>bouton pour tests focus</button>
+        </div></ng-template
+      >
+    </app-side-tab>
+  </app-side-tabs>
 </div>
