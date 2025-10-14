@@ -1,5 +1,14 @@
-.select-with-buttons.select-with-buttons {
+:host {
+  @apply relative;
+}
+
+.select-with-buttons {
   .placeholder {
     color: var(--grey-500);
   }
+}
+
+.clear-button {
+  @apply absolute right-10 top-2/4 -translate-y-2/4;
+  color: var(--star-dust-900);
 }

@@ -95,15 +95,6 @@ describe('SectionPlotComponent', () => {
     // Setup PlotService mock
     mockPlotService.plotOptions.mockReturnValue(mockPlotOptions);
 
-    // Mock document.getElementById
-    const mockElement = {
-      clientWidth: 800,
-      clientHeight: 600
-    };
-    jest
-      .spyOn(document, 'getElementById')
-      .mockReturnValue(mockElement as HTMLElement);
-
     await TestBed.configureTestingModule({
       imports: [SectionPlotComponent],
       providers: [
@@ -306,8 +297,6 @@ describe('SectionPlotComponent', () => {
       expect(mockCreatePlot).toHaveBeenCalledWith(
         'plotly-output',
         mockPlotData,
-        800,
-        600,
         false,
         false
       );
@@ -321,8 +310,6 @@ describe('SectionPlotComponent', () => {
       expect(mockCreatePlot).toHaveBeenCalledWith(
         'plotly-output',
         mockPlotData,
-        0,
-        0,
         false,
         false
       );
@@ -359,8 +346,6 @@ describe('SectionPlotComponent', () => {
       expect(mockCreatePlot).toHaveBeenCalledWith(
         'plotly-output',
         mockPlotData,
-        800,
-        600,
         true,
         false
       );

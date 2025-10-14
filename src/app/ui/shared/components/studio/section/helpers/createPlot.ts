@@ -45,12 +45,11 @@ const config = {
   displayModeBar: true,
   displaylogo: false,
   fillFrame: false,
-  responsive: false,
-  autosizable: false
+  responsive: true
 };
 
 const layout = (isSupportZoom: boolean, invert: boolean) => ({
-  autosize: false,
+  autosize: true,
   showlegend: false,
   margin: {
     l: 0,
@@ -64,8 +63,6 @@ const layout = (isSupportZoom: boolean, invert: boolean) => ({
 export const createPlot = (
   plotId: string,
   data: Data[],
-  width: number,
-  height: number,
   isSupportZoom: boolean,
   invert: boolean
 ) => {
@@ -74,8 +71,6 @@ export const createPlot = (
     data,
     {
       ...layout(isSupportZoom, invert),
-      width: width,
-      height: height,
       xaxis: {
         autorange: invert ? 'reversed' : true
       }

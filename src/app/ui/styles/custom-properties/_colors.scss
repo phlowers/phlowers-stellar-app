@@ -26,6 +26,10 @@
   }
   --main-grey: #{app.$main-grey};
 
+  @each $key, $value in app.$star-dust {
+    --star-dust-#{$key}: #{$value};
+  }
+
   @each $key, $value in app.$success {
     --success-#{$key}: #{$value};
   }

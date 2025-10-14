@@ -11,6 +11,7 @@
 
   --p-select-color: var(--grey-900);
   --p-select-disabled-color: var(--grey-500);
+  --p-select-placeholder-color: var(--grey-500);
 
   --p-select-shadow: #{map.get(app.$elevation, neutral-inner)};
 
@@ -35,8 +36,11 @@
 }
 
 // specific override for initial condition select list in study section tab (page study) and for charge case select list in studio menu bar
-.select-with-buttons-panel.select-with-buttons-panel {
+.select-with-buttons.has-clear-btn .p-select-label {
+  @apply pr-11;
+}
 
+.select-with-buttons-panel.select-with-buttons-panel {
   .p-select-list,
   .p-select-option {
     padding: 0rem;
@@ -51,7 +55,6 @@
   .select-dropdown {
     @apply flex flex-row items-center gap-2 p-2;
 
-
     &__select {
       @apply w-32 max-w-32 px-0;
       align-self: stretch;
@@ -63,10 +66,8 @@
       }
     }
 
-
     .erase-btn {
       color: var(--error-600);
     }
-
   }
 }

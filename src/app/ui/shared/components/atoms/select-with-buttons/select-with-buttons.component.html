@@ -3,17 +3,18 @@
   [options]="options()"
   [optionLabel]="optionLabel()"
   [optionValue]="optionValue()"
-  appendTo="body"
   [ariaLabel]="ariaLabel()"
+  [placeholder]="placeholder()"
+  [(ngModel)]="selectedOptionValue"
+  (ngModelChange)="onSelectionChange($event)"
+  appendTo="body"
   class="select-with-buttons"
   panelStyleClass="select-with-buttons-panel"
-  model="selectedOption"
+  [class.has-clear-btn]="selectedOptionValue() && showClear()"
 >
-  <ng-template #selectedItem let-selectedOptionStuff>
-    @if (selectedOption()) {
+  <ng-template #selectedItem let-selectedOption>
+    @if (selectedOptionValue()) {
       {{ selectedOptionLabel() }}
-    } @else {
-      <span class="placeholder">{{ placeholder() }}</span>
     }
   </ng-template>
 
@@ -23,7 +24,7 @@
         app-btn
         btnStyle="text"
         class="select-dropdown__select"
-        (click)="selectOption.emit(item); selectComponent.hide()"
+        (click)="onSelectItem(item)"
       >
         {{ item[optionLabel()] }}
       </button>
@@ -99,3 +100,16 @@
     </div>
   </ng-template>
 </p-select>
+
+@if (selectedOptionValue() && showClear()) {
+  <button
+    app-btn
+    btnStyle="text"
+    ariaLabel="clear selection"
+    i18n-ariaLabel
+    (click)="clearSelectedOptionValue()"
+    class="clear-button"
+  >
+    <app-icon icon="close" />
+  </button>
+}
