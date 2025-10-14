@@ -297,6 +297,7 @@ describe('SectionPlotComponent', () => {
       expect(mockCreatePlot).toHaveBeenCalledWith(
         'plotly-output',
         mockPlotData,
+        false,
         false
       );
     });
@@ -309,6 +310,7 @@ describe('SectionPlotComponent', () => {
       expect(mockCreatePlot).toHaveBeenCalledWith(
         'plotly-output',
         mockPlotData,
+        false,
         false
       );
     });
