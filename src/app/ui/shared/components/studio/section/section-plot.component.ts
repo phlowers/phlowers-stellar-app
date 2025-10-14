@@ -96,12 +96,13 @@ export class SectionPlotComponent {
     const height = myElement?.clientHeight ?? 0;
     const formattedData = formatLitData(litData);
     const plotData = createPlotData(formattedData, plotOptions);
-    return await createPlot(
+    return createPlot(
       'plotly-output',
       plotData,
       width,
       height,
-      isSupportZoom
+      isSupportZoom,
+      plotOptions.invert
     );
   }
 

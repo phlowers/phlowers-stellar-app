@@ -16,7 +16,7 @@
         <p-select
           inputId="supports"
           appendTo="body"
-          class="w-[200px] !rounded-none h-[33px] !border-0 !shadow-none"
+          class="w-[7.5rem] !rounded-none h-[2.0625rem] !border-0 !shadow-none"
           [options]="supportsOptions()"
           [ngModel]="supports()"
           (onChange)="supports.set($event.value)"
@@ -27,16 +27,18 @@
       </div>
       <div class="custom-slider w-full mx-2">
         <ngx-slider
+          [class.inverted]="plotService.plotOptions().invert"
           [(value)]="plotService.plotOptions().startSupport"
           [(highValue)]="plotService.plotOptions().endSupport"
           (valueChange)="plotService.plotOptionsChange('startSupport', $event)"
           (highValueChange)="
             plotService.plotOptionsChange('endSupport', $event)
           "
-          [options]="options()"
+          [options]="sliderOptions()"
           class="w-full"
         ></ngx-slider>
       </div>
     </div>
+    <app-section-plot-cards />
   </div>
 </div>

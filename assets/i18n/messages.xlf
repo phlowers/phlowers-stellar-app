@@ -1221,5 +1221,127 @@
         <source>add charge case</source>
       </segment>
     </unit>
+    <unit id="1481143027598560528">
+      <segment>
+        <source>Dénivelé (m) :</source>
+      </segment>
+    </unit>
+    <unit id="1839850085225752166">
+      <segment>
+        <source>Tension inf acc. :</source>
+      </segment>
+    </unit>
+    <unit id="187187500641108332">
+      <segment>
+        <source>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
+        </source>
+      </segment>
+    </unit>
+    <unit id="2063533551447007651">
+      <segment>
+        <source>L :</source>
+      </segment>
+    </unit>
+    <unit id="2071943182021763517">
+      <segment>
+        <source>Fleche F1 :</source>
+      </segment>
+    </unit>
+    <unit id="2469542949998183645">
+      <segment>
+        <source>Th - T0 :</source>
+      </segment>
+    </unit>
+    <unit id="3070039934798240648">
+      <segment>
+        <source>Angle balencement :</source>
+      </segment>
+    </unit>
+    <unit id="3473770442486249156">
+      <segment>
+        <source>Dist. horizontal acc. :</source>
+      </segment>
+    </unit>
+    <unit id="3777840194874581514">
+      <segment>
+        <source>Pente du câble acc. :</source>
+      </segment>
+    </unit>
+    <unit id="3791590607845887874">
+      <segment>
+        <source>Fleche F2 :</source>
+      </segment>
+    </unit>
+    <unit id="4089029341948015074">
+      <segment>
+        <source>Alt. pied supp :</source>
+      </segment>
+    </unit>
+    <unit id="4397785445453423100">
+      <segment>
+        <source>Y :</source>
+      </segment>
+    </unit>
+    <unit id="5071129435851121745">
+      <segment>
+        <source>Longeur portée :</source>
+      </segment>
+    </unit>
+    <unit id="5106156601844390550">
+      <segment>
+        <source>V :</source>
+      </segment>
+    </unit>
+    <unit id="5948960769057855607">
+      <segment>
+        <source>Longueur d&apos;arc LA :</source>
+      </segment>
+    </unit>
+    <unit id="6094941777760276714">
+      <segment>
+        <source>H :</source>
+      </segment>
+    </unit>
+    <unit id="6579859396556203170">
+      <segment>
+        <source>Longueur naturelle LO :</source>
+      </segment>
+    </unit>
+    <unit id="7866511975225263216">
+      <segment>
+        <source>Go back to study</source>
+      </segment>
+    </unit>
+    <unit id="8455573458204338917">
+      <segment>
+        <source>Angle en ligne :</source>
+      </segment>
+    </unit>
+    <unit id="8740504202579818263">
+      <segment>
+        <source>Résultante :</source>
+      </segment>
+    </unit>
+    <unit id="8989863100638695277">
+      <segment>
+        <source>X :</source>
+      </segment>
+    </unit>
+    <unit id="9005041075106523387">
+      <segment>
+        <source>Tension supp (Max) :</source>
+      </segment>
+    </unit>
+    <unit id="9049520591622775104">
+      <segment>
+        <source>Z :</source>
+      </segment>
+    </unit>
+    <unit id="997715536640361323">
+      <segment>
+        <source>Expand details</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

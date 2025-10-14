@@ -1465,5 +1465,153 @@
         <target>Ajouter un cas de charge</target>
       </segment>
     </unit>
+    <unit id="7866511975225263216">
+      <segment state="initial">
+        <source>Go back to study</source>
+        <target>Go back to study</target>
+      </segment>
+    </unit>
+    <unit id="187187500641108332">
+      <segment state="initial">
+        <source>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
+        </source>
+        <target>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
+        </target>
+      </segment>
+    </unit>
+    <unit id="997715536640361323">
+      <segment state="initial">
+        <source>Expand details</source>
+        <target>Expand details</target>
+      </segment>
+    </unit>
+    <unit id="5106156601844390550">
+      <segment state="initial">
+        <source>V :</source>
+        <target>V :</target>
+      </segment>
+    </unit>
+    <unit id="6094941777760276714">
+      <segment state="initial">
+        <source>H :</source>
+        <target>H :</target>
+      </segment>
+    </unit>
+    <unit id="2063533551447007651">
+      <segment state="initial">
+        <source>L :</source>
+        <target>L :</target>
+      </segment>
+    </unit>
+    <unit id="8740504202579818263">
+      <segment state="initial">
+        <source>Résultante :</source>
+        <target>Résultante :</target>
+      </segment>
+    </unit>
+    <unit id="8455573458204338917">
+      <segment state="initial">
+        <source>Angle en ligne :</source>
+        <target>Angle en ligne :</target>
+      </segment>
+    </unit>
+    <unit id="4089029341948015074">
+      <segment state="initial">
+        <source>Alt. pied supp :</source>
+        <target>Alt. pied supp :</target>
+      </segment>
+    </unit>
+    <unit id="8989863100638695277">
+      <segment state="initial">
+        <source>X :</source>
+        <target>X :</target>
+      </segment>
+    </unit>
+    <unit id="4397785445453423100">
+      <segment state="initial">
+        <source>Y :</source>
+        <target>Y :</target>
+      </segment>
+    </unit>
+    <unit id="9049520591622775104">
+      <segment state="initial">
+        <source>Z :</source>
+        <target>Z :</target>
+      </segment>
+    </unit>
+    <unit id="3070039934798240648">
+      <segment state="initial">
+        <source>Angle balencement :</source>
+        <target>Angle balencement :</target>
+      </segment>
+    </unit>
+    <unit id="3777840194874581514">
+      <segment state="initial">
+        <source>Pente du câble acc. :</source>
+        <target>Pente du câble acc. :</target>
+      </segment>
+    </unit>
+    <unit id="5071129435851121745">
+      <segment state="initial">
+        <source>Longeur portée :</source>
+        <target>Longeur portée :</target>
+      </segment>
+    </unit>
+    <unit id="1481143027598560528">
+      <segment state="initial">
+        <source>Dénivelé (m) :</source>
+        <target>Dénivelé (m) :</target>
+      </segment>
+    </unit>
+    <unit id="9005041075106523387">
+      <segment state="initial">
+        <source>Tension supp (Max) :</source>
+        <target>Tension supp (Max) :</target>
+      </segment>
+    </unit>
+    <unit id="6579859396556203170">
+      <segment state="initial">
+        <source>Longueur naturelle LO :</source>
+        <target>Longueur naturelle LO :</target>
+      </segment>
+    </unit>
+    <unit id="2071943182021763517">
+      <segment state="initial">
+        <source>Fleche F1 :</source>
+        <target>Fleche F1 :</target>
+      </segment>
+    </unit>
+    <unit id="3791590607845887874">
+      <segment state="initial">
+        <source>Fleche F2 :</source>
+        <target>Fleche F2 :</target>
+      </segment>
+    </unit>
+    <unit id="3473770442486249156">
+      <segment state="initial">
+        <source>Dist. horizontal acc. :</source>
+        <target>Dist. horizontal acc. :</target>
+      </segment>
+    </unit>
+    <unit id="5948960769057855607">
+      <segment state="initial">
+        <source>Longueur d&apos;arc LA :</source>
+        <target>Longueur d&apos;arc LA :</target>
+      </segment>
+    </unit>
+    <unit id="2469542949998183645">
+      <segment state="initial">
+        <source>Th - T0 :</source>
+        <target>Th - T0 :</target>
+      </segment>
+    </unit>
+    <unit id="1839850085225752166">
+      <segment state="initial">
+        <source>Tension inf acc. :</source>
+        <target>Tension inf acc. :</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
