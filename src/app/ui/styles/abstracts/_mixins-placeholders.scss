@@ -47,8 +47,10 @@
 }
 
 %focus-state {
+  @apply relative;
   outline: 0.0625rem solid var(--primary-900);
   outline-offset: 0.25rem;
+  z-index: 1;
 }
 
 %vertical-separator {

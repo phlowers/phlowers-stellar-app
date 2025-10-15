@@ -34,34 +34,49 @@
 }
 
 .supports-select {
-  @apply border rounded-md overflow-hidden;
+  @apply flex items-stretch border rounded-md;
   border-color: var(--star-dust-700);
 
-  &__p-select,
   &__buttons {
-    @apply inline-block;
-  }
-
-  &__buttons {
+    @apply inline-flex items-center;
     border-color: var(--star-dust-300);
-    font-size: 1.25rem;
     color: var(--star-dust-950);
+    background-color: var(--grey-white);
+    transition:
+      background-color 0.3s linear,
+      outline 0.3s linear;
+
+    &:hover {
+      background-color: var(--primary-100);
+    }
+
+    &:focus-visible {
+      @extend %focus-state;
+    }
+
+    &__icon {
+      font-size: 1.25rem;
+    }
 
     &--right {
-      @apply border-l;
+      @apply border-l rounded-se-md rounded-ee-md;
+      padding-left: 0.375rem;
     }
 
     &--left {
-      @apply border-r;
+      @apply border-r rounded-ss-md rounded-es-md;
+      padding-right: 0.375rem;
     }
+  }
+
+  &__p-select {
+    @apply border-0 shadow-none;
+    width: 7.25rem;
   }
 }
 
-.supports-select-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 1px;
+.slider-plot-cards {
+  @apply grow;
 }
 
 .load-tabs {

@@ -44,16 +44,19 @@
 
     <hr />
 
-    <div class="flex gap-4 items-start">
+    <div class="flex gap-6 items-start pl-4">
       <div class="supports-select">
         <button class="supports-select__buttons supports-select__buttons--left">
-          <app-icon icon="chevron_left" />
+          <app-icon
+            icon="chevron_left"
+            class="supports-select__buttons__icon"
+          />
         </button>
 
         <p-select
           inputId="supports"
           appendTo="body"
-          class="supports-select__p-select w-[7.5rem] !rounded-none h-[2.0625rem] !border-0 !shadow-none"
+          class="supports-select__p-select"
           [options]="supportsOptions()"
           [ngModel]="supports()"
           (onChange)="supports.set($event.value)"
@@ -62,11 +65,14 @@
         <button
           class="supports-select__buttons supports-select__buttons--right"
         >
-          <app-icon icon="chevron_right" />
+          <app-icon
+            icon="chevron_right"
+            class="supports-select__buttons__icon"
+          />
         </button>
       </div>
 
-      <div class="custom-slider w-full">
+      <div class="slider-plot-cards">
         <ngx-slider
           [class.inverted]="plotService.plotOptions().invert"
           [(value)]="plotService.plotOptions().startSupport"
@@ -76,7 +82,7 @@
             plotService.plotOptionsChange('endSupport', $event)
           "
           [options]="sliderOptions()"
-          class="w-full"
+          class="block"
         >
         </ngx-slider>
 
