@@ -59,7 +59,11 @@ const mockSupports: Support[] = [
     chainName: 'Chain 1',
     chainLength: 10.5,
     chainWeight: 2.3,
-    chainV: true
+    chainV: true,
+    counterWeight: 100.0,
+    supportFootAltitude: 100.0,
+    chainSurface: 10.0,
+    attachmentPosition: 'Position 1'
   },
   {
     uuid: 'support2',
@@ -75,7 +79,11 @@ const mockSupports: Support[] = [
     chainName: 'Chain 2',
     chainLength: 15.0,
     chainWeight: 3.1,
-    chainV: false
+    chainV: false,
+    counterWeight: 100.0,
+    supportFootAltitude: 100.0,
+    chainSurface: 10.0,
+    attachmentPosition: 'Position 2'
   },
   {
     uuid: 'support3',
@@ -91,7 +99,11 @@ const mockSupports: Support[] = [
     chainName: null,
     chainLength: null,
     chainWeight: null,
-    chainV: null
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    chainSurface: null,
+    attachmentPosition: null
   }
 ];
 

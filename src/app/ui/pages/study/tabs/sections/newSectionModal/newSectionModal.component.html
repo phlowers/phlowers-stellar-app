@@ -12,7 +12,11 @@
         <app-icon icon="edit" />
         <span i18n>Create a section</span>
       } @else {
-        <app-icon icon="description" />
+        @if (mode() === 'view') {
+          <app-icon icon="visibility" />
+        } @else {
+          <app-icon icon="edit" />
+        }
         <span>{{ section().name }}</span>
       }
     </p>
@@ -70,6 +74,7 @@
   <div>
     @if (source === 'manual' && isOpen()) {
       <app-manual-section
+        [isNameUnique]="isNameUnique()"
         [mode]="mode()"
         [section]="section()"
         (sectionChange)="onSectionChange($event)"
@@ -93,7 +98,7 @@
         type="button"
         btnSize="m"
         (click)="onValidate()"
-        [disabled]="!areAllRequiredFieldsFilled()"
+        [disabled]="!areAllRequiredFieldsFilled() || !isNameUnique()"
       >
         <app-icon icon="save" />
         @if (mode() === 'create') {

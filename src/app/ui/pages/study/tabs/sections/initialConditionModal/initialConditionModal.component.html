@@ -7,8 +7,16 @@
 >
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
-      <app-icon icon="edit" />
-      <span i18n>Create an initial condition</span>
+      @if (mode() === 'create') {
+        <app-icon icon="add_circle" />
+        <span i18n>Create an initial condition</span>
+      } @else if (mode() === 'edit') {
+        <app-icon icon="edit" />
+        <span i18n>Edit an initial condition</span>
+      } @else if (mode() === 'view') {
+        <app-icon icon="visibility" />
+        <span>{{ initialCondition().name }}</span>
+      }
     </p>
   </ng-template>
 
@@ -46,7 +54,13 @@
             id="initial-condition-name"
             pInputText
             [(ngModel)]="initialCondition().name"
+            (ngModelChange)="onNameChange($event)"
           />
+          @if (!isNameUnique()) {
+            <p-message severity="error" size="small" variant="simple" i18n>
+              Initial condition name must be unique.
+            </p-message>
+          }
         </div>
         <div>
           <label for="initial-condition-base-parameter" i18n>
@@ -114,7 +128,7 @@
       <button
         app-btn
         type="button"
-        [disabled]="!this.initialCondition().name"
+        [disabled]="!this.initialCondition().name || !isNameUnique()"
         btnSize="m"
         (click)="onSubmit()"
       >

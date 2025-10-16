@@ -16,6 +16,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { ButtonModule } from 'primeng/button';
+import { KeyFilterModule } from 'primeng/keyfilter';
 
 @Component({
   selector: 'app-supports-table',
@@ -32,7 +33,8 @@ import { ButtonModule } from 'primeng/button';
     InputIconModule,
     InputGroupModule,
     InputGroupAddonModule,
-    ButtonModule
+    ButtonModule,
+    KeyFilterModule
   ],
   templateUrl: './supportsTable.component.html',
   styleUrls: ['./supportsTable.component.scss']
@@ -47,6 +49,15 @@ export class SupportsTableComponent implements OnInit {
   attachmentSetModalOpen = signal<boolean>(false);
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   constructor(private readonly chainsService: ChainsService) {}
+
+  public onlyPositiveNumbers = /^[0-9]*$/;
+  public onlyPositiveNumbersWithDecimal = /^[0-9]*\.?[0-9]{0,20}$/;
+  public positiveAndNegativeNumbersWithDecimal = /^-?[0-9]*\.?[0-9]{0,20}$/;
+
+  optionsChainV = [
+    { label: $localize`Yes`, value: true },
+    { label: $localize`No`, value: false }
+  ];
 
   async getData() {
     const chains = await this.chainsService.getChains();

@@ -19,6 +19,7 @@ import { createEmptySection } from '@src/app/core/services/sections/helpers';
 import { RouterLink } from '@angular/router';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
+import { cloneDeep } from 'lodash';
 
 @Component({
   selector: 'app-sections-tab',
@@ -188,5 +189,9 @@ export class SectionsTabComponent {
       section: section,
       initialCondition: initialCondition
     });
+  };
+
+  orderedInitialConditions = (initialConditions: InitialCondition[]) => {
+    return cloneDeep(initialConditions).reverse();
   };
 }

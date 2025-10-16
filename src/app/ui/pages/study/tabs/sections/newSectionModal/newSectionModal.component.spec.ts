@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
 import { Section } from '@core/data/database/interfaces/section';
+import { Study } from '@core/data/database/interfaces/study';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
@@ -60,6 +61,18 @@ describe('NewSectionModalComponent (Jest)', () => {
     selected_initial_condition_uuid: undefined
   };
 
+  const mockStudy: Study = {
+    uuid: 'study-uuid',
+    author_email: 'test@example.com',
+    title: 'Test Study',
+    description: 'Test description',
+    shareable: false,
+    created_at_offline: '2023-01-01',
+    updated_at_offline: '2023-01-01',
+    saved: true,
+    sections: []
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NewSectionModalComponent, HttpClientTestingModule],
@@ -74,6 +87,7 @@ describe('NewSectionModalComponent (Jest)', () => {
     component = fixture.componentInstance;
 
     fixture.componentRef.setInput('section', mockSection);
+    fixture.componentRef.setInput('study', mockStudy);
     fixture.componentRef.setInput('mode', 'create');
     fixture.componentRef.setInput('isOpen', true);
 

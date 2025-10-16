@@ -20,4 +20,8 @@ export interface Support {
   chainLength: number | null;
   chainWeight: number | null;
   chainV: boolean | null;
+  counterWeight: number | null;
+  supportFootAltitude: number | null;
+  attachmentPosition: string | null;
+  chainSurface: number | null;
 }

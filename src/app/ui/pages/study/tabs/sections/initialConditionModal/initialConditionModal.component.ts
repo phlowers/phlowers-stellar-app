@@ -8,6 +8,7 @@ import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.com
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { FormsModule } from '@angular/forms';
 import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-initial-condition-modal',
@@ -19,7 +20,8 @@ import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-c
     DividerModule,
     ButtonComponent,
     IconComponent,
-    FormsModule
+    FormsModule,
+    MessageModule
   ]
 })
 export class InitialConditionModalComponent {
@@ -30,6 +32,7 @@ export class InitialConditionModalComponent {
   addInitialCondition = output<InitialConditionFunctionsInput>();
   updateInitialCondition = output<InitialConditionFunctionsInput>();
   initialConditionInput = input.required<InitialCondition>();
+  initialConditions = input.required<InitialCondition[]>();
   initialCondition = signal<InitialCondition>({
     uuid: '',
     name: '',
@@ -37,6 +40,14 @@ export class InitialConditionModalComponent {
     base_temperature: 0
   });
 
+  isNameUnique = signal<boolean>(true);
+  onNameChange(name: string) {
+    this.isNameUnique.set(
+      !this.initialConditions().find(
+        (ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid
+      )
+    );
+  }
   constructor() {
     effect(() => {
       this.initialCondition.set(this.initialConditionInput());

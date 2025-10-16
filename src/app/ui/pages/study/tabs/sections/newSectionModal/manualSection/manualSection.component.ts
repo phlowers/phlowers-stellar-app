@@ -31,6 +31,7 @@ import { Line } from '@src/app/core/data/database/interfaces/line';
 import { LinesService } from '@src/app/core/services/lines/lines.service';
 import { Cable } from '@src/app/core/data/database/interfaces/cable';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { MessageModule } from 'primeng/message';
 
 const sortLines = (lines: Line[]) => {
   return lines.sort((a, b) => {
@@ -48,7 +49,6 @@ const sortLines = (lines: Line[]) => {
   imports: [
     TabsModule,
     RadioButtonModule,
-    FormsModule,
     InputTextModule,
     DialogModule,
     DividerModule,
@@ -58,7 +58,9 @@ const sortLines = (lines: Line[]) => {
     IconComponent,
     StudioComponent,
     TextareaModule,
-    UniquePipe
+    UniquePipe,
+    FormsModule,
+    MessageModule
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'
@@ -71,6 +73,7 @@ export class ManualSectionComponent implements OnInit {
   studio = viewChild(StudioComponent);
   cablesFilterTable = signal<Cable[]>([]);
   public sectionTypes = sectionTypes;
+  isNameUnique = input<boolean>();
 
   constructor(
     private readonly maintenanceService: MaintenanceService,
@@ -81,9 +84,24 @@ export class ManualSectionComponent implements OnInit {
   maintenanceFilterTable = signal<MaintenanceData[]>([]);
   linesFilterTable = signal<Line[]>([]);
 
+  eelRead = signal<string>('');
+  cmRead = signal<string>('');
+  gmrRead = signal<string>('');
+
   async setupFilterTables() {
     const table = await this.maintenanceService.getMaintenance();
     this.maintenanceFilterTable.set(sortBy(table, 'eel_name'));
+    if (this.mode() === 'view') {
+      this.eelRead.set(
+        table.find((item) => item.eel_id === this.section().eel)?.eel_name || ''
+      );
+      this.cmRead.set(
+        table.find((item) => item.cm_id === this.section().cm)?.cm_name || ''
+      );
+      this.gmrRead.set(
+        table.find((item) => item.gmr_id === this.section().gmr)?.gmr_name || ''
+      );
+    }
     const linesTable = await this.linesService.getLines();
     this.linesFilterTable.set(sortLines(linesTable));
     const cablesTable = await this.cablesService.getCables();
