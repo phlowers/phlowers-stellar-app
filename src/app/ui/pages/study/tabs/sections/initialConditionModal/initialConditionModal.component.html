@@ -77,7 +77,8 @@
           <input
             name="initial-condition-base-parameter"
             required
-            type="text"
+            step="0.01"
+            type="number"
             id="initial-condition-base-parameter"
             pInputText
             [(ngModel)]="initialCondition().base_parameters"
@@ -94,6 +95,63 @@
             id="initial-condition-base-temperature"
             pInputText
             [(ngModel)]="initialCondition().base_temperature"
+          />
+        </div>
+        <div>
+          <p class="font-bold mb-0" i18n>
+            Extreme historical conditions incurred by the cable
+          </p>
+        </div>
+        <div>
+          <label for="initial-condition-base-temperature" i18n>
+            Cable pretension
+          </label>
+          <input
+            name="initial-condition-cable-pretension"
+            required
+            type="number"
+            id="initial-condition-cable-pretension"
+            pInputText
+            [(ngModel)]="initialCondition().cable_pretension"
+          />
+        </div>
+        <div>
+          <label for="initial-condition-base-temperature" i18n>
+            Min temperature
+          </label>
+          <input
+            name="initial-condition-min-temperature"
+            required
+            type="number"
+            id="initial-condition-min-temperature"
+            pInputText
+            [(ngModel)]="initialCondition().min_temperature"
+          />
+        </div>
+        <div>
+          <label for="initial-condition-base-temperature" i18n>
+            Max wind pressure
+          </label>
+          <input
+            name="initial-condition-max-wind-pressure"
+            required
+            type="number"
+            id="initial-condition-max-wind-pressure"
+            pInputText
+            [(ngModel)]="initialCondition().max_wind_pressure"
+          />
+        </div>
+        <div>
+          <label for="initial-condition-base-temperature" i18n>
+            Max frost width
+          </label>
+          <input
+            name="initial-condition-max-frost-width"
+            required
+            type="number"
+            id="initial-condition-max-frost-width"
+            pInputText
+            [(ngModel)]="initialCondition().max_frost_width"
           />
         </div>
       </div>
@@ -115,6 +173,30 @@
           <dt i18n>Base temperature (°C)</dt>
           <dd class="read-only-info test">
             {{ initialCondition().base_temperature }}
+          </dd>
+        </div>
+        <div>
+          <dt i18n>Cable pretension</dt>
+          <dd class="read-only-info test">
+            {{ initialCondition().cable_pretension }}
+          </dd>
+        </div>
+        <div>
+          <dt i18n>Min temperature</dt>
+          <dd class="read-only-info test">
+            {{ initialCondition().min_temperature }}
+          </dd>
+        </div>
+        <div>
+          <dt i18n>Max wind pressure</dt>
+          <dd class="read-only-info test">
+            {{ initialCondition().max_wind_pressure }}
+          </dd>
+        </div>
+        <div>
+          <dt i18n>Max frost width</dt>
+          <dd class="read-only-info test">
+            {{ initialCondition().max_frost_width }}
           </dd>
         </div>
       </dl>

@@ -52,7 +52,16 @@ export class StudiesComponent implements OnInit {
     private readonly confirmationService: ConfirmationService
   ) {
     this.studiesService.studies.subscribe((studies) => {
-      this.studies = studies;
+      this.studies = this.sortStudies(studies);
+    });
+  }
+
+  sortStudies(studies: Study[]) {
+    return studies.sort((a, b) => {
+      return (
+        new Date(b.created_at_offline).getTime() -
+        new Date(a.created_at_offline).getTime()
+      );
     });
   }
 
@@ -62,7 +71,7 @@ export class StudiesComponent implements OnInit {
     this.studiesService.ready.subscribe((ready) => {
       if (ready) {
         this.studiesService.getStudies().then((studies) => {
-          this.studies = studies;
+          this.studies = this.sortStudies(studies);
         });
       }
     });

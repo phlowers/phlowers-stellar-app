@@ -1523,5 +1523,75 @@
         <source> Angle </source>
       </segment>
     </unit>
+    <unit id="1079181845691356032">
+      <segment>
+        <source>Study imported successfully</source>
+      </segment>
+    </unit>
+    <unit id="1519954996184640001">
+      <segment>
+        <source>Error</source>
+      </segment>
+    </unit>
+    <unit id="4648900870671159218">
+      <segment>
+        <source>Success</source>
+      </segment>
+    </unit>
+    <unit id="8104834107183476829">
+      <segment>
+        <source>Error importing study</source>
+      </segment>
+    </unit>
+    <unit id="2153962924756003345">
+      <segment>
+        <source>Max wind pressure</source>
+      </segment>
+    </unit>
+    <unit id="3366260090021429573">
+      <segment>
+        <source>Max frost width</source>
+      </segment>
+    </unit>
+    <unit id="3766856601447528715">
+      <segment>
+        <source>Initial condition 1</source>
+      </segment>
+    </unit>
+    <unit id="3948064756684098346">
+      <segment>
+        <source> Max wind pressure </source>
+      </segment>
+    </unit>
+    <unit id="5455255610792577574">
+      <segment>
+        <source> Min temperature </source>
+      </segment>
+    </unit>
+    <unit id="5577525641723703663">
+      <segment>
+        <source> Cable pretension </source>
+      </segment>
+    </unit>
+    <unit id="7815555298089228750">
+      <segment>
+        <source> Max frost width </source>
+      </segment>
+    </unit>
+    <unit id="848481053719181700">
+      <segment>
+        <source> Extreme historical conditions incurred by the cable </source>
+      </segment>
+    </unit>
+    <unit id="8798542344025275411">
+      <segment>
+        <source>Min temperature</source>
+      </segment>
+    </unit>
+    <unit id="9095132887560670905">
+      <segment>
+        <source>Cable pretension</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

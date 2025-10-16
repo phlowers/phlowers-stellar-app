@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ImportStudyComponent } from './import-study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { MessageService } from 'primeng/api';
+import Papa from 'papaparse';
+import { Study } from '@src/app/core/data/database/interfaces/study';
 
 describe('ImportStudyComponent', () => {
   let component: ImportStudyComponent;
@@ -9,12 +12,60 @@ describe('ImportStudyComponent', () => {
 
   beforeEach(async () => {
     studiesServiceMock = {
-      createStudyFromProtoV4: jest.fn()
+      createStudyFromProtoV4: jest.fn().mockResolvedValue({} as Study)
     } as unknown as jest.Mocked<StudiesService>;
+    const mockMessageService = {
+      add: jest.fn()
+    } as unknown as MessageService;
+
+    // Mock Papa.parse
+    const mockParse = jest
+      .fn()
+      .mockImplementation(
+        (input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
+          if (config?.complete) {
+            // Simulate successful parsing
+            const mockResult: Papa.ParseResult<Record<string, string>> = {
+              data: [
+                {
+                  num: '1',
+                  nom: '98',
+                  suspension: 'FAUX',
+                  alt_acc: '1075,53',
+                  long_bras: '0',
+                  angle_ligne: '-19,1',
+                  long_ch: '0',
+                  pds_ch: '0',
+                  surf_ch: '0',
+                  ctr_poids: '0',
+                  ch_en_V: 'FAUX',
+                  portée: '473,07'
+                }
+              ],
+              errors: [],
+              meta: {
+                delimiter: ';',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0
+              }
+            };
+            // Call complete callback
+            config.complete!(mockResult, undefined);
+          }
+          return {} as Papa.ParseResult<Record<string, string>>;
+        }
+      );
+
+    (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
     await TestBed.configureTestingModule({
       imports: [ImportStudyComponent],
-      providers: [{ provide: StudiesService, useValue: studiesServiceMock }]
+      providers: [
+        { provide: StudiesService, useValue: studiesServiceMock },
+        { provide: MessageService, useValue: mockMessageService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ImportStudyComponent);
@@ -28,14 +79,14 @@ describe('ImportStudyComponent', () => {
   describe('loadProtoV4File', () => {
     let mockFile: File;
     let mockFileReader: {
-      readAsText: jest.Mock;
+      readAsDataURL: jest.Mock;
       onload: ((e: ProgressEvent<FileReader>) => void) | null;
     };
 
     beforeEach(() => {
       // Mock FileReader
       mockFileReader = {
-        readAsText: jest.fn(),
+        readAsDataURL: jest.fn(),
         onload: null
       };
 
@@ -60,12 +111,12 @@ describe('ImportStudyComponent', () => {
         target: {
           files: null
         }
-      } as any;
+      } as unknown as Event;
 
       component.loadFiles(mockEvent);
 
       expect(component.loading()).toBe(false);
-      expect(mockFileReader.readAsText).not.toHaveBeenCalled();
+      expect(mockFileReader.readAsDataURL).not.toHaveBeenCalled();
     });
 
     it('should handle empty files array gracefully', () => {
@@ -73,12 +124,12 @@ describe('ImportStudyComponent', () => {
         target: {
           files: createMockFileList([])
         }
-      } as any;
+      } as unknown as Event;
 
       component.loadFiles(mockEvent);
 
       expect(component.loading()).toBe(false);
-      expect(mockFileReader.readAsText).not.toHaveBeenCalled();
+      expect(mockFileReader.readAsDataURL).not.toHaveBeenCalled();
     });
 
     it('should set loading state correctly during file processing', () => {
@@ -86,14 +137,14 @@ describe('ImportStudyComponent', () => {
         target: {
           files: createMockFileList([mockFile])
         }
-      } as any;
+      } as unknown as Event;
 
       expect(component.loading()).toBe(false);
 
       component.loadFiles(mockEvent);
 
       expect(component.loading()).toBe(false);
-      expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
+      expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile);
     });
 
     it('should handle FileReader errors gracefully', () => {
@@ -101,11 +152,11 @@ describe('ImportStudyComponent', () => {
         target: {
           files: createMockFileList([mockFile])
         }
-      } as any;
+      } as unknown as Event;
 
       component.loadFiles(mockEvent);
 
-      expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
+      expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile);
       expect(component.loading()).toBe(false);
     });
 
@@ -133,18 +184,22 @@ describe('ImportStudyComponent', () => {
 19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
 20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
 
+      // Convert to base64 as readAsDataURL would do
+      const base64Content = btoa(mockCsvContent);
+      const dataUrl = `data:text/csv;base64,${base64Content}`;
+
       const mockEvent = {
         target: {
           files: createMockFileList([mockFile])
         }
-      } as any;
+      } as unknown as Event;
 
-      // Mock FileReader result
+      // Mock FileReader result with proper data URL format
       const mockProgressEvent = {
         target: {
-          result: mockCsvContent
+          result: dataUrl
         }
-      } as any;
+      } as unknown as ProgressEvent<FileReader>;
 
       component.loadFiles(mockEvent);
 
