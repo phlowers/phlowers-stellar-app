@@ -52,12 +52,20 @@
             required
             type="text"
             id="initial-condition-name"
+            [attr.aria-invalid]="!isNameUnique()"
+            aria-errormessage="initial-condition-name-error-message"
             pInputText
             [(ngModel)]="initialCondition().name"
             (ngModelChange)="onNameChange($event)"
           />
           @if (!isNameUnique()) {
-            <p-message severity="error" size="small" variant="simple" i18n>
+            <p-message
+              id="initial-condition-name-error-message"
+              severity="error"
+              size="small"
+              variant="simple"
+              i18n
+            >
               Initial condition name must be unique.
             </p-message>
           }

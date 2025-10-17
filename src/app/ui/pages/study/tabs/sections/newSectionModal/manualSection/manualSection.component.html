@@ -33,10 +33,17 @@
                 required
                 [(ngModel)]="section().name"
                 [class.ng-invalid]="!isNameUnique()"
+                [attr.aria-invalid]="!isNameUnique()"
+                aria-errormessage="section-name-error-message"
                 (ngModelChange)="onSectionChange()"
               />
               @if (!isNameUnique()) {
-                <p-message severity="error" size="small" variant="simple" i18n
+                <p-message
+                  id="section-name-error-message"
+                  severity="error"
+                  size="small"
+                  variant="simple"
+                  i18n
                   >Section name must be unique.</p-message
                 >
               }
