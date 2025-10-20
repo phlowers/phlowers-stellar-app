@@ -536,11 +536,6 @@
         <source>Are you sure you want to reset the database?</source>
       </segment>
     </unit>
-    <unit id="8581729683001364052">
-      <segment>
-        <source> Base temperature (°C) </source>
-      </segment>
-    </unit>
     <unit id="5281579610433386344">
       <segment>
         <source>Are you sure you want to reset the app?</source>
@@ -1548,9 +1543,9 @@
         <source>Max wind pressure</source>
       </segment>
     </unit>
-    <unit id="3366260090021429573">
+    <unit id="6888404140532857244">
       <segment>
-        <source>Max frost width</source>
+        <source>Max ice thickness</source>
       </segment>
     </unit>
     <unit id="3766856601447528715">
@@ -1573,9 +1568,9 @@
         <source> Cable pretension </source>
       </segment>
     </unit>
-    <unit id="7815555298089228750">
+    <unit id="7696118233074431582">
       <segment>
-        <source> Max frost width </source>
+        <source> Max ice thickness </source>
       </segment>
     </unit>
     <unit id="848481053719181700">
@@ -1591,6 +1586,31 @@
     <unit id="9095132887560670905">
       <segment>
         <source>Cable pretension</source>
+      </segment>
+    </unit>
+    <unit id="1382927506926002184">
+      <segment>
+        <source>DaN</source>
+      </segment>
+    </unit>
+    <unit id="2340664682417154043">
+      <segment>
+        <source>cm</source>
+      </segment>
+    </unit>
+    <unit id="2936057948596507296">
+      <segment>
+        <source>°C</source>
+      </segment>
+    </unit>
+    <unit id="8987297903552443142">
+      <segment>
+        <source> Base temperature </source>
+      </segment>
+    </unit>
+    <unit id="902828700910058336">
+      <segment>
+        <source>Pa</source>
       </segment>
     </unit>
   </file>

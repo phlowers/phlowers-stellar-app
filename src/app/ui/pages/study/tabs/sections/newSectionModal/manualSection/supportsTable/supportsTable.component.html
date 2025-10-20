@@ -169,7 +169,10 @@
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
-            {{ support.spanLength }} <ng-container i18n>m</ng-container>
+            {{ support.spanLength }}
+            @if (isNumber(support.spanLength)) {
+              <ng-container i18n>m</ng-container>
+            }
           </p>
         }
       </td>
@@ -190,7 +193,10 @@
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
-            {{ support.spanAngle }} <ng-container i18n>Gr</ng-container>
+            {{ support.spanAngle }}
+            @if (isNumber(support.spanAngle)) {
+              <ng-container i18n>Gr</ng-container>
+            }
           </p>
         }
       </td>
@@ -212,7 +218,10 @@
           />
         } @else {
           <p class="read-only_info">
-            {{ support.chainName }} <ng-container i18n>Gr</ng-container>
+            {{ support.chainName }}
+            @if (isNumber(support.chainName)) {
+              <ng-container i18n>Gr</ng-container>
+            }
           </p>
         }
       </td>
@@ -236,7 +245,10 @@
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
-            {{ support.chainLength }} <ng-container i18n>m</ng-container>
+            {{ support.chainLength }}
+            @if (isNumber(support.chainLength)) {
+              <ng-container i18n>m</ng-container>
+            }
           </p>
         }
       </td>
@@ -260,7 +272,10 @@
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
-            {{ support.chainWeight }} <ng-container i18n>kg</ng-container>
+            {{ support.chainWeight }}
+            @if (isNumber(support.chainWeight)) {
+              <ng-container i18n>kg</ng-container>
+            }
           </p>
         }
       </td>
@@ -328,7 +343,10 @@
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
-            {{ support.armLength }} <ng-container i18n>m</ng-container>
+            {{ support.armLength }}
+            @if (isNumber(support.armLength)) {
+              <ng-container i18n>m</ng-container>
+            }
           </p>
         }
       </td>
@@ -352,7 +370,10 @@
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
-            {{ support.attachmentHeight }} <ng-container i18n>m</ng-container>
+            {{ support.attachmentHeight }}
+            @if (isNumber(support.attachmentHeight)) {
+              <ng-container i18n>m</ng-container>
+            }
           </p>
         }
       </td>
@@ -394,7 +415,10 @@
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
-            {{ support.counterWeight }} <ng-container i18n>kg</ng-container>
+            {{ support.counterWeight }}
+            @if (isNumber(support.counterWeight)) {
+              <ng-container i18n>kg</ng-container>
+            }
           </p>
         }
       </td>
@@ -418,12 +442,16 @@
                 )
               "
             />
-            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+            @if (isNumber(support.supportFootAltitude)) {
+              <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+            }
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
             {{ support.supportFootAltitude }}
-            <ng-container i18n>m</ng-container>
+            @if (isNumber(support.supportFootAltitude)) {
+              <ng-container i18n>m</ng-container>
+            }
           </p>
         }
       </td>
@@ -466,7 +494,10 @@
           </p-inputgroup>
         } @else {
           <p class="read-only_info">
-            {{ support.chainSurface }} <ng-container i18n>m²</ng-container>
+            {{ support.chainSurface }}
+            @if (isNumber(support.chainSurface)) {
+              <ng-container i18n>m²</ng-container>
+            }
           </p>
         }
       </td>

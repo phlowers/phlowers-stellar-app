@@ -17,6 +17,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { ButtonModule } from 'primeng/button';
 import { KeyFilterModule } from 'primeng/keyfilter';
+import { isNumber } from 'lodash';
 
 @Component({
   selector: 'app-supports-table',
@@ -140,5 +141,9 @@ export class SupportsTableComponent implements OnInit {
       support.armLength = event.armLength;
       support.heightBelowConsole = event.heightBelowConsole;
     }
+  }
+
+  isNumber(value: any) {
+    return isNumber(value);
   }
 }
