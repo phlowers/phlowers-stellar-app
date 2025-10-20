@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { Study } from '@core/data/database/interfaces/study';
 
 const areAllRequiredFieldsFilled = (section: Section) => {
   return (
@@ -57,11 +58,13 @@ export class NewSectionModalComponent {
   isOpenChange = output<boolean>();
   source = 'manual';
   section = input.required<Section>();
+  study = input.required<Study | null>();
   sectionChange = output<Section>();
   outputSection = output<Section>();
   mode = input.required<'create' | 'edit' | 'view'>();
 
   areAllRequiredFieldsFilled = signal<boolean>(false);
+  isNameUnique = signal<boolean>(false);
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
@@ -74,10 +77,18 @@ export class NewSectionModalComponent {
 
   constructor() {
     effect(() => {
-      this.areAllRequiredFieldsFilled.set(
-        areAllRequiredFieldsFilled(this.section())
-      );
+      this.checkFields();
     });
+  }
+
+  checkFields() {
+    this.areAllRequiredFieldsFilled.set(
+      areAllRequiredFieldsFilled(this.section())
+    );
+    const isNameUnique = !this.study()?.sections.find(
+      (s) => s.name === this.section().name && s.uuid !== this.section().uuid
+    );
+    this.isNameUnique.set(isNameUnique);
   }
 
   onVisibleChange(visible: boolean) {
@@ -88,9 +99,7 @@ export class NewSectionModalComponent {
 
   onSectionChange(event: any) {
     this.sectionChange.emit(event);
-    this.areAllRequiredFieldsFilled.set(
-      areAllRequiredFieldsFilled(this.section())
-    );
+    this.checkFields();
   }
 
   onValidate() {

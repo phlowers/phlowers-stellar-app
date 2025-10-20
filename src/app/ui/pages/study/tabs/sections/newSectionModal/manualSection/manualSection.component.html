@@ -8,13 +8,11 @@
       General
     </p-tab>
     <p-tab (onSelect)="tabValue.set('supports')" value="supports" i18n>
-      Supports
+      Supports list
     </p-tab>
-    @if (mode() === 'view') {
-      <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n>
-        Graphical view
-      </p-tab>
-    }
+    <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n>
+      Graphical view
+    </p-tab>
   </p-tablist>
 
   <p-tabpanels>
@@ -34,8 +32,21 @@
                 id="sectionName"
                 required
                 [(ngModel)]="section().name"
+                [class.ng-invalid]="!isNameUnique()"
+                [attr.aria-invalid]="!isNameUnique()"
+                aria-errormessage="section-name-error-message"
                 (ngModelChange)="onSectionChange()"
               />
+              @if (!isNameUnique()) {
+                <p-message
+                  id="section-name-error-message"
+                  severity="error"
+                  size="small"
+                  variant="simple"
+                  i18n
+                  >Section name must be unique.</p-message
+                >
+              }
             </div>
 
             <div class="flex flex-col">
@@ -58,11 +69,12 @@
             </div>
 
             <div class="flex flex-col">
-              <label for="epn" i18n>Electric phase number</label>
-              <input
-                id="epn"
-                type="number"
-                pInputText
+              <label for="electricPhaseNumber" i18n
+                >Electric phase number</label
+              >
+              <p-select
+                inputId="electricPhaseNumber"
+                [options]="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]"
                 [(ngModel)]="section().electric_phase_number"
                 (ngModelChange)="onSectionChange()"
               />
@@ -194,17 +206,17 @@
           <dl class="section-form-part-grid">
             <div>
               <dt i18n>CM</dt>
-              <dd class="read-only-info">{{ section().cm }}</dd>
+              <dd class="read-only-info">{{ cmRead() }}</dd>
             </div>
 
             <div>
               <dt i18n>GMR</dt>
-              <dd class="read-only-info">{{ section().gmr }}</dd>
+              <dd class="read-only-info">{{ gmrRead() }}</dd>
             </div>
 
             <div>
               <dt i18n>EEL</dt>
-              <dd class="read-only-info">{{ section().eel }}</dd>
+              <dd class="read-only-info">{{ eelRead() }}</dd>
             </div>
           </dl>
         }

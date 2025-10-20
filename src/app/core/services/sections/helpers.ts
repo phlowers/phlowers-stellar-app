@@ -17,7 +17,11 @@ export const createEmptySupport = (): Support => {
     chainName: null,
     chainLength: null,
     chainWeight: null,
-    chainV: null
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null
   };
 };
 

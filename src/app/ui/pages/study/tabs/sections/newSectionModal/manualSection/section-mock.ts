@@ -4,6 +4,6 @@ interface SelectOption {
 }
 
 export const sectionTypes: SelectOption[] = [
-  { name: 'Guard', code: 'guard' },
-  { name: 'Phase', code: 'phase' }
+  { name: $localize`Guard`, code: 'guard' },
+  { name: $localize`Phase`, code: 'phase' }
 ];

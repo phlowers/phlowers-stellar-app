@@ -17,7 +17,7 @@ td {
   $_txtInputW: 9.7rem;
 
   >* {
-    width: 6.5rem;
+    width: 9rem;
   }
 
   >[type=text] {
@@ -26,5 +26,9 @@ td {
 
   :has([type=text]) {
     width: $_txtInputW;
+  }
+
+  .p-inputicon {
+    top: 40%;
   }
 }

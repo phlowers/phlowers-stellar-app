@@ -4,6 +4,7 @@
   (outputSection)="createOrUpdateSection.emit($event)"
   [section]="currentSection()"
   [mode]="newSectionModalMode()"
+  [study]="study()"
 />
 
 <app-initial-condition-modal
@@ -14,6 +15,7 @@
   (updateInitialCondition)="updateInitialCondition.emit($event)"
   [mode]="initialConditionModalMode()"
   [initialConditionInput]="currentInitialCondition()"
+  [initialConditions]="currentSection().initial_conditions"
 />
 
 @if (!study()?.sections?.length) {
@@ -67,7 +69,7 @@
           </dd>
         </dl>
 
-        <p i18n class="mb-0 section__title-init">Initial conditions</p>
+        <p i18n class="mb-0 section__title-init">Initial condition</p>
 
         @if (
           !section.initial_conditions || section.initial_conditions.length === 0
@@ -92,7 +94,7 @@
           section.initial_conditions && section.initial_conditions.length > 0
         ) {
           <app-select-with-buttons
-            [options]="section.initial_conditions"
+            [options]="orderedInitialConditions(section.initial_conditions)"
             [selectedOption]="section.selected_initial_condition_uuid"
             ariaLabel="Select initial conditions"
             i18n-ariaLabel

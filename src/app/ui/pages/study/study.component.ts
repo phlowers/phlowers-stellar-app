@@ -67,6 +67,9 @@ export class StudyComponent implements OnInit, OnDestroy {
           .getStudyAsObservable(uuid)
           .subscribe((study: Study | undefined) => {
             if (study) {
+              study.sections = study.sections.sort(
+                (a, b) => -a.created_at.localeCompare(b.created_at)
+              );
               this.study = study;
             } else {
               this.router.navigate(['/studies']);
@@ -201,10 +204,18 @@ export class StudyComponent implements OnInit, OnDestroy {
     if (!this.study) {
       return;
     }
-
     await this.initialConditionService.addInitialCondition(
       this.study,
       section,
+      initialCondition
+    );
+    const study = await this.studiesService.getStudy(this.study?.uuid);
+    if (!study) {
+      return;
+    }
+    await this.initialConditionService.setInitialCondition(
+      study,
+      study.sections.find((s) => s?.uuid === section?.uuid)!,
       initialCondition
     );
 
