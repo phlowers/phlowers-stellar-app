@@ -1,5 +1,11 @@
 import { Component, input, signal, computed } from '@angular/core';
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import {
+  trigger,
+  state,
+  style,
+  transition,
+  animate
+} from '@angular/animations';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 
@@ -21,16 +27,22 @@ interface DataSection {
   imports: [CardComponent, IconComponent],
   animations: [
     trigger('expandCollapse', [
-      state('collapsed', style({
-        height: '0',
-        opacity: '0',
-        overflow: 'hidden'
-      })),
-      state('expanded', style({
-        height: '*',
-        opacity: '1',
-        overflow: 'hidden'
-      })),
+      state(
+        'collapsed',
+        style({
+          height: '0',
+          opacity: '0',
+          overflow: 'hidden'
+        })
+      ),
+      state(
+        'expanded',
+        style({
+          height: '*',
+          opacity: '1',
+          overflow: 'hidden'
+        })
+      ),
       transition('collapsed <=> expanded', [
         animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')
       ])

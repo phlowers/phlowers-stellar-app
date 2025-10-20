@@ -1,10 +1,11 @@
-<div [@expandCollapse]="arraysOfSupports().length <= 3 ? 'expanded' : 'collapsed'">
-  <article class="articles">
-    @for (support of arraysOfSupports(); track $index) {
-      <app-section-plot-card [type]="'support'" [index]="support" />
-      @if ($index < arraysOfSupports().length - 1) {
-        <app-section-plot-card [type]="'span'" [index]="support" />
-      }
+<article
+  class="articles"
+  [@expandCollapse]="arraysOfSupports().length <= 3 ? 'expanded' : 'collapsed'"
+>
+  @for (support of arraysOfSupports(); track $index) {
+    <app-section-plot-card [type]="'support'" [index]="support" />
+    @if ($index < arraysOfSupports().length - 1) {
+      <app-section-plot-card [type]="'span'" [index]="support" />
     }
-  </article>
-</div>
+  }
+</article>
