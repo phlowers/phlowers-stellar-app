@@ -286,16 +286,6 @@
         <source>Study updated successfully</source>
       </segment>
     </unit>
-    <unit id="6133358799424876162">
-      <segment>
-        <source> Supports </source>
-      </segment>
-    </unit>
-    <unit id="7760196930365705954">
-      <segment>
-        <source> Attachment height (m) </source>
-      </segment>
-    </unit>
     <unit id="1949800506879332767">
       <segment>
         <source>Section Name</source>
@@ -331,9 +321,9 @@
         <source>Page not found</source>
       </segment>
     </unit>
-    <unit id="2346064433794006768">
+    <unit id="479690504462006012">
       <segment>
-        <source>Initial conditions</source>
+        <source>Initial condition</source>
       </segment>
     </unit>
     <unit id="2398619245085086844">
@@ -424,11 +414,6 @@
     <unit id="8155429097661917791">
       <segment>
         <source> Base parameter </source>
-      </segment>
-    </unit>
-    <unit id="844419370454903604">
-      <segment>
-        <source> Span angle (Gr) </source>
       </segment>
     </unit>
     <unit id="3510960524643312912">
@@ -676,11 +661,6 @@
         <source>Error: end not in list</source>
       </segment>
     </unit>
-    <unit id="6458039984683283908">
-      <segment>
-        <source> Chain length (m) </source>
-      </segment>
-    </unit>
     <unit id="6598075623864682368">
       <segment>
         <source>Add an initial condition</source>
@@ -731,11 +711,6 @@
         <source> Ready </source>
       </segment>
     </unit>
-    <unit id="3170243429374159395">
-      <segment>
-        <source> Chain weight (kg) </source>
-      </segment>
-    </unit>
     <unit id="7282804341793038828">
       <segment>
         <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
@@ -754,11 +729,6 @@
     <unit id="7434521647283704814">
       <segment>
         <source>Delete support</source>
-      </segment>
-    </unit>
-    <unit id="3071505366920262036">
-      <segment>
-        <source> Span length (m) </source>
       </segment>
     </unit>
     <unit id="7601213978629574297">
@@ -1076,11 +1046,6 @@
         <source> Support name </source>
       </segment>
     </unit>
-    <unit id="5249740663925942907">
-      <segment>
-        <source> Arm length (m) </source>
-      </segment>
-    </unit>
     <unit id="8455284935734906867">
       <segment>
         <source> Attachment set </source>
@@ -1341,6 +1306,221 @@
     <unit id="997715536640361323">
       <segment>
         <source>Expand details</source>
+      </segment>
+    </unit>
+    <unit id="1029122298839770722">
+      <segment>
+        <source>reset</source>
+      </segment>
+    </unit>
+    <unit id="1035207489563002235">
+      <segment>
+        <source> fold back </source>
+      </segment>
+    </unit>
+    <unit id="2037406622728640058">
+      <segment>
+        <source>Section name must be unique.</source>
+      </segment>
+    </unit>
+    <unit id="2516820066817918321">
+      <segment>
+        <source>Edit an initial condition</source>
+      </segment>
+    </unit>
+    <unit id="2802938289697505873">
+      <segment>
+        <source> Ice Thickness (Before Frontier) </source>
+      </segment>
+    </unit>
+    <unit id="2807800733729323332">
+      <segment>
+        <source>Yes</source>
+      </segment>
+    </unit>
+    <unit id="3542042671420335679">
+      <segment>
+        <source>No</source>
+      </segment>
+    </unit>
+    <unit id="4195378100574813215">
+      <segment>
+        <source>switch graph view</source>
+      </segment>
+    </unit>
+    <unit id="4323470180912194028">
+      <segment>
+        <source>Copy</source>
+      </segment>
+    </unit>
+    <unit id="438901499953241732">
+      <segment>
+        <source>chain surface</source>
+      </segment>
+    </unit>
+    <unit id="4510416540243450211">
+      <segment>
+        <source>clear selection</source>
+      </segment>
+    </unit>
+    <unit id="4588982619541413952">
+      <segment>
+        <source> Frontier Support Number </source>
+      </segment>
+    </unit>
+    <unit id="5005141257091855131">
+      <segment>
+        <source>Calculate</source>
+      </segment>
+    </unit>
+    <unit id="5204909450862821423">
+      <segment>
+        <source>erase load case</source>
+      </segment>
+    </unit>
+    <unit id="5763255287644465636">
+      <segment>
+        <source> Counter weight </source>
+      </segment>
+    </unit>
+    <unit id="6079274139415183182">
+      <segment>
+        <source> Ice Thickness (After Frontier) </source>
+      </segment>
+    </unit>
+    <unit id="6360407171073312357">
+      <segment>
+        <source>Symmetry Type</source>
+      </segment>
+    </unit>
+    <unit id="6613300769068333223">
+      <segment>
+        <source>Wind Pressure</source>
+      </segment>
+    </unit>
+    <unit id="6645271274546920288">
+      <segment>
+        <source> Chain surface </source>
+      </segment>
+    </unit>
+    <unit id="6970241527294087573">
+      <segment>
+        <source>support foot altitude</source>
+      </segment>
+    </unit>
+    <unit id="6983214908416978812">
+      <segment>
+        <source> Cable Temperature </source>
+      </segment>
+    </unit>
+    <unit id="7410825966608756111">
+      <segment>
+        <source>modify</source>
+      </segment>
+    </unit>
+    <unit id="8204555453748282582">
+      <segment>
+        <source>Ice Thickness</source>
+      </segment>
+    </unit>
+    <unit id="8217377030077972135">
+      <segment>
+        <source>delete study</source>
+      </segment>
+    </unit>
+    <unit id="8384742917026482252">
+      <segment>
+        <source>Phase</source>
+      </segment>
+    </unit>
+    <unit id="8718048249801659622">
+      <segment>
+        <source>comment</source>
+      </segment>
+    </unit>
+    <unit id="8721528059163811685">
+      <segment>
+        <source>Guard</source>
+      </segment>
+    </unit>
+    <unit id="995427497507634184">
+      <segment>
+        <source>counter weight</source>
+      </segment>
+    </unit>
+    <unit id="8494357329138575006">
+      <segment>
+        <source> Initial condition name must be unique. </source>
+      </segment>
+    </unit>
+    <unit id="1146214339732730560">
+      <segment>
+        <source>attachment position</source>
+      </segment>
+    </unit>
+    <unit id="2395680375895003637">
+      <segment>
+        <source> Attachment alt. (NGF) </source>
+      </segment>
+    </unit>
+    <unit id="2673079648784878747">
+      <segment>
+        <source> Supp. foot alt. </source>
+      </segment>
+    </unit>
+    <unit id="3573539458079377481">
+      <segment>
+        <source> Span l. </source>
+      </segment>
+    </unit>
+    <unit id="3712341023220217420">
+      <segment>
+        <source> Supports list </source>
+      </segment>
+    </unit>
+    <unit id="4141745434313993573">
+      <segment>
+        <source>kg</source>
+      </segment>
+    </unit>
+    <unit id="6707592636055800614">
+      <segment>
+        <source> Attachment pos. </source>
+      </segment>
+    </unit>
+    <unit id="7344185306127800763">
+      <segment>
+        <source> Chain l. </source>
+      </segment>
+    </unit>
+    <unit id="7929145588930827141">
+      <segment>
+        <source> Arm l. </source>
+      </segment>
+    </unit>
+    <unit id="8033953731717586115">
+      <segment>
+        <source>m</source>
+      </segment>
+    </unit>
+    <unit id="8041319185706138234">
+      <segment>
+        <source> Chain w. </source>
+      </segment>
+    </unit>
+    <unit id="8669671325133819004">
+      <segment>
+        <source>Gr</source>
+      </segment>
+    </unit>
+    <unit id="884256968362108043">
+      <segment>
+        <source>m²</source>
+      </segment>
+    </unit>
+    <unit id="8847384389461548292">
+      <segment>
+        <source> Angle </source>
       </segment>
     </unit>
   </file>

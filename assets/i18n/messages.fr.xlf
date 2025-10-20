@@ -46,7 +46,7 @@
     <unit id="6919207328705792165">
       <segment>
         <source>Section CUR:</source>
-        <target>Section CUR:</target>
+        <target>Canton CUR:</target>
       </segment>
     </unit>
     <unit id="1843028621431865126">
@@ -148,7 +148,7 @@
     <unit id="2471229163174544608">
       <segment>
         <source>Sections</source>
-        <target>Sections</target>
+        <target>Cantons</target>
       </segment>
     </unit>
     <unit id="4580988005648117665">
@@ -700,13 +700,7 @@
     <unit id="836321179652220398">
       <segment state="initial">
         <source> General </source>
-        <target> Général </target>
-      </segment>
-    </unit>
-    <unit id="6133358799424876162">
-      <segment state="initial">
-        <source> Supports </source>
-        <target> Supports </target>
+        <target> Généralités </target>
       </segment>
     </unit>
     <unit id="976888794834775617">
@@ -718,7 +712,7 @@
     <unit id="2593007815199532062">
       <segment state="initial">
         <source>Section</source>
-        <target>Section</target>
+        <target>Canton</target>
       </segment>
     </unit>
     <unit id="3569799587833040802">
@@ -811,24 +805,6 @@
         <target> Numéro </target>
       </segment>
     </unit>
-    <unit id="3071505366920262036">
-      <segment state="initial">
-        <source> Span length (m) </source>
-        <target> Longueur de la portée (m) </target>
-      </segment>
-    </unit>
-    <unit id="844419370454903604">
-      <segment state="initial">
-        <source> Span angle (Gr) </source>
-        <target> Angle de la portée (Gr) </target>
-      </segment>
-    </unit>
-    <unit id="7760196930365705954">
-      <segment state="initial">
-        <source> Attachment height (m) </source>
-        <target> Hauteur d&apos;attachement (m) </target>
-      </segment>
-    </unit>
     <unit id="6621067415830629818">
       <segment state="initial">
         <source>Arm length (m)</source>
@@ -839,18 +815,6 @@
       <segment state="initial">
         <source> Chain name </source>
         <target> Nom de la chaine </target>
-      </segment>
-    </unit>
-    <unit id="6458039984683283908">
-      <segment state="initial">
-        <source> Chain length (m) </source>
-        <target> Longueur de la chaine (m) </target>
-      </segment>
-    </unit>
-    <unit id="3170243429374159395">
-      <segment state="initial">
-        <source> Chain weight (kg) </source>
-        <target> Poids de la chaine (kg) </target>
       </segment>
     </unit>
     <unit id="5758842248880389182">
@@ -949,10 +913,10 @@
         <target>Dernière modification</target>
       </segment>
     </unit>
-    <unit id="2346064433794006768">
+    <unit id="479690504462006012">
       <segment state="initial">
-        <source>Initial conditions</source>
-        <target>Conditions initiales</target>
+        <source>Initial condition</source>
+        <target>Condition initiale</target>
       </segment>
     </unit>
     <unit id="8214037487031019515">
@@ -964,7 +928,7 @@
     <unit id="2509141182388535183">
       <segment state="initial">
         <source>View</source>
-        <target>Vue</target>
+        <target>Consulter</target>
       </segment>
     </unit>
     <unit id="6598075623864682368">
@@ -1297,12 +1261,6 @@
         <target> Attachment set </target>
       </segment>
     </unit>
-    <unit id="5249740663925942907">
-      <segment state="initial">
-        <source> Arm length (m) </source>
-        <target> Arm length (m) </target>
-      </segment>
-    </unit>
     <unit id="2932152767120246098">
       <segment state="initial">
         <source> Upload one or multiple protoV4 files </source>
@@ -1611,6 +1569,264 @@
       <segment state="initial">
         <source>Tension inf acc. :</source>
         <target>Tension inf acc. :</target>
+      </segment>
+    </unit>
+    <unit id="8217377030077972135">
+      <segment state="initial">
+        <source>delete study</source>
+        <target>supprimer l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="1029122298839770722">
+      <segment state="initial">
+        <source>reset</source>
+        <target>réinitialiser</target>
+      </segment>
+    </unit>
+    <unit id="6613300769068333223">
+      <segment state="initial">
+        <source>Wind Pressure</source>
+        <target>Pression du vent</target>
+      </segment>
+    </unit>
+    <unit id="6983214908416978812">
+      <segment state="initial">
+        <source> Cable Temperature </source>
+        <target> Température du câble </target>
+      </segment>
+    </unit>
+    <unit id="6360407171073312357">
+      <segment state="initial">
+        <source>Symmetry Type</source>
+        <target>Symétrie</target>
+      </segment>
+    </unit>
+    <unit id="8204555453748282582">
+      <segment state="initial">
+        <source>Ice Thickness</source>
+        <target>Épaisseur de la glace</target>
+      </segment>
+    </unit>
+    <unit id="4588982619541413952">
+      <segment state="initial">
+        <source> Frontier Support Number </source>
+        <target> N° de support frontière </target>
+      </segment>
+    </unit>
+    <unit id="2802938289697505873">
+      <segment state="initial">
+        <source> Ice Thickness (Before Frontier) </source>
+        <target> Épaisseur de la glace (avant la frontière) </target>
+      </segment>
+    </unit>
+    <unit id="6079274139415183182">
+      <segment state="initial">
+        <source> Ice Thickness (After Frontier) </source>
+        <target> Épaisseur de la glace (après la frontière) </target>
+      </segment>
+    </unit>
+    <unit id="5204909450862821423">
+      <segment state="initial">
+        <source>erase load case</source>
+        <target>effacer le cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="5005141257091855131">
+      <segment state="initial">
+        <source>Calculate</source>
+        <target>Calculer</target>
+      </segment>
+    </unit>
+    <unit id="1035207489563002235">
+      <segment state="initial">
+        <source> fold back </source>
+        <target> replier </target>
+      </segment>
+    </unit>
+    <unit id="7410825966608756111">
+      <segment state="initial">
+        <source>modify</source>
+        <target>modifier</target>
+      </segment>
+    </unit>
+    <unit id="2516820066817918321">
+      <segment state="initial">
+        <source>Edit an initial condition</source>
+        <target>Modifier une condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="2037406622728640058">
+      <segment state="initial">
+        <source>Section name must be unique.</source>
+        <target>Le nom du canton doit être unique.</target>
+      </segment>
+    </unit>
+    <unit id="8718048249801659622">
+      <segment state="initial">
+        <source>comment</source>
+        <target>commentaire</target>
+      </segment>
+    </unit>
+    <unit id="8721528059163811685">
+      <segment state="initial">
+        <source>Guard</source>
+        <target>Garde</target>
+      </segment>
+    </unit>
+    <unit id="8384742917026482252">
+      <segment state="initial">
+        <source>Phase</source>
+        <target>Phase</target>
+      </segment>
+    </unit>
+    <unit id="5763255287644465636">
+      <segment state="initial">
+        <source> Counter weight </source>
+        <target> Contrepoids </target>
+      </segment>
+    </unit>
+    <unit id="6645271274546920288">
+      <segment state="initial">
+        <source> Chain surface </source>
+        <target> Surface de la chaine </target>
+      </segment>
+    </unit>
+    <unit id="995427497507634184">
+      <segment state="initial">
+        <source>counter weight</source>
+        <target>contrepoids</target>
+      </segment>
+    </unit>
+    <unit id="6970241527294087573">
+      <segment state="initial">
+        <source>support foot altitude</source>
+        <target>altitude du pied de support</target>
+      </segment>
+    </unit>
+    <unit id="438901499953241732">
+      <segment state="initial">
+        <source>chain surface</source>
+        <target>surface de la chaine</target>
+      </segment>
+    </unit>
+    <unit id="2807800733729323332">
+      <segment state="initial">
+        <source>Yes</source>
+        <target>Oui</target>
+      </segment>
+    </unit>
+    <unit id="3542042671420335679">
+      <segment state="initial">
+        <source>No</source>
+        <target>Non</target>
+      </segment>
+    </unit>
+    <unit id="4510416540243450211">
+      <segment state="initial">
+        <source>clear selection</source>
+        <target>effacer la sélection</target>
+      </segment>
+    </unit>
+    <unit id="4195378100574813215">
+      <segment state="initial">
+        <source>switch graph view</source>
+        <target>changer la vue du graphique</target>
+      </segment>
+    </unit>
+    <unit id="4323470180912194028">
+      <segment state="initial">
+        <source>Copy</source>
+        <target>Copie</target>
+      </segment>
+    </unit>
+    <unit id="8494357329138575006">
+      <segment state="initial">
+        <source> Initial condition name must be unique. </source>
+        <target> Le nom de la condition initiale doit être unique. </target>
+      </segment>
+    </unit>
+    <unit id="3712341023220217420">
+      <segment state="initial">
+        <source> Supports list </source>
+        <target> Liste des supports </target>
+      </segment>
+    </unit>
+    <unit id="3573539458079377481">
+      <segment state="initial">
+        <source> Span l. </source>
+        <target> L. portée </target>
+      </segment>
+    </unit>
+    <unit id="8847384389461548292">
+      <segment state="initial">
+        <source> Angle </source>
+        <target> Angle </target>
+      </segment>
+    </unit>
+    <unit id="7344185306127800763">
+      <segment state="initial">
+        <source> Chain l. </source>
+        <target> L. chaine </target>
+      </segment>
+    </unit>
+    <unit id="8041319185706138234">
+      <segment state="initial">
+        <source> Chain w. </source>
+        <target> P. chaine </target>
+      </segment>
+    </unit>
+    <unit id="7929145588930827141">
+      <segment state="initial">
+        <source> Arm l. </source>
+        <target> L. bras </target>
+      </segment>
+    </unit>
+    <unit id="2395680375895003637">
+      <segment state="initial">
+        <source> Attachment alt. (NGF) </source>
+        <target> Alt. accroche (NGF) </target>
+      </segment>
+    </unit>
+    <unit id="2673079648784878747">
+      <segment state="initial">
+        <source> Supp. foot alt. </source>
+        <target> Alt. pied supp. </target>
+      </segment>
+    </unit>
+    <unit id="6707592636055800614">
+      <segment state="initial">
+        <source> Attachment pos. </source>
+        <target> Pos. accroche </target>
+      </segment>
+    </unit>
+    <unit id="8033953731717586115">
+      <segment state="initial">
+        <source>m</source>
+        <target>m</target>
+      </segment>
+    </unit>
+    <unit id="8669671325133819004">
+      <segment state="initial">
+        <source>Gr</source>
+        <target>Gr</target>
+      </segment>
+    </unit>
+    <unit id="4141745434313993573">
+      <segment state="initial">
+        <source>kg</source>
+        <target>kg</target>
+      </segment>
+    </unit>
+    <unit id="1146214339732730560">
+      <segment state="initial">
+        <source>attachment position</source>
+        <target>position accroche</target>
+      </segment>
+    </unit>
+    <unit id="884256968362108043">
+      <segment state="initial">
+        <source>m²</source>
+        <target>m²</target>
       </segment>
     </unit>
   </file>

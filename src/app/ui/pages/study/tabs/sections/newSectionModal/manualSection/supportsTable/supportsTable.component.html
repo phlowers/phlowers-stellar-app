@@ -30,14 +30,14 @@
         (dblclick)="onSupportNumberDoubleClick('spanLength')"
         i18n
       >
-        Span length (m)
+        Span l.
       </th>
       <th
         id="span_angle"
         (dblclick)="onSupportNumberDoubleClick('spanAngle')"
         i18n
       >
-        Span angle (Gr)
+        Angle
       </th>
       <th
         id="chain_name"
@@ -51,14 +51,14 @@
         (dblclick)="onSupportNumberDoubleClick('chainLength')"
         i18n
       >
-        Chain length (m)
+        Chain l.
       </th>
       <th
         id="chain_weight"
         (dblclick)="onSupportNumberDoubleClick('chainWeight')"
         i18n
       >
-        Chain weight (kg)
+        Chain w.
       </th>
       <th
         id="support_name"
@@ -80,7 +80,7 @@
         (dblclick)="onSupportNumberDoubleClick('armLength')"
         i18n
       >
-        Arm length (m)
+        Arm l.
       </th>
 
       <th
@@ -88,10 +88,38 @@
         (dblclick)="onSupportNumberDoubleClick('attachmentHeight')"
         i18n
       >
-        Attachment height (m)
+        Attachment alt. (NGF)
       </th>
       <th id="chain_v" (dblclick)="onSupportNumberDoubleClick('chainV')" i18n>
         Chain V
+      </th>
+      <th
+        id="counter_weight"
+        (dblclick)="onSupportNumberDoubleClick('counterWeight')"
+        i18n
+      >
+        Counter weight
+      </th>
+      <th
+        id="support_foot_altitude"
+        (dblclick)="onSupportNumberDoubleClick('supportFootAltitude')"
+        i18n
+      >
+        Supp. foot alt.
+      </th>
+      <th
+        id="attachment_position"
+        (dblclick)="onSupportNumberDoubleClick('attachmentPosition')"
+        i18n
+      >
+        Attachment pos.
+      </th>
+      <th
+        id="chain_surface"
+        (dblclick)="onSupportNumberDoubleClick('chainSurface')"
+        i18n
+      >
+        Chain surface
       </th>
 
       @if (mode() === 'create' || mode() === 'edit') {
@@ -113,6 +141,7 @@
             aria-label="support number"
             i18n-aria-label
             [ngModel]="support.number"
+            [pKeyFilter]="onlyPositiveNumbers"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'number', $event)
             "
@@ -123,37 +152,46 @@
       </td>
       <td>
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            step="0.01"
-            aria-label="span length"
-            i18n-aria-label
-            [ngModel]="support.spanLength"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'spanLength', $event)
-            "
-          />
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              step="0.01"
+              aria-label="span length"
+              i18n-aria-label
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              [ngModel]="support.spanLength"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'spanLength', $event)
+              "
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
         } @else {
-          <p class="read-only_info">{{ support.spanLength }}</p>
+          <p class="read-only_info">
+            {{ support.spanLength }} <ng-container i18n>m</ng-container>
+          </p>
         }
       </td>
       <td>
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            min="0"
-            step="0.01"
-            aria-label="span angle"
-            i18n-aria-label
-            [ngModel]="support.spanAngle"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'spanAngle', $event)
-            "
-          />
+          <p-inputgroup>
+            <input
+              pInputText
+              aria-label="span angle"
+              [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
+              i18n-aria-label
+              [ngModel]="support.spanAngle"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'spanAngle', $event)
+              "
+            />
+            <p-inputgroup-addon i18n>Gr</p-inputgroup-addon>
+          </p-inputgroup>
         } @else {
-          <p class="read-only_info">{{ support.spanAngle }}</p>
+          <p class="read-only_info">
+            {{ support.spanAngle }} <ng-container i18n>Gr</ng-container>
+          </p>
         }
       </td>
       <td>
@@ -173,43 +211,57 @@
             "
           />
         } @else {
-          <p class="read-only_info">{{ support.chainName }}</p>
+          <p class="read-only_info">
+            {{ support.chainName }} <ng-container i18n>Gr</ng-container>
+          </p>
         }
       </td>
       <td>
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            min="0"
-            step="0.01"
-            aria-label="chain length"
-            i18n-aria-label
-            [ngModel]="support.chainLength"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'chainLength', $event)
-            "
-          />
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              min="0"
+              step="0.01"
+              aria-label="chain length"
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              i18n-aria-label
+              [ngModel]="support.chainLength"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'chainLength', $event)
+              "
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
         } @else {
-          <p class="read-only_info">{{ support.chainLength }}</p>
+          <p class="read-only_info">
+            {{ support.chainLength }} <ng-container i18n>m</ng-container>
+          </p>
         }
       </td>
       <td>
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            min="0"
-            step="0.01"
-            aria-label="chain weight"
-            i18n-aria-label
-            [ngModel]="support.chainWeight"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'chainWeight', $event)
-            "
-          />
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              min="0"
+              step="0.01"
+              aria-label="chain weight"
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              i18n-aria-label
+              [ngModel]="support.chainWeight"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'chainWeight', $event)
+              "
+            />
+            <p-inputgroup-addon i18n>kg</p-inputgroup-addon>
+          </p-inputgroup>
         } @else {
-          <p class="read-only_info">{{ support.chainWeight }}</p>
+          <p class="read-only_info">
+            {{ support.chainWeight }} <ng-container i18n>kg</ng-container>
+          </p>
         }
       </td>
       <td>
@@ -222,6 +274,7 @@
               aria-label="support name"
               i18n-aria-label
               [ngModel]="support.name"
+              pKeyFilter="alphanum"
               (ngModelChange)="
                 onSupportFieldChange(support.uuid, 'name', $event)
               "
@@ -235,7 +288,7 @@
                 i18n-aria-label
                 (click)="openAttachmentSetModal(support.uuid)"
               >
-                <app-icon icon="visibility" />
+                <app-icon icon="visibility" class="text-black" />
               </button>
             </p-inputicon>
           </p-iconfield>
@@ -260,55 +313,161 @@
       </td>
       <td>
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            min="0"
-            step="0.01"
-            aria-label="arm length"
-            i18n-aria-label
-            [ngModel]="support.armLength"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'armLength', $event)
-            "
-          />
+          <p-inputgroup>
+            <input
+              pInputText
+              aria-label="arm length"
+              i18n-aria-label
+              [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
+              [ngModel]="support.armLength"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'armLength', $event)
+              "
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
         } @else {
-          <p class="read-only_info">{{ support.armLength }}</p>
+          <p class="read-only_info">
+            {{ support.armLength }} <ng-container i18n>m</ng-container>
+          </p>
         }
       </td>
       <td>
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            min="0"
-            step="0.01"
-            aria-label="attachment height"
-            i18n-aria-label
-            [ngModel]="support.attachmentHeight"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'attachmentHeight', $event)
-            "
-          />
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              min="0"
+              step="0.01"
+              aria-label="attachment height"
+              i18n-aria-label
+              [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
+              [ngModel]="support.attachmentHeight"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'attachmentHeight', $event)
+              "
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
         } @else {
-          <p class="read-only_info">{{ support.attachmentHeight }}</p>
+          <p class="read-only_info">
+            {{ support.attachmentHeight }} <ng-container i18n>m</ng-container>
+          </p>
         }
       </td>
-
       <td>
         @if (mode() !== 'view') {
           <p-select
-            [options]="[true, false]"
+            [options]="optionsChainV"
             appendTo="body"
             aria-label="chain V"
             i18n-aria-label
             [ngModel]="support.chainV"
+            optionLabel="label"
+            optionValue="value"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'chainV', $event)
             "
           />
         } @else {
           <p class="read-only_info">{{ support.chainV }}</p>
+        }
+      </td>
+      <td>
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              min="0"
+              step="0.01"
+              aria-label="counter weight"
+              i18n-aria-label
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              [ngModel]="support.counterWeight"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'counterWeight', $event)
+              "
+            />
+            <p-inputgroup-addon i18n>kg</p-inputgroup-addon>
+          </p-inputgroup>
+        } @else {
+          <p class="read-only_info">
+            {{ support.counterWeight }} <ng-container i18n>kg</ng-container>
+          </p>
+        }
+      </td>
+      <td>
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              min="0"
+              step="0.01"
+              aria-label="support foot altitude"
+              i18n-aria-label
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              [ngModel]="support.supportFootAltitude"
+              (ngModelChange)="
+                onSupportFieldChange(
+                  support.uuid,
+                  'supportFootAltitude',
+                  $event
+                )
+              "
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
+        } @else {
+          <p class="read-only_info">
+            {{ support.supportFootAltitude }}
+            <ng-container i18n>m</ng-container>
+          </p>
+        }
+      </td>
+      <td>
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            type="number"
+            min="0"
+            step="0.01"
+            aria-label="attachment position"
+            i18n-aria-label
+            [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+            [ngModel]="support.attachmentPosition"
+            (ngModelChange)="
+              onSupportFieldChange(support.uuid, 'attachmentPosition', $event)
+            "
+          />
+        } @else {
+          <p class="read-only_info">{{ support.attachmentPosition }}</p>
+        }
+      </td>
+      <td>
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              min="0"
+              step="0.01"
+              aria-label="chain surface"
+              i18n-aria-label
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              [ngModel]="support.chainSurface"
+              (ngModelChange)="
+                onSupportFieldChange(support.uuid, 'chainSurface', $event)
+              "
+            />
+            <p-inputgroup-addon i18n>m²</p-inputgroup-addon>
+          </p-inputgroup>
+        } @else {
+          <p class="read-only_info">
+            {{ support.chainSurface }} <ng-container i18n>m²</ng-container>
+          </p>
         }
       </td>
       @if (mode() === 'edit' || mode() === 'create') {

@@ -59,7 +59,11 @@ describe('AttachmentSetModalComponent', () => {
     chainName: 'Chain A',
     chainLength: 5.0,
     chainWeight: 10.0,
-    chainV: false
+    chainV: false,
+    counterWeight: 100.0,
+    supportFootAltitude: 100.0,
+    chainSurface: 10.0,
+    attachmentPosition: 'Position 1'
   };
 
   beforeEach(async () => {
