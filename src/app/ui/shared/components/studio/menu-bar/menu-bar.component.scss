@@ -10,6 +10,14 @@
     color: var(--star-dust-950);
   }
 
+  &__title {
+    @apply flex items-center whitespace-nowrap mb-0;
+
+    &__content {
+      @apply inline-block overflow-hidden overflow-ellipsis max-w-48;
+    }
+  }
+
   &__separator {
     @extend %vertical-separator;
   }

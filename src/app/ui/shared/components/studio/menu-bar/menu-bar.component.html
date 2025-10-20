@@ -10,9 +10,11 @@
     <app-icon class="menubar__back-arrow" icon="arrow_back" />
   </a>
 
-  <p class="mb-0">
+  <p class="menubar__title">
     <span class="text-s-600 pr-1" i18n>Section :</span>
-    <span class="text-m-600">{{ section()?.name }}</span>
+    <span class="text-m-600 menubar__title__content">
+      {{ section()?.name }}
+    </span>
   </p>
 
   <hr class="menubar__separator" />
