@@ -9,6 +9,11 @@
   height: calc(100% - 3rem);
 }
 
+.plot-view {
+  @apply block;
+  height: clamp(21.875rem, 60%, 36.875rem);
+}
+
 .quick-measures {
   @apply flex justify-center py-8;
 

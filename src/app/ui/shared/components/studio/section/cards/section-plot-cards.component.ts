@@ -13,14 +13,12 @@ import { PlotService } from '@src/app/ui/pages/studio/plot.service';
       state('collapsed', style({
         height: '0',
         opacity: '0',
-        paddingBottom: '0',
-        overflow: 'hidden'
+        paddingBottom: '0'
       })),
       state('expanded', style({
         height: '*',
         opacity: '1',
-        paddingBottom: '0.5rem',
-        overflow: 'hidden'
+        paddingBottom: '0.5rem'
       })),
       transition('collapsed <=> expanded', [
         animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')
