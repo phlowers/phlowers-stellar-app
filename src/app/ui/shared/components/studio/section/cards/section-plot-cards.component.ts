@@ -31,7 +31,7 @@ import { PlotService } from '@src/app/ui/pages/studio/plot.service';
           height: '*',
           opacity: '1',
           paddingBottom: '0.5rem',
-          overflow: 'visible'
+          overflow: 'hidden'
         })
       ),
       transition('collapsed <=> expanded', [
