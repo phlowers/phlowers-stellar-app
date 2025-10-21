@@ -9,6 +9,9 @@ import { InitialCondition } from '@src/app/core/data/database/interfaces/initial
 import { FormsModule } from '@angular/forms';
 import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
 import { MessageModule } from 'primeng/message';
+import { InputGroup } from 'primeng/inputgroup';
+import { InputGroupAddon } from 'primeng/inputgroupaddon';
+import { isNumber } from 'lodash';
 
 @Component({
   selector: 'app-initial-condition-modal',
@@ -21,7 +24,9 @@ import { MessageModule } from 'primeng/message';
     ButtonComponent,
     IconComponent,
     FormsModule,
-    MessageModule
+    MessageModule,
+    InputGroup,
+    InputGroupAddon
   ]
 })
 export class InitialConditionModalComponent {
@@ -36,8 +41,12 @@ export class InitialConditionModalComponent {
   initialCondition = signal<InitialCondition>({
     uuid: '',
     name: '',
-    base_parameters: '',
-    base_temperature: 0
+    base_parameters: 0,
+    base_temperature: 0,
+    cable_pretension: 0,
+    min_temperature: 0,
+    max_wind_pressure: 0,
+    max_frost_width: 0
   });
 
   isNameUnique = signal<boolean>(true);
@@ -75,5 +84,9 @@ export class InitialConditionModalComponent {
     } else if (this.mode() === 'view') {
       // do nothing
     }
+  }
+
+  isNumber(value: number): boolean {
+    return isNumber(value);
   }
 }

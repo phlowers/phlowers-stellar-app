@@ -22,5 +22,6 @@ export interface ProtoV4Parameters {
   temp_load: number;
   wind_load: number;
   frost_load: number;
+  section_name: string;
   project_name: string;
 }

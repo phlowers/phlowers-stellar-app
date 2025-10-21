@@ -397,12 +397,10 @@
         />
       </div>
     </p-tabpanel>
-    @if (mode() === 'view') {
-      <p-tabpanel value="graphical">
-        <div class="mt-2">
-          <app-studio [isSupportZoom]="false"></app-studio>
-        </div>
-      </p-tabpanel>
-    }
+    <p-tabpanel value="graphical">
+      <div class="mt-2">
+        <app-studio [isSupportZoom]="false"></app-studio>
+      </div>
+    </p-tabpanel>
   </p-tabpanels>
 </p-tabs>

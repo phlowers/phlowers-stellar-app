@@ -9,6 +9,7 @@ import { LinesService } from '@core/services/lines/lines.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { MessageService } from 'primeng/api';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -87,8 +88,12 @@ describe('SectionsTabComponent', () => {
       {
         uuid: 'ic-1',
         name: 'Initial Cond 1',
-        base_parameters: 'Params',
-        base_temperature: 20
+        base_parameters: 0,
+        base_temperature: 20,
+        cable_pretension: 0,
+        min_temperature: 0,
+        max_wind_pressure: 0,
+        max_frost_width: 0
       } as InitialCondition
     ],
     selected_initial_condition_uuid: 'ic-1'
@@ -97,11 +102,18 @@ describe('SectionsTabComponent', () => {
   const mockInitialCondition: InitialCondition = {
     uuid: 'init-1',
     name: 'Init Cond',
-    base_parameters: 'params',
-    base_temperature: 20
+    base_parameters: 0,
+    cable_pretension: 0,
+    min_temperature: 0,
+    max_wind_pressure: 0,
+    max_frost_width: 0,
+    base_temperature: 0
   };
 
   beforeEach(async () => {
+    const mockMessageService = {
+      add: jest.fn()
+    } as unknown as MessageService;
     await TestBed.configureTestingModule({
       imports: [
         SectionsTabComponent,
@@ -111,6 +123,7 @@ describe('SectionsTabComponent', () => {
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },
+        { provide: MessageService, useValue: mockMessageService },
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } }
       ],
       schemas: [NO_ERRORS_SCHEMA]
