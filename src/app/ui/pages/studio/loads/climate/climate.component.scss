@@ -12,8 +12,8 @@
   }
 
   &__divided-line {
-    @apply flex items-start justify-stretch;
-    gap: 0.625rem;
+    @apply grid grid-cols-2;
+    grid-gap: 0rem 0.625rem;
   }
 
   &__btn-wrapper {
