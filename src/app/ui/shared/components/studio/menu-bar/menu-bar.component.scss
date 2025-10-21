@@ -1,10 +1,24 @@
-// TODO : FP rework this to fit actual design
+@use 'abstract.extracts' as app;
 
-.menu-bar-container {
-  @apply flex flex-row gap-2 border bg-[#F3F4F4] px-[1.5rem] py-[.5rem] items-center;
-  border-color: var(--primary-300);
-}
+.menubar {
+  @apply flex items-center gap-2 px-6 py-2 border-b h-10 max-h-10;
+  background-color: var(--star-dust-100);
+  border-color: var(--primary-200);
 
-.vertical-divider {
-  @apply self-stretch bg-[#D2D4D5] w-[1px];
+  &,
+  &__back-arrow {
+    color: var(--star-dust-950);
+  }
+
+  &__title {
+    @apply flex items-center whitespace-nowrap mb-0;
+
+    &__content {
+      @apply inline-block overflow-hidden overflow-ellipsis max-w-48;
+    }
+  }
+
+  &__separator {
+    @extend %vertical-separator;
+  }
 }

@@ -1,4 +1,11 @@
 import { Component, input, signal, computed } from '@angular/core';
+import {
+  trigger,
+  state,
+  style,
+  transition,
+  animate
+} from '@angular/animations';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 
@@ -17,7 +24,30 @@ interface DataSection {
   selector: 'app-section-plot-card',
   templateUrl: './section-plot-card.component.html',
   styleUrl: './section-plot-card.component.scss',
-  imports: [CardComponent, IconComponent]
+  imports: [CardComponent, IconComponent],
+  animations: [
+    trigger('expandCollapse', [
+      state(
+        'collapsed',
+        style({
+          height: '0',
+          opacity: '0',
+          overflow: 'hidden'
+        })
+      ),
+      state(
+        'expanded',
+        style({
+          height: '*',
+          opacity: '1',
+          overflow: 'hidden'
+        })
+      ),
+      transition('collapsed <=> expanded', [
+        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ])
+    ])
+  ]
 })
 export class SectionPlotCardComponent {
   isExpanded = signal(false);
@@ -30,7 +60,7 @@ export class SectionPlotCardComponent {
   });
 
   cardColor = computed(() =>
-    this.type() === 'support' ? 'bg-[#0099FF]' : 'bg-[#ED6E13]'
+    this.type() === 'support' ? 'icon-wrapper--support' : 'icon-wrapper--line'
   );
 
   // Data structure for support type
