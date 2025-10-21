@@ -33,6 +33,7 @@ body.has-sidebar {
   &--expanded {
     width: $_sidebar-size--expanded;
     padding: 1rem;
+    padding-top: 0.5rem;
   }
 
   &__link {
@@ -135,7 +136,7 @@ body.has-sidebar {
   align-items: center;
   justify-content: center;
   gap: 0.625rem;
-  padding: 1rem 0rem;
+  padding: 0.5rem 0rem;
 
   .stellar-sidebar--expanded & {
     justify-content: flex-start;
@@ -143,15 +144,12 @@ body.has-sidebar {
   }
 
   &__link {
-    background-color: rgb(from var(--grey-white) r g b / 0);
-    transition: background-color $_animation-type-timing;
     min-width: 1.875rem;
 
     .stellar-sidebar--expanded & {
       padding: 0.25rem;
-      background-color: var(--primary-300);
       border-radius: 0.25rem;
-      min-width: 7.1875rem;
+      min-width: 4.125rem;
     }
   }
 

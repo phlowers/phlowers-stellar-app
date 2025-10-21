@@ -1613,5 +1613,30 @@
         <source>Pa</source>
       </segment>
     </unit>
+    <unit id="2143129387317692084">
+      <segment>
+        <source>Horizontal (m)</source>
+      </segment>
+    </unit>
+    <unit id="2205679024859102357">
+      <segment>
+        <source>Parameter (m)</source>
+      </segment>
+    </unit>
+    <unit id="3494570942698291859">
+      <segment>
+        <source>Oblique (m)</source>
+      </segment>
+    </unit>
+    <unit id="5909128736797701112">
+      <segment>
+        <source>Work load %</source>
+      </segment>
+    </unit>
+    <unit id="6560642783363072934">
+      <segment>
+        <source>Vertical (m)</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

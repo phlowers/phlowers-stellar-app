@@ -1937,5 +1937,35 @@
         <target>cm</target>
       </segment>
     </unit>
+    <unit id="2205679024859102357">
+      <segment state="initial">
+        <source>Parameter (m)</source>
+        <target>Paramètre (m)</target>
+      </segment>
+    </unit>
+    <unit id="5909128736797701112">
+      <segment state="initial">
+        <source>Work load %</source>
+        <target>Charge %</target>
+      </segment>
+    </unit>
+    <unit id="3494570942698291859">
+      <segment state="initial">
+        <source>Oblique (m)</source>
+        <target>Oblique (m)</target>
+      </segment>
+    </unit>
+    <unit id="6560642783363072934">
+      <segment state="initial">
+        <source>Vertical (m)</source>
+        <target>Vertical (m)</target>
+      </segment>
+    </unit>
+    <unit id="2143129387317692084">
+      <segment state="initial">
+        <source>Horizontal (m)</source>
+        <target>Horizontal (m)</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
