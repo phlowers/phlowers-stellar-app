@@ -1,0 +1,14 @@
+@use 'abstract.extracts' as app;
+
+.span {
+  &__form {
+    @apply grid grid-cols-2;
+    column-gap: 0.625rem;
+    align-items: end;
+  }
+
+  label {
+    @extend %text-s-400;
+    margin: 0.75rem 0.25rem 0.125rem;
+  }
+}

@@ -1,1 +1,90 @@
-<p>span works!</p>
+<form [formGroup]="form" class="span">
+  <div class="span__btns">
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      class="span__reset"
+    >
+      <app-icon icon="refresh" />
+      <ng-container i18n>reset</ng-container>
+    </button>
+  </div>
+
+  <div class="span__form">
+    <label for="spanSelect" i18n>Span</label>
+
+    <label for="supportNumber" i18n>Support n°</label>
+
+    <p-select
+      inputId="spanSelect"
+      [options]=""
+      formControlName="spanSelect"
+      optionLabel="label"
+      optionValue="value"
+    />
+
+    <p-select
+      inputId="supportNumber"
+      [options]=""
+      formControlName="supportNumber"
+      optionLabel="label"
+      optionValue="value"
+    />
+
+    <label for="loadType" i18n>Load type</label>
+
+    <label for="spanLoad" i18n>Span load</label>
+
+    <p-select
+      inputId="loadType"
+      [options]=""
+      formControlName="loadType"
+      optionLabel="label"
+      optionValue="value"
+    />
+
+    <input pInputText type="number" id="spanLoad" formControlName="spanLoad" />
+
+    <label for="CableLengthChange" i18n>Short. or allong. Cable (+ -)</label>
+
+    <label for="pointLoadDist" i18n>Distance to point load</label>
+
+    <input
+      pInputText
+      type="number"
+      id="CableLengthChange"
+      formControlName="CableLengthChange"
+    />
+
+    <input
+      pInputText
+      type="number"
+      id="pointLoadDist"
+      formControlName="pointLoadDist"
+    />
+  </div>
+
+  <div class="span__btns">
+    <button
+      app-btn
+      btnStyle="danger"
+      type="button"
+      aria-label="erase load case"
+      i18n-aria-label
+    >
+      <app-icon icon="delete" />
+    </button>
+
+    <button app-btn type="submit" btnStyle="outlined">
+      <app-icon icon="save" />
+      <ng-container i18n>Save</ng-container>
+    </button>
+
+    <button app-btn type="button">
+      <app-icon icon="rocket_launch" />
+      <ng-container i18n>Calculate</ng-container>
+    </button>
+  </div>
+</form>

@@ -16,6 +16,7 @@ import { SideTabsComponent } from './side-tabs/side-tabs.component';
 import { SideTabComponent } from './side-tabs/side-tab/side-tab.component';
 import { TabsModule } from 'primeng/tabs';
 import { ClimateComponent } from './loads/climate/climate.component';
+import { SpanComponent } from './loads/span/span.component';
 
 @Component({
   selector: 'app-studio-page',
@@ -32,7 +33,8 @@ import { ClimateComponent } from './loads/climate/climate.component';
     SideTabsComponent,
     SideTabComponent,
     TabsModule,
-    ClimateComponent
+    ClimateComponent,
+    SpanComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
