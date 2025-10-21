@@ -1,0 +1,6 @@
+.articles {
+  @apply flex gap-2 flex-wrap mt-4;
+  $_bxh-retrieve: 0.5rem;
+  margin-left: -#{$_bxh-retrieve};
+  padding-left: $_bxh-retrieve;
+}

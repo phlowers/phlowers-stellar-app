@@ -71,3 +71,9 @@
     }
   }
 }
+
+// specif for studio's menubar
+.menubar__select .select-with-buttons.p-select {
+  --p-select-padding-y: 0.125rem;
+  --p-select-padding-x: 0.5rem;
+}

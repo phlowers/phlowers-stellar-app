@@ -1,28 +1,49 @@
 @use 'abstract.extracts' as app;
 
 .section-plot-card {
-    @apply rounded-lg flex flex-row gap-2 p-[.5rem] min-w-[10rem] bg-[#F9FAFA]
+  @apply rounded-lg flex gap-2 p-2;
+  background-color: var(--star-dust-50);
 }
 
-%base-text {
-    @apply mb-0 pt-[.25rem];
-    @extend %text-xs-400;
+%_base-text {
+  @apply mb-1;
+  @extend %text-xs-400;
 }
 
 .title {
-    @extend %base-text;
-    @apply text-[#1E1E1E];
+  @extend %_base-text;
+  color: var(--star-dust-950);
+
+  &:not(:first-of-type) {
+    @apply mt-1;
+  }
 }
 
 .details {
-    @extend %base-text;
-    @apply text-[#45494A] flex flex-row gap-1;
+  @extend %_base-text;
+  @apply flex gap-1;
+  color: var(--star-dust-900);
 }
 
-.app-icon {
-    @apply text-white text-[.625rem] m-[3px];
+.icon-wrapper {
+  @apply rounded-full flex items-center justify-center w-4 aspect-square;
+
+  color: var(--grey-white);
+
+  &--support {
+    background-color: var(--rte-600);
+  }
+
+  &--line {
+    background-color: var(--warning-500);
+  }
+
+  .app-icon {
+    @apply text-[.625rem];
+  }
 }
 
 .arrow {
-    @apply text-[#1E1E1E] text-[1rem] m-0;
+  @apply text-[1rem];
+  color: var(--star-dust-950);
 }
