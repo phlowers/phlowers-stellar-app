@@ -691,12 +691,6 @@
         <target> Paramètre de base </target>
       </segment>
     </unit>
-    <unit id="8581729683001364052">
-      <segment state="initial">
-        <source> Base temperature (°C) </source>
-        <target> Température de base (°C) </target>
-      </segment>
-    </unit>
     <unit id="836321179652220398">
       <segment state="initial">
         <source> General </source>
@@ -1827,6 +1821,120 @@
       <segment state="initial">
         <source>m²</source>
         <target>m²</target>
+      </segment>
+    </unit>
+    <unit id="1519954996184640001">
+      <segment state="initial">
+        <source>Error</source>
+        <target>Erreur</target>
+      </segment>
+    </unit>
+    <unit id="8104834107183476829">
+      <segment state="initial">
+        <source>Error importing study</source>
+        <target>Erreur lors de l&apos;importation de l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="4648900870671159218">
+      <segment state="initial">
+        <source>Success</source>
+        <target>Succès</target>
+      </segment>
+    </unit>
+    <unit id="1079181845691356032">
+      <segment state="initial">
+        <source>Study imported successfully</source>
+        <target>Étude importée avec succès</target>
+      </segment>
+    </unit>
+    <unit id="3766856601447528715">
+      <segment state="initial">
+        <source>Initial condition 1</source>
+        <target>Condition initiale 1</target>
+      </segment>
+    </unit>
+    <unit id="848481053719181700">
+      <segment state="initial">
+        <source> Extreme historical conditions incurred by the cable </source>
+        <target> Conditions historiques extrêmes subies par le câble </target>
+      </segment>
+    </unit>
+    <unit id="5577525641723703663">
+      <segment state="initial">
+        <source> Cable pretension </source>
+        <target> Pretension du câble </target>
+      </segment>
+    </unit>
+    <unit id="5455255610792577574">
+      <segment state="initial">
+        <source> Min temperature </source>
+        <target> Température minimale </target>
+      </segment>
+    </unit>
+    <unit id="3948064756684098346">
+      <segment state="initial">
+        <source> Max wind pressure </source>
+        <target> Pression du vent maximale </target>
+      </segment>
+    </unit>
+    <unit id="7696118233074431582">
+      <segment state="initial">
+        <source> Max ice thickness </source>
+        <target> Largeur de la glace maximale </target>
+      </segment>
+    </unit>
+    <unit id="9095132887560670905">
+      <segment state="initial">
+        <source>Cable pretension</source>
+        <target>Pretension du câble</target>
+      </segment>
+    </unit>
+    <unit id="8798542344025275411">
+      <segment state="initial">
+        <source>Min temperature</source>
+        <target>Température minimale</target>
+      </segment>
+    </unit>
+    <unit id="2153962924756003345">
+      <segment state="initial">
+        <source>Max wind pressure</source>
+        <target>Pression du vent maximale</target>
+      </segment>
+    </unit>
+    <unit id="6888404140532857244">
+      <segment state="initial">
+        <source>Max ice thickness</source>
+        <target>Largeur de la glace maximale</target>
+      </segment>
+    </unit>
+    <unit id="8987297903552443142">
+      <segment state="initial">
+        <source> Base temperature </source>
+        <target> Température de base </target>
+      </segment>
+    </unit>
+    <unit id="2936057948596507296">
+      <segment state="initial">
+        <source>°C</source>
+        <target>°C</target>
+      </segment>
+    </unit>
+    <unit id="1382927506926002184">
+      <segment state="initial">
+        <source>DaN</source>
+        <target>DaN</target>
+      </segment>
+    </unit>
+    <unit id="902828700910058336">
+      <segment state="initial">
+        <source>Pa</source>
+        <target>Pa</target>
+      </segment>
+    </unit>
+    <unit id="2340664682417154043">
+      <segment state="initial">
+        <source>cm</source>
+        <target>cm</target>
       </segment>
     </unit>
   </file>

@@ -18,6 +18,7 @@ import { createEmptySection, createEmptySupport } from '../sections/helpers';
 import { Support } from '../../data/database/interfaces/support';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
+import { InitialCondition } from '../../data/database/interfaces/initialCondition';
 
 @Injectable({
   providedIn: 'root'
@@ -38,13 +39,16 @@ export class StudiesService {
    * @param study The study to create
    */
   async createStudy(
-    study: Pick<StudyModel, 'title' | 'description' | 'shareable' | 'sections'>
+    study: Pick<
+      StudyModel,
+      'title' | 'description' | 'shareable' | 'sections' | 'author_email'
+    >
   ): Promise<string> {
     const uuid = uuidv4();
     const user = (await this.storageService.db?.users.toArray())?.[0];
     await this.storageService.db?.studies.add({
       ...study,
-      author_email: user.email,
+      author_email: study.author_email || user.email,
       uuid,
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
@@ -151,7 +155,7 @@ export class StudiesService {
     parameters: ProtoV4Parameters
   ): Promise<Study> {
     const section = createEmptySection();
-    section.name = parameters.project_name;
+    section.name = parameters.section_name;
     section.type = 'phase';
     section.cables_amount = parameters.cable_amount;
     section.cable_name = parameters.conductor;
@@ -172,8 +176,21 @@ export class StudiesService {
         chainV: support.ch_en_V
       };
     });
+    const initialCondition: InitialCondition = {
+      uuid: uuidv4(),
+      name: $localize`Initial condition 1`,
+      base_parameters: parameters.parameter,
+      base_temperature: parameters.temperature_reference,
+      cable_pretension: parameters.cra,
+      min_temperature: parameters.temp_load,
+      max_wind_pressure: parameters.wind_load,
+      max_frost_width: parameters.frost_load
+    };
     section.supports = supports;
+    section.initial_conditions = [initialCondition];
+    section.selected_initial_condition_uuid = initialCondition.uuid;
     const uuid = await this.createStudy({
+      author_email: '',
       title: parameters.project_name,
       description: $localize`Study imported from protoV4`,
       shareable: false,

@@ -46,8 +46,12 @@ describe('InitialConditionModalComponent', () => {
   const mockInitialCondition: InitialCondition = {
     uuid: 'ic-1',
     name: 'Cond 1',
-    base_parameters: 'Params',
-    base_temperature: 20
+    base_parameters: 0,
+    base_temperature: 20,
+    cable_pretension: 0,
+    min_temperature: 0,
+    max_wind_pressure: 0,
+    max_frost_width: 0
   };
 
   beforeEach(async () => {

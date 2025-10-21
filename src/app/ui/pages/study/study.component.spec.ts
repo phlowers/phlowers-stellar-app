@@ -103,8 +103,12 @@ describe('StudyComponent', () => {
   const mockInitialCondition: InitialCondition = {
     uuid: 'ic-uuid-1',
     name: 'Test Initial Condition',
-    base_parameters: 'Test Parameters',
-    base_temperature: 25
+    base_parameters: 0,
+    base_temperature: 25,
+    cable_pretension: 0,
+    min_temperature: 0,
+    max_wind_pressure: 0,
+    max_frost_width: 0
   };
 
   beforeEach(async () => {

@@ -10,10 +10,87 @@ import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { RouterLink } from '@angular/router';
 import { Study } from '@src/app/core/data/database/interfaces/study';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+
+/**
+ * Parse a ISO 8859-1 base64 string
+ * @param str The base64 string to parse
+ * @returns The parsed string
+ */
+function parseISO88591Base64(str: string) {
+  return decodeURIComponent(
+    Array.prototype.map
+      .call(atob(str), function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join('')
+  );
+}
+
+const convertValueToNumber = (value: string) => {
+  return Number(value.replace(',', '.'));
+};
+
+const formatProtoV4Support = (support: Record<string, string>) => {
+  return {
+    ...support,
+    nom: support.nom,
+    num: convertValueToNumber(support.num),
+    portée: convertValueToNumber(support.portée),
+    angle_ligne: convertValueToNumber(support.angle_ligne),
+    ctr_poids: convertValueToNumber(support.ctr_poids),
+    long_bras: convertValueToNumber(support.long_bras),
+    long_ch: convertValueToNumber(support.long_ch),
+    pds_ch: convertValueToNumber(support.pds_ch),
+    surf_ch: convertValueToNumber(support.surf_ch),
+    alt_acc: convertValueToNumber(support.alt_acc),
+    suspension: support.suspension === 'FAUX' ? false : true,
+    ch_en_V: support.ch_en_V === 'FAUX' ? false : true
+  };
+};
+
+const formatProtoV4Parameters = (
+  rawParameters: string[],
+  fileName: string
+): ProtoV4Parameters => {
+  return {
+    conductor: rawParameters[3],
+    cable_amount: convertValueToNumber(rawParameters[5]),
+    temperature_reference: convertValueToNumber(rawParameters[7]),
+    parameter: convertValueToNumber(rawParameters[9]),
+    cra: convertValueToNumber(rawParameters[11]),
+    temp_load: convertValueToNumber(rawParameters[13]),
+    wind_load: convertValueToNumber(rawParameters[15]),
+    frost_load: convertValueToNumber(rawParameters[17]),
+    section_name: rawParameters[19],
+    project_name: fileName.replace('.csv', '')
+  };
+};
+
+const protoV4ErrorMessage = {
+  severity: 'error',
+  summary: $localize`Error`,
+  detail: $localize`Error importing study`,
+  life: 3000
+};
+
+const protoV4SuccessMessage = {
+  severity: 'success',
+  summary: $localize`Success`,
+  detail: $localize`Study imported successfully`,
+  life: 3000
+};
 
 @Component({
   selector: 'app-import-study',
-  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent],
+  imports: [
+    IconComponent,
+    DividerModule,
+    RouterLink,
+    ButtonComponent,
+    ToastModule
+  ],
   templateUrl: './import-study.component.html',
   styleUrl: './import-study.component.scss'
 })
@@ -21,7 +98,10 @@ export class ImportStudyComponent {
   loading = signal<boolean>(false);
   newStudies = signal<Study[]>([]);
 
-  constructor(private readonly studiesService: StudiesService) {}
+  constructor(
+    private readonly studiesService: StudiesService,
+    private readonly messageService: MessageService
+  ) {}
 
   async deleteStudy(uuid: string) {
     await this.studiesService.deleteStudy(uuid);
@@ -46,70 +126,63 @@ export class ImportStudyComponent {
   }
 
   loadProtoV4File(file: File) {
-    const convertValueToNumber = (value: string) => {
-      return Number(value.replace(',', '.'));
-    };
+    const fileName = file.name;
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const rawParameters: string[] = [];
-      const result = e.target?.result as string;
-      if (!result) {
-        return;
+      try {
+        const rawParameters: string[] = [];
+        const result = e.target?.result as string;
+
+        let parsed: string;
+        try {
+          parsed = parseISO88591Base64(
+            result.replace('data:text/csv;base64,', '')
+          );
+        } catch (_error: unknown) {
+          console.error('Error decoding base64', _error);
+          parsed = atob(result.replace('data:text/csv;base64,', ''));
+        }
+        if (!result) {
+          this.messageService.add(protoV4ErrorMessage);
+          return;
+        }
+        const csvSupports = parsed
+          .split('\n')
+          .map((line: string) => {
+            const parts = line.split(';');
+            rawParameters.push(parts.pop()?.replace('\r', '') ?? '');
+            parts.pop();
+            return parts.join(';');
+          })
+          .filter((line: string) => line.trim() !== '')
+          .join('\n');
+        const parameters = formatProtoV4Parameters(rawParameters, fileName);
+        Papa.parse(csvSupports as string, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (async (
+            jsonResults: Papa.ParseResult<Record<string, string>>
+          ) => {
+            const supports: ProtoV4Support[] = jsonResults.data
+              .filter((support) => support.num)
+              .map(formatProtoV4Support);
+            const study = await this.studiesService.createStudyFromProtoV4(
+              supports,
+              parameters
+            );
+            this.newStudies.set([...this.newStudies(), study]);
+            this.messageService.add(protoV4SuccessMessage);
+          }) as (jsonResults: Papa.ParseResult<Record<string, string>>) => void
+        });
+      } catch (_error: unknown) {
+        console.error('Error importing study', _error);
+        this.messageService.add(protoV4ErrorMessage);
       }
-      const csvSupports = result
-        .split('\n')
-        .map((line: string) => {
-          const parts = line.split(';');
-          rawParameters.push(parts.pop()?.replace('\r', '') ?? '');
-          parts.pop();
-          return parts.join(';');
-        })
-        .join('\n');
-      const parameters: ProtoV4Parameters = {
-        conductor: rawParameters[3],
-        cable_amount: convertValueToNumber(rawParameters[5]),
-        temperature_reference: convertValueToNumber(rawParameters[7]),
-        parameter: convertValueToNumber(rawParameters[9]),
-        cra: convertValueToNumber(rawParameters[11]),
-        temp_load: convertValueToNumber(rawParameters[13]),
-        wind_load: convertValueToNumber(rawParameters[15]),
-        frost_load: convertValueToNumber(rawParameters[17]),
-        project_name: rawParameters[19]
-      };
-      Papa.parse(csvSupports as string, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (async (
-          jsonResults: Papa.ParseResult<Record<string, string>>
-        ) => {
-          const supports: ProtoV4Support[] = jsonResults.data.map(
-            (support: Record<string, string>) => {
-              return {
-                ...support,
-                nom: support.nom,
-                num: convertValueToNumber(support.num),
-                portée: convertValueToNumber(support.portée),
-                angle_ligne: convertValueToNumber(support.angle_ligne),
-                ctr_poids: convertValueToNumber(support.ctr_poids),
-                long_bras: convertValueToNumber(support.long_bras),
-                long_ch: convertValueToNumber(support.long_ch),
-                pds_ch: convertValueToNumber(support.pds_ch),
-                surf_ch: convertValueToNumber(support.surf_ch),
-                alt_acc: convertValueToNumber(support.alt_acc),
-                suspension: support.suspension === 'FAUX' ? false : true,
-                ch_en_V: support.ch_en_V === 'FAUX' ? false : true
-              };
-            }
-          );
-          const study = await this.studiesService.createStudyFromProtoV4(
-            supports,
-            parameters
-          );
-          this.newStudies.set([...this.newStudies(), study]);
-        }) as (jsonResults: Papa.ParseResult<Record<string, string>>) => void
-      });
     };
-    reader.readAsText(file);
+    reader.onerror = () => {
+      this.messageService.add(protoV4ErrorMessage);
+    };
+    reader.readAsDataURL(file);
   }
 
   loadFiles(event: Event) {

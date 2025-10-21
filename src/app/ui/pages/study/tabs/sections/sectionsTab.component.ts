@@ -69,8 +69,12 @@ export class SectionsTabComponent {
         $localize`Initial Condition` +
         ' ' +
         (currentInitialConditions.length + 1),
-      base_parameters: '',
-      base_temperature: 0
+      base_parameters: 0,
+      base_temperature: 0,
+      cable_pretension: 0,
+      min_temperature: 0,
+      max_wind_pressure: 0,
+      max_frost_width: 0
     };
   }
 

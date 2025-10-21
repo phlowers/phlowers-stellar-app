@@ -47,12 +47,13 @@ describe('StudiesService', () => {
 
   const mockStudy: Pick<
     StudyModel,
-    'title' | 'description' | 'shareable' | 'sections'
+    'title' | 'description' | 'shareable' | 'sections' | 'author_email'
   > = {
     title: 'Test Study',
     description: 'Test Description',
     shareable: true,
-    sections: []
+    sections: [],
+    author_email: 'test@example.com'
   };
 
   const mockStudyFromDb: Study = {
@@ -129,7 +130,6 @@ describe('StudiesService', () => {
 
       expect(mockDb.users.toArray).toHaveBeenCalled();
       expect(mockDb.studies.add).toHaveBeenCalledWith({
-        author_email: mockUser.email,
         uuid: 'mock-uuid-123',
         ...mockStudy,
         created_at_offline: expect.any(String),
@@ -321,7 +321,8 @@ describe('StudiesService', () => {
       temp_load: 15,
       wind_load: 10,
       frost_load: 5,
-      project_name: 'Test Project'
+      project_name: 'Test Project',
+      section_name: 'Test Section'
     };
 
     const mockProtoV4Support: ProtoV4Support = {

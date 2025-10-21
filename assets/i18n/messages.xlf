@@ -536,11 +536,6 @@
         <source>Are you sure you want to reset the database?</source>
       </segment>
     </unit>
-    <unit id="8581729683001364052">
-      <segment>
-        <source> Base temperature (°C) </source>
-      </segment>
-    </unit>
     <unit id="5281579610433386344">
       <segment>
         <source>Are you sure you want to reset the app?</source>
@@ -1521,6 +1516,101 @@
     <unit id="8847384389461548292">
       <segment>
         <source> Angle </source>
+      </segment>
+    </unit>
+    <unit id="1079181845691356032">
+      <segment>
+        <source>Study imported successfully</source>
+      </segment>
+    </unit>
+    <unit id="1519954996184640001">
+      <segment>
+        <source>Error</source>
+      </segment>
+    </unit>
+    <unit id="4648900870671159218">
+      <segment>
+        <source>Success</source>
+      </segment>
+    </unit>
+    <unit id="8104834107183476829">
+      <segment>
+        <source>Error importing study</source>
+      </segment>
+    </unit>
+    <unit id="2153962924756003345">
+      <segment>
+        <source>Max wind pressure</source>
+      </segment>
+    </unit>
+    <unit id="6888404140532857244">
+      <segment>
+        <source>Max ice thickness</source>
+      </segment>
+    </unit>
+    <unit id="3766856601447528715">
+      <segment>
+        <source>Initial condition 1</source>
+      </segment>
+    </unit>
+    <unit id="3948064756684098346">
+      <segment>
+        <source> Max wind pressure </source>
+      </segment>
+    </unit>
+    <unit id="5455255610792577574">
+      <segment>
+        <source> Min temperature </source>
+      </segment>
+    </unit>
+    <unit id="5577525641723703663">
+      <segment>
+        <source> Cable pretension </source>
+      </segment>
+    </unit>
+    <unit id="7696118233074431582">
+      <segment>
+        <source> Max ice thickness </source>
+      </segment>
+    </unit>
+    <unit id="848481053719181700">
+      <segment>
+        <source> Extreme historical conditions incurred by the cable </source>
+      </segment>
+    </unit>
+    <unit id="8798542344025275411">
+      <segment>
+        <source>Min temperature</source>
+      </segment>
+    </unit>
+    <unit id="9095132887560670905">
+      <segment>
+        <source>Cable pretension</source>
+      </segment>
+    </unit>
+    <unit id="1382927506926002184">
+      <segment>
+        <source>DaN</source>
+      </segment>
+    </unit>
+    <unit id="2340664682417154043">
+      <segment>
+        <source>cm</source>
+      </segment>
+    </unit>
+    <unit id="2936057948596507296">
+      <segment>
+        <source>°C</source>
+      </segment>
+    </unit>
+    <unit id="8987297903552443142">
+      <segment>
+        <source> Base temperature </source>
+      </segment>
+    </unit>
+    <unit id="902828700910058336">
+      <segment>
+        <source>Pa</source>
       </segment>
     </unit>
   </file>
