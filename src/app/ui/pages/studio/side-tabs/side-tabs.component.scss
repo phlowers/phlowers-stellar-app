@@ -23,10 +23,22 @@
       @apply uppercase relative;
       @extend %text-s-600;
       @extend %_btn-bblr;
-      writing-mode: sideways-lr;
+      width: 2.375rem; // firefox has weird interpretation of sideways left to right size. Forcing buttons width to avoid weird side effect.
       padding: $_btn-px 0.6875rem;
       min-height: 8.1875rem;
       background-color: $_default-btn-bgc;
+
+      @supports (writing-mode: sideways-lr) {
+        writing-mode: sideways-lr;
+      }
+
+      @supports not (writing-mode: sideways-lr) {
+        @apply flex items-center justify-center;
+
+        &__label {
+          @apply inline-block py-8 -rotate-90;
+        }
+      }
 
       &:not(:first-child) {
         margin-top: -$_btn-overlap-size;

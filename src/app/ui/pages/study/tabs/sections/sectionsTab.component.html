@@ -144,6 +144,8 @@
           btnSize="l"
           btnStyle="text"
           class="section__content-action"
+          [ariaLabel]="'Actions for section ' + section.name"
+          i18n-ariaLabel
         >
           <app-icon icon="more_horiz" />
         </button>
