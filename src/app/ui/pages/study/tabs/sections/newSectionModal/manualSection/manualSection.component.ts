@@ -32,7 +32,8 @@ import { LinesService } from '@src/app/core/services/lines/lines.service';
 import { Cable } from '@src/app/core/data/database/interfaces/cable';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import { MessageModule } from 'primeng/message';
-
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { PaginatorModule } from 'primeng/paginator';
 const sortLines = (lines: Line[]) => {
   return lines.sort((a, b) => {
     const aElectricTensionLevelAdr = a.electric_tension_level_adr || '';
@@ -60,7 +61,9 @@ const sortLines = (lines: Line[]) => {
     TextareaModule,
     UniquePipe,
     FormsModule,
-    MessageModule
+    MessageModule,
+    ButtonComponent,
+    PaginatorModule
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'
@@ -74,7 +77,6 @@ export class ManualSectionComponent implements OnInit {
   cablesFilterTable = signal<Cable[]>([]);
   public sectionTypes = sectionTypes;
   isNameUnique = input<boolean>();
-
   constructor(
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,
@@ -83,6 +85,8 @@ export class ManualSectionComponent implements OnInit {
 
   maintenanceFilterTable = signal<MaintenanceData[]>([]);
   linesFilterTable = signal<Line[]>([]);
+  firstSupport = signal<number>(0);
+  rowsSupport = signal<number>(5);
 
   eelRead = signal<string>('');
   cmRead = signal<string>('');
@@ -113,10 +117,19 @@ export class ManualSectionComponent implements OnInit {
   }
 
   tabValueChange = (event: any) => {
+    this.tabValue.set(event);
     if (event === 'graphical') {
       this.studio()?.refreshStudio();
     }
   };
+
+  onNextTab() {
+    this.tabValue.set('supports');
+  }
+
+  onPreviousTab() {
+    this.tabValue.set('general');
+  }
 
   updateSupportsAmount(amount: number) {
     const currentSupports = this.section().supports || [];
@@ -134,6 +147,7 @@ export class ManualSectionComponent implements OnInit {
     } else {
       this.section().supports = currentSupports.slice(0, amount);
     }
+    this.onSectionChange();
   }
 
   onSupportsAmountChangeInput(event: any) {
@@ -172,6 +186,7 @@ export class ManualSectionComponent implements OnInit {
     if (support) {
       (support as any)[change.field] = change.value;
     }
+    this.onSectionChange();
   }
 
   async onMaintenanceSelect(event: any, type: 'cm' | 'gmr' | 'eel') {
@@ -242,5 +257,10 @@ export class ManualSectionComponent implements OnInit {
 
   onSectionChange() {
     this.sectionChange.emit(this.section());
+  }
+
+  onSupportsPageChange(event: any) {
+    this.rowsSupport.set(event.rows ?? 5);
+    this.firstSupport.set(event.page * (event.rows ?? 5));
   }
 }

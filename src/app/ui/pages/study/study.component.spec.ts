@@ -95,6 +95,7 @@ describe('StudyComponent', () => {
     branch_name: 'Branch 1',
     electric_tension_level: '400kV',
     comment: 'random comment',
+    supports_comment: 'random supports comment',
     supports: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined

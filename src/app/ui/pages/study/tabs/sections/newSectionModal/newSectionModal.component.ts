@@ -22,13 +22,19 @@ import { Section } from '@src/app/core/data/database/interfaces/section';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Study } from '@core/data/database/interfaces/study';
+import { isNil } from 'lodash';
 
 const areAllRequiredFieldsFilled = (section: Section) => {
   return (
     !!section.name &&
     !!section.type &&
     !!section.cables_amount &&
-    !!section.cable_name
+    !!section.cable_name &&
+    !!section.supports.every((support) => !isNil(support.number)) &&
+    !!section.supports.every((support) => !isNil(support.spanLength)) &&
+    !!section.supports.every((support) => !isNil(support.spanAngle)) &&
+    !!section.supports.every((support) => !isNil(support.chainLength)) &&
+    !!section.supports.every((support) => !isNil(support.attachmentHeight))
   );
 };
 

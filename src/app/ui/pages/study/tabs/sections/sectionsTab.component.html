@@ -29,7 +29,7 @@
       (click)="openNewSectionModalCreate()"
     >
       <app-icon icon="add" />
-      Add a section
+      Create a section
     </button>
   </section>
 }
@@ -132,6 +132,7 @@
             "
             optionLabel="name"
             optionValue="uuid"
+            width="12.5rem"
             class="section__content-init"
           />
         }
@@ -222,7 +223,7 @@
       (click)="openNewSectionModalCreate()"
     >
       <app-icon icon="add" />
-      Add a section
+      Create a section
     </button>
     <a
       app-btn
@@ -233,7 +234,7 @@
       [queryParams]="{ sectionUuid: selectedSection() }"
     >
       <app-icon icon="play_circle" />
-      <ng-container i18n>Generate an initial state</ng-container>
+      <ng-container i18n>Generate a state</ng-container>
     </a>
   </div>
 }

@@ -12,6 +12,7 @@ import { RouterLink } from '@angular/router';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { CablesService } from '@src/app/core/services/cables/cables.service';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -100,7 +101,8 @@ export class ImportStudyComponent {
 
   constructor(
     private readonly studiesService: StudiesService,
-    private readonly messageService: MessageService
+    private readonly messageService: MessageService,
+    private readonly cablesService: CablesService
   ) {}
 
   async deleteStudy(uuid: string) {
@@ -123,6 +125,12 @@ export class ImportStudyComponent {
       this.newStudies.set([...this.newStudies(), study]);
     };
     reader.readAsText(file);
+  }
+
+  checkIfCableExists(conductor: string): Promise<boolean> {
+    return this.cablesService.getCables().then((cables) => {
+      return !!cables?.find((cable) => cable.name === conductor);
+    });
   }
 
   loadProtoV4File(file: File) {
@@ -157,6 +165,15 @@ export class ImportStudyComponent {
           .filter((line: string) => line.trim() !== '')
           .join('\n');
         const parameters = formatProtoV4Parameters(rawParameters, fileName);
+        const cableExists = await this.checkIfCableExists(parameters.conductor);
+        if (!cableExists) {
+          this.messageService.add({
+            severity: 'error',
+            summary: $localize`Error`,
+            detail: $localize`Cable not found in database: ${parameters.conductor}`
+          });
+          return;
+        }
         Papa.parse(csvSupports as string, {
           header: true,
           skipEmptyLines: true,

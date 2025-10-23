@@ -37,6 +37,7 @@ export class SelectWithButtonsComponent<T extends Record<string, any>>
   ariaLabel = input.required<string>();
   placeholder = input<string>('');
   showClear = input<boolean>(false);
+  width = input<string>('');
 
   selectOption = output<T>();
   viewOption = output<T>();

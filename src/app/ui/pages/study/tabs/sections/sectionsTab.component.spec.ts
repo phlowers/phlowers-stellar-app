@@ -83,6 +83,7 @@ describe('SectionsTabComponent', () => {
     branch_name: 'BranchY',
     electric_tension_level: '230V',
     comment: 'Test section comment',
+    supports_comment: 'Test supports comment',
     supports: [],
     initial_conditions: [
       {

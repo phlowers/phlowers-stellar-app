@@ -41,6 +41,7 @@
 }
 
 .select-with-buttons-panel.select-with-buttons-panel {
+
   .p-select-list,
   .p-select-option {
     padding: 0rem;
@@ -52,17 +53,25 @@
     cursor: auto;
   }
 
+  li {
+    width: 23.8125rem;
+  }
+
   .select-dropdown {
     @apply flex flex-row items-center gap-2 p-2;
+    width: calc(100%);
 
     &__select {
-      @apply w-32 max-w-32 px-0;
+      @apply w-full px-0;
       align-self: stretch;
+      min-width: 0;
 
       .app-btn-label {
         @apply whitespace-nowrap overflow-hidden overflow-ellipsis px-1;
         @extend %text-m-400;
         color: var(--grey-750);
+        white-space: pre-wrap;
+        text-align: left;
       }
     }
 

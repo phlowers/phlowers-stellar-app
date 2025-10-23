@@ -793,12 +793,6 @@
         <target>Position</target>
       </segment>
     </unit>
-    <unit id="3109247660283861099">
-      <segment state="initial">
-        <source> Number </source>
-        <target> Numéro </target>
-      </segment>
-    </unit>
     <unit id="6621067415830629818">
       <segment state="initial">
         <source>Arm length (m)</source>
@@ -883,10 +877,10 @@
         <target>Aucun canton existant</target>
       </segment>
     </unit>
-    <unit id="6173209146841926976">
+    <unit id="1363022291205513969">
       <segment state="initial">
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Add a section </source>
-        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Ajouter un canton </target>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a section </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Créer un canton </target>
       </segment>
     </unit>
     <unit id="1949800506879332767">
@@ -1231,28 +1225,16 @@
         <target>Hauteur sous console (m)</target>
       </segment>
     </unit>
-    <unit id="6120722023223731581">
-      <segment state="initial">
-        <source>Generate an initial state</source>
-        <target>Générer un état initial</target>
-      </segment>
-    </unit>
-    <unit id="1005793920710327844">
-      <segment state="initial">
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;"/> Double click on a column to copy the value to all supports </source>
-        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;"/> Double click on a column to copy the value to all supports </target>
-      </segment>
-    </unit>
     <unit id="2901943060312328653">
       <segment state="initial">
         <source> Support name </source>
-        <target> Support name </target>
+        <target> Nom du support </target>
       </segment>
     </unit>
     <unit id="8455284935734906867">
       <segment state="initial">
         <source> Attachment set </source>
-        <target> Attachment set </target>
+        <target> Set d&apos;accroche </target>
       </segment>
     </unit>
     <unit id="2932152767120246098">
@@ -1396,13 +1378,13 @@
     <unit id="5638154401039870638">
       <segment state="initial">
         <source>Staff is present</source>
-        <target>Le personnel est présent</target>
+        <target>Personnel présent</target>
       </segment>
     </unit>
     <unit id="929550426768002309">
       <segment state="initial">
         <source>Staff is absent</source>
-        <target>Le personnel est absent</target>
+        <target>Personnel absent</target>
       </segment>
     </unit>
     <unit id="3778631527604022771">
@@ -1745,24 +1727,6 @@
         <target> Liste des supports </target>
       </segment>
     </unit>
-    <unit id="3573539458079377481">
-      <segment state="initial">
-        <source> Span l. </source>
-        <target> L. portée </target>
-      </segment>
-    </unit>
-    <unit id="8847384389461548292">
-      <segment state="initial">
-        <source> Angle </source>
-        <target> Angle </target>
-      </segment>
-    </unit>
-    <unit id="7344185306127800763">
-      <segment state="initial">
-        <source> Chain l. </source>
-        <target> L. chaine </target>
-      </segment>
-    </unit>
     <unit id="8041319185706138234">
       <segment state="initial">
         <source> Chain w. </source>
@@ -1775,16 +1739,10 @@
         <target> L. bras </target>
       </segment>
     </unit>
-    <unit id="2395680375895003637">
+    <unit id="937239552133817956">
       <segment state="initial">
-        <source> Attachment alt. (NGF) </source>
-        <target> Alt. accroche (NGF) </target>
-      </segment>
-    </unit>
-    <unit id="2673079648784878747">
-      <segment state="initial">
-        <source> Supp. foot alt. </source>
-        <target> Alt. pied supp. </target>
+        <source>Supp. foot alt.</source>
+        <target>Alt. pied supp.</target>
       </segment>
     </unit>
     <unit id="6707592636055800614">
@@ -1965,6 +1923,78 @@
       <segment state="initial">
         <source>Horizontal (m)</source>
         <target>Horizontal (m)</target>
+      </segment>
+    </unit>
+    <unit id="8687116247161905115">
+      <segment state="initial">
+        <source>Cable not found in database: <ph id="0" equiv="PH" disp="parameters.conductor"/></source>
+        <target>Câble non trouvé dans la base de données: <ph id="0" equiv="PH" disp="parameters.conductor"/></target>
+      </segment>
+    </unit>
+    <unit id="3885497195825665706">
+      <segment state="initial">
+        <source>Next</source>
+        <target>Next</target>
+      </segment>
+    </unit>
+    <unit id="3854993654974680287">
+      <segment state="initial">
+        <source>Support {first} to {last} of {totalRecords}</source>
+        <target>Support {first} à {last} de {totalRecords}</target>
+      </segment>
+    </unit>
+    <unit id="7386852230658433938">
+      <segment state="initial">
+        <source>Comment about the supports</source>
+        <target>Commentaire concernant les supports</target>
+      </segment>
+    </unit>
+    <unit id="4452427314943113135">
+      <segment state="initial">
+        <source>Previous</source>
+        <target>Précédent</target>
+      </segment>
+    </unit>
+    <unit id="4321296572437361289">
+      <segment state="initial">
+        <source>Generate a state</source>
+        <target>Générer un état</target>
+      </segment>
+    </unit>
+    <unit id="6370642728789544052">
+      <segment state="initial">
+        <source>Number</source>
+        <target>Numéro</target>
+      </segment>
+    </unit>
+    <unit id="2759009850634919490">
+      <segment state="initial">
+        <source>Span l.</source>
+        <target>L. portée</target>
+      </segment>
+    </unit>
+    <unit id="8240240329115149718">
+      <segment state="initial">
+        <source>Angle</source>
+        <target>Angle</target>
+      </segment>
+    </unit>
+    <unit id="4363811923368535546">
+      <segment state="initial">
+        <source>Chain l.</source>
+        <target>L. chaine</target>
+      </segment>
+    </unit>
+    <unit id="131564779447274448">
+      <segment state="initial">
+        <source>Attachment alt. (NGF)</source>
+        <target>Alt. accroche (NGF)</target>
+      </segment>
+    </unit>
+    <unit id="8502839014739399542">
+      <segment state="initial">
+        <source>Double click on a column to copy the value to all supports</source>
+        <target>Double cliquer sur une colonne pour copier la valeur à tous les supports</target>
       </segment>
     </unit>
   </file>

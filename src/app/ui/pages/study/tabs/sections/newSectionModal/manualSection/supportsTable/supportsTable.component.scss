@@ -13,19 +13,33 @@
   right: 0;
 }
 
+.integer-column {
+  width: 6rem;
+  min-width: 6rem;
+  max-width: 6rem;
+}
+
+.decimal-column {
+  width: 9rem;
+  min-width: 9rem;
+  max-width: 9rem;
+}
+
+.text-column {
+  width: 11rem;
+  min-width: 11rem;
+  max-width: 11rem;
+}
+
+.boolean-column {
+  width: 8rem;
+  min-width: 8rem;
+  max-width: 8rem;
+}
+
 td {
-  $_txtInputW: 9.7rem;
-
   >* {
-    width: 9rem;
-  }
-
-  >[type=text] {
-    width: $_txtInputW;
-  }
-
-  :has([type=text]) {
-    width: $_txtInputW;
+    width: 100%;
   }
 
   .p-inputicon {

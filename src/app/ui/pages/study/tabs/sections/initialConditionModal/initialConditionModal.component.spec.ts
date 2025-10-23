@@ -38,6 +38,7 @@ describe('InitialConditionModalComponent', () => {
     branch_name: undefined,
     electric_tension_level: undefined,
     comment: undefined,
+    supports_comment: undefined,
     supports: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined

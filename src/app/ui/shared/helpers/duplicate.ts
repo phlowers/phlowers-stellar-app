@@ -9,9 +9,13 @@ export const findDuplicateTitle = (
   existingTitles: string[],
   duplicatedTitle: string
 ) => {
-  const duplicateTitle = duplicatedTitle.replace(/\s*\(Copy\s*\d+\)/, ''); //NOSONAR
-  let copyIndex = 1;
   const copySuffix = $localize`Copy`;
+  const regex = new RegExp(/\s*\(Copy\s*\d+\)/); //NOSONAR
+  const duplicateTitle = duplicatedTitle.replace(
+    new RegExp(regex.source.replace('Copy', copySuffix), 'g'),
+    ''
+  );
+  let copyIndex = 1;
   while (
     existingTitles.includes(`${duplicateTitle} (${copySuffix} ${copyIndex})`)
   ) {

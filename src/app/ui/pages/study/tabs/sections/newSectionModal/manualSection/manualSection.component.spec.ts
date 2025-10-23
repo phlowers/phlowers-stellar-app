@@ -153,6 +153,7 @@ describe('ManualSectionComponent', () => {
       branch_name: '',
       electric_tension_level: '',
       comment: '',
+      supports_comment: '',
       supports: [],
       initial_conditions: [],
       selected_initial_condition_uuid: undefined
