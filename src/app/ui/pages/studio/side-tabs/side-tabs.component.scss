@@ -67,7 +67,7 @@
       }
 
       &::before {
-        @apply h-full w-full top-0 right-0 opacity-0;
+        @apply inset-0 opacity-0;
         @extend %_btn-bblr;
         @extend %_btn-btlr;
         @extend %_bcgc-transition;

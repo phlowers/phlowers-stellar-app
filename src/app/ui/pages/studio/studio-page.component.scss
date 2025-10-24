@@ -1,17 +1,24 @@
 @use 'abstract.extracts' as app;
 
 :host {
-  @apply block -m-6 h-full;
+  @apply block -m-6;
+  height: calc(100% + 3rem);
 }
 
 .graph-tools {
-  @apply flex;
-  height: calc(100% - 3rem);
+  @apply flex items-stretch;
+  min-height: calc(100% - 6rem);
+
+  &__left {
+    @apply grow pr-5;
+  }
 }
 
 .plot-view {
   @apply block;
-  height: clamp(21.875rem, 60%, 36.875rem);
+  min-height: 21.875rem;
+  height: 60%;
+  max-height: 36.875rem;
 }
 
 .quick-measures {

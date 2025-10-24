@@ -43,6 +43,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   supports = signal<string>('single');
   supportsOptions = signal<string[]>(['single', 'double', 'all']);
   subscription: Subscription | null = null;
+
   sliderOptions = computed<Options>(() => {
     return {
       floor: 0,
@@ -55,6 +56,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       rightToLeft: this.plotService.plotOptions().invert
     };
   });
+
   toggleSidebar() {
     this.sidebarOpen.set(!this.sidebarOpen());
     this.sidebarWidth.set(this.sidebarOpen() ? 300 : 0);
