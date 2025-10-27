@@ -1,15 +1,13 @@
-<div class="h-screen overflow-hidden">
-  <app-topbar></app-topbar>
+<app-topbar></app-topbar>
 
-  <app-sidebar
-    [logoIconExpanded]="'stellar-logo-expanded.svg'"
-    [logoIconShrank]="'stellar-logo-shrank.svg'"
-    [logoText]="'Stellar'"
-    [mainLinks]="sideBarNav().main"
-    [footerLinks]="sideBarNav().footer"
-  />
+<app-sidebar
+  [logoIconExpanded]="'stellar-logo-expanded.svg'"
+  [logoIconShrank]="'stellar-logo-shrank.svg'"
+  [logoText]="'Stellar'"
+  [mainLinks]="sideBarNav().main"
+  [footerLinks]="sideBarNav().footer"
+/>
 
-  <main class="overflow-y-auto p-6">
-    <router-outlet></router-outlet>
-  </main>
-</div>
+<main class="overflow-y-auto p-6">
+  <router-outlet></router-outlet>
+</main>
