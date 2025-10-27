@@ -1,11 +1,18 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  output,
+  signal,
+  ViewChild
+} from '@angular/core';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { NewSectionModalComponent } from './newSectionModal/newSectionModal.component';
 import { CardComponent } from '@src/app/ui/shared/components/atoms/card/card.component';
-import { PopoverModule } from 'primeng/popover';
+import { Popover, PopoverModule } from 'primeng/popover';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -60,6 +67,7 @@ export class SectionsTabComponent {
   isInitialConditionModalOpen = signal<boolean>(false);
   initialConditionModalMode = signal<CreateEditView>('create');
   selectedSection = signal<string>('');
+  @ViewChild('popover') popover!: Popover;
 
   createInitialCondition(section: Section): InitialCondition {
     const currentInitialConditions = section.initial_conditions;

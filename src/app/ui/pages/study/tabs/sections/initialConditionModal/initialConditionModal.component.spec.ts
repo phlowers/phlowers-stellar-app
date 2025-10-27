@@ -2,6 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InitialConditionModalComponent } from './initialConditionModal.component';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { CablesService } from '@core/services/cables/cables.service';
+import { StorageService } from '@core/services/storage/storage.service';
+import { BehaviorSubject } from 'rxjs';
 
 describe('InitialConditionModalComponent', () => {
   let component: InitialConditionModalComponent;
@@ -38,6 +42,7 @@ describe('InitialConditionModalComponent', () => {
     branch_name: undefined,
     electric_tension_level: undefined,
     comment: undefined,
+    supports_comment: undefined,
     supports: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined
@@ -55,8 +60,28 @@ describe('InitialConditionModalComponent', () => {
   };
 
   beforeEach(async () => {
+    // Create mock StorageService
+    const mockStorageService = {
+      ready$: new BehaviorSubject<boolean>(true),
+      db: {
+        cables: {
+          toArray: jest.fn().mockResolvedValue([])
+        }
+      }
+    } as unknown as StorageService;
+
+    // Create mock CablesService
+    const mockCablesService = {
+      getCables: jest.fn().mockResolvedValue([])
+    } as unknown as CablesService;
+
     await TestBed.configureTestingModule({
-      imports: [InitialConditionModalComponent]
+      imports: [InitialConditionModalComponent],
+      providers: [
+        provideHttpClientTesting(),
+        { provide: StorageService, useValue: mockStorageService },
+        { provide: CablesService, useValue: mockCablesService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(InitialConditionModalComponent);

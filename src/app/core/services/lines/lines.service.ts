@@ -38,8 +38,8 @@ export class LinesService {
 
   async importFromFile() {
     const linesFile = this.http
-      .get<string>(`${window.location.origin}/lines.csv`, {
-        responseType: 'text' as any
+      .get(`${window.location.origin}/lines.csv`, {
+        responseType: 'text'
       })
       .pipe(
         catchError((error) => {
@@ -73,8 +73,9 @@ export class LinesService {
               resolve();
               return;
             }
-            await this.storageService.db?.maintenance.clear();
+            await this.storageService.db?.lines.clear();
             const table: Line[] = mapData(data);
+            console.log('adding lines data', table.length);
             await this.storageService.db?.lines.bulkAdd(
               sortBy(table, 'electric_tension_level_adr')
             );

@@ -29,7 +29,7 @@
       (click)="openNewSectionModalCreate()"
     >
       <app-icon icon="add" />
-      Add a section
+      Create a section
     </button>
   </section>
 }
@@ -93,47 +93,49 @@
         } @else if (
           section.initial_conditions && section.initial_conditions.length > 0
         ) {
-          <app-select-with-buttons
-            [options]="orderedInitialConditions(section.initial_conditions)"
-            [selectedOption]="section.selected_initial_condition_uuid"
-            ariaLabel="Select initial conditions"
-            i18n-ariaLabel
-            (selectOption)="
-              selectInitialConditionClick({
-                initialCondition: $event,
-                section: section
-              })
-            "
-            placeholder="View initial conditions"
-            i18n-placeholder
-            (viewOption)="
-              viewInitialConditionClick({
-                initialCondition: $event,
-                section: section
-              })
-            "
-            (editOption)="
-              editInitialConditionClick({
-                initialCondition: $event,
-                section: section
-              })
-            "
-            (duplicateOption)="
-              duplicateInitialConditionClick({
-                initialCondition: $event,
-                section: section
-              })
-            "
-            (deleteOption)="
-              deleteInitialConditionClick({
-                initialCondition: $event,
-                section: section
-              })
-            "
-            optionLabel="name"
-            optionValue="uuid"
-            class="section__content-init"
-          />
+          <div class="section__content-init w-[12.5rem]">
+            <app-select-with-buttons
+              [options]="orderedInitialConditions(section.initial_conditions)"
+              [selectedOption]="section.selected_initial_condition_uuid"
+              ariaLabel="Select initial conditions"
+              i18n-ariaLabel
+              (selectOption)="
+                selectInitialConditionClick({
+                  initialCondition: $event,
+                  section: section
+                })
+              "
+              placeholder="View initial conditions"
+              i18n-placeholder
+              (viewOption)="
+                viewInitialConditionClick({
+                  initialCondition: $event,
+                  section: section
+                })
+              "
+              (editOption)="
+                editInitialConditionClick({
+                  initialCondition: $event,
+                  section: section
+                })
+              "
+              (duplicateOption)="
+                duplicateInitialConditionClick({
+                  initialCondition: $event,
+                  section: section
+                })
+              "
+              (deleteOption)="
+                deleteInitialConditionClick({
+                  initialCondition: $event,
+                  section: section
+                })
+              "
+              optionLabel="name"
+              optionValue="uuid"
+              class="section__content-init"
+            />
+          </div>
         }
 
         <p i18n class="mb-0 section__title-action">Actions</p>
@@ -191,7 +193,7 @@
               app-btn
               btnSize="s"
               btnStyle="text"
-              (click)="duplicateSection.emit(section)"
+              (click)="popover.hide(); duplicateSection.emit(section)"
             >
               <app-icon icon="content_copy" />
               <span i18n>Duplicate</span>
@@ -222,7 +224,7 @@
       (click)="openNewSectionModalCreate()"
     >
       <app-icon icon="add" />
-      Add a section
+      Create a section
     </button>
     <a
       app-btn
@@ -233,7 +235,7 @@
       [queryParams]="{ sectionUuid: selectedSection() }"
     >
       <app-icon icon="play_circle" />
-      <ng-container i18n>Generate an initial state</ng-container>
+      <ng-container i18n>Generate a state</ng-container>
     </a>
   </div>
 }

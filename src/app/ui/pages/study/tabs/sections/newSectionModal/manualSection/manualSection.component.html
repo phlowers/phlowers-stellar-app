@@ -62,7 +62,6 @@
                 optionValue="code"
                 required
                 (ngModelChange)="onSectionChange()"
-                [showClear]="true"
                 [filter]="true"
                 filterBy="name"
               />
@@ -148,7 +147,7 @@
       </div>
 
       <div class="section-form-part">
-        <h3 class="title-underline" i18n>Line maintenance team</h3>
+        <h3 class="title-underline" i18n>Line team</h3>
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid">
             <div class="flex flex-col">
@@ -348,6 +347,12 @@
           <p class="read-only-info">{{ section().comment }}</p>
         }
       </div>
+      <div class="flex justify-end pt-6">
+        <button app-btn btnSize="m" btnStyle="outlined" (click)="onNextTab()">
+          <app-icon icon="chevron_right" />
+          <ng-container i18n>Next</ng-container>
+        </button>
+      </div>
     </p-tabpanel>
 
     <p-tabpanel value="supports">
@@ -355,10 +360,12 @@
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="flex flex-col">
             <label for="supportsAmount" i18n>Supports amount</label>
-            <div class="flex flex-row gap-2 justify-between">
+            <div
+              class="flex flex-row gap-2 justify-between items-start w-[9.375rem]"
+            >
               <p-inputnumber
-                class="w-32"
-                min="0"
+                min="2"
+                fluid
                 [ngModel]="section().supports.length || 0"
                 [showButtons]="true"
                 buttonLayout="horizontal"
@@ -376,11 +383,27 @@
                   <app-icon icon="remove" />
                 </ng-template>
               </p-inputnumber>
-              <p i18n class="flex flex-row gap-2 items-center mb-0">
-                <app-icon icon="edit_arrow_down" />
-                Double click on a column to copy the value to all supports
-              </p>
             </div>
+          </div>
+          <div class="flex flex-row justify-between items-center mt-[-1rem]">
+            <p class="flex flex-row gap-2 items-center mb-0">
+              <app-icon icon="edit_arrow_down" />
+              <ng-container i18n
+                >Double click on a column to copy the value to all
+                supports</ng-container
+              >
+            </p>
+            <p-paginator
+              (onPageChange)="onSupportsPageChange($event)"
+              [totalRecords]="section().supports.length"
+              [rowsPerPageOptions]="[5, 10, 20]"
+              [rows]="rowsSupport()"
+              [showCurrentPageReport]="true"
+              [showPageLinks]="true"
+              [showJumpToPageDropdown]="false"
+              i18n-currentPageReportTemplate
+              currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
+            />
           </div>
         } @else if (mode() === 'view') {
           <dl>
@@ -388,13 +411,44 @@
             <dd class="read-only-info">{{ section().supports.length }}</dd>
           </dl>
         }
-        <app-supports-table
-          [mode]="mode()"
-          [supports]="section().supports || []"
-          (addSupport)="addSupport($event.index, $event.position)"
-          (deleteSupport)="deleteSupport($event)"
-          (supportChange)="onSupportChange($event)"
-        />
+        <div class="mt-[-1rem]">
+          <app-supports-table
+            [mode]="mode()"
+            [first]="firstSupport()"
+            [supports]="section().supports || []"
+            (addSupport)="addSupport($event.index, $event.position)"
+            (deleteSupport)="deleteSupport($event)"
+            (duplicateSupport)="duplicateSupport($event)"
+            (supportChange)="onSupportChange($event)"
+            [rows]="rowsSupport()"
+          />
+        </div>
+        @if (mode() === 'create' || mode() === 'edit') {
+          <textarea
+            pTextarea
+            i18n-aria-label
+            id="comment"
+            aria-label="comment"
+            i18n-placeholder
+            placeholder="Comment about the supports"
+            class="w-full"
+            [(ngModel)]="section().supports_comment"
+            (ngModelChange)="onSectionChange()"
+          ></textarea>
+        } @else if (mode() === 'view') {
+          <p class="read-only-info">{{ section().comment }}</p>
+        }
+        <div class="flex justify-end pt-3">
+          <button
+            app-btn
+            btnSize="m"
+            btnStyle="outlined"
+            (click)="onPreviousTab()"
+          >
+            <app-icon icon="chevron_left" />
+            <ng-container i18n>Previous</ng-container>
+          </button>
+        </div>
       </div>
     </p-tabpanel>
     <p-tabpanel value="graphical">

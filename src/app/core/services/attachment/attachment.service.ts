@@ -39,8 +39,8 @@ export class AttachmentService {
    */
   async importFromFile() {
     const attachments = this.http
-      .get<string>(`${window.location.origin}/attachments.csv`, {
-        responseType: 'text' as any
+      .get(`${window.location.origin}/attachments.csv`, {
+        responseType: 'text'
       })
       .pipe(
         catchError((error) => {
@@ -79,6 +79,7 @@ export class AttachmentService {
             }
             await this.storageService.db?.attachments.clear();
             const attachmentsTable: Attachment[] = mapData(data);
+            console.log('adding attachments data', attachmentsTable.length);
             await this.storageService.db?.attachments.bulkAdd(attachmentsTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<RteAttachmentsCsvFile>) => void

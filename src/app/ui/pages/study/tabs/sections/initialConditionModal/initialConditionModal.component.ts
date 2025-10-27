@@ -12,6 +12,7 @@ import { MessageModule } from 'primeng/message';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { isNumber } from 'lodash';
+import { CablesService } from '@core/services/cables/cables.service';
 
 @Component({
   selector: 'app-initial-condition-modal',
@@ -48,7 +49,7 @@ export class InitialConditionModalComponent {
     max_wind_pressure: 0,
     max_frost_width: 0
   });
-
+  isCableNarcisse = signal<boolean>(false);
   isNameUnique = signal<boolean>(true);
   onNameChange(name: string) {
     this.isNameUnique.set(
@@ -57,9 +58,23 @@ export class InitialConditionModalComponent {
       )
     );
   }
-  constructor() {
+  constructor(private readonly cablesService: CablesService) {
+    // Initialize initialCondition from input immediately
     effect(() => {
       this.initialCondition.set(this.initialConditionInput());
+    });
+
+    effect(() => {
+      if (this.isOpen()) {
+        this.cablesService.getCables().then((cables) => {
+          const sectionCableName = this.section().cable_name;
+          if (sectionCableName) {
+            this.isCableNarcisse.set(
+              !!cables?.find((c) => c.name === sectionCableName)?.is_narcisse
+            );
+          }
+        });
+      }
     });
   }
 

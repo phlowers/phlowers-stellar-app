@@ -18,7 +18,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { ButtonModule } from 'primeng/button';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { isNumber } from 'lodash';
-
+import { PaginatorModule } from 'primeng/paginator';
 @Component({
   selector: 'app-supports-table',
   imports: [
@@ -35,7 +35,8 @@ import { isNumber } from 'lodash';
     InputGroupModule,
     InputGroupAddonModule,
     ButtonModule,
-    KeyFilterModule
+    KeyFilterModule,
+    PaginatorModule
   ],
   templateUrl: './supportsTable.component.html',
   styleUrls: ['./supportsTable.component.scss']
@@ -45,10 +46,13 @@ export class SupportsTableComponent implements OnInit {
   mode = input.required<CreateEditView>();
   addSupport = output<{ index: number; position: 'before' | 'after' }>();
   deleteSupport = output<string>();
+  duplicateSupport = output<string>();
   supportChange = output<{ uuid: string; field: keyof Support; value: any }>();
   chains = signal<Chain[]>([]);
   attachmentSetModalOpen = signal<boolean>(false);
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
+  first = input.required<number>();
+  rows = input.required<number>();
   constructor(private readonly chainsService: ChainsService) {}
 
   public onlyPositiveNumbers = /^[0-9]*$/;

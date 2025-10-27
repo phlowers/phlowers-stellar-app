@@ -1,8 +1,11 @@
 :host {
   @apply relative;
+  width: 100%;
 }
 
 .select-with-buttons {
+  width: 100%;
+
   .placeholder {
     color: var(--grey-500);
   }
@@ -11,4 +14,8 @@
 .clear-button {
   @apply absolute right-10 top-2/4 -translate-y-2/4;
   color: var(--star-dust-900);
+}
+
+.p-divider {
+  align-self: stretch;
 }

@@ -12,6 +12,8 @@ import { RouterLink } from '@angular/router';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -28,23 +30,19 @@ function parseISO88591Base64(str: string) {
   );
 }
 
-const convertValueToNumber = (value: string) => {
-  return Number(value.replace(',', '.'));
-};
-
 const formatProtoV4Support = (support: Record<string, string>) => {
   return {
     ...support,
     nom: support.nom,
-    num: convertValueToNumber(support.num),
-    portée: convertValueToNumber(support.portée),
-    angle_ligne: convertValueToNumber(support.angle_ligne),
-    ctr_poids: convertValueToNumber(support.ctr_poids),
-    long_bras: convertValueToNumber(support.long_bras),
-    long_ch: convertValueToNumber(support.long_ch),
-    pds_ch: convertValueToNumber(support.pds_ch),
-    surf_ch: convertValueToNumber(support.surf_ch),
-    alt_acc: convertValueToNumber(support.alt_acc),
+    num: convertStringToNumber(support.num),
+    portée: convertStringToNumber(support.portée),
+    angle_ligne: convertStringToNumber(support.angle_ligne),
+    ctr_poids: convertStringToNumber(support.ctr_poids),
+    long_bras: convertStringToNumber(support.long_bras),
+    long_ch: convertStringToNumber(support.long_ch),
+    pds_ch: convertStringToNumber(support.pds_ch),
+    surf_ch: convertStringToNumber(support.surf_ch),
+    alt_acc: convertStringToNumber(support.alt_acc),
     suspension: support.suspension === 'FAUX' ? false : true,
     ch_en_V: support.ch_en_V === 'FAUX' ? false : true
   };
@@ -56,13 +54,13 @@ const formatProtoV4Parameters = (
 ): ProtoV4Parameters => {
   return {
     conductor: rawParameters[3],
-    cable_amount: convertValueToNumber(rawParameters[5]),
-    temperature_reference: convertValueToNumber(rawParameters[7]),
-    parameter: convertValueToNumber(rawParameters[9]),
-    cra: convertValueToNumber(rawParameters[11]),
-    temp_load: convertValueToNumber(rawParameters[13]),
-    wind_load: convertValueToNumber(rawParameters[15]),
-    frost_load: convertValueToNumber(rawParameters[17]),
+    cable_amount: convertStringToNumber(rawParameters[5]),
+    temperature_reference: convertStringToNumber(rawParameters[7]),
+    parameter: convertStringToNumber(rawParameters[9]),
+    cra: convertStringToNumber(rawParameters[11]),
+    temp_load: convertStringToNumber(rawParameters[13]),
+    wind_load: convertStringToNumber(rawParameters[15]),
+    frost_load: convertStringToNumber(rawParameters[17]),
     section_name: rawParameters[19],
     project_name: fileName.replace('.csv', '')
   };
@@ -100,7 +98,8 @@ export class ImportStudyComponent {
 
   constructor(
     private readonly studiesService: StudiesService,
-    private readonly messageService: MessageService
+    private readonly messageService: MessageService,
+    private readonly cablesService: CablesService
   ) {}
 
   async deleteStudy(uuid: string) {
@@ -123,6 +122,12 @@ export class ImportStudyComponent {
       this.newStudies.set([...this.newStudies(), study]);
     };
     reader.readAsText(file);
+  }
+
+  checkIfCableExists(conductor: string): Promise<boolean> {
+    return this.cablesService.getCables().then((cables) => {
+      return !!cables?.find((cable) => cable.name === conductor);
+    });
   }
 
   loadProtoV4File(file: File) {
@@ -157,6 +162,15 @@ export class ImportStudyComponent {
           .filter((line: string) => line.trim() !== '')
           .join('\n');
         const parameters = formatProtoV4Parameters(rawParameters, fileName);
+        const cableExists = await this.checkIfCableExists(parameters.conductor);
+        if (!cableExists) {
+          this.messageService.add({
+            severity: 'error',
+            summary: $localize`Error`,
+            detail: $localize`Cable not found in database: ${parameters.conductor}`
+          });
+          return;
+        }
         Papa.parse(csvSupports as string, {
           header: true,
           skipEmptyLines: true,

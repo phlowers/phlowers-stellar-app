@@ -111,7 +111,8 @@ describe('CablesService', () => {
           stress_strain_b1: 0.05,
           stress_strain_b2: 0.005,
           stress_strain_b3: 0.0005,
-          stress_strain_b4: 0.00005
+          stress_strain_b4: 0.00005,
+          is_narcisse: false
         },
         {
           name: 'Cable 2',
@@ -131,7 +132,8 @@ describe('CablesService', () => {
           stress_strain_b1: 0.055,
           stress_strain_b2: 0.0055,
           stress_strain_b3: 0.00055,
-          stress_strain_b4: 0.000055
+          stress_strain_b4: 0.000055,
+          is_narcisse: false
         }
       ];
       mockCablesTable.toArray.mockResolvedValue(mockCables);
@@ -164,42 +166,44 @@ describe('CablesService', () => {
         {
           name: 'Cable 1',
           data_source: 'RTE',
-          section: 100,
-          diameter: 10.5,
-          young_modulus: 200000,
-          linear_weight: 0.5,
-          dilatation_coefficient: 0.000012,
-          temperature_reference: 20,
-          stress_strain_a0: 1.0,
-          stress_strain_a1: 0.1,
-          stress_strain_a2: 0.01,
-          stress_strain_a3: 0.001,
-          stress_strain_a4: 0.0001,
-          stress_strain_b0: 0.5,
-          stress_strain_b1: 0.05,
-          stress_strain_b2: 0.005,
-          stress_strain_b3: 0.0005,
-          stress_strain_b4: 0.00005
+          section: '100',
+          diameter: '10.5',
+          young_modulus: '200000',
+          linear_weight: '0.5',
+          dilatation_coefficient: '0.000012',
+          temperature_reference: '20',
+          stress_strain_a0: '1.0',
+          stress_strain_a1: '0.1',
+          stress_strain_a2: '0.01',
+          stress_strain_a3: '0.001',
+          stress_strain_a4: '0.0001',
+          stress_strain_b0: '0.5',
+          stress_strain_b1: '0.05',
+          stress_strain_b2: '0.005',
+          stress_strain_b3: '0.0005',
+          stress_strain_b4: '0.00005',
+          is_narcisse: 'false'
         },
         {
           name: 'Cable 2',
           data_source: 'RTE',
-          section: 150,
-          diameter: 12.0,
-          young_modulus: 180000,
-          linear_weight: 0.6,
-          dilatation_coefficient: 0.000011,
-          temperature_reference: 20,
-          stress_strain_a0: 1.1,
-          stress_strain_a1: 0.11,
-          stress_strain_a2: 0.011,
-          stress_strain_a3: 0.0011,
-          stress_strain_a4: 0.00011,
-          stress_strain_b0: 0.55,
-          stress_strain_b1: 0.055,
-          stress_strain_b2: 0.0055,
-          stress_strain_b3: 0.00055,
-          stress_strain_b4: 0.000055
+          section: '150',
+          diameter: '12.0',
+          young_modulus: '180000',
+          linear_weight: '0.6',
+          dilatation_coefficient: '0.000011',
+          temperature_reference: '20',
+          stress_strain_a0: '1.1',
+          stress_strain_a1: '0.11',
+          stress_strain_a2: '0.011',
+          stress_strain_a3: '0.0011',
+          stress_strain_a4: '0.00011',
+          stress_strain_b0: '0.55',
+          stress_strain_b1: '0.055',
+          stress_strain_b2: '0.0055',
+          stress_strain_b3: '0.00055',
+          stress_strain_b4: '0.000055',
+          is_narcisse: 'false'
         }
       ];
 
@@ -263,7 +267,8 @@ describe('CablesService', () => {
           stress_strain_b1: 0.05,
           stress_strain_b2: 0.005,
           stress_strain_b3: 0.0005,
-          stress_strain_b4: 0.00005
+          stress_strain_b4: 0.00005,
+          is_narcisse: false
         },
         {
           name: 'Cable 2',
@@ -283,7 +288,8 @@ describe('CablesService', () => {
           stress_strain_b1: 0.055,
           stress_strain_b2: 0.0055,
           stress_strain_b3: 0.00055,
-          stress_strain_b4: 0.000055
+          stress_strain_b4: 0.000055,
+          is_narcisse: false
         }
       ]);
     });
@@ -338,42 +344,44 @@ describe('CablesService', () => {
         {
           name: '',
           data_source: 'RTE',
-          section: 100,
-          diameter: 10.5,
-          young_modulus: 200000,
-          linear_weight: 0.5,
-          dilatation_coefficient: 0.000012,
-          temperature_reference: 20,
-          stress_strain_a0: 1.0,
-          stress_strain_a1: 0.1,
-          stress_strain_a2: 0.01,
-          stress_strain_a3: 0.001,
-          stress_strain_a4: 0.0001,
-          stress_strain_b0: 0.5,
-          stress_strain_b1: 0.05,
-          stress_strain_b2: 0.005,
-          stress_strain_b3: 0.0005,
-          stress_strain_b4: 0.00005
+          section: '100',
+          diameter: '10.5',
+          young_modulus: '200000',
+          linear_weight: '0.5',
+          dilatation_coefficient: '0.000012',
+          temperature_reference: '20',
+          stress_strain_a0: '1.0',
+          stress_strain_a1: '0.1',
+          stress_strain_a2: '0.01',
+          stress_strain_a3: '0.001',
+          stress_strain_a4: '0.0001',
+          stress_strain_b0: '0.5',
+          stress_strain_b1: '0.05',
+          stress_strain_b2: '0.005',
+          stress_strain_b3: '0.0005',
+          stress_strain_b4: '0.00005',
+          is_narcisse: 'false'
         },
         {
           name: 'Cable 2',
           data_source: 'RTE',
-          section: 150,
-          diameter: 12.0,
-          young_modulus: 180000,
-          linear_weight: 0.6,
-          dilatation_coefficient: 0.000011,
-          temperature_reference: 20,
-          stress_strain_a0: 1.1,
-          stress_strain_a1: 0.11,
-          stress_strain_a2: 0.011,
-          stress_strain_a3: 0.0011,
-          stress_strain_a4: 0.00011,
-          stress_strain_b0: 0.55,
-          stress_strain_b1: 0.055,
-          stress_strain_b2: 0.0055,
-          stress_strain_b3: 0.00055,
-          stress_strain_b4: 0.000055
+          section: '150',
+          diameter: '12.0',
+          young_modulus: '180000',
+          linear_weight: '0.6',
+          dilatation_coefficient: '0.000011',
+          temperature_reference: '20',
+          stress_strain_a0: '1.1',
+          stress_strain_a1: '0.11',
+          stress_strain_a2: '0.011',
+          stress_strain_a3: '0.0011',
+          stress_strain_a4: '0.00011',
+          stress_strain_b0: '0.55',
+          stress_strain_b1: '0.055',
+          stress_strain_b2: '0.0055',
+          stress_strain_b3: '0.00055',
+          stress_strain_b4: '0.000055',
+          is_narcisse: 'false'
         }
       ];
 
@@ -436,7 +444,8 @@ describe('CablesService', () => {
           stress_strain_b1: 0.055,
           stress_strain_b2: 0.0055,
           stress_strain_b3: 0.00055,
-          stress_strain_b4: 0.000055
+          stress_strain_b4: 0.000055,
+          is_narcisse: false
         }
       ]);
     });
@@ -448,22 +457,23 @@ describe('CablesService', () => {
         {
           name: 'Cable 1',
           data_source: 'RTE',
-          section: 100,
-          diameter: 10.5,
-          young_modulus: 200000,
-          linear_weight: 0.5,
-          dilatation_coefficient: 0.000012,
-          temperature_reference: 20,
-          stress_strain_a0: 1.0,
-          stress_strain_a1: 0.1,
-          stress_strain_a2: 0.01,
-          stress_strain_a3: 0.001,
-          stress_strain_a4: 0.0001,
-          stress_strain_b0: 0.5,
-          stress_strain_b1: 0.05,
-          stress_strain_b2: 0.005,
-          stress_strain_b3: 0.0005,
-          stress_strain_b4: 0.00005
+          section: '100',
+          diameter: '10.5',
+          young_modulus: '200000',
+          linear_weight: '0.5',
+          dilatation_coefficient: '0.000012',
+          temperature_reference: '20',
+          stress_strain_a0: '1.0',
+          stress_strain_a1: '0.1',
+          stress_strain_a2: '0.01',
+          stress_strain_a3: '0.001',
+          stress_strain_a4: '0.0001',
+          stress_strain_b0: '0.5',
+          stress_strain_b1: '0.05',
+          stress_strain_b2: '0.005',
+          stress_strain_b3: '0.0005',
+          stress_strain_b4: '0.00005',
+          is_narcisse: 'false'
         }
       ];
 
@@ -513,62 +523,65 @@ describe('CablesService', () => {
         {
           name: 'Cable 1',
           data_source: 'RTE',
-          section: 100,
-          diameter: 10.5,
-          young_modulus: 200000,
-          linear_weight: 0.5,
-          dilatation_coefficient: 0.000012,
-          temperature_reference: 20,
-          stress_strain_a0: 1.0,
-          stress_strain_a1: 0.1,
-          stress_strain_a2: 0.01,
-          stress_strain_a3: 0.001,
-          stress_strain_a4: 0.0001,
-          stress_strain_b0: 0.5,
-          stress_strain_b1: 0.05,
-          stress_strain_b2: 0.005,
-          stress_strain_b3: 0.0005,
-          stress_strain_b4: 0.00005
+          section: '100',
+          diameter: '10.5',
+          young_modulus: '200000',
+          linear_weight: '0.5',
+          dilatation_coefficient: '0.000012',
+          temperature_reference: '20',
+          stress_strain_a0: '1.0',
+          stress_strain_a1: '0.1',
+          stress_strain_a2: '0.01',
+          stress_strain_a3: '0.001',
+          stress_strain_a4: '0.0001',
+          stress_strain_b0: '0.5',
+          stress_strain_b1: '0.05',
+          stress_strain_b2: '0.005',
+          stress_strain_b3: '0.0005',
+          stress_strain_b4: '0.00005',
+          is_narcisse: 'false'
         },
         {
           name: '',
           data_source: 'RTE',
-          section: 150,
-          diameter: 12.0,
-          young_modulus: 180000,
-          linear_weight: 0.6,
-          dilatation_coefficient: 0.000011,
-          temperature_reference: 20,
-          stress_strain_a0: 1.1,
-          stress_strain_a1: 0.11,
-          stress_strain_a2: 0.011,
-          stress_strain_a3: 0.0011,
-          stress_strain_a4: 0.00011,
-          stress_strain_b0: 0.55,
-          stress_strain_b1: 0.055,
-          stress_strain_b2: 0.0055,
-          stress_strain_b3: 0.00055,
-          stress_strain_b4: 0.000055
+          section: '150',
+          diameter: '12.0',
+          young_modulus: '180000',
+          linear_weight: '0.6',
+          dilatation_coefficient: '0.000011',
+          temperature_reference: '20',
+          stress_strain_a0: '1.1',
+          stress_strain_a1: '0.11',
+          stress_strain_a2: '0.011',
+          stress_strain_a3: '0.0011',
+          stress_strain_a4: '0.00011',
+          stress_strain_b0: '0.55',
+          stress_strain_b1: '0.055',
+          stress_strain_b2: '0.0055',
+          stress_strain_b3: '0.00055',
+          stress_strain_b4: '0.000055',
+          is_narcisse: 'false'
         },
         {
           name: 'Cable 3',
           data_source: 'RTE',
-          section: 200,
-          diameter: 15.0,
-          young_modulus: 190000,
-          linear_weight: 0.7,
-          dilatation_coefficient: 0.00001,
-          temperature_reference: 20,
-          stress_strain_a0: 1.2,
-          stress_strain_a1: 0.12,
-          stress_strain_a2: 0.012,
-          stress_strain_a3: 0.0012,
-          stress_strain_a4: 0.00012,
-          stress_strain_b0: 0.6,
-          stress_strain_b1: 0.06,
-          stress_strain_b2: 0.006,
-          stress_strain_b3: 0.0006,
-          stress_strain_b4: 0.00006
+          section: '200',
+          diameter: '15.0',
+          young_modulus: '190000',
+          linear_weight: '0.7',
+          dilatation_coefficient: '0.00001',
+          temperature_reference: '20',
+          stress_strain_a0: '1.2',
+          stress_strain_a1: '0.12',
+          stress_strain_a2: '0.012',
+          stress_strain_a3: '0.0012',
+          stress_strain_a4: '0.00012',
+          stress_strain_b0: '0.6',
+          stress_strain_b1: '0.06',
+          stress_strain_b2: '0.006',
+          stress_strain_b3: '0.0006',
+          stress_strain_b4: '0.00006',
+          is_narcisse: 'false'
         }
       ];
 
@@ -631,7 +644,8 @@ describe('CablesService', () => {
           stress_strain_b1: 0.05,
           stress_strain_b2: 0.005,
           stress_strain_b3: 0.0005,
-          stress_strain_b4: 0.00005
+          stress_strain_b4: 0.00005,
+          is_narcisse: false
         },
         {
           name: 'Cable 3',
@@ -651,7 +665,8 @@ describe('CablesService', () => {
           stress_strain_b1: 0.06,
           stress_strain_b2: 0.006,
           stress_strain_b3: 0.0006,
-          stress_strain_b4: 0.00006
+          stress_strain_b4: 0.00006,
+          is_narcisse: false
         }
       ]);
     });
@@ -661,22 +676,23 @@ describe('CablesService', () => {
         {
           name: 'Cable 1',
           data_source: 'RTE',
-          section: 100,
-          diameter: 10.5,
-          young_modulus: 200000,
-          linear_weight: 0.5,
-          dilatation_coefficient: 0.000012,
-          temperature_reference: 20,
-          stress_strain_a0: 1.0,
-          stress_strain_a1: 0.1,
-          stress_strain_a2: 0.01,
-          stress_strain_a3: 0.001,
-          stress_strain_a4: 0.0001,
-          stress_strain_b0: 0.5,
-          stress_strain_b1: 0.05,
-          stress_strain_b2: 0.005,
-          stress_strain_b3: 0.0005,
-          stress_strain_b4: 0.00005
+          section: '100',
+          diameter: '10.5',
+          young_modulus: '200000',
+          linear_weight: '0.5',
+          dilatation_coefficient: '0.000012',
+          temperature_reference: '20',
+          stress_strain_a0: '1.0',
+          stress_strain_a1: '0.1',
+          stress_strain_a2: '0.01',
+          stress_strain_a3: '0.001',
+          stress_strain_a4: '0.0001',
+          stress_strain_b0: '0.5',
+          stress_strain_b1: '0.05',
+          stress_strain_b2: '0.005',
+          stress_strain_b3: '0.0005',
+          stress_strain_b4: '0.00005',
+          is_narcisse: 'false'
         }
       ];
 
