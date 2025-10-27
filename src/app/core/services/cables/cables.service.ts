@@ -10,6 +10,7 @@ import { BehaviorSubject, catchError, of } from 'rxjs';
 import { Cable, RteCablesCsvFile } from '../../data/database/interfaces/cable';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
+import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
 
 @Injectable({
   providedIn: 'root'
@@ -32,8 +33,8 @@ export class CablesService {
 
   async importFromFile() {
     const cables = this.http
-      .get<string>(`${window.location.origin}/cables.csv`, {
-        responseType: 'text' as any
+      .get(`${window.location.origin}/cables.csv`, {
+        responseType: 'text'
       })
       .pipe(
         catchError((error) => {
@@ -42,27 +43,32 @@ export class CablesService {
         })
       );
 
-    const mapData = (data: RteCablesCsvFile[]) => {
+    const mapData = (data: RteCablesCsvFile[]): Cable[] => {
       return data
         .map((item) => ({
           name: item.name,
           data_source: item.data_source,
-          section: item.section,
-          diameter: item.diameter,
-          young_modulus: item.young_modulus,
-          linear_weight: item.linear_weight,
-          dilatation_coefficient: item.dilatation_coefficient,
-          temperature_reference: item.temperature_reference,
-          stress_strain_a0: item.stress_strain_a0,
-          stress_strain_a1: item.stress_strain_a1,
-          stress_strain_a2: item.stress_strain_a2,
-          stress_strain_a3: item.stress_strain_a3,
-          stress_strain_a4: item.stress_strain_a4,
-          stress_strain_b0: item.stress_strain_b0,
-          stress_strain_b1: item.stress_strain_b1,
-          stress_strain_b2: item.stress_strain_b2,
-          stress_strain_b3: item.stress_strain_b3,
-          stress_strain_b4: item.stress_strain_b4
+          section: convertStringToNumber(item.section),
+          diameter: convertStringToNumber(item.diameter),
+          young_modulus: convertStringToNumber(item.young_modulus),
+          linear_weight: convertStringToNumber(item.linear_weight),
+          dilatation_coefficient: convertStringToNumber(
+            item.dilatation_coefficient
+          ),
+          temperature_reference: convertStringToNumber(
+            item.temperature_reference
+          ),
+          stress_strain_a0: convertStringToNumber(item.stress_strain_a0),
+          stress_strain_a1: convertStringToNumber(item.stress_strain_a1),
+          stress_strain_a2: convertStringToNumber(item.stress_strain_a2),
+          stress_strain_a3: convertStringToNumber(item.stress_strain_a3),
+          stress_strain_a4: convertStringToNumber(item.stress_strain_a4),
+          stress_strain_b0: convertStringToNumber(item.stress_strain_b0),
+          stress_strain_b1: convertStringToNumber(item.stress_strain_b1),
+          stress_strain_b2: convertStringToNumber(item.stress_strain_b2),
+          stress_strain_b3: convertStringToNumber(item.stress_strain_b3),
+          stress_strain_b4: convertStringToNumber(item.stress_strain_b4),
+          is_narcisse: item.is_narcisse === 'true'
         }))
         .filter((item) => item.name);
     };
@@ -82,6 +88,7 @@ export class CablesService {
             }
             await this.storageService.db?.cables.clear();
             const cablesTable: Cable[] = mapData(data);
+            console.log('adding cables data', cablesTable.length);
             await this.storageService.db?.cables.bulkAdd(cablesTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<RteCablesCsvFile>) => void

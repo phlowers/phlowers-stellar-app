@@ -3,7 +3,9 @@ import { ImportStudyComponent } from './import-study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { MessageService } from 'primeng/api';
 import Papa from 'papaparse';
-import { Study } from '@src/app/core/data/database/interfaces/study';
+import { Study } from '@core/data/database/interfaces/study';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { CablesService } from '@src/app/core/services/cables/cables.service';
 
 describe('ImportStudyComponent', () => {
   let component: ImportStudyComponent;
@@ -17,6 +19,15 @@ describe('ImportStudyComponent', () => {
     const mockMessageService = {
       add: jest.fn()
     } as unknown as MessageService;
+    const mockCablesService = {
+      getCables: jest
+        .fn()
+        .mockResolvedValue([
+          { name: 'conducteur' },
+          { name: 'ASTER600' },
+          { name: 'câble par faisceau' }
+        ])
+    } as unknown as jest.Mocked<CablesService>;
 
     // Mock Papa.parse
     const mockParse = jest
@@ -24,35 +35,37 @@ describe('ImportStudyComponent', () => {
       .mockImplementation(
         (input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
           if (config?.complete) {
-            // Simulate successful parsing
-            const mockResult: Papa.ParseResult<Record<string, string>> = {
-              data: [
-                {
-                  num: '1',
-                  nom: '98',
-                  suspension: 'FAUX',
-                  alt_acc: '1075,53',
-                  long_bras: '0',
-                  angle_ligne: '-19,1',
-                  long_ch: '0',
-                  pds_ch: '0',
-                  surf_ch: '0',
-                  ctr_poids: '0',
-                  ch_en_V: 'FAUX',
-                  portée: '473,07'
+            // Simulate successful parsing with async behavior
+            setTimeout(() => {
+              const mockResult: Papa.ParseResult<Record<string, string>> = {
+                data: [
+                  {
+                    num: '1',
+                    nom: '98',
+                    suspension: 'FAUX',
+                    alt_acc: '1075,53',
+                    long_bras: '0',
+                    angle_ligne: '-19,1',
+                    long_ch: '0',
+                    pds_ch: '0',
+                    surf_ch: '0',
+                    ctr_poids: '0',
+                    ch_en_V: 'FAUX',
+                    portée: '473,07'
+                  }
+                ],
+                errors: [],
+                meta: {
+                  delimiter: ';',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0
                 }
-              ],
-              errors: [],
-              meta: {
-                delimiter: ';',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0
-              }
-            };
-            // Call complete callback
-            config.complete!(mockResult, undefined);
+              };
+              // Call complete callback
+              config.complete!(mockResult, undefined);
+            }, 0);
           }
           return {} as Papa.ParseResult<Record<string, string>>;
         }
@@ -61,10 +74,11 @@ describe('ImportStudyComponent', () => {
     (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
     await TestBed.configureTestingModule({
-      imports: [ImportStudyComponent],
+      imports: [ImportStudyComponent, HttpClientTestingModule],
       providers: [
         { provide: StudiesService, useValue: studiesServiceMock },
-        { provide: MessageService, useValue: mockMessageService }
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: CablesService, useValue: mockCablesService }
       ]
     }).compileComponents();
 
@@ -184,8 +198,11 @@ describe('ImportStudyComponent', () => {
 19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
 20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
 
-      // Convert to base64 as readAsDataURL would do
-      const base64Content = btoa(mockCsvContent);
+      // Convert to base64 using a method that handles ISO 8859-1 encoding properly
+      // Create a Uint8Array from the string using ISO 8859-1 encoding
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(mockCsvContent);
+      const base64Content = btoa(String.fromCharCode(...bytes));
       const dataUrl = `data:text/csv;base64,${base64Content}`;
 
       const mockEvent = {

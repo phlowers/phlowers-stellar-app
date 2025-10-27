@@ -266,11 +266,6 @@
         <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
-    <unit id="159395379410071627">
-      <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;public&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;public&quot; /&gt;"/> Publish </source>
-      </segment>
-    </unit>
     <unit id="1599802675385906175">
       <segment>
         <source>Add support after</source>
@@ -431,11 +426,6 @@
         <source>Database reset</source>
       </segment>
     </unit>
-    <unit id="3689220712977179060">
-      <segment>
-        <source>Section source</source>
-      </segment>
-    </unit>
     <unit id="3799093232488965923">
       <segment>
         <source> Open </source>
@@ -504,16 +494,6 @@
     <unit id="4667659558738672926">
       <segment>
         <source>Changelogs</source>
-      </segment>
-    </unit>
-    <unit id="4973351383154508059">
-      <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;content_copy&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;content_copy&quot; /&gt;"/> Duplicate </source>
-      </segment>
-    </unit>
-    <unit id="504426626920824980">
-      <segment>
-        <source>Study states</source>
       </segment>
     </unit>
     <unit id="5078151248323604568">
@@ -626,9 +606,9 @@
         <source>Create an initial condition</source>
       </segment>
     </unit>
-    <unit id="6173209146841926976">
+    <unit id="1363022291205513969">
       <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Add a section </source>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a section </source>
       </segment>
     </unit>
     <unit id="633450215070869903">
@@ -639,11 +619,6 @@
     <unit id="5684312348614575469">
       <segment>
         <source> Reset the app </source>
-      </segment>
-    </unit>
-    <unit id="3109247660283861099">
-      <segment>
-        <source> Number </source>
       </segment>
     </unit>
     <unit id="836321179652220398">
@@ -741,9 +716,9 @@
         <source>Section Duplicated</source>
       </segment>
     </unit>
-    <unit id="7915195931257031161">
+    <unit id="3329351932948801616">
       <segment>
-        <source>Ground and obstacles</source>
+        <source>Ground &amp; obstacles</source>
       </segment>
     </unit>
     <unit id="7937931707186931727">
@@ -826,11 +801,6 @@
         <source> Give a name to your study </source>
       </segment>
     </unit>
-    <unit id="862393570495704117">
-      <segment>
-        <source>Study sections</source>
-      </segment>
-    </unit>
     <unit id="8833276229402617730">
       <segment>
         <source>No existing section</source>
@@ -909,11 +879,6 @@
     <unit id="2662644497259948010">
       <segment>
         <source>Comment</source>
-      </segment>
-    </unit>
-    <unit id="2942231991688386110">
-      <segment>
-        <source>Line maintenance team</source>
       </segment>
     </unit>
     <unit id="3228248733549149448">
@@ -1011,11 +976,6 @@
         <source>Support name</source>
       </segment>
     </unit>
-    <unit id="6120722023223731581">
-      <segment>
-        <source>Generate an initial state</source>
-      </segment>
-    </unit>
     <unit id="7462301153729425254">
       <segment>
         <source>Export</source>
@@ -1029,11 +989,6 @@
     <unit id="7584732332123203553">
       <segment>
         <source>Attachment set</source>
-      </segment>
-    </unit>
-    <unit id="1005793920710327844">
-      <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;edit_arrow_down&quot; /&gt;"/> Double click on a column to copy the value to all supports </source>
       </segment>
     </unit>
     <unit id="2901943060312328653">
@@ -1453,19 +1408,9 @@
         <source>attachment position</source>
       </segment>
     </unit>
-    <unit id="2395680375895003637">
+    <unit id="937239552133817956">
       <segment>
-        <source> Attachment alt. (NGF) </source>
-      </segment>
-    </unit>
-    <unit id="2673079648784878747">
-      <segment>
-        <source> Supp. foot alt. </source>
-      </segment>
-    </unit>
-    <unit id="3573539458079377481">
-      <segment>
-        <source> Span l. </source>
+        <source>Supp. foot alt.</source>
       </segment>
     </unit>
     <unit id="3712341023220217420">
@@ -1481,11 +1426,6 @@
     <unit id="6707592636055800614">
       <segment>
         <source> Attachment pos. </source>
-      </segment>
-    </unit>
-    <unit id="7344185306127800763">
-      <segment>
-        <source> Chain l. </source>
       </segment>
     </unit>
     <unit id="7929145588930827141">
@@ -1511,11 +1451,6 @@
     <unit id="884256968362108043">
       <segment>
         <source>m²</source>
-      </segment>
-    </unit>
-    <unit id="8847384389461548292">
-      <segment>
-        <source> Angle </source>
       </segment>
     </unit>
     <unit id="1079181845691356032">
@@ -1636,6 +1571,91 @@
     <unit id="6560642783363072934">
       <segment>
         <source>Vertical (m)</source>
+      </segment>
+    </unit>
+    <unit id="3854993654974680287">
+      <segment>
+        <source>Support {first} to {last} of {totalRecords}</source>
+      </segment>
+    </unit>
+    <unit id="3885497195825665706">
+      <segment>
+        <source>Next</source>
+      </segment>
+    </unit>
+    <unit id="4321296572437361289">
+      <segment>
+        <source>Generate a state</source>
+      </segment>
+    </unit>
+    <unit id="4452427314943113135">
+      <segment>
+        <source>Previous</source>
+      </segment>
+    </unit>
+    <unit id="7386852230658433938">
+      <segment>
+        <source>Comment about the supports</source>
+      </segment>
+    </unit>
+    <unit id="8687116247161905115">
+      <segment>
+        <source>Cable not found in database: <ph id="0" equiv="PH" disp="parameters.conductor"/></source>
+      </segment>
+    </unit>
+    <unit id="131564779447274448">
+      <segment>
+        <source>Attachment alt. (NGF)</source>
+      </segment>
+    </unit>
+    <unit id="2759009850634919490">
+      <segment>
+        <source>Span l.</source>
+      </segment>
+    </unit>
+    <unit id="4363811923368535546">
+      <segment>
+        <source>Chain l.</source>
+      </segment>
+    </unit>
+    <unit id="6370642728789544052">
+      <segment>
+        <source>Number</source>
+      </segment>
+    </unit>
+    <unit id="8240240329115149718">
+      <segment>
+        <source>Angle</source>
+      </segment>
+    </unit>
+    <unit id="8502839014739399542">
+      <segment>
+        <source>Double click on a column to copy the value to all supports</source>
+      </segment>
+    </unit>
+    <unit id="1927414643473979733">
+      <segment>
+        <source>Choose a creation type</source>
+      </segment>
+    </unit>
+    <unit id="8792569904201285826">
+      <segment>
+        <source>List of saved states</source>
+      </segment>
+    </unit>
+    <unit id="9093347743965817292">
+      <segment>
+        <source>Line team</source>
+      </segment>
+    </unit>
+    <unit id="8446665382086922955">
+      <segment>
+        <source>dd/MM:yyyy at HH&apos;h&apos;mm</source>
+      </segment>
+    </unit>
+    <unit id="7430416142942514215">
+      <segment>
+        <source>Publish</source>
       </segment>
     </unit>
   </file>

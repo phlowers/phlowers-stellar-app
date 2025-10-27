@@ -39,6 +39,7 @@ export interface Section {
   branch_name: string | undefined;
   electric_tension_level: string | undefined;
   comment: string | undefined;
+  supports_comment: string | undefined;
   supports: Support[];
   initial_conditions: InitialCondition[];
   selected_initial_condition_uuid: string | undefined;

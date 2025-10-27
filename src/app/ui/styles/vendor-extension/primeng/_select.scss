@@ -37,10 +37,11 @@
 
 // specific override for initial condition select list in study section tab (page study) and for charge case select list in studio menu bar
 .select-with-buttons.has-clear-btn .p-select-label {
-  @apply pr-11;
+  padding-right: 2.75rem;
 }
 
 .select-with-buttons-panel.select-with-buttons-panel {
+
   .p-select-list,
   .p-select-option {
     padding: 0rem;
@@ -52,17 +53,33 @@
     cursor: auto;
   }
 
+  li {
+    width: 23.8125rem;
+  }
+
   .select-dropdown {
-    @apply flex flex-row items-center gap-2 p-2;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    width: 100%;
 
     &__select {
-      @apply w-32 max-w-32 px-0;
+      width: 100%;
+      padding-left: 0;
+      padding-right: 0;
       align-self: stretch;
+      min-width: 0;
 
       .app-btn-label {
-        @apply whitespace-nowrap overflow-hidden overflow-ellipsis px-1;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
         @extend %text-m-400;
         color: var(--grey-750);
+        white-space: pre-wrap;
+        text-align: left;
+        word-break: break-all
       }
     }
 

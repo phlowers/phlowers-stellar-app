@@ -22,13 +22,39 @@ import { Section } from '@src/app/core/data/database/interfaces/section';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Study } from '@core/data/database/interfaces/study';
+import { isNil } from 'lodash';
 
 const areAllRequiredFieldsFilled = (section: Section) => {
+  const nameCondition = !!section.name.trim();
+  const typeCondition = !!section.type;
+  const cablesAmountCondition = !!section.cables_amount;
+  const cableNameCondition = !!section.cable_name;
+  const supportsNumberCondition = !!section.supports.every(
+    (support) => !isNil(support.number)
+  );
+  const supportsSpanLengthCondition = !!section.supports.every(
+    (support, index) =>
+      !isNil(support.spanLength) || index === section.supports.length - 1
+  );
+  const supportsSpanAngleCondition = !!section.supports.every(
+    (support) => !isNil(support.spanAngle)
+  );
+  const supportsChainLengthCondition = !!section.supports.every(
+    (support) => !isNil(support.chainLength)
+  );
+  const supportsAttachmentHeightCondition = !!section.supports.every(
+    (support) => !isNil(support.attachmentHeight)
+  );
   return (
-    !!section.name &&
-    !!section.type &&
-    !!section.cables_amount &&
-    !!section.cable_name
+    nameCondition &&
+    typeCondition &&
+    cablesAmountCondition &&
+    cableNameCondition &&
+    supportsNumberCondition &&
+    supportsSpanLengthCondition &&
+    supportsSpanAngleCondition &&
+    supportsChainLengthCondition &&
+    supportsAttachmentHeightCondition
   );
 };
 
@@ -97,7 +123,7 @@ export class NewSectionModalComponent {
     }
   }
 
-  onSectionChange(event: any) {
+  onSectionChange(event: Section) {
     this.sectionChange.emit(event);
     this.checkFields();
   }

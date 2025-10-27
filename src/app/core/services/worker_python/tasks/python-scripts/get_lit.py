@@ -144,11 +144,8 @@ def main():
 
         return pdf
 
-    section_0 = get_section(frame, -4, 10, "garde")
     section_1 = get_section(frame, 0, -10, "phase_1")
-    section_2 = get_section(frame, -8, -5, "phase_2")
-    section_3 = get_section(frame, 0, 0, "phase_3")
-    lit = pd.concat([section_0, section_1, section_2, section_3], ignore_index=True)
+    lit = pd.concat([section_1], ignore_index=True)
     globals()["test_frame"] = frame
     globals()["test_weather"] = weather
 

@@ -41,12 +41,6 @@ export class LoggedLayoutComponent implements OnInit {
         label: $localize`Studies`,
         route: '/studies',
         icon: 'folder'
-      },
-      {
-        id: 'sideB-section',
-        label: $localize`Sections`,
-        route: '/sections',
-        icon: 'timeline'
       }
     ],
     footer: [

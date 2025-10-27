@@ -55,7 +55,8 @@ describe('LinesService', () => {
     mockLinesTable = {
       count: jest.fn().mockResolvedValue(5),
       toArray: jest.fn().mockResolvedValue([]),
-      bulkAdd: jest.fn().mockResolvedValue(undefined)
+      bulkAdd: jest.fn().mockResolvedValue(undefined),
+      clear: jest.fn().mockResolvedValue(undefined)
     };
 
     mockMaintenanceTable = {
@@ -210,7 +211,7 @@ describe('LinesService', () => {
 
       await importPromise;
 
-      expect(mockMaintenanceTable.clear).toHaveBeenCalled();
+      expect(mockLinesTable.clear).toHaveBeenCalled();
       expect(mockLinesTable.bulkAdd).toHaveBeenCalled();
     });
 
@@ -255,7 +256,7 @@ describe('LinesService', () => {
 
       await importPromise;
 
-      expect(mockMaintenanceTable.clear).not.toHaveBeenCalled();
+      expect(mockLinesTable.clear).not.toHaveBeenCalled();
       expect(mockLinesTable.bulkAdd).not.toHaveBeenCalled();
     });
 

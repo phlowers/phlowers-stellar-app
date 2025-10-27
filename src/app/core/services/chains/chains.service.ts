@@ -32,8 +32,8 @@ export class ChainsService {
 
   async importFromFile() {
     const chains = this.http
-      .get<string>(`${window.location.origin}/chains.csv`, {
-        responseType: 'text' as any
+      .get(`${window.location.origin}/chains.csv`, {
+        responseType: 'text'
       })
       .pipe(
         catchError((error) => {
@@ -68,6 +68,7 @@ export class ChainsService {
             }
             await this.storageService.db?.chains.clear();
             const chainsTable: Chain[] = mapData(data);
+            console.log('adding chains data', chainsTable.length);
             await this.storageService.db?.chains.bulkAdd(chainsTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<RteChainsCsvFile>) => void

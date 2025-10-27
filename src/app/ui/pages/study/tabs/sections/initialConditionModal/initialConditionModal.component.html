@@ -100,75 +100,77 @@
             <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
           </p-inputgroup>
         </div>
-        <div>
-          <p class="font-bold mb-0" i18n>
-            Extreme historical conditions incurred by the cable
-          </p>
-        </div>
-        <div>
-          <label for="initial-condition-base-temperature" i18n>
-            Cable pretension
-          </label>
-          <p-inputgroup>
-            <input
-              name="initial-condition-cable-pretension"
-              required
-              type="number"
-              id="initial-condition-cable-pretension"
-              pInputText
-              [(ngModel)]="initialCondition().cable_pretension"
-            />
-            <p-inputgroup-addon i18n>DaN</p-inputgroup-addon>
-          </p-inputgroup>
-        </div>
-        <div>
-          <label for="initial-condition-base-temperature" i18n>
-            Min temperature
-          </label>
-          <p-inputgroup>
-            <input
-              name="initial-condition-min-temperature"
-              required
-              type="number"
-              id="initial-condition-min-temperature"
-              pInputText
-              [(ngModel)]="initialCondition().min_temperature"
-            />
-            <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
-          </p-inputgroup>
-        </div>
-        <div>
-          <label for="initial-condition-base-temperature" i18n>
-            Max wind pressure
-          </label>
-          <p-inputgroup>
-            <input
-              name="initial-condition-max-wind-pressure"
-              required
-              type="number"
-              id="initial-condition-max-wind-pressure"
-              pInputText
-              [(ngModel)]="initialCondition().max_wind_pressure"
-            />
-            <p-inputgroup-addon i18n>Pa</p-inputgroup-addon>
-          </p-inputgroup>
-        </div>
-        <div>
-          <label for="initial-condition-base-temperature" i18n>
-            Max ice thickness
-          </label>
-          <p-inputgroup>
-            <input
-              name="initial-condition-max-frost-width"
-              required
-              type="number"
-              id="initial-condition-max-frost-width"
-              pInputText
-              [(ngModel)]="initialCondition().max_frost_width"
-            />
-            <p-inputgroup-addon i18n>cm</p-inputgroup-addon>
-          </p-inputgroup>
-        </div>
+        @if (isCableNarcisse()) {
+          <div>
+            <p class="font-bold mb-0" i18n>
+              Extreme historical conditions incurred by the cable
+            </p>
+          </div>
+          <div>
+            <label for="initial-condition-cable-pretension" i18n>
+              Cable pretension
+            </label>
+            <p-inputgroup>
+              <input
+                name="initial-condition-cable-pretension"
+                required
+                type="number"
+                id="initial-condition-cable-pretension"
+                pInputText
+                [(ngModel)]="initialCondition().cable_pretension"
+              />
+              <p-inputgroup-addon i18n>DaN</p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+          <div>
+            <label for="initial-condition-min-temperature" i18n>
+              Min temperature
+            </label>
+            <p-inputgroup>
+              <input
+                name="initial-condition-min-temperature"
+                required
+                type="number"
+                id="initial-condition-min-temperature"
+                pInputText
+                [(ngModel)]="initialCondition().min_temperature"
+              />
+              <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+          <div>
+            <label for="initial-condition-max-wind-pressure" i18n>
+              Max wind pressure
+            </label>
+            <p-inputgroup>
+              <input
+                name="initial-condition-max-wind-pressure"
+                required
+                type="number"
+                id="initial-condition-max-wind-pressure"
+                pInputText
+                [(ngModel)]="initialCondition().max_wind_pressure"
+              />
+              <p-inputgroup-addon i18n>Pa</p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+          <div>
+            <label for="initial-condition-max-frost-width" i18n>
+              Max ice thickness
+            </label>
+            <p-inputgroup>
+              <input
+                name="initial-condition-max-frost-width"
+                required
+                type="number"
+                id="initial-condition-max-frost-width"
+                pInputText
+                [(ngModel)]="initialCondition().max_frost_width"
+              />
+              <p-inputgroup-addon i18n>cm</p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+        }
       </div>
     } @else if (mode() === 'view') {
       <dl class="form__col form__col--right">
@@ -193,47 +195,49 @@
             }
           </dd>
         </div>
-        <div>
-          <p class="font-bold mb-0" i18n>
-            Extreme historical conditions incurred by the cable
-          </p>
-        </div>
-        <div>
-          <dt i18n>Cable pretension</dt>
-          <dd class="read-only-info test">
-            {{ initialCondition().cable_pretension }}
-            @if (isNumber(initialCondition().cable_pretension)) {
-              <ng-container i18n>DaN</ng-container>
-            }
-          </dd>
-        </div>
-        <div>
-          <dt i18n>Min temperature</dt>
-          <dd class="read-only-info test">
-            {{ initialCondition().min_temperature }}
-            @if (isNumber(initialCondition().min_temperature)) {
-              <ng-container i18n>°C</ng-container>
-            }
-          </dd>
-        </div>
-        <div>
-          <dt i18n>Max wind pressure</dt>
-          <dd class="read-only-info test">
-            {{ initialCondition().max_wind_pressure }}
-            @if (isNumber(initialCondition().max_wind_pressure)) {
-              <ng-container i18n>Pa</ng-container>
-            }
-          </dd>
-        </div>
-        <div>
-          <dt i18n>Max ice thickness</dt>
-          <dd class="read-only-info test">
-            {{ initialCondition().max_frost_width }}
-            @if (isNumber(initialCondition().max_frost_width)) {
-              <ng-container i18n>cm</ng-container>
-            }
-          </dd>
-        </div>
+        @if (isCableNarcisse()) {
+          <div>
+            <dt class="font-bold" i18n>
+              Extreme historical conditions incurred by the cable
+            </dt>
+          </div>
+          <div>
+            <dt i18n>Cable pretension</dt>
+            <dd class="read-only-info test">
+              {{ initialCondition().cable_pretension }}
+              @if (isNumber(initialCondition().cable_pretension)) {
+                <ng-container i18n>DaN</ng-container>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt i18n>Min temperature</dt>
+            <dd class="read-only-info test">
+              {{ initialCondition().min_temperature }}
+              @if (isNumber(initialCondition().min_temperature)) {
+                <ng-container i18n>°C</ng-container>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt i18n>Max wind pressure</dt>
+            <dd class="read-only-info test">
+              {{ initialCondition().max_wind_pressure }}
+              @if (isNumber(initialCondition().max_wind_pressure)) {
+                <ng-container i18n>Pa</ng-container>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt i18n>Max ice thickness</dt>
+            <dd class="read-only-info test">
+              {{ initialCondition().max_frost_width }}
+              @if (isNumber(initialCondition().max_frost_width)) {
+                <ng-container i18n>cm</ng-container>
+              }
+            </dd>
+          </div>
+        }
       </dl>
     }
   </div>

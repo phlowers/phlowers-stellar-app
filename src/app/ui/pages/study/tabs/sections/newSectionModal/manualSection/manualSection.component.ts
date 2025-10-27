@@ -32,6 +32,9 @@ import { LinesService } from '@src/app/core/services/lines/lines.service';
 import { Cable } from '@src/app/core/data/database/interfaces/cable';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import { MessageModule } from 'primeng/message';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { PaginatorModule } from 'primeng/paginator';
+import { v4 as uuidv4 } from 'uuid';
 
 const sortLines = (lines: Line[]) => {
   return lines.sort((a, b) => {
@@ -60,7 +63,9 @@ const sortLines = (lines: Line[]) => {
     TextareaModule,
     UniquePipe,
     FormsModule,
-    MessageModule
+    MessageModule,
+    ButtonComponent,
+    PaginatorModule
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'
@@ -69,12 +74,11 @@ export class ManualSectionComponent implements OnInit {
   tabValue = signal<string>('general');
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
-  sectionChange = output<any>();
+  sectionChange = output<Section>();
   studio = viewChild(StudioComponent);
   cablesFilterTable = signal<Cable[]>([]);
   public sectionTypes = sectionTypes;
   isNameUnique = input<boolean>();
-
   constructor(
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,
@@ -83,6 +87,8 @@ export class ManualSectionComponent implements OnInit {
 
   maintenanceFilterTable = signal<MaintenanceData[]>([]);
   linesFilterTable = signal<Line[]>([]);
+  firstSupport = signal<number>(0);
+  rowsSupport = signal<number>(5);
 
   eelRead = signal<string>('');
   cmRead = signal<string>('');
@@ -112,16 +118,28 @@ export class ManualSectionComponent implements OnInit {
     this.setupFilterTables();
   }
 
-  tabValueChange = (event: any) => {
+  tabValueChange = (event: string | number) => {
+    this.tabValue.set(String(event));
     if (event === 'graphical') {
       this.studio()?.refreshStudio();
     }
   };
 
+  onNextTab() {
+    this.tabValue.set('supports');
+  }
+
+  onPreviousTab() {
+    this.tabValue.set('general');
+  }
+
   updateSupportsAmount(amount: number) {
     const currentSupports = this.section().supports || [];
     if (amount === currentSupports.length) {
       return;
+    }
+    if (amount < 2) {
+      amount = 2;
     }
     if (amount > currentSupports.length) {
       this.section().supports = [
@@ -134,16 +152,21 @@ export class ManualSectionComponent implements OnInit {
     } else {
       this.section().supports = currentSupports.slice(0, amount);
     }
+    this.onSectionChange();
   }
 
-  onSupportsAmountChangeInput(event: any) {
-    if (event.originalEvent.type === 'mousedown') {
-      this.updateSupportsAmount(event.value);
+  onSupportsAmountChangeInput(event: {
+    originalEvent: { type: string };
+    value: string | number | null;
+  }) {
+    if (event.originalEvent.type === 'mousedown' && event.value !== null) {
+      this.updateSupportsAmount(Number(event.value));
     }
   }
 
-  onSupportsAmountChangeBlur(event: any) {
-    this.updateSupportsAmount(event.target.value);
+  onSupportsAmountChangeBlur(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.updateSupportsAmount(Number(target.value));
   }
 
   addSupport(index: number, position: 'before' | 'after') {
@@ -156,9 +179,24 @@ export class ManualSectionComponent implements OnInit {
   }
 
   deleteSupport(uuid: string) {
+    if (this.section().supports?.length <= 2) {
+      return;
+    }
     this.section().supports = this.section().supports?.filter(
       (support) => support.uuid !== uuid
     );
+  }
+
+  duplicateSupport(uuid: string) {
+    const support = this.section().supports?.find(
+      (support: Support) => support.uuid === uuid
+    );
+    if (support) {
+      this.section().supports?.push({
+        ...support,
+        uuid: uuidv4()
+      });
+    }
   }
 
   onSupportChange(change: {
@@ -170,11 +208,16 @@ export class ManualSectionComponent implements OnInit {
       (support: Support) => support.uuid === change.uuid
     );
     if (support) {
-      (support as any)[change.field] = change.value;
+      (support as unknown as Record<string, unknown>)[change.field] =
+        change.value;
     }
+    this.onSectionChange();
   }
 
-  async onMaintenanceSelect(event: any, type: 'cm' | 'gmr' | 'eel') {
+  async onMaintenanceSelect(
+    event: { value: string },
+    type: 'cm' | 'gmr' | 'eel'
+  ) {
     if (!event.value) {
       this.maintenanceFilterTable.set(
         sortBy(await this.maintenanceService.getMaintenance(), 'eel_name')
@@ -191,15 +234,16 @@ export class ManualSectionComponent implements OnInit {
     this.maintenanceFilterTable.set(sortBy(items, 'eel_name'));
     ['eel', 'cm', 'gmr'].forEach((id) => {
       if (uniqBy(items, `${id}_id`)?.length === 1) {
-        (this.section() as any)[id] = uniqBy(items, id)[0][
-          `${id}_id` as keyof MaintenanceData
-        ];
+        (this.section() as unknown as Record<string, unknown>)[id] = uniqBy(
+          items,
+          id
+        )[0][`${id}_id` as keyof MaintenanceData];
       }
     });
   }
 
   async onLinesSelect(
-    event: any,
+    event: { value: string },
     type: 'link_idr' | 'lit_adr' | 'branch_adr' | 'electric_tension_level_adr'
   ) {
     if (!event.value) {
@@ -242,5 +286,10 @@ export class ManualSectionComponent implements OnInit {
 
   onSectionChange() {
     this.sectionChange.emit(this.section());
+  }
+
+  onSupportsPageChange(event: { rows?: number; page?: number }) {
+    this.rowsSupport.set(event.rows ?? 5);
+    this.firstSupport.set((event.page ?? 0) * (event.rows ?? 5));
   }
 }

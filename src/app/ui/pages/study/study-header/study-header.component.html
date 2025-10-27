@@ -39,7 +39,7 @@
     class="study-header__time"
   >
     <app-icon icon="schedule" />
-    {{ study()?.created_at_offline | date: 'dd/MM/yyyy à HH:mm' }}
+    {{ study()?.created_at_offline | date: dateFormat }}
   </time>
 
   <hr *ngIf="study()?.shareable" class="study-header__separator" />
@@ -49,19 +49,23 @@
   <hr class="study-header__separator" />
 
   <button
-    i18n
     app-btn
     btnSize="s"
     btnStyle="text"
     (click)="duplicateStudy.emit(study()?.uuid!)"
   >
     <app-icon icon="content_copy" />
-    Duplicate
+    <ng-container i18n>Duplicate</ng-container>
   </button>
 
-  <button i18n app-btn btnSize="s" btnStyle="text">
+  <button app-btn btnSize="s" btnStyle="text">
     <app-icon icon="public" />
-    Publish
+    <ng-container i18n>Publish</ng-container>
+  </button>
+
+  <button app-btn btnSize="s" btnStyle="text" (click)="exportStudy()">
+    <app-icon icon="download" />
+    <ng-container i18n>Export</ng-container>
   </button>
 
   <p-accordion

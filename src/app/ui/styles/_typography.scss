@@ -88,6 +88,10 @@
       animation: 1s loading ease-in-out infinite;
     }
   }
+
+  &.filled {
+    font-variation-settings: 'FILL' 1;
+  }
 }
 
 @keyframes loading {

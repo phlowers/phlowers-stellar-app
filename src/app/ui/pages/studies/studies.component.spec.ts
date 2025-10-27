@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { StudiesComponent } from './studies.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { Study } from '@src/app/core/data/database/interfaces/study';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('StudiesComponent', () => {
   let component: StudiesComponent;
@@ -70,7 +71,7 @@ describe('StudiesComponent', () => {
     } as unknown as jest.Mocked<MessageService>;
 
     await TestBed.configureTestingModule({
-      imports: [StudiesComponent],
+      imports: [StudiesComponent, HttpClientTestingModule],
       providers: [
         { provide: StudiesService, useValue: mockStudiesService },
         { provide: ConfirmationService, useValue: mockConfirmationService },

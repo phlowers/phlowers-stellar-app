@@ -133,6 +133,8 @@ describe('SupportsTableComponent', () => {
     (component.supports as unknown as () => Support[]) = () => mockSupports;
     (component.mode as unknown as () => 'create' | 'edit' | 'view') = () =>
       'create';
+    (component.first as unknown as () => number) = () => 0;
+    (component.rows as unknown as () => number) = () => 10;
 
     // Setup component outputs
     component.addSupport = {
