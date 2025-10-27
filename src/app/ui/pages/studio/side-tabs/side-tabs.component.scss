@@ -6,6 +6,7 @@
 
   $_btn-overlap-size: 0.875rem;
   $_btn-px: 2.25rem;
+  $_btn-radius: 0.5rem;
   $_default-btn-bgc: var(--primary-100);
   $_active-btn-bgc: var(--grey-white);
   $_hover-btn-bgc: var(--primary-200);
@@ -13,7 +14,15 @@
   $_panel-transition-effect: ease-out;
 
   %_btn-bblr {
-    border-bottom-left-radius: 0.5rem;
+    border-bottom-left-radius: $_btn-radius;
+  }
+
+  %_btn-btlr {
+    border-top-left-radius: $_btn-radius;
+  }
+
+  %_bcgc-transition {
+    transition: background-color 0.3s ease-in-out;
   }
 
   &__header {
@@ -23,6 +32,7 @@
       @apply uppercase relative;
       @extend %text-s-600;
       @extend %_btn-bblr;
+      @extend %_bcgc-transition;
       width: 2.375rem; // firefox has weird interpretation of sideways left to right size. Forcing buttons width to avoid weird side effect.
       padding: $_btn-px 0.6875rem;
       min-height: 8.1875rem;
@@ -43,6 +53,11 @@
       &:not(:first-child) {
         margin-top: -$_btn-overlap-size;
         padding-top: $_btn-px + $_btn-overlap-size;
+        @extend %_btn-btlr;
+
+        .side-tab__header__btn__bxsh {
+          @extend %_btn-btlr;
+        }
       }
 
       &::before,
@@ -52,22 +67,18 @@
       }
 
       &::before {
-        @apply right-0 bottom-0 opacity-0;
-        width: 0.625rem;
-        height: calc(100% - #{$_btn-overlap-size});
+        @apply inset-0 opacity-0;
+        @extend %_btn-bblr;
+        @extend %_btn-btlr;
+        @extend %_bcgc-transition;
         background-color: $_active-btn-bgc;
         z-index: 4;
-      }
-
-      &:first-child {
-        &::before {
-          @apply h-full;
-        }
       }
 
       &::after {
         @apply bottom-0 left-0 w-full;
         @extend %_btn-bblr;
+        @extend %_bcgc-transition;
         z-index: 2;
         height: $_btn-overlap-size + 0.25rem;
         background-color: $_default-btn-bgc;
@@ -116,35 +127,12 @@
         z-index: 6;
       }
 
-      // Permits drop shadow to go over active button.
-      // but not over it's previous button (before pseudo el act as a mask for box-shadow. Tricky z-index issue)
-      // Proceed with caution on changes here
-      &:has(+ &.active) &__bxsh {
-        z-index: 5;
-
-        &::before {
-          @apply absolute left-0 w-full;
-          @extend %_btn-bblr;
-          content: '';
-          top: -0.25rem;
-          height: $_btn-overlap-size + 0.25rem;
-          background-image: linear-gradient(
-            to right,
-            $_default-btn-bgc 80%,
-            rgb(from #{$_default-btn-bgc} r g b / 0)
-          );
+      // "reset" active sibling buttons to let active one go above visually.
+      &:has(+ &.active) {
+        .side-tab__header__btn__bxsh,
+        &::after {
+          z-index: 0;
         }
-      }
-
-      // ensure masks are the correct bgc for themselves and their sibling hover state.
-      // Proceed with caution on changes here
-      &:hover + & &__bxsh::before,
-      &:first-child:hover &__bxsh::before {
-        background-image: linear-gradient(
-          to right,
-          $_hover-btn-bgc 80%,
-          rgb(from #{$_hover-btn-bgc} r g b / 0)
-        );
       }
     }
   }
