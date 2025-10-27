@@ -8,9 +8,11 @@ import { StudyComponent } from './study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import { InitialConditionService } from '@src/app/core/services/initial-conditions/initial-condition.service';
+import { CablesService } from '@core/services/cables/cables.service';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -48,6 +50,7 @@ describe('StudyComponent', () => {
   let mockStudiesService: jest.Mocked<StudiesService>;
   let mockSectionService: jest.Mocked<SectionService>;
   let mockInitialConditionService: jest.Mocked<InitialConditionService>;
+  let mockCablesService: jest.Mocked<CablesService>;
   let mockRouter: jest.Mocked<Router>;
   let mockMessageService: jest.Mocked<MessageService>;
   let readySubject: BehaviorSubject<boolean>;
@@ -156,6 +159,12 @@ describe('StudyComponent', () => {
       add: jest.fn()
     } as unknown as jest.Mocked<MessageService>;
 
+    mockCablesService = {
+      getCables: jest.fn().mockResolvedValue([]),
+      importFromFile: jest.fn().mockResolvedValue(undefined),
+      ready: new BehaviorSubject<boolean>(true)
+    } as unknown as jest.Mocked<CablesService>;
+
     await TestBed.configureTestingModule({
       imports: [StudyComponent],
       providers: [
@@ -166,9 +175,11 @@ describe('StudyComponent', () => {
           provide: InitialConditionService,
           useValue: mockInitialConditionService
         },
+        { provide: CablesService, useValue: mockCablesService },
         { provide: Router, useValue: mockRouter },
         { provide: MessageService, useValue: mockMessageService },
-        provideNoopAnimations()
+        provideNoopAnimations(),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
@@ -607,7 +618,10 @@ describe('StudyComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle study with null sections', async () => {
-      const studyWithNullSections = { ...mockStudy, sections: null as any };
+      const studyWithNullSections = {
+        ...mockStudy,
+        sections: null as unknown as Section[]
+      };
       component.study = studyWithNullSections;
 
       await component.createOrUpdateSection(mockSection);
@@ -627,7 +641,7 @@ describe('StudyComponent', () => {
     it('should handle section with null initial conditions', async () => {
       const sectionWithNullConditions = {
         ...mockSection,
-        initial_conditions: null as any
+        initial_conditions: null as unknown as InitialCondition[]
       };
       component.study = { ...mockStudy, sections: [sectionWithNullConditions] };
 

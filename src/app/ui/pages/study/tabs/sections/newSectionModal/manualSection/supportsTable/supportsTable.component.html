@@ -178,6 +178,7 @@
               i18n-aria-label
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.spanLength"
+              [disabled]="rowIndex === supports().length - 1"
               (ngModelChange)="
                 onSupportFieldChange(support.uuid, 'spanLength', $event)
               "
@@ -551,6 +552,15 @@
                 >
                   <app-icon icon="add" />
                   <span i18n>Add support after</span>
+                </button>
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  (click)="duplicateSupport.emit(support.uuid)"
+                >
+                  <app-icon icon="content_copy" />
+                  <span i18n>Duplicate</span>
                 </button>
                 <button
                   app-btn

@@ -25,6 +25,10 @@ export const createEmptySupport = (): Support => {
   };
 };
 
+const createFirstAndLastSupport = (): Support[] => {
+  return [createEmptySupport(), createEmptySupport()];
+};
+
 export const createEmptySection = (): Section => {
   return {
     uuid: uuidv4(),
@@ -36,7 +40,7 @@ export const createEmptySection = (): Section => {
     gmr: undefined,
     eel: undefined,
     cm: undefined,
-    supports: [],
+    supports: createFirstAndLastSupport(),
     internal_id: '',
     short_name: '',
     created_at: new Date().toISOString(),

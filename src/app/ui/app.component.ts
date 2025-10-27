@@ -119,8 +119,8 @@ export class AppComponent implements OnInit, OnDestroy {
             } else {
               this.userDialog = false;
             }
+            this.setupData();
           });
-          this.setupData();
         }
       })
     );
@@ -129,22 +129,27 @@ export class AppComponent implements OnInit, OnDestroy {
   async setupData() {
     const maintenance = await this.maintenanceService.getMaintenance();
     if (!maintenance || maintenance.length === 0) {
+      console.log('no maintenance found, importing from file');
       await this.maintenanceService.importFromFile();
     }
     const lines = await this.linesService.getLinesCount();
     if (!lines) {
+      console.log('no lines found, importing from file');
       await this.linesService.importFromFile();
     }
     const cables = await this.cablesService.getCables();
     if (!cables || cables.length === 0) {
+      console.log('no cables found, importing from file');
       await this.cablesService.importFromFile();
     }
     const chains = await this.chainsService.getChains();
     if (!chains || chains.length === 0) {
+      console.log('no chains found, importing from file');
       await this.chainsService.importFromFile();
     }
     const attachments = await this.attachmentService.getAttachments();
     if (!attachments || attachments.length === 0) {
+      console.log('no attachments found, importing from file');
       await this.attachmentService.importFromFile();
     }
   }

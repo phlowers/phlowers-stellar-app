@@ -46,6 +46,7 @@ export class SupportsTableComponent implements OnInit {
   mode = input.required<CreateEditView>();
   addSupport = output<{ index: number; position: 'before' | 'after' }>();
   deleteSupport = output<string>();
+  duplicateSupport = output<string>();
   supportChange = output<{ uuid: string; field: keyof Support; value: any }>();
   chains = signal<Chain[]>([]);
   attachmentSetModalOpen = signal<boolean>(false);

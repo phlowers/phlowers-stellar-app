@@ -11,7 +11,6 @@
   class="select-with-buttons"
   panelStyleClass="select-with-buttons-panel"
   [class.has-clear-btn]="selectedOptionValue() && showClear()"
-  [style.width]="width() || 'auto'"
 >
   <ng-template #selectedItem let-selectedOption>
     @if (selectedOptionValue()) {
@@ -30,7 +29,7 @@
         {{ item[optionLabel()] }}
       </button>
 
-      <p-divider layout="vertical" />
+      <p-divider class="divider" layout="vertical" />
 
       <button
         app-btn

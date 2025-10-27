@@ -35,8 +35,8 @@ export class MaintenanceService {
 
   async importFromFile() {
     const maintenanceTeams = this.http
-      .get<string>(`${window.location.origin}/maintenance-teams.csv`, {
-        responseType: 'text' as any
+      .get(`${window.location.origin}/maintenance-teams.csv`, {
+        responseType: 'text'
       })
       .pipe(
         catchError((error) => {
@@ -73,6 +73,7 @@ export class MaintenanceService {
             }
             await this.storageService.db?.maintenance.clear();
             const maintenanceTable: MaintenanceData[] = mapData(data);
+            console.log('adding maintenance data', maintenanceTable.length);
             await this.storageService.db?.maintenance.bulkAdd(maintenanceTable);
             resolve();
           }) as (

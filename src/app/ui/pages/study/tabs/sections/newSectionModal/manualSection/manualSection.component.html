@@ -62,7 +62,6 @@
                 optionValue="code"
                 required
                 (ngModelChange)="onSectionChange()"
-                [showClear]="true"
                 [filter]="true"
                 filterBy="name"
               />
@@ -148,7 +147,7 @@
       </div>
 
       <div class="section-form-part">
-        <h3 class="title-underline" i18n>Line maintenance team</h3>
+        <h3 class="title-underline" i18n>Line team</h3>
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid">
             <div class="flex flex-col">
@@ -361,10 +360,12 @@
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="flex flex-col">
             <label for="supportsAmount" i18n>Supports amount</label>
-            <div class="flex flex-row gap-2 justify-between items-start">
+            <div
+              class="flex flex-row gap-2 justify-between items-start w-[9.375rem]"
+            >
               <p-inputnumber
-                class="w-32"
-                min="0"
+                min="2"
+                fluid
                 [ngModel]="section().supports.length || 0"
                 [showButtons]="true"
                 buttonLayout="horizontal"
@@ -417,6 +418,7 @@
             [supports]="section().supports || []"
             (addSupport)="addSupport($event.index, $event.position)"
             (deleteSupport)="deleteSupport($event)"
+            (duplicateSupport)="duplicateSupport($event)"
             (supportChange)="onSupportChange($event)"
             [rows]="rowsSupport()"
           />

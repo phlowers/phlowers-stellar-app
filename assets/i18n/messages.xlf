@@ -266,11 +266,6 @@
         <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
-    <unit id="159395379410071627">
-      <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;public&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;public&quot; /&gt;"/> Publish </source>
-      </segment>
-    </unit>
     <unit id="1599802675385906175">
       <segment>
         <source>Add support after</source>
@@ -431,11 +426,6 @@
         <source>Database reset</source>
       </segment>
     </unit>
-    <unit id="3689220712977179060">
-      <segment>
-        <source>Section source</source>
-      </segment>
-    </unit>
     <unit id="3799093232488965923">
       <segment>
         <source> Open </source>
@@ -504,16 +494,6 @@
     <unit id="4667659558738672926">
       <segment>
         <source>Changelogs</source>
-      </segment>
-    </unit>
-    <unit id="4973351383154508059">
-      <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;content_copy&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;content_copy&quot; /&gt;"/> Duplicate </source>
-      </segment>
-    </unit>
-    <unit id="504426626920824980">
-      <segment>
-        <source>Study states</source>
       </segment>
     </unit>
     <unit id="5078151248323604568">
@@ -736,9 +716,9 @@
         <source>Section Duplicated</source>
       </segment>
     </unit>
-    <unit id="7915195931257031161">
+    <unit id="3329351932948801616">
       <segment>
-        <source>Ground and obstacles</source>
+        <source>Ground &amp; obstacles</source>
       </segment>
     </unit>
     <unit id="7937931707186931727">
@@ -821,11 +801,6 @@
         <source> Give a name to your study </source>
       </segment>
     </unit>
-    <unit id="862393570495704117">
-      <segment>
-        <source>Study sections</source>
-      </segment>
-    </unit>
     <unit id="8833276229402617730">
       <segment>
         <source>No existing section</source>
@@ -904,11 +879,6 @@
     <unit id="2662644497259948010">
       <segment>
         <source>Comment</source>
-      </segment>
-    </unit>
-    <unit id="2942231991688386110">
-      <segment>
-        <source>Line maintenance team</source>
       </segment>
     </unit>
     <unit id="3228248733549149448">
@@ -1661,6 +1631,31 @@
     <unit id="8502839014739399542">
       <segment>
         <source>Double click on a column to copy the value to all supports</source>
+      </segment>
+    </unit>
+    <unit id="1927414643473979733">
+      <segment>
+        <source>Choose a creation type</source>
+      </segment>
+    </unit>
+    <unit id="8792569904201285826">
+      <segment>
+        <source>List of saved states</source>
+      </segment>
+    </unit>
+    <unit id="9093347743965817292">
+      <segment>
+        <source>Line team</source>
+      </segment>
+    </unit>
+    <unit id="8446665382086922955">
+      <segment>
+        <source>dd/MM:yyyy at HH&apos;h&apos;mm</source>
+      </segment>
+    </unit>
+    <unit id="7430416142942514215">
+      <segment>
+        <source>Publish</source>
       </segment>
     </unit>
   </file>

@@ -577,28 +577,16 @@
         <target>Importer une étude</target>
       </segment>
     </unit>
-    <unit id="862393570495704117">
-      <segment state="initial">
-        <source>Study sections</source>
-        <target>Cantons de l&apos;étude</target>
-      </segment>
-    </unit>
-    <unit id="504426626920824980">
-      <segment state="initial">
-        <source>Study states</source>
-        <target>États de l&apos;étude</target>
-      </segment>
-    </unit>
     <unit id="5361585538695040272">
       <segment state="initial">
         <source>Measurements</source>
         <target>Mesures</target>
       </segment>
     </unit>
-    <unit id="7915195931257031161">
+    <unit id="3329351932948801616">
       <segment state="initial">
-        <source>Ground and obstacles</source>
-        <target>Sol et obstacles</target>
+        <source>Ground &amp; obstacles</source>
+        <target>Sol &amp; Obstacles</target>
       </segment>
     </unit>
     <unit id="3533138925800017240">
@@ -841,16 +829,10 @@
         <target>Créer un canton d&apos;étude</target>
       </segment>
     </unit>
-    <unit id="3689220712977179060">
-      <segment state="initial">
-        <source>Section source</source>
-        <target>Source du canton</target>
-      </segment>
-    </unit>
     <unit id="2233560223291461480">
       <segment state="initial">
         <source>Manual</source>
-        <target>Manuel</target>
+        <target>Manuellement</target>
       </segment>
     </unit>
     <unit id="7315024664317918263">
@@ -959,18 +941,6 @@
       <segment state="initial">
         <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></source>
         <target> Détails <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></target>
-      </segment>
-    </unit>
-    <unit id="4973351383154508059">
-      <segment state="initial">
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;content_copy&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;content_copy&quot; /&gt;"/> Duplicate </source>
-        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;content_copy&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;content_copy&quot; /&gt;"/> Dupliquer </target>
-      </segment>
-    </unit>
-    <unit id="159395379410071627">
-      <segment state="initial">
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;public&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;public&quot; /&gt;"/> Publish </source>
-        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;public&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;public&quot; /&gt;"/> Publier </target>
       </segment>
     </unit>
     <unit id="3102779920122732727">
@@ -1103,12 +1073,6 @@
       <segment state="initial">
         <source>Cable amount</source>
         <target>Nombre de câbles</target>
-      </segment>
-    </unit>
-    <unit id="2942231991688386110">
-      <segment state="initial">
-        <source>Line maintenance team</source>
-        <target>Équipe de maintenance de la ligne</target>
       </segment>
     </unit>
     <unit id="2662644497259948010">
@@ -1995,6 +1959,36 @@
       <segment state="initial">
         <source>Double click on a column to copy the value to all supports</source>
         <target>Double cliquer sur une colonne pour copier la valeur à tous les supports</target>
+      </segment>
+    </unit>
+    <unit id="8792569904201285826">
+      <segment state="initial">
+        <source>List of saved states</source>
+        <target>Liste des états enregistrés</target>
+      </segment>
+    </unit>
+    <unit id="9093347743965817292">
+      <segment state="initial">
+        <source>Line team</source>
+        <target>Equipe ligne</target>
+      </segment>
+    </unit>
+    <unit id="1927414643473979733">
+      <segment state="initial">
+        <source>Choose a creation type</source>
+        <target>Choisir un type de création</target>
+      </segment>
+    </unit>
+    <unit id="7430416142942514215">
+      <segment state="initial">
+        <source>Publish</source>
+        <target>Publier</target>
+      </segment>
+    </unit>
+    <unit id="8446665382086922955">
+      <segment state="initial">
+        <source>dd/MM:yyyy at HH&apos;h&apos;mm</source>
+        <target>dd/MM:yyyy à HH&apos;h&apos;mm</target>
       </segment>
     </unit>
   </file>

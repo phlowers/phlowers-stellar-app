@@ -238,12 +238,20 @@ describe('ManualSectionComponent', () => {
   });
 
   describe('deleteSupport', () => {
-    it('should delete a support by uuid', () => {
+    it('should not delete a support by uuid if there is less or equal 2 supports', () => {
       const s1 = createSupportMock();
       const s2 = createSupportMock();
       mockSection.supports = [s1, s2];
       component.deleteSupport(s1.uuid);
-      expect(mockSection.supports.length).toBe(1);
+      expect(mockSection.supports.length).toBe(2);
+    });
+    it('should delete a support by uuid if there is more than 2 supports', () => {
+      const s1 = createSupportMock();
+      const s2 = createSupportMock();
+      const s3 = createSupportMock();
+      mockSection.supports = [s1, s2, s3];
+      component.deleteSupport(s1.uuid);
+      expect(mockSection.supports.length).toBe(2);
       expect(mockSection.supports[0].uuid).toBe(s2.uuid);
     });
   });
@@ -340,7 +348,10 @@ describe('ManualSectionComponent', () => {
   describe('onSupportsAmountChangeBlur', () => {
     it('should update supports amount on blur', () => {
       mockSection.supports = [createSupportMock()];
-      const event = { target: { value: 3 } };
+      const event = new Event('blur') as unknown as Event & {
+        target: { value: number };
+      };
+      Object.defineProperty(event, 'target', { value: { value: 3 } });
 
       component.onSupportsAmountChangeBlur(event);
       expect(mockSection.supports.length).toBe(3);
@@ -377,7 +388,7 @@ describe('ManualSectionComponent', () => {
       ];
 
       component.updateSupportsAmount(1);
-      expect(mockSection.supports.length).toBe(1);
+      expect(mockSection.supports.length).toBe(2);
     });
 
     it('should handle empty supports array', () => {
@@ -397,7 +408,7 @@ describe('ManualSectionComponent', () => {
       mockMaintenanceService.getMaintenance.mockResolvedValue(
         mockMaintenanceData
       );
-      const event = { value: null };
+      const event = { value: '' };
 
       await component.onMaintenanceSelect(event, 'cm');
 
@@ -449,7 +460,7 @@ describe('ManualSectionComponent', () => {
 
     it('should reset filters when no value selected', async () => {
       mockLinesService.getLines.mockResolvedValue(mockLinesData);
-      const event = { value: null };
+      const event = { value: '' };
 
       await component.onLinesSelect(event, 'link_idr');
 
