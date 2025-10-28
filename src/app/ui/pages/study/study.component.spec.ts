@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { of, BehaviorSubject } from 'rxjs';
+import { of, BehaviorSubject, Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 
 import { StudyComponent } from './study.component';
@@ -582,6 +582,111 @@ describe('StudyComponent', () => {
         detail: expect.any(String),
         life: 3000
       });
+    });
+  });
+
+  describe('updateInitialCondition', () => {
+    beforeEach(() => {
+      const sectionWithConditions = {
+        ...mockSection,
+        initial_conditions: [mockInitialCondition]
+      };
+      component.study = { ...mockStudy, sections: [sectionWithConditions] };
+    });
+
+    it('should update initial condition in section', async () => {
+      const updatedIC = {
+        ...mockInitialCondition,
+        name: 'Updated IC'
+      };
+
+      await component.updateInitialCondition({
+        section: mockSection,
+        initialCondition: updatedIC
+      });
+
+      expect(
+        mockInitialConditionService.updateInitialCondition
+      ).toHaveBeenCalledWith(component.study, mockSection, updatedIC);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
+    });
+  });
+
+  describe('duplicateInitialCondition', () => {
+    beforeEach(() => {
+      const sectionWithConditions = {
+        ...mockSection,
+        initial_conditions: [mockInitialCondition]
+      };
+      component.study = { ...mockStudy, sections: [sectionWithConditions] };
+    });
+
+    it('should duplicate initial condition with new UUID', async () => {
+      const newUuid = 'new-ic-uuid';
+
+      await component.duplicateInitialCondition({
+        section: mockSection,
+        initialCondition: mockInitialCondition,
+        newUuid
+      });
+
+      expect(
+        mockInitialConditionService.duplicateInitialCondition
+      ).toHaveBeenCalledWith(
+        component.study,
+        mockSection,
+        mockInitialCondition,
+        newUuid
+      );
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
+    });
+  });
+
+  describe('setInitialCondition', () => {
+    beforeEach(() => {
+      const sectionWithConditions = {
+        ...mockSection,
+        initial_conditions: [mockInitialCondition]
+      };
+      component.study = { ...mockStudy, sections: [sectionWithConditions] };
+    });
+
+    it('should set the selected initial condition', async () => {
+      await component.setInitialCondition({
+        section: mockSection,
+        initialCondition: mockInitialCondition
+      });
+
+      expect(
+        mockInitialConditionService.setInitialCondition
+      ).toHaveBeenCalledWith(
+        component.study,
+        mockSection,
+        mockInitialCondition.uuid
+      );
+    });
+  });
+
+  describe('ngOnDestroy', () => {
+    it('should unsubscribe from subscriptions', () => {
+      const mockSubscription = {
+        unsubscribe: jest.fn()
+      } as unknown as Subscription;
+      component.subscription = mockSubscription;
+
+      component.ngOnDestroy();
+
+      expect(mockSubscription.unsubscribe).toHaveBeenCalled();
     });
   });
 
