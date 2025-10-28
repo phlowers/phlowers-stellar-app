@@ -24,11 +24,6 @@ interface SupportOption {
   value: number;
 }
 
-interface FormConfig {
-  fields: string[];
-  baseRequired: string[];
-}
-
 @Component({
   selector: 'app-span',
   imports: [
@@ -44,7 +39,7 @@ interface FormConfig {
   styleUrl: './span.component.scss'
 })
 export class SpanComponent implements OnDestroy {
-  private subscriptions = new Subscription();
+  private readonly subscriptions = new Subscription();
 
   readonly spans = input.required<SpanOption[]>();
   readonly supports = input.required<SupportOption[]>();
@@ -52,32 +47,23 @@ export class SpanComponent implements OnDestroy {
   private readonly selectedSpan = signal<string | null>(null);
   private readonly selectedSupport = signal<number | null>(null);
 
-  private readonly BASE_REQUIRED = ['spanSelect', 'loadType'];
-
   protected availableSpans = computed(() => {
-    if (!this.selectedSupport()) {
-      return this.spans();
-    }
-    return this.spans().filter((span) =>
-      span.supports.includes(this.selectedSupport()!)
-    );
+    const support = this.selectedSupport();
+    if (!support) return this.spans();
+
+    return this.spans().filter((span) => span.supports.includes(support));
   });
 
   protected availableSupports = computed(() => {
-    if (!this.selectedSpan()) {
-      return this.supports();
-    }
-    const selectedSpanData = this.spans().find(
-      (s) => s.value === this.selectedSpan()
-    );
-    return this.supports().filter((support) =>
-      selectedSpanData?.supports.includes(support.value)
-    );
-  });
+    const span = this.selectedSpan();
+    if (!span) return this.supports();
 
-  protected enabledFields = computed(() => {
-    const loadType = this.form.get('loadType')?.value;
-    return new Set(this.getFormConfig(loadType).fields);
+    const selectedSpanData = this.spans().find((s) => s.value === span);
+    if (!selectedSpanData) return this.supports();
+
+    return this.supports().filter((support) =>
+      selectedSpanData.supports.includes(support.value)
+    );
   });
 
   form: FormGroup;
@@ -119,84 +105,32 @@ export class SpanComponent implements OnDestroy {
 
   private updateFormControlsState() {
     const loadType = this.form.get('loadType')?.value;
-    const config = this.getFormConfig(loadType);
 
-    for (const controlName of Object.keys(this.form.controls)) {
-      const control = this.form.get(controlName);
-      if (control) {
-        if (config.fields.includes(controlName)) {
-          control.enable();
-        } else {
-          control.disable();
-          control.setValue(null);
-        }
-      }
-    }
-  }
+    // Disable all possible disabled fields then enable those who need to depending on loadType value.
+    this.form.get('supportNumber')?.disable();
+    this.form.get('spanLoad')?.disable();
+    this.form.get('cableLengthChange')?.disable();
+    this.form.get('pointLoadDist')?.disable();
 
-  private getFormConfig(loadType: string | null): FormConfig {
     switch (loadType) {
       case 'punctual':
-        return {
-          fields: [
-            'spanSelect',
-            'supportNumber',
-            'loadType',
-            'spanLoad',
-            'pointLoadDist'
-          ],
-          baseRequired: this.BASE_REQUIRED
-        };
+        this.form.get('supportNumber')?.enable();
+        this.form.get('spanLoad')?.enable();
+        this.form.get('pointLoadDist')?.enable();
+        break;
       case 'distributed':
-        return {
-          fields: ['spanSelect', 'loadType', 'spanLoad'],
-          baseRequired: this.BASE_REQUIRED
-        };
+        this.form.get('spanLoad')?.enable();
+        break;
       case 'shortlength':
-        return {
-          fields: ['spanSelect', 'loadType', 'cableLengthChange'],
-          baseRequired: this.BASE_REQUIRED
-        };
-      default:
-        return {
-          fields: Object.keys(this.form.controls),
-          baseRequired: this.BASE_REQUIRED
-        };
+        this.form.get('cableLengthChange')?.enable();
+        break;
     }
-  }
-
-  private getEnabledFormValues(): Record<string, any> {
-    const loadType = this.form.value.loadType;
-    const config = this.getFormConfig(loadType);
-
-    return config.fields.reduce(
-      (acc, field) => {
-        acc[field] = this.form.value[field];
-        return acc;
-      },
-      {} as Record<string, any>
-    );
-  }
-
-  isFieldEnabled(fieldName: string): boolean {
-    const loadType = this.form.get('loadType')?.value;
-    const config = this.getFormConfig(loadType);
-    return config.fields.includes(fieldName);
   }
 
   resetForm() {
-    this.form.reset({
-      spanSelect: [null, Validators.required],
-      supportNumber: [null],
-      loadType: [null, Validators.required],
-      spanLoad: [null],
-      cableLengthChange: [null],
-      pointLoadDist: [null]
-    });
-
+    this.form.reset();
     this.selectedSpan.set(null);
     this.selectedSupport.set(null);
-    this.updateFormControlsState();
   }
 
   eraseForm() {
@@ -204,27 +138,20 @@ export class SpanComponent implements OnDestroy {
   }
 
   submitForm() {
-    console.log('Submit (save):', this.getEnabledFormValues());
+    if (this.form.invalid) return;
+
+    // .value automatically excludes disabled fields
+    console.log('Submit (save):', this.form.value);
   }
 
   calculForm() {
-    console.log('Calculus values:');
-    for (const [key, val] of Object.entries(this.getEnabledFormValues())) {
-      console.log(`${key}: ${val}`);
-    }
+    if (this.form.invalid) return;
+
+    console.log('Calculus values:', this.form.value);
   }
 
-  isRequiredFieldsEmpty(): boolean {
-    const config = this.getFormConfig(this.form.value.loadType);
-
-    return config.baseRequired.some((field) => {
-      const control = this.form.get(field);
-      return (
-        control?.value === null ||
-        control?.value === undefined ||
-        control?.value === ''
-      );
-    });
+  isFormInvalid(): boolean {
+    return this.form.invalid;
   }
 
   ngOnDestroy(): void {

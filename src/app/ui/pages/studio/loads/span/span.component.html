@@ -14,7 +14,6 @@
 
   <div class="span__form">
     <label for="spanSelect" i18n>Span</label>
-
     <label for="supportNumber" i18n>Support n°</label>
 
     <p-select
@@ -23,7 +22,6 @@
       formControlName="spanSelect"
       optionLabel="label"
       optionValue="value"
-      [disabled]="!isFieldEnabled('spanSelect')"
     />
 
     <p-select
@@ -32,11 +30,9 @@
       formControlName="supportNumber"
       optionLabel="label"
       optionValue="value"
-      [disabled]="!isFieldEnabled('supportNumber')"
     />
 
     <label for="loadType" i18n>Load type</label>
-
     <label for="spanLoad" i18n>Span load</label>
 
     <p-select
@@ -45,7 +41,6 @@
       formControlName="loadType"
       optionLabel="label"
       optionValue="value"
-      [disabled]="!isFieldEnabled('loadType')"
     />
 
     <p-inputgroup>
@@ -54,22 +49,19 @@
         type="number"
         id="spanLoad"
         formControlName="spanLoad"
-        [disabled]="!isFieldEnabled('spanLoad')"
       />
       <p-inputgroup-addon>kg</p-inputgroup-addon>
     </p-inputgroup>
 
-    <label for="CableLengthChange" i18n>Short. or lengthen. Cable (+ -)</label>
-
+    <label for="cableLengthChange" i18n>Short. or lengthen. Cable (+ -)</label>
     <label for="pointLoadDist" i18n>Dist. to point load</label>
 
     <p-inputgroup>
       <input
         pInputText
         type="number"
-        id="CableLengthChange"
-        formControlName="CableLengthChange"
-        [disabled]="!isFieldEnabled('CableLengthChange')"
+        id="cableLengthChange"
+        formControlName="cableLengthChange"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
@@ -80,7 +72,6 @@
         type="number"
         id="pointLoadDist"
         formControlName="pointLoadDist"
-        [disabled]="!isFieldEnabled('pointLoadDist')"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
@@ -103,7 +94,7 @@
       type="submit"
       btnStyle="outlined"
       (click)="submitForm()"
-      [disabled]="isRequiredFieldsEmpty()"
+      [disabled]="isFormInvalid()"
     >
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
@@ -113,7 +104,7 @@
       app-btn
       type="button"
       (click)="calculForm()"
-      [disabled]="isRequiredFieldsEmpty()"
+      [disabled]="isFormInvalid()"
     >
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>
