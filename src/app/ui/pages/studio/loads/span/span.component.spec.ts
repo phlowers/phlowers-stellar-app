@@ -319,7 +319,9 @@ describe('SpanComponent', () => {
 
   describe('Erase Form', () => {
     it('should trigger alert when eraseForm is called', () => {
-      const alertSpy = jest.spyOn(global, 'alert').mockImplementation(() => {});
+      const alertSpy = jest
+        .spyOn(globalThis, 'alert')
+        .mockImplementation(() => undefined);
       component.eraseForm();
 
       expect(alertSpy).toHaveBeenCalledWith('erase the load case!');
