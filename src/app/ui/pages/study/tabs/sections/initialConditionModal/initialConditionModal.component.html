@@ -243,17 +243,48 @@
   </div>
 
   <ng-template #footer>
-    <button
-      app-btn
-      type="submit"
-      btnSize="m"
-      btnStyle="outlined"
-      (click)="isOpenChange.emit(false)"
-    >
-      <app-icon icon="close" />
-      <span i18n>Cancel</span>
-    </button>
-    @if (mode() !== 'view') {
+    @if (mode() === 'view') {
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        btnStyle="danger"
+        (click)="onDelete()"
+      >
+        <app-icon icon="delete" />
+        <span i18n>Delete</span>
+      </button>
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="onDuplicate()"
+      >
+        <app-icon icon="content_copy" />
+        <span i18n>Duplicate</span>
+      </button>
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="onModify()"
+      >
+        <app-icon icon="edit" />
+        <span i18n>Edit</span>
+      </button>
+    } @else {
+      <button
+        app-btn
+        type="submit"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="isOpenChange.emit(false)"
+      >
+        <app-icon icon="close" />
+        <span i18n>Cancel</span>
+      </button>
       <button
         app-btn
         type="button"

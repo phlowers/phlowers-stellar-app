@@ -5,6 +5,7 @@ import { InitialCondition } from '@src/app/core/data/database/interfaces/initial
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CablesService } from '@core/services/cables/cables.service';
 import { StorageService } from '@core/services/storage/storage.service';
+import { StudiesService } from '@core/services/studies/studies.service';
 import { BehaviorSubject } from 'rxjs';
 
 describe('InitialConditionModalComponent', () => {
@@ -75,12 +76,18 @@ describe('InitialConditionModalComponent', () => {
       getCables: jest.fn().mockResolvedValue([])
     } as unknown as CablesService;
 
+    // Create mock StudiesService
+    const mockStudiesService = {
+      updateStudy: jest.fn().mockResolvedValue(undefined)
+    } as unknown as StudiesService;
+
     await TestBed.configureTestingModule({
       imports: [InitialConditionModalComponent],
       providers: [
         provideHttpClientTesting(),
         { provide: StorageService, useValue: mockStorageService },
-        { provide: CablesService, useValue: mockCablesService }
+        { provide: CablesService, useValue: mockCablesService },
+        { provide: StudiesService, useValue: mockStudiesService }
       ]
     }).compileComponents();
 
@@ -163,6 +170,101 @@ describe('InitialConditionModalComponent', () => {
       expect(spyOpen).toHaveBeenCalledWith(false);
       expect(spyAdd).not.toHaveBeenCalled();
       expect(spyUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isNumber', () => {
+    it('should return true for a number', () => {
+      expect(component.isNumber(5)).toBe(true);
+    });
+
+    it('should return true for zero', () => {
+      expect(component.isNumber(0)).toBe(true);
+    });
+
+    it('should return true for negative numbers', () => {
+      expect(component.isNumber(-5)).toBe(true);
+    });
+
+    it('should return true for floating point numbers', () => {
+      expect(component.isNumber(3.14)).toBe(true);
+    });
+  });
+
+  describe('onModify', () => {
+    it('should emit changeMode with edit', () => {
+      const spy = jest.spyOn(component.changeMode, 'emit');
+      component.onModify();
+      expect(spy).toHaveBeenCalledWith('edit');
+    });
+  });
+
+  describe('onNameChange', () => {
+    beforeEach(() => {
+      const initialConditions: InitialCondition[] = [
+        mockInitialCondition,
+        {
+          uuid: 'ic-2',
+          name: 'Existing Condition',
+          base_parameters: 0,
+          base_temperature: 25,
+          cable_pretension: 0,
+          min_temperature: 0,
+          max_wind_pressure: 0,
+          max_frost_width: 0
+        }
+      ];
+      fixture.componentRef.setInput('initialConditions', initialConditions);
+      fixture.detectChanges();
+    });
+
+    it('should set isNameUnique to true for unique names', () => {
+      component.onNameChange('New Unique Name');
+      expect(component.isNameUnique()).toBe(true);
+    });
+
+    it('should set isNameUnique to false for duplicate names', () => {
+      component.onNameChange('Existing Condition');
+      expect(component.isNameUnique()).toBe(false);
+    });
+
+    it('should allow same name for the same initial condition (editing)', () => {
+      component.initialCondition.set(mockInitialCondition);
+      component.onNameChange('Cond 1');
+      expect(component.isNameUnique()).toBe(true);
+    });
+  });
+
+  describe('onDelete', () => {
+    it('should call deleteInitialCondition and close modal', () => {
+      const mockStudy = {
+        uuid: 'study-1',
+        title: 'Test Study',
+        description: '',
+        author_email: 'test@example.com',
+        sections: [mockSection],
+        shareable: true,
+        saved: true,
+        created_at_offline: '2025-01-01T00:00:00.000Z',
+        updated_at_offline: '2025-01-01T00:00:00.000Z'
+      };
+      fixture.componentRef.setInput('study', mockStudy);
+      fixture.detectChanges();
+
+      const deleteServiceSpy = jest.spyOn(
+        component['initialConditionService'],
+        'deleteInitialCondition'
+      );
+      const closeModalSpy = jest.spyOn(component.isOpenChange, 'emit');
+
+      component.onDelete();
+
+      expect(deleteServiceSpy).toHaveBeenCalledWith(
+        mockStudy,
+        mockSection,
+        mockInitialCondition
+      );
+      expect(closeModalSpy).toHaveBeenCalledWith(false);
     });
   });
 });

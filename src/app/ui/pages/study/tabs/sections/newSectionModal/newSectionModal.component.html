@@ -82,17 +82,17 @@
     }
   </div>
   <ng-template #footer>
-    <button
-      app-btn
-      type="button"
-      btnSize="m"
-      btnStyle="outlined"
-      (click)="onVisibleChange(false)"
-    >
-      <app-icon icon="close" />
-      <ng-container i18n>Cancel</ng-container>
-    </button>
     @if (mode() !== 'view') {
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="onVisibleChange(false)"
+      >
+        <app-icon icon="close" />
+        <ng-container i18n>Cancel</ng-container>
+      </button>
       <button
         app-btn
         type="button"
@@ -106,6 +106,34 @@
         } @else {
           <ng-container i18n>Update section</ng-container>
         }
+      </button>
+    } @else {
+      <div class="flex gap-2">
+        <button
+          app-btn
+          type="button"
+          btnSize="m"
+          btnStyle="danger"
+          (click)="onDeleteSection()"
+        >
+          <app-icon icon="delete" />
+          <ng-container i18n>Delete</ng-container>
+        </button>
+      </div>
+
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="onDuplicateSection()"
+      >
+        <app-icon icon="content_copy" />
+        <ng-container i18n>Duplicate</ng-container>
+      </button>
+      <button app-btn type="button" btnSize="m" (click)="onEditSection()">
+        <app-icon icon="edit" />
+        <ng-container i18n>Edit</ng-container>
       </button>
     }
   </ng-template>

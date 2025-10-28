@@ -9,13 +9,17 @@ import { Section } from '../../data/database/interfaces/section';
 import { Study } from '../../data/database/interfaces/study';
 import { InitialCondition } from '../../data/database/interfaces/initialCondition';
 import { StudiesService } from '../studies/studies.service';
-import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
 export interface InitialConditionFunctionsInput {
   section: Section;
   initialCondition: InitialCondition;
+}
+
+export interface DuplicateInitialConditionFunctionsInput
+  extends InitialConditionFunctionsInput {
+  newUuid: string;
 }
 
 @Injectable({
@@ -132,8 +136,9 @@ export class InitialConditionService {
   async duplicateInitialCondition(
     study: Study,
     section: Section,
-    initialCondition: InitialCondition
-  ): Promise<void> {
+    initialCondition: InitialCondition,
+    newUuid: string
+  ): Promise<string> {
     await this.updateStudyWithModification(study, (studyCopy) => {
       studyCopy.sections = study.sections.map((s) =>
         s?.uuid === section?.uuid
@@ -143,7 +148,7 @@ export class InitialConditionService {
                 ...(s.initial_conditions || []),
                 {
                   ...initialCondition,
-                  uuid: uuidv4(),
+                  uuid: newUuid,
                   name: findDuplicateTitle(
                     s.initial_conditions?.map((ic) => ic.name),
                     initialCondition.name
@@ -154,6 +159,7 @@ export class InitialConditionService {
           : s
       );
     });
+    return newUuid;
   }
 
   /**
@@ -166,14 +172,27 @@ export class InitialConditionService {
   async setInitialCondition(
     study: Study,
     section: Section,
-    initialCondition: InitialCondition
+    initialConditionUuid: string
   ): Promise<void> {
     await this.updateStudyWithModification(study, (studyCopy) => {
       studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
-          ? { ...s, selected_initial_condition_uuid: initialCondition.uuid }
+          ? { ...s, selected_initial_condition_uuid: initialConditionUuid }
           : s
       );
     });
+  }
+
+  async getInitialCondition(
+    studyUuid: string,
+    sectionUuid: string,
+    initialConditionUuid: string
+  ): Promise<InitialCondition | undefined> {
+    const study = await this.studiesService.getStudy(studyUuid);
+    const section = study?.sections.find((s) => s?.uuid === sectionUuid);
+    const initialCondition = section?.initial_conditions?.find(
+      (ic) => ic?.uuid === initialConditionUuid
+    );
+    return initialCondition;
   }
 }

@@ -59,20 +59,19 @@ export class SectionService {
    * @param section The section to duplicate
    * @returns Promise that resolves when the operation is complete
    */
-  async duplicateSection(study: Study, section: Section): Promise<void> {
-    study.sections = [
-      ...study.sections,
-      {
-        ...section,
-        uuid: uuidv4(),
-        name: findDuplicateTitle(
-          study.sections.map((s) => s.name),
-          section.name
-        ),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    ];
+  async duplicateSection(study: Study, section: Section): Promise<Section> {
+    const newSection = {
+      ...section,
+      uuid: uuidv4(),
+      name: findDuplicateTitle(
+        study.sections.map((s) => s.name),
+        section.name
+      ),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    study.sections = [...study.sections, newSection];
     await this.studiesService.updateStudy(study);
+    return newSection;
   }
 }

@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  output,
-  signal
-} from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
@@ -23,6 +16,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Study } from '@core/data/database/interfaces/study';
 import { isNil } from 'lodash';
+import { SectionService } from '@core/services/sections/section.service';
 
 const areAllRequiredFieldsFilled = (section: Section) => {
   const nameCondition = !!section.name.trim();
@@ -82,12 +76,14 @@ const areAllRequiredFieldsFilled = (section: Section) => {
 export class NewSectionModalComponent {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
+  setSection = output<Section>();
   source = 'manual';
   section = input.required<Section>();
   study = input.required<Study | null>();
   sectionChange = output<Section>();
   outputSection = output<Section>();
   mode = input.required<'create' | 'edit' | 'view'>();
+  setMode = output<'create' | 'edit' | 'view'>();
 
   areAllRequiredFieldsFilled = signal<boolean>(false);
   isNameUnique = signal<boolean>(false);
@@ -101,11 +97,7 @@ export class NewSectionModalComponent {
     return $localize`Create a study section`;
   });
 
-  constructor() {
-    effect(() => {
-      this.checkFields();
-    });
-  }
+  constructor(private readonly sectionService: SectionService) {}
 
   checkFields() {
     this.areAllRequiredFieldsFilled.set(
@@ -130,6 +122,24 @@ export class NewSectionModalComponent {
 
   onValidate() {
     this.outputSection.emit(this.section());
+    this.isOpenChange.emit(false);
+  }
+
+  async onDuplicateSection() {
+    const newSection = await this.sectionService.duplicateSection(
+      this.study()!,
+      this.section()
+    );
+    this.setSection.emit(newSection);
+  }
+
+  onEditSection() {
+    this.setMode.emit('edit');
+    this.checkFields();
+  }
+
+  onDeleteSection() {
+    this.sectionService.deleteSection(this.study()!, this.section());
     this.isOpenChange.emit(false);
   }
 }

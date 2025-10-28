@@ -4,6 +4,7 @@ import { StudyHeaderComponent } from '@ui/pages/study/study-header/study-header.
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import {
+  DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput,
   InitialConditionService
 } from '@src/app/core/services/initial-conditions/initial-condition.service';
@@ -216,7 +217,7 @@ export class StudyComponent implements OnInit, OnDestroy {
     await this.initialConditionService.setInitialCondition(
       study,
       study.sections.find((s) => s?.uuid === section?.uuid)!,
-      initialCondition
+      initialCondition.uuid
     );
 
     this.messageService.add({
@@ -251,8 +252,9 @@ export class StudyComponent implements OnInit, OnDestroy {
 
   async duplicateInitialCondition({
     section,
-    initialCondition
-  }: InitialConditionFunctionsInput) {
+    initialCondition,
+    newUuid
+  }: DuplicateInitialConditionFunctionsInput) {
     if (!this.study) {
       return;
     }
@@ -260,7 +262,8 @@ export class StudyComponent implements OnInit, OnDestroy {
     await this.initialConditionService.duplicateInitialCondition(
       this.study,
       section,
-      initialCondition
+      initialCondition,
+      newUuid
     );
 
     this.messageService.add({
@@ -281,7 +284,7 @@ export class StudyComponent implements OnInit, OnDestroy {
     await this.initialConditionService.setInitialCondition(
       this.study,
       section,
-      initialCondition
+      initialCondition.uuid
     );
   }
 }
