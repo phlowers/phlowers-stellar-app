@@ -19,7 +19,10 @@ import { FormsModule } from '@angular/forms';
 import { InitialConditionModalComponent } from './initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { DividerModule } from 'primeng/divider';
-import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
+import {
+  DuplicateInitialConditionFunctionsInput,
+  InitialConditionFunctionsInput
+} from '@core/services/initial-conditions/initial-condition.service';
 import { CreateEditView } from '@src/app/ui/shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
 import { createEmptySection } from '@src/app/core/services/sections/helpers';
@@ -56,7 +59,7 @@ export class SectionsTabComponent {
   addInitialCondition = output<InitialConditionFunctionsInput>();
   updateInitialCondition = output<InitialConditionFunctionsInput>();
   deleteInitialCondition = output<InitialConditionFunctionsInput>();
-  duplicateInitialCondition = output<InitialConditionFunctionsInput>();
+  duplicateInitialCondition = output<DuplicateInitialConditionFunctionsInput>();
   setInitialCondition = output<InitialConditionFunctionsInput>();
   currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(
@@ -123,8 +126,28 @@ export class SectionsTabComponent {
     this.isInitialConditionModalOpen.set(true);
   }
 
+  async duplicateInitialConditionFromModal({
+    initialCondition,
+    newUuid
+  }: {
+    initialCondition: InitialCondition;
+    newUuid: string;
+  }) {
+    await this.duplicateInitialCondition.emit({
+      section: this.currentSection(),
+      initialCondition: initialCondition,
+      newUuid
+    });
+    this.currentInitialCondition.set({ ...initialCondition, uuid: newUuid });
+    this.initialConditionModalMode.set('edit');
+  }
+
   onInitialConditionModalOpenChange(isOpen: boolean) {
     this.isInitialConditionModalOpen.set(isOpen);
+  }
+
+  onInitialConditionModalChangeMode(mode: CreateEditView) {
+    this.initialConditionModalMode.set(mode);
   }
 
   getSelectedInitialConditionUuid = computed(() => {
@@ -184,9 +207,11 @@ export class SectionsTabComponent {
     initialCondition: InitialCondition;
     section: Section;
   }) => {
+    const newUuid = uuidv4();
     return this.duplicateInitialCondition.emit({
       section,
-      initialCondition
+      initialCondition,
+      newUuid
     });
   };
 

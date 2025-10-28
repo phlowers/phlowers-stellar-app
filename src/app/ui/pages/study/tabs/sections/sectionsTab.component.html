@@ -5,15 +5,20 @@
   [section]="currentSection()"
   [mode]="newSectionModalMode()"
   [study]="study()"
+  (setSection)="currentSection.set($event); newSectionModalMode.set('edit')"
+  (setMode)="newSectionModalMode.set($event)"
 />
 
 <app-initial-condition-modal
+  (changeMode)="onInitialConditionModalChangeMode($event)"
   [isOpen]="isInitialConditionModalOpen()"
   (isOpenChange)="onInitialConditionModalOpenChange($event)"
   [section]="currentSection()"
+  [study]="study()"
   (addInitialCondition)="addInitialCondition.emit($event)"
   (updateInitialCondition)="updateInitialCondition.emit($event)"
   [mode]="initialConditionModalMode()"
+  (duplicateInitialCondition)="duplicateInitialConditionFromModal($event)"
   [initialConditionInput]="currentInitialCondition()"
   [initialConditions]="currentSection().initial_conditions"
 />

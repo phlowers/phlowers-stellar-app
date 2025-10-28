@@ -66,6 +66,10 @@ export const createPlot = (
   isSupportZoom: boolean,
   invert: boolean
 ) => {
+  // check if div with id plotly-output exists
+  if (!document.getElementById(plotId)) {
+    return undefined;
+  }
   return Plotly.newPlot(
     plotId,
     data,

@@ -7,12 +7,17 @@ import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/butt
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { FormsModule } from '@angular/forms';
-import { InitialConditionFunctionsInput } from '@src/app/core/services/initial-conditions/initial-condition.service';
+import {
+  InitialConditionFunctionsInput,
+  InitialConditionService
+} from '@core/services/initial-conditions/initial-condition.service';
 import { MessageModule } from 'primeng/message';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { isNumber } from 'lodash';
 import { CablesService } from '@core/services/cables/cables.service';
+import { v4 as uuidv4 } from 'uuid';
+import { Study } from '@core/data/database/interfaces/study';
 
 @Component({
   selector: 'app-initial-condition-modal',
@@ -34,8 +39,14 @@ export class InitialConditionModalComponent {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
   section = input.required<Section>();
+  study = input.required<Study | null>();
   mode = input.required<'view' | 'edit' | 'create'>();
+  changeMode = output<'view' | 'edit' | 'create'>();
   addInitialCondition = output<InitialConditionFunctionsInput>();
+  duplicateInitialCondition = output<{
+    initialCondition: InitialCondition;
+    newUuid: string;
+  }>();
   updateInitialCondition = output<InitialConditionFunctionsInput>();
   initialConditionInput = input.required<InitialCondition>();
   initialConditions = input.required<InitialCondition[]>();
@@ -58,7 +69,10 @@ export class InitialConditionModalComponent {
       )
     );
   }
-  constructor(private readonly cablesService: CablesService) {
+  constructor(
+    private readonly cablesService: CablesService,
+    private readonly initialConditionService: InitialConditionService
+  ) {
     // Initialize initialCondition from input immediately
     effect(() => {
       this.initialCondition.set(this.initialConditionInput());
@@ -103,5 +117,36 @@ export class InitialConditionModalComponent {
 
   isNumber(value: number): boolean {
     return isNumber(value);
+  }
+
+  onModify() {
+    this.changeMode.emit('edit');
+  }
+
+  async onDuplicate() {
+    const newUuid = uuidv4();
+    await this.duplicateInitialCondition.emit({
+      initialCondition: this.initialCondition(),
+      newUuid
+    });
+    const studyUuid = this.study()?.uuid ?? '';
+    const initialCondition =
+      await this.initialConditionService.getInitialCondition(
+        studyUuid,
+        this.section().uuid,
+        newUuid
+      );
+    if (initialCondition) {
+      this.initialCondition.set(initialCondition);
+    }
+  }
+
+  onDelete() {
+    this.initialConditionService.deleteInitialCondition(
+      this.study()!,
+      this.section(),
+      this.initialCondition()
+    );
+    this.isOpenChange.emit(false);
   }
 }
