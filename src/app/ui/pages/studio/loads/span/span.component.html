@@ -1,11 +1,11 @@
 <form [formGroup]="form" class="span">
-  <div class="span__btns">
+  <div class="span__reset">
     <button
       app-btn
       type="button"
       btnStyle="outlined"
       btnSize="s"
-      class="span__reset"
+      (click)="resetForm()"
     >
       <app-icon icon="refresh" />
       <ng-container i18n>reset</ng-container>
@@ -19,18 +19,20 @@
 
     <p-select
       inputId="spanSelect"
-      [options]=""
+      [options]="availableSpans()"
       formControlName="spanSelect"
       optionLabel="label"
       optionValue="value"
+      [disabled]="!isFieldEnabled('spanSelect')"
     />
 
     <p-select
       inputId="supportNumber"
-      [options]=""
+      [options]="availableSupports()"
       formControlName="supportNumber"
       optionLabel="label"
       optionValue="value"
+      [disabled]="!isFieldEnabled('supportNumber')"
     />
 
     <label for="loadType" i18n>Load type</label>
@@ -39,31 +41,49 @@
 
     <p-select
       inputId="loadType"
-      [options]=""
+      [options]="loadTypeOptions"
       formControlName="loadType"
       optionLabel="label"
       optionValue="value"
+      [disabled]="!isFieldEnabled('loadType')"
     />
 
-    <input pInputText type="number" id="spanLoad" formControlName="spanLoad" />
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="spanLoad"
+        formControlName="spanLoad"
+        [disabled]="!isFieldEnabled('spanLoad')"
+      />
+      <p-inputgroup-addon>kg</p-inputgroup-addon>
+    </p-inputgroup>
 
-    <label for="CableLengthChange" i18n>Short. or allong. Cable (+ -)</label>
+    <label for="CableLengthChange" i18n>Short. or lengthen. Cable (+ -)</label>
 
-    <label for="pointLoadDist" i18n>Distance to point load</label>
+    <label for="pointLoadDist" i18n>Dist. to point load</label>
 
-    <input
-      pInputText
-      type="number"
-      id="CableLengthChange"
-      formControlName="CableLengthChange"
-    />
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="CableLengthChange"
+        formControlName="CableLengthChange"
+        [disabled]="!isFieldEnabled('CableLengthChange')"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
 
-    <input
-      pInputText
-      type="number"
-      id="pointLoadDist"
-      formControlName="pointLoadDist"
-    />
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="pointLoadDist"
+        formControlName="pointLoadDist"
+        [disabled]="!isFieldEnabled('pointLoadDist')"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
   </div>
 
   <div class="span__btns">
@@ -73,16 +93,28 @@
       type="button"
       aria-label="erase load case"
       i18n-aria-label
+      (click)="eraseForm()"
     >
       <app-icon icon="delete" />
     </button>
 
-    <button app-btn type="submit" btnStyle="outlined">
+    <button
+      app-btn
+      type="submit"
+      btnStyle="outlined"
+      (click)="submitForm()"
+      [disabled]="isRequiredFieldsEmpty()"
+    >
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>
 
-    <button app-btn type="button">
+    <button
+      app-btn
+      type="button"
+      (click)="calculForm()"
+      [disabled]="isRequiredFieldsEmpty()"
+    >
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>
     </button>

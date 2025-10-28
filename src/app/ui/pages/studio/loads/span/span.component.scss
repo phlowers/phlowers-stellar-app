@@ -7,6 +7,14 @@
     align-items: end;
   }
 
+  &__reset {
+    @apply text-right;
+  }
+
+  &__btns {
+    @apply flex items-center justify-end gap-4 mt-8 pr-3;
+  }
+
   label {
     @extend %text-s-400;
     margin: 0.75rem 0.25rem 0.125rem;

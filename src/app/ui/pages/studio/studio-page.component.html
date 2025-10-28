@@ -7,7 +7,11 @@
 
 <div class="graph-tools">
   <div class="graph-tools__left">
-    <app-studio class="plot-view" [isSupportZoom]="false" />
+    <app-studio
+      class="plot-view"
+      [isSupportZoom]="false"
+      [style.height]="plotStudioHeight()"
+    />
 
     <div class="quick-measures">
       <div class="quick-measures__card">
@@ -108,7 +112,7 @@
             </p-tabpanel>
 
             <p-tabpanel value="1">
-              <app-span />
+              <app-span [spans]="spanData" [supports]="supportData" />
             </p-tabpanel>
 
             <p-tabpanel value="2">
