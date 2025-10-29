@@ -10,7 +10,7 @@
   --p-select-focus-border-color: var(--primary-600);
 
   --p-select-color: var(--grey-900);
-  --p-select-disabled-color: var(--grey-500);
+  --p-select-disabled-color: var(--grey-300);
   --p-select-placeholder-color: var(--grey-500);
 
   --p-select-shadow: #{map.get(app.$elevation, neutral-inner)};

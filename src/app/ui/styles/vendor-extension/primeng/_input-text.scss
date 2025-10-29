@@ -21,7 +21,7 @@
   --p-inputtext-shadow: #{map.get(app.$elevation, neutral-inner)};
 
   --p-inputtext-disabled-background: var(--grey-0);
-  --p-inputtext-disabled-color: var(--grey-500);
+  --p-inputtext-disabled-color: var(--grey-300);
 
   @extend %text-m-400;
 
@@ -57,6 +57,10 @@
       outline: none;
       box-shadow: var(--p-inputtext-shadow);
     }
+  }
+
+  &:disabled {
+    color: var(--p-inputtext-disabled-color);
   }
 }
 

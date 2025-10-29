@@ -1,7 +1,7 @@
 @use 'abstract.extracts' as app;
 
 :host {
-  @apply block -m-6;
+  @apply block -m-6 overflow-x-hidden;
   height: calc(100% + 3rem);
 }
 
