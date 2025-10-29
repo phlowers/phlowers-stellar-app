@@ -1,4 +1,11 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  output,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
@@ -97,7 +104,13 @@ export class NewSectionModalComponent {
     return $localize`Create a study section`;
   });
 
-  constructor(private readonly sectionService: SectionService) {}
+  constructor(private readonly sectionService: SectionService) {
+    effect(() => {
+      if (this.isOpen()) {
+        this.checkFields();
+      }
+    });
+  }
 
   checkFields() {
     this.areAllRequiredFieldsFilled.set(

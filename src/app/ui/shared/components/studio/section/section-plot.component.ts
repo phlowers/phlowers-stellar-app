@@ -1,26 +1,13 @@
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  output,
-  signal
-} from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
-import { formatLitData } from './helpers/formatLitData';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
-import { uniq } from 'lodash';
 import { PlotService } from '@src/app/ui/pages/studio/plot.service';
-
-interface SearchSupportEvent {
-  value: string;
-}
 
 @Component({
   selector: 'app-section-plot',
@@ -29,70 +16,20 @@ interface SearchSupportEvent {
 })
 export class SectionPlotComponent {
   litData = input<GetSectionOutput | null>(null);
-  selectedSpan = signal<number>(0);
-  plotOptionsChange = output<PlotOptions>();
   isSupportZoom = input.required<boolean>();
 
   constructor(public readonly plotService: PlotService) {}
 
-  supports = computed(() => {
-    const supportsAmount = uniq(
-      Object.values(this.litData()?.support ?? {})
-    ).length;
-    return Array.from({ length: supportsAmount }, (_, i) => ({
-      item: (i + 1).toString()
-    }));
-  });
-
-  errorMessage = computed(() => {
-    if (
-      this.plotService.plotOptions().startSupport >=
-      this.plotService.plotOptions().endSupport
-    ) {
-      return $localize`Error: start >= end`;
-    }
-    if (
-      !this.supports()
-        .map((s) => s.item)
-        .includes(this.plotService.plotOptions().startSupport.toString())
-    ) {
-      return $localize`Error: start not in list`;
-    }
-    if (
-      !this.supports()
-        .map((s) => s.item)
-        .includes(this.plotService.plotOptions().endSupport.toString())
-    ) {
-      return $localize`Error: end not in list`;
-    }
-    return '';
-  });
-
-  searchSupport(event: SearchSupportEvent, type: 'start' | 'end') {
-    const numberValue = Number(event.value);
-    if (type === 'start') {
-      this.plotOptionsChange.emit({
-        ...this.plotService.plotOptions(),
-        startSupport: numberValue
-      });
-    } else {
-      this.plotOptionsChange.emit({
-        ...this.plotService.plotOptions(),
-        endSupport: numberValue
-      });
-    }
-  }
-
-  async refreshSection(
+  async refreshPlot(
     litData: GetSectionOutput | null,
     plotOptions: PlotOptions,
-    isSupportZoom: boolean
+    isSupportZoom: boolean,
+    _isSidebarOpen: boolean // eslint-disable-line @typescript-eslint/no-unused-vars
   ) {
     if (!litData) {
       return;
     }
-    const formattedData = formatLitData(litData);
-    const plotData = createPlotData(formattedData, plotOptions);
+    const plotData = createPlotData(litData, plotOptions);
     return createPlot(
       'plotly-output',
       plotData,
@@ -102,10 +39,11 @@ export class SectionPlotComponent {
   }
 
   readonly effect = effect(() => {
-    this.refreshSection(
+    this.refreshPlot(
       this.litData(),
       this.plotService.plotOptions(),
-      this.isSupportZoom()
+      this.isSupportZoom(),
+      this.plotService.isSidebarOpen()
     );
   });
 }

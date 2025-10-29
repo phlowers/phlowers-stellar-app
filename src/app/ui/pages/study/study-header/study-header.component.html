@@ -79,7 +79,7 @@
           <app-icon icon="description" />
           <p>
             {{ study()?.description }}
-            @if (!study()?.description) {
+            @if (study() && !study()!.description) {
               <em i18n>There is no study description</em>
             }
           </p>

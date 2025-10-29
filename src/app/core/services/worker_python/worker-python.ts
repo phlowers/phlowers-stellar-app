@@ -57,7 +57,10 @@ addEventListener(
   }) => {
     if (pyodide) {
       handleTask(pyodide, data.task, data.inputs).then((result) => {
-        postMessage({ result: result.result, id: data.id });
+        postMessage({
+          ...result,
+          id: data.id
+        });
       });
     } else {
       console.error('pyodide is not loaded, cannot handle task ' + data.task);

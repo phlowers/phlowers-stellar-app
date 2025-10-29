@@ -18,3 +18,7 @@ dt {
 dt {
   @extend %label-spacing;
 }
+
+:host {
+  flex-grow: 1;
+}

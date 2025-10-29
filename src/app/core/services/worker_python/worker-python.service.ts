@@ -8,7 +8,7 @@
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Task, TaskInputs, TaskOutputs } from './tasks/types';
+import { Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +26,8 @@ export class WorkerPythonService {
     importTime: 0,
     runTime: 0
   });
-  handlerMap: Record<string, (result: any) => void> = {};
+  handlerMap: Record<string, (result: any, error: TaskError | null) => void> =
+    {};
 
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
@@ -39,29 +40,32 @@ export class WorkerPythonService {
   setup() {
     this.worker = new Worker(new URL('./worker-python', import.meta.url));
     this.worker.onmessage = ({ data }) => {
-      if (data.loadTime) {
+      if (data.error === TaskError.PYODIDE_LOAD_ERROR) {
+        this.pyodideLoadError$.next(true);
+      } else if (data.loadTime) {
         this.times.set({ ...this.times(), loadTime: data.loadTime });
       } else if (data.importTime) {
         this.times.set({ ...this.times(), importTime: data.importTime });
         this._ready.next(true);
       } else if (data.id) {
-        this.handlerMap[data.id](data.result);
-      } else if (data.error) {
-        this.pyodideLoadError$.next(true);
+        this.handlerMap[data.id](data.result, data.error);
       }
     };
   }
 
   runTask<taskId extends Task>(
     task: taskId,
-    inputs?: TaskInputs[taskId]
-  ): Promise<TaskOutputs[taskId]> {
+    inputs: TaskInputs[taskId]
+  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null }> {
     const id = uuidv4();
     return new Promise((resolve) => {
       this.worker?.postMessage({ task, inputs, id });
-      this.handlerMap[id] = (result: TaskOutputs[taskId]) => {
+      this.handlerMap[id] = (
+        result: TaskOutputs[taskId],
+        error: TaskError | null
+      ) => {
         delete this.handlerMap[id];
-        resolve(result);
+        resolve({ result, error });
       };
     });
   }
