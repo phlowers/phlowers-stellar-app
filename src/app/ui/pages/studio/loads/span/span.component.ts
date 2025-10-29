@@ -84,6 +84,8 @@ export class SpanComponent implements OnDestroy {
       pointLoadDist: [null]
     });
 
+    this.updateFormControlsState();
+
     this.subscriptions.add(
       this.form.get('loadType')?.valueChanges.subscribe(() => {
         this.updateFormControlsState();
