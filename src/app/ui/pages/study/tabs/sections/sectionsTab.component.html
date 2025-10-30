@@ -23,7 +23,7 @@
   [initialConditions]="currentSection().initial_conditions"
 />
 
-@if (!study()?.sections?.length) {
+@if (study() && !study()!.sections!.length) {
   <section class="text-center">
     <h1 class="no-section-text text-xl-400" i18n>No existing section</h1>
     <button

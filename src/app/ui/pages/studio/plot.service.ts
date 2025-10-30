@@ -16,6 +16,7 @@ export class PlotService {
     endSupport: 1,
     invert: false
   });
+  isSidebarOpen = signal(false);
 
   plotOptionsChange(
     key: keyof PlotOptions,

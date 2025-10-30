@@ -1,6 +1,7 @@
 import { createPlotData } from './createPlotData';
-import { CreateDataForPlotParams, PlotOptions } from './types';
+import { PlotOptions } from './types';
 import { createDataObject } from './createPlotDataObject';
+import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 
 // Mock the createDataObject function
 jest.mock('./createPlotDataObject');
@@ -8,13 +9,8 @@ const mockCreateDataObject = createDataObject as jest.MockedFunction<
   typeof createDataObject
 >;
 
-// Mock lodash uniq function
-jest.mock('lodash', () => ({
-  uniq: jest.fn((arr: any[]) => [...new Set(arr)])
-}));
-
 describe('createPlotData', () => {
-  let mockParams: CreateDataForPlotParams;
+  let mockParams: GetSectionOutput;
   let mockOptions: PlotOptions;
 
   beforeEach(() => {
@@ -23,18 +19,12 @@ describe('createPlotData', () => {
 
     // Setup default mock parameters
     mockParams = {
-      litXs: [1, 2, 3, 4, 5],
-      litYs: [10, 20, 30, 40, 50],
-      litZs: [100, 200, 300, 400, 500],
-      litSection: ['phase_1', 'phase_2', 'phase_3', 'garde', 'support'],
-      litTypes: ['span', 'span', 'span', 'span', 'support'],
-      litSupports: [
-        'support_1',
-        'support_2',
-        'support_1',
-        'support_2',
-        'support_1'
-      ]
+      supports: [[[1, 2, 3, 4, 5]]],
+      insulators: [[[10, 20, 30, 40, 50]]],
+      spans: [[[100, 200, 300, 400, 500]]],
+      span: [[[1, 2, 3, 4, 5]]],
+      support: [[[10, 20, 30, 40, 50]]],
+      insulator: [[[100, 200, 300, 400, 500]]]
     };
 
     mockOptions = {
@@ -68,11 +58,11 @@ describe('createPlotData', () => {
       expect(result.length).toBeGreaterThan(0);
     });
 
-    it('should call createDataObject for each plot object', () => {
+    it('should call createDataObject for each plot object type', () => {
       createPlotData(mockParams, mockOptions);
 
-      // Should be called 6 times (phase_1, phase_2, phase_3, garde, support, insulator)
-      expect(mockCreateDataObject).toHaveBeenCalledTimes(6);
+      // Should be called 3 times (spans, insulators, supports)
+      expect(mockCreateDataObject).toHaveBeenCalledTimes(3);
     });
 
     it('should flatten the result from createDataObject calls', () => {
@@ -84,67 +74,111 @@ describe('createPlotData', () => {
   });
 
   describe('plot object types', () => {
-    it('should handle span type objects correctly', () => {
+    it('should call createDataObject for spans type', () => {
       createPlotData(mockParams, mockOptions);
 
-      // Check that createDataObject was called for span types
       const calls = mockCreateDataObject.mock.calls;
-      const spanCalls = calls.filter((call) => call[0].type === 'span');
+      const spansCall = calls.find((call) => call[3] === 'spans');
 
-      expect(spanCalls.length).toBe(4); // phase_1, phase_2, phase_3, garde
+      expect(spansCall).toBeDefined();
+      expect(spansCall![0]).toEqual(mockParams.spans);
+      expect(spansCall![1]).toBe(mockOptions.startSupport);
+      expect(spansCall![2]).toBe(mockOptions.endSupport);
+      expect(spansCall![4]).toBe(mockOptions.view);
+      expect(spansCall![5]).toBe(mockOptions.side);
     });
 
-    it('should handle support type objects correctly', () => {
+    it('should call createDataObject for insulators type', () => {
       createPlotData(mockParams, mockOptions);
 
       const calls = mockCreateDataObject.mock.calls;
-      const supportCalls = calls.filter((call) => call[0].type === 'support');
+      const insulatorsCall = calls.find((call) => call[3] === 'insulators');
 
-      expect(supportCalls.length).toBe(1);
+      expect(insulatorsCall).toBeDefined();
+      expect(insulatorsCall![0]).toEqual(mockParams.insulators);
+      expect(insulatorsCall![1]).toBe(mockOptions.startSupport);
+      expect(insulatorsCall![2]).toBe(mockOptions.endSupport);
+      expect(insulatorsCall![4]).toBe(mockOptions.view);
+      expect(insulatorsCall![5]).toBe(mockOptions.side);
     });
 
-    it('should handle insulator type objects correctly', () => {
+    it('should call createDataObject for supports type', () => {
       createPlotData(mockParams, mockOptions);
 
       const calls = mockCreateDataObject.mock.calls;
-      const insulatorCalls = calls.filter(
-        (call) => call[0].type === 'insulator'
-      );
+      const supportsCall = calls.find((call) => call[3] === 'supports');
 
-      expect(insulatorCalls.length).toBe(1);
+      expect(supportsCall).toBeDefined();
+      expect(supportsCall![0]).toEqual(mockParams.supports);
+      expect(supportsCall![1]).toBe(mockOptions.startSupport);
+      expect(supportsCall![2]).toBe(mockOptions.endSupport);
+      expect(supportsCall![4]).toBe(mockOptions.view);
+      expect(supportsCall![5]).toBe(mockOptions.side);
     });
   });
 
-  describe('support filtering logic', () => {
-    it('should use uniqueSupports for span types', () => {
+  describe('parameter passing', () => {
+    it('should pass correct parameters to createDataObject for spans', () => {
       createPlotData(mockParams, mockOptions);
 
       const calls = mockCreateDataObject.mock.calls;
-      const spanCall = calls.find((call) => call[0].type === 'span');
+      const spansCall = calls.find((call) => call[3] === 'spans');
 
-      expect(spanCall).toBeDefined();
-      // With startSupport: 0, endSupport: 1, slice(0, 1) returns ['support_1']
-      expect(spanCall![0].uniqueSupports).toEqual(['support_1']);
+      expect(spansCall).toBeDefined();
+      expect(spansCall![0]).toBe(mockParams.spans);
+      expect(spansCall![1]).toBe(mockOptions.startSupport);
+      expect(spansCall![2]).toBe(mockOptions.endSupport);
+      expect(spansCall![3]).toBe('spans');
+      expect(spansCall![4]).toBe(mockOptions.view);
+      expect(spansCall![5]).toBe(mockOptions.side);
     });
 
-    it('should use uniqueSupportsForSupports for support and insulator types', () => {
+    it('should pass correct parameters to createDataObject for insulators', () => {
       createPlotData(mockParams, mockOptions);
 
       const calls = mockCreateDataObject.mock.calls;
-      const supportCall = calls.find((call) => call[0].type === 'support');
-      const insulatorCall = calls.find((call) => call[0].type === 'insulator');
+      const insulatorsCall = calls.find((call) => call[3] === 'insulators');
 
-      expect(supportCall).toBeDefined();
-      expect(insulatorCall).toBeDefined();
-      // For support/insulator, endSupport + 1 is used, so slice(0, 2) returns ['support_1', 'support_2']
-      expect(supportCall![0].uniqueSupports).toEqual([
-        'support_1',
-        'support_2'
-      ]);
-      expect(insulatorCall![0].uniqueSupports).toEqual([
-        'support_1',
-        'support_2'
-      ]);
+      expect(insulatorsCall).toBeDefined();
+      expect(insulatorsCall![0]).toBe(mockParams.insulators);
+      expect(insulatorsCall![1]).toBe(mockOptions.startSupport);
+      expect(insulatorsCall![2]).toBe(mockOptions.endSupport);
+      expect(insulatorsCall![3]).toBe('insulators');
+      expect(insulatorsCall![4]).toBe(mockOptions.view);
+      expect(insulatorsCall![5]).toBe(mockOptions.side);
+    });
+
+    it('should pass correct parameters to createDataObject for supports', () => {
+      createPlotData(mockParams, mockOptions);
+
+      const calls = mockCreateDataObject.mock.calls;
+      const supportsCall = calls.find((call) => call[3] === 'supports');
+
+      expect(supportsCall).toBeDefined();
+      expect(supportsCall![0]).toBe(mockParams.supports);
+      expect(supportsCall![1]).toBe(mockOptions.startSupport);
+      expect(supportsCall![2]).toBe(mockOptions.endSupport);
+      expect(supportsCall![3]).toBe('supports');
+      expect(supportsCall![4]).toBe(mockOptions.view);
+      expect(supportsCall![5]).toBe(mockOptions.side);
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle empty arrays in input parameters', () => {
+      const emptyParams: GetSectionOutput = {
+        supports: [],
+        insulators: [],
+        spans: [],
+        span: [],
+        support: [],
+        insulator: []
+      };
+
+      const result = createPlotData(emptyParams, mockOptions);
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(mockCreateDataObject).toHaveBeenCalledTimes(3);
     });
 
     it('should handle different startSupport and endSupport values', () => {
@@ -157,100 +191,10 @@ describe('createPlotData', () => {
       createPlotData(mockParams, customOptions);
 
       const calls = mockCreateDataObject.mock.calls;
-      const spanCall = calls.find((call) => call[0].type === 'span');
-
-      expect(spanCall).toBeDefined();
-      // Should slice from index 1 to 2
-      expect(spanCall![0].uniqueSupports).toEqual(['support_2']);
-    });
-  });
-
-  describe('parameter passing', () => {
-    it('should pass all required parameters to createDataObject', () => {
-      createPlotData(mockParams, mockOptions);
-
-      const call = mockCreateDataObject.mock.calls[0];
-      const params = call[0];
-
-      expect(params).toMatchObject({
-        litXs: mockParams.litXs,
-        litYs: mockParams.litYs,
-        litZs: mockParams.litZs,
-        litSection: mockParams.litSection,
-        litTypes: mockParams.litTypes,
-        litSupports: mockParams.litSupports,
-        side: mockOptions.side,
-        view: mockOptions.view
+      calls.forEach((call) => {
+        expect(call[1]).toBe(1);
+        expect(call[2]).toBe(2);
       });
-    });
-
-    it('should pass correct name and type for each plot object', () => {
-      createPlotData(mockParams, mockOptions);
-
-      const calls = mockCreateDataObject.mock.calls;
-
-      const expectedObjects = [
-        { name: 'phase_1', type: 'span' },
-        { name: 'phase_2', type: 'span' },
-        { name: 'phase_3', type: 'span' },
-        { name: 'garde', type: 'span' },
-        { name: 'support', type: 'support' },
-        { name: 'insulator', type: 'insulator' }
-      ];
-
-      expectedObjects.forEach((expected, index) => {
-        expect(calls[index][0]).toMatchObject(expected);
-      });
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle empty arrays in input parameters', () => {
-      const emptyParams: CreateDataForPlotParams = {
-        litXs: [],
-        litYs: [],
-        litZs: [],
-        litSection: [],
-        litTypes: [],
-        litSupports: []
-      };
-
-      const result = createPlotData(emptyParams, mockOptions);
-
-      expect(Array.isArray(result)).toBe(true);
-      expect(mockCreateDataObject).toHaveBeenCalledTimes(6);
-    });
-
-    it('should handle null values in coordinate arrays', () => {
-      const paramsWithNulls: CreateDataForPlotParams = {
-        ...mockParams,
-        litXs: [1, null, 3, null, 5],
-        litYs: [10, null, 30, null, 50],
-        litZs: [100, null, 300, null, 500]
-      };
-
-      const result = createPlotData(paramsWithNulls, mockOptions);
-
-      expect(Array.isArray(result)).toBe(true);
-      expect(mockCreateDataObject).toHaveBeenCalledTimes(6);
-    });
-
-    it('should handle single support in litSupports', () => {
-      const singleSupportParams: CreateDataForPlotParams = {
-        ...mockParams,
-        litSupports: [
-          'support_1',
-          'support_1',
-          'support_1',
-          'support_1',
-          'support_1'
-        ]
-      };
-
-      const result = createPlotData(singleSupportParams, mockOptions);
-
-      expect(Array.isArray(result)).toBe(true);
-      expect(mockCreateDataObject).toHaveBeenCalledTimes(6);
     });
   });
 
@@ -265,7 +209,7 @@ describe('createPlotData', () => {
 
       const calls = mockCreateDataObject.mock.calls;
       calls.forEach((call) => {
-        expect(call[0].view).toBe('3d');
+        expect(call[4]).toBe('3d');
       });
     });
   });
@@ -281,7 +225,7 @@ describe('createPlotData', () => {
 
       const calls = mockCreateDataObject.mock.calls;
       calls.forEach((call) => {
-        expect(call[0].side).toBe('face');
+        expect(call[5]).toBe('face');
       });
     });
   });
@@ -292,16 +236,14 @@ describe('createPlotData', () => {
       mockCreateDataObject
         .mockReturnValueOnce([{ type: 'scatter', x: [1], y: [1] }])
         .mockReturnValueOnce([{ type: 'scatter', x: [2], y: [2] }])
-        .mockReturnValueOnce([{ type: 'scatter', x: [3], y: [3] }])
-        .mockReturnValueOnce([{ type: 'scatter', x: [4], y: [4] }])
-        .mockReturnValueOnce([{ type: 'scatter', x: [5], y: [5] }])
-        .mockReturnValueOnce([{ type: 'scatter', x: [6], y: [6] }]);
+        .mockReturnValueOnce([{ type: 'scatter', x: [3], y: [3] }]);
 
       const result = createPlotData(mockParams, mockOptions);
 
-      expect(result).toHaveLength(6);
+      expect(result).toHaveLength(3);
       expect(result[0]).toEqual({ type: 'scatter', x: [1], y: [1] });
-      expect(result[5]).toEqual({ type: 'scatter', x: [6], y: [6] });
+      expect(result[1]).toEqual({ type: 'scatter', x: [2], y: [2] });
+      expect(result[2]).toEqual({ type: 'scatter', x: [3], y: [3] });
     });
 
     it('should handle createDataObject returning empty arrays', () => {

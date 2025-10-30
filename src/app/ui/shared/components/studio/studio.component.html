@@ -3,10 +3,15 @@
     <div class="absolute inset-0 flex justify-center items-center">
       <p-progress-spinner ariaLabel="loading" />
     </div>
+  } @else if (error()) {
+    <div class="absolute inset-0 flex justify-center items-center">
+      <p i18n class="text-red-500 text-2xl font-bold">Error!</p>
+    </div>
+  } @else {
+    <app-section-plot
+      class="h-full"
+      [litData]="litData()"
+      [isSupportZoom]="isSupportZoom()"
+    ></app-section-plot>
   }
-  <app-section-plot
-    class="h-full"
-    [litData]="litData()"
-    [isSupportZoom]="isSupportZoom()"
-  ></app-section-plot>
 </div>

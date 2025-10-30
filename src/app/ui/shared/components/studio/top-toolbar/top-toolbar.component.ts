@@ -28,7 +28,7 @@ export class StudioTopToolbarComponent {
       value: string;
     }[]
   >([
-    { label: 'Profile', value: 'profile' },
-    { label: 'Face', value: 'face' }
+    { label: $localize`Profil`, value: 'profile' },
+    { label: $localize`Face`, value: 'face' }
   ]);
 }

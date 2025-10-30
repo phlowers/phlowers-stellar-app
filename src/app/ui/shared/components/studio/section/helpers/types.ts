@@ -1,25 +1,13 @@
-export type PlotObjectType = 'support' | 'insulator' | 'span';
+export type PlotObjectsType =
+  | 'supports'
+  | 'insulators'
+  | 'spans'
+  | 'span'
+  | 'support'
+  | 'insulator';
 
 export type View = '2d' | '3d';
 export type Side = 'profile' | 'face';
-
-interface BaseParams {
-  litXs: (number | null)[];
-  litYs: (number | null)[];
-  litZs: (number | null)[];
-  litSection: string[];
-  litTypes: string[];
-  litSupports: string[];
-}
-export interface CreateDataObjectPlotParams extends BaseParams {
-  name: string;
-  type: PlotObjectType;
-  uniqueSupports: string[];
-  side: Side;
-  view: View;
-}
-
-export type CreateDataForPlotParams = BaseParams;
 
 export interface PlotOptions {
   view: View;

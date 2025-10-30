@@ -8,7 +8,7 @@ import { MaintenanceService } from '@core/services/maintenance/maintenance.servi
 import { LinesService } from '@core/services/lines/lines.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MessageService } from 'primeng/api';
 
 class MockMaintenanceService {
@@ -50,6 +50,9 @@ describe('SectionsTabComponent', () => {
       '.p-select-overlay, .p-dropdown-panel, .p-overlay'
     );
     overlays.forEach((o) => o.remove());
+
+    // Restore console.error
+    jest.restoreAllMocks();
   });
 
   const mockSection: Section = {
@@ -112,6 +115,9 @@ describe('SectionsTabComponent', () => {
   };
 
   beforeEach(async () => {
+    // Suppress console errors for template binding issues
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
     const mockMessageService = {
       add: jest.fn()
     } as unknown as MessageService;
@@ -127,7 +133,7 @@ describe('SectionsTabComponent', () => {
         { provide: MessageService, useValue: mockMessageService },
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } }
       ],
-      schemas: [NO_ERRORS_SCHEMA]
+      schemas: [NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SectionsTabComponent);
@@ -166,7 +172,12 @@ describe('SectionsTabComponent', () => {
   });
 
   it('should open new section modal in create mode when clicking "Add a section"', () => {
-    const btn = fixture.debugElement.query(By.css('button'));
+    // Set up the component with no sections to show the "Create a section" button
+    fixture.componentRef.setInput('study', { sections: [] });
+    fixture.detectChanges();
+
+    const btn = fixture.debugElement.query(By.css('button[app-btn]'));
+    expect(btn).toBeTruthy();
     btn.triggerEventHandler('click', {});
     fixture.detectChanges();
 

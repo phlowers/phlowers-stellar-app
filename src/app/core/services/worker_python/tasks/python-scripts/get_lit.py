@@ -1,13 +1,72 @@
 import numpy as np
 import pandas as pd
-from mechaphlowers import SectionDataFrame
-from mechaphlowers.entities.arrays import SectionArray
-from mechaphlowers.entities.arrays import CableArray, WeatherArray
+from mechaphlowers.entities.arrays import SectionArray, CableArray
 import mechaphlowers as mph
-from mechaphlowers import plotting as plt
+from mechaphlowers import BalanceEngine, PlotEngine
+from typing import Optional
+from dataclasses import dataclass
+from typing import List
+import math
 
 
-def generate_section_array(size_section=15):
+@dataclass
+class Support:
+    uuid: str
+    number: Optional[float] = None
+    name: Optional[str] = None
+    spanLength: Optional[float] = None
+    spanAngle: Optional[float] = None
+    attachmentSet: Optional[str] = None
+    attachmentHeight: Optional[float] = None
+    heightBelowConsole: Optional[float] = None
+    cableType: Optional[str] = None
+    armLength: Optional[float] = None
+    chainName: Optional[str] = None
+    chainLength: Optional[float] = None
+    chainWeight: Optional[float] = None
+    chainV: Optional[bool] = None
+    counterWeight: Optional[float] = None
+    supportFootAltitude: Optional[float] = None
+    attachmentPosition: Optional[str] = None
+    chainSurface: Optional[float] = None
+
+
+@dataclass
+class InitialCondition:
+    uuid: str
+    name: str
+    base_parameters: float
+    base_temperature: float
+    cable_pretension: float
+    min_temperature: float
+    max_wind_pressure: float
+    max_frost_width: float
+
+
+@dataclass
+class Cable:
+    name: str
+    data_source: str
+    section: float
+    diameter: float
+    young_modulus: float
+    linear_weight: float
+    dilatation_coefficient: float
+    temperature_reference: float
+    stress_strain_a0: float
+    stress_strain_a1: float
+    stress_strain_a2: float
+    stress_strain_a3: float
+    stress_strain_a4: float
+    stress_strain_b0: float
+    stress_strain_b1: float
+    stress_strain_b2: float
+    stress_strain_b3: float
+    stress_strain_b4: float
+    is_narcisse: bool
+
+
+def generate_section_array(supports: list[Support]):
     # Generate a SectionArray
     name = []
     suspension = []
@@ -16,23 +75,24 @@ def generate_section_array(size_section=15):
     line_angle = []
     insulator_length = []
     span_length = []
+    insulator_weight = []
+    load_weight = []
+    load_position = []
 
-    for i in range(size_section):
-        name.append(f"Section {i}")
-        if i == 0 or i == size_section - 1:
+    for index, support in enumerate(supports):
+        name.append(support.name or f"Support {index}")
+        if index == 0 or index == len(supports) - 1:
             suspension.append(False)
-            insulator_length.append(0.0)
         else:
             suspension.append(True)
-            insulator_length.append(float(np.random.uniform(5, 10)))
-        altitude.append(np.random.uniform(20, 150))
-        crossarm_length.append(4.0)
-
-        if i == size_section - 1:
-            span_length.append(np.nan)
-        else:
-            span_length.append(float(np.random.uniform(80, 1000)))
-        line_angle.append(np.random.uniform(0, 60))
+        altitude.append(support.attachmentHeight)
+        crossarm_length.append(support.armLength or 0)
+        insulator_length.append(1)
+        span_length.append(support.spanLength)
+        line_angle.append(support.spanAngle)
+        insulator_weight.append(200)
+        load_weight.append(0)
+        load_position.append(0)
 
     section_data = {
         "name": name,
@@ -40,6 +100,9 @@ def generate_section_array(size_section=15):
         "conductor_attachment_altitude": altitude,
         "crossarm_length": crossarm_length,
         "insulator_length": insulator_length,
+        "insulator_weight": insulator_weight,
+        "load_weight": load_weight,
+        "load_position": load_position,
         "span_length": span_length,
         "line_angle": line_angle,
     }
@@ -61,97 +124,100 @@ def add_obstacle(df, x, y, z, type_obstacle, name_obstacle, support):
     return pd.concat([df, new_df], ignore_index=True)
 
 
+def split_points_into_their_spans(data: List[List[float]]) -> List[List[List[float]]]:
+    spans = []
+    new_span = []
+    for row in data:
+        if math.isnan(row[0]) and math.isnan(row[1]) and math.isnan(row[2]):
+            spans.append(new_span)
+            new_span = []
+        else:
+            new_span.append(row)
+    return spans
+
+
+mock_data = """"""
+
+
 def main():
+    # import json
+
+    # js_inputs2 = globals()["js_inputs"].to_py()
+    # js_inputs = json.loads(data)
+    js_inputs = globals()["js_inputs"].to_py()
+    # print("js_inputs: ", json.dumps(js_inputs))
+    input_section = js_inputs["section"]
+    input_cable = js_inputs["cable"]
+    input_initial_conditions = input_section["initial_conditions"]
+    input_initial_condition = next(
+        condition
+        for condition in input_initial_conditions
+        if condition["uuid"] == input_section["selected_initial_condition_uuid"]
+    )
+    initial_condition = InitialCondition(**input_initial_condition)
+    cable = Cable(**input_cable)
+
+    if not input_section["supports"]:
+        return {"error": "No supports data provided"}
+
+    # Extract supports data from JavaScript inputs
+    supports_data = []
+    for support_js in input_section["supports"]:
+        supports_data.append(Support(**support_js))
     np.random.seed(142)
-    # np.random.seed(42)
-    size_multiple = 5
-    size_section = size_multiple * 5
-    df = generate_section_array(size_section)
-    mph.options.graphics.resolution = res = 10
+    df = generate_section_array(supports_data)
+    mph.options.graphics.resolution = 10
 
-    section = SectionArray(data=df)
-
+    section = SectionArray(df)
     # set sagging parameter and temperatur
-    section.sagging_parameter = 800
-    section.sagging_temperature = 15
+    section.sagging_parameter = 2000
+    section.sagging_temperature = initial_condition.base_temperature
 
     # Provide section to SectionDataFrame
-    frame = SectionDataFrame(section)
+    # frame = SectionDataFrame(section)
     cable_array = CableArray(
         pd.DataFrame(
             {
-                "section": [345.55],
-                "diameter": [22.4],
-                "linear_weight": [9.55494],
-                "young_modulus": [59],
-                "dilatation_coefficient": [23],
-                "temperature_reference": [15],
-                "a0": [0],
-                "a1": [59],
-                "a2": [0],
-                "a3": [0],
-                "a4": [0],
-                "b0": [0],
-                "b1": [0],
-                "b2": [0],
-                "b3": [0],
-                "b4": [0],
+                "section": [cable.section],
+                "diameter": [cable.diameter],
+                "linear_weight": [cable.linear_weight],
+                "young_modulus": [60],
+                "dilatation_coefficient": [cable.dilatation_coefficient],
+                "temperature_reference": [cable.temperature_reference],
+                "a0": [cable.stress_strain_a0],
+                "a1": [cable.stress_strain_a1],
+                "a2": [cable.stress_strain_a2],
+                "a3": [cable.stress_strain_a3],
+                "a4": [cable.stress_strain_a4],
+                "b0": [cable.stress_strain_b0],
+                "b1": [cable.stress_strain_b1],
+                "b2": [cable.stress_strain_b2],
+                "b3": [cable.stress_strain_b3],
+                "b4": [cable.stress_strain_b4],
             }
         )
     )
-    frame.add_cable(cable_array)
 
-    weather = WeatherArray(
-        pd.DataFrame(
-            {
-                "ice_thickness": [0] * size_section,
-                "wind_pressure": [540.12, 0.0, 212.0, 53.0, 0.0] * size_multiple,
-            }
-        )
+    balance_engine_base_test = BalanceEngine(
+        cable_array=cable_array, section_array=section
     )
-    frame.add_weather(weather=weather)
+    plt_line = PlotEngine.builder_from_balance_engine(balance_engine_base_test)
+    balance_engine_base_test.solve_adjustment()
+    balance_engine_base_test.solve_change_state()
 
-    def get_section(frame, shift_arm, shift_altitude, phase_name):
-        save1 = frame.section_array._data.conductor_attachment_altitude
-        save2 = frame.section_array._data.crossarm_length
+    span_coords = plt_line.section_pts.get_spans("section").points(True)
+    insulators_coords = plt_line.section_pts.get_insulators().points(True)
+    supports_coords = plt_line.section_pts.get_supports().points(True)
 
-        frame.section_array._data.conductor_attachment_altitude += shift_altitude
-        frame.section_array._data.crossarm_length += shift_arm
-        frame.update()
-        line_points = frame.get_coordinates()
-
-        support_points = plt.plot.get_support_points(frame.data)
-
-        insulator_points = plt.plot.get_insulator_points(frame.data)
-
-        spans = pd.DataFrame(line_points, columns=["x", "y", "z"])
-        spans["support"] = df.loc[0 : size_section - 2, "name"].repeat(res).values
-        spans["type"] = "span"
-
-        supports = pd.DataFrame(support_points, columns=["x", "y", "z"])
-        supports["support"] = df.name.repeat(6).values
-        supports["type"] = "support"
-
-        insulators = pd.DataFrame(insulator_points, columns=["x", "y", "z"])
-        insulators["support"] = df.name.repeat(3).values
-        insulators["type"] = "insulator"
-
-        pdf = pd.concat([spans, supports, insulators], ignore_index=True)
-        pdf["section"] = phase_name
-
-        frame.section_array._data.conductor_attachment_altitude = save1
-        frame.section_array._data.crossarm_length = save2
-
-        return pdf
-
-    section_1 = get_section(frame, 0, -10, "phase_1")
-    lit = pd.concat([section_1], ignore_index=True)
-    globals()["test_frame"] = frame
-    globals()["test_weather"] = weather
-
-    lit["color_select"] = lit.section + lit.type
-
-    return lit.to_dict()
+    spans = split_points_into_their_spans(span_coords)
+    insulators = split_points_into_their_spans(insulators_coords)
+    supports = split_points_into_their_spans(supports_coords)
+    result = {
+        "spans": spans,
+        "insulators": insulators,
+        "supports": supports,
+    }
+    return result
 
 
 result = main()

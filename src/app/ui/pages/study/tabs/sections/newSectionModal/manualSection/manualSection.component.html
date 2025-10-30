@@ -1,7 +1,7 @@
 <p-tabs
   [value]="tabValue()"
   (valueChange)="tabValueChange($event)"
-  class="basis-[50rem] {{ mode() === 'view' ? 'mt-0' : 'mt-4' }}"
+  class="{{ mode() === 'view' ? 'mt-0' : 'mt-4' }} h-full"
 >
   <p-tablist>
     <p-tab (onSelect)="tabValue.set('general')" value="general" i18n>
@@ -15,7 +15,7 @@
     </p-tab>
   </p-tablist>
 
-  <p-tabpanels>
+  <p-tabpanels class="grow">
     <p-tabpanel value="general">
       <div class="section-form-part">
         <h3 class="title-underline" i18n>Section</h3>
@@ -354,7 +354,6 @@
         </button>
       </div>
     </p-tabpanel>
-
     <p-tabpanel value="supports">
       <div class="flex flex-col gap-4 mt-2">
         @if (mode() === 'create' || mode() === 'edit') {
@@ -452,9 +451,14 @@
       </div>
     </p-tabpanel>
     <p-tabpanel value="graphical">
-      <div class="mt-2">
-        <app-studio [isSupportZoom]="false"></app-studio>
-      </div>
+      @if (tabValue() === 'graphical') {
+        <div class="mt-2 h-full">
+          <app-studio
+            [section]="section()"
+            [isSupportZoom]="false"
+          ></app-studio>
+        </div>
+      }
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>

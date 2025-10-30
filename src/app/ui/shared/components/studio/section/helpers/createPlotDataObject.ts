@@ -1,60 +1,45 @@
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
-import { CreateDataObjectPlotParams, PlotObjectType } from './types';
+import { PlotObjectsType, Side, View } from './types';
 
 const getColor = (
-  type: PlotObjectType
+  type: PlotObjectsType
 ): {
   color: string;
   dash: Dash;
 } => {
   switch (type) {
-    case 'span':
+    case 'spans':
       return { color: 'red', dash: 'solid' };
-    case 'support':
+    case 'supports':
       return { color: 'blue', dash: 'solid' };
-    case 'insulator':
+    case 'insulators':
       return { color: 'green', dash: 'solid' };
     default:
       return { color: 'black', dash: 'solid' };
   }
 };
 
-const getMode = (type: PlotObjectType): PlotData['mode'] => {
-  if (type === 'support') return 'text+lines';
+const getMode = (type: PlotObjectsType): PlotData['mode'] => {
+  if (type === 'supports') return 'text+lines';
   return 'lines';
 };
 
 export const createDataObject = (
-  params: CreateDataObjectPlotParams
+  data: number[][][],
+  startSupport: number,
+  endSupport: number,
+  type: PlotObjectsType,
+  view: View,
+  side: Side
 ): Data[] => {
-  const {
-    litXs,
-    litYs,
-    litZs,
-    litSection,
-    litTypes,
-    litSupports,
-    uniqueSupports,
-    name,
-    side,
-    type,
-    view
-  } = params;
-  const filterCoordinates = (
-    coordinates: (number | null)[],
-    support: string
-  ) => {
-    return coordinates.filter(
-      (_, index: number) =>
-        litSupports[index] === support &&
-        (litTypes[index] === 'span' ? litSection[index] === name : true) &&
-        litTypes[index] === type
-    );
-  };
-  return uniqueSupports.map((support) => {
-    const x = filterCoordinates(litXs, support);
-    const y = filterCoordinates(litYs, support);
-    const z = filterCoordinates(litZs, support);
+  const slidedData = data.slice(
+    startSupport,
+    type === 'spans' ? endSupport : endSupport + 1
+  );
+  return slidedData.map((points) => {
+    const x = points.map((point) => point[0]);
+    const y = points.map((point) => point[1]);
+    const z = points.map((point) => point[2]);
     return {
       x: side === 'face' && view === '2d' ? y : x,
       z: view === '3d' ? z : y,

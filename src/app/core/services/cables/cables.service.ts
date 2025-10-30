@@ -31,6 +31,10 @@ export class CablesService {
     return this.storageService.db?.cables?.toArray();
   }
 
+  async getCable(name: string): Promise<Cable | undefined> {
+    return this.storageService.db?.cables?.where('name').equals(name).first();
+  }
+
   async importFromFile() {
     const cables = this.http
       .get(`${window.location.origin}/cables.csv`, {

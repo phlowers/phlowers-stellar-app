@@ -25,6 +25,10 @@ import { SideTabComponent } from './side-tabs/side-tab/side-tab.component';
 import { TabsModule } from 'primeng/tabs';
 import { ClimateComponent } from './loads/climate/climate.component';
 import { SpanComponent } from './loads/span/span.component';
+import { debounce } from 'lodash';
+
+// debounce to make it more fluid when dragging the slider
+const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
 @Component({
   selector: 'app-studio-page',
@@ -60,7 +64,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   sliderOptions = computed<Options>(() => {
     return {
       floor: 0,
-      ceil: 20,
+      ceil: (this.plotService.section()?.supports?.length ?? 1) - 1,
       step: 1,
       showTicks: true,
       showTicksValues: true,
@@ -182,6 +186,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
               );
               if (section) {
                 this.plotService.section.set(section);
+                this.plotService.plotOptionsChange(
+                  'endSupport',
+                  section.supports.length - 1
+                );
               } else {
                 this.router.navigate(['/studies']);
               }
@@ -194,6 +202,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.plotService.section.set(null);
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -201,4 +210,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       this.resizeObserver.disconnect();
     }
   }
+
+  debounceUpdateSliderOptions = debounce(
+    (key: 'endSupport' | 'startSupport', value: number) => {
+      this.plotService.plotOptionsChange(key, value);
+    },
+    DEBOUNCED_REFRESH_STUDIO_DELAY
+  );
 }

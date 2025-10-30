@@ -61,7 +61,7 @@ class MockSupportsTableComponent {
   template: ''
 })
 class MockStudioComponent {
-  refreshStudio = jest.fn();
+  refreshSection = jest.fn();
 }
 
 // Mock services
@@ -317,28 +317,28 @@ describe('ManualSectionComponent', () => {
 
   describe('tabValueChange', () => {
     it('should refresh studio when switching to graphical tab', () => {
-      const mockStudio = { refreshStudio: jest.fn() };
+      const mockStudio = { refreshSection: jest.fn() };
       (component.studio as unknown as () => {
-        refreshStudio: jest.Mock;
+        refreshSection: jest.Mock;
       } | null) = () => mockStudio;
 
       component.tabValueChange('graphical');
-      expect(mockStudio.refreshStudio).toHaveBeenCalled();
+      expect(mockStudio.refreshSection).toHaveBeenCalled();
     });
 
     it('should not refresh studio when switching to other tabs', () => {
-      const mockStudio = { refreshStudio: jest.fn() };
+      const mockStudio = { refreshSection: jest.fn() };
       (component.studio as unknown as () => {
-        refreshStudio: jest.Mock;
+        refreshSection: jest.Mock;
       } | null) = () => mockStudio;
 
       component.tabValueChange('general');
-      expect(mockStudio.refreshStudio).not.toHaveBeenCalled();
+      expect(mockStudio.refreshSection).not.toHaveBeenCalled();
     });
 
     it('should handle case when studio is not available', () => {
       (component.studio as unknown as () => {
-        refreshStudio: jest.Mock;
+        refreshSection: jest.Mock;
       } | null) = () => null;
 
       expect(() => component.tabValueChange('graphical')).not.toThrow();

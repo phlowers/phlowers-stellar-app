@@ -121,7 +121,7 @@ export class ManualSectionComponent implements OnInit {
   tabValueChange = (event: string | number) => {
     this.tabValue.set(String(event));
     if (event === 'graphical') {
-      this.studio()?.refreshStudio();
+      this.studio()?.refreshSection();
     }
   };
 

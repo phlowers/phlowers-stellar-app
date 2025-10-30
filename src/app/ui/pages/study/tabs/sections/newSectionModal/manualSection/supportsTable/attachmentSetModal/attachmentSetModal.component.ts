@@ -12,8 +12,6 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { Select } from 'primeng/select';
 import { Attachment } from '@core/data/database/interfaces/attachment';
 import { DividerModule } from 'primeng/divider';
-import { StudioComponent } from '@ui/shared/components/studio/studio.component';
-import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import { AttachmentService } from '@core/services/attachment/attachment.service';
 import { Support } from '@core/data/database/interfaces/support';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +28,6 @@ import { Section } from '@core/data/database/interfaces/section';
     ButtonComponent,
     Select,
     DividerModule,
-    StudioComponent,
     FormsModule,
     UniquePipe,
     IconFieldModule,
@@ -54,14 +51,6 @@ export class AttachmentSetModalComponent implements OnInit {
     armLength: number;
     heightBelowConsole: number;
   }>();
-
-  plotOptions = signal<PlotOptions>({
-    view: '2d',
-    side: 'profile',
-    startSupport: 0,
-    endSupport: 1,
-    invert: false
-  });
 
   attachmentFilterTable = signal<Attachment[]>([]);
 
