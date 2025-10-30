@@ -85,18 +85,11 @@
           rgba(from var(--grey-white) r g b / 0) 60%);
       background-size: 200% 100%;
       background-position-x: 100%;
-      animation: 1s loading ease-in-out infinite;
     }
   }
 
   &.filled {
     font-variation-settings: 'FILL' 1;
-  }
-}
-
-@keyframes loading {
-  to {
-    background-position-x: -100%;
   }
 }
 

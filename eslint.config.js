@@ -14,7 +14,7 @@ module.exports = tseslint.config(
       }
     },
     files: ['**/*.ts'],
-    ignores: ['coverage/**', 'dist/**'],
+    ignores: ['coverage/**', 'dist/**', '.venv/**'],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -44,7 +44,7 @@ module.exports = tseslint.config(
   },
   {
     files: ['**/*.html'],
-    ignores: ['coverage/**', 'dist/**'],
+    ignores: ['coverage/**', 'dist/**', '.venv/**'],
     extends: [
       ...angular.configs.templateRecommended,
       ...angular.configs.templateAccessibility

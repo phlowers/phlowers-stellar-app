@@ -328,8 +328,8 @@ describe('SupportsTableComponent', () => {
     it('should copy chainName and propagate chainLength and chainWeight to all supports', () => {
       component.copyColumn('chainName');
 
-      // Should emit 9 times: 3 for chainName + 3 for chainLength + 3 for chainWeight
-      expect(component.supportChange.emit).toHaveBeenCalledTimes(9);
+      // Should emit 15 times: (chainName + chainLength + chainWeight + chainSurface + chainV) * 3 supports
+      expect(component.supportChange.emit).toHaveBeenCalledTimes(15);
 
       // Check chainName emissions
       expect(component.supportChange.emit).toHaveBeenCalledWith({
@@ -417,7 +417,7 @@ describe('SupportsTableComponent', () => {
 
       component.copyColumn('chainName');
 
-      expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
+      expect(component.supportChange.emit).toHaveBeenCalledTimes(5);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         field: 'chainName',
@@ -470,7 +470,7 @@ describe('SupportsTableComponent', () => {
     it('should emit chainName, chainLength, and chainWeight when chainName is changed', () => {
       component.onSupportFieldChange('support1', 'chainName', 'Chain 2');
 
-      expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
+      expect(component.supportChange.emit).toHaveBeenCalledTimes(5);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         field: 'chainName',

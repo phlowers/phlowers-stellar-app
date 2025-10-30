@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SideTabsComponent } from './side-tabs.component';
+import { PlotService } from '../plot.service';
 import { SideTabComponent } from './side-tab/side-tab.component';
 
 @Component({
@@ -18,8 +19,16 @@ describe('SideTabsComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
 
   beforeEach(async () => {
+    const isSidebarOpenMock = Object.assign(jest.fn().mockReturnValue(false), {
+      set: jest.fn()
+    });
+    const plotServiceMock = {
+      isSidebarOpen: isSidebarOpenMock
+    } as unknown as PlotService;
+
     await TestBed.configureTestingModule({
-      imports: [TestHostComponent]
+      imports: [TestHostComponent],
+      providers: [{ provide: PlotService, useValue: plotServiceMock }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);

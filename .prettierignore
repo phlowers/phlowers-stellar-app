@@ -12,3 +12,4 @@ node_modules
 *.yml
 /tsconfig.json
 *.json
+.venv

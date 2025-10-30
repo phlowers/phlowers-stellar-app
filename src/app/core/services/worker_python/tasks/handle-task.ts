@@ -5,22 +5,47 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { loadPyodide } from 'pyodide';
-import getLit from './python-scripts/get_lit.py';
+import type { PyProxy } from 'pyodide/ffi';
+import functions from './python-scripts/functions.py';
 import testsScript from './python-scripts/tests.py';
 import { Task, TaskError, TaskInputs, TaskOutputs } from './types';
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 
-const tasks: Record<Task, { script: string; externalPackages: string[] }> = {
+const tasks: Record<
+  Task,
+  {
+    function: string;
+    script: string | (() => Promise<void> | void);
+    externalPackages: string[];
+  }
+> = {
   [Task.runTests]: {
     script: testsScript,
+    function: 'run_tests',
     externalPackages: ['pytest']
   },
   [Task.getLit]: {
-    script: getLit,
+    script: functions,
+    function: 'init_section',
+    externalPackages: []
+  },
+  [Task.runEngine]: {
+    script: functions,
+    function: 'change_climate',
     externalPackages: []
   }
 };
+
+// let engine: any = null;
+
+// async function runEngine() {
+//   // console.log('running engine', engine);
+//   // engine.solve_change_state();
+//   // return engine.solve_change_state();
+//   const result = pyodide.globals.get('result');
+
+// }
 
 export async function handleTask<taskId extends Task>(
   pyodide: PyodideAPI,
@@ -38,16 +63,20 @@ export async function handleTask<taskId extends Task>(
       throw new Error(`Unknown task: ${task}`);
     }
 
-    pyodide.globals.set('js_inputs', inputs);
-    const { script, externalPackages } = tasks[task];
+    const { externalPackages } = tasks[task];
     if (externalPackages.length > 0) {
       await pyodide.loadPackage(externalPackages);
     }
-    await pyodide.runPythonAsync(script);
-    const result = pyodide.globals.get('result');
+    pyodide.globals.set('js_inputs', inputs);
+
+    const functionToRun = pyodide.globals.get(tasks[task].function) as (
+      inputs?: TaskInputs[taskId]
+    ) => PyProxy;
+    const result = inputs ? functionToRun(inputs) : functionToRun();
     const resultJs = result.toJs({ dict_converter: Object.fromEntries });
+    result.destroy();
     return {
-      result: resultJs,
+      result: resultJs as TaskOutputs[taskId],
       runTime: performance.now() - start,
       error: null
     };
@@ -56,7 +85,7 @@ export async function handleTask<taskId extends Task>(
     return {
       result: null,
       runTime: performance.now() - start,
-      error: TaskError.UNKNOWN_ERROR
+      error: TaskError.CALCULATION_ERROR
     };
   }
 }
