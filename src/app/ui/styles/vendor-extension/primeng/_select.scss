@@ -2,7 +2,7 @@
 @use 'abstract.extracts' as app;
 
 .p-select.p-select {
-  --p-select-disabled-background: var(--grey-200);
+  --p-select-disabled-background: var(--grey-0);
 
   --p-select-border-color: var(--grey-400);
   --p-select-hover-border-color: var(--grey-600);
@@ -10,7 +10,7 @@
   --p-select-focus-border-color: var(--primary-600);
 
   --p-select-color: var(--grey-900);
-  --p-select-disabled-color: var(--grey-500);
+  --p-select-disabled-color: var(--grey-300);
   --p-select-placeholder-color: var(--grey-500);
 
   --p-select-shadow: #{map.get(app.$elevation, neutral-inner)};
@@ -41,7 +41,6 @@
 }
 
 .select-with-buttons-panel.select-with-buttons-panel {
-
   .p-select-list,
   .p-select-option {
     padding: 0rem;
@@ -79,7 +78,7 @@
         color: var(--grey-750);
         white-space: pre-wrap;
         text-align: left;
-        word-break: break-all
+        word-break: break-all;
       }
     }
 

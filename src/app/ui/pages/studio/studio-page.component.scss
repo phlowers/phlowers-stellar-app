@@ -1,7 +1,7 @@
 @use 'abstract.extracts' as app;
 
 :host {
-  @apply block -m-6;
+  @apply block -m-6 overflow-x-hidden;
   height: calc(100% + 3rem);
 }
 
@@ -17,8 +17,8 @@
 .plot-view {
   @apply block;
   min-height: 21.875rem;
-  height: 60%;
   max-height: 36.875rem;
+  // necessary height in absolute (rem) value is set dynamically via [style.height] binding
 }
 
 .quick-measures {
