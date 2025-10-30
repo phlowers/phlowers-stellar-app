@@ -3,13 +3,27 @@
 
 .p-togglebutton.p-togglebutton {
   --p-togglebutton-padding: 0;
+  --p-togglebutton-content-padding: 0.3125rem 0.5rem;
+  --p-togglebutton-color: var(--star-dust-900);
+  --p-togglebutton-hover-color: var(--p-togglebutton-color);
+  --p-togglebutton-checked-color: var(--star-dust-950);
+  --p-togglebutton-background: var(--star-dust-100);
+  --p-togglebutton-hover-background: var(--p-togglebutton-background);
 
   &:focus-visible {
     @extend %focus-state;
   }
-}
 
-.p-togglebutton.p-togglebutton.p-togglebutton-checked {
-  box-shadow: map.get(app.$elevation, neutral-2);
-  border-radius: var(--p-togglebutton-border-radius);
+  &.p-togglebutton-checked {
+    box-shadow: map.get(app.$elevation, neutral-2);
+    border-radius: var(--p-togglebutton-border-radius);
+
+    .p-toggle-button-content {
+      padding: 0.25rem 0.5rem 0.375rem;
+    }
+  }
+
+  &:not(:disabled):not(.p-togglebutton-checked):hover {
+    box-shadow: var(--elevation-neutral-2);
+  }
 }

@@ -2,7 +2,6 @@
 
 .p-selectbutton.p-selectbutton {
   --p-selectbutton-border-radius: 0.125rem;
-  --p-togglebutton-content-padding: 0.25rem 0.5rem;
 
   .p-togglebutton.p-togglebutton {
     font-size: 0.875rem;
@@ -15,7 +14,7 @@
         --p-selectbutton-border-radius
       );
       z-index: 1;
-      outline: 0.0625rem solid var(--grey-150);
+      outline: 0.0625rem solid var(--star-dust-300);
 
       &:focus-visible {
         @extend %focus-state;

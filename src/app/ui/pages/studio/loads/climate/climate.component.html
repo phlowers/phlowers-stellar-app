@@ -12,8 +12,11 @@
   </button>
 
   <div class="climate__divided-line">
-    <div class="climate__form-item">
-      <label for="windPressure" class="wind" i18n>Wind Pressure</label>
+    <label for="windPressure" class="wind" i18n>Wind Pressure</label>
+
+    <label for="cableTemperature" class="temp" i18n>Cable Temperature</label>
+
+    <p-inputgroup>
       <input
         pInputText
         type="number"
@@ -21,12 +24,10 @@
         formControlName="windPressure"
         class="wind"
       />
-    </div>
+      <p-inputgroup-addon>Pa</p-inputgroup-addon>
+    </p-inputgroup>
 
-    <div class="climate__form-item">
-      <label for="cableTemperature" class="temp" i18n>
-        Cable Temperature
-      </label>
+    <p-inputgroup>
       <input
         pInputText
         type="number"
@@ -34,7 +35,8 @@
         formControlName="cableTemperature"
         class="temp"
       />
-    </div>
+      <p-inputgroup-addon>°C</p-inputgroup-addon>
+    </p-inputgroup>
   </div>
 
   <div class="climate__form-item">
@@ -52,13 +54,16 @@
   @if (form.value.symmetryType === 'symmetric') {
     <div class="climate__form-item">
       <label for="iceThickness" class="ice" i18n>Ice Thickness</label>
-      <input
-        pInputText
-        type="number"
-        id="iceThickness"
-        formControlName="iceThickness"
-        class="ice"
-      />
+      <p-inputgroup>
+        <input
+          pInputText
+          type="number"
+          id="iceThickness"
+          formControlName="iceThickness"
+          class="ice"
+        />
+        <p-inputgroup-addon>cm</p-inputgroup-addon>
+      </p-inputgroup>
     </div>
   } @else if (form.value.symmetryType === 'dis_symmetric') {
     <div class="climate__form-item">
@@ -79,26 +84,34 @@
       <label for="iceThicknessBefore" class="ice-before" i18n>
         Ice Thickness (Before Frontier)
       </label>
-      <input
-        pInputText
-        type="number"
-        id="iceThicknessBefore"
-        formControlName="iceThicknessBefore"
-        class="ice-before"
-      />
+
+      <p-inputgroup>
+        <input
+          pInputText
+          type="number"
+          id="iceThicknessBefore"
+          formControlName="iceThicknessBefore"
+          class="ice-before"
+        />
+        <p-inputgroup-addon>cm</p-inputgroup-addon>
+      </p-inputgroup>
     </div>
 
     <div class="climate__form-item">
       <label for="iceThicknessAfter" class="ice-after" i18n>
         Ice Thickness (After Frontier)
       </label>
-      <input
-        pInputText
-        type="number"
-        id="iceThicknessAfter"
-        formControlName="iceThicknessAfter"
-        class="ice-after"
-      />
+
+      <p-inputgroup>
+        <input
+          pInputText
+          type="number"
+          id="iceThicknessAfter"
+          formControlName="iceThicknessAfter"
+          class="ice-after"
+        />
+        <p-inputgroup-addon>cm</p-inputgroup-addon>
+      </p-inputgroup>
     </div>
   }
 

@@ -5,16 +5,20 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { SelectModule } from 'primeng/select';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { InputText } from 'primeng/inputtext';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { SelectModule } from 'primeng/select';
+import { InputText } from 'primeng/inputtext';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 @Component({
   selector: 'app-climate',
   imports: [
     ReactiveFormsModule,
     InputText,
+    InputGroupModule,
+    InputGroupAddonModule,
     SelectModule,
     ButtonComponent,
     IconComponent
@@ -26,8 +30,8 @@ export class ClimateComponent {
   form: FormGroup;
 
   symmetryOptions = [
-    { label: 'Symmetric', value: 'symmetric' },
-    { label: 'Dis Symmetric', value: 'dis_symmetric' }
+    { label: $localize`Symmetric`, value: 'symmetric' },
+    { label: $localize`Dis Symmetric`, value: 'dis_symmetric' }
   ];
 
   frontierSupportOptions = [
@@ -95,9 +99,9 @@ export class ClimateComponent {
 
   calculForm() {
     console.log('Calculus values:');
-    Object.entries(this.getVisibleFormValues()).forEach(([key, val]) =>
-      console.log(`${key}: ${val}`)
-    );
+    for (const [key, val] of Object.entries(this.getVisibleFormValues())) {
+      console.log(`${key}: ${val}`);
+    }
   }
 
   isFormEmpty(): boolean {

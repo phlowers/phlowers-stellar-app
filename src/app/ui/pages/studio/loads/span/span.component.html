@@ -1,0 +1,113 @@
+<form [formGroup]="form" class="span">
+  <div class="span__reset">
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="resetForm()"
+    >
+      <app-icon icon="refresh" />
+      <ng-container i18n>reset</ng-container>
+    </button>
+  </div>
+
+  <div class="span__form">
+    <label for="spanSelect" i18n>Span</label>
+    <label for="supportNumber" i18n>Support n°</label>
+
+    <p-select
+      inputId="spanSelect"
+      [options]="availableSpans()"
+      formControlName="spanSelect"
+      optionLabel="label"
+      optionValue="value"
+    />
+
+    <p-select
+      inputId="supportNumber"
+      [options]="availableSupports()"
+      formControlName="supportNumber"
+      optionLabel="label"
+      optionValue="value"
+    />
+
+    <label for="loadType" i18n>Load type</label>
+    <label for="spanLoad" i18n>Span load</label>
+
+    <p-select
+      inputId="loadType"
+      [options]="loadTypeOptions"
+      formControlName="loadType"
+      optionLabel="label"
+      optionValue="value"
+    />
+
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="spanLoad"
+        formControlName="spanLoad"
+      />
+      <p-inputgroup-addon>kg</p-inputgroup-addon>
+    </p-inputgroup>
+
+    <label for="cableLengthChange" i18n>Short. or lengthen. Cable (+ -)</label>
+    <label for="pointLoadDist" i18n>Dist. to point load</label>
+
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="cableLengthChange"
+        formControlName="cableLengthChange"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="pointLoadDist"
+        formControlName="pointLoadDist"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="span__btns">
+    <button
+      app-btn
+      btnStyle="danger"
+      type="button"
+      aria-label="erase load case"
+      i18n-aria-label
+      (click)="eraseForm()"
+    >
+      <app-icon icon="delete" />
+    </button>
+
+    <button
+      app-btn
+      type="submit"
+      btnStyle="outlined"
+      (click)="submitForm()"
+      [disabled]="isFormInvalid()"
+    >
+      <app-icon icon="save" />
+      <ng-container i18n>Save</ng-container>
+    </button>
+
+    <button
+      app-btn
+      type="button"
+      (click)="calculForm()"
+      [disabled]="isFormInvalid()"
+    >
+      <app-icon icon="rocket_launch" />
+      <ng-container i18n>Calculate</ng-container>
+    </button>
+  </div>
+</form>

@@ -12,17 +12,18 @@
   }
 
   &__divided-line {
-    @apply flex items-start justify-stretch;
-    gap: 0.625rem;
+    @apply grid grid-cols-2;
+    column-gap: 0.625rem;
+    align-items: end;
   }
 
   &__btn-wrapper {
-    @apply flex justify-end items-center gap-4 pt-5;
+    @apply flex justify-end items-center gap-4 pt-5 pr-3;
   }
 
   label {
     @extend %text-s-400;
-    padding: 0.125rem 0.25rem;
+    margin: 0.125rem 0.25rem;
   }
 
   input {
