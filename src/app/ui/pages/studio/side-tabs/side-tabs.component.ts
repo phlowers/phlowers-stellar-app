@@ -10,6 +10,9 @@ import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { PlotService } from '../plot.service';
+
+const REFRESH_STUDIO_DELAY = 400;
 
 @Component({
   selector: 'app-side-tabs',
@@ -24,6 +27,8 @@ export class SideTabsComponent {
 
   public sideTabs = signal<number | string>('');
   public panelWidth = signal<string>('0px');
+
+  constructor(private readonly plotService: PlotService) {}
 
   private updateWidth() {
     const idx = this.sideTabs();
@@ -60,6 +65,9 @@ export class SideTabsComponent {
     if (toggle !== '') {
       this.focusPanel(toggle);
     }
+    setTimeout(() => {
+      this.plotService.isSidebarOpen.set(toggle !== '');
+    }, REFRESH_STUDIO_DELAY);
   }
 
   isOpen(i: number): boolean {

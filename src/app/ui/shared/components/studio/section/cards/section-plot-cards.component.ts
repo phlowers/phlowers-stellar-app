@@ -44,12 +44,19 @@ export class SectionPlotCardsComponent {
   constructor(public readonly plotService: PlotService) {}
 
   arraysOfSupports = computed(() => {
-    return new Array(
+    if (!this.plotService.section()) {
+      return [];
+    }
+    const array = new Array(
       this.plotService.plotOptions().endSupport -
         this.plotService.plotOptions().startSupport +
         1
     )
       .fill(0)
       .map((_, index) => index + this.plotService.plotOptions().startSupport);
+    if (array.length > 3) {
+      return [];
+    }
+    return array;
   });
 }

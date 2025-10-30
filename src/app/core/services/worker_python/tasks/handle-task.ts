@@ -7,7 +7,7 @@
 import { loadPyodide } from 'pyodide';
 import getLit from './python-scripts/get_lit.py';
 import testsScript from './python-scripts/tests.py';
-import { Task, TaskInputs, TaskOutputs } from './types';
+import { Task, TaskError, TaskInputs, TaskOutputs } from './types';
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 
@@ -26,15 +26,37 @@ export async function handleTask<taskId extends Task>(
   pyodide: PyodideAPI,
   task: Task,
   inputs: TaskInputs[taskId]
-): Promise<{ result: TaskOutputs[taskId]; runTime: number }> {
+): Promise<{
+  result: TaskOutputs[taskId] | null;
+  runTime: number;
+  error: TaskError | null;
+}> {
   const start = performance.now();
-  pyodide.globals.set('js_inputs', inputs);
-  const { script, externalPackages } = tasks[task];
-  if (externalPackages.length > 0) {
-    await pyodide.loadPackage(externalPackages);
+  try {
+    // Check if task exists in tasks object
+    if (!tasks[task]) {
+      throw new Error(`Unknown task: ${task}`);
+    }
+
+    pyodide.globals.set('js_inputs', inputs);
+    const { script, externalPackages } = tasks[task];
+    if (externalPackages.length > 0) {
+      await pyodide.loadPackage(externalPackages);
+    }
+    await pyodide.runPythonAsync(script);
+    const result = pyodide.globals.get('result');
+    const resultJs = result.toJs({ dict_converter: Object.fromEntries });
+    return {
+      result: resultJs,
+      runTime: performance.now() - start,
+      error: null
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      result: null,
+      runTime: performance.now() - start,
+      error: TaskError.UNKNOWN_ERROR
+    };
   }
-  await pyodide.runPythonAsync(script);
-  const result = pyodide.globals.get('result');
-  const resultJs = result.toJs({ dict_converter: Object.fromEntries });
-  return { result: resultJs, runTime: performance.now() - start };
 }

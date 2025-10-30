@@ -64,7 +64,7 @@ describe('Task handlers', () => {
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockResult, runTime: 500 });
+      expect(result).toEqual({ result: mockResult, runTime: 500, error: null });
     });
 
     it('should handle getLit task', async () => {
@@ -101,7 +101,7 @@ describe('Task handlers', () => {
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockResult, runTime: 200 });
+      expect(result).toEqual({ result: mockResult, runTime: 200, error: null });
     });
 
     it('should handle unknown task', async () => {
@@ -110,15 +110,15 @@ describe('Task handlers', () => {
       const unknownTask = 'unknownTask' as Task;
 
       // Execute
-      try {
-        await handleTask(mockPyodide, unknownTask, undefined);
-      } catch (error) {
-        // Expected to throw since the task doesn't exist in the tasks object
-        expect(error).toBeDefined();
-      }
+      const result = await handleTask(mockPyodide, unknownTask, undefined);
 
       // Verify
-      expect(consoleSpy).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+      expect(result).toEqual({
+        result: null,
+        runTime: expect.any(Number),
+        error: 'UNKNOWN_ERROR'
+      });
     });
   });
 });

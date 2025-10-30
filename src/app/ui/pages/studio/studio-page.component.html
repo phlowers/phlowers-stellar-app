@@ -11,6 +11,7 @@
       class="plot-view"
       [isSupportZoom]="false"
       [style.height]="plotStudioHeight()"
+      [section]="plotService.section()"
     />
 
     <div class="quick-measures">
@@ -81,10 +82,8 @@
           [class.inverted]="plotService.plotOptions().invert"
           [(value)]="plotService.plotOptions().startSupport"
           [(highValue)]="plotService.plotOptions().endSupport"
-          (valueChange)="plotService.plotOptionsChange('startSupport', $event)"
-          (highValueChange)="
-            plotService.plotOptionsChange('endSupport', $event)
-          "
+          (valueChange)="debounceUpdateSliderOptions('startSupport', $event)"
+          (highValueChange)="debounceUpdateSliderOptions('endSupport', $event)"
           [options]="sliderOptions()"
           class="block"
         >
