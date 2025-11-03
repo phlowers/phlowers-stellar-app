@@ -1,7 +1,7 @@
 <p-dialog
   dismissableMask="true"
   [visible]="isOpen()"
-  (visibleChange)="onVisibleChange($event)"
+  (visibleChange)="onVisibleChange()"
   keepInViewport="false"
   [style]="{
     width: '37.5rem',
@@ -25,9 +25,10 @@
           <label for="supportName" i18n>Support name</label>
           <p-select
             inputId="supportName"
-            [options]="attachmentFilterTable() | unique: 'support_name'"
+            [options]="supportsFilterTable() | unique: 'support_name'"
             optionLabel="support_name"
             optionValue="support_name"
+            appendTo="body"
             [(ngModel)]="supportName"
             (onChange)="onAttachnementSelect($event, 'support_name')"
           />
@@ -38,9 +39,10 @@
             [showClear]="true"
             inputId="attachmentSet"
             [disabled]="!supportName()"
-            [options]="attachmentFilterTable() | unique: 'attachment_set'"
+            [options]="attachmentsFilterTable() | unique: 'attachment_set'"
             optionLabel="attachment_set"
             optionValue="attachment_set"
+            appendTo="body"
             [(ngModel)]="attachmentSet"
             (onChange)="onAttachnementSelect($event, 'attachment_set')"
           />
@@ -72,10 +74,10 @@
       type="button"
       btnSize="m"
       btnStyle="outlined"
-      (click)="onVisibleChange(false)"
+      (click)="onVisibleChange()"
     >
       <app-icon icon="close" />
-      <ng-container i18n>Cancel</ng-container>
+      <ng-container i18n>Close</ng-container>
     </button>
     <button
       app-btn

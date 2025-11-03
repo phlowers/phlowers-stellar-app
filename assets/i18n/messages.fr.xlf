@@ -748,13 +748,13 @@
     <unit id="5330590276782069905">
       <segment state="initial">
         <source>Electric tension level</source>
-        <target>Niveau de tension électrique</target>
+        <target>Tension électrique</target>
       </segment>
     </unit>
     <unit id="6963570697110110448">
       <segment state="initial">
         <source>Link name</source>
-        <target>Nom de la liaison</target>
+        <target>Liaison</target>
       </segment>
     </unit>
     <unit id="8569561572681353162">
@@ -766,7 +766,7 @@
     <unit id="1255388649183074058">
       <segment state="initial">
         <source>Branch name</source>
-        <target>Nom de la branche</target>
+        <target>Branche</target>
       </segment>
     </unit>
     <unit id="5798603970967359521">
@@ -775,28 +775,22 @@
         <target>Nombre de supports</target>
       </segment>
     </unit>
-    <unit id="1172866303261737245">
-      <segment state="initial">
-        <source>Position</source>
-        <target>Position</target>
-      </segment>
-    </unit>
     <unit id="6621067415830629818">
       <segment state="initial">
         <source>Arm length (m)</source>
-        <target>Longueur de l&apos;armature (m)</target>
+        <target>L. bras (m)</target>
       </segment>
     </unit>
     <unit id="5027494160802883894">
       <segment state="initial">
         <source> Chain name </source>
-        <target> Nom de la chaine </target>
+        <target> Nom chaîne </target>
       </segment>
     </unit>
     <unit id="5758842248880389182">
       <segment state="initial">
         <source> Chain V </source>
-        <target> Chaine V </target>
+        <target> Chaîne V </target>
       </segment>
     </unit>
     <unit id="3193976279273491157">
@@ -835,22 +829,10 @@
         <target>Manuellement</target>
       </segment>
     </unit>
-    <unit id="7315024664317918263">
-      <segment state="initial">
-        <source>From referencial</source>
-        <target>À partir du référentiel</target>
-      </segment>
-    </unit>
     <unit id="513031718637117901">
       <segment state="initial">
         <source>From distant referencial</source>
         <target>À partir du référentiel distant</target>
-      </segment>
-    </unit>
-    <unit id="6707260083636271016">
-      <segment state="initial">
-        <source>From extraction</source>
-        <target>À partir de l&apos;extraction</target>
       </segment>
     </unit>
     <unit id="8833276229402617730">
@@ -953,24 +935,6 @@
       <segment state="initial">
         <source> Ready </source>
         <target> Prêt </target>
-      </segment>
-    </unit>
-    <unit id="3931780727974941210">
-      <segment state="initial">
-        <source>Error: start &gt;= end</source>
-        <target>Erreur: début &gt;= fin</target>
-      </segment>
-    </unit>
-    <unit id="3808511518924568636">
-      <segment state="initial">
-        <source>Error: start not in list</source>
-        <target>Erreur: début pas dans la liste</target>
-      </segment>
-    </unit>
-    <unit id="6480514970774430660">
-      <segment state="initial">
-        <source>Error: end not in list</source>
-        <target>Erreur: fin pas dans la liste</target>
       </segment>
     </unit>
     <unit id="5323835340256603340">
@@ -1168,19 +1132,19 @@
     <unit id="7584732332123203553">
       <segment state="initial">
         <source>Attachment set</source>
-        <target>Set d&apos;attachement</target>
+        <target>Set d&apos;accroche</target>
       </segment>
     </unit>
     <unit id="755168724826424878">
       <segment state="initial">
         <source> The attachment set number and the arm length value will be automatically filled in the table. </source>
-        <target> Le numéro du set d&apos;attachement et la longueur de bras seront automatiquement remplis dans le tableau. </target>
+        <target> Choisissez le set d&apos;accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras. </target>
       </segment>
     </unit>
     <unit id="419149014255896698">
       <segment state="initial">
         <source>Support name</source>
-        <target>Nom du support</target>
+        <target>Nom de supp.</target>
       </segment>
     </unit>
     <unit id="361983614534909005">
@@ -1192,13 +1156,13 @@
     <unit id="2901943060312328653">
       <segment state="initial">
         <source> Support name </source>
-        <target> Nom du support </target>
+        <target> Nom de supp. </target>
       </segment>
     </unit>
     <unit id="8455284935734906867">
       <segment state="initial">
         <source> Attachment set </source>
-        <target> Set d&apos;accroche </target>
+        <target> Set accroche </target>
       </segment>
     </unit>
     <unit id="2932152767120246098">
@@ -1234,19 +1198,19 @@
     <unit id="9217388832996322692">
       <segment state="initial">
         <source>chain name</source>
-        <target>nom de la chaine</target>
+        <target>nom de la chaîne</target>
       </segment>
     </unit>
     <unit id="620478596918239347">
       <segment state="initial">
         <source>chain length</source>
-        <target>longueur de la chaine</target>
+        <target>longueur de la chaîne</target>
       </segment>
     </unit>
     <unit id="6831440935794088973">
       <segment state="initial">
         <source>chain weight</source>
-        <target>poids de la chaine</target>
+        <target>poids de la chaîne</target>
       </segment>
     </unit>
     <unit id="6583469756054732335">
@@ -1282,7 +1246,7 @@
     <unit id="2275797440786978301">
       <segment state="initial">
         <source>chain V</source>
-        <target>chaine V</target>
+        <target>chaîne V</target>
       </segment>
     </unit>
     <unit id="69654202240409398">
@@ -1589,12 +1553,6 @@
         <target>modifier</target>
       </segment>
     </unit>
-    <unit id="2516820066817918321">
-      <segment state="initial">
-        <source>Edit an initial condition</source>
-        <target>Modifier une condition initiale</target>
-      </segment>
-    </unit>
     <unit id="2037406622728640058">
       <segment state="initial">
         <source>Section name must be unique.</source>
@@ -1628,7 +1586,7 @@
     <unit id="6645271274546920288">
       <segment state="initial">
         <source> Chain surface </source>
-        <target> Surface de la chaine </target>
+        <target> Surf. chaîne </target>
       </segment>
     </unit>
     <unit id="995427497507634184">
@@ -1640,13 +1598,13 @@
     <unit id="6970241527294087573">
       <segment state="initial">
         <source>support foot altitude</source>
-        <target>altitude du pied de support</target>
+        <target>alt. pied supp.</target>
       </segment>
     </unit>
     <unit id="438901499953241732">
       <segment state="initial">
         <source>chain surface</source>
-        <target>surface de la chaine</target>
+        <target>surf. chaîne</target>
       </segment>
     </unit>
     <unit id="2807800733729323332">
@@ -1694,7 +1652,7 @@
     <unit id="8041319185706138234">
       <segment state="initial">
         <source> Chain w. </source>
-        <target> P. chaine </target>
+        <target> P. chaîne </target>
       </segment>
     </unit>
     <unit id="7929145588930827141">
@@ -1898,7 +1856,7 @@
     <unit id="3885497195825665706">
       <segment state="initial">
         <source>Next</source>
-        <target>Next</target>
+        <target>Suivant</target>
       </segment>
     </unit>
     <unit id="3854993654974680287">
@@ -1925,12 +1883,6 @@
         <target>Générer un état</target>
       </segment>
     </unit>
-    <unit id="6370642728789544052">
-      <segment state="initial">
-        <source>Number</source>
-        <target>Numéro</target>
-      </segment>
-    </unit>
     <unit id="2759009850634919490">
       <segment state="initial">
         <source>Span l.</source>
@@ -1946,19 +1898,19 @@
     <unit id="4363811923368535546">
       <segment state="initial">
         <source>Chain l.</source>
-        <target>L. chaine</target>
+        <target>L. chaîne</target>
       </segment>
     </unit>
     <unit id="131564779447274448">
       <segment state="initial">
         <source>Attachment alt. (NGF)</source>
-        <target>Alt. accroche (NGF)</target>
+        <target>Alt. accr. câble (NGF)</target>
       </segment>
     </unit>
     <unit id="8502839014739399542">
       <segment state="initial">
         <source>Double click on a column to copy the value to all supports</source>
-        <target>Double cliquer sur une colonne pour copier la valeur à tous les supports</target>
+        <target>Faites un double clique sur le nom de la colonne pour copier la valeur de la 1ère ligne sur toute la colonne.</target>
       </segment>
     </unit>
     <unit id="8792569904201285826">
@@ -1989,6 +1941,72 @@
       <segment state="initial">
         <source>dd/MM:yyyy at HH&apos;h&apos;mm</source>
         <target>dd/MM:yyyy à HH&apos;h&apos;mm</target>
+      </segment>
+    </unit>
+    <unit id="70265843712811398">
+      <segment state="initial">
+        <source>Electric tension</source>
+        <target>Tension électrique</target>
+      </segment>
+    </unit>
+    <unit id="8387651464002742246">
+      <segment state="initial">
+        <source>Branch</source>
+        <target>Branche</target>
+      </segment>
+    </unit>
+    <unit id="5946937164148510682">
+      <segment state="initial">
+        <source>supports comment</source>
+        <target>commentaire supports</target>
+      </segment>
+    </unit>
+    <unit id="4835655744650419347">
+      <segment state="initial">
+        <source>Support image</source>
+        <target>Image support</target>
+      </segment>
+    </unit>
+    <unit id="7819314041543176992">
+      <segment state="initial">
+        <source>Close</source>
+        <target>Fermer</target>
+      </segment>
+    </unit>
+    <unit id="3449156368391431679">
+      <segment state="initial">
+        <source>N° supp.</source>
+        <target>N° supp.</target>
+      </segment>
+    </unit>
+    <unit id="3852148482682745847">
+      <segment state="initial">
+        <source>From local referencial</source>
+        <target>À partir du référentiel local</target>
+      </segment>
+    </unit>
+    <unit id="5778821001923660039">
+      <segment state="initial">
+        <source>From a file</source>
+        <target>À partir d&apos;un fichier</target>
+      </segment>
+    </unit>
+    <unit id="1083238742531152930">
+      <segment state="initial">
+        <source> Error: <ph id="0" equiv="INTERPOLATION" disp="{{ getErrorString() }}"/> </source>
+        <target> Erreur: <ph id="0" equiv="INTERPOLATION" disp="{{ getErrorString() }}"/> </target>
+      </segment>
+    </unit>
+    <unit id="4915431133669985304">
+      <segment state="initial">
+        <source>Profile</source>
+        <target>Profil</target>
+      </segment>
+    </unit>
+    <unit id="4266658892163682187">
+      <segment state="initial">
+        <source>Face</source>
+        <target>Face</target>
       </segment>
     </unit>
   </file>

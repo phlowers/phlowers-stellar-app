@@ -4,7 +4,8 @@ import { PlotObjectsType } from '@ui/shared/components/studio/section/helpers/ty
 
 export enum Task {
   runTests = 'runTests',
-  getLit = 'getLit'
+  getLit = 'getLit',
+  runEngine = 'runEngine'
 }
 
 export enum DataError {
@@ -13,6 +14,7 @@ export enum DataError {
 
 export enum TaskError {
   PYODIDE_LOAD_ERROR = 'PYODIDE_LOAD_ERROR',
+  CALCULATION_ERROR = 'CALCULATION_ERROR',
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
 
@@ -21,9 +23,11 @@ export type GetSectionOutput = Record<PlotObjectsType, number[][][]>;
 export interface TaskInputs {
   [Task.getLit]: { section: Section; cable: Cable };
   [Task.runTests]: undefined;
+  [Task.runEngine]: { windPressure: number; cableTemperature: number };
 }
 
 export interface TaskOutputs {
   [Task.getLit]: GetSectionOutput;
   [Task.runTests]: undefined;
+  [Task.runEngine]: GetSectionOutput;
 }

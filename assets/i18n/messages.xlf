@@ -221,11 +221,6 @@
         <source>Create a study section</source>
       </segment>
     </unit>
-    <unit id="1172866303261737245">
-      <segment>
-        <source>Position</source>
-      </segment>
-    </unit>
     <unit id="1255388649183074058">
       <segment>
         <source>Branch name</source>
@@ -431,11 +426,6 @@
         <source> Open </source>
       </segment>
     </unit>
-    <unit id="3808511518924568636">
-      <segment>
-        <source>Error: start not in list</source>
-      </segment>
-    </unit>
     <unit id="3878398159737749263">
       <segment>
         <source>View latest updates.</source>
@@ -444,11 +434,6 @@
     <unit id="3922504333199040096">
       <segment>
         <source>Search a study</source>
-      </segment>
-    </unit>
-    <unit id="3931780727974941210">
-      <segment>
-        <source>Error: start &gt;= end</source>
       </segment>
     </unit>
     <unit id="4052831009850155733">
@@ -626,11 +611,6 @@
         <source> General </source>
       </segment>
     </unit>
-    <unit id="6480514970774430660">
-      <segment>
-        <source>Error: end not in list</source>
-      </segment>
-    </unit>
     <unit id="6598075623864682368">
       <segment>
         <source>Add an initial condition</source>
@@ -649,11 +629,6 @@
     <unit id="976888794834775617">
       <segment>
         <source> Graphical view </source>
-      </segment>
-    </unit>
-    <unit id="6707260083636271016">
-      <segment>
-        <source>From extraction</source>
       </segment>
     </unit>
     <unit id="6713690242020777174">
@@ -684,11 +659,6 @@
     <unit id="7282804341793038828">
       <segment>
         <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-      </segment>
-    </unit>
-    <unit id="7315024664317918263">
-      <segment>
-        <source>From referencial</source>
       </segment>
     </unit>
     <unit id="7372608945282781808">
@@ -1273,11 +1243,6 @@
         <source>Section name must be unique.</source>
       </segment>
     </unit>
-    <unit id="2516820066817918321">
-      <segment>
-        <source>Edit an initial condition</source>
-      </segment>
-    </unit>
     <unit id="2802938289697505873">
       <segment>
         <source> Ice Thickness (Before Frontier) </source>
@@ -1618,11 +1583,6 @@
         <source>Chain l.</source>
       </segment>
     </unit>
-    <unit id="6370642728789544052">
-      <segment>
-        <source>Number</source>
-      </segment>
-    </unit>
     <unit id="8240240329115149718">
       <segment>
         <source>Angle</source>
@@ -1656,6 +1616,61 @@
     <unit id="7430416142942514215">
       <segment>
         <source>Publish</source>
+      </segment>
+    </unit>
+    <unit id="1083238742531152930">
+      <segment>
+        <source> Error: <ph id="0" equiv="INTERPOLATION" disp="{{ getErrorString() }}"/> </source>
+      </segment>
+    </unit>
+    <unit id="3449156368391431679">
+      <segment>
+        <source>N° supp.</source>
+      </segment>
+    </unit>
+    <unit id="3852148482682745847">
+      <segment>
+        <source>From local referencial</source>
+      </segment>
+    </unit>
+    <unit id="4266658892163682187">
+      <segment>
+        <source>Face</source>
+      </segment>
+    </unit>
+    <unit id="4835655744650419347">
+      <segment>
+        <source>Support image</source>
+      </segment>
+    </unit>
+    <unit id="4915431133669985304">
+      <segment>
+        <source>Profile</source>
+      </segment>
+    </unit>
+    <unit id="5778821001923660039">
+      <segment>
+        <source>From a file</source>
+      </segment>
+    </unit>
+    <unit id="5946937164148510682">
+      <segment>
+        <source>supports comment</source>
+      </segment>
+    </unit>
+    <unit id="70265843712811398">
+      <segment>
+        <source>Electric tension</source>
+      </segment>
+    </unit>
+    <unit id="7819314041543176992">
+      <segment>
+        <source>Close</source>
+      </segment>
+    </unit>
+    <unit id="8387651464002742246">
+      <segment>
+        <source>Branch</source>
       </segment>
     </unit>
   </file>

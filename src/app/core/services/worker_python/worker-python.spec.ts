@@ -83,7 +83,6 @@ describe('Worker', () => {
       expect(loadPyodide).toHaveBeenCalledWith({
         indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
         packages: expect.arrayContaining([
-          'scipy',
           'numpy',
           'pandas',
           'pydantic',

@@ -18,6 +18,7 @@ import { isNumber } from 'lodash';
 import { CablesService } from '@core/services/cables/cables.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Study } from '@core/data/database/interfaces/study';
+import { KeyFilterModule } from 'primeng/keyfilter';
 
 @Component({
   selector: 'app-initial-condition-modal',
@@ -32,7 +33,8 @@ import { Study } from '@core/data/database/interfaces/study';
     FormsModule,
     MessageModule,
     InputGroup,
-    InputGroupAddon
+    InputGroupAddon,
+    KeyFilterModule
   ]
 })
 export class InitialConditionModalComponent {
@@ -62,13 +64,18 @@ export class InitialConditionModalComponent {
   });
   isCableNarcisse = signal<boolean>(false);
   isNameUnique = signal<boolean>(true);
+  public onlyPositiveNumbers = /^[0-9]*$/;
+
   onNameChange(name: string) {
-    this.isNameUnique.set(
-      !this.initialConditions().find(
-        (ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid
-      )
+    this.isNameUnique.set(this.checkNameUniqueness(name));
+  }
+
+  checkNameUniqueness(name: string) {
+    return !this.initialConditions().find(
+      (ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid
     );
   }
+
   constructor(
     private readonly cablesService: CablesService,
     private readonly initialConditionService: InitialConditionService
@@ -88,6 +95,10 @@ export class InitialConditionModalComponent {
             );
           }
         });
+        const isNameUnique = this.checkNameUniqueness(
+          this.initialCondition().name
+        );
+        this.isNameUnique.set(isNameUnique);
       }
     });
   }
@@ -121,6 +132,13 @@ export class InitialConditionModalComponent {
 
   onModify() {
     this.changeMode.emit('edit');
+  }
+
+  onInitialConditionFieldChange(field: keyof InitialCondition, value: any) {
+    this.initialCondition.set({
+      ...this.initialCondition(),
+      [field]: value
+    });
   }
 
   async onDuplicate() {

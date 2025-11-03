@@ -190,11 +190,11 @@ a.app-btn {
 
 .app-btn-loading {
   .app-icon {
-    animation: loading 0.6s linear infinite;
+    animation: button-loading-icon 0.6s linear infinite;
   }
 }
 
-@keyframes loading {
+@keyframes button-loading-icon {
   to {
     transform: rotate(360deg);
   }

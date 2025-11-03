@@ -7,7 +7,7 @@
 /// <reference lib="webworker" />
 
 import { loadPyodide } from 'pyodide';
-import importScript from './tasks/python-scripts/imports.py';
+import importScript from './tasks/python-scripts/functions.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
@@ -28,7 +28,6 @@ async function loadPyodideAndPackages() {
     pyodide = await loadPyodide({
       indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
       packages: [
-        'scipy',
         'numpy',
         'pandas',
         'pydantic',

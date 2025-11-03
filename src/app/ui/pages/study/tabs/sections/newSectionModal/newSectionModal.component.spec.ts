@@ -7,6 +7,9 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
 import { LinesService } from '@core/services/lines/lines.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ChainsService } from '@core/services/chains/chains.service';
+import { AttachmentService } from '@core/services/attachment/attachment.service';
+import { SectionService } from '@core/services/sections/section.service';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -19,6 +22,23 @@ class MockLinesService {
   getLinesCount = jest.fn().mockResolvedValue(0);
   getLines = jest.fn().mockResolvedValue([]);
   importFromFile = jest.fn().mockResolvedValue(undefined);
+}
+
+class MockChainsService {
+  ready = { next: jest.fn() };
+  getChains = jest.fn().mockResolvedValue([]);
+  importFromFile = jest.fn().mockResolvedValue(undefined);
+}
+
+class MockAttachmentService {
+  ready = { next: jest.fn() };
+  getAttachments = jest.fn().mockResolvedValue([]);
+  importFromFile = jest.fn().mockResolvedValue(undefined);
+}
+
+class MockSectionService {
+  duplicateSection = jest.fn().mockResolvedValue(undefined);
+  deleteSection = jest.fn();
 }
 
 describe('NewSectionModalComponent (Jest)', () => {
@@ -80,7 +100,10 @@ describe('NewSectionModalComponent (Jest)', () => {
       providers: [
         provideNoopAnimations(),
         { provide: MaintenanceService, useClass: MockMaintenanceService },
-        { provide: LinesService, useClass: MockLinesService }
+        { provide: LinesService, useClass: MockLinesService },
+        { provide: ChainsService, useClass: MockChainsService },
+        { provide: AttachmentService, useClass: MockAttachmentService },
+        { provide: SectionService, useClass: MockSectionService }
       ]
     }).compileComponents();
 
