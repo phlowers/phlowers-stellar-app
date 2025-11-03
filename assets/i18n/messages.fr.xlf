@@ -1213,12 +1213,6 @@
         <target>poids de la chaîne</target>
       </segment>
     </unit>
-    <unit id="6583469756054732335">
-      <segment state="initial">
-        <source>support name</source>
-        <target>nom du support</target>
-      </segment>
-    </unit>
     <unit id="1855573221352568994">
       <segment state="initial">
         <source>open attachment set modal</source>
@@ -1493,10 +1487,10 @@
         <target>Pression du vent</target>
       </segment>
     </unit>
-    <unit id="6983214908416978812">
+    <unit id="4865483609520535639">
       <segment state="initial">
-        <source> Cable Temperature </source>
-        <target> Température du câble </target>
+        <source>Cable Temperature</source>
+        <target>Température du câble</target>
       </segment>
     </unit>
     <unit id="6360407171073312357">
@@ -1742,49 +1736,49 @@
     <unit id="5577525641723703663">
       <segment state="initial">
         <source> Cable pretension </source>
-        <target> Pretension du câble </target>
+        <target> Pré-tension du câble </target>
       </segment>
     </unit>
     <unit id="5455255610792577574">
       <segment state="initial">
         <source> Min temperature </source>
-        <target> Température minimale </target>
+        <target> Température min </target>
       </segment>
     </unit>
     <unit id="3948064756684098346">
       <segment state="initial">
         <source> Max wind pressure </source>
-        <target> Pression du vent maximale </target>
+        <target> Pression du vent max </target>
       </segment>
     </unit>
     <unit id="7696118233074431582">
       <segment state="initial">
         <source> Max ice thickness </source>
-        <target> Largeur de la glace maximale </target>
+        <target> Epaisseur du givre max </target>
       </segment>
     </unit>
     <unit id="9095132887560670905">
       <segment state="initial">
         <source>Cable pretension</source>
-        <target>Pretension du câble</target>
+        <target>Pré-tension du câble</target>
       </segment>
     </unit>
     <unit id="8798542344025275411">
       <segment state="initial">
         <source>Min temperature</source>
-        <target>Température minimale</target>
+        <target>Température min</target>
       </segment>
     </unit>
     <unit id="2153962924756003345">
       <segment state="initial">
         <source>Max wind pressure</source>
-        <target>Pression du vent maximale</target>
+        <target>Pression du vent max</target>
       </segment>
     </unit>
     <unit id="6888404140532857244">
       <segment state="initial">
         <source>Max ice thickness</source>
-        <target>Largeur de la glace maximale</target>
+        <target>Epaisseur du givre max</target>
       </segment>
     </unit>
     <unit id="8987297903552443142">
@@ -1991,12 +1985,6 @@
         <target>À partir d&apos;un fichier</target>
       </segment>
     </unit>
-    <unit id="1083238742531152930">
-      <segment state="initial">
-        <source> Error: <ph id="0" equiv="INTERPOLATION" disp="{{ getErrorString() }}"/> </source>
-        <target> Erreur: <ph id="0" equiv="INTERPOLATION" disp="{{ getErrorString() }}"/> </target>
-      </segment>
-    </unit>
     <unit id="4915431133669985304">
       <segment state="initial">
         <source>Profile</source>
@@ -2007,6 +1995,114 @@
       <segment state="initial">
         <source>Face</source>
         <target>Face</target>
+      </segment>
+    </unit>
+    <unit id="3793363326863773180">
+      <segment state="initial">
+        <source>Error creating user</source>
+        <target>Erreur lors de la création de l&apos;utilisateur</target>
+      </segment>
+    </unit>
+    <unit id="4765388897418478416">
+      <segment state="initial">
+        <source>User info set</source>
+        <target>Informations utilisateur définies</target>
+      </segment>
+    </unit>
+    <unit id="8293684133671200243">
+      <segment state="initial">
+        <source>Symmetric</source>
+        <target>Symétrique</target>
+      </segment>
+    </unit>
+    <unit id="520772936343037608">
+      <segment state="initial">
+        <source>Dis Symmetric</source>
+        <target>Disymétrique</target>
+      </segment>
+    </unit>
+    <unit id="8990805719441989570">
+      <segment state="initial">
+        <source>Span</source>
+        <target>Portée</target>
+      </segment>
+    </unit>
+    <unit id="4613547067726634730">
+      <segment state="initial">
+        <source>Support n°</source>
+        <target>Support n°</target>
+      </segment>
+    </unit>
+    <unit id="3305078246675075385">
+      <segment state="initial">
+        <source>Load type</source>
+        <target>Type de charge</target>
+      </segment>
+    </unit>
+    <unit id="5729801747698322662">
+      <segment state="initial">
+        <source>Span load</source>
+        <target>Charge de la portée</target>
+      </segment>
+    </unit>
+    <unit id="7970276717935400824">
+      <segment state="initial">
+        <source>Short. or lengthen. Cable (+ -)</source>
+        <target>Raccourcir ou allonger le câble (+ -)</target>
+      </segment>
+    </unit>
+    <unit id="2973163940988682005">
+      <segment state="initial">
+        <source>Dist. to point load</source>
+        <target>Dist. à la charge ponctuelle</target>
+      </segment>
+    </unit>
+    <unit id="4377932527319537276">
+      <segment state="initial">
+        <source>Punctual</source>
+        <target>Ponctuel</target>
+      </segment>
+    </unit>
+    <unit id="4170797585902965304">
+      <segment state="initial">
+        <source>Distributed</source>
+        <target>Distribué</target>
+      </segment>
+    </unit>
+    <unit id="4486920800439525375">
+      <segment state="initial">
+        <source>Shortening / Lengthening</source>
+        <target>Raccourcir / Allonger</target>
+      </segment>
+    </unit>
+    <unit id="4606091236515013460">
+      <segment state="initial">
+        <source>Error:</source>
+        <target>Erreur:</target>
+      </segment>
+    </unit>
+    <unit id="8083736833442025529">
+      <segment state="initial">
+        <source>No cable found</source>
+        <target>Aucun câble trouvé</target>
+      </segment>
+    </unit>
+    <unit id="7215028324689336548">
+      <segment state="initial">
+        <source>Calculation error</source>
+        <target>Erreur de calcul</target>
+      </segment>
+    </unit>
+    <unit id="5080875188035619513">
+      <segment state="initial">
+        <source>Pyodide load error</source>
+        <target>Erreur de chargement Pyodide</target>
+      </segment>
+    </unit>
+    <unit id="2657043015926552641">
+      <segment state="initial">
+        <source>Unknown error</source>
+        <target>Erreur inconnue</target>
       </segment>
     </unit>
   </file>

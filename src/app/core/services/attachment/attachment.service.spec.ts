@@ -198,7 +198,7 @@ describe('AttachmentService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/attachments.csv`
+        `${window.location.origin}/data/attachments.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -263,7 +263,7 @@ describe('AttachmentService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/attachments.csv`
+        `${window.location.origin}/data/attachments.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -331,7 +331,7 @@ describe('AttachmentService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/attachments.csv`
+        `${window.location.origin}/data/attachments.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -408,7 +408,7 @@ describe('AttachmentService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/attachments.csv`
+        `${window.location.origin}/data/attachments.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -481,7 +481,7 @@ describe('AttachmentService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/attachments.csv`
+        `${window.location.origin}/data/attachments.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -556,7 +556,7 @@ describe('AttachmentService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/attachments.csv`
+        `${window.location.origin}/data/attachments.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -599,7 +599,7 @@ describe('AttachmentService', () => {
 
       // Mock the HTTP request to return an error
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/attachments.csv`
+        `${window.location.origin}/data/attachments.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush('Error', { status: 404, statusText: 'Not Found' });
@@ -660,7 +660,7 @@ describe('AttachmentService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/attachments.csv`
+        `${window.location.origin}/data/attachments.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);

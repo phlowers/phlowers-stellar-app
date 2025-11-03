@@ -9,10 +9,14 @@ export interface Chain {
   name: string;
   length: number;
   weight: number;
+  surface: number;
+  v: boolean;
 }
 
 export interface RteChainsCsvFile {
   name: string;
   length: string;
   weight: string;
+  surface: string;
+  v: string;
 }
