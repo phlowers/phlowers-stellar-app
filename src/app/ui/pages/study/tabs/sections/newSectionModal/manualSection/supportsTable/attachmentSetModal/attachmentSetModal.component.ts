@@ -52,16 +52,21 @@ export class AttachmentSetModalComponent implements OnInit {
     heightBelowConsole: number;
   }>();
 
-  attachmentFilterTable = signal<Attachment[]>([]);
+  supportsFilterTable = signal<Attachment[]>([]);
+  attachmentsFilterTable = signal<Attachment[]>([]);
 
-  onVisibleChange(visible: boolean) {
-    this.isOpenChange.emit(visible);
+  onVisibleChange() {
+    this.isOpenChange.emit(false);
   }
 
   constructor(private readonly attachmentService: AttachmentService) {
     effect(() => {
       if (this.isOpen()) {
         this.resetValues();
+        const name = this.support()?.name;
+        if (name) {
+          this.supportName.set(name);
+        }
       }
     });
   }
@@ -74,16 +79,23 @@ export class AttachmentSetModalComponent implements OnInit {
       heightBelowConsole: this.heightBelowConsole() || 0,
       uuid: this.support()?.uuid || ''
     });
-    this.onVisibleChange(false);
+    this.onVisibleChange();
   }
 
   async getData() {
     const attachments = await this.attachmentService.getAttachments();
-    this.attachmentFilterTable.set(
-      (attachments || []).sort(
-        (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
-      )
+    const attachmentsFilterTable = (attachments || []).sort(
+      (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
     );
+    this.supportsFilterTable.set(attachmentsFilterTable);
+    const items = (attachments || [])
+      .filter((item) =>
+        this.supportName() ? item.support_name === this.supportName() : true
+      )
+      .sort(
+        (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
+      );
+    this.attachmentsFilterTable.set(items);
   }
 
   resetValues() {
@@ -110,7 +122,7 @@ export class AttachmentSetModalComponent implements OnInit {
         .sort(
           (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
         );
-      this.attachmentFilterTable.set(items);
+      this.attachmentsFilterTable.set(items);
     }
 
     if (key === 'attachment_set') {

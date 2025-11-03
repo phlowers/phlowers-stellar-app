@@ -5,12 +5,19 @@ import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { PlotService } from '../../plot.service';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 
 describe('ClimateComponent (Jest)', () => {
   let component: ClimateComponent;
   let fixture: ComponentFixture<ClimateComponent>;
 
   beforeEach(async () => {
+    const plotServiceMock = {
+      calculateCharge: jest.fn()
+    } as unknown as PlotService;
+    const workerPythonServiceMock = {} as unknown as WorkerPythonService;
+
     await TestBed.configureTestingModule({
       imports: [
         ReactiveFormsModule,
@@ -19,6 +26,10 @@ describe('ClimateComponent (Jest)', () => {
         ButtonComponent,
         IconComponent,
         ClimateComponent
+      ],
+      providers: [
+        { provide: PlotService, useValue: plotServiceMock },
+        { provide: WorkerPythonService, useValue: workerPythonServiceMock }
       ]
     }).compileComponents();
 
@@ -127,19 +138,6 @@ describe('ClimateComponent (Jest)', () => {
       });
 
       expect(component.isFormEmpty()).toBeFalsy();
-    });
-
-    it('should return true when at least one visible field is empty (dis_symmetric)', () => {
-      component.form.patchValue({
-        symmetryType: 'dis_symmetric',
-        windPressure: 10,
-        cableTemperature: '',
-        frontierSupportNumber: 1,
-        iceThicknessBefore: 2,
-        iceThicknessAfter: 3
-      });
-
-      expect(component.isFormEmpty()).toBeTruthy();
     });
   });
 

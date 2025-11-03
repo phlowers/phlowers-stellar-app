@@ -94,13 +94,13 @@ export class SectionsTabComponent {
   }
 
   editSection(section: Section) {
-    this.currentSection.set(section);
+    this.currentSection.set(cloneDeep(section));
     this.newSectionModalMode.set('edit');
     this.isNewSectionModalOpen.set(true);
   }
 
   viewSection(section: Section) {
-    this.currentSection.set(section);
+    this.currentSection.set(cloneDeep(section));
     this.newSectionModalMode.set('view');
     this.isNewSectionModalOpen.set(true);
   }

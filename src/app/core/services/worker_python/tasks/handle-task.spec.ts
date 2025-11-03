@@ -5,8 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { handleTask, PyodideAPI } from './handle-task';
-import testsScript from './python-scripts/tests.py';
-import getLitScript from './python-scripts/get_lit.py';
+// import functions from './python-scripts/functions.py';
 import { Task } from './types';
 
 // Mock the pyodide module
@@ -14,9 +13,8 @@ jest.mock('pyodide', () => ({
   loadPyodide: jest.fn()
 }));
 
-// Mock the python scripts
-jest.mock('./python-scripts/tests.py', () => 'mock tests script');
-jest.mock('./python-scripts/get_lit.py', () => 'mock get_lit script');
+// Mock the python script bundle
+jest.mock('./python-scripts/functions.py', () => 'mock functions script');
 
 describe('Task handlers', () => {
   let mockPyodide: jest.Mocked<PyodideAPI>;
@@ -46,9 +44,9 @@ describe('Task handlers', () => {
         .mockReturnValueOnce(1500); // End time
 
       const mockToJs = jest.fn().mockReturnValue(mockResult);
-      mockPyodide.globals.get.mockReturnValue({
-        toJs: mockToJs
-      });
+      (mockPyodide.globals.get as jest.Mock)
+        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: jest.fn() }))
+        .mockReturnValueOnce(undefined as never);
 
       // Execute
       const result = await handleTask(mockPyodide, Task.runTests, undefined);
@@ -59,8 +57,7 @@ describe('Task handlers', () => {
         undefined
       );
       expect(mockPyodide.loadPackage).toHaveBeenCalledWith(['pytest']);
-      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith(testsScript);
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('result');
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith('run_tests');
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
@@ -84,9 +81,9 @@ describe('Task handlers', () => {
         .mockReturnValueOnce(1200); // End time
 
       const mockToJs = jest.fn().mockReturnValue(mockResult);
-      mockPyodide.globals.get.mockReturnValue({
-        toJs: mockToJs
-      });
+      (mockPyodide.globals.get as jest.Mock)
+        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: jest.fn() }))
+        .mockReturnValueOnce(undefined as never);
 
       // Execute
       const result = await handleTask(mockPyodide, Task.getLit, undefined);
@@ -96,8 +93,8 @@ describe('Task handlers', () => {
         'js_inputs',
         undefined
       );
-      expect(mockPyodide.runPythonAsync).toHaveBeenCalledWith(getLitScript);
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('result');
+      // script is loaded at worker boot time; here we only call the exposed function
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith('init_section');
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
@@ -117,7 +114,7 @@ describe('Task handlers', () => {
       expect(result).toEqual({
         result: null,
         runTime: expect.any(Number),
-        error: 'UNKNOWN_ERROR'
+        error: 'CALCULATION_ERROR'
       });
     });
   });

@@ -139,22 +139,49 @@ def split_points_into_their_spans(data: List[List[float]]) -> List[List[List[flo
 mock_data = """"""
 
 
-def main():
+engine = None
+plt_line = None
+
+
+def get_coordinates(plt_line: PlotEngine):
+    span_coords = plt_line.section_pts.get_spans("section").points(True)
+    insulators_coords = plt_line.section_pts.get_insulators().points(True)
+    supports_coords = plt_line.section_pts.get_supports().points(True)
+    spans = split_points_into_their_spans(span_coords)
+    insulators = split_points_into_their_spans(insulators_coords)
+    supports = split_points_into_their_spans(supports_coords)
+    result = {
+        "spans": spans,
+        "insulators": insulators,
+        "supports": supports,
+    }
+    return result
+
+
+def init_section(js_inputs: dict):
+    global engine, plt_line
+    python_inputs = js_inputs.to_py()
     # import json
 
     # js_inputs2 = globals()["js_inputs"].to_py()
-    # js_inputs = json.loads(data)
-    js_inputs = globals()["js_inputs"].to_py()
+    # js_inputs = json.loads(mock_data)
+    # js_inputs = globals()["js_inputs"].to_py()
     # print("js_inputs: ", json.dumps(js_inputs))
-    input_section = js_inputs["section"]
-    input_cable = js_inputs["cable"]
+    input_section = python_inputs["section"]
+    input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
-    input_initial_condition = next(
-        condition
-        for condition in input_initial_conditions
-        if condition["uuid"] == input_section["selected_initial_condition_uuid"]
+    input_initial_condition = (
+        None
+        if not input_initial_conditions
+        else next(
+            condition
+            for condition in input_initial_conditions
+            if condition["uuid"] == input_section["selected_initial_condition_uuid"]
+        )
     )
-    initial_condition = InitialCondition(**input_initial_condition)
+    initial_condition = (
+        InitialCondition(**input_initial_condition) if input_initial_condition else None
+    )
     cable = Cable(**input_cable)
 
     if not input_section["supports"]:
@@ -171,10 +198,10 @@ def main():
     section = SectionArray(df)
     # set sagging parameter and temperatur
     section.sagging_parameter = 2000
-    section.sagging_temperature = initial_condition.base_temperature
+    section.sagging_temperature = (
+        initial_condition.base_temperature if initial_condition else 20
+    )
 
-    # Provide section to SectionDataFrame
-    # frame = SectionDataFrame(section)
     cable_array = CableArray(
         pd.DataFrame(
             {
@@ -198,26 +225,22 @@ def main():
         )
     )
 
-    balance_engine_base_test = BalanceEngine(
-        cable_array=cable_array, section_array=section
-    )
-    plt_line = PlotEngine.builder_from_balance_engine(balance_engine_base_test)
-    balance_engine_base_test.solve_adjustment()
-    balance_engine_base_test.solve_change_state()
-
-    span_coords = plt_line.section_pts.get_spans("section").points(True)
-    insulators_coords = plt_line.section_pts.get_insulators().points(True)
-    supports_coords = plt_line.section_pts.get_supports().points(True)
-
-    spans = split_points_into_their_spans(span_coords)
-    insulators = split_points_into_their_spans(insulators_coords)
-    supports = split_points_into_their_spans(supports_coords)
-    result = {
-        "spans": spans,
-        "insulators": insulators,
-        "supports": supports,
-    }
-    return result
+    engine = BalanceEngine(cable_array=cable_array, section_array=section)
+    plt_line = PlotEngine.builder_from_balance_engine(engine)
+    engine.solve_adjustment()
+    engine.solve_change_state()
+    return get_coordinates(plt_line)
 
 
-result = main()
+def change_climate(js_inputs: dict):
+    global engine, plt_line
+    python_inputs = js_inputs.to_py()
+    wind_pressure = python_inputs["windPressure"]
+    cable_temperature = python_inputs["cableTemperature"]
+    engine.solve_change_state(new_temperature=cable_temperature * np.array([1] * 4))
+    engine.solve_change_state(wind_pressure=wind_pressure * np.array([1] * 4))
+    return get_coordinates(plt_line)
+
+
+# print("im in the main function")
+# result = init_section()

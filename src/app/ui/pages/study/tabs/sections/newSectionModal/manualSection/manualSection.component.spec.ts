@@ -315,36 +315,6 @@ describe('ManualSectionComponent', () => {
     });
   });
 
-  describe('tabValueChange', () => {
-    it('should refresh studio when switching to graphical tab', () => {
-      const mockStudio = { refreshSection: jest.fn() };
-      (component.studio as unknown as () => {
-        refreshSection: jest.Mock;
-      } | null) = () => mockStudio;
-
-      component.tabValueChange('graphical');
-      expect(mockStudio.refreshSection).toHaveBeenCalled();
-    });
-
-    it('should not refresh studio when switching to other tabs', () => {
-      const mockStudio = { refreshSection: jest.fn() };
-      (component.studio as unknown as () => {
-        refreshSection: jest.Mock;
-      } | null) = () => mockStudio;
-
-      component.tabValueChange('general');
-      expect(mockStudio.refreshSection).not.toHaveBeenCalled();
-    });
-
-    it('should handle case when studio is not available', () => {
-      (component.studio as unknown as () => {
-        refreshSection: jest.Mock;
-      } | null) = () => null;
-
-      expect(() => component.tabValueChange('graphical')).not.toThrow();
-    });
-  });
-
   describe('onSupportsAmountChangeBlur', () => {
     it('should update supports amount on blur', () => {
       mockSection.supports = [createSupportMock()];

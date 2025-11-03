@@ -121,7 +121,9 @@ export class ManualSectionComponent implements OnInit {
   tabValueChange = (event: string | number) => {
     this.tabValue.set(String(event));
     if (event === 'graphical') {
-      this.studio()?.refreshSection();
+      const studio = this.studio();
+      if (!studio) return;
+      studio.plotService.refreshSection(this.section());
     }
   };
 
@@ -182,9 +184,11 @@ export class ManualSectionComponent implements OnInit {
     if (this.section().supports?.length <= 2) {
       return;
     }
-    this.section().supports = this.section().supports?.filter(
-      (support) => support.uuid !== uuid
-    );
+    const supports =
+      this.section().supports?.filter((support) => support.uuid !== uuid) || [];
+    const lastSupport = supports[supports.length - 1];
+    lastSupport.spanLength = null;
+    this.section().supports = supports;
   }
 
   duplicateSupport(uuid: string) {

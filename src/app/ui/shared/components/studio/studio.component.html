@@ -1,16 +1,18 @@
 <div class="h-full relative">
-  @if (loading()) {
+  @if (plotService.loading()) {
     <div class="absolute inset-0 flex justify-center items-center">
       <p-progress-spinner ariaLabel="loading" />
     </div>
-  } @else if (error()) {
+  } @else if (plotService.error()) {
     <div class="absolute inset-0 flex justify-center items-center">
-      <p i18n class="text-red-500 text-2xl font-bold">Error!</p>
+      <p class="text-red-500 text-2xl font-bold">
+        <ng-container i18n>Error:</ng-container> {{ getErrorString() }}
+      </p>
     </div>
   } @else {
     <app-section-plot
       class="h-full"
-      [litData]="litData()"
+      [litData]="plotService.litData()"
       [isSupportZoom]="isSupportZoom()"
     ></app-section-plot>
   }

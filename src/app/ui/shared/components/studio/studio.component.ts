@@ -1,17 +1,22 @@
-import { Component, effect, input, OnDestroy, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  OnDestroy,
+  signal
+} from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import {
   DataError,
-  GetSectionOutput,
-  Task,
   TaskError
 } from '@src/app/core/services/worker_python/tasks/types';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Section } from '@core/data/database/interfaces/section';
 import { OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CablesService } from '@core/services/cables/cables.service';
+import { PlotService } from '@src/app/ui/pages/studio/plot.service';
 
 @Component({
   selector: 'app-studio',
@@ -19,21 +24,34 @@ import { CablesService } from '@core/services/cables/cables.service';
   imports: [SectionPlotComponent, ProgressSpinnerModule]
 })
 export class StudioComponent implements OnInit, OnDestroy {
-  litData = signal<GetSectionOutput | null>(null);
+  // litData = signal<GetSectionOutput | null>(null);
   section = input.required<Section | null>();
   isSupportZoom = input.required<boolean>();
-  loading = signal<boolean>(true);
+  // loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
-  error = signal<TaskError | DataError | null>(null);
+  // error = signal<TaskError | DataError | null>(null);
+
+  getErrorString = computed(() => {
+    switch (this.plotService.error()) {
+      case DataError.NO_CABLE_FOUND:
+        return $localize`No cable found`;
+      case TaskError.CALCULATION_ERROR:
+        return $localize`Calculation error`;
+      case TaskError.PYODIDE_LOAD_ERROR:
+        return $localize`Pyodide load error`;
+      default:
+        return $localize`Unknown error`;
+    }
+  });
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
-    private readonly cableService: CablesService
+    public readonly plotService: PlotService
   ) {
     effect(() => {
       if (this.workerReady() && this.section()) {
-        this.refreshSection();
+        this.plotService.refreshSection(this.section()!);
       }
     });
   }
@@ -48,30 +66,6 @@ export class StudioComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    this.plotService.purgePlot();
   }
-
-  refreshSection = async () => {
-    this.error.set(null);
-    this.litData.set(null);
-    const section = this.section();
-    if (!this.workerPythonService.ready || !section || !section.cable_name) {
-      console.error('refreshSection error');
-      return;
-    }
-    this.loading.set(true);
-    const cable = await this.cableService.getCable(section.cable_name);
-    if (!cable) {
-      console.error('no cable found: ', section.cable_name);
-      this.loading.set(false);
-      this.error.set(DataError.NO_CABLE_FOUND);
-      return;
-    }
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.getLit,
-      { section, cable }
-    );
-    this.litData.set(result);
-    this.error.set(error);
-    this.loading.set(false);
-  };
 }

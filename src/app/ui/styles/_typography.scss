@@ -79,13 +79,15 @@
       height: 1em;
       border-radius: 0.25rem;
       background-color: rgb(from var(--primary-200) r g b / 0.4);
-      background-image: linear-gradient(140deg,
-          rgb(from var(--grey-white) r g b / 0) 40%,
-          rgb(from var(--grey-white) r g b / 0.5) 50%,
-          rgba(from var(--grey-white) r g b / 0) 60%);
+      background-image: linear-gradient(
+        140deg,
+        rgb(from var(--grey-white) r g b / 0) 40%,
+        rgb(from var(--grey-white) r g b / 0.5) 50%,
+        rgba(from var(--grey-white) r g b / 0) 60%
+      );
       background-size: 200% 100%;
       background-position-x: 100%;
-      animation: 1s loading ease-in-out infinite;
+      animation: 1s icon-skeleton-loading ease-in-out infinite;
     }
   }
 
@@ -94,7 +96,7 @@
   }
 }
 
-@keyframes loading {
+@keyframes icon-skeleton-loading {
   to {
     background-position-x: -100%;
   }

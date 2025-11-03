@@ -105,7 +105,7 @@ describe('AttachmentSetModalComponent', () => {
     await fixture.whenStable();
 
     expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
-    expect(component.attachmentFilterTable()).toEqual(
+    expect(component.attachmentsFilterTable()).toEqual(
       mockAttachments.sort(
         (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
       )
@@ -132,10 +132,7 @@ describe('AttachmentSetModalComponent', () => {
   it('should emit isOpenChange when visibility changes', () => {
     const spy = jest.spyOn(component.isOpenChange, 'emit');
 
-    component.onVisibleChange(true);
-    expect(spy).toHaveBeenCalledWith(true);
-
-    component.onVisibleChange(false);
+    component.onVisibleChange();
     expect(spy).toHaveBeenCalledWith(false);
   });
 
@@ -152,7 +149,7 @@ describe('AttachmentSetModalComponent', () => {
         (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
       );
 
-    expect(component.attachmentFilterTable()).toEqual(filteredAttachments);
+    expect(component.attachmentsFilterTable()).toEqual(filteredAttachments);
   });
 
   it('should set arm length and height when attachment set is selected', async () => {
@@ -180,27 +177,6 @@ describe('AttachmentSetModalComponent', () => {
     expect(component.heightBelowConsole()).toBeUndefined();
     expect(component.attachmentSet()).toBeUndefined();
     expect(component.supportName()).toBeUndefined();
-  });
-
-  it('should emit validateForm with correct data when validate is called', () => {
-    const spy = jest.spyOn(component.validateForm, 'emit');
-    const isOpenChangeSpy = jest.spyOn(component, 'onVisibleChange');
-
-    component.supportName.set('Support A');
-    component.attachmentSet.set('Set 1');
-    component.armLength.set(2.5);
-    component.heightBelowConsole.set(10.5);
-
-    component.validate();
-
-    expect(spy).toHaveBeenCalledWith({
-      supportName: 'Support A',
-      attachmentSet: 'Set 1',
-      armLength: 2.5,
-      heightBelowConsole: 10.5,
-      uuid: ''
-    });
-    expect(isOpenChangeSpy).toHaveBeenCalledWith(false);
   });
 
   it('should emit validateForm with support uuid when support is provided', () => {

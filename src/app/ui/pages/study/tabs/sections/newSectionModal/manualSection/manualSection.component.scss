@@ -6,6 +6,7 @@
 
 .section-form-part-grid {
   @apply grid grid-cols-4 gap-x-8 gap-y-4;
+  align-items: flex-end;
   padding-right: 20%;
 }
 

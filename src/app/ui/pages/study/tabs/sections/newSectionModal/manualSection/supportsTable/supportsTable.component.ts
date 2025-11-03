@@ -17,8 +17,9 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { ButtonModule } from 'primeng/button';
 import { KeyFilterModule } from 'primeng/keyfilter';
-import { isNumber } from 'lodash';
+import { isNumber, uniq } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
+import { AttachmentService } from '@core/services/attachment/attachment.service';
 @Component({
   selector: 'app-supports-table',
   imports: [
@@ -53,7 +54,11 @@ export class SupportsTableComponent implements OnInit {
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   first = input.required<number>();
   rows = input.required<number>();
-  constructor(private readonly chainsService: ChainsService) {}
+  supportFilterTable = signal<string[]>([]);
+  constructor(
+    private readonly chainsService: ChainsService,
+    private readonly attachmentService: AttachmentService
+  ) {}
 
   public onlyPositiveNumbers = /^[0-9]*$/;
   public onlyPositiveNumbersWithDecimal = /^[0-9]*\.?[0-9]{0,20}$/;
@@ -67,6 +72,12 @@ export class SupportsTableComponent implements OnInit {
   async getData() {
     const chains = await this.chainsService.getChains();
     this.chains.set(chains || []);
+    const attachments = await this.attachmentService.getAttachments();
+    this.supportFilterTable.set(
+      uniq(
+        (attachments || []).map((attachment) => attachment.support_name || '')
+      )
+    );
   }
 
   ngOnInit() {
@@ -86,6 +97,16 @@ export class SupportsTableComponent implements OnInit {
           uuid,
           field: 'chainWeight',
           value: chain.weight
+        });
+        this.supportChange.emit({
+          uuid,
+          field: 'chainSurface',
+          value: 0
+        });
+        this.supportChange.emit({
+          uuid,
+          field: 'chainV',
+          value: false
         });
       }
     }
@@ -113,6 +134,16 @@ export class SupportsTableComponent implements OnInit {
           field: 'chainWeight',
           value: firstSupport['chainWeight']
         });
+        this.supportChange.emit({
+          uuid: support.uuid,
+          field: 'chainSurface',
+          value: 0
+        });
+        this.supportChange.emit({
+          uuid: support.uuid,
+          field: 'chainV',
+          value: false
+        });
       }
     }
   }
@@ -122,7 +153,6 @@ export class SupportsTableComponent implements OnInit {
   }
 
   openAttachmentSetModal(uuid: string) {
-    console.log('openAttachmentSetModal', uuid);
     this.supportForAttachmentSetModal.set(
       this.supports().find((support) => support.uuid === uuid)
     );

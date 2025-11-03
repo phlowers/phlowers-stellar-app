@@ -11,6 +11,8 @@ import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { PlotService } from '../../plot.service';
 
 @Component({
   selector: 'app-climate',
@@ -40,7 +42,11 @@ export class ClimateComponent {
     { label: '3', value: 3 }
   ];
 
-  constructor(private readonly fb: FormBuilder) {
+  constructor(
+    private readonly fb: FormBuilder,
+    private readonly workerPythonService: WorkerPythonService,
+    private readonly plotService: PlotService
+  ) {
     this.form = this.fb.group({
       windPressure: [0, Validators.required],
       cableTemperature: [15, Validators.required],
@@ -65,10 +71,18 @@ export class ClimateComponent {
   }
 
   eraseForm() {
-    alert('erase the load case!');
+    console.log('erase the load case!');
   }
 
-  getVisibleFormValues(): Record<string, any> {
+  getVisibleFormValues(): {
+    windPressure: number;
+    cableTemperature: number;
+    symmetryType: string;
+    iceThickness?: number;
+    frontierSupportNumber?: number;
+    iceThicknessBefore?: number;
+    iceThicknessAfter?: number;
+  } {
     const symmetryType = this.form.value.symmetryType;
 
     if (symmetryType === 'symmetric') {
@@ -98,15 +112,13 @@ export class ClimateComponent {
   }
 
   calculForm() {
-    console.log('Calculus values:');
-    for (const [key, val] of Object.entries(this.getVisibleFormValues())) {
-      console.log(`${key}: ${val}`);
-    }
+    this.plotService.calculateCharge(
+      this.getVisibleFormValues().windPressure,
+      this.getVisibleFormValues().cableTemperature
+    );
   }
 
   isFormEmpty(): boolean {
-    return Object.values(this.getVisibleFormValues()).some(
-      (val) => val === null || val === undefined || val === ''
-    );
+    return false;
   }
 }
