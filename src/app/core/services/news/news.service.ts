@@ -20,7 +20,7 @@ export class NewsService {
   constructor(private readonly http: HttpClient) {}
 
   getNews(): Observable<string> {
-    return this.http.get<string>(`${window.location.origin}/news.md`, {
+    return this.http.get<string>(`${window.location.origin}/data/news.md`, {
       responseType: 'text' as any
     });
   }

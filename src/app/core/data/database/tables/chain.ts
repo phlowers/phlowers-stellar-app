@@ -11,5 +11,7 @@
 export const chainTable = {
   chains: `&name,
     length,
-    weight`
+    weight,
+    surface,
+    v`
 };

@@ -147,15 +147,15 @@ export class AppComponent implements OnInit, OnDestroy {
           console.error('Error creating user', err);
           this.messageService.add({
             severity: 'error',
-            summary: 'Error',
-            detail: 'error creating user',
+            summary: $localize`Error`,
+            detail: $localize`Error creating user`,
             life: 3000
           });
         });
       this.messageService.add({
         severity: 'success',
-        summary: 'Successful',
-        detail: 'User info set',
+        summary: $localize`Successful`,
+        detail: $localize`User info set`,
         life: 3000
       });
       this.userDialog = false;

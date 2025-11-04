@@ -32,7 +32,7 @@ export class ChainsService {
 
   async importFromFile() {
     const chains = this.http
-      .get(`${window.location.origin}/chains.csv`, {
+      .get(`${window.location.origin}/data/chains.csv`, {
         responseType: 'text'
       })
       .pipe(
@@ -46,9 +46,9 @@ export class ChainsService {
         .map((item) => ({
           name: item.name,
           length: Number(item.length.replace(',', '.')),
-          weight: Number(item.weight.replace(',', '.'))
-          // length: item.length,
-          // weight: item.weight
+          weight: Number(item.weight.replace(',', '.')),
+          surface: Number(item.surface.replace(',', '.')),
+          v: item.v === 'true'
         }))
         .filter((item) => item.name);
     };

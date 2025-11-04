@@ -178,6 +178,7 @@ export class ManualSectionComponent implements OnInit {
     } else {
       this.section().supports?.splice(index + 1, 0, newSupport);
     }
+    this.onSectionChange();
   }
 
   deleteSupport(uuid: string) {
@@ -189,6 +190,7 @@ export class ManualSectionComponent implements OnInit {
     const lastSupport = supports[supports.length - 1];
     lastSupport.spanLength = null;
     this.section().supports = supports;
+    this.onSectionChange();
   }
 
   duplicateSupport(uuid: string) {
@@ -198,9 +200,11 @@ export class ManualSectionComponent implements OnInit {
     if (support) {
       this.section().supports?.push({
         ...support,
+        spanLength: null,
         uuid: uuidv4()
       });
     }
+    this.onSectionChange();
   }
 
   onSupportChange(change: {

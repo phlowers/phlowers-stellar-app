@@ -1056,11 +1056,6 @@
         <source>chain length</source>
       </segment>
     </unit>
-    <unit id="6583469756054732335">
-      <segment>
-        <source>support name</source>
-      </segment>
-    </unit>
     <unit id="6831440935794088973">
       <segment>
         <source>chain weight</source>
@@ -1323,9 +1318,9 @@
         <source>support foot altitude</source>
       </segment>
     </unit>
-    <unit id="6983214908416978812">
+    <unit id="4865483609520535639">
       <segment>
-        <source> Cable Temperature </source>
+        <source>Cable Temperature</source>
       </segment>
     </unit>
     <unit id="7410825966608756111">
@@ -1618,11 +1613,6 @@
         <source>Publish</source>
       </segment>
     </unit>
-    <unit id="1083238742531152930">
-      <segment>
-        <source> Error: <ph id="0" equiv="INTERPOLATION" disp="{{ getErrorString() }}"/> </source>
-      </segment>
-    </unit>
     <unit id="3449156368391431679">
       <segment>
         <source>N° supp.</source>
@@ -1671,6 +1661,96 @@
     <unit id="8387651464002742246">
       <segment>
         <source>Branch</source>
+      </segment>
+    </unit>
+    <unit id="2657043015926552641">
+      <segment>
+        <source>Unknown error</source>
+      </segment>
+    </unit>
+    <unit id="2973163940988682005">
+      <segment>
+        <source>Dist. to point load</source>
+      </segment>
+    </unit>
+    <unit id="3305078246675075385">
+      <segment>
+        <source>Load type</source>
+      </segment>
+    </unit>
+    <unit id="3793363326863773180">
+      <segment>
+        <source>Error creating user</source>
+      </segment>
+    </unit>
+    <unit id="4170797585902965304">
+      <segment>
+        <source>Distributed</source>
+      </segment>
+    </unit>
+    <unit id="4377932527319537276">
+      <segment>
+        <source>Punctual</source>
+      </segment>
+    </unit>
+    <unit id="4486920800439525375">
+      <segment>
+        <source>Shortening / Lengthening</source>
+      </segment>
+    </unit>
+    <unit id="4606091236515013460">
+      <segment>
+        <source>Error:</source>
+      </segment>
+    </unit>
+    <unit id="4613547067726634730">
+      <segment>
+        <source>Support n°</source>
+      </segment>
+    </unit>
+    <unit id="4765388897418478416">
+      <segment>
+        <source>User info set</source>
+      </segment>
+    </unit>
+    <unit id="5080875188035619513">
+      <segment>
+        <source>Pyodide load error</source>
+      </segment>
+    </unit>
+    <unit id="520772936343037608">
+      <segment>
+        <source>Dis Symmetric</source>
+      </segment>
+    </unit>
+    <unit id="5729801747698322662">
+      <segment>
+        <source>Span load</source>
+      </segment>
+    </unit>
+    <unit id="7215028324689336548">
+      <segment>
+        <source>Calculation error</source>
+      </segment>
+    </unit>
+    <unit id="7970276717935400824">
+      <segment>
+        <source>Short. or lengthen. Cable (+ -)</source>
+      </segment>
+    </unit>
+    <unit id="8083736833442025529">
+      <segment>
+        <source>No cable found</source>
+      </segment>
+    </unit>
+    <unit id="8293684133671200243">
+      <segment>
+        <source>Symmetric</source>
+      </segment>
+    </unit>
+    <unit id="8990805719441989570">
+      <segment>
+        <source>Span</source>
       </segment>
     </unit>
   </file>

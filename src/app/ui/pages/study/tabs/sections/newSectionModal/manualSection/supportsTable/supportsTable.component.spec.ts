@@ -35,12 +35,16 @@ const mockChains: Chain[] = [
   {
     name: 'Chain 1',
     length: 10.5,
-    weight: 2.3
+    weight: 2.3,
+    surface: 100,
+    v: false
   },
   {
     name: 'Chain 2',
     length: 15.0,
-    weight: 3.1
+    weight: 3.1,
+    surface: 150,
+    v: true
   }
 ];
 
@@ -179,7 +183,7 @@ describe('SupportsTableComponent', () => {
     it("should copy the first support's spanLength to all supports", () => {
       component.onSupportNumberDoubleClick('spanLength');
 
-      expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
+      expect(component.supportChange.emit).toHaveBeenCalledTimes(2);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         field: 'spanLength',
@@ -187,11 +191,6 @@ describe('SupportsTableComponent', () => {
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'spanLength',
-        value: 50.0
-      });
-      expect(component.supportChange.emit).toHaveBeenCalledWith({
-        uuid: 'support3',
         field: 'spanLength',
         value: 50.0
       });
@@ -221,7 +220,7 @@ describe('SupportsTableComponent', () => {
     it("should copy the first support's attachmentHeight to all supports", () => {
       component.onSupportNumberDoubleClick('attachmentHeight');
 
-      expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
+      expect(component.supportChange.emit).toHaveBeenCalledTimes(6);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         field: 'attachmentHeight',

@@ -96,12 +96,16 @@ describe('ChainsService', () => {
         {
           name: 'Chain 1',
           length: 100.5,
-          weight: 2.3
+          weight: 2.3,
+          surface: 100,
+          v: false
         },
         {
           name: 'Chain 2',
           length: 150.0,
-          weight: 3.1
+          weight: 3.1,
+          surface: 150,
+          v: true
         }
       ];
       mockChainsTable.toArray.mockResolvedValue(mockChains);
@@ -134,12 +138,16 @@ describe('ChainsService', () => {
         {
           name: 'Chain 1',
           length: '100,5',
-          weight: '2,3'
+          weight: '2,3',
+          surface: '100',
+          v: 'false'
         },
         {
           name: 'Chain 2',
           length: '150,0',
-          weight: '3,1'
+          weight: '3,1',
+          surface: '150',
+          v: 'true'
         }
       ];
 
@@ -176,7 +184,7 @@ describe('ChainsService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/chains.csv`
+        `${window.location.origin}/data/chains.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -188,12 +196,16 @@ describe('ChainsService', () => {
         {
           name: 'Chain 1',
           length: 100.5,
-          weight: 2.3
+          weight: 2.3,
+          surface: 100,
+          v: false
         },
         {
           name: 'Chain 2',
           length: 150.0,
-          weight: 3.1
+          weight: 3.1,
+          surface: 150,
+          v: true
         }
       ]);
     });
@@ -231,7 +243,7 @@ describe('ChainsService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/chains.csv`
+        `${window.location.origin}/data/chains.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -247,12 +259,16 @@ describe('ChainsService', () => {
         {
           name: '',
           length: '100,5',
-          weight: '2,3'
+          weight: '2,3',
+          surface: '100',
+          v: 'false'
         },
         {
           name: 'Chain 2',
           length: '150,0',
-          weight: '3,1'
+          weight: '3,1',
+          surface: '150',
+          v: 'true'
         }
       ];
 
@@ -288,7 +304,7 @@ describe('ChainsService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/chains.csv`
+        `${window.location.origin}/data/chains.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -300,7 +316,9 @@ describe('ChainsService', () => {
         {
           name: 'Chain 2',
           length: 150.0,
-          weight: 3.1
+          weight: 3.1,
+          surface: 150,
+          v: true
         }
       ]);
     });
@@ -312,7 +330,9 @@ describe('ChainsService', () => {
         {
           name: 'Chain 1',
           length: '100,5',
-          weight: '2,3'
+          weight: '2,3',
+          surface: '100',
+          v: 'false'
         }
       ];
 
@@ -347,7 +367,7 @@ describe('ChainsService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/chains.csv`
+        `${window.location.origin}/data/chains.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -361,22 +381,28 @@ describe('ChainsService', () => {
         {
           name: 'Chain 1',
           length: '100,5',
-          weight: '2,3'
+          weight: '2,3',
+          surface: '100',
+          v: 'false'
         },
         {
           name: '',
           length: '150,0',
-          weight: '3,1'
+          weight: '3,1',
+          surface: '150',
+          v: 'true'
         },
         {
           name: 'Chain 3',
           length: '200,0',
-          weight: '4,2'
+          weight: '4,2',
+          surface: '200',
+          v: 'false'
         }
       ];
 
       const mockCsvContent =
-        'name,length,weight\nChain 1,100,5,2,3\n,150,0,3,1\nChain 3,200,0,4,2';
+        'name,length,weight,surface,v\nChain 1,100,5,2,3,false\n,150,0,3,1,true\nChain 3,200,0,4,2,false';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteChainsCsvFile>) => {
@@ -407,7 +433,7 @@ describe('ChainsService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/chains.csv`
+        `${window.location.origin}/data/chains.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -419,12 +445,16 @@ describe('ChainsService', () => {
         {
           name: 'Chain 1',
           length: 100.5,
-          weight: 2.3
+          weight: 2.3,
+          surface: 100,
+          v: false
         },
         {
           name: 'Chain 3',
           length: 200.0,
-          weight: 4.2
+          weight: 4.2,
+          surface: 200,
+          v: false
         }
       ]);
     });
@@ -434,7 +464,9 @@ describe('ChainsService', () => {
         {
           name: 'Chain 1',
           length: '100,5',
-          weight: '2,3'
+          weight: '2,3',
+          surface: '100',
+          v: 'false'
         }
       ];
 
@@ -469,7 +501,7 @@ describe('ChainsService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/chains.csv`
+        `${window.location.origin}/data/chains.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);

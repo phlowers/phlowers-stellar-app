@@ -240,7 +240,7 @@ describe('CablesService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/cables.csv`
+        `${window.location.origin}/data/cables.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -328,7 +328,7 @@ describe('CablesService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/cables.csv`
+        `${window.location.origin}/data/cables.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -417,7 +417,7 @@ describe('CablesService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/cables.csv`
+        `${window.location.origin}/data/cables.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -509,7 +509,7 @@ describe('CablesService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/cables.csv`
+        `${window.location.origin}/data/cables.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -617,7 +617,7 @@ describe('CablesService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/cables.csv`
+        `${window.location.origin}/data/cables.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -728,7 +728,7 @@ describe('CablesService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/cables.csv`
+        `${window.location.origin}/data/cables.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
