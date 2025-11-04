@@ -38,4 +38,38 @@
   </div>
 
   <hr class="toolbar__separator" />
+
+  <p-multiselect
+    appendTo="body"
+    i18n-placeholder
+    placeholder="Display"
+    [filter]="false"
+    [showToggleAll]="false"
+    [options]="displayOptions()"
+    optionLabel="label"
+    class="toolbar-multiselect"
+    [class.toolbar-multiselect--active]="displayOptionsStatus()"
+    panelStyleClass="toolbar-multiselect-overlay"
+    (onPanelShow)="displayOptionsStatus.set(true)"
+    (onPanelHide)="displayOptionsStatus.set(false)"
+  >
+    <ng-template #selecteditems let-value>
+      @if (value?.length) {
+        Display
+      }
+    </ng-template>
+
+    <ng-template #dropdownicon>
+      <app-icon icon="visibility" />
+    </ng-template>
+
+    <ng-template #header>
+      <div class="toolbar-multiselect__dropdown__header">
+        <app-icon icon="info" />
+        <p class="mb-0" i18n>Select which elements to display on the studio.</p>
+      </div>
+    </ng-template>
+  </p-multiselect>
+
+  <hr class="toolbar__separator" />
 </div>

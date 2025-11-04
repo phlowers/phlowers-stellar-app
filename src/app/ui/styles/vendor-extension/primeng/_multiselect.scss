@@ -1,0 +1,79 @@
+@use 'abstract.extracts' as app;
+
+$_select-bgc: var(--primary-50);
+
+.p-multiselect.p-multiselect {
+  // specif for studio top toolbar "display" multiselect
+  &.toolbar-multiselect {
+    // --p-multiselect-padding-y: 0rem; // overriden by custom styles in .p-multiselect-label
+    // --p-multiselect-padding-x: 0.25rem; // overriden by custom styles in .p-multiselect-label
+
+    --p-multiselect-color: var(--primary-700);
+    --p-multiselect-placeholder-color: var(--p-multiselect-color);
+
+    --p-multiselect-border-color: var(--primary-700);
+    --p-multiselect-hover-border-color: var(--primary-900);
+
+    --p-multiselect-dropdown-color: var(--primary-700);
+
+    --p-multiselect-dropdown-width: 1.375rem;
+
+    --p-multiselect-shadow: none;
+    --p-multiselect-border-radius: 0.125rem;
+
+    @apply items-center;
+
+    .p-multiselect-label {
+      font-size: 0.875rem;
+      padding: 0.1875rem 0.5rem 0rem 0.25rem;
+    }
+
+    .p-multiselect-dropdown {
+      order: -1;
+      height: var(--p-multiselect-dropdown-width);
+      margin-left: 0.25rem;
+
+      &-icon {
+        @apply inline-flex items-center;
+      }
+    }
+  }
+}
+
+.p-multiselect-overlay.p-multiselect-overlay {
+  // specif for studio top toolbar "display" multiselect
+  &.toolbar-multiselect-overlay {
+    --p-multiselect-overlay-background: var(--star-dust-50);
+    --p-multiselect-overlay-border-color: var(--star-dust-300);
+    --p-multiselect-overlay-border-radius: 0.25rem;
+    --p-multiselect-overlay-color: var(--star-dust-700);
+    --p-multiselect-overlay-shadow: var(--elevation-neutral-4);
+    --p-multiselect-list-padding: 0rem;
+    --p-multiselect-list-header-padding: 0rem;
+    --p-multiselect-list-gap: 0rem;
+
+    --p-multiselect-option-focus-background: #{$_select-bgc};
+    --p-multiselect-option-selected-background: #{$_select-bgc};
+    --p-multiselect-option-selected-focus-background: #{$_select-bgc};
+
+    --p-multiselect-option-color: var(--star-dust-950);
+    --p-multiselect-option-focus-color: var(--p-multiselect-option-color);
+    --p-multiselect-option-selected-color: var(--p-multiselect-option-color);
+    --p-multiselect-option-selected-focus-color: var(
+      --p-multiselect-option-color
+    );
+    --p-multiselect-option-padding: 0.6875rem 0.625rem;
+    --p-multiselect-option-border-radius: 0rem;
+    --p-multiselect-option-gap: 0.625rem;
+
+    .p-multiselect-option {
+      background-color: $_select-bgc;
+      font-size: 0.875rem;
+      line-height: 1rem;
+
+      &:hover {
+        background-color: var(--primary-100);
+      }
+    }
+  }
+}
