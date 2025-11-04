@@ -174,7 +174,11 @@ export class InitialConditionService {
     section: Section,
     initialConditionUuid: string
   ): Promise<void> {
-    await this.updateStudyWithModification(study, (studyCopy) => {
+    const studyToUpdate = await this.studiesService.getStudy(study.uuid);
+    if (!studyToUpdate) {
+      return;
+    }
+    await this.updateStudyWithModification(studyToUpdate, (studyCopy) => {
       studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
           ? { ...s, selected_initial_condition_uuid: initialConditionUuid }

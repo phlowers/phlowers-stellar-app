@@ -194,7 +194,7 @@ describe('MaintenanceService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/maintenance-teams.csv`
+        `${window.location.origin}/data/maintenance-teams.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -259,7 +259,7 @@ describe('MaintenanceService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/maintenance-teams.csv`
+        `${window.location.origin}/data/maintenance-teams.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -325,7 +325,7 @@ describe('MaintenanceService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/maintenance-teams.csv`
+        `${window.location.origin}/data/maintenance-teams.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -394,7 +394,7 @@ describe('MaintenanceService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/maintenance-teams.csv`
+        `${window.location.origin}/data/maintenance-teams.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -466,7 +466,7 @@ describe('MaintenanceService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/maintenance-teams.csv`
+        `${window.location.origin}/data/maintenance-teams.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -541,7 +541,7 @@ describe('MaintenanceService', () => {
 
       // Mock the HTTP request
       const req = httpTestingController.expectOne(
-        `${window.location.origin}/maintenance-teams.csv`
+        `${window.location.origin}/data/maintenance-teams.csv`
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);

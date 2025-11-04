@@ -265,6 +265,11 @@ export class StudyComponent implements OnInit, OnDestroy {
       initialCondition,
       newUuid
     );
+    await this.initialConditionService.setInitialCondition(
+      this.study,
+      section,
+      newUuid
+    );
 
     this.messageService.add({
       severity: 'success',

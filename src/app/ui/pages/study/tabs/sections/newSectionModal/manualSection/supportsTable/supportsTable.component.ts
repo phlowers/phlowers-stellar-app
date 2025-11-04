@@ -84,6 +84,10 @@ export class SupportsTableComponent implements OnInit {
     this.getData();
   }
 
+  calculateSupportFootAltitude(attachmentHeight: number) {
+    return attachmentHeight - 30 > 0 ? attachmentHeight - 30 : 0;
+  }
+
   onSupportFieldChange(uuid: string, field: keyof Support, value: any) {
     if (field === 'chainName') {
       const chain = this.chains().find((chain) => chain.name === value);
@@ -110,6 +114,13 @@ export class SupportsTableComponent implements OnInit {
         });
       }
     }
+    if (field === 'attachmentHeight') {
+      this.supportChange.emit({
+        uuid,
+        field: 'supportFootAltitude',
+        value: this.calculateSupportFootAltitude(value)
+      });
+    }
     this.supportChange.emit({ uuid, field, value });
   }
 
@@ -117,7 +128,12 @@ export class SupportsTableComponent implements OnInit {
     const firstSupport = this.supports()[0];
     if (!firstSupport) return;
     const isChainName = header === 'chainName';
-    for (const support of this.supports()) {
+    const isSpanLength = header === 'spanLength';
+    const isAttachmentHeight = header === 'attachmentHeight';
+    for (const [index, support] of this.supports().entries()) {
+      if (isSpanLength && index === this.supports().length - 1) {
+        continue;
+      }
       this.supportChange.emit({
         uuid: support.uuid,
         field: header,
@@ -143,6 +159,18 @@ export class SupportsTableComponent implements OnInit {
           uuid: support.uuid,
           field: 'chainV',
           value: false
+        });
+      }
+      if (isAttachmentHeight) {
+        if (firstSupport['attachmentHeight'] === null) {
+          continue;
+        }
+        this.supportChange.emit({
+          uuid: support.uuid,
+          field: 'supportFootAltitude',
+          value: this.calculateSupportFootAltitude(
+            firstSupport['attachmentHeight']
+          )
         });
       }
     }

@@ -38,7 +38,7 @@ export class LinesService {
 
   async importFromFile() {
     const linesFile = this.http
-      .get(`${window.location.origin}/lines.csv`, {
+      .get(`${window.location.origin}/data/lines.csv`, {
         responseType: 'text'
       })
       .pipe(

@@ -153,12 +153,9 @@
         @if (mode() !== 'view') {
           <input
             pInputText
-            type="number"
-            min="0"
             aria-label="support number"
             i18n-aria-label
             [ngModel]="support.number"
-            [pKeyFilter]="onlyPositiveNumbers"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'number', $event)
             "
@@ -456,9 +453,7 @@
                 )
               "
             />
-            @if (isNumber(support.supportFootAltitude)) {
-              <p-inputgroup-addon i18n>m</p-inputgroup-addon>
-            }
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
         } @else {
           <p class="read-only_info">

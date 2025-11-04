@@ -87,6 +87,9 @@ export class PlotService {
   };
 
   purgePlot = () => {
+    if (!document.getElementById('plotly-output')) {
+      return;
+    }
     plotly.purge('plotly-output');
     this.litData.set(null);
     this.error.set(null);
