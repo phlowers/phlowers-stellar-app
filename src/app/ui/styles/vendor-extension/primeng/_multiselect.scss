@@ -3,6 +3,10 @@
 $_select-bgc: var(--primary-50);
 
 .p-multiselect.p-multiselect {
+  &:not(.p-disabled).p-focus {
+    @extend %focus-state;
+  }
+
   // specif for studio top toolbar "display" multiselect
   &.toolbar-multiselect {
     // --p-multiselect-padding-y: 0rem; // overriden by custom styles in .p-multiselect-label
