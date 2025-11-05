@@ -81,6 +81,13 @@
   >
     <ng-template #button let-toggleCallback="toggleCallback">
       <button i18n (click)="toggleCallback($event)">Tools</button>
+    [model]="tablesDropdown()"
+  >
+    <ng-template #button let-toggleCallback="toggleCallback">
+      <button i18n (click)="toggleCallback($event)">
+        <app-icon icon="table_chart" />
+        Tables
+      </button>
     </ng-template>
 
     <ng-template #item let-item let-toggleCallback="toggleCallback">
@@ -89,4 +96,26 @@
   </p-speedDial>
 
   <hr class="toolbar__separator" />
+
+  <p-speedDial
+    direction="down"
+    icon="pi pi-plus"
+    class="toolbar-speed-dial"
+    [model]="toolsDropdown()"
+  >
+    <ng-template #button let-toggleCallback="toggleCallback">
+      <button i18n (click)="toggleCallback($event)">
+        <app-icon icon="build" />
+        Tools
+      </button>
+    </ng-template>
+
+    <ng-template #item let-item let-toggleCallback="toggleCallback">
+      <button (click)="toggleCallback($event, item)">{{ item.label }}</button>
+    </ng-template>
+  </p-speedDial>
+
+  <hr class="toolbar__separator" />
+
+  <div class="shortcuts"></div>
 </div>

@@ -1,7 +1,7 @@
 @use 'abstract.extracts' as app;
 
 .toolbar {
-  @apply flex gap-4 items-center border-b px-6 py-1 h-14 max-h-14 overflow-hidden;
+  @apply flex gap-4 items-center flex-wrap border-b px-6 py-1 h-14 max-h-14;
   border-color: var(--primary-200);
   background-color: var(--primary-50);
   color: var(--star-dust-950);
@@ -19,6 +19,10 @@
       --p-multiselect-color: var(--grey-white);
       --p-multiselect-placeholder-color: var(--p-multiselect-color);
       --p-multiselect-dropdown-color: var(--p-multiselect-color);
+
+      &:hover {
+        background-color: var(--primary-700);
+      }
     }
   }
 

@@ -9,9 +9,6 @@ $_select-bgc: var(--primary-50);
 
   // specif for studio top toolbar "display" multiselect
   &.toolbar-multiselect {
-    // --p-multiselect-padding-y: 0rem; // overriden by custom styles in .p-multiselect-label
-    // --p-multiselect-padding-x: 0.25rem; // overriden by custom styles in .p-multiselect-label
-
     --p-multiselect-color: var(--primary-700);
     --p-multiselect-placeholder-color: var(--p-multiselect-color);
 
@@ -44,6 +41,10 @@ $_select-bgc: var(--primary-50);
 
       &-icon {
         @apply inline-flex items-center;
+
+        .app-icon {
+          font-size: 1.25rem;
+        }
       }
     }
   }

@@ -25,11 +25,40 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 })
 export class StudioTopToolbarComponent implements OnInit {
   items = signal<MenuItem[] | null>(null);
+  tablesDropdown = signal<MenuItem[] | null>(null);
+  toolsDropdown = signal<MenuItem[] | null>(null);
 
   constructor(public readonly plotService: PlotService) {}
 
   ngOnInit(): void {
-    this.items.set([
+    this.tablesDropdown.set([
+      {
+        label: $localize`Load table`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`Pose table`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`Obstacle table`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`Ground table`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      }
+    ]);
+
+    this.toolsDropdown.set([
       {
         label: $localize`Field measurment`,
         command: () => {
@@ -43,25 +72,37 @@ export class StudioTopToolbarComponent implements OnInit {
         }
       },
       {
-        label: $localize`Field measurment`,
+        label: $localize`Guying qqchose`,
         command: () => {
           console.log('Add action triggered');
         }
       },
       {
-        label: $localize`L0 sum`,
+        label: $localize`Cable marquing`,
         command: () => {
           console.log('Add action triggered');
         }
       },
       {
-        label: $localize`Field measurment`,
+        label: $localize`CRR de brins coupés`,
         command: () => {
           console.log('Add action triggered');
         }
       },
       {
-        label: $localize`L0 sum`,
+        label: $localize`Vegeo report`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`Free height & lateral distance`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`Cable setting`,
         command: () => {
           console.log('Add action triggered');
         }
