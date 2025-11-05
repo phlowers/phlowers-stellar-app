@@ -26,6 +26,11 @@ $_select-bgc: var(--primary-50);
     --p-multiselect-border-radius: 0.125rem;
 
     @apply items-center;
+    transition: background-color 0.2s linear;
+
+    &:not(.p-focus):hover {
+      background-color: var(--primary-50);
+    }
 
     .p-multiselect-label {
       font-size: 0.875rem;

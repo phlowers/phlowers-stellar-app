@@ -72,4 +72,21 @@
   </p-multiselect>
 
   <hr class="toolbar__separator" />
+
+  <p-speedDial
+    direction="down"
+    icon="pi pi-plus"
+    class="toolbar-speed-dial"
+    [model]="items()"
+  >
+    <ng-template #button let-toggleCallback="toggleCallback">
+      <button i18n (click)="toggleCallback($event)">Tools</button>
+    </ng-template>
+
+    <ng-template #item let-item let-toggleCallback="toggleCallback">
+      <button (click)="toggleCallback($event, item)">{{ item.label }}</button>
+    </ng-template>
+  </p-speedDial>
+
+  <hr class="toolbar__separator" />
 </div>

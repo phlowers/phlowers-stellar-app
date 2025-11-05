@@ -1,9 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { SpeedDialModule } from 'primeng/speeddial';
+import { MenuItem } from 'primeng/api';
 import { PlotService } from '@ui/pages/studio/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 
@@ -17,11 +19,55 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
     DividerModule,
     ToggleSwitchModule,
     MultiSelectModule,
-    IconComponent
+    IconComponent,
+    SpeedDialModule
   ]
 })
-export class StudioTopToolbarComponent {
+export class StudioTopToolbarComponent implements OnInit {
+  items = signal<MenuItem[] | null>(null);
+
   constructor(public readonly plotService: PlotService) {}
+
+  ngOnInit(): void {
+    this.items.set([
+      {
+        label: $localize`Field measurment`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`L0 sum`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`Field measurment`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`L0 sum`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`Field measurment`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      },
+      {
+        label: $localize`L0 sum`,
+        command: () => {
+          console.log('Add action triggered');
+        }
+      }
+    ]);
+  }
 
   threeDOptions = signal<
     {
