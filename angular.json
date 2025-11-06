@@ -148,6 +148,9 @@
             },
             "development": {
               "buildTarget": "phlowers-stellar-app:build:development"
+            },
+            "fr": {
+              "buildTarget": "phlowers-stellar-app:build:fr"
             }
           },
           "defaultConfiguration": "development"

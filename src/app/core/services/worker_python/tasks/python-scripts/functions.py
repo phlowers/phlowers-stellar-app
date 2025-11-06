@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from mechaphlowers.entities.arrays import SectionArray, CableArray
+from mechaphlowers.data.catalog import sample_support_catalog
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine
 from typing import Optional
@@ -248,6 +249,23 @@ def change_climate(js_inputs: dict):
     engine.solve_change_state(wind_pressure=wind_pressure * np.array([1] * 4))
     # engine.solve_change_state(ice_thickness=ice_thickness * np.array([1] * 4))
     return get_coordinates(plt_line)
+
+
+def get_support_coordinates(js_inputs: dict):
+    some_support_name = sample_support_catalog.keys()[0]
+    support_array_list = sample_support_catalog.get_as_object([some_support_name])
+
+    # data for plotting
+    shape_points = support_array_list[0].support_points
+    text_display_points = support_array_list[0].labels_points
+    text_to_display = support_array_list[0].set_number
+
+    print(f"{shape_points=}\n {text_display_points=}\n {text_to_display=}")
+    return {
+        "shape_points": shape_points,
+        "text_display_points": text_display_points,
+        "text_to_display": text_to_display,
+    }
 
 
 # print("im in the main function")

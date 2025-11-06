@@ -5,7 +5,8 @@ import { PlotObjectsType } from '@ui/shared/components/studio/section/helpers/ty
 export enum Task {
   runTests = 'runTests',
   getLit = 'getLit',
-  runEngine = 'runEngine'
+  runEngine = 'runEngine',
+  getSupportCoordinates = 'getSupportCoordinates'
 }
 
 export enum DataError {
@@ -28,10 +29,16 @@ export interface TaskInputs {
     cableTemperature: number;
     iceThickness: number;
   };
+  [Task.getSupportCoordinates]: Record<string, number[]>;
 }
 
 export interface TaskOutputs {
   [Task.getLit]: GetSectionOutput;
   [Task.runTests]: undefined;
   [Task.runEngine]: GetSectionOutput;
+  [Task.getSupportCoordinates]: {
+    shape_points: number[][];
+    text_display_points: number[][];
+    text_to_display: string[];
+  };
 }
