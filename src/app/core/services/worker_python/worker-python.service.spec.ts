@@ -97,7 +97,7 @@ describe('WorkerService', () => {
     section: 100,
     diameter: 10,
     young_modulus: 200000,
-    linear_weight: 0.5,
+    linear_mass: 0.5,
     dilatation_coefficient: 0.000012,
     temperature_reference: 20,
     stress_strain_a0: 0.1,

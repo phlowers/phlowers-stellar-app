@@ -46,13 +46,18 @@ export class PlotService {
     this.plotOptions.set({ ...this.plotOptions(), [key]: value });
   }
 
-  calculateCharge = async (windPressure: number, cableTemperature: number) => {
+  calculateCharge = async (
+    windPressure: number,
+    cableTemperature: number,
+    iceThickness: number
+  ) => {
     this.loading.set(true);
     const { result, error } = await this.workerPythonService.runTask(
       Task.runEngine,
       {
         windPressure,
-        cableTemperature
+        cableTemperature,
+        iceThickness
       }
     );
     this.litData.set(result);

@@ -20,7 +20,7 @@
         "source": "local"
     },
     "mechaphlowers": {
-        "file_name": "mechaphlowers-0.4.0-cp312-none-any.whl",
+        "file_name": "mechaphlowers-0.4.1-cp312-none-any.whl",
         "name": "mechaphlowers",
         "source": "local"
     },
@@ -76,7 +76,7 @@
     },
     "pydantic-core": {
         "file_name": "pydantic_core-2.27.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "pydantic-core",
+        "name": "pydantic_core",
         "source": "remote"
     },
     "python-dateutil": {

@@ -8,6 +8,10 @@ from dataclasses import dataclass
 from typing import List
 import math
 
+from importlib.metadata import version
+
+print("mechaphlowers version: ", version("mechaphlowers"))
+
 
 @dataclass
 class Support:
@@ -50,7 +54,7 @@ class Cable:
     section: float
     diameter: float
     young_modulus: float
-    linear_weight: float
+    linear_mass: float
     dilatation_coefficient: float
     temperature_reference: float
     stress_strain_a0: float
@@ -75,8 +79,8 @@ def generate_section_array(supports: list[Support]):
     line_angle = []
     insulator_length = []
     span_length = []
-    insulator_weight = []
-    load_weight = []
+    insulator_mass = []
+    load_mass = []
     load_position = []
 
     for index, support in enumerate(supports):
@@ -90,8 +94,8 @@ def generate_section_array(supports: list[Support]):
         insulator_length.append(1)
         span_length.append(support.spanLength)
         line_angle.append(support.spanAngle)
-        insulator_weight.append(200)
-        load_weight.append(0)
+        insulator_mass.append(200)
+        load_mass.append(0)
         load_position.append(0)
 
     section_data = {
@@ -100,8 +104,8 @@ def generate_section_array(supports: list[Support]):
         "conductor_attachment_altitude": altitude,
         "crossarm_length": crossarm_length,
         "insulator_length": insulator_length,
-        "insulator_weight": insulator_weight,
-        "load_weight": load_weight,
+        "insulator_mass": insulator_mass,
+        "load_mass": load_mass,
         "load_position": load_position,
         "span_length": span_length,
         "line_angle": line_angle,
@@ -207,7 +211,7 @@ def init_section(js_inputs: dict):
             {
                 "section": [cable.section],
                 "diameter": [cable.diameter],
-                "linear_weight": [cable.linear_weight],
+                "linear_mass": [cable.linear_mass],
                 "young_modulus": [60],
                 "dilatation_coefficient": [cable.dilatation_coefficient],
                 "temperature_reference": [cable.temperature_reference],
@@ -237,8 +241,12 @@ def change_climate(js_inputs: dict):
     python_inputs = js_inputs.to_py()
     wind_pressure = python_inputs["windPressure"]
     cable_temperature = python_inputs["cableTemperature"]
+    ice_thickness = python_inputs["iceThickness"]
+    # section_length = len(engine.section_array.section_length)
+    # print("section_length: ", section_length)
     engine.solve_change_state(new_temperature=cable_temperature * np.array([1] * 4))
     engine.solve_change_state(wind_pressure=wind_pressure * np.array([1] * 4))
+    # engine.solve_change_state(ice_thickness=ice_thickness * np.array([1] * 4))
     return get_coordinates(plt_line)
 
 

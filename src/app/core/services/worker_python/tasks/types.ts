@@ -23,7 +23,11 @@ export type GetSectionOutput = Record<PlotObjectsType, number[][][]>;
 export interface TaskInputs {
   [Task.getLit]: { section: Section; cable: Cable };
   [Task.runTests]: undefined;
-  [Task.runEngine]: { windPressure: number; cableTemperature: number };
+  [Task.runEngine]: {
+    windPressure: number;
+    cableTemperature: number;
+    iceThickness: number;
+  };
 }
 
 export interface TaskOutputs {
