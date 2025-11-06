@@ -1,0 +1,38 @@
+@use './abstract.extracts' as app;
+
+.section-title {
+  @extend %text-m-600;
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--grey-300);
+}
+
+.label-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.label {
+  @extend %text-m-600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.input-length {
+  font-size: 0.75rem;
+  color: var(--grey-500);
+}
+
+.personnel-presence {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  .label {
+    margin-bottom: 0;
+  }
+}

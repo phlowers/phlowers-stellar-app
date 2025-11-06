@@ -81,6 +81,12 @@ export class PlotService {
       Task.getLit,
       { section, cable }
     );
+    this.plotOptions.set({
+      ...this.plotOptions(),
+      startSupport: 0,
+      endSupport: section.supports.length - 1,
+      invert: false
+    });
     this.litData.set(result);
     this.error.set(error);
     this.loading.set(false);

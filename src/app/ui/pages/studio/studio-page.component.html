@@ -1,4 +1,12 @@
+<app-new-charge-modal
+  [isOpen]="isNewChargeModalOpen()"
+  (isOpenChange)="isNewChargeModalOpen.set($event)"
+  [mode]="newChargeModalMode()"
+  [uuidInput]="newChargeModalUuid()"
+/>
+
 <app-studio-menu-bar
+  (openNewChargeModal)="openNewChargeModal($event)"
   [section]="plotService.section()"
   [study]="plotService.study()"
 ></app-studio-menu-bar>
@@ -99,43 +107,73 @@
       <ng-template>
         <p-tabs value="0" class="load-tabs">
           <p-tablist>
-            <p-tab value="0">Condition climatique</p-tab>
-            <p-tab value="1">Chargement de portée</p-tab>
-            <p-tab value="2">Manip. câble au Supp.</p-tab>
-            <p-tab value="3">Manip. câble au portée</p-tab>
+            <p-tab
+              value="0"
+              [disabled]="!plotService.section()?.selected_charge_uuid"
+              i18n
+              >Climate condition</p-tab
+            >
+            <p-tab value="1" [disabled]="true" i18n>Span loading</p-tab>
+            <p-tab value="2" [disabled]="true" i18n
+              >Cable manip. at support</p-tab
+            >
+            <p-tab value="3" [disabled]="true" i18n>Cable manip. at span</p-tab>
           </p-tablist>
 
-          <p-tabpanels>
-            <p-tabpanel value="0">
-              <app-climate />
-            </p-tabpanel>
-
-            <p-tabpanel value="1">
-              <app-span [spans]="spanData" [supports]="supportData" />
-            </p-tabpanel>
-
-            <p-tabpanel value="2">
-              <p class="m-0">
-                At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                blanditiis praesentium voluptatum deleniti atque corrupti quos
-                dolores et quas molestias excepturi sint occaecati cupiditate
-                non provident, similique sunt in culpa qui officia deserunt
-                mollitia animi, id est laborum et dolorum fuga. Et harum quidem
-                rerum facilis est et expedita distinctio. Nam libero tempore,
-                cum soluta nobis est eligendi optio cumque nihil impedit quo
-                minus.
+          @if (!plotService.section()?.charges?.length) {
+            <div class="flex items-center justify-center gap-1 my-4">
+              <app-icon icon="info" />
+              <p i18n>
+                In order to add charges, you need to create a charge case.
               </p>
-            </p-tabpanel>
+            </div>
+            <div class="flex justify-center">
+              <button
+                class="inline-block mb-4"
+                app-btn
+                btnStyle="outlined"
+                btnSize="s"
+                (click)="openNewChargeModal({ mode: 'create', uuid: null })"
+              >
+                <app-icon icon="add_circle" />
+                <ng-container i18n>Add a charge case</ng-container>
+              </button>
+            </div>
+          }
 
-            <p-tabpanel value="3">
-              <p class="m-0">
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cumque
-                consequuntur vero, iste ducimus ipsam soluta ab libero maxime,
-                excepturi quia, veniam nostrum. Debitis necessitatibus veritatis
-                mollitia numquam? Optio, minus cum.
-              </p>
-            </p-tabpanel>
-          </p-tabpanels>
+          @if (plotService.section()?.selected_charge_uuid) {
+            <p-tabpanels>
+              <p-tabpanel value="0">
+                <app-climate />
+              </p-tabpanel>
+
+              <p-tabpanel value="1">
+                <app-span [spans]="spanData" [supports]="supportData" />
+              </p-tabpanel>
+
+              <p-tabpanel value="2">
+                <p class="m-0">
+                  At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                  blanditiis praesentium voluptatum deleniti atque corrupti quos
+                  dolores et quas molestias excepturi sint occaecati cupiditate
+                  non provident, similique sunt in culpa qui officia deserunt
+                  mollitia animi, id est laborum et dolorum fuga. Et harum
+                  quidem rerum facilis est et expedita distinctio. Nam libero
+                  tempore, cum soluta nobis est eligendi optio cumque nihil
+                  impedit quo minus.
+                </p>
+              </p-tabpanel>
+
+              <p-tabpanel value="3">
+                <p class="m-0">
+                  Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                  Cumque consequuntur vero, iste ducimus ipsam soluta ab libero
+                  maxime, excepturi quia, veniam nostrum. Debitis necessitatibus
+                  veritatis mollitia numquam? Optio, minus cum.
+                </p>
+              </p-tabpanel>
+            </p-tabpanels>
+          }
         </p-tabs>
       </ng-template>
     </app-side-tab>

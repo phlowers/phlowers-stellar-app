@@ -100,7 +100,9 @@ describe('SectionsTabComponent', () => {
         max_frost_width: 0
       } as InitialCondition
     ],
-    selected_initial_condition_uuid: 'ic-1'
+    selected_initial_condition_uuid: 'ic-1',
+    charges: [],
+    selected_charge_uuid: null
   };
 
   const mockInitialCondition: InitialCondition = {

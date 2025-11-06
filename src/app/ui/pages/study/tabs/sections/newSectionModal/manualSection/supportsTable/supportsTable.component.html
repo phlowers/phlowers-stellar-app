@@ -15,7 +15,7 @@
 >
   <ng-template pTemplate="header">
     <tr>
-      <th class="sticky-left" id="position" i18n></th>
+      <th class="sticky-left" id="position" class="position-column" i18n></th>
       <th
         id="support_number"
         (dblclick)="onSupportNumberDoubleClick('number')"
@@ -146,7 +146,7 @@
   </ng-template>
   <ng-template #body let-support let-index="index" let-rowIndex="rowIndex">
     <tr>
-      <td class="sticky-left">
+      <td class="sticky-left position-column">
         {{ rowIndex + 1 }}
       </td>
       <td class="integer-column">
@@ -516,6 +516,7 @@
             app-btn
             btnSize="s"
             btnStyle="text"
+            class="w-auto"
             (click)="popover.toggle($event)"
           >
             <span class="pi pi-ellipsis-h"></span>

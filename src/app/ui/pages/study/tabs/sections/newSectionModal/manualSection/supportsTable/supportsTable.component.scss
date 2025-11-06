@@ -1,3 +1,8 @@
+input {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
 .sticky-left,
 .sticky-right {
   position: sticky;
@@ -20,9 +25,15 @@
 }
 
 .decimal-column {
-  width: 9rem;
-  min-width: 9rem;
-  max-width: 9rem;
+  width: 7rem;
+  min-width: 7rem;
+  max-width: 7rem;
+}
+
+.position-column {
+  width: 3rem;
+  min-width: 3rem;
+  max-width: 3rem;
 }
 
 .text-column {
@@ -38,7 +49,7 @@
 }
 
 td {
-  >* {
+  >*:not(button) {
     width: 100%;
   }
 

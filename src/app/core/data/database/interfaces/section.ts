@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { Charge } from './charge';
 import { InitialCondition } from './initialCondition';
 import { Support } from './support';
 
@@ -43,4 +44,6 @@ export interface Section {
   supports: Support[];
   initial_conditions: InitialCondition[];
   selected_initial_condition_uuid: string | undefined;
+  charges: Charge[];
+  selected_charge_uuid: string | null;
 }
