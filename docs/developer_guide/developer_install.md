@@ -48,7 +48,7 @@ You should match global and local project CLI by watching current version in `pa
     - section
     - diameter
     - young_modulus
-    - linear_weight
+    - linear_mass
     - dilatation_coefficient
     - temperature_reference
     - stress_strain_a0

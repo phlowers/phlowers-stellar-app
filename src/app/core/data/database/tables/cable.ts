@@ -14,7 +14,7 @@ export const cableTable = {
     section,
     diameter,
     young_modulus,
-    linear_weight,
+    linear_mass,
     dilatation_coefficient,
     temperature_reference,
     stress_strain_a0,
