@@ -34,6 +34,11 @@ const tasks: Record<
     script: functions,
     function: 'change_climate',
     externalPackages: []
+  },
+  [Task.getSupportCoordinates]: {
+    script: functions,
+    function: 'get_support_coordinates',
+    externalPackages: []
   }
 };
 
