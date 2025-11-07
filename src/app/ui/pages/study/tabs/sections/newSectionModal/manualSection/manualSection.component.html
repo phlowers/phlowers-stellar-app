@@ -226,7 +226,7 @@
 
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid">
-            <div class="flex flex-col">
+            <div class="flex flex-col col-span-1">
               <label for="linkEtl" i18n>Electric tension level</label>
               <p-select
                 inputId="linkEtl"
@@ -246,9 +246,8 @@
                 filterBy="electric_tension_level_adr"
               />
             </div>
-
-            <div class="flex flex-col">
-              <label for="linkName" i18n>Link name</label>
+            <div class="flex flex-col col-span-1">
+              <label for="linkName" i18n>Link - IDR</label>
               <p-select
                 inputId="linkName"
                 [options]="linesFilterTable()"
@@ -265,9 +264,10 @@
                 filterBy="link_idr"
               />
             </div>
+            <div class="col-span-2"></div>
 
-            <div class="flex flex-col">
-              <label for="linkLit" i18n>LIT</label>
+            <div class="flex flex-col col-span-1">
+              <label for="linkLit" i18n>LIT - ADR</label>
               <p-select
                 inputId="linkLit"
                 [options]="linesFilterTable()"
@@ -284,9 +284,45 @@
                 filterBy="lit_adr"
               />
             </div>
+            <div class="flex flex-col col-span-3">
+              <label for="linkLit" i18n>LIT - IDR</label>
+              <p-select
+                inputId="linkLit"
+                [options]="linesFilterTable()"
+                [(ngModel)]="section().lit"
+                optionLabel="lit_idr"
+                optionValue="lit_adr"
+                (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'lit_adr')"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="lit_idr"
+              />
+            </div>
 
-            <div class="flex flex-col">
-              <label for="linkBm" i18n>Branch name</label>
+            <div class="flex flex-col col-span-1">
+              <label for="linkBm" i18n>Branch - IDR</label>
+              <p-select
+                inputId="linkBm"
+                [options]="linesFilterTable()"
+                [(ngModel)]="section().branch_name"
+                optionLabel="branch_idr"
+                optionValue="branch_adr"
+                (onChange)="onLinesSelect($event, 'branch_adr')"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                appendTo="body"
+                (ngModelChange)="onSectionChange()"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="branch_idr"
+              />
+            </div>
+            <div class="flex flex-col col-span-3">
+              <label for="linkBm" i18n>Branch - ADR</label>
               <p-select
                 inputId="linkBm"
                 [options]="linesFilterTable()"
@@ -405,10 +441,23 @@
             />
           </div>
         } @else if (mode() === 'view') {
-          <dl>
-            <dt i18n>Supports amount</dt>
-            <dd class="read-only-info">{{ section().supports.length }}</dd>
-          </dl>
+          <div class="flex flex-row justify-between items-center">
+            <dl>
+              <dt i18n>Supports amount</dt>
+              <dd class="read-only-info">{{ section().supports.length }}</dd>
+            </dl>
+            <p-paginator
+              (onPageChange)="onSupportsPageChange($event)"
+              [totalRecords]="section().supports.length"
+              [rowsPerPageOptions]="[5, 10, 20]"
+              [rows]="rowsSupport()"
+              [showCurrentPageReport]="true"
+              [showPageLinks]="true"
+              [showJumpToPageDropdown]="false"
+              i18n-currentPageReportTemplate
+              currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
+            />
+          </div>
         }
         <div class="mt-[-1rem]">
           <app-supports-table
