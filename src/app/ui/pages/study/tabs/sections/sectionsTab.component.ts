@@ -76,12 +76,9 @@ export class SectionsTabComponent {
     const currentInitialConditions = section.initial_conditions;
     return {
       uuid: uuidv4(),
-      name:
-        $localize`Initial Condition` +
-        ' ' +
-        (currentInitialConditions.length + 1),
+      name: $localize`IC` + ' ' + (currentInitialConditions.length + 1),
       base_parameters: 0,
-      base_temperature: 0,
+      base_temperature: 15,
       cable_pretension: 0,
       min_temperature: 0,
       max_wind_pressure: 0,
