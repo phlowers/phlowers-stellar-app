@@ -1,12 +1,19 @@
 import numpy as np
 import pandas as pd
 from mechaphlowers.entities.arrays import SectionArray, CableArray
+from mechaphlowers.data.catalog.catalog import sample_cable_catalog
+from mechaphlowers.data.catalog import sample_support_catalog
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine
 from typing import Optional
 from dataclasses import dataclass
 from typing import List
 import math
+import json
+
+from importlib.metadata import version
+
+print("mechaphlowers version: ", version("mechaphlowers"))
 
 
 @dataclass
@@ -50,7 +57,7 @@ class Cable:
     section: float
     diameter: float
     young_modulus: float
-    linear_weight: float
+    linear_mass: float
     dilatation_coefficient: float
     temperature_reference: float
     stress_strain_a0: float
@@ -75,8 +82,8 @@ def generate_section_array(supports: list[Support]):
     line_angle = []
     insulator_length = []
     span_length = []
-    insulator_weight = []
-    load_weight = []
+    insulator_mass = []
+    load_mass = []
     load_position = []
 
     for index, support in enumerate(supports):
@@ -87,11 +94,11 @@ def generate_section_array(supports: list[Support]):
             suspension.append(True)
         altitude.append(support.attachmentHeight)
         crossarm_length.append(support.armLength or 0)
-        insulator_length.append(1)
+        insulator_length.append(support.chainLength or 1)
         span_length.append(support.spanLength)
         line_angle.append(support.spanAngle)
-        insulator_weight.append(200)
-        load_weight.append(0)
+        insulator_mass.append(support.chainWeight or 0)
+        load_mass.append(0)
         load_position.append(0)
 
     section_data = {
@@ -100,8 +107,8 @@ def generate_section_array(supports: list[Support]):
         "conductor_attachment_altitude": altitude,
         "crossarm_length": crossarm_length,
         "insulator_length": insulator_length,
-        "insulator_weight": insulator_weight,
-        "load_weight": load_weight,
+        "insulator_mass": insulator_mass,
+        "load_mass": load_mass,
         "load_position": load_position,
         "span_length": span_length,
         "line_angle": line_angle,
@@ -191,24 +198,27 @@ def init_section(js_inputs: dict):
     supports_data = []
     for support_js in input_section["supports"]:
         supports_data.append(Support(**support_js))
-    np.random.seed(142)
+    # np.random.seed(142)
     df = generate_section_array(supports_data)
     mph.options.graphics.resolution = 10
 
     section = SectionArray(df)
     # set sagging parameter and temperatur
-    section.sagging_parameter = 2000
+    section.sagging_parameter = initial_condition.base_parameters
+    print("initial_condition: ", initial_condition)
     section.sagging_temperature = (
-        initial_condition.base_temperature if initial_condition else 20
+        initial_condition.base_temperature if initial_condition else 15
     )
+
+    # cable_array = sample_cable_catalog.get_as_object([cable.name])
 
     cable_array = CableArray(
         pd.DataFrame(
             {
                 "section": [cable.section],
                 "diameter": [cable.diameter],
-                "linear_weight": [cable.linear_weight],
-                "young_modulus": [60],
+                "linear_mass": [cable.linear_mass],
+                "young_modulus": [cable.young_modulus],
                 "dilatation_coefficient": [cable.dilatation_coefficient],
                 "temperature_reference": [cable.temperature_reference],
                 "a0": [cable.stress_strain_a0],
@@ -224,6 +234,23 @@ def init_section(js_inputs: dict):
             }
         )
     )
+    cable_array.add_units(
+        {
+            "young_modulus": "MPa",
+            "dilatation_coefficient": "1/K",
+            # "a0": "MPa",
+            # "a1": "MPa",
+            # "a2": "MPa",
+            # "a3": "MPa",
+            # "a4": "MPa",
+            # "b0": "MPa",
+            # "b1": "MPa",
+            # "b2": "MPa",
+            # "b3": "MPa",
+            # "b4": "MPa",
+        }
+    )
+    print("cable_array: ", json.dumps(cable_array.data.to_dict()))
 
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
     plt_line = PlotEngine.builder_from_balance_engine(engine)
@@ -233,13 +260,47 @@ def init_section(js_inputs: dict):
 
 
 def change_climate(js_inputs: dict):
+    import json
+
     global engine, plt_line
     python_inputs = js_inputs.to_py()
     wind_pressure = python_inputs["windPressure"]
     cable_temperature = python_inputs["cableTemperature"]
-    engine.solve_change_state(new_temperature=cable_temperature * np.array([1] * 4))
-    engine.solve_change_state(wind_pressure=wind_pressure * np.array([1] * 4))
+    ice_thickness = python_inputs["iceThickness"] / 100
+    section_length = len(engine.section_array.data)
+    print(
+        "engine.section_array.data: ", json.dumps(engine.section_array.data.to_dict())
+    )
+    # print("section_length: ", section_length)
+    # engine.solve_change_state(
+    #     new_temperature=cable_temperature * np.array([1] * section_length)
+    # )
+    # engine.solve_change_state(
+    #     wind_pressure=wind_pressure * np.array([1] * section_length)
+    # )
+    engine.solve_change_state(
+        ice_thickness=ice_thickness * np.array([1] * section_length),
+        new_temperature=cable_temperature * np.array([1] * section_length),
+        wind_pressure=wind_pressure * np.array([1] * section_length),
+    )
     return get_coordinates(plt_line)
+
+
+def get_support_coordinates(js_inputs: dict):
+    some_support_name = sample_support_catalog.keys()[0]
+    support_array_list = sample_support_catalog.get_as_object([some_support_name])
+
+    # data for plotting
+    shape_points = support_array_list[0].support_points
+    text_display_points = support_array_list[0].labels_points
+    text_to_display = support_array_list[0].set_number
+
+    print(f"{shape_points=}\n {text_display_points=}\n {text_to_display=}")
+    return {
+        "shape_points": shape_points,
+        "text_display_points": text_display_points,
+        "text_to_display": text_to_display,
+    }
 
 
 # print("im in the main function")
