@@ -67,10 +67,10 @@ export class StudioMenuBarComponent {
     value: string
   ) {
     if (value) {
-      functionToLaunch(
-        value,
+      functionToLaunch.bind(this.chargesService)(
         this.study()?.uuid ?? '',
-        this.section()?.uuid ?? ''
+        this.section()?.uuid ?? '',
+        value
       );
     }
   }
