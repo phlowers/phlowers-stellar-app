@@ -22,7 +22,7 @@ describe('WorkerService', () => {
   // Mock data creation functions
   const createMockSupport = (): Support => ({
     uuid: 'support-uuid-1',
-    number: 1,
+    number: '1',
     name: 'Support 1',
     spanLength: 100,
     spanAngle: 0,

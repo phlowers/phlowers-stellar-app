@@ -51,7 +51,7 @@ const mockChains: Chain[] = [
 const mockSupports: Support[] = [
   {
     uuid: 'support1',
-    number: 1,
+    number: '1',
     name: 'Support 1',
     spanLength: 50.0,
     spanAngle: 90.0,
@@ -71,7 +71,7 @@ const mockSupports: Support[] = [
   },
   {
     uuid: 'support2',
-    number: 2,
+    number: '2',
     name: 'Support 2',
     spanLength: 60.0,
     spanAngle: 85.0,
@@ -91,7 +91,7 @@ const mockSupports: Support[] = [
   },
   {
     uuid: 'support3',
-    number: 3,
+    number: '3',
     name: 'Support 3',
     spanLength: 55.0,
     spanAngle: 88.0,
@@ -166,17 +166,17 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         field: 'number',
-        value: 1
+        value: '1'
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
         field: 'number',
-        value: 1
+        value: '1'
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
         field: 'number',
-        value: 1
+        value: '1'
       });
     });
 
@@ -404,7 +404,7 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         field: 'number',
-        value: 1
+        value: '1'
       });
     });
   });

@@ -6,7 +6,7 @@ export interface ProtoV4Support {
   long_bras: number;
   long_ch: number;
   nom: string;
-  num: number;
+  num: string;
   pds_ch: number;
   portée: number;
   surf_ch: number;
