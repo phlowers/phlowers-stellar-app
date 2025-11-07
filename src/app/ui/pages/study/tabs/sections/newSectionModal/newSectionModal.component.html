@@ -3,7 +3,7 @@
   [visible]="isOpen()"
   (visibleChange)="onVisibleChange($event)"
   i18n-header
-  [style]="{ width: '90vw', height: '95vh' }"
+  [style]="{ width: '95vw', height: '95vh' }"
   [modal]="true"
 >
   <ng-template #header>
@@ -43,6 +43,7 @@
               value="referencial"
               [(ngModel)]="source"
               inputId="referencial"
+              [disabled]="true"
             />
             <label for="referencial" class="ml-2" i18n
               >From local referencial</label
@@ -55,6 +56,7 @@
               value="distantReferencial"
               [(ngModel)]="source"
               inputId="distantReferencial"
+              [disabled]="true"
             />
             <label for="distantReferencial" class="ml-2" i18n
               >From distant referencial</label
@@ -67,6 +69,7 @@
               value="extraction"
               [(ngModel)]="source"
               inputId="extraction"
+              [disabled]="true"
             />
             <label for="extraction" class="ml-2" i18n>From a file</label>
             <app-icon icon="info" />

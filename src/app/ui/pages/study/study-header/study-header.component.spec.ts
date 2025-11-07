@@ -1,16 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { MessageService } from 'primeng/api';
 
 import { StudyHeaderComponent } from './study-header.component';
 
 describe('StudyHeader', () => {
   let component: StudyHeaderComponent;
   let fixture: ComponentFixture<StudyHeaderComponent>;
+  let mockMessageService: jest.Mocked<MessageService>;
 
   beforeEach(async () => {
+    mockMessageService = {
+      add: jest.fn()
+    } as unknown as jest.Mocked<MessageService>;
     await TestBed.configureTestingModule({
       imports: [StudyHeaderComponent],
-      providers: [provideNoopAnimations()]
+      providers: [
+        provideNoopAnimations(),
+        { provide: MessageService, useValue: mockMessageService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(StudyHeaderComponent);
