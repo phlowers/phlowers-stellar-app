@@ -35,6 +35,7 @@ import { CablesService } from '../core/services/cables/cables.service';
 import { ChainsService } from '../core/services/chains/chains.service';
 import { PlotService } from './pages/studio/plot.service';
 import { AttachmentService } from '../core/services/attachment/attachment.service';
+import { ChargesService } from '../core/services/charges/charges.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -70,7 +71,8 @@ const modules = [
     UpdateService,
     CablesService,
     PlotService,
-    AttachmentService
+    AttachmentService,
+    ChargesService
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
