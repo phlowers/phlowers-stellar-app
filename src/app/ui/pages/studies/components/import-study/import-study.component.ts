@@ -204,14 +204,14 @@ export class ImportStudyComponent {
     this.newStudies.set([]);
     const files = (event.target as HTMLInputElement).files;
     const filesArray = Array.from(files ?? []).filter(
-      (file) => file.type === 'text/csv' || file.type === 'application/json'
+      (file) => file.type === 'text/csv' || file.name.endsWith('.clst')
     );
 
     if (filesArray) {
       for (const file of filesArray) {
         if (file.type === 'text/csv') {
           this.loadProtoV4File(file);
-        } else if (file.type === 'application/json') {
+        } else if (file.name.endsWith('.clst')) {
           this.loadAppFile(file);
         }
       }
