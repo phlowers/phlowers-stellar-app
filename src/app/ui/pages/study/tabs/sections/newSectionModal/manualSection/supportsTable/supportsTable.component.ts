@@ -88,8 +88,8 @@ export class SupportsTableComponent implements OnInit {
   ) {}
 
   public onlyPositiveNumbers = /^[0-9]*$/;
-  public onlyPositiveNumbersWithDecimal = /^[0-9]*\.?[0-9]{0,20}$/;
-  public positiveAndNegativeNumbersWithDecimal = /^-?[0-9]*\.?[0-9]{0,20}$/;
+  public onlyPositiveNumbersWithDecimal = /^[0-9]*[,.]?[0-9]{0,20}$/;
+  public positiveAndNegativeNumbersWithDecimal = /^-?[0-9]*[,.]?[0-9]{0,20}$/;
 
   optionsChainV = [
     { label: $localize`Yes`, value: true },

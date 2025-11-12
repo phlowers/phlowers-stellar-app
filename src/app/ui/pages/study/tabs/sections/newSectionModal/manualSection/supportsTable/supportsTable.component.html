@@ -342,6 +342,8 @@
             <input
               class="w-full"
               pInputText
+              type="number"
+              [pKeyFilter]="onlyPositiveNumbers"
               aria-label="attachment set"
               i18n-aria-label
               [ngModel]="support.attachmentSet"
@@ -371,6 +373,7 @@
           <p-inputgroup>
             <input
               pInputText
+              type="number"
               aria-label="arm length"
               i18n-aria-label
               [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
