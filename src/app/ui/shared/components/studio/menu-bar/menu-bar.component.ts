@@ -83,7 +83,6 @@ export class StudioMenuBarComponent {
   }
 
   deleteChargeCase(chargeCase?: { label: string; value: string }) {
-    console.log('chargeCase', chargeCase);
     this.launchChargeFunction(
       this.chargesService.deleteCharge,
       chargeCase?.value ?? ''
