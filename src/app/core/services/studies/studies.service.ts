@@ -85,12 +85,15 @@ export class StudiesService {
     if (!study) {
       return null;
     }
+    const userEmail = (await this.storageService.db?.users.toArray())?.[0]
+      ?.email;
     const allStudies = await this.storageService.db?.studies.toArray();
     const allStudyTitles = allStudies?.map((study) => study.title);
     const duplicateTitle = findDuplicateTitle(allStudyTitles, study.title);
     const newStudy = {
       ...study,
       title: duplicateTitle,
+      author_email: userEmail,
       uuid: uuidv4(),
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
@@ -138,6 +141,10 @@ export class StudiesService {
    * @param study The study to update
    */
   async updateStudy(study: { uuid: string } & Partial<Study>) {
+    const user = await this.storageService.db?.users.toArray();
+    if (user?.[0]?.email !== study.author_email) {
+      throw new Error('Unauthorized');
+    }
     await this.storageService.db?.studies.update(study.uuid, {
       ...study,
       updated_at_offline: new Date().toISOString()
