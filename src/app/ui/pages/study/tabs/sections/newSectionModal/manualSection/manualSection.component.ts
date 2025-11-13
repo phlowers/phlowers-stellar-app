@@ -25,7 +25,7 @@ import { createEmptySupport } from '@src/app/core/services/sections/helpers';
 import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
 import { MaintenanceData } from '@src/app/core/data/database/interfaces/maintenance';
-import { sortBy, uniqBy } from 'lodash';
+import { sortBy } from 'lodash';
 import { UniquePipe } from '@src/app/ui/shared/service/autocomplete/unique.pipe';
 import { Line } from '@src/app/core/data/database/interfaces/line';
 import { LinesService } from '@src/app/core/services/lines/lines.service';
@@ -46,6 +46,35 @@ const sortLines = (lines: Line[]) => {
     );
   });
 };
+
+const lineTablePropertiesToSectionProperties: Record<
+  LineTableProperties,
+  keyof Section
+> = {
+  electric_tension_level_adr: 'electric_tension_level',
+  link_idr: 'link_name',
+  lit_adr: 'lit',
+  branch_adr: 'branch_name'
+};
+
+const orderedMaintenanceTableProperties: ('cm' | 'gmr' | 'eel')[] = [
+  'cm',
+  'gmr',
+  'eel'
+];
+
+type LineTableProperties =
+  | 'electric_tension_level_adr'
+  | 'link_idr'
+  | 'lit_adr'
+  | 'branch_adr';
+
+const orderedLineTableProperties: LineTableProperties[] = [
+  'electric_tension_level_adr',
+  'link_idr',
+  'lit_adr',
+  'branch_adr'
+];
 
 @Component({
   selector: 'app-manual-section',
@@ -120,11 +149,6 @@ export class ManualSectionComponent implements OnInit {
 
   tabValueChange = (event: string | number) => {
     this.tabValue.set(String(event));
-    if (event === 'graphical') {
-      const studio = this.studio();
-      if (!studio) return;
-      studio.plotService.refreshSection(this.section());
-    }
   };
 
   onNextTab() {
@@ -194,15 +218,18 @@ export class ManualSectionComponent implements OnInit {
   }
 
   duplicateSupport(uuid: string) {
-    const support = this.section().supports?.find(
+    const index = this.section().supports?.findIndex(
       (support: Support) => support.uuid === uuid
     );
-    if (support) {
-      this.section().supports?.push({
-        ...support,
-        spanLength: null,
-        uuid: uuidv4()
-      });
+    if (index !== undefined) {
+      const support = this.section().supports?.[index];
+      if (support) {
+        const newSupport = {
+          ...support,
+          uuid: uuidv4()
+        };
+        this.section().supports?.splice(index + 1, 0, newSupport as Support);
+      }
     }
     this.onSectionChange();
   }
@@ -227,68 +254,81 @@ export class ManualSectionComponent implements OnInit {
     type: 'cm' | 'gmr' | 'eel'
   ) {
     if (!event.value) {
-      this.maintenanceFilterTable.set(
-        sortBy(await this.maintenanceService.getMaintenance(), 'eel_name')
-      );
-      this.section().eel = undefined;
-      this.section().cm = undefined;
-      this.section().gmr = undefined;
-      return;
+      let found = false;
+      orderedMaintenanceTableProperties.forEach((id) => {
+        if (id === type) {
+          found = true;
+        }
+        if (found) {
+          (this.section() as unknown as Record<string, unknown>)[id] =
+            undefined;
+        }
+      });
     }
 
-    const items = this.maintenanceFilterTable().filter(
-      (item) => item[`${type}_id`] === event.value
-    );
-    this.maintenanceFilterTable.set(sortBy(items, 'eel_name'));
-    ['eel', 'cm', 'gmr'].forEach((id) => {
-      if (uniqBy(items, `${id}_id`)?.length === 1) {
-        (this.section() as unknown as Record<string, unknown>)[id] = uniqBy(
-          items,
-          id
-        )[0][`${id}_id` as keyof MaintenanceData];
+    let maintenanceTable = await this.maintenanceService.getMaintenance();
+    orderedMaintenanceTableProperties.forEach((id) => {
+      if (id === type) {
+        maintenanceTable = maintenanceTable.filter(
+          (item) =>
+            !event.value ||
+            item[`${id}_id` as keyof MaintenanceData] === event.value
+        );
+      } else {
+        maintenanceTable = maintenanceTable.filter(
+          (item) =>
+            !this.section()[id as keyof Section] ||
+            item[`${id}_id` as keyof MaintenanceData] ===
+              this.section()[id as keyof Section]
+        );
       }
     });
+    this.maintenanceFilterTable.set(sortBy(maintenanceTable, 'eel_name'));
+    if (maintenanceTable.length === 1) {
+      orderedMaintenanceTableProperties.forEach((id) => {
+        (this.section() as unknown as Record<string, unknown>)[id] =
+          maintenanceTable[0][`${id}_id` as keyof MaintenanceData];
+      });
+    }
   }
 
-  async onLinesSelect(
-    event: { value: string },
-    type: 'link_idr' | 'lit_adr' | 'branch_adr' | 'electric_tension_level_adr'
-  ) {
+  async onLinesSelect(event: { value: string }, type: LineTableProperties) {
     if (!event.value) {
-      this.linesFilterTable.set(sortLines(await this.linesService.getLines()));
-      this.section().lit = undefined;
-      this.section().branch_name = undefined;
-      this.section().link_name = undefined;
-      this.section().electric_tension_level = undefined;
-      return;
+      let found = false;
+      orderedLineTableProperties.forEach((id) => {
+        if (id === type) {
+          found = true;
+        }
+        if (found) {
+          (this.section() as unknown as Record<string, unknown>)[
+            lineTablePropertiesToSectionProperties[id]
+          ] = undefined;
+        }
+      });
     }
 
-    const items = this.linesFilterTable().filter(
-      (item) => item[type] === event.value
-    );
-    this.linesFilterTable.set(sortLines(items));
-    const uniqByLinkIdr = uniqBy(items, `link_idr`);
-    const uniqByLitAdr = uniqBy(items, `lit_adr`);
-    const uniqByBranchIdr = uniqBy(items, `branch_idr`);
-    const uniqByElectricTensionLevelAdr = uniqBy(
-      items,
-      `electric_tension_level_adr`
-    );
-    if (uniqByLinkIdr?.length === 1) {
-      this.section().link_name = uniqByLinkIdr[0].link_idr;
-    }
-    if (uniqByLitAdr?.length === 1) {
-      this.section().lit = uniqByLitAdr[0].lit_adr;
-    }
-    if (uniqByBranchIdr?.length === 1) {
-      this.section().branch_name = uniqByBranchIdr[0].branch_adr;
-    }
-    if (uniqByElectricTensionLevelAdr?.length === 1) {
-      const tension =
-        uniqByElectricTensionLevelAdr[0].electric_tension_level_adr;
-      this.section().electric_tension_level = tension?.length
-        ? tension
-        : undefined;
+    let linesTable = await this.linesService.getLines();
+    orderedLineTableProperties.forEach((id) => {
+      if (id === type) {
+        linesTable = linesTable.filter(
+          (item) => !event.value || item[id] === event.value
+        );
+      } else {
+        linesTable = linesTable.filter(
+          (item) =>
+            !this.section()[lineTablePropertiesToSectionProperties[id]] ||
+            item[id] ===
+              this.section()[lineTablePropertiesToSectionProperties[id]]
+        );
+      }
+    });
+    this.linesFilterTable.set(sortLines(linesTable));
+    if (linesTable.length === 1) {
+      orderedLineTableProperties.forEach((id) => {
+        (this.section() as unknown as Record<string, unknown>)[
+          lineTablePropertiesToSectionProperties[id]
+        ] = linesTable[0][id];
+      });
     }
   }
 
