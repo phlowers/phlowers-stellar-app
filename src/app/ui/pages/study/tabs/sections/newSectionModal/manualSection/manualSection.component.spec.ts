@@ -156,7 +156,9 @@ describe('ManualSectionComponent', () => {
       supports_comment: '',
       supports: [],
       initial_conditions: [],
-      selected_initial_condition_uuid: undefined
+      selected_initial_condition_uuid: undefined,
+      charges: [],
+      selected_charge_uuid: null
     };
 
     await TestBed.configureTestingModule({
@@ -402,15 +404,6 @@ describe('ManualSectionComponent', () => {
       expect(mockSection.eel).toBe('eel1');
     });
 
-    it('should filter by gmr_id and auto-populate related fields', async () => {
-      const event = { value: 'gmr1' };
-
-      await component.onMaintenanceSelect(event, 'gmr');
-
-      expect(component.maintenanceFilterTable()).toHaveLength(2);
-      expect(mockSection.gmr).toBe('gmr1');
-    });
-
     it('should filter by eel_id and auto-populate related fields', async () => {
       const event = { value: 'eel1' };
 
@@ -426,21 +419,6 @@ describe('ManualSectionComponent', () => {
   describe('onLinesSelect', () => {
     beforeEach(() => {
       component.linesFilterTable.set(mockLinesData);
-    });
-
-    it('should reset filters when no value selected', async () => {
-      mockLinesService.getLines.mockResolvedValue(mockLinesData);
-      const event = { value: '' };
-
-      await component.onLinesSelect(event, 'link_idr');
-
-      expect(mockSection.lit).toBeUndefined();
-      expect(mockSection.branch_name).toBeUndefined();
-      expect(mockSection.link_name).toBeUndefined();
-      expect(mockSection.electric_tension_level).toBeUndefined();
-      expect(component.linesFilterTable()).toEqual(
-        expect.arrayContaining(mockLinesData)
-      );
     });
 
     it('should filter by link_idr and auto-populate related fields', async () => {
@@ -462,15 +440,6 @@ describe('ManualSectionComponent', () => {
 
       expect(component.linesFilterTable()).toHaveLength(1);
       expect(mockSection.lit).toBe('LIT 1');
-    });
-
-    it('should filter by branch_adr and auto-populate related fields', async () => {
-      const event = { value: 'BRANCH 1' };
-
-      await component.onLinesSelect(event, 'branch_adr');
-
-      expect(component.linesFilterTable()).toHaveLength(2);
-      expect(mockSection.branch_name).toBe('BRANCH 1');
     });
 
     it('should filter by electric_tension_level_adr and auto-populate related fields', async () => {

@@ -55,7 +55,9 @@ const mockSectionData: Section = {
   supports_comment: 'Test supports comment',
   supports: [],
   initial_conditions: [],
-  selected_initial_condition_uuid: undefined
+  selected_initial_condition_uuid: undefined,
+  charges: [],
+  selected_charge_uuid: null
 };
 
 describe('SectionService', () => {
@@ -146,7 +148,9 @@ describe('SectionService', () => {
         supports_comment: 'Test supports comment',
         supports: [],
         initial_conditions: [],
-        selected_initial_condition_uuid: undefined
+        selected_initial_condition_uuid: undefined,
+        charges: [],
+        selected_charge_uuid: null
       };
       const studyWithoutNewSection: Study = {
         ...mockStudy,

@@ -101,7 +101,9 @@ describe('StudyComponent', () => {
     supports_comment: 'random supports comment',
     supports: [],
     initial_conditions: [],
-    selected_initial_condition_uuid: undefined
+    selected_initial_condition_uuid: undefined,
+    charges: [],
+    selected_charge_uuid: null
   };
 
   const mockInitialCondition: InitialCondition = {

@@ -7,26 +7,26 @@ export const createEmptySupport = (): Support => {
     uuid: uuidv4(),
     number: null,
     name: null,
-    spanLength: null,
-    spanAngle: null,
+    spanLength: 0,
+    spanAngle: 0,
     attachmentSet: null,
     attachmentHeight: null,
     heightBelowConsole: null,
     cableType: null,
-    armLength: null,
+    armLength: 0,
     chainName: null,
-    chainLength: null,
-    chainWeight: null,
-    chainV: null,
-    counterWeight: null,
+    chainLength: 0,
+    chainWeight: 0,
+    chainV: false,
+    counterWeight: 0,
     supportFootAltitude: null,
     attachmentPosition: null,
-    chainSurface: null
+    chainSurface: 0
   };
 };
 
 const createFirstAndLastSupport = (): Support[] => {
-  return [createEmptySupport(), createEmptySupport()];
+  return [createEmptySupport(), { ...createEmptySupport(), spanLength: null }];
 };
 
 export const createEmptySection = (): Section => {
@@ -35,7 +35,7 @@ export const createEmptySection = (): Section => {
     name: '',
     type: 'phase',
     electric_phase_number: 0,
-    cables_amount: 0,
+    cables_amount: 1,
     cable_name: undefined,
     gmr: undefined,
     eel: undefined,
@@ -64,6 +64,8 @@ export const createEmptySection = (): Section => {
     comment: undefined,
     supports_comment: undefined,
     initial_conditions: [],
-    selected_initial_condition_uuid: undefined
+    selected_initial_condition_uuid: undefined,
+    charges: [],
+    selected_charge_uuid: null
   };
 };

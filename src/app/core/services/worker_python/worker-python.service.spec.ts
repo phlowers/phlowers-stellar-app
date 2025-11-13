@@ -86,7 +86,9 @@ describe('WorkerService', () => {
     supports_comment: 'Test supports comment',
     supports: [createMockSupport()],
     initial_conditions: [createMockInitialCondition()],
-    selected_initial_condition_uuid: 'ic-uuid-1'
+    selected_initial_condition_uuid: 'ic-uuid-1',
+    charges: [],
+    selected_charge_uuid: null
   });
 
   const createMockCable = (): Cable => ({

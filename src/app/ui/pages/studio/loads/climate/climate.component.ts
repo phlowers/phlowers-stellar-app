@@ -114,7 +114,8 @@ export class ClimateComponent {
   calculForm() {
     this.plotService.calculateCharge(
       this.getVisibleFormValues().windPressure,
-      this.getVisibleFormValues().cableTemperature
+      this.getVisibleFormValues().cableTemperature,
+      this.getVisibleFormValues().iceThickness ?? 0
     );
   }
 

@@ -71,7 +71,9 @@ describe('InitialConditionService', () => {
     supports_comment: 'Test supports comment',
     supports: [],
     initial_conditions: [mockInitialCondition],
-    selected_initial_condition_uuid: 'ic-uuid-1'
+    selected_initial_condition_uuid: 'ic-uuid-1',
+    charges: [],
+    selected_charge_uuid: null
   };
 
   const mockStudy: Study = {
