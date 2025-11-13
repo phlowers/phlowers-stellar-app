@@ -1438,11 +1438,6 @@
         <source>Cable pretension</source>
       </segment>
     </unit>
-    <unit id="1382927506926002184">
-      <segment>
-        <source>DaN</source>
-      </segment>
-    </unit>
     <unit id="2340664682417154043">
       <segment>
         <source>cm</source>
@@ -1813,11 +1808,6 @@
         <source>Link - IDR</source>
       </segment>
     </unit>
-    <unit id="6415844840947043786">
-      <segment>
-        <source>Only the author of the study can update it. Please duplicate it to make your changes.</source>
-      </segment>
-    </unit>
     <unit id="6965096128886264042">
       <segment>
         <source>Branch - IDR</source>
@@ -1866,6 +1856,16 @@
     <unit id="7726078135791017446">
       <segment>
         <source> Choose the attachment set in the list or on the graph to find the right arm length. </source>
+      </segment>
+    </unit>
+    <unit id="4893374109940250877">
+      <segment>
+        <source>%CRA</source>
+      </segment>
+    </unit>
+    <unit id="8669020716428920796">
+      <segment>
+        <source>Guard number</source>
       </segment>
     </unit>
   </file>

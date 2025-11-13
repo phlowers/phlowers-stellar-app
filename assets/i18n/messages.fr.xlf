@@ -1739,12 +1739,6 @@
         <target>°C</target>
       </segment>
     </unit>
-    <unit id="1382927506926002184">
-      <segment state="initial">
-        <source>DaN</source>
-        <target>DaN</target>
-      </segment>
-    </unit>
     <unit id="902828700910058336">
       <segment state="initial">
         <source>Pa</source>
@@ -2063,12 +2057,6 @@
         <target>Charge supprimée</target>
       </segment>
     </unit>
-    <unit id="6415844840947043786">
-      <segment state="initial">
-        <source>Only the author of the study can update it. Please duplicate it to make your changes.</source>
-        <target>Seul l&apos;auteur de l&apos;étude peut la mettre à jour. Veuillez la dupliquer pour apporter vos modifications.</target>
-      </segment>
-    </unit>
     <unit id="1864612253981729182">
       <segment state="initial">
         <source>suspension</source>
@@ -2234,14 +2222,25 @@
     <unit id="7726078135791017446">
       <segment state="initial">
         <source> Choose the attachment set in the list or on the graph to find the right arm length. </source>
-        <target> Choisissez le set d’accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras.
- </target>
+        <target> Choisissez le set d’accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras. </target>
       </segment>
     </unit>
     <unit id="2694623513112556993">
       <segment state="initial">
         <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
         <target> Le Set d’accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau. </target>
+      </segment>
+    </unit>
+    <unit id="4893374109940250877">
+      <segment state="initial">
+        <source>%CRA</source>
+        <target>%CRA</target>
+      </segment>
+    </unit>
+    <unit id="8669020716428920796">
+      <segment state="initial">
+        <source>Guard number</source>
+        <target>Numéro de garde</target>
       </segment>
     </unit>
   </file>
