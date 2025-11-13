@@ -1,4 +1,5 @@
 import { Injectable, isDevMode, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { environment } from '@src/environments/environment';
 import { isEqual } from 'lodash';
 import { MessageService } from 'primeng/api';
@@ -38,7 +39,10 @@ export class UpdateService {
   updateLoading = signal(false);
   needUpdate$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private readonly messageService: MessageService) {
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly router: Router
+  ) {
     navigator.serviceWorker.addEventListener('message', async (event) => {
       console.log(`Message from service worker:`, event.data);
       if (event.data.message) {
@@ -54,6 +58,7 @@ export class UpdateService {
               summary: $localize`Update successful`,
               detail: $localize`The application has been updated to the latest version`
             });
+            this.router.navigate(['/']);
             break;
           case 'install_complete':
             await this.checkAppVersion();
@@ -103,6 +108,11 @@ export class UpdateService {
     } else {
       this.needUpdate$.next(false);
     }
+    this.messageService.add({
+      severity: 'info',
+      summary: $localize`App version`,
+      detail: $localize`App version checked`
+    });
   }
 
   async update() {

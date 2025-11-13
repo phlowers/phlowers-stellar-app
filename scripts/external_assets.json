@@ -11,7 +11,6 @@
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pandas-2.2.3-cp312-cp312-pyodide_2024_0_wasm32.whl",
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/openblas-0.3.26.zip",
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/scipy-1.14.1-cp312-cp312-pyodide_2024_0_wasm32.whl",
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/typing_extensions-4.11.0-py3-none-any.whl",
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.asm.js",
         "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide-lock.json",
