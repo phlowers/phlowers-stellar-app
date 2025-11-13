@@ -271,6 +271,7 @@ def change_climate(js_inputs: dict):
     print(
         "engine.section_array.data: ", json.dumps(engine.section_array.data.to_dict())
     )
+    print("section_length: ", section_length)
     # print("section_length: ", section_length)
     # engine.solve_change_state(
     #     new_temperature=cable_temperature * np.array([1] * section_length)
