@@ -751,34 +751,16 @@
         <target>Tension électrique</target>
       </segment>
     </unit>
-    <unit id="6963570697110110448">
-      <segment state="initial">
-        <source>Link name</source>
-        <target>Liaison</target>
-      </segment>
-    </unit>
     <unit id="8569561572681353162">
       <segment state="initial">
         <source>LIT</source>
         <target>LIT</target>
       </segment>
     </unit>
-    <unit id="1255388649183074058">
-      <segment state="initial">
-        <source>Branch name</source>
-        <target>Branche</target>
-      </segment>
-    </unit>
     <unit id="5798603970967359521">
       <segment state="initial">
         <source>Supports amount</source>
         <target>Nombre de supports</target>
-      </segment>
-    </unit>
-    <unit id="6621067415830629818">
-      <segment state="initial">
-        <source>Arm length (m)</source>
-        <target>L. bras (m)</target>
       </segment>
     </unit>
     <unit id="5027494160802883894">
@@ -893,18 +875,6 @@
       <segment state="initial">
         <source>Last changed:</source>
         <target>Dernière modification:</target>
-      </segment>
-    </unit>
-    <unit id="2202835179714153957">
-      <segment state="initial">
-        <source>User preference</source>
-        <target>Préférences utilisateur</target>
-      </segment>
-    </unit>
-    <unit id="633450215070869903">
-      <segment state="initial">
-        <source>usr pref</source>
-        <target>pref usr</target>
       </segment>
     </unit>
     <unit id="1614612576043079687">
@@ -1093,12 +1063,6 @@
         <target>Aucune actualité</target>
       </segment>
     </unit>
-    <unit id="2112772949826062259">
-      <segment state="initial">
-        <source>Initial Condition</source>
-        <target>Condition initiale</target>
-      </segment>
-    </unit>
     <unit id="6389312883797462351">
       <segment state="initial">
         <source>Studio</source>
@@ -1135,22 +1099,10 @@
         <target>Set d&apos;accroche</target>
       </segment>
     </unit>
-    <unit id="755168724826424878">
-      <segment state="initial">
-        <source> The attachment set number and the arm length value will be automatically filled in the table. </source>
-        <target> Choisissez le set d&apos;accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras. </target>
-      </segment>
-    </unit>
     <unit id="419149014255896698">
       <segment state="initial">
         <source>Support name</source>
         <target>Nom de supp.</target>
-      </segment>
-    </unit>
-    <unit id="361983614534909005">
-      <segment state="initial">
-        <source>Height below console (m)</source>
-        <target>Hauteur sous console (m)</target>
       </segment>
     </unit>
     <unit id="2901943060312328653">
@@ -1721,12 +1673,6 @@
         <target>Étude importée avec succès</target>
       </segment>
     </unit>
-    <unit id="3766856601447528715">
-      <segment state="initial">
-        <source>Initial condition 1</source>
-        <target>Condition initiale 1</target>
-      </segment>
-    </unit>
     <unit id="848481053719181700">
       <segment state="initial">
         <source> Extreme historical conditions incurred by the cable </source>
@@ -1955,12 +1901,6 @@
         <target>commentaire supports</target>
       </segment>
     </unit>
-    <unit id="4835655744650419347">
-      <segment state="initial">
-        <source>Support image</source>
-        <target>Image support</target>
-      </segment>
-    </unit>
     <unit id="7819314041543176992">
       <segment state="initial">
         <source>Close</source>
@@ -2103,6 +2043,205 @@
       <segment state="initial">
         <source>Unknown error</source>
         <target>Erreur inconnue</target>
+      </segment>
+    </unit>
+    <unit id="344013254935185191">
+      <segment state="initial">
+        <source>Charge updated</source>
+        <target>Charge mise à jour</target>
+      </segment>
+    </unit>
+    <unit id="1019591151849311353">
+      <segment state="initial">
+        <source>Charge created</source>
+        <target>Charge créée</target>
+      </segment>
+    </unit>
+    <unit id="4807396535461926931">
+      <segment state="initial">
+        <source>Charge deleted</source>
+        <target>Charge supprimée</target>
+      </segment>
+    </unit>
+    <unit id="6415844840947043786">
+      <segment state="initial">
+        <source>Only the author of the study can update it. Please duplicate it to make your changes.</source>
+        <target>Seul l&apos;auteur de l&apos;étude peut la mettre à jour. Veuillez la dupliquer pour apporter vos modifications.</target>
+      </segment>
+    </unit>
+    <unit id="1864612253981729182">
+      <segment state="initial">
+        <source>suspension</source>
+        <target>suspension</target>
+      </segment>
+    </unit>
+    <unit id="2905929947185397074">
+      <segment state="initial">
+        <source>chain</source>
+        <target>chaîne</target>
+      </segment>
+    </unit>
+    <unit id="858950043240201803">
+      <segment state="initial">
+        <source>IC 1</source>
+        <target>CI 1</target>
+      </segment>
+    </unit>
+    <unit id="5351632617142518313">
+      <segment state="initial">
+        <source>App version checked</source>
+        <target>Version de l&apos;application vérifiée</target>
+      </segment>
+    </unit>
+    <unit id="2813428855529635901">
+      <segment state="initial">
+        <source>View charge case</source>
+        <target>Voir le cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="557544842878781608">
+      <segment state="initial">
+        <source>Edit charge case</source>
+        <target>Modifier le cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="7607770781665288883">
+      <segment state="initial">
+        <source>Create a charge case</source>
+        <target>Créer un cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="8736414220975972324">
+      <segment state="initial">
+        <source>Generalities</source>
+        <target>Généralités</target>
+      </segment>
+    </unit>
+    <unit id="8365437498463676833">
+      <segment state="initial">
+        <source> Personnel presence </source>
+        <target> Présence du personnel </target>
+      </segment>
+    </unit>
+    <unit id="581758079292144535">
+      <segment state="initial">
+        <source>Add a description to your charge case</source>
+        <target>Ajouter une description à votre cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="8179510261091625036">
+      <segment state="initial">
+        <source>Climate condition</source>
+        <target>Condition climatique</target>
+      </segment>
+    </unit>
+    <unit id="1546940907709341937">
+      <segment state="initial">
+        <source>Span loading</source>
+        <target>Charge de la portée</target>
+      </segment>
+    </unit>
+    <unit id="5884678477650117685">
+      <segment state="initial">
+        <source>Cable manip. at support</source>
+        <target>Câble manip. au support</target>
+      </segment>
+    </unit>
+    <unit id="1964106600703167330">
+      <segment state="initial">
+        <source>Cable manip. at span</source>
+        <target>Câble manip. à la portée</target>
+      </segment>
+    </unit>
+    <unit id="2398928213100250023">
+      <segment state="initial">
+        <source> In order to add charges, you need to create a charge case. </source>
+        <target> Pour ajouter des charges, vous devez créer un cas de charge. </target>
+      </segment>
+    </unit>
+    <unit id="1339958536387081724">
+      <segment state="initial">
+        <source>Add a charge case</source>
+        <target>Ajouter un cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="6212148435964115036">
+      <segment state="initial">
+        <source>Link - IDR</source>
+        <target>Liaison - IDR</target>
+      </segment>
+    </unit>
+    <unit id="1667027745228811183">
+      <segment state="initial">
+        <source>LIT - ADR</source>
+        <target>LIT - ADR</target>
+      </segment>
+    </unit>
+    <unit id="3065988870624889478">
+      <segment state="initial">
+        <source>LIT - IDR</source>
+        <target>LIT - IDR</target>
+      </segment>
+    </unit>
+    <unit id="6965096128886264042">
+      <segment state="initial">
+        <source>Branch - IDR</source>
+        <target>Branch - IDR</target>
+      </segment>
+    </unit>
+    <unit id="4438108941812329281">
+      <segment state="initial">
+        <source>Branch - ADR</source>
+        <target>Branch - ADR</target>
+      </segment>
+    </unit>
+    <unit id="3059442917741627872">
+      <segment state="initial">
+        <source>Arm length</source>
+        <target>Longueur de bras</target>
+      </segment>
+    </unit>
+    <unit id="4142858945350399408">
+      <segment state="initial">
+        <source>Height below console</source>
+        <target>Hauteur sous console</target>
+      </segment>
+    </unit>
+    <unit id="2087858758183650212">
+      <segment state="initial">
+        <source>IC</source>
+        <target>CI</target>
+      </segment>
+    </unit>
+    <unit id="9064235119713814924">
+      <segment state="initial">
+        <source>Version / MAJ</source>
+        <target>Version / MAJ</target>
+      </segment>
+    </unit>
+    <unit id="5004217118094368051">
+      <segment state="initial">
+        <source>Ver.MAJ</source>
+        <target>Ver.MAJ</target>
+      </segment>
+    </unit>
+    <unit id="4262495966859034995">
+      <segment state="initial">
+        <source>Charge case name</source>
+        <target>Charge case name</target>
+      </segment>
+    </unit>
+    <unit id="7726078135791017446">
+      <segment state="initial">
+        <source> Choose the attachment set in the list or on the graph to find the right arm length. </source>
+        <target> Choisissez le set d’accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras.
+ </target>
+      </segment>
+    </unit>
+    <unit id="2694623513112556993">
+      <segment state="initial">
+        <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
+        <target> Le Set d’accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau. </target>
       </segment>
     </unit>
   </file>
