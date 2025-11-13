@@ -170,22 +170,25 @@ export class StudiesService {
       return {
         ...createEmptySupport(),
         uuid: uuidv4(),
-        number: support.num,
-        name: support.nom,
+        number: support.nom,
         spanLength: support.portée,
         spanAngle: support.angle_ligne,
         attachmentHeight: support.alt_acc,
         cableType: parameters.conductor,
         armLength: support.long_bras,
-        chainName: support.suspension ? 'suspension' : 'chain',
+        chainName: support.suspension
+          ? $localize`suspension`
+          : $localize`chain`,
         chainLength: support.long_ch,
-        chainWeight: support.ctr_poids,
-        chainV: support.ch_en_V
+        chainWeight: support.pds_ch,
+        counterWeight: support.ctr_poids,
+        chainV: support.ch_en_V,
+        supportFootAltitude: support.alt_acc - 30 > 0 ? support.alt_acc - 30 : 0
       };
     });
     const initialCondition: InitialCondition = {
       uuid: uuidv4(),
-      name: $localize`Initial condition 1`,
+      name: $localize`IC 1`,
       base_parameters: parameters.parameter,
       base_temperature: parameters.temperature_reference,
       cable_pretension: parameters.cra,

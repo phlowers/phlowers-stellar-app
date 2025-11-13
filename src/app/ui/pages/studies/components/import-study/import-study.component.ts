@@ -34,7 +34,7 @@ const formatProtoV4Support = (support: Record<string, string>) => {
   return {
     ...support,
     nom: support.nom,
-    num: convertStringToNumber(support.num),
+    num: support.num,
     portée: convertStringToNumber(support.portée),
     angle_ligne: convertStringToNumber(support.angle_ligne),
     ctr_poids: convertStringToNumber(support.ctr_poids),
