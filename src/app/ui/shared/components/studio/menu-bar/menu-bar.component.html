@@ -32,6 +32,10 @@
       [options]="chargeCases()"
       [selectedOption]="selectedChargeCase()"
       (selectOption)="selectChargeCase($event)"
+      (deleteOption)="deleteChargeCase($event)"
+      (duplicateOption)="duplicateChargeCase($event)"
+      (viewOption)="viewOrEditChargeCase($event, 'view')"
+      (editOption)="viewOrEditChargeCase($event, 'edit')"
       optionLabel="label"
       optionValue="value"
       placeholder="Select charge case"
@@ -39,7 +43,7 @@
       ariaLabel="Select charge case"
       i18n-ariaLabel
       class="menubar__select"
-      [showClear]="true"
+      [showClear]="false"
     />
   </div>
 
@@ -49,6 +53,7 @@
     app-btn
     btnStyle="outlined"
     btnSize="s"
+    (click)="openNewChargeModal.emit({ mode: 'create', uuid: null })"
   >
     <app-icon icon="add_circle" />
   </button>

@@ -35,16 +35,33 @@
   @extend %text-m-400;
 }
 
+.p-select-list {
+  width: 100%;
+
+  .ng-star-inserted {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+}
+
 // specific override for initial condition select list in study section tab (page study) and for charge case select list in studio menu bar
 .select-with-buttons.has-clear-btn .p-select-label {
   padding-right: 2.75rem;
 }
 
 .select-with-buttons-panel.select-with-buttons-panel {
+
   .p-select-list,
   .p-select-option {
     padding: 0rem;
   }
+
+  .p-select-list {
+    .ng-star-inserted {
+      white-space: nowrap;
+    }
+  }
+
 
   .p-select-option.p-select-option.p-focus {
     background: unset;
