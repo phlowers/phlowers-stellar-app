@@ -99,7 +99,7 @@ describe('CablesService', () => {
           section: 100,
           diameter: 10.5,
           young_modulus: 200000,
-          linear_weight: 0.5,
+          linear_mass: 0.5,
           dilatation_coefficient: 0.000012,
           temperature_reference: 20,
           stress_strain_a0: 1.0,
@@ -120,7 +120,7 @@ describe('CablesService', () => {
           section: 150,
           diameter: 12.0,
           young_modulus: 180000,
-          linear_weight: 0.6,
+          linear_mass: 0.6,
           dilatation_coefficient: 0.000011,
           temperature_reference: 20,
           stress_strain_a0: 1.1,
@@ -169,7 +169,7 @@ describe('CablesService', () => {
           section: '100',
           diameter: '10.5',
           young_modulus: '200000',
-          linear_weight: '0.5',
+          linear_mass: '0.5',
           dilatation_coefficient: '0.000012',
           temperature_reference: '20',
           stress_strain_a0: '1.0',
@@ -190,7 +190,7 @@ describe('CablesService', () => {
           section: '150',
           diameter: '12.0',
           young_modulus: '180000',
-          linear_weight: '0.6',
+          linear_mass: '0.6',
           dilatation_coefficient: '0.000011',
           temperature_reference: '20',
           stress_strain_a0: '1.1',
@@ -208,7 +208,7 @@ describe('CablesService', () => {
       ];
 
       const mockCsvContent =
-        'name,data_source,section,diameter,young_modulus,linear_weight,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\nCable 2,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055';
+        'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\nCable 2,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055';
 
       // Mock Papa Parse to call complete callback
       (Papa.parse as jest.Mock).mockImplementation(
@@ -255,7 +255,7 @@ describe('CablesService', () => {
           section: 100,
           diameter: 10.5,
           young_modulus: 200000,
-          linear_weight: 0.5,
+          linear_mass: 0.5,
           dilatation_coefficient: 0.000012,
           temperature_reference: 20,
           stress_strain_a0: 1.0,
@@ -276,7 +276,7 @@ describe('CablesService', () => {
           section: 150,
           diameter: 12.0,
           young_modulus: 180000,
-          linear_weight: 0.6,
+          linear_mass: 0.6,
           dilatation_coefficient: 0.000011,
           temperature_reference: 20,
           stress_strain_a0: 1.1,
@@ -296,7 +296,7 @@ describe('CablesService', () => {
 
     it('should handle empty CSV data', async () => {
       const mockCsvContent =
-        'name,data_source,section,diameter,young_modulus,linear_weight,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\n';
+        'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\n';
 
       // Mock Papa Parse to call complete callback with empty data
       (Papa.parse as jest.Mock).mockImplementation(
@@ -347,7 +347,7 @@ describe('CablesService', () => {
           section: '100',
           diameter: '10.5',
           young_modulus: '200000',
-          linear_weight: '0.5',
+          linear_mass: '0.5',
           dilatation_coefficient: '0.000012',
           temperature_reference: '20',
           stress_strain_a0: '1.0',
@@ -368,7 +368,7 @@ describe('CablesService', () => {
           section: '150',
           diameter: '12.0',
           young_modulus: '180000',
-          linear_weight: '0.6',
+          linear_mass: '0.6',
           dilatation_coefficient: '0.000011',
           temperature_reference: '20',
           stress_strain_a0: '1.1',
@@ -386,7 +386,7 @@ describe('CablesService', () => {
       ];
 
       const mockCsvContent =
-        'name,data_source,section,diameter,young_modulus,linear_weight,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\n,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\nCable 2,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055';
+        'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\n,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\nCable 2,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteCablesCsvFile>) => {
@@ -432,7 +432,7 @@ describe('CablesService', () => {
           section: 150,
           diameter: 12.0,
           young_modulus: 180000,
-          linear_weight: 0.6,
+          linear_mass: 0.6,
           dilatation_coefficient: 0.000011,
           temperature_reference: 20,
           stress_strain_a0: 1.1,
@@ -460,7 +460,7 @@ describe('CablesService', () => {
           section: '100',
           diameter: '10.5',
           young_modulus: '200000',
-          linear_weight: '0.5',
+          linear_mass: '0.5',
           dilatation_coefficient: '0.000012',
           temperature_reference: '20',
           stress_strain_a0: '1.0',
@@ -478,7 +478,7 @@ describe('CablesService', () => {
       ];
 
       const mockCsvContent =
-        'name,data_source,section,diameter,young_modulus,linear_weight,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005';
+        'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteCablesCsvFile>) => {
@@ -526,7 +526,7 @@ describe('CablesService', () => {
           section: '100',
           diameter: '10.5',
           young_modulus: '200000',
-          linear_weight: '0.5',
+          linear_mass: '0.5',
           dilatation_coefficient: '0.000012',
           temperature_reference: '20',
           stress_strain_a0: '1.0',
@@ -547,7 +547,7 @@ describe('CablesService', () => {
           section: '150',
           diameter: '12.0',
           young_modulus: '180000',
-          linear_weight: '0.6',
+          linear_mass: '0.6',
           dilatation_coefficient: '0.000011',
           temperature_reference: '20',
           stress_strain_a0: '1.1',
@@ -568,7 +568,7 @@ describe('CablesService', () => {
           section: '200',
           diameter: '15.0',
           young_modulus: '190000',
-          linear_weight: '0.7',
+          linear_mass: '0.7',
           dilatation_coefficient: '0.00001',
           temperature_reference: '20',
           stress_strain_a0: '1.2',
@@ -586,7 +586,7 @@ describe('CablesService', () => {
       ];
 
       const mockCsvContent =
-        'name,data_source,section,diameter,young_modulus,linear_weight,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\n,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055\nCable 3,RTE,200,15.0,190000,0.7,0.000010,20,1.2,0.12,0.012,0.0012,0.00012,0.6,0.06,0.006,0.0006,0.00006';
+        'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\n,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055\nCable 3,RTE,200,15.0,190000,0.7,0.000010,20,1.2,0.12,0.012,0.0012,0.00012,0.6,0.06,0.006,0.0006,0.00006';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteCablesCsvFile>) => {
@@ -632,7 +632,7 @@ describe('CablesService', () => {
           section: 100,
           diameter: 10.5,
           young_modulus: 200000,
-          linear_weight: 0.5,
+          linear_mass: 0.5,
           dilatation_coefficient: 0.000012,
           temperature_reference: 20,
           stress_strain_a0: 1.0,
@@ -653,7 +653,7 @@ describe('CablesService', () => {
           section: 200,
           diameter: 15.0,
           young_modulus: 190000,
-          linear_weight: 0.7,
+          linear_mass: 0.7,
           dilatation_coefficient: 0.00001,
           temperature_reference: 20,
           stress_strain_a0: 1.2,
@@ -679,7 +679,7 @@ describe('CablesService', () => {
           section: '100',
           diameter: '10.5',
           young_modulus: '200000',
-          linear_weight: '0.5',
+          linear_mass: '0.5',
           dilatation_coefficient: '0.000012',
           temperature_reference: '20',
           stress_strain_a0: '1.0',
@@ -697,7 +697,7 @@ describe('CablesService', () => {
       ];
 
       const mockCsvContent =
-        'name,data_source,section,diameter,young_modulus,linear_weight,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005';
+        'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteCablesCsvFile>) => {

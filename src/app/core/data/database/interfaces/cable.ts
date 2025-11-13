@@ -11,7 +11,7 @@ export interface Cable {
   section: number;
   diameter: number;
   young_modulus: number;
-  linear_weight: number;
+  linear_mass: number;
   dilatation_coefficient: number;
   temperature_reference: number;
   stress_strain_a0: number | undefined;
@@ -33,7 +33,7 @@ export interface RteCablesCsvFile {
   section: string;
   diameter: string;
   young_modulus: string;
-  linear_weight: string;
+  linear_mass: string;
   dilatation_coefficient: string;
   temperature_reference: string;
   stress_strain_a0: string | undefined;

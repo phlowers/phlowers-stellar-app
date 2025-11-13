@@ -55,7 +55,7 @@ export class CablesService {
           section: convertStringToNumber(item.section),
           diameter: convertStringToNumber(item.diameter),
           young_modulus: convertStringToNumber(item.young_modulus),
-          linear_weight: convertStringToNumber(item.linear_weight),
+          linear_mass: convertStringToNumber(item.linear_mass),
           dilatation_coefficient: convertStringToNumber(
             item.dilatation_coefficient
           ),
