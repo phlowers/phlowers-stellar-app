@@ -1,0 +1,77 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: 🚀 Deploy to github pages
+
+on:
+  #Runs on pushes targeting the default branch
+  # push:
+  #   branches: ["dev"]
+  workflow_dispatch:
+    inputs:
+      language:
+        description: "Language"
+        required: true
+        default: "fr"
+        type: choice
+        options:
+          - fr
+          - en
+      branch:
+        description: "Branch"
+        required: true
+        default: "dev"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.24"
+          python-version: "3.12"
+      - name: Install dependencies
+        run: npm install
+      - name: Set up mechaphlowers
+        run: npm run set-up-mechaphlowers
+      - name: Build service worker
+        run: npm run build:service-worker
+      - name: Build application
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+        run: npm run build -- --configuration=production,${{ inputs.language }},githubPage
+      - name: Set environment variables
+        run: npm run set-env-variables
+      - name: Create assets list for service worker
+        run: npm run create-assets-list-for-service-worker:${{ inputs.language }}
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./dist/${{ inputs.language }}/"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

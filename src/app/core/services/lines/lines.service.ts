@@ -13,6 +13,31 @@ import { Line, RteLinesCsvFile } from '../../data/database/interfaces/line';
 import { v4 as uuidv4 } from 'uuid';
 import { sortBy } from 'lodash';
 
+const mockLines: () => Line[] = () => {
+  return [
+    {
+      uuid: uuidv4(),
+      link_idr: '1',
+      lit_idr: '1',
+      lit_adr: '1',
+      branch_idr: '1',
+      branch_adr: '1',
+      electric_tension_level_idr: '1',
+      electric_tension_level_adr: '1'
+    },
+    {
+      uuid: uuidv4(),
+      link_idr: '2',
+      lit_idr: '2',
+      lit_adr: '2',
+      branch_idr: '2',
+      branch_adr: '2',
+      electric_tension_level_idr: '2',
+      electric_tension_level_adr: '2'
+    }
+  ];
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -69,11 +94,12 @@ export class LinesService {
           skipEmptyLines: true,
           complete: (async (jsonResults: Papa.ParseResult<RteLinesCsvFile>) => {
             const data = jsonResults.data;
+            await this.storageService.db?.lines.clear();
             if (!data || data.length === 0) {
+              await this.storageService.db?.lines.bulkAdd(mockLines());
               resolve();
               return;
             }
-            await this.storageService.db?.lines.clear();
             const table: Line[] = mapData(data);
             console.log('adding lines data', table.length);
             await this.storageService.db?.lines.bulkAdd(

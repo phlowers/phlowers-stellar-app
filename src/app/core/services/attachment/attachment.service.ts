@@ -15,6 +15,31 @@ import {
 } from '../../data/database/interfaces/attachment';
 import { v4 as uuidv4 } from 'uuid';
 
+const mockAttachments: () => Attachment[] = () => {
+  return [
+    {
+      uuid: uuidv4(),
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      support_name: 'Support 1',
+      attachment_set: 'AS-1',
+      support_order: 1,
+      attachment_altitude: 10,
+      cross_arm_length: 10
+    },
+    {
+      uuid: uuidv4(),
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      support_name: 'Support 2',
+      attachment_set: 'AS-2',
+      support_order: 2,
+      attachment_altitude: 20,
+      cross_arm_length: 20
+    }
+  ];
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -72,12 +97,15 @@ export class AttachmentService {
           complete: (async (
             jsonResults: Papa.ParseResult<RteAttachmentsCsvFile>
           ) => {
+            await this.storageService.db?.attachments.clear();
             const data = jsonResults.data;
             if (!data || data.length === 0) {
+              await this.storageService.db?.attachments.bulkAdd(
+                mockAttachments()
+              );
               resolve();
               return;
             }
-            await this.storageService.db?.attachments.clear();
             const attachmentsTable: Attachment[] = mapData(data);
             console.log('adding attachments data', attachmentsTable.length);
             await this.storageService.db?.attachments.bulkAdd(attachmentsTable);

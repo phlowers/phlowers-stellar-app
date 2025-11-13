@@ -12,6 +12,53 @@ import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
 
+const mockCables: () => Cable[] = () => {
+  return [
+    {
+      name: 'FAKE_CABLE_1',
+      data_source: 'fictive',
+      section: 1,
+      diameter: 31.86,
+      young_modulus: 60000,
+      linear_mass: 1.8,
+      dilatation_coefficient: 2.3e-5,
+      temperature_reference: 15,
+      stress_strain_a0: 0,
+      stress_strain_a1: 60000,
+      stress_strain_a2: 0,
+      stress_strain_a3: 0,
+      stress_strain_a4: 0,
+      stress_strain_b0: 0,
+      stress_strain_b1: 0,
+      stress_strain_b2: 0,
+      stress_strain_b3: 0,
+      stress_strain_b4: 0,
+      is_narcisse: false
+    },
+    {
+      name: 'CROCUS400',
+      data_source: 'fictive',
+      section: 400.9,
+      diameter: 26.16,
+      young_modulus: 72000,
+      linear_mass: 1.6,
+      dilatation_coefficient: 1.76e-5,
+      temperature_reference: 15,
+      stress_strain_a0: 0,
+      stress_strain_a1: 72000,
+      stress_strain_a2: 0,
+      stress_strain_a3: 0,
+      stress_strain_a4: 0,
+      stress_strain_b0: 0,
+      stress_strain_b1: 0,
+      stress_strain_b2: 0,
+      stress_strain_b3: 0,
+      stress_strain_b4: 0,
+      is_narcisse: true
+    }
+  ];
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -86,11 +133,12 @@ export class CablesService {
             jsonResults: Papa.ParseResult<RteCablesCsvFile>
           ) => {
             const data = jsonResults.data;
+            await this.storageService.db?.cables.clear();
             if (!data || data.length === 0) {
+              await this.storageService.db?.cables.bulkAdd(mockCables());
               resolve();
               return;
             }
-            await this.storageService.db?.cables.clear();
             const cablesTable: Cable[] = mapData(data);
             console.log('adding cables data', cablesTable.length);
             await this.storageService.db?.cables.bulkAdd(cablesTable);

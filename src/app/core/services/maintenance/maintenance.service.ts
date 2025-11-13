@@ -14,6 +14,25 @@ import {
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 
+const mockMaintenance: MaintenanceData[] = [
+  {
+    cm_id: '1',
+    cm_name: 'cm_name_1',
+    gmr_id: '1',
+    gmr_name: 'gmr_name_1',
+    eel_id: '1',
+    eel_name: 'eel_name_1'
+  },
+  {
+    cm_id: '2',
+    cm_name: 'cm_name_2',
+    gmr_id: '2',
+    gmr_name: 'gmr_name_2',
+    eel_id: '2',
+    eel_name: 'eel_name_2'
+  }
+];
+
 @Injectable({
   providedIn: 'root'
 })
@@ -67,11 +86,14 @@ export class MaintenanceService {
             jsonResults: Papa.ParseResult<RteMaintenanceTeamsCsvFile>
           ) => {
             const data = jsonResults.data;
+            await this.storageService.db?.maintenance.clear();
             if (!data || data.length === 0) {
+              await this.storageService.db?.maintenance.bulkAdd(
+                mockMaintenance
+              );
               resolve();
               return;
             }
-            await this.storageService.db?.maintenance.clear();
             const maintenanceTable: MaintenanceData[] = mapData(data);
             console.log('adding maintenance data', maintenanceTable.length);
             await this.storageService.db?.maintenance.bulkAdd(maintenanceTable);

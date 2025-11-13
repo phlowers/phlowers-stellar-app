@@ -11,6 +11,18 @@ import { Chain, RteChainsCsvFile } from '../../data/database/interfaces/chain';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 
+const mockChains: () => Chain[] = () => {
+  return [
+    {
+      name: 'Chain 1',
+      length: 100,
+      weight: 100,
+      surface: 100,
+      v: false
+    }
+  ];
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -62,11 +74,12 @@ export class ChainsService {
             jsonResults: Papa.ParseResult<RteChainsCsvFile>
           ) => {
             const data = jsonResults.data;
+            await this.storageService.db?.chains.clear();
             if (!data || data.length === 0) {
+              await this.storageService.db?.chains.bulkAdd(mockChains());
               resolve();
               return;
             }
-            await this.storageService.db?.chains.clear();
             const chainsTable: Chain[] = mapData(data);
             console.log('adding chains data', chainsTable.length);
             await this.storageService.db?.chains.bulkAdd(chainsTable);
