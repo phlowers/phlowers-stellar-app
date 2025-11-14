@@ -75,12 +75,7 @@
 
   <p-speedDial
     direction="down"
-    icon="pi pi-plus"
     class="toolbar-speed-dial"
-    [model]="items()"
-  >
-    <ng-template #button let-toggleCallback="toggleCallback">
-      <button i18n (click)="toggleCallback($event)">Tools</button>
     [model]="tablesDropdown()"
   >
     <ng-template #button let-toggleCallback="toggleCallback">
@@ -99,7 +94,6 @@
 
   <p-speedDial
     direction="down"
-    icon="pi pi-plus"
     class="toolbar-speed-dial"
     [model]="toolsDropdown()"
   >
@@ -117,5 +111,70 @@
 
   <hr class="toolbar__separator" />
 
-  <div class="shortcuts"></div>
+  <div class="toolbar__shortcuts">
+    @for (item of toolsItems(); track $index) {
+      @if (item.checked) {
+        <button
+          class="toolbar__specifbtn"
+          (click)="item.action()"
+          [attr.aria-label]="item.label"
+          i18n-aria-label
+        >
+          {{ item.label }}
+        </button>
+      }
+    }
+  </div>
+
+  <button
+    class="toolbar__specifbtn toolbar__specifbtn--icon"
+    aria-label="Edit your selected tools shortcuts"
+    i18n-aria-label
+    (click)="shortcutsModal.set(true)"
+  >
+    <app-icon icon="edit" />
+  </button>
 </div>
+
+<p-dialog
+  [(visible)]="shortcutsModal"
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="{ width: '27.5rem' }"
+>
+  <ng-template #header>
+    <p class="modal__header">
+      <app-icon icon="build" />
+      <ng-container i18n>Inset</ng-container>
+    </p>
+  </ng-template>
+
+  <div class="modal__content">
+    <p i18n>Select and organise the tools with quick access (maximum 5).</p>
+
+    <ul>
+      @for (item of toolsItems(); track $index) {
+        <li class="modal__checkboxs">
+          <p-checkbox
+            [(ngModel)]="item.checked"
+            [binary]="true"
+            [disabled]="!item.checked && checkedCount() >= 5"
+            [inputId]="'item-' + item.id"
+            (onChange)="updateCheckedCount()"
+          >
+          </p-checkbox>
+          <label [for]="'item-' + item.id">
+            {{ item.label }}
+          </label>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <ng-template #footer>
+    <button app-btn (click)="shortcutsModal.set(false)">
+      <app-icon icon="check" />
+      <ng-container i18n>Validate</ng-container>
+    </button>
+  </ng-template>
+</p-dialog>
