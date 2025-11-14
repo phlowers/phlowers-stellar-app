@@ -55,7 +55,7 @@
   >
     <ng-template #selecteditems let-value>
       @if (value?.length) {
-        Display
+        <ng-container i18n>Display</ng-container>
       }
     </ng-template>
 
@@ -79,9 +79,9 @@
     [model]="tablesDropdown()"
   >
     <ng-template #button let-toggleCallback="toggleCallback">
-      <button i18n (click)="toggleCallback($event)">
+      <button (click)="toggleCallback($event)">
         <app-icon icon="table_chart" />
-        Tables
+        <ng-container i18n>Tables</ng-container>
       </button>
     </ng-template>
 
@@ -98,9 +98,9 @@
     [model]="toolsDropdown()"
   >
     <ng-template #button let-toggleCallback="toggleCallback">
-      <button i18n (click)="toggleCallback($event)">
+      <button (click)="toggleCallback($event)">
         <app-icon icon="build" />
-        Tools
+        <ng-container i18n>Tools</ng-container>
       </button>
     </ng-template>
 
