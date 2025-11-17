@@ -8,8 +8,17 @@ import subprocess
 import os
 import sys
 import json
-from datetime import datetime
+from datetime import datetime, tzinfo, timedelta
 from pathlib import Path
+
+
+# https://stackoverflow.com/a/23705687/9346979 real ISO 8601 format for UTC
+class simple_utc(tzinfo):
+    def tzname(self, **kwargs):
+        return "UTC"
+
+    def utcoffset(self, dt):
+        return timedelta(0)
 
 
 def get_git_revision_hash() -> str:
@@ -93,7 +102,9 @@ def main(language):
     res = {
         "app_version": {
             "git_hash": get_git_revision_hash(),
-            "build_datetime_utc": datetime.utcnow().isoformat(),
+            "build_datetime_utc": datetime.utcnow()
+            .replace(tzinfo=simple_utc())
+            .isoformat(),
             "version": version,
         },
         "files": [file for file in files if os.path.basename(file) not in blacklist]

@@ -27,10 +27,12 @@
       <tr>
         <td i18n>Build datetime</td>
         <td>
-          {{ updateService.currentVersion()?.build_datetime_utc | date:'full' }}
+          {{ updateService.currentVersion()?.build_datetime_utc | date:
+          'dd/MM/yyyy HH:mm' }}
         </td>
         <td>
-          {{ updateService.latestVersion()?.build_datetime_utc | date:'full' }}
+          {{ updateService.latestVersion()?.build_datetime_utc | date:
+          'dd/MM/yyyy HH:mm' }}
         </td>
       </tr>
       <tr>

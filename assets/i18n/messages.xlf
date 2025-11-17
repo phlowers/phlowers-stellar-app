@@ -1808,6 +1808,11 @@
         <source>Link - IDR</source>
       </segment>
     </unit>
+    <unit id="6415844840947043786">
+      <segment>
+        <source>Only the author of the study can update it. Please duplicate it to make your changes.</source>
+      </segment>
+    </unit>
     <unit id="6965096128886264042">
       <segment>
         <source>Branch - IDR</source>
@@ -1866,6 +1871,166 @@
     <unit id="8669020716428920796">
       <segment>
         <source>Guard number</source>
+      </segment>
+    </unit>
+    <unit id="4021752662928002901">
+      <segment>
+        <source>Update</source>
+      </segment>
+    </unit>
+    <unit id="5827348953140111224">
+      <segment>
+        <source> The update of your application is in progress </source>
+      </segment>
+    </unit>
+    <unit id="7102821621439027980">
+      <segment>
+        <source> The new version of your application is available! </source>
+      </segment>
+    </unit>
+    <unit id="9026083618139453880">
+      <segment>
+        <source>Later</source>
+      </segment>
+    </unit>
+    <unit id="145833412581392848">
+      <segment>
+        <source> Thank you for not closing the app when the update is in progress. </source>
+      </segment>
+    </unit>
+    <unit id="2694240619944418764">
+      <segment>
+        <source>Version :</source>
+      </segment>
+    </unit>
+    <unit id="391362148889807983">
+      <segment>
+        <source>Hash :</source>
+      </segment>
+    </unit>
+    <unit id="2222955931547347463">
+      <segment>
+        <source>Update now</source>
+      </segment>
+    </unit>
+    <unit id="1271914484753735123">
+      <segment>
+        <source>Cable adjustment</source>
+      </segment>
+    </unit>
+    <unit id="1684734235599362204">
+      <segment>
+        <source>Tools</source>
+      </segment>
+    </unit>
+    <unit id="2938335127110015653">
+      <segment>
+        <source>Field measurements</source>
+      </segment>
+    </unit>
+    <unit id="3135010041684944812">
+      <segment>
+        <source>Height &amp; lateral distance</source>
+      </segment>
+    </unit>
+    <unit id="3219524493839487316">
+      <segment>
+        <source>Inset</source>
+      </segment>
+    </unit>
+    <unit id="3228612487814937552">
+      <segment>
+        <source>Obstacles</source>
+      </segment>
+    </unit>
+    <unit id="3493980964958188572">
+      <segment>
+        <source>Obstacles table</source>
+      </segment>
+    </unit>
+    <unit id="3625719233264880082">
+      <segment>
+        <source>L0 sum</source>
+      </segment>
+    </unit>
+    <unit id="3627508489639881021">
+      <segment>
+        <source>Grounds table</source>
+      </segment>
+    </unit>
+    <unit id="4114020677798356875">
+      <segment>
+        <source>Tables</source>
+      </segment>
+    </unit>
+    <unit id="4819033235564776951">
+      <segment>
+        <source>Edit your selected tools shortcuts</source>
+      </segment>
+    </unit>
+    <unit id="568104999805025008">
+      <segment>
+        <source>Strand RRTS</source>
+      </segment>
+    </unit>
+    <unit id="6629591556260898648">
+      <segment>
+        <source>Ground</source>
+      </segment>
+    </unit>
+    <unit id="6800398544280479151">
+      <segment>
+        <source>Angle en ligne</source>
+      </segment>
+    </unit>
+    <unit id="6812930637022637485">
+      <segment>
+        <source>Display</source>
+      </segment>
+    </unit>
+    <unit id="6843015305937593038">
+      <segment>
+        <source>Loads table</source>
+      </segment>
+    </unit>
+    <unit id="7353266591752987691">
+      <segment>
+        <source>Forest trenches</source>
+      </segment>
+    </unit>
+    <unit id="7536890634485426754">
+      <segment>
+        <source>Select which elements to display on the studio.</source>
+      </segment>
+    </unit>
+    <unit id="770492681595827297">
+      <segment>
+        <source>Measure</source>
+      </segment>
+    </unit>
+    <unit id="7801621976146528131">
+      <segment>
+        <source>Loads</source>
+      </segment>
+    </unit>
+    <unit id="810011115797190863">
+      <segment>
+        <source>Cable marking</source>
+      </segment>
+    </unit>
+    <unit id="8365500949716833241">
+      <segment>
+        <source>VTL &amp; Guying</source>
+      </segment>
+    </unit>
+    <unit id="8772586645735221164">
+      <segment>
+        <source>Pose table</source>
+      </segment>
+    </unit>
+    <unit id="8826026204967028707">
+      <segment>
+        <source>Select and organise the tools with quick access (maximum 5).</source>
       </segment>
     </unit>
   </file>

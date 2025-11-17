@@ -103,7 +103,8 @@ describe('AppComponent', () => {
     } as unknown as UserService;
 
     mockUpdateService = {
-      checkAppVersion: jest.fn()
+      checkAppVersion: jest.fn(),
+      needUpdate$: new BehaviorSubject<boolean>(false)
     } as unknown as UpdateService;
 
     mockMaintenanceService = {
