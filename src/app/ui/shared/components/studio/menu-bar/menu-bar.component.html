@@ -30,7 +30,7 @@
     <p class="mb-0 text-s-600 whitespace-nowrap" i18n>CC :</p>
     <app-select-with-buttons
       [options]="chargeCases()"
-      [selectedOption]="selectedChargeCase()"
+      [selectedOption]="selectedChargeCaseUuid()"
       (selectOption)="selectChargeCase($event)"
       (deleteOption)="deleteChargeCase($event)"
       (duplicateOption)="duplicateChargeCase($event)"
@@ -58,14 +58,16 @@
     <app-icon icon="add_circle" />
   </button>
 
-  <p class="text-s-600 flex items-center gap-2 mb-0">
-    <app-icon class="text-primary" icon="engineering" [fill]="true" />
-    @if (staffIsPresent()) {
-      <ng-container i18n>Staff is present</ng-container>
-    } @else {
-      <ng-container i18n>Staff is absent</ng-container>
-    }
-  </p>
+  @if (staffIsPresent() !== undefined) {
+    <p class="text-s-600 flex items-center gap-2 mb-0">
+      <app-icon class="text-primary" icon="engineering" [fill]="true" />
+      @if (staffIsPresent() === true) {
+        <ng-container i18n>Staff is present</ng-container>
+      } @else if (staffIsPresent() === false) {
+        <ng-container i18n>Staff is absent</ng-container>
+      }
+    </p>
+  }
 
   <hr class="menubar__separator" />
 </div>

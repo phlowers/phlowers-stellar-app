@@ -129,7 +129,8 @@ describe('InitialConditionService', () => {
               initial_conditions: expect.arrayContaining([updatedIC])
             })
           ])
-        })
+        }),
+        false
       );
     });
   });
@@ -160,7 +161,8 @@ describe('InitialConditionService', () => {
               ])
             })
           ])
-        })
+        }),
+        false
       );
     });
   });
@@ -181,7 +183,8 @@ describe('InitialConditionService', () => {
               initial_conditions: []
             })
           ])
-        })
+        }),
+        false
       );
     });
   });
@@ -212,7 +215,8 @@ describe('InitialConditionService', () => {
               ])
             })
           ])
-        })
+        }),
+        false
       );
     });
   });
@@ -235,7 +239,8 @@ describe('InitialConditionService', () => {
               selected_initial_condition_uuid: newSelectedUuid
             })
           ])
-        })
+        }),
+        true
       );
     });
   });

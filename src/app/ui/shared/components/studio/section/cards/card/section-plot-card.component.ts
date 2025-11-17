@@ -56,7 +56,7 @@ export class SectionPlotCardComponent {
 
   cardTitle = computed(() => {
     const idx = this.index();
-    return this.type() === 'support' ? `N°${idx}` : `${idx}-${idx + 1}`;
+    return this.type() === 'support' ? `N°${idx + 1}` : `${idx + 1}-${idx + 2}`;
   });
 
   cardColor = computed(() =>

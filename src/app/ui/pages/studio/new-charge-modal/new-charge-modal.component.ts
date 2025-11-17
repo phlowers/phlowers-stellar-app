@@ -17,13 +17,17 @@ import { Charge } from '@src/app/core/data/database/interfaces/charge';
 import { v4 as uuidv4 } from 'uuid';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
 import { PlotService } from '../plot.service';
+import { defaultClimaticCharge } from '../loads/climate/climate.component';
 
 const newCharge = (): Charge => {
   return {
     uuid: uuidv4(),
     name: '',
     personnelPresence: false,
-    description: ''
+    description: '',
+    data: {
+      climate: { ...defaultClimaticCharge }
+    }
   };
 };
 
@@ -108,7 +112,10 @@ export class NewChargeModalComponent {
       uuid: chargeUuid ?? '',
       name: this.name(),
       personnelPresence: this.personnelPresence(),
-      description: this.description()
+      description: this.description(),
+      data: {
+        climate: { ...defaultClimaticCharge }
+      }
     };
 
     this.validate.emit(charge);
