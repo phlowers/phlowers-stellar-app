@@ -1,6 +1,74 @@
 <router-outlet></router-outlet>
-
 <p-toast position="top-center"></p-toast>
+<p-dialog
+  [(visible)]="isUpdateDialogOpen"
+  [style]="{ width: '43.75rem' }"
+  closable="false"
+  modal="true"
+  focusOnShow="false"
+  draggable="false"
+>
+  <ng-template #header>
+    <p class="text-l-600 mb-0 flex gap-2">
+      <app-icon icon="sync" />
+      <span i18n>Update</span>
+    </p>
+  </ng-template>
+  <ng-template #content>
+    @if (!updateService.updateLoading()) {
+      <p class="font-bold text-l-600 underline" i18n>
+        The new version of your application is available!
+      </p>
+      <div class="flex flex-row gap-2 items-center">
+        <p class="m-0">
+          <ng-container i18n>Version :</ng-container>
+          {{ updateService.latestVersion()?.version }}
+        </p>
+        <p-divider layout="vertical" />
+        <p class="flex flex-row gap-2 items-center m-0">
+          <app-icon icon="calendar_today" />
+          {{
+            updateService.latestVersion()?.build_datetime_utc
+              | date: 'dd/MM/yyyy HH:mm'
+          }}
+        </p>
+        <p-divider layout="vertical" />
+        <p class="m-0">
+          <ng-container i18n>Hash :</ng-container>
+          {{ updateService.latestVersion()?.git_hash }}
+        </p>
+      </div>
+    } @else {
+      <p class="font-bold underline text-xl-600" i18n>
+        The update of your application is in progress
+      </p>
+      <p class="flex gap-2 items-center text-l-600">
+        <app-icon icon="warning" />
+        <ng-container i18n>
+          Thank you for not closing the app when the update is in progress.
+        </ng-container>
+      </p>
+      <p-progressbar mode="indeterminate" [style]="{ height: '.375rem' }" />
+    }
+  </ng-template>
+  @if (!updateService.updateLoading()) {
+    <ng-template #footer>
+      <button
+        app-btn
+        type="button"
+        btnStyle="text"
+        (click)="isUpdateDialogOpen = false"
+      >
+        <app-icon icon="close" />
+        <span i18n>Later</span>
+      </button>
+      <button app-btn (click)="updateService.update()">
+        <app-icon icon="sync" />
+        <span i18n>Update now</span>
+      </button>
+    </ng-template>
+  }
+</p-dialog>
 
 <p-dialog
   [(visible)]="userDialog"
