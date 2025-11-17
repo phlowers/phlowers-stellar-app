@@ -143,7 +143,11 @@
           @if (plotService.section()?.selected_charge_uuid) {
             <p-tabpanels>
               <p-tabpanel value="0">
-                <app-climate />
+                <app-climate
+                  [chargeUuid]="
+                    plotService.section()?.selected_charge_uuid ?? ''
+                  "
+                />
               </p-tabpanel>
 
               <p-tabpanel value="1">

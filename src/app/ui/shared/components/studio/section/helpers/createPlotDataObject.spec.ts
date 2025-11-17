@@ -201,11 +201,11 @@ describe('createPlotDataObject', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).textposition
-      ).toBe('inside');
+      ).toBe('top center');
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).text
-      ).toBe('');
+      ).toEqual([]);
     });
 
     it('should handle spans type with correct slicing', () => {

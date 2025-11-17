@@ -1808,11 +1808,6 @@
         <source>Link - IDR</source>
       </segment>
     </unit>
-    <unit id="6415844840947043786">
-      <segment>
-        <source>Only the author of the study can update it. Please duplicate it to make your changes.</source>
-      </segment>
-    </unit>
     <unit id="6965096128886264042">
       <segment>
         <source>Branch - IDR</source>
@@ -2031,6 +2026,16 @@
     <unit id="8826026204967028707">
       <segment>
         <source>Select and organise the tools with quick access (maximum 5).</source>
+      </segment>
+    </unit>
+    <unit id="1834844445344817694">
+      <segment>
+        <source>Unauthorized</source>
+      </segment>
+    </unit>
+    <unit id="4124418045778511362">
+      <segment>
+        <source>You cannot update a study that you did not create, please duplicate it instead.</source>
       </segment>
     </unit>
   </file>

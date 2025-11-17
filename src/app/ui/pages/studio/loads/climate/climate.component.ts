@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators
@@ -13,6 +14,18 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { PlotService } from '../../plot.service';
+import { ChargesService } from '@core/services/charges/charges.service';
+import { ClimateCharge } from '@src/app/core/data/database/interfaces/charge';
+
+export const defaultClimaticCharge: ClimateCharge = {
+  windPressure: 0,
+  cableTemperature: 15,
+  symmetryType: 'symmetric',
+  iceThickness: 0,
+  frontierSupportNumber: null,
+  iceThicknessBefore: null,
+  iceThicknessAfter: null
+};
 
 @Component({
   selector: 'app-climate',
@@ -29,7 +42,16 @@ import { PlotService } from '../../plot.service';
   styleUrl: './climate.component.scss'
 })
 export class ClimateComponent {
-  form: FormGroup;
+  form: FormGroup<{
+    windPressure: FormControl<number | null>;
+    cableTemperature: FormControl<number | null>;
+    symmetryType: FormControl<string | null>;
+    iceThickness: FormControl<number | null>;
+    frontierSupportNumber: FormControl<null>;
+    iceThicknessBefore: FormControl<null>;
+    iceThicknessAfter: FormControl<null>;
+  }>;
+  chargeUuid = input.required<string>();
 
   symmetryOptions = [
     { label: $localize`Symmetric`, value: 'symmetric' },
@@ -45,77 +67,135 @@ export class ClimateComponent {
   constructor(
     private readonly fb: FormBuilder,
     private readonly workerPythonService: WorkerPythonService,
-    private readonly plotService: PlotService
+    private readonly plotService: PlotService,
+    private readonly chargesService: ChargesService
   ) {
     this.form = this.fb.group({
-      windPressure: [0, Validators.required],
-      cableTemperature: [15, Validators.required],
-      symmetryType: ['symmetric', Validators.required],
-      iceThickness: [0],
-      frontierSupportNumber: [null],
-      iceThicknessBefore: [null],
-      iceThicknessAfter: [null]
+      windPressure: [defaultClimaticCharge.windPressure, Validators.required],
+      cableTemperature: [
+        defaultClimaticCharge.cableTemperature,
+        Validators.required
+      ],
+      symmetryType: [defaultClimaticCharge.symmetryType, Validators.required],
+      iceThickness: [defaultClimaticCharge.iceThickness],
+      frontierSupportNumber: [defaultClimaticCharge.frontierSupportNumber],
+      iceThicknessBefore: [defaultClimaticCharge.iceThicknessBefore],
+      iceThicknessAfter: [defaultClimaticCharge.iceThicknessAfter]
+    });
+    effect(async () => {
+      const studyUuid = this.plotService.study()?.uuid;
+      const sectionUuid = this.plotService.section()?.uuid;
+      if (!studyUuid || !sectionUuid) {
+        return;
+      }
+      const charge = await this.chargesService.getCharge(
+        studyUuid,
+        sectionUuid,
+        this.chargeUuid()
+      );
+      if (!charge?.data) {
+        return;
+      }
+      const climate = charge.data.climate;
+      this.form.patchValue(climate);
+      this.form.updateValueAndValidity();
     });
   }
 
   resetForm() {
-    this.form.reset({
-      windPressure: 0,
-      cableTemperature: 15,
-      symmetryType: 'symmetric',
-      iceThickness: 0,
-      frontierSupportNumber: null,
-      iceThicknessBefore: null,
-      iceThicknessAfter: null
-    });
+    this.form.reset({ ...defaultClimaticCharge });
   }
 
-  eraseForm() {
-    console.log('erase the load case!');
+  deleteCharge() {
+    const studyUuid = this.plotService.study()?.uuid;
+    const sectionUuid = this.plotService.section()?.uuid;
+    if (!studyUuid || !sectionUuid) {
+      throw new Error('Study or section not found');
+    }
+    this.chargesService.deleteCharge(studyUuid, sectionUuid, this.chargeUuid());
   }
 
-  getVisibleFormValues(): {
-    windPressure: number;
-    cableTemperature: number;
-    symmetryType: string;
-    iceThickness?: number;
-    frontierSupportNumber?: number;
-    iceThicknessBefore?: number;
-    iceThicknessAfter?: number;
-  } {
-    const symmetryType = this.form.value.symmetryType;
+  getVisibleFormValues():
+    | {
+        windPressure: number;
+        cableTemperature: number;
+        symmetryType: string;
+        iceThickness: number;
+      }
+    | {
+        windPressure: number;
+        cableTemperature: number;
+        symmetryType: string;
+        frontierSupportNumber: number | null;
+        iceThicknessBefore: number | null;
+        iceThicknessAfter: number | null;
+      } {
+    const value = this.form.value;
+    const defaults = defaultClimaticCharge;
+    const symmetryType = value.symmetryType ?? defaults.symmetryType;
+
+    const baseValues = {
+      windPressure: value.windPressure ?? defaults.windPressure,
+      cableTemperature: value.cableTemperature ?? defaults.cableTemperature,
+      symmetryType: symmetryType
+    };
 
     if (symmetryType === 'symmetric') {
       return {
-        windPressure: this.form.value.windPressure,
-        cableTemperature: this.form.value.cableTemperature,
-        symmetryType,
-        iceThickness: this.form.value.iceThickness
+        ...baseValues,
+        iceThickness: value.iceThickness ?? defaults.iceThickness
       };
-    } else if (symmetryType === 'dis_symmetric') {
+    } else {
       return {
-        windPressure: this.form.value.windPressure,
-        cableTemperature: this.form.value.cableTemperature,
-        symmetryType,
-        frontierSupportNumber: this.form.value.frontierSupportNumber,
-        iceThicknessBefore: this.form.value.iceThicknessBefore,
-        iceThicknessAfter: this.form.value.iceThicknessAfter
+        ...baseValues,
+        frontierSupportNumber:
+          value.frontierSupportNumber ?? defaults.frontierSupportNumber,
+        iceThicknessBefore:
+          value.iceThicknessBefore ?? defaults.iceThicknessBefore,
+        iceThicknessAfter: value.iceThicknessAfter ?? defaults.iceThicknessAfter
       };
     }
-
-    // Fallback, should not happen
-    return this.form.value;
   }
 
-  submitForm() {
-    console.log('Submit (save):', this.getVisibleFormValues());
+  async submitForm() {
+    const studyUuid = this.plotService.study()?.uuid;
+    const sectionUuid = this.plotService.section()?.uuid;
+    if (!studyUuid || !sectionUuid) {
+      throw new Error('Study or section not found');
+    }
+    const visibleValues = this.getVisibleFormValues();
+    const charge = await this.chargesService.getCharge(
+      studyUuid,
+      sectionUuid,
+      this.chargeUuid()
+    );
+    if (!charge) {
+      throw new Error('Charge not found');
+    }
+    // Merge visible values with existing climate data to preserve hidden fields
+    // The spread order ensures visible values override existing ones, while preserving hidden fields
+    const climate = {
+      ...charge.data.climate,
+      ...visibleValues
+    } as ClimateCharge;
+    this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, {
+      ...charge,
+      data: {
+        ...charge.data,
+        climate
+      }
+    });
   }
 
   calculForm() {
+    const values = this.getVisibleFormValues();
+    const defaults = defaultClimaticCharge;
+    const iceThickness =
+      'iceThickness' in values ? values.iceThickness : defaults.iceThickness;
     this.plotService.calculateCharge(
-      this.getVisibleFormValues().windPressure,
-      this.getVisibleFormValues().cableTemperature,
-      this.getVisibleFormValues().iceThickness ?? 0
+      values.windPressure || defaults.windPressure,
+      values.cableTemperature || defaults.cableTemperature,
+      iceThickness || defaults.iceThickness
     );
   }
 

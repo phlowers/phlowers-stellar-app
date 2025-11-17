@@ -36,11 +36,12 @@ export class InitialConditionService {
    */
   private async updateStudyWithModification(
     study: Study,
-    modifier: (studyCopy: Study) => void
+    modifier: (studyCopy: Study) => void,
+    overrideAuthorCheck = false
   ): Promise<void> {
     const studyCopy = cloneDeep(study);
     modifier(studyCopy);
-    await this.studiesService.updateStudy(studyCopy);
+    await this.studiesService.updateStudy(studyCopy, overrideAuthorCheck);
   }
 
   /**
@@ -178,13 +179,17 @@ export class InitialConditionService {
     if (!studyToUpdate) {
       return;
     }
-    await this.updateStudyWithModification(studyToUpdate, (studyCopy) => {
-      studyCopy.sections = studyCopy.sections.map((s) =>
-        s?.uuid === section?.uuid
-          ? { ...s, selected_initial_condition_uuid: initialConditionUuid }
-          : s
-      );
-    });
+    await this.updateStudyWithModification(
+      studyToUpdate,
+      (studyCopy) => {
+        studyCopy.sections = studyCopy.sections.map((s) =>
+          s?.uuid === section?.uuid
+            ? { ...s, selected_initial_condition_uuid: initialConditionUuid }
+            : s
+        );
+      },
+      true
+    );
   }
 
   async getInitialCondition(

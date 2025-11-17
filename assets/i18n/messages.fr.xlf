@@ -2057,12 +2057,6 @@
         <target>Charge supprimée</target>
       </segment>
     </unit>
-    <unit id="6415844840947043786">
-      <segment state="initial">
-        <source>Only the author of the study can update it. Please duplicate it to make your changes.</source>
-        <target>Seul l&apos;auteur de l&apos;étude peut la mettre à jour. Veuillez la dupliquer pour apporter vos modifications.</target>
-      </segment>
-    </unit>
     <unit id="1864612253981729182">
       <segment state="initial">
         <source>suspension</source>
@@ -2354,7 +2348,7 @@
     <unit id="3493980964958188572">
       <segment state="initial">
         <source>Obstacles table</source>
-        <target>Tableau d'obstacles</target>
+        <target>Tableau d&apos;obstacles</target>
       </segment>
     </unit>
     <unit id="3627508489639881021">
@@ -2439,6 +2433,18 @@
       <segment state="initial">
         <source>Cable adjustment</source>
         <target>Réglage câble</target>
+      </segment>
+    </unit>
+    <unit id="1834844445344817694">
+      <segment state="initial">
+        <source>Unauthorized</source>
+        <target>Non autorisé</target>
+      </segment>
+    </unit>
+    <unit id="4124418045778511362">
+      <segment state="initial">
+        <source>You cannot update a study that you did not create, please duplicate it instead.</source>
+        <target>Vous ne pouvez pas mettre à jour une étude que vous n&apos;avez pas créée, veuillez la dupliquer.</target>
       </segment>
     </unit>
   </file>

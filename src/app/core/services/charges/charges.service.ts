@@ -171,7 +171,7 @@ export class ChargesService {
     );
 
     section.selected_charge_uuid = chargeUuid;
-    await this.studiesService.updateStudy(study);
+    await this.studiesService.updateStudy(study, true);
   }
 
   /**

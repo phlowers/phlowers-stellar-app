@@ -60,11 +60,11 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
   it('should compute correct title and color', () => {
     fixture.componentRef.setInput('type', 'support');
     fixture.componentRef.setInput('index', 2);
-    expect(component.cardTitle()).toBe('N°2');
+    expect(component.cardTitle()).toBe('N°3');
     expect(component.cardColor()).toBe('icon-wrapper--support');
 
     fixture.componentRef.setInput('type', 'span');
-    expect(component.cardTitle()).toBe('2-3');
+    expect(component.cardTitle()).toBe('3-4');
     expect(component.cardColor()).toBe('icon-wrapper--line');
   });
 
@@ -98,14 +98,14 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
       let title = hostFixture.nativeElement.querySelector(
         '.title'
       ) as HTMLElement;
-      expect(title.textContent?.trim()).toBe('N°3');
+      expect(title.textContent?.trim()).toBe('N°4');
 
       hostComponent.cardType = 'span';
       hostComponent.cardIndex = 4;
       hostFixture.detectChanges();
 
       title = hostFixture.nativeElement.querySelector('.title') as HTMLElement;
-      expect(title.textContent?.trim()).toBe('4-5');
+      expect(title.textContent?.trim()).toBe('5-6');
     });
 
     it('should render correct icon for type', () => {

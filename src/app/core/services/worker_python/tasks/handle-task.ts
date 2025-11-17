@@ -85,12 +85,16 @@ export async function handleTask<taskId extends Task>(
       runTime: performance.now() - start,
       error: null
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
+    let errorType = TaskError.CALCULATION_ERROR;
+    if (error?.message?.includes('Solver did not converge')) {
+      errorType = TaskError.SOLVER_DID_NOT_CONVERGE;
+    }
     return {
       result: null,
       runTime: performance.now() - start,
-      error: TaskError.CALCULATION_ERROR
+      error: errorType
     };
   }
 }

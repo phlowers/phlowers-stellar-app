@@ -186,6 +186,16 @@ def init_section(js_inputs: dict):
             if condition["uuid"] == input_section["selected_initial_condition_uuid"]
         )
     )
+    input_charges = input_section["charges"]
+    input_charge = (
+        None
+        if not input_charges
+        else next(
+            charge
+            for charge in input_charges
+            if charge["uuid"] == input_section["selected_charge_uuid"]
+        )
+    )
     initial_condition = (
         InitialCondition(**input_initial_condition) if input_initial_condition else None
     )
@@ -256,6 +266,16 @@ def init_section(js_inputs: dict):
     plt_line = PlotEngine.builder_from_balance_engine(engine)
     engine.solve_adjustment()
     engine.solve_change_state()
+
+    if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
+        section_length = len(engine.section_array.data)
+        climate = input_charge["data"]["climate"]
+        engine.solve_change_state(
+            ice_thickness=climate["iceThickness"] * np.array([1] * section_length),
+            new_temperature=climate["cableTemperature"]
+            * np.array([1] * section_length),
+            wind_pressure=climate["windPressure"] * np.array([1] * section_length),
+        )
     return get_coordinates(plt_line)
 
 
@@ -266,17 +286,15 @@ def change_climate(js_inputs: dict):
     python_inputs = js_inputs.to_py()
     wind_pressure = python_inputs["windPressure"]
     cable_temperature = python_inputs["cableTemperature"]
-    ice_thickness = python_inputs["iceThickness"] / 100
+    ice_thickness = python_inputs["iceThickness"] / 100  # in meters in the engine
     section_length = len(engine.section_array.data)
-    print(
-        "engine.section_array.data: ", json.dumps(engine.section_array.data.to_dict())
-    )
-    # print("section_length: ", section_length)
-    # engine.solve_change_state(
-    #     new_temperature=cable_temperature * np.array([1] * section_length)
+    # print(
+    #     "engine.section_array.data: ", json.dumps(engine.section_array.data.to_dict())
     # )
-    # engine.solve_change_state(
-    #     wind_pressure=wind_pressure * np.array([1] * section_length)
+    # print("engine.cable_array.data: ", json.dumps(engine.cable_array.data.to_dict()))
+    # print("section_length: ", section_length)
+    # print(
+    #     "engine.section_array.data: ", json.dumps(engine.section_array.data.to_dict())
     # )
     engine.solve_change_state(
         ice_thickness=ice_thickness * np.array([1] * section_length),

@@ -27,7 +27,18 @@ const mockChargeData: Charge = {
   uuid: 'charge-uuid-1',
   name: 'Charge 1',
   personnelPresence: true,
-  description: 'Test charge description'
+  description: 'Test charge description',
+  data: {
+    climate: {
+      windPressure: 0,
+      cableTemperature: 15,
+      symmetryType: 'symmetric',
+      iceThickness: 0,
+      frontierSupportNumber: null,
+      iceThicknessBefore: null,
+      iceThicknessAfter: null
+    }
+  }
 };
 
 const mockSectionData: Section = {
@@ -133,7 +144,18 @@ describe('ChargesService', () => {
         uuid: 'new-charge-uuid',
         name: 'New Charge',
         personnelPresence: false,
-        description: 'New charge description'
+        description: 'New charge description',
+        data: {
+          climate: {
+            windPressure: 0,
+            cableTemperature: 15,
+            symmetryType: 'symmetric',
+            iceThickness: 0,
+            frontierSupportNumber: null,
+            iceThicknessBefore: null,
+            iceThicknessAfter: null
+          }
+        }
       };
 
       const studyWithoutNewCharge: Study = {
@@ -275,7 +297,18 @@ describe('ChargesService', () => {
         uuid: 'charge-uuid-2',
         name: 'Charge 2',
         personnelPresence: false,
-        description: 'Second charge'
+        description: 'Second charge',
+        data: {
+          climate: {
+            windPressure: 0,
+            cableTemperature: 15,
+            symmetryType: 'symmetric',
+            iceThickness: 0,
+            frontierSupportNumber: null,
+            iceThicknessBefore: null,
+            iceThicknessAfter: null
+          }
+        }
       };
 
       const studyWithMultipleCharges: Study = {
@@ -472,7 +505,8 @@ describe('ChargesService', () => {
               selected_charge_uuid: 'charge-uuid-1'
             })
           ])
-        })
+        }),
+        true
       );
     });
 

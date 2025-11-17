@@ -19,6 +19,7 @@ import { Support } from '../../data/database/interfaces/support';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { InitialCondition } from '../../data/database/interfaces/initialCondition';
+import { MessageService } from 'primeng/api';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +29,10 @@ export class StudiesService {
 
   public readonly studies = new BehaviorSubject<Study[]>([]);
 
-  constructor(private readonly storageService: StorageService) {
+  constructor(
+    private readonly storageService: StorageService,
+    private readonly messageService: MessageService
+  ) {
     this.storageService.ready$.subscribe((value) => {
       this.ready.next(value);
     });
@@ -140,10 +144,18 @@ export class StudiesService {
    * Update a study
    * @param study The study to update
    */
-  async updateStudy(study: { uuid: string } & Partial<Study>) {
+  async updateStudy(
+    study: { uuid: string } & Partial<Study>,
+    overrideAuthorCheck = false
+  ) {
     const user = await this.storageService.db?.users.toArray();
-    if (user?.[0]?.email !== study.author_email) {
-      throw new Error('Unauthorized');
+    if (!overrideAuthorCheck && user?.[0]?.email !== study.author_email) {
+      this.messageService.add({
+        severity: 'error',
+        summary: $localize`Unauthorized`,
+        detail: $localize`You cannot update a study that you did not create, please duplicate it instead.`
+      });
+      return;
     }
     await this.storageService.db?.studies.update(study.uuid, {
       ...study,

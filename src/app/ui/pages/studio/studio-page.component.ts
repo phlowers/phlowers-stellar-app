@@ -76,6 +76,9 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       showTicksValues: true,
       animate: false,
       animateOnMove: false,
+      translate: (value: number) => {
+        return (value + 1).toString();
+      },
       rightToLeft: this.plotService.plotOptions().invert
     };
   });
