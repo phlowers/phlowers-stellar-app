@@ -60,38 +60,38 @@ export class StudioMenuBarComponent {
 
   launchChargeFunction(
     functionToLaunch: (
-      value: string,
       studyUuid: string,
-      sectionUuid: string
+      sectionUuid: string,
+      value: string
     ) => void,
     value: string
   ) {
     if (value) {
       functionToLaunch(
-        value,
         this.study()?.uuid ?? '',
-        this.section()?.uuid ?? ''
+        this.section()?.uuid ?? '',
+        value
       );
     }
   }
 
   selectChargeCase(chargeCase?: { label: string; value: string }) {
     this.launchChargeFunction(
-      this.chargesService.setSelectedCharge,
+      this.chargesService.setSelectedCharge.bind(this.chargesService),
       chargeCase?.value ?? ''
     );
   }
 
   deleteChargeCase(chargeCase?: { label: string; value: string }) {
     this.launchChargeFunction(
-      this.chargesService.deleteCharge,
+      this.chargesService.deleteCharge.bind(this.chargesService),
       chargeCase?.value ?? ''
     );
   }
 
   duplicateChargeCase(chargeCase?: { label: string; value: string }) {
     this.launchChargeFunction(
-      this.chargesService.duplicateCharge,
+      this.chargesService.duplicateCharge.bind(this.chargesService),
       chargeCase?.value ?? ''
     );
   }

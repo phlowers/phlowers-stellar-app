@@ -36,6 +36,8 @@ import { ChainsService } from '../core/services/chains/chains.service';
 import { PlotService } from './pages/studio/plot.service';
 import { AttachmentService } from '../core/services/attachment/attachment.service';
 import { ChargesService } from '../core/services/charges/charges.service';
+import { DividerModule } from 'primeng/divider';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -48,7 +50,9 @@ const modules = [
   DialogModule,
   ButtonComponent,
   IconComponent,
-  ReactiveFormsModule
+  ReactiveFormsModule,
+  DividerModule,
+  ProgressBarModule
 ];
 
 @Component({
@@ -80,6 +84,7 @@ const modules = [
 export class AppComponent implements OnInit, OnDestroy {
   title = 'phlowers-stellar-app';
   userDialog = false;
+  isUpdateDialogOpen = false;
   form: FormGroup<{
     email: FormControl<string | null>;
   }>;
@@ -92,7 +97,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly workerService: WorkerPythonService,
     private readonly userService: UserService,
     private readonly onlineService: OnlineService,
-    private readonly updateService: UpdateService,
+    public readonly updateService: UpdateService,
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,
     private readonly cablesService: CablesService,
@@ -124,6 +129,11 @@ export class AppComponent implements OnInit, OnDestroy {
             this.setupData();
           });
         }
+      })
+    );
+    this.subscriptions.add(
+      this.updateService.needUpdate$.subscribe((needUpdate) => {
+        this.isUpdateDialogOpen = needUpdate;
       })
     );
   }
@@ -181,5 +191,9 @@ export class AppComponent implements OnInit, OnDestroy {
   isInvalid(controlName: string) {
     const control = this.form.get(controlName);
     return control?.invalid && control.touched;
+  }
+
+  onUpdateClick() {
+    this.updateService.update();
   }
 }

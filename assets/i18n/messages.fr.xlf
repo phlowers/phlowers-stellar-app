@@ -2057,6 +2057,12 @@
         <target>Charge supprimée</target>
       </segment>
     </unit>
+    <unit id="6415844840947043786">
+      <segment state="initial">
+        <source>Only the author of the study can update it. Please duplicate it to make your changes.</source>
+        <target>Seul l&apos;auteur de l&apos;étude peut la mettre à jour. Veuillez la dupliquer pour apporter vos modifications.</target>
+      </segment>
+    </unit>
     <unit id="1864612253981729182">
       <segment state="initial">
         <source>suspension</source>
@@ -2241,6 +2247,198 @@
       <segment state="initial">
         <source>Guard number</source>
         <target>Numéro de garde</target>
+      </segment>
+    </unit>
+    <unit id="4021752662928002901">
+      <segment state="initial">
+        <source>Update</source>
+        <target>Mise à jour</target>
+      </segment>
+    </unit>
+    <unit id="7102821621439027980">
+      <segment state="initial">
+        <source> The new version of your application is available! </source>
+        <target> La nouvelle version de votre application est disponible ! </target>
+      </segment>
+    </unit>
+    <unit id="5827348953140111224">
+      <segment state="initial">
+        <source> The update of your application is in progress </source>
+        <target> La mise à jour de votre application est en cours </target>
+      </segment>
+    </unit>
+    <unit id="9026083618139453880">
+      <segment state="initial">
+        <source>Later</source>
+        <target>Plus tard</target>
+      </segment>
+    </unit>
+    <unit id="2694240619944418764">
+      <segment state="initial">
+        <source>Version :</source>
+        <target>Version :</target>
+      </segment>
+    </unit>
+    <unit id="391362148889807983">
+      <segment state="initial">
+        <source>Hash :</source>
+        <target>Hash :</target>
+      </segment>
+    </unit>
+    <unit id="145833412581392848">
+      <segment state="initial">
+        <source> Thank you for not closing the app when the update is in progress. </source>
+        <target> Merci de ne pas fermer l&apos;application pendant la mise à jour. </target>
+      </segment>
+    </unit>
+    <unit id="2222955931547347463">
+      <segment state="initial">
+        <source>Update now</source>
+        <target>Mettre à jour</target>
+      </segment>
+    </unit>
+    <unit id="6812930637022637485">
+      <segment state="initial">
+        <source>Display</source>
+        <target>Affichage</target>
+      </segment>
+    </unit>
+    <unit id="7536890634485426754">
+      <segment state="initial">
+        <source>Select which elements to display on the studio.</source>
+        <target>Sélectionnez les éléments à afficher dans le studio.</target>
+      </segment>
+    </unit>
+    <unit id="4114020677798356875">
+      <segment state="initial">
+        <source>Tables</source>
+        <target>Tables</target>
+      </segment>
+    </unit>
+    <unit id="1684734235599362204">
+      <segment state="initial">
+        <source>Tools</source>
+        <target>Outils</target>
+      </segment>
+    </unit>
+    <unit id="4819033235564776951">
+      <segment state="initial">
+        <source>Edit your selected tools shortcuts</source>
+        <target>Modifier les raccourcis des outils sélectionnés</target>
+      </segment>
+    </unit>
+    <unit id="3219524493839487316">
+      <segment state="initial">
+        <source>Inset</source>
+        <target>Insertion</target>
+      </segment>
+    </unit>
+    <unit id="8826026204967028707">
+      <segment state="initial">
+        <source>Select and organise the tools with quick access (maximum 5).</source>
+        <target>Sélectionnez et organisez les outils avec un accès rapide (maximum 5).</target>
+      </segment>
+    </unit>
+    <unit id="6843015305937593038">
+      <segment state="initial">
+        <source>Loads table</source>
+        <target>Tableau de charges</target>
+      </segment>
+    </unit>
+    <unit id="8772586645735221164">
+      <segment state="initial">
+        <source>Pose table</source>
+        <target>Tableau de pose</target>
+      </segment>
+    </unit>
+    <unit id="3493980964958188572">
+      <segment state="initial">
+        <source>Obstacles table</source>
+        <target>Tableau d'obstacles</target>
+      </segment>
+    </unit>
+    <unit id="3627508489639881021">
+      <segment state="initial">
+        <source>Grounds table</source>
+        <target>Tableau de sols</target>
+      </segment>
+    </unit>
+    <unit id="7801621976146528131">
+      <segment state="initial">
+        <source>Loads</source>
+        <target>Charges</target>
+      </segment>
+    </unit>
+    <unit id="3228612487814937552">
+      <segment state="initial">
+        <source>Obstacles</source>
+        <target>Obstacles</target>
+      </segment>
+    </unit>
+    <unit id="6629591556260898648">
+      <segment state="initial">
+        <source>Ground</source>
+        <target>Ground</target>
+      </segment>
+    </unit>
+    <unit id="6800398544280479151">
+      <segment state="initial">
+        <source>Angle en ligne</source>
+        <target>Angle en ligne</target>
+      </segment>
+    </unit>
+    <unit id="770492681595827297">
+      <segment state="initial">
+        <source>Measure</source>
+        <target>Mesure</target>
+      </segment>
+    </unit>
+    <unit id="2938335127110015653">
+      <segment state="initial">
+        <source>Field measurements</source>
+        <target>Mesures terrain</target>
+      </segment>
+    </unit>
+    <unit id="3625719233264880082">
+      <segment state="initial">
+        <source>L0 sum</source>
+        <target>Somme L0</target>
+      </segment>
+    </unit>
+    <unit id="8365500949716833241">
+      <segment state="initial">
+        <source>VTL &amp; Guying</source>
+        <target>Haubanage &amp; VTL</target>
+      </segment>
+    </unit>
+    <unit id="810011115797190863">
+      <segment state="initial">
+        <source>Cable marking</source>
+        <target>Marquage câble</target>
+      </segment>
+    </unit>
+    <unit id="568104999805025008">
+      <segment state="initial">
+        <source>Strand RRTS</source>
+        <target>RRTS de brin</target>
+      </segment>
+    </unit>
+    <unit id="7353266591752987691">
+      <segment state="initial">
+        <source>Forest trenches</source>
+        <target>Tranchées forestières</target>
+      </segment>
+    </unit>
+    <unit id="3135010041684944812">
+      <segment state="initial">
+        <source>Height &amp; lateral distance</source>
+        <target>Hauteur &amp; distance latérale</target>
+      </segment>
+    </unit>
+    <unit id="1271914484753735123">
+      <segment state="initial">
+        <source>Cable adjustment</source>
+        <target>Réglage câble</target>
       </segment>
     </unit>
   </file>

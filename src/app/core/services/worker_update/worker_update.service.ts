@@ -58,7 +58,7 @@ export class UpdateService {
               summary: $localize`Update successful`,
               detail: $localize`The application has been updated to the latest version`
             });
-            this.router.navigate(['/']);
+            window.location.href = '/';
             break;
           case 'install_complete':
             await this.checkAppVersion();
@@ -98,7 +98,6 @@ export class UpdateService {
   }
 
   async checkAppVersion() {
-    console.log('checking app version');
     const currentVersion = await this.getCurrentVersion();
     const latestVersion = await this.getLatestVersion();
     this.currentVersion.set(currentVersion);

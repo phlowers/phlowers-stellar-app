@@ -161,16 +161,16 @@ export class ChargesService {
    * @returns The charge
    */
   async setSelectedCharge(
-    uuid: string,
     studyUuid: string,
-    sectionUuid: string
+    sectionUuid: string,
+    chargeUuid: string
   ): Promise<void> {
     const { study, section } = await this.getStudyAndSection(
       studyUuid,
       sectionUuid
     );
 
-    section.selected_charge_uuid = uuid;
+    section.selected_charge_uuid = chargeUuid;
     await this.studiesService.updateStudy(study);
   }
 

@@ -459,9 +459,9 @@ describe('ChargesService', () => {
   describe('setSelectedCharge', () => {
     it('should set the selected charge uuid', async () => {
       await service.setSelectedCharge(
-        'charge-uuid-1',
         'study-uuid-1',
-        'section-uuid-1'
+        'section-uuid-1',
+        'charge-uuid-1'
       );
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
@@ -481,9 +481,9 @@ describe('ChargesService', () => {
 
       await expect(
         service.setSelectedCharge(
-          'charge-uuid-1',
           'non-existent-study',
-          'section-uuid-1'
+          'section-uuid-1',
+          'charge-uuid-1'
         )
       ).rejects.toThrow('Study with uuid non-existent-study not found');
     });
@@ -498,9 +498,9 @@ describe('ChargesService', () => {
 
       await expect(
         service.setSelectedCharge(
-          'charge-uuid-1',
           'study-uuid-1',
-          'non-existent-section'
+          'non-existent-section',
+          'charge-uuid-1'
         )
       ).rejects.toThrow('Section with uuid non-existent-section not found');
     });
