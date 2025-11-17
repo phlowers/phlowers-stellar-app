@@ -24,6 +24,20 @@ const getMode = (type: PlotObjectsType): PlotData['mode'] => {
   return 'lines';
 };
 
+const getText = (
+  type: PlotObjectsType,
+  points: number[][],
+  supportIndex: number
+): string[] => {
+  if (type !== 'supports') return [];
+  const highestPointIndex = points.findIndex(
+    (point) => point[2] === Math.max(...points.map((point) => point[2]))
+  );
+  return points.map((point, index) =>
+    index === highestPointIndex ? (supportIndex + 1).toString() : ''
+  );
+};
+
 export const createDataObject = (
   data: number[][][],
   startSupport: number,
@@ -36,7 +50,7 @@ export const createDataObject = (
     startSupport,
     type === 'spans' ? endSupport : endSupport + 1
   );
-  return slidedData.map((points) => {
+  return slidedData.map((points, index) => {
     const x = points.map((point) => point[0]);
     const y = points.map((point) => point[1]);
     const z = points.map((point) => point[2]);
@@ -47,8 +61,8 @@ export const createDataObject = (
       type: view === '3d' ? 'scatter3d' : 'scatter',
       mode: getMode(type),
       line: getColor(type),
-      textposition: 'inside',
-      text: ''
+      textposition: 'top center',
+      text: getText(type, points, startSupport + index)
     };
   });
 };

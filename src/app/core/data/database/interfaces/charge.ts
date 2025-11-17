@@ -10,4 +10,17 @@ export interface Charge {
   name: string;
   personnelPresence: boolean;
   description: string;
+  data: {
+    climate: ClimateCharge;
+  };
+}
+
+export interface ClimateCharge {
+  windPressure: number;
+  cableTemperature: number;
+  symmetryType: string;
+  iceThickness: number;
+  frontierSupportNumber: null;
+  iceThicknessBefore: null;
+  iceThicknessAfter: null;
 }

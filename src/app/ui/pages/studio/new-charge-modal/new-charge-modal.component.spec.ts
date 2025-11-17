@@ -30,7 +30,18 @@ describe('NewChargeModalComponent (Jest)', () => {
     uuid: 'charge-uuid-1',
     name: 'Test Charge',
     personnelPresence: true,
-    description: 'Test charge description'
+    description: 'Test charge description',
+    data: {
+      climate: {
+        windPressure: 0,
+        cableTemperature: 15,
+        symmetryType: 'symmetric',
+        iceThickness: 0,
+        frontierSupportNumber: null,
+        iceThicknessBefore: null,
+        iceThicknessAfter: null
+      }
+    }
   };
 
   const mockStudy: Study = {

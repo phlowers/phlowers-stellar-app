@@ -1,4 +1,4 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule } from '@angular/forms';
 import { DividerModule } from 'primeng/divider';
@@ -41,7 +41,7 @@ export class StudioMenuBarComponent {
       this.section()?.charges?.map((c) => ({ label: c.name, value: c.uuid })) ??
       []
   );
-  selectedChargeCase = computed(() => {
+  selectedChargeCaseUuid = computed(() => {
     return (
       this.study()?.sections.find((s) => s?.uuid === this.section()?.uuid)
         ?.selected_charge_uuid ?? null
@@ -52,7 +52,11 @@ export class StudioMenuBarComponent {
       (ic) => ic.uuid === this.section()?.selected_initial_condition_uuid
     )
   );
-  staffIsPresent = signal(false);
+  staffIsPresent = computed(() => {
+    return this.section()?.charges.find(
+      (c) => c.uuid === this.selectedChargeCaseUuid()
+    )?.personnelPresence;
+  });
   constructor(
     public readonly plotService: PlotService,
     private readonly chargesService: ChargesService
