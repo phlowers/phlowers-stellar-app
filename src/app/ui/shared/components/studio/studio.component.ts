@@ -35,6 +35,8 @@ export class StudioComponent implements OnInit, OnDestroy {
         return $localize`No cable found`;
       case TaskError.CALCULATION_ERROR:
         return $localize`Calculation error`;
+      case TaskError.SOLVER_DID_NOT_CONVERGE:
+        return $localize`Calculation error: 'Solver did not converge'`;
       case TaskError.PYODIDE_LOAD_ERROR:
         return $localize`Pyodide load error`;
       default:
