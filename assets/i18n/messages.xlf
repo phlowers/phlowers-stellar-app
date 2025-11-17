@@ -221,11 +221,6 @@
         <source>Create a study section</source>
       </segment>
     </unit>
-    <unit id="1255388649183074058">
-      <segment>
-        <source>Branch name</source>
-      </segment>
-    </unit>
     <unit id="1267728769006543252">
       <segment>
         <source> Delete all studies </source>
@@ -284,11 +279,6 @@
     <unit id="2102825898069375693">
       <segment>
         <source>Menu</source>
-      </segment>
-    </unit>
-    <unit id="2202835179714153957">
-      <segment>
-        <source>User preference</source>
       </segment>
     </unit>
     <unit id="2233560223291461480">
@@ -596,11 +586,6 @@
         <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a section </source>
       </segment>
     </unit>
-    <unit id="633450215070869903">
-      <segment>
-        <source>usr pref</source>
-      </segment>
-    </unit>
     <unit id="5684312348614575469">
       <segment>
         <source> Reset the app </source>
@@ -621,11 +606,6 @@
         <source>Section Updated</source>
       </segment>
     </unit>
-    <unit id="6621067415830629818">
-      <segment>
-        <source>Arm length (m)</source>
-      </segment>
-    </unit>
     <unit id="976888794834775617">
       <segment>
         <source> Graphical view </source>
@@ -634,11 +614,6 @@
     <unit id="6713690242020777174">
       <segment>
         <source>Build version</source>
-      </segment>
-    </unit>
-    <unit id="6963570697110110448">
-      <segment>
-        <source>Link name</source>
       </segment>
     </unit>
     <unit id="6414866325880172359">
@@ -906,11 +881,6 @@
         <source>No news found</source>
       </segment>
     </unit>
-    <unit id="2112772949826062259">
-      <segment>
-        <source>Initial Condition</source>
-      </segment>
-    </unit>
     <unit id="2622453688077092594">
       <segment>
         <source>Study imported from protoV4</source>
@@ -936,11 +906,6 @@
         <source>Studio</source>
       </segment>
     </unit>
-    <unit id="361983614534909005">
-      <segment>
-        <source>Height below console (m)</source>
-      </segment>
-    </unit>
     <unit id="419149014255896698">
       <segment>
         <source>Support name</source>
@@ -949,11 +914,6 @@
     <unit id="7462301153729425254">
       <segment>
         <source>Export</source>
-      </segment>
-    </unit>
-    <unit id="755168724826424878">
-      <segment>
-        <source> The attachment set number and the arm length value will be automatically filled in the table. </source>
       </segment>
     </unit>
     <unit id="7584732332123203553">
@@ -1443,11 +1403,6 @@
         <source>Max ice thickness</source>
       </segment>
     </unit>
-    <unit id="3766856601447528715">
-      <segment>
-        <source>Initial condition 1</source>
-      </segment>
-    </unit>
     <unit id="3948064756684098346">
       <segment>
         <source> Max wind pressure </source>
@@ -1481,11 +1436,6 @@
     <unit id="9095132887560670905">
       <segment>
         <source>Cable pretension</source>
-      </segment>
-    </unit>
-    <unit id="1382927506926002184">
-      <segment>
-        <source>DaN</source>
       </segment>
     </unit>
     <unit id="2340664682417154043">
@@ -1628,11 +1578,6 @@
         <source>Face</source>
       </segment>
     </unit>
-    <unit id="4835655744650419347">
-      <segment>
-        <source>Support image</source>
-      </segment>
-    </unit>
     <unit id="4915431133669985304">
       <segment>
         <source>Profile</source>
@@ -1751,6 +1696,176 @@
     <unit id="8990805719441989570">
       <segment>
         <source>Span</source>
+      </segment>
+    </unit>
+    <unit id="1019591151849311353">
+      <segment>
+        <source>Charge created</source>
+      </segment>
+    </unit>
+    <unit id="1339958536387081724">
+      <segment>
+        <source>Add a charge case</source>
+      </segment>
+    </unit>
+    <unit id="1546940907709341937">
+      <segment>
+        <source>Span loading</source>
+      </segment>
+    </unit>
+    <unit id="1667027745228811183">
+      <segment>
+        <source>LIT - ADR</source>
+      </segment>
+    </unit>
+    <unit id="1864612253981729182">
+      <segment>
+        <source>suspension</source>
+      </segment>
+    </unit>
+    <unit id="1964106600703167330">
+      <segment>
+        <source>Cable manip. at span</source>
+      </segment>
+    </unit>
+    <unit id="2087858758183650212">
+      <segment>
+        <source>IC</source>
+      </segment>
+    </unit>
+    <unit id="2398928213100250023">
+      <segment>
+        <source> In order to add charges, you need to create a charge case. </source>
+      </segment>
+    </unit>
+    <unit id="2813428855529635901">
+      <segment>
+        <source>View charge case</source>
+      </segment>
+    </unit>
+    <unit id="2905929947185397074">
+      <segment>
+        <source>chain</source>
+      </segment>
+    </unit>
+    <unit id="3059442917741627872">
+      <segment>
+        <source>Arm length</source>
+      </segment>
+    </unit>
+    <unit id="3065988870624889478">
+      <segment>
+        <source>LIT - IDR</source>
+      </segment>
+    </unit>
+    <unit id="344013254935185191">
+      <segment>
+        <source>Charge updated</source>
+      </segment>
+    </unit>
+    <unit id="4142858945350399408">
+      <segment>
+        <source>Height below console</source>
+      </segment>
+    </unit>
+    <unit id="4438108941812329281">
+      <segment>
+        <source>Branch - ADR</source>
+      </segment>
+    </unit>
+    <unit id="4807396535461926931">
+      <segment>
+        <source>Charge deleted</source>
+      </segment>
+    </unit>
+    <unit id="5004217118094368051">
+      <segment>
+        <source>Ver.MAJ</source>
+      </segment>
+    </unit>
+    <unit id="5351632617142518313">
+      <segment>
+        <source>App version checked</source>
+      </segment>
+    </unit>
+    <unit id="557544842878781608">
+      <segment>
+        <source>Edit charge case</source>
+      </segment>
+    </unit>
+    <unit id="581758079292144535">
+      <segment>
+        <source>Add a description to your charge case</source>
+      </segment>
+    </unit>
+    <unit id="5884678477650117685">
+      <segment>
+        <source>Cable manip. at support</source>
+      </segment>
+    </unit>
+    <unit id="6212148435964115036">
+      <segment>
+        <source>Link - IDR</source>
+      </segment>
+    </unit>
+    <unit id="6965096128886264042">
+      <segment>
+        <source>Branch - IDR</source>
+      </segment>
+    </unit>
+    <unit id="7607770781665288883">
+      <segment>
+        <source>Create a charge case</source>
+      </segment>
+    </unit>
+    <unit id="8179510261091625036">
+      <segment>
+        <source>Climate condition</source>
+      </segment>
+    </unit>
+    <unit id="8365437498463676833">
+      <segment>
+        <source> Personnel presence </source>
+      </segment>
+    </unit>
+    <unit id="858950043240201803">
+      <segment>
+        <source>IC 1</source>
+      </segment>
+    </unit>
+    <unit id="8736414220975972324">
+      <segment>
+        <source>Generalities</source>
+      </segment>
+    </unit>
+    <unit id="9064235119713814924">
+      <segment>
+        <source>Version / MAJ</source>
+      </segment>
+    </unit>
+    <unit id="2694623513112556993">
+      <segment>
+        <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
+      </segment>
+    </unit>
+    <unit id="4262495966859034995">
+      <segment>
+        <source>Charge case name</source>
+      </segment>
+    </unit>
+    <unit id="7726078135791017446">
+      <segment>
+        <source> Choose the attachment set in the list or on the graph to find the right arm length. </source>
+      </segment>
+    </unit>
+    <unit id="4893374109940250877">
+      <segment>
+        <source>%CRA</source>
+      </segment>
+    </unit>
+    <unit id="8669020716428920796">
+      <segment>
+        <source>Guard number</source>
       </segment>
     </unit>
   </file>

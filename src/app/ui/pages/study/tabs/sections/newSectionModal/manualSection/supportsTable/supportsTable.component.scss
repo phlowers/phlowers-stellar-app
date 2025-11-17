@@ -1,3 +1,8 @@
+input {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
 .sticky-left,
 .sticky-right {
   position: sticky;
@@ -14,31 +19,27 @@
 }
 
 .integer-column {
-  width: 6rem;
   min-width: 6rem;
-  max-width: 6rem;
 }
 
 .decimal-column {
-  width: 9rem;
-  min-width: 9rem;
-  max-width: 9rem;
+  min-width: 7rem;
+}
+
+.position-column {
+  min-width: 3rem;
 }
 
 .text-column {
-  width: 11rem;
   min-width: 11rem;
-  max-width: 11rem;
 }
 
 .boolean-column {
-  width: 8rem;
-  min-width: 8rem;
-  max-width: 8rem;
+  min-width: 5rem;
 }
 
 td {
-  >* {
+  >*:not(button) {
     width: 100%;
   }
 
