@@ -7,7 +7,7 @@
 
 export interface Support {
   uuid: string;
-  number: number | null;
+  number: string | null;
   name: string | null;
   spanLength: number | null;
   spanAngle: number | null;

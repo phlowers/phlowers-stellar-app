@@ -46,8 +46,8 @@ export class LoggedLayoutComponent implements OnInit {
     footer: [
       {
         id: 'sideB-usrPref',
-        label: $localize`User preference`,
-        shortLabel: $localize`usr pref`,
+        label: $localize`Version / MAJ`,
+        shortLabel: $localize`Ver.MAJ`,
         route: '/admin',
         icon: 'account_circle'
       }

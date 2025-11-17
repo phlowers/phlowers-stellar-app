@@ -15,6 +15,7 @@ import {
   ProtoV4Support,
   ProtoV4Parameters
 } from '../../data/database/interfaces/protoV4';
+import { MessageService } from 'primeng/api';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -24,6 +25,9 @@ jest.mock('uuid', () => ({
 describe('StudiesService', () => {
   let service: StudiesService;
   let mockStorageService: jest.Mocked<StorageService>;
+  const mockMessageService = {
+    add: jest.fn()
+  } as any;
   let mockDb: {
     users: {
       toArray: jest.Mock;
@@ -91,7 +95,8 @@ describe('StudiesService', () => {
     TestBed.configureTestingModule({
       providers: [
         StudiesService,
-        { provide: StorageService, useValue: mockStorageService }
+        { provide: StorageService, useValue: mockStorageService },
+        { provide: MessageService, useValue: mockMessageService }
       ]
     });
 
@@ -333,7 +338,7 @@ describe('StudiesService', () => {
       long_bras: 3.0,
       long_ch: 1.5,
       nom: 'Support 1',
-      num: 1,
+      num: '1',
       pds_ch: 1.2,
       portée: 200,
       surf_ch: 0.8,

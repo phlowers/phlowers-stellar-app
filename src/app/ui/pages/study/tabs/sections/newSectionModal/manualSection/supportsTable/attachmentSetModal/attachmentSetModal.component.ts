@@ -19,6 +19,7 @@ import { UniquePipe } from '@ui/shared/service/autocomplete/unique.pipe';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { Section } from '@core/data/database/interfaces/section';
+import { SupportPlotComponent } from '@ui/shared/components/studio/support/support-plot.component';
 
 @Component({
   selector: 'app-attachment-set-modal',
@@ -31,7 +32,8 @@ import { Section } from '@core/data/database/interfaces/section';
     FormsModule,
     UniquePipe,
     IconFieldModule,
-    InputIconModule
+    InputIconModule,
+    SupportPlotComponent
   ],
   templateUrl: './attachmentSetModal.component.html'
 })

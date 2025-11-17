@@ -85,12 +85,15 @@ export class StudiesService {
     if (!study) {
       return null;
     }
+    const userEmail = (await this.storageService.db?.users.toArray())?.[0]
+      ?.email;
     const allStudies = await this.storageService.db?.studies.toArray();
     const allStudyTitles = allStudies?.map((study) => study.title);
     const duplicateTitle = findDuplicateTitle(allStudyTitles, study.title);
     const newStudy = {
       ...study,
       title: duplicateTitle,
+      author_email: userEmail,
       uuid: uuidv4(),
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
@@ -138,6 +141,10 @@ export class StudiesService {
    * @param study The study to update
    */
   async updateStudy(study: { uuid: string } & Partial<Study>) {
+    const user = await this.storageService.db?.users.toArray();
+    if (user?.[0]?.email !== study.author_email) {
+      throw new Error('Unauthorized');
+    }
     await this.storageService.db?.studies.update(study.uuid, {
       ...study,
       updated_at_offline: new Date().toISOString()
@@ -163,22 +170,25 @@ export class StudiesService {
       return {
         ...createEmptySupport(),
         uuid: uuidv4(),
-        number: support.num,
-        name: support.nom,
+        number: support.nom,
         spanLength: support.portée,
         spanAngle: support.angle_ligne,
         attachmentHeight: support.alt_acc,
         cableType: parameters.conductor,
         armLength: support.long_bras,
-        chainName: support.suspension ? 'suspension' : 'chain',
+        chainName: support.suspension
+          ? $localize`suspension`
+          : $localize`chain`,
         chainLength: support.long_ch,
-        chainWeight: support.ctr_poids,
-        chainV: support.ch_en_V
+        chainWeight: support.pds_ch,
+        counterWeight: support.ctr_poids,
+        chainV: support.ch_en_V,
+        supportFootAltitude: support.alt_acc - 30 > 0 ? support.alt_acc - 30 : 0
       };
     });
     const initialCondition: InitialCondition = {
       uuid: uuidv4(),
-      name: $localize`Initial condition 1`,
+      name: $localize`IC 1`,
       base_parameters: parameters.parameter,
       base_temperature: parameters.temperature_reference,
       cable_pretension: parameters.cra,
@@ -215,7 +225,7 @@ export class StudiesService {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${study.title}.json`;
+    a.download = `${study.title}.clst`;
     a.click();
     URL.revokeObjectURL(url);
     return;

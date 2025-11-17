@@ -189,6 +189,15 @@ export class StudyComponent implements OnInit, OnDestroy {
       section,
       initialCondition
     );
+    const study = await this.studiesService.getStudy(this.study?.uuid);
+    if (!study) {
+      return;
+    }
+    await this.initialConditionService.setInitialCondition(
+      study,
+      study.sections.find((s) => s?.uuid === section?.uuid)!,
+      initialCondition.uuid
+    );
 
     this.messageService.add({
       severity: 'success',

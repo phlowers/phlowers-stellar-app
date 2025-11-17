@@ -111,11 +111,6 @@
           </div>
           @if (isCableNarcisse()) {
             <div>
-              <p class="font-bold mb-0" i18n>
-                Extreme historical conditions incurred by the cable
-              </p>
-            </div>
-            <div>
               <label for="initial-condition-cable-pretension" i18n>
                 Cable pretension
               </label>
@@ -128,8 +123,13 @@
                   pInputText
                   [(ngModel)]="initialCondition().cable_pretension"
                 />
-                <p-inputgroup-addon i18n>DaN</p-inputgroup-addon>
+                <p-inputgroup-addon i18n>%CRA</p-inputgroup-addon>
               </p-inputgroup>
+            </div>
+            <div>
+              <p class="font-bold mb-0" i18n>
+                Extreme historical conditions incurred by the cable
+              </p>
             </div>
             <div>
               <label for="initial-condition-min-temperature" i18n>
@@ -206,18 +206,18 @@
           </div>
           @if (isCableNarcisse()) {
             <div>
-              <dt class="extreme-historical-conditions" i18n>
-                Extreme historical conditions incurred by the cable
-              </dt>
-            </div>
-            <div>
               <dt i18n>Cable pretension</dt>
               <dd class="read-only-info test">
                 {{ initialCondition().cable_pretension }}
                 @if (isNumber(initialCondition().cable_pretension)) {
-                  <ng-container i18n>DaN</ng-container>
+                  <ng-container i18n>%CRA</ng-container>
                 }
               </dd>
+            </div>
+            <div>
+              <dt class="extreme-historical-conditions" i18n>
+                Extreme historical conditions incurred by the cable
+              </dt>
             </div>
             <div>
               <dt i18n>Min temperature</dt>

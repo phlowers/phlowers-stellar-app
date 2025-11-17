@@ -67,10 +67,10 @@ export class StudioMenuBarComponent {
     value: string
   ) {
     if (value) {
-      functionToLaunch.bind(this.chargesService)(
+      functionToLaunch(
+        value,
         this.study()?.uuid ?? '',
-        this.section()?.uuid ?? '',
-        value
+        this.section()?.uuid ?? ''
       );
     }
   }
@@ -83,7 +83,6 @@ export class StudioMenuBarComponent {
   }
 
   deleteChargeCase(chargeCase?: { label: string; value: string }) {
-    console.log('chargeCase', chargeCase);
     this.launchChargeFunction(
       this.chargesService.deleteCharge,
       chargeCase?.value ?? ''

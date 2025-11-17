@@ -24,13 +24,10 @@ import { PlotService } from '@src/app/ui/pages/studio/plot.service';
   imports: [SectionPlotComponent, ProgressSpinnerModule]
 })
 export class StudioComponent implements OnInit, OnDestroy {
-  // litData = signal<GetSectionOutput | null>(null);
   section = input.required<Section | null>();
   isSupportZoom = input.required<boolean>();
-  // loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
-  // error = signal<TaskError | DataError | null>(null);
 
   getErrorString = computed(() => {
     switch (this.plotService.error()) {

@@ -20,6 +20,33 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { isNumber, uniq } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
 import { AttachmentService } from '@core/services/attachment/attachment.service';
+
+const calculateSupportNumber = (
+  firstSupport: Support,
+  header: keyof Support
+) => {
+  if (header !== 'number') {
+    return { firstNumber: null, restOfString: '', isNumberField: false };
+  }
+  let firstNumber = null;
+  let restOfString = '';
+  let isNumberField = false;
+  let unit = 1;
+  while (
+    /^[0-9]+$/.test(firstSupport['number']?.slice(-unit) || '') &&
+    unit <= (firstSupport['number']?.length || 0)
+  ) {
+    unit++;
+  }
+  if (unit > 1) {
+    unit = unit - 1;
+    firstNumber = Number(firstSupport['number']?.slice(-unit));
+    restOfString = firstSupport['number']?.slice(0, -unit) || '';
+    isNumberField = true;
+  }
+  return { firstNumber, restOfString, isNumberField };
+};
+
 @Component({
   selector: 'app-supports-table',
   imports: [
@@ -61,8 +88,8 @@ export class SupportsTableComponent implements OnInit {
   ) {}
 
   public onlyPositiveNumbers = /^[0-9]*$/;
-  public onlyPositiveNumbersWithDecimal = /^[0-9]*\.?[0-9]{0,20}$/;
-  public positiveAndNegativeNumbersWithDecimal = /^-?[0-9]*\.?[0-9]{0,20}$/;
+  public onlyPositiveNumbersWithDecimal = /^[0-9]*[,.]?[0-9]{0,20}$/;
+  public positiveAndNegativeNumbersWithDecimal = /^-?[0-9]*[,.]?[0-9]{0,20}$/;
 
   optionsChainV = [
     { label: $localize`Yes`, value: true },
@@ -130,8 +157,21 @@ export class SupportsTableComponent implements OnInit {
     const isChainName = header === 'chainName';
     const isSpanLength = header === 'spanLength';
     const isAttachmentHeight = header === 'attachmentHeight';
+    const { firstNumber, restOfString, isNumberField } = calculateSupportNumber(
+      firstSupport,
+      header
+    );
     for (const [index, support] of this.supports().entries()) {
       if (isSpanLength && index === this.supports().length - 1) {
+        continue;
+      }
+
+      if (isNumberField && isNumber(firstNumber)) {
+        this.supportChange.emit({
+          uuid: support.uuid,
+          field: header,
+          value: restOfString + String(firstNumber + index)
+        });
         continue;
       }
       this.supportChange.emit({
@@ -177,6 +217,9 @@ export class SupportsTableComponent implements OnInit {
   }
 
   onSupportNumberDoubleClick(header: keyof Support) {
+    if (this.mode() === 'view') {
+      return;
+    }
     this.copyColumn(header);
   }
 

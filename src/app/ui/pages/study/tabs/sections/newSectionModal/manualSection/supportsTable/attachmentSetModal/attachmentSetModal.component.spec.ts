@@ -47,7 +47,7 @@ describe('AttachmentSetModalComponent', () => {
 
   const mockSupport: Support = {
     uuid: 'support-uuid',
-    number: 1,
+    number: '1',
     name: 'Test Support',
     spanLength: 100.0,
     spanAngle: 0.0,
