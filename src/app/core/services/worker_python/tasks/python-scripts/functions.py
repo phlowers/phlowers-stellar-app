@@ -9,6 +9,8 @@ from typing import Optional
 from dataclasses import dataclass
 from typing import List
 import math
+from mechaphlowers.entities.shapes import SupportShape
+
 import json
 
 from importlib.metadata import version
@@ -52,6 +54,7 @@ class InitialCondition:
 
 @dataclass
 class Cable:
+    id: str
     name: str
     data_source: str
     section: float
@@ -70,7 +73,16 @@ class Cable:
     stress_strain_b2: float
     stress_strain_b3: float
     stress_strain_b4: float
-    is_narcisse: bool
+    is_polynomial: bool
+    diameter_heart: float
+    section_conductor: float
+    section_heart: float
+    solar_absorption: float
+    emissivity: float
+    electric_resistance_20: float
+    linear_resistance_temperature_coef: float
+    radial_thermal_conductivity: float
+    has_magnetic_heart: bool
 
 
 def generate_section_array(supports: list[Support]):
@@ -85,6 +97,7 @@ def generate_section_array(supports: list[Support]):
     insulator_mass = []
     load_mass = []
     load_position = []
+    ground_altitude = []
 
     for index, support in enumerate(supports):
         name.append(support.name or f"Support {index}")
@@ -100,6 +113,7 @@ def generate_section_array(supports: list[Support]):
         insulator_mass.append(support.chainWeight or 0)
         load_mass.append(0)
         load_position.append(0)
+        ground_altitude.append(support.supportFootAltitude)
 
     section_data = {
         "name": name,
@@ -112,6 +126,7 @@ def generate_section_array(supports: list[Support]):
         "load_position": load_position,
         "span_length": span_length,
         "line_angle": line_angle,
+        "ground_altitude": ground_altitude,
     }
     return pd.DataFrame(section_data)
 
@@ -150,17 +165,27 @@ engine = None
 plt_line = None
 
 
-def get_coordinates(plt_line: PlotEngine):
-    span_coords = plt_line.section_pts.get_spans("section").points(True)
-    insulators_coords = plt_line.section_pts.get_insulators().points(True)
-    supports_coords = plt_line.section_pts.get_supports().points(True)
-    spans = split_points_into_their_spans(span_coords)
-    insulators = split_points_into_their_spans(insulators_coords)
-    supports = split_points_into_their_spans(supports_coords)
+def get_section_middle_span(support_length: int):
+    if support_length % 2 == 0:
+        return support_length // 2
+    else:
+        return support_length // 2 + 1
+
+
+def get_coordinates(
+    plt_line: PlotEngine, project: bool = False, support_length: int = 0
+):
+    print(
+        "get_section_middle_span(support_length)",
+        get_section_middle_span(support_length),
+    )
+    span, supports, insulators = plt_line.section_pts.get_points_for_plot(
+        project=project, frame_index=2
+    )
     result = {
-        "spans": spans,
-        "insulators": insulators,
-        "supports": supports,
+        "spans": span.coords,
+        "insulators": insulators.coords,
+        "supports": supports.coords,
     }
     return result
 
@@ -199,6 +224,17 @@ def init_section(js_inputs: dict):
     initial_condition = (
         InitialCondition(**input_initial_condition) if input_initial_condition else None
     )
+    # print("input_cable: ", input_cable)
+    # del input_cable["id"]
+    # del input_cable["diameter_heart"]
+    # del input_cable["section_conductor"]
+    # del input_cable["section_heart"]
+    # del input_cable["solar_absorption"]
+    # del input_cable["emissivity"]
+    # del input_cable["electric_resistance_20"]
+    # del input_cable["linear_resistance_temperature_coef"]
+    # del input_cable["radial_thermal_conductivity"]
+    # del input_cable["has_magnetic_heart"]
     cable = Cable(**input_cable)
 
     if not input_section["supports"]:
@@ -214,8 +250,10 @@ def init_section(js_inputs: dict):
 
     section = SectionArray(df)
     # set sagging parameter and temperatur
-    section.sagging_parameter = initial_condition.base_parameters
-    print("initial_condition: ", initial_condition)
+    section.sagging_parameter = (
+        initial_condition.base_parameters if initial_condition else 2000
+    )
+    # print("initial_condition: ", initial_condition)
     section.sagging_temperature = (
         initial_condition.base_temperature if initial_condition else 15
     )
@@ -241,6 +279,18 @@ def init_section(js_inputs: dict):
                 "b2": [cable.stress_strain_b2],
                 "b3": [cable.stress_strain_b3],
                 "b4": [cable.stress_strain_b4],
+                "diameter_heart": [cable.diameter_heart],
+                "section_conductor": [cable.section_conductor],
+                "section_heart": [cable.section_heart],
+                "solar_absorption": [cable.solar_absorption],
+                "emissivity": [cable.emissivity],
+                "electric_resistance_20": [cable.electric_resistance_20],
+                "linear_resistance_temperature_coef": [
+                    cable.linear_resistance_temperature_coef
+                ],
+                "radial_thermal_conductivity": [cable.radial_thermal_conductivity],
+                "has_magnetic_heart": [cable.has_magnetic_heart],
+                "is_polynomial": [cable.is_polynomial],
             }
         )
     )
@@ -260,7 +310,7 @@ def init_section(js_inputs: dict):
             # "b4": "MPa",
         }
     )
-    print("cable_array: ", json.dumps(cable_array.data.to_dict()))
+    # print("cable_array: ", json.dumps(cable_array.data.to_dict()))
 
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
     plt_line = PlotEngine.builder_from_balance_engine(engine)
@@ -268,15 +318,14 @@ def init_section(js_inputs: dict):
     engine.solve_change_state()
 
     if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
-        section_length = len(engine.section_array.data)
         climate = input_charge["data"]["climate"]
         engine.solve_change_state(
-            ice_thickness=climate["iceThickness"] * np.array([1] * section_length),
-            new_temperature=climate["cableTemperature"]
-            * np.array([1] * section_length),
-            wind_pressure=climate["windPressure"] * np.array([1] * section_length),
+            ice_thickness=climate["iceThickness"],
+            new_temperature=climate["cableTemperature"],
+            wind_pressure=climate["windPressure"],
         )
-    return get_coordinates(plt_line)
+    section_length = len(engine.section_array.data)
+    return get_coordinates(plt_line, False, section_length)
 
 
 def change_climate(js_inputs: dict):
@@ -297,23 +346,40 @@ def change_climate(js_inputs: dict):
     #     "engine.section_array.data: ", json.dumps(engine.section_array.data.to_dict())
     # )
     engine.solve_change_state(
-        ice_thickness=ice_thickness * np.array([1] * section_length),
-        new_temperature=cable_temperature * np.array([1] * section_length),
-        wind_pressure=wind_pressure * np.array([1] * section_length),
+        ice_thickness=ice_thickness,
+        new_temperature=cable_temperature,
+        wind_pressure=wind_pressure,
     )
     return get_coordinates(plt_line)
 
 
 def get_support_coordinates(js_inputs: dict):
-    some_support_name = sample_support_catalog.keys()[0]
-    support_array_list = sample_support_catalog.get_as_object([some_support_name])
+    python_inputs = js_inputs.to_py()
+    # print("get_support_coordinates: ", python_inputs)
+    # coordinates = python_inputs["coordinates"]
+    coordinates = python_inputs["coordinates"]
+    shape_values = np.array(coordinates)
+    shape_name = "pyl"
+    shape_set_number = np.array(python_inputs["attachmentSetNumbers"])
 
-    # data for plotting
-    shape_points = support_array_list[0].support_points
-    text_display_points = support_array_list[0].labels_points
-    text_to_display = support_array_list[0].set_number
+    pyl_shape = SupportShape(
+        name=shape_name,
+        xyz_arms=shape_values,
+        set_number=shape_set_number,
+    )
+    shape_points = pyl_shape.support_points
+    text_display_points = pyl_shape.labels_points
+    text_to_display = pyl_shape.set_number
 
-    print(f"{shape_points=}\n {text_display_points=}\n {text_to_display=}")
+    # some_support_name = sample_support_catalog.keys()[0]
+    # support_array_list = sample_support_catalog.get_as_object([some_support_name])
+
+    # # data for plotting
+    # shape_points = support_array_list[0].support_points
+    # text_display_points = support_array_list[0].labels_points
+    # text_to_display = support_array_list[0].set_number
+
+    # print(f"{shape_points=}\n {text_display_points=}\n {text_to_display=}")
     return {
         "shape_points": shape_points,
         "text_display_points": text_display_points,
