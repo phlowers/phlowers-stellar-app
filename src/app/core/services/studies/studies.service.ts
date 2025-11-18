@@ -150,17 +150,18 @@ export class StudiesService {
    * @param study The study to update
    */
   async updateStudy(
-    study: { uuid: string } & Partial<Study>,
+    study: { uuid: string; author_email: string } & Partial<Study>,
     overrideAuthorCheck = false
   ) {
     const user = await this.storageService.db?.users.toArray();
     if (!overrideAuthorCheck && user?.[0]?.email !== study.author_email) {
+      const errorMessage = $localize`You cannot update a study that you did not create, please duplicate it instead.`;
       this.messageService.add({
         severity: 'error',
         summary: $localize`Unauthorized`,
-        detail: $localize`You cannot update a study that you did not create, please duplicate it instead.`
+        detail: errorMessage
       });
-      return;
+      throw new Error(errorMessage);
     }
     await this.storageService.db?.studies.update(study.uuid, {
       ...study,
