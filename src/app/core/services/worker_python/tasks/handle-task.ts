@@ -88,7 +88,10 @@ export async function handleTask<taskId extends Task>(
   } catch (error: any) {
     console.error(error);
     let errorType = TaskError.CALCULATION_ERROR;
-    if (error?.message?.includes('Solver did not converge')) {
+    if (
+      error?.message &&
+      error?.message?.toLowerCase().includes('did not converge')
+    ) {
       errorType = TaskError.SOLVER_DID_NOT_CONVERGE;
     }
     return {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -24,23 +24,40 @@ const layout = () => ({
   templateUrl: './support-plot.component.html',
   imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
 })
-export class SupportPlotComponent implements OnInit {
-  constructor(private readonly workerPythonService: WorkerPythonService) {}
-
-  ngOnInit() {
-    this.workerPythonService.ready$.subscribe(async (ready) => {
-      if (ready) {
-        const { result } = await this.workerPythonService.runTask(
-          Task.getSupportCoordinates,
-          {}
-        );
-        const { shape_points, text_display_points, text_to_display } = result;
-        console.log('shape_points', shape_points);
-        console.log('text_display_points', text_display_points);
-        console.log('text_to_display', text_to_display);
-        this.createPlot(shape_points, text_display_points, text_to_display);
+export class SupportPlotComponent {
+  coordinates = input<(number | undefined)[][]>();
+  attachmentSetNumbers = input<number[]>();
+  constructor(private readonly workerPythonService: WorkerPythonService) {
+    effect(() => {
+      if (
+        this.coordinates()?.length &&
+        this.attachmentSetNumbers()?.length &&
+        this.workerPythonService.ready
+      ) {
+        this.refreshPlot(this.coordinates()!, this.attachmentSetNumbers()!);
+      } else {
+        this.clearPlot();
       }
     });
+  }
+
+  clearPlot() {
+    plotly.purge('plotly-output-support');
+  }
+
+  async refreshPlot(
+    coordinates: (number | undefined)[][],
+    attachmentSetNumbers: number[]
+  ) {
+    const { result } = await this.workerPythonService.runTask(
+      Task.getSupportCoordinates,
+      {
+        coordinates: coordinates,
+        attachmentSetNumbers: attachmentSetNumbers
+      }
+    );
+    const { shape_points, text_display_points, text_to_display } = result;
+    this.createPlot(shape_points, text_display_points, text_to_display);
   }
 
   createPlot(

@@ -77,7 +77,10 @@
       <div
         class="w-[18.75rem] bg-gray-100 flex flex-col items-center justify-center"
       >
-        <app-support-plot></app-support-plot>
+        <app-support-plot
+          [coordinates]="coordinates()"
+          [attachmentSetNumbers]="attachmentSetNumbers()"
+        ></app-support-plot>
       </div>
     </div>
   </ng-template>
