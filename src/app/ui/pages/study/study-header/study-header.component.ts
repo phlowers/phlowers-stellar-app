@@ -6,6 +6,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { CommonModule, DatePipe } from '@angular/common';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { ExportDialogComponent } from './export-dialog/export-dialog.component';
 
 @Component({
   selector: 'app-study-header',
@@ -15,7 +16,8 @@ import { StudiesService } from '@src/app/core/services/studies/studies.service';
     TagComponent,
     AccordionModule,
     DatePipe,
-    CommonModule
+    CommonModule,
+    ExportDialogComponent
   ],
   templateUrl: './study-header.component.html',
   styleUrl: './study-header.component.scss'
@@ -28,7 +30,6 @@ export class StudyHeaderComponent {
   public duplicateStudy = output<string>();
   public openModifyStudyModal = output<void>();
   public dateFormat = $localize`dd/MM:yyyy at HH'h'mm`;
-
   constructor(private readonly studiesService: StudiesService) {}
 
   toggleActiveDetail() {
@@ -40,10 +41,11 @@ export class StudyHeaderComponent {
     }
   }
 
-  exportStudy() {
-    if (!this.study()) {
-      return;
-    }
-    this.studiesService.downloadStudy(this.study()!.uuid);
+  openExportDialog() {
+    this.studiesService.exportDialogData.set({
+      uuid: this.study()?.uuid ?? '',
+      title: this.study()?.title ?? '',
+      isOpen: true
+    });
   }
 }

@@ -1,3 +1,4 @@
+<app-export-dialog></app-export-dialog>
 <p-confirmdialog key="positionDialog" [position]="'center'" />
 <section>
   <app-new-study-modal [(isOpen)]="isNewStudyModalOpen" />
@@ -26,7 +27,6 @@
         [studies]="studies"
         (deleteStudy)="deleteStudy($event)"
         (duplicateStudy)="duplicateStudy($event)"
-        (downloadStudy)="downloadStudy($event)"
       />
     </p-tabpanel>
     <p-tabpanel value="searchStudy"> </p-tabpanel>

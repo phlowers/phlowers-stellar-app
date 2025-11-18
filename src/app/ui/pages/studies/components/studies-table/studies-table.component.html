@@ -160,7 +160,7 @@
               app-btn
               btnSize="s"
               btnStyle="text"
-              (click)="downloadStudy.emit(study.uuid)"
+              (click)="openExportDialog(study.uuid)"
             >
               <app-icon icon="download" />
               <ng-container i18n>Export</ng-container>
