@@ -6,17 +6,21 @@
  */
 
 export interface Chain {
-  name: string;
-  length: number;
-  weight: number;
-  surface: number;
-  v: boolean;
+  chain_name: string;
+  mean_length: number;
+  mean_mass: number;
+  v_chain: boolean;
+  chain_type: string;
+  chain_surface: number;
+  uuid: string;
 }
 
 export interface RteChainsCsvFile {
-  name: string;
-  length: string;
-  weight: string;
-  surface: string;
-  v: string;
+  chain_name: string;
+  mean_length: string;
+  mean_mass: string;
+  v_chain: string;
+  chain_type: string;
+  chain_surface: string;
+  uuid: string;
 }

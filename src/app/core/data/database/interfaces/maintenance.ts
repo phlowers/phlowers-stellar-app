@@ -19,19 +19,19 @@ export interface MaintenanceTeam extends MaintenanceCenter {
 }
 
 export interface RteMaintenanceTeamsCsvFile {
-  CM_CUR: string;
-  CM_DESIGNATION: string;
-  GMR_CUR: string;
-  GMR_DESIGNATION: string;
-  EEL_CUR: string;
-  EEL_DESIGNATION: string;
+  maintenance_center: string;
+  regional_team: string;
+  maintenance_team: string;
+  maintenance_center_id: string;
+  regional_team_id: string;
+  maintenance_team_id: string;
 }
 
 export interface MaintenanceData {
-  cm_id: string;
-  cm_name: string;
-  gmr_id: string;
-  gmr_name: string;
-  eel_id: string;
-  eel_name: string;
+  maintenance_center: string;
+  regional_team: string;
+  maintenance_team: string;
+  maintenance_center_id: string;
+  regional_team_id: string;
+  maintenance_team_id: string;
 }

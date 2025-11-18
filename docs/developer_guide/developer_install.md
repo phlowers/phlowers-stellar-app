@@ -61,7 +61,7 @@ You should match global and local project CLI by watching current version in `pa
     - stress_strain_b2
     - stress_strain_b3
     - stress_strain_b4
-    - is_narcisse
+    - is_polynomial
 
 4. chains data should be put inside a `public/data/chains.csv` file with the following columns:
     - name

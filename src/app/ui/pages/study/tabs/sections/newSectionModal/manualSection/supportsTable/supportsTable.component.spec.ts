@@ -33,18 +33,22 @@ const mockAttachmentService = {
 // Mock data
 const mockChains: Chain[] = [
   {
-    name: 'Chain 1',
-    length: 10.5,
-    weight: 2.3,
-    surface: 100,
-    v: false
+    chain_name: 'Chain 1',
+    mean_length: 10.5,
+    mean_mass: 2.3,
+    chain_surface: 100,
+    v_chain: false,
+    chain_type: 'type1',
+    uuid: 'uuid1'
   },
   {
-    name: 'Chain 2',
-    length: 15.0,
-    weight: 3.1,
-    surface: 150,
-    v: true
+    chain_name: 'Chain 2',
+    mean_length: 15.0,
+    mean_mass: 3.1,
+    chain_surface: 150,
+    v_chain: true,
+    chain_type: 'type2',
+    uuid: 'uuid2'
   }
 ];
 
@@ -57,7 +61,7 @@ const mockSupports: Support[] = [
     spanAngle: 90.0,
     attachmentHeight: 12.0,
     cableType: null,
-    attachmentSet: 'Set A',
+    attachmentSet: 1,
     heightBelowConsole: 1.5,
     armLength: 2.0,
     chainName: 'Chain 1',
@@ -77,7 +81,7 @@ const mockSupports: Support[] = [
     spanAngle: 85.0,
     attachmentHeight: 11.0,
     cableType: null,
-    attachmentSet: 'Set B',
+    attachmentSet: 2,
     heightBelowConsole: 1.2,
     armLength: 1.8,
     chainName: 'Chain 2',
@@ -97,7 +101,7 @@ const mockSupports: Support[] = [
     spanAngle: 88.0,
     attachmentHeight: 13.0,
     cableType: null,
-    attachmentSet: 'Set C',
+    attachmentSet: 3,
     heightBelowConsole: 1.8,
     armLength: 2.2,
     chainName: null,
@@ -265,17 +269,17 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         field: 'attachmentSet',
-        value: 'Set A'
+        value: 1
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
         field: 'attachmentSet',
-        value: 'Set A'
+        value: 1
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
         field: 'attachmentSet',
-        value: 'Set A'
+        value: 1
       });
     });
 
@@ -550,7 +554,7 @@ describe('SupportsTableComponent', () => {
       const event = {
         uuid: 'support1',
         supportName: 'Updated Support 1',
-        attachmentSet: 'Updated Set A',
+        attachmentSet: 1,
         armLength: 3.0,
         heightBelowConsole: 2.0
       };
@@ -559,7 +563,7 @@ describe('SupportsTableComponent', () => {
 
       const support = component.supports().find((s) => s.uuid === 'support1');
       expect(support?.name).toBe('Updated Support 1');
-      expect(support?.attachmentSet).toBe('Updated Set A');
+      expect(support?.attachmentSet).toBe(1);
       expect(support?.armLength).toBe(3.0);
       expect(support?.heightBelowConsole).toBe(2.0);
     });

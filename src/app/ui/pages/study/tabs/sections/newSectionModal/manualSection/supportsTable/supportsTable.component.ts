@@ -117,17 +117,17 @@ export class SupportsTableComponent implements OnInit {
 
   onSupportFieldChange(uuid: string, field: keyof Support, value: any) {
     if (field === 'chainName') {
-      const chain = this.chains().find((chain) => chain.name === value);
+      const chain = this.chains().find((chain) => chain.chain_name === value);
       if (chain) {
         this.supportChange.emit({
           uuid,
           field: 'chainLength',
-          value: chain.length
+          value: chain.mean_length
         });
         this.supportChange.emit({
           uuid,
           field: 'chainWeight',
-          value: chain.weight
+          value: chain.mean_mass
         });
         this.supportChange.emit({
           uuid,
@@ -233,7 +233,7 @@ export class SupportsTableComponent implements OnInit {
   onValidateFormAttachmentSetModal(event: {
     uuid: string;
     supportName: string;
-    attachmentSet: string;
+    attachmentSet: number;
     armLength: number;
     heightBelowConsole: number;
   }) {

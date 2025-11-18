@@ -11,7 +11,7 @@ export interface Support {
   name: string | null;
   spanLength: number | null;
   spanAngle: number | null;
-  attachmentSet: string | null;
+  attachmentSet: number | null;
   attachmentHeight: number | null;
   heightBelowConsole: number | null;
   cableType: string | null;

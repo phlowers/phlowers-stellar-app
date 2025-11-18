@@ -10,6 +10,7 @@ import { Study } from '../../data/database/interfaces/study';
 import { StudiesService } from '../studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+import { cloneDeep } from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,7 @@ export class SectionService {
     const existingSection = study.sections.find(
       (s) => s?.uuid === section?.uuid
     );
+    const studyKeep = cloneDeep(study);
 
     const nowDate = new Date().toISOString();
     section.updated_at = nowDate;
@@ -39,7 +41,10 @@ export class SectionService {
       study.sections = [...study.sections, section];
     }
 
-    await this.studiesService.updateStudy(study);
+    await this.studiesService.updateStudy(study).catch((error: any) => {
+      study.sections = studyKeep.sections;
+      throw error;
+    });
   }
 
   /**
@@ -73,5 +78,17 @@ export class SectionService {
     study.sections = [...study.sections, newSection];
     await this.studiesService.updateStudy(study);
     return newSection;
+  }
+
+  getSectionByUuid(
+    studyUuid: string | undefined,
+    sectionUuid: string
+  ): Promise<Section | undefined> {
+    if (!studyUuid) {
+      return Promise.resolve(undefined);
+    }
+    return this.studiesService.getStudy(studyUuid).then((study) => {
+      return study?.sections.find((s) => s?.uuid === sectionUuid);
+    });
   }
 }
