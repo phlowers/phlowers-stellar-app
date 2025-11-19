@@ -1,3 +1,4 @@
+<app-export-dialog></app-export-dialog>
 <section class="study-header">
   <h1 class="study-header__title">{{ study()?.title }}</h1>
 
@@ -63,7 +64,7 @@
     <ng-container i18n>Publish</ng-container>
   </button>
 
-  <button app-btn btnSize="s" btnStyle="text" (click)="exportStudy()">
+  <button app-btn btnSize="s" btnStyle="text" (click)="openExportDialog()">
     <app-icon icon="download" />
     <ng-container i18n>Export</ng-container>
   </button>

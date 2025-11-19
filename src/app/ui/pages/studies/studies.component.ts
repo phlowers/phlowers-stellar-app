@@ -22,6 +22,7 @@ import { CommonModule } from '@angular/common';
 import { StudiesTableComponent } from './components/studies-table/studies-table.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from './components/import-study/import-study.component';
+import { ExportDialogComponent } from '../study/study-header/export-dialog/export-dialog.component';
 
 @Component({
   standalone: true,
@@ -37,7 +38,8 @@ import { ImportStudyComponent } from './components/import-study/import-study.com
     CommonModule,
     StudiesTableComponent,
     ConfirmDialogModule,
-    ImportStudyComponent
+    ImportStudyComponent,
+    ExportDialogComponent
   ],
   templateUrl: './studies.component.html',
   providers: [MessageService, ConfirmationService]
@@ -79,10 +81,6 @@ export class StudiesComponent implements OnInit {
 
   duplicateStudy(uuid: string) {
     this.studiesService.duplicateStudy(uuid);
-  }
-
-  downloadStudy(uuid: string) {
-    this.studiesService.downloadStudy(uuid);
   }
 
   deleteStudy(uuid: string) {
