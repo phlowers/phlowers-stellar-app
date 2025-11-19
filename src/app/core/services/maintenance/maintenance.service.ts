@@ -48,14 +48,14 @@ export class MaintenanceService {
     const mapData = (data: RteMaintenanceTeamsCsvFile[]) => {
       return data
         .map((item) => ({
-          cm_id: item.CM_CUR,
-          cm_name: item.CM_DESIGNATION,
-          gmr_id: item.GMR_CUR,
-          gmr_name: item.GMR_DESIGNATION,
-          eel_id: item.EEL_CUR,
-          eel_name: item.EEL_DESIGNATION
+          maintenance_center_id: item.maintenance_center_id,
+          maintenance_center: item.maintenance_center,
+          regional_team_id: item.regional_team_id,
+          regional_team: item.regional_team,
+          maintenance_team_id: item.maintenance_team_id,
+          maintenance_team: item.maintenance_team
         }))
-        .filter((item) => item.eel_id);
+        .filter((item) => item.maintenance_team_id);
     };
 
     await new Promise<void>((resolve) => {

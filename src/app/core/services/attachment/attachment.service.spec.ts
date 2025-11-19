@@ -106,7 +106,7 @@ describe('AttachmentService', () => {
           updated_at: '2025-01-01T00:00:00.000Z',
           created_at: '2025-01-01T00:00:00.000Z',
           support_name: 'Support 1',
-          attachment_set: '1',
+          attachment_set: 1,
           support_order: 1,
           attachment_altitude: 10.5,
           cross_arm_length: 2.0
@@ -116,7 +116,7 @@ describe('AttachmentService', () => {
           updated_at: '2025-01-01T00:00:00.000Z',
           created_at: '2025-01-01T00:00:00.000Z',
           support_name: 'Support 2',
-          attachment_set: '2',
+          attachment_set: 2,
           support_order: 2,
           attachment_altitude: 11.0,
           cross_arm_length: 2.5
@@ -150,23 +150,33 @@ describe('AttachmentService', () => {
     it('should import attachments from CSV file successfully', async () => {
       const mockCsvData: RteAttachmentsCsvFile[] = [
         {
+          support_id_catalog: 'catalog1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
           support_family: 'Family 1',
-          support_name: 'Support 1',
-          set_number: '1',
-          altitude: '10.5',
-          arm_length: '2.0'
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
         },
         {
+          support_id_catalog: 'catalog2',
+          support_idr: 'idr2',
+          support_adr: 'Support 2',
+          support_tower: 'tower2',
           support_family: 'Family 2',
-          support_name: 'Support 2',
-          set_number: '2',
-          altitude: '11.0',
-          arm_length: '2.5'
+          position: '2',
+          X: '0',
+          Y: '0',
+          Z: '11.0',
+          L: '2.5'
         }
       ];
 
       const mockCsvContent =
-        'support_name,set_number,altitude,arm_length\nSupport 1,1,10.5,2.0\nSupport 2,2,11.0,2.5';
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncatalog1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncatalog2,idr2,Support 2,tower2,Family 2,2,0,0,11.0,2.5';
 
       // Mock Papa Parse to call complete callback
       (Papa.parse as jest.Mock).mockImplementation(
@@ -212,26 +222,31 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 1',
-          attachment_set: '1',
-          support_order: 1,
+          attachment_set: 1,
           attachment_altitude: 10.5,
-          cross_arm_length: 2.0
+          cross_arm_length: 2.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 10.5
         },
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 2',
-          attachment_set: '2',
-          support_order: 2,
+          attachment_set: 2,
           attachment_altitude: 11.0,
-          cross_arm_length: 2.5
+          cross_arm_length: 2.5,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 11.0
         }
       ]);
     });
 
     it('should handle empty CSV data', async () => {
-      const mockCsvContent = 'support_name,set_number,altitude,arm_length\n';
+      const mockCsvContent =
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\n';
 
       // Mock Papa Parse to call complete callback with empty data
       (Papa.parse as jest.Mock).mockImplementation(
@@ -274,33 +289,48 @@ describe('AttachmentService', () => {
       expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
     });
 
-    it('should filter out attachments with missing support_name', async () => {
+    it('should filter out attachments with missing support_adr', async () => {
       const mockCsvData: RteAttachmentsCsvFile[] = [
         {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
           support_family: 'Family 1',
-          support_name: 'Support 1',
-          set_number: '1',
-          altitude: '10.5',
-          arm_length: '2.0'
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
         },
         {
+          support_id_catalog: 'cat2',
+          support_idr: 'idr2',
+          support_adr: '',
+          support_tower: 'tower2',
           support_family: 'Family 2',
-          support_name: '',
-          set_number: '2',
-          altitude: '11.0',
-          arm_length: '2.5'
+          position: '2',
+          X: '0',
+          Y: '0',
+          Z: '11.0',
+          L: '2.5'
         },
         {
+          support_id_catalog: 'cat3',
+          support_idr: 'idr3',
+          support_adr: 'Support 3',
+          support_tower: 'tower3',
           support_family: 'Family 3',
-          support_name: 'Support 3',
-          set_number: '3',
-          altitude: '12.0',
-          arm_length: '3.0'
+          position: '3',
+          X: '0',
+          Y: '0',
+          Z: '12.0',
+          L: '3.0'
         }
       ];
 
       const mockCsvContent =
-        'support_family,support_name,set_number,altitude,arm_length\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,,2,11.0,2.5\nFamily 3,Support 3,3,12.0,3.0';
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncat2,idr2,,tower2,Family 2,2,0,0,11.0,2.5\ncat3,idr3,Support 3,tower3,Family 3,3,0,0,12.0,3.0';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
@@ -338,27 +368,31 @@ describe('AttachmentService', () => {
 
       await importPromise;
 
-      // Should only add attachments with valid support_name
+      // Should only add attachments with valid support_adr
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 1',
-          attachment_set: '1',
-          support_order: 1,
+          attachment_set: 1,
           attachment_altitude: 10.5,
-          cross_arm_length: 2.0
+          cross_arm_length: 2.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 10.5
         },
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 3',
-          attachment_set: '3',
-          support_order: 3,
+          attachment_set: 3,
           attachment_altitude: 12.0,
-          cross_arm_length: 3.0
+          cross_arm_length: 3.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 12.0
         }
       ]);
     });
@@ -368,16 +402,21 @@ describe('AttachmentService', () => {
 
       const mockCsvData: RteAttachmentsCsvFile[] = [
         {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
           support_family: 'Family 1',
-          support_name: 'Support 1',
-          set_number: '1',
-          altitude: '10.5',
-          arm_length: '2.0'
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
         }
       ];
 
       const mockCsvContent =
-        'support_family,support_name,set_number,altitude,arm_length\nFamily 1,Support 1,1,10.5,2.0';
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
@@ -417,40 +456,60 @@ describe('AttachmentService', () => {
       await expect(importPromise).resolves.toBeUndefined();
     });
 
-    it('should handle CSV data with mixed valid and invalid support_name values', async () => {
+    it('should handle CSV data with mixed valid and invalid support_adr values', async () => {
       const mockCsvData: RteAttachmentsCsvFile[] = [
         {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
           support_family: 'Family 1',
-          support_name: 'Support 1',
-          set_number: '1',
-          altitude: '10.5',
-          arm_length: '2.0'
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
         },
         {
+          support_id_catalog: 'cat2',
+          support_idr: 'idr2',
+          support_adr: '',
+          support_tower: 'tower2',
           support_family: 'Family 2',
-          support_name: '',
-          set_number: '2',
-          altitude: '11.0',
-          arm_length: '2.5'
+          position: '2',
+          X: '0',
+          Y: '0',
+          Z: '11.0',
+          L: '2.5'
         },
         {
+          support_id_catalog: 'cat3',
+          support_idr: 'idr3',
+          support_adr: 'Support 3',
+          support_tower: 'tower3',
           support_family: 'Family 3',
-          support_name: 'Support 3',
-          set_number: '3',
-          altitude: '12.0',
-          arm_length: '3.0'
+          position: '3',
+          X: '0',
+          Y: '0',
+          Z: '12.0',
+          L: '3.0'
         },
         {
+          support_id_catalog: 'cat4',
+          support_idr: 'idr4',
+          support_adr: null as unknown as string,
+          support_tower: 'tower4',
           support_family: 'Family 4',
-          support_name: null as unknown as string,
-          set_number: '4',
-          altitude: '13.0',
-          arm_length: '3.5'
+          position: '4',
+          X: '0',
+          Y: '0',
+          Z: '13.0',
+          L: '3.5'
         }
       ];
 
       const mockCsvContent =
-        'support_family,support_name,set_number,altitude,arm_length\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,,2,11.0,2.5\nFamily 3,Support 3,3,12.0,3.0\nFamily 4,,4,13.0,3.5';
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,,2,11.0,2.5\nFamily 3,Support 3,3,12.0,3.0\nFamily 4,,4,13.0,3.5';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
@@ -488,27 +547,31 @@ describe('AttachmentService', () => {
 
       await importPromise;
 
-      // Should only add attachments with valid support_name
+      // Should only add attachments with valid support_adr
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 1',
-          attachment_set: '1',
-          support_order: 1,
+          attachment_set: 1,
           attachment_altitude: 10.5,
-          cross_arm_length: 2.0
+          cross_arm_length: 2.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 10.5
         },
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 3',
-          attachment_set: '3',
-          support_order: 3,
+          attachment_set: 3,
           attachment_altitude: 12.0,
-          cross_arm_length: 3.0
+          cross_arm_length: 3.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 12.0
         }
       ]);
     });
@@ -516,16 +579,21 @@ describe('AttachmentService', () => {
     it('should clear attachments table before adding new data', async () => {
       const mockCsvData: RteAttachmentsCsvFile[] = [
         {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
           support_family: 'Family 1',
-          support_name: 'Support 1',
-          set_number: '1',
-          altitude: '10.5',
-          arm_length: '2.0'
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
         }
       ];
 
       const mockCsvContent =
-        'support_family,support_name,set_number,altitude,arm_length\nFamily 1,Support 1,1,10.5,2.0';
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
@@ -613,23 +681,33 @@ describe('AttachmentService', () => {
     it('should parse numeric values correctly', async () => {
       const mockCsvData: RteAttachmentsCsvFile[] = [
         {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
           support_family: 'Family 1',
-          support_name: 'Support 1',
-          set_number: '1',
-          altitude: '10.5',
-          arm_length: '2.0'
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
         },
         {
           support_family: 'Family 2',
-          support_name: 'Support 2',
-          set_number: '2',
-          altitude: '11',
-          arm_length: '2.5'
+          support_adr: 'Support 2',
+          position: '2',
+          support_id_catalog: 'cat2',
+          support_idr: 'idr2',
+          support_tower: 'tower2',
+          X: '0',
+          Y: '0',
+          Z: '11',
+          L: '2.5'
         }
       ];
 
       const mockCsvContent =
-        'support_family,support_name,set_number,altitude,arm_length\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,Support 2,2,11,2.5';
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,Support 2,2,11,2.5';
 
       (Papa.parse as jest.Mock).mockImplementation(
         (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
@@ -673,20 +751,24 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 1',
-          attachment_set: '1',
-          support_order: 1,
+          attachment_set: 1,
           attachment_altitude: 10.5,
-          cross_arm_length: 2.0
+          cross_arm_length: 2.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 10.5
         },
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 2',
-          attachment_set: '2',
-          support_order: 2,
+          attachment_set: 2,
           attachment_altitude: 11,
-          cross_arm_length: 2.5
+          cross_arm_length: 2.5,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 11
         }
       ]);
     });

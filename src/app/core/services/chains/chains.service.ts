@@ -44,13 +44,15 @@ export class ChainsService {
     const mapData = (data: RteChainsCsvFile[]) => {
       return data
         .map((item) => ({
-          name: item.name,
-          length: Number(item.length.replace(',', '.')),
-          weight: Number(item.weight.replace(',', '.')),
-          surface: Number(item.surface.replace(',', '.')),
-          v: item.v === 'true'
+          uuid: item.uuid,
+          chain_name: item.chain_name,
+          mean_length: Number(item.mean_length.replace(',', '.')),
+          mean_mass: Number(item.mean_mass.replace(',', '.')),
+          v_chain: item.v_chain === 'true',
+          chain_type: item.chain_type,
+          chain_surface: Number(item.chain_surface.replace(',', '.'))
         }))
-        .filter((item) => item.name);
+        .filter((item) => item.chain_name);
     };
 
     await new Promise<void>((resolve) => {

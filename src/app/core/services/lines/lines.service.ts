@@ -11,7 +11,7 @@ import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { Line, RteLinesCsvFile } from '../../data/database/interfaces/line';
 import { v4 as uuidv4 } from 'uuid';
-import { sortBy } from 'lodash';
+import { sortBy, uniqBy } from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -52,13 +52,14 @@ export class LinesService {
       return data
         .map((item) => ({
           uuid: uuidv4(),
-          link_idr: item.LIAISON_IDR || '',
-          lit_idr: item.LIT_IDR || '',
-          lit_adr: item.LIT_ADR || '',
-          branch_idr: item.BRANCHE_IDR || '',
-          branch_adr: item.BRANCHE_ADR || '',
-          electric_tension_level_idr: item.TENSION_ELECTRIQUE_IDR || '',
-          electric_tension_level_adr: item.TENSION_ELECTRIQUE_ADR || ''
+          link_idr: item.link_idr || '',
+          link_adr: item.link_adr || '',
+          lit_idr: item.lit_idr || '',
+          lit_adr: item.lit_adr || '',
+          branch_idr: item.branch_idr || '',
+          branch_adr: item.branch_adr || '',
+          voltage_idr: item.voltage_idr || '',
+          voltage_adr: item.voltage_adr || ''
         }))
         .filter((item) => item.link_idr);
     };
@@ -75,9 +76,16 @@ export class LinesService {
             }
             await this.storageService.db?.lines.clear();
             const table: Line[] = mapData(data);
-            console.log('adding lines data', table.length);
+            const uniqueTable = uniqBy(table, (element) =>
+              [
+                element.voltage_idr,
+                element.link_idr,
+                element.lit_idr,
+                element.branch_idr
+              ].join('')
+            );
             await this.storageService.db?.lines.bulkAdd(
-              sortBy(table, 'electric_tension_level_adr')
+              sortBy(uniqueTable, 'voltage_adr')
             );
             resolve();
           }) as (jsonResults: Papa.ParseResult<RteLinesCsvFile>) => void

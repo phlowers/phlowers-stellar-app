@@ -32,13 +32,13 @@ export interface Section {
   last_attachment_set: string;
   regional_maintenance_center_names: string[];
   maintenance_center_names: string[];
-  gmr: string | undefined;
-  eel: string | undefined;
-  cm: string | undefined;
+  regional_team_id: string | undefined;
+  maintenance_team_id: string | undefined;
+  maintenance_center_id: string | undefined;
   link_name: string | undefined;
   lit: string | undefined;
   branch_name: string | undefined;
-  electric_tension_level: string | undefined;
+  voltage_idr: string | undefined;
   comment: string | undefined;
   supports_comment: string | undefined;
   supports: Support[];

@@ -26,7 +26,7 @@ describe('WorkerService', () => {
     name: 'Support 1',
     spanLength: 100,
     spanAngle: 0,
-    attachmentSet: 'set1',
+    attachmentSet: 1,
     attachmentHeight: 10,
     heightBelowConsole: 5,
     cableType: 'type1',
@@ -75,13 +75,13 @@ describe('WorkerService', () => {
     last_attachment_set: 'set1',
     regional_maintenance_center_names: ['center1'],
     maintenance_center_names: ['center1'],
-    gmr: 'gmr1',
-    eel: 'eel1',
-    cm: 'cm1',
+    regional_team_id: 'gmr1',
+    maintenance_team_id: 'eel1',
+    maintenance_center_id: 'cm1',
     link_name: 'link1',
     lit: 'lit1',
     branch_name: 'branch1',
-    electric_tension_level: '400kV',
+    voltage_idr: '400kV',
     comment: 'Test comment',
     supports_comment: 'Test supports comment',
     supports: [createMockSupport()],
@@ -110,7 +110,14 @@ describe('WorkerService', () => {
     stress_strain_b2: 0.8,
     stress_strain_b3: 0.9,
     stress_strain_b4: 1.0,
-    is_narcisse: false
+    is_polynomial: false,
+    diameter_heart: undefined,
+    section_conductor: undefined,
+    section_heart: undefined,
+    solar_absorption: undefined,
+    emissivity: undefined,
+    electric_resistance_20: undefined,
+    linear_resistance_temperature_coef: undefined
   });
 
   beforeEach(() => {

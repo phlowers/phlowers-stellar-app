@@ -28,7 +28,18 @@ jest.mock('uuid', () => ({
 
 // Mock lodash
 jest.mock('lodash', () => ({
-  sortBy: jest.fn((arr: unknown[]) => arr)
+  sortBy: jest.fn((arr: unknown[]) => arr),
+  uniqBy: jest.fn((arr: unknown[], iteratee: (item: unknown) => unknown) => {
+    const seen = new Set();
+    return arr.filter((item: unknown) => {
+      const key = iteratee(item);
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  })
 }));
 
 interface MockTable {
@@ -129,8 +140,9 @@ describe('LinesService', () => {
           lit_adr: 'LIT_ADR001',
           branch_idr: 'BRANCH001',
           branch_adr: 'BRANCH_ADR001',
-          electric_tension_level_idr: 'TENSION001',
-          electric_tension_level_adr: 'TENSION_ADR001'
+          voltage_idr: 'TENSION001',
+          voltage_adr: 'TENSION_ADR001',
+          link_adr: 'LINK_ADR001'
         }
       ];
       mockLinesTable.toArray.mockResolvedValue(mockLines);
@@ -161,13 +173,26 @@ describe('LinesService', () => {
     it('should import lines from CSV file successfully', async () => {
       const mockCsvData: RteLinesCsvFile[] = [
         {
-          LIAISON_IDR: 'LINK001',
-          LIT_IDR: 'LIT001',
-          LIT_ADR: 'LIT_ADR001',
-          BRANCHE_IDR: 'BRANCH001',
-          BRANCHE_ADR: 'BRANCH_ADR001',
-          TENSION_ELECTRIQUE_IDR: 'TENSION001',
-          TENSION_ELECTRIQUE_ADR: 'TENSION_ADR001'
+          link_idr: 'LINK001',
+          lit_idr: 'LIT001',
+          lit_adr: 'LIT_ADR001',
+          branch_idr: 'BRANCH001',
+          branch_adr: 'BRANCH_ADR001',
+          voltage_idr: 'TENSION001',
+          voltage_adr: 'TENSION_ADR001',
+          link_adr: 'LINK_ADR001',
+          section_id: 'SECTION001',
+          section_type: 'SECTION_TYPE001',
+          cable_id: 'CABLE001',
+          cable_idr: 'CABLE_IDR001',
+          cable_adr: 'CABLE_ADR001',
+          electric_phase_number: 1,
+          cable_bundle_amount: 1,
+          opical_fiber_amount: 1,
+          link_id: 'LINK001',
+          lit_id: 'LIT001',
+          branch_id: 'BRANCH001',
+          voltage_id: 'TENSION001'
         }
       ];
 
@@ -263,22 +288,48 @@ describe('LinesService', () => {
     it('should handle CSV data with null/undefined LIAISON_IDR', async () => {
       const mockCsvData: RteLinesCsvFile[] = [
         {
-          LIAISON_IDR: '',
-          LIT_IDR: 'LIT001',
-          LIT_ADR: 'LIT_ADR001',
-          BRANCHE_IDR: 'BRANCH001',
-          BRANCHE_ADR: 'BRANCH_ADR001',
-          TENSION_ELECTRIQUE_IDR: 'TENSION001',
-          TENSION_ELECTRIQUE_ADR: 'TENSION_ADR001'
+          link_idr: '',
+          lit_idr: 'LIT001',
+          lit_adr: 'LIT_ADR001',
+          branch_idr: 'BRANCH001',
+          branch_adr: 'BRANCH_ADR001',
+          voltage_idr: 'TENSION001',
+          voltage_adr: 'TENSION_ADR001',
+          section_id: 'SECTION001',
+          section_type: 'SECTION_TYPE001',
+          cable_id: 'CABLE001',
+          cable_idr: 'CABLE_IDR001',
+          cable_adr: 'CABLE_ADR001',
+          electric_phase_number: 1,
+          cable_bundle_amount: 1,
+          opical_fiber_amount: 1,
+          link_id: 'LINK001',
+          lit_id: 'LIT001',
+          branch_id: 'BRANCH001',
+          voltage_id: 'TENSION001',
+          link_adr: 'LINK_ADR001'
         },
         {
-          LIAISON_IDR: 'LINK002',
-          LIT_IDR: 'LIT002',
-          LIT_ADR: 'LIT_ADR002',
-          BRANCHE_IDR: 'BRANCH002',
-          BRANCHE_ADR: 'BRANCH_ADR002',
-          TENSION_ELECTRIQUE_IDR: 'TENSION002',
-          TENSION_ELECTRIQUE_ADR: 'TENSION_ADR002'
+          link_idr: 'LINK002',
+          lit_idr: 'LIT002',
+          lit_adr: 'LIT_ADR002',
+          branch_idr: 'BRANCH002',
+          branch_adr: 'BRANCH_ADR002',
+          voltage_idr: 'TENSION002',
+          voltage_adr: 'TENSION_ADR002',
+          section_id: 'SECTION002',
+          section_type: 'SECTION_TYPE002',
+          cable_id: 'CABLE002',
+          cable_idr: 'CABLE_IDR002',
+          cable_adr: 'CABLE_ADR002',
+          electric_phase_number: 2,
+          cable_bundle_amount: 2,
+          opical_fiber_amount: 2,
+          link_id: 'LINK002',
+          lit_id: 'LIT002',
+          branch_id: 'BRANCH002',
+          voltage_id: 'TENSION002',
+          link_adr: 'LINK_ADR002'
         }
       ];
 
@@ -330,8 +381,8 @@ describe('LinesService', () => {
           lit_adr: 'LIT_ADR002',
           branch_idr: 'BRANCH002',
           branch_adr: 'BRANCH_ADR002',
-          electric_tension_level_idr: 'TENSION002',
-          electric_tension_level_adr: 'TENSION_ADR002'
+          voltage_idr: 'TENSION002',
+          voltage_adr: 'TENSION_ADR002'
         })
       ]);
     });
@@ -341,13 +392,26 @@ describe('LinesService', () => {
 
       const mockCsvData: RteLinesCsvFile[] = [
         {
-          LIAISON_IDR: 'LINK001',
-          LIT_IDR: 'LIT001',
-          LIT_ADR: 'LIT_ADR001',
-          BRANCHE_IDR: 'BRANCH001',
-          BRANCHE_ADR: 'BRANCH_ADR001',
-          TENSION_ELECTRIQUE_IDR: 'TENSION001',
-          TENSION_ELECTRIQUE_ADR: 'TENSION_ADR001'
+          link_idr: '',
+          lit_idr: 'LIT001',
+          lit_adr: 'LIT_ADR001',
+          branch_idr: 'BRANCH001',
+          branch_adr: 'BRANCH_ADR001',
+          voltage_idr: 'TENSION001',
+          voltage_adr: 'TENSION_ADR001',
+          section_id: 'SECTION001',
+          section_type: 'SECTION_TYPE001',
+          cable_id: 'CABLE001',
+          cable_idr: 'CABLE_IDR001',
+          cable_adr: 'CABLE_ADR001',
+          electric_phase_number: 1,
+          cable_bundle_amount: 1,
+          opical_fiber_amount: 1,
+          link_id: 'LINK001',
+          lit_id: 'LIT001',
+          branch_id: 'BRANCH001',
+          voltage_id: 'TENSION001',
+          link_adr: 'LINK_ADR001'
         }
       ];
 
@@ -395,13 +459,26 @@ describe('LinesService', () => {
     it('should sort lines by electric_tension_level_adr', async () => {
       const mockCsvData: RteLinesCsvFile[] = [
         {
-          LIAISON_IDR: 'LINK001',
-          LIT_IDR: 'LIT001',
-          LIT_ADR: 'LIT_ADR001',
-          BRANCHE_IDR: 'BRANCH001',
-          BRANCHE_ADR: 'BRANCH_ADR001',
-          TENSION_ELECTRIQUE_IDR: 'TENSION001',
-          TENSION_ELECTRIQUE_ADR: 'TENSION_ADR001'
+          link_idr: '',
+          lit_idr: 'LIT001',
+          lit_adr: 'LIT_ADR001',
+          branch_idr: 'BRANCH001',
+          branch_adr: 'BRANCH_ADR001',
+          voltage_idr: 'TENSION001',
+          voltage_adr: 'TENSION_ADR001',
+          section_id: 'SECTION001',
+          section_type: 'SECTION_TYPE001',
+          cable_id: 'CABLE001',
+          cable_idr: 'CABLE_IDR001',
+          cable_adr: 'CABLE_ADR001',
+          electric_phase_number: 1,
+          cable_bundle_amount: 1,
+          opical_fiber_amount: 1,
+          link_id: 'LINK001',
+          lit_id: 'LIT001',
+          branch_id: 'BRANCH001',
+          voltage_id: 'TENSION001',
+          link_adr: 'LINK_ADR001'
         }
       ];
 
@@ -446,7 +523,7 @@ describe('LinesService', () => {
 
       expect(sortBy as jest.Mock).toHaveBeenCalledWith(
         expect.any(Array),
-        'electric_tension_level_adr'
+        'voltage_adr'
       );
     });
   });

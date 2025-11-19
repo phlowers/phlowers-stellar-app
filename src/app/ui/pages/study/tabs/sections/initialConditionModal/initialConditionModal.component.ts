@@ -55,8 +55,8 @@ export class InitialConditionModalComponent {
   initialCondition = signal<InitialCondition>({
     uuid: '',
     name: '',
-    base_parameters: 0,
-    base_temperature: 0,
+    base_parameters: 2000,
+    base_temperature: 15,
     cable_pretension: 0,
     min_temperature: 0,
     max_wind_pressure: 0,
@@ -91,7 +91,7 @@ export class InitialConditionModalComponent {
           const sectionCableName = this.section().cable_name;
           if (sectionCableName) {
             this.isCableNarcisse.set(
-              !!cables?.find((c) => c.name === sectionCableName)?.is_narcisse
+              !!cables?.find((c) => c.name === sectionCableName)?.is_polynomial
             );
           }
         });

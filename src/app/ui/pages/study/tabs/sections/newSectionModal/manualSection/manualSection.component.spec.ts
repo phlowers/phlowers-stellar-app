@@ -76,20 +76,20 @@ const mockLinesService = {
 // Mock data
 const mockMaintenanceData: MaintenanceData[] = [
   {
-    cm_id: 'cm1',
-    cm_name: 'CM 1',
-    gmr_id: 'gmr1',
-    gmr_name: 'GMR 1',
-    eel_id: 'eel1',
-    eel_name: 'EEL 1'
+    maintenance_center_id: 'cm1',
+    maintenance_center: 'CM 1',
+    regional_team_id: 'gmr1',
+    regional_team: 'GMR 1',
+    maintenance_team_id: 'maintenance_team1',
+    maintenance_team: 'MAINTENANCE TEAM 1'
   },
   {
-    cm_id: 'cm2',
-    cm_name: 'CM 2',
-    gmr_id: 'gmr1',
-    gmr_name: 'GMR 1',
-    eel_id: 'eel2',
-    eel_name: 'EEL 2'
+    maintenance_center_id: 'cm2',
+    maintenance_center: 'CM 2',
+    regional_team_id: 'gmr1',
+    regional_team: 'GMR 1',
+    maintenance_team_id: 'maintenance_team2',
+    maintenance_team: 'MAINTENANCE TEAM 2'
   }
 ];
 
@@ -101,8 +101,9 @@ const mockLinesData: Line[] = [
     lit_adr: 'LIT 1',
     branch_idr: 'branch1',
     branch_adr: 'BRANCH 1',
-    electric_tension_level_idr: 'tension1',
-    electric_tension_level_adr: '400'
+    voltage_idr: 'tension1',
+    voltage_adr: '400',
+    link_adr: 'LINK 1'
   },
   {
     uuid: 'line2',
@@ -111,8 +112,9 @@ const mockLinesData: Line[] = [
     lit_adr: 'LIT 2',
     branch_idr: 'branch1',
     branch_adr: 'BRANCH 1',
-    electric_tension_level_idr: 'tension2',
-    electric_tension_level_adr: '225'
+    voltage_idr: 'tension2',
+    voltage_adr: '225',
+    link_adr: 'LINK 2'
   }
 ];
 
@@ -145,13 +147,13 @@ describe('ManualSectionComponent', () => {
       last_attachment_set: '',
       regional_maintenance_center_names: [],
       maintenance_center_names: [],
-      gmr: '',
-      eel: '',
-      cm: '',
+      regional_team_id: undefined,
+      maintenance_team_id: undefined,
+      maintenance_center_id: undefined,
       link_name: '',
       lit: '',
       branch_name: '',
-      electric_tension_level: '',
+      voltage_idr: '',
       comment: '',
       supports_comment: '',
       supports: [],
@@ -299,8 +301,8 @@ describe('ManualSectionComponent', () => {
       expect(mockMaintenanceService.getMaintenance).toHaveBeenCalled();
       expect(component.maintenanceFilterTable()).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ eel_name: 'EEL 1' }),
-          expect.objectContaining({ eel_name: 'EEL 2' })
+          expect.objectContaining({ maintenance_center_id: 'cm1' }),
+          expect.objectContaining({ maintenance_center_id: 'cm2' })
         ])
       );
     });
@@ -310,8 +312,8 @@ describe('ManualSectionComponent', () => {
       expect(mockLinesService.getLines).toHaveBeenCalled();
       expect(component.linesFilterTable()).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ electric_tension_level_adr: '225' }),
-          expect.objectContaining({ electric_tension_level_adr: '400' })
+          expect.objectContaining({ voltage_adr: '225' }),
+          expect.objectContaining({ voltage_adr: '400' })
         ])
       );
     });
@@ -382,37 +384,29 @@ describe('ManualSectionComponent', () => {
       );
       const event = { value: '' };
 
-      await component.onMaintenanceSelect(event, 'cm');
+      await component.onMaintenanceSelect(event, 'maintenance_center_id');
 
-      expect(mockSection.eel).toBeUndefined();
-      expect(mockSection.cm).toBeUndefined();
-      expect(mockSection.gmr).toBeUndefined();
+      expect(mockSection.maintenance_team_id).toBeUndefined();
+      expect(mockSection.maintenance_center_id).toBeUndefined();
+      expect(mockSection.regional_team_id).toBeUndefined();
       expect(component.maintenanceFilterTable()).toEqual(
         expect.arrayContaining(mockMaintenanceData)
       );
-    });
-
-    it('should filter by cm_id and auto-populate related fields', async () => {
-      const event = { value: 'cm1' };
-
-      await component.onMaintenanceSelect(event, 'cm');
-
-      expect(component.maintenanceFilterTable()).toHaveLength(1);
-      expect(component.maintenanceFilterTable()[0].cm_id).toBe('cm1');
-      expect(mockSection.cm).toBe('cm1');
-      expect(mockSection.gmr).toBe('gmr1');
-      expect(mockSection.eel).toBe('eel1');
+      expect(component.maintenanceFilterTable()).toHaveLength(2);
+      expect(component.maintenanceFilterTable()[0].maintenance_center_id).toBe(
+        'cm1'
+      );
     });
 
     it('should filter by eel_id and auto-populate related fields', async () => {
-      const event = { value: 'eel1' };
+      const event = { value: 'maintenance_team1' };
 
-      await component.onMaintenanceSelect(event, 'eel');
+      await component.onMaintenanceSelect(event, 'maintenance_team_id');
 
       expect(component.maintenanceFilterTable()).toHaveLength(1);
-      expect(mockSection.eel).toBe('eel1');
-      expect(mockSection.cm).toBe('cm1');
-      expect(mockSection.gmr).toBe('gmr1');
+      expect(mockSection.maintenance_team_id).toBe('maintenance_team1');
+      expect(mockSection.maintenance_center_id).toBe('cm1');
+      expect(mockSection.regional_team_id).toBe('gmr1');
     });
   });
 
@@ -428,42 +422,42 @@ describe('ManualSectionComponent', () => {
 
       expect(component.linesFilterTable()).toHaveLength(1);
       expect(mockSection.link_name).toBe('link1');
-      expect(mockSection.lit).toBe('LIT 1');
-      expect(mockSection.branch_name).toBe('BRANCH 1');
-      expect(mockSection.electric_tension_level).toBe('400');
+      expect(mockSection.lit).toBe('lit1');
+      expect(mockSection.branch_name).toBe('branch1');
+      expect(mockSection.voltage_idr).toBe('tension1');
     });
 
-    it('should filter by lit_adr and auto-populate related fields', async () => {
-      const event = { value: 'LIT 1' };
+    it('should filter by lit_idr and auto-populate related fields', async () => {
+      const event = { value: 'lit1' };
 
-      await component.onLinesSelect(event, 'lit_adr');
+      await component.onLinesSelect(event, 'lit_idr');
 
       expect(component.linesFilterTable()).toHaveLength(1);
-      expect(mockSection.lit).toBe('LIT 1');
+      expect(mockSection.lit).toBe('lit1');
     });
 
-    it('should filter by electric_tension_level_adr and auto-populate related fields', async () => {
-      const event = { value: '400' };
+    it('should filter by voltage_idr and auto-populate related fields', async () => {
+      const event = { value: 'tension1' };
 
-      await component.onLinesSelect(event, 'electric_tension_level_adr');
+      await component.onLinesSelect(event, 'voltage_idr');
 
       expect(component.linesFilterTable()).toHaveLength(1);
-      expect(mockSection.electric_tension_level).toBe('400');
+      expect(mockSection.voltage_idr).toBe('tension1');
     });
 
     it('should handle empty electric_tension_level_adr', async () => {
       const linesWithEmptyTension = [
         {
           ...mockLinesData[0],
-          electric_tension_level_adr: ''
+          voltage_adr: ''
         }
       ];
       component.linesFilterTable.set(linesWithEmptyTension);
       const event = { value: '' };
 
-      await component.onLinesSelect(event, 'electric_tension_level_adr');
+      await component.onLinesSelect(event, 'voltage_idr');
 
-      expect(mockSection.electric_tension_level).toBeUndefined();
+      expect(mockSection.voltage_idr).toBeUndefined();
     });
   });
 });

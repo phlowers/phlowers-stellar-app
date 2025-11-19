@@ -16,7 +16,7 @@ describe('AttachmentSetModalComponent', () => {
     {
       uuid: '1',
       support_name: 'Support A',
-      attachment_set: 'Set 1',
+      attachment_set: 1,
       support_order: 1,
       attachment_altitude: 10.5,
       cross_arm_length: 2.5,
@@ -26,7 +26,7 @@ describe('AttachmentSetModalComponent', () => {
     {
       uuid: '2',
       support_name: 'Support A',
-      attachment_set: 'Set 2',
+      attachment_set: 2,
       support_order: 2,
       attachment_altitude: 12.0,
       cross_arm_length: 3.0,
@@ -36,7 +36,7 @@ describe('AttachmentSetModalComponent', () => {
     {
       uuid: '3',
       support_name: 'Support B',
-      attachment_set: 'Set 1',
+      attachment_set: 1,
       support_order: 1,
       attachment_altitude: 8.5,
       cross_arm_length: 2.0,
@@ -51,7 +51,7 @@ describe('AttachmentSetModalComponent', () => {
     name: 'Test Support',
     spanLength: 100.0,
     spanAngle: 0.0,
-    attachmentSet: 'Set 1',
+    attachmentSet: 1,
     attachmentHeight: 15.0,
     heightBelowConsole: 10.0,
     cableType: 'ACSR',
@@ -107,7 +107,7 @@ describe('AttachmentSetModalComponent', () => {
     expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
     expect(component.attachmentsFilterTable()).toEqual(
       mockAttachments.sort(
-        (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
+        (a, b) => (a.attachment_set || 0) - (b.attachment_set || 0)
       )
     );
   });
@@ -116,7 +116,7 @@ describe('AttachmentSetModalComponent', () => {
     // Set some initial values
     component.armLength.set(5);
     component.heightBelowConsole.set(10);
-    component.attachmentSet.set('test');
+    component.attachmentSet.set(1);
     component.supportName.set('test');
 
     // Simulate modal opening by calling resetValues directly
@@ -145,9 +145,7 @@ describe('AttachmentSetModalComponent', () => {
 
     const filteredAttachments = mockAttachments
       .filter((item) => item.support_name === 'Support A')
-      .sort(
-        (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
-      );
+      .sort((a, b) => (a.attachment_set || 0) - (b.attachment_set || 0));
 
     expect(component.attachmentsFilterTable()).toEqual(filteredAttachments);
   });
@@ -157,7 +155,7 @@ describe('AttachmentSetModalComponent', () => {
     component.ngOnInit();
     await fixture.whenStable();
 
-    const event = { value: 'Set 1' };
+    const event = { value: 1 };
     await component.onAttachnementSelect(event, 'attachment_set');
 
     expect(component.armLength()).toBe(2.5);
@@ -166,7 +164,7 @@ describe('AttachmentSetModalComponent', () => {
 
   it('should reset values when attachment selection is cleared', async () => {
     component.supportName.set('Support A');
-    component.attachmentSet.set('Set 1');
+    component.attachmentSet.set(1);
     component.armLength.set(2.5);
     component.heightBelowConsole.set(10.5);
 
@@ -183,7 +181,7 @@ describe('AttachmentSetModalComponent', () => {
     const spy = jest.spyOn(component.validateForm, 'emit');
 
     component.supportName.set('Support A');
-    component.attachmentSet.set('Set 1');
+    component.attachmentSet.set(1);
     component.armLength.set(2.5);
     component.heightBelowConsole.set(10.5);
 
@@ -194,7 +192,7 @@ describe('AttachmentSetModalComponent', () => {
 
     expect(spy).toHaveBeenCalledWith({
       supportName: 'Support A',
-      attachmentSet: 'Set 1',
+      attachmentSet: 1,
       armLength: 2.5,
       heightBelowConsole: 10.5,
       uuid: 'support-uuid'
@@ -208,7 +206,7 @@ describe('AttachmentSetModalComponent', () => {
 
     expect(spy).toHaveBeenCalledWith({
       supportName: '',
-      attachmentSet: '',
+      attachmentSet: 0,
       armLength: 0,
       heightBelowConsole: 0,
       uuid: ''

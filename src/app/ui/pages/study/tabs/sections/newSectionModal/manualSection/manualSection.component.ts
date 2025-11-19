@@ -38,11 +38,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 const sortLines = (lines: Line[]) => {
   return lines.sort((a, b) => {
-    const aElectricTensionLevelAdr = a.electric_tension_level_adr || '';
-    const bElectricTensionLevelAdr = b.electric_tension_level_adr || '';
+    const aVoltageAdr = a.voltage_adr || '';
+    const bVoltageAdr = b.voltage_adr || '';
     return (
-      aElectricTensionLevelAdr.length - bElectricTensionLevelAdr.length ||
-      aElectricTensionLevelAdr.localeCompare(bElectricTensionLevelAdr || '')
+      aVoltageAdr.length - bVoltageAdr.length ||
+      aVoltageAdr.localeCompare(bVoltageAdr || '')
     );
   });
 };
@@ -51,29 +51,29 @@ const lineTablePropertiesToSectionProperties: Record<
   LineTableProperties,
   keyof Section
 > = {
-  electric_tension_level_adr: 'electric_tension_level',
+  voltage_idr: 'voltage_idr',
   link_idr: 'link_name',
-  lit_adr: 'lit',
-  branch_adr: 'branch_name'
+  lit_idr: 'lit',
+  branch_idr: 'branch_name'
 };
 
-const orderedMaintenanceTableProperties: ('cm' | 'gmr' | 'eel')[] = [
-  'cm',
-  'gmr',
-  'eel'
-];
+const orderedMaintenanceTableProperties: (
+  | 'maintenance_center_id'
+  | 'regional_team_id'
+  | 'maintenance_team_id'
+)[] = ['maintenance_center_id', 'regional_team_id', 'maintenance_team_id'];
 
 type LineTableProperties =
-  | 'electric_tension_level_adr'
+  | 'voltage_idr'
   | 'link_idr'
-  | 'lit_adr'
-  | 'branch_adr';
+  | 'lit_idr'
+  | 'branch_idr';
 
 const orderedLineTableProperties: LineTableProperties[] = [
-  'electric_tension_level_adr',
+  'voltage_idr',
   'link_idr',
-  'lit_adr',
-  'branch_adr'
+  'lit_idr',
+  'branch_idr'
 ];
 
 @Component({
@@ -119,22 +119,30 @@ export class ManualSectionComponent implements OnInit {
   firstSupport = signal<number>(0);
   rowsSupport = signal<number>(5);
 
-  eelRead = signal<string>('');
-  cmRead = signal<string>('');
-  gmrRead = signal<string>('');
+  maintenanceTeamRead = signal<string>('');
+  maintenanceCenterRead = signal<string>('');
+  regionalTeamRead = signal<string>('');
 
   async setupFilterTables() {
     const table = await this.maintenanceService.getMaintenance();
-    this.maintenanceFilterTable.set(sortBy(table, 'eel_name'));
+    this.maintenanceFilterTable.set(sortBy(table, 'maintenance_team'));
     if (this.mode() === 'view') {
-      this.eelRead.set(
-        table.find((item) => item.eel_id === this.section().eel)?.eel_name || ''
+      this.maintenanceTeamRead.set(
+        table.find(
+          (item) =>
+            item.maintenance_team_id === this.section().maintenance_team_id
+        )?.maintenance_team || ''
       );
-      this.cmRead.set(
-        table.find((item) => item.cm_id === this.section().cm)?.cm_name || ''
+      this.maintenanceCenterRead.set(
+        table.find(
+          (item) =>
+            item.maintenance_center_id === this.section().maintenance_center_id
+        )?.maintenance_center || ''
       );
-      this.gmrRead.set(
-        table.find((item) => item.gmr_id === this.section().gmr)?.gmr_name || ''
+      this.regionalTeamRead.set(
+        table.find(
+          (item) => item.regional_team_id === this.section().regional_team_id
+        )?.regional_team || ''
       );
     }
     const linesTable = await this.linesService.getLines();
@@ -251,7 +259,7 @@ export class ManualSectionComponent implements OnInit {
 
   async onMaintenanceSelect(
     event: { value: string },
-    type: 'cm' | 'gmr' | 'eel'
+    type: 'maintenance_center_id' | 'regional_team_id' | 'maintenance_team_id'
   ) {
     if (!event.value) {
       let found = false;
@@ -271,23 +279,24 @@ export class ManualSectionComponent implements OnInit {
       if (id === type) {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
-            !event.value ||
-            item[`${id}_id` as keyof MaintenanceData] === event.value
+            !event.value || item[id as keyof MaintenanceData] === event.value
         );
       } else {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
             !this.section()[id as keyof Section] ||
-            item[`${id}_id` as keyof MaintenanceData] ===
+            item[id as keyof MaintenanceData] ===
               this.section()[id as keyof Section]
         );
       }
     });
-    this.maintenanceFilterTable.set(sortBy(maintenanceTable, 'eel_name'));
+    this.maintenanceFilterTable.set(
+      sortBy(maintenanceTable, 'maintenance_team')
+    );
     if (maintenanceTable.length === 1) {
       orderedMaintenanceTableProperties.forEach((id) => {
         (this.section() as unknown as Record<string, unknown>)[id] =
-          maintenanceTable[0][`${id}_id` as keyof MaintenanceData];
+          maintenanceTable[0][id as keyof MaintenanceData];
       });
     }
   }

@@ -10,11 +10,11 @@
 
 export const maintenance = {
   maintenance: `
-   eel_id,
-   eel_name,
-   cm_id,
-   cm_name,
-   gmr_id,
-   gmr_name
+  maintenance_team_id,
+   maintenance_center,
+   regional_team,
+   maintenance_team,
+   maintenance_center_id,
+   regional_team_id
   `
 };

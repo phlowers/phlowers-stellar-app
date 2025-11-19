@@ -155,71 +155,79 @@
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid">
             <div class="flex flex-col">
-              <label for="maintCm" i18n>CM</label>
+              <label for="maintenanceCenter" i18n>Maintenance center</label>
               <p-select
-                inputId="sectionType"
-                [options]="maintenanceFilterTable() | unique: 'cm_id'"
-                [(ngModel)]="section().cm"
+                inputId="maintenanceCenter"
+                [options]="
+                  maintenanceFilterTable() | unique: 'maintenance_center_id'
+                "
+                [(ngModel)]="section().maintenance_center_id"
                 appendTo="body"
-                optionLabel="cm_name"
-                optionValue="cm_id"
-                (onChange)="onMaintenanceSelect($event, 'cm')"
+                optionLabel="maintenance_center"
+                optionValue="maintenance_center_id"
+                (onChange)="
+                  onMaintenanceSelect($event, 'maintenance_center_id')
+                "
                 (ngModelChange)="onSectionChange()"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="cm_name"
+                filterBy="maintenance_center"
               />
             </div>
 
             <div class="flex flex-col">
-              <label for="maintGmr" i18n>GMR</label>
+              <label for="maintRegionalTeam" i18n>Regional team</label>
               <p-select
-                inputId="maintGmr"
-                [options]="maintenanceFilterTable() | unique: 'gmr_id'"
-                [(ngModel)]="section().gmr"
+                inputId="maintRegionalTeam"
+                [options]="
+                  maintenanceFilterTable() | unique: 'regional_team_id'
+                "
+                [(ngModel)]="section().regional_team_id"
                 appendTo="body"
-                optionLabel="gmr_name"
-                optionValue="gmr_id"
-                (onChange)="onMaintenanceSelect($event, 'gmr')"
+                optionLabel="regional_team"
+                optionValue="regional_team_id"
+                (onChange)="onMaintenanceSelect($event, 'regional_team_id')"
                 (ngModelChange)="onSectionChange()"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="gmr_name"
+                filterBy="regional_team"
               />
             </div>
 
             <div class="flex flex-col">
-              <label for="maintEel" i18n>EEL</label>
+              <label for="maintenanceTeam" i18n>Maintenance team</label>
               <p-select
-                inputId="maintEel"
-                [options]="maintenanceFilterTable() | unique: 'eel_id'"
-                [(ngModel)]="section().eel"
+                inputId="maintenanceTeam"
+                [options]="
+                  maintenanceFilterTable() | unique: 'maintenance_team_id'
+                "
+                [(ngModel)]="section().maintenance_team_id"
                 appendTo="body"
-                optionLabel="eel_name"
-                optionValue="eel_id"
-                (onChange)="onMaintenanceSelect($event, 'eel')"
+                optionLabel="maintenance_team"
+                optionValue="maintenance_team_id"
+                (onChange)="onMaintenanceSelect($event, 'maintenance_team_id')"
                 (ngModelChange)="onSectionChange()"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="eel_name"
+                filterBy="maintenance_team"
               />
             </div>
           </div>
         } @else if (mode() === 'view') {
           <dl class="section-form-part-grid">
             <div>
-              <dt i18n>CM</dt>
-              <dd class="read-only-info">{{ cmRead() }}</dd>
+              <dt i18n>Maintenance center</dt>
+              <dd class="read-only-info">{{ maintenanceCenterRead() }}</dd>
             </div>
 
             <div>
-              <dt i18n>GMR</dt>
-              <dd class="read-only-info">{{ gmrRead() }}</dd>
+              <dt i18n>Regional team</dt>
+              <dd class="read-only-info">{{ regionalTeamRead() }}</dd>
             </div>
 
             <div>
-              <dt i18n>EEL</dt>
-              <dd class="read-only-info">{{ eelRead() }}</dd>
+              <dt i18n>Maintenance team</dt>
+              <dd class="read-only-info">{{ maintenanceTeamRead() }}</dd>
             </div>
           </dl>
         }
@@ -234,27 +242,25 @@
               <label for="linkEtl" i18n>Electric tension level</label>
               <p-select
                 inputId="linkEtl"
-                [options]="
-                  linesFilterTable() | unique: 'electric_tension_level_adr'
-                "
-                [(ngModel)]="section().electric_tension_level"
-                optionLabel="electric_tension_level_adr"
-                optionValue="electric_tension_level_adr"
+                [options]="linesFilterTable() | unique: 'voltage_idr'"
+                [(ngModel)]="section().voltage_idr"
+                optionLabel="voltage_idr"
+                optionValue="voltage_idr"
                 appendTo="body"
                 (ngModelChange)="onSectionChange()"
                 virtualScroll="true"
                 virtualScrollItemSize="10"
-                (onChange)="onLinesSelect($event, 'electric_tension_level_adr')"
+                (onChange)="onLinesSelect($event, 'voltage_idr')"
                 [showClear]="true"
                 [filter]="true"
-                filterBy="electric_tension_level_adr"
+                filterBy="voltage_idr"
               />
             </div>
             <div class="flex flex-col col-span-1">
-              <label for="linkName" i18n>Link - IDR</label>
+              <label for="linkName" i18n>Link - ID</label>
               <p-select
                 inputId="linkName"
-                [options]="linesFilterTable()"
+                [options]="linesFilterTable() | unique: 'link_idr'"
                 [(ngModel)]="section().link_name"
                 optionLabel="link_idr"
                 optionValue="link_idr"
@@ -269,35 +275,16 @@
               />
             </div>
             <div class="col-span-2"></div>
-
             <div class="flex flex-col col-span-1">
-              <label for="linkLit" i18n>LIT - ADR</label>
+              <label for="linkLit" i18n>LIT - ID</label>
               <p-select
                 inputId="linkLit"
-                [options]="linesFilterTable()"
-                [(ngModel)]="section().lit"
-                optionLabel="lit_adr"
-                optionValue="lit_adr"
-                (ngModelChange)="onSectionChange()"
-                (onChange)="onLinesSelect($event, 'lit_adr')"
-                appendTo="body"
-                virtualScroll="true"
-                virtualScrollItemSize="10"
-                [showClear]="true"
-                [filter]="true"
-                filterBy="lit_adr"
-              />
-            </div>
-            <div class="flex flex-col col-span-3">
-              <label for="linkLit" i18n>LIT - IDR</label>
-              <p-select
-                inputId="linkLit"
-                [options]="linesFilterTable()"
+                [options]="linesFilterTable() | unique: 'lit_idr'"
                 [(ngModel)]="section().lit"
                 optionLabel="lit_idr"
-                optionValue="lit_adr"
+                optionValue="lit_idr"
                 (ngModelChange)="onSectionChange()"
-                (onChange)="onLinesSelect($event, 'lit_adr')"
+                (onChange)="onLinesSelect($event, 'lit_idr')"
                 appendTo="body"
                 virtualScroll="true"
                 virtualScrollItemSize="10"
@@ -307,15 +294,34 @@
               />
             </div>
 
+            <div class="flex flex-col col-span-3">
+              <label for="linkLit" i18n>LIT - Name</label>
+              <p-select
+                inputId="linkLit"
+                [options]="linesFilterTable() | unique: 'lit_idr'"
+                [(ngModel)]="section().lit"
+                optionLabel="lit_adr"
+                optionValue="lit_idr"
+                (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'lit_idr')"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="lit_adr"
+              />
+            </div>
+
             <div class="flex flex-col col-span-1">
-              <label for="linkBm" i18n>Branch - IDR</label>
+              <label for="linkBm" i18n>Branch - ID</label>
               <p-select
                 inputId="linkBm"
-                [options]="linesFilterTable()"
+                [options]="linesFilterTable() | unique: 'branch_idr'"
                 [(ngModel)]="section().branch_name"
                 optionLabel="branch_idr"
-                optionValue="branch_adr"
-                (onChange)="onLinesSelect($event, 'branch_adr')"
+                optionValue="branch_idr"
+                (onChange)="onLinesSelect($event, 'branch_idr')"
                 virtualScroll="true"
                 virtualScrollItemSize="10"
                 appendTo="body"
@@ -326,14 +332,14 @@
               />
             </div>
             <div class="flex flex-col col-span-3">
-              <label for="linkBm" i18n>Branch - ADR</label>
+              <label for="linkBm" i18n>Branch - Name</label>
               <p-select
                 inputId="linkBm"
-                [options]="linesFilterTable()"
+                [options]="linesFilterTable() | unique: 'branch_idr'"
                 [(ngModel)]="section().branch_name"
                 optionLabel="branch_adr"
-                optionValue="branch_adr"
-                (onChange)="onLinesSelect($event, 'branch_adr')"
+                optionValue="branch_idr"
+                (onChange)="onLinesSelect($event, 'branch_idr')"
                 virtualScroll="true"
                 virtualScrollItemSize="10"
                 appendTo="body"
@@ -349,7 +355,7 @@
             <div>
               <dt i18n>Electric tension</dt>
               <dd class="read-only-info">
-                {{ section().electric_tension_level }}
+                {{ section().voltage_idr }}
               </dd>
             </div>
 

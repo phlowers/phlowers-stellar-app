@@ -24,10 +24,18 @@ export interface Cable {
   stress_strain_b2: number | undefined;
   stress_strain_b3: number | undefined;
   stress_strain_b4: number | undefined;
-  is_narcisse: boolean;
+  is_polynomial: boolean;
+  diameter_heart: number | undefined;
+  section_conductor: number | undefined;
+  section_heart: number | undefined;
+  solar_absorption: number | undefined;
+  emissivity: number | undefined;
+  electric_resistance_20: number | undefined;
+  linear_resistance_temperature_coef: number | undefined;
 }
 
 export interface RteCablesCsvFile {
+  cable_id: string;
   name: string;
   data_source: string;
   section: string;
@@ -46,5 +54,14 @@ export interface RteCablesCsvFile {
   stress_strain_b2: string | undefined;
   stress_strain_b3: string | undefined;
   stress_strain_b4: string | undefined;
-  is_narcisse: string;
+  is_polynomial: string;
+  diameter_heart: string;
+  section_conductor: string;
+  section_heart: string;
+  solar_absorption: string;
+  emissivity: string;
+  electric_resistance_20: string;
+  linear_resistance_temperature_coef: string;
+  radial_thermal_conductivity: string;
+  has_magnetic_heart: string;
 }

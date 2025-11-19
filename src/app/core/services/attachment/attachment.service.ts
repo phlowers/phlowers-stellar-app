@@ -14,6 +14,7 @@ import {
   RteAttachmentsCsvFile
 } from '../../data/database/interfaces/attachment';
 import { v4 as uuidv4 } from 'uuid';
+import { toNumber } from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -51,16 +52,18 @@ export class AttachmentService {
 
     const mapData = (data: RteAttachmentsCsvFile[]): Attachment[] => {
       return data
-        .filter((item) => item.support_name)
+        .filter((item) => item.support_adr)
         .map((item) => ({
           uuid: uuidv4(),
           updated_at: new Date().toISOString(),
           created_at: new Date().toISOString(),
-          support_name: item.support_name,
-          attachment_set: item.set_number,
-          support_order: parseInt(item.set_number),
-          attachment_altitude: parseFloat(item.altitude),
-          cross_arm_length: parseFloat(item.arm_length)
+          support_name: item.support_adr,
+          attachment_set: toNumber(item.position),
+          attachment_altitude: parseFloat(item.Z),
+          cross_arm_length: parseFloat(item.L),
+          attachment_set_x: parseFloat(item.X),
+          attachment_set_y: parseFloat(item.Y),
+          attachment_set_z: parseFloat(item.Z)
         }));
     };
 

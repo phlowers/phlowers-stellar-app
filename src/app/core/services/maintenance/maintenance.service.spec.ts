@@ -97,20 +97,20 @@ describe('MaintenanceService', () => {
     it('should return maintenance array from database', async () => {
       const mockMaintenance: MaintenanceData[] = [
         {
-          cm_id: 'CM001',
-          cm_name: 'Maintenance Center 1',
-          gmr_id: 'GMR001',
-          gmr_name: 'Regional Center 1',
-          eel_id: 'EEL001',
-          eel_name: 'Team 1'
+          maintenance_center: 'Maintenance Center 1',
+          maintenance_center_id: 'CM001',
+          regional_team: 'Regional Center 1',
+          regional_team_id: 'GMR001',
+          maintenance_team: 'Team 1',
+          maintenance_team_id: 'EEL001'
         },
         {
-          cm_id: 'CM002',
-          cm_name: 'Maintenance Center 2',
-          gmr_id: 'GMR002',
-          gmr_name: 'Regional Center 2',
-          eel_id: 'EEL002',
-          eel_name: 'Team 2'
+          maintenance_center: 'Maintenance Center 2',
+          maintenance_center_id: 'CM002',
+          regional_team: 'Regional Center 2',
+          regional_team_id: 'GMR002',
+          maintenance_team: 'Team 2',
+          maintenance_team_id: 'EEL002'
         }
       ];
       mockMaintenanceTable.toArray.mockResolvedValue(mockMaintenance);
@@ -141,20 +141,20 @@ describe('MaintenanceService', () => {
     it('should import maintenance teams from CSV file successfully', async () => {
       const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
         {
-          CM_CUR: 'CM001',
-          CM_DESIGNATION: 'Maintenance Center 1',
-          GMR_CUR: 'GMR001',
-          GMR_DESIGNATION: 'Regional Center 1',
-          EEL_CUR: 'EEL001',
-          EEL_DESIGNATION: 'Team 1'
+          maintenance_center_id: 'CM001',
+          maintenance_center: 'Maintenance Center 1',
+          regional_team_id: 'GMR001',
+          regional_team: 'Regional Center 1',
+          maintenance_team_id: 'EEL001',
+          maintenance_team: 'Team 1'
         },
         {
-          CM_CUR: 'CM002',
-          CM_DESIGNATION: 'Maintenance Center 2',
-          GMR_CUR: 'GMR002',
-          GMR_DESIGNATION: 'Regional Center 2',
-          EEL_CUR: 'EEL002',
-          EEL_DESIGNATION: 'Team 2'
+          maintenance_center_id: 'CM002',
+          maintenance_center: 'Maintenance Center 2',
+          regional_team_id: 'GMR002',
+          regional_team: 'Regional Center 2',
+          maintenance_team_id: 'EEL002',
+          maintenance_team: 'Team 2'
         }
       ];
 
@@ -204,20 +204,20 @@ describe('MaintenanceService', () => {
       expect(mockMaintenanceTable.clear).toHaveBeenCalled();
       expect(mockMaintenanceTable.bulkAdd).toHaveBeenCalledWith([
         {
-          cm_id: 'CM001',
-          cm_name: 'Maintenance Center 1',
-          gmr_id: 'GMR001',
-          gmr_name: 'Regional Center 1',
-          eel_id: 'EEL001',
-          eel_name: 'Team 1'
+          maintenance_center_id: 'CM001',
+          maintenance_center: 'Maintenance Center 1',
+          regional_team_id: 'GMR001',
+          regional_team: 'Regional Center 1',
+          maintenance_team_id: 'EEL001',
+          maintenance_team: 'Team 1'
         },
         {
-          cm_id: 'CM002',
-          cm_name: 'Maintenance Center 2',
-          gmr_id: 'GMR002',
-          gmr_name: 'Regional Center 2',
-          eel_id: 'EEL002',
-          eel_name: 'Team 2'
+          maintenance_center_id: 'CM002',
+          maintenance_center: 'Maintenance Center 2',
+          regional_team_id: 'GMR002',
+          regional_team: 'Regional Center 2',
+          maintenance_team_id: 'EEL002',
+          maintenance_team: 'Team 2'
         }
       ]);
     });
@@ -273,20 +273,20 @@ describe('MaintenanceService', () => {
     it('should handle CSV data with null/undefined EEL_CUR', async () => {
       const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
         {
-          CM_CUR: 'CM001',
-          CM_DESIGNATION: 'Maintenance Center 1',
-          GMR_CUR: 'GMR001',
-          GMR_DESIGNATION: 'Regional Center 1',
-          EEL_CUR: '',
-          EEL_DESIGNATION: 'Team 1'
+          maintenance_center_id: 'CM001',
+          maintenance_center: 'Maintenance Center 1',
+          regional_team_id: 'GMR001',
+          regional_team: 'Regional Center 1',
+          maintenance_team_id: '',
+          maintenance_team: 'Team 1'
         },
         {
-          CM_CUR: 'CM002',
-          CM_DESIGNATION: 'Maintenance Center 2',
-          GMR_CUR: 'GMR002',
-          GMR_DESIGNATION: 'Regional Center 2',
-          EEL_CUR: 'EEL002',
-          EEL_DESIGNATION: 'Team 2'
+          maintenance_center_id: 'CM002',
+          maintenance_center: 'Maintenance Center 2',
+          regional_team_id: 'GMR002',
+          regional_team: 'Regional Center 2',
+          maintenance_team_id: 'EEL002',
+          maintenance_team: 'Team 2'
         }
       ];
 
@@ -332,15 +332,15 @@ describe('MaintenanceService', () => {
 
       await importPromise;
 
-      // Should only add the maintenance team with valid EEL_CUR
+      // Should only add the maintenance team with valid maintenance_team_id
       expect(mockMaintenanceTable.bulkAdd).toHaveBeenCalledWith([
         {
-          cm_id: 'CM002',
-          cm_name: 'Maintenance Center 2',
-          gmr_id: 'GMR002',
-          gmr_name: 'Regional Center 2',
-          eel_id: 'EEL002',
-          eel_name: 'Team 2'
+          maintenance_center_id: 'CM002',
+          maintenance_center: 'Maintenance Center 2',
+          regional_team_id: 'GMR002',
+          regional_team: 'Regional Center 2',
+          maintenance_team_id: 'EEL002',
+          maintenance_team: 'Team 2'
         }
       ]);
     });
@@ -350,12 +350,12 @@ describe('MaintenanceService', () => {
 
       const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
         {
-          CM_CUR: 'CM001',
-          CM_DESIGNATION: 'Maintenance Center 1',
-          GMR_CUR: 'GMR001',
-          GMR_DESIGNATION: 'Regional Center 1',
-          EEL_CUR: 'EEL001',
-          EEL_DESIGNATION: 'Team 1'
+          maintenance_center_id: 'CM001',
+          maintenance_center: 'Maintenance Center 1',
+          regional_team_id: 'GMR001',
+          regional_team: 'Regional Center 1',
+          maintenance_team_id: 'EEL001',
+          maintenance_team: 'Team 1'
         }
       ];
 
@@ -406,28 +406,28 @@ describe('MaintenanceService', () => {
     it('should handle CSV data with mixed valid and invalid EEL_CUR values', async () => {
       const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
         {
-          CM_CUR: 'CM001',
-          CM_DESIGNATION: 'Maintenance Center 1',
-          GMR_CUR: 'GMR001',
-          GMR_DESIGNATION: 'Regional Center 1',
-          EEL_CUR: 'EEL001',
-          EEL_DESIGNATION: 'Team 1'
+          maintenance_center_id: 'CM001',
+          maintenance_center: 'Maintenance Center 1',
+          regional_team_id: 'GMR001',
+          regional_team: 'Regional Center 1',
+          maintenance_team_id: 'EEL001',
+          maintenance_team: 'Team 1'
         },
         {
-          CM_CUR: 'CM002',
-          CM_DESIGNATION: 'Maintenance Center 2',
-          GMR_CUR: 'GMR002',
-          GMR_DESIGNATION: 'Regional Center 2',
-          EEL_CUR: '',
-          EEL_DESIGNATION: 'Team 2'
+          maintenance_center_id: 'CM002',
+          maintenance_center: 'Maintenance Center 2',
+          regional_team_id: 'GMR002',
+          regional_team: 'Regional Center 2',
+          maintenance_team_id: '',
+          maintenance_team: 'Team 2'
         },
         {
-          CM_CUR: 'CM003',
-          CM_DESIGNATION: 'Maintenance Center 3',
-          GMR_CUR: 'GMR003',
-          GMR_DESIGNATION: 'Regional Center 3',
-          EEL_CUR: 'EEL003',
-          EEL_DESIGNATION: 'Team 3'
+          maintenance_center_id: 'CM003',
+          maintenance_center: 'Maintenance Center 3',
+          regional_team_id: 'GMR003',
+          regional_team: 'Regional Center 3',
+          maintenance_team_id: 'EEL003',
+          maintenance_team: 'Team 3'
         }
       ];
 
@@ -473,23 +473,23 @@ describe('MaintenanceService', () => {
 
       await importPromise;
 
-      // Should only add maintenance teams with valid EEL_CUR
+      // Should only add maintenance teams with valid maintenance_team_id
       expect(mockMaintenanceTable.bulkAdd).toHaveBeenCalledWith([
         {
-          cm_id: 'CM001',
-          cm_name: 'Maintenance Center 1',
-          gmr_id: 'GMR001',
-          gmr_name: 'Regional Center 1',
-          eel_id: 'EEL001',
-          eel_name: 'Team 1'
+          maintenance_center_id: 'CM001',
+          maintenance_center: 'Maintenance Center 1',
+          regional_team_id: 'GMR001',
+          regional_team: 'Regional Center 1',
+          maintenance_team_id: 'EEL001',
+          maintenance_team: 'Team 1'
         },
         {
-          cm_id: 'CM003',
-          cm_name: 'Maintenance Center 3',
-          gmr_id: 'GMR003',
-          gmr_name: 'Regional Center 3',
-          eel_id: 'EEL003',
-          eel_name: 'Team 3'
+          maintenance_center_id: 'CM003',
+          maintenance_center: 'Maintenance Center 3',
+          regional_team_id: 'GMR003',
+          regional_team: 'Regional Center 3',
+          maintenance_team_id: 'EEL003',
+          maintenance_team: 'Team 3'
         }
       ]);
     });
@@ -497,12 +497,12 @@ describe('MaintenanceService', () => {
     it('should clear maintenance table before adding new data', async () => {
       const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
         {
-          CM_CUR: 'CM001',
-          CM_DESIGNATION: 'Maintenance Center 1',
-          GMR_CUR: 'GMR001',
-          GMR_DESIGNATION: 'Regional Center 1',
-          EEL_CUR: 'EEL001',
-          EEL_DESIGNATION: 'Team 1'
+          maintenance_center_id: 'CM001',
+          maintenance_center: 'Maintenance Center 1',
+          regional_team_id: 'GMR001',
+          regional_team: 'Regional Center 1',
+          maintenance_team_id: 'EEL001',
+          maintenance_team: 'Team 1'
         }
       ];
 

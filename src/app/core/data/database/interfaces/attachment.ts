@@ -21,7 +21,7 @@ export interface Attachment {
   support_ground_x?: number;
   support_ground_y?: number;
   attachment_type?: string;
-  attachment_set?: string;
+  attachment_set?: number;
   attachment_set_z?: number;
   attachment_set_x?: number;
   attachment_set_y?: number;
@@ -48,9 +48,14 @@ export interface Attachment {
 }
 
 export interface RteAttachmentsCsvFile {
+  support_id_catalog: string;
+  support_idr: string;
+  support_adr: string;
+  support_tower: string;
   support_family: string;
-  support_name: string;
-  set_number: string;
-  arm_length: string;
-  altitude: string;
+  position: string;
+  X: string;
+  Y: string;
+  Z: string;
+  L: string;
 }
