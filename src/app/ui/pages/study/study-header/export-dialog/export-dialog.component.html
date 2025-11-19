@@ -1,0 +1,61 @@
+<p-dialog
+  [visible]="studiesService.exportDialogData()?.isOpen ?? false"
+  [style]="{ width: '31rem' }"
+  closable="false"
+  modal="true"
+  focusOnShow="false"
+  draggable="false"
+>
+  <ng-template #header>
+    <div class="export-header">
+      <app-icon icon="download" />
+      <p class="heading-s" i18n>Export</p>
+    </div>
+  </ng-template>
+  <ng-template #content>
+    <form
+      [formGroup]="form"
+      (ngSubmit)="exportStudy()"
+      class="flex flex-col gap-4"
+    >
+      <div>
+        <label i18n for="filename">Filename</label>
+        <input
+          type="text"
+          pInputText
+          name="filename"
+          id="filename"
+          formControlName="filename"
+          required
+          fluid
+        />
+      </div>
+      <div>
+        <label i18n for="exportFormat">Export format</label>
+        <p-select
+          [options]="exportFormats()"
+          formControlName="exportFormat"
+          appendTo="body"
+          inputId="exportFormat"
+          fluid
+          required
+        />
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <button app-btn btnStyle="text" (click)="cancel()">
+      <span i18n>Cancel</span>
+    </button>
+    <button
+      app-btn
+      type="submit"
+      [disabled]="!form.valid"
+      (click)="exportStudy()"
+    >
+      <app-icon icon="download" />
+      <span i18n>Export</span>
+    </button>
+  </ng-template>
+</p-dialog>

@@ -17,6 +17,7 @@ import { PopoverModule } from 'primeng/popover';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { StudiesService } from '@core/services/studies/studies.service';
 
 @Component({
   standalone: true,
@@ -42,7 +43,16 @@ export class StudiesTableComponent {
   sortOrder = signal<number>(1);
   deleteStudy = output<string>();
   duplicateStudy = output<string>();
-  downloadStudy = output<string>();
+
+  constructor(public readonly studiesService: StudiesService) {}
+
+  openExportDialog = (uuid: string) => {
+    this.studiesService.exportDialogData.set({
+      uuid,
+      title: this.studies().find((study) => study.uuid === uuid)?.title ?? '',
+      isOpen: true
+    });
+  };
 
   onSort(event: SortEvent) {
     this.sortField.set(event.field as string);

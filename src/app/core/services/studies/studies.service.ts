@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { StudyModel } from '../../data/models/study.model';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageService } from '../storage/storage.service';
@@ -28,6 +28,11 @@ export class StudiesService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   public readonly studies = new BehaviorSubject<Study[]>([]);
+  public readonly exportDialogData = signal<{
+    uuid: string;
+    title: string;
+    isOpen: boolean;
+  } | null>(null);
 
   constructor(
     private readonly storageService: StorageService,
@@ -226,18 +231,19 @@ export class StudiesService {
    * Export a study
    * @param uuid The uuid of the study to export
    */
-  async downloadStudy(uuid: string) {
+  async downloadStudy(uuid: string, filename: string) {
     const study = await this.getStudy(uuid);
     if (!study) {
       return;
     }
-    const blob = new Blob([JSON.stringify(study)], {
-      type: 'application/json'
+    const studyBase64 = btoa(JSON.stringify(study));
+    const blob = new Blob([studyBase64], {
+      type: 'application/octet-stream'
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${study.title}.clst`;
+    a.download = `${filename}.clst`;
     a.click();
     URL.revokeObjectURL(url);
     return;

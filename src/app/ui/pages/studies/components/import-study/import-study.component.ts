@@ -113,7 +113,8 @@ export class ImportStudyComponent {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const result = e.target?.result as string;
-      const parsedResult = JSON.parse(result);
+      const studyBase64 = atob(result);
+      const parsedResult = JSON.parse(studyBase64);
       const uuid = await this.studiesService.createStudy(parsedResult);
       const study = await this.studiesService.getStudy(uuid);
       if (!study) {

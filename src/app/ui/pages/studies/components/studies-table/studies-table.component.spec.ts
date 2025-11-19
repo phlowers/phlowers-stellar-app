@@ -10,10 +10,12 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { SortEvent } from 'primeng/api';
 import { StudiesTableComponent } from './studies-table.component';
 import { Study } from '@src/app/core/data/database/interfaces/study';
+import { MessageService } from 'primeng/api';
 
 describe('StudiesTableComponent', () => {
   let component: StudiesTableComponent;
   let fixture: ComponentFixture<StudiesTableComponent>;
+  let mockMessageService: jest.Mocked<MessageService>;
 
   const mockStudy1: Study = {
     uuid: 'test-uuid-1',
@@ -42,8 +44,13 @@ describe('StudiesTableComponent', () => {
   const mockStudies: Study[] = [mockStudy1, mockStudy2];
 
   beforeEach(async () => {
+    mockMessageService = {
+      add: jest.fn()
+    } as unknown as jest.Mocked<MessageService>;
+
     await TestBed.configureTestingModule({
-      imports: [StudiesTableComponent, RouterTestingModule]
+      imports: [StudiesTableComponent, RouterTestingModule],
+      providers: [{ provide: MessageService, useValue: mockMessageService }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(StudiesTableComponent);
