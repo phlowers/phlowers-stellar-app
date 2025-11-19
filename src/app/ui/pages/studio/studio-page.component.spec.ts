@@ -33,6 +33,7 @@ function createSignalMock<T>(initialValue: T): SignalFn<T> {
 class PlotServiceMock {
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
   section: SignalFn<Section | null> = createSignalMock<Section | null>(null);
+  loading: SignalFn<boolean> = createSignalMock<boolean>(false);
   plotOptions = jest.fn().mockReturnValue({ invert: false });
   plotOptionsChange = jest.fn();
 }
@@ -112,7 +113,7 @@ describe('StudioPageComponent', () => {
 
   it('sliderOptions should reflect initial ceil and invert values', () => {
     // Initial state: no section and invert=false per mock
-    expect(component.sliderOptions().ceil).toBe(0);
+    expect(component.sliderOptions().ceil).toBe(99);
     expect(component.sliderOptions().rightToLeft).toBe(false);
   });
 

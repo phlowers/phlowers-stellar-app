@@ -250,7 +250,7 @@ describe('PlotService', () => {
       await service.calculateCharge(100, 20, 5);
 
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.runEngine,
+        Task.changeClimateLoad,
         {
           windPressure: 100,
           cableTemperature: 20,
@@ -314,7 +314,7 @@ describe('PlotService', () => {
       await service.calculateCharge(50, 15, 2);
 
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.runEngine,
+        Task.changeClimateLoad,
         {
           windPressure: 50,
           cableTemperature: 15,

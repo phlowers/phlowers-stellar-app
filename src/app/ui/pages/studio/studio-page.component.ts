@@ -70,12 +70,13 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   sliderOptions = computed<Options>(() => {
     return {
       floor: 0,
-      ceil: (this.plotService.section()?.supports?.length ?? 1) - 1,
+      ceil: (this.plotService.section()?.supports?.length ?? 100) - 1,
       step: 1,
       showTicks: true,
       showTicksValues: true,
       animate: false,
       animateOnMove: false,
+      disabled: this.plotService.loading(),
       translate: (value: number) => {
         return (value + 1).toString();
       },
@@ -226,6 +227,24 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     },
     DEBOUNCED_REFRESH_STUDIO_DELAY
   );
+
+  updateSliderOptions({
+    value,
+    highValue
+  }: {
+    value?: number | undefined;
+    highValue?: number | undefined;
+  }) {
+    const options = this.plotService.plotOptions();
+    [
+      { val: value, key: 'startSupport' as const, opt: options.startSupport },
+      { val: highValue, key: 'endSupport' as const, opt: options.endSupport }
+    ].forEach(({ val, key, opt }) => {
+      if (val !== undefined && val !== opt) {
+        this.debounceUpdateSliderOptions(key, val);
+      }
+    });
+  }
 
   openNewChargeModal(
     {
