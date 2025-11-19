@@ -1,0 +1,24 @@
+.dialog-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+p-inputgroup {
+  button {
+    @apply py-0;
+  }
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  font-size: 0.5rem;
+  height: 0.5rem;
+  display: none;
+  height: 20px;
+}
+
+input[type="time"] {
+  height: 20px;
+  box-sizing: content-box;
+}

@@ -27,6 +27,7 @@ import { SpanComponent } from './loads/span/span.component';
 import { debounce } from 'lodash';
 import { ButtonComponent } from '../../shared/components/atoms/button/button.component';
 import { NewChargeModalComponent } from './new-charge-modal/new-charge-modal.component';
+import { FieldMeasuringComponent } from './tools-dialogs/field-measuring/field-measuring.component';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
@@ -49,7 +50,8 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
     ClimateComponent,
     SpanComponent,
     ButtonComponent,
-    NewChargeModalComponent
+    NewChargeModalComponent,
+    FieldMeasuringComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
