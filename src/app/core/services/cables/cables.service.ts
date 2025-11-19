@@ -50,6 +50,7 @@ export class CablesService {
     const mapData = (data: RteCablesCsvFile[]): Cable[] => {
       return data
         .map((item) => ({
+          id: item.cable_id,
           name: item.name,
           data_source: item.data_source,
           section: convertStringToNumber(item.section),
@@ -72,7 +73,22 @@ export class CablesService {
           stress_strain_b2: convertStringToNumber(item.stress_strain_b2),
           stress_strain_b3: convertStringToNumber(item.stress_strain_b3),
           stress_strain_b4: convertStringToNumber(item.stress_strain_b4),
-          is_narcisse: item.is_narcisse === 'true'
+          is_polynomial: item.is_polynomial === 'true',
+          diameter_heart: convertStringToNumber(item.diameter_heart),
+          section_conductor: convertStringToNumber(item.section_conductor),
+          section_heart: convertStringToNumber(item.section_heart),
+          solar_absorption: convertStringToNumber(item.solar_absorption),
+          emissivity: convertStringToNumber(item.emissivity),
+          electric_resistance_20: convertStringToNumber(
+            item.electric_resistance_20
+          ),
+          linear_resistance_temperature_coef: convertStringToNumber(
+            item.linear_resistance_temperature_coef
+          ),
+          radial_thermal_conductivity: convertStringToNumber(
+            item.radial_thermal_conductivity
+          ),
+          has_magnetic_heart: item.has_magnetic_heart === 'true'
         }))
         .filter((item) => item.name);
     };

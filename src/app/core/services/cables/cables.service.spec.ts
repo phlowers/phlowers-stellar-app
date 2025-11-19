@@ -112,7 +112,14 @@ describe('CablesService', () => {
           stress_strain_b2: 0.005,
           stress_strain_b3: 0.0005,
           stress_strain_b4: 0.00005,
-          is_narcisse: false
+          is_polynomial: false,
+          diameter_heart: undefined,
+          section_conductor: undefined,
+          section_heart: undefined,
+          solar_absorption: undefined,
+          emissivity: undefined,
+          electric_resistance_20: undefined,
+          linear_resistance_temperature_coef: undefined
         },
         {
           name: 'Cable 2',
@@ -133,7 +140,14 @@ describe('CablesService', () => {
           stress_strain_b2: 0.0055,
           stress_strain_b3: 0.00055,
           stress_strain_b4: 0.000055,
-          is_narcisse: false
+          is_polynomial: false,
+          diameter_heart: undefined,
+          section_conductor: undefined,
+          section_heart: undefined,
+          solar_absorption: undefined,
+          emissivity: undefined,
+          electric_resistance_20: undefined,
+          linear_resistance_temperature_coef: undefined
         }
       ];
       mockCablesTable.toArray.mockResolvedValue(mockCables);
@@ -164,6 +178,7 @@ describe('CablesService', () => {
     it('should import cables from CSV file successfully', async () => {
       const mockCsvData: RteCablesCsvFile[] = [
         {
+          cable_id: 'cable1',
           name: 'Cable 1',
           data_source: 'RTE',
           section: '100',
@@ -182,9 +197,19 @@ describe('CablesService', () => {
           stress_strain_b2: '0.005',
           stress_strain_b3: '0.0005',
           stress_strain_b4: '0.00005',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         },
         {
+          cable_id: 'cable2',
           name: 'Cable 2',
           data_source: 'RTE',
           section: '150',
@@ -203,7 +228,16 @@ describe('CablesService', () => {
           stress_strain_b2: '0.0055',
           stress_strain_b3: '0.00055',
           stress_strain_b4: '0.000055',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         }
       ];
 
@@ -250,6 +284,7 @@ describe('CablesService', () => {
       expect(mockCablesTable.clear).toHaveBeenCalled();
       expect(mockCablesTable.bulkAdd).toHaveBeenCalledWith([
         {
+          id: 'cable1',
           name: 'Cable 1',
           data_source: 'RTE',
           section: 100,
@@ -268,9 +303,19 @@ describe('CablesService', () => {
           stress_strain_b2: 0.005,
           stress_strain_b3: 0.0005,
           stress_strain_b4: 0.00005,
-          is_narcisse: false
+          is_polynomial: false,
+          diameter_heart: 0,
+          section_conductor: 0,
+          section_heart: 0,
+          solar_absorption: 0,
+          emissivity: 0,
+          electric_resistance_20: 0,
+          linear_resistance_temperature_coef: 0,
+          radial_thermal_conductivity: 0,
+          has_magnetic_heart: false
         },
         {
+          id: 'cable2',
           name: 'Cable 2',
           data_source: 'RTE',
           section: 150,
@@ -289,7 +334,16 @@ describe('CablesService', () => {
           stress_strain_b2: 0.0055,
           stress_strain_b3: 0.00055,
           stress_strain_b4: 0.000055,
-          is_narcisse: false
+          is_polynomial: false,
+          diameter_heart: 0,
+          section_conductor: 0,
+          section_heart: 0,
+          solar_absorption: 0,
+          emissivity: 0,
+          electric_resistance_20: 0,
+          linear_resistance_temperature_coef: 0,
+          radial_thermal_conductivity: 0,
+          has_magnetic_heart: false
         }
       ]);
     });
@@ -342,6 +396,7 @@ describe('CablesService', () => {
     it('should handle CSV data with null/undefined name', async () => {
       const mockCsvData: RteCablesCsvFile[] = [
         {
+          cable_id: 'cable1',
           name: '',
           data_source: 'RTE',
           section: '100',
@@ -360,9 +415,19 @@ describe('CablesService', () => {
           stress_strain_b2: '0.005',
           stress_strain_b3: '0.0005',
           stress_strain_b4: '0.00005',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         },
         {
+          cable_id: 'cable2',
           name: 'Cable 2',
           data_source: 'RTE',
           section: '150',
@@ -381,7 +446,16 @@ describe('CablesService', () => {
           stress_strain_b2: '0.0055',
           stress_strain_b3: '0.00055',
           stress_strain_b4: '0.000055',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         }
       ];
 
@@ -427,6 +501,7 @@ describe('CablesService', () => {
       // Should only add the cable with valid name
       expect(mockCablesTable.bulkAdd).toHaveBeenCalledWith([
         {
+          id: 'cable2',
           name: 'Cable 2',
           data_source: 'RTE',
           section: 150,
@@ -445,7 +520,16 @@ describe('CablesService', () => {
           stress_strain_b2: 0.0055,
           stress_strain_b3: 0.00055,
           stress_strain_b4: 0.000055,
-          is_narcisse: false
+          is_polynomial: false,
+          diameter_heart: 0,
+          section_conductor: 0,
+          section_heart: 0,
+          solar_absorption: 0,
+          emissivity: 0,
+          electric_resistance_20: 0,
+          linear_resistance_temperature_coef: 0,
+          radial_thermal_conductivity: 0,
+          has_magnetic_heart: false
         }
       ]);
     });
@@ -455,6 +539,7 @@ describe('CablesService', () => {
 
       const mockCsvData: RteCablesCsvFile[] = [
         {
+          cable_id: 'cable1',
           name: 'Cable 1',
           data_source: 'RTE',
           section: '100',
@@ -473,7 +558,16 @@ describe('CablesService', () => {
           stress_strain_b2: '0.005',
           stress_strain_b3: '0.0005',
           stress_strain_b4: '0.00005',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         }
       ];
 
@@ -521,6 +615,7 @@ describe('CablesService', () => {
     it('should handle CSV data with mixed valid and invalid name values', async () => {
       const mockCsvData: RteCablesCsvFile[] = [
         {
+          cable_id: 'cable1',
           name: 'Cable 1',
           data_source: 'RTE',
           section: '100',
@@ -539,9 +634,19 @@ describe('CablesService', () => {
           stress_strain_b2: '0.005',
           stress_strain_b3: '0.0005',
           stress_strain_b4: '0.00005',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         },
         {
+          cable_id: 'cable2',
           name: '',
           data_source: 'RTE',
           section: '150',
@@ -560,9 +665,19 @@ describe('CablesService', () => {
           stress_strain_b2: '0.0055',
           stress_strain_b3: '0.00055',
           stress_strain_b4: '0.000055',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         },
         {
+          cable_id: 'cable3',
           name: 'Cable 3',
           data_source: 'RTE',
           section: '200',
@@ -581,7 +696,16 @@ describe('CablesService', () => {
           stress_strain_b2: '0.006',
           stress_strain_b3: '0.0006',
           stress_strain_b4: '0.00006',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         }
       ];
 
@@ -627,6 +751,7 @@ describe('CablesService', () => {
       // Should only add cables with valid name
       expect(mockCablesTable.bulkAdd).toHaveBeenCalledWith([
         {
+          id: 'cable1',
           name: 'Cable 1',
           data_source: 'RTE',
           section: 100,
@@ -645,9 +770,19 @@ describe('CablesService', () => {
           stress_strain_b2: 0.005,
           stress_strain_b3: 0.0005,
           stress_strain_b4: 0.00005,
-          is_narcisse: false
+          is_polynomial: false,
+          diameter_heart: 0,
+          section_conductor: 0,
+          section_heart: 0,
+          solar_absorption: 0,
+          emissivity: 0,
+          electric_resistance_20: 0,
+          linear_resistance_temperature_coef: 0,
+          radial_thermal_conductivity: 0,
+          has_magnetic_heart: false
         },
         {
+          id: 'cable3',
           name: 'Cable 3',
           data_source: 'RTE',
           section: 200,
@@ -666,7 +801,16 @@ describe('CablesService', () => {
           stress_strain_b2: 0.006,
           stress_strain_b3: 0.0006,
           stress_strain_b4: 0.00006,
-          is_narcisse: false
+          is_polynomial: false,
+          diameter_heart: 0,
+          section_conductor: 0,
+          section_heart: 0,
+          solar_absorption: 0,
+          emissivity: 0,
+          electric_resistance_20: 0,
+          linear_resistance_temperature_coef: 0,
+          radial_thermal_conductivity: 0,
+          has_magnetic_heart: false
         }
       ]);
     });
@@ -674,6 +818,7 @@ describe('CablesService', () => {
     it('should clear cables table before adding new data', async () => {
       const mockCsvData: RteCablesCsvFile[] = [
         {
+          cable_id: 'cable1',
           name: 'Cable 1',
           data_source: 'RTE',
           section: '100',
@@ -692,7 +837,16 @@ describe('CablesService', () => {
           stress_strain_b2: '0.005',
           stress_strain_b3: '0.0005',
           stress_strain_b4: '0.00005',
-          is_narcisse: 'false'
+          is_polynomial: 'false',
+          diameter_heart: '0',
+          section_conductor: '0',
+          section_heart: '0',
+          solar_absorption: '0',
+          emissivity: '0',
+          electric_resistance_20: '0',
+          linear_resistance_temperature_coef: '0',
+          radial_thermal_conductivity: '0',
+          has_magnetic_heart: 'false'
         }
       ];
 

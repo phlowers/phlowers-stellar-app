@@ -94,18 +94,22 @@ describe('ChainsService', () => {
     it('should return chains array from database', async () => {
       const mockChains: Chain[] = [
         {
-          name: 'Chain 1',
-          length: 100.5,
-          weight: 2.3,
-          surface: 100,
-          v: false
+          chain_name: 'Chain 1',
+          mean_length: 100.5,
+          mean_mass: 2.3,
+          chain_surface: 100,
+          v_chain: false,
+          chain_type: 'type1',
+          uuid: 'uuid1'
         },
         {
-          name: 'Chain 2',
-          length: 150.0,
-          weight: 3.1,
-          surface: 150,
-          v: true
+          chain_name: 'Chain 2',
+          mean_length: 150.0,
+          mean_mass: 3.1,
+          chain_surface: 150,
+          v_chain: true,
+          chain_type: 'type2',
+          uuid: 'uuid2'
         }
       ];
       mockChainsTable.toArray.mockResolvedValue(mockChains);
@@ -136,18 +140,22 @@ describe('ChainsService', () => {
     it('should import chains from CSV file successfully', async () => {
       const mockCsvData: RteChainsCsvFile[] = [
         {
-          name: 'Chain 1',
-          length: '100,5',
-          weight: '2,3',
-          surface: '100',
-          v: 'false'
+          chain_name: 'Chain 1',
+          mean_length: '100,5',
+          mean_mass: '2,3',
+          chain_surface: '100',
+          v_chain: 'false',
+          chain_type: 'type1',
+          uuid: 'uuid1'
         },
         {
-          name: 'Chain 2',
-          length: '150,0',
-          weight: '3,1',
-          surface: '150',
-          v: 'true'
+          chain_name: 'Chain 2',
+          mean_length: '150,0',
+          mean_mass: '3,1',
+          chain_surface: '150',
+          v_chain: 'true',
+          chain_type: 'type2',
+          uuid: 'uuid2'
         }
       ];
 
@@ -194,18 +202,22 @@ describe('ChainsService', () => {
       expect(mockChainsTable.clear).toHaveBeenCalled();
       expect(mockChainsTable.bulkAdd).toHaveBeenCalledWith([
         {
-          name: 'Chain 1',
-          length: 100.5,
-          weight: 2.3,
-          surface: 100,
-          v: false
+          chain_name: 'Chain 1',
+          mean_length: 100.5,
+          mean_mass: 2.3,
+          chain_surface: 100,
+          v_chain: false,
+          chain_type: 'type1',
+          uuid: 'uuid1'
         },
         {
-          name: 'Chain 2',
-          length: 150.0,
-          weight: 3.1,
-          surface: 150,
-          v: true
+          chain_name: 'Chain 2',
+          mean_length: 150.0,
+          mean_mass: 3.1,
+          chain_surface: 150,
+          v_chain: true,
+          chain_type: 'type2',
+          uuid: 'uuid2'
         }
       ]);
     });
@@ -257,18 +269,22 @@ describe('ChainsService', () => {
     it('should handle CSV data with null/undefined name', async () => {
       const mockCsvData: RteChainsCsvFile[] = [
         {
-          name: '',
-          length: '100,5',
-          weight: '2,3',
-          surface: '100',
-          v: 'false'
+          chain_name: '',
+          mean_length: '100,5',
+          mean_mass: '2,3',
+          chain_surface: '100',
+          v_chain: 'false',
+          chain_type: 'type1',
+          uuid: 'uuid1'
         },
         {
-          name: 'Chain 2',
-          length: '150,0',
-          weight: '3,1',
-          surface: '150',
-          v: 'true'
+          chain_name: 'Chain 2',
+          mean_length: '150,0',
+          mean_mass: '3,1',
+          chain_surface: '150',
+          v_chain: 'true',
+          chain_type: 'type2',
+          uuid: 'uuid2'
         }
       ];
 
@@ -314,11 +330,13 @@ describe('ChainsService', () => {
       // Should only add the chain with valid name
       expect(mockChainsTable.bulkAdd).toHaveBeenCalledWith([
         {
-          name: 'Chain 2',
-          length: 150.0,
-          weight: 3.1,
-          surface: 150,
-          v: true
+          chain_name: 'Chain 2',
+          mean_length: 150.0,
+          mean_mass: 3.1,
+          chain_surface: 150,
+          v_chain: true,
+          chain_type: 'type2',
+          uuid: 'uuid2'
         }
       ]);
     });
@@ -328,11 +346,13 @@ describe('ChainsService', () => {
 
       const mockCsvData: RteChainsCsvFile[] = [
         {
-          name: 'Chain 1',
-          length: '100,5',
-          weight: '2,3',
-          surface: '100',
-          v: 'false'
+          chain_name: 'Chain 1',
+          mean_length: '100,5',
+          mean_mass: '2,3',
+          chain_surface: '100',
+          v_chain: 'false',
+          chain_type: 'type1',
+          uuid: 'uuid1'
         }
       ];
 
@@ -379,25 +399,31 @@ describe('ChainsService', () => {
     it('should handle CSV data with mixed valid and invalid name values', async () => {
       const mockCsvData: RteChainsCsvFile[] = [
         {
-          name: 'Chain 1',
-          length: '100,5',
-          weight: '2,3',
-          surface: '100',
-          v: 'false'
+          chain_name: 'Chain 1',
+          mean_length: '100,5',
+          mean_mass: '2,3',
+          chain_surface: '100',
+          v_chain: 'false',
+          chain_type: 'type1',
+          uuid: 'uuid1'
         },
         {
-          name: '',
-          length: '150,0',
-          weight: '3,1',
-          surface: '150',
-          v: 'true'
+          chain_name: '',
+          mean_length: '150,0',
+          mean_mass: '3,1',
+          chain_surface: '150',
+          v_chain: 'true',
+          chain_type: 'type2',
+          uuid: 'uuid2'
         },
         {
-          name: 'Chain 3',
-          length: '200,0',
-          weight: '4,2',
-          surface: '200',
-          v: 'false'
+          chain_name: 'Chain 3',
+          mean_length: '200,0',
+          mean_mass: '4,2',
+          chain_surface: '200',
+          v_chain: 'false',
+          chain_type: 'type3',
+          uuid: 'uuid3'
         }
       ];
 
@@ -443,18 +469,22 @@ describe('ChainsService', () => {
       // Should only add chains with valid name
       expect(mockChainsTable.bulkAdd).toHaveBeenCalledWith([
         {
-          name: 'Chain 1',
-          length: 100.5,
-          weight: 2.3,
-          surface: 100,
-          v: false
+          chain_name: 'Chain 1',
+          mean_length: 100.5,
+          mean_mass: 2.3,
+          chain_surface: 100,
+          v_chain: false,
+          chain_type: 'type1',
+          uuid: 'uuid1'
         },
         {
-          name: 'Chain 3',
-          length: 200.0,
-          weight: 4.2,
-          surface: 200,
-          v: false
+          chain_name: 'Chain 3',
+          mean_length: 200.0,
+          mean_mass: 4.2,
+          chain_surface: 200,
+          v_chain: false,
+          chain_type: 'type3',
+          uuid: 'uuid3'
         }
       ]);
     });
@@ -462,11 +492,13 @@ describe('ChainsService', () => {
     it('should clear chains table before adding new data', async () => {
       const mockCsvData: RteChainsCsvFile[] = [
         {
-          name: 'Chain 1',
-          length: '100,5',
-          weight: '2,3',
-          surface: '100',
-          v: 'false'
+          chain_name: 'Chain 1',
+          mean_length: '100,5',
+          mean_mass: '2,3',
+          chain_surface: '100',
+          v_chain: 'false',
+          chain_type: 'type1',
+          uuid: 'uuid1'
         }
       ];
 

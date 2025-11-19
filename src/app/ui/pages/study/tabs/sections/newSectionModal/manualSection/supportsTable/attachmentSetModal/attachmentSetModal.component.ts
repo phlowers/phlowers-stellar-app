@@ -42,14 +42,14 @@ export class AttachmentSetModalComponent implements OnInit {
   support = input<Support>();
   isOpenChange = output<boolean>();
   section = input.required<Section | null>();
-  attachmentSet = signal<string | undefined>(undefined);
+  attachmentSet = signal<number | undefined>(undefined);
   supportName = signal<string | undefined>(undefined);
   armLength = signal<number | undefined>(undefined);
   heightBelowConsole = signal<number | undefined>(undefined);
   validateForm = output<{
     uuid: string;
     supportName: string;
-    attachmentSet: string;
+    attachmentSet: number;
     armLength: number;
     heightBelowConsole: number;
   }>();
@@ -76,7 +76,7 @@ export class AttachmentSetModalComponent implements OnInit {
   validate() {
     this.validateForm.emit({
       supportName: this.supportName() || '',
-      attachmentSet: this.attachmentSet() || '',
+      attachmentSet: this.attachmentSet() || 0,
       armLength: this.armLength() || 0,
       heightBelowConsole: this.heightBelowConsole() || 0,
       uuid: this.support()?.uuid || ''
@@ -87,16 +87,16 @@ export class AttachmentSetModalComponent implements OnInit {
   async getData() {
     const attachments = await this.attachmentService.getAttachments();
     const attachmentsFilterTable = (attachments || []).sort(
-      (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
+      (a, b) => (a.attachment_set || 0) - (b.attachment_set || 0)
     );
+
     this.supportsFilterTable.set(attachmentsFilterTable);
     const items = (attachments || [])
       .filter((item) =>
         this.supportName() ? item.support_name === this.supportName() : true
       )
-      .sort(
-        (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
-      );
+      .sort((a, b) => (a.attachment_set || 0) - (b.attachment_set || 0));
+
     this.attachmentsFilterTable.set(items);
   }
 
@@ -121,9 +121,7 @@ export class AttachmentSetModalComponent implements OnInit {
       const attachments = await this.attachmentService.getAttachments();
       const items = (attachments || [])
         .filter((item) => item.support_name === event.value)
-        .sort(
-          (a, b) => a.attachment_set?.localeCompare(b.attachment_set ?? '') || 0
-        );
+        .sort((a, b) => (a.attachment_set || 0) - (b.attachment_set || 0));
       this.attachmentsFilterTable.set(items);
     }
 

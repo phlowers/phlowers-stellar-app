@@ -9,9 +9,12 @@
  */
 
 export const chainTable = {
-  chains: `&name,
-    length,
-    weight,
-    surface,
-    v`
+  chains: `&uuid,
+  chain_name,
+  mean_length,
+  mean_mass,
+  v_chain,
+  chain_type,
+  chain_surface
+  `
 };
