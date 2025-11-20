@@ -11,14 +11,11 @@ p-inputgroup {
   }
 }
 
-input[type="time"]::-webkit-calendar-picker-indicator {
-  font-size: 0.5rem;
-  height: 0.5rem;
-  display: none;
-  height: 20px;
-}
-
-input[type="time"] {
+input[type='time'] {
   height: 20px;
   box-sizing: content-box;
+
+  &::-webkit-calendar-picker-indicator {
+    display: none;
+  }
 }

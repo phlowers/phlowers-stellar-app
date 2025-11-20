@@ -16,6 +16,15 @@ import { HeaderInfoComponent } from './components/header-info/header-info.compon
 import { LocationFieldsComponent } from './components/location-fields/location-fields.component';
 import { CalculationResults, TerrainMeasureData } from './types';
 import { ToolsDialogService } from '../tools-dialog.service';
+import {
+  SPAN_OPTIONS,
+  WIND_DIRECTION_OPTIONS,
+  SKY_COVER_OPTIONS,
+  LEFT_SUPPORT_OPTIONS,
+  CABLE_OPTIONS,
+  SelectOption
+} from './constants';
+import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -31,8 +40,8 @@ import { ToolsDialogService } from '../tools-dialog.service';
   styleUrls: ['./field-measuring.component.scss']
 })
 export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<any>;
-  @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<any>;
+  @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
+  @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
 
   private readonly toolsDialogService = inject(ToolsDialogService);
 
@@ -43,65 +52,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  measureData = signal<TerrainMeasureData>({
-    line: 'Line 225kV Rougemontier - Tourbe #1',
-    voltage: 123,
-    spanType: 'Phase',
-    phaseNumber: 3,
-    numberOfConductors: 3,
-    span: '12-13',
-    longitude: 123.12345678,
-    latitude: 123.87654321,
-    altitude: 123.09876523,
-    azimuth: 123,
-    date: new Date(),
-    time: '10:13',
-    season: 'summer',
-    ambientTemperature: null,
-    windSpeed: null,
-    windSpeedUnit: 'kmh',
-    windDirection: 'North',
-    skyCover: '8 (cloudy)',
-    calculationMethod: 'papoto',
-    leftSupport: '',
-    spanLength: null,
-    measuredElevationDifference: null,
-    HG: null,
-    H1: null,
-    H2: null,
-    H3: null,
-    HD: null,
-    VG: null,
-    V1: null,
-    V2: null,
-    V3: null,
-    VD: null,
-    cableHAccDistance: null,
-    cableVerticalAccAngle: null,
-    calculationType: 'parametre',
-    cableTangentAngle: null,
-    lengthBetweenSightGD: null,
-    elevationDifferenceBetweenSightGD: null,
-    xSight1: null,
-    xSight2: null,
-    xSight3: null,
-    ySight1: null,
-    ySight2: null,
-    ySight3: null,
-    cableName: 'ASTER570',
-    transit: 'A',
-    windIncidence: 47,
-    windIncidenceMode: 'auto',
-    diffuseSolarFlux: 123,
-    directSolarFlux: 123,
-    diffuseDirectSolarFlux: 246,
-    measuredSolarFlux: 248,
-    updateMode15C: 'auto',
-    parameterFapolo: 1700,
-    parameterUncertaintyFapolo: 12,
-    cableTemperature15C: 45,
-    cableTemperatureUncertainty15C: 3
-  });
+  measureData = signal<TerrainMeasureData>(INITIAL_MEASURE_DATA);
 
   activeTab = signal<
     | 'terrainData'
@@ -110,58 +61,13 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     | 'parameterAt15CWithoutWind'
   >('terrainData');
 
-  spanOptions = signal<{ label: string; value: string }[]>([
-    { label: '12-13', value: '12-13' },
-    { label: '13-14', value: '13-14' },
-    { label: '14-15', value: '14-15' }
-  ]);
+  readonly spanOptions = signal<SelectOption[]>(SPAN_OPTIONS);
+  readonly windDirectionOptions = signal<SelectOption[]>(WIND_DIRECTION_OPTIONS);
+  readonly skyCoverOptions = signal<SelectOption[]>(SKY_COVER_OPTIONS);
+  readonly leftSupportOptions = signal<SelectOption[]>(LEFT_SUPPORT_OPTIONS);
+  readonly cableOptions = signal<SelectOption[]>(CABLE_OPTIONS);
 
-  windDirectionOptions = signal<{ label: string; value: string }[]>([
-    { label: 'North', value: 'North' },
-    { label: 'North-East', value: 'North-East' },
-    { label: 'East', value: 'East' },
-    { label: 'South-East', value: 'South-East' },
-    { label: 'South', value: 'South' },
-    { label: 'South-West', value: 'South-West' },
-    { label: 'West', value: 'West' },
-    { label: 'North-West', value: 'North-West' }
-  ]);
-
-  skyCoverOptions = signal<{ label: string; value: string }[]>([
-    { label: '0 (clear)', value: '0 (clear)' },
-    { label: '4 (partly cloudy)', value: '4 (partly cloudy)' },
-    { label: '8 (cloudy)', value: '8 (cloudy)' }
-  ]);
-
-  leftSupportOptions = signal<{ label: string; value: string }[]>([
-    { label: 'Support 1', value: 'support1' },
-    { label: 'Support 2', value: 'support2' },
-    { label: 'Support 3', value: 'support3' }
-  ]);
-
-  cableOptions = signal<{ label: string; value: string }[]>([
-    { label: 'ASTER570', value: 'ASTER570' },
-    { label: 'ASTER490', value: 'ASTER490' },
-    { label: 'ASTER380', value: 'ASTER380' }
-  ]);
-
-  calculationResults = signal<CalculationResults>({
-    parameter: null,
-    parameterUncertainty: null,
-    parameter12: null,
-    parameter23: null,
-    parameter13: null,
-    criteria05: null,
-    sideDGreaterThan2m: null,
-    sideDValid: null,
-    validMeasurement: null,
-    cableTemperature: null,
-    cableTemperatureUncertainty: null,
-    cableSolarFlux: null,
-    parameter15CMinusUncertainty: null,
-    parameter15C: null,
-    parameter15CPlusUncertainty: null
-  });
+  calculationResults = signal<CalculationResults>(INITIAL_CALCULATION_RESULTS);
 
   constructor() {
     effect(() => {
