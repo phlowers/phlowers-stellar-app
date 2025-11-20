@@ -107,7 +107,7 @@ describe('AttachmentSetModalComponent', () => {
     expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
     expect(component.attachmentsFilterTable()).toEqual(
       mockAttachments.sort(
-        (a, b) => (a.attachment_set || 0) - (b.attachment_set || 0)
+        (a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0)
       )
     );
   });
@@ -145,7 +145,7 @@ describe('AttachmentSetModalComponent', () => {
 
     const filteredAttachments = mockAttachments
       .filter((item) => item.support_name === 'Support A')
-      .sort((a, b) => (a.attachment_set || 0) - (b.attachment_set || 0));
+      .sort((a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0));
 
     expect(component.attachmentsFilterTable()).toEqual(filteredAttachments);
   });

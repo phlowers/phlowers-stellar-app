@@ -54,6 +54,7 @@ describe('StudyComponent', () => {
   let mockRouter: jest.Mocked<Router>;
   let mockMessageService: jest.Mocked<MessageService>;
   let readySubject: BehaviorSubject<boolean>;
+  let paramsSubject: BehaviorSubject<{ uuid: string }>;
 
   const mockStudy: Study = {
     uuid: 'test-uuid-1',
@@ -119,6 +120,9 @@ describe('StudyComponent', () => {
 
   beforeEach(async () => {
     readySubject = new BehaviorSubject<boolean>(false);
+    paramsSubject = new BehaviorSubject<{ uuid: string }>({
+      uuid: 'test-uuid-1'
+    });
 
     const mockParamMap = {
       get: jest.fn().mockReturnValue('test-uuid-1')
@@ -128,7 +132,7 @@ describe('StudyComponent', () => {
       snapshot: {
         paramMap: mockParamMap
       },
-      params: of({ uuid: 'test-uuid-1' })
+      params: paramsSubject.asObservable()
     } as unknown as jest.Mocked<ActivatedRoute>;
 
     mockStudiesService = {
@@ -216,12 +220,14 @@ describe('StudyComponent', () => {
     });
 
     it('should load study when service is ready and uuid is provided', async () => {
-      readySubject.next(true);
       component.ngOnInit();
+      readySubject.next(true);
 
       await fixture.whenStable();
 
-      expect(mockStudiesService.getStudy).toHaveBeenCalledWith('test-uuid-1');
+      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(
+        'test-uuid-1'
+      );
       expect(component.study).toEqual(mockStudy);
     });
 
@@ -229,43 +235,51 @@ describe('StudyComponent', () => {
       readySubject.next(false);
       component.ngOnInit();
 
-      expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
+      expect(mockStudiesService.getStudyAsObservable).not.toHaveBeenCalled();
     });
 
     it('should subscribe to route params and refresh study on changes', async () => {
-      readySubject.next(true);
       component.ngOnInit();
+      readySubject.next(true);
       await fixture.whenStable();
 
       // Simulate route param change
       const newUuid = 'new-uuid-123';
-      mockActivatedRoute.params = of({ uuid: newUuid });
-      mockStudiesService.getStudy.mockResolvedValue({
-        ...mockStudy,
-        uuid: newUuid
-      });
+      mockStudiesService.getStudyAsObservable.mockReturnValue(
+        of({
+          ...mockStudy,
+          uuid: newUuid
+        }) as any
+      );
 
-      // Trigger ngOnInit again to test the subscription
-      component.ngOnInit();
+      // Emit new params value
+      paramsSubject.next({ uuid: newUuid });
       await fixture.whenStable();
 
-      expect(mockStudiesService.getStudy).toHaveBeenCalledWith(newUuid);
+      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(
+        newUuid
+      );
     });
   });
 
   describe('refreshStudy', () => {
     it('should refresh study when uuid is provided and service is ready', async () => {
+      component.ngOnInit();
       readySubject.next(true);
       await fixture.whenStable();
 
       const newUuid = 'new-uuid-123';
       const updatedStudy = { ...mockStudy, uuid: newUuid };
-      mockStudiesService.getStudy.mockResolvedValue(updatedStudy);
+      mockStudiesService.getStudyAsObservable.mockReturnValue(
+        of(updatedStudy) as any
+      );
 
       component.refreshStudy(newUuid);
       await fixture.whenStable();
 
-      expect(mockStudiesService.getStudy).toHaveBeenCalledWith(newUuid);
+      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(
+        newUuid
+      );
       expect(component.study).toEqual(updatedStudy);
     });
 
@@ -274,7 +288,7 @@ describe('StudyComponent', () => {
 
       component.refreshStudy('test-uuid');
 
-      expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
+      expect(mockStudiesService.getStudyAsObservable).not.toHaveBeenCalled();
     });
 
     it('should not refresh study when uuid is not provided', () => {

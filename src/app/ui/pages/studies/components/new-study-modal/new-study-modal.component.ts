@@ -103,8 +103,13 @@ export class NewStudyModalComponent {
         detail: $localize`Study created successfully`
       });
     } else {
+      const study = await this.studiesService.getStudy(this.studyUuid());
+      if (!study) {
+        return;
+      }
       await this.studiesService.updateStudy({
-        uuid: this.studyUuid(),
+        uuid: study.uuid,
+        author_email: study.author_email,
         title: this.title(),
         description: this.description()
       });
