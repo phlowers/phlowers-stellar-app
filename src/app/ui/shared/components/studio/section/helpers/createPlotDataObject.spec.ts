@@ -21,7 +21,7 @@ describe('createPlotDataObject', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).line
-      ).toEqual({ color: 'red', dash: 'solid' });
+      ).toEqual({ color: 'dodgerblue', dash: 'solid', width: 8 });
     });
 
     it('should return blue color for supports type', () => {
@@ -37,7 +37,7 @@ describe('createPlotDataObject', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).line
-      ).toEqual({ color: 'blue', dash: 'solid' });
+      ).toEqual({ color: 'indigo', dash: 'solid', width: 8 });
     });
 
     it('should return green color for insulators type', () => {
@@ -54,8 +54,9 @@ describe('createPlotDataObject', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).line
       ).toEqual({
-        color: 'green',
-        dash: 'solid'
+        color: 'red',
+        dash: 'solid',
+        width: 8
       });
     });
 
@@ -74,7 +75,8 @@ describe('createPlotDataObject', () => {
         (result[0] as any).line
       ).toEqual({
         color: 'black',
-        dash: 'solid'
+        dash: 'solid',
+        width: 8
       });
     });
   });
@@ -104,7 +106,7 @@ describe('createPlotDataObject', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).mode
-      ).toBe('text+lines');
+      ).toBe('text+lines+markers');
     });
 
     it('should return lines mode for spans type', () => {
@@ -113,7 +115,7 @@ describe('createPlotDataObject', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).mode
-      ).toBe('lines');
+      ).toBe('lines+markers');
     });
 
     it('should return lines mode for insulators type', () => {
@@ -129,7 +131,7 @@ describe('createPlotDataObject', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).mode
-      ).toBe('lines');
+      ).toBe('lines+markers');
     });
   });
 

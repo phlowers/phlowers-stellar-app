@@ -77,7 +77,7 @@ export class SectionsTabComponent {
     return {
       uuid: uuidv4(),
       name: $localize`IC` + ' ' + (currentInitialConditions.length + 1),
-      base_parameters: 0,
+      base_parameters: 2000,
       base_temperature: 15,
       cable_pretension: 0,
       min_temperature: 0,
