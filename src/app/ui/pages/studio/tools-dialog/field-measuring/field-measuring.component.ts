@@ -1,4 +1,13 @@
-import { Component, output, signal, effect } from '@angular/core';
+import {
+  Component,
+  signal,
+  effect,
+  inject,
+  ViewChild,
+  TemplateRef,
+  AfterViewInit,
+  OnDestroy
+} from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -6,6 +15,7 @@ import { TabsModule } from 'primeng/tabs';
 import { HeaderInfoComponent } from './components/header-info/header-info.component';
 import { LocationFieldsComponent } from './components/location-fields/location-fields.component';
 import { CalculationResults, TerrainMeasureData } from './types';
+import { ToolsDialogService } from '../tools-dialog.service';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -20,9 +30,18 @@ import { CalculationResults, TerrainMeasureData } from './types';
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss']
 })
-export class FieldMeasuringComponent {
-  isOpen = signal<boolean>(true);
-  isOpenChange = output<boolean>();
+export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<any>;
+  @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<any>;
+
+  private readonly toolsDialogService = inject(ToolsDialogService);
+
+  ngAfterViewInit(): void {
+    this.toolsDialogService.setTemplates({
+      header: this.headerTemplate,
+      footer: this.footerTemplate
+    });
+  }
 
   measureData = signal<TerrainMeasureData>({
     line: 'Line 225kV Rougemontier - Tourbe #1',
@@ -146,15 +165,19 @@ export class FieldMeasuringComponent {
 
   constructor() {
     effect(() => {
-      if (this.isOpen()) {
+      if (this.toolsDialogService.isOpen()) {
         // Initialize or reset data when dialog opens
       }
     });
   }
 
+  ngOnDestroy(): void {
+    this.toolsDialogService.setTemplates({});
+  }
+
   onVisibleChange(visible: boolean) {
     if (!visible) {
-      this.isOpenChange.emit(false);
+      this.toolsDialogService.closeTool();
     }
   }
 
@@ -181,7 +204,7 @@ export class FieldMeasuringComponent {
   onSave() {
     // TODO: Implement save functionality
     console.log('Save', this.measureData());
-    this.isOpenChange.emit(false);
+    this.toolsDialogService.closeTool();
   }
 
   onImportStationData() {
@@ -210,10 +233,6 @@ export class FieldMeasuringComponent {
       parameter15CPlusUncertainty: null
     });
     console.log('Calculate', this.measureData());
-  }
-
-  closeModal() {
-    this.isOpen.set(false);
   }
 
   onCalculateParameter15C() {

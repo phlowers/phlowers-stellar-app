@@ -4,13 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { PlotService } from '@ui/pages/studio/plot.service';
-import { ButtonComponent } from '../../atoms/button/button.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
+import { ButtonComponent } from '../../../shared/components/atoms/button/button.component';
+import { IconComponent } from '../../../shared/components/atoms/icon/icon.component';
 import { Section } from '@core/data/database/interfaces/section';
 import { SelectModule } from 'primeng/select';
 import { RouterLink } from '@angular/router';
 import { Study } from '@core/data/database/interfaces/study';
-import { SelectWithButtonsComponent } from '../../atoms/select-with-buttons/select-with-buttons.component';
+import { SelectWithButtonsComponent } from '../../../shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { ChargesService } from '@core/services/charges/charges.service';
 
 @Component({

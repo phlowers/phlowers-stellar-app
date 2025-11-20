@@ -1,0 +1,78 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2">
+    <app-icon icon="calculate" />
+    <span i18n>Compute base parameter from terrain measurement</span>
+  </p>
+</ng-template>
+
+<app-header-info [measureData]="measureData()" />
+
+<app-location-fields
+  [measureData]="measureData()"
+  [spanOptions]="spanOptions()"
+  (fieldChange)="onFieldChange($event.field, $event.value)"
+/>
+
+<p-tabs [(value)]="activeTab">
+  <p-tablist>
+    <p-tab value="terrainData" i18n>Terrain data</p-tab>
+    <p-tab value="parameterCalculation" i18n>Parameter calculation</p-tab>
+    <p-tab value="temperatureCalculation" i18n>Temperature calculation</p-tab>
+    <p-tab value="parameterAt15CWithoutWind" i18n
+      >Parameter at 15°C without wind</p-tab
+    >
+  </p-tablist>
+
+  <p-tabpanel value="terrainData">
+    <ng-template #header>
+      <span i18n>Terrain data</span>
+    </ng-template>
+  </p-tabpanel>
+
+  <p-tabpanel value="parameterCalculation">
+    <ng-template #header>
+      <span i18n>Parameter calculation</span>
+    </ng-template>
+  </p-tabpanel>
+
+  <p-tabpanel value="temperatureCalculation">
+    <ng-template #header>
+      <span i18n>Temperature calculation</span>
+    </ng-template>
+  </p-tabpanel>
+
+  <p-tabpanel value="parameterAt15CWithoutWind">
+    <ng-template #header>
+      <span i18n>Parameter at 15°C without wind</span>
+    </ng-template>
+  </p-tabpanel>
+</p-tabs>
+
+<ng-template #footer>
+  <div class="dialog-footer">
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      btnStyle="outlined"
+      (click)="onExport()"
+    >
+      <app-icon icon="download" />
+      <span i18n>Export</span>
+    </button>
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      btnStyle="outlined"
+      (click)="onReport()"
+    >
+      <app-icon icon="description" />
+      <span i18n>Report</span>
+    </button>
+    <button app-btn type="button" btnSize="m" (click)="onSave()">
+      <app-icon icon="save" />
+      <span i18n>Save</span>
+    </button>
+  </div>
+</ng-template>

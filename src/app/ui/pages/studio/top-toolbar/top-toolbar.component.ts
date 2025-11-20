@@ -1,5 +1,6 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ToolsDialogService } from '../tools-dialog/tools-dialog.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -30,6 +31,8 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
   ]
 })
 export class StudioTopToolbarComponent implements OnInit {
+  private readonly toolsDialogService = inject(ToolsDialogService);
+
   items = signal<MenuItem[] | null>(null);
   tablesDropdown = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
@@ -127,7 +130,7 @@ export class StudioTopToolbarComponent implements OnInit {
       label: $localize`Field measurements`, // Mesures terrain
       checked: false,
       action: () => {
-        alert('click field measurements');
+        this.toolsDialogService.openTool('field-measuring');
       }
     },
     {
