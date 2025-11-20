@@ -1,11 +1,15 @@
 import { Cable } from '@core/data/database/interfaces/cable';
 import { Section } from '@core/data/database/interfaces/section';
-import { PlotObjectsType } from '@ui/shared/components/studio/section/helpers/types';
+import {
+  PlotObjectsType,
+  View
+} from '@ui/shared/components/studio/section/helpers/types';
 
 export enum Task {
   runTests = 'runTests',
   getLit = 'getLit',
-  runEngine = 'runEngine',
+  changeClimateLoad = 'changeClimateLoad',
+  refreshProjection = 'refreshProjection',
   getSupportCoordinates = 'getSupportCoordinates'
 }
 
@@ -25,10 +29,15 @@ export type GetSectionOutput = Record<PlotObjectsType, number[][][]>;
 export interface TaskInputs {
   [Task.getLit]: { section: Section; cable: Cable };
   [Task.runTests]: undefined;
-  [Task.runEngine]: {
+  [Task.changeClimateLoad]: {
     windPressure: number;
     cableTemperature: number;
     iceThickness: number;
+  };
+  [Task.refreshProjection]: {
+    startSupport: number;
+    endSupport: number;
+    view: View;
   };
   [Task.getSupportCoordinates]: {
     coordinates: (number | undefined)[][];
@@ -39,7 +48,8 @@ export interface TaskInputs {
 export interface TaskOutputs {
   [Task.getLit]: GetSectionOutput;
   [Task.runTests]: undefined;
-  [Task.runEngine]: GetSectionOutput;
+  [Task.changeClimateLoad]: GetSectionOutput;
+  [Task.refreshProjection]: GetSectionOutput;
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
     text_display_points: number[][];

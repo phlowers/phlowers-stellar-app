@@ -16,7 +16,7 @@ import requests
 from pyodide_build.cli.py_compile import main as pyodide_build  # type: ignore
 
 PYODIDE_VERSION = "0.27.4"
-MECHAPHLOWERS_VERSION = "0.4.2"
+MECHAPHLOWERS_VERSION = "0.4.3"
 PYODIDE_DIRECTORY_PATH = "./public/pyodide"
 PYODIDE_LOCK_PATH = "./public/pyodide/pyodide-lock.json"
 PYODIDE_PACKAGES_PATH = "./src/app/core/services/worker_python/python-packages.json"

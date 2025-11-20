@@ -1,7 +1,8 @@
 <div class="toolbar" role="menubar">
   <p-selectbutton
     [options]="threeDOptions()"
-    [(ngModel)]="plotService.plotOptions().view"
+    [disabled]="plotService.loading()"
+    [ngModel]="plotService.plotOptions().view"
     (onChange)="plotService.plotOptionsChange('view', $event.value)"
     optionLabel="label"
     optionValue="value"
@@ -16,7 +17,7 @@
     <p id="side" class="text-l-600 m-0" i18n>Side:</p>
     <p-selectbutton
       [options]="sideOptions()"
-      [(ngModel)]="plotService.plotOptions().side"
+      [ngModel]="plotService.plotOptions().side"
       (onChange)="plotService.plotOptionsChange('side', $event.value)"
       optionLabel="label"
       optionValue="value"

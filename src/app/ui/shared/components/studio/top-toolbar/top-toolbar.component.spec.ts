@@ -26,6 +26,7 @@ describe('StudioTopToolbarComponent', () => {
         side: 'profile',
         invert: false
       }),
+      loading: signal(false),
       plotOptionsChange: jest.fn()
     } as any;
 

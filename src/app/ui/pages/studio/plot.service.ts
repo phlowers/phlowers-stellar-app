@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { Study } from '@core/data/database/interfaces/study';
 import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
 import {
@@ -13,6 +13,32 @@ import { WorkerPythonService } from '@src/app/core/services/worker_python/worker
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import * as plotly from 'plotly.js-dist-min';
 
+const checkIfProjectionNeedRefresh = (
+  oldOptions: PlotOptions,
+  newOptions: PlotOptions,
+  loading: boolean
+) => {
+  if (loading) {
+    return false;
+  }
+  const oldView = oldOptions.view;
+  const newView = newOptions.view;
+  if (oldView !== newView) {
+    return true;
+  }
+  if (newView !== '2d') {
+    return false;
+  }
+  const oldStartSupport = oldOptions.startSupport;
+  const oldEndSupport = oldOptions.endSupport;
+  const newStartSupport = newOptions.startSupport;
+  const newEndSupport = newOptions.endSupport;
+  if (oldStartSupport !== newStartSupport || oldEndSupport !== newEndSupport) {
+    return true;
+  }
+  return false;
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,6 +48,7 @@ export class PlotService {
   loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
+  destroyRef = inject(DestroyRef);
 
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
@@ -43,7 +70,12 @@ export class PlotService {
     key: keyof PlotOptions,
     value: PlotOptions[keyof PlotOptions]
   ) {
-    this.plotOptions.set({ ...this.plotOptions(), [key]: value });
+    const oldOptions = this.plotOptions();
+    const newOptions = { ...oldOptions, [key]: value };
+    this.plotOptions.set(newOptions);
+    if (checkIfProjectionNeedRefresh(oldOptions, newOptions, this.loading())) {
+      this.refreshProjection();
+    }
   }
 
   calculateCharge = async (
@@ -53,7 +85,7 @@ export class PlotService {
   ) => {
     this.loading.set(true);
     const { result, error } = await this.workerPythonService.runTask(
-      Task.runEngine,
+      Task.changeClimateLoad,
       {
         windPressure,
         cableTemperature,
@@ -92,6 +124,21 @@ export class PlotService {
       endSupport: section.supports.length - 1,
       invert: false
     });
+    this.litData.set(result);
+    this.error.set(error);
+    this.loading.set(false);
+  };
+
+  refreshProjection = async () => {
+    this.loading.set(true);
+    const { result, error } = await this.workerPythonService.runTask(
+      Task.refreshProjection,
+      {
+        startSupport: this.plotOptions().startSupport,
+        endSupport: this.plotOptions().endSupport,
+        view: this.plotOptions().view
+      }
+    );
     this.litData.set(result);
     this.error.set(error);
     this.loading.set(false);

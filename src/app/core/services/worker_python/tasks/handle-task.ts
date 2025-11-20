@@ -30,27 +30,22 @@ const tasks: Record<
     function: 'init_section',
     externalPackages: []
   },
-  [Task.runEngine]: {
+  [Task.changeClimateLoad]: {
     script: functions,
-    function: 'change_climate',
+    function: 'change_climate_load',
     externalPackages: []
   },
   [Task.getSupportCoordinates]: {
     script: functions,
     function: 'get_support_coordinates',
     externalPackages: []
+  },
+  [Task.refreshProjection]: {
+    script: functions,
+    function: 'refresh_projection',
+    externalPackages: []
   }
 };
-
-// let engine: any = null;
-
-// async function runEngine() {
-//   // console.log('running engine', engine);
-//   // engine.solve_change_state();
-//   // return engine.solve_change_state();
-//   const result = pyodide.globals.get('result');
-
-// }
 
 export async function handleTask<taskId extends Task>(
   pyodide: PyodideAPI,
