@@ -20,6 +20,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { Section } from '@core/data/database/interfaces/section';
 import { SupportPlotComponent } from '@ui/shared/components/studio/support/support-plot.component';
+import { uniq } from 'lodash';
 
 @Component({
   selector: 'app-attachment-set-modal',
@@ -53,12 +54,31 @@ export class AttachmentSetModalComponent implements OnInit {
     armLength: number;
     heightBelowConsole: number;
   }>();
+  coordinates = signal<(number | undefined)[][]>([]);
+  attachmentSetNumbers = signal<number[]>([]);
 
   supportsFilterTable = signal<Attachment[]>([]);
   attachmentsFilterTable = signal<Attachment[]>([]);
 
   onVisibleChange() {
     this.isOpenChange.emit(false);
+  }
+
+  async findCoordinates(supportName: string) {
+    const attachments = await this.attachmentService.getAttachments();
+    const attachmentSets = attachments.filter(
+      (attachment) => attachment.support_name === supportName
+    );
+    this.coordinates.set(
+      attachmentSets.map((attachment) => [
+        attachment.attachment_set_x,
+        attachment.attachment_set_y,
+        attachment.attachment_set_z
+      ])
+    );
+    this.attachmentSetNumbers.set(
+      uniq(attachmentSets.map((attachment) => attachment.attachment_set ?? 0))
+    );
   }
 
   constructor(private readonly attachmentService: AttachmentService) {
@@ -71,12 +91,17 @@ export class AttachmentSetModalComponent implements OnInit {
         }
       }
     });
+    effect(() => {
+      if (this.supportName()) {
+        this.findCoordinates(this.supportName()!);
+      }
+    });
   }
 
   validate() {
     this.validateForm.emit({
       supportName: this.supportName() || '',
-      attachmentSet: this.attachmentSet() || 0,
+      attachmentSet: this.attachmentSet() ?? 0,
       armLength: this.armLength() || 0,
       heightBelowConsole: this.heightBelowConsole() || 0,
       uuid: this.support()?.uuid || ''
@@ -96,7 +121,6 @@ export class AttachmentSetModalComponent implements OnInit {
         this.supportName() ? item.support_name === this.supportName() : true
       )
       .sort((a, b) => (a.attachment_set || 0) - (b.attachment_set || 0));
-
     this.attachmentsFilterTable.set(items);
   }
 
@@ -105,6 +129,7 @@ export class AttachmentSetModalComponent implements OnInit {
     this.heightBelowConsole.set(undefined);
     this.attachmentSet.set(undefined);
     this.supportName.set(undefined);
+    this.coordinates.set([]);
     this.getData();
   }
 

@@ -29,8 +29,17 @@ const supportCamera = {
   projection: { type: 'perspective' }
 };
 
+const axis = {
+  backgroundcolor: 'gainsboro',
+  gridcolor: 'dimgray',
+  showbackground: true
+};
+
 const scene = (isSupportZoom: boolean, invert: boolean) => ({
   aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+  xaxis: axis,
+  yaxis: axis,
+  zaxis: axis,
   aspectratio: {
     x: 3,
     y: 0.2,

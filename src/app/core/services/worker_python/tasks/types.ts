@@ -30,7 +30,10 @@ export interface TaskInputs {
     cableTemperature: number;
     iceThickness: number;
   };
-  [Task.getSupportCoordinates]: Record<string, number[]>;
+  [Task.getSupportCoordinates]: {
+    coordinates: (number | undefined)[][];
+    attachmentSetNumbers: number[];
+  };
 }
 
 export interface TaskOutputs {
