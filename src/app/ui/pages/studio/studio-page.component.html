@@ -88,10 +88,9 @@
       <div class="slider-plot-cards">
         <ngx-slider
           [class.inverted]="plotService.plotOptions().invert"
-          [(value)]="plotService.plotOptions().startSupport"
-          [(highValue)]="plotService.plotOptions().endSupport"
-          (valueChange)="debounceUpdateSliderOptions('startSupport', $event)"
-          (highValueChange)="debounceUpdateSliderOptions('endSupport', $event)"
+          [value]="plotService.plotOptions().startSupport"
+          [highValue]="plotService.plotOptions().endSupport"
+          (userChangeEnd)="updateSliderOptions($event)"
           [options]="sliderOptions()"
           class="block"
         >

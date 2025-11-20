@@ -165,22 +165,19 @@ engine = None
 plt_line = None
 
 
-def get_section_middle_span(support_length: int):
-    if support_length % 2 == 0:
-        return support_length // 2
-    else:
-        return support_length // 2 + 1
+def get_section_middle_span(start_support: int, end_support: int):
+    return (start_support + end_support) // 2
 
 
 def get_coordinates(
-    plt_line: PlotEngine, project: bool = False, support_length: int = 0
+    plt_line: PlotEngine,
+    project: bool = False,
+    start_support: int = 0,
+    end_support: int = 0,
 ):
-    print(
-        "get_section_middle_span(support_length)",
-        get_section_middle_span(support_length),
-    )
+    middle_span = get_section_middle_span(start_support, end_support)
     span, supports, insulators = plt_line.section_pts.get_points_for_plot(
-        project=project, frame_index=2
+        project=project, frame_index=middle_span
     )
     result = {
         "spans": span.coords,
@@ -250,9 +247,8 @@ def init_section(js_inputs: dict):
 
     section = SectionArray(df)
     # set sagging parameter and temperatur
-    section.sagging_parameter = (
-        initial_condition.base_parameters if initial_condition else 2000
-    )
+    if initial_condition:
+        section.sagging_parameter = initial_condition.base_parameters
     # print("initial_condition: ", initial_condition)
     section.sagging_temperature = (
         initial_condition.base_temperature if initial_condition else 15
@@ -325,11 +321,20 @@ def init_section(js_inputs: dict):
             wind_pressure=climate["windPressure"],
         )
     section_length = len(engine.section_array.data)
-    return get_coordinates(plt_line, False, section_length)
+    return get_coordinates(plt_line, False, 0, section_length - 1)
 
 
-def change_climate(js_inputs: dict):
-    import json
+def refresh_projection(js_inputs: dict):
+    global plt_line
+    python_inputs = js_inputs.to_py()
+    start_support = python_inputs["startSupport"]
+    end_support = python_inputs["endSupport"]
+    view = python_inputs["view"]
+    return get_coordinates(plt_line, view == "2d", start_support, end_support)
+
+
+def change_climate_load(js_inputs: dict):
+    # import json
 
     global engine, plt_line
     python_inputs = js_inputs.to_py()
