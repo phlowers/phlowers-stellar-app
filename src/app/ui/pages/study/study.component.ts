@@ -64,18 +64,7 @@ export class StudyComponent implements OnInit, OnDestroy {
     }
     this.studiesService.ready.subscribe((ready) => {
       if (ready && uuid) {
-        this.subscription = this.studiesService
-          .getStudyAsObservable(uuid)
-          .subscribe((study: Study | undefined) => {
-            if (study) {
-              study.sections = study.sections.sort(
-                (a, b) => -a.created_at.localeCompare(b.created_at)
-              );
-              this.study = study;
-            } else {
-              this.router.navigate(['/studies']);
-            }
-          });
+        this.refreshStudy(uuid);
       }
     });
     this.route.params.subscribe((params) => {
@@ -94,11 +83,18 @@ export class StudyComponent implements OnInit, OnDestroy {
 
   refreshStudy(uuid: string) {
     if (uuid && this.studiesService.ready.value) {
-      this.studiesService.getStudy(uuid).then((study) => {
-        if (study) {
-          this.study = study;
-        }
-      });
+      this.subscription = this.studiesService
+        .getStudyAsObservable(uuid)
+        .subscribe((study: Study | undefined) => {
+          if (study) {
+            study.sections = study.sections.sort(
+              (a, b) => -a.created_at.localeCompare(b.created_at)
+            );
+            this.study = study;
+          } else {
+            this.router.navigate(['/studies']);
+          }
+        });
     }
   }
 
