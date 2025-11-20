@@ -6,28 +6,28 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import { StudioComponent } from '@ui/shared/components/studio/studio.component';
-import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
-import { StudioTopToolbarComponent } from '@ui/shared/components/studio/top-toolbar/top-toolbar.component';
-import { SelectModule } from 'primeng/select';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { PlotService } from './plot.service';
-import { StudioMenuBarComponent } from '@ui/shared/components/studio/menu-bar/menu-bar.component';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
+import { debounce } from 'lodash';
+import { PlotService } from './plot.service';
 import { StudiesService } from '@core/services/studies/studies.service';
 import { Subscription } from 'dexie';
-import { SectionPlotCardsComponent } from '@ui/shared/components/studio/section/cards/section-plot-cards.component';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { TabsModule } from 'primeng/tabs';
+import { StudioComponent } from '@ui/shared/components/studio/studio.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { StudioTopToolbarComponent } from './top-toolbar/top-toolbar.component';
+import { StudioMenuBarComponent } from './menu-bar/menu-bar.component';
+import { SectionPlotCardsComponent } from './cards/section-plot-cards.component';
 import { SideTabsComponent } from './side-tabs/side-tabs.component';
 import { SideTabComponent } from './side-tabs/side-tab/side-tab.component';
-import { TabsModule } from 'primeng/tabs';
 import { ClimateComponent } from './loads/climate/climate.component';
 import { SpanComponent } from './loads/span/span.component';
-import { debounce } from 'lodash';
-import { ButtonComponent } from '../../shared/components/atoms/button/button.component';
 import { NewChargeModalComponent } from './new-charge-modal/new-charge-modal.component';
-import { FieldMeasuringComponent } from './tools-dialogs/field-measuring/field-measuring.component';
+import { ToolsDialogComponent } from './tools-dialog/tools-dialog.component';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
@@ -35,23 +35,23 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 @Component({
   selector: 'app-studio-page',
   imports: [
-    StudioComponent,
+    FormsModule,
     NgxSliderModule,
     InputNumberModule,
-    FormsModule,
-    StudioTopToolbarComponent,
     SelectModule,
+    TabsModule,
+    StudioComponent,
+    ButtonComponent,
     IconComponent,
+    StudioTopToolbarComponent,
     StudioMenuBarComponent,
     SectionPlotCardsComponent,
     SideTabsComponent,
     SideTabComponent,
-    TabsModule,
     ClimateComponent,
     SpanComponent,
-    ButtonComponent,
     NewChargeModalComponent,
-    FieldMeasuringComponent
+    ToolsDialogComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'

@@ -10,7 +10,7 @@ import { SpeedDialModule } from 'primeng/speeddial';
 import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '../../atoms/button/button.component';
+import { ButtonComponent } from '../../../shared/components/atoms/button/button.component';
 import { signal } from '@angular/core';
 
 describe('StudioTopToolbarComponent', () => {
