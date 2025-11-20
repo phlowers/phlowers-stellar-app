@@ -6,6 +6,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TerrainMeasureData } from '../../types';
+import { SelectOption } from '../../constants';
 
 @Component({
   selector: 'app-location-fields',
@@ -22,10 +23,10 @@ import { TerrainMeasureData } from '../../types';
 })
 export class LocationFieldsComponent {
   measureData = input.required<TerrainMeasureData>();
-  spanOptions = input.required<{ label: string; value: string }[]>();
-  fieldChange = output<{ field: keyof TerrainMeasureData; value: any }>();
+  spanOptions = input.required<SelectOption[]>();
+  fieldChange = output<{ field: keyof TerrainMeasureData; value: TerrainMeasureData[keyof TerrainMeasureData] }>();
 
-  onFieldChange(field: keyof TerrainMeasureData, value: any) {
+  onFieldChange(field: keyof TerrainMeasureData, value: TerrainMeasureData[keyof TerrainMeasureData]): void {
     this.fieldChange.emit({ field, value });
   }
 }

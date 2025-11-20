@@ -1,28 +1,28 @@
 .form-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    align-items: flex-end;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-color);
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.25rem;
 
-    label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--text-color);
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-
-        .help-icon {
-            font-size: 1rem;
-            color: var(--text-color-secondary);
-            cursor: help;
-        }
+    .help-icon {
+      font-size: 1rem;
+      color: var(--text-color-secondary);
+      cursor: help;
     }
+  }
 }
