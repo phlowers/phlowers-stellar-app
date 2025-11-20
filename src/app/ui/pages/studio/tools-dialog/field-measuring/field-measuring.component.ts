@@ -62,7 +62,9 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   >('terrainData');
 
   readonly spanOptions = signal<SelectOption[]>(SPAN_OPTIONS);
-  readonly windDirectionOptions = signal<SelectOption[]>(WIND_DIRECTION_OPTIONS);
+  readonly windDirectionOptions = signal<SelectOption[]>(
+    WIND_DIRECTION_OPTIONS
+  );
   readonly skyCoverOptions = signal<SelectOption[]>(SKY_COVER_OPTIONS);
   readonly leftSupportOptions = signal<SelectOption[]>(LEFT_SUPPORT_OPTIONS);
   readonly cableOptions = signal<SelectOption[]>(CABLE_OPTIONS);
