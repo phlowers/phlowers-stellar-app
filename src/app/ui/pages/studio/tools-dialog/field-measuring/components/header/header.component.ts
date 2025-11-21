@@ -9,7 +9,7 @@ import { TerrainMeasureData } from '../../types';
 import { SelectOption } from '../../constants';
 
 @Component({
-  selector: 'app-location-fields',
+  selector: 'app-header',
   imports: [
     SelectModule,
     InputTextModule,
@@ -18,10 +18,10 @@ import { SelectOption } from '../../constants';
     InputGroupAddonModule,
     IconComponent
   ],
-  templateUrl: './location-fields.component.html',
-  styleUrls: ['./location-fields.component.scss']
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss']
 })
-export class LocationFieldsComponent {
+export class HeaderComponent {
   measureData = input.required<TerrainMeasureData>();
   spanOptions = input.required<SelectOption[]>();
   fieldChange = output<{ field: keyof TerrainMeasureData; value: TerrainMeasureData[keyof TerrainMeasureData] }>();

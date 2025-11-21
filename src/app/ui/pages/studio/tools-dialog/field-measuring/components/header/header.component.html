@@ -1,4 +1,28 @@
-<div class="form-grid">
+<div class="header-grid">
+  <dl class="contents">
+    <div class="header-info">
+      <dt i18n>Line</dt>
+      <dd>{{ measureData().line }}</dd>
+    </div>
+    <div class="header-info">
+      <dt i18n>Voltage</dt>
+      <dd i18n>{{ measureData().voltage }} kV</dd>
+    </div>
+    <div class="header-info">
+      <dt i18n>Span type</dt>
+      <dd>{{ measureData().spanType }}</dd>
+    </div>
+    <div class="header-info">
+      <dt i18n>Phase number</dt>
+      <dd>{{ measureData().phaseNumber }}</dd>
+    </div>
+    <div class="header-info">
+      <dt i18n>Number of conductors</dt>
+      <dd>{{ measureData().numberOfConductors }}</dd>
+    </div>
+  </dl>
+
+  <!-- Location Fields Section -->
   <div class="form-field">
     <label for="portee">
       <ng-container i18n>Span</ng-container>
@@ -18,8 +42,10 @@
 
   <div class="form-field">
     <label for="longitude">
-      <ng-container i18n>Longitude</ng-container>
-      <sup class="mandatory">*</sup>
+      <span>
+        <ng-container i18n>Longitude</ng-container>
+        <sup class="mandatory">*</sup>
+      </span>
       <app-icon icon="help" class="help-icon" />
     </label>
     <p-inputgroup>
@@ -37,8 +63,10 @@
 
   <div class="form-field">
     <label for="latitude">
-      <ng-container i18n>Latitude</ng-container>
-      <sup class="mandatory">*</sup>
+      <span>
+        <ng-container i18n>Latitude</ng-container>
+        <sup class="mandatory">*</sup>
+      </span>
       <app-icon icon="help" class="help-icon" />
     </label>
     <p-inputgroup>
