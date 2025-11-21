@@ -5,9 +5,7 @@
   </p>
 </ng-template>
 
-<app-header-info [measureData]="measureData()" />
-
-<app-location-fields
+<app-header
   [measureData]="measureData()"
   [spanOptions]="spanOptions()"
   (fieldChange)="onFieldChange($event.field, $event.value)"

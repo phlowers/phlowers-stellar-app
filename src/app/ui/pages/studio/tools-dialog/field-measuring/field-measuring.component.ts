@@ -12,8 +12,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TabsModule } from 'primeng/tabs';
-import { HeaderInfoComponent } from './components/header-info/header-info.component';
-import { LocationFieldsComponent } from './components/location-fields/location-fields.component';
+import { HeaderComponent } from './components/header/header.component';
 import { CalculationResults, TerrainMeasureData } from './types';
 import { ToolsDialogService } from '../tools-dialog.service';
 import {
@@ -33,8 +32,7 @@ import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
     ButtonComponent,
     IconComponent,
     TabsModule,
-    HeaderInfoComponent,
-    LocationFieldsComponent
+    HeaderComponent
   ],
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss']
