@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { TerrainMeasureData } from '../../types';
+import { FieldMeasureData } from '../../types';
 import { SelectOption } from '../../constants';
 
 @Component({
@@ -22,11 +22,17 @@ import { SelectOption } from '../../constants';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
-  measureData = input.required<TerrainMeasureData>();
+  measureData = input.required<FieldMeasureData>();
   spanOptions = input.required<SelectOption[]>();
-  fieldChange = output<{ field: keyof TerrainMeasureData; value: TerrainMeasureData[keyof TerrainMeasureData] }>();
+  fieldChange = output<{
+    field: keyof FieldMeasureData;
+    value: FieldMeasureData[keyof FieldMeasureData];
+  }>();
 
-  onFieldChange(field: keyof TerrainMeasureData, value: TerrainMeasureData[keyof TerrainMeasureData]): void {
+  onFieldChange(
+    field: keyof FieldMeasureData,
+    value: FieldMeasureData[keyof FieldMeasureData]
+  ): void {
     this.fieldChange.emit({ field, value });
   }
 }

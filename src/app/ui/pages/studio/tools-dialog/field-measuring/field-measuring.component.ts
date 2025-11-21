@@ -13,7 +13,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from './components/header/header.component';
-import { CalculationResults, TerrainMeasureData } from './types';
+import { CalculationResults, FieldMeasureData } from './types';
 import { ToolsDialogService } from '../tools-dialog.service';
 import {
   SPAN_OPTIONS,
@@ -24,6 +24,7 @@ import {
   SelectOption
 } from './constants';
 import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
+import { FieldDatasComponent } from './components/field-datas/field-datas.component';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -32,7 +33,8 @@ import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
     ButtonComponent,
     IconComponent,
     TabsModule,
-    HeaderComponent
+    HeaderComponent,
+    FieldDatasComponent
   ],
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss']
@@ -50,7 +52,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  measureData = signal<TerrainMeasureData>(INITIAL_MEASURE_DATA);
+  measureData = signal<FieldMeasureData>(INITIAL_MEASURE_DATA);
 
   activeTab = signal<
     | 'terrainData'
@@ -88,8 +90,8 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   }
 
   onFieldChange(
-    field: keyof TerrainMeasureData,
-    value: TerrainMeasureData[keyof TerrainMeasureData]
+    field: keyof FieldMeasureData,
+    value: FieldMeasureData[keyof FieldMeasureData]
   ) {
     this.measureData.set({
       ...this.measureData(),

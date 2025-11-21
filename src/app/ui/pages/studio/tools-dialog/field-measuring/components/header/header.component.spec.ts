@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { HeaderComponent } from './header.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { TerrainMeasureData } from '../../types';
+import { FieldMeasureData } from '../../types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { INITIAL_MEASURE_DATA } from '../../mock-data';
 
@@ -17,16 +17,18 @@ describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
 
-  const mockMeasureData: TerrainMeasureData = { ...INITIAL_MEASURE_DATA };
+  const mockMeasureData: FieldMeasureData = { ...INITIAL_MEASURE_DATA };
   const mockSpanOptions: SelectOption[] = SPAN_OPTIONS;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HeaderComponent]
-    }).overrideComponent(HeaderComponent, {
-      remove: { imports: [IconComponent] },
-      add: { imports: [MockIconComponent] }
-    }).compileComponents();
+    })
+      .overrideComponent(HeaderComponent, {
+        remove: { imports: [IconComponent] },
+        add: { imports: [MockIconComponent] }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
@@ -90,9 +92,15 @@ describe('HeaderComponent', () => {
 
     it('should display voltage with kV unit', () => {
       const element = fixture.nativeElement;
-      const sections = Array.from(element.querySelectorAll('.header-info')) as HTMLElement[];
-      const voltageSection = sections.find(el => el.textContent?.includes('Voltage'));
-      expect(voltageSection?.textContent).toContain(`${mockMeasureData.voltage} kV`);
+      const sections = Array.from(
+        element.querySelectorAll('.header-info')
+      ) as HTMLElement[];
+      const voltageSection = sections.find((el) =>
+        el.textContent?.includes('Voltage')
+      );
+      expect(voltageSection?.textContent).toContain(
+        `${mockMeasureData.voltage} kV`
+      );
     });
 
     it('should display span type', () => {
@@ -287,7 +295,7 @@ describe('HeaderComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle measure data with null values', () => {
-      const dataWithNulls: TerrainMeasureData = {
+      const dataWithNulls: FieldMeasureData = {
         ...mockMeasureData,
         longitude: 0,
         latitude: 0,
@@ -312,7 +320,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should display zero values correctly', () => {
-      const dataWithZeros: TerrainMeasureData = {
+      const dataWithZeros: FieldMeasureData = {
         ...mockMeasureData,
         voltage: 0,
         phaseNumber: 0,
