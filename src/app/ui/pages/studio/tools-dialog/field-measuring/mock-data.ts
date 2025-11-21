@@ -1,6 +1,7 @@
-import { TerrainMeasureData, CalculationResults } from './types';
+import { FieldMeasureData, CalculationResults } from './types';
 
-export const INITIAL_MEASURE_DATA: TerrainMeasureData = {
+export const INITIAL_MEASURE_DATA: FieldMeasureData = {
+  measureName: '',
   line: 'Line 225kV Rougemontier - Tourbe #1',
   voltage: 123,
   spanType: 'Phase',

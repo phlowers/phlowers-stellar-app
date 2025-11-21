@@ -22,27 +22,22 @@
   </p-tablist>
 
   <p-tabpanel value="terrainData">
-    <ng-template #header>
-      <span i18n>Terrain data</span>
-    </ng-template>
+    <app-field-datas
+      [measureData]="measureData()"
+      (fieldChange)="onFieldChange($event.field, $event.value)"
+    />
   </p-tabpanel>
 
   <p-tabpanel value="parameterCalculation">
-    <ng-template #header>
-      <span i18n>Parameter calculation</span>
-    </ng-template>
+    <span i18n>Parameter calculation</span>
   </p-tabpanel>
 
   <p-tabpanel value="temperatureCalculation">
-    <ng-template #header>
-      <span i18n>Temperature calculation</span>
-    </ng-template>
+    <span i18n>Temperature calculation</span>
   </p-tabpanel>
 
   <p-tabpanel value="parameterAt15CWithoutWind">
-    <ng-template #header>
-      <span i18n>Parameter at 15°C without wind</span>
-    </ng-template>
+    <span i18n>Parameter at 15°C without wind</span>
   </p-tabpanel>
 </p-tabs>
 

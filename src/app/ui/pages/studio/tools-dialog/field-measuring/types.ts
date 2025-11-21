@@ -1,4 +1,5 @@
-export interface TerrainMeasureData {
+export interface FieldMeasureData {
+  measureName: string;
   line: string;
   voltage: number;
   spanType: string;
