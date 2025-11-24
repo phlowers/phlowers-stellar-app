@@ -22,7 +22,7 @@ import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/butt
 import { Router } from '@angular/router';
 import { FileUploadModule } from 'primeng/fileupload';
 
-const newStudy = (): StudyModel => {
+export const createEmptyStudy = (): StudyModel => {
   return {
     title: '',
     description: '',
@@ -92,7 +92,7 @@ export class NewStudyModalComponent {
   async onSubmit() {
     if (this.mode() === 'new') {
       const uuid = await this.studiesService.createStudy({
-        ...newStudy(),
+        ...createEmptyStudy(),
         title: this.title(),
         description: this.description()
       });

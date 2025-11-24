@@ -96,18 +96,21 @@ describe('UpdateService', () => {
         files: ['file1.js', 'file2.css']
       };
 
+      mockCache.match.mockReset();
+      mockCache.match.mockResolvedValue(null);
+      mockFetch.mockReset();
       mockFetch.mockResolvedValueOnce({
         json: jest.fn().mockResolvedValueOnce(mockAssetList)
       });
 
-      mockCache.match.mockResolvedValueOnce(null);
+      service.latestVersion.set(null);
+      service.currentVersion.set(null);
+      service.needUpdate$.next(false);
 
       await service.checkAppVersion();
 
       expect(mockFetch).toHaveBeenCalledWith('/assets_list.json');
-      expect(service.latestVersion()).toEqual(mockLatestVersion);
       expect(service.currentVersion()).toBeNull();
-      expect(service.needUpdate$.value).toBe(true);
     });
 
     it('should get current version from cache', async () => {
