@@ -1,7 +1,7 @@
 @use 'abstract.extracts' as app;
 
 .header-grid {
-  @apply grid grid-cols-5 items-end gap-x-8 gap-y-3 mt-4 mb-3;
+  @extend %tools-grid-layout;
 }
 
 %_label-style {
