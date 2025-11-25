@@ -7,5 +7,6 @@ import { Component, ContentChild, input, TemplateRef } from '@angular/core';
 })
 export class SideTabComponent {
   label = input.required<string>();
+  disabled = input<boolean>(false);
   @ContentChild(TemplateRef) template!: TemplateRef<unknown>;
 }
