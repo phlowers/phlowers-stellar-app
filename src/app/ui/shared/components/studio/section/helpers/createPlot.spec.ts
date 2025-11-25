@@ -53,14 +53,14 @@ describe('createPlot', () => {
 
   describe('basic functionality', () => {
     it('should call Plotly.newPlot when element exists', () => {
-      createPlot('test-plot-id', mockData, false, false);
+      createPlot('test-plot-id', mockData, false, false, '3d');
 
       expect(document.getElementById).toHaveBeenCalledWith('test-plot-id');
       expect(Plotly.newPlot).toHaveBeenCalled();
     });
 
     it('should pass the correct plotId to Plotly.newPlot', () => {
-      createPlot('test-plot-id', mockData, false, false);
+      createPlot('test-plot-id', mockData, false, false, '3d');
 
       expect(Plotly.newPlot).toHaveBeenCalledWith(
         'test-plot-id',
@@ -71,7 +71,7 @@ describe('createPlot', () => {
     });
 
     it('should pass the data to Plotly.newPlot', () => {
-      createPlot('test-plot-id', mockData, false, false);
+      createPlot('test-plot-id', mockData, false, false, '3d');
 
       expect(Plotly.newPlot).toHaveBeenCalledWith(
         expect.any(String),
@@ -84,14 +84,14 @@ describe('createPlot', () => {
 
   describe('scene configuration', () => {
     it('should configure scene with manual aspectmode', () => {
-      createPlot('test-plot-id', mockData, false, false);
+      createPlot('test-plot-id', mockData, false, false, '3d');
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.scene.aspectmode).toBe('manual');
     });
 
     it('should configure scene with correct aspectratio', () => {
-      createPlot('test-plot-id', mockData, false, false);
+      createPlot('test-plot-id', mockData, false, false, '3d');
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.scene.aspectratio).toEqual({

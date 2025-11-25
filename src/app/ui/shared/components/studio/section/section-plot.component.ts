@@ -34,7 +34,8 @@ export class SectionPlotComponent {
       'plotly-output',
       plotData,
       isSupportZoom,
-      plotOptions.invert
+      plotOptions.invert,
+      plotOptions.view
     );
   }
 
