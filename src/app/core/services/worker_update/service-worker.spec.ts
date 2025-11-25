@@ -277,10 +277,18 @@ describe('Service Worker Functions', () => {
       mockEvent.request.url = 'https://example.com/app.js';
       (global.caches as any).match.mockResolvedValue(null);
       mockFetch.mockResolvedValue(new Response('console.log("test");'));
+      const clonedRequest = { url: 'https://example.com/app.js' };
+      mockEvent.request.clone.mockReturnValue(clonedRequest);
 
       await handleFetch(mockEvent);
 
-      expect(mockFetch).toHaveBeenCalledWith(mockEvent.request.clone());
+      expect(mockFetch).toHaveBeenCalledWith(
+        clonedRequest,
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.any(Object)
+        })
+      );
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 

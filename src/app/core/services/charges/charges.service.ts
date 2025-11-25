@@ -135,7 +135,7 @@ export class ChargesService {
       sectionUuid
     );
 
-    const charge = section.charges.find((c) => c?.uuid === chargeUuid);
+    const charge = section.charges?.find((c) => c?.uuid === chargeUuid) ?? null;
     if (!charge) {
       throw new Error(`Charge with uuid ${chargeUuid} not found`);
     }
@@ -188,6 +188,6 @@ export class ChargesService {
   ): Promise<Charge | null> {
     const { section } = await this.getStudyAndSection(studyUuid, sectionUuid);
 
-    return section.charges.find((c) => c?.uuid === chargeUuid) ?? null;
+    return section.charges?.find((c) => c?.uuid === chargeUuid) ?? null;
   }
 }

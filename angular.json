@@ -99,6 +99,7 @@
               "localize": ["fr"],
               "baseHref": "/",
               "extractLicenses": false,
+              "sourceMap": true,
               "optimization": {
                   "scripts": true,
                   "styles": true,
