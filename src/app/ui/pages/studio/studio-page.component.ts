@@ -59,7 +59,16 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   sidebarWidth = signal(300);
   sidebarOpen = signal(false);
   supports = signal<string>('single');
-  supportsOptions = signal<string[]>(['single', 'double', 'all']);
+  supportsOptions = signal<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([
+    { label: $localize`Single`, value: 'single' },
+    { label: $localize`Double`, value: 'double' },
+    { label: $localize`All`, value: 'all' }
+  ]);
   subscription: Subscription | null = null;
   plotStudioHeight = signal<string>('21.875rem');
   isNewChargeModalOpen = signal(false);
