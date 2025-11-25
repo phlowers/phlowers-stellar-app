@@ -120,7 +120,8 @@ describe('SectionPlotComponent', () => {
         'plotly-output',
         mockPlotData,
         false,
-        false
+        false,
+        '2d'
       );
     });
 
@@ -133,7 +134,8 @@ describe('SectionPlotComponent', () => {
         'plotly-output',
         mockPlotData,
         false,
-        false
+        false,
+        '2d'
       );
     });
 
@@ -156,7 +158,8 @@ describe('SectionPlotComponent', () => {
         'plotly-output',
         mockPlotData,
         true,
-        true
+        true,
+        '3d'
       );
     });
   });
