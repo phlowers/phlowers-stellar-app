@@ -1,5 +1,4 @@
 import {
-  afterNextRender,
   Component,
   computed,
   ElementRef,
@@ -117,75 +116,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly studiesService: StudiesService,
     private readonly elementRef: ElementRef
-  ) {
-    afterNextRender(() => {
-      this.setupPlotViewHeightCalculation();
-    });
-  }
-
-  private setupPlotViewHeightCalculation() {
-    const hostElement = this.elementRef.nativeElement as HTMLElement;
-    const graphToolsLeftElement = hostElement.querySelector(
-      '.graph-tools__left'
-    ) as HTMLElement;
-
-    if (!graphToolsLeftElement) return;
-
-    const calculatePlotHeight = () => {
-      const MIN_HEIGHT_REM = 21.875;
-      const MAX_HEIGHT_REM = 36.875;
-      const MIN_HEIGHT_PX = MIN_HEIGHT_REM * 16;
-      const MAX_HEIGHT_PX = MAX_HEIGHT_REM * 16;
-
-      const availableHeight = graphToolsLeftElement.clientHeight;
-
-      const sixtyPercent = availableHeight * 0.6;
-
-      const wouldOverflow = this.checkIfOverflows(
-        graphToolsLeftElement,
-        MIN_HEIGHT_PX
-      );
-
-      if (wouldOverflow) {
-        this.plotStudioHeight.set('21.875rem');
-      } else {
-        const targetHeight = Math.min(sixtyPercent, MAX_HEIGHT_PX) / 16; // divided by 16 to convert back to rem
-        this.plotStudioHeight.set(`${targetHeight}rem`);
-      }
-    };
-
-    calculatePlotHeight();
-
-    this.resizeObserver = new ResizeObserver(() => {
-      calculatePlotHeight();
-    });
-
-    this.resizeObserver.observe(graphToolsLeftElement);
-  }
-
-  private checkIfOverflows(
-    container: HTMLElement,
-    plotHeight: number
-  ): boolean {
-    const leftElement = container.querySelector(
-      '.graph-tools__left'
-    ) as HTMLElement;
-    if (!leftElement) return false;
-
-    // Get all children heights except plot-view
-    let otherContentHeight = 0;
-    const children = Array.from(leftElement.children);
-
-    for (const child of children) {
-      if (!(child as HTMLElement).classList.contains('plot-view')) {
-        otherContentHeight += (child as HTMLElement).offsetHeight;
-      }
-    }
-
-    const totalHeight = plotHeight + otherContentHeight + 48; // 48px buffer for padding/gaps
-
-    return totalHeight > container.clientHeight;
-  }
+  ) {}
 
   ngOnInit() {
     const studyUuid = this.route.snapshot.paramMap.get('uuid');
