@@ -53,9 +53,13 @@ export class StudioMenuBarComponent {
     )
   );
   staffIsPresent = computed(() => {
-    return this.section()?.charges.find(
-      (c) => c.uuid === this.selectedChargeCaseUuid()
-    )?.personnelPresence;
+    const section = this.section();
+    const selectedChargeUuid = this.selectedChargeCaseUuid();
+    if (!section || !selectedChargeUuid) {
+      return false;
+    }
+    const charge = section.charges?.find((c) => c.uuid === selectedChargeUuid);
+    return charge?.personnelPresence;
   });
   constructor(
     public readonly plotService: PlotService,

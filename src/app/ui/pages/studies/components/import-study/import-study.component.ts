@@ -14,6 +14,13 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
+import { createEmptyStudy } from '../new-study-modal/new-study-modal.component';
+import {
+  createEmptySection,
+  createEmptySupport
+} from '@src/app/core/services/sections/helpers';
+import { Section } from '@src/app/core/data/database/interfaces/section';
+import { Support } from '@src/app/core/data/database/interfaces/support';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -115,7 +122,25 @@ export class ImportStudyComponent {
       const result = e.target?.result as string;
       const studyBase64 = atob(result);
       const parsedResult = JSON.parse(studyBase64);
-      const uuid = await this.studiesService.createStudy(parsedResult);
+      const newStudy = {
+        ...createEmptyStudy(),
+        ...parsedResult,
+        sections: parsedResult.sections
+          ? parsedResult.sections.map((section: Section) => {
+              return {
+                ...createEmptySection(),
+                ...section,
+                supports: section.supports.map((support: Support) => {
+                  return {
+                    ...createEmptySupport(),
+                    ...support
+                  };
+                })
+              };
+            })
+          : []
+      };
+      const uuid = await this.studiesService.createStudy(newStudy);
       const study = await this.studiesService.getStudy(uuid);
       if (!study) {
         return;

@@ -208,7 +208,7 @@ def init_section(js_inputs: dict):
             if condition["uuid"] == input_section["selected_initial_condition_uuid"]
         )
     )
-    input_charges = input_section["charges"]
+    input_charges = input_section["charges"] if "charges" in input_section else []
     input_charge = (
         None
         if not input_charges

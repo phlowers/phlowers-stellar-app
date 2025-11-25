@@ -95,6 +95,16 @@ export async function updateApp() {
   return appVersion;
 }
 
+const noCacheHeaders = () => {
+  const myHeaders = new Headers();
+  myHeaders.append('pragma', 'no-cache');
+  myHeaders.append('cache-control', 'no-cache');
+  return {
+    method: 'GET',
+    headers: myHeaders
+  };
+};
+
 export async function handleFetch(event: FetchEvent) {
   const url = event.request.url;
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration
@@ -121,7 +131,7 @@ export async function handleFetch(event: FetchEvent) {
           return response;
         }
         const fetchRequest = event.request.clone();
-        return fetch(fetchRequest).catch((error) => {
+        return fetch(fetchRequest, noCacheHeaders()).catch((error) => {
           console.error('Fetch failed:', error);
           return Response.error();
         });
@@ -163,7 +173,7 @@ export async function handleFetch(event: FetchEvent) {
             return response;
           }
           const fetchRequest = event.request.clone();
-          return fetch(fetchRequest).catch((error) => {
+          return fetch(fetchRequest, noCacheHeaders()).catch((error) => {
             console.error('Fetch failed:', error);
             return Response.error();
           });

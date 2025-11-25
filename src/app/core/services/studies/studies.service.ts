@@ -20,6 +20,7 @@ import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { InitialCondition } from '../../data/database/interfaces/initialCondition';
 import { MessageService } from 'primeng/api';
+import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/new-study-modal.component';
 
 @Injectable({
   providedIn: 'root'
@@ -218,6 +219,7 @@ export class StudiesService {
     section.initial_conditions = [initialCondition];
     section.selected_initial_condition_uuid = initialCondition.uuid;
     const uuid = await this.createStudy({
+      ...createEmptyStudy(),
       author_email: '',
       title: parameters.project_name,
       description: $localize`Study imported from protoV4`,
