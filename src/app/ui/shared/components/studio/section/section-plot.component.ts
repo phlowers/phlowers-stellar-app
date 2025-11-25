@@ -30,12 +30,15 @@ export class SectionPlotComponent {
       return;
     }
     const plotData = createPlotData(litData, plotOptions);
+    const camera = this.plotService.camera();
     return createPlot(
       'plotly-output',
       plotData,
       isSupportZoom,
       plotOptions.invert,
-      plotOptions.view
+      plotOptions.view,
+      camera,
+      plotOptions.side
     );
   }
 
