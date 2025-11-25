@@ -73,7 +73,7 @@ const formatProtoV4Parameters = (
   };
 };
 
-const protoV4ErrorMessage = {
+const importErrorMessage = {
   severity: 'error',
   summary: $localize`Error`,
   detail: $localize`Error importing study`,
@@ -119,33 +119,38 @@ export class ImportStudyComponent {
   loadAppFile(file: File) {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const result = e.target?.result as string;
-      const studyBase64 = atob(result);
-      const parsedResult = JSON.parse(studyBase64);
-      const newStudy = {
-        ...createEmptyStudy(),
-        ...parsedResult,
-        sections: parsedResult.sections
-          ? parsedResult.sections.map((section: Section) => {
-              return {
-                ...createEmptySection(),
-                ...section,
-                supports: section.supports.map((support: Support) => {
-                  return {
-                    ...createEmptySupport(),
-                    ...support
-                  };
-                })
-              };
-            })
-          : []
-      };
-      const uuid = await this.studiesService.createStudy(newStudy);
-      const study = await this.studiesService.getStudy(uuid);
-      if (!study) {
-        return;
+      try {
+        const result = e.target?.result as string;
+        const studyBase64 = atob(result);
+        const parsedResult = JSON.parse(studyBase64);
+        const newStudy = {
+          ...createEmptyStudy(),
+          ...parsedResult,
+          sections: parsedResult.sections
+            ? parsedResult.sections.map((section: Section) => {
+                return {
+                  ...createEmptySection(),
+                  ...section,
+                  supports: section.supports.map((support: Support) => {
+                    return {
+                      ...createEmptySupport(),
+                      ...support
+                    };
+                  })
+                };
+              })
+            : []
+        };
+        const uuid = await this.studiesService.createStudy(newStudy);
+        const study = await this.studiesService.getStudy(uuid);
+        if (!study) {
+          return;
+        }
+        this.newStudies.set([...this.newStudies(), study]);
+      } catch (_error: unknown) {
+        console.error('Error importing study', _error);
+        this.messageService.add(importErrorMessage);
       }
-      this.newStudies.set([...this.newStudies(), study]);
     };
     reader.readAsText(file);
   }
@@ -174,7 +179,7 @@ export class ImportStudyComponent {
           parsed = atob(result.replace('data:text/csv;base64,', ''));
         }
         if (!result) {
-          this.messageService.add(protoV4ErrorMessage);
+          this.messageService.add(importErrorMessage);
           return;
         }
         const csvSupports = parsed
@@ -216,11 +221,11 @@ export class ImportStudyComponent {
         });
       } catch (_error: unknown) {
         console.error('Error importing study', _error);
-        this.messageService.add(protoV4ErrorMessage);
+        this.messageService.add(importErrorMessage);
       }
     };
     reader.onerror = () => {
-      this.messageService.add(protoV4ErrorMessage);
+      this.messageService.add(importErrorMessage);
     };
     reader.readAsDataURL(file);
   }

@@ -86,7 +86,7 @@ export class StudiesComponent implements OnInit {
   deleteStudy(uuid: string) {
     this.confirmationService.confirm({
       key: 'positionDialog',
-      message: 'Are you sure you want to delete this study?',
+      message: $localize`Are you sure you want to delete this study?`,
       accept: () => {
         this.studiesService.deleteStudy(uuid);
       }
