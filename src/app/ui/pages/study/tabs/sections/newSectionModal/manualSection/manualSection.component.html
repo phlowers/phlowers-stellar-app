@@ -237,8 +237,8 @@
         <h3 class="title-underline" i18n>Link</h3>
 
         @if (mode() === 'create' || mode() === 'edit') {
-          <div class="section-form-part-grid">
-            <div class="flex flex-col col-span-1">
+          <div class="section-form-part-grid lines-form-grid">
+            <div class="flex flex-col [grid-area:a]">
               <label for="linkEtl" i18n>Electric tension level</label>
               <p-select
                 inputId="linkEtl"
@@ -256,7 +256,7 @@
                 filterBy="voltage_idr"
               />
             </div>
-            <div class="flex flex-col col-span-1">
+            <div class="flex flex-col [grid-area:b]">
               <label for="linkName" i18n>Link - ID</label>
               <p-select
                 inputId="linkName"
@@ -274,8 +274,26 @@
                 filterBy="link_idr"
               />
             </div>
-            <div class="col-span-2"></div>
-            <div class="flex flex-col col-span-1">
+            <div class="flex flex-col [grid-area:c]">
+              <label for="linkName" i18n>Link - Name</label>
+              <p-select
+                inputId="linkName"
+                [options]="linesFilterTable() | unique: 'link_adr'"
+                [(ngModel)]="section().link_name"
+                optionLabel="link_adr"
+                optionValue="link_idr"
+                [fluid]="true"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'link_idr')"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="link_adr"
+              />
+            </div>
+            <div class="flex flex-col [grid-area:d]">
               <label for="linkLit" i18n>LIT - ID</label>
               <p-select
                 inputId="linkLit"
@@ -294,7 +312,7 @@
               />
             </div>
 
-            <div class="flex flex-col col-span-3">
+            <div class="flex flex-col [grid-area:e]">
               <label for="linkLit" i18n>LIT - Name</label>
               <p-select
                 inputId="linkLit"
@@ -313,7 +331,7 @@
               />
             </div>
 
-            <div class="flex flex-col col-span-1">
+            <div class="flex flex-col [grid-area:f]">
               <label for="linkBm" i18n>Branch - ID</label>
               <p-select
                 inputId="linkBm"
@@ -329,24 +347,6 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="branch_idr"
-              />
-            </div>
-            <div class="flex flex-col col-span-3">
-              <label for="linkBm" i18n>Branch - Name</label>
-              <p-select
-                inputId="linkBm"
-                [options]="linesFilterTable() | unique: 'branch_idr'"
-                [(ngModel)]="section().branch_name"
-                optionLabel="branch_adr"
-                optionValue="branch_idr"
-                (onChange)="onLinesSelect($event, 'branch_idr')"
-                virtualScroll="true"
-                virtualScrollItemSize="10"
-                appendTo="body"
-                (ngModelChange)="onSectionChange()"
-                [showClear]="true"
-                [filter]="true"
-                filterBy="branch_adr"
               />
             </div>
           </div>
