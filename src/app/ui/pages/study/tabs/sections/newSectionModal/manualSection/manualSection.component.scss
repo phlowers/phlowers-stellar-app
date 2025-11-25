@@ -8,6 +8,12 @@
   @apply grid grid-cols-4 gap-x-8 gap-y-4;
   align-items: flex-end;
   padding-right: 20%;
+
+  &.lines-form-grid {
+    grid-template-areas: 'a . . .'
+      'b c c .'
+      'd e e f';
+  }
 }
 
 label,
