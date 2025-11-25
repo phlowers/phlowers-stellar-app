@@ -3,6 +3,7 @@
     @for (tab of tabs; track $index) {
       <button
         #btnRef
+        [disabled]="tab.disabled()"
         type="button"
         role="tab"
         class="side-tab__header__btn"
