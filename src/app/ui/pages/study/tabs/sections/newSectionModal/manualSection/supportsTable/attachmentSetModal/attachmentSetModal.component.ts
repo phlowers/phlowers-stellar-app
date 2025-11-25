@@ -36,6 +36,7 @@ import { uniq } from 'lodash';
     InputIconModule,
     SupportPlotComponent
   ],
+  styleUrls: ['./attachmentSetModal.component.scss'],
   templateUrl: './attachmentSetModal.component.html'
 })
 export class AttachmentSetModalComponent implements OnInit {
@@ -138,7 +139,7 @@ export class AttachmentSetModalComponent implements OnInit {
   }
 
   async onAttachnementSelect(event: any, key: keyof Attachment) {
-    if (!event.value) {
+    if (event.value === null || event.value === undefined) {
       this.resetValues();
       return;
     }

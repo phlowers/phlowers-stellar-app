@@ -254,8 +254,11 @@
             [ngModel]="support.chainName"
             optionLabel="chain_name"
             type="text"
+            [showClear]="true"
             optionValue="chain_name"
             appendTo="body"
+            [filter]="true"
+            filterBy="chain_name"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'chainName', $event)
             "
@@ -329,7 +332,9 @@
             class="w-full"
             [options]="supportFilterTable()"
             [(ngModel)]="support.name"
+            [showClear]="true"
             appendTo="body"
+            [filter]="true"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
           />
         } @else {
