@@ -313,12 +313,6 @@
         <target> Réinitialiser la base de données </target>
       </segment>
     </unit>
-    <unit id="5684312348614575469">
-      <segment state="initial">
-        <source> Reset the app </source>
-        <target> Réinitialiser l&apos;application </target>
-      </segment>
-    </unit>
     <unit id="4238708305594970843">
       <segment state="initial">
         <source>Update successful</source>
@@ -719,24 +713,6 @@
       <segment state="initial">
         <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
         <target> Nom du câble <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
-      </segment>
-    </unit>
-    <unit id="3099536771768294227">
-      <segment state="initial">
-        <source>CM</source>
-        <target>CM</target>
-      </segment>
-    </unit>
-    <unit id="8039268900393010928">
-      <segment state="initial">
-        <source>GMR</source>
-        <target>GMR</target>
-      </segment>
-    </unit>
-    <unit id="4486647169102354749">
-      <segment state="initial">
-        <source>EEL</source>
-        <target>EEL</target>
       </segment>
     </unit>
     <unit id="2981219928115418649">
@@ -2009,12 +1985,6 @@
         <target>Raccourcir / Allonger</target>
       </segment>
     </unit>
-    <unit id="4606091236515013460">
-      <segment state="initial">
-        <source>Error:</source>
-        <target>Erreur:</target>
-      </segment>
-    </unit>
     <unit id="8083736833442025529">
       <segment state="initial">
         <source>No cable found</source>
@@ -2153,34 +2123,22 @@
         <target>Ajouter un cas de charge</target>
       </segment>
     </unit>
-    <unit id="6212148435964115036">
+    <unit id="472586784721739380">
       <segment state="initial">
-        <source>Link - IDR</source>
+        <source>Link - ID</source>
         <target>Liaison - IDR</target>
       </segment>
     </unit>
-    <unit id="1667027745228811183">
+    <unit id="8198965325876404733">
       <segment state="initial">
-        <source>LIT - ADR</source>
-        <target>LIT - ADR</target>
-      </segment>
-    </unit>
-    <unit id="3065988870624889478">
-      <segment state="initial">
-        <source>LIT - IDR</source>
+        <source>LIT - ID</source>
         <target>LIT - IDR</target>
       </segment>
     </unit>
-    <unit id="6965096128886264042">
+    <unit id="6760730176467866326">
       <segment state="initial">
-        <source>Branch - IDR</source>
-        <target>Branch - IDR</target>
-      </segment>
-    </unit>
-    <unit id="4438108941812329281">
-      <segment state="initial">
-        <source>Branch - ADR</source>
-        <target>Branch - ADR</target>
+        <source>Branch - ID</source>
+        <target>Branche - IDR</target>
       </segment>
     </unit>
     <unit id="3059442917741627872">
@@ -2235,12 +2193,6 @@
       <segment state="initial">
         <source>%CRA</source>
         <target>%CRA</target>
-      </segment>
-    </unit>
-    <unit id="8669020716428920796">
-      <segment state="initial">
-        <source>Guard number</source>
-        <target>Numéro de garde</target>
       </segment>
     </unit>
     <unit id="4021752662928002901">
@@ -2445,6 +2397,84 @@
       <segment state="initial">
         <source>You cannot update a study that you did not create, please duplicate it instead.</source>
         <target>Vous ne pouvez pas mettre à jour une étude que vous n&apos;avez pas créée, veuillez la dupliquer.</target>
+      </segment>
+    </unit>
+    <unit id="9006227511499022859">
+      <segment state="initial">
+        <source> Reset the app without resetting the database </source>
+        <target> Réinitialiser l&apos;application sans réinitialiser la base de données </target>
+      </segment>
+    </unit>
+    <unit id="7003790776240394114">
+      <segment state="initial">
+        <source>Filename</source>
+        <target>Nom du fichier</target>
+      </segment>
+    </unit>
+    <unit id="3523371283363294838">
+      <segment state="initial">
+        <source>Export format</source>
+        <target>Format d&apos;export</target>
+      </segment>
+    </unit>
+    <unit id="2820133611314033915">
+      <segment state="initial">
+        <source>Maintenance center</source>
+        <target>CM</target>
+      </segment>
+    </unit>
+    <unit id="7291169079105941936">
+      <segment state="initial">
+        <source>Regional team</source>
+        <target>GMR</target>
+      </segment>
+    </unit>
+    <unit id="3574421572547202133">
+      <segment state="initial">
+        <source>Maintenance team</source>
+        <target>EEL</target>
+      </segment>
+    </unit>
+    <unit id="7952517032522600259">
+      <segment state="initial">
+        <source>Link - Name</source>
+        <target>Liaison - ADR</target>
+      </segment>
+    </unit>
+    <unit id="7554418821130915590">
+      <segment state="initial">
+        <source>LIT - Name</source>
+        <target>LIT - ADR</target>
+      </segment>
+    </unit>
+    <unit id="1630268381780426388">
+      <segment state="initial">
+        <source>Calculation error: &apos;Solver did not converge&apos;</source>
+        <target>Erreur de calcul: &apos;Solver did not converge&apos;</target>
+      </segment>
+    </unit>
+    <unit id="8837923071812939954">
+      <segment state="initial">
+        <source>Are you sure you want to delete this study?</source>
+        <target>Êtes-vous sûr de vouloir supprimer cette étude ?</target>
+      </segment>
+    </unit>
+    <unit id="3413004253239957216">
+      <segment state="initial">
+        <source>Single</source>
+        <target>Simple</target>
+      </segment>
+    </unit>
+    <unit id="4061312488520540569">
+      <segment state="initial">
+        <source>Double</source>
+        <target>Double poteau</target>
+      </segment>
+    </unit>
+    <unit id="1616102757855967475">
+      <segment state="initial">
+        <source>All</source>
+        <target>Tous</target>
       </segment>
     </unit>
   </file>

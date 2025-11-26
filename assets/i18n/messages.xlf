@@ -366,11 +366,6 @@
         <source>Initial Condition Added</source>
       </segment>
     </unit>
-    <unit id="3099536771768294227">
-      <segment>
-        <source>CM</source>
-      </segment>
-    </unit>
     <unit id="3102779920122732727">
       <segment>
         <source> Loading </source>
@@ -454,11 +449,6 @@
     <unit id="4408679057911996366">
       <segment>
         <source>Cable name</source>
-      </segment>
-    </unit>
-    <unit id="4486647169102354749">
-      <segment>
-        <source>EEL</source>
       </segment>
     </unit>
     <unit id="4665164818576576044">
@@ -586,11 +576,6 @@
         <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a section </source>
       </segment>
     </unit>
-    <unit id="5684312348614575469">
-      <segment>
-        <source> Reset the app </source>
-      </segment>
-    </unit>
     <unit id="836321179652220398">
       <segment>
         <source> General </source>
@@ -679,11 +664,6 @@
     <unit id="797001286432919577">
       <segment>
         <source>Are you sure you want to delete all studies?</source>
-      </segment>
-    </unit>
-    <unit id="8039268900393010928">
-      <segment>
-        <source>GMR</source>
       </segment>
     </unit>
     <unit id="8109561878775602635">
@@ -1643,11 +1623,6 @@
         <source>Shortening / Lengthening</source>
       </segment>
     </unit>
-    <unit id="4606091236515013460">
-      <segment>
-        <source>Error:</source>
-      </segment>
-    </unit>
     <unit id="4613547067726634730">
       <segment>
         <source>Support n°</source>
@@ -1713,11 +1688,6 @@
         <source>Span loading</source>
       </segment>
     </unit>
-    <unit id="1667027745228811183">
-      <segment>
-        <source>LIT - ADR</source>
-      </segment>
-    </unit>
     <unit id="1864612253981729182">
       <segment>
         <source>suspension</source>
@@ -1753,9 +1723,9 @@
         <source>Arm length</source>
       </segment>
     </unit>
-    <unit id="3065988870624889478">
+    <unit id="8198965325876404733">
       <segment>
-        <source>LIT - IDR</source>
+        <source>LIT - ID</source>
       </segment>
     </unit>
     <unit id="344013254935185191">
@@ -1766,11 +1736,6 @@
     <unit id="4142858945350399408">
       <segment>
         <source>Height below console</source>
-      </segment>
-    </unit>
-    <unit id="4438108941812329281">
-      <segment>
-        <source>Branch - ADR</source>
       </segment>
     </unit>
     <unit id="4807396535461926931">
@@ -1803,14 +1768,14 @@
         <source>Cable manip. at support</source>
       </segment>
     </unit>
-    <unit id="6212148435964115036">
+    <unit id="472586784721739380">
       <segment>
-        <source>Link - IDR</source>
+        <source>Link - ID</source>
       </segment>
     </unit>
-    <unit id="6965096128886264042">
+    <unit id="6760730176467866326">
       <segment>
-        <source>Branch - IDR</source>
+        <source>Branch - ID</source>
       </segment>
     </unit>
     <unit id="7607770781665288883">
@@ -1861,11 +1826,6 @@
     <unit id="4893374109940250877">
       <segment>
         <source>%CRA</source>
-      </segment>
-    </unit>
-    <unit id="8669020716428920796">
-      <segment>
-        <source>Guard number</source>
       </segment>
     </unit>
     <unit id="4021752662928002901">
@@ -2036,6 +1996,71 @@
     <unit id="4124418045778511362">
       <segment>
         <source>You cannot update a study that you did not create, please duplicate it instead.</source>
+      </segment>
+    </unit>
+    <unit id="1630268381780426388">
+      <segment>
+        <source>Calculation error: &apos;Solver did not converge&apos;</source>
+      </segment>
+    </unit>
+    <unit id="2820133611314033915">
+      <segment>
+        <source>Maintenance center</source>
+      </segment>
+    </unit>
+    <unit id="3523371283363294838">
+      <segment>
+        <source>Export format</source>
+      </segment>
+    </unit>
+    <unit id="3574421572547202133">
+      <segment>
+        <source>Maintenance team</source>
+      </segment>
+    </unit>
+    <unit id="7003790776240394114">
+      <segment>
+        <source>Filename</source>
+      </segment>
+    </unit>
+    <unit id="7291169079105941936">
+      <segment>
+        <source>Regional team</source>
+      </segment>
+    </unit>
+    <unit id="7554418821130915590">
+      <segment>
+        <source>LIT - Name</source>
+      </segment>
+    </unit>
+    <unit id="7952517032522600259">
+      <segment>
+        <source>Link - Name</source>
+      </segment>
+    </unit>
+    <unit id="9006227511499022859">
+      <segment>
+        <source> Reset the app without resetting the database </source>
+      </segment>
+    </unit>
+    <unit id="1616102757855967475">
+      <segment>
+        <source>All</source>
+      </segment>
+    </unit>
+    <unit id="3413004253239957216">
+      <segment>
+        <source>Single</source>
+      </segment>
+    </unit>
+    <unit id="4061312488520540569">
+      <segment>
+        <source>Double</source>
+      </segment>
+    </unit>
+    <unit id="8837923071812939954">
+      <segment>
+        <source>Are you sure you want to delete this study?</source>
       </segment>
     </unit>
   </file>
