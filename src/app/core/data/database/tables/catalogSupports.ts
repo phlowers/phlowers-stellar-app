@@ -8,17 +8,8 @@ v. 2.0. If a copy of the MPL was not distributed with this
 You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export const attachmentTable = {
-  attachments: `&uuid,
-  support_id_catalog,
-  support_idr,
-  support_adr,
-  support_tower,
-  support_family,
-  support_name,
-  position,
-  X,
-  Y,
-  Z,
-  L`
+export const catalogSupportsTable = {
+  catalogSupports: `
+  name
+  `
 };

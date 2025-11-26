@@ -25,13 +25,12 @@
           <label for="supportName" i18n>Support name</label>
           <p-select
             inputId="supportName"
-            [options]="supportsFilterTable() | unique: 'support_name'"
-            optionLabel="support_name"
-            optionValue="support_name"
+            [options]="supportsFilterTable()"
             appendTo="body"
             [(ngModel)]="supportName"
             [filter]="true"
-            filterBy="support_name"
+            virtualScroll="true"
+            virtualScrollItemSize="10"
             [showClear]="true"
             (onChange)="onAttachnementSelect($event, 'support_name')"
           />

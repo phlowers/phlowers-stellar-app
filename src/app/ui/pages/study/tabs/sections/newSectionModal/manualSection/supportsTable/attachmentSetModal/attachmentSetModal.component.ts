@@ -21,6 +21,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { Section } from '@core/data/database/interfaces/section';
 import { SupportPlotComponent } from '@ui/shared/components/studio/support/support-plot.component';
 import { uniq } from 'lodash';
+import { CatalogSupportsService } from '@src/app/core/services/catalogSupports/catalogSupports.service';
 
 @Component({
   selector: 'app-attachment-set-modal',
@@ -58,7 +59,7 @@ export class AttachmentSetModalComponent implements OnInit {
   coordinates = signal<(number | undefined)[][]>([]);
   attachmentSetNumbers = signal<number[]>([]);
 
-  supportsFilterTable = signal<Attachment[]>([]);
+  supportsFilterTable = signal<string[]>([]);
   attachmentsFilterTable = signal<Attachment[]>([]);
 
   onVisibleChange() {
@@ -66,23 +67,25 @@ export class AttachmentSetModalComponent implements OnInit {
   }
 
   async findCoordinates(supportName: string) {
-    const attachments = await this.attachmentService.getAttachments();
-    const attachmentSets = attachments.filter(
-      (attachment) => attachment.support_name === supportName
-    );
+    const attachments =
+      await this.attachmentService.searchAttachmentsBySupportName(supportName);
     this.coordinates.set(
-      attachmentSets.map((attachment) => [
+      attachments.map((attachment) => [
         attachment.attachment_set_x,
         attachment.attachment_set_y,
         attachment.attachment_set_z
       ])
     );
+    this.attachmentsFilterTable.set(attachments);
     this.attachmentSetNumbers.set(
-      uniq(attachmentSets.map((attachment) => attachment.attachment_set ?? 0))
+      uniq(attachments.map((attachment) => attachment.attachment_set ?? 0))
     );
   }
 
-  constructor(private readonly attachmentService: AttachmentService) {
+  constructor(
+    private readonly attachmentService: AttachmentService,
+    private readonly catalogSupportsService: CatalogSupportsService
+  ) {
     effect(() => {
       if (this.isOpen()) {
         this.resetValues();
@@ -111,18 +114,11 @@ export class AttachmentSetModalComponent implements OnInit {
   }
 
   async getData() {
-    const attachments = await this.attachmentService.getAttachments();
-    const attachmentsFilterTable = (attachments || []).sort(
-      (a, b) => (a.attachment_set || 0) - (b.attachment_set || 0)
+    const catalogSupports =
+      await this.catalogSupportsService.getCatalogSupports();
+    this.supportsFilterTable.set(
+      catalogSupports.map((support) => support.name) || []
     );
-
-    this.supportsFilterTable.set(attachmentsFilterTable);
-    const items = (attachments || [])
-      .filter((item) =>
-        this.supportName() ? item.support_name === this.supportName() : true
-      )
-      .sort((a, b) => (a.attachment_set || 0) - (b.attachment_set || 0));
-    this.attachmentsFilterTable.set(items);
   }
 
   resetValues() {
@@ -144,7 +140,10 @@ export class AttachmentSetModalComponent implements OnInit {
       return;
     }
     if (key === 'support_name') {
-      const attachments = await this.attachmentService.getAttachments();
+      const attachments =
+        await this.attachmentService.searchAttachmentsBySupportName(
+          event.value
+        );
       const items = (attachments || [])
         .filter((item) => item.support_name === event.value)
         .sort((a, b) => (a.attachment_set || 0) - (b.attachment_set || 0));
@@ -152,11 +151,12 @@ export class AttachmentSetModalComponent implements OnInit {
     }
 
     if (key === 'attachment_set') {
-      const attachments = await this.attachmentService.getAttachments();
+      const attachments =
+        await this.attachmentService.searchAttachmentsBySupportName(
+          this.supportName() || ''
+        );
       const items = (attachments || []).filter(
-        (item) =>
-          item.attachment_set === event.value &&
-          item.support_name === this.supportName()
+        (item) => item.attachment_set === event.value
       );
       if (items[0]) {
         this.armLength.set(items[0].cross_arm_length);
