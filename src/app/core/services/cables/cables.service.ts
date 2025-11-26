@@ -73,7 +73,8 @@ export class CablesService {
           stress_strain_b2: convertStringToNumber(item.stress_strain_b2),
           stress_strain_b3: convertStringToNumber(item.stress_strain_b3),
           stress_strain_b4: convertStringToNumber(item.stress_strain_b4),
-          is_polynomial: item.is_polynomial === 'true',
+          is_polynomial:
+            item.is_polynomial === 'true' || item.is_polynomial === 'True',
           diameter_heart: convertStringToNumber(item.diameter_heart),
           section_conductor: convertStringToNumber(item.section_conductor),
           section_heart: convertStringToNumber(item.section_heart),
