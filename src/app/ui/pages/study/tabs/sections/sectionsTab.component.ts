@@ -30,6 +30,7 @@ import { RouterLink } from '@angular/router';
 import { Study } from '@src/app/core/data/database/interfaces/study';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
+import { ChargesService } from '@src/app/core/services/charges/charges.service';
 
 @Component({
   selector: 'app-sections-tab',
@@ -71,6 +72,8 @@ export class SectionsTabComponent {
   initialConditionModalMode = signal<CreateEditView>('create');
   selectedSection = signal<string>('');
   @ViewChild('popover') popover!: Popover;
+
+  constructor(private readonly chargesService: ChargesService) {}
 
   createInitialCondition(section: Section): InitialCondition {
     const currentInitialConditions = section.initial_conditions;
@@ -228,4 +231,12 @@ export class SectionsTabComponent {
   orderedInitialConditions = (initialConditions: InitialCondition[]) => {
     return cloneDeep(initialConditions).reverse();
   };
+
+  onChargeChange(section: Section, event: any) {
+    this.chargesService.setSelectedCharge(
+      this.study()?.uuid ?? '',
+      section.uuid,
+      event.value
+    );
+  }
 }

@@ -15,8 +15,8 @@
     min-content 2fr auto 1fr 1fr 2fr 2fr min-content;
   grid-template-rows: repeat(2, auto);
   grid-template-areas:
-    'selector nameTitle typeTitle litTitle modifiedTitle initTitle . actionTitle'
-    'selector nameContent typeContent litContent modifiedContent initContent . actionContent';
+    'selector nameTitle typeTitle litTitle modifiedTitle initTitle chargesTitle actionTitle'
+    'selector nameContent typeContent litContent modifiedContent initContent chargesContent actionContent';
   justify-items: start;
   align-items: start;
   gap: 0.25rem 1rem;
@@ -51,6 +51,10 @@
     grid-area: initTitle;
   }
 
+  &__title-charges {
+    grid-area: chargesTitle;
+  }
+
   &__title-action {
     grid-area: actionTitle;
     justify-self: center;
@@ -74,6 +78,10 @@
 
   &__content-init {
     grid-area: initContent;
+  }
+
+  &__content-charges {
+    grid-area: chargesContent;
   }
 
   &__content-action {
