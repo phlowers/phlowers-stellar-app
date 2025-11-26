@@ -162,6 +162,24 @@
             </div>
           }
 
+          @if (section.charges && section.charges.length > 0) {
+            <p i18n class="mb-0 section__title-charges">Charges</p>
+            <div class="section__content-charges w-[12.5rem]">
+              <p-select
+                [options]="section.charges"
+                [ngModel]="section.selected_charge_uuid"
+                ariaLabel="Select charges"
+                [fluid]="true"
+                optionLabel="name"
+                optionValue="uuid"
+                i18n-ariaLabel
+                placeholder="View charges"
+                (onChange)="onChargeChange(section, $event)"
+                i18n-placeholder
+              />
+            </div>
+          }
+
           <p i18n class="mb-0 section__title-action">Actions</p>
 
           <button
