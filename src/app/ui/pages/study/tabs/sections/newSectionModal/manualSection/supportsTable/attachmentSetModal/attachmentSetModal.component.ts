@@ -93,6 +93,14 @@ export class AttachmentSetModalComponent implements OnInit {
         if (name) {
           this.supportName.set(name);
         }
+        const attachmentSet = this.support()?.attachmentSet;
+        if (attachmentSet) {
+          this.attachmentSet.set(attachmentSet);
+          this.armLength.set(this.support()?.armLength ?? undefined);
+          this.heightBelowConsole.set(
+            this.support()?.heightBelowConsole ?? undefined
+          );
+        }
       }
     });
     effect(() => {

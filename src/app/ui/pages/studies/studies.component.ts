@@ -89,7 +89,9 @@ export class StudiesComponent implements OnInit {
       message: $localize`Are you sure you want to delete this study?`,
       accept: () => {
         this.studiesService.deleteStudy(uuid);
-      }
+      },
+      acceptLabel: $localize`Yes`,
+      rejectLabel: $localize`No`
     });
   }
 }
