@@ -1,10 +1,11 @@
 import Plotly, {
+  Camera,
   Data,
   Layout,
   ModeBarDefaultButtons,
   ScatterData
 } from 'plotly.js-dist-min';
-import { View } from './types';
+import { Side, View } from './types';
 
 const normalCamera = (invert: boolean) => ({
   center: {
@@ -41,7 +42,11 @@ const axis = {
   showbackground: true
 };
 
-const scene = (isSupportZoom: boolean, invert: boolean) => ({
+const scene = (
+  isSupportZoom: boolean,
+  invert: boolean,
+  camera: Camera | null
+) => ({
   aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
   xaxis: axis,
   yaxis: axis,
@@ -51,7 +56,7 @@ const scene = (isSupportZoom: boolean, invert: boolean) => ({
     y: 0.2,
     z: 0.5
   },
-  camera: {
+  camera: camera ?? {
     ...(isSupportZoom ? supportCamera : normalCamera(invert))
   }
 });
@@ -72,7 +77,11 @@ const config = {
   ] as ModeBarDefaultButtons[]
 };
 
-const layout3d = (isSupportZoom: boolean, invert: boolean) => ({
+const layout3d = (
+  isSupportZoom: boolean,
+  invert: boolean,
+  camera: Camera | null
+) => ({
   autosize: true,
   showlegend: false,
   margin: {
@@ -81,20 +90,25 @@ const layout3d = (isSupportZoom: boolean, invert: boolean) => ({
     t: 0,
     b: 0
   },
-  scene: scene(isSupportZoom, invert)
+  scene: scene(isSupportZoom, invert, camera)
 });
 
-const layout2d: (invert: boolean, data: Data[]) => Partial<Layout> = (
+const layout2d: (
   invert: boolean,
-  data: Data[]
-) => {
-  const allXValues = data.flatMap(
-    (d) => ((d as ScatterData).x as number[]) ?? []
-  ) as number[];
-  let xMin = Math.min(...allXValues);
-  let xMax = Math.max(...allXValues);
-  xMin = Math.min(-2, xMin);
-  xMax = Math.max(2, xMax);
+  data: Data[],
+  side: Side
+) => Partial<Layout> = (invert: boolean, data: Data[], side: Side) => {
+  let xMin = 0;
+  let xMax = 0;
+  if (side === 'face') {
+    const allXValues = data.flatMap(
+      (d) => ((d as ScatterData).x as number[]) ?? []
+    ) as number[];
+    xMin = Math.min(...allXValues);
+    xMax = Math.max(...allXValues);
+    xMin -= 1;
+    xMax += 1;
+  }
   return {
     autosize: true,
     showlegend: false,
@@ -107,11 +121,11 @@ const layout2d: (invert: boolean, data: Data[]) => Partial<Layout> = (
     },
     xaxis: {
       ...axis,
-      autorange: false,
+      autorange: side === 'face' ? false : true,
       showticklabels: true,
       showgrid: true,
       showline: true,
-      range: [xMin, xMax]
+      range: side === 'face' ? [xMin, xMax] : undefined
     },
     yaxis: {
       ...axis,
@@ -127,14 +141,18 @@ export const createPlot = (
   data: Data[],
   isSupportZoom: boolean,
   invert: boolean,
-  view: View
+  view: View,
+  camera: Camera | null,
+  side: Side
 ) => {
   // check if div with id plotly-output exists
   if (!document.getElementById(plotId)) {
     return undefined;
   }
   const baseLayout =
-    view === '3d' ? layout3d(isSupportZoom, invert) : layout2d(invert, data);
+    view === '3d'
+      ? layout3d(isSupportZoom, invert, camera)
+      : layout2d(invert, data, side);
 
   return Plotly.newPlot(plotId, data, baseLayout, config);
 };

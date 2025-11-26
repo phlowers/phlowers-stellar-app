@@ -66,5 +66,6 @@ export class StudioComponent implements OnInit, OnDestroy {
       this.subscription.unsubscribe();
     }
     this.plotService.purgePlot();
+    this.plotService.camera.set(null);
   }
 }
