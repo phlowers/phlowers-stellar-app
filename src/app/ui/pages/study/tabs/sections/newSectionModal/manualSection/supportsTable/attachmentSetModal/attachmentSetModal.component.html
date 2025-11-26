@@ -104,7 +104,7 @@
       type="button"
       btnSize="m"
       btnStyle="base"
-      [disabled]="!supportName() || !attachmentSet()"
+      [disabled]="!supportName() || attachmentSet() === undefined"
       (click)="validate()"
     >
       <app-icon icon="check" />
