@@ -164,6 +164,9 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   debounceUpdateSliderOptions = debounce(
     (key: 'endSupport' | 'startSupport', value: number) => {
       this.plotService.plotOptionsChange(key, value);
+      const options = this.plotService.plotOptions();
+      const diff = Math.abs(options.endSupport - options.startSupport);
+      this.supports.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
     },
     DEBOUNCED_REFRESH_STUDIO_DELAY
   );
@@ -198,5 +201,40 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.isNewChargeModalOpen.set(true);
     this.newChargeModalMode.set(mode);
     this.newChargeModalUuid.set(uuid);
+  }
+
+  onSelectPlotOptions(value: string) {
+    this.supports.set(value);
+    const startSupport = this.plotService.plotOptions().startSupport;
+    const maxSupport = (this.plotService.section()?.supports.length ?? 0) - 1;
+    const offset = value === 'single' ? 1 : value === 'double' ? 2 : null;
+    if (offset !== null) {
+      this.plotService.plotOptionsChange(
+        'endSupport',
+        Math.min(startSupport + offset, maxSupport)
+      );
+    } else {
+      this.plotService.plotOptionsChange('startSupport', 0);
+      this.plotService.plotOptionsChange('endSupport', maxSupport);
+    }
+  }
+
+  onSupportButtonClick(direction: 'left' | 'right') {
+    const supportButton = this.supports();
+    if (supportButton === 'all') return;
+    const incrementValue =
+      supportButton === 'single' ? 1 : supportButton === 'double' ? 2 : 0;
+    const increment = direction === 'left' ? -incrementValue : incrementValue;
+    const options = this.plotService.plotOptions();
+    const updateOrder: ('startSupport' | 'endSupport')[] =
+      direction === 'left'
+        ? ['startSupport', 'endSupport']
+        : ['endSupport', 'startSupport'];
+    updateOrder.forEach((key) => {
+      this.plotService.plotOptionsChange(
+        key,
+        Math.max(options[key] + increment, 0)
+      );
+    });
   }
 }
