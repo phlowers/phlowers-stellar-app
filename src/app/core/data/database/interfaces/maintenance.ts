@@ -22,7 +22,8 @@ export interface RteMaintenanceTeamsCsvFile {
   maintenance_center: string;
   regional_team: string;
   maintenance_team: string;
-  maintenance_center_id: string;
+  maintenance_center_id?: string;
+  maintenance_id?: string;
   regional_team_id: string;
   maintenance_team_id: string;
 }
