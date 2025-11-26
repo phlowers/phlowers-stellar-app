@@ -41,147 +41,61 @@
 
 @if (study()?.sections?.length) {
   <article class="sections-container">
-    @for (section of study()?.sections; track section.uuid) {
-      <app-card class="section" role="article">
-        <p-checkbox
-          ariaLabel="select this study's section"
-          i18n-ariaLabel
-          class="section__selector"
-          [binary]="true"
-          [ngModel]="selectedSection() === section.uuid"
-          (onChange)="selectSection(section, $event)"
-        />
+    @for (section of study()?.sections; track $index) {
+      <div
+        role="button"
+        (click)="
+          selectSection(section, {
+            checked: selectedSection() !== section.uuid
+          })
+        "
+        [tabindex]="$index"
+        (keydown)="
+          selectSection(section, {
+            checked: selectedSection() !== section.uuid
+          })
+        "
+      >
+        <app-card class="section" role="article">
+          <p-checkbox
+            ariaLabel="select this study's section"
+            i18n-ariaLabel
+            class="section__selector"
+            [binary]="true"
+            (click)="$event.stopPropagation()"
+            [ngModel]="selectedSection() === section.uuid"
+            (onChange)="selectSection(section, $event)"
+          />
 
-        <dl>
-          <dt i18n class="section__title-name">Section Name</dt>
-          <dd class="section__text-name">{{ section.name }}</dd>
-        </dl>
+          <dl>
+            <dt i18n class="section__title-name">Section Name</dt>
+            <dd class="section__text-name">{{ section.name }}</dd>
+          </dl>
 
-        <dl>
-          <dt i18n class="section__title-type">Section type</dt>
-          <dd class="section__text-type">{{ section.type }}</dd>
-        </dl>
+          <dl>
+            <dt i18n class="section__title-type">Section type</dt>
+            <dd class="section__text-type">{{ section.type }}</dd>
+          </dl>
 
-        <dl>
-          <dt i18n class="section__title-lit">LIT</dt>
-          <dd class="section__text-lit">{{ section.lit }}</dd>
-        </dl>
+          <dl>
+            <dt i18n class="section__title-lit">LIT</dt>
+            <dd class="section__text-lit">{{ section.lit }}</dd>
+          </dl>
 
-        <dl>
-          <dt i18n class="section__title-date">Last modified</dt>
-          <dd class="section__text-date">
-            {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}
-          </dd>
-        </dl>
+          <dl>
+            <dt i18n class="section__title-date">Last modified</dt>
+            <dd class="section__text-date">
+              {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}
+            </dd>
+          </dl>
 
-        <p i18n class="mb-0 section__title-init">Initial condition</p>
+          <p i18n class="mb-0 section__title-init">Initial condition</p>
 
-        @if (
-          !section.initial_conditions || section.initial_conditions.length === 0
-        ) {
-          <button
-            (click)="
-              openInitialConditionModal(
-                section,
-                createInitialCondition(section),
-                'create'
-              )
-            "
-            app-btn
-            btnSize="s"
-            btnStyle="outlined"
-            class="section__content-init"
-          >
-            <app-icon icon="add" />
-            <span i18n>Add initial condition</span>
-          </button>
-        } @else if (
-          section.initial_conditions && section.initial_conditions.length > 0
-        ) {
-          <div class="section__content-init w-[12.5rem]">
-            <app-select-with-buttons
-              [options]="orderedInitialConditions(section.initial_conditions)"
-              [selectedOption]="section.selected_initial_condition_uuid"
-              ariaLabel="Select initial conditions"
-              i18n-ariaLabel
-              (selectOption)="
-                selectInitialConditionClick({
-                  initialCondition: $event,
-                  section: section
-                })
-              "
-              placeholder="View initial conditions"
-              i18n-placeholder
-              (viewOption)="
-                viewInitialConditionClick({
-                  initialCondition: $event,
-                  section: section
-                })
-              "
-              (editOption)="
-                editInitialConditionClick({
-                  initialCondition: $event,
-                  section: section
-                })
-              "
-              (duplicateOption)="
-                duplicateInitialConditionClick({
-                  initialCondition: $event,
-                  section: section
-                })
-              "
-              (deleteOption)="
-                deleteInitialConditionClick({
-                  initialCondition: $event,
-                  section: section
-                })
-              "
-              optionLabel="name"
-              optionValue="uuid"
-              class="section__content-init"
-            />
-          </div>
-        }
-
-        <p i18n class="mb-0 section__title-action">Actions</p>
-
-        <button
-          (click)="popover.toggle($event)"
-          app-btn
-          btnSize="l"
-          btnStyle="text"
-          class="section__content-action"
-          [ariaLabel]="'Actions for section ' + section.name"
-          i18n-ariaLabel
-        >
-          <app-icon icon="more_horiz" />
-        </button>
-
-        <p-popover #popover>
-          <ng-template pTemplate="content">
+          @if (
+            !section.initial_conditions ||
+            section.initial_conditions.length === 0
+          ) {
             <button
-              app-btn
-              btnSize="s"
-              btnStyle="text"
-              (click)="viewSection(section)"
-            >
-              <app-icon icon="visibility" />
-              <span i18n>View</span>
-            </button>
-            <button
-              app-btn
-              btnSize="s"
-              btnStyle="text"
-              (click)="editSection(section)"
-            >
-              <app-icon icon="edit" />
-              <span i18n>Edit</span>
-            </button>
-
-            <button
-              app-btn
-              btnSize="s"
-              btnStyle="text"
               (click)="
                 openInitialConditionModal(
                   section,
@@ -189,34 +103,141 @@
                   'create'
                 )
               "
-            >
-              <app-icon icon="add_circle" />
-              <span i18n>Add an initial condition</span>
-            </button>
-
-            <button
               app-btn
               btnSize="s"
-              btnStyle="text"
-              (click)="popover.hide(); duplicateSection.emit(section)"
+              btnStyle="outlined"
+              class="section__content-init"
             >
-              <app-icon icon="content_copy" />
-              <span i18n>Duplicate</span>
+              <app-icon icon="add" />
+              <span i18n>Add initial condition</span>
             </button>
+          } @else if (
+            section.initial_conditions && section.initial_conditions.length > 0
+          ) {
+            <div class="section__content-init w-[12.5rem]">
+              <app-select-with-buttons
+                onKeyDown="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()"
+                (click)="$event.stopPropagation()"
+                [options]="orderedInitialConditions(section.initial_conditions)"
+                [selectedOption]="section.selected_initial_condition_uuid"
+                ariaLabel="Select initial conditions"
+                i18n-ariaLabel
+                (selectOption)="
+                  selectInitialConditionClick({
+                    initialCondition: $event,
+                    section: section
+                  })
+                "
+                placeholder="View initial conditions"
+                i18n-placeholder
+                (viewOption)="
+                  viewInitialConditionClick({
+                    initialCondition: $event,
+                    section: section
+                  })
+                "
+                (editOption)="
+                  editInitialConditionClick({
+                    initialCondition: $event,
+                    section: section
+                  })
+                "
+                (duplicateOption)="
+                  duplicateInitialConditionClick({
+                    initialCondition: $event,
+                    section: section
+                  })
+                "
+                (deleteOption)="
+                  deleteInitialConditionClick({
+                    initialCondition: $event,
+                    section: section
+                  })
+                "
+                optionLabel="name"
+                optionValue="uuid"
+                class="section__content-init"
+              />
+            </div>
+          }
 
-            <button
-              app-btn
-              btnSize="s"
-              btnStyle="text"
-              class="erase-btn"
-              (click)="deleteSection.emit(section)"
-            >
-              <app-icon icon="delete" />
-              <span i18n>Delete</span>
-            </button>
-          </ng-template>
-        </p-popover>
-      </app-card>
+          <p i18n class="mb-0 section__title-action">Actions</p>
+
+          <button
+            (click)="$event.stopPropagation(); popover.toggle($event)"
+            app-btn
+            btnSize="l"
+            btnStyle="text"
+            class="section__content-action"
+            [ariaLabel]="'Actions for section ' + section.name"
+            i18n-ariaLabel
+          >
+            <app-icon icon="more_horiz" />
+          </button>
+
+          <p-popover #popover>
+            <ng-template pTemplate="content">
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                (click)="viewSection(section)"
+              >
+                <app-icon icon="visibility" />
+                <span i18n>View</span>
+              </button>
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                (click)="editSection(section)"
+              >
+                <app-icon icon="edit" />
+                <span i18n>Edit</span>
+              </button>
+
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                (click)="
+                  $event.stopPropagation();
+                  openInitialConditionModal(
+                    section,
+                    createInitialCondition(section),
+                    'create'
+                  )
+                "
+              >
+                <app-icon icon="add_circle" />
+                <span i18n>Add an initial condition</span>
+              </button>
+
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                (click)="popover.hide(); duplicateSection.emit(section)"
+              >
+                <app-icon icon="content_copy" />
+                <span i18n>Duplicate</span>
+              </button>
+
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                class="erase-btn"
+                (click)="deleteSection.emit(section)"
+              >
+                <app-icon icon="delete" />
+                <span i18n>Delete</span>
+              </button>
+            </ng-template>
+          </p-popover>
+        </app-card>
+      </div>
     }
   </article>
 
