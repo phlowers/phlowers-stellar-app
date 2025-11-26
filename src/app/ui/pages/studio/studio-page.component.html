@@ -60,7 +60,15 @@
 
     <div class="flex gap-6 items-start pl-4">
       <div class="supports-select">
-        <button class="supports-select__buttons supports-select__buttons--left">
+        <button
+          [disabled]="
+            supports() === 'all' ||
+            plotService.loading() ||
+            plotService.plotOptions().startSupport === 0
+          "
+          (click)="onSupportButtonClick('left')"
+          class="supports-select__buttons supports-select__buttons--left"
+        >
           <app-icon
             icon="chevron_left"
             class="supports-select__buttons__icon"
@@ -71,12 +79,20 @@
           inputId="supports"
           appendTo="body"
           class="supports-select__p-select"
+          [disabled]="plotService.loading()"
           [options]="supportsOptions()"
           [ngModel]="supports()"
-          (onChange)="supports.set($event.value)"
+          (onChange)="onSelectPlotOptions($event.value)"
         />
 
         <button
+          [disabled]="
+            supports() === 'all' ||
+            plotService.loading() ||
+            plotService.plotOptions().endSupport ===
+              (this.plotService.section()?.supports?.length ?? 0) - 1
+          "
+          (click)="onSupportButtonClick('right')"
           class="supports-select__buttons supports-select__buttons--right"
         >
           <app-icon
