@@ -22,7 +22,7 @@
 }
 
 .quick-measures {
-  @apply flex justify-center py-8;
+  @apply flex justify-center py-2;
 
   &__card {
     @apply inline-flex items-start gap-2 p-2 h-12 max-h-12 rounded-sm;
