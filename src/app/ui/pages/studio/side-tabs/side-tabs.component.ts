@@ -66,7 +66,7 @@ export class SideTabsComponent {
       this.focusPanel(toggle);
     }
     setTimeout(() => {
-      this.plotService.isSidebarOpen.set(!this.plotService.isSidebarOpen());
+      this.plotService.setSidebarOpen();
     }, REFRESH_STUDIO_DELAY);
   }
 

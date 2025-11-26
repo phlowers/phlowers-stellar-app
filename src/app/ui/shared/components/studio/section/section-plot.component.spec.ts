@@ -18,7 +18,9 @@ const mockCreatePlotData = createPlotData as jest.MockedFunction<
 
 // Mock PlotService
 const mockPlotService = {
-  plotOptions: jest.fn()
+  plotOptions: jest.fn(),
+  camera: jest.fn().mockReturnValue(null),
+  isSidebarOpen: jest.fn().mockReturnValue(false)
 };
 
 describe('SectionPlotComponent', () => {
@@ -121,7 +123,9 @@ describe('SectionPlotComponent', () => {
         mockPlotData,
         false,
         false,
-        '2d'
+        '2d',
+        null,
+        'profile'
       );
     });
 
@@ -135,7 +139,9 @@ describe('SectionPlotComponent', () => {
         mockPlotData,
         false,
         false,
-        '2d'
+        '2d',
+        null,
+        'profile'
       );
     });
 
@@ -159,7 +165,9 @@ describe('SectionPlotComponent', () => {
         mockPlotData,
         true,
         true,
-        '3d'
+        '3d',
+        null,
+        'face'
       );
     });
   });

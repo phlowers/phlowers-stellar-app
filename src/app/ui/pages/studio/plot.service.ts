@@ -12,6 +12,10 @@ import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import * as plotly from 'plotly.js-dist-min';
+import { Camera } from 'plotly.js-dist-min';
+import { isEqual } from 'lodash';
+
+const PLOT_ID = 'plotly-output';
 
 const checkIfProjectionNeedRefresh = (
   oldOptions: PlotOptions,
@@ -49,6 +53,7 @@ export class PlotService {
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
   destroyRef = inject(DestroyRef);
+  camera = signal<Camera | null>(null);
 
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
@@ -73,6 +78,7 @@ export class PlotService {
     const oldOptions = this.plotOptions();
     const newOptions = { ...oldOptions, [key]: value };
     this.plotOptions.set(newOptions);
+    this.refreshCamera();
     if (checkIfProjectionNeedRefresh(oldOptions, newOptions, this.loading())) {
       this.refreshProjection();
     }
@@ -83,6 +89,7 @@ export class PlotService {
     cableTemperature: number,
     iceThickness: number
   ) => {
+    this.refreshCamera();
     this.loading.set(true);
     const { result, error } = await this.workerPythonService.runTask(
       Task.changeClimateLoad,
@@ -129,6 +136,22 @@ export class PlotService {
     this.loading.set(false);
   };
 
+  getCamera = () => {
+    const plot = document.getElementById(PLOT_ID);
+    if (!plot) {
+      return null;
+    }
+    return (plot as any)._fullLayout?.scene?.camera;
+  };
+
+  refreshCamera = (): Camera | null => {
+    const camera = this.getCamera();
+    if (!isEqual(camera, this.camera())) {
+      this.camera.set(camera);
+    }
+    return camera;
+  };
+
   refreshProjection = async () => {
     this.loading.set(true);
     const { result, error } = await this.workerPythonService.runTask(
@@ -152,5 +175,10 @@ export class PlotService {
     this.litData.set(null);
     this.error.set(null);
     this.loading.set(false);
+  };
+
+  setSidebarOpen = () => {
+    this.refreshCamera();
+    this.isSidebarOpen.set(!this.isSidebarOpen());
   };
 }
