@@ -190,6 +190,7 @@ def get_coordinates(
 def init_section(js_inputs: dict):
     global engine, plt_line
     python_inputs = js_inputs.to_py()
+    print("python_inputs: ", python_inputs)
     # import json
 
     # js_inputs2 = globals()["js_inputs"].to_py()
@@ -338,6 +339,7 @@ def change_climate_load(js_inputs: dict):
 
     global engine, plt_line
     python_inputs = js_inputs.to_py()
+    print("python_inputs: ", python_inputs)
     wind_pressure = python_inputs["windPressure"]
     cable_temperature = python_inputs["cableTemperature"]
     ice_thickness = python_inputs["iceThickness"] / 100  # in meters in the engine
