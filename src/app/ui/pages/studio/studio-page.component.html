@@ -18,7 +18,8 @@
     <app-studio
       class="plot-view"
       [isSupportZoom]="false"
-      [style.height]="plotStudioHeight()"
+      [style.height]="'calc(60vh - 6.5rem)'"
+      [style.min-height]="'calc(60vh - 6.5rem)'"
       [section]="plotService.section()"
     />
 

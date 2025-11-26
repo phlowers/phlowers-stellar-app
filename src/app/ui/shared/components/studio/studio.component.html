@@ -6,7 +6,7 @@
   } @else if (plotService.error()) {
     <div class="absolute inset-0 flex justify-center items-center">
       <p class="text-red-500 text-2xl font-bold">
-        <ng-container i18n>Error:</ng-container> {{ getErrorString() }}
+        {{ getErrorString() }}
       </p>
     </div>
   } @else {
