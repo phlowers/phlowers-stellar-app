@@ -331,6 +331,8 @@
           <p-select
             class="w-full"
             [options]="supportFilterTable()"
+            virtualScroll="true"
+            virtualScrollItemSize="10"
             [(ngModel)]="support.name"
             [showClear]="true"
             appendTo="body"

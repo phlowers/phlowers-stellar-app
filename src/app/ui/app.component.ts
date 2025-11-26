@@ -38,6 +38,7 @@ import { AttachmentService } from '../core/services/attachment/attachment.servic
 import { ChargesService } from '../core/services/charges/charges.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { CatalogSupportsService } from '../core/services/catalogSupports/catalogSupports.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -76,6 +77,7 @@ const modules = [
     CablesService,
     PlotService,
     AttachmentService,
+    CatalogSupportsService,
     ChargesService
   ],
   templateUrl: './app.component.html',

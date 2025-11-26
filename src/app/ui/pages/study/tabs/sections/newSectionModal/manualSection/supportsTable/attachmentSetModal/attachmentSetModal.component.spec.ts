@@ -6,11 +6,13 @@ import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
 import { Attachment } from '@src/app/core/data/database/interfaces/attachment';
 import { Support } from '@src/app/core/data/database/interfaces/support';
+import { CatalogSupportsService } from '@src/app/core/services/catalogSupports/catalogSupports.service';
 
 describe('AttachmentSetModalComponent', () => {
   let component: AttachmentSetModalComponent;
   let fixture: ComponentFixture<AttachmentSetModalComponent>;
   let attachmentServiceMock: jest.Mocked<AttachmentService>;
+  let catalogSupportsServiceMock: jest.Mocked<CatalogSupportsService>;
 
   const mockAttachments: Attachment[] = [
     {
@@ -68,8 +70,18 @@ describe('AttachmentSetModalComponent', () => {
 
   beforeEach(async () => {
     attachmentServiceMock = {
-      getAttachments: jest.fn().mockResolvedValue(mockAttachments)
+      getAttachments: jest.fn().mockResolvedValue(mockAttachments),
+      searchAttachmentsBySupportName: jest
+        .fn()
+        .mockResolvedValue(mockAttachments)
     } as unknown as jest.Mocked<AttachmentService>;
+
+    catalogSupportsServiceMock = {
+      getCatalogSupports: jest.fn().mockResolvedValue([
+        { name: 'Support A' },
+        { name: 'Support B' }
+      ])
+    } as unknown as jest.Mocked<CatalogSupportsService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -81,6 +93,10 @@ describe('AttachmentSetModalComponent', () => {
         {
           provide: AttachmentService,
           useValue: attachmentServiceMock
+        },
+        {
+          provide: CatalogSupportsService,
+          useValue: catalogSupportsServiceMock
         }
       ]
     }).compileComponents();
@@ -104,12 +120,8 @@ describe('AttachmentSetModalComponent', () => {
     component.ngOnInit();
     await fixture.whenStable();
 
-    expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
-    expect(component.attachmentsFilterTable()).toEqual(
-      mockAttachments.sort(
-        (a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0)
-      )
-    );
+    expect(catalogSupportsServiceMock.getCatalogSupports).toHaveBeenCalled();
+    expect(component.supportsFilterTable()).toEqual(['Support A', 'Support B']);
   });
 
   it('should reset values when modal opens', async () => {
@@ -226,11 +238,11 @@ describe('AttachmentSetModalComponent', () => {
   });
 
   it('should handle attachment service errors gracefully', async () => {
-    attachmentServiceMock.getAttachments.mockRejectedValue(
+    catalogSupportsServiceMock.getCatalogSupports.mockRejectedValue(
       new Error('Service error')
     );
 
-    // Should not throw error
+    // Should throw error
     await expect(component.getData()).rejects.toThrow('Service error');
   });
 });
