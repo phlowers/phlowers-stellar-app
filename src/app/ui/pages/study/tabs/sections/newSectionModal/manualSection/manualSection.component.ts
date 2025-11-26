@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   input,
   OnInit,
   output,
@@ -25,7 +26,7 @@ import { createEmptySupport } from '@src/app/core/services/sections/helpers';
 import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
 import { MaintenanceData } from '@src/app/core/data/database/interfaces/maintenance';
-import { sortBy } from 'lodash';
+import { debounce, sortBy } from 'lodash';
 import { UniquePipe } from '@src/app/ui/shared/service/autocomplete/unique.pipe';
 import { Line } from '@src/app/core/data/database/interfaces/line';
 import { LinesService } from '@src/app/core/services/lines/lines.service';
@@ -35,6 +36,11 @@ import { MessageModule } from 'primeng/message';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
+import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
+import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+
+// debounce to make it more fluid when dragging the slider
+const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
 const sortLines = (lines: Line[]) => {
   return lines.sort((a, b) => {
@@ -94,7 +100,8 @@ const orderedLineTableProperties: LineTableProperties[] = [
     FormsModule,
     MessageModule,
     ButtonComponent,
-    PaginatorModule
+    PaginatorModule,
+    NgxSliderModule
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'
@@ -111,8 +118,26 @@ export class ManualSectionComponent implements OnInit {
   constructor(
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,
-    private readonly cablesService: CablesService
+    private readonly cablesService: CablesService,
+    public readonly plotService: PlotService
   ) {}
+
+  //TODO: To put into the plot service
+  sliderOptions = computed<Options>(() => {
+    return {
+      floor: 0,
+      ceil: (this.section().supports?.length ?? 100) - 1,
+      step: 1,
+      showTicks: true,
+      showTicksValues: true,
+      animate: false,
+      animateOnMove: false,
+      disabled: this.plotService.loading(),
+      translate: (value: number) => {
+        return (value + 1).toString();
+      }
+    };
+  });
 
   maintenanceFilterTable = signal<MaintenanceData[]>([]);
   linesFilterTable = signal<Line[]>([]);
@@ -348,5 +373,31 @@ export class ManualSectionComponent implements OnInit {
   onSupportsPageChange(event: { rows?: number; page?: number }) {
     this.rowsSupport.set(event.rows ?? 5);
     this.firstSupport.set((event.page ?? 0) * (event.rows ?? 5));
+  }
+
+  debounceUpdateSliderOptions = debounce(
+    (key: 'endSupport' | 'startSupport', value: number) => {
+      this.plotService.plotOptionsChange(key, value);
+    },
+    DEBOUNCED_REFRESH_STUDIO_DELAY
+  );
+
+  //TODO: To put into the plot service
+  updateSliderOptions({
+    value,
+    highValue
+  }: {
+    value?: number | undefined;
+    highValue?: number | undefined;
+  }) {
+    const options = this.plotService.plotOptions();
+    [
+      { val: value, key: 'startSupport' as const, opt: options.startSupport },
+      { val: highValue, key: 'endSupport' as const, opt: options.endSupport }
+    ].forEach(({ val, key, opt }) => {
+      if (val !== undefined && val !== opt) {
+        this.debounceUpdateSliderOptions(key, val);
+      }
+    });
   }
 }

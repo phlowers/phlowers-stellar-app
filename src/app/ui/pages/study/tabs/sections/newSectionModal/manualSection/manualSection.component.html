@@ -509,11 +509,21 @@
     </p-tabpanel>
     <p-tabpanel value="graphical">
       @if (tabValue() === 'graphical') {
-        <div class="mt-2 h-full">
-          <app-studio
-            [section]="section()"
-            [isSupportZoom]="false"
-          ></app-studio>
+        <div class="mt-2 h-full flex flex-col gap-2">
+          <div class="h-[100%]">
+            <app-studio
+              [section]="section()"
+              [isSupportZoom]="false"
+            ></app-studio>
+          </div>
+          <ngx-slider
+            [value]="plotService.plotOptions().startSupport"
+            [highValue]="plotService.plotOptions().endSupport"
+            (userChangeEnd)="updateSliderOptions($event)"
+            [options]="sliderOptions()"
+            class="block pb-4"
+          >
+          </ngx-slider>
         </div>
       }
     </p-tabpanel>
