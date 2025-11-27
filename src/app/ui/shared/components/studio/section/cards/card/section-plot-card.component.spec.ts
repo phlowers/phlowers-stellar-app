@@ -5,15 +5,50 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SectionPlotCardComponent } from './section-plot-card.component';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+
+const mockLitData: GetSectionOutput = {
+  supports: [[[1, 2, 3]]],
+  insulators: [[[4, 5, 6]]],
+  spans: [[[7, 8, 9]]],
+  L0: [100, 200, 300],
+  elevation: [10, 20, 30],
+  line_angle: [0.1, 0.2, 0.3],
+  vhl_under_chain: [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+  ],
+  r_under_chain: [10, 20, 30],
+  vhl_under_console: [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+  ],
+  r_under_console: [10, 20, 30],
+  ground_altitude: [100, 200, 300],
+  load_angle: [0.1, 0.2, 0.3],
+  displacement: [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+  ],
+  span_length: [100, 200, 300]
+};
 
 @Component({
-  template: `<app-section-plot-card [type]="cardType" [index]="cardIndex" />`,
+  template: `<app-section-plot-card
+    [type]="cardType"
+    [index]="cardIndex"
+    [litData]="litData"
+  />`,
   standalone: true,
   imports: [SectionPlotCardComponent]
 })
 class TestHostComponent {
   cardType: 'span' | 'support' = 'support';
   cardIndex = 1;
+  litData: GetSectionOutput | null = mockLitData;
 }
 
 describe('SectionPlotCardComponent (Angular 19)', () => {
@@ -35,6 +70,9 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
 
     fixture = TestBed.createComponent(SectionPlotCardComponent);
     component = fixture.componentInstance;
+    // Set required inputs
+    fixture.componentRef.setInput('index', 0);
+    fixture.componentRef.setInput('litData', mockLitData);
   });
 
   // --- COMPONENT CREATION ---------------------------------------------------
@@ -43,6 +81,8 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
   });
 
   it('should initialize default values', () => {
+    fixture.componentRef.setInput('index', 0);
+    fixture.componentRef.setInput('litData', mockLitData);
     expect(component.type()).toBe('support');
     expect(component.index()).toBe(0);
     expect(component.isExpanded()).toBe(false);
@@ -52,6 +92,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
   it('should update inputs reactively', () => {
     fixture.componentRef.setInput('type', 'span');
     fixture.componentRef.setInput('index', 5);
+    fixture.componentRef.setInput('litData', mockLitData);
     expect(component.type()).toBe('span');
     expect(component.index()).toBe(5);
   });
@@ -60,6 +101,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
   it('should compute correct title and color', () => {
     fixture.componentRef.setInput('type', 'support');
     fixture.componentRef.setInput('index', 2);
+    fixture.componentRef.setInput('litData', mockLitData);
     expect(component.cardTitle()).toBe('N°3');
     expect(component.cardColor()).toBe('icon-wrapper--support');
 
@@ -155,12 +197,14 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
 
   // --- DATA STRUCTURE INTEGRITY --------------------------------------------
   it('should provide valid support and span data', () => {
+    fixture.componentRef.setInput('index', 0);
+    fixture.componentRef.setInput('litData', mockLitData);
     const support = component.supportData();
     const span = component.spanData();
 
     expect(support.length).toBe(2);
     expect(span.length).toBe(4);
     expect(support[0].fields.length).toBe(4);
-    expect(span[0].label).toContain('Longeur portée');
+    expect(span[0].label).toContain('Span length');
   });
 });

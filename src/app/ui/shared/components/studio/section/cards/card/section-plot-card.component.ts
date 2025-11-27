@@ -8,10 +8,12 @@ import {
 } from '@angular/animations';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
+import { round } from 'lodash';
 
 interface DataField {
   label: string;
-  value: string;
+  value: string | number;
 }
 
 interface DataSection {
@@ -19,6 +21,13 @@ interface DataSection {
   fields: DataField[];
   indent?: boolean;
 }
+
+const formatNumber = (value: number | undefined): number | string => {
+  if (value === undefined) {
+    return '-';
+  }
+  return round(value, 2);
+};
 
 @Component({
   selector: 'app-section-plot-card',
@@ -51,8 +60,9 @@ interface DataSection {
 })
 export class SectionPlotCardComponent {
   isExpanded = signal(false);
+  litData = input.required<GetSectionOutput | null>();
   type = input<'span' | 'support'>('support');
-  index = input<number>(0);
+  index = input.required<number>();
 
   cardTitle = computed(() => {
     const idx = this.index();
@@ -64,69 +74,148 @@ export class SectionPlotCardComponent {
   );
 
   // Data structure for support type
-  supportData = computed((): DataSection[] => [
-    {
-      title: 'VHL (sous chaine)',
-      fields: [
-        { label: $localize`V :`, value: '1234' },
-        { label: $localize`H :`, value: '1234' },
-        { label: $localize`L :`, value: '1234' },
-        { label: $localize`Résultante :`, value: '1234' }
-      ],
-      indent: true
-    },
-    {
-      fields: [{ label: $localize`Angle en ligne :`, value: '1234' }]
-    }
-  ]);
+  supportData = computed((): DataSection[] => {
+    const vhl_under_chain = this.litData()?.vhl_under_chain;
+    // const vhl_under_console = this.litData()?.vhl_under_console;
+    const r_under_chain = this.litData()?.r_under_chain;
+    const lineAngle = this.litData()?.line_angle;
+
+    return [
+      {
+        title: $localize`VHL (under chain)`,
+        fields: [
+          {
+            label: $localize`V :`,
+            value: formatNumber(vhl_under_chain?.[0][this.index()])
+          },
+          {
+            label: $localize`H :`,
+            value: formatNumber(vhl_under_chain?.[1][this.index()])
+          },
+          {
+            label: $localize`L :`,
+            value: formatNumber(vhl_under_chain?.[2][this.index()])
+          },
+          {
+            label: $localize`Resultant :`,
+            value: formatNumber(r_under_chain?.[this.index()])
+          }
+        ],
+        indent: true
+      },
+      {
+        fields: [
+          {
+            label: $localize`Line angle :`,
+            value: formatNumber(lineAngle?.[this.index()])
+          }
+        ]
+      }
+    ];
+  });
 
   // Expanded data for support type
-  supportExpandedData = computed((): DataSection[] => [
-    {
-      title: 'VHL (sous console)',
-      fields: [
-        { label: $localize`V :`, value: '1234' },
-        { label: $localize`H :`, value: '1234' },
-        { label: $localize`L :`, value: '1234' },
-        { label: $localize`Résultante :`, value: '1234' }
-      ],
-      indent: true
-    },
-    {
-      fields: [{ label: $localize`Alt. pied supp :`, value: '1234' }]
-    },
-    {
-      title: 'Deplacement chaine acc.',
-      fields: [
-        { label: $localize`X :`, value: '1234' },
-        { label: $localize`Y :`, value: '1234' },
-        { label: $localize`Z :`, value: '1234' }
-      ],
-      indent: true
-    },
-    {
-      fields: [
-        { label: $localize`Angle balencement :`, value: '1234' },
-        { label: $localize`Pente du câble acc. :`, value: '1234' }
-      ]
-    }
-  ]);
+  supportExpandedData = computed((): DataSection[] => {
+    const vhl_under_console = this.litData()?.vhl_under_console;
+    const r_under_console = this.litData()?.r_under_console;
+    const groundAltitude = this.litData()?.ground_altitude;
+    const displacement = this.litData()?.displacement;
+    const loadAngle = this.litData()?.load_angle;
+
+    return [
+      {
+        title: $localize`VHL (under console)`,
+        fields: [
+          {
+            label: $localize`V :`,
+            value: formatNumber(vhl_under_console?.[0][this.index()])
+          },
+          {
+            label: $localize`H :`,
+            value: formatNumber(vhl_under_console?.[1][this.index()])
+          },
+          {
+            label: $localize`L :`,
+            value: formatNumber(vhl_under_console?.[2][this.index()])
+          },
+          {
+            label: $localize`Resultant :`,
+            value: formatNumber(r_under_console?.[this.index()])
+          }
+        ],
+        indent: true
+      },
+      {
+        fields: [
+          {
+            label: $localize`Alt. supp foot :`,
+            value: formatNumber(groundAltitude?.[this.index()])
+          }
+        ]
+      },
+      {
+        title: $localize`Chain displacement acc.`,
+        fields: [
+          {
+            label: $localize`X :`,
+            value: formatNumber(displacement?.[this.index()]?.[0])
+          },
+          {
+            label: $localize`Y :`,
+            value: formatNumber(displacement?.[this.index()]?.[1])
+          },
+          {
+            label: $localize`Z :`,
+            value: formatNumber(displacement?.[this.index()]?.[2])
+          }
+        ],
+        indent: true
+      },
+      {
+        fields: [
+          {
+            label: $localize`Angle balencement :`,
+            value: formatNumber(loadAngle?.[this.index()])
+          },
+          {
+            label: $localize`Cable slope acc. :`,
+            value: formatNumber(loadAngle?.[this.index()])
+          }
+        ]
+      }
+    ];
+  });
 
   // Data structure for span type
-  spanData = computed((): DataField[] => [
-    { label: $localize`Longeur portée :`, value: '1234' },
-    { label: $localize`Dénivelé (m) :`, value: '1234' },
-    { label: $localize`Tension supp (Max) :`, value: '1234' },
-    { label: $localize`Longueur naturelle LO :`, value: '1234' }
-  ]);
+  spanData = computed((): DataField[] => {
+    const spanLength = this.litData()?.span_length;
+    const elevation = this.litData()?.elevation;
+    const L0 = this.litData()?.L0;
+
+    return [
+      {
+        label: $localize`Span length :`,
+        value: formatNumber(spanLength?.[this.index()])
+      },
+      {
+        label: $localize`Elevation (m) :`,
+        value: formatNumber(elevation?.[this.index()])
+      },
+      { label: $localize`Supp tension (Max) :`, value: '-' },
+      {
+        label: $localize`Natural length LO :`,
+        value: formatNumber(L0?.[this.index()])
+      }
+    ];
+  });
 
   // Expanded data for span type
   spanExpandedData = computed((): DataField[] => [
-    { label: $localize`Fleche F1 :`, value: '1234' },
-    { label: $localize`Fleche F2 :`, value: '1234' },
-    { label: $localize`Dist. horizontal acc. :`, value: '1234' },
-    { label: $localize`Longueur d'arc LA :`, value: '1234' },
-    { label: $localize`Th - T0 :`, value: '1234' },
-    { label: $localize`Tension inf acc. :`, value: '1234' }
+    { label: $localize`Arrow F1 :`, value: '-' },
+    { label: $localize`Arrow F2 :`, value: '-' },
+    { label: $localize`Horizontal dist. acc. :`, value: '-' },
+    { label: $localize`Arc length LA :`, value: '-' },
+    { label: $localize`Th - T0 :`, value: '-' },
+    { label: $localize`Inf tension  acc. :`, value: '-' }
   ]);
 }

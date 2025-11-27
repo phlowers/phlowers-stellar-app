@@ -32,9 +32,17 @@ describe('SectionPlotComponent', () => {
     supports: [[[1, 2, 3, 4, 5]]],
     insulators: [[[10, 20, 30, 40, 50]]],
     spans: [[[100, 200, 300, 400, 500]]],
-    span: [[[1, 2, 3, 4, 5]]],
-    support: [[[10, 20, 30, 40, 50]]],
-    insulator: [[[100, 200, 300, 400, 500]]]
+    L0: [],
+    elevation: [],
+    line_angle: [],
+    vhl_under_chain: [],
+    vhl_under_console: [],
+    r_under_chain: [],
+    r_under_console: [],
+    ground_altitude: [],
+    load_angle: [],
+    displacement: [],
+    span_length: []
   };
 
   // Mock plotOptions signal
@@ -287,9 +295,17 @@ describe('SectionPlotComponent', () => {
         supports: [],
         insulators: [],
         spans: [],
-        span: [],
-        support: [],
-        insulator: []
+        L0: [],
+        elevation: [],
+        line_angle: [],
+        vhl_under_chain: [],
+        vhl_under_console: [],
+        r_under_chain: [],
+        r_under_console: [],
+        ground_altitude: [],
+        load_angle: [],
+        displacement: [],
+        span_length: []
       };
 
       fixture.componentRef.setInput('litData', emptyData);
@@ -312,9 +328,17 @@ describe('SectionPlotComponent', () => {
         supports: [[[1, 2]]],
         insulators: [[[10, 20]]],
         spans: [[[100, 200]]],
-        span: [[[1, 2]]],
-        support: [[[10, 20]]],
-        insulator: [[[100, 200]]]
+        L0: [],
+        elevation: [],
+        line_angle: [],
+        vhl_under_chain: [],
+        vhl_under_console: [],
+        r_under_chain: [],
+        r_under_console: [],
+        ground_altitude: [],
+        load_angle: [],
+        displacement: [],
+        span_length: []
       };
 
       fixture.componentRef.setInput('litData', dataWithNulls);
@@ -337,9 +361,17 @@ describe('SectionPlotComponent', () => {
         supports: [[[999999]]],
         insulators: [[[10]]],
         spans: [[[100]]],
-        span: [[[1]]],
-        support: [[[10]]],
-        insulator: [[[100]]]
+        L0: [],
+        elevation: [],
+        line_angle: [],
+        vhl_under_chain: [],
+        vhl_under_console: [],
+        r_under_chain: [],
+        r_under_console: [],
+        ground_altitude: [],
+        load_angle: [],
+        displacement: [],
+        span_length: []
       };
 
       fixture.componentRef.setInput('litData', largeData);
