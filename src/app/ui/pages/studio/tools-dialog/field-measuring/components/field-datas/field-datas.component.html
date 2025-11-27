@@ -92,6 +92,7 @@
         pInputText
         id="windSpeed"
         type="number"
+        [fluid]="true"
         [min]="0"
         [ngModel]="measureData().windSpeed"
         (ngModelChange)="onFieldChange('windSpeed', $event)"

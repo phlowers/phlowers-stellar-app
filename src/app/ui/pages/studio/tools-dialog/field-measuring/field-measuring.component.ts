@@ -25,6 +25,7 @@ import {
 } from './constants';
 import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
+import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -34,7 +35,8 @@ import { FieldDatasComponent } from './components/field-datas/field-datas.compon
     IconComponent,
     TabsModule,
     HeaderComponent,
-    FieldDatasComponent
+    FieldDatasComponent,
+    CalculusSettingComponent
   ],
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss']
