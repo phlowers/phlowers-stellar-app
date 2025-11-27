@@ -1,0 +1,94 @@
+<p-dialog
+  dismissableMask="true"
+  [visible]="isOpen()"
+  (visibleChange)="isOpenChange.emit(false)"
+  i18n-header
+  [style]="{ width: '496px' }"
+  [modal]="true"
+>
+  <ng-template #header>
+    <p class="text-l-600 mb-0 flex gap-2">
+      <app-icon icon="edit" />
+      @if (mode() === 'new') {
+        <span i18n>Create a new study</span>
+      } @else {
+        <span i18n>Modify my study</span>
+      }
+    </p>
+  </ng-template>
+
+  <ng-template #content>
+    <form class="flex flex-col gap-6">
+      <div>
+        <div class="label-container">
+          <label i18n for="title" class="label">
+            Study name
+            <sup class="mandatory">*</sup>
+          </label>
+          <span class="input-length">{{ titleLength() }}/100</span>
+        </div>
+        <input
+          type="text"
+          pInputText
+          id="title"
+          name="title"
+          maxlength="100"
+          i18n-placeholder
+          placeholder="Study name"
+          [ngModel]="title()"
+          (ngModelChange)="updateTitle($event)"
+          required
+          aria-describedby="title-description"
+          fluid
+        />
+        <small id="title-description" class="text-s-600 ml-1" i18n>
+          Give a name to your study
+        </small>
+      </div>
+      <div>
+        <div class="label-container">
+          <label i18n for="description" class="label">Description</label>
+          <span class="input-length">{{ descriptionLength() }}/240</span>
+        </div>
+        <textarea
+          id="description"
+          name="description"
+          i18n-placeholder
+          placeholder="Enter description"
+          aria-describedby="description-description"
+          class="block"
+          pTextarea
+          [ngModel]="description()"
+          (ngModelChange)="updateDescription($event)"
+          maxlength="240"
+          rows="3"
+          cols="20"
+          fluid
+        ></textarea>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <button
+      app-btn
+      type="submit"
+      btnSize="m"
+      btnStyle="text"
+      (click)="isOpenChange.emit(false)"
+    >
+      <app-icon icon="close" />
+      <span i18n>Cancel</span>
+    </button>
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      (click)="onSubmit()"
+      [disabled]="titleLength() === 0"
+    >
+      <app-icon icon="check" />
+      <span i18n>Validate</span>
+    </button>
+  </ng-template>
+</p-dialog>

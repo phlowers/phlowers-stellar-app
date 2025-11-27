@@ -1,0 +1,228 @@
+<app-new-charge-modal
+  [isOpen]="isNewChargeModalOpen()"
+  (isOpenChange)="isNewChargeModalOpen.set($event)"
+  [mode]="newChargeModalMode()"
+  [uuidInput]="newChargeModalUuid()"
+/>
+
+<app-studio-menu-bar
+  (openNewChargeModal)="openNewChargeModal($event)"
+  [section]="plotService.section()"
+  [study]="plotService.study()"
+></app-studio-menu-bar>
+
+<app-studio-top-toolbar />
+
+<div class="graph-tools">
+  <div class="graph-tools__left">
+    <app-studio
+      class="plot-view"
+      [isSupportZoom]="false"
+      [style.height]="'calc(60vh - 6.5rem)'"
+      [style.min-height]="'calc(60vh - 6.5rem)'"
+      [section]="plotService.section()"
+    />
+
+    <div class="quick-measures">
+      <div class="quick-measures__card">
+        <p>
+          <span class="quick-measures__title" i18n>Parameter (m)</span>
+          <span class="quick-measures__value">123</span>
+        </p>
+
+        <p>
+          <span class="quick-measures__title" i18n>Work load %</span>
+          <span class="quick-measures__value">123</span>
+        </p>
+
+        <hr class="quick-measures__separator" />
+
+        <p-select [disabled]="true" />
+
+        <p>
+          <span class="quick-measures__title" i18n>Oblique (m)</span>
+          <span class="quick-measures__value"></span>
+        </p>
+
+        <p>
+          <span class="quick-measures__title" i18n>Vertical (m)</span>
+          <span class="quick-measures__value"></span>
+        </p>
+
+        <p>
+          <span class="quick-measures__title" i18n>Horizontal (m)</span>
+          <span class="quick-measures__value"></span>
+        </p>
+      </div>
+    </div>
+
+    <hr />
+
+    <div class="flex gap-6 items-start pl-4">
+      <div class="supports-select">
+        <button
+          [disabled]="
+            supports() === 'all' ||
+            plotService.loading() ||
+            plotService.plotOptions().startSupport === 0
+          "
+          (click)="onSupportButtonClick('left')"
+          class="supports-select__buttons supports-select__buttons--left"
+        >
+          <app-icon
+            icon="chevron_left"
+            class="supports-select__buttons__icon"
+          />
+        </button>
+
+        <p-select
+          inputId="supports"
+          appendTo="body"
+          class="supports-select__p-select"
+          [disabled]="plotService.loading()"
+          [options]="supportsOptions()"
+          [ngModel]="supports()"
+          (onChange)="onSelectPlotOptions($event.value)"
+        />
+
+        <button
+          [disabled]="
+            supports() === 'all' ||
+            plotService.loading() ||
+            plotService.plotOptions().endSupport ===
+              (this.plotService.section()?.supports?.length ?? 0) - 1
+          "
+          (click)="onSupportButtonClick('right')"
+          class="supports-select__buttons supports-select__buttons--right"
+        >
+          <app-icon
+            icon="chevron_right"
+            class="supports-select__buttons__icon"
+          />
+        </button>
+      </div>
+
+      <div class="slider-plot-cards">
+        <ngx-slider
+          [class.inverted]="plotService.plotOptions().invert"
+          [value]="plotService.plotOptions().startSupport"
+          [highValue]="plotService.plotOptions().endSupport"
+          (userChangeEnd)="updateSliderOptions($event)"
+          [options]="sliderOptions()"
+          class="block"
+        >
+        </ngx-slider>
+
+        <app-section-plot-cards />
+      </div>
+    </div>
+  </div>
+
+  <app-side-tabs>
+    <app-side-tab label="Charges">
+      <ng-template>
+        <p-tabs value="0" class="load-tabs">
+          <p-tablist>
+            <p-tab
+              value="0"
+              [disabled]="!plotService.section()?.selected_charge_uuid"
+              i18n
+              >Climate condition</p-tab
+            >
+            <p-tab value="1" [disabled]="true" i18n>Span loading</p-tab>
+            <p-tab value="2" [disabled]="true" i18n
+              >Cable manip. at support</p-tab
+            >
+            <p-tab value="3" [disabled]="true" i18n>Cable manip. at span</p-tab>
+          </p-tablist>
+
+          @if (!plotService.section()?.charges?.length) {
+            <div class="flex items-center justify-center gap-1 my-4">
+              <app-icon icon="info" />
+              <p i18n>
+                In order to add charges, you need to create a charge case.
+              </p>
+            </div>
+            <div class="flex justify-center">
+              <button
+                app-btn
+                btnStyle="outlined"
+                btnSize="s"
+                (click)="openNewChargeModal({ mode: 'create', uuid: null })"
+              >
+                <app-icon icon="add_circle" />
+                <ng-container i18n>Add a charge case</ng-container>
+              </button>
+            </div>
+          }
+
+          @if (plotService.section()?.selected_charge_uuid) {
+            <p-tabpanels>
+              <p-tabpanel value="0">
+                <app-climate
+                  [chargeUuid]="
+                    plotService.section()?.selected_charge_uuid ?? ''
+                  "
+                />
+              </p-tabpanel>
+
+              <p-tabpanel value="1">
+                <app-span [spans]="spanData" [supports]="supportData" />
+              </p-tabpanel>
+
+              <p-tabpanel value="2">
+                <p class="m-0">
+                  At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                  blanditiis praesentium voluptatum deleniti atque corrupti quos
+                  dolores et quas molestias excepturi sint occaecati cupiditate
+                  non provident, similique sunt in culpa qui officia deserunt
+                  mollitia animi, id est laborum et dolorum fuga. Et harum
+                  quidem rerum facilis est et expedita distinctio. Nam libero
+                  tempore, cum soluta nobis est eligendi optio cumque nihil
+                  impedit quo minus.
+                </p>
+              </p-tabpanel>
+
+              <p-tabpanel value="3">
+                <p class="m-0">
+                  Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                  Cumque consequuntur vero, iste ducimus ipsam soluta ab libero
+                  maxime, excepturi quia, veniam nostrum. Debitis necessitatibus
+                  veritatis mollitia numquam? Optio, minus cum.
+                </p>
+              </p-tabpanel>
+            </p-tabpanels>
+          }
+        </p-tabs>
+      </ng-template>
+    </app-side-tab>
+
+    <app-side-tab [disabled]="true" label="Obstacles">
+      <ng-template
+        ><div style="width: 300px">
+          coucou contenu onglet "obstacles"
+          <br /><br />
+          <button app-btn>bouton pour tests focus</button>
+        </div></ng-template
+      >
+    </app-side-tab>
+
+    <app-side-tab [disabled]="true" label="Sol">
+      <ng-template
+        ><div style="width: 400px">
+          coucou contenu onglet "sol"<br /><br />
+          <button app-btn>bouton pour tests focus</button>
+        </div></ng-template
+      >
+    </app-side-tab>
+
+    <app-side-tab [disabled]="true" label="Estimations">
+      <ng-template
+        ><div style="width: 500px">
+          coucou contenu onglet "estimations"<br /><br />
+          <button app-btn>bouton pour tests focus</button>
+        </div></ng-template
+      >
+    </app-side-tab>
+  </app-side-tabs>
+</div>

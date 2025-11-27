@@ -1,0 +1,44 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    // "module": "CommonJS",
+    "isolatedModules": false,
+    "target": "esnext",
+    "module": "esnext",
+    "lib": [
+      "es2022",
+      "dom",
+      "webworker"
+    ],
+    "types": [
+      "jest",
+      "node",
+      "@angular/localize"
+    ],
+    "paths": {
+      "@src/*": [
+        "./src/*"
+      ],
+      "@app/*": [
+        "./src/app/*"
+      ],
+      "@core/*": [
+        "./src/app/core/*"
+      ],
+      "@ui/*": [
+        "./src/app/ui/*"
+      ],
+      "@plugins/*": [
+        "./src/app/plugins/*"
+      ],
+      "@adapters/*": [
+        "./src/app/adapters/*"
+      ],
+    },
+  },
+  "include": [
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

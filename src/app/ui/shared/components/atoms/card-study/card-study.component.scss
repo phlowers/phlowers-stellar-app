@@ -1,0 +1,65 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+:host {
+  @apply inline-flex items-stretch justify-stretch;
+}
+
+article {
+  @apply relative flex flex-col w-full p-4 rounded-lg overflow-hidden;
+  background-color: var(--grey-white);
+  box-shadow:
+    map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3);
+  transition: background-color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: var(--grey-50);
+  }
+
+  &:focus-within {
+    @extend %focus-state;
+  }
+}
+
+h3 {
+  @apply mb-2;
+  @extend %heading-xs;
+  color: var(--grey-950);
+  overflow-wrap: break-word;
+}
+
+dl {
+  @apply overflow-hidden grow;
+  color: var(--grey-700);
+}
+
+dt,
+dd {
+  @apply float-start mb-2;
+}
+
+dt {
+  @apply flex items-center gap-2 clear-start;
+
+  app-icon {
+    font-size: 1rem;
+  }
+}
+
+dd {
+  @apply ml-1;
+}
+
+ul {
+  @apply flex flex-wrap gap-2;
+}
+
+button {
+  @apply h-0 w-0;
+  text-indent: -999rem;
+
+  &::after {
+    @apply absolute inset-0;
+    content: '';
+  }
+}

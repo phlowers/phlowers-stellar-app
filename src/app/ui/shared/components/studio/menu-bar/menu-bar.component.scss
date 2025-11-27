@@ -1,0 +1,24 @@
+@use 'abstract.extracts' as app;
+
+.menubar {
+  @apply flex items-center gap-2 px-6 py-2 border-b h-10 max-h-10;
+  background-color: var(--star-dust-100);
+  border-color: var(--primary-200);
+
+  &,
+  &__back-arrow {
+    color: var(--star-dust-950);
+  }
+
+  &__title {
+    @apply flex items-center whitespace-nowrap mb-0;
+
+    &__content {
+      @apply inline-block overflow-hidden overflow-ellipsis max-w-48;
+    }
+  }
+
+  &__separator {
+    @extend %vertical-separator;
+  }
+}

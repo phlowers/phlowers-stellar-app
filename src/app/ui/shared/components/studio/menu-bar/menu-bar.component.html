@@ -1,0 +1,73 @@
+<div class="menubar">
+  <a
+    [routerLink]="'/study/' + study()?.uuid"
+    app-btn
+    aria-label="Go back to study"
+    i18n-aria-label
+    btnStyle="text"
+    btnSize="s"
+  >
+    <app-icon class="menubar__back-arrow" icon="arrow_back" />
+  </a>
+
+  <p class="menubar__title">
+    <span class="text-s-600 pr-1" i18n>Section :</span>
+    <span class="text-m-600 menubar__title__content">
+      {{ section()?.name }}
+    </span>
+  </p>
+
+  <hr class="menubar__separator" />
+
+  <p class="mb-0">
+    <span class="text-s-600 pr-1" i18n>CI :</span>
+    <span class="text-m-400">{{ initialCondition()?.name }}</span>
+  </p>
+
+  <hr class="menubar__separator" />
+
+  <div class="flex items-center gap-1">
+    <p class="mb-0 text-s-600 whitespace-nowrap" i18n>CC :</p>
+    <app-select-with-buttons
+      [options]="chargeCases()"
+      [selectedOption]="selectedChargeCaseUuid()"
+      (selectOption)="selectChargeCase($event)"
+      (deleteOption)="deleteChargeCase($event)"
+      (duplicateOption)="duplicateChargeCase($event)"
+      (viewOption)="viewOrEditChargeCase($event, 'view')"
+      (editOption)="viewOrEditChargeCase($event, 'edit')"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Select charge case"
+      i18n-placeholder
+      ariaLabel="Select charge case"
+      i18n-ariaLabel
+      class="menubar__select"
+      [showClear]="false"
+    />
+  </div>
+
+  <button
+    aria-label="add charge case"
+    i18n-aria-label
+    app-btn
+    btnStyle="outlined"
+    btnSize="s"
+    (click)="openNewChargeModal.emit({ mode: 'create', uuid: null })"
+  >
+    <app-icon icon="add_circle" />
+  </button>
+
+  @if (staffIsPresent() !== undefined) {
+    <p class="text-s-600 flex items-center gap-2 mb-0">
+      <app-icon class="text-primary" icon="engineering" [fill]="true" />
+      @if (staffIsPresent() === true) {
+        <ng-container i18n>Staff is present</ng-container>
+      } @else if (staffIsPresent() === false) {
+        <ng-container i18n>Staff is absent</ng-container>
+      }
+    </p>
+  }
+
+  <hr class="menubar__separator" />
+</div>

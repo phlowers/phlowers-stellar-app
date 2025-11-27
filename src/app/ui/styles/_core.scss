@@ -1,0 +1,28 @@
+@use './abstracts/abstract.extracts' as app;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+label {
+  @extend %text-m-400;
+  @extend %label-spacing;
+  display: inline-block;
+  color: var(--grey-800);
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}

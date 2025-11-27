@@ -1,0 +1,72 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.p-inputtext.p-inputtext {
+  --p-inputtext-border-radius: 0.25rem;
+
+  --p-inputtext-border-color: var(--grey-400);
+  --p-inputtext-hover-border-color: var(--grey-600);
+  --p-inputtext-focus-border-color: var(--primary-600);
+  --p-inputtext-invalid-border-color: var(--error-600);
+
+  --p-inputtext-color: var(--grey-900);
+
+  --p-inputtext-padding-y: 0.375rem;
+  --p-inputtext-padding-x: 1rem;
+
+  --p-inputtext-focus-ring-width: 0.0625rem;
+  --p-inputtext-focus-ring-style: solid;
+  --p-inputtext-focus-ring-color: var(--p-inputtext-focus-border-color);
+
+  --p-inputtext-shadow: #{map.get(app.$elevation, neutral-inner)};
+
+  --p-inputtext-disabled-background: var(--grey-0);
+  --p-inputtext-disabled-color: var(--grey-300);
+
+  @extend %text-m-400;
+
+  &:enabled {
+    &:focus,
+    &:active {
+      outline: var(--p-inputtext-focus-ring-width)
+        var(--p-inputtext-focus-ring-style) var(--p-inputtext-focus-ring-color);
+      box-shadow: inset 0rem 0rem 0rem rgb(0, 0, 0, 0);
+    }
+  }
+
+  &.ng-invalid.ng-dirty {
+    box-shadow: inset 0rem 0rem 0rem rgb(0, 0, 0, 0);
+  }
+
+  &:disabled,
+  &:read-only {
+    border-color: var(--grey-200);
+  }
+
+  &:read-only {
+    background: var(--p-inputtext-disabled-background);
+    color: var(--p-inputtext-color);
+
+    &:hover,
+    &:focus,
+    &:active {
+      border-color: var(--grey-200);
+    }
+    &:focus,
+    &:active {
+      outline: none;
+      box-shadow: var(--p-inputtext-shadow);
+    }
+  }
+
+  &:disabled {
+    color: var(--p-inputtext-disabled-color);
+  }
+}
+
+.input-error-message {
+  @extend %text-l-600;
+  display: block;
+  color: var(--error-600);
+  padding: 0.25rem 0.5rem;
+}

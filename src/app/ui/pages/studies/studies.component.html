@@ -1,0 +1,37 @@
+<app-export-dialog></app-export-dialog>
+<p-confirmdialog key="positionDialog" [position]="'center'" />
+<section>
+  <app-new-study-modal [(isOpen)]="isNewStudyModalOpen" />
+  <div class="flex justify-between items-start">
+    <h2 i18n>Studies</h2>
+    <button
+      app-btn
+      type="submit"
+      btnSize="m"
+      (click)="isNewStudyModalOpen = true"
+    >
+      <app-icon icon="add" />
+      <span i18n>Create a new study</span>
+    </button>
+  </div>
+</section>
+<p-tabs value="myStudies">
+  <p-tablist>
+    <p-tab value="myStudies" i18n>My last studies</p-tab>
+    <p-tab value="searchStudy" i18n>Search a study</p-tab>
+    <p-tab value="importStudy" i18n>Import a study</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="myStudies"
+      ><app-studies-table
+        [studies]="studies"
+        (deleteStudy)="deleteStudy($event)"
+        (duplicateStudy)="duplicateStudy($event)"
+      />
+    </p-tabpanel>
+    <p-tabpanel value="searchStudy"> </p-tabpanel>
+    <p-tabpanel value="importStudy">
+      <app-import-study />
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>

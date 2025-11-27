@@ -1,0 +1,19 @@
+<div class="h-full relative">
+  @if (plotService.loading()) {
+    <div class="absolute inset-0 flex justify-center items-center">
+      <p-progress-spinner ariaLabel="loading" />
+    </div>
+  } @else if (plotService.error()) {
+    <div class="absolute inset-0 flex justify-center items-center">
+      <p class="text-red-500 text-2xl font-bold">
+        {{ getErrorString() }}
+      </p>
+    </div>
+  } @else {
+    <app-section-plot
+      class="h-full"
+      [litData]="plotService.litData()"
+      [isSupportZoom]="isSupportZoom()"
+    ></app-section-plot>
+  }
+</div>

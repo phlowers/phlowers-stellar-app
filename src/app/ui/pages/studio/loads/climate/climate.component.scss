@@ -1,0 +1,32 @@
+@use 'abstract.extracts' as app;
+
+.climate {
+  @apply flex flex-col gap-3 items-stretch;
+
+  &__reset {
+    align-self: flex-end;
+  }
+
+  &__form-item {
+    @apply flex flex-col items-stretch;
+  }
+
+  &__divided-line {
+    @apply grid grid-cols-2;
+    column-gap: 0.625rem;
+    align-items: end;
+  }
+
+  &__btn-wrapper {
+    @apply flex justify-end items-center gap-4 pt-5 pr-3;
+  }
+
+  label {
+    @extend %text-s-400;
+    margin: 0.125rem 0.25rem;
+  }
+
+  input {
+    @apply w-full;
+  }
+}

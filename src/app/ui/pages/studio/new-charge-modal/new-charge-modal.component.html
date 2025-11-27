@@ -1,0 +1,112 @@
+<p-dialog
+  dismissableMask="true"
+  [visible]="isOpen()"
+  (visibleChange)="isOpenChange.emit(false)"
+  [style]="{ width: '31rem' }"
+  [modal]="true"
+>
+  <ng-template #header>
+    <p class="text-l-600 mb-0 flex gap-2">
+      @if (isViewMode()) {
+        <app-icon icon="visibility" />
+        <span i18n>View charge case</span>
+      } @else if (isEditMode()) {
+        <app-icon icon="edit" />
+        <span i18n>Edit charge case</span>
+      } @else {
+        <app-icon icon="add_circle" />
+        <span i18n>Create a charge case</span>
+      }
+    </p>
+  </ng-template>
+
+  <ng-template #content>
+    <form class="flex flex-col gap-3">
+      <h3 class="section-title" i18n>Generalities</h3>
+
+      <div>
+        <label for="chargeName" class="label">
+          <ng-container i18n>Charge case name</ng-container>
+          @if (!isViewMode()) {
+            <sup class="mandatory">*</sup>
+          }
+        </label>
+        <input
+          type="text"
+          pInputText
+          id="chargeName"
+          name="chargeName"
+          maxlength="100"
+          i18n-placeholder
+          [ngModel]="name()"
+          (ngModelChange)="updateName($event)"
+          [readonly]="isViewMode()"
+          [required]="!isViewMode()"
+          fluid
+        />
+      </div>
+
+      <div class="personnel-presence">
+        <label for="personnelPresence" class="label" i18n>
+          Personnel presence
+        </label>
+        <p-toggleswitch
+          inputId="personnelPresence"
+          name="personnelPresence"
+          [ngModel]="personnelPresence()"
+          (onChange)="updatePersonnelPresence($event.checked)"
+          [readonly]="isViewMode()"
+        />
+      </div>
+
+      <div>
+        <div class="label-container">
+          <label i18n for="description" class="label">Description</label>
+          @if (!isViewMode()) {
+            <span class="input-length">{{ descriptionLength() }}/240</span>
+          }
+        </div>
+        <textarea
+          id="description"
+          name="description"
+          i18n-placeholder
+          placeholder="Add a description to your charge case"
+          class="block"
+          pTextarea
+          [ngModel]="description()"
+          (ngModelChange)="updateDescription($event)"
+          [readonly]="isViewMode()"
+          maxlength="240"
+          rows="3"
+          cols="20"
+          fluid
+        ></textarea>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      btnStyle="text"
+      (click)="onClose()"
+    >
+      <app-icon icon="close" />
+      <ng-container i18n>Close</ng-container>
+    </button>
+    @if (!isViewMode()) {
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        (click)="onSubmit()"
+        [disabled]="nameLength() === 0"
+      >
+        <app-icon icon="check" />
+        <ng-container i18n>Validate</ng-container>
+      </button>
+    }
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,12 @@
+@if (!btnLoading()) {
+  <ng-content select="app-icon:not([iconRight]), .app-icon:not([iconRight])" />
+
+  <span class="app-btn-label">
+    <ng-content />
+  </span>
+
+  <ng-content select="app-icon[iconRight], .app-icon[iconRight]" />
+} @else if (btnLoading()) {
+  <span class="app-btn-label" i18n>loading</span>
+  <app-icon icon="progress_activity" />
+}

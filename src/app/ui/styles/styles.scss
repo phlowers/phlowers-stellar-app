@@ -1,0 +1,10 @@
+@forward './abstracts/abstract.extracts.scss';
+@forward './custom-properties/custom-properties.extracts';
+@forward './core';
+@forward './typography';
+@forward './utils';
+@forward './vendor-extension/vendor-extension.extract.scss';
+@forward './component/component.extracts';
+
+@import './tailwind.css';
+@import 'primeicons/primeicons.css';

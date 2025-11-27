@@ -1,0 +1,54 @@
+<header>
+  <p class="text-l-600 mb-0">{{ currentPageTitle() }}</p>
+
+  <p
+    class="calculation mb-0"
+    [class]="{
+      'calculation--ready': workerReady(),
+      'calculation--error': workerError()
+    }"
+    id="topbar-engine"
+  >
+    <span class="calculation__icon">
+      <app-icon icon="calculate" class="calculation__icon__calc" />
+
+      <app-icon
+        icon="progress_activity"
+        [class.show]="!workerReady() && !workerError()"
+        class="calculation__icon__status calculation__icon__status--spinner"
+      />
+      <app-icon
+        icon="check_circle"
+        [class.show]="workerReady() && !workerError()"
+        class="calculation__icon__status calculation__icon__status--filled"
+      />
+      <app-icon
+        icon="error"
+        [class.show]="workerError()"
+        class="calculation__icon__status calculation__icon__status--filled"
+      ></app-icon>
+    </span>
+
+    <span
+      i18n
+      class="calculation__txt"
+      [class.show]="!workerReady() && !workerError()"
+    >
+      Loading
+    </span>
+
+    <span
+      i18n
+      class="calculation__txt"
+      [class.show]="workerReady() && !workerError()"
+    >
+      Ready
+    </span>
+
+    <span i18n class="calculation__txt" [class.show]="workerError()">
+      Error
+    </span>
+  </p>
+
+  <p class="user">{{ user()?.email ?? 'No user' }}</p>
+</header>

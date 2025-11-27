@@ -1,0 +1,60 @@
+@use 'sass:map';
+@use './vars' as stel;
+
+// ***************************
+// **** breakpoint mixins ****
+// ***************************
+// min-width
+@mixin min-bp($size) {
+  @if map.has-key(stel.$bp, $size) {
+    @media (min-width: map.get(stel.$bp, $size)) {
+      @content;
+    }
+  } @else {
+    @error "Invalid breakpoint with min-bp mixin '#{$size}'. Available breakpoints are: #{map.keys(stel.$bp)}";
+  }
+}
+// max-width
+@mixin max-bp($size) {
+  @if map.has-key(stel.$bp, $size) {
+    @media (max-width: map.get(stel.$bp, $size)) {
+      @content;
+    }
+  } @else {
+    @error "Invalid breakpoint with max-bp mixin '#{$size}'. Available breakpoints are: #{map.keys(stel.$bp)}";
+  }
+}
+
+// ***************************
+// **** texts placeholder ****
+// ***************************
+// headings texts
+@each $name, $value in stel.$txt-heading {
+  %heading-#{$name} {
+    font: map.get($value, font);
+    letter-spacing: map.get($value, letter-spacing);
+  }
+}
+// common texts
+@each $name, $value in stel.$text {
+  %text-#{$name} {
+    font: $value;
+  }
+}
+
+%label-spacing {
+  margin: 0.125rem 0.5rem;
+}
+
+%focus-state {
+  @apply relative;
+  outline: 0.0625rem solid var(--primary-900);
+  outline-offset: 0.25rem;
+  z-index: 1;
+}
+
+%vertical-separator {
+  @apply h-full m-0 border-t-0;
+  width: 0.0625rem;
+  border-right: 0.0625rem solid var(--star-dust-300);
+}

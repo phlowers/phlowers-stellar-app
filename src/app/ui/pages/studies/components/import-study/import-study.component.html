@@ -1,0 +1,60 @@
+<p-toast position="top-center"></p-toast>
+<div class="import-study">
+  <label for="study-file" class="import-study__tool">
+    <app-icon icon="upload" class="import-study__tool__icon" />
+
+    <span class="import-study__tool__txt" i18n>
+      Upload one or multiple protoV4 files
+    </span>
+
+    <input
+      id="study-file"
+      form="file"
+      multiple
+      name="file"
+      type="file"
+      onclick="this.value = null"
+      (change)="loadFiles($event)"
+      class="import-study__tool__input"
+    />
+  </label>
+
+  @if (this.newStudies().length > 0) {
+    <ul class="import-study__list">
+      @for (study of this.newStudies(); track study) {
+        <li class="import-study__list__item">
+          <p class="import-study__list__label">
+            <app-icon icon="check" class="import-study__list__icon" />
+            {{ study.title }}
+          </p>
+
+          <div class="import-study__list__btns">
+            <a
+              [routerLink]="'/study/' + study.uuid"
+              app-btn
+              btnStyle="base"
+              btnSize="s"
+              i18n
+            >
+              Open
+            </a>
+
+            <button
+              app-btn
+              btnSize="m"
+              btnStyle="text"
+              (click)="deleteStudy(study.uuid)"
+              i18n-aria-label
+              aria-label="delete study"
+            >
+              <app-icon
+                icon="delete"
+                class="import-study__list__btns__erase-icon"
+              />
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

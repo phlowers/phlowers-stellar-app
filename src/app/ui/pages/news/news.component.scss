@@ -1,0 +1,5 @@
+@use 'abstract.extracts' as app;
+
+.title {
+  @extend %heading-m;
+}

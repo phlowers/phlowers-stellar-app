@@ -1,0 +1,186 @@
+$_sidebar-size--expanded: 14rem;
+$_sidebar-size--shrank: 4rem;
+$_animation-type-timing: 0.35s cubic-bezier(1, 0.19, 0.23, 0.84);
+
+body.has-sidebar {
+  padding-left: $_sidebar-size--shrank;
+
+  &--expanded {
+    padding-left: $_sidebar-size--expanded;
+  }
+
+  &--animation {
+    transition: padding-left $_animation-type-timing;
+  }
+}
+
+.stellar-sidebar {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1000; // TODO: remove this and manage z-indexes through a sass map and or custom properties
+  width: $_sidebar-size--shrank;
+  height: 100%;
+  padding: 0.5rem;
+  background-color: var(--primary-950);
+  border-right: 1px solid var(--grey-150);
+  color: var(--grey-white);
+  transition: width $_animation-type-timing;
+
+  &--expanded {
+    width: $_sidebar-size--expanded;
+    padding: 1rem;
+    padding-top: 0.5rem;
+  }
+
+  &__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    position: relative;
+    overflow: hidden;
+    padding: 0.125rem;
+    margin: 0 -0.25rem 0.5rem -0.25rem;
+    font-weight: 300;
+    line-height: 1;
+    background-color: var(--primary-950);
+    border-radius: 0.25rem;
+    transition: all $_animation-type-timing;
+
+    .app-icon {
+      font-size: 1.25rem;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0.25rem;
+      background-color: var(--primary-950);
+      transition: background-color $_animation-type-timing;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 0.25rem;
+      box-shadow: inset 0 0 0 1px var(--primary-950);
+      transition: box-shadow $_animation-type-timing;
+    }
+
+    &:hover {
+      background-color: var(--primary-800);
+
+      &::before {
+        background-color: var(--primary-800);
+      }
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        box-shadow: inset 0 0 0 1px var(--grey-white);
+      }
+    }
+
+    &:active {
+      background-color: var(--primary-600);
+
+      &::before {
+        background-color: var(--primary-600);
+      }
+    }
+
+    &.active {
+      &::before {
+        background-color: var(--primary-200);
+      }
+    }
+
+    .stellar-sidebar--expanded & {
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      margin: 0rem -0.5rem 0.25rem -0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+
+      .app-icon {
+        position: relative;
+        bottom: 0.125rem;
+      }
+    }
+  }
+
+  hr {
+    border-top-color: var(--grey-white);
+    margin: 0.6875rem 0;
+  }
+}
+
+.stelBar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0rem;
+
+  .stellar-sidebar--expanded & {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  &__link {
+    min-width: 1.875rem;
+
+    .stellar-sidebar--expanded & {
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      min-width: 4.125rem;
+    }
+  }
+
+  &__version-display {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+}
+
+.stelBar-main {
+  flex-grow: 1;
+}
+
+.stelBar-footer {
+  button.stellar-sidebar__link {
+    margin-bottom: 0;
+    width: calc(100% + 0.5rem);
+
+    .app-icon {
+      transform-origin: 50%;
+      transform: rotate(0deg);
+      transition: transform $_animation-type-timing;
+    }
+
+    .stellar-sidebar--expanded & {
+      width: calc(100% + 1rem);
+
+      .app-icon {
+        transform: rotate(-180deg);
+      }
+    }
+  }
+}

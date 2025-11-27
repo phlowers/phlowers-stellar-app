@@ -1,0 +1,8 @@
+.p-paginator.p-paginator {
+  --p-paginator-current-page-report-color: var(--grey-900);
+  --p-paginator-nav-button-color: var(--grey-750);
+  --p-paginator-nav-button-color: var(--p-paginator-current-page-report-color);
+  --p-paginator-nav-button-hover-color: var(--primary-800);
+  --p-paginator-nav-button-hover-background: var(--primary-50);
+  --p-paginator-nav-button-selected-background: var(--primary-100);
+}
