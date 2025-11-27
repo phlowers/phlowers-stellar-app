@@ -1041,16 +1041,6 @@
         <source>add charge case</source>
       </segment>
     </unit>
-    <unit id="1481143027598560528">
-      <segment>
-        <source>Dénivelé (m) :</source>
-      </segment>
-    </unit>
-    <unit id="1839850085225752166">
-      <segment>
-        <source>Tension inf acc. :</source>
-      </segment>
-    </unit>
     <unit id="187187500641108332">
       <segment>
         <source>
@@ -1063,11 +1053,6 @@
         <source>L :</source>
       </segment>
     </unit>
-    <unit id="2071943182021763517">
-      <segment>
-        <source>Fleche F1 :</source>
-      </segment>
-    </unit>
     <unit id="2469542949998183645">
       <segment>
         <source>Th - T0 :</source>
@@ -1078,34 +1063,9 @@
         <source>Angle balencement :</source>
       </segment>
     </unit>
-    <unit id="3473770442486249156">
-      <segment>
-        <source>Dist. horizontal acc. :</source>
-      </segment>
-    </unit>
-    <unit id="3777840194874581514">
-      <segment>
-        <source>Pente du câble acc. :</source>
-      </segment>
-    </unit>
-    <unit id="3791590607845887874">
-      <segment>
-        <source>Fleche F2 :</source>
-      </segment>
-    </unit>
-    <unit id="4089029341948015074">
-      <segment>
-        <source>Alt. pied supp :</source>
-      </segment>
-    </unit>
     <unit id="4397785445453423100">
       <segment>
         <source>Y :</source>
-      </segment>
-    </unit>
-    <unit id="5071129435851121745">
-      <segment>
-        <source>Longeur portée :</source>
       </segment>
     </unit>
     <unit id="5106156601844390550">
@@ -1113,19 +1073,9 @@
         <source>V :</source>
       </segment>
     </unit>
-    <unit id="5948960769057855607">
-      <segment>
-        <source>Longueur d&apos;arc LA :</source>
-      </segment>
-    </unit>
     <unit id="6094941777760276714">
       <segment>
         <source>H :</source>
-      </segment>
-    </unit>
-    <unit id="6579859396556203170">
-      <segment>
-        <source>Longueur naturelle LO :</source>
       </segment>
     </unit>
     <unit id="7866511975225263216">
@@ -1133,24 +1083,14 @@
         <source>Go back to study</source>
       </segment>
     </unit>
-    <unit id="8455573458204338917">
+    <unit id="6878706142952083204">
       <segment>
-        <source>Angle en ligne :</source>
-      </segment>
-    </unit>
-    <unit id="8740504202579818263">
-      <segment>
-        <source>Résultante :</source>
+        <source>Resultant :</source>
       </segment>
     </unit>
     <unit id="8989863100638695277">
       <segment>
         <source>X :</source>
-      </segment>
-    </unit>
-    <unit id="9005041075106523387">
-      <segment>
-        <source>Tension supp (Max) :</source>
       </segment>
     </unit>
     <unit id="9049520591622775104">
@@ -1998,14 +1938,49 @@
         <source>You cannot update a study that you did not create, please duplicate it instead.</source>
       </segment>
     </unit>
+    <unit id="1146602380315581259">
+      <segment>
+        <source>Arc length LA :</source>
+      </segment>
+    </unit>
+    <unit id="1455021675803464772">
+      <segment>
+        <source>Line angle :</source>
+      </segment>
+    </unit>
+    <unit id="146808728587794667">
+      <segment>
+        <source>VHL (under console)</source>
+      </segment>
+    </unit>
     <unit id="1630268381780426388">
       <segment>
         <source>Calculation error: &apos;Solver did not converge&apos;</source>
       </segment>
     </unit>
+    <unit id="1754428445982279363">
+      <segment>
+        <source>Inf tension acc. :</source>
+      </segment>
+    </unit>
+    <unit id="20555684131803245">
+      <segment>
+        <source>Horizontal dist. acc. :</source>
+      </segment>
+    </unit>
+    <unit id="2637772256766666872">
+      <segment>
+        <source>Natural length LO :</source>
+      </segment>
+    </unit>
     <unit id="2820133611314033915">
       <segment>
         <source>Maintenance center</source>
+      </segment>
+    </unit>
+    <unit id="3228204757532465885">
+      <segment>
+        <source>Span length :</source>
       </segment>
     </unit>
     <unit id="3523371283363294838">
@@ -2018,9 +1993,24 @@
         <source>Maintenance team</source>
       </segment>
     </unit>
+    <unit id="5045082531574334615">
+      <segment>
+        <source>Supp tension (Max) :</source>
+      </segment>
+    </unit>
+    <unit id="5015532824363367508">
+      <segment>
+        <source>Elevation (m) :</source>
+      </segment>
+    </unit>
     <unit id="7003790776240394114">
       <segment>
         <source>Filename</source>
+      </segment>
+    </unit>
+    <unit id="7034395083246764527">
+      <segment>
+        <source>Cable slope acc. :</source>
       </segment>
     </unit>
     <unit id="7291169079105941936">
@@ -2033,9 +2023,39 @@
         <source>LIT - Name</source>
       </segment>
     </unit>
+    <unit id="758471193876128020">
+      <segment>
+        <source>Alt. supp foot :</source>
+      </segment>
+    </unit>
+    <unit id="7621171811584493753">
+      <segment>
+        <source>Chain displacement acc.</source>
+      </segment>
+    </unit>
     <unit id="7952517032522600259">
       <segment>
         <source>Link - Name</source>
+      </segment>
+    </unit>
+    <unit id="839778022983023928">
+      <segment>
+        <source>Arrow F1 :</source>
+      </segment>
+    </unit>
+    <unit id="8556557769909937132">
+      <segment>
+        <source>VHL (under chain)</source>
+      </segment>
+    </unit>
+    <unit id="8837923071812939954">
+      <segment>
+        <source>Are you sure you want to delete this study?</source>
+      </segment>
+    </unit>
+    <unit id="8940150942032374654">
+      <segment>
+        <source>Arrow F2 :</source>
       </segment>
     </unit>
     <unit id="9006227511499022859">
@@ -2048,6 +2068,16 @@
         <source>All</source>
       </segment>
     </unit>
+    <unit id="1995462320428563005">
+      <segment>
+        <source>Charges</source>
+      </segment>
+    </unit>
+    <unit id="27019801939265889">
+      <segment>
+        <source>Select charges</source>
+      </segment>
+    </unit>
     <unit id="3413004253239957216">
       <segment>
         <source>Single</source>
@@ -2058,9 +2088,9 @@
         <source>Double</source>
       </segment>
     </unit>
-    <unit id="8837923071812939954">
+    <unit id="9161302603054307750">
       <segment>
-        <source>Are you sure you want to delete this study?</source>
+        <source>View charges</source>
       </segment>
     </unit>
   </file>
