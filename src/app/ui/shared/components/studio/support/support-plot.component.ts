@@ -11,13 +11,19 @@ const layout = () => ({
   autosize: true,
   showlegend: false,
   margin: {
-    l: 0,
-    r: 0,
-    t: 0,
-    b: 0
+    l: 5,
+    r: 5,
+    t: 5,
+    b: 5
   },
-  width: 300
+  width: 340,
+  height: 330
 });
+
+const config = {
+  displayModeBar: false,
+  displaylogo: false
+};
 
 @Component({
   selector: 'app-support-plot',
@@ -86,6 +92,6 @@ export class SupportPlotComponent {
       textposition: 'inside' as const
     };
     const data = [shape_data, text_data];
-    plotly.newPlot('plotly-output-support', data, layout());
+    plotly.newPlot('plotly-output-support', data, layout(), config);
   }
 }

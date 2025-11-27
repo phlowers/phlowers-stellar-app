@@ -17,9 +17,9 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { ButtonModule } from 'primeng/button';
 import { KeyFilterModule } from 'primeng/keyfilter';
-import { isNumber, uniq } from 'lodash';
+import { isNumber } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
-import { AttachmentService } from '@core/services/attachment/attachment.service';
+import { CatalogSupportsService } from '@core/services/catalogSupports/catalogSupports.service';
 
 const calculateSupportNumber = (
   firstSupport: Support,
@@ -84,7 +84,7 @@ export class SupportsTableComponent implements OnInit {
   supportFilterTable = signal<string[]>([]);
   constructor(
     private readonly chainsService: ChainsService,
-    private readonly attachmentService: AttachmentService
+    private readonly catalogSupportsService: CatalogSupportsService
   ) {}
 
   public onlyPositiveNumbers = /^[0-9]*$/;
@@ -99,11 +99,10 @@ export class SupportsTableComponent implements OnInit {
   async getData() {
     const chains = await this.chainsService.getChains();
     this.chains.set(chains || []);
-    const attachments = await this.attachmentService.getAttachments();
+    const catalogSupports =
+      await this.catalogSupportsService.getCatalogSupports();
     this.supportFilterTable.set(
-      uniq(
-        (attachments || []).map((attachment) => attachment.support_name || '')
-      )
+      catalogSupports.map((support) => support.name) || []
     );
   }
 

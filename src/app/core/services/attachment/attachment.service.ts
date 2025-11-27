@@ -14,7 +14,7 @@ import {
   RteAttachmentsCsvFile
 } from '../../data/database/interfaces/attachment';
 import { v4 as uuidv4 } from 'uuid';
-import { toNumber } from 'lodash';
+import { toNumber, uniq } from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +33,14 @@ export class AttachmentService {
 
   async getAttachments() {
     return this.storageService.db?.attachments.toArray();
+  }
+
+  async searchAttachmentsBySupportName(value: string) {
+    return this.storageService.db?.attachments
+      .where('support_name')
+      .startsWithIgnoreCase(value)
+      .limit(100)
+      .toArray();
   }
 
   /**
@@ -81,9 +89,19 @@ export class AttachmentService {
               return;
             }
             await this.storageService.db?.attachments.clear();
-            const attachmentsTable: Attachment[] = mapData(data);
+            await this.storageService.db?.catalogSupports.clear();
+            const attachmentsTable: Attachment[] = mapData(data).slice(0, 1000);
+            const supportNames = uniq(
+              attachmentsTable.map(
+                (attachment) => attachment.support_name || ''
+              )
+            ).map((name) => ({
+              name
+            }));
             console.log('adding attachments data', attachmentsTable.length);
+            console.log('adding supports catalog data', supportNames.length);
             await this.storageService.db?.attachments.bulkAdd(attachmentsTable);
+            await this.storageService.db?.catalogSupports.bulkAdd(supportNames);
             resolve();
           }) as (jsonResults: Papa.ParseResult<RteAttachmentsCsvFile>) => void
         });
