@@ -1,9 +1,6 @@
 import { Cable } from '@core/data/database/interfaces/cable';
 import { Section } from '@core/data/database/interfaces/section';
-import {
-  PlotObjectsType,
-  View
-} from '@ui/shared/components/studio/section/helpers/types';
+import { View } from '@ui/shared/components/studio/section/helpers/types';
 
 export enum Task {
   runTests = 'runTests',
@@ -24,7 +21,22 @@ export enum TaskError {
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
 
-export type GetSectionOutput = Record<PlotObjectsType, number[][][]>;
+export interface GetSectionOutput {
+  spans: number[][][];
+  insulators: number[][][];
+  supports: number[][][];
+  L0: number[];
+  elevation: number[];
+  line_angle: number[];
+  vhl_under_chain: number[][];
+  vhl_under_console: number[][];
+  r_under_chain: number[];
+  r_under_console: number[];
+  ground_altitude: number[];
+  load_angle: number[];
+  displacement: number[][];
+  span_length: number[];
+}
 
 export interface TaskInputs {
   [Task.getLit]: { section: Section; cable: Cable };

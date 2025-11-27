@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import {
   trigger,
   state,
@@ -8,6 +8,7 @@ import {
 } from '@angular/animations';
 import { SectionPlotCardComponent } from './card/section-plot-card.component';
 import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-section-plot-cards',
@@ -41,7 +42,16 @@ import { PlotService } from '@src/app/ui/pages/studio/plot.service';
   ]
 })
 export class SectionPlotCardsComponent {
-  constructor(public readonly plotService: PlotService) {}
+  litData = signal<GetSectionOutput | null>(null);
+  constructor(public readonly plotService: PlotService) {
+    effect(() => {
+      const litData = this.plotService.litData();
+      if (!litData) {
+        return;
+      }
+      this.litData.set(litData);
+    });
+  }
 
   arraysOfSupports = computed(() => {
     if (!this.plotService.section()) {

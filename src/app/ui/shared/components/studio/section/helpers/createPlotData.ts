@@ -7,18 +7,18 @@ export const createPlotData = (
   params: GetSectionOutput,
   options: PlotOptions
 ): Data[] => {
-  const data = (['spans', 'insulators', 'supports'] as PlotObjectsType[]).map(
-    (type) => {
-      return createDataObject(
-        params[type],
-        options.startSupport,
-        options.endSupport,
-        type,
-        options.view,
-        options.side
-      );
-    }
-  );
+  const data = (
+    ['spans', 'insulators', 'supports'] as (keyof GetSectionOutput)[]
+  ).map((type) => {
+    return createDataObject(
+      params[type as keyof GetSectionOutput] as number[][][],
+      options.startSupport,
+      options.endSupport,
+      type as PlotObjectsType,
+      options.view,
+      options.side
+    );
+  });
 
   return data.flat();
 };

@@ -16,6 +16,7 @@ import json
 from importlib.metadata import version
 
 print("mechaphlowers version: ", version("mechaphlowers"))
+RESOLUTION = 100
 
 
 @dataclass
@@ -179,10 +180,24 @@ def get_coordinates(
     span, supports, insulators = plt_line.section_pts.get_points_for_plot(
         project=project, frame_index=middle_span
     )
+    vhl_under_chain = list(engine.balance_model.vhl_under_chain().vhl)
+    vhl_under_console = list(engine.balance_model.vhl_under_console().vhl)
+    # vhl = vhl_under_chain.vhl)
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
         "supports": supports.coords,
+        "L0": engine.L_ref.tolist(),
+        "elevation": engine.section_array.data.elevation_difference.tolist(),
+        "line_angle": engine.section_array.data.line_angle.tolist(),
+        "vhl_under_chain": [v.value.tolist() for v in vhl_under_chain],
+        "vhl_under_console": [v.value.tolist() for v in vhl_under_console],
+        "r_under_chain": engine.balance_model.vhl_under_chain().R.value.tolist(),
+        "r_under_console": engine.balance_model.vhl_under_console().R.value.tolist(),
+        "ground_altitude": engine.section_array.data.ground_altitude.tolist(),
+        "displacement": engine.get_displacement().tolist(),
+        "load_angle": engine.cable_loads.load_angle.tolist(),
+        "span_length": engine.section_array.data.span_length.tolist(),
     }
     return result
 
@@ -244,7 +259,7 @@ def init_section(js_inputs: dict):
         supports_data.append(Support(**support_js))
     # np.random.seed(142)
     df = generate_section_array(supports_data)
-    mph.options.graphics.resolution = 10
+    mph.options.graphics.resolution = RESOLUTION
 
     section = SectionArray(df)
     # set sagging parameter and temperatur

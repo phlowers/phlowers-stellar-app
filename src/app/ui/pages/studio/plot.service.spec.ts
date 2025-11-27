@@ -39,9 +39,17 @@ describe('PlotService', () => {
     supports: [[[1, 2, 3]]],
     insulators: [[[4, 5, 6]]],
     spans: [[[7, 8, 9]]],
-    span: [[[10, 11, 12]]],
-    support: [[[13, 14, 15]]],
-    insulator: [[[16, 17, 18]]]
+    L0: [],
+    elevation: [],
+    line_angle: [],
+    vhl_under_chain: [],
+    vhl_under_console: [],
+    r_under_chain: [],
+    r_under_console: [],
+    ground_altitude: [],
+    load_angle: [],
+    displacement: [],
+    span_length: []
   };
 
   const mockCable: Cable = {

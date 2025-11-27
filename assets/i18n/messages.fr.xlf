@@ -1289,22 +1289,10 @@
         <target>L :</target>
       </segment>
     </unit>
-    <unit id="8740504202579818263">
+    <unit id="6878706142952083204">
       <segment state="initial">
-        <source>Résultante :</source>
+        <source>Resultant :</source>
         <target>Résultante :</target>
-      </segment>
-    </unit>
-    <unit id="8455573458204338917">
-      <segment state="initial">
-        <source>Angle en ligne :</source>
-        <target>Angle en ligne :</target>
-      </segment>
-    </unit>
-    <unit id="4089029341948015074">
-      <segment state="initial">
-        <source>Alt. pied supp :</source>
-        <target>Alt. pied supp :</target>
       </segment>
     </unit>
     <unit id="8989863100638695277">
@@ -1331,70 +1319,10 @@
         <target>Angle balencement :</target>
       </segment>
     </unit>
-    <unit id="3777840194874581514">
-      <segment state="initial">
-        <source>Pente du câble acc. :</source>
-        <target>Pente du câble acc. :</target>
-      </segment>
-    </unit>
-    <unit id="5071129435851121745">
-      <segment state="initial">
-        <source>Longeur portée :</source>
-        <target>Longeur portée :</target>
-      </segment>
-    </unit>
-    <unit id="1481143027598560528">
-      <segment state="initial">
-        <source>Dénivelé (m) :</source>
-        <target>Dénivelé (m) :</target>
-      </segment>
-    </unit>
-    <unit id="9005041075106523387">
-      <segment state="initial">
-        <source>Tension supp (Max) :</source>
-        <target>Tension supp (Max) :</target>
-      </segment>
-    </unit>
-    <unit id="6579859396556203170">
-      <segment state="initial">
-        <source>Longueur naturelle LO :</source>
-        <target>Longueur naturelle LO :</target>
-      </segment>
-    </unit>
-    <unit id="2071943182021763517">
-      <segment state="initial">
-        <source>Fleche F1 :</source>
-        <target>Fleche F1 :</target>
-      </segment>
-    </unit>
-    <unit id="3791590607845887874">
-      <segment state="initial">
-        <source>Fleche F2 :</source>
-        <target>Fleche F2 :</target>
-      </segment>
-    </unit>
-    <unit id="3473770442486249156">
-      <segment state="initial">
-        <source>Dist. horizontal acc. :</source>
-        <target>Dist. horizontal acc. :</target>
-      </segment>
-    </unit>
-    <unit id="5948960769057855607">
-      <segment state="initial">
-        <source>Longueur d&apos;arc LA :</source>
-        <target>Longueur d&apos;arc LA :</target>
-      </segment>
-    </unit>
     <unit id="2469542949998183645">
       <segment state="initial">
         <source>Th - T0 :</source>
         <target>Th - T0 :</target>
-      </segment>
-    </unit>
-    <unit id="1839850085225752166">
-      <segment state="initial">
-        <source>Tension inf acc. :</source>
-        <target>Tension inf acc. :</target>
       </segment>
     </unit>
     <unit id="8217377030077972135">
@@ -2405,6 +2333,12 @@
         <target> Réinitialiser l&apos;application sans réinitialiser la base de données </target>
       </segment>
     </unit>
+    <unit id="8837923071812939954">
+      <segment state="initial">
+        <source>Are you sure you want to delete this study?</source>
+        <target>Êtes-vous sûr de vouloir supprimer cette étude ?</target>
+      </segment>
+    </unit>
     <unit id="7003790776240394114">
       <segment state="initial">
         <source>Filename</source>
@@ -2447,6 +2381,96 @@
         <target>LIT - ADR</target>
       </segment>
     </unit>
+    <unit id="8556557769909937132">
+      <segment state="initial">
+        <source>VHL (under chain)</source>
+        <target>VHL (sous chaîne)</target>
+      </segment>
+    </unit>
+    <unit id="1455021675803464772">
+      <segment state="initial">
+        <source>Line angle :</source>
+        <target>Angle en ligne :</target>
+      </segment>
+    </unit>
+    <unit id="146808728587794667">
+      <segment state="initial">
+        <source>VHL (under console)</source>
+        <target>VHL (sous console)</target>
+      </segment>
+    </unit>
+    <unit id="758471193876128020">
+      <segment state="initial">
+        <source>Alt. supp foot :</source>
+        <target>Alt. pied support :</target>
+      </segment>
+    </unit>
+    <unit id="7621171811584493753">
+      <segment state="initial">
+        <source>Chain displacement acc.</source>
+        <target>Déplacement chaîne acc.</target>
+      </segment>
+    </unit>
+    <unit id="7034395083246764527">
+      <segment state="initial">
+        <source>Cable slope acc. :</source>
+        <target>Pente du câble acc. :</target>
+      </segment>
+    </unit>
+    <unit id="3228204757532465885">
+      <segment state="initial">
+        <source>Span length :</source>
+        <target>Longueur portée :</target>
+      </segment>
+    </unit>
+    <unit id="5015532824363367508">
+      <segment state="initial">
+        <source>Elevation (m) :</source>
+        <target>Dénivelé (m) :</target>
+      </segment>
+    </unit>
+    <unit id="5045082531574334615">
+      <segment state="initial">
+        <source>Supp tension (Max) :</source>
+        <target>Tension supp (Max) :</target>
+      </segment>
+    </unit>
+    <unit id="2637772256766666872">
+      <segment state="initial">
+        <source>Natural length LO :</source>
+        <target>Longueur naturelle LO :</target>
+      </segment>
+    </unit>
+    <unit id="839778022983023928">
+      <segment state="initial">
+        <source>Arrow F1 :</source>
+        <target>Flèche F1 :</target>
+      </segment>
+    </unit>
+    <unit id="8940150942032374654">
+      <segment state="initial">
+        <source>Arrow F2 :</source>
+        <target>Flèche F2 :</target>
+      </segment>
+    </unit>
+    <unit id="20555684131803245">
+      <segment state="initial">
+        <source>Horizontal dist. acc. :</source>
+        <target>Dist. horizontale acc. :</target>
+      </segment>
+    </unit>
+    <unit id="1146602380315581259">
+      <segment state="initial">
+        <source>Arc length LA :</source>
+        <target>Longueur d&apos;arc LA :</target>
+      </segment>
+    </unit>
+    <unit id="1754428445982279363">
+      <segment state="initial">
+        <source>Inf tension acc. :</source>
+        <target>Tension inf acc. :</target>
+      </segment>
+    </unit>
     <unit id="1630268381780426388">
       <segment state="initial">
         <source>Calculation error: &apos;Solver did not converge&apos;</source>
@@ -2475,6 +2499,24 @@
       <segment state="initial">
         <source>All</source>
         <target>Tous</target>
+      </segment>
+    </unit>
+    <unit id="1995462320428563005">
+      <segment state="initial">
+        <source>Charges</source>
+        <target>Charges</target>
+      </segment>
+    </unit>
+    <unit id="27019801939265889">
+      <segment state="initial">
+        <source>Select charges</source>
+        <target>Sélectionner</target>
+      </segment>
+    </unit>
+    <unit id="9161302603054307750">
+      <segment state="initial">
+        <source>View charges</source>
+        <target>Voir</target>
       </segment>
     </unit>
   </file>
