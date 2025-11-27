@@ -57,7 +57,7 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 export class StudioPageComponent implements OnInit, OnDestroy {
   sidebarWidth = signal(300);
   sidebarOpen = signal(false);
-  supports = signal<string>('single');
+  supports = signal<string>('all');
   supportsOptions = signal<
     {
       label: string;

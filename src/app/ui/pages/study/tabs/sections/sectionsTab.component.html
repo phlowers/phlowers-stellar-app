@@ -97,6 +97,7 @@
           ) {
             <button
               (click)="
+                $event.stopPropagation();
                 openInitialConditionModal(
                   section,
                   createInitialCondition(section),
@@ -168,6 +169,8 @@
               <p-select
                 [options]="section.charges"
                 [ngModel]="section.selected_charge_uuid"
+                (keydown)="$event.stopPropagation()"
+                (click)="$event.stopPropagation()"
                 ariaLabel="Select charges"
                 [fluid]="true"
                 optionLabel="name"
