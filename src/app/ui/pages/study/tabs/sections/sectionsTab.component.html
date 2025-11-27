@@ -74,7 +74,13 @@
 
           <dl>
             <dt i18n class="section__title-type">Section type</dt>
-            <dd class="section__text-type">{{ section.type }}</dd>
+            <dd class="section__text-type">
+              @if (section.type === 'phase') {
+                <ng-container i18n>Phase</ng-container>
+              } @else if (section.type === 'guard') {
+                <ng-container i18n>Guard</ng-container>
+              }
+            </dd>
           </dl>
 
           <dl>
