@@ -1,1 +1,192 @@
-<p>papoto works!</p>
+<p id="mandatory-papoto" class="papoto__mandatory-msg">
+  <app-icon icon="info" />
+  <span i18n>All fields are mandatory for calculus setting</span>
+</p>
+
+<div class="papoto__form">
+  <div class="leftSupport">
+    <label for="leftSupport" i18n>Left support</label>
+    <p-select
+      inputId="leftSupport"
+      [options]="leftSupportOption()"
+      [(ngModel)]="leftSupport"
+      optionLabel="label"
+      optionValue="value"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      [required]="true"
+    />
+  </div>
+
+  <div class="spanLength">
+    <label for="spanLength" i18n>Measured span length</label>
+    <p-inputgroup>
+      <input
+        id="spanLength"
+        type="number"
+        pInputText
+        [(ngModel)]="spanLength"
+        [min]="0"
+        aria-describedby="mandatory-papoto"
+        required
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="measuredElevationDifference">
+    <label for="measuredElevationDifference" i18n>
+      Elevation diff. of measured attach.
+    </label>
+    <p-inputgroup>
+      <input
+        id="measuredElevationDifference"
+        type="number"
+        pInputText
+        [(ngModel)]="measuredElevationDifference"
+        aria-describedby="mandatory-papoto"
+        required
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="HG">
+    <label for="HG" i18n>HG</label>
+    <input
+      id="HG"
+      type="number"
+      pInputText
+      [(ngModel)]="HG"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="H1">
+    <label for="H1" i18n>H1</label>
+    <input
+      id="H1"
+      type="number"
+      pInputText
+      [(ngModel)]="H1"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="H2">
+    <label for="H2" i18n>H2</label>
+    <input
+      id="H2"
+      type="number"
+      pInputText
+      [(ngModel)]="H2"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="H3">
+    <label for="H3" i18n>H3</label>
+    <input
+      id="H3"
+      type="number"
+      pInputText
+      [(ngModel)]="H3"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="HD">
+    <label for="HD" i18n>HD</label>
+    <input
+      id="HD"
+      type="number"
+      pInputText
+      [(ngModel)]="HD"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="VG">
+    <label for="VG" i18n>VG</label>
+    <input
+      id="VG"
+      type="number"
+      pInputText
+      [(ngModel)]="VG"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="V1">
+    <label for="V1" i18n>V1</label>
+    <input
+      id="V1"
+      type="number"
+      pInputText
+      [(ngModel)]="V1"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="V2">
+    <label for="V2" i18n>V2</label>
+    <input
+      id="V2"
+      type="number"
+      pInputText
+      [(ngModel)]="V2"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="V3">
+    <label for="V3" i18n>V3</label>
+    <input
+      id="V3"
+      type="number"
+      pInputText
+      [(ngModel)]="V3"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="VD">
+    <label for="VD" i18n>VD</label>
+    <input
+      id="VD"
+      type="number"
+      pInputText
+      [(ngModel)]="VD"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+</div>
+
+<div class="text-right">
+  <button app-btn>
+    <app-icon icon="rocket_launch" />
+    <ng-container i18n>Calculate</ng-container>
+  </button>
+</div>
+
+<div class="papoto__results"></div>

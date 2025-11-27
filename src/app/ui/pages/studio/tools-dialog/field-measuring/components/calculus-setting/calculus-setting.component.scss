@@ -1,0 +1,9 @@
+@use 'abstract.extracts' as app;
+
+.cac-set-select {
+  @extend %tools-grid-layout;
+
+  &__item {
+    @apply flex items-center;
+  }
+}

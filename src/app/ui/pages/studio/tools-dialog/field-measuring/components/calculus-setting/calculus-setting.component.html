@@ -1,1 +1,43 @@
-<app-papoto />
+<div class="cac-set-select">
+  <div class="cac-set-select__item">
+    <p-radiobutton
+      name="calculusType"
+      value="PAPOTO"
+      [(ngModel)]="selectedCalculusType"
+      inputId="papoto"
+    />
+    <label for="papoto" i18n>PAPOTO</label>
+  </div>
+
+  <div class="cac-set-select__item">
+    <p-radiobutton
+      name="calculusType"
+      value="TANGENT_BEARINGS"
+      [(ngModel)]="selectedCalculusType"
+      inputId="tangentBearings"
+      [disabled]="true"
+    />
+    <label for="tangentBearings" i18n>Tangent bearings</label>
+  </div>
+
+  <div class="cac-set-select__item">
+    <p-radiobutton
+      name="calculusType"
+      value="PEP"
+      [(ngModel)]="selectedCalculusType"
+      inputId="pep"
+      [disabled]="true"
+    />
+    <label for="pep" i18n>PEP</label>
+  </div>
+</div>
+
+@if (selectedCalculusType === 'PAPOTO') {
+  <app-papoto [leftSupportOption]="leftSupportOption" />
+}
+@if (selectedCalculusType === 'TANGENT_BEARINGS') {
+  <app-tangent-bearings />
+}
+@if (selectedCalculusType === 'PEP') {
+  <app-pep />
+}

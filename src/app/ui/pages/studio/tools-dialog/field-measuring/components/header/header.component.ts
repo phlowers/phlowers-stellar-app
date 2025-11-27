@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
-import { FormsModule } from '@angular/forms';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -11,9 +11,9 @@ import { SelectOption } from '../../constants';
 @Component({
   selector: 'app-header',
   imports: [
+    FormsModule,
     SelectModule,
     InputTextModule,
-    FormsModule,
     InputGroupModule,
     InputGroupAddonModule,
     IconComponent

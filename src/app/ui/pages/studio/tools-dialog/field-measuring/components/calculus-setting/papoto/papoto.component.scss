@@ -1,0 +1,57 @@
+@use 'abstract.extracts' as app;
+
+.papoto {
+  &__mandatory-msg {
+    @apply flex items-center gap-1 my-4;
+    @extend %text-s-600;
+    color: var(--star-dust-950);
+  }
+
+  &__form {
+    @extend %tools-grid-layout;
+    grid-template-areas:
+      'support length elevation . .'
+      'HG H1 H2 H3 HD'
+      'VG V1 V2 V3 VD';
+
+    .leftSupport {
+      grid-area: support;
+    }
+    .spanLength {
+      grid-area: length;
+    }
+    .measuredElevationDifference {
+      grid-area: elevation;
+    }
+    .HG {
+      grid-area: HG;
+    }
+    .H1 {
+      grid-area: H1;
+    }
+    .H2 {
+      grid-area: H2;
+    }
+    .H3 {
+      grid-area: H3;
+    }
+    .HD {
+      grid-area: HD;
+    }
+    .VG {
+      grid-area: VG;
+    }
+    .V1 {
+      grid-area: V1;
+    }
+    .V2 {
+      grid-area: V2;
+    }
+    .V3 {
+      grid-area: V3;
+    }
+    .VD {
+      grid-area: VD;
+    }
+  }
+}
