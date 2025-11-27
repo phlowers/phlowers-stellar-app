@@ -1,0 +1,33 @@
+@use 'abstract.extracts' as app;
+
+.btn-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.info-cards {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr;
+  align-items: stretch;
+  grid-gap: 1rem;
+  min-height: 9rem;
+  margin: 1.5rem 0;
+}
+
+.study-cards:has(article) {
+  display: grid;
+  grid-template-columns:
+    calc(25% - 0.75rem)
+    calc(25% - 0.75rem)
+    calc(25% - 0.75rem)
+    calc(25% - 0.75rem);
+  grid-gap: 1rem;
+  margin: 1rem 0;
+}
+
+.study-empty {
+  @extend %text-l-400;
+  text-align: center;
+  margin: 1rem 0 2rem;
+  color: var(--grey-600);
+}

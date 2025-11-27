@@ -9,11 +9,13 @@
 # Node
 /node_modules
 npm-debug.log
+yarn-error.log
 
 # IDEs and editors
 .idea/
 .project
 .classpath
+.cursor/
 .c9/
 *.launch
 .settings/
@@ -41,7 +43,15 @@ testem.log
 Thumbs.db
 
 public/pyodide/*
+public/service-worker.js
 
 .vscode/settings.json
-certificates
-# src/python-packages.json
+
+*.ipynb
+
+public/data/chains.csv
+public/data/cables.csv
+public/data/maintenance-teams.csv
+public/data/lines.csv
+public/data/attachments.csv
+report-task.txt

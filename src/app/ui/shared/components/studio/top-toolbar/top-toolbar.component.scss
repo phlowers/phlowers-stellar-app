@@ -1,0 +1,109 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.toolbar {
+  @apply flex gap-4 items-center border-b px-6 py-1 h-14 max-h-14;
+  border-color: var(--primary-200);
+  background-color: var(--primary-50);
+  color: var(--star-dust-950);
+
+  &__separator {
+    @extend %vertical-separator;
+  }
+
+  &__shortcuts {
+    @apply flex items-center gap-2 flex-grow overflow-x-auto py-1 -my-1 self-stretch;
+
+    @supports not selector(::-webkit-scrollbar) {
+      scrollbar-width: thin;
+    }
+
+    @supports selector(::-webkit-scrollbar) {
+      &::-webkit-scrollbar {
+        @apply h-1 w-full;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        @apply rounded;
+        background-color: var(--star-dust-400);
+      }
+    }
+  }
+
+  &__specifbtn {
+    @apply rounded-sm border whitespace-nowrap;
+    padding: 0.3125rem 0.375rem 0.1875rem;
+    font-size: 0.875rem;
+    line-height: 1;
+    border-color: var(--star-dust-300);
+    color: var(--star-dust-950);
+    background-color: var(--star-dust-0);
+    box-shadow: map.get(app.$elevation, neutral-2);
+    transition: background-color 0.2s ease-in-out;
+
+    .app-icon {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      background-color: var(--primary-50);
+    }
+
+    &:focus-visible {
+      @extend %focus-state;
+    }
+
+    &--icon {
+      padding: 0.1875rem 0.375rem 0rem;
+    }
+  }
+}
+
+.toolbar-multiselect {
+  &#{&} {
+    &--active {
+      --p-multiselect-border-color: var(--primary-900);
+      --p-multiselect-background: var(--primary-800);
+      --p-multiselect-color: var(--grey-white);
+      --p-multiselect-placeholder-color: var(--p-multiselect-color);
+      --p-multiselect-dropdown-color: var(--p-multiselect-color);
+
+      &:hover {
+        background-color: var(--primary-700);
+      }
+    }
+  }
+
+  &__dropdown {
+    &__header {
+      @apply flex items-center gap-2 border-b mb-2 max-w-52;
+      padding: 0.375rem 0.625rem 0.625rem;
+      border-color: var(--star-dust-300);
+    }
+  }
+}
+
+.modal {
+  &__header {
+    @apply flex items-center gap-2 mb-0;
+    @extend %heading-s;
+  }
+
+  &__content {
+    @extend %text-m-400;
+    background-color: var(--star-dust-50);
+    color: var(--star-dust-950);
+    margin: -1rem -1rem -1.625rem;
+    padding: 1rem;
+  }
+
+  &__checkboxs {
+    @apply flex items-center border-b gap-4 py-2 px-3;
+    border-color: var(--star-dust-300);
+
+    label {
+      margin: 0.125rem 0rem 0.0625rem;
+      color: var(--star-dust-950);
+    }
+  }
+}

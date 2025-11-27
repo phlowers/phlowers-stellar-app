@@ -1,0 +1,47 @@
+@use 'abstract.extracts' as app;
+
+:root {
+  @each $key, $value in app.$primary {
+    --primary-#{$key}: #{$value};
+  }
+  --main-primary: #{app.$main-primary};
+
+  @each $key, $value in app.$secondary {
+    --secondary-#{$key}: #{$value};
+  }
+  --main-secondary: #{app.$main-secondary};
+
+  @each $key, $value in app.$tertiary {
+    --tertiary-#{$key}: #{$value};
+  }
+  --main-tertiary: #{app.$main-tertiary};
+
+  @each $key, $value in app.$rte-blue {
+    --rte-#{$key}: #{$value};
+  }
+  --main-rte: #{app.$main-rte-blue};
+
+  @each $key, $value in app.$grey {
+    --grey-#{$key}: #{$value};
+  }
+  --main-grey: #{app.$main-grey};
+
+  @each $key, $value in app.$star-dust {
+    --star-dust-#{$key}: #{$value};
+  }
+
+  @each $key, $value in app.$success {
+    --success-#{$key}: #{$value};
+  }
+  --main-success: #{app.$main-success};
+
+  @each $key, $value in app.$warning {
+    --warning-#{$key}: #{$value};
+  }
+  --main-warning: #{app.$main-warning};
+
+  @each $key, $value in app.$error {
+    --error-#{$key}: #{$value};
+  }
+  --main-error: #{app.$main-error};
+}

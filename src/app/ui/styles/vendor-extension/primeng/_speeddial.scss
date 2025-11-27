@@ -1,0 +1,81 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+// Specif for studio toolbar speed dial
+.toolbar-speed-dial {
+  .p-speeddial.p-speeddial {
+    @apply relative;
+
+    &.p-speeddial-open {
+      > button {
+        background-color: var(--primary-800);
+        border-color: var(--primary-900);
+        color: var(--grey-white);
+
+        &:hover {
+          background-color: var(--primary-700);
+        }
+      }
+
+      .p-speeddial-list {
+        @apply border;
+        background-color: var(--star-dust-50);
+        box-shadow: map.get(app.$elevation, neutral-5);
+        border-color: var(--star-dust-300);
+      }
+    }
+
+    > button {
+      @apply flex items-center gap-1 border rounded-sm;
+      padding: 0.125rem 0.5rem 0rem 0.25rem;
+      color: var(--primary-700);
+      border-color: var(--primary-700);
+      background-color: var(--grey-white);
+      font-size: 0.875rem;
+      line-height: 1;
+      transition:
+        border-color 0.2s ease-in-out,
+        color 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+
+      .app-icon {
+        @apply relative;
+        bottom: 0.0625rem;
+        font-size: 1.25rem;
+      }
+
+      &:hover {
+        background-color: var(--primary-50);
+        border-color: var(--primary-900);
+      }
+
+      &:focus-visible {
+        @extend %focus-state;
+      }
+    }
+
+    .p-speeddial-list {
+      @apply block absolute py-1 rounded;
+      left: 0;
+      top: 2rem; // 24px + 8px in REM
+      width: 13.125rem;
+      padding-right: 0.125rem;
+      padding-left: 0.125rem;
+
+      button {
+        @apply w-full text-left;
+        @extend %text-m-400;
+        padding: 0.625rem 0.5rem;
+        color: var(--star-dust-950);
+
+        &:hover {
+          background-color: var(--primary-50);
+        }
+
+        &:focus-visible {
+          @extend %focus-state;
+        }
+      }
+    }
+  }
+}

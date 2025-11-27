@@ -1,0 +1,2523 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
+  <file id="ngi18n" original="ng.template">
+    <unit id="4768749765465246664">
+      <segment>
+        <source>Email</source>
+        <target>Email</target>
+      </segment>
+    </unit>
+    <unit id="7884682505577720946">
+      <segment>
+        <source>Current version</source>
+        <target>Version actuelle</target>
+      </segment>
+    </unit>
+    <unit id="1354376805041038577">
+      <segment>
+        <source>Latest version</source>
+        <target>Version la plus récente</target>
+      </segment>
+    </unit>
+    <unit id="7971756555133484892">
+      <segment>
+        <source>Build Hash</source>
+        <target>Hash du build</target>
+      </segment>
+    </unit>
+    <unit id="2891008338883840095">
+      <segment>
+        <source>Build datetime</source>
+        <target>Date et heure du build</target>
+      </segment>
+    </unit>
+    <unit id="3139759594550656304">
+      <segment>
+        <source> Update to latest version </source>
+        <target> Mettre à jour vers la version la plus récente </target>
+      </segment>
+    </unit>
+    <unit id="7658402240953727096">
+      <segment>
+        <source>Name:</source>
+        <target>Nom:</target>
+      </segment>
+    </unit>
+    <unit id="6919207328705792165">
+      <segment>
+        <source>Section CUR:</source>
+        <target>Canton CUR:</target>
+      </segment>
+    </unit>
+    <unit id="1843028621431865126">
+      <segment>
+        <source>Section Short name:</source>
+        <target>Nom court:</target>
+      </segment>
+    </unit>
+    <unit id="5502261281300289989">
+      <segment>
+        <source>Section name:</source>
+        <target>Nom du canton:</target>
+      </segment>
+    </unit>
+    <unit id="2681129456719834482">
+      <segment>
+        <source>Cable short name:</source>
+        <target>Nom court du câble:</target>
+      </segment>
+    </unit>
+    <unit id="6115903835147878111">
+      <segment>
+        <source>Cable name:</source>
+        <target>Nom du câble:</target>
+      </segment>
+    </unit>
+    <unit id="7052646852891832055">
+      <segment>
+        <source>Section type:</source>
+        <target>Type de canton:</target>
+      </segment>
+    </unit>
+    <unit id="3136844473693708275">
+      <segment>
+        <source>Link name:</source>
+        <target>Nom de la liaison:</target>
+      </segment>
+    </unit>
+    <unit id="3738692095093251722">
+      <segment>
+        <source>Branch name:</source>
+        <target>Nom de la branche:</target>
+      </segment>
+    </unit>
+    <unit id="1533968084549174775">
+      <segment>
+        <source>Transit link name:</source>
+        <target>Nom de la LIT:</target>
+      </segment>
+    </unit>
+    <unit id="6238568029904268206">
+      <segment>
+        <source>Voltage name:</source>
+        <target>Nom de la tension:</target>
+      </segment>
+    </unit>
+    <unit id="7716208024960184784">
+      <segment>
+        <source>UUID</source>
+        <target>UUID</target>
+      </segment>
+    </unit>
+    <unit id="5701618810648052610">
+      <segment>
+        <source>Title</source>
+        <target>Titre</target>
+      </segment>
+    </unit>
+    <unit id="1733264802646111587">
+      <segment>
+        <source>Author email</source>
+        <target>Email de l&apos;auteur</target>
+      </segment>
+    </unit>
+    <unit id="1520049505561836231">
+      <segment>
+        <source>Created at</source>
+        <target>Créé le</target>
+      </segment>
+    </unit>
+    <unit id="7447022493696033106">
+      <segment>
+        <source>Updated at</source>
+        <target>Mis à jour le</target>
+      </segment>
+    </unit>
+    <unit id="2159130950882492111">
+      <segment>
+        <source>Cancel</source>
+        <target>Annuler</target>
+      </segment>
+    </unit>
+    <unit id="1071721880474488785">
+      <segment>
+        <source>Import</source>
+        <target>Importer</target>
+      </segment>
+    </unit>
+    <unit id="2471229163174544608">
+      <segment>
+        <source>Sections</source>
+        <target>Cantons</target>
+      </segment>
+    </unit>
+    <unit id="4580988005648117665">
+      <segment>
+        <source>Search</source>
+        <target>Rechercher</target>
+      </segment>
+    </unit>
+    <unit id="4902817035128594900">
+      <segment>
+        <source>Description</source>
+        <target>Description</target>
+      </segment>
+    </unit>
+    <unit id="305142716106924307">
+      <segment state="initial">
+        <source>Author:</source>
+        <target>Auteur</target>
+      </segment>
+    </unit>
+    <unit id="8846437459005249553">
+      <segment>
+        <source>Studies</source>
+        <target>Études</target>
+      </segment>
+    </unit>
+    <unit id="5041354590769758251">
+      <segment state="initial">
+        <source>Admin</source>
+        <target>Admin</target>
+      </segment>
+    </unit>
+    <unit id="7022070615528435141">
+      <segment state="initial">
+        <source>Delete</source>
+        <target>Supprimer</target>
+      </segment>
+    </unit>
+    <unit id="6621329748219109148">
+      <segment state="initial">
+        <source>Duplicate</source>
+        <target>Dupliquer</target>
+      </segment>
+    </unit>
+    <unit id="7585826646011739428">
+      <segment state="initial">
+        <source>Edit</source>
+        <target>Modifier</target>
+      </segment>
+    </unit>
+    <unit id="3768927257183755959">
+      <segment state="initial">
+        <source>Save</source>
+        <target>Enregistrer</target>
+      </segment>
+    </unit>
+    <unit id="3521084103654700903">
+      <segment state="initial">
+        <source>Successful</source>
+        <target>Succès</target>
+      </segment>
+    </unit>
+    <unit id="3317759112793075512">
+      <segment state="initial">
+        <source>Studies deleted</source>
+        <target>Études supprimées</target>
+      </segment>
+    </unit>
+    <unit id="6536020395223120161">
+      <segment state="initial">
+        <source> Error </source>
+        <target> Erreur </target>
+      </segment>
+    </unit>
+    <unit id="6202213245388240559">
+      <segment state="initial">
+        <source>Study updated</source>
+        <target>Étude mise à jour!</target>
+      </segment>
+    </unit>
+    <unit id="8337097439903063887">
+      <segment state="initial">
+        <source>Study created</source>
+        <target>Étude créée</target>
+      </segment>
+    </unit>
+    <unit id="3676810969871565173">
+      <segment state="initial">
+        <source>App version</source>
+        <target>Version de l&apos;application</target>
+      </segment>
+    </unit>
+    <unit id="8835813397293521026">
+      <segment state="initial">
+        <source>Reset fields</source>
+        <target>Réinitialiser les champs</target>
+      </segment>
+    </unit>
+    <unit id="8892964333730306563">
+      <segment state="initial">
+        <source>Plotly</source>
+        <target>Plotly</target>
+      </segment>
+    </unit>
+    <unit id="3407827478067561796">
+      <segment state="initial">
+        <source>Change line height</source>
+        <target>Modifier la hauteur de la ligne</target>
+      </segment>
+    </unit>
+    <unit id="2821179408673282599">
+      <segment state="initial">
+        <source>Home</source>
+        <target>Accueil</target>
+      </segment>
+    </unit>
+    <unit id="2250155903065806087">
+      <segment state="initial">
+        <source>Study</source>
+        <target>Étude</target>
+      </segment>
+    </unit>
+    <unit id="841934696444961534">
+      <segment state="initial">
+        <source>News</source>
+        <target>Actualités</target>
+      </segment>
+    </unit>
+    <unit id="2275328567992347600">
+      <segment state="initial">
+        <source>Page not found</source>
+        <target>Page non trouvée</target>
+      </segment>
+    </unit>
+    <unit id="7601213978629574297">
+      <segment state="initial">
+        <source> Go to home page </source>
+        <target> Aller à la page d&apos;accueil </target>
+      </segment>
+    </unit>
+    <unit id="6713690242020777174">
+      <segment state="initial">
+        <source>Build version</source>
+        <target>Version du build</target>
+      </segment>
+    </unit>
+    <unit id="2547571169649786686">
+      <segment state="initial">
+        <source>Danger zone</source>
+        <target>Zone Danger</target>
+      </segment>
+    </unit>
+    <unit id="1267728769006543252">
+      <segment state="initial">
+        <source> Delete all studies </source>
+        <target> Supprimer toutes les études </target>
+      </segment>
+    </unit>
+    <unit id="2398619245085086844">
+      <segment state="initial">
+        <source> Reset database </source>
+        <target> Réinitialiser la base de données </target>
+      </segment>
+    </unit>
+    <unit id="4238708305594970843">
+      <segment state="initial">
+        <source>Update successful</source>
+        <target>Mise à jour réussie</target>
+      </segment>
+    </unit>
+    <unit id="8439372668099146162">
+      <segment state="initial">
+        <source>The application has been updated to the latest version</source>
+        <target>L&apos;application a été mise à jour vers la dernière version</target>
+      </segment>
+    </unit>
+    <unit id="797001286432919577">
+      <segment state="initial">
+        <source>Are you sure you want to delete all studies?</source>
+        <target>Êtes-vous sûr de vouloir supprimer toutes les études?</target>
+      </segment>
+    </unit>
+    <unit id="7628479102589681060">
+      <segment state="initial">
+        <source>All studies have been deleted</source>
+        <target>Toutes les études ont été supprimées</target>
+      </segment>
+    </unit>
+    <unit id="5255221529688423139">
+      <segment state="initial">
+        <source>Are you sure you want to reset the database?</source>
+        <target>Êtes-vous sûr de vouloir réinitialiser la base de données?</target>
+      </segment>
+    </unit>
+    <unit id="367434070679684080">
+      <segment state="initial">
+        <source>Database reset</source>
+        <target>Réinitialisation de la base de données</target>
+      </segment>
+    </unit>
+    <unit id="2426063357414126636">
+      <segment state="initial">
+        <source>The database has been reset</source>
+        <target>La base de données a été réinitialisée</target>
+      </segment>
+    </unit>
+    <unit id="5281579610433386344">
+      <segment state="initial">
+        <source>Are you sure you want to reset the app?</source>
+        <target>Êtes-vous sûr de vouloir réinitialiser l&apos;application?</target>
+      </segment>
+    </unit>
+    <unit id="4125361306674691550">
+      <segment state="initial">
+        <source>App reset</source>
+        <target>Réinitialisation de l&apos;application</target>
+      </segment>
+    </unit>
+    <unit id="5994109586105591631">
+      <segment state="initial">
+        <source>The app has been reset</source>
+        <target>L&apos;application a été réinitialisée</target>
+      </segment>
+    </unit>
+    <unit id="8283592065951885988">
+      <segment state="initial">
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a new study </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Créer une nouvelle étude </target>
+      </segment>
+    </unit>
+    <unit id="983324339375029355">
+      <segment state="initial">
+        <source>My last studies</source>
+        <target>Mes dernières études</target>
+      </segment>
+    </unit>
+    <unit id="5455631818675024639">
+      <segment state="initial">
+        <source>No recent studies</source>
+        <target>Aucune étude récente</target>
+      </segment>
+    </unit>
+    <unit id="6016428309492185040">
+      <segment state="initial">
+        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></source>
+        <target> Aller à mes études <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="2640561782983672481">
+      <segment state="initial">
+        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!</source>
+        <target>Bienvenue sur Celeste! Nous sommes ravis de vous présenter cette nouvelle application. Veuillez nous contacter pour partager vos idées et vos retours pour nous aider à améliorer cette application!</target>
+      </segment>
+    </unit>
+    <unit id="1444333919089743258">
+      <segment state="initial">
+        <source>View all news</source>
+        <target>Voir toutes les actualités</target>
+      </segment>
+    </unit>
+    <unit id="4667659558738672926">
+      <segment state="initial">
+        <source>Changelogs</source>
+        <target>Journal des modifications</target>
+      </segment>
+    </unit>
+    <unit id="3878398159737749263">
+      <segment state="initial">
+        <source>View latest updates.</source>
+        <target>Voir les dernières mises à jour.</target>
+      </segment>
+    </unit>
+    <unit id="819996403327805209">
+      <segment state="initial">
+        <source>Learn more</source>
+        <target>En savoir plus</target>
+      </segment>
+    </unit>
+    <unit id="2668751339669907539">
+      <segment state="initial">
+        <source>Learn more about latest updates</source>
+        <target>En savoir plus sur les dernières mises à jour</target>
+      </segment>
+    </unit>
+    <unit id="8436059801222132475">
+      <segment state="initial">
+        <source>Server state</source>
+        <target>État du serveur</target>
+      </segment>
+    </unit>
+    <unit id="5799777256002258190">
+      <segment state="initial">
+        <source>Trying to reach the servers!</source>
+        <target>Tentative de connexion au serveur!</target>
+      </segment>
+    </unit>
+    <unit id="509090351011426949">
+      <segment state="initial">
+        <source>Update available</source>
+        <target>Mise à jour disponible</target>
+      </segment>
+    </unit>
+    <unit id="2269840927612671406">
+      <segment state="initial">
+        <source>A new application update is available!</source>
+        <target>Une nouvelle mise à jour de l&apos;application est disponible!</target>
+      </segment>
+    </unit>
+    <unit id="5078151248323604568">
+      <segment state="initial">
+        <source>Cannot reach data. Please check your internet connectivity.</source>
+        <target>Impossible de récupérer les données. Veuillez vérifier votre connexion internet.</target>
+      </segment>
+    </unit>
+    <unit id="3510960524643312912">
+      <segment state="initial">
+        <source>Trying to reach the servers.</source>
+        <target>Tentative de connexion au serveur.</target>
+      </segment>
+    </unit>
+    <unit id="5955728908893282532">
+      <segment state="initial">
+        <source>An error occured while trying to reach servers.</source>
+        <target>Une erreur est survenue lors de la tentative de connexion au serveur.</target>
+      </segment>
+    </unit>
+    <unit id="3159332545494825825">
+      <segment state="initial">
+        <source>Server connexion success!</source>
+        <target>Connexion au serveur réussie!</target>
+      </segment>
+    </unit>
+    <unit id="5231861831935768001">
+      <segment state="initial">
+        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom de l&apos;étude <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="5712660129975085658">
+      <segment state="initial">
+        <source> Give a name to your study </source>
+        <target> Donnez un nom à votre étude </target>
+      </segment>
+    </unit>
+    <unit id="6057281094654962766">
+      <segment state="initial">
+        <source>Validate</source>
+        <target>Valider</target>
+      </segment>
+    </unit>
+    <unit id="5519001504653726625">
+      <segment state="initial">
+        <source>Study created successfully</source>
+        <target>Étude créée avec succès</target>
+      </segment>
+    </unit>
+    <unit id="1653305415865364716">
+      <segment state="initial">
+        <source>Study updated successfully</source>
+        <target>Étude mise à jour avec succès</target>
+      </segment>
+    </unit>
+    <unit id="1386766078260547788">
+      <segment state="initial">
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Tire <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="7282804341793038828">
+      <segment state="initial">
+        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Auteur <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="6045024918689189924">
+      <segment state="initial">
+        <source> Creation date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Date de création <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="5375905790663497716">
+      <segment state="initial">
+        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Date de modification <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="4665164818576576044">
+      <segment state="initial">
+        <source> LIT code <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> code LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="2463238050344760316">
+      <segment state="initial">
+        <source> Shared <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Partagée <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="3799093232488965923">
+      <segment state="initial">
+        <source> Open </source>
+        <target> Ouvrir </target>
+      </segment>
+    </unit>
+    <unit id="8109561878775602635">
+      <segment state="initial">
+        <source>Create a new study</source>
+        <target>Créer une nouvelle étude</target>
+      </segment>
+    </unit>
+    <unit id="3922504333199040096">
+      <segment state="initial">
+        <source>Search a study</source>
+        <target>Rechercher une étude</target>
+      </segment>
+    </unit>
+    <unit id="7128845509017303174">
+      <segment state="initial">
+        <source>Import a study</source>
+        <target>Importer une étude</target>
+      </segment>
+    </unit>
+    <unit id="5361585538695040272">
+      <segment state="initial">
+        <source>Measurements</source>
+        <target>Mesures</target>
+      </segment>
+    </unit>
+    <unit id="3329351932948801616">
+      <segment state="initial">
+        <source>Ground &amp; obstacles</source>
+        <target>Sol &amp; Obstacles</target>
+      </segment>
+    </unit>
+    <unit id="3533138925800017240">
+      <segment state="initial">
+        <source>Study Duplicated</source>
+        <target>Étude dupliquée</target>
+      </segment>
+    </unit>
+    <unit id="6600961151364207736">
+      <segment state="initial">
+        <source>Section Updated</source>
+        <target>Canton mis à jour</target>
+      </segment>
+    </unit>
+    <unit id="4167548029405227892">
+      <segment state="initial">
+        <source>Section Created</source>
+        <target>Canton créé</target>
+      </segment>
+    </unit>
+    <unit id="128932358295516526">
+      <segment state="initial">
+        <source>Section Deleted</source>
+        <target>Canton supprimé</target>
+      </segment>
+    </unit>
+    <unit id="7697593277738514956">
+      <segment state="initial">
+        <source>Section Duplicated</source>
+        <target>Canton dupliqué</target>
+      </segment>
+    </unit>
+    <unit id="8157568719212294147">
+      <segment state="initial">
+        <source>Initial Condition Updated</source>
+        <target>Condition initiale mise à jour</target>
+      </segment>
+    </unit>
+    <unit id="3049551355280538164">
+      <segment state="initial">
+        <source>Initial Condition Added</source>
+        <target>Condition initiale ajoutée</target>
+      </segment>
+    </unit>
+    <unit id="5722345326918734257">
+      <segment state="initial">
+        <source>Initial Condition Deleted</source>
+        <target>Condition initiale supprimée</target>
+      </segment>
+    </unit>
+    <unit id="7937931707186931727">
+      <segment state="initial">
+        <source>Initial Condition Duplicated</source>
+        <target>Condition initiale dupliquée</target>
+      </segment>
+    </unit>
+    <unit id="6083227782927355534">
+      <segment state="initial">
+        <source>Create an initial condition</source>
+        <target>Créer une condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="5437172145642680301">
+      <segment state="initial">
+        <source>Section name</source>
+        <target>Nom du canton</target>
+      </segment>
+    </unit>
+    <unit id="4408679057911996366">
+      <segment state="initial">
+        <source>Cable name</source>
+        <target>Nom du câble</target>
+      </segment>
+    </unit>
+    <unit id="4052831009850155733">
+      <segment state="initial">
+        <source>Cables amount</source>
+        <target>Nombre de câbles</target>
+      </segment>
+    </unit>
+    <unit id="2638469548137871317">
+      <segment state="initial">
+        <source>Initial condition name</source>
+        <target>Nom de la condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="8155429097661917791">
+      <segment state="initial">
+        <source> Base parameter </source>
+        <target> Paramètre de base </target>
+      </segment>
+    </unit>
+    <unit id="836321179652220398">
+      <segment state="initial">
+        <source> General </source>
+        <target> Généralités </target>
+      </segment>
+    </unit>
+    <unit id="976888794834775617">
+      <segment state="initial">
+        <source> Graphical view </source>
+        <target> Vue graphique </target>
+      </segment>
+    </unit>
+    <unit id="2593007815199532062">
+      <segment state="initial">
+        <source>Section</source>
+        <target>Canton</target>
+      </segment>
+    </unit>
+    <unit id="3569799587833040802">
+      <segment state="initial">
+        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom du canton <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="6414866325880172359">
+      <segment state="initial">
+        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Type de canton <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="2715728438895385250">
+      <segment state="initial">
+        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nombre de câbles <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="928951684182090210">
+      <segment state="initial">
+        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom du câble <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+      </segment>
+    </unit>
+    <unit id="2981219928115418649">
+      <segment state="initial">
+        <source>Link</source>
+        <target>Liaison</target>
+      </segment>
+    </unit>
+    <unit id="5330590276782069905">
+      <segment state="initial">
+        <source>Electric tension level</source>
+        <target>Tension électrique</target>
+      </segment>
+    </unit>
+    <unit id="8569561572681353162">
+      <segment state="initial">
+        <source>LIT</source>
+        <target>LIT</target>
+      </segment>
+    </unit>
+    <unit id="5798603970967359521">
+      <segment state="initial">
+        <source>Supports amount</source>
+        <target>Nombre de supports</target>
+      </segment>
+    </unit>
+    <unit id="5027494160802883894">
+      <segment state="initial">
+        <source> Chain name </source>
+        <target> Nom chaîne </target>
+      </segment>
+    </unit>
+    <unit id="5758842248880389182">
+      <segment state="initial">
+        <source> Chain V </source>
+        <target> Chaîne V </target>
+      </segment>
+    </unit>
+    <unit id="3193976279273491157">
+      <segment state="initial">
+        <source>Actions</source>
+        <target>Actions</target>
+      </segment>
+    </unit>
+    <unit id="8609810939352282595">
+      <segment state="initial">
+        <source>Add support before</source>
+        <target>Ajouter un support avant</target>
+      </segment>
+    </unit>
+    <unit id="1599802675385906175">
+      <segment state="initial">
+        <source>Add support after</source>
+        <target>Ajouter un support après</target>
+      </segment>
+    </unit>
+    <unit id="7434521647283704814">
+      <segment state="initial">
+        <source>Delete support</source>
+        <target>Supprimer le support</target>
+      </segment>
+    </unit>
+    <unit id="1170667643695316061">
+      <segment state="initial">
+        <source>Create a study section</source>
+        <target>Créer un canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="2233560223291461480">
+      <segment state="initial">
+        <source>Manual</source>
+        <target>Manuellement</target>
+      </segment>
+    </unit>
+    <unit id="513031718637117901">
+      <segment state="initial">
+        <source>From distant referencial</source>
+        <target>À partir du référentiel distant</target>
+      </segment>
+    </unit>
+    <unit id="8833276229402617730">
+      <segment state="initial">
+        <source>No existing section</source>
+        <target>Aucun canton existant</target>
+      </segment>
+    </unit>
+    <unit id="1363022291205513969">
+      <segment state="initial">
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a section </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Créer un canton </target>
+      </segment>
+    </unit>
+    <unit id="1949800506879332767">
+      <segment state="initial">
+        <source>Section Name</source>
+        <target>Nom du canton</target>
+      </segment>
+    </unit>
+    <unit id="1289308098980826210">
+      <segment state="initial">
+        <source>Section type</source>
+        <target>Type de canton</target>
+      </segment>
+    </unit>
+    <unit id="2925129304308690882">
+      <segment state="initial">
+        <source>Last modified</source>
+        <target>Dernière modification</target>
+      </segment>
+    </unit>
+    <unit id="479690504462006012">
+      <segment state="initial">
+        <source>Initial condition</source>
+        <target>Condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="8214037487031019515">
+      <segment state="initial">
+        <source>Add initial condition</source>
+        <target>Ajouter une condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="2509141182388535183">
+      <segment state="initial">
+        <source>View</source>
+        <target>Consulter</target>
+      </segment>
+    </unit>
+    <unit id="6598075623864682368">
+      <segment state="initial">
+        <source>Add an initial condition</source>
+        <target>Ajouter une condition initiale</target>
+      </segment>
+    </unit>
+    <unit id="7372608945282781808">
+      <segment state="initial">
+        <source>Last changed:</source>
+        <target>Dernière modification:</target>
+      </segment>
+    </unit>
+    <unit id="1614612576043079687">
+      <segment state="initial">
+        <source>Shrink menu</source>
+        <target>Réduire le menu</target>
+      </segment>
+    </unit>
+    <unit id="2102825898069375693">
+      <segment state="initial">
+        <source>Menu</source>
+        <target>Menu</target>
+      </segment>
+    </unit>
+    <unit id="794617384648959179">
+      <segment state="initial">
+        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></source>
+        <target> Détails <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></target>
+      </segment>
+    </unit>
+    <unit id="3102779920122732727">
+      <segment state="initial">
+        <source> Loading </source>
+        <target> Chargement </target>
+      </segment>
+    </unit>
+    <unit id="7215759904460573154">
+      <segment state="initial">
+        <source> Ready </source>
+        <target> Prêt </target>
+      </segment>
+    </unit>
+    <unit id="5323835340256603340">
+      <segment state="initial">
+        <source>View initial conditions</source>
+        <target>Vue des conditions initiales</target>
+      </segment>
+    </unit>
+    <unit id="6558234134180056546">
+      <segment state="initial">
+        <source>Install successful</source>
+        <target>Installation réussie</target>
+      </segment>
+    </unit>
+    <unit id="7951447255685596650">
+      <segment state="initial">
+        <source>The application has been installed</source>
+        <target>L&apos;application a été installée</target>
+      </segment>
+    </unit>
+    <unit id="2336550011721758066">
+      <segment state="initial">
+        <source>Log in</source>
+        <target>Se connecter</target>
+      </segment>
+    </unit>
+    <unit id="5662040103831344720">
+      <segment state="initial">
+        <source> Check app version </source>
+        <target> Vérifier la version de l&apos;application </target>
+      </segment>
+    </unit>
+    <unit id="3249058349487812759">
+      <segment state="initial">
+        <source>Modify my study</source>
+        <target>Modifier mon étude</target>
+      </segment>
+    </unit>
+    <unit id="2143900724975264499">
+      <segment state="initial">
+        <source>View a study section</source>
+        <target>Voir un canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="5329466797434154908">
+      <segment state="initial">
+        <source>Modify a study section</source>
+        <target>Modifier un canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="3501835423208116051">
+      <segment state="initial">
+        <source>select this study&apos;s section</source>
+        <target>sélectionner ce canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="3411835502741534903">
+      <segment state="initial">
+        <source>loading</source>
+        <target>chargement</target>
+      </segment>
+    </unit>
+    <unit id="1724907302012419507">
+      <segment state="initial">
+        <source>There is no study description</source>
+        <target>Il n&apos;y a pas de description d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="927660422911816633">
+      <segment state="initial">
+        <source>Study name</source>
+        <target>Nom de l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="5551874320378862200">
+      <segment state="initial">
+        <source>Enter description</source>
+        <target>Entrer la description</target>
+      </segment>
+    </unit>
+    <unit id="3228248733549149448">
+      <segment state="initial">
+        <source>Base parameter</source>
+        <target>Paramètre de base</target>
+      </segment>
+    </unit>
+    <unit id="5280610039017327422">
+      <segment state="initial">
+        <source>Base temperature (°C)</source>
+        <target>Température de base (°C)</target>
+      </segment>
+    </unit>
+    <unit id="5532577047370657996">
+      <segment state="initial">
+        <source>Electric phase number</source>
+        <target>Numéro de phase électrique</target>
+      </segment>
+    </unit>
+    <unit id="6816078733546230354">
+      <segment state="initial">
+        <source>Cable amount</source>
+        <target>Nombre de câbles</target>
+      </segment>
+    </unit>
+    <unit id="2662644497259948010">
+      <segment state="initial">
+        <source>Comment</source>
+        <target>Commentaire</target>
+      </segment>
+    </unit>
+    <unit id="8536672882452926308">
+      <segment state="initial">
+        <source>Create a section</source>
+        <target>Créer un canton</target>
+      </segment>
+    </unit>
+    <unit id="5145287154773357101">
+      <segment state="initial">
+        <source>Create section</source>
+        <target>Créer un canton</target>
+      </segment>
+    </unit>
+    <unit id="4040362203515657781">
+      <segment state="initial">
+        <source>Update section</source>
+        <target>Mettre à jour le canton</target>
+      </segment>
+    </unit>
+    <unit id="7136888919962092730">
+      <segment state="initial">
+        <source>Changelog</source>
+        <target>Changelog</target>
+      </segment>
+    </unit>
+    <unit id="4768592761478998496">
+      <segment state="initial">
+        <source>You are offline</source>
+        <target>Vous êtes hors ligne</target>
+      </segment>
+    </unit>
+    <unit id="7096169249854506812">
+      <segment state="initial">
+        <source>No changelogs found</source>
+        <target>Aucun changelog trouvé</target>
+      </segment>
+    </unit>
+    <unit id="2622453688077092594">
+      <segment state="initial">
+        <source>Study imported from protoV4</source>
+        <target>Étude importé depuis le protoV4</target>
+      </segment>
+    </unit>
+    <unit id="1690240850123989028">
+      <segment state="initial">
+        <source>No news found</source>
+        <target>Aucune actualité</target>
+      </segment>
+    </unit>
+    <unit id="6389312883797462351">
+      <segment state="initial">
+        <source>Studio</source>
+        <target>Studio</target>
+      </segment>
+    </unit>
+    <unit id="5201756345475523940">
+      <segment state="initial">
+        <source>Initial condition name </source>
+        <target>Nom de condition initiale </target>
+      </segment>
+    </unit>
+    <unit id="1063780443229000887">
+      <segment state="initial">
+        <source>Side:</source>
+        <target>Sens :</target>
+      </segment>
+    </unit>
+    <unit id="3652243134148906527">
+      <segment state="initial">
+        <source>Invert:</source>
+        <target>Inverser le sens :</target>
+      </segment>
+    </unit>
+    <unit id="7462301153729425254">
+      <segment state="initial">
+        <source>Export</source>
+        <target>Exporter</target>
+      </segment>
+    </unit>
+    <unit id="7584732332123203553">
+      <segment state="initial">
+        <source>Attachment set</source>
+        <target>Set d&apos;accroche</target>
+      </segment>
+    </unit>
+    <unit id="419149014255896698">
+      <segment state="initial">
+        <source>Support name</source>
+        <target>Nom de supp.</target>
+      </segment>
+    </unit>
+    <unit id="2901943060312328653">
+      <segment state="initial">
+        <source> Support name </source>
+        <target> Nom de supp. </target>
+      </segment>
+    </unit>
+    <unit id="8455284935734906867">
+      <segment state="initial">
+        <source> Attachment set </source>
+        <target> Set accroche </target>
+      </segment>
+    </unit>
+    <unit id="2932152767120246098">
+      <segment state="initial">
+        <source> Upload one or multiple protoV4 files </source>
+        <target> Charger un ou plusieurs fichiers protoV4 </target>
+      </segment>
+    </unit>
+    <unit id="4280648003561719483">
+      <segment state="initial">
+        <source>supports amount</source>
+        <target>nombre de supports</target>
+      </segment>
+    </unit>
+    <unit id="349300253783483450">
+      <segment state="initial">
+        <source>support number</source>
+        <target>numéro de support</target>
+      </segment>
+    </unit>
+    <unit id="3599249630457687633">
+      <segment state="initial">
+        <source>span length</source>
+        <target>longueur de portée</target>
+      </segment>
+    </unit>
+    <unit id="2045054298163856321">
+      <segment state="initial">
+        <source>span angle</source>
+        <target>angle de portée</target>
+      </segment>
+    </unit>
+    <unit id="9217388832996322692">
+      <segment state="initial">
+        <source>chain name</source>
+        <target>nom de la chaîne</target>
+      </segment>
+    </unit>
+    <unit id="620478596918239347">
+      <segment state="initial">
+        <source>chain length</source>
+        <target>longueur de la chaîne</target>
+      </segment>
+    </unit>
+    <unit id="6831440935794088973">
+      <segment state="initial">
+        <source>chain weight</source>
+        <target>poids de la chaîne</target>
+      </segment>
+    </unit>
+    <unit id="1855573221352568994">
+      <segment state="initial">
+        <source>open attachment set modal</source>
+        <target>ouvrir le modal de set d&apos;accroche</target>
+      </segment>
+    </unit>
+    <unit id="4240018243849737669">
+      <segment state="initial">
+        <source>attachment set</source>
+        <target>set d&apos;accroche</target>
+      </segment>
+    </unit>
+    <unit id="3973913981535334331">
+      <segment state="initial">
+        <source>arm length</source>
+        <target>longueur de bras</target>
+      </segment>
+    </unit>
+    <unit id="5452784528816163120">
+      <segment state="initial">
+        <source>attachment height</source>
+        <target>hauteur d&apos;accroche</target>
+      </segment>
+    </unit>
+    <unit id="2275797440786978301">
+      <segment state="initial">
+        <source>chain V</source>
+        <target>chaîne V</target>
+      </segment>
+    </unit>
+    <unit id="69654202240409398">
+      <segment state="initial">
+        <source>Select initial conditions</source>
+        <target>Sélectionner les conditions initiales</target>
+      </segment>
+    </unit>
+    <unit id="2400362719050540518">
+      <segment state="initial">
+        <source>view</source>
+        <target>voir</target>
+      </segment>
+    </unit>
+    <unit id="9095134843628689709">
+      <segment state="initial">
+        <source>edit</source>
+        <target>modifier</target>
+      </segment>
+    </unit>
+    <unit id="6133338617402043535">
+      <segment state="initial">
+        <source>duplicate</source>
+        <target>dupliquer</target>
+      </segment>
+    </unit>
+    <unit id="2456043080471762298">
+      <segment state="initial">
+        <source>delete</source>
+        <target>supprimer</target>
+      </segment>
+    </unit>
+    <unit id="7249112263207864079">
+      <segment state="initial">
+        <source>Section :</source>
+        <target>Canton :</target>
+      </segment>
+    </unit>
+    <unit id="477906921630190891">
+      <segment state="initial">
+        <source>CI :</source>
+        <target>CI :</target>
+      </segment>
+    </unit>
+    <unit id="8735221513379114136">
+      <segment state="initial">
+        <source>CC :</source>
+        <target>CC :</target>
+      </segment>
+    </unit>
+    <unit id="3901869594843063192">
+      <segment state="initial">
+        <source>Select charge case</source>
+        <target>Sélectionner le cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="5638154401039870638">
+      <segment state="initial">
+        <source>Staff is present</source>
+        <target>Personnel présent</target>
+      </segment>
+    </unit>
+    <unit id="929550426768002309">
+      <segment state="initial">
+        <source>Staff is absent</source>
+        <target>Personnel absent</target>
+      </segment>
+    </unit>
+    <unit id="3778631527604022771">
+      <segment state="initial">
+        <source>Go to study</source>
+        <target>Aller à l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="6492147370027863408">
+      <segment state="initial">
+        <source>add charge case</source>
+        <target>Ajouter un cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="7866511975225263216">
+      <segment state="initial">
+        <source>Go back to study</source>
+        <target>Go back to study</target>
+      </segment>
+    </unit>
+    <unit id="187187500641108332">
+      <segment state="initial">
+        <source>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
+        </source>
+        <target>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
+        </target>
+      </segment>
+    </unit>
+    <unit id="997715536640361323">
+      <segment state="initial">
+        <source>Expand details</source>
+        <target>Expand details</target>
+      </segment>
+    </unit>
+    <unit id="5106156601844390550">
+      <segment state="initial">
+        <source>V :</source>
+        <target>V :</target>
+      </segment>
+    </unit>
+    <unit id="6094941777760276714">
+      <segment state="initial">
+        <source>H :</source>
+        <target>H :</target>
+      </segment>
+    </unit>
+    <unit id="2063533551447007651">
+      <segment state="initial">
+        <source>L :</source>
+        <target>L :</target>
+      </segment>
+    </unit>
+    <unit id="6878706142952083204">
+      <segment state="initial">
+        <source>Resultant :</source>
+        <target>Résultante :</target>
+      </segment>
+    </unit>
+    <unit id="8989863100638695277">
+      <segment state="initial">
+        <source>X :</source>
+        <target>X :</target>
+      </segment>
+    </unit>
+    <unit id="4397785445453423100">
+      <segment state="initial">
+        <source>Y :</source>
+        <target>Y :</target>
+      </segment>
+    </unit>
+    <unit id="9049520591622775104">
+      <segment state="initial">
+        <source>Z :</source>
+        <target>Z :</target>
+      </segment>
+    </unit>
+    <unit id="3070039934798240648">
+      <segment state="initial">
+        <source>Angle balencement :</source>
+        <target>Angle balencement :</target>
+      </segment>
+    </unit>
+    <unit id="2469542949998183645">
+      <segment state="initial">
+        <source>Th - T0 :</source>
+        <target>Th - T0 :</target>
+      </segment>
+    </unit>
+    <unit id="8217377030077972135">
+      <segment state="initial">
+        <source>delete study</source>
+        <target>supprimer l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="1029122298839770722">
+      <segment state="initial">
+        <source>reset</source>
+        <target>réinitialiser</target>
+      </segment>
+    </unit>
+    <unit id="6613300769068333223">
+      <segment state="initial">
+        <source>Wind Pressure</source>
+        <target>Pression du vent</target>
+      </segment>
+    </unit>
+    <unit id="4865483609520535639">
+      <segment state="initial">
+        <source>Cable Temperature</source>
+        <target>Température du câble</target>
+      </segment>
+    </unit>
+    <unit id="6360407171073312357">
+      <segment state="initial">
+        <source>Symmetry Type</source>
+        <target>Symétrie</target>
+      </segment>
+    </unit>
+    <unit id="8204555453748282582">
+      <segment state="initial">
+        <source>Ice Thickness</source>
+        <target>Épaisseur de la glace</target>
+      </segment>
+    </unit>
+    <unit id="4588982619541413952">
+      <segment state="initial">
+        <source> Frontier Support Number </source>
+        <target> N° de support frontière </target>
+      </segment>
+    </unit>
+    <unit id="2802938289697505873">
+      <segment state="initial">
+        <source> Ice Thickness (Before Frontier) </source>
+        <target> Épaisseur de la glace (avant la frontière) </target>
+      </segment>
+    </unit>
+    <unit id="6079274139415183182">
+      <segment state="initial">
+        <source> Ice Thickness (After Frontier) </source>
+        <target> Épaisseur de la glace (après la frontière) </target>
+      </segment>
+    </unit>
+    <unit id="5204909450862821423">
+      <segment state="initial">
+        <source>erase load case</source>
+        <target>effacer le cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="5005141257091855131">
+      <segment state="initial">
+        <source>Calculate</source>
+        <target>Calculer</target>
+      </segment>
+    </unit>
+    <unit id="1035207489563002235">
+      <segment state="initial">
+        <source> fold back </source>
+        <target> replier </target>
+      </segment>
+    </unit>
+    <unit id="7410825966608756111">
+      <segment state="initial">
+        <source>modify</source>
+        <target>modifier</target>
+      </segment>
+    </unit>
+    <unit id="2037406622728640058">
+      <segment state="initial">
+        <source>Section name must be unique.</source>
+        <target>Le nom du canton doit être unique.</target>
+      </segment>
+    </unit>
+    <unit id="8718048249801659622">
+      <segment state="initial">
+        <source>comment</source>
+        <target>commentaire</target>
+      </segment>
+    </unit>
+    <unit id="8721528059163811685">
+      <segment state="initial">
+        <source>Guard</source>
+        <target>Garde</target>
+      </segment>
+    </unit>
+    <unit id="8384742917026482252">
+      <segment state="initial">
+        <source>Phase</source>
+        <target>Phase</target>
+      </segment>
+    </unit>
+    <unit id="5763255287644465636">
+      <segment state="initial">
+        <source> Counter weight </source>
+        <target> Contrepoids </target>
+      </segment>
+    </unit>
+    <unit id="6645271274546920288">
+      <segment state="initial">
+        <source> Chain surface </source>
+        <target> Surf. chaîne </target>
+      </segment>
+    </unit>
+    <unit id="995427497507634184">
+      <segment state="initial">
+        <source>counter weight</source>
+        <target>contrepoids</target>
+      </segment>
+    </unit>
+    <unit id="6970241527294087573">
+      <segment state="initial">
+        <source>support foot altitude</source>
+        <target>alt. pied supp.</target>
+      </segment>
+    </unit>
+    <unit id="438901499953241732">
+      <segment state="initial">
+        <source>chain surface</source>
+        <target>surf. chaîne</target>
+      </segment>
+    </unit>
+    <unit id="2807800733729323332">
+      <segment state="initial">
+        <source>Yes</source>
+        <target>Oui</target>
+      </segment>
+    </unit>
+    <unit id="3542042671420335679">
+      <segment state="initial">
+        <source>No</source>
+        <target>Non</target>
+      </segment>
+    </unit>
+    <unit id="4510416540243450211">
+      <segment state="initial">
+        <source>clear selection</source>
+        <target>effacer la sélection</target>
+      </segment>
+    </unit>
+    <unit id="4195378100574813215">
+      <segment state="initial">
+        <source>switch graph view</source>
+        <target>changer la vue du graphique</target>
+      </segment>
+    </unit>
+    <unit id="4323470180912194028">
+      <segment state="initial">
+        <source>Copy</source>
+        <target>Copie</target>
+      </segment>
+    </unit>
+    <unit id="8494357329138575006">
+      <segment state="initial">
+        <source> Initial condition name must be unique. </source>
+        <target> Le nom de la condition initiale doit être unique. </target>
+      </segment>
+    </unit>
+    <unit id="3712341023220217420">
+      <segment state="initial">
+        <source> Supports list </source>
+        <target> Liste des supports </target>
+      </segment>
+    </unit>
+    <unit id="8041319185706138234">
+      <segment state="initial">
+        <source> Chain w. </source>
+        <target> P. chaîne </target>
+      </segment>
+    </unit>
+    <unit id="7929145588930827141">
+      <segment state="initial">
+        <source> Arm l. </source>
+        <target> L. bras </target>
+      </segment>
+    </unit>
+    <unit id="937239552133817956">
+      <segment state="initial">
+        <source>Supp. foot alt.</source>
+        <target>Alt. pied supp.</target>
+      </segment>
+    </unit>
+    <unit id="6707592636055800614">
+      <segment state="initial">
+        <source> Attachment pos. </source>
+        <target> Pos. accroche </target>
+      </segment>
+    </unit>
+    <unit id="8033953731717586115">
+      <segment state="initial">
+        <source>m</source>
+        <target>m</target>
+      </segment>
+    </unit>
+    <unit id="8669671325133819004">
+      <segment state="initial">
+        <source>Gr</source>
+        <target>Gr</target>
+      </segment>
+    </unit>
+    <unit id="4141745434313993573">
+      <segment state="initial">
+        <source>kg</source>
+        <target>kg</target>
+      </segment>
+    </unit>
+    <unit id="1146214339732730560">
+      <segment state="initial">
+        <source>attachment position</source>
+        <target>position accroche</target>
+      </segment>
+    </unit>
+    <unit id="884256968362108043">
+      <segment state="initial">
+        <source>m²</source>
+        <target>m²</target>
+      </segment>
+    </unit>
+    <unit id="1519954996184640001">
+      <segment state="initial">
+        <source>Error</source>
+        <target>Erreur</target>
+      </segment>
+    </unit>
+    <unit id="8104834107183476829">
+      <segment state="initial">
+        <source>Error importing study</source>
+        <target>Erreur lors de l&apos;importation de l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="4648900870671159218">
+      <segment state="initial">
+        <source>Success</source>
+        <target>Succès</target>
+      </segment>
+    </unit>
+    <unit id="1079181845691356032">
+      <segment state="initial">
+        <source>Study imported successfully</source>
+        <target>Étude importée avec succès</target>
+      </segment>
+    </unit>
+    <unit id="848481053719181700">
+      <segment state="initial">
+        <source> Extreme historical conditions incurred by the cable </source>
+        <target> Conditions historiques extrêmes subies par le câble </target>
+      </segment>
+    </unit>
+    <unit id="5577525641723703663">
+      <segment state="initial">
+        <source> Cable pretension </source>
+        <target> Pré-tension du câble </target>
+      </segment>
+    </unit>
+    <unit id="5455255610792577574">
+      <segment state="initial">
+        <source> Min temperature </source>
+        <target> Température min </target>
+      </segment>
+    </unit>
+    <unit id="3948064756684098346">
+      <segment state="initial">
+        <source> Max wind pressure </source>
+        <target> Pression du vent max </target>
+      </segment>
+    </unit>
+    <unit id="7696118233074431582">
+      <segment state="initial">
+        <source> Max ice thickness </source>
+        <target> Epaisseur du givre max </target>
+      </segment>
+    </unit>
+    <unit id="9095132887560670905">
+      <segment state="initial">
+        <source>Cable pretension</source>
+        <target>Pré-tension du câble</target>
+      </segment>
+    </unit>
+    <unit id="8798542344025275411">
+      <segment state="initial">
+        <source>Min temperature</source>
+        <target>Température min</target>
+      </segment>
+    </unit>
+    <unit id="2153962924756003345">
+      <segment state="initial">
+        <source>Max wind pressure</source>
+        <target>Pression du vent max</target>
+      </segment>
+    </unit>
+    <unit id="6888404140532857244">
+      <segment state="initial">
+        <source>Max ice thickness</source>
+        <target>Epaisseur du givre max</target>
+      </segment>
+    </unit>
+    <unit id="8987297903552443142">
+      <segment state="initial">
+        <source> Base temperature </source>
+        <target> Température de base </target>
+      </segment>
+    </unit>
+    <unit id="2936057948596507296">
+      <segment state="initial">
+        <source>°C</source>
+        <target>°C</target>
+      </segment>
+    </unit>
+    <unit id="902828700910058336">
+      <segment state="initial">
+        <source>Pa</source>
+        <target>Pa</target>
+      </segment>
+    </unit>
+    <unit id="2340664682417154043">
+      <segment state="initial">
+        <source>cm</source>
+        <target>cm</target>
+      </segment>
+    </unit>
+    <unit id="2205679024859102357">
+      <segment state="initial">
+        <source>Parameter (m)</source>
+        <target>Paramètre (m)</target>
+      </segment>
+    </unit>
+    <unit id="5909128736797701112">
+      <segment state="initial">
+        <source>Work load %</source>
+        <target>Charge %</target>
+      </segment>
+    </unit>
+    <unit id="3494570942698291859">
+      <segment state="initial">
+        <source>Oblique (m)</source>
+        <target>Oblique (m)</target>
+      </segment>
+    </unit>
+    <unit id="6560642783363072934">
+      <segment state="initial">
+        <source>Vertical (m)</source>
+        <target>Vertical (m)</target>
+      </segment>
+    </unit>
+    <unit id="2143129387317692084">
+      <segment state="initial">
+        <source>Horizontal (m)</source>
+        <target>Horizontal (m)</target>
+      </segment>
+    </unit>
+    <unit id="8687116247161905115">
+      <segment state="initial">
+        <source>Cable not found in database: <ph id="0" equiv="PH" disp="parameters.conductor"/></source>
+        <target>Câble non trouvé dans la base de données: <ph id="0" equiv="PH" disp="parameters.conductor"/></target>
+      </segment>
+    </unit>
+    <unit id="3885497195825665706">
+      <segment state="initial">
+        <source>Next</source>
+        <target>Suivant</target>
+      </segment>
+    </unit>
+    <unit id="3854993654974680287">
+      <segment state="initial">
+        <source>Support {first} to {last} of {totalRecords}</source>
+        <target>Support {first} à {last} de {totalRecords}</target>
+      </segment>
+    </unit>
+    <unit id="7386852230658433938">
+      <segment state="initial">
+        <source>Comment about the supports</source>
+        <target>Commentaire concernant les supports</target>
+      </segment>
+    </unit>
+    <unit id="4452427314943113135">
+      <segment state="initial">
+        <source>Previous</source>
+        <target>Précédent</target>
+      </segment>
+    </unit>
+    <unit id="4321296572437361289">
+      <segment state="initial">
+        <source>Generate a state</source>
+        <target>Générer un état</target>
+      </segment>
+    </unit>
+    <unit id="2759009850634919490">
+      <segment state="initial">
+        <source>Span l.</source>
+        <target>L. portée</target>
+      </segment>
+    </unit>
+    <unit id="8240240329115149718">
+      <segment state="initial">
+        <source>Angle</source>
+        <target>Angle</target>
+      </segment>
+    </unit>
+    <unit id="4363811923368535546">
+      <segment state="initial">
+        <source>Chain l.</source>
+        <target>L. chaîne</target>
+      </segment>
+    </unit>
+    <unit id="131564779447274448">
+      <segment state="initial">
+        <source>Attachment alt. (NGF)</source>
+        <target>Alt. accr. câble (NGF)</target>
+      </segment>
+    </unit>
+    <unit id="8502839014739399542">
+      <segment state="initial">
+        <source>Double click on a column to copy the value to all supports</source>
+        <target>Faites un double clique sur le nom de la colonne pour copier la valeur de la 1ère ligne sur toute la colonne.</target>
+      </segment>
+    </unit>
+    <unit id="8792569904201285826">
+      <segment state="initial">
+        <source>List of saved states</source>
+        <target>Liste des états enregistrés</target>
+      </segment>
+    </unit>
+    <unit id="9093347743965817292">
+      <segment state="initial">
+        <source>Line team</source>
+        <target>Equipe ligne</target>
+      </segment>
+    </unit>
+    <unit id="1927414643473979733">
+      <segment state="initial">
+        <source>Choose a creation type</source>
+        <target>Choisir un type de création</target>
+      </segment>
+    </unit>
+    <unit id="7430416142942514215">
+      <segment state="initial">
+        <source>Publish</source>
+        <target>Publier</target>
+      </segment>
+    </unit>
+    <unit id="8446665382086922955">
+      <segment state="initial">
+        <source>dd/MM:yyyy at HH&apos;h&apos;mm</source>
+        <target>dd/MM:yyyy à HH&apos;h&apos;mm</target>
+      </segment>
+    </unit>
+    <unit id="70265843712811398">
+      <segment state="initial">
+        <source>Electric tension</source>
+        <target>Tension électrique</target>
+      </segment>
+    </unit>
+    <unit id="8387651464002742246">
+      <segment state="initial">
+        <source>Branch</source>
+        <target>Branche</target>
+      </segment>
+    </unit>
+    <unit id="5946937164148510682">
+      <segment state="initial">
+        <source>supports comment</source>
+        <target>commentaire supports</target>
+      </segment>
+    </unit>
+    <unit id="7819314041543176992">
+      <segment state="initial">
+        <source>Close</source>
+        <target>Fermer</target>
+      </segment>
+    </unit>
+    <unit id="3449156368391431679">
+      <segment state="initial">
+        <source>N° supp.</source>
+        <target>N° supp.</target>
+      </segment>
+    </unit>
+    <unit id="3852148482682745847">
+      <segment state="initial">
+        <source>From local referencial</source>
+        <target>À partir du référentiel local</target>
+      </segment>
+    </unit>
+    <unit id="5778821001923660039">
+      <segment state="initial">
+        <source>From a file</source>
+        <target>À partir d&apos;un fichier</target>
+      </segment>
+    </unit>
+    <unit id="4915431133669985304">
+      <segment state="initial">
+        <source>Profile</source>
+        <target>Profil</target>
+      </segment>
+    </unit>
+    <unit id="4266658892163682187">
+      <segment state="initial">
+        <source>Face</source>
+        <target>Face</target>
+      </segment>
+    </unit>
+    <unit id="3793363326863773180">
+      <segment state="initial">
+        <source>Error creating user</source>
+        <target>Erreur lors de la création de l&apos;utilisateur</target>
+      </segment>
+    </unit>
+    <unit id="4765388897418478416">
+      <segment state="initial">
+        <source>User info set</source>
+        <target>Informations utilisateur définies</target>
+      </segment>
+    </unit>
+    <unit id="8293684133671200243">
+      <segment state="initial">
+        <source>Symmetric</source>
+        <target>Symétrique</target>
+      </segment>
+    </unit>
+    <unit id="520772936343037608">
+      <segment state="initial">
+        <source>Dis Symmetric</source>
+        <target>Disymétrique</target>
+      </segment>
+    </unit>
+    <unit id="8990805719441989570">
+      <segment state="initial">
+        <source>Span</source>
+        <target>Portée</target>
+      </segment>
+    </unit>
+    <unit id="4613547067726634730">
+      <segment state="initial">
+        <source>Support n°</source>
+        <target>Support n°</target>
+      </segment>
+    </unit>
+    <unit id="3305078246675075385">
+      <segment state="initial">
+        <source>Load type</source>
+        <target>Type de charge</target>
+      </segment>
+    </unit>
+    <unit id="5729801747698322662">
+      <segment state="initial">
+        <source>Span load</source>
+        <target>Charge de la portée</target>
+      </segment>
+    </unit>
+    <unit id="7970276717935400824">
+      <segment state="initial">
+        <source>Short. or lengthen. Cable (+ -)</source>
+        <target>Raccourcir ou allonger le câble (+ -)</target>
+      </segment>
+    </unit>
+    <unit id="2973163940988682005">
+      <segment state="initial">
+        <source>Dist. to point load</source>
+        <target>Dist. à la charge ponctuelle</target>
+      </segment>
+    </unit>
+    <unit id="4377932527319537276">
+      <segment state="initial">
+        <source>Punctual</source>
+        <target>Ponctuel</target>
+      </segment>
+    </unit>
+    <unit id="4170797585902965304">
+      <segment state="initial">
+        <source>Distributed</source>
+        <target>Distribué</target>
+      </segment>
+    </unit>
+    <unit id="4486920800439525375">
+      <segment state="initial">
+        <source>Shortening / Lengthening</source>
+        <target>Raccourcir / Allonger</target>
+      </segment>
+    </unit>
+    <unit id="8083736833442025529">
+      <segment state="initial">
+        <source>No cable found</source>
+        <target>Aucun câble trouvé</target>
+      </segment>
+    </unit>
+    <unit id="7215028324689336548">
+      <segment state="initial">
+        <source>Calculation error</source>
+        <target>Erreur de calcul</target>
+      </segment>
+    </unit>
+    <unit id="5080875188035619513">
+      <segment state="initial">
+        <source>Pyodide load error</source>
+        <target>Erreur de chargement Pyodide</target>
+      </segment>
+    </unit>
+    <unit id="2657043015926552641">
+      <segment state="initial">
+        <source>Unknown error</source>
+        <target>Erreur inconnue</target>
+      </segment>
+    </unit>
+    <unit id="344013254935185191">
+      <segment state="initial">
+        <source>Charge updated</source>
+        <target>Charge mise à jour</target>
+      </segment>
+    </unit>
+    <unit id="1019591151849311353">
+      <segment state="initial">
+        <source>Charge created</source>
+        <target>Charge créée</target>
+      </segment>
+    </unit>
+    <unit id="4807396535461926931">
+      <segment state="initial">
+        <source>Charge deleted</source>
+        <target>Charge supprimée</target>
+      </segment>
+    </unit>
+    <unit id="1864612253981729182">
+      <segment state="initial">
+        <source>suspension</source>
+        <target>suspension</target>
+      </segment>
+    </unit>
+    <unit id="2905929947185397074">
+      <segment state="initial">
+        <source>chain</source>
+        <target>chaîne</target>
+      </segment>
+    </unit>
+    <unit id="858950043240201803">
+      <segment state="initial">
+        <source>IC 1</source>
+        <target>CI 1</target>
+      </segment>
+    </unit>
+    <unit id="5351632617142518313">
+      <segment state="initial">
+        <source>App version checked</source>
+        <target>Version de l&apos;application vérifiée</target>
+      </segment>
+    </unit>
+    <unit id="2813428855529635901">
+      <segment state="initial">
+        <source>View charge case</source>
+        <target>Voir le cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="557544842878781608">
+      <segment state="initial">
+        <source>Edit charge case</source>
+        <target>Modifier le cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="7607770781665288883">
+      <segment state="initial">
+        <source>Create a charge case</source>
+        <target>Créer un cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="8736414220975972324">
+      <segment state="initial">
+        <source>Generalities</source>
+        <target>Généralités</target>
+      </segment>
+    </unit>
+    <unit id="8365437498463676833">
+      <segment state="initial">
+        <source> Personnel presence </source>
+        <target> Présence du personnel </target>
+      </segment>
+    </unit>
+    <unit id="581758079292144535">
+      <segment state="initial">
+        <source>Add a description to your charge case</source>
+        <target>Ajouter une description à votre cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="8179510261091625036">
+      <segment state="initial">
+        <source>Climate condition</source>
+        <target>Condition climatique</target>
+      </segment>
+    </unit>
+    <unit id="1546940907709341937">
+      <segment state="initial">
+        <source>Span loading</source>
+        <target>Charge de la portée</target>
+      </segment>
+    </unit>
+    <unit id="5884678477650117685">
+      <segment state="initial">
+        <source>Cable manip. at support</source>
+        <target>Câble manip. au support</target>
+      </segment>
+    </unit>
+    <unit id="1964106600703167330">
+      <segment state="initial">
+        <source>Cable manip. at span</source>
+        <target>Câble manip. à la portée</target>
+      </segment>
+    </unit>
+    <unit id="2398928213100250023">
+      <segment state="initial">
+        <source> In order to add charges, you need to create a charge case. </source>
+        <target> Pour ajouter des charges, vous devez créer un cas de charge. </target>
+      </segment>
+    </unit>
+    <unit id="1339958536387081724">
+      <segment state="initial">
+        <source>Add a charge case</source>
+        <target>Ajouter un cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="472586784721739380">
+      <segment state="initial">
+        <source>Link - ID</source>
+        <target>Liaison - IDR</target>
+      </segment>
+    </unit>
+    <unit id="8198965325876404733">
+      <segment state="initial">
+        <source>LIT - ID</source>
+        <target>LIT - IDR</target>
+      </segment>
+    </unit>
+    <unit id="6760730176467866326">
+      <segment state="initial">
+        <source>Branch - ID</source>
+        <target>Branche - IDR</target>
+      </segment>
+    </unit>
+    <unit id="3059442917741627872">
+      <segment state="initial">
+        <source>Arm length</source>
+        <target>Longueur de bras</target>
+      </segment>
+    </unit>
+    <unit id="4142858945350399408">
+      <segment state="initial">
+        <source>Height below console</source>
+        <target>Hauteur sous console</target>
+      </segment>
+    </unit>
+    <unit id="2087858758183650212">
+      <segment state="initial">
+        <source>IC</source>
+        <target>CI</target>
+      </segment>
+    </unit>
+    <unit id="9064235119713814924">
+      <segment state="initial">
+        <source>Version / MAJ</source>
+        <target>Version / MAJ</target>
+      </segment>
+    </unit>
+    <unit id="5004217118094368051">
+      <segment state="initial">
+        <source>Ver.MAJ</source>
+        <target>Ver.MAJ</target>
+      </segment>
+    </unit>
+    <unit id="4262495966859034995">
+      <segment state="initial">
+        <source>Charge case name</source>
+        <target>Charge case name</target>
+      </segment>
+    </unit>
+    <unit id="7726078135791017446">
+      <segment state="initial">
+        <source> Choose the attachment set in the list or on the graph to find the right arm length. </source>
+        <target> Choisissez le set d’accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras. </target>
+      </segment>
+    </unit>
+    <unit id="2694623513112556993">
+      <segment state="initial">
+        <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
+        <target> Le Set d’accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau. </target>
+      </segment>
+    </unit>
+    <unit id="4893374109940250877">
+      <segment state="initial">
+        <source>%CRA</source>
+        <target>%CRA</target>
+      </segment>
+    </unit>
+    <unit id="4021752662928002901">
+      <segment state="initial">
+        <source>Update</source>
+        <target>Mise à jour</target>
+      </segment>
+    </unit>
+    <unit id="7102821621439027980">
+      <segment state="initial">
+        <source> The new version of your application is available! </source>
+        <target> La nouvelle version de votre application est disponible ! </target>
+      </segment>
+    </unit>
+    <unit id="5827348953140111224">
+      <segment state="initial">
+        <source> The update of your application is in progress </source>
+        <target> La mise à jour de votre application est en cours </target>
+      </segment>
+    </unit>
+    <unit id="9026083618139453880">
+      <segment state="initial">
+        <source>Later</source>
+        <target>Plus tard</target>
+      </segment>
+    </unit>
+    <unit id="2694240619944418764">
+      <segment state="initial">
+        <source>Version :</source>
+        <target>Version :</target>
+      </segment>
+    </unit>
+    <unit id="391362148889807983">
+      <segment state="initial">
+        <source>Hash :</source>
+        <target>Hash :</target>
+      </segment>
+    </unit>
+    <unit id="145833412581392848">
+      <segment state="initial">
+        <source> Thank you for not closing the app when the update is in progress. </source>
+        <target> Merci de ne pas fermer l&apos;application pendant la mise à jour. </target>
+      </segment>
+    </unit>
+    <unit id="2222955931547347463">
+      <segment state="initial">
+        <source>Update now</source>
+        <target>Mettre à jour</target>
+      </segment>
+    </unit>
+    <unit id="6812930637022637485">
+      <segment state="initial">
+        <source>Display</source>
+        <target>Affichage</target>
+      </segment>
+    </unit>
+    <unit id="7536890634485426754">
+      <segment state="initial">
+        <source>Select which elements to display on the studio.</source>
+        <target>Sélectionnez les éléments à afficher dans le studio.</target>
+      </segment>
+    </unit>
+    <unit id="4114020677798356875">
+      <segment state="initial">
+        <source>Tables</source>
+        <target>Tables</target>
+      </segment>
+    </unit>
+    <unit id="1684734235599362204">
+      <segment state="initial">
+        <source>Tools</source>
+        <target>Outils</target>
+      </segment>
+    </unit>
+    <unit id="4819033235564776951">
+      <segment state="initial">
+        <source>Edit your selected tools shortcuts</source>
+        <target>Modifier les raccourcis des outils sélectionnés</target>
+      </segment>
+    </unit>
+    <unit id="3219524493839487316">
+      <segment state="initial">
+        <source>Inset</source>
+        <target>Insertion</target>
+      </segment>
+    </unit>
+    <unit id="8826026204967028707">
+      <segment state="initial">
+        <source>Select and organise the tools with quick access (maximum 5).</source>
+        <target>Sélectionnez et organisez les outils avec un accès rapide (maximum 5).</target>
+      </segment>
+    </unit>
+    <unit id="6843015305937593038">
+      <segment state="initial">
+        <source>Loads table</source>
+        <target>Tableau de charges</target>
+      </segment>
+    </unit>
+    <unit id="8772586645735221164">
+      <segment state="initial">
+        <source>Pose table</source>
+        <target>Tableau de pose</target>
+      </segment>
+    </unit>
+    <unit id="3493980964958188572">
+      <segment state="initial">
+        <source>Obstacles table</source>
+        <target>Tableau d&apos;obstacles</target>
+      </segment>
+    </unit>
+    <unit id="3627508489639881021">
+      <segment state="initial">
+        <source>Grounds table</source>
+        <target>Tableau de sols</target>
+      </segment>
+    </unit>
+    <unit id="7801621976146528131">
+      <segment state="initial">
+        <source>Loads</source>
+        <target>Charges</target>
+      </segment>
+    </unit>
+    <unit id="3228612487814937552">
+      <segment state="initial">
+        <source>Obstacles</source>
+        <target>Obstacles</target>
+      </segment>
+    </unit>
+    <unit id="6629591556260898648">
+      <segment state="initial">
+        <source>Ground</source>
+        <target>Ground</target>
+      </segment>
+    </unit>
+    <unit id="6800398544280479151">
+      <segment state="initial">
+        <source>Angle en ligne</source>
+        <target>Angle en ligne</target>
+      </segment>
+    </unit>
+    <unit id="770492681595827297">
+      <segment state="initial">
+        <source>Measure</source>
+        <target>Mesure</target>
+      </segment>
+    </unit>
+    <unit id="2938335127110015653">
+      <segment state="initial">
+        <source>Field measurements</source>
+        <target>Mesures terrain</target>
+      </segment>
+    </unit>
+    <unit id="3625719233264880082">
+      <segment state="initial">
+        <source>L0 sum</source>
+        <target>Somme L0</target>
+      </segment>
+    </unit>
+    <unit id="8365500949716833241">
+      <segment state="initial">
+        <source>VTL &amp; Guying</source>
+        <target>Haubanage &amp; VTL</target>
+      </segment>
+    </unit>
+    <unit id="810011115797190863">
+      <segment state="initial">
+        <source>Cable marking</source>
+        <target>Marquage câble</target>
+      </segment>
+    </unit>
+    <unit id="568104999805025008">
+      <segment state="initial">
+        <source>Strand RRTS</source>
+        <target>RRTS de brin</target>
+      </segment>
+    </unit>
+    <unit id="7353266591752987691">
+      <segment state="initial">
+        <source>Forest trenches</source>
+        <target>Tranchées forestières</target>
+      </segment>
+    </unit>
+    <unit id="3135010041684944812">
+      <segment state="initial">
+        <source>Height &amp; lateral distance</source>
+        <target>Hauteur &amp; distance latérale</target>
+      </segment>
+    </unit>
+    <unit id="1271914484753735123">
+      <segment state="initial">
+        <source>Cable adjustment</source>
+        <target>Réglage câble</target>
+      </segment>
+    </unit>
+    <unit id="1834844445344817694">
+      <segment state="initial">
+        <source>Unauthorized</source>
+        <target>Non autorisé</target>
+      </segment>
+    </unit>
+    <unit id="4124418045778511362">
+      <segment state="initial">
+        <source>You cannot update a study that you did not create, please duplicate it instead.</source>
+        <target>Vous ne pouvez pas mettre à jour une étude que vous n&apos;avez pas créée, veuillez la dupliquer.</target>
+      </segment>
+    </unit>
+    <unit id="9006227511499022859">
+      <segment state="initial">
+        <source> Reset the app without resetting the database </source>
+        <target> Réinitialiser l&apos;application sans réinitialiser la base de données </target>
+      </segment>
+    </unit>
+    <unit id="8837923071812939954">
+      <segment state="initial">
+        <source>Are you sure you want to delete this study?</source>
+        <target>Êtes-vous sûr de vouloir supprimer cette étude ?</target>
+      </segment>
+    </unit>
+    <unit id="7003790776240394114">
+      <segment state="initial">
+        <source>Filename</source>
+        <target>Nom du fichier</target>
+      </segment>
+    </unit>
+    <unit id="3523371283363294838">
+      <segment state="initial">
+        <source>Export format</source>
+        <target>Format d&apos;export</target>
+      </segment>
+    </unit>
+    <unit id="2820133611314033915">
+      <segment state="initial">
+        <source>Maintenance center</source>
+        <target>CM</target>
+      </segment>
+    </unit>
+    <unit id="7291169079105941936">
+      <segment state="initial">
+        <source>Regional team</source>
+        <target>GMR</target>
+      </segment>
+    </unit>
+    <unit id="3574421572547202133">
+      <segment state="initial">
+        <source>Maintenance team</source>
+        <target>EEL</target>
+      </segment>
+    </unit>
+    <unit id="7952517032522600259">
+      <segment state="initial">
+        <source>Link - Name</source>
+        <target>Liaison - ADR</target>
+      </segment>
+    </unit>
+    <unit id="7554418821130915590">
+      <segment state="initial">
+        <source>LIT - Name</source>
+        <target>LIT - ADR</target>
+      </segment>
+    </unit>
+    <unit id="8556557769909937132">
+      <segment state="initial">
+        <source>VHL (under chain)</source>
+        <target>VHL (sous chaîne)</target>
+      </segment>
+    </unit>
+    <unit id="1455021675803464772">
+      <segment state="initial">
+        <source>Line angle :</source>
+        <target>Angle en ligne :</target>
+      </segment>
+    </unit>
+    <unit id="146808728587794667">
+      <segment state="initial">
+        <source>VHL (under console)</source>
+        <target>VHL (sous console)</target>
+      </segment>
+    </unit>
+    <unit id="758471193876128020">
+      <segment state="initial">
+        <source>Alt. supp foot :</source>
+        <target>Alt. pied support :</target>
+      </segment>
+    </unit>
+    <unit id="7621171811584493753">
+      <segment state="initial">
+        <source>Chain displacement acc.</source>
+        <target>Déplacement chaîne acc.</target>
+      </segment>
+    </unit>
+    <unit id="7034395083246764527">
+      <segment state="initial">
+        <source>Cable slope acc. :</source>
+        <target>Pente du câble acc. :</target>
+      </segment>
+    </unit>
+    <unit id="3228204757532465885">
+      <segment state="initial">
+        <source>Span length :</source>
+        <target>Longueur portée :</target>
+      </segment>
+    </unit>
+    <unit id="5015532824363367508">
+      <segment state="initial">
+        <source>Elevation (m) :</source>
+        <target>Dénivelé (m) :</target>
+      </segment>
+    </unit>
+    <unit id="5045082531574334615">
+      <segment state="initial">
+        <source>Supp tension (Max) :</source>
+        <target>Tension supp (Max) :</target>
+      </segment>
+    </unit>
+    <unit id="2637772256766666872">
+      <segment state="initial">
+        <source>Natural length LO :</source>
+        <target>Longueur naturelle LO :</target>
+      </segment>
+    </unit>
+    <unit id="839778022983023928">
+      <segment state="initial">
+        <source>Arrow F1 :</source>
+        <target>Flèche F1 :</target>
+      </segment>
+    </unit>
+    <unit id="8940150942032374654">
+      <segment state="initial">
+        <source>Arrow F2 :</source>
+        <target>Flèche F2 :</target>
+      </segment>
+    </unit>
+    <unit id="20555684131803245">
+      <segment state="initial">
+        <source>Horizontal dist. acc. :</source>
+        <target>Dist. horizontale acc. :</target>
+      </segment>
+    </unit>
+    <unit id="1146602380315581259">
+      <segment state="initial">
+        <source>Arc length LA :</source>
+        <target>Longueur d&apos;arc LA :</target>
+      </segment>
+    </unit>
+    <unit id="1754428445982279363">
+      <segment state="initial">
+        <source>Inf tension acc. :</source>
+        <target>Tension inf acc. :</target>
+      </segment>
+    </unit>
+    <unit id="1630268381780426388">
+      <segment state="initial">
+        <source>Calculation error: &apos;Solver did not converge&apos;</source>
+        <target>Erreur de calcul: &apos;Solver did not converge&apos;</target>
+      </segment>
+    </unit>
+    <unit id="8837923071812939954">
+      <segment state="initial">
+        <source>Are you sure you want to delete this study?</source>
+        <target>Êtes-vous sûr de vouloir supprimer cette étude ?</target>
+      </segment>
+    </unit>
+    <unit id="3413004253239957216">
+      <segment state="initial">
+        <source>Single</source>
+        <target>Simple</target>
+      </segment>
+    </unit>
+    <unit id="4061312488520540569">
+      <segment state="initial">
+        <source>Double</source>
+        <target>Double poteau</target>
+      </segment>
+    </unit>
+    <unit id="1616102757855967475">
+      <segment state="initial">
+        <source>All</source>
+        <target>Tous</target>
+      </segment>
+    </unit>
+    <unit id="1995462320428563005">
+      <segment state="initial">
+        <source>Charges</source>
+        <target>Charges</target>
+      </segment>
+    </unit>
+    <unit id="27019801939265889">
+      <segment state="initial">
+        <source>Select charges</source>
+        <target>Sélectionner</target>
+      </segment>
+    </unit>
+    <unit id="9161302603054307750">
+      <segment state="initial">
+        <source>View charges</source>
+        <target>Voir</target>
+      </segment>
+    </unit>
+  </file>
+</xliff>

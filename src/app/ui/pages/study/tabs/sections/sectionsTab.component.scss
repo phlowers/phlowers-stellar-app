@@ -1,0 +1,113 @@
+@use 'abstract.extracts' as app;
+
+.no-section-text {
+  color: var(--grey-600);
+  margin: 2.5rem 0 1rem;
+}
+
+.sections-container {
+  @apply flex flex-col gap-6 mt-6;
+}
+
+.section {
+  display: grid;
+  grid-template-columns:
+    min-content 2fr auto 1fr 1fr 2fr 2fr min-content;
+  grid-template-rows: repeat(2, auto);
+  grid-template-areas:
+    'selector nameTitle typeTitle litTitle modifiedTitle initTitle chargesTitle actionTitle'
+    'selector nameContent typeContent litContent modifiedContent initContent chargesContent actionContent';
+  justify-items: start;
+  align-items: start;
+  gap: 0.25rem 1rem;
+
+  dl {
+    display: contents;
+  }
+
+  &__selector {
+    grid-area: selector;
+    justify-self: center;
+    align-self: center;
+  }
+
+  &__title-name {
+    grid-area: nameTitle;
+  }
+
+  &__title-type {
+    grid-area: typeTitle;
+  }
+
+  &__title-lit {
+    grid-area: litTitle;
+  }
+
+  &__title-date {
+    grid-area: modifiedTitle;
+  }
+
+  &__title-init {
+    grid-area: initTitle;
+  }
+
+  &__title-charges {
+    grid-area: chargesTitle;
+  }
+
+  &__title-action {
+    grid-area: actionTitle;
+    justify-self: center;
+  }
+
+  &__text-name {
+    grid-area: nameContent;
+  }
+
+  &__text-type {
+    grid-area: typeContent;
+  }
+
+  &__text-lit {
+    grid-area: litContent;
+  }
+
+  &__text-date {
+    grid-area: modifiedContent;
+  }
+
+  &__content-init {
+    grid-area: initContent;
+  }
+
+  &__content-charges {
+    grid-area: chargesContent;
+  }
+
+  &__content-action {
+    grid-area: actionContent;
+    justify-self: center;
+  }
+
+  dt,
+  &__title-init,
+  &__title-action {
+    @extend %text-s-400;
+    color: var(--grey-700);
+  }
+
+  dd {
+    @extend %text-m-400;
+    color: var(--grey-900);
+  }
+}
+
+.erase-btn {
+  color: var(--error-600);
+}
+
+.sticky-btn-wrapper {
+  @apply sticky text-right p-6 -bottom-6 -inset-x-6 -mx-6 flex gap-2 justify-end;
+  background-image: linear-gradient(rgb(from var(--grey-white) r g b / 0),
+      rgb(from var(--grey-white) r g b / 0.9) 70%);
+}

@@ -1,0 +1,31 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.p-popover.p-popover {
+  --p-popover-background: var(--grey-0);
+  --p-popover-border-color: var(--grey-150);
+  --p-popover-border-radius: 0.25rem;
+  --p-popover-shadow: #{map.get(app.$elevation, neutral-5)};
+  --p-popover-gutter: 0rem;
+  --p-popover-arrow-offset: 0rem;
+  --p-popover-content-padding: 0.25rem 0.125rem;
+
+  // button is widely different in popovers.
+  // Font-size and icon size correspond to small button, the rest is different from standard button style.
+  .app-btn {
+    display: flex;
+    width: 100%;
+    color: var(--grey-800);
+
+    &.app-btn-s {
+      padding: 0.5rem;
+      .app-btn-label {
+        padding: 0rem 0.5rem;
+      }
+    }
+
+    &.erase-btn {
+      color: var(--main-error);
+    }
+  }
+}
