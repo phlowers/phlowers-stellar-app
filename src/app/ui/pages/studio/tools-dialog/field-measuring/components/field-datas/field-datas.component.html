@@ -1,133 +1,138 @@
-<div class="field-datas">
-  <p id="mandatory-fields-info" class="field-datas__mandatory-msg">
-    <app-icon icon="info" />
-    <span i18n>All fields are mandatory</span>
-  </p>
+<p id="mandatory-data-field" class="field-datas__mandatory-msg">
+  <app-icon icon="info" />
+  <span i18n>All fields are mandatory</span>
+</p>
 
-  <div class="field-datas__grid">
-    <div class="name">
-      <label for="measureName" i18n>Measure name</label>
+<div class="field-datas__grid">
+  <div class="name">
+    <label for="measureName" i18n>Measure name</label>
+    <input
+      pInputText
+      id="measureName"
+      type="text"
+      [fluid]="true"
+      [ngModel]="measureData().measureName"
+      (ngModelChange)="onFieldChange('measureName', $event)"
+      aria-describedby="mandatory-data-field"
+      required
+    />
+  </div>
+
+  <div class="date">
+    <label for="date" i18n>Date</label>
+    <p-datepicker
+      appendTo="body"
+      id="date"
+      [ngModel]="measureData().date"
+      (ngModelChange)="onFieldChange('date', $event)"
+      dateFormat="dd/mm/yy"
+      styleClass="w-full"
+      [showIcon]="true"
+      ariaDescribedBy="mandatory-data-field"
+      [required]="true"
+    />
+  </div>
+
+  <div class="time">
+    <label for="time">
+      <ng-container i18n>Time</ng-container>
+      <p-selectbutton
+        [options]="timeModeOptions"
+        [ngModel]="measureData().season"
+        (onChange)="onFieldChange('season', $event.value)"
+        optionLabel="label"
+        optionValue="value"
+        allowEmpty="false"
+        class="small"
+      />
+    </label>
+    <p-datepicker
+      appendTo="body"
+      id="time"
+      [ngModel]="measureData().time"
+      (ngModelChange)="onFieldChange('time', $event)"
+      [timeOnly]="true"
+      hourFormat="24"
+      styleClass="w-full"
+      [showIcon]="true"
+      ariaDescribedBy="mandatory-data-field"
+      [required]="true"
+    />
+  </div>
+
+  <div class="temperature">
+    <label for="ambientTemperature" i18n>Ambient temperature</label>
+    <p-inputgroup>
       <input
         pInputText
-        id="measureName"
-        type="text"
-        [fluid]="true"
-        [ngModel]="measureData().measureName"
-        (ngModelChange)="onFieldChange('measureName', $event)"
-        aria-describedby="mandatory-fields-info"
-      />
-    </div>
-
-    <div class="date">
-      <label for="date" i18n>Date</label>
-      <p-datepicker
-        appendTo="body"
-        id="date"
-        [ngModel]="measureData().date"
-        (ngModelChange)="onFieldChange('date', $event)"
-        dateFormat="dd/mm/yy"
-        styleClass="w-full"
-        [showIcon]="true"
-        ariaDescribedBy="mandatory-fields-info"
-      />
-    </div>
-
-    <div class="time">
-      <label for="time">
-        <ng-container i18n>Time</ng-container>
-        <p-selectbutton
-          [options]="timeModeOptions"
-          [ngModel]="measureData().season"
-          (onChange)="onFieldChange('season', $event.value)"
-          optionLabel="label"
-          optionValue="value"
-          allowEmpty="false"
-          class="small"
-        />
-      </label>
-      <p-datepicker
-        appendTo="body"
-        id="time"
-        [ngModel]="measureData().time"
-        (ngModelChange)="onFieldChange('time', $event)"
-        [timeOnly]="true"
-        hourFormat="24"
-        styleClass="w-full"
-        [showIcon]="true"
-        ariaDescribedBy="mandatory-fields-info"
-      />
-    </div>
-
-    <div class="temperature">
-      <label for="ambientTemperature" i18n>Ambient temperature</label>
-      <p-inputgroup>
-        <input
-          pInputText
-          id="ambientTemperature"
-          type="number"
-          [min]="-80"
-          [max]="80"
-          [ngModel]="measureData().ambientTemperature"
-          (ngModelChange)="onFieldChange('ambientTemperature', $event)"
-          aria-describedby="mandatory-fields-info"
-        />
-        <p-inputgroup-addon>°C</p-inputgroup-addon>
-      </p-inputgroup>
-    </div>
-
-    <div class="wind">
-      <label for="windSpeed">
-        <ng-container i18n>Wind speed</ng-container>
-        <p-selectbutton
-          [options]="windSpeedUnitOptions"
-          [ngModel]="measureData().windSpeedUnit"
-          (onChange)="onFieldChange('windSpeedUnit', $event.value)"
-          optionLabel="label"
-          optionValue="value"
-          allowEmpty="false"
-          class="small"
-        />
-      </label>
-      <input
-        pInputText
-        id="windSpeed"
+        id="ambientTemperature"
         type="number"
-        [fluid]="true"
-        [min]="0"
-        [ngModel]="measureData().windSpeed"
-        (ngModelChange)="onFieldChange('windSpeed', $event)"
-        aria-describedby="mandatory-fields-info"
+        [min]="-80"
+        [max]="80"
+        [ngModel]="measureData().ambientTemperature"
+        (ngModelChange)="onFieldChange('ambientTemperature', $event)"
+        aria-describedby="mandatory-data-field"
+        required
       />
-    </div>
+      <p-inputgroup-addon>°C</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
 
-    <div class="direction">
-      <label for="windDirection" i18n>Wind direction</label>
-      <p-select
-        appendTo="body"
-        id="windDirection"
-        [options]="windDirectionOptions"
+  <div class="wind">
+    <label for="windSpeed">
+      <ng-container i18n>Wind speed</ng-container>
+      <p-selectbutton
+        [options]="windSpeedUnitOptions"
+        [ngModel]="measureData().windSpeedUnit"
+        (onChange)="onFieldChange('windSpeedUnit', $event.value)"
         optionLabel="label"
         optionValue="value"
-        [ngModel]="measureData().windDirection"
-        (ngModelChange)="onFieldChange('windDirection', $event)"
-        styleClass="w-full"
-        ariaDescribedBy="mandatory-fields-info"
+        allowEmpty="false"
+        class="small"
       />
-    </div>
+    </label>
+    <input
+      pInputText
+      id="windSpeed"
+      type="number"
+      [fluid]="true"
+      [min]="0"
+      [ngModel]="measureData().windSpeed"
+      (ngModelChange)="onFieldChange('windSpeed', $event)"
+      aria-describedby="mandatory-data-field"
+      required
+    />
+  </div>
 
-    <div class="sky">
-      <label for="skyCover" i18n>Sky cover</label>
-      <p-select
-        appendTo="body"
-        id="skyCover"
-        [options]="skyCoverOptions"
-        optionLabel="label"
-        optionValue="value"
-        [ngModel]="measureData().skyCover"
-        (ngModelChange)="onFieldChange('skyCover', $event)"
-        styleClass="w-full"
-        ariaDescribedBy="mandatory-fields-info"
-      />
-    </div>
+  <div class="direction">
+    <label for="windDirection" i18n>Wind direction</label>
+    <p-select
+      appendTo="body"
+      id="windDirection"
+      [options]="windDirectionOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="measureData().windDirection"
+      (ngModelChange)="onFieldChange('windDirection', $event)"
+      styleClass="w-full"
+      ariaDescribedBy="mandatory-data-field"
+      [required]="true"
+    />
+  </div>
+
+  <div class="sky">
+    <label for="skyCover" i18n>Sky cover</label>
+    <p-select
+      appendTo="body"
+      id="skyCover"
+      [options]="skyCoverOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="measureData().skyCover"
+      (ngModelChange)="onFieldChange('skyCover', $event)"
+      styleClass="w-full"
+      ariaDescribedBy="mandatory-data-field"
+      [required]="true"
+    />
   </div>
 </div>

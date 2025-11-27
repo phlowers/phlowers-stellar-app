@@ -37,6 +37,7 @@
       [ngModel]="measureData().span"
       (ngModelChange)="onFieldChange('span', $event)"
       styleClass="w-full"
+      [required]="true"
     />
   </div>
 
@@ -56,6 +57,7 @@
         step="0.00000001"
         [ngModel]="measureData().longitude"
         (ngModelChange)="onFieldChange('longitude', $event)"
+        required
       />
       <p-inputgroup-addon i18n>°</p-inputgroup-addon>
     </p-inputgroup>
@@ -77,6 +79,7 @@
         step="0.00000001"
         [ngModel]="measureData().latitude"
         (ngModelChange)="onFieldChange('latitude', $event)"
+        required
       />
       <p-inputgroup-addon i18n>°</p-inputgroup-addon>
     </p-inputgroup>
@@ -95,6 +98,7 @@
         step="0.00000001"
         [ngModel]="measureData().altitude"
         (ngModelChange)="onFieldChange('altitude', $event)"
+        required
       />
       <p-inputgroup-addon i18n>m</p-inputgroup-addon>
     </p-inputgroup>
@@ -114,6 +118,7 @@
         type="number"
         [ngModel]="measureData().azimuth"
         (ngModelChange)="onFieldChange('azimuth', $event)"
+        required
       />
       <p-inputgroup-addon i18n>°</p-inputgroup-addon>
     </p-inputgroup>

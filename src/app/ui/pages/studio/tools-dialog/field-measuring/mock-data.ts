@@ -1,5 +1,12 @@
 import { FieldMeasureData, CalculationResults } from './types';
 
+export const leftSupportOption = [
+  { label: '12', value: '12' },
+  { label: '13', value: '13' },
+  { label: '14', value: '14' },
+  { label: '15', value: '15' }
+];
+
 export const INITIAL_MEASURE_DATA: FieldMeasureData = {
   measureName: '',
   line: 'Line 225kV Rougemontier - Tourbe #1',
