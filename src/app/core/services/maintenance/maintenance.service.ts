@@ -48,7 +48,8 @@ export class MaintenanceService {
     const mapData = (data: RteMaintenanceTeamsCsvFile[]) => {
       return data
         .map((item) => ({
-          maintenance_center_id: item.maintenance_center_id,
+          maintenance_center_id:
+            item.maintenance_center_id || item.maintenance_id || '',
           maintenance_center: item.maintenance_center,
           regional_team_id: item.regional_team_id,
           regional_team: item.regional_team,
