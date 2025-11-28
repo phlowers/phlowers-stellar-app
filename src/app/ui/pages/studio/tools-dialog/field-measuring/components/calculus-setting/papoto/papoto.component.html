@@ -4,8 +4,10 @@
 </p>
 
 <div class="papoto__form">
-  <div class="leftSupport">
-    <label for="leftSupport" i18n>Left support</label>
+  <div class="papoto__form__line1">
+    <label for="leftSupport" class="leftSupport__label" i18n>
+      Left support
+    </label>
     <p-select
       inputId="leftSupport"
       [options]="leftSupportOption()"
@@ -15,40 +17,47 @@
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       [required]="true"
+      class="leftSupport__input"
     />
-  </div>
 
-  <div class="spanLength">
-    <label for="spanLength" i18n>Measured span length</label>
-    <p-inputgroup>
+    <label for="spanLength" i18n class="spanLength__label">
+      Measured span length
+    </label>
+    <p-inputgroup class="spanLength__input">
       <input
         id="spanLength"
         type="number"
         pInputText
         [(ngModel)]="spanLength"
         [min]="0"
-        aria-describedby="mandatory-papoto"
+        aria-describedby="mandatory-papoto spanLength-calculated"
         required
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
-  </div>
+    <p id="spanLength-calculated" class="spanLength__desc">
+      <ng-container i18n> calculated value:</ng-container>
+      &nbsp;123 m
+    </p>
 
-  <div class="measuredElevationDifference">
-    <label for="measuredElevationDifference" i18n>
+    <label for="measuredElevationDifference" i18n class="MED__label">
       Elevation diff. of measured attach.
     </label>
-    <p-inputgroup>
+    <p-inputgroup class="MED__input">
       <input
         id="measuredElevationDifference"
         type="number"
         pInputText
         [(ngModel)]="measuredElevationDifference"
-        aria-describedby="mandatory-papoto"
+        aria-describedby="mandatory-papoto measuredElevationDifference-calculated"
         required
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
+    <p id="measuredElevationDifference-calculated" class="MED__desc">
+      <ng-container i18n>calculated value:</ng-container>
+      &nbsp;123 m
+    </p>
   </div>
 
   <div class="HG">

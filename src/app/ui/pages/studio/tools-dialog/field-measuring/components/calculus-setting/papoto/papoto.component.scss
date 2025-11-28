@@ -10,18 +10,58 @@
   &__form {
     @extend %tools-grid-layout;
     grid-template-areas:
-      'support length elevation . .'
+      'line1 line1 line1 . .'
       'HG H1 H2 H3 HD'
       'VG V1 V2 V3 VD';
 
+    &__line1 {
+      grid-area: line1;
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-areas:
+        'supportLabel lengthLabel elevationLabel'
+        'supportInput lengthInput elevationInput'
+        '. lengthDesc elevationDesc';
+    }
+
     .leftSupport {
-      grid-area: support;
+      &__label {
+        grid-area: supportLabel;
+        align-self: end;
+      }
+      &__input {
+        grid-area: supportInput;
+      }
     }
+
     .spanLength {
-      grid-area: length;
+      &__label {
+        grid-area: lengthLabel;
+        align-self: end;
+      }
+      &__input {
+        grid-area: lengthInput;
+      }
+      &__desc {
+        @apply mb-0 font-semibold;
+        grid-area: lengthDesc;
+        color: var(--star-dust-900);
+      }
     }
-    .measuredElevationDifference {
-      grid-area: elevation;
+
+    .MED {
+      &__label {
+        grid-area: elevationLabel;
+        align-self: end;
+      }
+      &__input {
+        grid-area: elevationInput;
+      }
+      &__desc {
+        @apply mb-0 font-semibold;
+        grid-area: elevationDesc;
+        color: var(--star-dust-900);
+      }
     }
     .HG {
       grid-area: HG;
