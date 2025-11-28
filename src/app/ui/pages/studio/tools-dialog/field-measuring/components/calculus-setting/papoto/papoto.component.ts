@@ -1,5 +1,11 @@
-import { Component, input } from '@angular/core';
+import { Component, input, model, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import {
+  trigger,
+  transition,
+  style,
+  animate
+} from '@angular/animations';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -19,24 +25,39 @@ import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/butt
     ButtonComponent
   ],
   templateUrl: './papoto.component.html',
-  styleUrl: './papoto.component.scss'
+  styleUrl: './papoto.component.scss',
+  animations: [
+    trigger('expandCollapse', [
+      transition(':enter', [
+        style({ height: 0, opacity: 0, overflow: 'hidden' }),
+        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        style({ overflow: 'hidden' }),
+        animate('300ms ease-in', style({ height: 0, opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class PapotoComponent {
   leftSupportOption = input.required<{ label: string; value: string }[]>();
 
-  leftSupport: string | null = null;
-  spanLength: number | null = null;
-  measuredElevationDifference: number | null = null;
+  leftSupport = model<string | null>(null);
+  spanLength = model<number | null>(null);
+  measuredElevationDifference = model<number | null>(null);
 
-  HG: number | null = null;
-  H1: number | null = null;
-  H2: number | null = null;
-  H3: number | null = null;
-  HD: number | null = null;
+  HG = model<number | null>(null);
+  H1 = model<number | null>(null);
+  H2 = model<number | null>(null);
+  H3 = model<number | null>(null);
+  HD = model<number | null>(null);
 
-  VG: number | null = null;
-  V1: number | null = null;
-  V2: number | null = null;
-  V3: number | null = null;
-  VD: number | null = null;
+  VG = model<number | null>(null);
+  V1 = model<number | null>(null);
+  V2 = model<number | null>(null);
+  V3 = model<number | null>(null);
+  VD = model<number | null>(null);
+
+  papotoResults = signal<boolean>(false);
+  criterion = signal<boolean>(true);
 }
