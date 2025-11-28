@@ -47,15 +47,10 @@ const scene = (
   invert: boolean,
   camera: Camera | null
 ) => ({
-  aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+  aspectmode: 'data' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
   xaxis: axis,
-  yaxis: axis,
+  yaxis: { ...axis, scaleanchor: 'x', scaleratio: 1 },
   zaxis: axis,
-  aspectratio: {
-    x: 3,
-    y: 0.2,
-    z: 0.5
-  },
   camera: camera ?? {
     ...(isSupportZoom ? supportCamera : normalCamera(invert))
   }

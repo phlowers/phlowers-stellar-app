@@ -83,22 +83,18 @@ describe('createPlot', () => {
   });
 
   describe('scene configuration', () => {
-    it('should configure scene with manual aspectmode', () => {
+    it('should configure scene with data aspectmode', () => {
       createPlot('test-plot-id', mockData, false, false, '3d', null, 'profile');
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
-      expect(layoutArg.scene.aspectmode).toBe('manual');
+      expect(layoutArg.scene.aspectmode).toBe('data');
     });
 
     it('should configure scene with correct aspectratio', () => {
       createPlot('test-plot-id', mockData, false, false, '3d', null, 'profile');
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
-      expect(layoutArg.scene.aspectratio).toEqual({
-        x: 3,
-        y: 0.2,
-        z: 0.5
-      });
+      expect(layoutArg.scene.aspectratio).toEqual(undefined);
     });
   });
 });
