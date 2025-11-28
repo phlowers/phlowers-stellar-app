@@ -2,13 +2,19 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
-import { TangentBearingsComponent } from './tangent-bearings/tangent-bearings.component';
+import { TangentAimingComponent } from './tangent-aiming/tangent-aiming.component';
 import { PepComponent } from './pep/pep.component';
 import { leftSupportOption } from '../../mock-data';
 
 @Component({
   selector: 'app-calculus-setting',
-  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentBearingsComponent],
+  imports: [
+    FormsModule,
+    RadioButton,
+    PapotoComponent,
+    PepComponent,
+    TangentAimingComponent
+  ],
   templateUrl: './calculus-setting.component.html',
   styleUrl: './calculus-setting.component.scss'
 })
