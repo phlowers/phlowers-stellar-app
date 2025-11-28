@@ -102,6 +102,7 @@ const protoV4SuccessMessage = {
 export class ImportStudyComponent {
   loading = signal<boolean>(false);
   newStudies = signal<Study[]>([]);
+  erroredFiles = signal<string[]>([]);
 
   constructor(
     private readonly studiesService: StudiesService,
@@ -150,6 +151,7 @@ export class ImportStudyComponent {
       } catch (_error: unknown) {
         console.error('Error importing study', _error);
         this.messageService.add(importErrorMessage);
+        this.erroredFiles.set([...this.erroredFiles(), file.name]);
       }
     };
     reader.readAsText(file);
@@ -222,6 +224,7 @@ export class ImportStudyComponent {
       } catch (_error: unknown) {
         console.error('Error importing study', _error);
         this.messageService.add(importErrorMessage);
+        this.erroredFiles.set([...this.erroredFiles(), fileName]);
       }
     };
     reader.onerror = () => {
