@@ -94,4 +94,79 @@
       grid-area: VD;
     }
   }
+
+  &__results {
+    @apply border-t mt-3;
+    border-color: var(--star-dust-300);
+
+    &__title {
+      @apply mt-4 mb-0;
+      @extend %heading-s;
+      color: var(--star-dust-950);
+    }
+
+    &__list {
+      @extend %tools-grid-layout;
+      grid-template-areas:
+        'param incertainParam . . .'
+        'param12 param23 param13 crit .';
+
+      .param {
+        grid-area: param;
+      }
+
+      .incertainParam {
+        grid-area: incertainParam;
+      }
+
+      .param12 {
+        grid-area: param12;
+      }
+
+      .param23 {
+        grid-area: param23;
+      }
+
+      .param13 {
+        grid-area: param13;
+      }
+
+      .crit {
+        grid-area: crit;
+
+        &__result {
+          @apply flex items-center gap-4 py-1;
+
+          .app-icon {
+            color: var(--grey-white);
+            font-size: 1.25rem;
+            border-radius: 1.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            line-height: 1.5rem;
+            text-align: center;
+
+            &.criterion-ok {
+              background-color: var(--main-success);
+            }
+
+            &.criterion-ko {
+              background-color: var(--main-error);
+            }
+          }
+        }
+      }
+
+      dt {
+        @apply px-1;
+        color: var(--star-dust-900);
+      }
+
+      dd {
+        @apply px-1 py-2;
+        @extend %text-m-400;
+        color: var(--star-dust-950);
+      }
+    }
+  }
 }
