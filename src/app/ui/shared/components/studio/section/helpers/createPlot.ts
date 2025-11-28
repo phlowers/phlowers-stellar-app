@@ -46,20 +46,28 @@ const scene = (
   isSupportZoom: boolean,
   invert: boolean,
   camera: Camera | null
-) => ({
-  aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
-  xaxis: axis,
-  yaxis: axis,
-  zaxis: axis,
-  aspectratio: {
-    x: 3,
-    y: 0.2,
-    z: 0.5
-  },
-  camera: camera ?? {
-    ...(isSupportZoom ? supportCamera : normalCamera(invert))
+) => {
+  if (camera) {
+    const y = Math.abs(camera.eye?.y || 0);
+    camera.eye = { ...camera.eye, y: invert ? y : y * -1 };
   }
-});
+  return {
+    aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+    xaxis: axis,
+    yaxis: axis,
+    zaxis: axis,
+    aspectratio: {
+      x: 3,
+      y: 0.2,
+      z: 0.5
+    },
+    camera: camera
+      ? camera
+      : {
+          ...(isSupportZoom ? supportCamera : normalCamera(invert))
+        }
+  };
+};
 
 const config = {
   displayModeBar: true,
@@ -121,11 +129,12 @@ const layout2d: (
     },
     xaxis: {
       ...axis,
-      autorange: side === 'face' ? false : true,
+      autorange: side === 'face' ? false : invert ? 'reversed' : true,
       showticklabels: true,
       showgrid: true,
       showline: true,
-      range: side === 'face' ? [xMin, xMax] : undefined
+      range:
+        side === 'face' ? (invert ? [xMax, xMin] : [xMin, xMax]) : undefined
     },
     yaxis: {
       ...axis,
