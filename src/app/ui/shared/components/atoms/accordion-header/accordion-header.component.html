@@ -1,0 +1,10 @@
+<p-accordion-header>
+  <ng-content />
+  <ng-template #toggleicon let-active="active">
+    @if (active) {
+      <app-icon icon="keyboard_arrow_down" class="accordion-arrow" />
+    } @else {
+      <app-icon icon="keyboard_arrow_up" class="accordion-arrow" />
+    }
+  </ng-template>
+</p-accordion-header>

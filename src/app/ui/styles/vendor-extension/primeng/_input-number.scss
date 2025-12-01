@@ -1,0 +1,15 @@
+.p-inputnumber-horizontal.p-inputnumber-horizontal {
+  .p-inputnumber-input {
+    order: 1;
+    border: .0625rem solid var(--p-inputnumber-button-border-color);
+    border-right: none;
+    box-shadow: none;
+    border-start-start-radius: var(--p-form-field-border-radius);
+    border-end-start-radius: var(--p-form-field-border-radius);
+  }
+
+  .p-inputnumber-decrement-button {
+    border-left: none;
+    border-radius: 0;
+  }
+}

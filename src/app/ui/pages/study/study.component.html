@@ -1,0 +1,47 @@
+<app-study-header
+  [study]="study"
+  (duplicateStudy)="duplicateStudy($event)"
+  (openModifyStudyModal)="openModifyStudyModal()"
+/>
+@if (study) {
+  <app-new-study-modal
+    [(isOpen)]="isNewStudyModalOpen"
+    mode="modify"
+    [studyUuid]="study!.uuid"
+    [titleInput]="study!.title"
+    [descriptionInput]="study!.description ?? ''"
+    (refreshStudy)="refreshStudy($event)"
+  />
+}
+<div class="mt-6">
+  <p-tabs value="sections">
+    <p-tablist>
+      <p-tab value="sections" i18n>Sections</p-tab>
+      <p-tab value="studyStates" disabled="true" i18n
+        >List of saved states</p-tab
+      >
+      <p-tab value="measurements" disabled="true" i18n>Measurements</p-tab>
+      <p-tab value="groundAndObstacles" disabled="true" i18n
+        >Ground & obstacles</p-tab
+      >
+    </p-tablist>
+    <p-tabpanels class="px-0">
+      <p-tabpanel value="sections">
+        <app-sections-tab
+          [study]="study"
+          (createOrUpdateSection)="createOrUpdateSection($event)"
+          (deleteSection)="deleteSection($event)"
+          (duplicateSection)="duplicateSection($event)"
+          (addInitialCondition)="addInitialCondition($event)"
+          (updateInitialCondition)="updateInitialCondition($event)"
+          (deleteInitialCondition)="deleteInitialCondition($event)"
+          (duplicateInitialCondition)="duplicateInitialCondition($event)"
+          (setInitialCondition)="setInitialCondition($event)"
+        />
+      </p-tabpanel>
+      <p-tabpanel value="initialState"> </p-tabpanel>
+      <p-tabpanel value="studyState"> </p-tabpanel>
+      <p-tabpanel value="measurements"> </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>

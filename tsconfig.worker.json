@@ -1,0 +1,14 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./public",
+    "lib": [
+      "webworker",
+      "es2022"
+    ],
+  },
+  "include": [
+    "./src/app/core/services/worker_update/service-worker.ts"
+  ]
+}

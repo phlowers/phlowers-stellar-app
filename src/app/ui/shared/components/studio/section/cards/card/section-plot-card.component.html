@@ -1,0 +1,81 @@
+<app-card role="article" class="section-plot-card">
+  <header class="flex flex-col justify-between items-center">
+    <div class="flex flex-col gap-2 items-center w-[1.5rem]">
+      <div [class]="cardColor()" class="icon-wrapper">
+        <app-icon [icon]="type()" />
+      </div>
+
+      <p class="title" i18n>{{ cardTitle() }}</p>
+    </div>
+
+    <button
+      (click)="isExpanded.set(!isExpanded())"
+      app-button
+      aria-label="Expand details"
+      i18n-aria-label
+      btnStyle="text"
+      btnSize="s"
+    >
+      <app-icon
+        class="arrow"
+        [icon]="isExpanded() ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+      />
+    </button>
+  </header>
+
+  <main class="flex flex-col">
+    @if (type() === 'support') {
+      <!-- Support Type Content -->
+      @for (section of supportData(); track $index) {
+        @if (section.title) {
+          <p class="title" i18n>{{ section.title }}</p>
+        }
+        <div [class]="section.indent ? 'pl-2' : ''">
+          @for (field of section.fields; track $index) {
+            <dl class="details">
+              <dt>{{ field.label }}</dt>
+              <dd>{{ field.value }}</dd>
+            </dl>
+          }
+        </div>
+      }
+
+      <!-- Expanded Support Content -->
+      <div [@expandCollapse]="isExpanded() ? 'expanded' : 'collapsed'">
+        @for (section of supportExpandedData(); track $index) {
+          @if (section.title) {
+            <p class="title" i18n>{{ section.title }}</p>
+          }
+          <div [class]="section.indent ? 'pl-2' : ''">
+            @for (field of section.fields; track $index) {
+              <dl class="details">
+                <dt>{{ field.label }}</dt>
+                <dd>{{ field.value }}</dd>
+              </dl>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (type() === 'span') {
+      <!-- Span Type Content -->
+      @for (field of spanData(); track $index) {
+        <dl class="details">
+          <dt>{{ field.label }}</dt>
+          <dd>{{ field.value }}</dd>
+        </dl>
+      }
+
+      <!-- Expanded Span Content -->
+      <div [@expandCollapse]="isExpanded() ? 'expanded' : 'collapsed'">
+        @for (field of spanExpandedData(); track $index) {
+          <dl class="details">
+            <dt>{{ field.label }}</dt>
+            <dd>{{ field.value }}</dd>
+          </dl>
+        }
+      </div>
+    }
+  </main>
+</app-card>

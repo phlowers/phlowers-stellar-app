@@ -1,0 +1,310 @@
+<p-dialog
+  dismissableMask="true"
+  [visible]="isOpen()"
+  (visibleChange)="onVisibleChange($event)"
+  [style]="{ 'min-width': '50vw', 'max-width': '40.625rem' }"
+  [modal]="true"
+>
+  <ng-template #header>
+    <p class="text-l-600 mb-0 flex gap-2">
+      @if (mode() === 'create') {
+        <app-icon icon="add_circle" />
+        <span i18n>Create an initial condition</span>
+      } @else if (mode() === 'edit') {
+        <app-icon icon="edit" />
+        <span>{{ initialCondition().name }}</span>
+      } @else if (mode() === 'view') {
+        <app-icon icon="visibility" />
+        <span>{{ initialCondition().name }}</span>
+      }
+    </p>
+  </ng-template>
+  <ng-template #content>
+    <div class="form">
+      <dl class="form__col">
+        <div>
+          <dt i18n>Section name</dt>
+          <dd class="read-only-info test">{{ section().name }}</dd>
+        </div>
+
+        <div>
+          <dt i18n>Cable name</dt>
+          <dd class="read-only-info test">{{ section().cable_name }}</dd>
+        </div>
+
+        <div>
+          <dt i18n>Cables amount</dt>
+          <dd class="read-only-info test">{{ section().cables_amount }}</dd>
+        </div>
+      </dl>
+
+      <p-divider layout="vertical" />
+
+      @if (mode() === 'create' || mode() === 'edit') {
+        <div class="form__col form__col--right">
+          <div>
+            <label for="initial-condition-name">
+              <ng-container i18n>Initial condition name </ng-container>
+              <sup class="mandatory">*</sup>
+            </label>
+            <input
+              name="initial-condition-name"
+              required
+              type="text"
+              id="initial-condition-name"
+              [attr.aria-invalid]="!isNameUnique()"
+              aria-errormessage="initial-condition-name-error-message"
+              pInputText
+              [(ngModel)]="initialCondition().name"
+              (ngModelChange)="onNameChange($event)"
+            />
+            @if (!isNameUnique()) {
+              <p-message
+                id="initial-condition-name-error-message"
+                severity="error"
+                size="small"
+                variant="simple"
+                i18n
+              >
+                Initial condition name must be unique.
+              </p-message>
+            }
+          </div>
+          <div>
+            <label for="initial-condition-base-parameter" i18n>
+              Base parameter
+            </label>
+            <input
+              name="initial-condition-base-parameter"
+              required
+              step="0.01"
+              min="0"
+              [pKeyFilter]="onlyPositiveNumbers"
+              type="number"
+              id="initial-condition-base-parameter"
+              pInputText
+              [ngModel]="initialCondition().base_parameters"
+              (ngModelChange)="
+                onInitialConditionFieldChange('base_parameters', $event)
+              "
+            />
+          </div>
+          <div>
+            <label for="initial-condition-base-temperature" i18n>
+              Base temperature
+            </label>
+            <p-inputgroup>
+              <input
+                name="initial-condition-base-temperature"
+                min="-273"
+                required
+                type="number"
+                id="initial-condition-base-temperature"
+                pInputText
+                [ngModel]="initialCondition().base_temperature"
+                (ngModelChange)="
+                  onInitialConditionFieldChange('base_temperature', $event)
+                "
+              />
+              <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+          @if (isCableNarcisse()) {
+            <div>
+              <label for="initial-condition-cable-pretension" i18n>
+                Cable pretension
+              </label>
+              <p-inputgroup>
+                <input
+                  name="initial-condition-cable-pretension"
+                  required
+                  type="number"
+                  id="initial-condition-cable-pretension"
+                  pInputText
+                  [(ngModel)]="initialCondition().cable_pretension"
+                />
+                <p-inputgroup-addon i18n>%CRA</p-inputgroup-addon>
+              </p-inputgroup>
+            </div>
+            <div>
+              <p class="font-bold mb-0" i18n>
+                Extreme historical conditions incurred by the cable
+              </p>
+            </div>
+            <div>
+              <label for="initial-condition-min-temperature" i18n>
+                Min temperature
+              </label>
+              <p-inputgroup>
+                <input
+                  name="initial-condition-min-temperature"
+                  required
+                  type="number"
+                  id="initial-condition-min-temperature"
+                  pInputText
+                  [(ngModel)]="initialCondition().min_temperature"
+                />
+                <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
+              </p-inputgroup>
+            </div>
+            <div>
+              <label for="initial-condition-max-wind-pressure" i18n>
+                Max wind pressure
+              </label>
+              <p-inputgroup>
+                <input
+                  name="initial-condition-max-wind-pressure"
+                  required
+                  type="number"
+                  id="initial-condition-max-wind-pressure"
+                  pInputText
+                  [(ngModel)]="initialCondition().max_wind_pressure"
+                />
+                <p-inputgroup-addon i18n>Pa</p-inputgroup-addon>
+              </p-inputgroup>
+            </div>
+            <div>
+              <label for="initial-condition-max-frost-width" i18n>
+                Max ice thickness
+              </label>
+              <p-inputgroup>
+                <input
+                  name="initial-condition-max-frost-width"
+                  required
+                  type="number"
+                  id="initial-condition-max-frost-width"
+                  pInputText
+                  [(ngModel)]="initialCondition().max_frost_width"
+                />
+                <p-inputgroup-addon i18n>cm</p-inputgroup-addon>
+              </p-inputgroup>
+            </div>
+          }
+        </div>
+      } @else if (mode() === 'view') {
+        <dl class="form__col form__col--right">
+          <div>
+            <dt i18n>Initial condition name</dt>
+            <dd class="read-only-info test">{{ initialCondition().name }}</dd>
+          </div>
+
+          <div>
+            <dt i18n>Base parameter</dt>
+            <dd class="read-only-info test">
+              {{ initialCondition().base_parameters }}
+            </dd>
+          </div>
+
+          <div>
+            <dt i18n>Base temperature (°C)</dt>
+            <dd class="read-only-info test">
+              {{ initialCondition().base_temperature }}
+              @if (isNumber(initialCondition().base_temperature)) {
+                <ng-container i18n>°C</ng-container>
+              }
+            </dd>
+          </div>
+          @if (isCableNarcisse()) {
+            <div>
+              <dt i18n>Cable pretension</dt>
+              <dd class="read-only-info test">
+                {{ initialCondition().cable_pretension }}
+                @if (isNumber(initialCondition().cable_pretension)) {
+                  <ng-container i18n>%CRA</ng-container>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt class="extreme-historical-conditions" i18n>
+                Extreme historical conditions incurred by the cable
+              </dt>
+            </div>
+            <div>
+              <dt i18n>Min temperature</dt>
+              <dd class="read-only-info test">
+                {{ initialCondition().min_temperature }}
+                @if (isNumber(initialCondition().min_temperature)) {
+                  <ng-container i18n>°C</ng-container>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt i18n>Max wind pressure</dt>
+              <dd class="read-only-info test">
+                {{ initialCondition().max_wind_pressure }}
+                @if (isNumber(initialCondition().max_wind_pressure)) {
+                  <ng-container i18n>Pa</ng-container>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt i18n>Max ice thickness</dt>
+              <dd class="read-only-info test">
+                {{ initialCondition().max_frost_width }}
+                @if (isNumber(initialCondition().max_frost_width)) {
+                  <ng-container i18n>cm</ng-container>
+                }
+              </dd>
+            </div>
+          }
+        </dl>
+      }
+    </div>
+  </ng-template>
+
+  <ng-template #footer>
+    @if (mode() === 'view') {
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        btnStyle="danger"
+        (click)="onDelete()"
+      >
+        <app-icon icon="delete" />
+        <span i18n>Delete</span>
+      </button>
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="onDuplicate()"
+      >
+        <app-icon icon="content_copy" />
+        <span i18n>Duplicate</span>
+      </button>
+      <button
+        app-btn
+        type="button"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="onModify()"
+      >
+        <app-icon icon="edit" />
+        <span i18n>Edit</span>
+      </button>
+    } @else {
+      <button
+        app-btn
+        type="submit"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="isOpenChange.emit(false)"
+      >
+        <app-icon icon="close" />
+        <span i18n>Cancel</span>
+      </button>
+      <button
+        app-btn
+        type="button"
+        [disabled]="!this.initialCondition().name || !isNameUnique()"
+        btnSize="m"
+        (click)="onSubmit()"
+      >
+        <app-icon icon="check" />
+        <span i18n>Validate</span>
+      </button>
+    }
+  </ng-template>
+</p-dialog>

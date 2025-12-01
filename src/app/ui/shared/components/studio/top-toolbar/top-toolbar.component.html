@@ -1,0 +1,181 @@
+<div class="toolbar" role="menubar">
+  <p-selectbutton
+    [options]="threeDOptions()"
+    [disabled]="plotService.loading()"
+    [ngModel]="plotService.plotOptions().view"
+    (onChange)="plotService.plotOptionsChange('view', $event.value)"
+    optionLabel="label"
+    optionValue="value"
+    allowEmpty="false"
+    ariaLabel="switch graph view"
+    i18n-ariaLabel
+  />
+
+  <hr class="toolbar__separator" />
+
+  <div class="flex items-center gap-2">
+    <p id="side" class="text-l-600 m-0" i18n>Side:</p>
+    <p-selectbutton
+      [options]="sideOptions()"
+      [ngModel]="plotService.plotOptions().side"
+      (onChange)="plotService.plotOptionsChange('side', $event.value)"
+      optionLabel="label"
+      optionValue="value"
+      ariaLabelledBy="side"
+      allowEmpty="false"
+      [disabled]="plotService.plotOptions().view === '3d'"
+    />
+  </div>
+
+  <hr class="toolbar__separator" />
+
+  <div class="flex flex-col items-start">
+    <label for="invert" class="text-m-600 m-0" i18n>Invert:</label>
+    <p-toggleswitch
+      inputId="invert"
+      [(ngModel)]="plotService.plotOptions().invert"
+      (onChange)="plotService.plotOptionsChange('invert', $event.checked)"
+    />
+  </div>
+
+  <hr class="toolbar__separator" />
+
+  <p-multiselect
+    appendTo="body"
+    i18n-placeholder
+    placeholder="Display"
+    [filter]="false"
+    [showToggleAll]="false"
+    [options]="displayOptions()"
+    optionLabel="label"
+    class="toolbar-multiselect"
+    [class.toolbar-multiselect--active]="displayOptionsStatus()"
+    panelStyleClass="toolbar-multiselect-overlay"
+    (onPanelShow)="displayOptionsStatus.set(true)"
+    (onPanelHide)="displayOptionsStatus.set(false)"
+  >
+    <ng-template #selecteditems let-value>
+      @if (value?.length) {
+        <ng-container i18n>Display</ng-container>
+      }
+    </ng-template>
+
+    <ng-template #dropdownicon>
+      <app-icon icon="visibility" />
+    </ng-template>
+
+    <ng-template #header>
+      <div class="toolbar-multiselect__dropdown__header">
+        <app-icon icon="info" />
+        <p class="mb-0" i18n>Select which elements to display on the studio.</p>
+      </div>
+    </ng-template>
+  </p-multiselect>
+
+  <hr class="toolbar__separator" />
+
+  <p-speedDial
+    direction="down"
+    class="toolbar-speed-dial"
+    [model]="tablesDropdown()"
+  >
+    <ng-template #button let-toggleCallback="toggleCallback">
+      <button (click)="toggleCallback($event)">
+        <app-icon icon="table_chart" />
+        <ng-container i18n>Tables</ng-container>
+      </button>
+    </ng-template>
+
+    <ng-template #item let-item let-toggleCallback="toggleCallback">
+      <button (click)="toggleCallback($event, item)">{{ item.label }}</button>
+    </ng-template>
+  </p-speedDial>
+
+  <hr class="toolbar__separator" />
+
+  <p-speedDial
+    direction="down"
+    class="toolbar-speed-dial"
+    [model]="toolsDropdown()"
+  >
+    <ng-template #button let-toggleCallback="toggleCallback">
+      <button (click)="toggleCallback($event)">
+        <app-icon icon="build" />
+        <ng-container i18n>Tools</ng-container>
+      </button>
+    </ng-template>
+
+    <ng-template #item let-item let-toggleCallback="toggleCallback">
+      <button (click)="toggleCallback($event, item)">{{ item.label }}</button>
+    </ng-template>
+  </p-speedDial>
+
+  <hr class="toolbar__separator" />
+
+  <div class="toolbar__shortcuts">
+    @for (item of toolsItems(); track $index) {
+      @if (item.checked) {
+        <button
+          class="toolbar__specifbtn"
+          (click)="item.action()"
+          [attr.aria-label]="item.label"
+          i18n-aria-label
+        >
+          {{ item.label }}
+        </button>
+      }
+    }
+  </div>
+
+  <button
+    class="toolbar__specifbtn toolbar__specifbtn--icon"
+    aria-label="Edit your selected tools shortcuts"
+    i18n-aria-label
+    (click)="shortcutsModal.set(true)"
+  >
+    <app-icon icon="edit" />
+  </button>
+</div>
+
+<p-dialog
+  [(visible)]="shortcutsModal"
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="{ width: '27.5rem' }"
+>
+  <ng-template #header>
+    <p class="modal__header">
+      <app-icon icon="build" />
+      <ng-container i18n>Inset</ng-container>
+    </p>
+  </ng-template>
+
+  <div class="modal__content">
+    <p i18n>Select and organise the tools with quick access (maximum 5).</p>
+
+    <ul>
+      @for (item of toolsItems(); track $index) {
+        <li class="modal__checkboxs">
+          <p-checkbox
+            [(ngModel)]="item.checked"
+            [binary]="true"
+            [disabled]="!item.checked && checkedCount() >= 5"
+            [inputId]="'item-' + item.id"
+            (onChange)="updateCheckedCount()"
+          >
+          </p-checkbox>
+          <label [for]="'item-' + item.id">
+            {{ item.label }}
+          </label>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <ng-template #footer>
+    <button app-btn (click)="shortcutsModal.set(false)">
+      <app-icon icon="check" />
+      <ng-container i18n>Validate</ng-container>
+    </button>
+  </ng-template>
+</p-dialog>

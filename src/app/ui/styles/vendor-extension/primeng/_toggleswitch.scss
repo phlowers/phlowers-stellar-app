@@ -1,0 +1,59 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+.p-toggleswitch.p-toggleswitch {
+  --p-toggleswitch-width: 2.25rem;
+  --p-toggleswitch-height: 1rem;
+  --p-toggleswitch-handle-size: 0.875rem;
+  --p-toggleswitch-gap: 0rem;
+  --p-toggleswitch-border-color: var(--grey-100);
+  --p-toggleswitch-hover-border-color: var(--p-toggleswitch-border-color);
+  --p-toggleswitch-checked-border-color: var(--primary-700);
+  --p-toggleswitch-background: var(--grey-0);
+  --p-toggleswitch-hover-background: var(--p-toggleswitch-background);
+  --p-toggleswitch-checked-background: var(--primary-600);
+  --p-toggleswitch-checked-hover-background: var(--primary-700);
+  --p-toggleswitch-shadow: 0 0 0 rgb(255, 255, 255, 0);
+  --p-toggleswitch-handle-size: var(--p-toggleswitch-height);
+
+  border-radius: var(--p-toggleswitch-border-radius);
+
+  &:hover {
+    box-shadow: map.get(app.$elevation, neutral-2);
+  }
+
+  &:not(.p-disabled):has(.p-toggleswitch-input:focus-visible) {
+    .p-toggleswitch-slider {
+      @extend %focus-state;
+    }
+  }
+
+  &.p-toggleswitch-checked {
+    .p-toggleswitch-handle {
+      border-color: var(--primary-700);
+
+      &::before {
+        content: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" fill="none"%3E%3Cpath d="M4.63789 7.47461L8.37539 3.73711C8.46631 3.64544 8.57235 3.59961 8.69352 3.59961C8.81477 3.59961 8.92122 3.64544 9.01289 3.73711C9.10456 3.82878 9.15039 3.93536 9.15039 4.05686C9.15039 4.17836 9.10618 4.28332 9.01777 4.37173L4.96289 8.43711C4.87197 8.52878 4.76593 8.57461 4.64477 8.57461C4.52352 8.57461 4.41706 8.52878 4.32539 8.43711L2.53789 6.64961C2.44622 6.55794 2.40039 6.45169 2.40039 6.33086C2.40039 6.21003 2.44622 6.10378 2.53789 6.01211C2.62956 5.92044 2.73652 5.87461 2.85877 5.87461C2.98093 5.87461 3.08647 5.92044 3.17539 6.01211L4.63789 7.47461Z" fill="%23674883"/%3E%3C/svg%3E');
+        height: 0.75rem;
+        top: 0; // but this one does...
+      }
+    }
+  }
+
+  .p-toggleswitch-handle {
+    border: 1px solid var(--grey-150);
+    box-shadow: map.get(app.$elevation, neutral-2);
+    line-height: 1;
+
+    &::before {
+      @apply block;
+      content: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6"%3E%3Cpath d="M3.6890869,2.9820557L5.8168945.8540039c.1953125-.1953125.1953125-.5117188,0-.7070312s-.5117188-.1953125-.7070312,0l-2.1278076,2.1280518L.8535156.1464844C.6582031-.0488281.3417969-.0488281.1464844.1464844S-.0488281.6582031.1464844.8535156l2.12854,2.12854L.1464844,5.1108398c-.1953125.1953125-.1953125.5117188,0,.7070312.0976562.0976562.2255859.1464844.3535156.1464844s.2558594-.0488281.3535156-.1464844l2.12854-2.1287842,2.1278076,2.1278076c.0976562.0976562.2255859.1464844.3535156.1464844s.2558594-.0488281.3535156-.1464844c.1953125-.1953125.1953125-.5117188,0-.7070312l-2.1278076-2.1278076Z" fill="%23626769"/%3E%3C/svg%3E');
+      height: 0.375rem;
+      aspect-ratio: 1;
+
+      // don't know why svg is placed outside its box. an unidentified css property must mess with it
+      position: relative;
+      top: -0.25rem;
+    }
+  }
+}

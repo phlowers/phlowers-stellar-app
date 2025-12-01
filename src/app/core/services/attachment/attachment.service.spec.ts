@@ -1,0 +1,776 @@
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+import { TestBed } from '@angular/core/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController
+} from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
+import { AttachmentService } from './attachment.service';
+import { StorageService } from '../storage/storage.service';
+import {
+  Attachment,
+  RteAttachmentsCsvFile
+} from '../../data/database/interfaces/attachment';
+import Papa from 'papaparse';
+
+// Mock Papa Parse
+jest.mock('papaparse', () => ({
+  parse: jest.fn()
+}));
+
+// Mock uuid
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'mock-uuid-123')
+}));
+
+interface MockTable {
+  count: jest.Mock;
+  toArray: jest.Mock;
+  bulkAdd: jest.Mock;
+  clear?: jest.Mock;
+}
+
+interface MockDb {
+  lines: MockTable;
+  attachments: MockTable;
+}
+
+describe('AttachmentService', () => {
+  let service: AttachmentService;
+  let storageService: StorageService;
+  let mockDb: MockDb;
+  let mockAttachmentsTable: MockTable;
+
+  beforeEach(() => {
+    // Create mock database tables
+    mockAttachmentsTable = {
+      count: jest.fn().mockResolvedValue(3),
+      toArray: jest.fn().mockResolvedValue([]),
+      bulkAdd: jest.fn().mockResolvedValue(undefined),
+      clear: jest.fn().mockResolvedValue(undefined)
+    };
+
+    mockDb = {
+      lines: {
+        count: jest.fn().mockResolvedValue(0),
+        toArray: jest.fn().mockResolvedValue([]),
+        bulkAdd: jest.fn().mockResolvedValue(undefined)
+      },
+      attachments: mockAttachmentsTable
+    };
+
+    // Create spy for StorageService
+    const storageServiceSpy = {
+      ready$: new BehaviorSubject<boolean>(false),
+      db: mockDb
+    } as unknown as StorageService;
+
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        AttachmentService,
+        { provide: StorageService, useValue: storageServiceSpy }
+      ]
+    });
+
+    service = TestBed.inject(AttachmentService);
+    storageService = TestBed.inject(StorageService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  describe('constructor', () => {
+    it('should initialize ready state as false', () => {
+      expect(service.ready.value).toBe(false);
+    });
+
+    it('should subscribe to storage service ready state', () => {
+      const readySubject = storageService.ready$ as BehaviorSubject<boolean>;
+      readySubject.next(true);
+      expect(service.ready.value).toBe(true);
+    });
+  });
+
+  describe('getAttachments', () => {
+    it('should return attachments array from database', async () => {
+      const mockAttachments: Attachment[] = [
+        {
+          uuid: 'uuid-1',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          created_at: '2025-01-01T00:00:00.000Z',
+          support_name: 'Support 1',
+          attachment_set: 1,
+          support_order: 1,
+          attachment_altitude: 10.5,
+          cross_arm_length: 2.0
+        },
+        {
+          uuid: 'uuid-2',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          created_at: '2025-01-01T00:00:00.000Z',
+          support_name: 'Support 2',
+          attachment_set: 2,
+          support_order: 2,
+          attachment_altitude: 11.0,
+          cross_arm_length: 2.5
+        }
+      ];
+      mockAttachmentsTable.toArray.mockResolvedValue(mockAttachments);
+
+      const result = await service.getAttachments();
+      expect(mockAttachmentsTable.toArray).toHaveBeenCalled();
+      expect(result).toEqual(mockAttachments);
+    });
+
+    it('should return undefined if database is not available', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+      const result = await service.getAttachments();
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('importFromFile', () => {
+    let httpTestingController: HttpTestingController;
+
+    beforeEach(() => {
+      httpTestingController = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+      httpTestingController.verify();
+    });
+
+    it('should import attachments from CSV file successfully', async () => {
+      const mockCsvData: RteAttachmentsCsvFile[] = [
+        {
+          support_id_catalog: 'catalog1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
+          support_family: 'Family 1',
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
+        },
+        {
+          support_id_catalog: 'catalog2',
+          support_idr: 'idr2',
+          support_adr: 'Support 2',
+          support_tower: 'tower2',
+          support_family: 'Family 2',
+          position: '2',
+          X: '0',
+          Y: '0',
+          Z: '11.0',
+          L: '2.5'
+        }
+      ];
+
+      const mockCsvContent =
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncatalog1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncatalog2,idr2,Support 2,tower2,Family 2,2,0,0,11.0,2.5';
+
+      // Mock Papa Parse to call complete callback
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: mockCsvData,
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/attachments.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+
+      await importPromise;
+
+      expect(mockAttachmentsTable.clear).toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 1',
+          attachment_set: 1,
+          attachment_altitude: 10.5,
+          cross_arm_length: 2.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 10.5
+        },
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 2',
+          attachment_set: 2,
+          attachment_altitude: 11.0,
+          cross_arm_length: 2.5,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 11.0
+        }
+      ]);
+    });
+
+    it('should handle empty CSV data', async () => {
+      const mockCsvContent =
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\n';
+
+      // Mock Papa Parse to call complete callback with empty data
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: [],
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/attachments.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+
+      await importPromise;
+
+      expect(mockAttachmentsTable.clear).not.toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
+    });
+
+    it('should filter out attachments with missing support_adr', async () => {
+      const mockCsvData: RteAttachmentsCsvFile[] = [
+        {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
+          support_family: 'Family 1',
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
+        },
+        {
+          support_id_catalog: 'cat2',
+          support_idr: 'idr2',
+          support_adr: '',
+          support_tower: 'tower2',
+          support_family: 'Family 2',
+          position: '2',
+          X: '0',
+          Y: '0',
+          Z: '11.0',
+          L: '2.5'
+        },
+        {
+          support_id_catalog: 'cat3',
+          support_idr: 'idr3',
+          support_adr: 'Support 3',
+          support_tower: 'tower3',
+          support_family: 'Family 3',
+          position: '3',
+          X: '0',
+          Y: '0',
+          Z: '12.0',
+          L: '3.0'
+        }
+      ];
+
+      const mockCsvContent =
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncat2,idr2,,tower2,Family 2,2,0,0,11.0,2.5\ncat3,idr3,Support 3,tower3,Family 3,3,0,0,12.0,3.0';
+
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: mockCsvData,
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/attachments.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+
+      await importPromise;
+
+      // Should only add attachments with valid support_adr
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 1',
+          attachment_set: 1,
+          attachment_altitude: 10.5,
+          cross_arm_length: 2.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 10.5
+        },
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 3',
+          attachment_set: 3,
+          attachment_altitude: 12.0,
+          cross_arm_length: 3.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 12.0
+        }
+      ]);
+    });
+
+    it('should handle missing database gracefully', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+
+      const mockCsvData: RteAttachmentsCsvFile[] = [
+        {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
+          support_family: 'Family 1',
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
+        }
+      ];
+
+      const mockCsvContent =
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0';
+
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: mockCsvData,
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/attachments.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+
+      // Should not throw error
+      await expect(importPromise).resolves.toBeUndefined();
+    });
+
+    it('should handle CSV data with mixed valid and invalid support_adr values', async () => {
+      const mockCsvData: RteAttachmentsCsvFile[] = [
+        {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
+          support_family: 'Family 1',
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
+        },
+        {
+          support_id_catalog: 'cat2',
+          support_idr: 'idr2',
+          support_adr: '',
+          support_tower: 'tower2',
+          support_family: 'Family 2',
+          position: '2',
+          X: '0',
+          Y: '0',
+          Z: '11.0',
+          L: '2.5'
+        },
+        {
+          support_id_catalog: 'cat3',
+          support_idr: 'idr3',
+          support_adr: 'Support 3',
+          support_tower: 'tower3',
+          support_family: 'Family 3',
+          position: '3',
+          X: '0',
+          Y: '0',
+          Z: '12.0',
+          L: '3.0'
+        },
+        {
+          support_id_catalog: 'cat4',
+          support_idr: 'idr4',
+          support_adr: null as unknown as string,
+          support_tower: 'tower4',
+          support_family: 'Family 4',
+          position: '4',
+          X: '0',
+          Y: '0',
+          Z: '13.0',
+          L: '3.5'
+        }
+      ];
+
+      const mockCsvContent =
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,,2,11.0,2.5\nFamily 3,Support 3,3,12.0,3.0\nFamily 4,,4,13.0,3.5';
+
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: mockCsvData,
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/attachments.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+
+      await importPromise;
+
+      // Should only add attachments with valid support_adr
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 1',
+          attachment_set: 1,
+          attachment_altitude: 10.5,
+          cross_arm_length: 2.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 10.5
+        },
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 3',
+          attachment_set: 3,
+          attachment_altitude: 12.0,
+          cross_arm_length: 3.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 12.0
+        }
+      ]);
+    });
+
+    it('should clear attachments table before adding new data', async () => {
+      const mockCsvData: RteAttachmentsCsvFile[] = [
+        {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
+          support_family: 'Family 1',
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
+        }
+      ];
+
+      const mockCsvContent =
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0';
+
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: mockCsvData,
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/attachments.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+
+      await importPromise;
+
+      // Verify clear is called before bulkAdd
+      expect(mockAttachmentsTable.clear).toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalled();
+    });
+
+    it('should handle HTTP errors gracefully', async () => {
+      // Mock Papa Parse to call complete callback with empty data when HTTP error occurs
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: [],
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request to return an error
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/attachments.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush('Error', { status: 404, statusText: 'Not Found' });
+
+      await importPromise;
+
+      // Should not throw error and not call bulkAdd (but clear may be called)
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
+    });
+
+    it('should parse numeric values correctly', async () => {
+      const mockCsvData: RteAttachmentsCsvFile[] = [
+        {
+          support_id_catalog: 'cat1',
+          support_idr: 'idr1',
+          support_adr: 'Support 1',
+          support_tower: 'tower1',
+          support_family: 'Family 1',
+          position: '1',
+          X: '0',
+          Y: '0',
+          Z: '10.5',
+          L: '2.0'
+        },
+        {
+          support_family: 'Family 2',
+          support_adr: 'Support 2',
+          position: '2',
+          support_id_catalog: 'cat2',
+          support_idr: 'idr2',
+          support_tower: 'tower2',
+          X: '0',
+          Y: '0',
+          Z: '11',
+          L: '2.5'
+        }
+      ];
+
+      const mockCsvContent =
+        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,Support 2,2,11,2.5';
+
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: mockCsvData,
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/attachments.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+
+      await importPromise;
+
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 1',
+          attachment_set: 1,
+          attachment_altitude: 10.5,
+          cross_arm_length: 2.0,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 10.5
+        },
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 2',
+          attachment_set: 2,
+          attachment_altitude: 11,
+          cross_arm_length: 2.5,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 11
+        }
+      ]);
+    });
+  });
+});

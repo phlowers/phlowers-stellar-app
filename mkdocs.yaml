@@ -1,10 +1,10 @@
 site_name: Stellar
-site_url : http://phlowers.readthedocs.com
+site_url: http://phlowers.readthedocs.com
 repo_url: https://github.com/phlowers/phlowers-stellar-app
 copyright: Copyright &copy; 2025 RTE France. Unless otherwise indicated, content is licensed under CC-BY-4.0.
 
 theme:
-  name: "material"
+  name: 'material'
   logo: _static/stellar_ico.svg
   favicon: _static/stellar_ico.svg
   features:
@@ -94,7 +94,6 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.arithmatex:
       generic: true
-
 
 extra:
   social:

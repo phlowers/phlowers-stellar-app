@@ -1,0 +1,116 @@
+<p-select
+  #selectComponent
+  [options]="options()"
+  [optionLabel]="optionLabel()"
+  [optionValue]="optionValue()"
+  [ariaLabel]="ariaLabel()"
+  [placeholder]="placeholder()"
+  [(ngModel)]="selectedOptionValue"
+  (ngModelChange)="onSelectionChange($event)"
+  appendTo="body"
+  class="select-with-buttons"
+  panelStyleClass="select-with-buttons-panel"
+  [class.has-clear-btn]="selectedOptionValue() && showClear()"
+>
+  <ng-template #selectedItem let-selectedOption>
+    @if (selectedOptionValue()) {
+      {{ selectedOptionLabel() }}
+    }
+  </ng-template>
+
+  <ng-template let-item let-index="index" #item>
+    <div class="select-dropdown">
+      <button
+        app-btn
+        btnStyle="text"
+        class="select-dropdown__select"
+        (click)="onSelectItem(item)"
+      >
+        {{ item[optionLabel()] }}
+      </button>
+
+      <p-divider class="divider" layout="vertical" />
+
+      <button
+        app-btn
+        btnSize="l"
+        btnStyle="text"
+        ariaLabel="view"
+        i18n-ariaLabel
+        (click)="
+          $event.stopPropagation();
+          $event.stopImmediatePropagation();
+          viewOption.emit(item)
+        "
+      >
+        <app-icon icon="visibility" />
+      </button>
+
+      <p-divider layout="vertical" />
+
+      <button
+        app-btn
+        btnSize="l"
+        btnStyle="text"
+        ariaLabel="edit"
+        i18n-ariaLabel
+        (click)="
+          $event.stopPropagation();
+          $event.stopImmediatePropagation();
+          editOption.emit(item)
+        "
+      >
+        <app-icon icon="edit" />
+      </button>
+
+      <p-divider layout="vertical" />
+
+      <button
+        app-btn
+        btnSize="l"
+        btnStyle="text"
+        ariaLabel="duplicate"
+        i18n-ariaLabel
+        (click)="
+          $event.stopPropagation();
+          $event.stopImmediatePropagation();
+          duplicateOption.emit(item)
+        "
+      >
+        <app-icon icon="content_copy" />
+      </button>
+
+      <p-divider layout="vertical" />
+
+      <button
+        app-btn
+        btnSize="l"
+        btnStyle="text"
+        class="erase-btn"
+        ariaLabel="delete"
+        i18n-ariaLabel
+        (click)="
+          $event.stopPropagation();
+          $event.stopImmediatePropagation();
+          deleteOption.emit(item)
+        "
+      >
+        <app-icon icon="delete" />
+      </button>
+    </div>
+  </ng-template>
+</p-select>
+
+@if (selectedOptionValue() && showClear()) {
+  <button
+    app-btn
+    btnStyle="text"
+    btnSize="s"
+    ariaLabel="clear selection"
+    i18n-ariaLabel
+    (click)="clearSelectedOptionValue()"
+    class="clear-button"
+  >
+    <app-icon icon="close" />
+  </button>
+}

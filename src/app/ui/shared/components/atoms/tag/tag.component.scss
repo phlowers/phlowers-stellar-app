@@ -1,0 +1,39 @@
+@use 'abstract.extracts' as app;
+
+p {
+  display: inline-block;
+  @extend %text-s-400;
+  color: var(--grey-750);
+  padding: 0.1875rem 0.25rem;
+  border-radius: 0.25rem;
+  background-color: var(--grey-50);
+  margin-bottom: 0;
+
+  &.success {
+    background-color: var(--success-200);
+  }
+
+  &.error {
+    background-color: var(--error-200);
+  }
+
+  &.warning {
+    background-color: var(--warning-200);
+  }
+
+  &.primary {
+    background-color: var(--primary-200);
+  }
+
+  &.secondary {
+    background-color: var(--secondary-200);
+  }
+
+  &.tertiary {
+    background-color: var(--tertiary-200);
+  }
+
+  &.rte {
+    background-color: var(--rte-200);
+  }
+}

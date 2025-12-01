@@ -1,0 +1,49 @@
+input {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.sticky-left,
+.sticky-right {
+  position: sticky;
+  z-index: 1;
+  background-color: var(--grey-white);
+}
+
+.sticky-left {
+  left: 0;
+}
+
+.sticky-right {
+  right: 0;
+}
+
+.integer-column {
+  min-width: 6rem;
+}
+
+.decimal-column {
+  min-width: 7rem;
+}
+
+.position-column {
+  min-width: 3rem;
+}
+
+.text-column {
+  min-width: 11rem;
+}
+
+.boolean-column {
+  min-width: 5rem;
+}
+
+td {
+  >*:not(button) {
+    width: 100%;
+  }
+
+  .p-inputicon {
+    top: 40%;
+  }
+}

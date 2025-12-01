@@ -1,0 +1,7 @@
+@if (isCustomSvgIcon()) {
+  <svg height="100%" viewBox="0 0 16 16" width="100%">
+    <use [attr.xlink:href]="customSvgContent()"></use>
+  </svg>
+} @else {
+  {{ icon() }}
+}

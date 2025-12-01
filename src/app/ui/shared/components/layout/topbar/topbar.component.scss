@@ -1,0 +1,94 @@
+@use 'abstract.extracts' as app;
+
+header,
+.calculation {
+  display: flex;
+  align-items: center;
+}
+
+header {
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  min-height: 4rem;
+  height: 4rem;
+  color: var(--grey-750);
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.calculation,
+.user {
+  @extend %text-m-600;
+}
+
+.calculation {
+  gap: 0.625rem;
+  justify-content: flex-end;
+  flex-grow: 1;
+
+  &--ready {
+    color: var(--success-700);
+  }
+
+  &--error {
+    color: var(--error-700);
+  }
+
+  &__icon__status,
+  &__txt {
+    display: none;
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+    transition-behavior: allow-discrete;
+
+    &.show {
+      display: block;
+      opacity: 1;
+
+      @starting-style {
+        opacity: 0;
+      }
+    }
+  }
+
+  &__icon {
+    @apply inline-block relative overflow-hidden;
+    width: 2rem;
+    height: 1.5rem;
+    line-height: 1;
+
+    &__calc {
+      font-size: 1.5rem;
+      font-variation-settings: 'GRAD' 200;
+    }
+
+    &__status {
+      position: absolute;
+      top: calc(50% - 0.5rem);
+      right: 0rem;
+      font-size: 1rem;
+      font-variation-settings: 'GRAD' 200;
+
+      &--spinner {
+        animation: pyodide-loading 0.5s linear infinite;
+      }
+
+      &--filled {
+        font-variation-settings: 'FILL' 1;
+        background-color: var(--grey-white);
+        border-radius: 100%;
+      }
+    }
+  }
+
+  @keyframes pyodide-loading {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

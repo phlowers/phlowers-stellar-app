@@ -22,3 +22,60 @@ You should match global and local project CLI by watching current version in `pa
 2. Setup mechaflowers using local script `npm run set-up-mechaphlowers`
 
 3. Launch local server with `ng serve` or `npm run start`
+
+## Import lines and maintenance data
+
+1. lines data should be put inside a `public/data/lines.csv` file with the following columns:
+    - LIAISON_IDR
+    - LIT_IDR
+    - LIT_ADR
+    - BRANCHE_IDR
+    - BRANCHE_ADR
+    - TENSION_ELECTRIQUE_IDR
+    - TENSION_ELECTRIQUE_ADR
+
+2. maintenance data should be put inside a `public/data/maintenance-teams.csv` file with the following columns:
+    - CM_CUR
+    - CM_DESIGNATION
+    - GMR_CUR
+    - GMR_DESIGNATION
+    - EEL_CUR
+    - EEL_DESIGNATION
+
+3. cables data should be put inside a `public/data/cables.csv` file with the following columns:
+    - name
+    - data_source
+    - section
+    - diameter
+    - young_modulus
+    - linear_mass
+    - dilatation_coefficient
+    - temperature_reference
+    - stress_strain_a0
+    - stress_strain_a1
+    - stress_strain_a2
+    - stress_strain_a3
+    - stress_strain_a4
+    - stress_strain_b0
+    - stress_strain_b1
+    - stress_strain_b2
+    - stress_strain_b3
+    - stress_strain_b4
+    - is_polynomial
+
+4. chains data should be put inside a `public/data/chains.csv` file with the following columns:
+    - name
+    - length
+    - weight
+    - surface
+    - v
+
+5. attachments data should be put inside a `public/data/attachments.csv` file with the following columns:
+    - support_family
+    - support_name
+    - set_number
+    - arm_length
+    - altitude
+
+
+At startup, the application will import the data from the csv files and store it in the database.

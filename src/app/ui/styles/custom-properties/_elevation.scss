@@ -1,0 +1,7 @@
+@use 'abstract.extracts' as app;
+
+:root {
+  @each $key, $value in app.$elevation {
+    --elevation-#{$key}: #{$value};
+  }
+}

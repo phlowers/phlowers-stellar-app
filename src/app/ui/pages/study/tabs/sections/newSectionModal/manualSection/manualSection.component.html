@@ -1,0 +1,531 @@
+<p-tabs
+  [value]="tabValue()"
+  (valueChange)="tabValueChange($event)"
+  class="{{ mode() === 'view' ? 'mt-0' : 'mt-4' }} h-full"
+>
+  <p-tablist>
+    <p-tab (onSelect)="tabValue.set('general')" value="general" i18n>
+      General
+    </p-tab>
+    <p-tab (onSelect)="tabValue.set('supports')" value="supports" i18n>
+      Supports list
+    </p-tab>
+    <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n>
+      Graphical view
+    </p-tab>
+  </p-tablist>
+
+  <p-tabpanels class="grow">
+    <p-tabpanel value="general">
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Section</h3>
+        @if (mode() === 'create' || mode() === 'edit') {
+          <div class="section-form-part-grid">
+            <div class="flex flex-col col-span-2">
+              <label for="sectionName" i18n>
+                Section name
+                <sup class="mandatory">*</sup>
+              </label>
+              <input
+                type="text"
+                pInputText
+                id="sectionName"
+                required
+                [(ngModel)]="section().name"
+                [class.ng-invalid]="!isNameUnique()"
+                [attr.aria-invalid]="!isNameUnique()"
+                aria-errormessage="section-name-error-message"
+                (ngModelChange)="onSectionChange()"
+              />
+              @if (!isNameUnique()) {
+                <p-message
+                  id="section-name-error-message"
+                  severity="error"
+                  size="small"
+                  variant="simple"
+                  i18n
+                  >Section name must be unique.</p-message
+                >
+              }
+            </div>
+
+            <div class="flex flex-col">
+              <label for="sectionType" i18n>
+                Section type
+                <sup class="mandatory">*</sup>
+              </label>
+              <p-select
+                inputId="sectionType"
+                [options]="sectionTypes"
+                [(ngModel)]="section().type"
+                optionLabel="name"
+                optionValue="code"
+                required
+                (ngModelChange)="onSectionChange()"
+                [filter]="true"
+                filterBy="name"
+              />
+            </div>
+
+            <div class="flex flex-col">
+              @if (section().type === 'phase') {
+                <label for="electricPhaseNumber">
+                  <ng-container i18n>Electric phase number</ng-container>
+                </label>
+                <p-select
+                  inputId="electricPhaseNumber"
+                  [options]="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]"
+                  [(ngModel)]="section().electric_phase_number"
+                  (ngModelChange)="onSectionChange()"
+                />
+              }
+            </div>
+
+            <div class="flex flex-col">
+              <label for="cableName" i18n>
+                Cable name
+                <sup class="mandatory">*</sup>
+              </label>
+              <p-select
+                inputId="cableName"
+                [options]="cablesFilterTable() | unique: 'name'"
+                [(ngModel)]="section().cable_name"
+                optionLabel="name"
+                optionValue="name"
+                appendTo="body"
+                (ngModelChange)="onSectionChange()"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="name"
+              />
+            </div>
+
+            <div class="flex flex-col">
+              <label for="cableAmount" i18n>
+                Cable amount
+                <sup class="mandatory">*</sup>
+              </label>
+              <p-select
+                inputId="cableAmount"
+                [options]="[1, 2, 3, 4]"
+                [(ngModel)]="section().cables_amount"
+                required
+                (ngModelChange)="onSectionChange()"
+              />
+            </div>
+          </div>
+        } @else if (mode() === 'view') {
+          <dl class="section-form-part-grid">
+            <div class="col-span-2">
+              <dt i18n>Section name</dt>
+              <dd class="read-only-info">{{ section().name }}</dd>
+            </div>
+
+            <div>
+              <dt i18n>Section type</dt>
+              <dd class="read-only-info">{{ section().type }}</dd>
+            </div>
+
+            <div>
+              <dt i18n>Electric phase number</dt>
+              <dd class="read-only-info">
+                {{ section().electric_phase_number }}
+              </dd>
+            </div>
+
+            <div>
+              <dt i18n>Cable name</dt>
+              <dd class="read-only-info">{{ section().cable_name }}</dd>
+            </div>
+
+            <div>
+              <dt i18n>Cable amount</dt>
+              <dd class="read-only-info">{{ section().cables_amount }}</dd>
+            </div>
+          </dl>
+        }
+      </div>
+
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Line team</h3>
+        @if (mode() === 'create' || mode() === 'edit') {
+          <div class="section-form-part-grid">
+            <div class="flex flex-col">
+              <label for="maintenanceCenter" i18n>Maintenance center</label>
+              <p-select
+                inputId="maintenanceCenter"
+                [options]="
+                  maintenanceFilterTable() | unique: 'maintenance_center_id'
+                "
+                [(ngModel)]="section().maintenance_center_id"
+                appendTo="body"
+                optionLabel="maintenance_center"
+                optionValue="maintenance_center_id"
+                (onChange)="
+                  onMaintenanceSelect($event, 'maintenance_center_id')
+                "
+                (ngModelChange)="onSectionChange()"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="maintenance_center"
+              />
+            </div>
+
+            <div class="flex flex-col">
+              <label for="maintRegionalTeam" i18n>Regional team</label>
+              <p-select
+                inputId="maintRegionalTeam"
+                [options]="
+                  maintenanceFilterTable() | unique: 'regional_team_id'
+                "
+                [(ngModel)]="section().regional_team_id"
+                appendTo="body"
+                optionLabel="regional_team"
+                optionValue="regional_team_id"
+                (onChange)="onMaintenanceSelect($event, 'regional_team_id')"
+                (ngModelChange)="onSectionChange()"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="regional_team"
+              />
+            </div>
+
+            <div class="flex flex-col">
+              <label for="maintenanceTeam" i18n>Maintenance team</label>
+              <p-select
+                inputId="maintenanceTeam"
+                [options]="
+                  maintenanceFilterTable() | unique: 'maintenance_team_id'
+                "
+                [(ngModel)]="section().maintenance_team_id"
+                appendTo="body"
+                optionLabel="maintenance_team"
+                optionValue="maintenance_team_id"
+                (onChange)="onMaintenanceSelect($event, 'maintenance_team_id')"
+                (ngModelChange)="onSectionChange()"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="maintenance_team"
+              />
+            </div>
+          </div>
+        } @else if (mode() === 'view') {
+          <dl class="section-form-part-grid">
+            <div>
+              <dt i18n>Maintenance center</dt>
+              <dd class="read-only-info">{{ maintenanceCenterRead() }}</dd>
+            </div>
+
+            <div>
+              <dt i18n>Regional team</dt>
+              <dd class="read-only-info">{{ regionalTeamRead() }}</dd>
+            </div>
+
+            <div>
+              <dt i18n>Maintenance team</dt>
+              <dd class="read-only-info">{{ maintenanceTeamRead() }}</dd>
+            </div>
+          </dl>
+        }
+      </div>
+
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Link</h3>
+
+        @if (mode() === 'create' || mode() === 'edit') {
+          <div class="section-form-part-grid lines-form-grid">
+            <div class="flex flex-col [grid-area:a]">
+              <label for="linkEtl" i18n>Electric tension level</label>
+              <p-select
+                inputId="linkEtl"
+                [options]="linesFilterTable() | unique: 'voltage_idr'"
+                [(ngModel)]="section().voltage_idr"
+                optionLabel="voltage_idr"
+                optionValue="voltage_idr"
+                appendTo="body"
+                (ngModelChange)="onSectionChange()"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                (onChange)="onLinesSelect($event, 'voltage_idr')"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="voltage_idr"
+              />
+            </div>
+            <div class="flex flex-col [grid-area:b]">
+              <label for="linkName" i18n>Link - ID</label>
+              <p-select
+                inputId="linkName"
+                [options]="linesFilterTable() | unique: 'link_idr'"
+                [(ngModel)]="section().link_name"
+                optionLabel="link_idr"
+                optionValue="link_idr"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'link_idr')"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="link_idr"
+              />
+            </div>
+            <div class="flex flex-col [grid-area:c]">
+              <label for="linkName" i18n>Link - Name</label>
+              <p-select
+                inputId="linkName"
+                [options]="linesFilterTable() | unique: 'link_adr'"
+                [(ngModel)]="section().link_name"
+                optionLabel="link_adr"
+                optionValue="link_idr"
+                [fluid]="true"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'link_idr')"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="link_adr"
+              />
+            </div>
+            <div class="flex flex-col [grid-area:d]">
+              <label for="linkLit" i18n>LIT - ID</label>
+              <p-select
+                inputId="linkLit"
+                [options]="linesFilterTable() | unique: 'lit_idr'"
+                [(ngModel)]="section().lit"
+                optionLabel="lit_idr"
+                optionValue="lit_idr"
+                (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'lit_idr')"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="lit_idr"
+              />
+            </div>
+
+            <div class="flex flex-col [grid-area:e]">
+              <label for="linkLit" i18n>LIT - Name</label>
+              <p-select
+                inputId="linkLit"
+                [options]="linesFilterTable() | unique: 'lit_idr'"
+                [(ngModel)]="section().lit"
+                optionLabel="lit_adr"
+                optionValue="lit_idr"
+                (ngModelChange)="onSectionChange()"
+                (onChange)="onLinesSelect($event, 'lit_idr')"
+                appendTo="body"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="lit_adr"
+              />
+            </div>
+
+            <div class="flex flex-col [grid-area:f]">
+              <label for="linkBm" i18n>Branch - ID</label>
+              <p-select
+                inputId="linkBm"
+                [options]="linesFilterTable() | unique: 'branch_idr'"
+                [(ngModel)]="section().branch_name"
+                optionLabel="branch_idr"
+                optionValue="branch_idr"
+                (onChange)="onLinesSelect($event, 'branch_idr')"
+                virtualScroll="true"
+                virtualScrollItemSize="10"
+                appendTo="body"
+                (ngModelChange)="onSectionChange()"
+                [showClear]="true"
+                [filter]="true"
+                filterBy="branch_idr"
+              />
+            </div>
+          </div>
+        } @else if (mode() === 'view') {
+          <dl class="section-form-part-grid">
+            <div>
+              <dt i18n>Electric tension</dt>
+              <dd class="read-only-info">
+                {{ section().voltage_idr }}
+              </dd>
+            </div>
+
+            <div>
+              <dt i18n>Link</dt>
+              <dd class="read-only-info">{{ section().link_name }}</dd>
+            </div>
+
+            <div>
+              <dt i18n>LIT</dt>
+              <dd class="read-only-info">{{ section().lit }}</dd>
+            </div>
+
+            <div>
+              <dt i18n>Branch</dt>
+              <dd class="read-only-info">{{ section().branch_name }}</dd>
+            </div>
+          </dl>
+        }
+      </div>
+
+      <div class="section-form-part">
+        <h3 class="title-underline" i18n>Comment</h3>
+        @if (mode() === 'create' || mode() === 'edit') {
+          <textarea
+            pTextarea
+            i18n-aria-label
+            id="comment"
+            aria-label="comment"
+            class="w-full"
+            [(ngModel)]="section().comment"
+            (ngModelChange)="onSectionChange()"
+          ></textarea>
+        } @else if (mode() === 'view') {
+          <p class="read-only-info">{{ section().comment }}</p>
+        }
+      </div>
+      <div class="flex justify-end pt-6">
+        <button app-btn btnSize="m" btnStyle="outlined" (click)="onNextTab()">
+          <app-icon icon="chevron_right" />
+          <ng-container i18n>Next</ng-container>
+        </button>
+      </div>
+    </p-tabpanel>
+    <p-tabpanel value="supports">
+      <div class="flex flex-col gap-4 mt-2">
+        @if (mode() === 'create' || mode() === 'edit') {
+          <div class="flex flex-col">
+            <label for="supportsAmount" i18n>Supports amount</label>
+            <div
+              class="flex flex-row gap-2 justify-between items-start w-[9.375rem]"
+            >
+              <p-inputnumber
+                min="2"
+                fluid
+                [ngModel]="section().supports.length || 0"
+                [showButtons]="true"
+                buttonLayout="horizontal"
+                inputId="supportsAmount"
+                spinnerMode="horizontal"
+                aria-label="supports amount"
+                i18n-aria-label
+                (onBlur)="onSupportsAmountChangeBlur($event)"
+                (onInput)="onSupportsAmountChangeInput($event)"
+              >
+                <ng-template #incrementbuttonicon>
+                  <app-icon icon="add" />
+                </ng-template>
+                <ng-template #decrementbuttonicon>
+                  <app-icon icon="remove" />
+                </ng-template>
+              </p-inputnumber>
+            </div>
+          </div>
+          <div class="flex flex-row justify-between items-center mt-[-1rem]">
+            <p class="flex flex-row gap-2 items-center mb-0">
+              <app-icon icon="edit_arrow_down" />
+              <ng-container i18n
+                >Double click on a column to copy the value to all
+                supports</ng-container
+              >
+            </p>
+            <p-paginator
+              (onPageChange)="onSupportsPageChange($event)"
+              [totalRecords]="section().supports.length"
+              [rowsPerPageOptions]="[5, 10, 20]"
+              [rows]="rowsSupport()"
+              [showCurrentPageReport]="true"
+              [showPageLinks]="true"
+              [showJumpToPageDropdown]="false"
+              i18n-currentPageReportTemplate
+              currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
+            />
+          </div>
+        } @else if (mode() === 'view') {
+          <div class="flex flex-row justify-between items-center">
+            <dl>
+              <dt i18n>Supports amount</dt>
+              <dd class="read-only-info">{{ section().supports.length }}</dd>
+            </dl>
+            <p-paginator
+              (onPageChange)="onSupportsPageChange($event)"
+              [totalRecords]="section().supports.length"
+              [rowsPerPageOptions]="[5, 10, 20]"
+              [rows]="rowsSupport()"
+              [showCurrentPageReport]="true"
+              [showPageLinks]="true"
+              [showJumpToPageDropdown]="false"
+              i18n-currentPageReportTemplate
+              currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
+            />
+          </div>
+        }
+        <div class="mt-[-1rem]">
+          <app-supports-table
+            [mode]="mode()"
+            [first]="firstSupport()"
+            [supports]="section().supports || []"
+            (addSupport)="addSupport($event.index, $event.position)"
+            (deleteSupport)="deleteSupport($event)"
+            (duplicateSupport)="duplicateSupport($event)"
+            (supportChange)="onSupportChange($event)"
+            [rows]="rowsSupport()"
+          />
+        </div>
+        @if (mode() === 'create' || mode() === 'edit') {
+          <textarea
+            pTextarea
+            i18n-aria-label
+            id="supports-comment"
+            aria-label="supports comment"
+            i18n-placeholder
+            placeholder="Comment about the supports"
+            class="w-full"
+            [(ngModel)]="section().supports_comment"
+            (ngModelChange)="onSectionChange()"
+          ></textarea>
+        } @else if (mode() === 'view') {
+          <p class="read-only-info">{{ section().comment }}</p>
+        }
+        <div class="flex justify-end pt-3">
+          <button
+            app-btn
+            btnSize="m"
+            btnStyle="outlined"
+            (click)="onPreviousTab()"
+          >
+            <app-icon icon="chevron_left" />
+            <ng-container i18n>Previous</ng-container>
+          </button>
+        </div>
+      </div>
+    </p-tabpanel>
+    <p-tabpanel value="graphical">
+      @if (tabValue() === 'graphical') {
+        <div class="mt-2 h-full flex flex-col gap-2">
+          <div class="h-[100%]">
+            <app-studio
+              [section]="section()"
+              [isSupportZoom]="false"
+            ></app-studio>
+          </div>
+          <ngx-slider
+            [value]="plotService.plotOptions().startSupport"
+            [highValue]="plotService.plotOptions().endSupport"
+            (userChangeEnd)="updateSliderOptions($event)"
+            [options]="sliderOptions()"
+            class="block pb-4"
+          >
+          </ngx-slider>
+        </div>
+      }
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>

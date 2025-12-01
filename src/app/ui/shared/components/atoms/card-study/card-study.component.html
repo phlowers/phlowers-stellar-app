@@ -1,0 +1,37 @@
+<article>
+  <h3>
+    {{ title() }}
+  </h3>
+
+  <dl>
+    <dt>
+      <app-icon icon="person" />
+      <span i18n>Author:</span>
+    </dt>
+    <dd>
+      {{ authorMail() }}
+    </dd>
+
+    <dt>
+      <app-icon icon="history" />
+      <span i18n>Last changed:</span>
+    </dt>
+    <dd>
+      {{ modificationDate() }}
+    </dd>
+  </dl>
+
+  @if (tagList()) {
+    <ul>
+      @for (tag of tagList(); track $index) {
+        <li>
+          <app-tag [text]="tag.text" [type]="tag.color" />
+        </li>
+      }
+    </ul>
+  }
+
+  <button (click)="onCardClick()">
+    <ng-container i18n>Go to study</ng-container> {{ title() }}
+  </button>
+</article>
