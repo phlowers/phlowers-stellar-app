@@ -26,7 +26,8 @@
     <p-select
       inputId="leftSupport"
       [options]="leftSupportOption()"
-      [(ngModel)]="leftSupport"
+      [ngModel]="measureData().leftSupport"
+      (ngModelChange)="updateField('leftSupport', $event)"
       optionLabel="label"
       optionValue="value"
       [fluid]="true"
@@ -43,7 +44,8 @@
         id="spanLength"
         type="number"
         pInputText
-        [(ngModel)]="spanLength"
+        [ngModel]="measureData().spanLength"
+        (ngModelChange)="updateField('spanLength', $event)"
         [min]="0"
         aria-describedby="mandatory-papoto spanLength-calculated"
         required
@@ -63,7 +65,8 @@
         id="measuredElevationDifference"
         type="number"
         pInputText
-        [(ngModel)]="measuredElevationDifference"
+        [ngModel]="measureData().measuredElevationDifference"
+        (ngModelChange)="updateField('measuredElevationDifference', $event)"
         aria-describedby="mandatory-papoto measuredElevationDifference-calculated"
         required
       />
@@ -81,7 +84,8 @@
       id="HG"
       type="number"
       pInputText
-      [(ngModel)]="HG"
+      [ngModel]="measureData().HG"
+      (ngModelChange)="updateField('HG', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -94,7 +98,8 @@
       id="H1"
       type="number"
       pInputText
-      [(ngModel)]="H1"
+      [ngModel]="measureData().H1"
+      (ngModelChange)="updateField('H1', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -107,7 +112,8 @@
       id="H2"
       type="number"
       pInputText
-      [(ngModel)]="H2"
+      [ngModel]="measureData().H2"
+      (ngModelChange)="updateField('H2', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -120,7 +126,8 @@
       id="H3"
       type="number"
       pInputText
-      [(ngModel)]="H3"
+      [ngModel]="measureData().H3"
+      (ngModelChange)="updateField('H3', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -133,7 +140,8 @@
       id="HD"
       type="number"
       pInputText
-      [(ngModel)]="HD"
+      [ngModel]="measureData().HD"
+      (ngModelChange)="updateField('HD', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -146,7 +154,8 @@
       id="VG"
       type="number"
       pInputText
-      [(ngModel)]="VG"
+      [ngModel]="measureData().VG"
+      (ngModelChange)="updateField('VG', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -159,7 +168,8 @@
       id="V1"
       type="number"
       pInputText
-      [(ngModel)]="V1"
+      [ngModel]="measureData().V1"
+      (ngModelChange)="updateField('V1', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -172,7 +182,8 @@
       id="V2"
       type="number"
       pInputText
-      [(ngModel)]="V2"
+      [ngModel]="measureData().V2"
+      (ngModelChange)="updateField('V2', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -185,7 +196,8 @@
       id="V3"
       type="number"
       pInputText
-      [(ngModel)]="V3"
+      [ngModel]="measureData().V3"
+      (ngModelChange)="updateField('V3', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -198,7 +210,8 @@
       id="VD"
       type="number"
       pInputText
-      [(ngModel)]="VD"
+      [ngModel]="measureData().VD"
+      (ngModelChange)="updateField('VD', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -207,7 +220,7 @@
 </div>
 
 <div class="text-right">
-  <button app-btn (click)="papotoResults.set(!papotoResults())">
+  <button app-btn (click)="calculatePapoto()" [disabled]="!isFormValid()">
     <app-icon icon="rocket_launch" />
     <ng-container i18n>Calculate</ng-container>
   </button>

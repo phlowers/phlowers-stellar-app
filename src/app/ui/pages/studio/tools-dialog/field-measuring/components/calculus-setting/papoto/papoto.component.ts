@@ -1,4 +1,4 @@
-import { Component, input, model, signal } from '@angular/core';
+import { Component, input, model, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -8,7 +8,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DialogModule } from 'primeng/dialog';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { INITIAL_CALCULATION_RESULTS } from '../../../mock-data';
+import { FieldMeasureData } from '../../../types';
 
 @Component({
   selector: 'app-papoto',
@@ -39,29 +39,37 @@ import { INITIAL_CALCULATION_RESULTS } from '../../../mock-data';
 })
 export class PapotoComponent {
   leftSupportOption = input.required<{ label: string; value: string }[]>();
+  measureData = model.required<FieldMeasureData>();
 
   papotoHelpDialog = signal<boolean>(false);
-
-  leftSupport = model<string | null>(null);
-  spanLength = model<number | null>(null);
-  measuredElevationDifference = model<number | null>(null);
-
-  HG = model<number | null>(null);
-  H1 = model<number | null>(null);
-  H2 = model<number | null>(null);
-  H3 = model<number | null>(null);
-  HD = model<number | null>(null);
-
-  VG = model<number | null>(null);
-  V1 = model<number | null>(null);
-  V2 = model<number | null>(null);
-  V3 = model<number | null>(null);
-  VD = model<number | null>(null);
-
   papotoResults = signal<boolean>(false);
   criterion = signal<boolean>(true);
 
-  calculationResults = INITIAL_CALCULATION_RESULTS;
+  isFormValid = computed(() => {
+    const data = this.measureData();
+    return !!(
+      data.leftSupport &&
+      data.spanLength != null &&
+      data.measuredElevationDifference != null &&
+      data.HG != null &&
+      data.H1 != null &&
+      data.H2 != null &&
+      data.H3 != null &&
+      data.HD != null &&
+      data.VG != null &&
+      data.V1 != null &&
+      data.V2 != null &&
+      data.V3 != null &&
+      data.VD != null
+    );
+  });
+
+  updateField<K extends keyof FieldMeasureData>(
+    field: K,
+    value: FieldMeasureData[K]
+  ) {
+    this.measureData.update((d) => ({ ...d, [field]: value }));
+  }
 
   openHelp() {
     this.papotoHelpDialog.set(true);
@@ -69,5 +77,27 @@ export class PapotoComponent {
 
   import() {
     alert('import PAPOTO station datas');
+  }
+
+  calculatePapoto() {
+    const data = this.measureData();
+
+    console.log('PAPOTO Calculation Values:', {
+      leftSupport: data.leftSupport,
+      spanLength: data.spanLength,
+      measuredElevationDifference: data.measuredElevationDifference,
+      HG: data.HG,
+      H1: data.H1,
+      H2: data.H2,
+      H3: data.H3,
+      HD: data.HD,
+      VG: data.VG,
+      V1: data.V1,
+      V2: data.V2,
+      V3: data.V3,
+      VD: data.VD
+    });
+
+    this.papotoResults.set(true);
   }
 }

@@ -33,7 +33,10 @@
 </div>
 
 @if (selectedCalculusType === 'PAPOTO') {
-  <app-papoto [leftSupportOption]="leftSupportOption" />
+  <app-papoto
+    [leftSupportOption]="leftSupportOption"
+    [(measureData)]="measureData"
+  />
 }
 @if (selectedCalculusType === 'TANGENT_BEARINGS') {
   <app-tangent-aiming />
