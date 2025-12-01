@@ -1,3 +1,18 @@
+<div class="papoto__btns">
+  <button
+    app-btn
+    aria-label="open PAPOTO help"
+    i18n-aria-label
+    (click)="openHelp()"
+  >
+    <app-icon icon="help" />
+  </button>
+
+  <button disabled app-btn btnStyle="outlined" (click)="import()">
+    <ng-container i18n>Import station's datas</ng-container>
+  </button>
+</div>
+
 <p id="mandatory-papoto" class="papoto__mandatory-msg">
   <app-icon icon="info" />
   <span i18n>All fields are mandatory for calculus setting</span>
@@ -243,3 +258,20 @@
     </dl>
   </div>
 }
+
+<p-dialog
+  closeAriaLabel="Close"
+  i18n-closeAriaLabel
+  [(visible)]="papotoHelpDialog"
+  [draggable]="true"
+  appendTo="body"
+>
+  <ng-template #header>
+    <p class="help-papoto-header">
+      <app-icon icon="help" />
+      <span i18n>Help (PAPOTO)</span>
+    </p>
+  </ng-template>
+
+  <img src="img/papoto-help.webp" alt="papoto help" />
+</p-dialog>

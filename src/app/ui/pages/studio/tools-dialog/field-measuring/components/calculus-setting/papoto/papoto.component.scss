@@ -1,6 +1,9 @@
 @use 'abstract.extracts' as app;
 
 .papoto {
+  &__btns {
+    @apply flex items-center gap-8;
+  }
   &__mandatory-msg {
     @apply flex items-center gap-1 my-4;
     @extend %text-s-600;
@@ -168,5 +171,14 @@
         color: var(--star-dust-950);
       }
     }
+  }
+}
+
+.help-papoto-header {
+  @apply mb-0 flex gap-2 flex-grow cursor-grab;
+  @extend %text-l-600;
+
+  &:active {
+    @apply cursor-grabbing;
   }
 }

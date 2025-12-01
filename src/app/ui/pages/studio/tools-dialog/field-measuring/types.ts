@@ -19,8 +19,9 @@ export interface FieldMeasureData {
   windDirection: string;
   skyCover: string;
   // Parameter calculation fields
-  calculationMethod: 'papoto' | 'visees-tangentes' | 'pep';
-  leftSupport: string;
+  calculationMethod: 'papoto' | 'tangente-aiming' | 'pep';
+  // Papoto fields
+  leftSupport: string | null;
   spanLength: number | null;
   measuredElevationDifference: number | null;
   HG: number | null;

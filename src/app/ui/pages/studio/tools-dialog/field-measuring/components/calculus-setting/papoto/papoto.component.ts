@@ -1,17 +1,14 @@
 import { Component, input, model, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  trigger,
-  transition,
-  style,
-  animate
-} from '@angular/animations';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { DialogModule } from 'primeng/dialog';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { INITIAL_CALCULATION_RESULTS } from '../../../mock-data';
 
 @Component({
   selector: 'app-papoto',
@@ -22,7 +19,8 @@ import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/butt
     InputGroupModule,
     InputGroupAddonModule,
     IconComponent,
-    ButtonComponent
+    ButtonComponent,
+    DialogModule
   ],
   templateUrl: './papoto.component.html',
   styleUrl: './papoto.component.scss',
@@ -42,6 +40,8 @@ import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/butt
 export class PapotoComponent {
   leftSupportOption = input.required<{ label: string; value: string }[]>();
 
+  papotoHelpDialog = signal<boolean>(false);
+
   leftSupport = model<string | null>(null);
   spanLength = model<number | null>(null);
   measuredElevationDifference = model<number | null>(null);
@@ -60,4 +60,14 @@ export class PapotoComponent {
 
   papotoResults = signal<boolean>(false);
   criterion = signal<boolean>(true);
+
+  calculationResults = INITIAL_CALCULATION_RESULTS;
+
+  openHelp() {
+    this.papotoHelpDialog.set(true);
+  }
+
+  import() {
+    alert('import PAPOTO station datas');
+  }
 }
