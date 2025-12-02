@@ -195,13 +195,11 @@ export class StudiesService {
         attachmentHeight: support.alt_acc,
         cableType: parameters.conductor,
         armLength: support.long_bras,
-        chainName: support.suspension
-          ? $localize`suspension`
-          : $localize`chain`,
         chainLength: support.long_ch,
         chainWeight: support.pds_ch,
         counterWeight: support.ctr_poids,
         chainV: support.ch_en_V,
+        chainSurface: support.surf_ch,
         supportFootAltitude: support.alt_acc - 30 > 0 ? support.alt_acc - 30 : 0
       };
     });
