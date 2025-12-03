@@ -32,14 +32,20 @@ import {
 })
 export class FieldDatasComponent {
   measureData = input.required<FieldMeasureData>();
-  fieldChange = output<{ field: keyof FieldMeasureData; value: FieldMeasureData[keyof FieldMeasureData] }>();
+  fieldChange = output<{
+    field: keyof FieldMeasureData;
+    value: FieldMeasureData[keyof FieldMeasureData];
+  }>();
 
   readonly timeModeOptions = TIME_MODE_OPTIONS;
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
   readonly windDirectionOptions = WIND_DIRECTION_OPTIONS;
   readonly skyCoverOptions = SKY_COVER_OPTIONS;
 
-  onFieldChange(field: keyof FieldMeasureData, value: FieldMeasureData[keyof FieldMeasureData]): void {
+  onFieldChange(
+    field: keyof FieldMeasureData,
+    value: FieldMeasureData[keyof FieldMeasureData]
+  ): void {
     this.fieldChange.emit({ field, value });
   }
 }
