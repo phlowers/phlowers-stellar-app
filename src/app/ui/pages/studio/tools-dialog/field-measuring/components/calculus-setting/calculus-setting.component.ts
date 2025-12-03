@@ -21,6 +21,6 @@ import { FieldMeasureData } from '../../types';
 })
 export class CalculusSettingComponent {
   measureData = model.required<FieldMeasureData>();
-  selectedCalculusType: string = 'PAPOTO';
+  selectedCalculusType = 'PAPOTO';
   leftSupportOption = leftSupportOption;
 }
