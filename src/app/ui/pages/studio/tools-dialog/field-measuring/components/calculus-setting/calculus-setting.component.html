@@ -12,12 +12,12 @@
   <div class="cac-set-select__item">
     <p-radiobutton
       name="calculusType"
-      value="TANGENT_BEARINGS"
+      value="TANGENT_AIMING"
       [(ngModel)]="selectedCalculusType"
-      inputId="tangentBearings"
+      inputId="tangentAiming"
       [disabled]="true"
     />
-    <label for="tangentBearings" i18n>Tangent bearings</label>
+    <label for="tangentAiming" i18n>Tangent aiming</label>
   </div>
 
   <div class="cac-set-select__item">
@@ -38,7 +38,7 @@
     [(measureData)]="measureData"
   />
 }
-@if (selectedCalculusType === 'TANGENT_BEARINGS') {
+@if (selectedCalculusType === 'TANGENT_AIMING') {
   <app-tangent-aiming />
 }
 @if (selectedCalculusType === 'PEP') {

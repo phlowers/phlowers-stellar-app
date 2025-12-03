@@ -3,8 +3,6 @@ import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ToolsDialogService } from './tools-dialog.service';
 
-type Tool = 'field-measuring' | 'other-tool';
-
 @Component({
   selector: 'app-tools-dialog',
   imports: [DialogModule, NgComponentOutlet, NgTemplateOutlet],

@@ -75,10 +75,6 @@ export class PapotoComponent {
     this.papotoHelpDialog.set(true);
   }
 
-  import() {
-    alert('import PAPOTO station datas');
-  }
-
   calculatePapoto() {
     const data = this.measureData();
 
