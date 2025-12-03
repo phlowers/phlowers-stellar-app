@@ -936,11 +936,6 @@
         <source>delete</source>
       </segment>
     </unit>
-    <unit id="2932152767120246098">
-      <segment>
-        <source> Upload one or multiple protoV4 files </source>
-      </segment>
-    </unit>
     <unit id="349300253783483450">
       <segment>
         <source>support number</source>
@@ -1426,11 +1421,6 @@
     <unit id="7386852230658433938">
       <segment>
         <source>Comment about the supports</source>
-      </segment>
-    </unit>
-    <unit id="8687116247161905115">
-      <segment>
-        <source>Cable not found in database: <ph id="0" equiv="PH" disp="parameters.conductor"/></source>
       </segment>
     </unit>
     <unit id="131564779447274448">
@@ -2093,9 +2083,49 @@
         <source>View charges</source>
       </segment>
     </unit>
-    <unit id="6738867123972990167">
+    <unit id="292067144793702032">
       <segment>
-        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
+        <source> Upload one or several files </source>
+      </segment>
+    </unit>
+    <unit id="2978133532545567808">
+      <segment>
+        <source> You can import multiple files, they will be available in the “My studies” tab. </source>
+      </segment>
+    </unit>
+    <unit id="4888540688990075177">
+      <segment>
+        <source> File formats: .csv, .clst </source>
+      </segment>
+    </unit>
+    <unit id="2459402123301430299">
+      <segment>
+        <source>Error parsing file</source>
+      </segment>
+    </unit>
+    <unit id="3436792933196581692">
+      <segment>
+        <source>Error decoding file</source>
+      </segment>
+    </unit>
+    <unit id="3440092522520088595">
+      <segment>
+        <source>Cable not found in database</source>
+      </segment>
+    </unit>
+    <unit id="4431214807656751717">
+      <segment>
+        <source>Error reading file</source>
+      </segment>
+    </unit>
+    <unit id="7263348910820793991">
+      <segment>
+        <source>Error deleting study</source>
+      </segment>
+    </unit>
+    <unit id="8863452099399152076">
+      <segment>
+        <source>File type not allowed</source>
       </segment>
     </unit>
   </file>

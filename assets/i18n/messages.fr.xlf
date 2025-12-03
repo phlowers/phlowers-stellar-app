@@ -1093,12 +1093,6 @@
         <target> Set accroche </target>
       </segment>
     </unit>
-    <unit id="2932152767120246098">
-      <segment state="initial">
-        <source> Upload one or multiple protoV4 files </source>
-        <target> Charger un ou plusieurs fichiers protoV4 </target>
-      </segment>
-    </unit>
     <unit id="4280648003561719483">
       <segment state="initial">
         <source>supports amount</source>
@@ -1683,12 +1677,6 @@
       <segment state="initial">
         <source>Horizontal (m)</source>
         <target>Horizontal (m)</target>
-      </segment>
-    </unit>
-    <unit id="8687116247161905115">
-      <segment state="initial">
-        <source>Cable not found in database: <ph id="0" equiv="PH" disp="parameters.conductor"/></source>
-        <target>Câble non trouvé dans la base de données: <ph id="0" equiv="PH" disp="parameters.conductor"/></target>
       </segment>
     </unit>
     <unit id="3885497195825665706">
@@ -2519,10 +2507,58 @@
         <target>Voir</target>
       </segment>
     </unit>
-    <unit id="6738867123972990167">
+    <unit id="2978133532545567808">
       <segment state="initial">
-        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
-        <target>L&apos;étude <ph id="0" equiv="PH" disp="study.title"/> existe déjà. Souhaitez-vous la remplacer ?</target>
+        <source> You can import multiple files, they will be available in the “My studies” tab. </source>
+        <target> Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l&apos;onglet &quot;Mes études&quot;. </target>
+      </segment>
+    </unit>
+    <unit id="292067144793702032">
+      <segment state="initial">
+        <source> Upload one or several files </source>
+        <target> Importer un ou plusieurs fichiers </target>
+      </segment>
+    </unit>
+    <unit id="4888540688990075177">
+      <segment state="initial">
+        <source> File formats: .csv, .clst </source>
+        <target> Formats de fichiers: .csv, .clst </target>
+      </segment>
+    </unit>
+    <unit id="3440092522520088595">
+      <segment state="initial">
+        <source>Cable not found in database</source>
+        <target>Câble non trouvé dans la base de données</target>
+      </segment>
+    </unit>
+    <unit id="8863452099399152076">
+      <segment state="initial">
+        <source>File type not allowed</source>
+        <target>Format de fichier non autorisé</target>
+      </segment>
+    </unit>
+    <unit id="7263348910820793991">
+      <segment state="initial">
+        <source>Error deleting study</source>
+        <target>Erreur lors de la suppression de l'étude</target>
+      </segment>
+    </unit>
+    <unit id="3436792933196581692">
+      <segment state="initial">
+        <source>Error decoding file</source>
+        <target>Erreur lors de la décodage du fichier</target>
+      </segment>
+    </unit>
+    <unit id="2459402123301430299">
+      <segment state="initial">
+        <source>Error parsing file</source>
+        <target>Erreur lors de l'analyse du fichier</target>
+      </segment>
+    </unit>
+    <unit id="4431214807656751717">
+      <segment state="initial">
+        <source>Error reading file</source>
+        <target>Erreur lors de la lecture du fichier</target>
       </segment>
     </unit>
   </file>
