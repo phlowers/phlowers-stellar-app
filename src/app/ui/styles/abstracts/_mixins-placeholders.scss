@@ -1,27 +1,28 @@
 @use 'sass:map';
-@use './vars' as stel;
+@use 'sass:math';
+@use './vars' as app;
 
 // ***************************
 // **** breakpoint mixins ****
 // ***************************
 // min-width
 @mixin min-bp($size) {
-  @if map.has-key(stel.$bp, $size) {
-    @media (min-width: map.get(stel.$bp, $size)) {
+  @if map.has-key(app.$bp, $size) {
+    @media (min-width: map.get(app.$bp, $size)) {
       @content;
     }
   } @else {
-    @error "Invalid breakpoint with min-bp mixin '#{$size}'. Available breakpoints are: #{map.keys(stel.$bp)}";
+    @error "Invalid breakpoint with min-bp mixin '#{$size}'. Available breakpoints are: #{map.keys(app.$bp)}";
   }
 }
 // max-width
 @mixin max-bp($size) {
-  @if map.has-key(stel.$bp, $size) {
-    @media (max-width: map.get(stel.$bp, $size)) {
+  @if map.has-key(app.$bp, $size) {
+    @media (max-width: map.get(app.$bp, $size)) {
       @content;
     }
   } @else {
-    @error "Invalid breakpoint with max-bp mixin '#{$size}'. Available breakpoints are: #{map.keys(stel.$bp)}";
+    @error "Invalid breakpoint with max-bp mixin '#{$size}'. Available breakpoints are: #{map.keys(app.$bp)}";
   }
 }
 
@@ -29,14 +30,14 @@
 // **** texts placeholder ****
 // ***************************
 // headings texts
-@each $name, $value in stel.$txt-heading {
+@each $name, $value in app.$txt-heading {
   %heading-#{$name} {
     font: map.get($value, font);
     letter-spacing: map.get($value, letter-spacing);
   }
 }
 // common texts
-@each $name, $value in stel.$text {
+@each $name, $value in app.$text {
   %text-#{$name} {
     font: $value;
   }
@@ -57,4 +58,14 @@
   @apply h-full m-0 border-t-0;
   width: 0.0625rem;
   border-right: 0.0625rem solid var(--star-dust-300);
+}
+
+%tools-grid-layout {
+  $_column-gap: 2rem;
+  @apply grid items-end gap-y-3 mt-4 mb-3;
+  column-gap: $_column-gap;
+  grid-template-columns: repeat(
+    5,
+    calc(20% - math.div($_column-gap, 1.25))
+  ); // force grids cell width to 5 cols minus a quarter of gaps (5 columns, 4 gaps)
 }

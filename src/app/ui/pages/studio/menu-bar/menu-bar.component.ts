@@ -1,31 +1,31 @@
 import { Component, computed, input, output } from '@angular/core';
-import { SelectButtonModule } from 'primeng/selectbutton';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ChargesService } from '@core/services/charges/charges.service';
+import { Study } from '@core/data/database/interfaces/study';
+import { Section } from '@core/data/database/interfaces/section';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
+import { PlotService } from '@ui/pages/studio/plot.service';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { PlotService } from '@ui/pages/studio/plot.service';
-import { ButtonComponent } from '../../atoms/button/button.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
-import { Section } from '@core/data/database/interfaces/section';
 import { SelectModule } from 'primeng/select';
-import { RouterLink } from '@angular/router';
-import { Study } from '@core/data/database/interfaces/study';
-import { SelectWithButtonsComponent } from '../../atoms/select-with-buttons/select-with-buttons.component';
-import { ChargesService } from '@core/services/charges/charges.service';
 
 @Component({
   selector: 'app-studio-menu-bar',
   templateUrl: './menu-bar.component.html',
   styleUrl: './menu-bar.component.scss',
   imports: [
-    SelectButtonModule,
     FormsModule,
+    RouterLink,
+    SelectButtonModule,
     DividerModule,
     ToggleSwitchModule,
     ButtonComponent,
     IconComponent,
     SelectModule,
-    RouterLink,
     SelectWithButtonsComponent
   ]
 })

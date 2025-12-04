@@ -1,0 +1,290 @@
+<div class="papoto__btns">
+  <button
+    app-btn
+    aria-label="open PAPOTO help"
+    i18n-aria-label
+    (click)="openHelp()"
+  >
+    <app-icon icon="help" />
+  </button>
+
+  <button disabled app-btn btnStyle="outlined">
+    <ng-container i18n>Import station's datas</ng-container>
+  </button>
+</div>
+
+<p id="mandatory-papoto" class="papoto__mandatory-msg">
+  <app-icon icon="info" />
+  <span i18n>All fields are mandatory for calculus setting</span>
+</p>
+
+<div class="papoto__form">
+  <div class="papoto__form__line1">
+    <label for="leftSupport" class="leftSupport__label" i18n>
+      Left support
+    </label>
+    <p-select
+      inputId="leftSupport"
+      [options]="leftSupportOption()"
+      [ngModel]="measureData().leftSupport"
+      (ngModelChange)="updateField('leftSupport', $event)"
+      optionLabel="label"
+      optionValue="value"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      [required]="true"
+      class="leftSupport__input"
+    />
+
+    <label for="spanLength" i18n class="spanLength__label">
+      Measured span length
+    </label>
+    <p-inputgroup class="spanLength__input">
+      <input
+        id="spanLength"
+        type="number"
+        pInputText
+        [ngModel]="measureData().spanLength"
+        (ngModelChange)="updateField('spanLength', $event)"
+        [min]="0"
+        aria-describedby="mandatory-papoto spanLength-calculated"
+        required
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+    <p id="spanLength-calculated" class="spanLength__desc">
+      <ng-container i18n> calculated value:</ng-container>
+      &nbsp;123 m
+    </p>
+
+    <label for="measuredElevationDifference" i18n class="MED__label">
+      Elevation diff. of measured attach.
+    </label>
+    <p-inputgroup class="MED__input">
+      <input
+        id="measuredElevationDifference"
+        type="number"
+        pInputText
+        [ngModel]="measureData().measuredElevationDifference"
+        (ngModelChange)="updateField('measuredElevationDifference', $event)"
+        aria-describedby="mandatory-papoto measuredElevationDifference-calculated"
+        required
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+    <p id="measuredElevationDifference-calculated" class="MED__desc">
+      <ng-container i18n>calculated value:</ng-container>
+      &nbsp;123 m
+    </p>
+  </div>
+
+  <div class="HG">
+    <label for="HG" i18n>HG</label>
+    <input
+      id="HG"
+      type="number"
+      pInputText
+      [ngModel]="measureData().HG"
+      (ngModelChange)="updateField('HG', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="H1">
+    <label for="H1" i18n>H1</label>
+    <input
+      id="H1"
+      type="number"
+      pInputText
+      [ngModel]="measureData().H1"
+      (ngModelChange)="updateField('H1', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="H2">
+    <label for="H2" i18n>H2</label>
+    <input
+      id="H2"
+      type="number"
+      pInputText
+      [ngModel]="measureData().H2"
+      (ngModelChange)="updateField('H2', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="H3">
+    <label for="H3" i18n>H3</label>
+    <input
+      id="H3"
+      type="number"
+      pInputText
+      [ngModel]="measureData().H3"
+      (ngModelChange)="updateField('H3', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="HD">
+    <label for="HD" i18n>HD</label>
+    <input
+      id="HD"
+      type="number"
+      pInputText
+      [ngModel]="measureData().HD"
+      (ngModelChange)="updateField('HD', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="VG">
+    <label for="VG" i18n>VG</label>
+    <input
+      id="VG"
+      type="number"
+      pInputText
+      [ngModel]="measureData().VG"
+      (ngModelChange)="updateField('VG', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="V1">
+    <label for="V1" i18n>V1</label>
+    <input
+      id="V1"
+      type="number"
+      pInputText
+      [ngModel]="measureData().V1"
+      (ngModelChange)="updateField('V1', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="V2">
+    <label for="V2" i18n>V2</label>
+    <input
+      id="V2"
+      type="number"
+      pInputText
+      [ngModel]="measureData().V2"
+      (ngModelChange)="updateField('V2', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="V3">
+    <label for="V3" i18n>V3</label>
+    <input
+      id="V3"
+      type="number"
+      pInputText
+      [ngModel]="measureData().V3"
+      (ngModelChange)="updateField('V3', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+
+  <div class="VD">
+    <label for="VD" i18n>VD</label>
+    <input
+      id="VD"
+      type="number"
+      pInputText
+      [ngModel]="measureData().VD"
+      (ngModelChange)="updateField('VD', $event)"
+      [fluid]="true"
+      aria-describedby="mandatory-papoto"
+      required
+    />
+  </div>
+</div>
+
+<div class="text-right">
+  <button app-btn (click)="calculatePapoto()" [disabled]="!isFormValid()">
+    <app-icon icon="rocket_launch" />
+    <ng-container i18n>Calculate</ng-container>
+  </button>
+</div>
+
+@if (papotoResults()) {
+  <div class="papoto__results" [@expandCollapse]>
+    <h2 class="papoto__results__title">results:</h2>
+
+    <dl class="papoto__results__list">
+      <div class="param">
+        <dt i18n>Parameter</dt>
+        <dd>123 m</dd>
+      </div>
+
+      <div class="incertainParam">
+        <dt i18n>uncertainty parameter</dt>
+        <dd>123 m</dd>
+      </div>
+
+      <div class="param12">
+        <dt i18n>Paramter 1-2</dt>
+        <dd>123 m</dd>
+      </div>
+
+      <div class="param23">
+        <dt i18n>Parameter 2-3</dt>
+        <dd>123 m</dd>
+      </div>
+
+      <div class="param13">
+        <dt i18n>Parameter 1-3</dt>
+        <dd>123 m</dd>
+      </div>
+
+      <div class="crit">
+        <dt i18n>0.5% criterion</dt>
+        <dd class="crit__result">
+          @if (criterion()) {
+            <ng-container i18n>Yes</ng-container>
+            <app-icon icon="check" class="criterion-ok" />
+          } @else {
+            <ng-container i18n>No</ng-container>
+            <app-icon icon="check" class="criterion-ko" />
+          }
+        </dd>
+      </div>
+    </dl>
+  </div>
+}
+
+<p-dialog
+  closeAriaLabel="Close"
+  i18n-closeAriaLabel
+  [(visible)]="papotoHelpDialog"
+  [draggable]="true"
+  appendTo="body"
+>
+  <ng-template #header>
+    <p class="help-papoto-header">
+      <app-icon icon="help" />
+      <span i18n>Help (PAPOTO)</span>
+    </p>
+  </ng-template>
+
+  <img src="img/papoto-help.webp" alt="papoto help" />
+</p-dialog>
