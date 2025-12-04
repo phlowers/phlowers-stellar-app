@@ -24,12 +24,12 @@ theme:
     - python
     - typescript
     - bash
-  palette: 
+  palette:
     - primary: indigo
     # Palette toggle for light mode
     - scheme: default
       toggle:
-        icon: material/brightness-7 
+        icon: material/brightness-7
         name: Switch to dark mode
     # Palette toggle for dark mode
     - scheme: slate
@@ -40,44 +40,45 @@ theme:
 nav:
   - Home: index.md
   - Getting Started: home/home.md
-  # - User Guide: 
+  # - User Guide:
   - Developer guide:
-    # - API Reference:
-      
-    # - Guidelines : developer_guide/guidelines.md
-    - Documentation : developer_guide/documentation.md
+      # - API Reference:
 
-
+      # - Guidelines : developer_guide/guidelines.md
+      - Documentation: developer_guide/documentation.md
+      - Studio:
+          - Plot: developer_guide/plot/objects.md
 
 plugins:
   - search
   - offline
   - mkdocstrings:
-      default_handler: typescript
+      default_handler:
+        typescript
         # See: https://mkdocstrings.github.io/python/usage/
         # python:
-          # paths: [src]
-          # import:
-          #   - url: https://docs.python.org/3/objects.inv
-          #     domains: [py, std]
-          # options:
-          #   docstring_options:
-          #     ignore_init_summary: true
-          #   # docstring_section_style: list
-          #   filters: ["!^_"]
-          #   heading_level: 1
-          #   inherited_members: true
-          #   merge_init_into_class: true
-          #   parameter_headings: true
-          #   separate_signature: true
-          #   show_root_heading: true
-          #   show_root_full_path: false
-          #   show_signature_annotations: true
-          #   # show_source: false
-          #   show_symbol_type_heading: true
-          #   show_symbol_type_toc: true
-          #   signature_crossrefs: true
-            # summary: true
+        # paths: [src]
+        # import:
+        #   - url: https://docs.python.org/3/objects.inv
+        #     domains: [py, std]
+        # options:
+        #   docstring_options:
+        #     ignore_init_summary: true
+        #   # docstring_section_style: list
+        #   filters: ["!^_"]
+        #   heading_level: 1
+        #   inherited_members: true
+        #   merge_init_into_class: true
+        #   parameter_headings: true
+        #   separate_signature: true
+        #   show_root_heading: true
+        #   show_root_full_path: false
+        #   show_signature_annotations: true
+        #   # show_source: false
+        #   show_symbol_type_heading: true
+        #   show_symbol_type_toc: true
+        #   signature_crossrefs: true
+        # summary: true
 
 markdown_extensions:
   - admonition # https://squidfunk.github.io/mkdocs-material/reference/admonitions/#collapsible-blocks

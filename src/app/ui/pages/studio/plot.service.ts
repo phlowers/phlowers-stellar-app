@@ -168,10 +168,10 @@ export class PlotService {
   };
 
   purgePlot = () => {
-    if (!document.getElementById('plotly-output')) {
+    if (!document.getElementById(PLOT_ID)) {
       return;
     }
-    plotly.purge('plotly-output');
+    plotly.purge(PLOT_ID);
     this.litData.set(null);
     this.error.set(null);
     this.loading.set(false);
