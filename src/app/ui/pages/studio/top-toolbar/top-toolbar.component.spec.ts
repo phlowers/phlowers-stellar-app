@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioTopToolbarComponent } from './top-toolbar.component';
 import { PlotService } from '@ui/pages/studio/plot.service';
+import { ToolsDialogService } from '../tools-dialog/tools-dialog.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -10,13 +11,14 @@ import { SpeedDialModule } from 'primeng/speeddial';
 import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '../../atoms/button/button.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { signal } from '@angular/core';
 
 describe('StudioTopToolbarComponent', () => {
   let component: StudioTopToolbarComponent;
   let fixture: ComponentFixture<StudioTopToolbarComponent>;
   let mockPlotService: jest.Mocked<PlotService>;
+  let mockToolsDialogService: jest.Mocked<ToolsDialogService>;
 
   beforeEach(async () => {
     // Mock PlotService
@@ -28,6 +30,11 @@ describe('StudioTopToolbarComponent', () => {
       }),
       loading: signal(false),
       plotOptionsChange: jest.fn()
+    } as any;
+
+    // Mock ToolsDialogService
+    mockToolsDialogService = {
+      openTool: jest.fn()
     } as any;
 
     await TestBed.configureTestingModule({
@@ -44,7 +51,10 @@ describe('StudioTopToolbarComponent', () => {
         IconComponent,
         ButtonComponent
       ],
-      providers: [{ provide: PlotService, useValue: mockPlotService }]
+      providers: [
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: ToolsDialogService, useValue: mockToolsDialogService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(StudioTopToolbarComponent);
@@ -169,14 +179,13 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should map toolsItems actions to toolsDropdown commands', () => {
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
       component.ngOnInit();
       const tools = component.toolsDropdown();
 
       tools?.[0].command?.({});
-      expect(alertSpy).toHaveBeenCalledWith('click field measurements');
-
-      alertSpy.mockRestore();
+      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+        'field-measuring'
+      );
     });
   });
 
@@ -358,13 +367,12 @@ describe('StudioTopToolbarComponent', () => {
 
   describe('toolsItems actions', () => {
     it('should execute action for tool item 1 - Field measurements', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
       const items = component.toolsItems();
 
       items[0].action();
-      expect(alertSpy).toHaveBeenCalledWith('click field measurements');
-
-      alertSpy.mockRestore();
+      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+        'field-measuring'
+      );
     });
 
     it('should execute action for tool item 2 - L0 sum', () => {
@@ -446,7 +454,9 @@ describe('StudioTopToolbarComponent', () => {
         tools?.[i].command?.({});
       }
 
-      expect(alertSpy).toHaveBeenCalledTimes(8);
+      // First tool calls service, remaining 7 call alert
+      expect(mockToolsDialogService.openTool).toHaveBeenCalledTimes(1);
+      expect(alertSpy).toHaveBeenCalledTimes(7);
       alertSpy.mockRestore();
     });
   });

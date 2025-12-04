@@ -223,10 +223,10 @@
             <input
               pInputText
               type="number"
-              min="0"
+              min="-400"
               max="400"
               aria-label="span angle"
-              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
               i18n-aria-label
               [ngModel]="support.spanAngle"
               (ngModelChange)="

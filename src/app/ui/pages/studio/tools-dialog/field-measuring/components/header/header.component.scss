@@ -1,0 +1,43 @@
+@use 'abstract.extracts' as app;
+
+.header-grid {
+  @extend %tools-grid-layout;
+}
+
+%_label-style {
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--star-dust-900);
+  margin: 0.125rem 0.25rem;
+}
+
+.header-info {
+  @apply self-start;
+
+  dt {
+    @extend %_label-style;
+  }
+
+  dd {
+    @extend %text-m-400;
+    color: var(--star-dust-950);
+    padding: 0.375rem 0.5rem;
+  }
+}
+
+.form-field {
+  label {
+    @apply flex items-end gap-1;
+    @extend %_label-style;
+
+    &:has(.help-icon) {
+      @apply justify-between;
+    }
+
+    .help-icon {
+      font-size: 1.25rem;
+      color: var(--star-dust-950);
+      cursor: help;
+    }
+  }
+}
