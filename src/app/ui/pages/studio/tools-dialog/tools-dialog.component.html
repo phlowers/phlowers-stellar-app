@@ -1,0 +1,38 @@
+<p-dialog
+  dismissableMask="false"
+  [visible]="toolsDialogService.isOpen()"
+  (visibleChange)="toolsDialogService.isOpen.set($event)"
+  [modal]="true"
+  [style]="
+    toolsDialogService.getCurrentDialogStyle() || {
+      'min-width': '60vw',
+      'max-width': '75rem'
+    }
+  "
+  closeAriaLabel="Close"
+  i18n-closeAriaLabel
+  (onHide)="toolsDialogService.closeTool()"
+>
+  @if (toolsDialogService.templates().header) {
+    <ng-template #header>
+      <ng-container
+        *ngTemplateOutlet="toolsDialogService.templates().header!"
+      />
+    </ng-template>
+  }
+
+  <ng-container
+    *ngComponentOutlet="
+      toolsDialogService.getCurrentToolComponent();
+      injector: injector
+    "
+  />
+
+  @if (toolsDialogService.templates().footer) {
+    <ng-template #footer>
+      <ng-container
+        *ngTemplateOutlet="toolsDialogService.templates().footer!"
+      />
+    </ng-template>
+  }
+</p-dialog>

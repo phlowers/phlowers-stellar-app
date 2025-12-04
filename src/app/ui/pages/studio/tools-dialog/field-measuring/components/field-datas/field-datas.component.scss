@@ -1,0 +1,53 @@
+@use 'abstract.extracts' as app;
+
+.field-datas {
+  &__mandatory-msg {
+    @apply flex items-center gap-1 my-4;
+    @extend %text-s-600;
+    color: var(--star-dust-950);
+  }
+
+  &__grid {
+    @extend %tools-grid-layout;
+    grid-template-areas:
+      'name name date time .'
+      'temperature wind direction sky .';
+
+    .name {
+      grid-area: name;
+    }
+
+    .date {
+      grid-area: date;
+    }
+
+    .time {
+      grid-area: time;
+    }
+
+    .temperature {
+      grid-area: temperature;
+    }
+
+    .wind {
+      grid-area: wind;
+    }
+
+    .direction {
+      grid-area: direction;
+    }
+
+    .sky {
+      grid-area: sky;
+    }
+
+    label {
+      @extend %text-s-400;
+      margin: 0.125rem 0.25rem;
+
+      &:has(.small) {
+        @apply flex items-end gap-1 justify-between;
+      }
+    }
+  }
+}
