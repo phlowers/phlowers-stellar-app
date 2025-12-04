@@ -38,6 +38,11 @@ describe('StudioTopToolbarComponent', () => {
       openTool: jest.fn()
     } as any;
 
+    // Mock ToolsDialogService
+    mockToolsDialogService = {
+      openTool: jest.fn()
+    } as any;
+
     await TestBed.configureTestingModule({
       imports: [
         StudioTopToolbarComponent,
