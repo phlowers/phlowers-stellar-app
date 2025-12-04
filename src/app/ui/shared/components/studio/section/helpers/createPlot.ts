@@ -2,8 +2,7 @@ import Plotly, {
   Camera,
   Data,
   Layout,
-  ModeBarDefaultButtons,
-  ScatterData
+  ModeBarDefaultButtons
 } from 'plotly.js-dist-min';
 import { Side, View } from './types';
 
@@ -47,15 +46,10 @@ const scene = (
   invert: boolean,
   camera: Camera | null
 ) => ({
-  aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+  aspectmode: 'data' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
   xaxis: axis,
-  yaxis: axis,
+  yaxis: { ...axis, scaleanchor: 'x', scaleratio: 1 },
   zaxis: axis,
-  aspectratio: {
-    x: 3,
-    y: 0.2,
-    z: 0.5
-  },
   camera: camera ?? {
     ...(isSupportZoom ? supportCamera : normalCamera(invert))
   }
@@ -98,17 +92,6 @@ const layout2d: (
   data: Data[],
   side: Side
 ) => Partial<Layout> = (invert: boolean, data: Data[], side: Side) => {
-  let xMin = 0;
-  let xMax = 0;
-  if (side === 'face') {
-    const allXValues = data.flatMap(
-      (d) => ((d as ScatterData).x as number[]) ?? []
-    ) as number[];
-    xMin = Math.min(...allXValues);
-    xMax = Math.max(...allXValues);
-    xMin -= 1;
-    xMax += 1;
-  }
   return {
     autosize: true,
     showlegend: false,
@@ -124,14 +107,15 @@ const layout2d: (
       autorange: side === 'face' ? false : true,
       showticklabels: true,
       showgrid: true,
-      showline: true,
-      range: side === 'face' ? [xMin, xMax] : undefined
+      showline: true
     },
     yaxis: {
       ...axis,
       showticklabels: true,
       showgrid: true,
-      showline: true
+      showline: true,
+      scaleratio: side === 'face' ? 0.2 : undefined,
+      scaleanchor: side === 'face' ? 'x' : undefined
     }
   };
 };

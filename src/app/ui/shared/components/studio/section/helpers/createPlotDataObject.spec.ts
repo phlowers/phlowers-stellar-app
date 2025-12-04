@@ -21,7 +21,7 @@ describe('createPlotDataObject', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).line
-      ).toEqual({ color: 'dodgerblue', dash: 'solid', width: 8 });
+      ).toEqual({ color: 'dodgerblue', dash: 'solid', width: 4 });
     });
 
     it('should return blue color for supports type', () => {
@@ -37,7 +37,7 @@ describe('createPlotDataObject', () => {
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).line
-      ).toEqual({ color: 'indigo', dash: 'solid', width: 8 });
+      ).toEqual({ color: 'indigo', dash: 'solid', width: 4 });
     });
 
     it('should return green color for insulators type', () => {
@@ -56,7 +56,7 @@ describe('createPlotDataObject', () => {
       ).toEqual({
         color: 'red',
         dash: 'solid',
-        width: 8
+        width: 4
       });
     });
 
@@ -76,7 +76,7 @@ describe('createPlotDataObject', () => {
       ).toEqual({
         color: 'black',
         dash: 'solid',
-        width: 8
+        width: 4
       });
     });
   });

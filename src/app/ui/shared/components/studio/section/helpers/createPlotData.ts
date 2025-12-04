@@ -8,7 +8,7 @@ export const createPlotData = (
   options: PlotOptions
 ): Data[] => {
   const data = (
-    ['spans', 'insulators', 'supports'] as (keyof GetSectionOutput)[]
+    ['spans', 'supports', 'insulators'] as (keyof GetSectionOutput)[]
   ).map((type) => {
     return createDataObject(
       params[type as keyof GetSectionOutput] as number[][][],
