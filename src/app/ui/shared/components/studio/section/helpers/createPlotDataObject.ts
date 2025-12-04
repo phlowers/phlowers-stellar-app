@@ -2,7 +2,8 @@ import { Dash, Data, PlotData } from 'plotly.js-dist-min';
 import { PlotObjectsType, Side, View } from './types';
 
 const getLine = (
-  type: PlotObjectsType
+  type: PlotObjectsType,
+  view: View
 ): {
   color: string;
   dash: Dash;
@@ -10,13 +11,17 @@ const getLine = (
 } => {
   switch (type) {
     case 'spans':
-      return { color: 'dodgerblue', dash: 'solid', width: 8 };
+      return {
+        color: 'dodgerblue',
+        dash: 'solid',
+        width: view === '3d' ? 8 : 4
+      };
     case 'supports':
-      return { color: 'indigo', dash: 'solid', width: 8 };
+      return { color: 'indigo', dash: 'solid', width: view === '3d' ? 8 : 4 };
     case 'insulators':
-      return { color: 'red', dash: 'solid', width: 8 };
+      return { color: 'red', dash: 'solid', width: view === '3d' ? 8 : 4 };
     default:
-      return { color: 'black', dash: 'solid', width: 8 };
+      return { color: 'black', dash: 'solid', width: view === '3d' ? 8 : 4 };
   }
 };
 
@@ -37,6 +42,19 @@ const getText = (
   return points.map((point, index) =>
     index === highestPointIndex ? (supportIndex + 1).toString() : ''
   );
+};
+
+const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
+  switch (type) {
+    case 'spans':
+      return { size: view === '3d' ? 3 : 5 };
+    case 'supports':
+      return { size: view === '3d' ? 3 : 4 };
+    case 'insulators':
+      return { size: view === '3d' ? 4 : 6 };
+    default:
+      return { size: 3 };
+  }
 };
 
 export const createDataObject = (
@@ -61,11 +79,9 @@ export const createDataObject = (
       y: view === '3d' ? y : z,
       type: view === '3d' ? 'scatter3d' : 'scatter',
       mode: getMode(type),
-      line: getLine(type),
+      line: getLine(type, view),
       textposition: 'top center',
-      marker: {
-        size: 3
-      },
+      marker: getMarker(type, view),
       text: getText(type, points, startSupport + index)
     };
     return dataObject;
