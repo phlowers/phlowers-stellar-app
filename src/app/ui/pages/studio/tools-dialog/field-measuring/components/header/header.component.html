@@ -1,0 +1,126 @@
+<div class="header-grid">
+  <dl class="contents">
+    <div class="header-info">
+      <dt i18n>Line</dt>
+      <dd>{{ measureData().line }}</dd>
+    </div>
+    <div class="header-info">
+      <dt i18n>Voltage</dt>
+      <dd i18n>{{ measureData().voltage }} kV</dd>
+    </div>
+    <div class="header-info">
+      <dt i18n>Span type</dt>
+      <dd>{{ measureData().spanType }}</dd>
+    </div>
+    <div class="header-info">
+      <dt i18n>Phase number</dt>
+      <dd>{{ measureData().phaseNumber }}</dd>
+    </div>
+    <div class="header-info">
+      <dt i18n>Number of conductors</dt>
+      <dd>{{ measureData().numberOfConductors }}</dd>
+    </div>
+  </dl>
+
+  <!-- Location Fields Section -->
+  <div class="form-field">
+    <label for="portee">
+      <ng-container i18n>Span</ng-container>
+      <sup class="mandatory">*</sup>
+    </label>
+    <p-select
+      appendTo="body"
+      id="portee"
+      [options]="spanOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="measureData().span"
+      (ngModelChange)="onFieldChange('span', $event)"
+      styleClass="w-full"
+      [required]="true"
+    />
+  </div>
+
+  <div class="form-field">
+    <label for="longitude">
+      <span>
+        <ng-container i18n>Longitude</ng-container>
+        <sup class="mandatory">*</sup>
+      </span>
+      <app-icon icon="help" class="help-icon" />
+    </label>
+    <p-inputgroup>
+      <input
+        pInputText
+        id="longitude"
+        type="number"
+        step="0.00000001"
+        [ngModel]="measureData().longitude"
+        (ngModelChange)="onFieldChange('longitude', $event)"
+        required
+      />
+      <p-inputgroup-addon i18n>°</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="form-field">
+    <label for="latitude">
+      <span>
+        <ng-container i18n>Latitude</ng-container>
+        <sup class="mandatory">*</sup>
+      </span>
+      <app-icon icon="help" class="help-icon" />
+    </label>
+    <p-inputgroup>
+      <input
+        pInputText
+        id="latitude"
+        type="number"
+        step="0.00000001"
+        [ngModel]="measureData().latitude"
+        (ngModelChange)="onFieldChange('latitude', $event)"
+        required
+      />
+      <p-inputgroup-addon i18n>°</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="form-field">
+    <label for="altitude">
+      <ng-container i18n>Altitude</ng-container>
+      <sup class="mandatory">*</sup>
+    </label>
+    <p-inputgroup>
+      <input
+        pInputText
+        id="altitude"
+        type="number"
+        step="0.00000001"
+        [ngModel]="measureData().altitude"
+        (ngModelChange)="onFieldChange('altitude', $event)"
+        required
+      />
+      <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="form-field">
+    <label for="azimuth">
+      <span>
+        <ng-container i18n>Azimuth (clockwise — 0° North/South) </ng-container>
+        <sup class="mandatory">*</sup>
+      </span>
+    </label>
+    <p-inputgroup>
+      <input
+        pInputText
+        id="azimuth"
+        type="number"
+        [ngModel]="measureData().azimuth"
+        (ngModelChange)="onFieldChange('azimuth', $event)"
+        required
+      />
+      <p-inputgroup-addon i18n>°</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, QueryList, ElementRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SideTabsComponent } from './side-tabs.component';
@@ -17,14 +17,16 @@ class TestHostComponent {}
 
 describe('SideTabsComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
+  let plotServiceMock: { isSidebarOpen: jest.Mock; setSidebarOpen: jest.Mock };
 
   beforeEach(async () => {
     const isSidebarOpenMock = Object.assign(jest.fn().mockReturnValue(false), {
       set: jest.fn()
     });
-    const plotServiceMock = {
-      isSidebarOpen: isSidebarOpenMock
-    } as unknown as PlotService;
+    plotServiceMock = {
+      isSidebarOpen: isSidebarOpenMock,
+      setSidebarOpen: jest.fn()
+    };
 
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
@@ -133,14 +135,65 @@ describe('SideTabsComponent', () => {
     expect(component.panelWidth()).toBe('0px');
   });
 
+  it('updateWidth sets panelWidth based on element offsetWidth when tab is open', (done) => {
+    const component = fixture.debugElement.query(
+      By.directive(SideTabsComponent)
+    ).componentInstance;
+
+    // Set a tab to be open
+    component.sideTabs.set(0);
+
+    // Mock the panel element with offsetWidth
+    const mockPanel = {
+      nativeElement: {
+        offsetWidth: 300
+      }
+    };
+    component['panels'] = {
+      toArray: () => [mockPanel]
+    } as unknown as QueryList<ElementRef<HTMLElement>>;
+
+    component['updateWidth']();
+
+    // Wait for setTimeout to complete
+    setTimeout(() => {
+      expect(component.panelWidth()).toBe('300px');
+      done();
+    }, 10);
+  });
+
   it('focusPanel does nothing if panel element is missing', () => {
     const component = fixture.debugElement.query(
       By.directive(SideTabsComponent)
     ).componentInstance;
     component['panels'] = {
       toArray: () => []
-    } as any;
+    } as unknown as QueryList<ElementRef<HTMLElement>>;
     expect(() => component).not.toThrow();
+  });
+
+  it('focusPanel focuses the panel element when it exists', (done) => {
+    const component = fixture.debugElement.query(
+      By.directive(SideTabsComponent)
+    ).componentInstance;
+
+    const focusSpy = jest.fn();
+    const mockPanel = {
+      nativeElement: {
+        focus: focusSpy
+      }
+    };
+    component['panels'] = {
+      toArray: () => [mockPanel]
+    } as unknown as QueryList<ElementRef<HTMLElement>>;
+
+    component['focusPanel'](0);
+
+    // Wait for setTimeout to complete
+    setTimeout(() => {
+      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+      done();
+    }, 10);
   });
 
   it('handlePanelFocusOut does nothing if panel is missing', () => {
@@ -149,7 +202,7 @@ describe('SideTabsComponent', () => {
     ).componentInstance;
     component['panels'] = {
       toArray: () => [undefined]
-    } as any;
+    } as unknown as QueryList<ElementRef<HTMLElement>>;
 
     expect(() =>
       component.handlePanelFocusOut({ relatedTarget: null } as FocusEvent, 0)
@@ -164,7 +217,7 @@ describe('SideTabsComponent', () => {
     const panelEl = document.createElement('div');
     component['panels'] = {
       toArray: () => [{ nativeElement: panelEl }]
-    } as any;
+    } as unknown as QueryList<ElementRef<HTMLElement>>;
 
     const insideEl = document.createElement('button');
     panelEl.appendChild(insideEl);
@@ -173,5 +226,18 @@ describe('SideTabsComponent', () => {
       { relatedTarget: insideEl } as unknown as FocusEvent,
       0
     );
+  });
+
+  it('toggleTab calls plotService.setSidebarOpen after delay', (done) => {
+    const buttons = getButtons();
+
+    buttons[0].click();
+    fixture.detectChanges();
+
+    // Wait for the REFRESH_STUDIO_DELAY (400ms)
+    setTimeout(() => {
+      expect(plotServiceMock.setSidebarOpen).toHaveBeenCalled();
+      done();
+    }, 450);
   });
 });
