@@ -31,11 +31,14 @@ import { MaintenanceData } from './interfaces/maintenance';
 import { maintenance } from './tables/maintenance';
 import { Chain } from './interfaces/chain';
 import { chainTable } from './tables/chain';
+import { CatalogSupport } from './interfaces/support';
+import { catalogSupportsTable } from './tables/catalogSupports';
 
 export class AppDB extends Dexie {
   users!: Table<User, number>;
   studies!: Table<Study, string>;
   attachments!: Table<Attachment, string>;
+  catalogSupports!: Table<CatalogSupport, string>;
   branches!: Table<Branch, string>;
   lines!: Table<Line, string>;
   maintenance!: Table<MaintenanceData, string>;
@@ -60,7 +63,8 @@ export class AppDB extends Dexie {
       ...tensionTable,
       ...transitLinkTable,
       ...userTable,
-      ...cableTable
+      ...cableTable,
+      ...catalogSupportsTable
     });
   }
 
