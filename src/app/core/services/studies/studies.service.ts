@@ -52,9 +52,10 @@ export class StudiesService {
     study: Pick<
       StudyModel,
       'title' | 'description' | 'shareable' | 'sections' | 'author_email'
-    >
+    >,
+    newUuid?: string
   ): Promise<string> {
-    const uuid = uuidv4();
+    const uuid = newUuid || uuidv4();
     const user = (await this.storageService.db?.users.toArray())?.[0];
     await this.storageService.db?.studies.add({
       ...study,

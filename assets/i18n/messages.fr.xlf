@@ -2519,5 +2519,11 @@
         <target>Voir</target>
       </segment>
     </unit>
+    <unit id="6738867123972990167">
+      <segment state="initial">
+        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
+        <target>L&apos;étude <ph id="0" equiv="PH" disp="study.title"/> existe déjà. Souhaitez-vous la remplacer ?</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
