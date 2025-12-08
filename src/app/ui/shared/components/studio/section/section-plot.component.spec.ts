@@ -5,7 +5,7 @@ import { createPlot } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
 import { Data } from 'plotly.js-dist-min';
 import { PlotOptions } from './helpers/types';
-import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
 
 // Mock the helper functions
 jest.mock('./helpers/createPlot');
