@@ -17,7 +17,7 @@ import { isEqual } from 'lodash';
 
 const PLOT_ID = 'plotly-output';
 
-const checkIfProjectionNeedRefresh = (
+export const checkIfProjectionNeedRefresh = (
   oldOptions: PlotOptions,
   newOptions: PlotOptions,
   loading: boolean
@@ -27,7 +27,9 @@ const checkIfProjectionNeedRefresh = (
   }
   const oldView = oldOptions.view;
   const newView = newOptions.view;
-  if (oldView !== newView) {
+  const oldSide = oldOptions.side;
+  const newSide = newOptions.side;
+  if (oldView !== newView || oldSide !== newSide) {
     return true;
   }
   if (newView !== '2d') {
@@ -41,6 +43,14 @@ const checkIfProjectionNeedRefresh = (
     return true;
   }
   return false;
+};
+
+export const defaultPlotOptions: PlotOptions = {
+  view: '3d',
+  side: 'profile',
+  startSupport: 0,
+  endSupport: 1,
+  invert: false
 };
 
 @Injectable({
@@ -58,11 +68,7 @@ export class PlotService {
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
   plotOptions = signal<PlotOptions>({
-    view: '3d',
-    side: 'profile',
-    startSupport: 0,
-    endSupport: 1,
-    invert: false
+    ...defaultPlotOptions
   });
   isSidebarOpen = signal(false);
 
@@ -71,12 +77,22 @@ export class PlotService {
     private readonly cableService: CablesService
   ) {}
 
-  plotOptionsChange(
-    key: keyof PlotOptions,
-    value: PlotOptions[keyof PlotOptions]
-  ) {
+  resetAll = () => {
+    this.purgePlot();
+    this.error.set(null);
+    this.litData.set(null);
+    this.loading.set(false);
+    this.plotOptions.set({
+      ...defaultPlotOptions
+    });
+    this.camera.set(null);
+    this.section.set(null);
+    this.study.set(null);
+  };
+
+  plotOptionsChange(values: Partial<PlotOptions>) {
     const oldOptions = this.plotOptions();
-    const newOptions = { ...oldOptions, [key]: value };
+    const newOptions = { ...oldOptions, ...values };
     this.plotOptions.set(newOptions);
     this.refreshCamera();
     if (checkIfProjectionNeedRefresh(oldOptions, newOptions, this.loading())) {
