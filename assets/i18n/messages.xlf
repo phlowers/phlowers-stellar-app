@@ -1618,11 +1618,6 @@
         <source>Span loading</source>
       </segment>
     </unit>
-    <unit id="1864612253981729182">
-      <segment>
-        <source>suspension</source>
-      </segment>
-    </unit>
     <unit id="1964106600703167330">
       <segment>
         <source>Cable manip. at span</source>
@@ -1641,11 +1636,6 @@
     <unit id="2813428855529635901">
       <segment>
         <source>View charge case</source>
-      </segment>
-    </unit>
-    <unit id="2905929947185397074">
-      <segment>
-        <source>chain</source>
       </segment>
     </unit>
     <unit id="3059442917741627872">
@@ -2126,6 +2116,366 @@
     <unit id="8863452099399152076">
       <segment>
         <source>File type not allowed</source>
+      </segment>
+    </unit>
+    <unit id="1183601349925746054">
+      <segment>
+        <source>Parameter</source>
+      </segment>
+    </unit>
+    <unit id="1203647783433086430">
+      <segment>
+        <source>PAPOTO</source>
+      </segment>
+    </unit>
+    <unit id="1203928427291740707">
+      <segment>
+        <source>North-West</source>
+      </segment>
+    </unit>
+    <unit id="1214925224648740766">
+      <segment>
+        <source>Sky cover</source>
+      </segment>
+    </unit>
+    <unit id="1341898151776599609">
+      <segment>
+        <source>°</source>
+      </segment>
+    </unit>
+    <unit id="1546856207674794665">
+      <segment>
+        <source>Measure name</source>
+      </segment>
+    </unit>
+    <unit id="2100284670541523377">
+      <segment>
+        <source>V1</source>
+      </segment>
+    </unit>
+    <unit id="2147039543508081675">
+      <segment>
+        <source> Elevation diff. of measured attach. </source>
+      </segment>
+    </unit>
+    <unit id="2507676024821952431">
+      <segment>
+        <source>East</source>
+      </segment>
+    </unit>
+    <unit id="2561480989640213677">
+      <segment>
+        <source>South-West</source>
+      </segment>
+    </unit>
+    <unit id="2683177506127057493">
+      <segment>
+        <source>HD</source>
+      </segment>
+    </unit>
+    <unit id="2744826406336414605">
+      <segment>
+        <source>Paramter 1-2</source>
+      </segment>
+    </unit>
+    <unit id="3236954287106088041">
+      <segment>
+        <source>N6 - Covered sky</source>
+      </segment>
+    </unit>
+    <unit id="3275519279768264405">
+      <segment>
+        <source>All fields are mandatory</source>
+      </segment>
+    </unit>
+    <unit id="3344297091974909478">
+      <segment>
+        <source>Parameter at 15°C without wind</source>
+      </segment>
+    </unit>
+    <unit id="3552226234722879893">
+      <segment>
+        <source>open PAPOTO help</source>
+      </segment>
+    </unit>
+    <unit id="3599922959288251477">
+      <segment>
+        <source>H1</source>
+      </segment>
+    </unit>
+    <unit id="3870240363377114184">
+      <segment>
+        <source>Support 1</source>
+      </segment>
+    </unit>
+    <unit id="3968142117594394855">
+      <segment>
+        <source>Phase number</source>
+      </segment>
+    </unit>
+    <unit id="3973931101896534797">
+      <segment>
+        <source>Date</source>
+      </segment>
+    </unit>
+    <unit id="3999096471992552378">
+      <segment>
+        <source>North</source>
+      </segment>
+    </unit>
+    <unit id="4057359344329666188">
+      <segment>
+        <source>West</source>
+      </segment>
+    </unit>
+    <unit id="4192982166698299789">
+      <segment>
+        <source>N2 - partly cloudy</source>
+      </segment>
+    </unit>
+    <unit id="4293705742456284563">
+      <segment>
+        <source>Parameter 1-3</source>
+      </segment>
+    </unit>
+    <unit id="4372504809293098890">
+      <segment>
+        <source> Left support </source>
+      </segment>
+    </unit>
+    <unit id="4449607081524618909">
+      <segment>
+        <source>All fields are mandatory for calculus setting</source>
+      </segment>
+    </unit>
+    <unit id="4679516709693484256">
+      <segment>
+        <source>Number of conductors</source>
+      </segment>
+    </unit>
+    <unit id="4996922266254528864">
+      <segment>
+        <source>Winter</source>
+      </segment>
+    </unit>
+    <unit id="5088621818536959590">
+      <segment>
+        <source> calculated value:</source>
+      </segment>
+    </unit>
+    <unit id="5174359152122758396">
+      <segment>
+        <source>Longitude</source>
+      </segment>
+    </unit>
+    <unit id="518519385564060454">
+      <segment>
+        <source>Wind speed</source>
+      </segment>
+    </unit>
+    <unit id="5198396305972397137">
+      <segment>
+        <source>Voltage</source>
+      </segment>
+    </unit>
+    <unit id="5241020730740347210">
+      <segment>
+        <source>Altitude</source>
+      </segment>
+    </unit>
+    <unit id="5301637922955688420">
+      <segment>
+        <source>North-East</source>
+      </segment>
+    </unit>
+    <unit id="5375267255227557614">
+      <segment>
+        <source>South</source>
+      </segment>
+    </unit>
+    <unit id="5470767886742617950">
+      <segment>
+        <source>Support 3</source>
+      </segment>
+    </unit>
+    <unit id="5479852114667655535">
+      <segment>
+        <source>Help (PAPOTO)</source>
+      </segment>
+    </unit>
+    <unit id="5508192867090472125">
+      <segment>
+        <source><ph id="0" equiv="INTERPOLATION" disp="{{ measureData().voltage }}"/> kV</source>
+      </segment>
+    </unit>
+    <unit id="5521778727858271522">
+      <segment>
+        <source>Import station&apos;s datas</source>
+      </segment>
+    </unit>
+    <unit id="5674291517084885842">
+      <segment>
+        <source>Support 2</source>
+      </segment>
+    </unit>
+    <unit id="571757945706473817">
+      <segment>
+        <source>calculated value:</source>
+      </segment>
+    </unit>
+    <unit id="5723444180002865661">
+      <segment>
+        <source>V2</source>
+      </segment>
+    </unit>
+    <unit id="57361994969699356">
+      <segment>
+        <source>Span type</source>
+      </segment>
+    </unit>
+    <unit id="5951488432861381360">
+      <segment>
+        <source>Wind direction</source>
+      </segment>
+    </unit>
+    <unit id="6116311114445443296">
+      <segment>
+        <source>V3</source>
+      </segment>
+    </unit>
+    <unit id="6145928415540193222">
+      <segment>
+        <source>N1 - Sunny</source>
+      </segment>
+    </unit>
+    <unit id="6365666220420105100">
+      <segment>
+        <source>Parameter calculation</source>
+      </segment>
+    </unit>
+    <unit id="6654329837393989472">
+      <segment>
+        <source>South-East</source>
+      </segment>
+    </unit>
+    <unit id="6673871987217292573">
+      <segment>
+        <source>0.5% criterion</source>
+      </segment>
+    </unit>
+    <unit id="6738867123972990167">
+      <segment>
+        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
+      </segment>
+    </unit>
+    <unit id="7008439939460403347">
+      <segment>
+        <source>Report</source>
+      </segment>
+    </unit>
+    <unit id="7053072293973747391">
+      <segment>
+        <source>PEP</source>
+      </segment>
+    </unit>
+    <unit id="7355843892858662403">
+      <segment>
+        <source>Terrain data</source>
+      </segment>
+    </unit>
+    <unit id="7445879416935051036">
+      <segment>
+        <source>Azimuth (clockwise — 0° North/South) </source>
+      </segment>
+    </unit>
+    <unit id="7521763556168175281">
+      <segment>
+        <source>VG</source>
+      </segment>
+    </unit>
+    <unit id="7632588300330135571">
+      <segment>
+        <source>Tangent aiming</source>
+      </segment>
+    </unit>
+    <unit id="78111435214333571">
+      <segment>
+        <source>Temperature calculation</source>
+      </segment>
+    </unit>
+    <unit id="7838365629862703936">
+      <segment>
+        <source>HG</source>
+      </segment>
+    </unit>
+    <unit id="7930349729068923819">
+      <segment>
+        <source>VD</source>
+      </segment>
+    </unit>
+    <unit id="8299980005026088275">
+      <segment>
+        <source>Compute base parameter from terrain measurement</source>
+      </segment>
+    </unit>
+    <unit id="8314090883669143391">
+      <segment>
+        <source>Latitude</source>
+      </segment>
+    </unit>
+    <unit id="8471487881386607602">
+      <segment>
+        <source>Summer</source>
+      </segment>
+    </unit>
+    <unit id="8475559139207580230">
+      <segment>
+        <source>N8 - covered - smoky</source>
+      </segment>
+    </unit>
+    <unit id="8497528947328199741">
+      <segment>
+        <source>Time</source>
+      </segment>
+    </unit>
+    <unit id="8543119714580512727">
+      <segment>
+        <source>Line</source>
+      </segment>
+    </unit>
+    <unit id="8546353274317555587">
+      <segment>
+        <source>Ambient temperature</source>
+      </segment>
+    </unit>
+    <unit id="8566581441957557985">
+      <segment>
+        <source> Measured span length </source>
+      </segment>
+    </unit>
+    <unit id="8762477959615349195">
+      <segment>
+        <source>Parameter 2-3</source>
+      </segment>
+    </unit>
+    <unit id="8907130458722935866">
+      <segment>
+        <source>H2</source>
+      </segment>
+    </unit>
+    <unit id="9071236182141230808">
+      <segment>
+        <source>uncertainty parameter</source>
+      </segment>
+    </unit>
+    <unit id="9199827368355942438">
+      <segment>
+        <source>H3</source>
+      </segment>
+    </unit>
+    <unit id="959518481042894436">
+      <segment>
+        <source>N5 - Cloudy</source>
       </segment>
     </unit>
   </file>

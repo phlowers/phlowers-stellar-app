@@ -1943,18 +1943,6 @@
         <target>Charge supprimée</target>
       </segment>
     </unit>
-    <unit id="1864612253981729182">
-      <segment state="initial">
-        <source>suspension</source>
-        <target>suspension</target>
-      </segment>
-    </unit>
-    <unit id="2905929947185397074">
-      <segment state="initial">
-        <source>chain</source>
-        <target>chaîne</target>
-      </segment>
-    </unit>
     <unit id="858950043240201803">
       <segment state="initial">
         <source>IC 1</source>
@@ -2540,7 +2528,7 @@
     <unit id="7263348910820793991">
       <segment state="initial">
         <source>Error deleting study</source>
-        <target>Erreur lors de la suppression de l'étude</target>
+        <target>Erreur lors de la suppression de l&apos;étude</target>
       </segment>
     </unit>
     <unit id="3436792933196581692">
@@ -2552,13 +2540,445 @@
     <unit id="2459402123301430299">
       <segment state="initial">
         <source>Error parsing file</source>
-        <target>Erreur lors de l'analyse du fichier</target>
+        <target>Erreur lors de l&apos;analyse du fichier</target>
       </segment>
     </unit>
     <unit id="4431214807656751717">
       <segment state="initial">
         <source>Error reading file</source>
         <target>Erreur lors de la lecture du fichier</target>
+      </segment>
+    </unit>
+    <unit id="6738867123972990167">
+      <segment state="initial">
+        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
+        <target>L&apos;étude <ph id="0" equiv="PH" disp="study.title"/> existe déjà. Souhaitez-vous la remplacer ?</target>
+      </segment>
+    </unit>
+    <unit id="1203647783433086430">
+      <segment state="initial">
+        <source>PAPOTO</source>
+        <target>PAPOTO</target>
+      </segment>
+    </unit>
+    <unit id="7632588300330135571">
+      <segment state="initial">
+        <source>Tangent aiming</source>
+        <target>Visée tangente</target>
+      </segment>
+    </unit>
+    <unit id="7053072293973747391">
+      <segment state="initial">
+        <source>PEP</source>
+        <target>PEP</target>
+      </segment>
+    </unit>
+    <unit id="3552226234722879893">
+      <segment state="initial">
+        <source>open PAPOTO help</source>
+        <target>ouvrir l&apos;aide de PAPOTO</target>
+      </segment>
+    </unit>
+    <unit id="5521778727858271522">
+      <segment state="initial">
+        <source>Import station&apos;s datas</source>
+        <target>Importer les données de la station</target>
+      </segment>
+    </unit>
+    <unit id="4449607081524618909">
+      <segment state="initial">
+        <source>All fields are mandatory for calculus setting</source>
+        <target>Tous les champs sont obligatoires pour le calcul</target>
+      </segment>
+    </unit>
+    <unit id="4372504809293098890">
+      <segment state="initial">
+        <source> Left support </source>
+        <target> Support gauche </target>
+      </segment>
+    </unit>
+    <unit id="8566581441957557985">
+      <segment state="initial">
+        <source> Measured span length </source>
+        <target> Longueur de la portée mesurée </target>
+      </segment>
+    </unit>
+    <unit id="5088621818536959590">
+      <segment state="initial">
+        <source> calculated value:</source>
+        <target> valeur calculée :</target>
+      </segment>
+    </unit>
+    <unit id="2147039543508081675">
+      <segment state="initial">
+        <source> Elevation diff. of measured attach. </source>
+        <target> Diff. d&apos;élévation de l&apos;accroche mesurée </target>
+      </segment>
+    </unit>
+    <unit id="571757945706473817">
+      <segment state="initial">
+        <source>calculated value:</source>
+        <target>valeur calculée :</target>
+      </segment>
+    </unit>
+    <unit id="7838365629862703936">
+      <segment state="initial">
+        <source>HG</source>
+        <target>HG</target>
+      </segment>
+    </unit>
+    <unit id="3599922959288251477">
+      <segment state="initial">
+        <source>H1</source>
+        <target>H1</target>
+      </segment>
+    </unit>
+    <unit id="8907130458722935866">
+      <segment state="initial">
+        <source>H2</source>
+        <target>H2</target>
+      </segment>
+    </unit>
+    <unit id="9199827368355942438">
+      <segment state="initial">
+        <source>H3</source>
+        <target>H3</target>
+      </segment>
+    </unit>
+    <unit id="2683177506127057493">
+      <segment state="initial">
+        <source>HD</source>
+        <target>HD</target>
+      </segment>
+    </unit>
+    <unit id="7521763556168175281">
+      <segment state="initial">
+        <source>VG</source>
+        <target>VG</target>
+      </segment>
+    </unit>
+    <unit id="2100284670541523377">
+      <segment state="initial">
+        <source>V1</source>
+        <target>V1</target>
+      </segment>
+    </unit>
+    <unit id="5723444180002865661">
+      <segment state="initial">
+        <source>V2</source>
+        <target>V2</target>
+      </segment>
+    </unit>
+    <unit id="6116311114445443296">
+      <segment state="initial">
+        <source>V3</source>
+        <target>V3</target>
+      </segment>
+    </unit>
+    <unit id="7930349729068923819">
+      <segment state="initial">
+        <source>VD</source>
+        <target>VD</target>
+      </segment>
+    </unit>
+    <unit id="1183601349925746054">
+      <segment state="initial">
+        <source>Parameter</source>
+        <target>Paramètre</target>
+      </segment>
+    </unit>
+    <unit id="9071236182141230808">
+      <segment state="initial">
+        <source>uncertainty parameter</source>
+        <target>paramètre d'incertitude</target>
+      </segment>
+    </unit>
+    <unit id="2744826406336414605">
+      <segment state="initial">
+        <source>Paramter 1-2</source>
+        <target>Paramètre 1-2</target>
+      </segment>
+    </unit>
+    <unit id="8762477959615349195">
+      <segment state="initial">
+        <source>Parameter 2-3</source>
+        <target>Paramètre 2-3</target>
+      </segment>
+    </unit>
+    <unit id="4293705742456284563">
+      <segment state="initial">
+        <source>Parameter 1-3</source>
+        <target>Paramètre 1-3</target>
+      </segment>
+    </unit>
+    <unit id="6673871987217292573">
+      <segment state="initial">
+        <source>0.5% criterion</source>
+        <target>critère 0.5%</target>
+      </segment>
+    </unit>
+    <unit id="5479852114667655535">
+      <segment state="initial">
+        <source>Help (PAPOTO)</source>
+        <target>Aide (PAPOTO)</target>
+      </segment>
+    </unit>
+    <unit id="3275519279768264405">
+      <segment state="initial">
+        <source>All fields are mandatory</source>
+        <target>Tous les champs sont obligatoires</target>
+      </segment>
+    </unit>
+    <unit id="1546856207674794665">
+      <segment state="initial">
+        <source>Measure name</source>
+        <target>Nom de la mesure</target>
+      </segment>
+    </unit>
+    <unit id="3973931101896534797">
+      <segment state="initial">
+        <source>Date</source>
+        <target>Date</target>
+      </segment>
+    </unit>
+    <unit id="8497528947328199741">
+      <segment state="initial">
+        <source>Time</source>
+        <target>Heure</target>
+      </segment>
+    </unit>
+    <unit id="8546353274317555587">
+      <segment state="initial">
+        <source>Ambient temperature</source>
+        <target>Température ambiante</target>
+      </segment>
+    </unit>
+    <unit id="518519385564060454">
+      <segment state="initial">
+        <source>Wind speed</source>
+        <target>Vitesse du vent</target>
+      </segment>
+    </unit>
+    <unit id="5951488432861381360">
+      <segment state="initial">
+        <source>Wind direction</source>
+        <target>Direction du vent</target>
+      </segment>
+    </unit>
+    <unit id="1214925224648740766">
+      <segment state="initial">
+        <source>Sky cover</source>
+        <target>Couverture du ciel</target>
+      </segment>
+    </unit>
+    <unit id="8543119714580512727">
+      <segment state="initial">
+        <source>Line</source>
+        <target>Ligne</target>
+      </segment>
+    </unit>
+    <unit id="5198396305972397137">
+      <segment state="initial">
+        <source>Voltage</source>
+        <target>Tension</target>
+      </segment>
+    </unit>
+    <unit id="5508192867090472125">
+      <segment state="initial">
+        <source><ph id="0" equiv="INTERPOLATION" disp="{{ measureData().voltage }}"/> kV</source>
+        <target><ph id="0" equiv="INTERPOLATION" disp="{{ measureData().voltage }}"/> kV</target>
+      </segment>
+    </unit>
+    <unit id="57361994969699356">
+      <segment state="initial">
+        <source>Span type</source>
+        <target>Type de portée</target>
+      </segment>
+    </unit>
+    <unit id="3968142117594394855">
+      <segment state="initial">
+        <source>Phase number</source>
+        <target>Numéro de phase</target>
+      </segment>
+    </unit>
+    <unit id="4679516709693484256">
+      <segment state="initial">
+        <source>Number of conductors</source>
+        <target>Nombre de conducteurs</target>
+      </segment>
+    </unit>
+    <unit id="5174359152122758396">
+      <segment state="initial">
+        <source>Longitude</source>
+        <target>Longitude</target>
+      </segment>
+    </unit>
+    <unit id="1341898151776599609">
+      <segment state="initial">
+        <source>°</source>
+        <target>°</target>
+      </segment>
+    </unit>
+    <unit id="8314090883669143391">
+      <segment state="initial">
+        <source>Latitude</source>
+        <target>Latitude</target>
+      </segment>
+    </unit>
+    <unit id="5241020730740347210">
+      <segment state="initial">
+        <source>Altitude</source>
+        <target>Altitude</target>
+      </segment>
+    </unit>
+    <unit id="7445879416935051036">
+      <segment state="initial">
+        <source>Azimuth (clockwise — 0° North/South) </source>
+        <target>Azimut (sens horaire — 0° Nord/Sud) </target>
+      </segment>
+    </unit>
+    <unit id="3999096471992552378">
+      <segment state="initial">
+        <source>North</source>
+        <target>Nord</target>
+      </segment>
+    </unit>
+    <unit id="5301637922955688420">
+      <segment state="initial">
+        <source>North-East</source>
+        <target>Nord-Est</target>
+      </segment>
+    </unit>
+    <unit id="2507676024821952431">
+      <segment state="initial">
+        <source>East</source>
+        <target>Est</target>
+      </segment>
+    </unit>
+    <unit id="6654329837393989472">
+      <segment state="initial">
+        <source>South-East</source>
+        <target>Sud-Est</target>
+      </segment>
+    </unit>
+    <unit id="5375267255227557614">
+      <segment state="initial">
+        <source>South</source>
+        <target>Sud</target>
+      </segment>
+    </unit>
+    <unit id="2561480989640213677">
+      <segment state="initial">
+        <source>South-West</source>
+        <target>Sud-Ouest</target>
+      </segment>
+    </unit>
+    <unit id="4057359344329666188">
+      <segment state="initial">
+        <source>West</source>
+        <target>Ouest</target>
+      </segment>
+    </unit>
+    <unit id="1203928427291740707">
+      <segment state="initial">
+        <source>North-West</source>
+        <target>Nord-Ouest</target>
+      </segment>
+    </unit>
+    <unit id="8471487881386607602">
+      <segment state="initial">
+        <source>Summer</source>
+        <target>Été</target>
+      </segment>
+    </unit>
+    <unit id="4996922266254528864">
+      <segment state="initial">
+        <source>Winter</source>
+        <target>Hiver</target>
+      </segment>
+    </unit>
+    <unit id="6145928415540193222">
+      <segment state="initial">
+        <source>N1 - Sunny</source>
+        <target>N1 - Soleil</target>
+      </segment>
+    </unit>
+    <unit id="4192982166698299789">
+      <segment state="initial">
+        <source>N2 - partly cloudy</source>
+        <target>N2 - partiellement nuageux</target>
+      </segment>
+    </unit>
+    <unit id="959518481042894436">
+      <segment state="initial">
+        <source>N5 - Cloudy</source>
+        <target>N5 - Nuageux</target>
+      </segment>
+    </unit>
+    <unit id="3236954287106088041">
+      <segment state="initial">
+        <source>N6 - Covered sky</source>
+        <target>N6 - Ciel couvert</target>
+      </segment>
+    </unit>
+    <unit id="8475559139207580230">
+      <segment state="initial">
+        <source>N8 - covered - smoky</source>
+        <target>N8 - couvert - fumé</target>
+      </segment>
+    </unit>
+    <unit id="3870240363377114184">
+      <segment state="initial">
+        <source>Support 1</source>
+        <target>Support 1</target>
+      </segment>
+    </unit>
+    <unit id="5674291517084885842">
+      <segment state="initial">
+        <source>Support 2</source>
+        <target>Support 2</target>
+      </segment>
+    </unit>
+    <unit id="5470767886742617950">
+      <segment state="initial">
+        <source>Support 3</source>
+        <target>Support 3</target>
+      </segment>
+    </unit>
+    <unit id="8299980005026088275">
+      <segment state="initial">
+        <source>Compute base parameter from terrain measurement</source>
+        <target>Calculer le paramètre de base à partir des mesures de terrain</target>
+      </segment>
+    </unit>
+    <unit id="7355843892858662403">
+      <segment state="initial">
+        <source>Terrain data</source>
+        <target>Données de terrain</target>
+      </segment>
+    </unit>
+    <unit id="6365666220420105100">
+      <segment state="initial">
+        <source>Parameter calculation</source>
+        <target>Calcul du paramètre</target>
+      </segment>
+    </unit>
+    <unit id="78111435214333571">
+      <segment state="initial">
+        <source>Temperature calculation</source>
+        <target>Calcul de la température</target>
+      </segment>
+    </unit>
+    <unit id="3344297091974909478">
+      <segment state="initial">
+        <source>Parameter at 15°C without wind</source>
+        <target>Paramètre à 15°C sans vent</target>
+      </segment>
+    </unit>
+    <unit id="7008439939460403347">
+      <segment state="initial">
+        <source>Report</source>
+        <target>Rapport</target>
       </segment>
     </unit>
   </file>
