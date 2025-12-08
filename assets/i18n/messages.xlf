@@ -2093,5 +2093,10 @@
         <source>View charges</source>
       </segment>
     </unit>
+    <unit id="6738867123972990167">
+      <segment>
+        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
