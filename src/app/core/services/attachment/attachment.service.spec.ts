@@ -38,6 +38,7 @@ interface MockTable {
 interface MockDb {
   lines: MockTable;
   attachments: MockTable;
+  catalogSupports: MockTable;
 }
 
 describe('AttachmentService', () => {
@@ -45,11 +46,19 @@ describe('AttachmentService', () => {
   let storageService: StorageService;
   let mockDb: MockDb;
   let mockAttachmentsTable: MockTable;
+  let mockCatalogSupportsTable: MockTable;
 
   beforeEach(() => {
     // Create mock database tables
     mockAttachmentsTable = {
       count: jest.fn().mockResolvedValue(3),
+      toArray: jest.fn().mockResolvedValue([]),
+      bulkAdd: jest.fn().mockResolvedValue(undefined),
+      clear: jest.fn().mockResolvedValue(undefined)
+    };
+
+    mockCatalogSupportsTable = {
+      count: jest.fn().mockResolvedValue(0),
       toArray: jest.fn().mockResolvedValue([]),
       bulkAdd: jest.fn().mockResolvedValue(undefined),
       clear: jest.fn().mockResolvedValue(undefined)
@@ -61,7 +70,8 @@ describe('AttachmentService', () => {
         toArray: jest.fn().mockResolvedValue([]),
         bulkAdd: jest.fn().mockResolvedValue(undefined)
       },
-      attachments: mockAttachmentsTable
+      attachments: mockAttachmentsTable,
+      catalogSupports: mockCatalogSupportsTable
     };
 
     // Create spy for StorageService
@@ -216,6 +226,7 @@ describe('AttachmentService', () => {
       await importPromise;
 
       expect(mockAttachmentsTable.clear).toHaveBeenCalled();
+      expect(mockCatalogSupportsTable.clear).toHaveBeenCalled();
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
         {
           uuid: 'mock-uuid-123',
@@ -241,6 +252,10 @@ describe('AttachmentService', () => {
           attachment_set_y: 0,
           attachment_set_z: 11.0
         }
+      ]);
+      expect(mockCatalogSupportsTable.bulkAdd).toHaveBeenCalledWith([
+        { name: 'Support 1' },
+        { name: 'Support 2' }
       ]);
     });
 
@@ -394,6 +409,10 @@ describe('AttachmentService', () => {
           attachment_set_y: 0,
           attachment_set_z: 12.0
         }
+      ]);
+      expect(mockCatalogSupportsTable.bulkAdd).toHaveBeenCalledWith([
+        { name: 'Support 1' },
+        { name: 'Support 3' }
       ]);
     });
 
@@ -574,6 +593,10 @@ describe('AttachmentService', () => {
           attachment_set_z: 12.0
         }
       ]);
+      expect(mockCatalogSupportsTable.bulkAdd).toHaveBeenCalledWith([
+        { name: 'Support 1' },
+        { name: 'Support 3' }
+      ]);
     });
 
     it('should clear attachments table before adding new data', async () => {
@@ -633,7 +656,9 @@ describe('AttachmentService', () => {
 
       // Verify clear is called before bulkAdd
       expect(mockAttachmentsTable.clear).toHaveBeenCalled();
+      expect(mockCatalogSupportsTable.clear).toHaveBeenCalled();
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalled();
+      expect(mockCatalogSupportsTable.bulkAdd).toHaveBeenCalled();
     });
 
     it('should handle HTTP errors gracefully', async () => {
@@ -770,6 +795,10 @@ describe('AttachmentService', () => {
           attachment_set_y: 0,
           attachment_set_z: 11
         }
+      ]);
+      expect(mockCatalogSupportsTable.bulkAdd).toHaveBeenCalledWith([
+        { name: 'Support 1' },
+        { name: 'Support 2' }
       ]);
     });
   });

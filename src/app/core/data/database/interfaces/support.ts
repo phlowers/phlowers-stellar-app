@@ -25,3 +25,7 @@ export interface Support {
   attachmentPosition: string | null;
   chainSurface: number | null;
 }
+
+export interface CatalogSupport {
+  name: string;
+}
