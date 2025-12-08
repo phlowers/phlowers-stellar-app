@@ -2483,22 +2483,10 @@
         <target>Voir</target>
       </segment>
     </unit>
-    <unit id="6028011477486800998">
+    <unit id="6738867123972990167">
       <segment state="initial">
-        <source>One span</source>
-        <target>Une portée</target>
-      </segment>
-    </unit>
-    <unit id="2981359641232309364">
-      <segment state="initial">
-        <source>Two spans</source>
-        <target>Deux portées</target>
-      </segment>
-    </unit>
-    <unit id="2050780142571489753">
-      <segment state="initial">
-        <source>Description/comment</source>
-        <target>Description/commentaire</target>
+        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
+        <target>L&apos;étude <ph id="0" equiv="PH" disp="study.title"/> existe déjà. Souhaitez-vous la remplacer ?</target>
       </segment>
     </unit>
   </file>

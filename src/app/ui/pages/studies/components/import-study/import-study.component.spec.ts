@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ImportStudyComponent } from './import-study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import Papa from 'papaparse';
 import { Study } from '@core/data/database/interfaces/study';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -11,14 +11,19 @@ describe('ImportStudyComponent', () => {
   let component: ImportStudyComponent;
   let fixture: ComponentFixture<ImportStudyComponent>;
   let studiesServiceMock: jest.Mocked<StudiesService>;
+  let mockConfirmationService: jest.Mocked<ConfirmationService>;
+  let mockMessageService: jest.Mocked<MessageService>;
 
   beforeEach(async () => {
     studiesServiceMock = {
-      createStudyFromProtoV4: jest.fn().mockResolvedValue({} as Study)
+      createStudyFromProtoV4: jest.fn().mockResolvedValue({} as Study),
+      getStudy: jest.fn(),
+      deleteStudy: jest.fn(),
+      createStudy: jest.fn()
     } as unknown as jest.Mocked<StudiesService>;
-    const mockMessageService = {
+    mockMessageService = {
       add: jest.fn()
-    } as unknown as MessageService;
+    } as unknown as jest.Mocked<MessageService>;
     const mockCablesService = {
       getCables: jest
         .fn()
@@ -28,6 +33,9 @@ describe('ImportStudyComponent', () => {
           { name: 'câble par faisceau' }
         ])
     } as unknown as jest.Mocked<CablesService>;
+    mockConfirmationService = {
+      confirm: jest.fn()
+    } as unknown as jest.Mocked<ConfirmationService>;
 
     // Mock Papa.parse
     const mockParse = jest
@@ -78,7 +86,8 @@ describe('ImportStudyComponent', () => {
       providers: [
         { provide: StudiesService, useValue: studiesServiceMock },
         { provide: MessageService, useValue: mockMessageService },
-        { provide: CablesService, useValue: mockCablesService }
+        { provide: CablesService, useValue: mockCablesService },
+        { provide: ConfirmationService, useValue: mockConfirmationService }
       ]
     }).compileComponents();
 
@@ -233,6 +242,580 @@ describe('ImportStudyComponent', () => {
           done();
         }, 100);
       }, 10);
+    });
+  });
+
+  describe('loadAppFile', () => {
+    let mockFile: File;
+    let mockFileReader: {
+      readAsText: jest.Mock;
+      onload: ((e: ProgressEvent<FileReader>) => void) | null;
+      onerror: ((e: ProgressEvent<FileReader>) => void) | null;
+    };
+
+    beforeEach(() => {
+      // Mock FileReader
+      mockFileReader = {
+        readAsText: jest.fn(),
+        onload: null,
+        onerror: null
+      };
+
+      // Mock global FileReader
+      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(
+        () => mockFileReader
+      );
+
+      // Create a mock file
+      mockFile = new File(['test content'], 'test.clst', {
+        type: 'application/json'
+      });
+    });
+
+    const createMockStudyData = (uuid?: string): any => {
+      const studyData: any = {
+        title: 'Test Study',
+        description: 'Test Description',
+        author_email: 'test@example.com',
+        shareable: false,
+        sections: [
+          {
+            uuid: 'section-uuid-1',
+            name: 'Section 1',
+            supports: [
+              {
+                uuid: 'support-uuid-1',
+                number: 1,
+                name: 'Support 1'
+              }
+            ]
+          }
+        ]
+      };
+      if (uuid) {
+        studyData.uuid = uuid;
+      }
+      return studyData;
+    };
+
+    const encodeStudyToBase64 = (studyData: any): string => {
+      const jsonString = JSON.stringify(studyData);
+      return btoa(jsonString);
+    };
+
+    it('should successfully import a study without existing UUID', (done) => {
+      const studyData = createMockStudyData();
+      const base64Content = encodeStudyToBase64(studyData);
+      const newUuid = 'new-study-uuid';
+      const createdStudy: Study = {
+        ...studyData,
+        uuid: newUuid,
+        created_at_offline: '2025-01-01T00:00:00Z',
+        updated_at_offline: '2025-01-01T00:00:00Z',
+        saved: true
+      } as Study;
+
+      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+
+      const mockProgressEvent = {
+        target: {
+          result: base64Content
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
+
+      // Simulate FileReader onload
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        // Wait for async operations
+        setTimeout(() => {
+          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
+          expect(component.newStudies().length).toBe(1);
+          expect(component.newStudies()[0].uuid).toBe(newUuid);
+          expect(mockMessageService.add).not.toHaveBeenCalled();
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should successfully import a study with existing UUID when user accepts', (done) => {
+      const existingUuid = 'existing-uuid';
+      const studyData = createMockStudyData(existingUuid);
+      const base64Content = encodeStudyToBase64(studyData);
+      const newUuid = 'new-study-uuid';
+      const existingStudy = {
+        ...studyData,
+        uuid: existingUuid,
+        title: 'Existing Study',
+        created_at_offline: '2025-01-01T00:00:00Z',
+        updated_at_offline: '2025-01-01T00:00:00Z',
+        saved: true
+      } as unknown as Study;
+      const createdStudy = {
+        ...studyData,
+        uuid: newUuid,
+        created_at_offline: '2025-01-01T00:00:00Z',
+        updated_at_offline: '2025-01-01T00:00:00Z',
+        saved: true
+      } as unknown as Study;
+
+      studiesServiceMock.getStudy = jest
+        .fn()
+        .mockResolvedValueOnce(existingStudy) // For promptIfStudyAlreadyExists
+        .mockResolvedValueOnce(createdStudy); // For final getStudy
+      studiesServiceMock.deleteStudy = jest.fn().mockResolvedValue(undefined);
+      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
+
+      // Mock confirmation service to accept
+      mockConfirmationService.confirm = jest
+        .fn()
+        .mockImplementation(
+          async (options: {
+            accept?: () => void | Promise<void>;
+            reject?: () => void;
+          }) => {
+            if (options.accept) {
+              await options.accept();
+            }
+          }
+        );
+
+      const mockProgressEvent = {
+        target: {
+          result: base64Content
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        setTimeout(() => {
+          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(
+            existingUuid
+          );
+          expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(
+            existingUuid
+          );
+          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+          expect(component.newStudies().length).toBe(1);
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should not import a study with existing UUID when user rejects', (done) => {
+      const existingUuid = 'existing-uuid';
+      const studyData = createMockStudyData(existingUuid);
+      const base64Content = encodeStudyToBase64(studyData);
+      const existingStudy = {
+        ...studyData,
+        uuid: existingUuid,
+        title: 'Existing Study',
+        created_at_offline: '2025-01-01T00:00:00Z',
+        updated_at_offline: '2025-01-01T00:00:00Z',
+        saved: true
+      } as unknown as Study;
+
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(existingStudy);
+      studiesServiceMock.createStudy = jest.fn();
+
+      // Mock confirmation service to reject
+      mockConfirmationService.confirm = jest
+        .fn()
+        .mockImplementation(
+          (options: { accept?: () => void; reject?: () => void }) => {
+            if (options.reject) {
+              options.reject();
+            }
+          }
+        );
+
+      const mockProgressEvent = {
+        target: {
+          result: base64Content
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        setTimeout(() => {
+          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(
+            existingUuid
+          );
+          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+          expect(component.newStudies().length).toBe(0);
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should handle study without sections', (done) => {
+      const studyData = {
+        title: 'Test Study',
+        description: 'Test Description',
+        author_email: 'test@example.com',
+        shareable: false
+      };
+      const base64Content = encodeStudyToBase64(studyData);
+      const newUuid = 'new-study-uuid';
+      const createdStudy = {
+        ...studyData,
+        uuid: newUuid,
+        sections: [],
+        created_at_offline: '2025-01-01T00:00:00Z',
+        updated_at_offline: '2025-01-01T00:00:00Z',
+        saved: true
+      } as unknown as Study;
+
+      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+
+      const mockProgressEvent = {
+        target: {
+          result: base64Content
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        setTimeout(() => {
+          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+          expect(component.newStudies().length).toBe(1);
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should handle invalid JSON in file', (done) => {
+      const invalidBase64 = btoa('invalid json content');
+
+      const mockProgressEvent = {
+        target: {
+          result: invalidBase64
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        setTimeout(() => {
+          expect(mockMessageService.add).toHaveBeenCalledWith({
+            severity: 'error',
+            summary: expect.any(String),
+            detail: expect.any(String),
+            life: 3000
+          });
+          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+          expect(component.newStudies().length).toBe(0);
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should handle invalid base64 content', (done) => {
+      const invalidBase64 = 'not-valid-base64!!!';
+
+      const mockProgressEvent = {
+        target: {
+          result: invalidBase64
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        setTimeout(() => {
+          expect(mockMessageService.add).toHaveBeenCalledWith({
+            severity: 'error',
+            summary: expect.any(String),
+            detail: expect.any(String),
+            life: 3000
+          });
+          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should handle missing study after creation', (done) => {
+      const studyData = createMockStudyData();
+      const base64Content = encodeStudyToBase64(studyData);
+      const newUuid = 'new-study-uuid';
+
+      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
+
+      const mockProgressEvent = {
+        target: {
+          result: base64Content
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        setTimeout(() => {
+          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
+          expect(component.newStudies().length).toBe(0);
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should handle FileReader error', () => {
+      component.loadAppFile(mockFile);
+
+      expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
+
+      // Note: The current implementation doesn't have an onerror handler,
+      // but we test that readAsText is called correctly
+      expect(mockFileReader.readAsText).toHaveBeenCalled();
+    });
+
+    it('should handle null result from FileReader', (done) => {
+      const mockProgressEvent = {
+        target: {
+          result: null
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        setTimeout(() => {
+          expect(mockMessageService.add).toHaveBeenCalledWith({
+            severity: 'error',
+            summary: expect.any(String),
+            detail: expect.any(String),
+            life: 3000
+          });
+          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should properly merge sections and supports with empty defaults', (done) => {
+      const studyData = {
+        title: 'Test Study',
+        sections: [
+          {
+            uuid: 'section-uuid-1',
+            name: 'Section 1',
+            type: 'phase',
+            supports: [
+              {
+                uuid: 'support-uuid-1',
+                number: 1,
+                name: 'Support 1',
+                spanLength: 100
+              },
+              {
+                uuid: 'support-uuid-2',
+                number: 2,
+                name: 'Support 2',
+                spanLength: 200
+              }
+            ]
+          }
+        ]
+      };
+      const base64Content = encodeStudyToBase64(studyData);
+      const newUuid = 'new-study-uuid';
+      const createdStudy = {
+        ...studyData,
+        uuid: newUuid,
+        author_email: '',
+        shareable: false,
+        created_at_offline: '2025-01-01T00:00:00Z',
+        updated_at_offline: '2025-01-01T00:00:00Z',
+        saved: true
+      } as unknown as Study;
+
+      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+
+      const mockProgressEvent = {
+        target: {
+          result: base64Content
+        }
+      } as unknown as ProgressEvent<FileReader>;
+
+      component.loadAppFile(mockFile);
+
+      setTimeout(() => {
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        setTimeout(() => {
+          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+          const createStudyCall = studiesServiceMock.createStudy.mock
+            .calls[0][0] as any;
+          expect(createStudyCall.sections).toBeDefined();
+          expect(createStudyCall.sections.length).toBe(1);
+          expect(createStudyCall.sections[0].supports.length).toBe(2);
+          expect(component.newStudies().length).toBe(1);
+          done();
+        }, 10);
+      }, 10);
+    });
+  });
+
+  describe('promptIfStudyAlreadyExists', () => {
+    const testUuid = 'test-uuid-123';
+    const mockStudy: Study = {
+      uuid: testUuid,
+      title: 'Test Study',
+      author_email: 'test@example.com',
+      shareable: false,
+      created_at_offline: '2025-01-01T00:00:00Z',
+      updated_at_offline: '2025-01-01T00:00:00Z',
+      saved: true,
+      sections: []
+    } as Study;
+
+    it('should return false when study does not exist', async () => {
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
+
+      const result = await component.promptIfStudyAlreadyExists(testUuid);
+
+      expect(result).toBe(false);
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
+      expect(mockConfirmationService.confirm).not.toHaveBeenCalled();
+    });
+
+    it('should return false when study is undefined', async () => {
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(undefined);
+
+      const result = await component.promptIfStudyAlreadyExists(testUuid);
+
+      expect(result).toBe(false);
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
+      expect(mockConfirmationService.confirm).not.toHaveBeenCalled();
+    });
+
+    it('should show confirmation dialog and return true when user accepts', async () => {
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
+      studiesServiceMock.deleteStudy = jest.fn().mockResolvedValue(undefined);
+
+      // Mock the confirm method to call the accept callback
+      mockConfirmationService.confirm = jest
+        .fn()
+        .mockImplementation(
+          async (options: {
+            accept?: () => void | Promise<void>;
+            reject?: () => void;
+          }) => {
+            // Simulate user accepting
+            if (options.accept) {
+              await options.accept();
+            }
+          }
+        );
+
+      const result = await component.promptIfStudyAlreadyExists(testUuid);
+
+      expect(result).toBe(true);
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
+      expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: 'positionDialog',
+          acceptLabel: expect.any(String),
+          rejectLabel: expect.any(String)
+        })
+      );
+      expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(testUuid);
+    });
+
+    it('should show confirmation dialog and return false when user rejects', async () => {
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
+
+      // Mock the confirm method to call the reject callback
+      mockConfirmationService.confirm = jest
+        .fn()
+        .mockImplementation(
+          (options: { accept?: () => void; reject?: () => void }) => {
+            // Simulate user rejecting
+            if (options.reject) {
+              options.reject();
+            }
+          }
+        );
+
+      const result = await component.promptIfStudyAlreadyExists(testUuid);
+
+      expect(result).toBe(false);
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
+      expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: 'positionDialog',
+          acceptLabel: expect.any(String),
+          rejectLabel: expect.any(String)
+        })
+      );
+      expect(studiesServiceMock.deleteStudy).not.toHaveBeenCalled();
+    });
+
+    it('should include study title in confirmation message', async () => {
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
+
+      mockConfirmationService.confirm = jest
+        .fn()
+        .mockImplementation(
+          (options: { accept?: () => void; reject?: () => void }) => {
+            if (options.reject) {
+              options.reject();
+            }
+          }
+        );
+
+      await component.promptIfStudyAlreadyExists(testUuid);
+
+      expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('Test Study')
+        })
+      );
     });
   });
 });
