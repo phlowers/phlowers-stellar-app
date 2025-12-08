@@ -10,7 +10,7 @@ import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { RouterLink } from '@angular/router';
 import { Study } from '@src/app/core/data/database/interfaces/study';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
@@ -106,7 +106,8 @@ export class ImportStudyComponent {
   constructor(
     private readonly studiesService: StudiesService,
     private readonly messageService: MessageService,
-    private readonly cablesService: CablesService
+    private readonly cablesService: CablesService,
+    private readonly confirmationService: ConfirmationService
   ) {}
 
   async deleteStudy(uuid: string) {
@@ -123,6 +124,14 @@ export class ImportStudyComponent {
         const result = e.target?.result as string;
         const studyBase64 = atob(result);
         const parsedResult = JSON.parse(studyBase64);
+        if (parsedResult.uuid) {
+          const continueImport = await this.promptIfStudyAlreadyExists(
+            parsedResult.uuid
+          );
+          if (!continueImport) {
+            return;
+          }
+        }
         const newStudy = {
           ...createEmptyStudy(),
           ...parsedResult,
@@ -141,7 +150,10 @@ export class ImportStudyComponent {
               })
             : []
         };
-        const uuid = await this.studiesService.createStudy(newStudy);
+        const uuid = await this.studiesService.createStudy(
+          newStudy,
+          parsedResult.uuid
+        );
         const study = await this.studiesService.getStudy(uuid);
         if (!study) {
           return;
@@ -159,6 +171,28 @@ export class ImportStudyComponent {
     return this.cablesService.getCables().then((cables) => {
       return !!cables?.find((cable) => cable.name === conductor);
     });
+  }
+
+  async promptIfStudyAlreadyExists(uuid: string): Promise<boolean> {
+    const study = await this.studiesService.getStudy(uuid);
+    if (!study) {
+      return false;
+    }
+    return await new Promise((resolve) =>
+      this.confirmationService.confirm({
+        key: 'positionDialog',
+        message: $localize`Study ${study.title} already exists. Do you want to replace it?`,
+        accept: async () => {
+          await this.studiesService.deleteStudy(uuid);
+          resolve(true);
+        },
+        reject: () => {
+          resolve(false);
+        },
+        acceptLabel: $localize`Yes`,
+        rejectLabel: $localize`No`
+      })
+    );
   }
 
   loadProtoV4File(file: File) {
