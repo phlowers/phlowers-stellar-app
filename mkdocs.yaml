@@ -46,8 +46,9 @@ nav:
 
       # - Guidelines : developer_guide/guidelines.md
       - Documentation: developer_guide/documentation.md
-      - Studio:
-          - Plot: developer_guide/plot/objects.md
+      - Plot:
+          - Home: developer_guide/plot/index.md
+          - Data Objects: developer_guide/plot/objects.md
 
 plugins:
   - search
