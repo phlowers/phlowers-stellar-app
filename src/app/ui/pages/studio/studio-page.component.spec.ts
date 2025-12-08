@@ -152,7 +152,9 @@ describe('StudioPageComponent', () => {
 
     expect(typeof plotService.study.set).toBe('function');
     expect(sectionSetSpy).toHaveBeenCalledWith(study.sections[1]);
-    expect(plotService.plotOptionsChange).toHaveBeenCalledWith('endSupport', 2);
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      endSupport: 2
+    });
   });
 
   it('ngOnInit should navigate if section not found', () => {
@@ -178,10 +180,9 @@ describe('StudioPageComponent', () => {
     expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(300);
-    expect(plotService.plotOptionsChange).toHaveBeenCalledWith(
-      'startSupport',
-      1
-    );
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 1
+    });
   });
 
   it('ngOnDestroy should clean up subscription, section, and resizeObserver', () => {

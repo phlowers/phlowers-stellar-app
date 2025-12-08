@@ -377,7 +377,7 @@ export class ManualSectionComponent implements OnInit {
 
   debounceUpdateSliderOptions = debounce(
     (key: 'endSupport' | 'startSupport', value: number) => {
-      this.plotService.plotOptionsChange(key, value);
+      this.plotService.plotOptionsChange({ [key]: value });
     },
     DEBOUNCED_REFRESH_STUDIO_DELAY
   );
