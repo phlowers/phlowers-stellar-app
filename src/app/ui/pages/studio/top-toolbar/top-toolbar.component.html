@@ -3,7 +3,7 @@
     [options]="threeDOptions()"
     [disabled]="plotService.loading()"
     [ngModel]="plotService.plotOptions().view"
-    (onChange)="plotService.plotOptionsChange('view', $event.value)"
+    (onChange)="plotService.plotOptionsChange({ view: $event.value })"
     optionLabel="label"
     optionValue="value"
     allowEmpty="false"
@@ -18,7 +18,7 @@
     <p-selectbutton
       [options]="sideOptions()"
       [ngModel]="plotService.plotOptions().side"
-      (onChange)="plotService.plotOptionsChange('side', $event.value)"
+      (onChange)="plotService.plotOptionsChange({ side: $event.value })"
       optionLabel="label"
       optionValue="value"
       ariaLabelledBy="side"
@@ -34,7 +34,7 @@
     <p-toggleswitch
       inputId="invert"
       [(ngModel)]="plotService.plotOptions().invert"
-      (onChange)="plotService.plotOptionsChange('invert', $event.checked)"
+      (onChange)="plotService.plotOptionsChange({ invert: $event.checked })"
     />
   </div>
 

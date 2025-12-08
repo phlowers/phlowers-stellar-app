@@ -6,7 +6,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { PlotService } from './plot.service';
+import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import {
@@ -18,6 +18,9 @@ import { Section } from '@core/data/database/interfaces/section';
 import { Cable } from '@core/data/database/interfaces/cable';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
+import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
+import { Study } from '@core/data/database/interfaces/study';
+import { Camera } from 'plotly.js-dist-min';
 
 // Mock plotly
 jest.mock('plotly.js-dist-min', () => ({
@@ -222,28 +225,28 @@ describe('PlotService', () => {
 
   describe('plotOptionsChange', () => {
     it('should update a single plot option', () => {
-      service.plotOptionsChange('view', '2d');
+      service.plotOptionsChange({ view: '2d' });
       expect(service.plotOptions().view).toBe('2d');
       expect(service.plotOptions().side).toBe('profile'); // Other options unchanged
     });
 
     it('should update side option', () => {
-      service.plotOptionsChange('side', 'face');
+      service.plotOptionsChange({ side: 'face' });
       expect(service.plotOptions().side).toBe('face');
     });
 
     it('should update startSupport option', () => {
-      service.plotOptionsChange('startSupport', 5);
+      service.plotOptionsChange({ startSupport: 5 });
       expect(service.plotOptions().startSupport).toBe(5);
     });
 
     it('should update endSupport option', () => {
-      service.plotOptionsChange('endSupport', 10);
+      service.plotOptionsChange({ endSupport: 10 });
       expect(service.plotOptions().endSupport).toBe(10);
     });
 
     it('should update invert option', () => {
-      service.plotOptionsChange('invert', true);
+      service.plotOptionsChange({ invert: true });
       expect(service.plotOptions().invert).toBe(true);
     });
   });
@@ -428,8 +431,8 @@ describe('PlotService', () => {
     });
 
     it('should preserve other plotOptions when updating support range', async () => {
-      service.plotOptionsChange('view', '2d');
-      service.plotOptionsChange('side', 'face');
+      service.plotOptionsChange({ view: '2d' });
+      service.plotOptionsChange({ side: 'face' });
 
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
@@ -560,6 +563,508 @@ describe('PlotService', () => {
       expect(service.litData()).toBeNull();
       expect(service.error()).toBeNull();
       expect(service.loading()).toBe(false);
+    });
+  });
+
+  describe('resetAll', () => {
+    beforeEach(() => {
+      // Mock document.getElementById
+      document.getElementById = jest.fn();
+    });
+
+    it('should call purgePlot', () => {
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+    });
+
+    it('should reset error to null', () => {
+      service.error.set(TaskError.CALCULATION_ERROR);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(service.error()).toBeNull();
+    });
+
+    it('should reset litData to null', () => {
+      service.litData.set(mockGetSectionOutput);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(service.litData()).toBeNull();
+    });
+
+    it('should set loading to false', () => {
+      service.loading.set(true);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(service.loading()).toBe(false);
+    });
+
+    it('should reset plotOptions to default values', () => {
+      service.plotOptionsChange({
+        view: '2d',
+        side: 'face',
+        startSupport: 5,
+        endSupport: 10,
+        invert: true
+      });
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      const plotOptions = service.plotOptions();
+      expect(plotOptions.view).toBe('3d');
+      expect(plotOptions.side).toBe('profile');
+      expect(plotOptions.startSupport).toBe(0);
+      expect(plotOptions.endSupport).toBe(1);
+      expect(plotOptions.invert).toBe(false);
+    });
+
+    it('should reset camera to null', () => {
+      const mockCamera: Camera = {
+        eye: { x: 1, y: 1, z: 1 },
+        center: { x: 0, y: 0, z: 0 },
+        up: { x: 0, y: 0, z: 1 }
+      };
+      service.camera.set(mockCamera);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(service.camera()).toBeNull();
+    });
+
+    it('should reset section to null', () => {
+      service.section.set(mockSection);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(service.section()).toBeNull();
+    });
+
+    it('should reset study to null', () => {
+      const mockStudy: Study = {
+        uuid: 'study-uuid-1',
+        author_email: 'test@example.com',
+        title: 'Test Study',
+        description: 'Test Description',
+        shareable: false,
+        created_at_offline: '2025-01-01T00:00:00.000Z',
+        updated_at_offline: '2025-01-01T00:00:00.000Z',
+        saved: true,
+        sections: [mockSection]
+      };
+      service.study.set(mockStudy);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(service.study()).toBeNull();
+    });
+
+    it('should reset all state properties at once', () => {
+      const mockStudy: Study = {
+        uuid: 'study-uuid-1',
+        author_email: 'test@example.com',
+        title: 'Test Study',
+        description: 'Test Description',
+        shareable: false,
+        created_at_offline: '2025-01-01T00:00:00.000Z',
+        updated_at_offline: '2025-01-01T00:00:00.000Z',
+        saved: true,
+        sections: [mockSection]
+      };
+      const mockCamera: Camera = {
+        eye: { x: 1, y: 1, z: 1 },
+        center: { x: 0, y: 0, z: 0 },
+        up: { x: 0, y: 0, z: 1 }
+      };
+
+      // Set all state to non-default values
+      service.error.set(TaskError.CALCULATION_ERROR);
+      service.litData.set(mockGetSectionOutput);
+      service.loading.set(true);
+      service.plotOptionsChange({
+        view: '2d',
+        side: 'face',
+        startSupport: 5,
+        endSupport: 10,
+        invert: true
+      });
+      service.camera.set(mockCamera);
+      service.section.set(mockSection);
+      service.study.set(mockStudy);
+
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      // Verify all state is reset
+      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(service.error()).toBeNull();
+      expect(service.litData()).toBeNull();
+      expect(service.loading()).toBe(false);
+      expect(service.camera()).toBeNull();
+      expect(service.section()).toBeNull();
+      expect(service.study()).toBeNull();
+
+      const plotOptions = service.plotOptions();
+      expect(plotOptions.view).toBe('3d');
+      expect(plotOptions.side).toBe('profile');
+      expect(plotOptions.startSupport).toBe(0);
+      expect(plotOptions.endSupport).toBe(1);
+      expect(plotOptions.invert).toBe(false);
+    });
+
+    it('should handle reset when plotly-output element does not exist', () => {
+      (document.getElementById as jest.Mock).mockReturnValue(null);
+
+      service.error.set(TaskError.CALCULATION_ERROR);
+      service.litData.set(mockGetSectionOutput);
+      service.loading.set(true);
+
+      service.resetAll();
+
+      // purgePlot should not throw, but other resets should work
+      expect(service.error()).toBeNull();
+      expect(service.litData()).toBeNull();
+      expect(service.loading()).toBe(false);
+    });
+  });
+
+  describe('checkIfProjectionNeedRefresh', () => {
+    const baseOptions: PlotOptions = {
+      view: '3d',
+      side: 'profile',
+      startSupport: 0,
+      endSupport: 1,
+      invert: false
+    };
+
+    describe('when loading is true', () => {
+      it('should return false regardless of options changes', () => {
+        const oldOptions: PlotOptions = { ...baseOptions };
+        const newOptions: PlotOptions = {
+          ...baseOptions,
+          view: '2d',
+          side: 'face',
+          startSupport: 5,
+          endSupport: 10
+        };
+
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, true)).toBe(
+          false
+        );
+      });
+
+      it('should return false even when all options are identical', () => {
+        const options: PlotOptions = { ...baseOptions };
+        expect(checkIfProjectionNeedRefresh(options, options, true)).toBe(
+          false
+        );
+      });
+    });
+
+    describe('when loading is false', () => {
+      describe('view or side changes', () => {
+        it('should return true when view changes from 3d to 2d', () => {
+          const oldOptions: PlotOptions = { ...baseOptions, view: '3d' };
+          const newOptions: PlotOptions = { ...baseOptions, view: '2d' };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(true);
+        });
+
+        it('should return true when view changes from 2d to 3d', () => {
+          const oldOptions: PlotOptions = { ...baseOptions, view: '2d' };
+          const newOptions: PlotOptions = { ...baseOptions, view: '3d' };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(true);
+        });
+
+        it('should return true when side changes from profile to face', () => {
+          const oldOptions: PlotOptions = { ...baseOptions, side: 'profile' };
+          const newOptions: PlotOptions = { ...baseOptions, side: 'face' };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(true);
+        });
+
+        it('should return true when side changes from face to profile', () => {
+          const oldOptions: PlotOptions = { ...baseOptions, side: 'face' };
+          const newOptions: PlotOptions = { ...baseOptions, side: 'profile' };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(true);
+        });
+
+        it('should return true when both view and side change', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '3d',
+            side: 'profile'
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            side: 'face'
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(true);
+        });
+      });
+
+      describe('when view is not 2d', () => {
+        it('should return false when view is 3d and only startSupport changes', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '3d',
+            startSupport: 0
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '3d',
+            startSupport: 5
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(false);
+        });
+
+        it('should return false when view is 3d and only endSupport changes', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '3d',
+            endSupport: 1
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '3d',
+            endSupport: 10
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(false);
+        });
+
+        it('should return false when view is 3d and both supports change', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '3d',
+            startSupport: 0,
+            endSupport: 1
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '3d',
+            startSupport: 5,
+            endSupport: 10
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(false);
+        });
+
+        it('should return false when view is 3d and all options are identical', () => {
+          const options: PlotOptions = { ...baseOptions, view: '3d' };
+          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(
+            false
+          );
+        });
+      });
+
+      describe('when view is 2d', () => {
+        it('should return true when startSupport changes', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            startSupport: 0
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            startSupport: 5
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(true);
+        });
+
+        it('should return true when endSupport changes', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            endSupport: 1
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            endSupport: 10
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(true);
+        });
+
+        it('should return true when both startSupport and endSupport change', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            startSupport: 0,
+            endSupport: 1
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            startSupport: 5,
+            endSupport: 10
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(true);
+        });
+
+        it('should return false when supports do not change', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            startSupport: 0,
+            endSupport: 1
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            startSupport: 0,
+            endSupport: 1
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(false);
+        });
+
+        it('should return false when only invert changes', () => {
+          const oldOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            invert: false
+          };
+          const newOptions: PlotOptions = {
+            ...baseOptions,
+            view: '2d',
+            invert: true
+          };
+
+          expect(
+            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+          ).toBe(false);
+        });
+
+        it('should return false when all options are identical', () => {
+          const options: PlotOptions = { ...baseOptions, view: '2d' };
+          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(
+            false
+          );
+        });
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle zero values for supports', () => {
+        const oldOptions: PlotOptions = {
+          ...baseOptions,
+          view: '2d',
+          startSupport: 0,
+          endSupport: 0
+        };
+        const newOptions: PlotOptions = {
+          ...baseOptions,
+          view: '2d',
+          startSupport: 0,
+          endSupport: 1
+        };
+
+        expect(
+          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+        ).toBe(true);
+      });
+
+      it('should handle large values for supports', () => {
+        const oldOptions: PlotOptions = {
+          ...baseOptions,
+          view: '2d',
+          startSupport: 100,
+          endSupport: 200
+        };
+        const newOptions: PlotOptions = {
+          ...baseOptions,
+          view: '2d',
+          startSupport: 100,
+          endSupport: 201
+        };
+
+        expect(
+          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+        ).toBe(true);
+      });
+
+      it('should handle negative values for supports', () => {
+        const oldOptions: PlotOptions = {
+          ...baseOptions,
+          view: '2d',
+          startSupport: -1,
+          endSupport: 0
+        };
+        const newOptions: PlotOptions = {
+          ...baseOptions,
+          view: '2d',
+          startSupport: -1,
+          endSupport: 1
+        };
+
+        expect(
+          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
+        ).toBe(true);
+      });
     });
   });
 });
