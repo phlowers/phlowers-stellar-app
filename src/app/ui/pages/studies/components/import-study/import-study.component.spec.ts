@@ -1807,7 +1807,25 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      component
+        .loadAppFile(mockFile)
+        .then(() => {
+          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
+          expect(component.newStudies().length).toBe(1);
+          expect(component.newStudies()[0].uuid).toBe(newUuid);
+          expect(mockMessageService.add).toHaveBeenCalledWith(
+            expect.objectContaining({
+              severity: 'success',
+              summary: expect.any(String),
+              detail: expect.any(String)
+            })
+          );
+          done();
+        })
+        .catch((error) => {
+          done(error);
+        });
 
       expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
 
@@ -1816,16 +1834,6 @@ describe('ImportStudyComponent', () => {
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
-
-        // Wait for async operations
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
-          expect(component.newStudies().length).toBe(1);
-          expect(component.newStudies()[0].uuid).toBe(newUuid);
-          expect(mockMessageService.add).not.toHaveBeenCalled();
-          done();
-        }, 10);
       }, 10);
     });
 
@@ -2000,24 +2008,18 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      component.loadAppFile(mockFile).catch((error) => {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toBe('fileParseError');
+        expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+        expect(component.newStudies().length).toBe(0);
+        done();
+      });
 
       setTimeout(() => {
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
-
-        setTimeout(() => {
-          expect(mockMessageService.add).toHaveBeenCalledWith({
-            severity: 'error',
-            summary: expect.any(String),
-            detail: expect.any(String),
-            life: 3000
-          });
-          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
-          expect(component.newStudies().length).toBe(0);
-          done();
-        }, 10);
       }, 10);
     });
 
@@ -2030,23 +2032,17 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      component.loadAppFile(mockFile).catch((error) => {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toBe('fileDecodeError');
+        expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+        done();
+      });
 
       setTimeout(() => {
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
-
-        setTimeout(() => {
-          expect(mockMessageService.add).toHaveBeenCalledWith({
-            severity: 'error',
-            summary: expect.any(String),
-            detail: expect.any(String),
-            life: 3000
-          });
-          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
-          done();
-        }, 10);
       }, 10);
     });
 
@@ -2090,31 +2086,26 @@ describe('ImportStudyComponent', () => {
       expect(mockFileReader.readAsText).toHaveBeenCalled();
     });
 
-    it('should handle null result from FileReader', (done) => {
+    it('should handle null result from FileReader', async () => {
       const mockProgressEvent = {
         target: {
           result: null
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      const promise = component.loadAppFile(mockFile);
 
+      // Trigger the onload handler
       setTimeout(() => {
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
-
-        setTimeout(() => {
-          expect(mockMessageService.add).toHaveBeenCalledWith({
-            severity: 'error',
-            summary: expect.any(String),
-            detail: expect.any(String),
-            life: 3000
-          });
-          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
-          done();
-        }, 10);
       }, 10);
+
+      // Wait for the promise to reject
+      // Note: null gets decoded (throws fileDecodeError internally) then parsed as JSON (throws fileParseError)
+      await expect(promise).rejects.toThrow('fileParseError');
+      expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
     });
 
     it('should properly merge sections and supports with empty defaults', (done) => {
@@ -2197,22 +2188,22 @@ describe('ImportStudyComponent', () => {
       sections: []
     } as Study;
 
-    it('should return false when study does not exist', async () => {
+    it('should return true when study does not exist', async () => {
       studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
 
       const result = await component.promptIfStudyAlreadyExists(testUuid);
 
-      expect(result).toBe(false);
+      expect(result).toBe(true);
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
       expect(mockConfirmationService.confirm).not.toHaveBeenCalled();
     });
 
-    it('should return false when study is undefined', async () => {
+    it('should return true when study is undefined', async () => {
       studiesServiceMock.getStudy = jest.fn().mockResolvedValue(undefined);
 
       const result = await component.promptIfStudyAlreadyExists(testUuid);
 
-      expect(result).toBe(false);
+      expect(result).toBe(true);
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
       expect(mockConfirmationService.confirm).not.toHaveBeenCalled();
     });

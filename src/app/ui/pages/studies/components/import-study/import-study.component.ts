@@ -257,7 +257,7 @@ export class ImportStudyComponent {
   async promptIfStudyAlreadyExists(uuid: string): Promise<boolean> {
     const study = await this.studiesService.getStudy(uuid);
     if (!study) {
-      return false;
+      return true;
     }
     return await new Promise((resolve) =>
       this.confirmationService.confirm({
