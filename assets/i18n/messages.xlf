@@ -926,11 +926,6 @@
         <source>delete</source>
       </segment>
     </unit>
-    <unit id="2932152767120246098">
-      <segment>
-        <source> Upload one or multiple protoV4 files </source>
-      </segment>
-    </unit>
     <unit id="349300253783483450">
       <segment>
         <source>support number</source>
@@ -1413,11 +1408,6 @@
         <source>Comment about the supports</source>
       </segment>
     </unit>
-    <unit id="8687116247161905115">
-      <segment>
-        <source>Cable not found in database: <ph id="0" equiv="PH" disp="parameters.conductor"/></source>
-      </segment>
-    </unit>
     <unit id="131564779447274448">
       <segment>
         <source>Attachment alt. (NGF)</source>
@@ -1613,11 +1603,6 @@
         <source>Span loading</source>
       </segment>
     </unit>
-    <unit id="1864612253981729182">
-      <segment>
-        <source>suspension</source>
-      </segment>
-    </unit>
     <unit id="1964106600703167330">
       <segment>
         <source>Cable manip. at span</source>
@@ -1636,11 +1621,6 @@
     <unit id="2813428855529635901">
       <segment>
         <source>View charge case</source>
-      </segment>
-    </unit>
-    <unit id="2905929947185397074">
-      <segment>
-        <source>chain</source>
       </segment>
     </unit>
     <unit id="3059442917741627872">
@@ -2076,6 +2056,116 @@
     <unit id="2050780142571489753">
       <segment>
         <source>Description/comment</source>
+      </segment>
+    </unit>
+    <unit id="7008439939460403347">
+      <segment>
+        <source>Report</source>
+      </segment>
+    </unit>
+    <unit id="7053072293973747391">
+      <segment>
+        <source>PEP</source>
+      </segment>
+    </unit>
+    <unit id="7355843892858662403">
+      <segment>
+        <source>Terrain data</source>
+      </segment>
+    </unit>
+    <unit id="7445879416935051036">
+      <segment>
+        <source>Azimuth (clockwise — 0° North/South) </source>
+      </segment>
+    </unit>
+    <unit id="7521763556168175281">
+      <segment>
+        <source>VG</source>
+      </segment>
+    </unit>
+    <unit id="7632588300330135571">
+      <segment>
+        <source>Tangent aiming</source>
+      </segment>
+    </unit>
+    <unit id="78111435214333571">
+      <segment>
+        <source>Temperature calculation</source>
+      </segment>
+    </unit>
+    <unit id="7838365629862703936">
+      <segment>
+        <source>HG</source>
+      </segment>
+    </unit>
+    <unit id="7930349729068923819">
+      <segment>
+        <source>VD</source>
+      </segment>
+    </unit>
+    <unit id="8299980005026088275">
+      <segment>
+        <source>Compute base parameter from terrain measurement</source>
+      </segment>
+    </unit>
+    <unit id="8314090883669143391">
+      <segment>
+        <source>Latitude</source>
+      </segment>
+    </unit>
+    <unit id="8471487881386607602">
+      <segment>
+        <source>Summer</source>
+      </segment>
+    </unit>
+    <unit id="8475559139207580230">
+      <segment>
+        <source>N8 - covered - smoky</source>
+      </segment>
+    </unit>
+    <unit id="8497528947328199741">
+      <segment>
+        <source>Time</source>
+      </segment>
+    </unit>
+    <unit id="8543119714580512727">
+      <segment>
+        <source>Line</source>
+      </segment>
+    </unit>
+    <unit id="8546353274317555587">
+      <segment>
+        <source>Ambient temperature</source>
+      </segment>
+    </unit>
+    <unit id="8566581441957557985">
+      <segment>
+        <source> Measured span length </source>
+      </segment>
+    </unit>
+    <unit id="8762477959615349195">
+      <segment>
+        <source>Parameter 2-3</source>
+      </segment>
+    </unit>
+    <unit id="8907130458722935866">
+      <segment>
+        <source>H2</source>
+      </segment>
+    </unit>
+    <unit id="9071236182141230808">
+      <segment>
+        <source>uncertainty parameter</source>
+      </segment>
+    </unit>
+    <unit id="9199827368355942438">
+      <segment>
+        <source>H3</source>
+      </segment>
+    </unit>
+    <unit id="959518481042894436">
+      <segment>
+        <source>N5 - Cloudy</source>
       </segment>
     </unit>
   </file>
