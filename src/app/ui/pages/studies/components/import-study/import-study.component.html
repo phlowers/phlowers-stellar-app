@@ -1,12 +1,18 @@
 <p-toast position="top-center"></p-toast>
 <div class="import-study">
+  <div class="my-8">
+    <p i18n class="text-l-600">
+      You can import multiple files, they will be available in the “My studies”
+      tab.
+    </p>
+  </div>
   <label for="study-file" class="import-study__tool">
     <app-icon icon="upload" class="import-study__tool__icon" />
 
-    <span class="import-study__tool__txt" i18n>
-      Upload one or multiple protoV4 files
+    <span class="import-study__tool__txt">
+      <span i18n> Upload one or several files </span><br />
+      <span class="small-txt" i18n> File formats: .csv, .clst </span>
     </span>
-
     <input
       id="study-file"
       form="file"
@@ -53,6 +59,18 @@
               />
             </button>
           </div>
+        </li>
+      }
+    </ul>
+  }
+  @if (this.erroredFiles().length > 0) {
+    <ul class="import-study__list">
+      @for (file of this.erroredFiles(); track file) {
+        <li class="import-study__list__item">
+          <p class="import-study__list__label">
+            <app-icon icon="close" class="import-study__list__icon error" />
+            {{ file }}
+          </p>
         </li>
       }
     </ul>
