@@ -7,10 +7,13 @@
 /// <reference lib="webworker" />
 
 import { loadPyodide } from 'pyodide';
-import importScript from './tasks/python-scripts/functions.py';
+import functions from './tasks/python-scripts/functions.py';
+import loads from './tasks/python-scripts/loads.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
+
+const pythonFiles = [functions, loads];
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;
@@ -38,7 +41,9 @@ async function loadPyodideAndPackages() {
     });
     const loadEnd = performance.now();
     postMessage({ loadTime: loadEnd - start });
-    await pyodide.runPython(importScript);
+    for (const file of pythonFiles) {
+      await pyodide.runPython(file);
+    }
     const importEnd = performance.now();
     postMessage({ importTime: importEnd - loadEnd });
   } catch (error) {
