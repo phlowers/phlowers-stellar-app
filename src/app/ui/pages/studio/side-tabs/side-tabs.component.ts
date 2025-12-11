@@ -10,7 +10,7 @@ import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { PlotService } from '../plot.service';
+import { PlotService } from '../services/plot.service';
 
 const REFRESH_STUDIO_DELAY = 400;
 
