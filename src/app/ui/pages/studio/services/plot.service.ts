@@ -15,7 +15,7 @@ import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
 
-const PLOT_ID = 'plotly-output';
+export const PLOT_ID = 'plotly-output';
 
 export const checkIfProjectionNeedRefresh = (
   oldOptions: PlotOptions,
@@ -123,6 +123,7 @@ export class PlotService {
   refreshSection = async (section: Section) => {
     this.error.set(null);
     this.litData.set(null);
+    this.section.set(section);
     if (!this.workerPythonService.ready || !section || !section.cable_name) {
       console.error('refreshSection error');
       this.error.set(DataError.NO_CABLE_FOUND);

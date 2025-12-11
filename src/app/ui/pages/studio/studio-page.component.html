@@ -129,7 +129,12 @@
               i18n
               >Climate condition</p-tab
             >
-            <p-tab value="1" [disabled]="true" i18n>Span loading</p-tab>
+            <p-tab
+              value="1"
+              [disabled]="!plotService.section()?.selected_charge_uuid"
+              i18n
+              >Load/marking</p-tab
+            >
             <p-tab value="2" [disabled]="true" i18n
               >Cable manip. at support</p-tab
             >
@@ -167,7 +172,7 @@
               </p-tabpanel>
 
               <p-tabpanel value="1">
-                <app-span [spans]="spanData" [supports]="supportData" />
+                <app-span />
               </p-tabpanel>
 
               <p-tabpanel value="2">
