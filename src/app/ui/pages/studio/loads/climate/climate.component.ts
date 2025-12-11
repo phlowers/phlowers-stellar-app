@@ -13,7 +13,7 @@ import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { PlotService } from '../../plot.service';
+import { PlotService } from '../../services/plot.service';
 import { ChargesService } from '@core/services/charges/charges.service';
 import { ClimateCharge } from '@src/app/core/data/database/interfaces/charge';
 

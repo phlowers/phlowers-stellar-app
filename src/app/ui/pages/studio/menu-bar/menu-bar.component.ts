@@ -3,15 +3,15 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ChargesService } from '@core/services/charges/charges.service';
 import { Study } from '@core/data/database/interfaces/study';
-import { Section } from '@core/data/database/interfaces/section';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
-import { PlotService } from '@ui/pages/studio/plot.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { Section } from '@core/data/database/interfaces/section';
 import { SelectModule } from 'primeng/select';
+import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 
 @Component({
   selector: 'app-studio-menu-bar',
@@ -23,10 +23,10 @@ import { SelectModule } from 'primeng/select';
     SelectButtonModule,
     DividerModule,
     ToggleSwitchModule,
-    ButtonComponent,
-    IconComponent,
     SelectModule,
-    SelectWithButtonsComponent
+    SelectWithButtonsComponent,
+    ButtonComponent,
+    IconComponent
   ]
 })
 export class StudioMenuBarComponent {

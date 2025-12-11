@@ -3,7 +3,7 @@ import { StudioPageComponent } from './studio-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { ElementRef } from '@angular/core';
-import { PlotService } from './plot.service';
+import { PlotService } from './services/plot.service';
 import { StudiesService } from '@core/services/studies/studies.service';
 
 interface Section {

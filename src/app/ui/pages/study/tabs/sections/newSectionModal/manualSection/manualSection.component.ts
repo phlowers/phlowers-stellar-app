@@ -37,7 +37,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
