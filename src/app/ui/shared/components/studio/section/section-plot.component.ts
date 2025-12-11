@@ -7,7 +7,7 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
-import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
 
 @Component({
   selector: 'app-section-plot',
