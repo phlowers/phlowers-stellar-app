@@ -33,5 +33,6 @@ Object.defineProperty(window.URL, 'createObjectURL', {
 // Mock Plotly
 jest.mock('plotly.js-dist-min', () => ({
   newPlot: jest.fn().mockResolvedValue({}),
+  relayout: jest.fn().mockResolvedValue({}),
   Data: jest.fn()
 }));
