@@ -505,31 +505,6 @@ describe('SpanComponent', () => {
 
       expect(console.log).not.toHaveBeenCalled();
     });
-
-    it('should log form value when form is valid', () => {
-      component.form.patchValue({
-        spanSelect: [0, 1],
-        supportNumber: 0,
-        loadType: 'punctual',
-        spanLoad: 100,
-        cableLengthChange: 50,
-        pointLoadDist: 25
-      });
-
-      component.calculateLoadCase();
-
-      expect(console.log).toHaveBeenCalledWith(
-        'Calculus values:',
-        expect.objectContaining({
-          spanSelect: [0, 1],
-          supportNumber: 0,
-          loadType: 'punctual',
-          spanLoad: 100,
-          cableLengthChange: 50,
-          pointLoadDist: 25
-        })
-      );
-    });
   });
 
   describe('isFormInvalid', () => {

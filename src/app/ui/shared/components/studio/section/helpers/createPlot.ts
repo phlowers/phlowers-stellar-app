@@ -6,7 +6,7 @@ import Plotly, {
 } from 'plotly.js-dist-min';
 import { Side, View } from './types';
 
-const normalCamera = (invert: boolean) => ({
+const normalCamera = () => ({
   center: {
     x: 0,
     y: 0,
@@ -14,7 +14,7 @@ const normalCamera = (invert: boolean) => ({
   },
   eye: {
     x: 0.02,
-    y: invert ? 2 : -2,
+    y: -3.5,
     z: 0.2
   }
 });
@@ -41,17 +41,13 @@ const axis = {
   showbackground: true
 };
 
-const scene = (
-  isSupportZoom: boolean,
-  invert: boolean,
-  camera: Camera | null
-) => ({
+const scene = (isSupportZoom: boolean, camera: Camera | null) => ({
   aspectmode: 'data' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
   xaxis: axis,
   yaxis: { ...axis, scaleanchor: 'x', scaleratio: 1 },
   zaxis: axis,
   camera: camera ?? {
-    ...(isSupportZoom ? supportCamera : normalCamera(invert))
+    ...(isSupportZoom ? supportCamera : normalCamera())
   }
 });
 
@@ -71,11 +67,7 @@ const config = {
   ] as ModeBarDefaultButtons[]
 };
 
-const layout3d = (
-  isSupportZoom: boolean,
-  invert: boolean,
-  camera: Camera | null
-) => ({
+const layout3d = (isSupportZoom: boolean, camera: Camera | null) => ({
   autosize: true,
   showlegend: false,
   margin: {
@@ -84,7 +76,7 @@ const layout3d = (
     t: 0,
     b: 0
   },
-  scene: scene(isSupportZoom, invert, camera)
+  scene: scene(isSupportZoom, camera)
 });
 
 const layout2d: (
@@ -135,7 +127,7 @@ export const createPlot = (
   }
   const baseLayout =
     view === '3d'
-      ? layout3d(isSupportZoom, invert, camera)
+      ? layout3d(isSupportZoom, camera)
       : layout2d(invert, data, side);
 
   return Plotly.newPlot(plotId, data, baseLayout, config);
