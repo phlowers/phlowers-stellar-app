@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioTopToolbarComponent } from './top-toolbar.component';
-import { PlotService } from '@ui/pages/studio/plot.service';
 import { ToolsDialogService } from '../tools-dialog/tools-dialog.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
