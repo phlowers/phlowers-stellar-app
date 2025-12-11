@@ -28,6 +28,22 @@ NEEDED_PYODIDE_SOURCE_FILES = [
 ]
 
 
+# remove duplicate wheels ( so that there no py3 and cp312 with the same name) in a directory
+def remove_duplicate_wheels_in_directory(directory):
+    # list all files in directory
+    files = os.listdir(directory)
+
+    # remove duplicate files that start with the same name
+    for file in files:
+        package_name = file.split("-")[0]
+        if "py3" not in file:
+            for other_file in files:
+                second_package_name = other_file.split("-")[0]
+                if second_package_name == package_name and file != other_file:
+                    print(f"Removing duplicate {other_file}, keeping {file}")
+                    os.remove(os.path.join(PYODIDE_DIRECTORY_PATH, other_file))
+
+
 def recreate_directory(directory):
     if os.path.exists(directory):
         shutil.rmtree(directory)
@@ -145,7 +161,9 @@ if __name__ == "__main__":
     subprocess.run(process_args)
     print("Building wheel files")
     # compile the wheel files to pyc
-    pyodide_build(Path(PYODIDE_DIRECTORY_PATH), False, False, 6, "")
+    pyodide_build(Path(PYODIDE_DIRECTORY_PATH), False, True, 6, "")
+
+    remove_duplicate_wheels_in_directory(PYODIDE_DIRECTORY_PATH)
 
     with open(PYODIDE_LOCK_PATH) as f:
         pyodide_lock_content = json.load(f)
