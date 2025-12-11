@@ -2,7 +2,7 @@ import { Component, QueryList, ElementRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SideTabsComponent } from './side-tabs.component';
-import { PlotService } from '../plot.service';
+import { PlotService } from '../services/plot.service';
 import { SideTabComponent } from './side-tab/side-tab.component';
 
 @Component({

@@ -1,4 +1,4 @@
-<form [formGroup]="form" class="span">
+<form [formGroup]="form" class="span__form">
   <div class="span__reset">
     <button
       app-btn
@@ -12,68 +12,72 @@
     </button>
   </div>
 
-  <div class="span__form">
+  <div>
     <label for="spanSelect" i18n>Span</label>
-    <label for="supportNumber" i18n>Support n°</label>
-
     <p-select
       inputId="spanSelect"
-      [options]="availableSpans()"
+      [options]="spans()"
+      fluid
+      (onChange)="selectedSpan.set($event.value)"
       formControlName="spanSelect"
       optionLabel="label"
       optionValue="value"
     />
+  </div>
 
+  <div>
+    <label for="supportNumber" i18n>Reference support</label>
     <p-select
       inputId="supportNumber"
-      [options]="availableSupports()"
+      [options]="supports()"
+      fluid
+      (onChange)="selectedSupport.set($event.value)"
       formControlName="supportNumber"
       optionLabel="label"
       optionValue="value"
     />
+  </div>
 
+  <div class="col-span-2">
     <label for="loadType" i18n>Load type</label>
-    <label for="spanLoad" i18n>Span load</label>
-
     <p-select
       inputId="loadType"
+      fluid
       [options]="loadTypeOptions"
       formControlName="loadType"
       optionLabel="label"
       optionValue="value"
     />
+  </div>
+  <div class="col-span-2 flex items-center">
+    <p-toggleswitch disabled inputId="freePositioning" name="freePositioning" />
+    <label for="freePositioning" i18n> Free positioning </label>
+  </div>
 
-    <p-inputgroup>
-      <input
-        pInputText
-        type="number"
-        id="spanLoad"
-        formControlName="spanLoad"
-      />
-      <p-inputgroup-addon>kg</p-inputgroup-addon>
-    </p-inputgroup>
-
-    <label for="cableLengthChange" i18n>Short. or lengthen. Cable (+ -)</label>
-    <label for="pointLoadDist" i18n>Dist. to point load</label>
-
-    <p-inputgroup>
-      <input
-        pInputText
-        type="number"
-        id="cableLengthChange"
-        formControlName="cableLengthChange"
-      />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
-    </p-inputgroup>
-
+  <div>
+    <label for="pointLoadDist" i18n>Dist. to ref. support</label>
     <p-inputgroup>
       <input
         pInputText
         type="number"
         id="pointLoadDist"
+        fluid
         formControlName="pointLoadDist"
       />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
+      <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+  <div>
+    <label for="spanLoad" i18n>Load</label>
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="spanLoad"
+        fluid
+        formControlName="spanLoad"
+      />
+      <p-inputgroup-addon i18n>N</p-inputgroup-addon>
     </p-inputgroup>
   </div>
 
@@ -84,7 +88,7 @@
       type="button"
       aria-label="erase load case"
       i18n-aria-label
-      (click)="eraseForm()"
+      (click)="deleteLoadCase()"
     >
       <app-icon icon="delete" />
     </button>
@@ -93,7 +97,7 @@
       app-btn
       type="submit"
       btnStyle="outlined"
-      (click)="submitForm()"
+      (click)="saveLoadCase()"
       [disabled]="isFormInvalid()"
     >
       <app-icon icon="save" />
@@ -103,7 +107,7 @@
     <button
       app-btn
       type="button"
-      (click)="calculForm()"
+      (click)="calculateLoadCase()"
       [disabled]="isFormInvalid()"
     >
       <app-icon icon="rocket_launch" />

@@ -9,7 +9,7 @@ import { SpeedDialModule } from 'primeng/speeddial';
 import { MenuItem } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
-import { PlotService } from '@ui/pages/studio/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 

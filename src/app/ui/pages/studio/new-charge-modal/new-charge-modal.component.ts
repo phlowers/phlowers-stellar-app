@@ -16,7 +16,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { Charge } from '@src/app/core/data/database/interfaces/charge';
 import { v4 as uuidv4 } from 'uuid';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
-import { PlotService } from '../plot.service';
+import { PlotService } from '../services/plot.service';
 import { defaultClimaticCharge } from '../loads/climate/climate.component';
 
 const newCharge = (): Charge => {
