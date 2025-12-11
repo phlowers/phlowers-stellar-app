@@ -60,7 +60,7 @@
         "source": "local"
     },
     "platformdirs": {
-        "file_name": "platformdirs-4.5.0-cp312-none-any.whl",
+        "file_name": "platformdirs-4.5.1-cp312-none-any.whl",
         "name": "platformdirs",
         "source": "local"
     },

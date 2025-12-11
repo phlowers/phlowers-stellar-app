@@ -10,8 +10,8 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { Section } from '@core/data/database/interfaces/section';
 import { SelectModule } from 'primeng/select';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 
 @Component({
   selector: 'app-studio-menu-bar',
