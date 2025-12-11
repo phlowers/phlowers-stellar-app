@@ -7,7 +7,8 @@ export enum Task {
   getLit = 'getLit',
   changeClimateLoad = 'changeClimateLoad',
   refreshProjection = 'refreshProjection',
-  getSupportCoordinates = 'getSupportCoordinates'
+  getSupportCoordinates = 'getSupportCoordinates',
+  addLoad = 'addLoad'
 }
 
 export enum DataError {
@@ -55,6 +56,11 @@ export interface TaskInputs {
     coordinates: (number | undefined)[][];
     attachmentSetNumbers: number[];
   };
+  [Task.addLoad]: {
+    supportNumber: number;
+    pointLoadDist: number;
+    spanLoad: number;
+  };
 }
 
 export interface TaskOutputs {
@@ -66,5 +72,8 @@ export interface TaskOutputs {
     shape_points: number[][];
     text_display_points: number[][];
     text_to_display: string[];
+  };
+  [Task.addLoad]: {
+    coordinates: number[];
   };
 }

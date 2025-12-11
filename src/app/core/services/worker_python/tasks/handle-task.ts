@@ -6,8 +6,6 @@
  */
 import { loadPyodide } from 'pyodide';
 import type { PyProxy } from 'pyodide/ffi';
-import functions from './python-scripts/functions.py';
-import testsScript from './python-scripts/tests.py';
 import { Task, TaskError, TaskInputs, TaskOutputs } from './types';
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
@@ -16,33 +14,31 @@ const tasks: Record<
   Task,
   {
     function: string;
-    script: string | (() => Promise<void> | void);
     externalPackages: string[];
   }
 > = {
   [Task.runTests]: {
-    script: testsScript,
     function: 'run_tests',
     externalPackages: ['pytest']
   },
   [Task.getLit]: {
-    script: functions,
     function: 'init_section',
     externalPackages: []
   },
   [Task.changeClimateLoad]: {
-    script: functions,
     function: 'change_climate_load',
     externalPackages: []
   },
   [Task.getSupportCoordinates]: {
-    script: functions,
     function: 'get_support_coordinates',
     externalPackages: []
   },
   [Task.refreshProjection]: {
-    script: functions,
     function: 'refresh_projection',
+    externalPackages: []
+  },
+  [Task.addLoad]: {
+    function: 'add_load',
     externalPackages: []
   }
 };
