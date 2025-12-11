@@ -16,6 +16,9 @@ import { Subscription } from 'rxjs';
 import { PlotService } from '../../services/plot.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
+import { LoadsService } from '../../services/loads.service';
+import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { Task } from '@src/app/core/services/worker_python/tasks/types';
 
 interface SpanOption {
   label: string;
@@ -83,7 +86,9 @@ export class SpanComponent implements OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     public readonly plotService: PlotService,
-    public readonly chargesService: ChargesService
+    public readonly chargesService: ChargesService,
+    public readonly loadsService: LoadsService,
+    public readonly workerPythonService: WorkerPythonService
   ) {
     this.form = this.fb.group({
       spanSelect: [null, Validators.required],
@@ -135,8 +140,18 @@ export class SpanComponent implements OnDestroy {
     console.log('Submit (save):', this.form.value);
   }
 
-  calculateLoadCase() {
+  async calculateLoadCase() {
     if (this.form.invalid) return;
+
+    const { result } = await this.workerPythonService.runTask(Task.addLoad, {
+      supportNumber: this.form.get('supportNumber')?.value ?? 0,
+      pointLoadDist: this.form.get('pointLoadDist')?.value ?? 0,
+      spanLoad: this.form.get('spanLoad')?.value ?? 0
+    });
+    this.loadsService.addLoadAnnotation(
+      result?.coordinates ?? [],
+      this.form.get('loadType')?.value
+    );
 
     console.log('Calculus values:', this.form.value);
   }
