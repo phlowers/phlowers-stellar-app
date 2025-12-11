@@ -16,7 +16,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Section } from '@core/data/database/interfaces/section';
 import { OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
 
 @Component({
   selector: 'app-studio',
