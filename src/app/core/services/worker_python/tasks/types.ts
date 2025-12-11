@@ -150,4 +150,7 @@ export interface TaskOutputs {
     parameter15C: number;
     parameter15CPlusUncertainty: number;
   };
+  [Task.addLoad]: {
+    coordinates: number[];
+  };
 }
