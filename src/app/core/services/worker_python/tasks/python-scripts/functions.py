@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import List
 import math
 from mechaphlowers.entities.shapes import SupportShape
+from mechaphlowers.data.measures import PapotoParameterMeasure
 
 import json
 
@@ -411,3 +412,41 @@ def get_support_coordinates(js_inputs: dict):
 
 # print("im in the main function")
 # result = init_section()
+
+
+def calculate_papoto(js_inputs: dict):
+    python_inputs = js_inputs.to_py()
+    spanLength = python_inputs["spanLength"]
+    HL = python_inputs["HL"]
+    H1 = python_inputs["H1"]
+    H2 = python_inputs["H2"]
+    H3 = python_inputs["H3"]
+    HR = python_inputs["HR"]
+    VL = python_inputs["VL"]
+    V1 = python_inputs["V1"]
+    V2 = python_inputs["V2"]
+    V3 = python_inputs["V3"]
+    VR = python_inputs["VR"]
+    papoto = PapotoParameterMeasure()
+    papoto(
+        a=spanLength,
+        HL=HL,
+        VL=VL,
+        HR=HR,
+        VR=VR,
+        H1=H1,
+        V1=V1,
+        H2=H2,
+        V2=V2,
+        H3=H3,
+        V3=V3,
+    )
+
+    return {
+        "parameter": papoto.parameter[0],
+        # "uncertainty_parameter": 0, # uncertainty isn't set yet in mechaphlowers
+        "parameter_1_2": papoto.parameter_1_2[0],
+        "parameter_2_3": papoto.parameter_2_3[0],
+        "parameter_1_3": papoto.parameter_1_3[0],
+        "check_validity": bool(papoto.check_validity()[0]),
+    }
