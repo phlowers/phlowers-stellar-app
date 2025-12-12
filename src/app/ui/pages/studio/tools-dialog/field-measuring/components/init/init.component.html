@@ -28,7 +28,12 @@
   />
 
   <div class="mt-4 text-right">
-    <button app-btn type="button" [disabled]="newMeasureControl.invalid" (click)="createMeasure()">
+    <button
+      app-btn
+      type="button"
+      [disabled]="newMeasureControl.invalid"
+      (click)="createMeasure()"
+    >
       <app-icon icon="add_circle" />
       <ng-container i18n>Create a new measurement</ng-container>
     </button>
@@ -56,7 +61,12 @@
   />
 
   <div class="mt-4 text-right">
-    <button app-btn type="button" [disabled]="chooseMeasureControl.invalid" (click)="chooseMeasure()">
+    <button
+      app-btn
+      type="button"
+      [disabled]="chooseMeasureControl.invalid"
+      (click)="chooseMeasure()"
+    >
       <app-icon icon="check" />
       <ng-container i18n>Choose</ng-container>
     </button>

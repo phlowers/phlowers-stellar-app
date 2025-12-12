@@ -10,7 +10,7 @@ export const leftSupportOption = [
 export const INITIAL_MEASURE_DATA: FieldMeasureData = {
   measureName: '',
   line: 'Line 225kV Rougemontier - Tourbe #1',
-  voltage: 123,
+  voltage: '123 kV',
   spanType: 'Phase',
   phaseNumber: 3,
   numberOfConductors: 3,

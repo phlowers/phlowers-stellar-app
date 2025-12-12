@@ -1,10 +1,38 @@
+<!-- Dialog Init -->
 <p-dialog
   dismissableMask="false"
-  [visible]="toolsDialogService.isOpen()"
-  (visibleChange)="toolsDialogService.isOpen.set($event)"
+  [visible]="toolsDialogService.isInitOpen()"
+  (visibleChange)="toolsDialogService.isInitOpen.set($event)"
+  [modal]="true"
+  [style]="toolsDialogService.getInitDialogStyle()"
+  closeAriaLabel="Close"
+  i18n-closeAriaLabel
+  (onHide)="onInitDialogHide()"
+>
+  @if (toolsDialogService.templates().header) {
+    <ng-template #header>
+      <ng-container
+        *ngTemplateOutlet="toolsDialogService.templates().header!"
+      />
+    </ng-template>
+  }
+
+  <ng-container
+    *ngComponentOutlet="
+      toolsDialogService.getInitComponent();
+      injector: injector
+    "
+  />
+</p-dialog>
+
+<!-- Dialog Main -->
+<p-dialog
+  dismissableMask="false"
+  [visible]="toolsDialogService.isMainOpen()"
+  (visibleChange)="toolsDialogService.isMainOpen.set($event)"
   [modal]="true"
   [style]="
-    toolsDialogService.getCurrentDialogStyle() || {
+    toolsDialogService.getMainDialogStyle() || {
       'min-width': '60vw',
       'max-width': '75rem'
     }
@@ -23,7 +51,7 @@
 
   <ng-container
     *ngComponentOutlet="
-      toolsDialogService.getCurrentToolComponent();
+      toolsDialogService.getMainComponent();
       injector: injector
     "
   />
