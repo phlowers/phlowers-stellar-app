@@ -1,0 +1,64 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2">
+    <app-icon icon="calculate" />
+    <span i18n>Compute base parameter from terrain measurement</span>
+  </p>
+</ng-template>
+
+<p id="complementary-form-field-measuring-init" class="context-paragraph">
+  <app-icon icon="info" />
+  <ng-container i18n>
+    Create a new measurment or select an existing one
+  </ng-container>
+</p>
+
+<div>
+  <label for="new-measure">
+    <ng-container i18n>Measure's name</ng-container>
+    <sup class="mandatory">*</sup>
+  </label>
+  <input
+    id="new-measure"
+    type="text"
+    pInputText
+    fluid
+    required
+    aria-describedby="complementary-form-field-measuring-init"
+    [formControl]="newMeasureControl"
+  />
+
+  <div class="mt-4 text-right">
+    <button app-btn type="button" [disabled]="newMeasureControl.invalid" (click)="createMeasure()">
+      <app-icon icon="add_circle" />
+      <ng-container i18n>Create a new measurement</ng-container>
+    </button>
+  </div>
+</div>
+
+<hr />
+
+<div>
+  <label for="choose-measure">
+    <ng-container i18n>Measure's name</ng-container>
+    <sup class="mandatory">*</sup>
+  </label>
+  <p-select
+    inputId="choose-measure"
+    required
+    fluid
+    showClear
+    appendTo="body"
+    ariaLabelledBy="complementary-form-field-measuring-init"
+    [options]="measures()"
+    optionLabel="label"
+    optionValue="value"
+    [formControl]="chooseMeasureControl"
+  />
+
+  <div class="mt-4 text-right">
+    <button app-btn type="button" [disabled]="chooseMeasureControl.invalid" (click)="chooseMeasure()">
+      <app-icon icon="check" />
+      <ng-container i18n>Choose</ng-container>
+    </button>
+  </div>
+</div>

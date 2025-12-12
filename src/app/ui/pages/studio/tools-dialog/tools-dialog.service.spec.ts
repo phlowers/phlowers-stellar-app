@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { TemplateRef } from '@angular/core';
 import { ToolsDialogService } from './tools-dialog.service';
 import { FieldMeasuringComponent } from './field-measuring/field-measuring.component';
+import { InitComponent } from './field-measuring/components/init/init.component';
 
 describe('ToolsDialogService', () => {
   let service: ToolsDialogService;
@@ -17,6 +19,10 @@ describe('ToolsDialogService', () => {
 
     it('should initialize with null currentTool', () => {
       expect(service.currentTool()).toBeNull();
+    });
+
+    it('should initialize with showingInit as false', () => {
+      expect(service.showingInit()).toBe(false);
     });
 
     it('should initialize with isOpen as false', () => {
@@ -39,6 +45,16 @@ describe('ToolsDialogService', () => {
       expect(service.isOpen()).toBe(true);
     });
 
+    it('should set showingInit to true for tools with initComponent', () => {
+      service.openTool('field-measuring');
+      expect(service.showingInit()).toBe(true);
+    });
+
+    it('should set showingInit to false for tools without initComponent', () => {
+      service.openTool('other-tool');
+      expect(service.showingInit()).toBe(false);
+    });
+
     it('should handle opening different tools', () => {
       service.openTool('field-measuring');
       expect(service.currentTool()).toBe('field-measuring');
@@ -53,6 +69,15 @@ describe('ToolsDialogService', () => {
 
       service.openTool('other-tool');
       expect(service.isOpen()).toBe(true);
+    });
+
+    it('should reset showingInit when reopening tool with initComponent', () => {
+      service.openTool('field-measuring');
+      service.proceedToMainComponent();
+      expect(service.showingInit()).toBe(false);
+
+      service.openTool('field-measuring');
+      expect(service.showingInit()).toBe(true);
     });
   });
 
@@ -79,6 +104,20 @@ describe('ToolsDialogService', () => {
       }, 350);
     });
 
+    it('should reset showingInit to false after delay', (done) => {
+      expect(service.showingInit()).toBe(true);
+      service.closeTool();
+
+      // Should still have showingInit immediately after close
+      expect(service.showingInit()).toBe(true);
+
+      // Should reset showingInit after 300ms
+      setTimeout(() => {
+        expect(service.showingInit()).toBe(false);
+        done();
+      }, 350);
+    });
+
     it('should allow reopening tool before timeout completes', (done) => {
       service.closeTool();
 
@@ -97,8 +136,15 @@ describe('ToolsDialogService', () => {
       expect(service.getCurrentToolComponent()).toBeNull();
     });
 
-    it('should return FieldMeasuringComponent for field-measuring tool', () => {
+    it('should return InitComponent when field-measuring tool is opened initially', () => {
       service.openTool('field-measuring');
+      const component = service.getCurrentToolComponent();
+      expect(component).toBe(InitComponent);
+    });
+
+    it('should return FieldMeasuringComponent after proceeding from init', () => {
+      service.openTool('field-measuring');
+      service.proceedToMainComponent();
       const component = service.getCurrentToolComponent();
       expect(component).toBe(FieldMeasuringComponent);
     });
@@ -109,12 +155,12 @@ describe('ToolsDialogService', () => {
       expect(component).toBeNull();
     });
 
-    it('should return null after closing tool', () => {
+    it('should return InitComponent after closing tool (until timeout)', () => {
       service.openTool('field-measuring');
       service.closeTool();
 
-      // Still has component until timeout
-      expect(service.getCurrentToolComponent()).toBe(FieldMeasuringComponent);
+      // Still has init component until timeout
+      expect(service.getCurrentToolComponent()).toBe(InitComponent);
     });
   });
 
@@ -123,8 +169,18 @@ describe('ToolsDialogService', () => {
       expect(service.getCurrentDialogStyle()).toEqual({});
     });
 
-    it('should return custom style for field-measuring tool', () => {
+    it('should return init style when field-measuring tool is opened initially', () => {
       service.openTool('field-measuring');
+      const style = service.getCurrentDialogStyle();
+      expect(style).toEqual({
+        'min-width': '29rem',
+        'max-width': '90%'
+      });
+    });
+
+    it('should return main style after proceeding from init', () => {
+      service.openTool('field-measuring');
+      service.proceedToMainComponent();
       const style = service.getCurrentDialogStyle();
       expect(style).toEqual({
         'min-width': '90%',
@@ -138,24 +194,50 @@ describe('ToolsDialogService', () => {
       expect(style).toEqual({});
     });
 
-    it('should return empty object after closing tool', () => {
+    it('should return init style after closing tool (until timeout)', () => {
       service.openTool('field-measuring');
       service.closeTool();
 
-      // Still has style until timeout
+      // Still has init style until timeout
       const styleDuringClose = service.getCurrentDialogStyle();
       expect(styleDuringClose).toEqual({
-        'min-width': '90%',
-        'max-width': '72.5rem'
+        'min-width': '29rem',
+        'max-width': '90%'
       });
+    });
+  });
+
+  describe('proceedToMainComponent', () => {
+    it('should set showingInit to false', () => {
+      service.openTool('field-measuring');
+      expect(service.showingInit()).toBe(true);
+
+      service.proceedToMainComponent();
+      expect(service.showingInit()).toBe(false);
+    });
+
+    it('should change current component from init to main', () => {
+      service.openTool('field-measuring');
+      expect(service.getCurrentToolComponent()).toBe(InitComponent);
+
+      service.proceedToMainComponent();
+      expect(service.getCurrentToolComponent()).toBe(FieldMeasuringComponent);
+    });
+
+    it('should not affect other state when called', () => {
+      service.openTool('field-measuring');
+      service.proceedToMainComponent();
+
+      expect(service.currentTool()).toBe('field-measuring');
+      expect(service.isOpen()).toBe(true);
     });
   });
 
   describe('setTemplates', () => {
     it('should set templates signal', () => {
       const mockTemplates = {
-        header: {} as any,
-        footer: {} as any
+        header: {} as TemplateRef<unknown>,
+        footer: {} as TemplateRef<unknown>
       };
 
       service.setTemplates(mockTemplates);
@@ -163,8 +245,8 @@ describe('ToolsDialogService', () => {
     });
 
     it('should update templates when called multiple times', () => {
-      const templates1 = { header: {} as any };
-      const templates2 = { footer: {} as any };
+      const templates1 = { header: {} as TemplateRef<unknown> };
+      const templates2 = { footer: {} as TemplateRef<unknown> };
 
       service.setTemplates(templates1);
       expect(service.templates()).toBe(templates1);
@@ -175,8 +257,8 @@ describe('ToolsDialogService', () => {
 
     it('should clear templates when passed empty object', () => {
       const mockTemplates = {
-        header: {} as any,
-        footer: {} as any
+        header: {} as TemplateRef<unknown>,
+        footer: {} as TemplateRef<unknown>
       };
 
       service.setTemplates(mockTemplates);
@@ -187,11 +269,11 @@ describe('ToolsDialogService', () => {
     });
 
     it('should handle partial template updates', () => {
-      const headerTemplate = { header: {} as any };
+      const headerTemplate = { header: {} as TemplateRef<unknown> };
       service.setTemplates(headerTemplate);
       expect(service.templates()).toEqual(headerTemplate);
 
-      const footerTemplate = { footer: {} as any };
+      const footerTemplate = { footer: {} as TemplateRef<unknown> };
       service.setTemplates(footerTemplate);
       expect(service.templates()).toEqual(footerTemplate);
     });
@@ -216,6 +298,16 @@ describe('ToolsDialogService', () => {
 
       service.closeTool();
       expect(service.isOpen()).toBe(false);
+    });
+
+    it('should update showingInit signal value when changed', () => {
+      expect(service.showingInit()).toBe(false);
+
+      service.openTool('field-measuring');
+      expect(service.showingInit()).toBe(true);
+
+      service.proceedToMainComponent();
+      expect(service.showingInit()).toBe(false);
     });
   });
 

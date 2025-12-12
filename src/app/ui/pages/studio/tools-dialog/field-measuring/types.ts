@@ -1,7 +1,7 @@
 export interface FieldMeasureData {
   measureName: string;
   line: string;
-  voltage: number;
+  voltage: string;
   spanType: string;
   phaseNumber: number;
   numberOfConductors: number;
