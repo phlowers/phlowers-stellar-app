@@ -78,14 +78,14 @@
     </p>
   </div>
 
-  <div class="HG">
-    <label for="HG" i18n>HG</label>
+  <div class="HL">
+    <label for="HL" i18n>HL</label>
     <input
-      id="HG"
+      id="HL"
       type="number"
       pInputText
-      [ngModel]="measureData().HG"
-      (ngModelChange)="updateField('HG', $event)"
+      [ngModel]="measureData().HL"
+      (ngModelChange)="updateField('HL', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -134,28 +134,28 @@
     />
   </div>
 
-  <div class="HD">
-    <label for="HD" i18n>HD</label>
+  <div class="HR">
+    <label for="HR" i18n>HR</label>
     <input
-      id="HD"
+      id="HR"
       type="number"
       pInputText
-      [ngModel]="measureData().HD"
-      (ngModelChange)="updateField('HD', $event)"
+      [ngModel]="measureData().HR"
+      (ngModelChange)="updateField('HR', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
     />
   </div>
 
-  <div class="VG">
-    <label for="VG" i18n>VG</label>
+  <div class="VL">
+    <label for="VL" i18n>VL</label>
     <input
-      id="VG"
+      id="VL"
       type="number"
       pInputText
-      [ngModel]="measureData().VG"
-      (ngModelChange)="updateField('VG', $event)"
+      [ngModel]="measureData().VL"
+      (ngModelChange)="updateField('VL', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -204,14 +204,14 @@
     />
   </div>
 
-  <div class="VD">
-    <label for="VD" i18n>VD</label>
+  <div class="VR">
+    <label for="VR" i18n>VR</label>
     <input
-      id="VD"
+      id="VR"
       type="number"
       pInputText
-      [ngModel]="measureData().VD"
-      (ngModelChange)="updateField('VD', $event)"
+      [ngModel]="measureData().VR"
+      (ngModelChange)="updateField('VR', $event)"
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       required
@@ -226,14 +226,14 @@
   </button>
 </div>
 
-@if (papotoResults()) {
+@if (papotoResult()) {
   <div class="papoto__results" [@expandCollapse]>
-    <h2 class="papoto__results__title">results:</h2>
+    <h2 class="papoto__results__title" i18n>results:</h2>
 
     <dl class="papoto__results__list">
       <div class="param">
         <dt i18n>Parameter</dt>
-        <dd>123 m</dd>
+        <dd>{{ papotoResult()?.parameter }}</dd>
       </div>
 
       <div class="incertainParam">
@@ -243,23 +243,23 @@
 
       <div class="param12">
         <dt i18n>Paramter 1-2</dt>
-        <dd>123 m</dd>
+        <dd>{{ papotoResult()?.parameter_1_2 }}</dd>
       </div>
 
       <div class="param23">
         <dt i18n>Parameter 2-3</dt>
-        <dd>123 m</dd>
+        <dd>{{ papotoResult()?.parameter_2_3 }}</dd>
       </div>
 
       <div class="param13">
         <dt i18n>Parameter 1-3</dt>
-        <dd>123 m</dd>
+        <dd>{{ papotoResult()?.parameter_1_3 }}</dd>
       </div>
 
       <div class="crit">
         <dt i18n>0.5% criterion</dt>
         <dd class="crit__result">
-          @if (criterion()) {
+          @if (papotoResult()?.check_validity) {
             <ng-container i18n>Yes</ng-container>
             <app-icon icon="check" class="criterion-ok" />
           } @else {
