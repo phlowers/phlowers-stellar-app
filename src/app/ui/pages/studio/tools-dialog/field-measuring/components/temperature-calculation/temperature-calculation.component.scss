@@ -1,0 +1,172 @@
+@use 'abstract.extracts' as app;
+
+dt {
+  margin: 0.125rem 0.25rem;
+  display: inline-block;
+  color: var(--grey-800);
+  @extend %text-s-400;
+}
+
+dd {
+  @extend %text-m-400;
+  color: var(--star-dust-950);
+  height: 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.temperature-calculation {
+  &__mandatory-msg {
+    @apply flex items-center gap-1 my-4;
+    @extend %text-s-600;
+    color: var(--star-dust-950);
+  }
+
+  &__form {
+    @extend %tools-grid-layout;
+    grid-template-areas:
+      'conductor transit . . .'
+      'ambientTemp windSpeed windDirection windIncidence windIncidence'
+      'solar solar solar solar .'
+      'skyCover diffusedSolarFlux directSolarFlux diffusedPlusDirectSolarFlux measuredDiffusedPlusDirectSolarFlux';
+
+    .conductor {
+      grid-area: conductor;
+    }
+
+    .ambientTemp {
+      grid-area: ambientTemp;
+    }
+
+    .longitude {
+      grid-area: longitude;
+    }
+
+    .latitude {
+      grid-area: latitude;
+    }
+
+    .transit {
+      grid-area: transit;
+    }
+
+    .azimuth {
+      grid-area: azimuth;
+
+      &__input-group {
+        @apply flex items-center gap-2;
+      }
+
+      &__help {
+        @apply flex-shrink-0;
+      }
+    }
+
+    .windSpeed {
+      grid-area: windSpeed;
+
+      &__label {
+        @apply flex items-end gap-1 justify-between;
+      }
+    }
+
+    .windDirection {
+      grid-area: windDirection;
+    }
+
+    .windIncidence {
+      grid-area: windIncidence;
+
+      &__value {
+        @apply mb-0 text-lg;
+        color: var(--star-dust-950);
+        min-height: 2rem;
+        display: flex;
+        align-items: center;
+      }
+    }
+
+
+    .solar {
+      grid-area: solar;
+      @apply flex flex-col gap-4;
+
+      &__heading {
+        @apply mb-0;
+        @extend %heading-s;
+        color: var(--star-dust-950);
+      }
+
+      &__options {
+        @apply flex gap-4;
+      }
+
+      &__option {
+        @apply flex items-center gap-2;
+      }
+
+      &__input {
+        @apply flex flex-col;
+      }
+    }
+
+    .skyCover {
+      grid-area: skyCover;
+    }
+
+    .diffusedSolarFlux {
+      grid-area: diffusedSolarFlux;
+    }
+
+    .directSolarFlux {
+      grid-area: directSolarFlux;
+    }
+
+    .diffusedPlusDirectSolarFlux {
+      grid-area: diffusedPlusDirectSolarFlux;
+    }
+
+    .measuredDiffusedPlusDirectSolarFlux {
+      grid-area: measuredDiffusedPlusDirectSolarFlux;
+    }
+
+    label {
+      @extend %text-s-400;
+      margin: 0.125rem 0.25rem;
+
+      &:has(.small) {
+        @apply flex items-end gap-1 justify-between;
+      }
+    }
+  }
+
+  &__results {
+    @apply border-t mt-3;
+    border-color: var(--star-dust-300);
+
+    &__title {
+      @apply mt-4 mb-0;
+      @extend %heading-s;
+      color: var(--star-dust-950);
+    }
+
+    &__list {
+      @extend %tools-grid-layout;
+      grid-template-areas: 'cableTemperature incertainCableTemperature . . .'
+        'solarFlux . . . .';
+
+
+      .solarFlux {
+        grid-area: solarFlux;
+      }
+
+      .cableTemperature {
+        grid-area: cableTemperature;
+      }
+
+      .incertainCableTemperature {
+        grid-area: incertainCableTemperature;
+      }
+    }
+  }
+}
