@@ -22,6 +22,7 @@
         background-color: var(--star-dust-50);
         box-shadow: map.get(app.$elevation, neutral-5);
         border-color: var(--star-dust-300);
+        z-index: 7;
       }
     }
 
