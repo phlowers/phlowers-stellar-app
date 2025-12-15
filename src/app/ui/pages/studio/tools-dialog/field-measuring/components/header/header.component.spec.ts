@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HeaderComponent } from './header.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { FieldMeasureData } from '../../types';
@@ -22,7 +24,8 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent]
+      imports: [HeaderComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()]
     })
       .overrideComponent(HeaderComponent, {
         remove: { imports: [IconComponent] },
@@ -98,9 +101,7 @@ describe('HeaderComponent', () => {
       const voltageSection = sections.find((el) =>
         el.textContent?.includes('Voltage')
       );
-      expect(voltageSection?.textContent).toContain(
-        `${mockMeasureData.voltage} kV`
-      );
+      expect(voltageSection?.textContent).toContain(mockMeasureData.voltage);
     });
 
     it('should display span type', () => {
@@ -128,7 +129,7 @@ describe('HeaderComponent', () => {
     it('should update displayed values when measureData changes', () => {
       const updatedData = {
         ...mockMeasureData,
-        voltage: 400,
+        voltage: '400 kV',
         phaseNumber: 6
       };
 
@@ -322,7 +323,7 @@ describe('HeaderComponent', () => {
     it('should display zero values correctly', () => {
       const dataWithZeros: FieldMeasureData = {
         ...mockMeasureData,
-        voltage: 0,
+        voltage: '0 kV',
         phaseNumber: 0,
         numberOfConductors: 0
       };
