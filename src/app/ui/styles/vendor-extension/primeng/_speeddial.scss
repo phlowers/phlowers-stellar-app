@@ -69,12 +69,16 @@
         padding: 0.625rem 0.5rem;
         color: var(--star-dust-950);
 
-        &:hover {
+        &:not(:disabled):hover {
           background-color: var(--primary-50);
         }
 
         &:focus-visible {
           @extend %focus-state;
+        }
+
+        &:disabled {
+          color: var(--star-dust-500);
         }
       }
     }
