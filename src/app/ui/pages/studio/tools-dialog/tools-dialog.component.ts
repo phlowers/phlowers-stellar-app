@@ -11,4 +11,10 @@ import { ToolsDialogService } from './tools-dialog.service';
 export class ToolsDialogComponent {
   readonly toolsDialogService = inject(ToolsDialogService);
   readonly injector = inject(Injector);
+
+  onInitDialogHide(): void {
+    if (this.toolsDialogService.isInitOpen()) {
+      this.toolsDialogService.closeTool();
+    }
+  }
 }

@@ -53,6 +53,7 @@
     panelStyleClass="toolbar-multiselect-overlay"
     (onPanelShow)="displayOptionsStatus.set(true)"
     (onPanelHide)="displayOptionsStatus.set(false)"
+    optionDisabled="label"
   >
     <ng-template #selecteditems let-value>
       @if (value?.length) {
@@ -87,7 +88,9 @@
     </ng-template>
 
     <ng-template #item let-item let-toggleCallback="toggleCallback">
-      <button (click)="toggleCallback($event, item)">{{ item.label }}</button>
+      <button (click)="toggleCallback($event, item)" [disabled]="item.disabled">
+        {{ item.label }}
+      </button>
     </ng-template>
   </p-speedDial>
 
@@ -106,7 +109,9 @@
     </ng-template>
 
     <ng-template #item let-item let-toggleCallback="toggleCallback">
-      <button (click)="toggleCallback($event, item)">{{ item.label }}</button>
+      <button (click)="toggleCallback($event, item)" [disabled]="item.disabled">
+        {{ item.label }}
+      </button>
     </ng-template>
   </p-speedDial>
 
@@ -117,6 +122,7 @@
       @if (item.checked) {
         <button
           class="toolbar__specifbtn"
+          [disabled]="item.disabled"
           (click)="item.action()"
           [attr.aria-label]="item.label"
           i18n-aria-label

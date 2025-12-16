@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ToolsDialogComponent } from './tools-dialog.component';
 import { ToolsDialogService } from './tools-dialog.service';
 
@@ -11,7 +13,11 @@ describe('ToolsDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ToolsDialogComponent],
-      providers: [provideAnimations()]
+      providers: [
+        provideAnimations(),
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolsDialogComponent);
@@ -48,47 +54,53 @@ describe('ToolsDialogComponent', () => {
   });
 
   describe('Template Rendering', () => {
-    it('should render p-dialog component', () => {
+    it('should render p-dialog components', () => {
       const element = fixture.nativeElement;
-      const dialog = element.querySelector('p-dialog');
-      expect(dialog).toBeTruthy();
+      const dialogs = element.querySelectorAll('p-dialog');
+      expect(dialogs.length).toBe(2); // Init and Main dialogs
     });
 
-    it('should bind visible property to service isOpen signal', () => {
-      toolsDialogService.isOpen.set(true);
+    it('should bind visible property to service isInitOpen signal for init dialog', () => {
+      toolsDialogService.isInitOpen.set(true);
       fixture.detectChanges();
 
-      const dialog = fixture.nativeElement.querySelector('p-dialog');
-      expect(dialog.getAttribute('ng-reflect-visible')).toBe('true');
+      const dialogs = fixture.nativeElement.querySelectorAll('p-dialog');
+      expect(dialogs[0].getAttribute('ng-reflect-visible')).toBe('true');
     });
 
-    it('should display dialog with correct style when tool is open', () => {
+    it('should display init dialog when tool with initComponent is opened', () => {
       toolsDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      expect(toolsDialogService.isOpen()).toBe(true);
+      expect(toolsDialogService.isInitOpen()).toBe(true);
+      expect(toolsDialogService.isMainOpen()).toBe(false);
     });
   });
 
   describe('Dialog State Management', () => {
     it('should reflect service state changes', () => {
-      expect(toolsDialogService.isOpen()).toBe(false);
+      expect(toolsDialogService.isInitOpen()).toBe(false);
+      expect(toolsDialogService.isMainOpen()).toBe(false);
 
       toolsDialogService.openTool('field-measuring');
       fixture.detectChanges();
-      expect(toolsDialogService.isOpen()).toBe(true);
+      expect(toolsDialogService.isInitOpen()).toBe(true);
+      expect(toolsDialogService.isMainOpen()).toBe(false);
 
       toolsDialogService.closeTool();
       fixture.detectChanges();
-      expect(toolsDialogService.isOpen()).toBe(false);
+      expect(toolsDialogService.isInitOpen()).toBe(false);
+      expect(toolsDialogService.isMainOpen()).toBe(false);
     });
 
-    it('should render dynamic component based on current tool', () => {
+    it('should render dynamic components based on current tool', () => {
       toolsDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      const component = toolsDialogService.getCurrentToolComponent();
-      expect(component).toBeDefined();
+      const initComponent = toolsDialogService.getInitComponent();
+      const mainComponent = toolsDialogService.getMainComponent();
+      expect(initComponent).toBeDefined();
+      expect(mainComponent).toBeDefined();
     });
   });
 });

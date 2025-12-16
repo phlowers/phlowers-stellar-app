@@ -48,24 +48,28 @@ export class StudioTopToolbarComponent implements OnInit {
     this.tablesDropdown.set([
       {
         label: $localize`Loads table`, // Tableau de charges
+        disabled: true,
         command: () => {
           console.log('Add action triggered');
         }
       },
       {
         label: $localize`Pose table`, // Tableau de pose
+        disabled: true,
         command: () => {
           console.log('Add action triggered');
         }
       },
       {
         label: $localize`Obstacles table`, // Tableau d'obstacles
+        disabled: true,
         command: () => {
           console.log('Add action triggered');
         }
       },
       {
         label: $localize`Grounds table`, // Tableau de sols
+        disabled: true,
         command: () => {
           console.log('Add action triggered');
         }
@@ -75,6 +79,7 @@ export class StudioTopToolbarComponent implements OnInit {
     this.toolsDropdown.set(
       this.toolsItems().map((item) => ({
         label: item.label,
+        disabled: item.disabled,
         command: () => {
           item.action();
         }
@@ -122,6 +127,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: number;
       label: string;
       checked: boolean;
+      disabled: boolean;
       action: () => void;
     }[]
   >([
@@ -129,6 +135,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 1,
       label: $localize`Field measurements`, // Mesures terrain
       checked: false,
+      disabled: false,
       action: () => {
         this.toolsDialogService.openTool('field-measuring');
       }
@@ -137,6 +144,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 2,
       label: $localize`L0 sum`, // Somme L0
       checked: false,
+      disabled: true,
       action: () => {
         alert('click L0 sum');
       }
@@ -145,6 +153,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 3,
       label: $localize`VTL & Guying`, // VHL & haubanage
       checked: false,
+      disabled: true,
       action: () => {
         alert('click VTL & Guying');
       }
@@ -153,6 +162,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 4,
       label: $localize`Cable marking`, // Marquage câble
       checked: false,
+      disabled: true,
       action: () => {
         alert('click Cable marking');
       }
@@ -161,6 +171,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 5,
       label: $localize`Strand RRTS`, // CRR de brin
       checked: false,
+      disabled: true,
       action: () => {
         alert('click Strand RRTS');
       }
@@ -169,6 +180,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 6,
       label: $localize`Forest trenches`, // Rapport Vegeo
       checked: false,
+      disabled: true,
       action: () => {
         alert('click Forest trenches');
       }
@@ -177,6 +189,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 7,
       label: $localize`Height & lateral distance`, // Hauteur libre & distance latérale
       checked: false,
+      disabled: true,
       action: () => {
         alert('click Height & lateral distance');
       }
@@ -185,6 +198,7 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 8,
       label: $localize`Cable adjustment`, // Réglage câble
       checked: false,
+      disabled: true,
       action: () => {
         alert('click Cable adjustment');
       }
