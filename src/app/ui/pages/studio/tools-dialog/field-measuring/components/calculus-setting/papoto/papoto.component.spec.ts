@@ -32,16 +32,16 @@ describe('Papoto component', () => {
     expect(data.leftSupport).toBe('');
     expect(data.spanLength).toBeNull();
     expect(data.measuredElevationDifference).toBeNull();
-    expect(data.HG).toBeNull();
+    expect(data.HL).toBeNull();
     expect(data.H1).toBeNull();
     expect(data.H2).toBeNull();
     expect(data.H3).toBeNull();
-    expect(data.HD).toBeNull();
-    expect(data.VG).toBeNull();
+    expect(data.HR).toBeNull();
+    expect(data.VL).toBeNull();
     expect(data.V1).toBeNull();
     expect(data.V2).toBeNull();
     expect(data.V3).toBeNull();
-    expect(data.VD).toBeNull();
+    expect(data.VR).toBeNull();
   });
 
   it('should render left support select field', () => {
@@ -51,13 +51,13 @@ describe('Papoto component', () => {
 
   it('should update measureData when form values change', () => {
     component.updateField('spanLength', 100.5);
-    component.updateField('HG', 50.25);
-    component.updateField('VG', 30.75);
+    component.updateField('HL', 50.25);
+    component.updateField('VL', 30.75);
 
     const data = component.measureData();
     expect(data.spanLength).toBe(100.5);
-    expect(data.HG).toBe(50.25);
-    expect(data.VG).toBe(30.75);
+    expect(data.HL).toBe(50.25);
+    expect(data.VL).toBe(30.75);
   });
 
   it('should open help dialog when openHelp is called', () => {
@@ -75,16 +75,16 @@ describe('Papoto component', () => {
     component.updateField('leftSupport', '12');
     component.updateField('spanLength', 100);
     component.updateField('measuredElevationDifference', 5);
-    component.updateField('HG', 10);
+    component.updateField('HL', 10);
     component.updateField('H1', 20);
     component.updateField('H2', 30);
     component.updateField('H3', 40);
-    component.updateField('HD', 50);
-    component.updateField('VG', 15);
+    component.updateField('HR', 50);
+    component.updateField('VL', 15);
     component.updateField('V1', 25);
     component.updateField('V2', 35);
     component.updateField('V3', 45);
-    component.updateField('VD', 55);
+    component.updateField('VR', 55);
 
     expect(component.papotoResults()).toBe(false);
 
@@ -94,16 +94,16 @@ describe('Papoto component', () => {
       leftSupport: '12',
       spanLength: 100,
       measuredElevationDifference: 5,
-      HG: 10,
+      HL: 10,
       H1: 20,
       H2: 30,
       H3: 40,
-      HD: 50,
-      VG: 15,
+      HR: 50,
+      VL: 15,
       V1: 25,
       V2: 35,
       V3: 45,
-      VD: 55
+      VR: 55
     });
     expect(component.papotoResults()).toBe(true);
 
@@ -117,16 +117,16 @@ describe('Papoto component', () => {
     component.updateField('leftSupport', '12');
     component.updateField('spanLength', 100);
     component.updateField('measuredElevationDifference', 5);
-    component.updateField('HG', 10);
+    component.updateField('HL', 10);
     component.updateField('H1', 20);
     component.updateField('H2', 30);
     component.updateField('H3', 40);
-    component.updateField('HD', 50);
-    component.updateField('VG', 15);
+    component.updateField('HR', 50);
+    component.updateField('VL', 15);
     component.updateField('V1', 25);
     component.updateField('V2', 35);
     component.updateField('V3', 45);
-    component.updateField('VD', 55);
+    component.updateField('VR', 55);
 
     expect(component.isFormValid()).toBe(true);
   });
