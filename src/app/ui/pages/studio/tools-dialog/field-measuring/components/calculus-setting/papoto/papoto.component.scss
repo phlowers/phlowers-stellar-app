@@ -14,8 +14,8 @@
     @extend %tools-grid-layout;
     grid-template-areas:
       'line1 line1 line1 . .'
-      'HG H1 H2 H3 HD'
-      'VG V1 V2 V3 VD';
+      'HL H1 H2 H3 HR'
+      'VL V1 V2 V3 VR';
 
     &__line1 {
       grid-area: line1;
@@ -66,8 +66,8 @@
         color: var(--star-dust-900);
       }
     }
-    .HG {
-      grid-area: HG;
+    .HL {
+      grid-area: HL;
     }
     .H1 {
       grid-area: H1;
@@ -78,11 +78,11 @@
     .H3 {
       grid-area: H3;
     }
-    .HD {
-      grid-area: HD;
+    .HR {
+      grid-area: HR;
     }
-    .VG {
-      grid-area: VG;
+    .VL {
+      grid-area: VL;
     }
     .V1 {
       grid-area: V1;
@@ -93,8 +93,8 @@
     .V3 {
       grid-area: V3;
     }
-    .VD {
-      grid-area: VD;
+    .VR {
+      grid-area: VR;
     }
   }
 

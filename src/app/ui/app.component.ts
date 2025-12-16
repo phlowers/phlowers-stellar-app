@@ -33,7 +33,7 @@ import { MaintenanceService } from '../core/services/maintenance/maintenance.ser
 import { LinesService } from '../core/services/lines/lines.service';
 import { CablesService } from '../core/services/cables/cables.service';
 import { ChainsService } from '../core/services/chains/chains.service';
-import { PlotService } from './pages/studio/services/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { AttachmentService } from '../core/services/attachment/attachment.service';
 import { ChargesService } from '../core/services/charges/charges.service';
 import { DividerModule } from 'primeng/divider';
