@@ -51,16 +51,16 @@ export class PapotoComponent {
       data.leftSupport &&
       data.spanLength != null &&
       data.measuredElevationDifference != null &&
-      data.HG != null &&
+      data.HL != null &&
       data.H1 != null &&
       data.H2 != null &&
       data.H3 != null &&
-      data.HD != null &&
-      data.VG != null &&
+      data.HR != null &&
+      data.VL != null &&
       data.V1 != null &&
       data.V2 != null &&
       data.V3 != null &&
-      data.VD != null
+      data.VR != null
     );
   });
 
@@ -82,16 +82,16 @@ export class PapotoComponent {
       leftSupport: data.leftSupport,
       spanLength: data.spanLength,
       measuredElevationDifference: data.measuredElevationDifference,
-      HG: data.HG,
+      HL: data.HL,
       H1: data.H1,
       H2: data.H2,
       H3: data.H3,
-      HD: data.HD,
-      VG: data.VG,
+      HR: data.HR,
+      VL: data.VL,
       V1: data.V1,
       V2: data.V2,
       V3: data.V3,
-      VD: data.VD
+      VR: data.VR
     });
 
     this.papotoResults.set(true);

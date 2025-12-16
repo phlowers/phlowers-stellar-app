@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, TemplateRef } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolsDialogService } from '../tools-dialog.service';
 import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
@@ -47,7 +49,12 @@ describe('FieldMeasuringComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ToolsDialogService, provideAnimations()]
+      providers: [
+        ToolsDialogService,
+        provideAnimations(),
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
       .overrideComponent(FieldMeasuringComponent, {
         set: {
@@ -122,7 +129,9 @@ describe('FieldMeasuringComponent', () => {
       toolsDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      expect(toolsDialogService.isOpen()).toBe(true);
+      // field-measuring opens init dialog first
+      expect(toolsDialogService.isInitOpen()).toBe(true);
+      expect(toolsDialogService.isMainOpen()).toBe(false);
     });
   });
 
@@ -402,22 +411,37 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('Integration with ToolsDialogService', () => {
-    it('should work with service open state', () => {
-      expect(toolsDialogService.isOpen()).toBe(false);
+    it('should work with service open state', (done) => {
+      expect(toolsDialogService.isMainOpen()).toBe(false);
 
       toolsDialogService.openTool('field-measuring');
-      expect(toolsDialogService.isOpen()).toBe(true);
+      expect(toolsDialogService.isInitOpen()).toBe(true);
 
-      component.onSave();
-      expect(toolsDialogService.isOpen()).toBe(false);
+      // Proceed to main component
+      toolsDialogService.proceedToMainComponent();
+
+      // Wait for the timeout that opens main dialog
+      setTimeout(() => {
+        expect(toolsDialogService.isMainOpen()).toBe(true);
+
+        component.onSave();
+        expect(toolsDialogService.isMainOpen()).toBe(false);
+        done();
+      }, 200);
     });
 
-    it('should work with onVisibleChange integration', () => {
+    it('should work with onVisibleChange integration', (done) => {
       toolsDialogService.openTool('field-measuring');
-      expect(toolsDialogService.isOpen()).toBe(true);
+      toolsDialogService.proceedToMainComponent();
 
-      component.onVisibleChange(false);
-      expect(toolsDialogService.isOpen()).toBe(false);
+      // Wait for the timeout that opens main dialog
+      setTimeout(() => {
+        expect(toolsDialogService.isMainOpen()).toBe(true);
+
+        component.onVisibleChange(false);
+        expect(toolsDialogService.isMainOpen()).toBe(false);
+        done();
+      }, 200);
     });
   });
 
@@ -461,7 +485,9 @@ describe('FieldMeasuringComponent', () => {
       toolsDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      expect(toolsDialogService.isOpen()).toBe(true);
+      // field-measuring opens init dialog first
+      expect(toolsDialogService.isInitOpen()).toBe(true);
+      expect(toolsDialogService.isMainOpen()).toBe(false);
     });
   });
 });

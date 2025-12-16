@@ -1,0 +1,13 @@
+.context-paragraph {
+  @apply flex gap-1 items-center;
+  color: var(--star-dust-950);
+}
+
+label {
+  margin: 0.125rem 0.25rem;
+  color: var(--star-dust-900);
+}
+
+hr {
+  border-color: var(--star-dust-300);
+}
