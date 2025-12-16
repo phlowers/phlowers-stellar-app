@@ -6,7 +6,8 @@ import {
   ViewChild,
   TemplateRef,
   AfterViewInit,
-  OnDestroy
+  OnDestroy,
+  untracked
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -26,6 +27,7 @@ import {
 import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
 import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -46,6 +48,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
 
   private readonly toolsDialogService = inject(ToolsDialogService);
+  private readonly plotService = inject(PlotService);
 
   ngAfterViewInit(): void {
     this.toolsDialogService.setTemplates({
@@ -75,14 +78,34 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
 
   constructor() {
     effect(() => {
-      if (this.toolsDialogService.isOpen()) {
-        // Initialize or reset data when dialog opens
+      if (this.toolsDialogService.isMainOpen()) {
+        // Initialize data from PlotService when dialog opens
+        this.initializeMeasureData();
       }
     });
   }
 
   ngOnDestroy(): void {
     this.toolsDialogService.setTemplates({});
+  }
+
+  private initializeMeasureData(): void {
+    const section = this.plotService.section();
+
+    if (!section) {
+      console.warn('No section available');
+      return;
+    }
+
+    this.measureData.set({
+      ...untracked(() => this.measureData()),
+      line: section.cable_name || '',
+      voltage: section.voltage_idr || '',
+      spanType: section.type || '',
+      phaseNumber: section.electric_phase_number || 0,
+      numberOfConductors: section.cables_amount || 0,
+      cableName: section.cable_name || ''
+    });
   }
 
   onVisibleChange(visible: boolean) {
