@@ -1,7 +1,7 @@
 export interface FieldMeasureData {
   measureName: string;
   line: string;
-  voltage: number;
+  voltage: string;
   spanType: string;
   phaseNumber: number;
   numberOfConductors: number;
@@ -24,16 +24,16 @@ export interface FieldMeasureData {
   leftSupport: string | null;
   spanLength: number | null;
   measuredElevationDifference: number | null;
-  HG: number | null;
+  HL: number | null;
   H1: number | null;
   H2: number | null;
   H3: number | null;
-  HD: number | null;
-  VG: number | null;
+  HR: number | null;
+  VL: number | null;
   V1: number | null;
   V2: number | null;
   V3: number | null;
-  VD: number | null;
+  VR: number | null;
   // Visées tangentes fields
   cableHAccDistance: number | null;
   cableVerticalAccAngle: number | null;

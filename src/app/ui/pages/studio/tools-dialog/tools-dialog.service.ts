@@ -1,17 +1,19 @@
-// tools-dialog.service.ts
 import { Injectable, signal, TemplateRef, Type } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring/field-measuring.component';
+import { InitComponent } from './field-measuring/components/init/init.component';
 
 export type Tool = 'field-measuring' | 'other-tool';
 
 export interface ToolConfig {
-  component: Type<any>;
-  dialogStyle?: Record<string, string>; // default { 'min-width': '60vw', 'max-width': '75rem' }
+  component: Type<unknown>;
+  dialogStyle?: Record<string, string>;
+  initComponent?: Type<unknown>;
+  initDialogStyle?: Record<string, string>;
 }
 
 export interface ToolTemplates {
-  header?: TemplateRef<any>;
-  footer?: TemplateRef<any>;
+  header?: TemplateRef<unknown>;
+  footer?: TemplateRef<unknown>;
 }
 
 @Injectable({
@@ -19,38 +21,74 @@ export interface ToolTemplates {
 })
 export class ToolsDialogService {
   readonly currentTool = signal<Tool | null>(null);
-  readonly isOpen = signal(false);
+  readonly isInitOpen = signal(false);
+  readonly isMainOpen = signal(false);
   readonly templates = signal<ToolTemplates>({});
 
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
       component: FieldMeasuringComponent,
-      dialogStyle: { 'min-width': '90%', 'max-width': '72.5rem' }
+      dialogStyle: { 'min-width': '90%', 'max-width': '72.5rem' },
+      initComponent: InitComponent,
+      initDialogStyle: { 'min-width': '29rem', 'max-width': '90%' }
     },
     'other-tool': {
-      component: null as any // set other tools later
+      component: null!
     }
   };
 
   openTool(tool: Tool): void {
     this.currentTool.set(tool);
-    this.isOpen.set(true);
+    const config = this.toolMap[tool];
+
+    if (config.initComponent) {
+      this.isInitOpen.set(true);
+      this.isMainOpen.set(false);
+    } else {
+      this.isInitOpen.set(false);
+      this.isMainOpen.set(true);
+    }
   }
 
   closeTool(): void {
-    this.isOpen.set(false);
-    // Small delay to allow dialog close animation
-    setTimeout(() => this.currentTool.set(null), 300);
+    this.isInitOpen.set(false);
+    this.isMainOpen.set(false);
+
+    setTimeout(() => {
+      this.currentTool.set(null);
+    }, 300);
   }
 
-  getCurrentToolComponent(): Type<any> | null {
-    const tool = this.currentTool();
-    return tool ? this.toolMap[tool].component : null;
+  proceedToMainComponent(): void {
+    this.isInitOpen.set(false);
+    // Attendre la fermeture complète du dialog init avant d'ouvrir le main
+    setTimeout(() => {
+      this.isMainOpen.set(true);
+    }, 150);
   }
 
-  getCurrentDialogStyle(): Record<string, string> {
+  getInitComponent(): Type<unknown> | null {
     const tool = this.currentTool();
-    return tool ? this.toolMap[tool].dialogStyle || {} : {};
+    if (!tool) return null;
+    return this.toolMap[tool].initComponent || null;
+  }
+
+  getMainComponent(): Type<unknown> | null {
+    const tool = this.currentTool();
+    if (!tool) return null;
+    return this.toolMap[tool].component;
+  }
+
+  getInitDialogStyle(): Record<string, string> {
+    const tool = this.currentTool();
+    if (!tool) return {};
+    return this.toolMap[tool].initDialogStyle || {};
+  }
+
+  getMainDialogStyle(): Record<string, string> {
+    const tool = this.currentTool();
+    if (!tool) return {};
+    return this.toolMap[tool].dialogStyle || {};
   }
 
   setTemplates(templates: ToolTemplates): void {

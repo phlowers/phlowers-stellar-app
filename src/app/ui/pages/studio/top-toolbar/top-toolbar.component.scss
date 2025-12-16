@@ -53,6 +53,11 @@
       @extend %focus-state;
     }
 
+    &:disabled {
+      background-color: var(--star-dust-50);
+      color: var(--star-dust-500);
+    }
+
     &--icon {
       padding: 0.1875rem 0.375rem 0rem;
     }
