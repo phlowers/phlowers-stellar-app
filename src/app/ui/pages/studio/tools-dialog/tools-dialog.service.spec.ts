@@ -246,6 +246,30 @@ describe('ToolsDialogService', () => {
     });
   });
 
+  describe('proceedToMainComponent', () => {
+    it('should close init dialog and open main dialog', (done) => {
+      service.openTool('field-measuring');
+      expect(service.isInitOpen()).toBe(true);
+      expect(service.isMainOpen()).toBe(false);
+
+      service.proceedToMainComponent();
+      expect(service.isInitOpen()).toBe(false);
+
+      // Wait for the timeout that opens main dialog
+      setTimeout(() => {
+        expect(service.isMainOpen()).toBe(true);
+        done();
+      }, 200);
+    });
+
+    it('should not affect other state when called', () => {
+      service.openTool('field-measuring');
+      service.proceedToMainComponent();
+
+      expect(service.currentTool()).toBe('field-measuring');
+    });
+  });
+
   describe('setTemplates', () => {
     it('should set templates signal', () => {
       const mockTemplates = {

@@ -52,6 +52,7 @@
     panelStyleClass="toolbar-multiselect-overlay"
     (onPanelShow)="displayOptionsStatus.set(true)"
     (onPanelHide)="displayOptionsStatus.set(false)"
+    optionDisabled="label"
   >
     <ng-template #selecteditems let-value>
       @if (value?.length) {
