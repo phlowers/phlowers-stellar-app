@@ -1,0 +1,193 @@
+<app-initial-condition-modal
+  [isOpen]="initialConditionModalOpen()"
+  (isOpenChange)="initialConditionModalOpen.set($event)"
+  [mode]="'create'"
+  [initialConditionInput]="initialConditionInput()"
+  [initialConditions]="
+    sectionService.currentSection()?.initial_conditions ?? []
+  "
+  [section]="sectionService.currentSection()!"
+  [study]="studiesService.currentStudy()"
+  [isInsideToolsDialog]="true"
+  (addInitialCondition)="addInitialCondition($event)"
+/>
+<p
+  id="mandatory-parameter-15c"
+  class="parameter-calculation-15-without-wind__mandatory-msg"
+>
+  <app-icon icon="info" />
+  <span i18n>All fields are mandatory for parameter calculation at 15°C</span>
+</p>
+
+<div class="parameter-calculation-15-without-wind__form">
+  <div class="updateMode">
+    <label for="updateMode15C" i18n>Update mode</label>
+    <p-selectbutton
+      [options]="updateModeOptions"
+      [ngModel]="measureData().updateMode15C"
+      (onChange)="updateField('updateMode15C', $event.value)"
+      optionLabel="label"
+      optionValue="value"
+      allowEmpty="false"
+    />
+  </div>
+
+  @if (measureData().updateMode15C === 'manual') {
+    <div class="parameterPapoto">
+      <label for="parameterPapoto-input" i18n>Parameter Papoto</label>
+      <p-inputgroup>
+        <input
+          id="parameterPapoto-input"
+          type="number"
+          pInputText
+          [ngModel]="measureData().parameterPapoto"
+          (ngModelChange)="updateField('parameterPapoto', $event)"
+          [fluid]="true"
+          aria-describedby="mandatory-parameter-15c"
+          [required]="true"
+        />
+      </p-inputgroup>
+    </div>
+
+    <div class="parameterUncertaintyPapoto">
+      <label for="parameterUncertaintyPapoto-input" i18n
+        >Parameter uncertainty Papoto</label
+      >
+      <p-inputgroup>
+        <input
+          id="parameterUncertaintyPapoto-input"
+          type="number"
+          pInputText
+          [ngModel]="measureData().parameterUncertaintyPapoto"
+          (ngModelChange)="updateField('parameterUncertaintyPapoto', $event)"
+          aria-describedby="mandatory-parameter-15c"
+          [required]="true"
+        />
+      </p-inputgroup>
+    </div>
+
+    <div class="cableTemperature15C">
+      <label for="cableTemperature15C-input" i18n
+        >Cable temperature at 15°C</label
+      >
+      <p-inputgroup>
+        <input
+          id="cableTemperature15C-input"
+          type="number"
+          pInputText
+          [ngModel]="measureData().cableTemperature15C"
+          (ngModelChange)="updateField('cableTemperature15C', $event)"
+          [fluid]="true"
+          aria-describedby="mandatory-parameter-15c"
+          [required]="true"
+        />
+        <p-inputgroup-addon>°C</p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+
+    <div class="cableTemperatureUncertainty15C">
+      <label for="cableTemperatureUncertainty15C-input" i18n
+        >Cable temperature uncertainty at 15°C</label
+      >
+      <p-inputgroup>
+        <input
+          id="cableTemperatureUncertainty15C-input"
+          type="number"
+          pInputText
+          [ngModel]="measureData().cableTemperatureUncertainty15C"
+          (ngModelChange)="
+            updateField('cableTemperatureUncertainty15C', $event)
+          "
+          [fluid]="true"
+          aria-describedby="mandatory-parameter-15c"
+          [required]="true"
+        />
+        <p-inputgroup-addon>°C</p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+  } @else {
+    <dl class="parameterPapoto">
+      <dt id="parameterPapoto-display" i18n>Parameter Papoto</dt>
+      <dd>{{ measureData().parameterPapoto }}</dd>
+    </dl>
+
+    <dl class="parameterUncertaintyPapoto">
+      <dt id="parameterUncertaintyPapoto-display" i18n>
+        Parameter uncertainty Papoto
+      </dt>
+      <dd>{{ measureData().parameterUncertaintyPapoto }}</dd>
+    </dl>
+
+    <dl class="cableTemperature15C">
+      <dt id="cableTemperature15C-display" i18n>Cable temperature at 15°C</dt>
+      <dd>{{ measureData().cableTemperature15C }} °C</dd>
+    </dl>
+
+    <dl class="cableTemperatureUncertainty15C">
+      <dt id="cableTemperatureUncertainty15C-display" i18n>
+        Cable temperature uncertainty at 15°C
+      </dt>
+      <dd>{{ measureData().cableTemperatureUncertainty15C }} °C</dd>
+    </dl>
+  }
+</div>
+
+<div class="text-right mt-8">
+  <button app-btn (click)="calculateParameter15C()" [disabled]="!isFormValid()">
+    <app-icon icon="rocket_launch" />
+    <ng-container i18n>Calculate</ng-container>
+  </button>
+</div>
+
+@if (parameter15CResult()) {
+  <div class="parameter-calculation-15-without-wind__results" [@expandCollapse]>
+    <h2 class="parameter-calculation-15-without-wind__results__title" i18n>
+      Results :
+    </h2>
+
+    <dl class="parameter-calculation-15-without-wind__results__list">
+      <div class="parameter15CMinusUncertainty">
+        <dt i18n>Parameter at 15°C - uncertainty</dt>
+        <dd>{{ parameter15CResult()?.parameter15CMinusUncertainty }}</dd>
+      </div>
+      <div class="parameter15C">
+        <dt i18n>Parameter at 15°C</dt>
+        <dd>{{ parameter15CResult()?.parameter15C }}</dd>
+      </div>
+      <div class="parameter15CPlusUncertainty">
+        <dt i18n>Parameter at 15°C + uncertainty</dt>
+        <dd>{{ parameter15CResult()?.parameter15CPlusUncertainty }}</dd>
+      </div>
+    </dl>
+
+    <div class="parameter-calculation-15-without-wind__results__actions">
+      <button
+        app-btn
+        btnStyle="outlined"
+        class="createInitialMinus"
+        (click)="onCreateInitialCondition('minus')"
+      >
+        <app-icon icon="add" />
+        <ng-container i18n>Create initial condition</ng-container>
+      </button>
+      <button
+        app-btn
+        btnStyle="outlined"
+        class="createInitialNominal"
+        (click)="onCreateInitialCondition('nominal')"
+      >
+        <app-icon icon="add" />
+        <ng-container i18n>Create initial condition</ng-container>
+      </button>
+      <button
+        app-btn
+        btnStyle="outlined"
+        class="createInitialPlus"
+        (click)="onCreateInitialCondition('plus')"
+      >
+        <app-icon icon="add" />
+        <ng-container i18n>Create initial condition</ng-container>
+      </button>
+    </div>
+  </div>
+}

@@ -134,12 +134,13 @@ describe('InitialConditionModalComponent', () => {
       const spyAdd = jest.spyOn(component.addInitialCondition, 'emit');
       const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
 
-      component.onSubmit();
+      component.onSubmit(false);
 
       expect(spyOpen).toHaveBeenCalledWith(false);
       expect(spyAdd).toHaveBeenCalledWith({
         section: mockSection,
-        initialCondition: mockInitialCondition
+        initialCondition: mockInitialCondition,
+        generateState: false
       });
     });
 
@@ -150,12 +151,13 @@ describe('InitialConditionModalComponent', () => {
       const spyUpdate = jest.spyOn(component.updateInitialCondition, 'emit');
       const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
 
-      component.onSubmit();
+      component.onSubmit(false);
 
       expect(spyOpen).toHaveBeenCalledWith(false);
       expect(spyUpdate).toHaveBeenCalledWith({
         section: mockSection,
-        initialCondition: mockInitialCondition
+        initialCondition: mockInitialCondition,
+        generateState: false
       });
     });
 
@@ -167,7 +169,7 @@ describe('InitialConditionModalComponent', () => {
       const spyUpdate = jest.spyOn(component.updateInitialCondition, 'emit');
       const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
 
-      component.onSubmit();
+      component.onSubmit(false);
 
       expect(spyOpen).toHaveBeenCalledWith(false);
       expect(spyAdd).not.toHaveBeenCalled();

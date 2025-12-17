@@ -28,6 +28,7 @@ import { SpanComponent } from './loads/span/span.component';
 import { NewChargeModalComponent } from './new-charge-modal/new-charge-modal.component';
 import { ToolsDialogComponent } from './tools-dialog/tools-dialog.component';
 import { PlotService } from './services/plot.service';
+import { SectionService } from '@src/app/core/services/sections/section.service';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
@@ -117,6 +118,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly studiesService: StudiesService,
+    private readonly sectionService: SectionService,
     private readonly elementRef: ElementRef
   ) {}
 
@@ -133,11 +135,13 @@ export class StudioPageComponent implements OnInit, OnDestroy {
           .subscribe((study) => {
             if (study) {
               this.plotService.study.set(study);
+              this.studiesService.setCurrentStudy(study);
               const section = study.sections.find(
                 (s) => s.uuid === sectionUuid
               );
               if (section) {
                 this.plotService.section.set(section);
+                this.sectionService.setCurrentSection(section);
                 this.plotService.plotOptionsChange({
                   endSupport: section.supports.length - 1
                 });
