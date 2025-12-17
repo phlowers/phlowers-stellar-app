@@ -104,9 +104,9 @@ describe('StudioTopToolbarComponent', () => {
       ]);
     });
 
-    it('should initialize toolsItems with 8 items', () => {
+    it('should initialize toolsItems with 7 items', () => {
       const items = component.toolsItems();
-      expect(items).toHaveLength(8);
+      expect(items).toHaveLength(7);
       expect(items.every((item) => item.checked === false)).toBe(true);
     });
   });
@@ -118,10 +118,10 @@ describe('StudioTopToolbarComponent', () => {
       expect(loadSpy).toHaveBeenCalled();
     });
 
-    it('should initialize tablesDropdown with 4 items', () => {
+    it('should initialize tablesDropdown with 5 items', () => {
       component.ngOnInit();
       const tables = component.tablesDropdown();
-      expect(tables).toHaveLength(4);
+      expect(tables).toHaveLength(5);
       expect(tables?.[0].label).toBeDefined();
       expect(tables?.[0].command).toBeDefined();
     });
@@ -137,18 +137,15 @@ describe('StudioTopToolbarComponent', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should execute tablesDropdown command for Pose table', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    it('should execute tablesDropdown command for L0 table', () => {
       component.ngOnInit();
       const tables = component.tablesDropdown();
 
       tables?.[1].command?.({});
-      expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
-
-      consoleSpy.mockRestore();
+      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith('l0-sum');
     });
 
-    it('should execute tablesDropdown command for Obstacles table', () => {
+    it('should execute tablesDropdown command for Pose table', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       component.ngOnInit();
       const tables = component.tablesDropdown();
@@ -159,7 +156,7 @@ describe('StudioTopToolbarComponent', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should execute tablesDropdown command for Grounds table', () => {
+    it('should execute tablesDropdown command for Obstacles table', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       component.ngOnInit();
       const tables = component.tablesDropdown();
@@ -170,10 +167,21 @@ describe('StudioTopToolbarComponent', () => {
       consoleSpy.mockRestore();
     });
 
+    it('should execute tablesDropdown command for Grounds table', () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      component.ngOnInit();
+      const tables = component.tablesDropdown();
+
+      tables?.[4].command?.({});
+      expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
+
+      consoleSpy.mockRestore();
+    });
+
     it('should initialize toolsDropdown from toolsItems', () => {
       component.ngOnInit();
       const tools = component.toolsDropdown();
-      expect(tools).toHaveLength(8);
+      expect(tools).toHaveLength(7);
       expect(tools?.[0].label).toBeDefined();
       expect(tools?.[0].command).toBeDefined();
     });
@@ -255,17 +263,17 @@ describe('StudioTopToolbarComponent', () => {
       expect(saved).toBeDefined();
 
       const parsed = JSON.parse(saved!);
-      expect(parsed).toHaveLength(8);
+      expect(parsed).toHaveLength(7);
       expect(parsed[0].checked).toBe(true);
       expect(parsed[1].checked).toBe(false);
       expect(parsed[2].checked).toBe(true);
     });
 
-    it('should save all 8 items state correctly', () => {
+    it('should save all 7 items state correctly', () => {
       const items = component.toolsItems();
       items[0].checked = true;
-      items[3].checked = true;
-      items[7].checked = true;
+      items[2].checked = true;
+      items[6].checked = true;
       component.toolsItems.set([...items]);
 
       component.updateCheckedCount();
@@ -274,18 +282,17 @@ describe('StudioTopToolbarComponent', () => {
       const parsed = JSON.parse(saved!);
 
       expect(parsed[0]).toEqual({ id: 1, checked: true });
-      expect(parsed[3]).toEqual({ id: 4, checked: true });
-      expect(parsed[7]).toEqual({ id: 8, checked: true });
+      expect(parsed[2]).toEqual({ id: 4, checked: true });
+      expect(parsed[6]).toEqual({ id: 8, checked: true });
     });
 
     it('should load checked items from localStorage on init', () => {
       const mockState = [
         { id: 1, checked: true },
-        { id: 2, checked: false },
-        { id: 3, checked: true },
-        { id: 4, checked: false },
-        { id: 5, checked: true },
-        { id: 6, checked: false },
+        { id: 3, checked: false },
+        { id: 4, checked: true },
+        { id: 5, checked: false },
+        { id: 6, checked: true },
         { id: 7, checked: false },
         { id: 8, checked: false }
       ];
@@ -336,7 +343,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should handle partial state in localStorage', () => {
       const mockState = [
         { id: 1, checked: true },
-        { id: 2, checked: true }
+        { id: 3, checked: true }
       ];
       localStorage.setItem('toolsItemsState', JSON.stringify(mockState));
 
@@ -352,7 +359,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should handle state with non-matching IDs', () => {
       const mockState = [
         { id: 999, checked: true }, // Non-existent ID
-        { id: 2, checked: true }
+        { id: 3, checked: true }
       ];
       localStorage.setItem('toolsItemsState', JSON.stringify(mockState));
 
@@ -375,71 +382,61 @@ describe('StudioTopToolbarComponent', () => {
       );
     });
 
-    it('should execute action for tool item 2 - L0 sum', () => {
+    it('should execute action for tool item 2 - VTL & Guying', () => {
       const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
       const items = component.toolsItems();
 
       items[1].action();
-      expect(alertSpy).toHaveBeenCalledWith('click L0 sum');
-
-      alertSpy.mockRestore();
-    });
-
-    it('should execute action for tool item 3 - VTL & Guying', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
-      const items = component.toolsItems();
-
-      items[2].action();
       expect(alertSpy).toHaveBeenCalledWith('click VTL & Guying');
 
       alertSpy.mockRestore();
     });
 
-    it('should execute action for tool item 4 - Cable marking', () => {
+    it('should execute action for tool item 3 - Cable marking', () => {
       const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
       const items = component.toolsItems();
 
-      items[3].action();
+      items[2].action();
       expect(alertSpy).toHaveBeenCalledWith('click Cable marking');
 
       alertSpy.mockRestore();
     });
 
-    it('should execute action for tool item 5 - Strand RRTS', () => {
+    it('should execute action for tool item 4 - Strand RRTS', () => {
       const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
       const items = component.toolsItems();
 
-      items[4].action();
+      items[3].action();
       expect(alertSpy).toHaveBeenCalledWith('click Strand RRTS');
 
       alertSpy.mockRestore();
     });
 
-    it('should execute action for tool item 6 - Forest trenches', () => {
+    it('should execute action for tool item 5 - Forest trenches', () => {
       const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
       const items = component.toolsItems();
 
-      items[5].action();
+      items[4].action();
       expect(alertSpy).toHaveBeenCalledWith('click Forest trenches');
 
       alertSpy.mockRestore();
     });
 
-    it('should execute action for tool item 7 - Height & lateral distance', () => {
+    it('should execute action for tool item 6 - Height & lateral distance', () => {
       const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
       const items = component.toolsItems();
 
-      items[6].action();
+      items[5].action();
       expect(alertSpy).toHaveBeenCalledWith('click Height & lateral distance');
 
       alertSpy.mockRestore();
     });
 
-    it('should execute action for tool item 8 - Cable adjustment', () => {
+    it('should execute action for tool item 7 - Cable adjustment', () => {
       const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
       const items = component.toolsItems();
 
-      items[7].action();
+      items[6].action();
       expect(alertSpy).toHaveBeenCalledWith('click Cable adjustment');
 
       alertSpy.mockRestore();
@@ -450,13 +447,13 @@ describe('StudioTopToolbarComponent', () => {
       component.ngOnInit();
       const tools = component.toolsDropdown();
 
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 7; i++) {
         tools?.[i].command?.({});
       }
 
-      // First tool calls service, remaining 7 call alert
+      // First tool calls service, remaining 6 call alert
       expect(mockToolsDialogService.openTool).toHaveBeenCalledTimes(1);
-      expect(alertSpy).toHaveBeenCalledTimes(7);
+      expect(alertSpy).toHaveBeenCalledTimes(6);
       alertSpy.mockRestore();
     });
   });
@@ -564,7 +561,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should handle null values in localStorage state', () => {
       const mockState = [
         { id: 1, checked: null },
-        { id: 2, checked: true }
+        { id: 3, checked: true }
       ];
       localStorage.setItem('toolsItemsState', JSON.stringify(mockState));
 
