@@ -65,8 +65,8 @@ export const INITIAL_MEASURE_DATA: FieldMeasureData = {
   measuredDiffusedSolarFlux: null,
   diffusedPlusDirectSolarFlux: null,
   updateMode15C: 'auto',
-  parameterFapolo: 1700,
-  parameterUncertaintyFapolo: 12,
+  parameterPapoto: 1700,
+  parameterUncertaintyPapoto: 12,
   cableTemperature15C: 45,
   cableTemperatureUncertainty15C: 3
 };

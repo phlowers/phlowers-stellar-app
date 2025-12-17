@@ -15,6 +15,7 @@ import { cloneDeep } from 'lodash';
 export interface InitialConditionFunctionsInput {
   section: Section;
   initialCondition: InitialCondition;
+  generateState?: boolean;
 }
 
 export interface DuplicateInitialConditionFunctionsInput

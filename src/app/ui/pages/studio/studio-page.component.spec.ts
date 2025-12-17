@@ -5,6 +5,7 @@ import { of, Subject } from 'rxjs';
 import { ElementRef } from '@angular/core';
 import { PlotService } from './services/plot.service';
 import { StudiesService } from '@core/services/studies/studies.service';
+import { SectionService } from '@src/app/core/services/sections/section.service';
 
 interface Section {
   uuid: string;
@@ -42,6 +43,7 @@ class PlotServiceMock {
 class StudiesServiceMock {
   ready = new Subject<boolean>();
   getStudyAsObservable = jest.fn();
+  setCurrentStudy = jest.fn();
 }
 
 describe('StudioPageComponent', () => {
@@ -51,10 +53,14 @@ describe('StudioPageComponent', () => {
   let route: ActivatedRoute;
   let plotService: PlotServiceMock;
   let studiesService: StudiesServiceMock;
+  let sectionService: jest.Mocked<SectionService>;
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
     studiesService = new StudiesServiceMock();
+    sectionService = {
+      setCurrentSection: jest.fn()
+    } as unknown as jest.Mocked<SectionService>;
 
     await TestBed.configureTestingModule({
       imports: [StudioPageComponent],
@@ -71,6 +77,7 @@ describe('StudioPageComponent', () => {
         },
         { provide: PlotService, useValue: plotService },
         { provide: StudiesService, useValue: studiesService },
+        { provide: SectionService, useValue: sectionService },
         {
           provide: ElementRef,
           useValue: {
@@ -144,14 +151,22 @@ describe('StudioPageComponent', () => {
     );
 
     const sectionSetSpy = jest.spyOn(plotService.section, 'set');
+    const studySetSpy = jest.spyOn(plotService.study, 'set');
 
     component.ngOnInit();
 
-    // Emit ready
+    // Emit ready - this triggers the subscription
     studiesService.ready.next(true);
 
-    expect(typeof plotService.study.set).toBe('function');
+    // Wait for async operations
+    fixture.detectChanges();
+
+    expect(studySetSpy).toHaveBeenCalledWith(study);
+    expect(studiesService.setCurrentStudy).toHaveBeenCalledWith(study);
     expect(sectionSetSpy).toHaveBeenCalledWith(study.sections[1]);
+    expect(sectionService.setCurrentSection).toHaveBeenCalledWith(
+      study.sections[1]
+    );
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 2
     });
@@ -170,6 +185,9 @@ describe('StudioPageComponent', () => {
 
     component.ngOnInit();
     studiesService.ready.next(true);
+
+    // Wait for async operations
+    fixture.detectChanges();
 
     expect(router.navigate).toHaveBeenCalledWith(['/studies']);
   });

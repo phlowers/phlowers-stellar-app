@@ -62,6 +62,7 @@ export class InitialConditionModalComponent {
     max_wind_pressure: 0,
     max_frost_width: 0
   });
+  isInsideToolsDialog = input<boolean>(false);
   isCableNarcisse = signal<boolean>(false);
   isNameUnique = signal<boolean>(true);
   public onlyPositiveNumbers = /^[0-9]*$/;
@@ -109,17 +110,19 @@ export class InitialConditionModalComponent {
     }
   }
 
-  onSubmit() {
+  onSubmit(generateState: boolean) {
     this.isOpenChange.emit(false);
     if (this.mode() === 'create') {
       this.addInitialCondition.emit({
         section: this.section(),
-        initialCondition: this.initialCondition()
+        initialCondition: this.initialCondition(),
+        generateState: generateState
       });
     } else if (this.mode() === 'edit') {
       this.updateInitialCondition.emit({
         section: this.section(),
-        initialCondition: this.initialCondition()
+        initialCondition: this.initialCondition(),
+        generateState: generateState
       });
     } else if (this.mode() === 'view') {
       // do nothing
