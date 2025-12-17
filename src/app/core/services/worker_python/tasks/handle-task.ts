@@ -40,6 +40,10 @@ const tasks: Record<
   [Task.addLoad]: {
     function: 'add_load',
     externalPackages: []
+  },
+  [Task.calculatePapoto]: {
+    function: 'calculate_papoto',
+    externalPackages: []
   }
 };
 

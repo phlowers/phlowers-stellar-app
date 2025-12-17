@@ -1,9 +1,17 @@
 @use 'abstract.extracts' as app;
 
 .papoto {
+
+  &__error {
+    @apply flex items-center gap-1 my-4;
+    @extend %text-s-600;
+    color: var(--main-error);
+  }
+
   &__btns {
     @apply flex items-center gap-8;
   }
+
   &__mandatory-msg {
     @apply flex items-center gap-1 my-4;
     @extend %text-s-600;
@@ -32,6 +40,7 @@
         grid-area: supportLabel;
         align-self: end;
       }
+
       &__input {
         grid-area: supportInput;
       }
@@ -42,9 +51,11 @@
         grid-area: lengthLabel;
         align-self: end;
       }
+
       &__input {
         grid-area: lengthInput;
       }
+
       &__desc {
         @apply mb-0 font-semibold;
         grid-area: lengthDesc;
@@ -57,42 +68,54 @@
         grid-area: elevationLabel;
         align-self: end;
       }
+
       &__input {
         grid-area: elevationInput;
       }
+
       &__desc {
         @apply mb-0 font-semibold;
         grid-area: elevationDesc;
         color: var(--star-dust-900);
       }
     }
+
     .HL {
       grid-area: HL;
     }
+
     .H1 {
       grid-area: H1;
     }
+
     .H2 {
       grid-area: H2;
     }
+
     .H3 {
       grid-area: H3;
     }
+
     .HR {
       grid-area: HR;
     }
+
     .VL {
       grid-area: VL;
     }
+
     .V1 {
       grid-area: V1;
     }
+
     .V2 {
       grid-area: V2;
     }
+
     .V3 {
       grid-area: V3;
     }
+
     .VR {
       grid-area: VR;
     }
