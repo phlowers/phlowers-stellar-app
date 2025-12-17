@@ -112,6 +112,20 @@ export interface TaskInputs {
     cableTemperatureCalibrationUncertainty: number | null;
     span_index: number | null;
   };
+  [Task.calculatePapoto]: {
+    spanLength: number;
+    measuredElevationDifference: number;
+    HL: number;
+    H1: number;
+    H2: number;
+    H3: number;
+    HR: number;
+    VL: number;
+    V1: number;
+    V2: number;
+    V3: number;
+    VR: number;
+  };
 }
 
 export interface TaskOutputs {
@@ -152,5 +166,13 @@ export interface TaskOutputs {
   };
   [Task.addLoad]: {
     coordinates: number[];
+  };
+  [Task.calculatePapoto]: {
+    parameter: number;
+    // uncertainty_parameter: number;
+    parameter_1_2: number;
+    parameter_2_3: number;
+    parameter_1_3: number;
+    check_validity: boolean;
   };
 }

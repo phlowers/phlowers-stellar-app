@@ -56,6 +56,10 @@ const tasks: Record<
   [Task.calculateParameter15CWithoutWind]: {
     function: 'parameter_15_without_wind',
     externalPackages: []
+  },
+  [Task.calculatePapoto]: {
+    function: 'calculate_papoto',
+    externalPackages: []
   }
 };
 
