@@ -7,7 +7,8 @@ import {
   TemplateRef,
   AfterViewInit,
   OnDestroy,
-  untracked
+  untracked,
+  input
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -29,6 +30,12 @@ import { FieldDatasComponent } from './components/field-datas/field-datas.compon
 import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { TemperatureCalculationComponent } from './components/temperature-calculation/temperature-calculation.component';
+import { Study } from '@src/app/core/data/database/interfaces/study';
+import { Section } from '@src/app/core/data/database/interfaces/section';
+import { SectionService } from '@src/app/core/services/sections/section.service';
+import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { ParameterCalculation15WithoutWindComponent } from './components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -40,7 +47,8 @@ import { TemperatureCalculationComponent } from './components/temperature-calcul
     HeaderComponent,
     FieldDatasComponent,
     CalculusSettingComponent,
-    TemperatureCalculationComponent
+    TemperatureCalculationComponent,
+    ParameterCalculation15WithoutWindComponent
   ],
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss']
@@ -51,6 +59,20 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
 
   private readonly toolsDialogService = inject(ToolsDialogService);
   private readonly plotService = inject(PlotService);
+  section = input.required<Section>();
+  study = input.required<Study>();
+  initialConditionModalOpen = signal<boolean>(false);
+
+  initialConditionInput = signal<InitialCondition>({
+    uuid: '',
+    name: '',
+    base_parameters: 2000,
+    base_temperature: 15,
+    cable_pretension: 0,
+    min_temperature: 0,
+    max_wind_pressure: 0,
+    max_frost_width: 0
+  });
 
   ngAfterViewInit(): void {
     this.toolsDialogService.setTemplates({
@@ -78,7 +100,10 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
 
   calculationResults = signal<CalculationResults>(INITIAL_CALCULATION_RESULTS);
 
-  constructor() {
+  constructor(
+    public readonly sectionService: SectionService,
+    public readonly studiesService: StudiesService
+  ) {
     effect(() => {
       if (this.toolsDialogService.isMainOpen()) {
         // Initialize data from PlotService when dialog opens
@@ -180,10 +205,5 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       parameter15CPlusUncertainty: 1900
     });
     console.log('Calculate Parameter at 15°C', this.measureData());
-  }
-
-  onCreateInitialCondition(type: 'minus' | 'nominal' | 'plus') {
-    // TODO: Implement create initial condition functionality
-    console.log('Create initial condition:', type);
   }
 }

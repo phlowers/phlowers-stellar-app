@@ -62,8 +62,8 @@ export interface FieldMeasureData {
   diffusedPlusDirectSolarFlux: number | null;
   // Parameter at 15°C without wind fields
   updateMode15C: 'auto' | 'manual';
-  parameterFapolo: number | null;
-  parameterUncertaintyFapolo: number | null;
+  parameterPapoto: number | null;
+  parameterUncertaintyPapoto: number | null;
   cableTemperature15C: number | null;
   cableTemperatureUncertainty15C: number | null;
 }
