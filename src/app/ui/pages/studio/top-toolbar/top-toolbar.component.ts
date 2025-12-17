@@ -54,6 +54,13 @@ export class StudioTopToolbarComponent implements OnInit {
         }
       },
       {
+        label: $localize`L0 table`, // Tableau L0
+        disabled: false,
+        command: () => {
+          this.toolsDialogService.openTool('l0-sum');
+        }
+      },
+      {
         label: $localize`Pose table`, // Tableau de pose
         disabled: true,
         command: () => {
@@ -138,15 +145,6 @@ export class StudioTopToolbarComponent implements OnInit {
       disabled: false,
       action: () => {
         this.toolsDialogService.openTool('field-measuring');
-      }
-    },
-    {
-      id: 2,
-      label: $localize`L0 sum`, // Somme L0
-      checked: false,
-      disabled: true,
-      action: () => {
-        alert('click L0 sum');
       }
     },
     {
