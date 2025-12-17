@@ -1,0 +1,85 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="table_chart" />
+    <span i18n>Natural lengths L0</span>
+  </p>
+</ng-template>
+
+<div class="l0-sum-container" *ngIf="!loading(); else loadingTpl">
+  <section class="l0-table-section">
+    <h3 class="l0-table-title underline-text" i18n>L0 table</h3>
+
+    <p-table
+      [value]="l0Rows()"
+      [paginator]="true"
+      [rows]="rowsPerPage"
+      [rowsPerPageOptions]="[10]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{currentPage} sur {totalPages}"
+      styleClass="l0-table"
+      [tableStyle]="{ 'min-width': '100%' }"
+      [customSort]="true"
+      (sortFunction)="customSort($event)"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th id="span-header" pSortableColumn="span" style="width: 50%">
+            <div class="flex items-center gap-2">
+              <span i18n>Span</span>
+              <app-icon [icon]="getSortIcon('span')" />
+            </div>
+          </th>
+          <th
+            id="l0-header"
+            pSortableColumn="l0"
+            style="width: 50%; text-align: right"
+          >
+            <div class="flex items-center gap-2 justify-end">
+              <span i18n>L0</span>
+              <app-icon [icon]="getSortIcon('l0')" />
+            </div>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>
+            <span>{{ row.span }}</span>
+          </td>
+          <td>
+            <span>{{ row.l0 | number: '1.0-3' }}&nbsp;m</span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+
+  <section class="l0-summary-section">
+    <h3 class="l0-summary-title" i18n>Sum L0</h3>
+    <p class="l0-summary-value" i18n="@@l0-sum-value">
+      {{ totalL0() | number: '1.3-3' }}&nbsp;m
+    </p>
+  </section>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="l0-loading">
+    <p-progressSpinner />
+    <span class="l0-loading-text" i18n>Loading L0 data…</span>
+  </div>
+</ng-template>
+
+<ng-template #footer>
+  <div class="dialog-footer">
+    <button
+      disabled="true"
+      app-btn
+      type="button"
+      btnSize="m"
+      (click)="onExport()"
+    >
+      <app-icon icon="download" />
+      <span i18n>Export</span>
+    </button>
+  </div>
+</ng-template>
