@@ -1,8 +1,9 @@
 import { Injectable, signal, TemplateRef, Type } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring/field-measuring.component';
 import { InitComponent } from './field-measuring/components/init/init.component';
+import { L0SumComponent } from './l0-sum/l0-sum.component';
 
-export type Tool = 'field-measuring' | 'other-tool';
+export type Tool = 'field-measuring' | 'l0-sum' | 'other-tool';
 
 export interface ToolConfig {
   component: Type<unknown>;
@@ -31,6 +32,10 @@ export class ToolsDialogService {
       dialogStyle: { 'min-width': '90%', 'max-width': '72.5rem' },
       initComponent: InitComponent,
       initDialogStyle: { 'min-width': '29rem', 'max-width': '90%' }
+    },
+    'l0-sum': {
+      component: L0SumComponent,
+      dialogStyle: { 'min-width': '50rem', 'max-width': '50rem' }
     },
     'other-tool': {
       component: null!
