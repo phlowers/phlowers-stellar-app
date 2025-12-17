@@ -56,7 +56,10 @@ export interface FieldMeasureData {
   diffuseSolarFlux: number | null;
   directSolarFlux: number | null;
   diffuseDirectSolarFlux: number | null;
-  measuredSolarFlux: number | null;
+  diffusedSolarFlux: number | null;
+  measuredDiffusedPlusDirectSolarFlux: number | null;
+  measuredDiffusedSolarFlux: number | null;
+  diffusedPlusDirectSolarFlux: number | null;
   // Parameter at 15°C without wind fields
   updateMode15C: 'auto' | 'manual';
   parameterFapolo: number | null;

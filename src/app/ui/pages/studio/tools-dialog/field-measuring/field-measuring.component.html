@@ -33,7 +33,12 @@
   </p-tabpanel>
 
   <p-tabpanel value="temperatureCalculation">
-    <span i18n>Temperature calculation</span>
+    <app-temperature-calculation
+      [cableOptions]="cableOptions()"
+      [windDirectionOptions]="windDirectionOptions()"
+      [skyCoverOptions]="skyCoverOptions()"
+      [(measureData)]="measureData"
+    />
   </p-tabpanel>
 
   <p-tabpanel value="parameterAt15CWithoutWind">

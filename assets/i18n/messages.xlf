@@ -1523,11 +1523,6 @@
         <source>Unknown error</source>
       </segment>
     </unit>
-    <unit id="2973163940988682005">
-      <segment>
-        <source>Dist. to point load</source>
-      </segment>
-    </unit>
     <unit id="3305078246675075385">
       <segment>
         <source>Load type</source>
@@ -1538,24 +1533,9 @@
         <source>Error creating user</source>
       </segment>
     </unit>
-    <unit id="4170797585902965304">
-      <segment>
-        <source>Distributed</source>
-      </segment>
-    </unit>
     <unit id="4377932527319537276">
       <segment>
         <source>Punctual</source>
-      </segment>
-    </unit>
-    <unit id="4486920800439525375">
-      <segment>
-        <source>Shortening / Lengthening</source>
-      </segment>
-    </unit>
-    <unit id="4613547067726634730">
-      <segment>
-        <source>Support n°</source>
       </segment>
     </unit>
     <unit id="4765388897418478416">
@@ -1573,19 +1553,9 @@
         <source>Dis Symmetric</source>
       </segment>
     </unit>
-    <unit id="5729801747698322662">
-      <segment>
-        <source>Span load</source>
-      </segment>
-    </unit>
     <unit id="7215028324689336548">
       <segment>
         <source>Calculation error</source>
-      </segment>
-    </unit>
-    <unit id="7970276717935400824">
-      <segment>
-        <source>Short. or lengthen. Cable (+ -)</source>
       </segment>
     </unit>
     <unit id="8083736833442025529">
@@ -1611,11 +1581,6 @@
     <unit id="1339958536387081724">
       <segment>
         <source>Add a charge case</source>
-      </segment>
-    </unit>
-    <unit id="1546940907709341937">
-      <segment>
-        <source>Span loading</source>
       </segment>
     </unit>
     <unit id="1964106600703167330">
@@ -2476,6 +2441,121 @@
     <unit id="959518481042894436">
       <segment>
         <source>N5 - Cloudy</source>
+      </segment>
+    </unit>
+    <unit id="100914384350148711">
+      <segment>
+        <source> It won&apos;t be used in the calculation. </source>
+      </segment>
+    </unit>
+    <unit id="1252103849589771616">
+      <segment>
+        <source>Perpendicular</source>
+      </segment>
+    </unit>
+    <unit id="1348805484863844194">
+      <segment>
+        <source>Dist. to ref. support</source>
+      </segment>
+    </unit>
+    <unit id="1629692616024358810">
+      <segment>
+        <source>Cable temperature</source>
+      </segment>
+    </unit>
+    <unit id="2198417033022962728">
+      <segment>
+        <source>Wind incidence (degrees)</source>
+      </segment>
+    </unit>
+    <unit id="230124996532453189">
+      <segment>
+        <source>Direct solar flux</source>
+      </segment>
+    </unit>
+    <unit id="2721513819199429371">
+      <segment>
+        <source>Load/marking</source>
+      </segment>
+    </unit>
+    <unit id="2986159287834234807">
+      <segment>
+        <source>N</source>
+      </segment>
+    </unit>
+    <unit id="3911341609936417398">
+      <segment>
+        <source>Results :</source>
+      </segment>
+    </unit>
+    <unit id="4699707792929776525">
+      <segment>
+        <source>Wind direction (degrees)</source>
+      </segment>
+    </unit>
+    <unit id="4841701538805347294">
+      <segment>
+        <source>Diffused solar flux</source>
+      </segment>
+    </unit>
+    <unit id="5327011370475378063">
+      <segment>
+        <source>Solar flux on the cable</source>
+      </segment>
+    </unit>
+    <unit id="5724969710718529338">
+      <segment>
+        <source>Measured diffused plus direct solar flux (not required)</source>
+      </segment>
+    </unit>
+    <unit id="6054510843574670830">
+      <segment>
+        <source>Transit</source>
+      </segment>
+    </unit>
+    <unit id="606296209858589287">
+      <segment>
+        <source>Incertain cable temperature</source>
+      </segment>
+    </unit>
+    <unit id="616064537937996961">
+      <segment>
+        <source>Auto</source>
+      </segment>
+    </unit>
+    <unit id="6161150769798431069">
+      <segment>
+        <source>Ambient temperature (°C)</source>
+      </segment>
+    </unit>
+    <unit id="6494353762632546017">
+      <segment>
+        <source> Free positioning </source>
+      </segment>
+    </unit>
+    <unit id="7722549882037437502">
+      <segment>
+        <source>Marking</source>
+      </segment>
+    </unit>
+    <unit id="867538041196492933">
+      <segment>
+        <source>Reference support</source>
+      </segment>
+    </unit>
+    <unit id="8863594855529448621">
+      <segment>
+        <source>Solar flux :</source>
+      </segment>
+    </unit>
+    <unit id="9131913350495870905">
+      <segment>
+        <source>Load</source>
+      </segment>
+    </unit>
+    <unit id="9189086018583411432">
+      <segment>
+        <source> Diffused plus direct solar flux </source>
       </segment>
     </unit>
   </file>
