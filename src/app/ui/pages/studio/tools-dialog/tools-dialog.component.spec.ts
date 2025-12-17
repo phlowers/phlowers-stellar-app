@@ -4,6 +4,26 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ToolsDialogComponent } from './tools-dialog.component';
 import { ToolsDialogService } from './tools-dialog.service';
+import { MessageService } from 'primeng/api';
+import { SectionService } from '@src/app/core/services/sections/section.service';
+import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { BehaviorSubject } from 'rxjs';
+import { CablesService } from '@src/app/core/services/cables/cables.service';
+
+interface SignalFn<T> {
+  (): T;
+  set: (v: T) => void;
+}
+
+// Helper to create a signal-like mock that is both callable and has a .set method
+function createSignalMock<T>(initialValue: T): SignalFn<T> {
+  let value = initialValue;
+  const fn = (() => value) as SignalFn<T>;
+  fn.set = (v: T) => {
+    value = v;
+  };
+  return fn;
+}
 
 describe('ToolsDialogComponent', () => {
   let component: ToolsDialogComponent;
@@ -11,12 +31,39 @@ describe('ToolsDialogComponent', () => {
   let toolsDialogService: ToolsDialogService;
 
   beforeEach(async () => {
+    const mockMessageService = {
+      add: jest.fn()
+    } as unknown as MessageService;
+
+    const mockStudiesService = {
+      ready: new BehaviorSubject<boolean>(true),
+      currentStudy: jest.fn().mockReturnValue(null),
+      getStudy: jest.fn(),
+      getStudyAsObservable: jest.fn(),
+      updateStudy: jest.fn().mockResolvedValue(undefined)
+    } as unknown as StudiesService;
+
+    const mockSectionService = {
+      setCurrentSection: jest.fn(),
+      currentSection: createSignalMock(null)
+    } as unknown as SectionService;
+
+    const mockCablesService = {
+      getCables: jest.fn().mockResolvedValue([]),
+      importFromFile: jest.fn().mockResolvedValue(undefined),
+      ready: new BehaviorSubject<boolean>(true)
+    } as unknown as CablesService;
+
     await TestBed.configureTestingModule({
       imports: [ToolsDialogComponent],
       providers: [
         provideAnimations(),
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: StudiesService, useValue: mockStudiesService },
+        { provide: SectionService, useValue: mockSectionService },
+        { provide: CablesService, useValue: mockCablesService }
       ]
     }).compileComponents();
 
