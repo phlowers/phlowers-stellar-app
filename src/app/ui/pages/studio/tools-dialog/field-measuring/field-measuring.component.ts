@@ -28,6 +28,7 @@ import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
 import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { TemperatureCalculationComponent } from './components/temperature-calculation/temperature-calculation.component';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -38,7 +39,8 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
     TabsModule,
     HeaderComponent,
     FieldDatasComponent,
-    CalculusSettingComponent
+    CalculusSettingComponent,
+    TemperatureCalculationComponent
   ],
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss']
