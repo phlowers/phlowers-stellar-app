@@ -1853,52 +1853,16 @@
         <target>Portée</target>
       </segment>
     </unit>
-    <unit id="4613547067726634730">
-      <segment state="initial">
-        <source>Support n°</source>
-        <target>Support n°</target>
-      </segment>
-    </unit>
     <unit id="3305078246675075385">
       <segment state="initial">
         <source>Load type</source>
         <target>Type de charge</target>
       </segment>
     </unit>
-    <unit id="5729801747698322662">
-      <segment state="initial">
-        <source>Span load</source>
-        <target>Charge de la portée</target>
-      </segment>
-    </unit>
-    <unit id="7970276717935400824">
-      <segment state="initial">
-        <source>Short. or lengthen. Cable (+ -)</source>
-        <target>Raccourcir ou allonger le câble (+ -)</target>
-      </segment>
-    </unit>
-    <unit id="2973163940988682005">
-      <segment state="initial">
-        <source>Dist. to point load</source>
-        <target>Dist. à la charge ponctuelle</target>
-      </segment>
-    </unit>
     <unit id="4377932527319537276">
       <segment state="initial">
         <source>Punctual</source>
         <target>Ponctuel</target>
-      </segment>
-    </unit>
-    <unit id="4170797585902965304">
-      <segment state="initial">
-        <source>Distributed</source>
-        <target>Distribué</target>
-      </segment>
-    </unit>
-    <unit id="4486920800439525375">
-      <segment state="initial">
-        <source>Shortening / Lengthening</source>
-        <target>Raccourcir / Allonger</target>
       </segment>
     </unit>
     <unit id="8083736833442025529">
@@ -1995,12 +1959,6 @@
       <segment state="initial">
         <source>Climate condition</source>
         <target>Condition climatique</target>
-      </segment>
-    </unit>
-    <unit id="1546940907709341937">
-      <segment state="initial">
-        <source>Span loading</source>
-        <target>Charge de la portée</target>
       </segment>
     </unit>
     <unit id="5884678477650117685">
@@ -2690,7 +2648,7 @@
     <unit id="9071236182141230808">
       <segment state="initial">
         <source>uncertainty parameter</source>
-        <target>paramètre d'incertitude</target>
+        <target>paramètre d&apos;incertitude</target>
       </segment>
     </unit>
     <unit id="2744826406336414605">
@@ -2979,6 +2937,144 @@
       <segment state="initial">
         <source>Report</source>
         <target>Rapport</target>
+      </segment>
+    </unit>
+    <unit id="867538041196492933">
+      <segment state="initial">
+        <source>Reference support</source>
+        <target>Support de référence</target>
+      </segment>
+    </unit>
+    <unit id="6494353762632546017">
+      <segment state="initial">
+        <source> Free positioning </source>
+        <target> Positionnement libre </target>
+      </segment>
+    </unit>
+    <unit id="1348805484863844194">
+      <segment state="initial">
+        <source>Dist. to ref. support</source>
+        <target>Dist. au support de réf.</target>
+      </segment>
+    </unit>
+    <unit id="9131913350495870905">
+      <segment state="initial">
+        <source>Load</source>
+        <target>Charge</target>
+      </segment>
+    </unit>
+    <unit id="2986159287834234807">
+      <segment state="initial">
+        <source>N</source>
+        <target>N</target>
+      </segment>
+    </unit>
+    <unit id="7722549882037437502">
+      <segment state="initial">
+        <source>Marking</source>
+        <target>Marquage</target>
+      </segment>
+    </unit>
+    <unit id="2721513819199429371">
+      <segment state="initial">
+        <source>Load/marking</source>
+        <target>Charge/marquage</target>
+      </segment>
+    </unit>
+    <unit id="6161150769798431069">
+      <segment state="initial">
+        <source>Ambient temperature (°C)</source>
+        <target>Température ambiante (°C)</target>
+      </segment>
+    </unit>
+    <unit id="6054510843574670830">
+      <segment state="initial">
+        <source>Transit</source>
+        <target>Transit</target>
+      </segment>
+    </unit>
+    <unit id="4699707792929776525">
+      <segment state="initial">
+        <source>Wind direction (degrees)</source>
+        <target>Direction du vent (degrés)</target>
+      </segment>
+    </unit>
+    <unit id="2198417033022962728">
+      <segment state="initial">
+        <source>Wind incidence (degrees)</source>
+        <target>Incidence du vent (degrés)</target>
+      </segment>
+    </unit>
+    <unit id="8863594855529448621">
+      <segment state="initial">
+        <source>Solar flux :</source>
+        <target>Flux solaire :</target>
+      </segment>
+    </unit>
+    <unit id="4841701538805347294">
+      <segment state="initial">
+        <source>Diffused solar flux</source>
+        <target>Flux solaire diffus</target>
+      </segment>
+    </unit>
+    <unit id="230124996532453189">
+      <segment state="initial">
+        <source>Direct solar flux</source>
+        <target>Flux solaire direct</target>
+      </segment>
+    </unit>
+    <unit id="9189086018583411432">
+      <segment state="initial">
+        <source> Diffused plus direct solar flux </source>
+        <target> Flux solaire diffus plus direct </target>
+      </segment>
+    </unit>
+    <unit id="5724969710718529338">
+      <segment state="initial">
+        <source>Measured diffused plus direct solar flux (not required)</source>
+        <target> Flux solaire diffus plus direct mesuré (non requis)</target>
+      </segment>
+    </unit>
+    <unit id="100914384350148711">
+      <segment state="initial">
+        <source> It won&apos;t be used in the calculation. </source>
+        <target> Non utilisé dans le calcul. </target>
+      </segment>
+    </unit>
+    <unit id="3911341609936417398">
+      <segment state="initial">
+        <source>Results :</source>
+        <target>Résultats :</target>
+      </segment>
+    </unit>
+    <unit id="1629692616024358810">
+      <segment state="initial">
+        <source>Cable temperature</source>
+        <target>Température du câble</target>
+      </segment>
+    </unit>
+    <unit id="606296209858589287">
+      <segment state="initial">
+        <source>Incertain cable temperature</source>
+        <target>Incertitude de la température du câble</target>
+      </segment>
+    </unit>
+    <unit id="5327011370475378063">
+      <segment state="initial">
+        <source>Solar flux on the cable</source>
+        <target>Flux solaire sur le câble</target>
+      </segment>
+    </unit>
+    <unit id="616064537937996961">
+      <segment state="initial">
+        <source>Auto</source>
+        <target>Auto</target>
+      </segment>
+    </unit>
+    <unit id="1252103849589771616">
+      <segment state="initial">
+        <source>Perpendicular</source>
+        <target>Perpendiculaire</target>
       </segment>
     </unit>
   </file>
