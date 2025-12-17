@@ -2623,7 +2623,7 @@
     </unit>
     <unit id="7838365629862703936">
       <segment state="initial">
-        <source>HG</source>
+        <source>HL</source>
         <target>HG</target>
       </segment>
     </unit>
@@ -2647,13 +2647,13 @@
     </unit>
     <unit id="2683177506127057493">
       <segment state="initial">
-        <source>HD</source>
+        <source>HR</source>
         <target>HD</target>
       </segment>
     </unit>
     <unit id="7521763556168175281">
       <segment state="initial">
-        <source>VG</source>
+        <source>VL</source>
         <target>VG</target>
       </segment>
     </unit>
@@ -2677,7 +2677,7 @@
     </unit>
     <unit id="7930349729068923819">
       <segment state="initial">
-        <source>VD</source>
+        <source>VR</source>
         <target>VD</target>
       </segment>
     </unit>

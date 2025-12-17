@@ -4,15 +4,28 @@ import { By } from '@angular/platform-browser';
 
 import { PapotoComponent } from './papoto.component';
 import { INITIAL_MEASURE_DATA, leftSupportOption } from '../../../mock-data';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import {
+  Task,
+  TaskError
+} from '@src/app/core/services/worker_python/tasks/types';
 
 describe('Papoto component', () => {
   let component: PapotoComponent;
   let fixture: ComponentFixture<PapotoComponent>;
   let componentRef: ComponentRef<PapotoComponent>;
+  let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
 
   beforeEach(async () => {
+    workerPythonServiceMock = {
+      runTask: jest.fn()
+    } as unknown as jest.Mocked<WorkerPythonService>;
+
     await TestBed.configureTestingModule({
-      imports: [PapotoComponent]
+      imports: [PapotoComponent],
+      providers: [
+        { provide: WorkerPythonService, useValue: workerPythonServiceMock }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PapotoComponent);
@@ -68,8 +81,19 @@ describe('Papoto component', () => {
     expect(component.papotoHelpDialog()).toBe(true);
   });
 
-  it('should calculate PAPOTO and show results', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+  it('should calculate PAPOTO and show results', async () => {
+    const mockResult = {
+      parameter: 1.5,
+      parameter_1_2: 2.0,
+      parameter_2_3: 2.5,
+      parameter_1_3: 3.0,
+      check_validity: true
+    };
+
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: mockResult,
+      error: null
+    });
 
     // Set all required fields
     component.updateField('leftSupport', '12');
@@ -86,28 +110,65 @@ describe('Papoto component', () => {
     component.updateField('V3', 45);
     component.updateField('VR', 55);
 
-    expect(component.papotoResults()).toBe(false);
+    expect(component.papotoResult()).toBe(null);
+    expect(component.papotoError()).toBe(false);
 
-    component.calculatePapoto();
+    await component.calculatePapoto();
 
-    expect(consoleSpy).toHaveBeenCalledWith('PAPOTO Calculation Values:', {
-      leftSupport: '12',
-      spanLength: 100,
-      measuredElevationDifference: 5,
-      HL: 10,
-      H1: 20,
-      H2: 30,
-      H3: 40,
-      HR: 50,
-      VL: 15,
-      V1: 25,
-      V2: 35,
-      V3: 45,
-      VR: 55
+    expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(
+      Task.calculatePapoto,
+      {
+        spanLength: 100,
+        measuredElevationDifference: 5,
+        HL: 10,
+        H1: 20,
+        H2: 30,
+        H3: 40,
+        HR: 50,
+        VL: 15,
+        V1: 25,
+        V2: 35,
+        V3: 45,
+        VR: 55
+      }
+    );
+    expect(component.papotoResult()).toEqual(mockResult);
+    expect(component.papotoError()).toBe(false);
+  });
+
+  it('should handle calculation error', async () => {
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: null as unknown as {
+        parameter: number;
+        parameter_1_2: number;
+        parameter_2_3: number;
+        parameter_1_3: number;
+        check_validity: boolean;
+      },
+      error: TaskError.CALCULATION_ERROR
     });
-    expect(component.papotoResults()).toBe(true);
 
-    consoleSpy.mockRestore();
+    // Set all required fields
+    component.updateField('leftSupport', '12');
+    component.updateField('spanLength', 100);
+    component.updateField('measuredElevationDifference', 5);
+    component.updateField('HL', 10);
+    component.updateField('H1', 20);
+    component.updateField('H2', 30);
+    component.updateField('H3', 40);
+    component.updateField('HR', 50);
+    component.updateField('VL', 15);
+    component.updateField('V1', 25);
+    component.updateField('V2', 35);
+    component.updateField('V3', 45);
+    component.updateField('VR', 55);
+
+    expect(component.papotoError()).toBe(false);
+
+    await component.calculatePapoto();
+
+    expect(component.papotoError()).toBe(true);
+    expect(component.papotoResult()).toBe(null);
   });
 
   it('should validate form correctly with isFormValid', () => {
