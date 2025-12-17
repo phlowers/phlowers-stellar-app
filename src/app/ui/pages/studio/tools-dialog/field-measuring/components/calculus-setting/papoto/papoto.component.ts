@@ -9,7 +9,9 @@ import { DialogModule } from 'primeng/dialog';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { FieldMeasureData } from '../../../types';
-
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { Task } from '@src/app/core/services/worker_python/tasks/types';
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-papoto',
   imports: [
@@ -20,7 +22,8 @@ import { FieldMeasureData } from '../../../types';
     InputGroupAddonModule,
     IconComponent,
     ButtonComponent,
-    DialogModule
+    DialogModule,
+    CommonModule
   ],
   templateUrl: './papoto.component.html',
   styleUrl: './papoto.component.scss',
@@ -42,8 +45,18 @@ export class PapotoComponent {
   measureData = model.required<FieldMeasureData>();
 
   papotoHelpDialog = signal<boolean>(false);
-  papotoResults = signal<boolean>(false);
-  criterion = signal<boolean>(true);
+
+  papotoResult = signal<{
+    parameter: number;
+    parameter_1_2: number;
+    parameter_2_3: number;
+    parameter_1_3: number;
+    check_validity: boolean;
+  } | null>(null);
+
+  papotoError = signal<boolean>(false);
+
+  constructor(private readonly workerPythonService: WorkerPythonService) {}
 
   isFormValid = computed(() => {
     const data = this.measureData();
@@ -75,25 +88,29 @@ export class PapotoComponent {
     this.papotoHelpDialog.set(true);
   }
 
-  calculatePapoto() {
+  async calculatePapoto() {
     const data = this.measureData();
+    const { result, error } = await this.workerPythonService.runTask(
+      Task.calculatePapoto,
+      {
+        spanLength: data.spanLength || 0,
+        measuredElevationDifference: data.measuredElevationDifference || 0,
+        HL: data.HL || 0,
+        H1: data.H1 || 0,
+        H2: data.H2 || 0,
+        H3: data.H3 || 0,
+        HR: data.HR || 0,
+        VL: data.VL || 0,
+        V1: data.V1 || 0,
+        V2: data.V2 || 0,
+        V3: data.V3 || 0,
+        VR: data.VR || 0
+      }
+    );
+    if (error) {
+      this.papotoError.set(true);
+    }
 
-    console.log('PAPOTO Calculation Values:', {
-      leftSupport: data.leftSupport,
-      spanLength: data.spanLength,
-      measuredElevationDifference: data.measuredElevationDifference,
-      HL: data.HL,
-      H1: data.H1,
-      H2: data.H2,
-      H3: data.H3,
-      HR: data.HR,
-      VL: data.VL,
-      V1: data.V1,
-      V2: data.V2,
-      V3: data.V3,
-      VR: data.VR
-    });
-
-    this.papotoResults.set(true);
+    this.papotoResult.set(result);
   }
 }
