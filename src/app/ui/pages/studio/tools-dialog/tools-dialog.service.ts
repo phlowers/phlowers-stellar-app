@@ -46,6 +46,10 @@ export class ToolsDialogService {
       component: VhlAndGuyingComponent,
       dialogStyle: { width: '86.5625rem', 'max-width': '90%' }
     },
+    'l0-sum': {
+      component: L0SumComponent,
+      dialogStyle: { 'min-width': '50rem', 'max-width': '50rem' }
+    },
     'other-tool': {
       component: null!
     }
