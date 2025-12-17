@@ -1201,9 +1201,9 @@
         <target>Canton :</target>
       </segment>
     </unit>
-    <unit id="477906921630190891">
+    <unit id="1589900573112577804">
       <segment state="initial">
-        <source>CI :</source>
+        <source>IC :</source>
         <target>CI :</target>
       </segment>
     </unit>
@@ -2579,7 +2579,7 @@
         <target>valeur calculée :</target>
       </segment>
     </unit>
-    <unit id="7838365629862703936">
+    <unit id="6008615727838547074">
       <segment state="initial">
         <source>HL</source>
         <target>HG</target>
@@ -2603,13 +2603,13 @@
         <target>H3</target>
       </segment>
     </unit>
-    <unit id="2683177506127057493">
+    <unit id="2542803911675450798">
       <segment state="initial">
         <source>HR</source>
         <target>HD</target>
       </segment>
     </unit>
-    <unit id="7521763556168175281">
+    <unit id="6871225145442476572">
       <segment state="initial">
         <source>VL</source>
         <target>VG</target>
@@ -2633,7 +2633,7 @@
         <target>V3</target>
       </segment>
     </unit>
-    <unit id="7930349729068923819">
+    <unit id="8529808818273448935">
       <segment state="initial">
         <source>VR</source>
         <target>VD</target>
@@ -2741,12 +2741,6 @@
         <target>Tension</target>
       </segment>
     </unit>
-    <unit id="5508192867090472125">
-      <segment state="initial">
-        <source><ph id="0" equiv="INTERPOLATION" disp="{{ measureData().voltage }}"/> kV</source>
-        <target><ph id="0" equiv="INTERPOLATION" disp="{{ measureData().voltage }}"/> kV</target>
-      </segment>
-    </unit>
     <unit id="57361994969699356">
       <segment state="initial">
         <source>Span type</source>
@@ -2757,12 +2751,6 @@
       <segment state="initial">
         <source>Phase number</source>
         <target>Numéro de phase</target>
-      </segment>
-    </unit>
-    <unit id="4679516709693484256">
-      <segment state="initial">
-        <source>Number of conductors</source>
-        <target>Nombre de conducteurs</target>
       </segment>
     </unit>
     <unit id="5174359152122758396">
@@ -3065,6 +3053,78 @@
         <target>Flux solaire sur le câble</target>
       </segment>
     </unit>
+    <unit id="4417879210680246482">
+      <segment state="initial">
+        <source>All fields are mandatory for parameter calculation at 15°C</source>
+        <target>Tous les champs sont obligatoires pour le calcul du paramètre à 15°C</target>
+      </segment>
+    </unit>
+    <unit id="3177280644106670130">
+      <segment state="initial">
+        <source>Update mode</source>
+        <target>Mode de mise à jour</target>
+      </segment>
+    </unit>
+    <unit id="2126467800557253860">
+      <segment state="initial">
+        <source>Parameter Papoto</source>
+        <target>Paramètre Papoto</target>
+      </segment>
+    </unit>
+    <unit id="8448503906316835592">
+      <segment state="initial">
+        <source>Parameter uncertainty Papoto</source>
+        <target>Incertitude du paramètre Papoto</target>
+      </segment>
+    </unit>
+    <unit id="7296322989741811450">
+      <segment state="initial">
+        <source>Cable temperature at 15°C</source>
+        <target>Température du câble à 15°C</target>
+      </segment>
+    </unit>
+    <unit id="310445057254465407">
+      <segment state="initial">
+        <source>Cable temperature uncertainty at 15°C</source>
+        <target>Incertitude de la température du câble à 15°C</target>
+      </segment>
+    </unit>
+    <unit id="5478452081175426719">
+      <segment state="initial">
+        <source> Cable temperature uncertainty at 15°C </source>
+        <target> Incertitude de la température du câble à 15°C </target>
+      </segment>
+    </unit>
+    <unit id="4659361480509875242">
+      <segment state="initial">
+        <source> Results : </source>
+        <target> Résultats : </target>
+      </segment>
+    </unit>
+    <unit id="3044790599387992172">
+      <segment state="initial">
+        <source>Parameter at 15°C - uncertainty</source>
+        <target>Paramètre à 15°C - incertitude</target>
+      </segment>
+    </unit>
+    <unit id="7477006503326420990">
+      <segment state="initial">
+        <source>Parameter at 15°C</source>
+        <target>Paramètre à 15°C</target>
+      </segment>
+    </unit>
+    <unit id="8360415002925335916">
+      <segment state="initial">
+        <source>Parameter at 15°C + uncertainty</source>
+        <target>Paramètre à 15°C + incertitude</target>
+      </segment>
+    </unit>
+    <unit id="3090494322722231527">
+      <segment state="initial">
+        <source>Create initial condition</source>
+        <target>Créer la condition initiale</target>
+      </segment>
+    </unit>
     <unit id="616064537937996961">
       <segment state="initial">
         <source>Auto</source>
@@ -3075,6 +3135,72 @@
       <segment state="initial">
         <source>Perpendicular</source>
         <target>Perpendiculaire</target>
+      </segment>
+    </unit>
+    <unit id="7288576464171916715">
+      <segment state="initial">
+        <source>Initial Condition added and state generated</source>
+        <target>Condition initiale ajoutée et état généré</target>
+      </segment>
+    </unit>
+    <unit id="6231230520120019174">
+      <segment state="initial">
+        <source>Initial Condition added</source>
+        <target>Condition initiale ajoutée</target>
+      </segment>
+    </unit>
+    <unit id="9010681967368917708">
+      <segment state="initial">
+        <source>Create the IC and generate the state</source>
+        <target>Créer la CI et générer l&apos;état</target>
+      </segment>
+    </unit>
+    <unit id="3365141286815408674">
+      <segment state="initial">
+        <source>Create the IC</source>
+        <target>Créer la CI</target>
+      </segment>
+    </unit>
+    <unit id="4317701172500307440">
+      <segment state="initial">
+        <source>results:</source>
+        <target>résultats:</target>
+      </segment>
+    </unit>
+    <unit id="7065464372847182937">
+      <segment state="initial">
+        <source>An error occurred</source>
+        <target>Une erreur est survenue</target>
+      </segment>
+    </unit>
+    <unit id="6968554497797539073">
+      <segment state="initial">
+        <source> Create a new measurment or select an existing one </source>
+        <target> Créer une nouvelle mesure ou sélectionner une mesure existante </target>
+      </segment>
+    </unit>
+    <unit id="8791866312630411087">
+      <segment state="initial">
+        <source>Measure&apos;s name</source>
+        <target>Nom de la mesure</target>
+      </segment>
+    </unit>
+    <unit id="4741387452851624047">
+      <segment state="initial">
+        <source>Create a new measurement</source>
+        <target>Créer une nouvelle mesure</target>
+      </segment>
+    </unit>
+    <unit id="5698046514233867599">
+      <segment state="initial">
+        <source>Choose</source>
+        <target>Choisir</target>
+      </segment>
+    </unit>
+    <unit id="1698502503890694225">
+      <segment state="initial">
+        <source> Parameter uncertainty Papoto </source>
+        <target> Incertitude du paramètre Papoto </target>
       </segment>
     </unit>
   </file>

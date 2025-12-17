@@ -295,16 +295,40 @@
         <app-icon icon="close" />
         <span i18n>Cancel</span>
       </button>
-      <button
-        app-btn
-        type="button"
-        [disabled]="!this.initialCondition().name || !isNameUnique()"
-        btnSize="m"
-        (click)="onSubmit()"
-      >
-        <app-icon icon="check" />
-        <span i18n>Validate</span>
-      </button>
+      @if (!isInsideToolsDialog()) {
+        <button
+          app-btn
+          type="button"
+          [disabled]="!this.initialCondition().name || !isNameUnique()"
+          btnSize="m"
+          (click)="onSubmit(false)"
+        >
+          <app-icon icon="check" />
+          <span i18n>Validate</span>
+        </button>
+      } @else {
+        <button
+          app-btn
+          type="button"
+          [disabled]="!this.initialCondition().name || !isNameUnique()"
+          btnSize="m"
+          (click)="onSubmit(true)"
+          btnStyle="outlined"
+        >
+          <app-icon icon="play_circle" />
+          <span i18n>Create the IC and generate the state</span>
+        </button>
+        <button
+          app-btn
+          type="button"
+          [disabled]="!this.initialCondition().name || !isNameUnique()"
+          btnSize="m"
+          (click)="onSubmit(false)"
+        >
+          <app-icon icon="check" />
+          <span i18n>Create the IC</span>
+        </button>
+      }
     }
   </ng-template>
 </p-dialog>

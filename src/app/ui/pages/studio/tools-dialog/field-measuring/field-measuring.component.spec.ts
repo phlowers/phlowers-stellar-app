@@ -6,6 +6,10 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolsDialogService } from '../tools-dialog.service';
 import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
+import { MessageService } from 'primeng/api';
+import { SectionService } from '@src/app/core/services/sections/section.service';
+import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-button',
@@ -48,12 +52,31 @@ describe('FieldMeasuringComponent', () => {
   let toolsDialogService: ToolsDialogService;
 
   beforeEach(async () => {
+    const mockMessageService = {
+      add: jest.fn()
+    } as unknown as MessageService;
+
+    const mockStudiesService = {
+      ready: new BehaviorSubject<boolean>(true),
+      currentStudy: jest.fn().mockReturnValue(null),
+      getStudy: jest.fn(),
+      getStudyAsObservable: jest.fn(),
+      updateStudy: jest.fn().mockResolvedValue(undefined)
+    } as unknown as StudiesService;
+
+    const mockSectionService = {
+      setCurrentSection: jest.fn()
+    } as unknown as SectionService;
+
     await TestBed.configureTestingModule({
       providers: [
         ToolsDialogService,
         provideAnimations(),
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: StudiesService, useValue: mockStudiesService },
+        { provide: SectionService, useValue: mockSectionService }
       ]
     })
       .overrideComponent(FieldMeasuringComponent, {
@@ -358,41 +381,6 @@ describe('FieldMeasuringComponent', () => {
       expect(consoleSpy).toHaveBeenCalledWith(
         'Calculate Parameter at 15°C',
         component.measureData()
-      );
-    });
-  });
-
-  describe('onCreateInitialCondition', () => {
-    it('should log create initial condition for minus type', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
-
-      component.onCreateInitialCondition('minus');
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Create initial condition:',
-        'minus'
-      );
-    });
-
-    it('should log create initial condition for nominal type', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
-
-      component.onCreateInitialCondition('nominal');
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Create initial condition:',
-        'nominal'
-      );
-    });
-
-    it('should log create initial condition for plus type', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
-
-      component.onCreateInitialCondition('plus');
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Create initial condition:',
-        'plus'
       );
     });
   });
