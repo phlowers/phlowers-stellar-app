@@ -11,6 +11,7 @@
   [isInsideToolsDialog]="true"
   (addInitialCondition)="addInitialCondition($event)"
 />
+
 <p
   id="mandatory-parameter-15c"
   class="parameter-calculation-15-without-wind__mandatory-msg"
@@ -21,7 +22,7 @@
 
 <div class="parameter-calculation-15-without-wind__form">
   <div class="updateMode">
-    <label for="updateMode15C" i18n>Update mode</label>
+    <p id="updateModeLabel" class="mb-0" i18n>Update mode</p>
     <p-selectbutton
       [options]="updateModeOptions"
       [ngModel]="measureData().updateMode15C"
@@ -29,6 +30,7 @@
       optionLabel="label"
       optionValue="value"
       allowEmpty="false"
+      ariaLabelledBy="updateModeLabel"
     />
   </div>
 
@@ -67,9 +69,9 @@
     </div>
 
     <div class="cableTemperature15C">
-      <label for="cableTemperature15C-input" i18n
-        >Cable temperature at 15°C</label
-      >
+      <label for="cableTemperature15C-input" i18n>
+        Cable temperature at 15°C
+      </label>
       <p-inputgroup>
         <input
           id="cableTemperature15C-input"
@@ -77,7 +79,6 @@
           pInputText
           [ngModel]="measureData().cableTemperature15C"
           (ngModelChange)="updateField('cableTemperature15C', $event)"
-          [fluid]="true"
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
         />
@@ -86,9 +87,9 @@
     </div>
 
     <div class="cableTemperatureUncertainty15C">
-      <label for="cableTemperatureUncertainty15C-input" i18n
-        >Cable temperature uncertainty at 15°C</label
-      >
+      <label for="cableTemperatureUncertainty15C-input" i18n>
+        Cable temperature uncertainty at 15°C
+      </label>
       <p-inputgroup>
         <input
           id="cableTemperatureUncertainty15C-input"
@@ -98,7 +99,6 @@
           (ngModelChange)="
             updateField('cableTemperatureUncertainty15C', $event)
           "
-          [fluid]="true"
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
         />
@@ -106,28 +106,30 @@
       </p-inputgroup>
     </div>
   } @else {
-    <dl class="parameterPapoto">
-      <dt id="parameterPapoto-display" i18n>Parameter Papoto</dt>
-      <dd>{{ measureData().parameterPapoto }}</dd>
-    </dl>
+    <dl class="contents">
+      <div class="parameterPapoto">
+        <dt id="parameterPapoto-display" i18n>Parameter Papoto</dt>
+        <dd>{{ measureData().parameterPapoto }}</dd>
+      </div>
 
-    <dl class="parameterUncertaintyPapoto">
-      <dt id="parameterUncertaintyPapoto-display" i18n>
-        Parameter uncertainty Papoto
-      </dt>
-      <dd>{{ measureData().parameterUncertaintyPapoto }}</dd>
-    </dl>
+      <div class="parameterUncertaintyPapoto">
+        <dt id="parameterUncertaintyPapoto-display" i18n>
+          Parameter uncertainty Papoto
+        </dt>
+        <dd>{{ measureData().parameterUncertaintyPapoto }}</dd>
+      </div>
 
-    <dl class="cableTemperature15C">
-      <dt id="cableTemperature15C-display" i18n>Cable temperature at 15°C</dt>
-      <dd>{{ measureData().cableTemperature15C }} °C</dd>
-    </dl>
+      <div class="cableTemperature15C">
+        <dt id="cableTemperature15C-display" i18n>Cable temperature at 15°C</dt>
+        <dd>{{ measureData().cableTemperature15C }} °C</dd>
+      </div>
 
-    <dl class="cableTemperatureUncertainty15C">
-      <dt id="cableTemperatureUncertainty15C-display" i18n>
-        Cable temperature uncertainty at 15°C
-      </dt>
-      <dd>{{ measureData().cableTemperatureUncertainty15C }} °C</dd>
+      <div class="cableTemperatureUncertainty15C">
+        <dt id="cableTemperatureUncertainty15C-display" i18n>
+          Cable temperature uncertainty at 15°C
+        </dt>
+        <dd>{{ measureData().cableTemperatureUncertainty15C }} °C</dd>
+      </div>
     </dl>
   }
 </div>
@@ -170,6 +172,7 @@
         <app-icon icon="add" />
         <ng-container i18n>Create initial condition</ng-container>
       </button>
+
       <button
         app-btn
         btnStyle="outlined"
@@ -179,6 +182,7 @@
         <app-icon icon="add" />
         <ng-container i18n>Create initial condition</ng-container>
       </button>
+
       <button
         app-btn
         btnStyle="outlined"
