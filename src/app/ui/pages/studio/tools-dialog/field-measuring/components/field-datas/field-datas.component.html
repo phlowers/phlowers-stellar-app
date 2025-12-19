@@ -34,8 +34,8 @@
   </div>
 
   <div class="time">
-    <label for="time">
-      <ng-container i18n>Time</ng-container>
+    <div class="time__label">
+      <label for="time" id="timeLabel" i18n>Time</label>
       <p-selectbutton
         [options]="timeModeOptions"
         [ngModel]="measureData().season"
@@ -43,9 +43,10 @@
         optionLabel="label"
         optionValue="value"
         allowEmpty="false"
-        class="small"
+        ariaLabelledBy="timeLabel"
       />
-    </label>
+    </div>
+
     <p-datepicker
       appendTo="body"
       id="time"
@@ -79,8 +80,8 @@
   </div>
 
   <div class="wind">
-    <label for="windSpeed">
-      <ng-container i18n>Wind speed</ng-container>
+    <div class="wind__label">
+      <label for="windSpeed" id="wind" i18n>Wind speed</label>
       <p-selectbutton
         [options]="windSpeedUnitOptions"
         [ngModel]="measureData().windSpeedUnit"
@@ -88,9 +89,10 @@
         optionLabel="label"
         optionValue="value"
         allowEmpty="false"
-        class="small"
+        ariaLabelledBy="wind"
       />
-    </label>
+    </div>
+
     <input
       pInputText
       id="windSpeed"
