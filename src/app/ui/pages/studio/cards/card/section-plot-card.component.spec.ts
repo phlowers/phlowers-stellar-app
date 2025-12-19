@@ -14,13 +14,13 @@ const mockLitData: GetSectionOutput = {
   L0: [100, 200, 300],
   elevation: [10, 20, 30],
   line_angle: [0.1, 0.2, 0.3],
-  vhl_under_chain: [
+  vtl_under_chain: [
     [1, 2, 3],
     [4, 5, 6],
     [7, 8, 9]
   ],
   r_under_chain: [10, 20, 30],
-  vhl_under_console: [
+  vtl_under_console: [
     [1, 2, 3],
     [4, 5, 6],
     [7, 8, 9]

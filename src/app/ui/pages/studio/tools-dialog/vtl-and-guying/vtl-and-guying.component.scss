@@ -1,0 +1,172 @@
+@use 'abstract.extracts' as app;
+
+// Block
+.vtl-guying {
+  @apply flex gap-8 min-h-[37.5rem] py-2;
+}
+
+// Elements
+.vtl-guying__left {
+  @apply flex flex-col w-full;
+}
+
+.vtl-guying__right {
+  @apply flex-1 flex flex-col min-w-[25rem] max-w-[25rem];
+}
+
+.vtl-guying__support-selection {
+  @apply flex flex-row gap-12;
+}
+
+.vtl-guying__form-field {
+  @apply flex flex-col gap-2;
+
+  label {
+    @extend %text-m-400;
+    @apply m-0;
+  }
+
+  &--checkbox {
+    @apply flex items-center gap-2 flex-row mt-2;
+
+    label {
+      @apply m-0;
+      @extend %text-m-400;
+    }
+  }
+}
+
+.vtl-guying__support-type {
+  @apply flex flex-col gap-2 mt-1;
+  @extend %text-m-400;
+}
+
+.vtl-guying__support-type-label {
+  @extend %text-m-400;
+  @apply m-0;
+}
+
+.vtl-guying__support-type-value {
+  color: var(--grey-700);
+}
+
+.vtl-guying__vtl-section {
+  @apply flex flex-col gap-3;
+}
+
+.vtl-guying__section-header {
+  @apply flex items-center mb-1;
+}
+
+.vtl-guying__section-title {
+  @extend %text-l-600;
+  @apply m-0 font-semibold text-base inline-block;
+}
+
+.vtl-guying__export-btn {
+  @apply flex items-center gap-2 ml-4;
+}
+
+.vtl-guying__vtl-fields {
+  @apply grid gap-x-4 gap-y-3;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.vtl-guying__vtl-field {
+  @apply flex flex-col gap-1.5;
+
+  dt {
+    @extend %text-m-400;
+    @apply m-0;
+  }
+
+  label {
+    @extend %text-s-400;
+    @apply m-0;
+    color: var(--grey-600);
+  }
+}
+
+.vtl-guying__vtl-value {
+  @extend %text-m-400;
+  @apply m-0;
+  color: var(--grey-900);
+}
+
+.vtl-guying__guying-section {
+  @apply flex flex-col gap-3;
+}
+
+.vtl-guying__calculate-btn-container {
+  @apply flex justify-end mt-3;
+}
+
+.vtl-guying__calculate-btn {
+  @apply flex items-center gap-2;
+}
+
+.vtl-guying__results-section {
+  @apply flex flex-col gap-3;
+}
+
+.vtl-guying__results-fields {
+  @apply flex flex-row justify-between gap-3;
+}
+
+.vtl-guying__result-column {
+  @apply flex flex-col gap-3;
+  width: 20%;
+}
+
+.vtl-guying__result-field {
+  @apply flex flex-col gap-2;
+
+  dt {
+    @extend %text-m-400;
+    @apply m-0;
+  }
+
+  label {
+    @extend %text-m-400;
+    @apply m-0;
+  }
+
+  &--comment {
+    label {
+      @apply mb-2;
+    }
+  }
+}
+
+.vtl-guying__result-value {
+  @extend %text-m-400;
+  @apply m-0;
+  color: var(--grey-900);
+}
+
+.vtl-guying__info-text {
+  @apply flex gap-3 mt-2 py-3.5;
+
+  p {
+    @extend %text-s-400;
+    @apply m-0;
+    line-height: 1.5;
+  }
+}
+
+.vtl-guying__info-icon {
+  @apply flex-shrink-0 mt-0.5 text-base;
+}
+
+.vtl-guying__loading {
+  @apply flex items-center justify-center gap-3 py-12;
+}
+
+.vtl-guying__loading-text {
+  @extend %text-m-400;
+  color: var(--grey-600);
+}
+
+.vtl-guying__dialog-footer {
+  @apply flex gap-3 justify-end w-full;
+}
