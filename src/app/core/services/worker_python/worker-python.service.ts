@@ -47,6 +47,9 @@ export class WorkerPythonService {
       } else if (data.importTime) {
         this.times.set({ ...this.times(), importTime: data.importTime });
         this._ready.next(true);
+        const activateDebugLogs =
+          localStorage.getItem('activateDebugLogs') === 'true';
+        this.runTask(Task.setLogLevel, { activateDebugLogs });
       } else if (data.id) {
         this.handlerMap[data.id](data.result, data.error);
       }
