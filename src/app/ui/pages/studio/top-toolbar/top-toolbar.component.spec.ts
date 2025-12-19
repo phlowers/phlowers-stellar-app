@@ -382,12 +382,12 @@ describe('StudioTopToolbarComponent', () => {
       );
     });
 
-    it('should execute action for tool item 2 - VHL & Guying', () => {
+    it('should execute action for tool item 2 - VTL & Guying', () => {
       const items = component.toolsItems();
 
       items[1].action();
       expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
-        'vhl-and-guying'
+        'vtl-and-guying'
       );
     });
 

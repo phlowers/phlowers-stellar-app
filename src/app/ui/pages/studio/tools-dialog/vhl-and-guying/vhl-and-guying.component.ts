@@ -32,7 +32,7 @@ interface SupportOption {
 }
 
 @Component({
-  selector: 'app-vhl-and-guying-tool',
+  selector: 'app-vtl-and-guying-tool',
   imports: [
     CommonModule,
     FormsModule,
@@ -49,8 +49,8 @@ interface SupportOption {
     InputTextModule,
     CardComponent
   ],
-  templateUrl: './vhl-and-guying.component.html',
-  styleUrls: ['./vhl-and-guying.component.scss']
+  templateUrl: './vtl-and-guying.component.html',
+  styleUrls: ['./vtl-and-guying.component.scss']
 })
 export class VhlAndGuyingComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
@@ -83,16 +83,16 @@ export class VhlAndGuyingComponent implements AfterViewInit {
     );
   });
 
-  readonly vhlWithoutGuying = computed(() => {
+  readonly vtlWithoutGuying = computed(() => {
     if (this.selectedSupport() === null) {
       return null;
     }
-    const vhlUnderChain = this.plotService.litData()?.vhl_under_chain;
+    const vtlUnderChain = this.plotService.litData()?.vtl_under_chain;
     const rUnderChain = this.plotService.litData()?.r_under_chain;
     return {
-      chargeV: vhlUnderChain?.[0][this.selectedSupport()!],
-      chargeH: vhlUnderChain?.[1][this.selectedSupport()!],
-      chargeL: vhlUnderChain?.[2][this.selectedSupport()!],
+      chargeV: vtlUnderChain?.[0][this.selectedSupport()!],
+      chargeH: vtlUnderChain?.[1][this.selectedSupport()!],
+      chargeL: vtlUnderChain?.[2][this.selectedSupport()!],
       resultant: rUnderChain?.[this.selectedSupport()!]
     };
   });
@@ -152,7 +152,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
   };
 
   onExportVhl(): void {
-    // TODO: Implement export functionality for VHL sans haubanage
+    // TODO: Implement export functionality for VTL sans haubanage
   }
 
   onExport(): void {

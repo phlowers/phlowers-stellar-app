@@ -75,26 +75,26 @@ export class SectionPlotCardComponent {
 
   // Data structure for support type
   supportData = computed((): DataSection[] => {
-    const vhl_under_chain = this.litData()?.vhl_under_chain;
-    // const vhl_under_console = this.litData()?.vhl_under_console;
+    const vtl_under_chain = this.litData()?.vtl_under_chain;
+    // const vtl_under_console = this.litData()?.vtl_under_console;
     const r_under_chain = this.litData()?.r_under_chain;
     const lineAngle = this.litData()?.line_angle;
 
     return [
       {
-        title: $localize`VHL (under chain)`,
+        title: $localize`VTL (under chain)`,
         fields: [
           {
             label: $localize`V :`,
-            value: formatNumber(vhl_under_chain?.[0][this.index()])
+            value: formatNumber(vtl_under_chain?.[0][this.index()])
           },
           {
             label: $localize`H :`,
-            value: formatNumber(vhl_under_chain?.[1][this.index()])
+            value: formatNumber(vtl_under_chain?.[1][this.index()])
           },
           {
             label: $localize`L :`,
-            value: formatNumber(vhl_under_chain?.[2][this.index()])
+            value: formatNumber(vtl_under_chain?.[2][this.index()])
           },
           {
             label: $localize`Resultant :`,
@@ -116,7 +116,7 @@ export class SectionPlotCardComponent {
 
   // Expanded data for support type
   supportExpandedData = computed((): DataSection[] => {
-    const vhl_under_console = this.litData()?.vhl_under_console;
+    const vtl_under_console = this.litData()?.vtl_under_console;
     const r_under_console = this.litData()?.r_under_console;
     const groundAltitude = this.litData()?.ground_altitude;
     const displacement = this.litData()?.displacement;
@@ -124,19 +124,19 @@ export class SectionPlotCardComponent {
 
     return [
       {
-        title: $localize`VHL (under console)`,
+        title: $localize`VTL (under console)`,
         fields: [
           {
             label: $localize`V :`,
-            value: formatNumber(vhl_under_console?.[0][this.index()])
+            value: formatNumber(vtl_under_console?.[0][this.index()])
           },
           {
             label: $localize`H :`,
-            value: formatNumber(vhl_under_console?.[1][this.index()])
+            value: formatNumber(vtl_under_console?.[1][this.index()])
           },
           {
             label: $localize`L :`,
-            value: formatNumber(vhl_under_console?.[2][this.index()])
+            value: formatNumber(vtl_under_console?.[2][this.index()])
           },
           {
             label: $localize`Resultant :`,

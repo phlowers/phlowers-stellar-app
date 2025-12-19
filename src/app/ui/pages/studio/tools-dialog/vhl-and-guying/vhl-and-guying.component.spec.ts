@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { VhlAndGuyingComponent } from './vhl-and-guying.component';
+import { VhlAndGuyingComponent } from './vtl-and-guying.component';
 import { ToolsDialogService } from '../tools-dialog.service';
 import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
@@ -44,7 +44,7 @@ describe('VhlAndGuyingComponent', () => {
 
   beforeEach(async () => {
     const mockLitData = {
-      vhl_under_chain: [
+      vtl_under_chain: [
         [10, 20],
         [15, 25],
         [5, 10]
@@ -203,10 +203,10 @@ describe('VhlAndGuyingComponent', () => {
     ]);
   });
 
-  it('should compute vhlWithoutGuying when support is selected', () => {
+  it('should compute vtlWithoutGuying when support is selected', () => {
     component.selectedSupport.set(0);
-    const vhl = component.vhlWithoutGuying();
-    expect(vhl).toEqual({
+    const vtl = component.vtlWithoutGuying();
+    expect(vtl).toEqual({
       chargeV: 10,
       chargeH: 15,
       chargeL: 5,

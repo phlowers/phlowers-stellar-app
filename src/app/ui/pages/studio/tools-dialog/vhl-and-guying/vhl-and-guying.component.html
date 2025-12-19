@@ -1,15 +1,15 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2 items-center">
     <app-icon icon="build" />
-    <span i18n>VHL & Guying</span>
+    <span i18n>VTL & Guying</span>
   </p>
 </ng-template>
 
 @if (!loading()) {
-  <div class="vhl-guying">
-    <div class="vhl-guying__left">
-      <div class="vhl-guying__support-selection">
-        <div class="vhl-guying__form-field">
+  <div class="vtl-guying">
+    <div class="vtl-guying__left">
+      <div class="vtl-guying__support-selection">
+        <div class="vtl-guying__form-field">
           <label for="span-select" i18n>Span</label>
           <p-select
             id="span-select"
@@ -24,7 +24,7 @@
             styleClass="w-[12.5rem]"
           />
         </div>
-        <div class="vhl-guying__form-field">
+        <div class="vtl-guying__form-field">
           <label for="support-select" i18n>Support</label>
           <p-select
             id="support-select"
@@ -38,19 +38,19 @@
             styleClass="w-[12.5rem]"
           />
         </div>
-        <dl class="vhl-guying__support-type">
-          <dt class="vhl-guying__support-type-label" i18n>Support type:</dt>
-          <dd class="vhl-guying__support-type-value">
+        <dl class="vtl-guying__support-type">
+          <dt class="vtl-guying__support-type-label" i18n>Support type:</dt>
+          <dd class="vtl-guying__support-type-value">
             {{ supportType() ?? '-' }}
           </dd>
         </dl>
       </div>
       <hr class="my-3" />
 
-      <section class="vhl-guying__vhl-section">
-        <header class="vhl-guying__section-header">
-          <h3 class="vhl-guying__section-title underline-text" i18n>
-            VHL without guying
+      <section class="vtl-guying__vtl-section">
+        <header class="vtl-guying__section-header">
+          <h3 class="vtl-guying__section-title underline-text" i18n>
+            VTL without guying
           </h3>
           <button
             app-btn
@@ -58,41 +58,41 @@
             btnStyle="outlined"
             type="button"
             (click)="onExportVhl()"
-            class="vhl-guying__export-btn"
+            class="vtl-guying__export-btn"
             [disabled]="true"
           >
             <app-icon icon="download" />
             <span i18n>Export</span>
           </button>
         </header>
-        <dl class="vhl-guying__vhl-fields">
-          <div class="vhl-guying__vhl-field">
+        <dl class="vtl-guying__vtl-fields">
+          <div class="vtl-guying__vtl-field">
             <dt i18n>Charge V</dt>
-            <dd class="vhl-guying__vhl-value">
-              {{ vhlWithoutGuying()?.chargeV | number: '1.0-3' }}&nbsp;daN
+            <dd class="vtl-guying__vtl-value">
+              {{ vtlWithoutGuying()?.chargeV | number: '1.0-3' }}&nbsp;daN
             </dd>
           </div>
-          <div class="vhl-guying__vhl-field">
+          <div class="vtl-guying__vtl-field">
             <dt i18n>Charge L</dt>
-            <dd class="vhl-guying__vhl-value">
+            <dd class="vtl-guying__vtl-value">
               {{
-                (vhlWithoutGuying()?.chargeL | number: '1.0-3') ?? '-'
+                (vtlWithoutGuying()?.chargeL | number: '1.0-3') ?? '-'
               }}&nbsp;daN
             </dd>
           </div>
-          <div class="vhl-guying__vhl-field">
+          <div class="vtl-guying__vtl-field">
             <dt i18n>Charge H</dt>
-            <dd class="vhl-guying__vhl-value">
+            <dd class="vtl-guying__vtl-value">
               {{
-                (vhlWithoutGuying()?.chargeH | number: '1.0-3') ?? '-'
+                (vtlWithoutGuying()?.chargeH | number: '1.0-3') ?? '-'
               }}&nbsp;daN
             </dd>
           </div>
-          <div class="vhl-guying__vhl-field">
+          <div class="vtl-guying__vtl-field">
             <dt i18n>Resultant</dt>
-            <dd class="vhl-guying__vhl-value">
+            <dd class="vtl-guying__vtl-value">
               {{
-                (vhlWithoutGuying()?.resultant | number: '1.0-3') ?? '-'
+                (vtlWithoutGuying()?.resultant | number: '1.0-3') ?? '-'
               }}&nbsp;daN
             </dd>
           </div>
@@ -101,12 +101,12 @@
 
       <hr class="my-3" />
 
-      <section class="vhl-guying__guying-section">
+      <section class="vtl-guying__guying-section">
         <div>
-          <h3 class="vhl-guying__section-title underline-text" i18n>Guying</h3>
+          <h3 class="vtl-guying__section-title underline-text" i18n>Guying</h3>
         </div>
         <div class="flex flex-row gap-3">
-          <div class="vhl-guying__form-field">
+          <div class="vtl-guying__form-field">
             <label for="altitude-input">a</label>
             <p-inputgroup>
               <input
@@ -119,7 +119,7 @@
               <p-inputgroup-addon>m</p-inputgroup-addon>
             </p-inputgroup>
           </div>
-          <div class="vhl-guying__form-field">
+          <div class="vtl-guying__form-field">
             <label for="horizontal-distance-input">d</label>
             <p-inputgroup>
               <input
@@ -135,7 +135,7 @@
             </p-inputgroup>
           </div>
         </div>
-        <div class="vhl-guying__form-field vhl-guying__form-field--checkbox">
+        <div class="vtl-guying__form-field vtl-guying__form-field--checkbox">
           <p-checkbox
             [binary]="true"
             [ngModel]="hasPulley()"
@@ -144,7 +144,7 @@
           />
           <label for="pulley-checkbox" i18n>Pulley</label>
         </div>
-        <div class="vhl-guying__calculate-btn-container">
+        <div class="vtl-guying__calculate-btn-container">
           <button
             app-btn
             btnSize="m"
@@ -156,7 +156,7 @@
               selectedSupport() === null
             "
             (click)="onCalculate()"
-            class="vhl-guying__calculate-btn"
+            class="vtl-guying__calculate-btn"
           >
             <app-icon icon="rocket_launch" />
             <span i18n>Calculate</span>
@@ -167,49 +167,49 @@
       <hr class="my-3" />
 
       @if (results()) {
-        <section class="vhl-guying__results-section">
+        <section class="vtl-guying__results-section">
           <div>
-            <h3 class="vhl-guying__section-title underline-text" i18n>
+            <h3 class="vtl-guying__section-title underline-text" i18n>
               Results
             </h3>
           </div>
-          <dl class="vhl-guying__results-fields">
-            <div class="vhl-guying__result-column">
-              <div class="vhl-guying__result-field">
+          <dl class="vtl-guying__results-fields">
+            <div class="vtl-guying__result-column">
+              <div class="vtl-guying__result-field">
                 <dt i18n>Tension in the guy line</dt>
-                <dd class="vhl-guying__result-value">
+                <dd class="vtl-guying__result-value">
                   {{
                     (results()?.tensionInGuy | number: '1.0-3') ?? '-'
                   }}&nbsp;daN
                 </dd>
               </div>
-              <div class="vhl-guying__result-field">
+              <div class="vtl-guying__result-field">
                 <dt i18n>Angle guy line / Horizon</dt>
-                <dd class="vhl-guying__result-value">
+                <dd class="vtl-guying__result-value">
                   {{ (results()?.guyAngle | number: '1.0-3') ?? '-' }}&nbsp;°
                 </dd>
               </div>
             </div>
-            <div class="vhl-guying__result-column">
-              <div class="vhl-guying__result-field">
+            <div class="vtl-guying__result-column">
+              <div class="vtl-guying__result-field">
                 <dt i18n>Charge V under console</dt>
-                <dd class="vhl-guying__result-value">
+                <dd class="vtl-guying__result-value">
                   {{
                     (results()?.chargeVUnderConsole | number: '1.0-3') ?? '-'
                   }}&nbsp;daN
                 </dd>
               </div>
-              <div class="vhl-guying__result-field">
+              <div class="vtl-guying__result-field">
                 <dt i18n>Charge H under console</dt>
-                <dd class="vhl-guying__result-value">
+                <dd class="vtl-guying__result-value">
                   {{
                     (results()?.chargeHUnderConsole | number: '1.0-3') ?? '-'
                   }}&nbsp;daN
                 </dd>
               </div>
-              <div class="vhl-guying__result-field">
+              <div class="vtl-guying__result-field">
                 <dt i18n>Charge L (if pulley)</dt>
-                <dd class="vhl-guying__result-value">
+                <dd class="vtl-guying__result-value">
                   {{
                     (results()?.chargeLIfPulley | number: '1.0-3') ?? '-'
                   }}&nbsp;daN
@@ -217,7 +217,7 @@
               </div>
             </div>
             <div
-              class="vhl-guying__result-field vhl-guying__result-field--comment w-[50%]"
+              class="vtl-guying__result-field vtl-guying__result-field--comment w-[50%]"
             >
               <label for="comment-textarea" i18n>Comment</label>
               <textarea
@@ -232,8 +232,8 @@
               ></textarea>
             </div>
           </dl>
-          <div class="vhl-guying__info-text w-[35rem]">
-            <app-icon icon="info" class="vhl-guying__info-icon" />
+          <div class="vtl-guying__info-text w-[35rem]">
+            <app-icon icon="info" class="vtl-guying__info-icon" />
             <p i18n>
               For a stop or a suspension without pulley, the tension in the guy
               line allows to balance the longitudinal charges at the console
@@ -246,7 +246,7 @@
       }
     </div>
 
-    <div class="vhl-guying__right">
+    <div class="vtl-guying__right">
       <app-card role="generic">
         <img
           src="img/guying-help.png"
@@ -256,13 +256,13 @@
     </div>
   </div>
 } @else {
-  <div class="vhl-guying__loading">
+  <div class="vtl-guying__loading">
     <p-progressSpinner aria-label="Loading" />
-    <span class="vhl-guying__loading-text" i18n>Loading data…</span>
+    <span class="vtl-guying__loading-text" i18n>Loading data…</span>
   </div>
 }
 <ng-template #footer>
-  <div class="vhl-guying__dialog-footer">
+  <div class="vtl-guying__dialog-footer">
     <button
       [disabled]="true"
       app-btn

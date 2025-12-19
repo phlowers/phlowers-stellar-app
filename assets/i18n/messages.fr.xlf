@@ -2209,8 +2209,8 @@
     </unit>
     <unit id="3232856077921805796">
       <segment state="initial">
-        <source>VHL &amp; Guying</source>
-        <target>Haubanage &amp; VHL</target>
+        <source>VTL &amp; Guying</source>
+        <target>Haubanage &amp; VTL</target>
       </segment>
     </unit>
     <unit id="810011115797190863">
@@ -2311,8 +2311,8 @@
     </unit>
     <unit id="8556557769909937132">
       <segment state="initial">
-        <source>VHL (under chain)</source>
-        <target>VHL (sous chaîne)</target>
+        <source>VTL (under chain)</source>
+        <target>VTL (sous chaîne)</target>
       </segment>
     </unit>
     <unit id="1455021675803464772">
@@ -2323,8 +2323,8 @@
     </unit>
     <unit id="146808728587794667">
       <segment state="initial">
-        <source>VHL (under console)</source>
-        <target>VHL (sous console)</target>
+        <source>VTL (under console)</source>
+        <target>VTL (sous console)</target>
       </segment>
     </unit>
     <unit id="758471193876128020">
@@ -3247,8 +3247,8 @@
     </unit>
     <unit id="1370499216902676579">
       <segment state="initial">
-        <source>VHL without guying</source>
-        <target>VHL sans haubanage</target>
+        <source>VTL without guying</source>
+        <target>VTL sans haubanage</target>
       </segment>
     </unit>
     <unit id="8104522487016152357">

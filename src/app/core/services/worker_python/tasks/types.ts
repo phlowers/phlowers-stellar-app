@@ -31,8 +31,8 @@ export interface GetSectionOutput {
   L0: number[];
   elevation: number[];
   line_angle: number[];
-  vhl_under_chain: number[][];
-  vhl_under_console: number[][];
+  vtl_under_chain: number[][];
+  vtl_under_console: number[][];
   r_under_chain: number[];
   r_under_console: number[];
   ground_altitude: number[];

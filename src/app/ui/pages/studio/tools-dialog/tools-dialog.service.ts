@@ -2,12 +2,12 @@ import { Injectable, signal, TemplateRef, Type } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring/field-measuring.component';
 import { InitComponent } from './field-measuring/components/init/init.component';
 import { L0SumComponent } from './l0-sum/l0-sum.component';
-import { VhlAndGuyingComponent } from './vhl-and-guying/vhl-and-guying.component';
+import { VhlAndGuyingComponent } from './vtl-and-guying/vtl-and-guying.component';
 
 export type Tool =
   | 'field-measuring'
   | 'l0-sum'
-  | 'vhl-and-guying'
+  | 'vtl-and-guying'
   | 'other-tool';
 
 export interface ToolConfig {
@@ -42,7 +42,7 @@ export class ToolsDialogService {
       component: L0SumComponent,
       dialogStyle: { 'min-width': '50rem', 'max-width': '50rem' }
     },
-    'vhl-and-guying': {
+    'vtl-and-guying': {
       component: VhlAndGuyingComponent,
       dialogStyle: { 'min-width': '80rem', 'max-width': '90rem' }
     },

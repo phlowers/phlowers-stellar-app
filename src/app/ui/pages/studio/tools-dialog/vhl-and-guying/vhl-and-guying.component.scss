@@ -1,24 +1,24 @@
 @use 'abstract.extracts' as app;
 
 // Block
-.vhl-guying {
+.vtl-guying {
   @apply flex gap-8 min-h-[37.5rem] py-2;
 }
 
 // Elements
-.vhl-guying__left {
+.vtl-guying__left {
   @apply flex flex-col w-full;
 }
 
-.vhl-guying__right {
+.vtl-guying__right {
   @apply flex-1 flex flex-col min-w-[25rem] max-w-[25rem];
 }
 
-.vhl-guying__support-selection {
+.vtl-guying__support-selection {
   @apply flex flex-row gap-12;
 }
 
-.vhl-guying__form-field {
+.vtl-guying__form-field {
   @apply flex flex-col gap-2;
 
   label {
@@ -36,43 +36,43 @@
   }
 }
 
-.vhl-guying__support-type {
+.vtl-guying__support-type {
   @apply flex flex-col gap-2 mt-1;
   @extend %text-m-400;
 }
 
-.vhl-guying__support-type-label {
+.vtl-guying__support-type-label {
   @extend %text-m-400;
   @apply m-0;
 }
 
-.vhl-guying__support-type-value {
+.vtl-guying__support-type-value {
   color: var(--grey-700);
 }
 
-.vhl-guying__vhl-section {
+.vtl-guying__vtl-section {
   @apply flex flex-col gap-3;
 }
 
-.vhl-guying__section-header {
+.vtl-guying__section-header {
   @apply flex items-center mb-1;
 }
 
-.vhl-guying__section-title {
+.vtl-guying__section-title {
   @extend %text-l-600;
   @apply m-0 font-semibold text-base inline-block;
 }
 
-.vhl-guying__export-btn {
+.vtl-guying__export-btn {
   @apply flex items-center gap-2 ml-4;
 }
 
-.vhl-guying__vhl-fields {
+.vtl-guying__vtl-fields {
   @apply grid gap-x-4 gap-y-3;
   grid-template-columns: repeat(4, 1fr);
 }
 
-.vhl-guying__vhl-field {
+.vtl-guying__vtl-field {
   @apply flex flex-col gap-1.5;
 
   dt {
@@ -87,38 +87,38 @@
   }
 }
 
-.vhl-guying__vhl-value {
+.vtl-guying__vtl-value {
   @extend %text-m-400;
   @apply m-0;
   color: var(--grey-900);
 }
 
-.vhl-guying__guying-section {
+.vtl-guying__guying-section {
   @apply flex flex-col gap-3;
 }
 
-.vhl-guying__calculate-btn-container {
+.vtl-guying__calculate-btn-container {
   @apply flex justify-end mt-3;
 }
 
-.vhl-guying__calculate-btn {
+.vtl-guying__calculate-btn {
   @apply flex items-center gap-2;
 }
 
-.vhl-guying__results-section {
+.vtl-guying__results-section {
   @apply flex flex-col gap-3;
 }
 
-.vhl-guying__results-fields {
+.vtl-guying__results-fields {
   @apply flex flex-row justify-between gap-3;
 }
 
-.vhl-guying__result-column {
+.vtl-guying__result-column {
   @apply flex flex-col gap-3;
   width: 20%;
 }
 
-.vhl-guying__result-field {
+.vtl-guying__result-field {
   @apply flex flex-col gap-2;
 
   dt {
@@ -138,13 +138,13 @@
   }
 }
 
-.vhl-guying__result-value {
+.vtl-guying__result-value {
   @extend %text-m-400;
   @apply m-0;
   color: var(--grey-900);
 }
 
-.vhl-guying__info-text {
+.vtl-guying__info-text {
   @apply flex gap-3 mt-2 py-3.5;
 
   p {
@@ -154,19 +154,19 @@
   }
 }
 
-.vhl-guying__info-icon {
+.vtl-guying__info-icon {
   @apply flex-shrink-0 mt-0.5 text-base;
 }
 
-.vhl-guying__loading {
+.vtl-guying__loading {
   @apply flex items-center justify-center gap-3 py-12;
 }
 
-.vhl-guying__loading-text {
+.vtl-guying__loading-text {
   @extend %text-m-400;
   color: var(--grey-600);
 }
 
-.vhl-guying__dialog-footer {
+.vtl-guying__dialog-footer {
   @apply flex gap-3 justify-end w-full;
 }
