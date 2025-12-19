@@ -44,6 +44,10 @@ const tasks: Record<
   [Task.calculatePapoto]: {
     function: 'calculate_papoto',
     externalPackages: []
+  },
+  [Task.setLogLevel]: {
+    function: 'set_log_level',
+    externalPackages: []
   }
 };
 

@@ -9,7 +9,8 @@ export enum Task {
   refreshProjection = 'refreshProjection',
   getSupportCoordinates = 'getSupportCoordinates',
   addLoad = 'addLoad',
-  calculatePapoto = 'calculatePapoto'
+  calculatePapoto = 'calculatePapoto',
+  setLogLevel = 'setLogLevel'
 }
 
 export enum DataError {
@@ -38,6 +39,14 @@ export interface GetSectionOutput {
   load_angle: number[];
   displacement: number[][];
   span_length: number[];
+}
+
+export enum LogLevel {
+  DEBUG = 10,
+  INFO = 20,
+  WARNING = 30,
+  ERROR = 40,
+  CRITICAL = 50
 }
 
 export interface TaskInputs {
@@ -76,6 +85,9 @@ export interface TaskInputs {
     V3: number;
     VR: number;
   };
+  [Task.setLogLevel]: {
+    activateDebugLogs: boolean;
+  };
 }
 
 export interface TaskOutputs {
@@ -99,4 +111,5 @@ export interface TaskOutputs {
     parameter_1_3: number;
     check_validity: boolean;
   };
+  [Task.setLogLevel]: undefined;
 }

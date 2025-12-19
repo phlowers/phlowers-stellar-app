@@ -53,6 +53,15 @@
     </button>
     }
   </p-card>
+  <p-card header="">
+    <div class="flex flex-row gap-2 items-center">
+      <label for="activateDebugLogs" i18n>Activate Python logs</label>
+      <p-toggleSwitch
+        [(ngModel)]="activateDebugLogs"
+        (onChange)="onChangeActivateDebugLogs(activateDebugLogs)"
+      />
+    </div>
+  </p-card>
   <p-card i18n-header header="Danger zone">
     <div class="flex flex-row gap-2">
       <button app-btn i18n btnStyle="danger" (click)="deleteAllStudies()">
