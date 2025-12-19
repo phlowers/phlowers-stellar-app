@@ -89,7 +89,7 @@ export class SectionPlotCardComponent {
             value: formatNumber(vtl_under_chain?.[0][this.index()])
           },
           {
-            label: $localize`H :`,
+            label: $localize`T :`,
             value: formatNumber(vtl_under_chain?.[1][this.index()])
           },
           {

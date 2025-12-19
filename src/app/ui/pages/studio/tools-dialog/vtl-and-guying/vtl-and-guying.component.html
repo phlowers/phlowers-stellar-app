@@ -73,18 +73,18 @@
             </dd>
           </div>
           <div class="vtl-guying__vtl-field">
-            <dt i18n>Charge L</dt>
+            <dt i18n>Charge T</dt>
             <dd class="vtl-guying__vtl-value">
               {{
-                (vtlWithoutGuying()?.chargeL | number: '1.0-3') ?? '-'
+                (vtlWithoutGuying()?.chargeH | number: '1.0-3') ?? '-'
               }}&nbsp;daN
             </dd>
           </div>
           <div class="vtl-guying__vtl-field">
-            <dt i18n>Charge H</dt>
+            <dt i18n>Charge L</dt>
             <dd class="vtl-guying__vtl-value">
               {{
-                (vtlWithoutGuying()?.chargeH | number: '1.0-3') ?? '-'
+                (vtlWithoutGuying()?.chargeL | number: '1.0-3') ?? '-'
               }}&nbsp;daN
             </dd>
           </div>
@@ -200,7 +200,7 @@
                 </dd>
               </div>
               <div class="vtl-guying__result-field">
-                <dt i18n>Charge H under console</dt>
+                <dt i18n>Charge T under console</dt>
                 <dd class="vtl-guying__result-value">
                   {{
                     (results()?.chargeHUnderConsole | number: '1.0-3') ?? '-'

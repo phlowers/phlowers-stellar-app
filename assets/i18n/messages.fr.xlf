@@ -2207,10 +2207,10 @@
         <target>Mesures terrain</target>
       </segment>
     </unit>
-    <unit id="3232856077921805796">
+    <unit id="8365500949716833241">
       <segment state="initial">
         <source>VTL &amp; Guying</source>
-        <target>Haubanage &amp; VTL</target>
+        <target>Haubanage &amp; VHL</target>
       </segment>
     </unit>
     <unit id="810011115797190863">
@@ -2309,10 +2309,10 @@
         <target>LIT - ADR</target>
       </segment>
     </unit>
-    <unit id="8556557769909937132">
+    <unit id="3980974174191771572">
       <segment state="initial">
         <source>VTL (under chain)</source>
-        <target>VTL (sous chaîne)</target>
+        <target>VHL (sous chaîne)</target>
       </segment>
     </unit>
     <unit id="1455021675803464772">
@@ -2321,10 +2321,10 @@
         <target>Angle en ligne :</target>
       </segment>
     </unit>
-    <unit id="146808728587794667">
+    <unit id="4708771953728158073">
       <segment state="initial">
         <source>VTL (under console)</source>
-        <target>VTL (sous console)</target>
+        <target>VHL (sous console)</target>
       </segment>
     </unit>
     <unit id="758471193876128020">
@@ -3245,10 +3245,10 @@
         <target>Type de support:</target>
       </segment>
     </unit>
-    <unit id="1370499216902676579">
+    <unit id="4289686132341098096">
       <segment state="initial">
-        <source>VTL without guying</source>
-        <target>VTL sans haubanage</target>
+        <source> VTL without guying </source>
+        <target> VHL sans haubanage </target>
       </segment>
     </unit>
     <unit id="8104522487016152357">
@@ -3263,9 +3263,9 @@
         <target>Charge L</target>
       </segment>
     </unit>
-    <unit id="8806646983185856986">
+    <unit id="2592173227911935397">
       <segment state="initial">
-        <source>Charge H</source>
+        <source>Charge T</source>
         <target>Charge H</target>
       </segment>
     </unit>
@@ -3287,10 +3287,10 @@
         <target>Poulie</target>
       </segment>
     </unit>
-    <unit id="5968132631442328843">
+    <unit id="6036308268629413664">
       <segment state="initial">
-        <source>Results</source>
-        <target>Résultats</target>
+        <source> Results </source>
+        <target> Résultats </target>
       </segment>
     </unit>
     <unit id="5521065577754808188">
@@ -3311,9 +3311,9 @@
         <target>Charge V sous console</target>
       </segment>
     </unit>
-    <unit id="3177789169273011855">
+    <unit id="1682829464476951720">
       <segment state="initial">
-        <source>Charge H under console</source>
+        <source>Charge T under console</source>
         <target>Charge H sous console</target>
       </segment>
     </unit>
@@ -3339,6 +3339,12 @@
       <segment state="initial">
         <source>Loading data…</source>
         <target>Chargement des données…</target>
+      </segment>
+    </unit>
+    <unit id="4879686808912531747">
+      <segment state="initial">
+        <source>T :</source>
+        <target>H :</target>
       </segment>
     </unit>
   </file>
