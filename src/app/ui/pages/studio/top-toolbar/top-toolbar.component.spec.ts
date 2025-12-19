@@ -382,14 +382,13 @@ describe('StudioTopToolbarComponent', () => {
       );
     });
 
-    it('should execute action for tool item 2 - VTL & Guying', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
+    it('should execute action for tool item 2 - VHL & Guying', () => {
       const items = component.toolsItems();
 
       items[1].action();
-      expect(alertSpy).toHaveBeenCalledWith('click VTL & Guying');
-
-      alertSpy.mockRestore();
+      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+        'vhl-and-guying'
+      );
     });
 
     it('should execute action for tool item 3 - Cable marking', () => {
@@ -451,9 +450,9 @@ describe('StudioTopToolbarComponent', () => {
         tools?.[i].command?.({});
       }
 
-      // First tool calls service, remaining 6 call alert
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledTimes(1);
-      expect(alertSpy).toHaveBeenCalledTimes(6);
+      // First two tools call service, remaining 5 call alert
+      expect(mockToolsDialogService.openTool).toHaveBeenCalledTimes(2);
+      expect(alertSpy).toHaveBeenCalledTimes(5);
       alertSpy.mockRestore();
     });
   });

@@ -16,7 +16,7 @@
     <label for="spanSelect" i18n>Span</label>
     <p-select
       inputId="spanSelect"
-      [options]="spans()"
+      [options]="plotService.getSpanOptions()"
       fluid
       (onChange)="selectedSpan.set($event.value)"
       formControlName="spanSelect"

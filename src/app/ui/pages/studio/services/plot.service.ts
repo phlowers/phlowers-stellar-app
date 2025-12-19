@@ -1,4 +1,10 @@
-import { DestroyRef, inject, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  DestroyRef,
+  inject,
+  Injectable,
+  signal
+} from '@angular/core';
 import { Study } from '@core/data/database/interfaces/study';
 import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
 import {
@@ -16,6 +22,12 @@ import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
 
 export const PLOT_ID = 'plotly-output';
+
+export interface SpanOption {
+  label: string;
+  value: number[];
+  supports: number[];
+}
 
 export const checkIfProjectionNeedRefresh = (
   oldOptions: PlotOptions,
@@ -198,4 +210,17 @@ export class PlotService {
     this.refreshCamera();
     this.isSidebarOpen.set(!this.isSidebarOpen());
   };
+
+  getSpanOptions = computed<SpanOption[]>(() => {
+    const supportsLength =
+      this.plotOptions().endSupport - this.plotOptions().startSupport + 1;
+    const spanAmount = Math.max(supportsLength - 1, 0);
+    // create an array the length of spanAmount
+    const spans = Array.from({ length: spanAmount }, (_, index) => ({
+      label: `${index + 1} - ${index + 2}`,
+      value: [index, index + 1],
+      supports: [index, index + 1]
+    }));
+    return spans;
+  });
 }

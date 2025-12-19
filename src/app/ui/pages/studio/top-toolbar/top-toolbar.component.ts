@@ -149,11 +149,11 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 3,
-      label: $localize`VTL & Guying`, // VHL & haubanage
+      label: $localize`VHL & Guying`, // VHL & haubanage
       checked: false,
-      disabled: true,
+      disabled: false,
       action: () => {
-        alert('click VTL & Guying');
+        this.toolsDialogService.openTool('vhl-and-guying');
       }
     },
     {
