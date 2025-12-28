@@ -481,6 +481,7 @@ function createSupportMock(): Support {
     counterWeight: null,
     supportFootAltitude: null,
     chainSurface: null,
-    attachmentPosition: null
+    attachmentPosition: null,
+    towerModel: null
   };
 }

@@ -38,7 +38,8 @@ describe('WorkerService', () => {
     counterWeight: 10,
     supportFootAltitude: 100,
     attachmentPosition: 'top',
-    chainSurface: 0.1
+    chainSurface: 0.1,
+    towerModel: 'Tower Model'
   });
 
   const createMockInitialCondition = (): InitialCondition => ({
