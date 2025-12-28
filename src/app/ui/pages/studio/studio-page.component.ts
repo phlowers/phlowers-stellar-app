@@ -64,8 +64,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       value: string;
     }[]
   >([
-    { label: $localize`Single`, value: 'single' },
-    { label: $localize`Double`, value: 'double' },
+    { label: $localize`One span`, value: 'single' },
+    { label: $localize`Two spans`, value: 'double' },
     { label: $localize`All`, value: 'all' }
   ]);
   subscription: Subscription | null = null;

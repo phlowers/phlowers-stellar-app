@@ -2483,22 +2483,10 @@
         <target>Êtes-vous sûr de vouloir supprimer cette étude ?</target>
       </segment>
     </unit>
-    <unit id="3413004253239957216">
-      <segment state="initial">
-        <source>Single</source>
-        <target>Simple</target>
-      </segment>
-    </unit>
-    <unit id="4061312488520540569">
-      <segment state="initial">
-        <source>Double</source>
-        <target>Double poteau</target>
-      </segment>
-    </unit>
     <unit id="1616102757855967475">
       <segment state="initial">
         <source>All</source>
-        <target>Tous</target>
+        <target>Toutes</target>
       </segment>
     </unit>
     <unit id="1995462320428563005">
@@ -2517,6 +2505,18 @@
       <segment state="initial">
         <source>View charges</source>
         <target>Voir</target>
+      </segment>
+    </unit>
+    <unit id="6028011477486800998">
+      <segment state="initial">
+        <source>One span</source>
+        <target>Une portée</target>
+      </segment>
+    </unit>
+    <unit id="2981359641232309364">
+      <segment state="initial">
+        <source>Two spans</source>
+        <target>Deux portées</target>
       </segment>
     </unit>
   </file>
