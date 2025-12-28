@@ -120,13 +120,15 @@ describe('AttachmentSetModalComponent', () => {
     component.supportName.set('test');
 
     // Simulate modal opening by calling resetValues directly
+    // resetValues() defaults to resetSupportName = false, so supportName is not reset
     component.resetValues();
     await fixture.whenStable();
 
     expect(component.armLength()).toBeUndefined();
     expect(component.heightBelowConsole()).toBeUndefined();
     expect(component.attachmentSet()).toBeUndefined();
-    expect(component.supportName()).toBeUndefined();
+    // supportName is not reset when resetSupportName is false (default)
+    expect(component.supportName()).toBe('test');
   });
 
   it('should emit isOpenChange when visibility changes', () => {
@@ -174,7 +176,8 @@ describe('AttachmentSetModalComponent', () => {
     expect(component.armLength()).toBeUndefined();
     expect(component.heightBelowConsole()).toBeUndefined();
     expect(component.attachmentSet()).toBeUndefined();
-    expect(component.supportName()).toBeUndefined();
+    // When clearing attachment_set, resetValues(false) is called, so supportName is not reset
+    expect(component.supportName()).toBe('Support A');
   });
 
   it('should emit validateForm with support uuid when support is provided', () => {
