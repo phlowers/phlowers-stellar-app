@@ -15,6 +15,7 @@
       type="file"
       onclick="this.value = null"
       (change)="loadFiles($event)"
+      accept=".csv,.clst"
       class="import-study__tool__input"
     />
   </label>
@@ -38,20 +39,6 @@
             >
               Open
             </a>
-
-            <button
-              app-btn
-              btnSize="m"
-              btnStyle="text"
-              (click)="deleteStudy(study.uuid)"
-              i18n-aria-label
-              aria-label="delete study"
-            >
-              <app-icon
-                icon="delete"
-                class="import-study__list__btns__erase-icon"
-              />
-            </button>
           </div>
         </li>
       }
