@@ -221,7 +221,10 @@ export class ManualSectionComponent implements OnInit {
         )
       ] as Support[];
     } else {
-      this.section().supports = currentSupports.slice(0, amount);
+      const supports = currentSupports.slice(0, amount);
+      const lastSupport = supports[supports.length - 1];
+      lastSupport.spanLength = null;
+      this.section().supports = supports;
     }
     this.onSectionChange();
   }
