@@ -1,108 +1,101 @@
 @use 'abstract.extracts' as app;
 
 dt {
-    margin: 0.125rem 0.25rem;
-    display: inline-block;
-    color: var(--grey-800);
-    @extend %text-s-400;
+  margin: 0.125rem 0.25rem;
+  display: inline-block;
+  color: var(--grey-800);
+  @extend %text-s-400;
 }
 
 dd {
-    @extend %text-m-400;
-    color: var(--star-dust-950);
-    height: 2rem;
-    display: flex;
-    align-items: center;
+  @extend %text-m-400;
+  color: var(--star-dust-950);
+  padding: 0.375rem 0.5rem;
 }
 
 .parameter-calculation-15-without-wind {
-    &__mandatory-msg {
-        @apply flex items-center gap-1 my-4;
-        @extend %text-s-600;
-        color: var(--star-dust-950);
+  &__mandatory-msg {
+    @apply flex items-center gap-1 my-4;
+    @extend %text-s-600;
+    color: var(--star-dust-950);
+  }
+
+  &__form {
+    @extend %tools-grid-layout;
+    grid-template-areas:
+      'updateMode updateMode . . .'
+      'parameterPapoto parameterUncertaintyPapoto cableTemperature15C cableTemperatureUncertainty15C .';
+
+    .updateMode {
+      grid-area: updateMode;
     }
 
-    &__form {
-        @extend %tools-grid-layout;
-        grid-template-areas:
-            'updateMode updateMode . . .'
-            'parameterPapoto parameterUncertaintyPapoto cableTemperature15C cableTemperatureUncertainty15C .';
-
-        .updateMode {
-            grid-area: updateMode;
-        }
-
-        .parameterPapoto {
-            grid-area: parameterPapoto;
-        }
-
-        .parameterUncertaintyPapoto {
-            grid-area: parameterUncertaintyPapoto;
-        }
-
-        .cableTemperature15C {
-            grid-area: cableTemperature15C;
-        }
-
-        .cableTemperatureUncertainty15C {
-            grid-area: cableTemperatureUncertainty15C;
-        }
-
-        label {
-            @extend %text-s-400;
-            margin: 0.125rem 0.25rem;
-
-            &:has(.small) {
-                @apply flex items-end gap-1 justify-between;
-            }
-        }
+    .parameterPapoto {
+      grid-area: parameterPapoto;
     }
 
-    &__results {
-        @apply border-t mt-3;
-        border-color: var(--star-dust-300);
-
-        &__title {
-            @apply mt-4 mb-0;
-            @extend %heading-s;
-            color: var(--star-dust-950);
-        }
-
-        &__list {
-            @extend %tools-grid-layout;
-            grid-template-areas:
-                'parameter15CMinusUncertainty parameter15C parameter15CPlusUncertainty . .';
-
-            .parameter15CMinusUncertainty {
-                grid-area: parameter15CMinusUncertainty;
-            }
-
-            .parameter15C {
-                grid-area: parameter15C;
-            }
-
-            .parameter15CPlusUncertainty {
-                grid-area: parameter15CPlusUncertainty;
-            }
-        }
-
-        &__actions {
-            @extend %tools-grid-layout;
-            grid-template-areas: 'createInitialMinus createInitialNominal createInitialPlus . .';
-            row-gap: 0.5rem;
-            margin-top: 1.5rem;
-
-            .createInitialMinus {
-                grid-area: createInitialMinus;
-            }
-
-            .createInitialNominal {
-                grid-area: createInitialNominal;
-            }
-
-            .createInitialPlus {
-                grid-area: createInitialPlus;
-            }
-        }
+    .parameterUncertaintyPapoto {
+      grid-area: parameterUncertaintyPapoto;
     }
+
+    .cableTemperature15C {
+      grid-area: cableTemperature15C;
+    }
+
+    .cableTemperatureUncertainty15C {
+      grid-area: cableTemperatureUncertainty15C;
+    }
+
+    label {
+      @extend %text-s-400;
+      margin: 0.125rem 0.25rem;
+    }
+  }
+
+  &__results {
+    @apply border-t mt-3;
+    border-color: var(--star-dust-300);
+
+    &__title {
+      @apply mt-4 mb-0;
+      @extend %heading-s;
+      color: var(--star-dust-950);
+    }
+
+    &__list {
+      @extend %tools-grid-layout;
+      grid-template-areas: 'parameter15CMinusUncertainty parameter15C parameter15CPlusUncertainty . .';
+
+      .parameter15CMinusUncertainty {
+        grid-area: parameter15CMinusUncertainty;
+      }
+
+      .parameter15C {
+        grid-area: parameter15C;
+      }
+
+      .parameter15CPlusUncertainty {
+        grid-area: parameter15CPlusUncertainty;
+      }
+    }
+
+    &__actions {
+      @extend %tools-grid-layout;
+      grid-template-areas: 'createInitialMinus createInitialNominal createInitialPlus . .';
+      row-gap: 0.5rem;
+      margin-top: 1.5rem;
+
+      .createInitialMinus {
+        grid-area: createInitialMinus;
+      }
+
+      .createInitialNominal {
+        grid-area: createInitialNominal;
+      }
+
+      .createInitialPlus {
+        grid-area: createInitialPlus;
+      }
+    }
+  }
 }

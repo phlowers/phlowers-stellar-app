@@ -1,7 +1,6 @@
 @use 'abstract.extracts' as app;
 
 .papoto {
-
   &__error {
     @apply flex items-center gap-1 my-4;
     @extend %text-s-600;
@@ -204,4 +203,9 @@
   &:active {
     @apply cursor-grabbing;
   }
+}
+
+label {
+  @extend %text-s-400;
+  margin: 0.125rem 0.25rem;
 }

@@ -20,11 +20,10 @@
   </div>
 
   <dl class="ambientTemp">
-    <dt id="ambientTemperature" i18n>Ambient temperature (°C)</dt>
-    <dd class="text-sx-400 text-gray-500">
-      {{ measureData().ambientTemperature }} °C
-    </dd>
+    <dt i18n>Ambient temperature (°C)</dt>
+    <dd>{{ measureData().ambientTemperature }} °C</dd>
   </dl>
+
   <div class="transit">
     <label for="transit" i18n>Transit</label>
     <input
@@ -39,22 +38,24 @@
     />
   </div>
 
-  <dl class="windSpeed">
-    <dt for="windSpeed" class="windSpeed__label" i18n>Wind speed</dt>
-    <dd>
-      {{ measureData().windSpeed }}
-      {{ measureData().windSpeedUnit === 'ms' ? 'm/s' : 'km/h' }}
-    </dd>
+  <dl class="contents">
+    <div class="windSpeed">
+      <dt for="windSpeed" class="windSpeed__label" i18n>Wind speed</dt>
+      <dd>
+        {{ measureData().windSpeed }}
+        {{ measureData().windSpeedUnit === 'ms' ? 'm/s' : 'km/h' }}
+      </dd>
+    </div>
+
+    <div class="windDirection">
+      <dt id="windDirection" i18n>Wind direction (degrees)</dt>
+      <dd>{{ measureData().windDirection }}</dd>
+    </div>
   </dl>
 
-  <dl class="windDirection">
-    <dt id="windDirection" i18n>Wind direction (degrees)</dt>
-    <dd>{{ measureData().windDirection }}</dd>
-  </dl>
-
-  <div class="windIncidence">
-    <div class="flex flex-row gap-2 items-center">
-      <label for="windIncidence" i18n>Wind incidence (degrees)</label>
+  <dl class="windIncidence">
+    <dt>
+      <p id="windIncidenceLabel" class="mb-0" i18n>Wind incidence (degrees)</p>
       <p-selectbutton
         [options]="windIncidenceModeOptions"
         [ngModel]="measureData().windIncidenceMode"
@@ -62,25 +63,20 @@
         optionLabel="label"
         optionValue="value"
         allowEmpty="false"
+        ariaLabelledBy="windIncidenceLabel"
       />
-    </div>
+    </dt>
     @if (measureData().windIncidenceMode === 'auto') {
-      <dl>
-        <dd>
-          {{ measureData().windIncidence }}
-        </dd>
-      </dl>
+      <dd>
+        {{ measureData().windIncidence }}
+      </dd>
     } @else {
-      <dl>
-        <dd>90°</dd>
-      </dl>
+      <dd>90°</dd>
     }
-  </div>
+  </dl>
 
   <div class="solar">
-    <div class="flex flex-row gap-4 items-center">
-      <h3 class="solar__heading" i18n>Solar flux :</h3>
-    </div>
+    <h3 class="solar__heading underline-text" i18n>Solar flux :</h3>
   </div>
 
   <div class="skyCover">
@@ -98,24 +94,28 @@
       [required]="true"
     />
   </div>
-  <dl class="diffusedSolarFlux">
-    <dt id="diffusedSolarFlux" i18n>Diffused solar flux</dt>
-    <dd>{{ measureData().diffusedSolarFlux }} W/m²</dd>
+
+  <dl class="contents">
+    <div class="diffusedSolarFlux">
+      <dt i18n>Diffused solar flux</dt>
+      <dd>{{ measureData().diffusedSolarFlux }} W/m²</dd>
+    </div>
+
+    <div class="directSolarFlux">
+      <dt i18n>Direct solar flux</dt>
+      <dd>{{ measureData().directSolarFlux }} W/m²</dd>
+    </div>
+
+    <div class="diffusedPlusDirectSolarFlux">
+      <dt i18n>Diffused plus direct solar flux</dt>
+      <dd>{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
+    </div>
   </dl>
-  <dl class="directSolarFlux">
-    <dt id="directSolarFlux" i18n>Direct solar flux</dt>
-    <dd>{{ measureData().directSolarFlux }} W/m²</dd>
-  </dl>
-  <dl class="diffusedPlusDirectSolarFlux">
-    <dt id="diffusedPlusDirectSolarFlux" i18n>
-      Diffused plus direct solar flux
-    </dt>
-    <dd>{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
-  </dl>
-  <div class="measuredDiffusedPlusDirectSolarFlux relative">
-    <label for="measuredDiffusedPlusDirectSolarFlux" i18n
-      >Measured diffused plus direct solar flux (not required)</label
-    >
+
+  <div class="measuredDiffusedPlusDirectSolarFlux">
+    <label for="measuredDiffusedPlusDirectSolarFlux" i18n>
+      Measured diffused plus direct solar flux (not required)
+    </label>
     <p-inputgroup>
       <input
         id="measuredDiffusedPlusDirectSolarFlux"
@@ -125,16 +125,17 @@
         (ngModelChange)="
           updateField('measuredDiffusedPlusDirectSolarFlux', $event)
         "
-        aria-describedby="mandatory-temperature"
+        aria-describedby="mandatory-temperature solar-fluxs-impact"
         [min]="0"
         required
       />
       <p-inputgroup-addon>W/m²</p-inputgroup-addon>
     </p-inputgroup>
-    <p class="text-sx-400 text-gray-500 absolute right-0" i18n>
-      It won't be used in the calculation.
-    </p>
   </div>
+
+  <p id="solar-fluxs-impact" class="solar-fluxs-impact" i18n>
+    It won't be used in the calculation.
+  </p>
 </div>
 
 <div class="text-right mt-8">
@@ -149,18 +150,18 @@
     <h2 class="temperature-calculation__results__title" i18n>Results :</h2>
 
     <dl class="temperature-calculation__results__list">
-      <dl class="cableTemperature">
+      <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
         <dd>{{ temperatureResult()?.cableTemperature }} °C</dd>
-      </dl>
-      <dl class="incertainCableTemperature">
+      </div>
+      <div class="incertainCableTemperature">
         <dt i18n>Incertain cable temperature</dt>
         <dd>{{ temperatureResult()?.cableTemperatureUncertainty }} °C</dd>
-      </dl>
-      <dl class="solarFlux">
+      </div>
+      <div class="solarFlux">
         <dt i18n>Solar flux on the cable</dt>
         <dd>{{ temperatureResult()?.cableSolarFlux }} W/m²</dd>
-      </dl>
+      </div>
     </dl>
   </div>
 }
