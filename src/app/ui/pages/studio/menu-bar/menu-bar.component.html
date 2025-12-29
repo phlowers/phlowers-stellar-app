@@ -26,37 +26,53 @@
 
   <hr class="menubar__separator" />
 
-  <div class="flex items-center gap-1">
-    <p class="mb-0 text-s-600 whitespace-nowrap" i18n>CC :</p>
-    <app-select-with-buttons
-      [options]="chargeCases()"
-      [selectedOption]="selectedChargeCaseUuid()"
-      (selectOption)="selectChargeCase($event)"
-      (deleteOption)="deleteChargeCase($event)"
-      (duplicateOption)="duplicateChargeCase($event)"
-      (viewOption)="viewOrEditChargeCase($event, 'view')"
-      (editOption)="viewOrEditChargeCase($event, 'edit')"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="Select charge case"
-      i18n-placeholder
-      ariaLabel="Select charge case"
-      i18n-ariaLabel
-      class="menubar__select"
-      [showClear]="false"
-    />
-  </div>
+  @if (chargeCases().length > 0) {
+    <div class="flex items-center gap-1">
+      <p class="mb-0 text-s-600 whitespace-nowrap" i18n>CC :</p>
+      <app-select-with-buttons
+        [options]="chargeCases()"
+        [selectedOption]="selectedChargeCaseUuid()"
+        (selectOption)="selectChargeCase($event)"
+        (deleteOption)="deleteChargeCase($event)"
+        (duplicateOption)="duplicateChargeCase($event)"
+        (viewOption)="viewOrEditChargeCase($event, 'view')"
+        (editOption)="viewOrEditChargeCase($event, 'edit')"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select charge case"
+        i18n-placeholder
+        ariaLabel="Select charge case"
+        i18n-ariaLabel
+        class="menubar__select"
+        [showClear]="false"
+      />
+    </div>
 
-  <button
-    aria-label="add charge case"
-    i18n-aria-label
-    app-btn
-    btnStyle="outlined"
-    btnSize="s"
-    (click)="openNewChargeModal.emit({ mode: 'create', uuid: null })"
-  >
-    <app-icon icon="add_circle" />
-  </button>
+    <button
+      aria-label="add charge case"
+      i18n-aria-label
+      app-btn
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="openNewChargeModal.emit({ mode: 'create', uuid: null })"
+    >
+      <app-icon icon="add_circle" />
+    </button>
+  } @else {
+    <button
+      (click)="
+        $event.stopPropagation();
+        openNewChargeModal.emit({ mode: 'create', uuid: null })
+      "
+      app-btn
+      btnSize="s"
+      btnStyle="outlined"
+      class="section__content-init"
+    >
+      <app-icon icon="add" />
+      <span i18n>Add a load case</span>
+    </button>
+  }
 
   @if (staffIsPresent() !== undefined) {
     <p class="text-s-600 flex items-center gap-2 mb-0">
