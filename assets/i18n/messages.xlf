@@ -2078,19 +2078,19 @@
         <source>Select charges</source>
       </segment>
     </unit>
-    <unit id="3413004253239957216">
-      <segment>
-        <source>Single</source>
-      </segment>
-    </unit>
-    <unit id="4061312488520540569">
-      <segment>
-        <source>Double</source>
-      </segment>
-    </unit>
     <unit id="9161302603054307750">
       <segment>
         <source>View charges</source>
+      </segment>
+    </unit>
+    <unit id="2981359641232309364">
+      <segment>
+        <source>Two spans</source>
+      </segment>
+    </unit>
+    <unit id="6028011477486800998">
+      <segment>
+        <source>One span</source>
       </segment>
     </unit>
   </file>
