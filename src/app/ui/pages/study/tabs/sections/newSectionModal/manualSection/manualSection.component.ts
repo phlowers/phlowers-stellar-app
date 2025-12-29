@@ -142,7 +142,7 @@ export class ManualSectionComponent implements OnInit {
   maintenanceFilterTable = signal<MaintenanceData[]>([]);
   linesFilterTable = signal<Line[]>([]);
   firstSupport = signal<number>(0);
-  rowsSupport = signal<number>(5);
+  rowsSupport = signal<number>(10);
 
   maintenanceTeamRead = signal<string>('');
   maintenanceCenterRead = signal<string>('');
