@@ -87,14 +87,14 @@ describe('createPlot', () => {
       createPlot('test-plot-id', mockData, false, false, '3d', null, 'profile');
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
-      expect(layoutArg.scene.aspectmode).toBe('data');
+      expect(layoutArg.scene.aspectmode).toBe('manual');
     });
 
     it('should configure scene with correct aspectratio', () => {
       createPlot('test-plot-id', mockData, false, false, '3d', null, 'profile');
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
-      expect(layoutArg.scene.aspectratio).toEqual(undefined);
+      expect(layoutArg.scene.aspectratio).toEqual({ x: 3, y: 0.2, z: 0.5 });
     });
   });
 
@@ -212,7 +212,7 @@ describe('createPlot', () => {
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
-      expect(layoutArg.xaxis.autorange).toBe(true);
+      expect(layoutArg.xaxis.autorange).toBe('reversed');
     });
 
     it('should work with invert parameter set to false', () => {
