@@ -32,11 +32,11 @@ async function loadPyodideAndPackages() {
     pyodide = await loadPyodide({
       indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
       packages: [
-        'numpy',
-        'pandas',
-        'pydantic',
-        'packaging',
-        'wrapt',
+        // 'numpy',
+        // 'pandas',
+        // 'pydantic',
+        // 'packaging',
+        // 'wrapt',
         ...localPythonPackages
       ]
     });
