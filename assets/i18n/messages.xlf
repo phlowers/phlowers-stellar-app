@@ -524,7 +524,264 @@
     </unit>
     <unit id="4888540688990075177">
       <segment>
-        <source> File formats: .csv, .clst </source>
+        <source>Author:</source>
+      </segment>
+    </unit>
+    <unit id="7022070615528435141">
+      <segment>
+        <source>Delete</source>
+      </segment>
+    </unit>
+    <unit id="6621329748219109148">
+      <segment>
+        <source>Duplicate</source>
+      </segment>
+    </unit>
+    <unit id="7585826646011739428">
+      <segment>
+        <source>Edit</source>
+      </segment>
+    </unit>
+    <unit id="3768927257183755959">
+      <segment>
+        <source>Save</source>
+      </segment>
+    </unit>
+    <unit id="3317759112793075512">
+      <segment>
+        <source>Studies deleted</source>
+      </segment>
+    </unit>
+    <unit id="6536020395223120161">
+      <segment>
+        <source> Error </source>
+      </segment>
+    </unit>
+    <unit id="6202213245388240559">
+      <segment>
+        <source>Study updated</source>
+      </segment>
+    </unit>
+    <unit id="8337097439903063887">
+      <segment>
+        <source>Study created</source>
+      </segment>
+    </unit>
+    <unit id="3521084103654700903">
+      <segment>
+        <source>Successful</source>
+      </segment>
+    </unit>
+    <unit id="3676810969871565173">
+      <segment>
+        <source>App version</source>
+      </segment>
+    </unit>
+    <unit id="8835813397293521026">
+      <segment>
+        <source>Reset fields</source>
+      </segment>
+    </unit>
+    <unit id="3407827478067561796">
+      <segment>
+        <source>Change line height</source>
+      </segment>
+    </unit>
+    <unit id="8892964333730306563">
+      <segment>
+        <source>Plotly</source>
+      </segment>
+    </unit>
+    <unit id="1170667643695316061">
+      <segment>
+        <source>Create a study section</source>
+      </segment>
+    </unit>
+    <unit id="1267728769006543252">
+      <segment>
+        <source> Delete all studies </source>
+      </segment>
+    </unit>
+    <unit id="928951684182090210">
+      <segment>
+        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
+            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
+          *</pc></source>
+      </segment>
+    </unit>
+    <unit id="1289308098980826210">
+      <segment>
+        <source>Section type</source>
+      </segment>
+    </unit>
+    <unit id="128932358295516526">
+      <segment>
+        <source>Section Deleted</source>
+      </segment>
+    </unit>
+    <unit id="1386766078260547788">
+      <segment>
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
+            type="other"
+            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
+            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
+      </segment>
+    </unit>
+    <unit id="1444333919089743258">
+      <segment>
+        <source>View all news</source>
+      </segment>
+    </unit>
+    <unit id="3569799587833040802">
+      <segment>
+        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
+            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
+          *</pc></source>
+      </segment>
+    </unit>
+    <unit id="1599802675385906175">
+      <segment>
+        <source>Add support after</source>
+      </segment>
+    </unit>
+    <unit id="1614612576043079687">
+      <segment>
+        <source>Shrink menu</source>
+      </segment>
+    </unit>
+    <unit id="1653305415865364716">
+      <segment>
+        <source>Study updated successfully</source>
+      </segment>
+    </unit>
+    <unit id="1949800506879332767">
+      <segment>
+        <source>Section Name</source>
+      </segment>
+    </unit>
+    <unit id="2102825898069375693">
+      <segment>
+        <source>Menu</source>
+      </segment>
+    </unit>
+    <unit id="2233560223291461480">
+      <segment>
+        <source>Manual</source>
+      </segment>
+    </unit>
+    <unit id="2250155903065806087">
+      <segment>
+        <source>Study</source>
+      </segment>
+    </unit>
+    <unit id="2269840927612671406">
+      <segment>
+        <source>A new application update is available!</source>
+      </segment>
+    </unit>
+    <unit id="2275328567992347600">
+      <segment>
+        <source>Page not found</source>
+      </segment>
+    </unit>
+    <unit id="479690504462006012">
+      <segment>
+        <source>Initial condition</source>
+      </segment>
+    </unit>
+    <unit id="2398619245085086844">
+      <segment>
+        <source> Reset database </source>
+      </segment>
+    </unit>
+    <unit id="2426063357414126636">
+      <segment>
+        <source>The database has been reset</source>
+      </segment>
+    </unit>
+    <unit id="2509141182388535183">
+      <segment>
+        <source>View</source>
+      </segment>
+    </unit>
+    <unit id="2547571169649786686">
+      <segment>
+        <source>Danger zone</source>
+      </segment>
+    </unit>
+    <unit id="2593007815199532062">
+      <segment>
+        <source>Section</source>
+      </segment>
+    </unit>
+    <unit id="2638469548137871317">
+      <segment>
+        <source>Initial condition name</source>
+      </segment>
+    </unit>
+    <unit id="2668751339669907539">
+      <segment>
+        <source>Learn more about latest updates</source>
+      </segment>
+    </unit>
+    <unit id="2821179408673282599">
+      <segment>
+        <source>Home</source>
+      </segment>
+    </unit>
+    <unit id="2925129304308690882">
+      <segment>
+        <source>Last modified</source>
+      </segment>
+    </unit>
+    <unit id="2981219928115418649">
+      <segment>
+        <source>Link</source>
+      </segment>
+    </unit>
+    <unit id="3049551355280538164">
+      <segment>
+        <source>Initial Condition Added</source>
+      </segment>
+    </unit>
+    <unit id="3102779920122732727">
+      <segment>
+        <source> Loading </source>
+      </segment>
+    </unit>
+    <unit id="5758842248880389182">
+      <segment>
+        <source> Chain V </source>
+      </segment>
+    </unit>
+    <unit id="3159332545494825825">
+      <segment>
+        <source>Server connexion success!</source>
+      </segment>
+    </unit>
+    <unit id="3193976279273491157">
+      <segment>
+        <source>Actions</source>
+      </segment>
+    </unit>
+    <unit id="8155429097661917791">
+      <segment>
+        <source> Base parameter </source>
+      </segment>
+    </unit>
+    <unit id="3510960524643312912">
+      <segment>
+        <source>Trying to reach the servers.</source>
+      </segment>
+    </unit>
+    <unit id="3533138925800017240">
+      <segment>
+        <source>Study Duplicated</source>
+      </segment>
+    </unit>
+    <unit id="367434070679684080">
+      <segment>
+        <source>Database reset</source>
       </segment>
     </unit>
     <unit id="3799093232488965923">
@@ -572,9 +829,12 @@
         <source>Error reading file</source>
       </segment>
     </unit>
-    <unit id="4648900870671159218">
+    <unit id="4413475670596381933">
       <segment>
-        <source>Success</source>
+        <source> LIT designation <pc id="0" equivStart="START_TAG_APP_ICON"
+            equivEnd="CLOSE_TAG_APP_ICON" type="other"
+            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
+            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
       </segment>
     </unit>
     <unit id="1079181845691356032">
