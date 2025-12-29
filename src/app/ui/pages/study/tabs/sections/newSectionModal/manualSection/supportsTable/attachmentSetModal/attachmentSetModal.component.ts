@@ -133,11 +133,13 @@ export class AttachmentSetModalComponent implements OnInit {
     this.attachmentsFilterTable.set(items);
   }
 
-  resetValues() {
+  resetValues(resetSupportName = false) {
     this.armLength.set(undefined);
     this.heightBelowConsole.set(undefined);
     this.attachmentSet.set(undefined);
-    this.supportName.set(undefined);
+    if (resetSupportName) {
+      this.supportName.set(undefined);
+    }
     this.coordinates.set([]);
     this.getData();
   }
@@ -148,7 +150,7 @@ export class AttachmentSetModalComponent implements OnInit {
 
   async onAttachnementSelect(event: any, key: keyof Attachment) {
     if (event.value === null || event.value === undefined) {
-      this.resetValues();
+      this.resetValues(key === 'support_name');
       return;
     }
     if (key === 'support_name') {
