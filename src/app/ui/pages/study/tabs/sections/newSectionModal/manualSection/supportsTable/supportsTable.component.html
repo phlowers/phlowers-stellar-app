@@ -484,15 +484,14 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            min="0"
-            step="0.01"
+          <p-select
+            [options]="optionsAttachmentPosition"
+            appendTo="body"
             aria-label="attachment position"
             i18n-aria-label
-            [pKeyFilter]="onlyPositiveNumbersWithDecimal"
             [ngModel]="support.attachmentPosition"
+            optionLabel="label"
+            optionValue="value"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'attachmentPosition', $event)
             "
