@@ -29,19 +29,9 @@
         "name": "mypy_extensions",
         "source": "local"
     },
-    "numpy": {
-        "file_name": "numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "numpy",
-        "source": "remote"
-    },
     "packaging": {
         "file_name": "packaging-24.2-py3-none-any.whl",
         "name": "packaging",
-        "source": "remote"
-    },
-    "pandas": {
-        "file_name": "pandas-2.2.3-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "pandas",
         "source": "remote"
     },
     "pandera": {
@@ -71,7 +61,7 @@
     },
     "pydantic-core": {
         "file_name": "pydantic_core-2.27.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "pydantic-core",
+        "name": "pydantic_core",
         "source": "remote"
     },
     "python-dateutil": {
@@ -122,11 +112,6 @@
     "tzdata": {
         "file_name": "tzdata-2024.1-py2.py3-none-any.whl",
         "name": "tzdata",
-        "source": "remote"
-    },
-    "wrapt": {
-        "file_name": "wrapt-1.16.0-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "wrapt",
         "source": "remote"
     }
 }
