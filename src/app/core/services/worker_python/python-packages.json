@@ -7,7 +7,7 @@
     "annotated-types": {
         "file_name": "annotated_types-0.6.0-py3-none-any.whl",
         "name": "annotated-types",
-        "source": "remote"
+        "source": "local"
     },
     "flexcache": {
         "file_name": "flexcache-0.3-cp312-none-any.whl",
@@ -37,17 +37,17 @@
     "numpy": {
         "file_name": "numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
         "name": "numpy",
-        "source": "remote"
+        "source": "local"
     },
     "packaging": {
         "file_name": "packaging-24.2-py3-none-any.whl",
         "name": "packaging",
-        "source": "remote"
+        "source": "local"
     },
     "pandas": {
         "file_name": "pandas-2.2.3-cp312-cp312-pyodide_2024_0_wasm32.whl",
         "name": "pandas",
-        "source": "remote"
+        "source": "local"
     },
     "pandera": {
         "file_name": "pandera-0.21.1-cp312-none-any.whl",
@@ -72,27 +72,27 @@
     "pydantic": {
         "file_name": "pydantic-2.10.5-py3-none-any.whl",
         "name": "pydantic",
-        "source": "remote"
+        "source": "local"
     },
     "pydantic-core": {
         "file_name": "pydantic_core-2.27.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
         "name": "pydantic-core",
-        "source": "remote"
+        "source": "local"
     },
     "python-dateutil": {
         "file_name": "python_dateutil-2.9.0.post0-cp312-none-any.whl",
         "name": "python-dateutil",
-        "source": "remote"
+        "source": "local"
     },
     "pytz": {
         "file_name": "pytz-2024.1-py2.py3-none-any.whl",
         "name": "pytz",
-        "source": "remote"
+        "source": "local"
     },
     "six": {
         "file_name": "six-1.16.0-py2.py3-none-any.whl",
         "name": "six",
-        "source": "remote"
+        "source": "local"
     },
     "tenacity": {
         "file_name": "tenacity-9.1.2-cp312-none-any.whl",
@@ -107,7 +107,7 @@
     "typing-extensions": {
         "file_name": "typing_extensions-4.11.0-py3-none-any.whl",
         "name": "typing-extensions",
-        "source": "remote"
+        "source": "local"
     },
     "typing-inspect": {
         "file_name": "typing_inspect-0.9.0-cp312-none-any.whl",
@@ -122,11 +122,11 @@
     "tzdata": {
         "file_name": "tzdata-2024.1-py2.py3-none-any.whl",
         "name": "tzdata",
-        "source": "remote"
+        "source": "local"
     },
     "wrapt": {
         "file_name": "wrapt-1.16.0-cp312-cp312-pyodide_2024_0_wasm32.whl",
         "name": "wrapt",
-        "source": "remote"
+        "source": "local"
     }
 }
