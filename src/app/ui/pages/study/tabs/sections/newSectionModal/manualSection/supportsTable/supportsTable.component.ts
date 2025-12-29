@@ -86,7 +86,7 @@ export class SupportsTableComponent implements OnInit {
     private readonly chainsService: ChainsService,
     private readonly attachmentService: AttachmentService
   ) {}
-  optionsAttachmentPosition = new Array(5).fill(0).map((_, index) => ({
+  optionsAttachmentPosition = new Array(6).fill(0).map((_, index) => ({
     label: String(index + 1),
     value: index + 1
   }));

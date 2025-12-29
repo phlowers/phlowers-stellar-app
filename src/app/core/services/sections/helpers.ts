@@ -7,7 +7,7 @@ export const createEmptySupport = (): Support => {
     uuid: uuidv4(),
     number: null,
     name: null,
-    spanLength: 0,
+    spanLength: null,
     spanAngle: 0,
     attachmentSet: null,
     attachmentHeight: null,
