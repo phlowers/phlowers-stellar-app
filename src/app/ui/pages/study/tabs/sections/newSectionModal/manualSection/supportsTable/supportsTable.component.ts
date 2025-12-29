@@ -86,7 +86,10 @@ export class SupportsTableComponent implements OnInit {
     private readonly chainsService: ChainsService,
     private readonly attachmentService: AttachmentService
   ) {}
-
+  optionsAttachmentPosition = new Array(5).fill(0).map((_, index) => ({
+    label: String(index + 1),
+    value: index + 1
+  }));
   public onlyPositiveNumbers = /^[0-9]*$/;
   public onlyPositiveNumbersWithDecimal = /^[0-9]*[,.]?[0-9]{0,20}$/;
   public positiveAndNegativeNumbersWithDecimal = /^-?[0-9]*[,.]?[0-9]{0,20}$/;
