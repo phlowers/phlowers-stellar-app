@@ -41,15 +41,32 @@ const axis = {
   showbackground: true
 };
 
-const scene = (isSupportZoom: boolean, camera: Camera | null) => ({
-  aspectmode: 'data' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
-  xaxis: axis,
-  yaxis: { ...axis, scaleanchor: 'x', scaleratio: 1 },
-  zaxis: axis,
-  camera: camera ?? {
-    ...(isSupportZoom ? supportCamera : normalCamera())
+const scene = (
+  isSupportZoom: boolean,
+  invert: boolean,
+  camera: Camera | null
+) => {
+  if (camera) {
+    const y = Math.abs(camera.eye?.y || 0);
+    camera.eye = { ...camera.eye, y: invert ? y : y * -1 };
   }
-});
+  return {
+    aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+    xaxis: axis,
+    yaxis: { ...axis, scaleanchor: 'x', scaleratio: 1 },
+    zaxis: axis,
+    aspectratio: {
+      x: 3,
+      y: 0.2,
+      z: 0.5
+    },
+    camera: camera
+      ? camera
+      : {
+          ...(isSupportZoom ? supportCamera : normalCamera())
+        }
+  };
+};
 
 const config = {
   displayModeBar: true,
@@ -67,7 +84,11 @@ const config = {
   ] as ModeBarDefaultButtons[]
 };
 
-const layout3d = (isSupportZoom: boolean, camera: Camera | null) => ({
+const layout3d = (
+  isSupportZoom: boolean,
+  camera: Camera | null,
+  invert: boolean
+) => ({
   autosize: true,
   showlegend: false,
   margin: {
@@ -76,7 +97,7 @@ const layout3d = (isSupportZoom: boolean, camera: Camera | null) => ({
     t: 0,
     b: 0
   },
-  scene: scene(isSupportZoom, camera)
+  scene: scene(isSupportZoom, invert, camera)
 });
 
 const layout2d: (
@@ -96,7 +117,7 @@ const layout2d: (
     },
     xaxis: {
       ...axis,
-      autorange: side === 'face' ? false : true,
+      autorange: side === 'face' ? false : invert ? 'reversed' : true,
       showticklabels: true,
       showgrid: true,
       showline: true
@@ -127,7 +148,7 @@ export const createPlot = (
   }
   const baseLayout =
     view === '3d'
-      ? layout3d(isSupportZoom, camera)
+      ? layout3d(isSupportZoom, camera, invert)
       : layout2d(invert, data, side);
 
   return Plotly.newPlot(plotId, data, baseLayout, config);
