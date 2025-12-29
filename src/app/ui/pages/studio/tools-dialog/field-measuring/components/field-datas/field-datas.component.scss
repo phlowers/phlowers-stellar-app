@@ -1,5 +1,9 @@
 @use 'abstract.extracts' as app;
 
+%_label-margin {
+  margin: 0.125rem 0.25rem;
+}
+
 .field-datas {
   &__mandatory-msg {
     @apply flex items-center gap-1 my-4;
