@@ -29,13 +29,7 @@ async function loadPyodideAndPackages() {
     ];
     const start = performance.now();
     pyodide = await loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
       packages: [
-        // 'numpy',
-        // 'pandas',
-        // 'pydantic',
-        // 'packaging',
-        // 'wrapt',
         ...localPythonPackages
       ]
     });

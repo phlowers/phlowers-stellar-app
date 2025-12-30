@@ -251,12 +251,12 @@ def main() -> None:
 
     remove_duplicate_wheels_in_directory(PYODIDE_DIRECTORY_PATH)
 
-    # Load the Pyodide lock file
+    # # Load the Pyodide lock file
     with open(PYODIDE_LOCK_PATH, encoding="utf-8") as f:
         pyodide_lock_content = json.load(f)
 
-    # download extra cdn files
-    download_cdn_files(PYODIDE_DIRECTORY_PATH)
+    # # download extra cdn files
+    # # download_cdn_files(PYODIDE_DIRECTORY_PATH)
 
     wheel_names = get_all_wheel_file_names_in_directory(PYODIDE_DIRECTORY_PATH)
     mechaphlowers_packages: Dict[str, Dict[str, str]] = {}
@@ -271,36 +271,7 @@ def main() -> None:
 
     # List the packages and their dependencies
     all_packages: Dict[str, Dict[str, str]] = dict(mechaphlowers_packages)
-    
-    for package_name, package_info in mechaphlowers_packages.items():
-        print(f"Processing package: {package_name}")
-        
-        if package_name not in pyodide_lock_content.get("packages", {}):
-            continue
-            
-        pyodide_package = pyodide_lock_content["packages"][package_name]
-        
-        # Use remote version instead of local
-        all_packages[package_name] = {
-            "name": package_name,
-            "file_name": pyodide_package["file_name"],
-            "source": "remote",
-        }
-        
-        # Remove local package file since we use the remote one
-        local_file = Path(PYODIDE_DIRECTORY_PATH) / package_info["file_name"]
-        if local_file.exists():
-            local_file.unlink()
 
-        # Add dependencies
-        for dependency in pyodide_package.get("depends", []):
-            dep_name = dependency.replace("_", "-")
-            if dep_name in pyodide_lock_content["packages"]:
-                all_packages[dep_name] = {
-                    "name": dependency,
-                    "file_name": pyodide_lock_content["packages"][dep_name]["file_name"],
-                    "source": "remote",
-                }
     # Write packages to file
     packages_output = Path(PYODIDE_PACKAGES_PATH)
     packages_output.parent.mkdir(parents=True, exist_ok=True)
