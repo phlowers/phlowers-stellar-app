@@ -5,8 +5,8 @@
         "source": "local"
     },
     "annotated-types": {
-        "file_name": "annotated_types-0.6.0-py3-none-any.whl",
-        "name": "annotated-types",
+        "file_name": "annotated_types-0.7.0-cp312-none-any.whl",
+        "name": "annotated_types",
         "source": "local"
     },
     "flexcache": {
@@ -35,17 +35,17 @@
         "source": "local"
     },
     "numpy": {
-        "file_name": "numpy-2.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "file_name": "numpy-2.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
         "name": "numpy",
         "source": "local"
     },
     "packaging": {
-        "file_name": "packaging-24.2-py3-none-any.whl",
+        "file_name": "packaging-25.0-cp312-none-any.whl",
         "name": "packaging",
         "source": "local"
     },
     "pandas": {
-        "file_name": "pandas-2.2.3-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "file_name": "pandas-2.2.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
         "name": "pandas",
         "source": "local"
     },
@@ -70,27 +70,27 @@
         "source": "local"
     },
     "pydantic": {
-        "file_name": "pydantic-2.10.5-py3-none-any.whl",
+        "file_name": "pydantic-2.12.5-cp312-none-any.whl",
         "name": "pydantic",
         "source": "local"
     },
     "pydantic-core": {
-        "file_name": "pydantic_core-2.27.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
-        "name": "pydantic-core",
+        "file_name": "pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "name": "pydantic_core",
         "source": "local"
     },
     "python-dateutil": {
         "file_name": "python_dateutil-2.9.0.post0-cp312-none-any.whl",
-        "name": "python-dateutil",
+        "name": "python_dateutil",
         "source": "local"
     },
     "pytz": {
-        "file_name": "pytz-2024.1-py2.py3-none-any.whl",
+        "file_name": "pytz-2025.2-cp312-none-any.whl",
         "name": "pytz",
         "source": "local"
     },
     "six": {
-        "file_name": "six-1.16.0-py2.py3-none-any.whl",
+        "file_name": "six-1.17.0-cp312-none-any.whl",
         "name": "six",
         "source": "local"
     },
@@ -105,8 +105,8 @@
         "source": "local"
     },
     "typing-extensions": {
-        "file_name": "typing_extensions-4.11.0-py3-none-any.whl",
-        "name": "typing-extensions",
+        "file_name": "typing_extensions-4.15.0-cp312-none-any.whl",
+        "name": "typing_extensions",
         "source": "local"
     },
     "typing-inspect": {
@@ -120,12 +120,12 @@
         "source": "local"
     },
     "tzdata": {
-        "file_name": "tzdata-2024.1-py2.py3-none-any.whl",
+        "file_name": "tzdata-2025.3-cp312-none-any.whl",
         "name": "tzdata",
         "source": "local"
     },
     "wrapt": {
-        "file_name": "wrapt-1.16.0-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "file_name": "wrapt-2.0.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
         "name": "wrapt",
         "source": "local"
     }
