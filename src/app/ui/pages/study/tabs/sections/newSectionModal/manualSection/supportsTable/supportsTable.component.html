@@ -140,9 +140,7 @@
         Chain surface
       </th>
       @if (mode() === 'view') {
-        <th id="tower_model">
-          <ng-container i18n>Tower</ng-container>
-        </th>
+        <th id="tower" i18n class="decimal-column">Tower</th>
       }
 
       @if (mode() === 'create' || mode() === 'edit') {
@@ -530,8 +528,8 @@
         }
       </td>
       @if (mode() === 'view') {
-        <td>
-          {{ support.towerModel }}
+        <td class="text-column">
+          <p class="read-only_info">{{ support.towerModel }}</p>
         </td>
       }
       @if (mode() === 'edit' || mode() === 'create') {

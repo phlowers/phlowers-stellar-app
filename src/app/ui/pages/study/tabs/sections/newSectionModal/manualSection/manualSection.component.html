@@ -128,12 +128,14 @@
               <dd class="read-only-info">{{ section().type }}</dd>
             </div>
 
-            <div>
-              <dt i18n>Electric phase number</dt>
-              <dd class="read-only-info">
-                {{ section().electric_phase_number }}
-              </dd>
-            </div>
+            @if (section().type === 'phase') {
+              <div>
+                <dt i18n>Electric phase number</dt>
+                <dd class="read-only-info">
+                  {{ section().electric_phase_number }}
+                </dd>
+              </div>
+            }
 
             <div>
               <dt i18n>Cable name</dt>
@@ -343,27 +345,37 @@
             </div>
           </div>
         } @else if (mode() === 'view') {
-          <dl class="section-form-part-grid">
-            <div>
-              <dt i18n>Electric tension</dt>
+          <dl class="section-form-part-grid lines-form-grid">
+            <div class="[grid-area:a]">
+              <dt i18n>Electric tension level</dt>
               <dd class="read-only-info">
                 {{ section().voltage_idr }}
               </dd>
             </div>
 
-            <div>
-              <dt i18n>Link</dt>
+            <div class="[grid-area:b]">
+              <dt i18n>Link - ID</dt>
               <dd class="read-only-info">{{ section().link_name }}</dd>
             </div>
 
-            <div>
-              <dt i18n>LIT</dt>
-              <dd class="read-only-info">{{ section().lit_name }}</dd>
+            <div class="[grid-area:c]">
+              <dt i18n>Link - Name</dt>
+              <dd class="read-only-info">{{ linkAdrRead() }}</dd>
             </div>
 
-            <div>
-              <dt i18n>Branch</dt>
-              <dd class="read-only-info">{{ section().branch_idr }}</dd>
+            <div class="[grid-area:d]">
+              <dt i18n>LIT - ID</dt>
+              <dd class="read-only-info">{{ section().lit }}</dd>
+            </div>
+
+            <div class="[grid-area:e]">
+              <dt i18n>LIT - Name</dt>
+              <dd class="read-only-info">{{ litAdrRead() }}</dd>
+            </div>
+
+            <div class="[grid-area:f]">
+              <dt i18n>Branch - ID</dt>
+              <dd class="read-only-info">{{ section().branch_name }}</dd>
             </div>
           </dl>
         }

@@ -72,7 +72,7 @@ const mockSupports: Support[] = [
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
     attachmentPosition: 'Position 1',
-    towerModel: 'D-Type'
+    towerModel: 'Tower Model'
   },
   {
     uuid: 'support2',
@@ -93,7 +93,7 @@ const mockSupports: Support[] = [
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
     attachmentPosition: 'Position 2',
-    towerModel: 'D-Type'
+    towerModel: 'Tower Model'
   },
   {
     uuid: 'support3',
