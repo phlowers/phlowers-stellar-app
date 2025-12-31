@@ -20,12 +20,6 @@ import { LoadsService } from '../../services/loads.service';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import { Task } from '@src/app/core/services/worker_python/tasks/types';
 
-interface SpanOption {
-  label: string;
-  value: number[];
-  supports: number[];
-}
-
 interface SupportOption {
   label: string;
   value: number;
@@ -50,20 +44,10 @@ interface SupportOption {
 export class SpanComponent implements OnDestroy {
   private readonly subscriptions = new Subscription();
 
-  readonly spans = computed<SpanOption[]>(() => {
-    const supportsLength =
-      this.plotService.plotOptions().endSupport -
-      this.plotService.plotOptions().startSupport +
-      1;
-    const spanAmount = Math.max(supportsLength - 1, 0);
-    // create an array the length of spanAmount
-    const spans = Array.from({ length: spanAmount }, (_, index) => ({
-      label: `${index + 1} - ${index + 2}`,
-      value: [index, index + 1],
-      supports: [index, index + 1]
-    }));
-    return spans;
+  readonly spans = computed(() => {
+    return this.plotService.getSpanOptions();
   });
+
   readonly supports = computed<SupportOption[]>(() => {
     return (
       this.selectedSpan()?.map((support) => ({
