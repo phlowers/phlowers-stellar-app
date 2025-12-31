@@ -139,8 +139,8 @@ export class AttachmentSetModalComponent implements OnInit {
     this.attachmentSet.set(undefined);
     if (resetSupportName) {
       this.supportName.set(undefined);
+      this.coordinates.set([]);
     }
-    this.coordinates.set([]);
     this.getData();
   }
 
