@@ -1,7 +1,7 @@
 export interface InitialCondition {
   uuid: string;
   name: string;
-  base_parameters: number;
+  base_parameters: number | null;
   base_temperature: number;
   cable_pretension: number;
   min_temperature: number;
