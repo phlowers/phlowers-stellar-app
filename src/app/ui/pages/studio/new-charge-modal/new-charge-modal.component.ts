@@ -19,10 +19,10 @@ import { ChargesService } from '@src/app/core/services/charges/charges.service';
 import { PlotService } from '../services/plot.service';
 import { defaultClimaticCharge } from '../loads/climate/climate.component';
 
-const newCharge = (): Charge => {
+const newCharge = (currentCharges: Charge[]): Charge => {
   return {
     uuid: uuidv4(),
-    name: '',
+    name: $localize`CC` + ' ' + (currentCharges.length + 1),
     personnelPresence: false,
     description: '',
     data: {
@@ -83,7 +83,9 @@ export class NewChargeModalComponent {
           this.personnelPresence.set(charge.personnelPresence);
           this.description.set(charge.description);
         } else {
-          const emptyCase = newCharge();
+          const emptyCase = newCharge(
+            this.plotService.section()?.charges ?? []
+          );
           this.name.set(emptyCase.name);
           this.personnelPresence.set(emptyCase.personnelPresence);
           this.description.set(emptyCase.description);

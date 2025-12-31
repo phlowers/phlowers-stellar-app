@@ -321,7 +321,8 @@ describe('NewChargeModalComponent (Jest)', () => {
     // Wait for effect to complete
     await fixture.whenStable();
 
-    expect(component.name()).toBe('');
+    // newCharge generates a name based on existing charges count (mockSection has 1 charge, so new one is "CC 2")
+    expect(component.name()).toBe('CC 2');
     expect(component.personnelPresence()).toBe(false);
     expect(component.description()).toBe('');
   });
