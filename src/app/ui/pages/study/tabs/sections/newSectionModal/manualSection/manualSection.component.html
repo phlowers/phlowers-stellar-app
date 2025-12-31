@@ -125,7 +125,13 @@
 
             <div>
               <dt i18n>Section type</dt>
-              <dd class="read-only-info">{{ section().type }}</dd>
+              <dd class="read-only-info">
+                @if (section().type === 'phase') {
+                  <ng-container i18n>Phase</ng-container>
+                } @else if (section().type === 'guard') {
+                  <ng-container i18n>Guard</ng-container>
+                }
+              </dd>
             </div>
 
             @if (section().type === 'phase') {
