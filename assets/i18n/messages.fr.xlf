@@ -2207,16 +2207,10 @@
         <target>Mesures terrain</target>
       </segment>
     </unit>
-    <unit id="3625719233264880082">
-      <segment state="initial">
-        <source>L0 sum</source>
-        <target>Somme L0</target>
-      </segment>
-    </unit>
     <unit id="8365500949716833241">
       <segment state="initial">
         <source>VTL &amp; Guying</source>
-        <target>Haubanage &amp; VTL</target>
+        <target>Haubanage &amp; VHL</target>
       </segment>
     </unit>
     <unit id="810011115797190863">
@@ -2315,9 +2309,9 @@
         <target>LIT - ADR</target>
       </segment>
     </unit>
-    <unit id="8556557769909937132">
+    <unit id="3980974174191771572">
       <segment state="initial">
-        <source>VHL (under chain)</source>
+        <source>VTL (under chain)</source>
         <target>VHL (sous chaîne)</target>
       </segment>
     </unit>
@@ -2327,9 +2321,9 @@
         <target>Angle en ligne :</target>
       </segment>
     </unit>
-    <unit id="146808728587794667">
+    <unit id="4708771953728158073">
       <segment state="initial">
-        <source>VHL (under console)</source>
+        <source>VTL (under console)</source>
         <target>VHL (sous console)</target>
       </segment>
     </unit>
@@ -3201,6 +3195,156 @@
       <segment state="initial">
         <source> Parameter uncertainty Papoto </source>
         <target> Incertitude du paramètre Papoto </target>
+      </segment>
+    </unit>
+    <unit id="1831958434012261940">
+      <segment state="initial">
+        <source>Natural lengths L0</source>
+        <target>Longueurs naturelles L0</target>
+      </segment>
+    </unit>
+    <unit id="8065031423203926640">
+      <segment state="initial">
+        <source>L0 table</source>
+        <target>L0 table</target>
+      </segment>
+    </unit>
+    <unit id="971569449266353120">
+      <segment state="initial">
+        <source>L0</source>
+        <target>L0</target>
+      </segment>
+    </unit>
+    <unit id="4436770741152429750">
+      <segment state="initial">
+        <source>Sum L0</source>
+        <target>Somme L0</target>
+      </segment>
+    </unit>
+    <unit id="l0-sum-value">
+      <segment state="initial">
+        <source> <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}"/> m </source>
+        <target> <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}"/> m </target>
+      </segment>
+    </unit>
+    <unit id="8198413691907314778">
+      <segment state="initial">
+        <source>Loading L0 data…</source>
+        <target>Chargement des données L0…</target>
+      </segment>
+    </unit>
+    <unit id="2288513108450439427">
+      <segment state="initial">
+        <source>Support</source>
+        <target>Support</target>
+      </segment>
+    </unit>
+    <unit id="2763143653229759651">
+      <segment state="initial">
+        <source>Support type:</source>
+        <target>Type de support:</target>
+      </segment>
+    </unit>
+    <unit id="4289686132341098096">
+      <segment state="initial">
+        <source> VTL without guying </source>
+        <target> VHL sans haubanage </target>
+      </segment>
+    </unit>
+    <unit id="8104522487016152357">
+      <segment state="initial">
+        <source>Charge V</source>
+        <target>Charge V</target>
+      </segment>
+    </unit>
+    <unit id="2203215067045218337">
+      <segment state="initial">
+        <source>Charge L</source>
+        <target>Charge L</target>
+      </segment>
+    </unit>
+    <unit id="2592173227911935397">
+      <segment state="initial">
+        <source>Charge T</source>
+        <target>Charge H</target>
+      </segment>
+    </unit>
+    <unit id="5819878164896182593">
+      <segment state="initial">
+        <source>Resultant</source>
+        <target>Résultante</target>
+      </segment>
+    </unit>
+    <unit id="3001880415806038829">
+      <segment state="initial">
+        <source>Guying</source>
+        <target>Haubanage</target>
+      </segment>
+    </unit>
+    <unit id="4021521782447475905">
+      <segment state="initial">
+        <source>Pulley</source>
+        <target>Poulie</target>
+      </segment>
+    </unit>
+    <unit id="6036308268629413664">
+      <segment state="initial">
+        <source> Results </source>
+        <target> Résultats </target>
+      </segment>
+    </unit>
+    <unit id="5521065577754808188">
+      <segment state="initial">
+        <source>Tension in the guy line</source>
+        <target>Tension dans le hauban</target>
+      </segment>
+    </unit>
+    <unit id="3482664162570542899">
+      <segment state="initial">
+        <source>Angle guy line / Horizon</source>
+        <target>Angle du hauban / Horizon</target>
+      </segment>
+    </unit>
+    <unit id="6175534130375947992">
+      <segment state="initial">
+        <source>Charge V under console</source>
+        <target>Charge V sous console</target>
+      </segment>
+    </unit>
+    <unit id="1682829464476951720">
+      <segment state="initial">
+        <source>Charge T under console</source>
+        <target>Charge H sous console</target>
+      </segment>
+    </unit>
+    <unit id="2837109850472064180">
+      <segment state="initial">
+        <source>Charge L (if pulley)</source>
+        <target>Charge L (si poulie)</target>
+      </segment>
+    </unit>
+    <unit id="1258725719065801469">
+      <segment state="initial">
+        <source>Add a comment for the export.</source>
+        <target>Ajouter un commentaire pour l&apos;export.</target>
+      </segment>
+    </unit>
+    <unit id="5667174251183495987">
+      <segment state="initial">
+        <source> For a stop or a suspension without pulley, the tension in the guy line allows to balance the longitudinal charges at the console level (no L). For a suspension with a pulley, the tension in the guy line is the maximum tension in all the cables of the bundle and a longitudinal charge appears. </source>
+        <target> Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet d’équilibrer les charges longitudinales au niveau de la console (pas de L). Pour une suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles du faisceau et une charge longitudinale apparaît.</target>
+      </segment>
+    </unit>
+    <unit id="8828649339346559125">
+      <segment state="initial">
+        <source>Loading data…</source>
+        <target>Chargement des données…</target>
+      </segment>
+    </unit>
+    <unit id="4879686808912531747">
+      <segment state="initial">
+        <source>T :</source>
+        <target>H :</target>
       </segment>
     </unit>
   </file>
