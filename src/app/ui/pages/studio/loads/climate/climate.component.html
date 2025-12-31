@@ -132,7 +132,7 @@
       type="submit"
       btnStyle="outlined"
       (click)="submitForm()"
-      [disabled]="isFormEmpty()"
+      [disabled]="!isFormValid()"
     >
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
@@ -142,7 +142,7 @@
       app-btn
       type="button"
       (click)="calculForm()"
-      [disabled]="isFormEmpty()"
+      [disabled]="!isFormValid()"
     >
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>
