@@ -109,13 +109,6 @@ export class ImportStudyComponent {
     private readonly cablesService: CablesService
   ) {}
 
-  async deleteStudy(uuid: string) {
-    await this.studiesService.deleteStudy(uuid);
-    this.newStudies.set(
-      this.newStudies().filter((study) => study.uuid !== uuid)
-    );
-  }
-
   loadAppFile(file: File) {
     const reader = new FileReader();
     reader.onload = async (e) => {
