@@ -1,4 +1,11 @@
-import { Component, effect, input, output, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  input,
+  OnDestroy,
+  output,
+  signal
+} from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
@@ -6,7 +13,12 @@ import { Section } from '@src/app/core/data/database/interfaces/section';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import {
   InitialConditionFunctionsInput,
   InitialConditionService
@@ -19,6 +31,8 @@ import { CablesService } from '@core/services/cables/cables.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Study } from '@core/data/database/interfaces/study';
 import { KeyFilterModule } from 'primeng/keyfilter';
+import { Subscription } from 'rxjs';
+import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 
 @Component({
   selector: 'app-initial-condition-modal',
@@ -30,14 +44,16 @@ import { KeyFilterModule } from 'primeng/keyfilter';
     DividerModule,
     ButtonComponent,
     IconComponent,
-    FormsModule,
+    ReactiveFormsModule,
     MessageModule,
     InputGroup,
     InputGroupAddon,
     KeyFilterModule
   ]
 })
-export class InitialConditionModalComponent {
+export class InitialConditionModalComponent implements OnDestroy {
+  private readonly subscriptions = new Subscription();
+
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
   section = input.required<Section>();
@@ -55,7 +71,7 @@ export class InitialConditionModalComponent {
   initialCondition = signal<InitialCondition>({
     uuid: '',
     name: '',
-    base_parameters: 2000,
+    base_parameters: null,
     base_temperature: 15,
     cable_pretension: 0,
     min_temperature: 0,
@@ -66,6 +82,8 @@ export class InitialConditionModalComponent {
   isCableNarcisse = signal<boolean>(false);
   isNameUnique = signal<boolean>(true);
   public onlyPositiveNumbers = /^[0-9]*$/;
+
+  form: FormGroup;
 
   onNameChange(name: string) {
     this.isNameUnique.set(this.checkNameUniqueness(name));
@@ -78,12 +96,38 @@ export class InitialConditionModalComponent {
   }
 
   constructor(
+    private readonly fb: FormBuilder,
     private readonly cablesService: CablesService,
     private readonly initialConditionService: InitialConditionService
   ) {
-    // Initialize initialCondition from input immediately
+    this.form = this.fb.group({
+      name: ['', Validators.required],
+      base_parameters: [null, [Validators.min(50), Validators.max(3500)]],
+      base_temperature: [15, [Validators.min(-50), Validators.max(200)]],
+      cable_pretension: [0],
+      min_temperature: [0],
+      max_wind_pressure: [0],
+      max_frost_width: [0]
+    });
+
+    this.subscriptions.add(
+      this.form.get('name')?.valueChanges.subscribe((name) => {
+        this.onNameChange(name);
+      })
+    );
+
     effect(() => {
-      this.initialCondition.set(this.initialConditionInput());
+      const input = this.initialConditionInput();
+      this.initialCondition.set(input);
+      this.form.patchValue({
+        name: input.name,
+        base_parameters: input.base_parameters,
+        base_temperature: input.base_temperature,
+        cable_pretension: input.cable_pretension,
+        min_temperature: input.min_temperature,
+        max_wind_pressure: input.max_wind_pressure,
+        max_frost_width: input.max_frost_width
+      });
     });
 
     effect(() => {
@@ -91,9 +135,26 @@ export class InitialConditionModalComponent {
         this.cablesService.getCables().then((cables) => {
           const sectionCableName = this.section().cable_name;
           if (sectionCableName) {
-            this.isCableNarcisse.set(
-              !!cables?.find((c) => c.name === sectionCableName)?.is_polynomial
-            );
+            const isNarcisse = !!cables?.find(
+              (c) => c.name === sectionCableName
+            )?.is_polynomial;
+            this.isCableNarcisse.set(isNarcisse);
+
+            const cableFields = [
+              'cable_pretension',
+              'min_temperature',
+              'max_wind_pressure',
+              'max_frost_width'
+            ];
+            cableFields.forEach((field) => {
+              const control = this.form.get(field);
+              if (isNarcisse) {
+                control?.setValidators(Validators.required);
+              } else {
+                control?.clearValidators();
+              }
+              control?.updateValueAndValidity();
+            });
           }
         });
         const isNameUnique = this.checkNameUniqueness(
@@ -111,17 +172,25 @@ export class InitialConditionModalComponent {
   }
 
   onSubmit(generateState: boolean) {
+    if (this.form.invalid) return;
+
     this.isOpenChange.emit(false);
+    const formValue = this.form.value;
+    const updatedInitialCondition: InitialCondition = {
+      ...this.initialCondition(),
+      ...formValue
+    };
+
     if (this.mode() === 'create') {
       this.addInitialCondition.emit({
         section: this.section(),
-        initialCondition: this.initialCondition(),
+        initialCondition: updatedInitialCondition,
         generateState: generateState
       });
     } else if (this.mode() === 'edit') {
       this.updateInitialCondition.emit({
         section: this.section(),
-        initialCondition: this.initialCondition(),
+        initialCondition: updatedInitialCondition,
         generateState: generateState
       });
     } else if (this.mode() === 'view') {
@@ -137,17 +206,16 @@ export class InitialConditionModalComponent {
     this.changeMode.emit('edit');
   }
 
-  onInitialConditionFieldChange(field: keyof InitialCondition, value: any) {
-    this.initialCondition.set({
-      ...this.initialCondition(),
-      [field]: value
-    });
-  }
-
   async onDuplicate() {
     const newUuid = uuidv4();
     await this.duplicateInitialCondition.emit({
-      initialCondition: this.initialCondition(),
+      initialCondition: {
+        ...this.initialCondition(),
+        name: findDuplicateTitle(
+          this.initialConditions().map((ic) => ic.name),
+          this.initialCondition().name
+        )
+      },
       newUuid
     });
     const studyUuid = this.study()?.uuid ?? '';
@@ -159,6 +227,15 @@ export class InitialConditionModalComponent {
       );
     if (initialCondition) {
       this.initialCondition.set(initialCondition);
+      this.form.patchValue({
+        name: initialCondition.name,
+        base_parameters: initialCondition.base_parameters,
+        base_temperature: initialCondition.base_temperature,
+        cable_pretension: initialCondition.cable_pretension,
+        min_temperature: initialCondition.min_temperature,
+        max_wind_pressure: initialCondition.max_wind_pressure,
+        max_frost_width: initialCondition.max_frost_width
+      });
     }
   }
 
@@ -169,5 +246,9 @@ export class InitialConditionModalComponent {
       this.initialCondition()
     );
     this.isOpenChange.emit(false);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }
