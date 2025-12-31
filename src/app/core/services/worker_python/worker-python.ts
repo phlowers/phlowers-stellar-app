@@ -9,11 +9,12 @@
 import { loadPyodide } from 'pyodide';
 import functions from './tasks/python-scripts/functions.py';
 import loads from './tasks/python-scripts/loads.py';
+import guying from './tasks/python-scripts/guying.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [functions, loads];
+const pythonFiles = [functions, loads, guying];
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;
