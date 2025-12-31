@@ -71,7 +71,8 @@ const mockSupports: Support[] = [
     counterWeight: 100.0,
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
-    attachmentPosition: 'Position 1'
+    attachmentPosition: 'Position 1',
+    towerModel: 'Tower Model'
   },
   {
     uuid: 'support2',
@@ -91,7 +92,8 @@ const mockSupports: Support[] = [
     counterWeight: 100.0,
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
-    attachmentPosition: 'Position 2'
+    attachmentPosition: 'Position 2',
+    towerModel: 'Tower Model'
   },
   {
     uuid: 'support3',
@@ -111,7 +113,8 @@ const mockSupports: Support[] = [
     counterWeight: null,
     supportFootAltitude: null,
     chainSurface: null,
-    attachmentPosition: null
+    attachmentPosition: null,
+    towerModel: null
   }
 ];
 

@@ -138,6 +138,9 @@
       >
         Chain surface
       </th>
+      @if (mode() === 'view') {
+        <th id="tower" i18n class="decimal-column">Tower</th>
+      }
 
       @if (mode() === 'create' || mode() === 'edit') {
         <th class="sticky-right" id="actions" i18n>Actions</th>
@@ -524,6 +527,11 @@
           </p>
         }
       </td>
+      @if (mode() === 'view') {
+        <td class="text-column">
+          <p class="read-only_info">{{ support.towerModel }}</p>
+        </td>
+      }
       @if (mode() === 'edit' || mode() === 'create') {
         <td class="sticky-right">
           <button

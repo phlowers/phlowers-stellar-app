@@ -24,4 +24,5 @@ export interface Support {
   supportFootAltitude: number | null;
   attachmentPosition: string | null;
   chainSurface: number | null;
+  towerModel: string | null;
 }

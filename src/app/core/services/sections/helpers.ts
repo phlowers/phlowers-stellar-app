@@ -21,7 +21,8 @@ export const createEmptySupport = (): Support => {
     counterWeight: 0,
     supportFootAltitude: null,
     attachmentPosition: null,
-    chainSurface: 0
+    chainSurface: 0,
+    towerModel: null
   };
 };
 

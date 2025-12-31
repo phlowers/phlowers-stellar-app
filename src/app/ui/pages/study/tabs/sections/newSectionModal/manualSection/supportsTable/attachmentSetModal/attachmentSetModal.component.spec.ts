@@ -63,7 +63,8 @@ describe('AttachmentSetModalComponent', () => {
     counterWeight: 100.0,
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
-    attachmentPosition: 'Position 1'
+    attachmentPosition: 'Position 1',
+    towerModel: 'Tower Model'
   };
 
   beforeEach(async () => {
