@@ -163,19 +163,6 @@ describe('ClimateComponent (Jest)', () => {
     });
   });
 
-  describe('isFormEmpty', () => {
-    it('should return false when all visible fields are filled (symmetric)', () => {
-      component.form.patchValue({
-        symmetryType: 'symmetric',
-        windPressure: 10,
-        cableTemperature: 15,
-        iceThickness: 5
-      });
-
-      expect(component.isFormEmpty()).toBeFalsy();
-    });
-  });
-
   describe('button actions', () => {
     it('should call submitForm when submit button is clicked', () => {
       const spy = jest.spyOn(component, 'submitForm');

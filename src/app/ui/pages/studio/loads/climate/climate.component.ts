@@ -58,11 +58,7 @@ export class ClimateComponent {
     { label: $localize`Dis Symmetric`, value: 'dis_symmetric' }
   ];
 
-  frontierSupportOptions = [
-    { label: '1', value: 1 },
-    { label: '2', value: 2 },
-    { label: '3', value: 3 }
-  ];
+  frontierSupportOptions: { label: string; value: number }[] = [];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -71,10 +67,13 @@ export class ClimateComponent {
     private readonly chargesService: ChargesService
   ) {
     this.form = this.fb.group({
-      windPressure: [defaultClimaticCharge.windPressure, Validators.required],
+      windPressure: [
+        defaultClimaticCharge.windPressure,
+        [Validators.required, Validators.min(-1600), Validators.max(1600)]
+      ],
       cableTemperature: [
         defaultClimaticCharge.cableTemperature,
-        Validators.required
+        [Validators.required, Validators.min(-50), Validators.max(1000)]
       ],
       symmetryType: [defaultClimaticCharge.symmetryType, Validators.required],
       iceThickness: [defaultClimaticCharge.iceThickness],
@@ -83,6 +82,15 @@ export class ClimateComponent {
       iceThicknessAfter: [defaultClimaticCharge.iceThicknessAfter]
     });
     effect(async () => {
+      const supports = this.plotService.section()?.supports;
+      const frontierSupportOptions =
+        supports?.map((_, index) => ({
+          label: (index + 1).toString(),
+          value: index
+        })) ?? [];
+      frontierSupportOptions.shift();
+      frontierSupportOptions.pop();
+      this.frontierSupportOptions = frontierSupportOptions;
       const studyUuid = this.plotService.study()?.uuid;
       const sectionUuid = this.plotService.section()?.uuid;
       if (!studyUuid || !sectionUuid) {
@@ -199,7 +207,7 @@ export class ClimateComponent {
     );
   }
 
-  isFormEmpty(): boolean {
-    return false;
+  isFormValid(): boolean {
+    return this.form.valid;
   }
 }
