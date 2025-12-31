@@ -93,8 +93,8 @@
       <td>{{ study.title }}</td>
       <td>{{ study.author_email }}</td>
       <td>{{ study.updated_at_offline | date: 'medium' }}</td>
-      <td>{{ study.sections?.[0]?.lit_code }}</td>
-      <td>{{ study.description }}</td>
+      <td>{{ study.sections?.[0]?.lit }}</td>
+      <td>{{ study.description | slice: 0 : 30 }}</td>
       <td>
         <a
           [routerLink]="'/study/' + study.uuid"
