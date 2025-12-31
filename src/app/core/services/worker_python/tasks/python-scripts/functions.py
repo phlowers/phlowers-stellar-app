@@ -181,9 +181,9 @@ def get_coordinates(
     span, supports, insulators = plt_line.section_pts.get_points_for_plot(
         project=project, frame_index=middle_span
     )
-    vhl_under_chain = list(engine.balance_model.vhl_under_chain().vhl)
-    vhl_under_console = list(engine.balance_model.vhl_under_console().vhl)
-    # vhl = vhl_under_chain.vhl)
+    vtl_under_chain = list(engine.balance_model.vhl_under_chain().vhl)
+    vtl_under_console = list(engine.balance_model.vhl_under_console().vhl)
+    # vtl = vtl_under_chain.vtl)
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
@@ -191,8 +191,8 @@ def get_coordinates(
         "L0": engine.L_ref.tolist(),
         "elevation": engine.section_array.data.elevation_difference.tolist(),
         "line_angle": engine.section_array.data.line_angle.tolist(),
-        "vhl_under_chain": [v.value.tolist() for v in vhl_under_chain],
-        "vhl_under_console": [v.value.tolist() for v in vhl_under_console],
+        "vtl_under_chain": [v.value.tolist() for v in vtl_under_chain],
+        "vtl_under_console": [v.value.tolist() for v in vtl_under_console],
         "r_under_chain": engine.balance_model.vhl_under_chain().R.value.tolist(),
         "r_under_console": engine.balance_model.vhl_under_console().R.value.tolist(),
         "ground_altitude": engine.section_array.data.ground_altitude.tolist(),
