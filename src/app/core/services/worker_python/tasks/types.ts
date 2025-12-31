@@ -9,7 +9,8 @@ export enum Task {
   refreshProjection = 'refreshProjection',
   getSupportCoordinates = 'getSupportCoordinates',
   addLoad = 'addLoad',
-  calculatePapoto = 'calculatePapoto'
+  calculatePapoto = 'calculatePapoto',
+  calculateGuying = 'calculateGuying'
 }
 
 export enum DataError {
@@ -30,8 +31,8 @@ export interface GetSectionOutput {
   L0: number[];
   elevation: number[];
   line_angle: number[];
-  vhl_under_chain: number[][];
-  vhl_under_console: number[][];
+  vtl_under_chain: number[][];
+  vtl_under_console: number[][];
   r_under_chain: number[];
   r_under_console: number[];
   ground_altitude: number[];
@@ -76,6 +77,11 @@ export interface TaskInputs {
     V3: number;
     VR: number;
   };
+  [Task.calculateGuying]: {
+    altitude: number;
+    horizontalDistance: number;
+    hasPulley: boolean;
+  };
 }
 
 export interface TaskOutputs {
@@ -98,5 +104,12 @@ export interface TaskOutputs {
     parameter_2_3: number;
     parameter_1_3: number;
     check_validity: boolean;
+  };
+  [Task.calculateGuying]: {
+    tensionInGuy: number;
+    guyAngle: number;
+    chargeVUnderConsole: number;
+    chargeHUnderConsole: number;
+    chargeLIfPulley: number;
   };
 }

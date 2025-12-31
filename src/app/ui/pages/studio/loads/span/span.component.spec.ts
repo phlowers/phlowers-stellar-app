@@ -3,7 +3,7 @@ import { SpanComponent } from './span.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PlotService } from '../../services/plot.service';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
-import { signal } from '@angular/core';
+import { signal, computed } from '@angular/core';
 import { Study } from '@core/data/database/interfaces/study';
 import { Section } from '@core/data/database/interfaces/section';
 import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
@@ -67,16 +67,33 @@ describe('SpanComponent', () => {
 
   beforeEach(async () => {
     // Mock PlotService
+    const plotOptionsSignal = signal<PlotOptions>({
+      view: '3d',
+      side: 'profile',
+      startSupport: 0,
+      endSupport: 2,
+      invert: false
+    });
     mockPlotService = {
-      plotOptions: signal<PlotOptions>({
-        view: '3d',
-        side: 'profile',
-        startSupport: 0,
-        endSupport: 2,
-        invert: false
-      }),
+      plotOptions: plotOptionsSignal,
       study: signal<Study | null>(mockStudy),
-      section: signal<Section | null>(mockSection)
+      section: signal<Section | null>(mockSection),
+      getSpanOptions: computed(() => {
+        const options = plotOptionsSignal();
+        const supportsLength = options.endSupport - options.startSupport + 1;
+        const spanAmount = Math.max(supportsLength - 1, 0);
+        return Array.from({ length: spanAmount }, (_, index) => ({
+          label: `${index + 1} - ${index + 2}`,
+          value: [
+            options.startSupport + index,
+            options.startSupport + index + 1
+          ],
+          supports: [
+            options.startSupport + index,
+            options.startSupport + index + 1
+          ]
+        }));
+      })
     } as unknown as jest.Mocked<PlotService>;
 
     // Mock ChargesService
