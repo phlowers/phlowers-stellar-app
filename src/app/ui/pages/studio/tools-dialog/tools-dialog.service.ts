@@ -50,6 +50,10 @@ export class ToolsDialogService {
       component: L0SumComponent,
       dialogStyle: { 'min-width': '50rem', 'max-width': '50rem' }
     },
+    'vtl-and-guying': {
+      component: VhlAndGuyingComponent,
+      dialogStyle: { 'min-width': '80rem', 'max-width': '90rem' }
+    },
     'other-tool': {
       component: null!
     }

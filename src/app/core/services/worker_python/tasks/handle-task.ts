@@ -60,6 +60,10 @@ const tasks: Record<
   [Task.calculatePapoto]: {
     function: 'calculate_papoto',
     externalPackages: []
+  },
+  [Task.calculateGuying]: {
+    function: 'calculate_guying',
+    externalPackages: []
   }
 };
 
