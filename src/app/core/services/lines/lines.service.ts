@@ -58,8 +58,8 @@ export class LinesService {
           lit_adr: item.lit_adr || '',
           branch_idr: item.branch_idr || item.branch_id || '',
           branch_adr: item.branch_adr || '',
-          voltage_idr: item.voltage_idr || '0',
-          voltage_adr: item.voltage_adr || '0'
+          voltage_idr: item.voltage_idr || '0 KV',
+          voltage_adr: item.voltage_adr || '0 KV'
         }))
         .filter((item) => item.link_idr);
     };

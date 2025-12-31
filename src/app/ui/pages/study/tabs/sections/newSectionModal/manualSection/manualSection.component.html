@@ -88,7 +88,7 @@
               </label>
               <p-select
                 inputId="cableName"
-                [options]="cablesFilterTable() | unique: 'name'"
+                [options]="uniqueCableNames()"
                 [(ngModel)]="section().cable_name"
                 optionLabel="name"
                 optionValue="name"
@@ -164,9 +164,7 @@
               <label for="maintenanceCenter" i18n>Maintenance center</label>
               <p-select
                 inputId="maintenanceCenter"
-                [options]="
-                  maintenanceFilterTable() | unique: 'maintenance_center_id'
-                "
+                [options]="uniqueMaintenanceCenters()"
                 [(ngModel)]="section().maintenance_center_id"
                 appendTo="body"
                 optionLabel="maintenance_center"
@@ -185,9 +183,7 @@
               <label for="maintRegionalTeam" i18n>Regional team</label>
               <p-select
                 inputId="maintRegionalTeam"
-                [options]="
-                  maintenanceFilterTable() | unique: 'regional_team_id'
-                "
+                [options]="uniqueRegionalTeams()"
                 [(ngModel)]="section().regional_team_id"
                 appendTo="body"
                 optionLabel="regional_team"
@@ -204,9 +200,7 @@
               <label for="maintenanceTeam" i18n>Maintenance team</label>
               <p-select
                 inputId="maintenanceTeam"
-                [options]="
-                  maintenanceFilterTable() | unique: 'maintenance_team_id'
-                "
+                [options]="uniqueMaintenanceTeams()"
                 [(ngModel)]="section().maintenance_team_id"
                 appendTo="body"
                 optionLabel="maintenance_team"
@@ -248,7 +242,7 @@
               <label for="linkEtl" i18n>Electric tension level</label>
               <p-select
                 inputId="linkEtl"
-                [options]="linesFilterTable() | unique: 'voltage_idr'"
+                [options]="uniqueVoltageIdr()"
                 [(ngModel)]="section().voltage_idr"
                 optionLabel="voltage_idr"
                 optionValue="voltage_idr"
@@ -266,7 +260,7 @@
               <label for="linkName" i18n>Link - ID</label>
               <p-select
                 inputId="linkName"
-                [options]="linesFilterTable() | unique: 'link_idr'"
+                [options]="uniqueLinkIdr()"
                 [(ngModel)]="section().link_name"
                 optionLabel="link_idr"
                 optionValue="link_idr"
@@ -284,7 +278,7 @@
               <label for="linkName" i18n>Link - Name</label>
               <p-select
                 inputId="linkName"
-                [options]="linesFilterTable() | unique: 'link_adr'"
+                [options]="uniqueLinkAdr()"
                 [(ngModel)]="section().link_name"
                 optionLabel="link_adr"
                 optionValue="link_idr"
@@ -303,7 +297,7 @@
               <label for="linkLit" i18n>LIT - ID</label>
               <p-select
                 inputId="linkLit"
-                [options]="linesFilterTable() | unique: 'lit_idr'"
+                [options]="uniqueLitIdr()"
                 [(ngModel)]="section().lit"
                 optionLabel="lit_idr"
                 optionValue="lit_idr"
@@ -322,7 +316,7 @@
               <label for="linkLit" i18n>LIT - Name</label>
               <p-select
                 inputId="linkLit"
-                [options]="linesFilterTable() | unique: 'lit_idr'"
+                [options]="uniqueLitAdr()"
                 [(ngModel)]="section().lit"
                 optionLabel="lit_adr"
                 optionValue="lit_idr"
@@ -341,7 +335,7 @@
               <label for="linkBm" i18n>Branch - ID</label>
               <p-select
                 inputId="linkBm"
-                [options]="linesFilterTable() | unique: 'branch_idr'"
+                [options]="uniqueBranchIdr()"
                 [(ngModel)]="section().branch_name"
                 optionLabel="branch_idr"
                 optionValue="branch_idr"
