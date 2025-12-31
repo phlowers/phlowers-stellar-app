@@ -26,8 +26,7 @@ import { createEmptySupport } from '@src/app/core/services/sections/helpers';
 import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
 import { MaintenanceData } from '@src/app/core/data/database/interfaces/maintenance';
-import { debounce, sortBy } from 'lodash';
-import { UniquePipe } from '@src/app/ui/shared/service/autocomplete/unique.pipe';
+import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
 import { Line } from '@src/app/core/data/database/interfaces/line';
 import { LinesService } from '@src/app/core/services/lines/lines.service';
 import { Cable } from '@src/app/core/data/database/interfaces/cable';
@@ -44,12 +43,13 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
 const sortLines = (lines: Line[]) => {
   return lines.sort((a, b) => {
-    const aVoltageAdr = a.voltage_adr || '';
-    const bVoltageAdr = b.voltage_adr || '';
-    return (
-      aVoltageAdr.length - bVoltageAdr.length ||
-      aVoltageAdr.localeCompare(bVoltageAdr || '')
-    );
+    if (a.voltage_idr === '0 KV' || a.voltage_idr === '0') {
+      return -1;
+    }
+    if (b.voltage_idr === '0 KV' || b.voltage_idr === '0') {
+      return 1;
+    }
+    return a.voltage_adr.localeCompare(b.voltage_adr);
   });
 };
 
@@ -96,7 +96,6 @@ const orderedLineTableProperties: LineTableProperties[] = [
     IconComponent,
     StudioComponent,
     TextareaModule,
-    UniquePipe,
     FormsModule,
     MessageModule,
     ButtonComponent,
@@ -147,6 +146,54 @@ export class ManualSectionComponent implements OnInit {
   maintenanceTeamRead = signal<string>('');
   maintenanceCenterRead = signal<string>('');
   regionalTeamRead = signal<string>('');
+
+  readonly uniqueMaintenanceCenters = computed(() =>
+    orderBy(
+      uniqBy(this.maintenanceFilterTable(), 'maintenance_center_id'),
+      ['maintenance_center'],
+      ['asc']
+    )
+  );
+
+  readonly uniqueRegionalTeams = computed(() =>
+    uniqBy(this.maintenanceFilterTable(), 'regional_team_id')
+  );
+
+  readonly uniqueMaintenanceTeams = computed(() =>
+    uniqBy(this.maintenanceFilterTable(), 'maintenance_team_id')
+  );
+
+  readonly uniqueCableNames = computed(() =>
+    uniqBy(this.cablesFilterTable(), 'name')
+  );
+
+  readonly uniqueVoltageIdr = computed(() =>
+    uniqBy(this.linesFilterTable(), 'voltage_idr')
+  );
+
+  readonly uniqueLinkIdr = computed(() =>
+    orderBy(uniqBy(this.linesFilterTable(), 'link_idr'), ['link_idr'], ['asc'])
+  );
+
+  readonly uniqueLinkAdr = computed(() =>
+    orderBy(uniqBy(this.linesFilterTable(), 'link_adr'), ['link_adr'], ['asc'])
+  );
+
+  readonly uniqueLitIdr = computed(() =>
+    orderBy(uniqBy(this.linesFilterTable(), 'lit_idr'), ['lit_idr'], ['asc'])
+  );
+
+  readonly uniqueLitAdr = computed(() =>
+    orderBy(uniqBy(this.linesFilterTable(), 'lit_idr'), ['lit_adr'], ['asc'])
+  );
+
+  readonly uniqueBranchIdr = computed(() =>
+    orderBy(
+      uniqBy(this.linesFilterTable(), 'branch_idr'),
+      ['branch_idr'],
+      ['asc']
+    )
+  );
 
   async setupFilterTables() {
     const table = await this.maintenanceService.getMaintenance();
