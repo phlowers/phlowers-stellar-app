@@ -152,6 +152,8 @@ export class ManualSectionComponent implements OnInit {
   maintenanceTeamRead = signal<string>('');
   maintenanceCenterRead = signal<string>('');
   regionalTeamRead = signal<string>('');
+  linkAdrRead = signal<string>('');
+  litAdrRead = signal<string>('');
 
   readonly uniqueMaintenanceCenters = computed(() =>
     orderBy(
@@ -233,6 +235,16 @@ export class ManualSectionComponent implements OnInit {
       );
     });
     this.linesFilterTable.set(sortLines(linesTable));
+    if (this.mode() === 'view') {
+      const linkLine = linesTable.find(
+        (item) => item.link_idr === this.section().link_name
+      );
+      this.linkAdrRead.set(linkLine?.link_adr || '');
+      const litLine = linesTable.find(
+        (item) => item.lit_idr === this.section().lit
+      );
+      this.litAdrRead.set(litLine?.lit_adr || '');
+    }
     const cablesTable = await this.cablesService.getCables();
     this.cablesFilterTable.set(sortBy(cablesTable, 'name'));
   }
