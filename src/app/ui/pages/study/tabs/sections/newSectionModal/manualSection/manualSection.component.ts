@@ -320,17 +320,12 @@ export class ManualSectionComponent implements OnInit {
     this.onSectionChange();
   }
 
-  onSupportChange(change: {
-    uuid: string;
-    field: keyof Support;
-    value: Support;
-  }) {
+  onSupportChange(change: { uuid: string; support: Partial<Support> }) {
     const support = this.section().supports?.find(
       (support: Support) => support.uuid === change.uuid
     );
     if (support) {
-      (support as unknown as Record<string, unknown>)[change.field] =
-        change.value;
+      Object.assign(support, change.support);
     }
     this.onSectionChange();
   }

@@ -75,7 +75,7 @@ export class SupportsTableComponent implements OnInit {
   addSupport = output<{ index: number; position: 'before' | 'after' }>();
   deleteSupport = output<string>();
   duplicateSupport = output<string>();
-  supportChange = output<{ uuid: string; field: keyof Support; value: any }>();
+  supportChange = output<{ uuid: string; support: Partial<Support> }>();
   chains = signal<Chain[]>([]);
   attachmentSetModalOpen = signal<boolean>(false);
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
@@ -124,34 +124,31 @@ export class SupportsTableComponent implements OnInit {
       if (chain) {
         this.supportChange.emit({
           uuid,
-          field: 'chainLength',
-          value: chain.mean_length
+          support: { chainLength: chain.mean_length }
         });
         this.supportChange.emit({
           uuid,
-          field: 'chainWeight',
-          value: chain.mean_mass
+          support: { chainWeight: chain.mean_mass }
         });
         this.supportChange.emit({
           uuid,
-          field: 'chainSurface',
-          value: 0
+          support: { chainSurface: 0 }
         });
         this.supportChange.emit({
           uuid,
-          field: 'chainV',
-          value: false
+          support: { chainV: false }
         });
       }
     }
     if (field === 'attachmentHeight') {
       this.supportChange.emit({
         uuid,
-        field: 'supportFootAltitude',
-        value: this.calculateSupportFootAltitude(value)
+        support: {
+          supportFootAltitude: this.calculateSupportFootAltitude(value)
+        }
       });
     }
-    this.supportChange.emit({ uuid, field, value });
+    this.supportChange.emit({ uuid, support: { [field]: value } });
   }
 
   copyColumn(header: keyof Support) {
@@ -172,36 +169,30 @@ export class SupportsTableComponent implements OnInit {
       if (isNumberField && isNumber(firstNumber)) {
         this.supportChange.emit({
           uuid: support.uuid,
-          field: header,
-          value: restOfString + String(firstNumber + index)
+          support: { [header]: restOfString + String(firstNumber + index) }
         });
         continue;
       }
       this.supportChange.emit({
         uuid: support.uuid,
-        field: header,
-        value: firstSupport[header]
+        support: { [header]: firstSupport[header] }
       });
       if (isChainName) {
         this.supportChange.emit({
           uuid: support.uuid,
-          field: 'chainLength',
-          value: firstSupport['chainLength']
+          support: { chainLength: firstSupport['chainLength'] }
         });
         this.supportChange.emit({
           uuid: support.uuid,
-          field: 'chainWeight',
-          value: firstSupport['chainWeight']
+          support: { chainWeight: firstSupport['chainWeight'] }
         });
         this.supportChange.emit({
           uuid: support.uuid,
-          field: 'chainSurface',
-          value: 0
+          support: { chainSurface: 0 }
         });
         this.supportChange.emit({
           uuid: support.uuid,
-          field: 'chainV',
-          value: false
+          support: { chainV: false }
         });
       }
       if (isAttachmentHeight) {
@@ -210,10 +201,11 @@ export class SupportsTableComponent implements OnInit {
         }
         this.supportChange.emit({
           uuid: support.uuid,
-          field: 'supportFootAltitude',
-          value: this.calculateSupportFootAltitude(
-            firstSupport['attachmentHeight']
-          )
+          support: {
+            supportFootAltitude: this.calculateSupportFootAltitude(
+              firstSupport['attachmentHeight']
+            )
+          }
         });
       }
     }
@@ -239,6 +231,7 @@ export class SupportsTableComponent implements OnInit {
     attachmentSet: number;
     armLength: number;
     heightBelowConsole: number;
+    towerModel: string;
   }) {
     const support = this.supports().find(
       (support) => support.uuid === event.uuid
@@ -248,6 +241,7 @@ export class SupportsTableComponent implements OnInit {
       support.attachmentSet = event.attachmentSet;
       support.armLength = event.armLength;
       support.heightBelowConsole = event.heightBelowConsole;
+      support.towerModel = event.towerModel;
     }
   }
 

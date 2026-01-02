@@ -14,6 +14,7 @@ export interface Support {
   attachmentSet: number | null;
   attachmentHeight: number | null;
   heightBelowConsole: number | null;
+  towerModel: string | null;
   cableType: string | null;
   armLength: number | null;
   chainName: string | null;

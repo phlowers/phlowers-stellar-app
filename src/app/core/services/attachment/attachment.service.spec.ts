@@ -109,7 +109,8 @@ describe('AttachmentService', () => {
           attachment_set: 1,
           support_order: 1,
           attachment_altitude: 10.5,
-          cross_arm_length: 2.0
+          cross_arm_length: 2.0,
+          support_tower: 'tower'
         },
         {
           uuid: 'uuid-2',
@@ -119,7 +120,8 @@ describe('AttachmentService', () => {
           attachment_set: 2,
           support_order: 2,
           attachment_altitude: 11.0,
-          cross_arm_length: 2.5
+          cross_arm_length: 2.5,
+          support_tower: 'tower'
         }
       ];
       mockAttachmentsTable.toArray.mockResolvedValue(mockAttachments);
@@ -222,6 +224,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 1',
+          support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
           cross_arm_length: 2.0,
@@ -234,6 +237,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 2',
+          support_tower: 'tower2',
           attachment_set: 2,
           attachment_altitude: 11.0,
           cross_arm_length: 2.5,
@@ -375,6 +379,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 1',
+          support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
           cross_arm_length: 2.0,
@@ -387,6 +392,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 3',
+          support_tower: 'tower3',
           attachment_set: 3,
           attachment_altitude: 12.0,
           cross_arm_length: 3.0,
@@ -554,6 +560,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 1',
+          support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
           cross_arm_length: 2.0,
@@ -566,6 +573,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_name: 'Support 3',
+          support_tower: 'tower3',
           attachment_set: 3,
           attachment_altitude: 12.0,
           cross_arm_length: 3.0,
@@ -750,6 +758,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
+          support_tower: 'tower1',
           support_name: 'Support 1',
           attachment_set: 1,
           attachment_altitude: 10.5,
@@ -762,6 +771,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
+          support_tower: 'tower2',
           support_name: 'Support 2',
           attachment_set: 2,
           attachment_altitude: 11,

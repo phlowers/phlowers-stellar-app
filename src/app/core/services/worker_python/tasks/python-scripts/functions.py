@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 from mechaphlowers.entities.arrays import SectionArray, CableArray
-from mechaphlowers.data.catalog.catalog import sample_cable_catalog
-from mechaphlowers.data.catalog import sample_support_catalog
+# from mechaphlowers.data.catalog.catalog import sample_cable_catalog
+# from mechaphlowers.data.catalog import sample_support_catalog
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine
 from typing import Optional
@@ -33,6 +33,7 @@ class Support:
     armLength: Optional[float] = None
     chainName: Optional[str] = None
     chainLength: Optional[float] = None
+    towerModel: Optional[str] = None
     chainWeight: Optional[float] = None
     chainV: Optional[bool] = None
     counterWeight: Optional[float] = None

@@ -133,7 +133,8 @@ describe('PlotService', () => {
         counterWeight: 10,
         supportFootAltitude: 100,
         attachmentPosition: 'top',
-        chainSurface: 0.1
+        chainSurface: 0.1,
+        towerModel: 'D-Type'
       },
       {
         uuid: 'support-uuid-2',
@@ -153,7 +154,8 @@ describe('PlotService', () => {
         counterWeight: 10,
         supportFootAltitude: 100,
         attachmentPosition: 'top',
-        chainSurface: 0.1
+        chainSurface: 0.1,
+        towerModel: 'D-Type'
       }
     ],
     initial_conditions: [],
