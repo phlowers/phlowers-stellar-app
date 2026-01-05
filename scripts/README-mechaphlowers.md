@@ -10,7 +10,11 @@ npm run set-up-mechaphlowers
 ## 📊 Qu'est-ce que fait ce script?
 
 ```
+<<<<<<< HEAD
 Input: mechaphlowers==0.5.1 + Pyodide 0.28.3 CDN
+=======
+Input: mechaphlowers==0.4.3 + Pyodide 0.28.3 CDN
+>>>>>>> fb86a38 (New whl files management optimized with cdn and auto dependencies management.)
                 ↓
         ┌───────────────┐
         │ Analyse des   │
@@ -206,7 +210,12 @@ npm run set-up-mechaphlowers
 
 ---
 
+<<<<<<< HEAD
 **Version**: Pyodide 0.28.3 / mechaphlowers 0.5.1  
 **Date**: 6 janvier 2026  
+=======
+**Version**: Pyodide 0.28.3 / mechaphlowers 0.4.3  
+**Date**: 5 janvier 2026  
+>>>>>>> fb86a38 (New whl files management optimized with cdn and auto dependencies management.)
 **Script**: 658 lignes, 10 imports  
 **Optimisations**: Fonction `normalize_package_name()`, types modernes Python 3.12+, déduplication par `set`
