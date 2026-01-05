@@ -7,7 +7,6 @@ import argparse
 import json
 import shutil
 import subprocess
-import sys
 import tarfile
 import tempfile
 from pathlib import Path
@@ -158,7 +157,7 @@ def get_mechaphlowers_dependencies() -> list[str]:
         with tempfile.TemporaryDirectory() as temp_dir:
             result = subprocess.run(
                 [
-                    sys.executable, "-m", "pip", "download",
+                    "uvx", "--python", ">=3.12,<3.13", "pip", "download",
                     f"mechaphlowers=={MECHAPHLOWERS_VERSION}",
                     "-d", temp_dir,
                 ],
