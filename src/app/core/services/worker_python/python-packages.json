@@ -30,17 +30,17 @@
     "source": "local"
   },
   "numpy": {
-    "file_name": "numpy-2.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    "file_name": "numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl",
     "name": "numpy",
     "source": "local"
   },
   "packaging": {
-    "file_name": "packaging-25.0-cp312-none-any.whl",
+    "file_name": "packaging-24.2-cp312-none-any.whl",
     "name": "packaging",
     "source": "local"
   },
   "pandas": {
-    "file_name": "pandas-2.2.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    "file_name": "pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl",
     "name": "pandas",
     "source": "local"
   },
@@ -55,7 +55,7 @@
     "source": "local"
   },
   "platformdirs": {
-    "file_name": "platformdirs-4.5.1-cp312-none-any.whl",
+    "file_name": "platformdirs-4.3.6-cp312-none-any.whl",
     "name": "platformdirs",
     "source": "local"
   },
@@ -65,12 +65,12 @@
     "source": "local"
   },
   "pydantic": {
-    "file_name": "pydantic-2.12.5-cp312-none-any.whl",
+    "file_name": "pydantic-2.10.6-cp312-none-any.whl",
     "name": "pydantic",
     "source": "local"
   },
   "pydantic-core": {
-    "file_name": "pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    "file_name": "pydantic_core-2.27.2-cp313-cp313-pyodide_2025_0_wasm32.whl",
     "name": "pydantic_core",
     "source": "local"
   },
@@ -85,8 +85,8 @@
     "source": "local"
   },
   "pyyaml": {
-    "file_name": "PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
-    "name": "PyYAML",
+    "file_name": "pyyaml-6.0.2-cp313-cp313-pyodide_2025_0_wasm32.whl",
+    "name": "pyyaml",
     "source": "local"
   },
   "six": {
@@ -105,7 +105,7 @@
     "source": "local"
   },
   "typing-extensions": {
-    "file_name": "typing_extensions-4.15.0-cp312-none-any.whl",
+    "file_name": "typing_extensions-4.14.1-cp312-none-any.whl",
     "name": "typing_extensions",
     "source": "local"
   },
@@ -120,12 +120,12 @@
     "source": "local"
   },
   "tzdata": {
-    "file_name": "tzdata-2025.3-cp312-none-any.whl",
+    "file_name": "tzdata-2025.2-cp312-none-any.whl",
     "name": "tzdata",
     "source": "local"
   },
   "wrapt": {
-    "file_name": "wrapt-2.0.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+    "file_name": "wrapt-1.17.2-cp313-cp313-pyodide_2025_0_wasm32.whl",
     "name": "wrapt",
     "source": "local"
   }
