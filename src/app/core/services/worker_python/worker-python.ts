@@ -31,9 +31,7 @@ async function loadPyodideAndPackages() {
     const start = performance.now();
     pyodide = await loadPyodide({
       indexURL: self.name + 'pyodide/',
-      packages: [
-        ...localPythonPackages
-      ]
+      packages: [...localPythonPackages]
     });
     const loadEnd = performance.now();
     postMessage({ loadTime: loadEnd - start });
