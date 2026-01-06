@@ -6,11 +6,25 @@ import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
 import { Attachment } from '@src/app/core/data/database/interfaces/attachment';
 import { Support } from '@src/app/core/data/database/interfaces/support';
+import { Section } from '@src/app/core/data/database/interfaces/section';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+
+// Mock plotly.js-dist-min to prevent errors in SupportPlotComponent
+jest.mock('plotly.js-dist-min', () => ({
+  __esModule: true,
+  default: {
+    purge: jest.fn(),
+    newPlot: jest.fn(),
+    restyle: jest.fn(),
+    relayout: jest.fn()
+  }
+}));
 
 describe('AttachmentSetModalComponent', () => {
   let component: AttachmentSetModalComponent;
   let fixture: ComponentFixture<AttachmentSetModalComponent>;
   let attachmentServiceMock: jest.Mocked<AttachmentService>;
+  let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
 
   const mockAttachments: Attachment[] = [
     {
@@ -67,10 +81,54 @@ describe('AttachmentSetModalComponent', () => {
     towerModel: 'Tower Model'
   };
 
+  const mockSection: Section = {
+    uuid: 'section-uuid',
+    internal_id: 'section-1',
+    name: 'Test Section',
+    short_name: 'TS',
+    created_at: '2023-01-01',
+    updated_at: '2023-01-01',
+    internal_catalog_id: 'catalog-1',
+    type: 'type-1',
+    electric_phase_number: 3,
+    cable_name: 'Cable A',
+    cable_short_name: 'CA',
+    cables_amount: 1,
+    optical_fibers_amount: 0,
+    spans_amount: 1,
+    begin_span_name: 'span-1',
+    last_span_name: 'span-1',
+    first_support_number: 1,
+    last_support_number: 1,
+    first_attachment_set: '1',
+    last_attachment_set: '1',
+    regional_maintenance_center_names: [],
+    maintenance_center_names: [],
+    regional_team_id: undefined,
+    maintenance_team_id: undefined,
+    maintenance_center_id: undefined,
+    link_name: undefined,
+    lit_code: undefined,
+    lit_name: undefined,
+    branch_name: undefined,
+    voltage_idr: undefined,
+    comment: undefined,
+    supports_comment: undefined,
+    supports: [],
+    initial_conditions: [],
+    selected_initial_condition_uuid: undefined,
+    charges: [],
+    selected_charge_uuid: null
+  };
+
   beforeEach(async () => {
     attachmentServiceMock = {
       getAttachments: jest.fn().mockResolvedValue(mockAttachments)
     } as unknown as jest.Mocked<AttachmentService>;
+
+    workerPythonServiceMock = {
+      ready: true
+    } as unknown as jest.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -82,12 +140,18 @@ describe('AttachmentSetModalComponent', () => {
         {
           provide: AttachmentService,
           useValue: attachmentServiceMock
+        },
+        {
+          provide: WorkerPythonService,
+          useValue: workerPythonServiceMock
         }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AttachmentSetModalComponent);
     component = fixture.componentInstance;
+    // Set required section input
+    fixture.componentRef.setInput('section', mockSection);
   });
 
   it('should create', () => {
@@ -122,7 +186,7 @@ describe('AttachmentSetModalComponent', () => {
 
     // Simulate modal opening by calling resetValues directly
     // resetValues() defaults to resetSupportName = false, so supportName is not reset
-    component.resetValues();
+    component.resetValues(false);
     await fixture.whenStable();
 
     expect(component.armLength()).toBeUndefined();
@@ -236,5 +300,137 @@ describe('AttachmentSetModalComponent', () => {
 
     // Should not throw error
     await expect(component.getData()).rejects.toThrow('Service error');
+  });
+
+  describe('Effect at line 86-102', () => {
+    it('should reset values and set support data when isOpen becomes true', async () => {
+      // Set initial values to verify they get reset
+      component.armLength.set(5);
+      component.heightBelowConsole.set(10);
+      component.attachmentSet.set(2);
+      component.supportName.set('Initial Name');
+      component.coordinates.set([[1, 2, 3]]);
+
+      // Set support input with name and attachmentSet
+      fixture.componentRef.setInput('support', mockSupport);
+
+      // Set isOpen to true to trigger the effect
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify resetValues(true) was called - all values should be reset first
+      // Then supportName should be set from support.name
+      expect(component.supportName()).toBe('Test Support');
+      // attachmentSet, armLength, and heightBelowConsole should be set from support
+      expect(component.attachmentSet()).toBe(1);
+      expect(component.armLength()).toBe(2.5);
+      expect(component.heightBelowConsole()).toBe(10.0);
+      // coordinates should be reset (empty array)
+      expect(component.coordinates()).toEqual([]);
+      // getData should be called (via resetValues)
+      expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
+    });
+
+    it('should only set supportName when support has name but no attachmentSet', async () => {
+      const supportWithoutAttachmentSet: Support = {
+        ...mockSupport,
+        name: 'Support Without Set',
+        attachmentSet: null,
+        armLength: null,
+        heightBelowConsole: null
+      };
+
+      // Set initial values
+      component.armLength.set(5);
+      component.heightBelowConsole.set(10);
+      component.attachmentSet.set(2);
+
+      // Set support input
+      fixture.componentRef.setInput('support', supportWithoutAttachmentSet);
+
+      // Set isOpen to true to trigger the effect
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify supportName is set
+      expect(component.supportName()).toBe('Support Without Set');
+      // attachmentSet, armLength, and heightBelowConsole should remain undefined
+      // (resetValues clears them, and they're not set because attachmentSet is null)
+      expect(component.attachmentSet()).toBeUndefined();
+      expect(component.armLength()).toBeUndefined();
+      expect(component.heightBelowConsole()).toBeUndefined();
+    });
+
+    it('should reset values but not set support data when support is undefined', async () => {
+      // Set initial values
+      component.armLength.set(5);
+      component.heightBelowConsole.set(10);
+      component.attachmentSet.set(2);
+      component.supportName.set('Initial Name');
+
+      // Set support to undefined
+      fixture.componentRef.setInput('support', undefined);
+
+      // Set isOpen to true to trigger the effect
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify resetValues(true) was called - all values should be reset
+      expect(component.supportName()).toBeUndefined();
+      expect(component.attachmentSet()).toBeUndefined();
+      expect(component.armLength()).toBeUndefined();
+      expect(component.heightBelowConsole()).toBeUndefined();
+      expect(component.coordinates()).toEqual([]);
+    });
+
+    it('should not trigger effect when isOpen is false', async () => {
+      const resetValuesSpy = jest.spyOn(component, 'resetValues');
+
+      // Set initial values
+      component.armLength.set(5);
+      component.supportName.set('Initial Name');
+
+      // Set support input
+      fixture.componentRef.setInput('support', mockSupport);
+
+      // Set isOpen to false
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify resetValues was not called
+      expect(resetValuesSpy).not.toHaveBeenCalled();
+      // Values should remain unchanged
+      expect(component.armLength()).toBe(5);
+      expect(component.supportName()).toBe('Initial Name');
+    });
+
+    it('should handle support with attachmentSet but no name', async () => {
+      const supportWithoutName: Support = {
+        ...mockSupport,
+        name: null
+      };
+
+      // Set initial values
+      component.supportName.set('Initial Name');
+
+      // Set support input
+      fixture.componentRef.setInput('support', supportWithoutName);
+
+      // Set isOpen to true to trigger the effect
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // supportName should be reset (not set because support.name is null)
+      expect(component.supportName()).toBeUndefined();
+      // But attachmentSet, armLength, and heightBelowConsole should be set
+      expect(component.attachmentSet()).toBe(1);
+      expect(component.armLength()).toBe(2.5);
+      expect(component.heightBelowConsole()).toBe(10.0);
+    });
   });
 });

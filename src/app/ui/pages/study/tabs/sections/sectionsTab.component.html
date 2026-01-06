@@ -68,31 +68,30 @@
           />
 
           <dl>
-            <dt i18n class="section__title-name">Section Name</dt>
-            <dd class="section__text-name">{{ section.name }}</dd>
-          </dl>
-
-          <dl>
-            <dt i18n class="section__title-type">Section type</dt>
-            <dd class="section__text-type">
-              @if (section.type === 'phase') {
-                <ng-container i18n>Phase</ng-container>
-              } @else if (section.type === 'guard') {
-                <ng-container i18n>Guard</ng-container>
-              }
-            </dd>
-          </dl>
-
-          <dl>
-            <dt i18n class="section__title-lit">LIT</dt>
-            <dd class="section__text-lit">{{ section.lit }}</dd>
-          </dl>
-
-          <dl>
-            <dt i18n class="section__title-date">Last modified</dt>
-            <dd class="section__text-date">
-              {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}
-            </dd>
+            <div>
+              <dt i18n class="section__title-name">Section Name</dt>
+              <dd class="section__text-name">{{ section.name }}</dd>
+            </div>
+            <div>
+              <dt i18n class="section__title-type">Section type</dt>
+              <dd class="section__text-type">
+                @if (section.type === 'guard') {
+                  <ng-container i18n>Guard</ng-container>
+                } @else {
+                  <ng-container i18n>Phase</ng-container>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt i18n class="section__title-lit">LIT</dt>
+              <dd class="section__text-lit">{{ section.lit_name }}</dd>
+            </div>
+            <div>
+              <dt i18n class="section__title-date">Last modified</dt>
+              <dd class="section__text-date">
+                {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}
+              </dd>
+            </div>
           </dl>
 
           <p i18n class="mb-0 section__title-init">Initial condition</p>

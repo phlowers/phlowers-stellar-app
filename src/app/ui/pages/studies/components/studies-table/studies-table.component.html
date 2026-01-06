@@ -62,7 +62,7 @@
       </th>
       <th id="lit_code" pSortableColumn="lit_code">
         <div i18n class="flex items-center gap-2">
-          LIT designation
+          LIT
           <app-icon
             [icon]="
               $any(
@@ -77,7 +77,7 @@
         </div>
       </th>
       <th id="description" pSortableColumn="description">
-        <div i18n class="flex items-center gap-2">Description</div>
+        <div i18n class="flex items-center gap-2">Description/comment</div>
       </th>
       <th id="space"></th>
       <th id="actions">
@@ -93,8 +93,12 @@
       <td>{{ study.title }}</td>
       <td>{{ study.author_email }}</td>
       <td>{{ study.updated_at_offline | date: 'medium' }}</td>
-      <td>{{ study.sections?.[0]?.lit }}</td>
-      <td>{{ study.description | slice: 0 : 30 }}</td>
+      <td>{{ study.sections?.[0]?.lit_name }}</td>
+      <td>
+        <p class="line-clamp-3 text-ellipsis overflow-hidden">
+          {{ study.description }}
+        </p>
+      </td>
       <td>
         <a
           [routerLink]="'/study/' + study.uuid"

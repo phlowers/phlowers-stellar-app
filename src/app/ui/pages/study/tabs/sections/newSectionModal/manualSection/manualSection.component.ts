@@ -59,7 +59,8 @@ const lineTablePropertiesToSectionProperties: Record<
 > = {
   voltage_idr: 'voltage_idr',
   link_idr: 'link_name',
-  lit_idr: 'lit',
+  lit_idr: 'lit_code',
+  lit_adr: 'lit_name',
   branch_idr: 'branch_name'
 };
 
@@ -73,12 +74,14 @@ type LineTableProperties =
   | 'voltage_idr'
   | 'link_idr'
   | 'lit_idr'
+  | 'lit_adr'
   | 'branch_idr';
 
 const orderedLineTableProperties: LineTableProperties[] = [
   'voltage_idr',
   'link_idr',
   'lit_idr',
+  'lit_adr',
   'branch_idr'
 ];
 
@@ -227,7 +230,7 @@ export class ManualSectionComponent implements OnInit {
       );
       this.linkAdrRead.set(linkLine?.link_adr || '');
       const litLine = linesTable.find(
-        (item) => item.lit_idr === this.section().lit
+        (item) => item.lit_idr === this.section().lit_code
       );
       this.litAdrRead.set(litLine?.lit_adr || '');
     }
