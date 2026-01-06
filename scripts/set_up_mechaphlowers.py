@@ -1,5 +1,5 @@
 # /// script
-# requires-python = ">=3.12,<3.13"
+# requires-python = ">=3.13,<3.14"
 # dependencies = ["requests == 2.32.3", "pyodide-build == 0.30.6"]
 # ///
 """Set up mechaphlowers with Pyodide dependencies and bandwidth optimization."""
@@ -17,7 +17,7 @@ from pyodide_build.cli.py_compile import main as pyodide_build  # type: ignore
 # Configuration
 PYODIDE_VERSION = "0.28.3"
 PYODIDE_CDN_URL = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full"
-MECHAPHLOWERS_VERSION = "0.4.3"
+MECHAPHLOWERS_VERSION = "0.5.1"
 PYODIDE_DIRECTORY_PATH = "./public/pyodide"
 PYODIDE_PACKAGES_PATH = "./src/app/core/services/worker_python/python-packages.json"
 NEEDED_PYODIDE_SOURCE_FILES = [
@@ -157,7 +157,7 @@ def get_mechaphlowers_dependencies() -> list[str]:
         with tempfile.TemporaryDirectory() as temp_dir:
             result = subprocess.run(
                 [
-                    "uvx", "--python", ">=3.12,<3.13", "pip", "download",
+                    "uvx", "--python", ">=3.13,<3.14", "pip", "download",
                     f"mechaphlowers=={MECHAPHLOWERS_VERSION}",
                     "-d", temp_dir,
                 ],
@@ -574,7 +574,7 @@ def main() -> None:
         process_args = [
             "uvx",
             "--python",
-            ">=3.12,<3.13",
+            ">=3.13,<3.14",
             "pip",
             "download",
             "-d",
@@ -595,7 +595,7 @@ def main() -> None:
             process_args = [
                 "uvx",
                 "--python",
-                ">=3.12,<3.13",
+                ">=3.13,<3.14",
                 "pip",
                 "download",
                 f"mechaphlowers=={MECHAPHLOWERS_VERSION}",
@@ -607,9 +607,28 @@ def main() -> None:
             
             subprocess.run(process_args, check=False, capture_output=True, text=True)
     
-    print("\nBuilding wheel files")
-    # compile the wheel files to pyc
+    # Step 3: Compile wheel files to .pyc for faster loading (NOT python_stdlib.zip or other Pyodide core files)
+    # pyodide_build compiles everything in the directory, so we need to protect core files
+    pyodide_core_files = ["python_stdlib.zip", "pyodide.asm.wasm", "pyodide.asm.js", "pyodide-lock.json"]
+    temp_core_dir = Path(PYODIDE_DIRECTORY_PATH) / ".core_temp"
+    temp_core_dir.mkdir(exist_ok=True)
+    
+    # Temporarily move core files out of the way
+    for core_file in pyodide_core_files:
+        core_path = Path(PYODIDE_DIRECTORY_PATH) / core_file
+        if core_path.exists():
+            shutil.move(str(core_path), str(temp_core_dir / core_file))
+    
+    print("\nCompiling wheel files to .pyc")
     pyodide_build(Path(PYODIDE_DIRECTORY_PATH), False, True, 6, "")
+    
+    # Restore core files
+    for core_file in pyodide_core_files:
+        temp_path = temp_core_dir / core_file
+        if temp_path.exists():
+            shutil.move(str(temp_path), str(Path(PYODIDE_DIRECTORY_PATH) / core_file))
+    
+    temp_core_dir.rmdir()
 
     remove_duplicate_wheels_in_directory(PYODIDE_DIRECTORY_PATH)
 
