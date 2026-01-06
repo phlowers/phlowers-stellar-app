@@ -11,6 +11,7 @@ export interface Line {
   link_adr: string;
   lit_idr: string;
   lit_adr: string;
+  branch_id: string;
   branch_idr: string;
   branch_adr: string;
   voltage_idr: string;

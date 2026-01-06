@@ -1203,11 +1203,6 @@
         <source>Ice Thickness</source>
       </segment>
     </unit>
-    <unit id="8217377030077972135">
-      <segment>
-        <source>delete study</source>
-      </segment>
-    </unit>
     <unit id="8384742917026482252">
       <segment>
         <source>Phase</source>
@@ -1701,11 +1696,6 @@
     <unit id="472586784721739380">
       <segment>
         <source>Link - ID</source>
-      </segment>
-    </unit>
-    <unit id="6760730176467866326">
-      <segment>
-        <source>Branch - ID</source>
       </segment>
     </unit>
     <unit id="7607770781665288883">

@@ -56,7 +56,8 @@ export class LinesService {
           link_adr: item.link_adr || '',
           lit_idr: item.lit_idr || '',
           lit_adr: item.lit_adr || '',
-          branch_idr: item.branch_idr || item.branch_id || '',
+          branch_id: item.branch_id || '',
+          branch_idr: item.branch_idr || '',
           branch_adr: item.branch_adr || '',
           voltage_idr: item.voltage_idr || '0 KV',
           voltage_adr: item.voltage_adr || '0 KV'
@@ -81,6 +82,7 @@ export class LinesService {
                 element.voltage_idr,
                 element.link_idr,
                 element.lit_idr,
+                element.branch_id,
                 element.branch_idr
               ].join('')
             );

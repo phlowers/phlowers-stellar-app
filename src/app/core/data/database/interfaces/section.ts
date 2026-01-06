@@ -39,6 +39,7 @@ export interface Section {
   lit_code: string | undefined;
   lit_name: string | undefined;
   branch_name: string | undefined;
+  branch_idr: string | undefined;
   voltage_idr: string | undefined;
   comment: string | undefined;
   supports_comment: string | undefined;

@@ -1313,12 +1313,6 @@
         <target>Th - T0 :</target>
       </segment>
     </unit>
-    <unit id="8217377030077972135">
-      <segment state="initial">
-        <source>delete study</source>
-        <target>supprimer l&apos;étude</target>
-      </segment>
-    </unit>
     <unit id="1029122298839770722">
       <segment state="initial">
         <source>reset</source>
@@ -2049,12 +2043,6 @@
       <segment state="initial">
         <source>LIT - ID</source>
         <target>LIT - IDR</target>
-      </segment>
-    </unit>
-    <unit id="6760730176467866326">
-      <segment state="initial">
-        <source>Branch - ID</source>
-        <target>Branche - IDR</target>
       </segment>
     </unit>
     <unit id="3059442917741627872">
