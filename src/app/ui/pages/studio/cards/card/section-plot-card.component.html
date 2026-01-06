@@ -34,7 +34,7 @@
           @for (field of section.fields; track $index) {
             <dl class="details">
               <dt>{{ field.label }}</dt>
-              <dd>{{ field.value }}</dd>
+              <dd>{{ field.value }} {{ field.unit }}</dd>
             </dl>
           }
         </div>
@@ -50,7 +50,7 @@
             @for (field of section.fields; track $index) {
               <dl class="details">
                 <dt>{{ field.label }}</dt>
-                <dd>{{ field.value }}</dd>
+                <dd>{{ field.value }} {{ field.unit }}</dd>
               </dl>
             }
           </div>
@@ -63,7 +63,7 @@
       @for (field of spanData(); track $index) {
         <dl class="details">
           <dt>{{ field.label }}</dt>
-          <dd>{{ field.value }}</dd>
+          <dd>{{ field.value }} {{ field.unit }}</dd>
         </dl>
       }
 
@@ -72,7 +72,7 @@
         @for (field of spanExpandedData(); track $index) {
           <dl class="details">
             <dt>{{ field.label }}</dt>
-            <dd>{{ field.value }}</dd>
+            <dd>{{ field.value }} {{ field.unit }}</dd>
           </dl>
         }
       </div>
