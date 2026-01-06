@@ -808,9 +808,9 @@
         <source>°C</source>
       </segment>
     </unit>
-    <unit id="8987297903552443142">
+    <unit id="8662695338423847831">
       <segment>
-        <source> Base temperature </source>
+        <source>Base temperature</source>
       </segment>
     </unit>
     <unit id="902828700910058336">
@@ -1171,11 +1171,6 @@
     <unit id="6629591556260898648">
       <segment>
         <source>Ground</source>
-      </segment>
-    </unit>
-    <unit id="6800398544280479151">
-      <segment>
-        <source>Angle en ligne</source>
       </segment>
     </unit>
     <unit id="6812930637022637485">
@@ -2133,11 +2128,6 @@
         <source> Initial condition name must be unique. </source>
       </segment>
     </unit>
-    <unit id="8155429097661917791">
-      <segment>
-        <source> Base parameter </source>
-      </segment>
-    </unit>
     <unit id="2638469548137871317">
       <segment>
         <source>Initial condition name</source>
@@ -2821,6 +2811,11 @@
     <unit id="9213587357522873966">
       <segment>
         <source>ON</source>
+      </segment>
+    </unit>
+    <unit id="6711210390465051476">
+      <segment>
+        <source>In line angle</source>
       </segment>
     </unit>
   </file>
