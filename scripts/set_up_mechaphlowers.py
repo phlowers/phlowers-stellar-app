@@ -90,18 +90,22 @@ def normalize_package_name(name: str) -> str:
     return name.lower().replace("_", "-")
 
 
-def remove_duplicate_wheels_in_directory(directory: str) -> None:
+def remove_duplicate_wheels_in_directory(directory: str, cdn_wheels: list[str] | None = None) -> None:
     """
     Remove duplicate wheel files, keeping the optimized version.
     
     For each package (case-insensitive), keeps the better wheel version:
-    - Prefer Pyodide optimized wheels (cp313-pyodide)
-    - Then prefer non-py3 compiled versions (cp312)
-    - Remove generic/py3 versions
+    - Prefer CDN wheels (known good versions for Pyodide compatibility)
+    - Then prefer Pyodide optimized wheels (cp313-pyodide)
+    - Then prefer non-py3 compiled versions (cp312, cp313)
+    - Remove generic/py3 versions from pip
     
     Args:
         directory: Path to directory containing wheel files
+        cdn_wheels: List of wheel filenames downloaded from CDN (to prioritize)
     """
+    cdn_wheels = cdn_wheels or []
+    cdn_wheels_set = set(cdn_wheels)
     wheel_files = get_all_wheel_file_names_in_directory(directory)
     
     # Group files by normalized package name (case-insensitive)
@@ -116,14 +120,18 @@ def remove_duplicate_wheels_in_directory(directory: str) -> None:
             continue
         
         # Priority order for which wheel to keep:
-        # 1. Pyodide optimized (cp313-pyodide_*)
-        # 2. Non-py3 compiled (cp312, cp313 but not py3)
-        # 3. Any other version
+        # 1. CDN wheels (known compatible versions)
+        # 2. Pyodide optimized (cp313-pyodide_*)
+        # 3. Non-py3 compiled (cp312, cp313 but not py3)
+        # 4. Any other version
         
+        cdn_matches = [w for w in wheels if w in cdn_wheels_set]
         pyodide_wheels = [w for w in wheels if "pyodide" in w]
         compiled_wheels = [w for w in wheels if "py3" not in w and "pyodide" not in w]
         
-        if pyodide_wheels:
+        if cdn_matches:
+            keep_wheel = cdn_matches[0]  # Prefer CDN version (known compatible)
+        elif pyodide_wheels:
             keep_wheel = pyodide_wheels[0]  # Prefer Pyodide optimized
         elif compiled_wheels:
             keep_wheel = compiled_wheels[0]  # Prefer compiled
@@ -675,7 +683,7 @@ def main() -> None:
     
     temp_core_dir.rmdir()
 
-    remove_duplicate_wheels_in_directory(PYODIDE_DIRECTORY_PATH)
+    remove_duplicate_wheels_in_directory(PYODIDE_DIRECTORY_PATH, cdn_wheels=cdn_wheels)
 
     # Clean up any leftover .old files
     for old_file in Path(PYODIDE_DIRECTORY_PATH).glob("*.old"):

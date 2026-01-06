@@ -1,6 +1,6 @@
 {
   "annotated-types": {
-    "file_name": "annotated_types-0.7.0-cp313-none-any.whl",
+    "file_name": "annotated_types-0.7.0-py3-none-any.whl",
     "name": "annotated_types",
     "source": "local"
   },
@@ -35,7 +35,7 @@
     "source": "local"
   },
   "packaging": {
-    "file_name": "packaging-24.2-cp313-none-any.whl",
+    "file_name": "packaging-24.2-py3-none-any.whl",
     "name": "packaging",
     "source": "local"
   },
@@ -55,7 +55,7 @@
     "source": "local"
   },
   "platformdirs": {
-    "file_name": "platformdirs-4.3.6-cp313-none-any.whl",
+    "file_name": "platformdirs-4.3.6-py3-none-any.whl",
     "name": "platformdirs",
     "source": "local"
   },
@@ -65,7 +65,7 @@
     "source": "local"
   },
   "pydantic": {
-    "file_name": "pydantic-2.10.6-cp313-none-any.whl",
+    "file_name": "pydantic-2.10.6-py3-none-any.whl",
     "name": "pydantic",
     "source": "local"
   },
@@ -75,12 +75,12 @@
     "source": "local"
   },
   "python-dateutil": {
-    "file_name": "python_dateutil-2.9.0.post0-cp313-none-any.whl",
+    "file_name": "python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
     "name": "python_dateutil",
     "source": "local"
   },
   "pytz": {
-    "file_name": "pytz-2025.2-cp313-none-any.whl",
+    "file_name": "pytz-2025.2-py2.py3-none-any.whl",
     "name": "pytz",
     "source": "local"
   },
@@ -90,7 +90,7 @@
     "source": "local"
   },
   "six": {
-    "file_name": "six-1.17.0-cp313-none-any.whl",
+    "file_name": "six-1.17.0-py2.py3-none-any.whl",
     "name": "six",
     "source": "local"
   },
@@ -105,7 +105,7 @@
     "source": "local"
   },
   "typing-extensions": {
-    "file_name": "typing_extensions-4.14.1-cp313-none-any.whl",
+    "file_name": "typing_extensions-4.14.1-py3-none-any.whl",
     "name": "typing_extensions",
     "source": "local"
   },
@@ -120,7 +120,7 @@
     "source": "local"
   },
   "tzdata": {
-    "file_name": "tzdata-2025.3-cp313-none-any.whl",
+    "file_name": "tzdata-2025.2-py2.py3-none-any.whl",
     "name": "tzdata",
     "source": "local"
   },
