@@ -88,7 +88,7 @@ Télécharger et optimiser les dépendances Python de mechaphlowers en **préfé
 ```python
 PYODIDE_VERSION = "0.28.3"
 PYODIDE_CDN_URL = "https://cdn.jsdelivr.net/pyodide/v0.28.3/full"
-MECHAPHLOWERS_VERSION = "0.4.3"
+MECHAPHLOWERS_VERSION = "0.5.1"
 PYODIDE_DIRECTORY_PATH = "./public/pyodide"
 PYODIDE_PACKAGES_PATH = "./src/app/core/services/worker_python/python-packages.json"
 
@@ -712,6 +712,6 @@ npm run set-up-mechaphlowers -- --skip-compression
 
 ---
 
-**Dernière mise à jour**: 5 janvier 2026  
+**Dernière mise à jour**: 6 janvier 2026  
 **Version Pyodide**: 0.28.3  
-**Version mechaphlowers**: 0.4.3
+**Version mechaphlowers**: 0.5.1
