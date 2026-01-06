@@ -12,12 +12,31 @@ import math
 from mechaphlowers.entities.shapes import SupportShape
 from mechaphlowers.data.measures import PapotoParameterMeasure
 
-import json
-
+import logging
 from importlib.metadata import version
+import sys
 
-print("mechaphlowers version: ", version("mechaphlowers"))
 RESOLUTION = 100
+# init a logger to print to stdout
+logger = logging.getLogger("mechaphlowers")
+logger.setLevel(logging.WARNING)  # Set logger level to INFO so info messages are shown
+
+# configure handler to print to stdout
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+print(f"mechaphlowers version: {version('mechaphlowers')}")
+
+
+def set_log_level(js_inputs: dict):
+    python_inputs = js_inputs.to_py()
+    log_level = python_inputs["activateDebugLogs"]
+
+    print("log_level: ", log_level)
+    logger.setLevel(logging.DEBUG if log_level else logging.WARNING)
+    return {"success": True}
 
 
 @dataclass
@@ -268,7 +287,6 @@ def init_section(js_inputs: dict):
     # set sagging parameter and temperatur
     if initial_condition:
         section.sagging_parameter = initial_condition.base_parameters
-    # print("initial_condition: ", initial_condition)
     section.sagging_temperature = (
         initial_condition.base_temperature if initial_condition else 15
     )
@@ -325,7 +343,6 @@ def init_section(js_inputs: dict):
             # "b4": "MPa",
         }
     )
-    # print("cable_array: ", json.dumps(cable_array.data.to_dict()))
 
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
     plt_line = PlotEngine.builder_from_balance_engine(engine)
@@ -357,7 +374,7 @@ def change_climate_load(js_inputs: dict):
 
     global engine, plt_line
     python_inputs = js_inputs.to_py()
-    print("python_inputs: ", python_inputs)
+    logger.debug("python_inputs: ", python_inputs)
     wind_pressure = python_inputs["windPressure"]
     cable_temperature = python_inputs["cableTemperature"]
     ice_thickness = python_inputs["iceThickness"] / 100  # in meters in the engine

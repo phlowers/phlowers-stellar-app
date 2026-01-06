@@ -10,7 +10,8 @@ export enum Task {
   getSupportCoordinates = 'getSupportCoordinates',
   addLoad = 'addLoad',
   calculatePapoto = 'calculatePapoto',
-  calculateGuying = 'calculateGuying'
+  calculateGuying = 'calculateGuying',
+  setLogLevel = 'setLogLevel'
 }
 
 export enum DataError {
@@ -39,6 +40,14 @@ export interface GetSectionOutput {
   load_angle: number[];
   displacement: number[][];
   span_length: number[];
+}
+
+export enum LogLevel {
+  DEBUG = 10,
+  INFO = 20,
+  WARNING = 30,
+  ERROR = 40,
+  CRITICAL = 50
 }
 
 export interface TaskInputs {
@@ -82,6 +91,9 @@ export interface TaskInputs {
     horizontalDistance: number;
     hasPulley: boolean;
   };
+  [Task.setLogLevel]: {
+    activateDebugLogs: boolean;
+  };
 }
 
 export interface TaskOutputs {
@@ -112,4 +124,5 @@ export interface TaskOutputs {
     chargeHUnderConsole: number;
     chargeLIfPulley: number;
   };
+  [Task.setLogLevel]: undefined;
 }

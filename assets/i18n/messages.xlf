@@ -2435,19 +2435,9 @@
         <source>supports comment</source>
       </segment>
     </unit>
-    <unit id="70265843712811398">
-      <segment>
-        <source>Electric tension</source>
-      </segment>
-    </unit>
     <unit id="7819314041543176992">
       <segment>
         <source>Close</source>
-      </segment>
-    </unit>
-    <unit id="8387651464002742246">
-      <segment>
-        <source>Branch</source>
       </segment>
     </unit>
     <unit id="2657043015926552641">
@@ -3280,11 +3270,6 @@
         <source>Cable temperature at 15°C</source>
       </segment>
     </unit>
-    <unit id="310445057254465407">
-      <segment>
-        <source>Cable temperature uncertainty at 15°C</source>
-      </segment>
-    </unit>
     <unit id="1698502503890694225">
       <segment>
         <source> Parameter uncertainty Papoto </source>
@@ -3380,14 +3365,14 @@
         <source>Direct solar flux</source>
       </segment>
     </unit>
-    <unit id="9189086018583411432">
+    <unit id="7197115832855767963">
       <segment>
-        <source> Diffused plus direct solar flux </source>
+        <source>Diffused plus direct solar flux</source>
       </segment>
     </unit>
-    <unit id="5724969710718529338">
+    <unit id="5681976093367495930">
       <segment>
-        <source>Measured diffused plus direct solar flux (not required)</source>
+        <source> Measured diffused plus direct solar flux (not required) </source>
       </segment>
     </unit>
     <unit id="100914384350148711">
@@ -4288,6 +4273,61 @@
     <unit id="4879686808912531747">
       <segment>
         <source>T :</source>
+      </segment>
+    </unit>
+    <unit id="1839839226703008167">
+      <segment>
+        <source>The python logs have been deactivated</source>
+      </segment>
+    </unit>
+    <unit id="2401579609429794582">
+      <segment>
+        <source>The python logs have been activated</source>
+      </segment>
+    </unit>
+    <unit id="2587240527868724590">
+      <segment>
+        <source>CC</source>
+      </segment>
+    </unit>
+    <unit id="2936879176471643383">
+      <segment>
+        <source>Activate Python logs</source>
+      </segment>
+    </unit>
+    <unit id="3129001544428431323">
+      <segment>
+        <source>OFF</source>
+      </segment>
+    </unit>
+    <unit id="4443682149844413583">
+      <segment>
+        <source> Cable temperature at 15°C </source>
+      </segment>
+    </unit>
+    <unit id="5093495639955235689">
+      <segment>
+        <source>Python logs deactivated</source>
+      </segment>
+    </unit>
+    <unit id="5463714848868355880">
+      <segment>
+        <source>Tower</source>
+      </segment>
+    </unit>
+    <unit id="7565332931594484808">
+      <segment>
+        <source>Python logs activated</source>
+      </segment>
+    </unit>
+    <unit id="8690924341268563915">
+      <segment>
+        <source>Add a load case</source>
+      </segment>
+    </unit>
+    <unit id="9213587357522873966">
+      <segment>
+        <source>ON</source>
       </segment>
     </unit>
   </file>

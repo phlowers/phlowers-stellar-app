@@ -1751,18 +1751,6 @@
         <target>dd/MM:yyyy à HH&apos;h&apos;mm</target>
       </segment>
     </unit>
-    <unit id="70265843712811398">
-      <segment state="initial">
-        <source>Electric tension</source>
-        <target>Tension électrique</target>
-      </segment>
-    </unit>
-    <unit id="8387651464002742246">
-      <segment state="initial">
-        <source>Branch</source>
-        <target>Branche</target>
-      </segment>
-    </unit>
     <unit id="5946937164148510682">
       <segment state="initial">
         <source>supports comment</source>
@@ -2927,16 +2915,16 @@
         <target>Flux solaire direct</target>
       </segment>
     </unit>
-    <unit id="9189086018583411432">
+    <unit id="7197115832855767963">
       <segment state="initial">
-        <source> Diffused plus direct solar flux </source>
-        <target> Flux solaire diffus plus direct </target>
+        <source>Diffused plus direct solar flux</source>
+        <target>Flux solaire diffus plus direct</target>
       </segment>
     </unit>
-    <unit id="5724969710718529338">
+    <unit id="5681976093367495930">
       <segment state="initial">
-        <source>Measured diffused plus direct solar flux (not required)</source>
-        <target> Flux solaire diffus plus direct mesuré (non requis)</target>
+        <source> Measured diffused plus direct solar flux (not required) </source>
+        <target> Flux solaire diffus plus direct mesuré (non requis) </target>
       </segment>
     </unit>
     <unit id="100914384350148711">
@@ -2997,12 +2985,6 @@
       <segment state="initial">
         <source>Cable temperature at 15°C</source>
         <target>Température du câble à 15°C</target>
-      </segment>
-    </unit>
-    <unit id="310445057254465407">
-      <segment state="initial">
-        <source>Cable temperature uncertainty at 15°C</source>
-        <target>Incertitude de la température du câble à 15°C</target>
       </segment>
     </unit>
     <unit id="5478452081175426719">
@@ -3267,6 +3249,72 @@
       <segment state="initial">
         <source>T :</source>
         <target>H :</target>
+      </segment>
+    </unit>
+    <unit id="2936879176471643383">
+      <segment state="initial">
+        <source>Activate Python logs</source>
+        <target>Activer les logs Python</target>
+      </segment>
+    </unit>
+    <unit id="9213587357522873966">
+      <segment state="initial">
+        <source>ON</source>
+        <target>OUI</target>
+      </segment>
+    </unit>
+    <unit id="3129001544428431323">
+      <segment state="initial">
+        <source>OFF</source>
+        <target>NON</target>
+      </segment>
+    </unit>
+    <unit id="7565332931594484808">
+      <segment state="initial">
+        <source>Python logs activated</source>
+        <target>Les logs Python sont activés</target>
+      </segment>
+    </unit>
+    <unit id="5093495639955235689">
+      <segment state="initial">
+        <source>Python logs deactivated</source>
+        <target>Les logs Python sont désactivés</target>
+      </segment>
+    </unit>
+    <unit id="2401579609429794582">
+      <segment state="initial">
+        <source>The python logs have been activated</source>
+        <target>Les logs Python sont activés</target>
+      </segment>
+    </unit>
+    <unit id="1839839226703008167">
+      <segment state="initial">
+        <source>The python logs have been deactivated</source>
+        <target>Les logs Python sont désactivés</target>
+      </segment>
+    </unit>
+    <unit id="8690924341268563915">
+      <segment state="initial">
+        <source>Add a load case</source>
+        <target>Ajouter un cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="2587240527868724590">
+      <segment state="initial">
+        <source>CC</source>
+        <target>CC</target>
+      </segment>
+    </unit>
+    <unit id="4443682149844413583">
+      <segment state="initial">
+        <source> Cable temperature at 15°C </source>
+        <target> Température du câble à 15°C </target>
+      </segment>
+    </unit>
+    <unit id="5463714848868355880">
+      <segment state="initial">
+        <source>Tower</source>
+        <target>Tower</target>
       </segment>
     </unit>
   </file>
