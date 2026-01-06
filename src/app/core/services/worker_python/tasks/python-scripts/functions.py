@@ -59,6 +59,7 @@ class Support:
     towerModel: Optional[str] = None
     chainV: Optional[bool] = None
     counterWeight: Optional[float] = None
+    towerModel: Optional[str] = None
     supportFootAltitude: Optional[float] = None
     attachmentPosition: Optional[str] = None
     chainSurface: Optional[float] = None
