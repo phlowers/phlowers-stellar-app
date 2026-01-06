@@ -18,6 +18,9 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonComponent } from '../../shared/components/atoms/button/button.component';
 import { OnlineService } from '@src/app/core/services/online/online.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { LogLevel, Task } from '@core/services/worker_python/tasks/types';
+import { ToggleSwitch } from 'primeng/toggleswitch';
+import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 
 const CACHE_NAME = 'app-assets';
 
@@ -35,7 +38,8 @@ const CACHE_NAME = 'app-assets';
     ConfirmDialogModule,
     ButtonComponent,
     ProgressSpinnerModule,
-    DatePipe
+    DatePipe,
+    ToggleSwitch
   ]
 })
 export class AdminComponent {
@@ -45,10 +49,19 @@ export class AdminComponent {
     private readonly messageService: MessageService,
     private readonly studyService: StudiesService,
     private readonly storageService: StorageService,
-    private readonly confirmationService: ConfirmationService
-  ) {}
+    private readonly confirmationService: ConfirmationService,
+    private readonly workerPythonService: WorkerPythonService
+  ) {
+    this.activateDebugLogs =
+      localStorage.getItem('activateDebugLogs') === 'true';
+  }
   updateAvailable = false;
   newVersion = '';
+  activateDebugLogsOptions = [
+    { label: $localize`ON`, value: LogLevel.DEBUG },
+    { label: $localize`OFF`, value: LogLevel.WARNING }
+  ];
+  activateDebugLogs = false;
 
   deleteAllStudies() {
     this.confirmationService.confirm({
@@ -97,6 +110,23 @@ export class AdminComponent {
           window.location.href = '/';
         }, 2000);
       }
+    });
+  }
+
+  async onChangeActivateDebugLogs(activate: boolean) {
+    await this.workerPythonService.runTask(Task.setLogLevel, {
+      activateDebugLogs: activate
+    });
+    // store the info in the local storage
+    localStorage.setItem('activateDebugLogs', activate.toString());
+    this.messageService.add({
+      severity: 'success',
+      summary: activate
+        ? $localize`Python logs activated`
+        : $localize`Python logs deactivated`,
+      detail: activate
+        ? $localize`The python logs have been activated`
+        : $localize`The python logs have been deactivated`
     });
   }
 }
