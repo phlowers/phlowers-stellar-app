@@ -52,6 +52,14 @@ export enum LogLevel {
   CRITICAL = 50
 }
 
+export enum LogLevel {
+  DEBUG = 10,
+  INFO = 20,
+  WARNING = 30,
+  ERROR = 40,
+  CRITICAL = 50
+}
+
 export interface TaskInputs {
   [Task.getLit]: { section: Section; cable: CatalogCable };
   [Task.runTests]: undefined;
@@ -131,6 +139,9 @@ export interface TaskInputs {
     horizontalDistance: number;
     hasPulley: boolean;
   };
+  [Task.setLogLevel]: {
+    activateDebugLogs: boolean;
+  };
 }
 
 export interface TaskOutputs {
@@ -187,4 +198,5 @@ export interface TaskOutputs {
     chargeHUnderConsole: number;
     chargeLIfPulley: number;
   };
+  [Task.setLogLevel]: undefined;
 }
