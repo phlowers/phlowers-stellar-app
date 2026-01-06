@@ -102,8 +102,14 @@ export class InitialConditionModalComponent implements OnDestroy {
   ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
-      base_parameters: [null, [Validators.min(50), Validators.max(3500)]],
-      base_temperature: [15, [Validators.min(-50), Validators.max(200)]],
+      base_parameters: [
+        null,
+        [Validators.required, Validators.min(50), Validators.max(3500)]
+      ],
+      base_temperature: [
+        15,
+        [Validators.required, Validators.min(-50), Validators.max(200)]
+      ],
       cable_pretension: [0],
       min_temperature: [0],
       max_wind_pressure: [0],
