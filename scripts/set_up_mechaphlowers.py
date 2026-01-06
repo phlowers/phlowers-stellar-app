@@ -11,14 +11,60 @@ import tarfile
 import tempfile
 from pathlib import Path
 
+import re
+import sys
+
 import requests
 from pyodide_build.cli.py_compile import main as pyodide_build  # type: ignore
 
-# Configuration
-PYODIDE_VERSION = "0.28.3"
-PYODIDE_CDN_URL = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full"
-MECHAPHLOWERS_VERSION = "0.5.1"
+# Configuration paths
+PACKAGE_JSON_PATH = Path(__file__).parent.parent / "package.json"
 PYODIDE_DIRECTORY_PATH = "./public/pyodide"
+
+
+def get_versions_from_package_json() -> tuple[str, str]:
+    """Read PYODIDE_VERSION and MECHAPHLOWERS_VERSION from package.json.
+    
+    Returns:
+        Tuple of (pyodide_version, mechaphlowers_version)
+        
+    Raises:
+        SystemExit: If package.json cannot be read or versions are missing
+    """
+    try:
+        package_data = json.loads(PACKAGE_JSON_PATH.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error: Could not read package.json: {e}")
+        sys.exit(1)
+    
+    # Extract pyodide version from dependencies (handles ^, ~, >= prefixes)
+    pyodide_dep = package_data.get("dependencies", {}).get("pyodide")
+    if not pyodide_dep:
+        print("Error: 'pyodide' not found in package.json dependencies")
+        sys.exit(1)
+    
+    # Remove version prefix characters (^, ~, >=, etc.)
+    pyodide_version = re.sub(r'^[\^~>=<]+', '', pyodide_dep)
+    
+    # Extract mechaphlowers version from config section
+    mechaphlowers_version = package_data.get("config", {}).get("mechaphlowers")
+    if not mechaphlowers_version:
+        print("Error: 'mechaphlowers' not found in package.json config section")
+        sys.exit(1)
+    
+    return pyodide_version, mechaphlowers_version
+
+
+# Read versions from package.json
+PYODIDE_VERSION, MECHAPHLOWERS_VERSION = get_versions_from_package_json()
+PYODIDE_CDN_URL = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full"
+
+print(f"\n{'='*70}")
+print(f"CONFIGURATION (from package.json)")
+print(f"{'='*70}")
+print(f"  Pyodide version:      {PYODIDE_VERSION}")
+print(f"  Mechaphlowers version: {MECHAPHLOWERS_VERSION}")
+print(f"{'='*70}\n")
 PYODIDE_PACKAGES_PATH = "./src/app/core/services/worker_python/python-packages.json"
 NEEDED_PYODIDE_SOURCE_FILES = [
     "pyodide.asm.wasm",
@@ -76,7 +122,6 @@ def remove_duplicate_wheels_in_directory(directory: str) -> None:
         
         pyodide_wheels = [w for w in wheels if "pyodide" in w]
         compiled_wheels = [w for w in wheels if "py3" not in w and "pyodide" not in w]
-        other_wheels = [w for w in wheels if "py3" in w]
         
         if pyodide_wheels:
             keep_wheel = pyodide_wheels[0]  # Prefer Pyodide optimized
@@ -631,6 +676,11 @@ def main() -> None:
     temp_core_dir.rmdir()
 
     remove_duplicate_wheels_in_directory(PYODIDE_DIRECTORY_PATH)
+
+    # Clean up any leftover .old files
+    for old_file in Path(PYODIDE_DIRECTORY_PATH).glob("*.old"):
+        old_file.unlink()
+        print(f"Removed leftover file: {old_file.name}")
 
     # Compress wheels with Brotli/Gzip for bandwidth optimization
     compression_stats = {}

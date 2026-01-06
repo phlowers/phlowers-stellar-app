@@ -1,41 +1,41 @@
-# Guide complet: set_up_mechaphlowers.py
+# Complete Guide: set_up_mechaphlowers.py
 
-## 📋 Table des matières
-1. [Vue d'ensemble](#vue-densemble)
-2. [Architecture générale](#architecture-générale)
+## 📋 Table of Contents
+1. [Overview](#overview)
+2. [General Architecture](#general-architecture)
 3. [Configuration](#configuration)
-4. [Workflow principal](#workflow-principal)
-5. [Fonctions détaillées](#fonctions-détaillées)
-6. [Optimisations](#optimisations)
-7. [Exemples de sortie](#exemples-de-sortie)
-8. [Dépannage](#dépannage)
+4. [Main Workflow](#main-workflow)
+5. [Detailed Functions](#detailed-functions)
+6. [Optimizations](#optimizations)
+7. [Output Examples](#output-examples)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
-## Vue d'ensemble
+## Overview
 
-Le script **`set_up_mechaphlowers.py`** automatise complètement la configuration de **mechaphlowers avec Pyodide** pour une application web Angular/TypeScript.
+The **`set_up_mechaphlowers.py`** script fully automates the configuration of **mechaphlowers with Pyodide** for an Angular/TypeScript web application.
 
-### Objectif principal
-Télécharger et optimiser les dépendances Python de mechaphlowers en **préférant dynamiquement les versions du CDN Pyodide** lorsqu'elles sont disponibles.
+### Main Objective
+Download and optimize mechaphlowers Python dependencies by **dynamically preferring Pyodide CDN versions** when available.
 
-### Avantages clés
-- ✅ **Détection automatique** de toutes les dépendances (directes et transitives)
-- ✅ **Intelligence CDN** : préfère les wheels optimisées pour Pyodide
-- ✅ **Compression optimale** : Brotli + Gzip pour ~60% de réduction de bande passante
-- ✅ **Zéro maintenance** : s'adapte automatiquement aux changements du CDN
-- ✅ **Performance** : compilation en bytecode `.pyc` pour l'exécution rapide
+### Key Benefits
+- ✅ **Automatic detection** of all dependencies (direct and transitive)
+- ✅ **CDN Intelligence**: prefers Pyodide-optimized wheels
+- ✅ **Optimal compression**: Brotli + Gzip for ~60% bandwidth reduction
+- ✅ **Zero maintenance**: automatically adapts to CDN changes
+- ✅ **Performance**: bytecode `.pyc` compilation for fast execution
 
 ---
 
-## Architecture générale
+## General Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    PHASE 1: SETUP PYODIDE                   │
+│                    PHASE 1: PYODIDE SETUP                   │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. Télécharger Pyodide runtime (NPM)                        │
-│ 2. Extraire seulement les fichiers essentiels               │
+│ 1. Download Pyodide runtime (NPM)                           │
+│ 2. Extract only essential files                             │
 │    - pyodide.asm.wasm                                       │
 │    - pyodide.asm.js                                         │
 │    - python_stdlib.zip                                      │
@@ -43,39 +43,40 @@ Télécharger et optimiser les dépendances Python de mechaphlowers en **préfé
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
-│            PHASE 2: ANALYSE DES DÉPENDANCES                 │
+│            PHASE 2: DEPENDENCY ANALYSIS                     │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. Télécharger mechaphlowers et résoudre toutes les deps    │
-│ 2. Extraire 26 packages (direct + transitive)               │
-│ 3. Comparer avec le CDN Pyodide (343 packages disponibles)  │
-│ 4. Déterminer: 14 sur CDN vs 12 via pip                    │
+│ 1. Download mechaphlowers and resolve all deps              │
+│ 2. Extract 26 packages (direct + transitive)                │
+│ 3. Compare with Pyodide CDN (343 available packages)        │
+│ 4. Determine: 14 on CDN vs 12 via pip                       │
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
-│            PHASE 3: TÉLÉCHARGEMENT INTELLIGENT              │
+│            PHASE 3: SMART DOWNLOAD                          │
 ├─────────────────────────────────────────────────────────────┤
-│ Priorité 1: CDN Pyodide (wheels optimisés cp313-wasm32)    │
-│   - numpy, pandas, scipy, pydantic, pydantic-core, etc.    │
+│ Priority 1: Pyodide CDN (optimized cp313-wasm32 wheels)     │
+│   - numpy, pandas, scipy, pydantic, pydantic-core, etc.     │
 │                                                             │
-│ Priorité 2: PyPI via pip (packages non CDN)                │
-│   - mechaphlowers, plotly, pandera, pint, etc.             │
+│ Priority 2: PyPI via pip (non-CDN packages)                 │
+│   - mechaphlowers, plotly, pandera, pint, etc.              │
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
-│             PHASE 4: OPTIMISATION & COMPRESSION             │
+│             PHASE 4: OPTIMIZATION & COMPRESSION             │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. Compilation PyC (bytecode) pour performance             │
-│ 2. Suppression des doublons (py3 vs cp312)                │
-│ 3. Compression Brotli/Gzip (~60% réduction)               │
-│    - Skip fichiers CDN (déjà comprimés)                   │
-│    - Compresse seulement fichiers > 1 MB                  │
+│ 1. PyC compilation (bytecode) for performance               │
+│ 2. Duplicate removal (py3 vs cp312)                         │
+│ 3. Leftover file cleanup (.old)                             │
+│ 4. Brotli/Gzip compression (~60% reduction)                 │
+│    - Skip CDN files (already compressed)                    │
+│    - Compress only files > 1 MB                             │
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
-│             PHASE 5: GÉNÉRATION CONFIG                      │
+│             PHASE 5: CONFIG GENERATION                      │
 ├─────────────────────────────────────────────────────────────┤
-│ Générer python-packages.json pour le worker Python         │
-│ Format: {package-name: {file_name, name, source}}          │
+│ Generate python-packages.json for Python worker             │
+│ Format: {package-name: {file_name, name, source}}           │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -83,62 +84,113 @@ Télécharger et optimiser les dépendances Python de mechaphlowers en **préfé
 
 ## Configuration
 
-### Variables globales
+### Versions centralized in package.json
+
+Versions are automatically read from `package.json` to avoid synchronization errors:
+
+```json
+// package.json
+{
+  "dependencies": {
+    "pyodide": "^0.28.3"     // → PYODIDE_VERSION
+  },
+  "config": {
+    "mechaphlowers": "0.5.1"  // → MECHAPHLOWERS_VERSION
+  }
+}
+```
+
+### Version reading function
 
 ```python
-PYODIDE_VERSION = "0.28.3"
-PYODIDE_CDN_URL = "https://cdn.jsdelivr.net/pyodide/v0.28.3/full"
-MECHAPHLOWERS_VERSION = "0.5.1"
+def get_versions_from_package_json() -> tuple[str, str]:
+    """Read PYODIDE_VERSION and MECHAPHLOWERS_VERSION from package.json."""
+    package_data = json.loads(PACKAGE_JSON_PATH.read_text(encoding="utf-8"))
+    
+    # Extract pyodide version (handles ^, ~, >= prefixes)
+    pyodide_dep = package_data["dependencies"]["pyodide"]
+    pyodide_version = re.sub(r'^[\^~>=<]+', '', pyodide_dep)  # "^0.28.3" → "0.28.3"
+    
+    # Extract mechaphlowers version from config section
+    mechaphlowers_version = package_data["config"]["mechaphlowers"]
+    
+    return pyodide_version, mechaphlowers_version
+
+# Global variables initialized at startup
+PYODIDE_VERSION, MECHAPHLOWERS_VERSION = get_versions_from_package_json()
+PYODIDE_CDN_URL = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full"
+```
+
+### Configuration variables
+
+```python
+PACKAGE_JSON_PATH = Path(__file__).parent.parent / "package.json"
 PYODIDE_DIRECTORY_PATH = "./public/pyodide"
 PYODIDE_PACKAGES_PATH = "./src/app/core/services/worker_python/python-packages.json"
 
 NEEDED_PYODIDE_SOURCE_FILES = [
-    "pyodide.asm.wasm",      # Runtime WebAssembly
-    "pyodide.asm.js",        # Runtime JavaScript
-    "python_stdlib.zip",     # Stdlib Python
-    "pyodide-lock.json",     # Inventory des packages CDN
+    "pyodide.asm.wasm",      # WebAssembly Runtime
+    "pyodide.asm.js",        # JavaScript Runtime
+    "python_stdlib.zip",     # Python Stdlib
+    "pyodide-lock.json",     # CDN packages inventory
 ]
 ```
 
-### Mise à jour des versions
+### Updating versions
 
-Pour mettre à jour vers une nouvelle version de Pyodide :
+To update to a new version, simply modify `package.json`:
 
-```python
-# Étape 1: Vérifier la version disponible
-# https://cdn.jsdelivr.net/pyodide/
+```bash
+# Step 1: Modify package.json
+# For Pyodide: change "pyodide": "^0.29.0" in dependencies
+# For mechaphlowers: change "mechaphlowers": "0.6.0" in config
 
-PYODIDE_VERSION = "0.29.0"  # Changer ici
-# PYODIDE_CDN_URL se met à jour automatiquement
+# Step 2: Rerun the script
+npm run set-up-mechaphlowers
 ```
 
-Le script fonctionnera **automatiquement** avec la nouvelle version du CDN! 🚀
+The script will work **automatically** with the new versions! 🚀
+
+### Benefits of this approach
+
+- ✅ **Single source of truth**: versions defined in one place
+- ✅ **Consistency**: pyodide npm and pyodide CDN always synchronized
+- ✅ **Easy maintenance**: no need to modify the Python script
+- ✅ **Error detection**: script exits if a version is missing
 
 ---
 
-## Workflow principal
+## Main Workflow
 
-### Ordre d'exécution dans `main()`
+### Execution order in `main()`
 
 ```python
 def main() -> None:
-    # 1️⃣ SETUP PYODIDE
+    # 0️⃣ VERSION READING (automatic at module load)
+    # PYODIDE_VERSION, MECHAPHLOWERS_VERSION = get_versions_from_package_json()
+    
+    # 1️⃣ PYODIDE SETUP
     recreate_directory(PYODIDE_DIRECTORY_PATH)
     download_and_extract_tgz(pyodide_url, PYODIDE_DIRECTORY_PATH)
     keep_only_needed_files(PYODIDE_DIRECTORY_PATH, NEEDED_PYODIDE_SOURCE_FILES)
     
-    # 2️⃣ ANALYSE & TÉLÉCHARGEMENT
+    # 2️⃣ ANALYSIS & DOWNLOAD
     cdn_wheels, packages_not_on_cdn = download_optimized_wheels_from_cdn(PYODIDE_DIRECTORY_PATH)
-    # ↓ Retour: (liste des wheels CDN, liste des packages manquants)
+    # ↓ Returns: (CDN wheels list, missing packages list)
     
-    # 3️⃣ TÉLÉCHARGEMENT PIP (seulement ce qui manque)
+    # 3️⃣ PIP DOWNLOAD (only what's missing)
     if packages_not_on_cdn:
-        # Construit la liste et utilise "uvx pip download"
+        # Build list and use "uvx pip download"
         subprocess.run([...pip download...])
     
-    # 4️⃣ OPTIMISATION
-    pyodide_build(...)                                    # Compilation .pyc
-    remove_duplicate_wheels_in_directory(...)             # Nettoyage
+    # 4️⃣ OPTIMIZATION
+    pyodide_build(...)                                    # .pyc compilation
+    remove_duplicate_wheels_in_directory(...)             # Duplicate cleanup
+    
+    # Leftover file cleanup
+    for old_file in Path(PYODIDE_DIRECTORY_PATH).glob("*.old"):
+        old_file.unlink()
+    
     compress_pyodide_wheels(..., skip_files=cdn_wheels)   # Compression
     
     # 5️⃣ CONFIGURATION
@@ -146,7 +198,7 @@ def main() -> None:
     all_packages = {pkg_name: {file_name, name, source} for pkg in wheel_names}
     write python-packages.json(all_packages)
     
-    # 6️⃣ RAPPORT FINAL
+    # 6️⃣ FINAL REPORT
     print(f"✓ Setup complete!")
     print(f"  Packages: {len(all_packages)}")
     print(f"  Bandwidth saved: {total_savings:.1f} MB")
@@ -154,22 +206,22 @@ def main() -> None:
 
 ---
 
-## Fonctions détaillées
+## Detailed Functions
 
 ### 1️⃣ `get_mechaphlowers_dependencies() -> List[str]`
 
-**Objectif**: Résoudre **TOUTES les dépendances** de mechaphlowers (directes + transitives)
+**Objective**: Resolve **ALL dependencies** of mechaphlowers (direct + transitive)
 
-**Processus**:
+**Process**:
 ```
-1. Utilise: pip download mechaphlowers==0.4.3 -d /tmp
-2. Résout automatiquement l'arbre complet de dépendances
-3. Extrait les noms des wheels téléchargés
-4. Normalise les noms (minuscules, _ → -)
-5. Retourne une liste de 26 packages
+1. Uses: pip download mechaphlowers==0.4.3 -d /tmp
+2. Automatically resolves complete dependency tree
+3. Extracts names from downloaded wheels
+4. Normalizes names (lowercase, _ → -)
+5. Returns a list of 26 packages
 ```
 
-**Exemple de sortie**:
+**Example output**:
 ```python
 [
     'annotated-types', 'flexcache', 'flexparser', 'mechaphlowers',
@@ -181,46 +233,46 @@ def main() -> None:
 ]
 ```
 
-**Avantage**: Zéro dépendance manquée! ✨
+**Benefit**: Zero missed dependencies! ✨
 
 ---
 
 ### 2️⃣ `get_available_packages_from_cdn() -> Dict[str, str]`
 
-**Objectif**: Trouver quels packages sont disponibles sur le CDN Pyodide
+**Objective**: Find which packages are available on Pyodide CDN
 
-**Processus**:
+**Process**:
 ```
-1. Télécharge pyodide-lock.json du CDN (343 packages disponibles)
-2. Construit un lookup dictionary normalisé O(1)
-3. Pour chaque package de mechaphlowers:
-   - Cherche correspondance (case-insensitive, _ ↔ -)
-   - Récupère le nom du wheel (.whl)
-4. Retourne {package_name → wheel_filename}
+1. Download pyodide-lock.json from CDN (343 available packages)
+2. Build normalized O(1) lookup dictionary
+3. For each mechaphlowers package:
+   - Search for match (case-insensitive, _ ↔ -)
+   - Get wheel name (.whl)
+4. Return {package_name → wheel_filename}
 ```
 
-**Algorithme optimisé avec normalisation case-insensitive**:
+**Optimized algorithm with case-insensitive normalization**:
 ```python
-# Build lookup O(n) une seule fois
-# Normalise les noms: pyyaml, PyYAML, pydantic-core → pydantic-core
+# Build O(n) lookup once
+# Normalize names: pyyaml, PyYAML, pydantic-core → pydantic-core
 lookup = {
     key.lower().replace("_", "-"): key
     for key in cdn_packages.keys()
 }
 
-# Recherche O(1) pour chaque package
+# O(1) search for each package
 for pkg_name in packages_to_check:
     normalized_name = pkg_name.lower().replace("_", "-")
-    if normalized_name in lookup:  # ← Recherche rapide!
+    if normalized_name in lookup:  # ← Fast search!
         wheel_file = cdn_packages[lookup[normalized_name]].get("file_name")
 ```
 
-**Normalisation des noms de packages**:
-- Convertit tout en minuscules: `PyYAML` → `pyyaml`
-- Remplace underscores par tirets: `pydantic_core` → `pydantic-core`
-- Élimine les faux doublons (ex: `PyYAML` et `pyyaml`)
+**Package name normalization**:
+- Converts everything to lowercase: `PyYAML` → `pyyaml`
+- Replaces underscores with dashes: `pydantic_core` → `pydantic-core`
+- Eliminates false duplicates (e.g., `PyYAML` and `pyyaml`)
 
-**Résultat**: 14/26 packages trouvés sur CDN
+**Result**: 14/26 packages found on CDN
 ```
 ✓ annotated-types    → annotated_types-0.7.0-py3-none-any.whl
 ✓ numpy              → numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl
@@ -234,18 +286,18 @@ for pkg_name in packages_to_check:
 
 ### 3️⃣ `download_optimized_wheels_from_cdn() -> tuple[List[str], List[str]]`
 
-**Objectif**: Le **cœur de l'intelligence** - Orchestrer le téléchargement préférentiel
+**Objective**: The **intelligence core** - Orchestrate preferential downloading
 
-**Processus**:
+**Process**:
 ```
-1. Récupère toutes les dépendances de mechaphlowers
-2. Vérifie quelles sont disponibles sur le CDN
-3. Affiche un rapport de couverture
-4. Télécharge les wheels disponibles
-5. Retourne (downloaded_wheels, packages_not_on_cdn)
+1. Get all mechaphlowers dependencies
+2. Check which are available on CDN
+3. Display coverage report
+4. Download available wheels
+5. Return (downloaded_wheels, packages_not_on_cdn)
 ```
 
-**Rapport généré**:
+**Generated report**:
 ```
 ======================================================================
 CHECKING CDN FOR MECHAPHLOWERS DEPENDENCIES (Pyodide v0.28.3)
@@ -258,7 +310,7 @@ CDN Coverage for mechaphlowers dependencies:
     ✓ pandas
     ✓ pydantic
     ✓ pydantic-core
-    ... (9 autres)
+    ... (9 others)
 
   Will use pip:      12/26
     ○ flexcache
@@ -274,7 +326,7 @@ CDN Coverage for mechaphlowers dependencies:
     ○ typing-inspection
 ```
 
-**Téléchargement CDN**:
+**CDN Download**:
 ```
 ======================================================================
 DOWNLOADING OPTIMIZED WHEELS FROM Pyodide CDN
@@ -292,28 +344,28 @@ DOWNLOADING OPTIMIZED WHEELS FROM Pyodide CDN
 
 ### 4️⃣ `compress_pyodide_wheels() -> Dict[str, Dict]`
 
-**Objectif**: Réduire la bande passante avec compression intelligente
+**Objective**: Reduce bandwidth with intelligent compression
 
-**Stratégie**:
+**Strategy**:
 ```
-1. SKIP fichiers CDN (déjà optimisés)
-   ├─ Les wheels Pyodide sont pré-compressés
-   └─ Ne pas re-compresser = gain de temps
+1. SKIP CDN files (already optimized)
+   ├─ Pyodide wheels are pre-compressed
+   └─ No re-compression = time savings
 
-2. FILTRE par taille (seuil 1 MB)
-   ├─ Compresse seulement les gros fichiers
-   └─ Les petits donnent peu de gain
+2. FILTER by size (1 MB threshold)
+   ├─ Compress only large files
+   └─ Small files give little gain
 
-3. COMPRESSION à deux niveaux
-   ├─ Brotli (-q 11) : meilleure compression (~70% réduction)
-   └─ Gzip (-9) : fallback si Brotli indisponible
+3. TWO-LEVEL COMPRESSION
+   ├─ Brotli (-q 11): best compression (~70% reduction)
+   └─ Gzip (-9): fallback if Brotli unavailable
 
-4. Serveur HTTP avec Accept-Encoding
-   ├─ Apache serve automatiquement .whl.br ou .whl.gz
+4. HTTP server with Accept-Encoding
+   ├─ Apache automatically serves .whl.br or .whl.gz
    └─ Based on client capabilities
 ```
 
-**Exemple de compression**:
+**Compression example**:
 ```
 plotly                            25.40 MB →    18.74 MB (26.2%)
   └─ Brotli: 25.40 MB → 18.63 MB
@@ -323,149 +375,149 @@ Total: 57.88 MB → 50.57 MB
 Savings: 7.31 MB (12.6%)
 ```
 
-**Résultat final**:
+**Final result**:
 ```
 Files skipped (CDN): 14
-  └─ Déjà optimisés, pas de re-compression
+  └─ Already optimized, no re-compression
 
 Files skipped (small): 11
-  └─ < 1 MB, peu de gain de compression
+  └─ < 1 MB, little compression gain
 
 Files compressed: 1
-  └─ plotly (seul fichier > 1 MB non-CDN)
+  └─ plotly (only file > 1 MB non-CDN)
 ```
 
 ---
 
-### 5️⃣ Autres fonctions utilitaires
+### 5️⃣ Other utility functions
 
 #### `remove_duplicate_wheels_in_directory()`
 ```python
-# Problème: pip + compilation créent des doublons
-# Exemple: PyYAML (pip) + pyyaml (CDN) sont la même librairie
+# Problem: pip + compilation create duplicates
+# Example: PyYAML (pip) + pyyaml (CDN) are the same library
 #
-# Solution: Normaliser + priorités intelligentes
-# Avant: mechaphlowers-0.4.3-py3-none-any.whl       (pip, générique)
-#        mechaphlowers-0.4.3-cp312-none-any.whl    (compilé, meilleur)
+# Solution: Normalize + smart priorities
+# Before: mechaphlowers-0.4.3-py3-none-any.whl       (pip, generic)
+#         mechaphlowers-0.4.3-cp312-none-any.whl    (compiled, better)
 #
-# Après: mechaphlowers-0.4.3-cp312-none-any.whl    (seul, optimisé)
+# After: mechaphlowers-0.4.3-cp312-none-any.whl    (only, optimized)
 
-# Système de priorités (de meilleur au pire):
-# 1. Pyodide optimisé: cp313-cp313-pyodide_2025_0_wasm32.whl (PRÉFÉRÉ)
-# 2. Compilé: cp312-none-any.whl ou cp313-none-any.whl
-# 3. Générique: py3-none-any.whl (DERNIER CHOIX)
+# Priority system (best to worst):
+# 1. Pyodide optimized: cp313-cp313-pyodide_2025_0_wasm32.whl (PREFERRED)
+# 2. Compiled: cp312-none-any.whl or cp313-none-any.whl
+# 3. Generic: py3-none-any.whl (LAST CHOICE)
 ```
 
 #### `compress_wheel_brotli() / compress_wheel_gzip()`
 ```python
-# Brotli: Excellent compression + décompression rapide
+# Brotli: Excellent compression + fast decompression
 subprocess.run(["brotli", "-q", "11", "-k", "-f", wheel_path])
 # Result: wheel.whl.br
 
-# Gzip: Fallback si Brotli indisponible
+# Gzip: Fallback if Brotli unavailable
 subprocess.run(["gzip", "-9", "-k", "-f", wheel_path])
 # Result: wheel.whl.gz
 ```
 
 #### `download_and_extract_tgz()`
 ```python
-# Télécharger Pyodide depuis NPM avec un seul appel réseau
-# Lire le .tgz dans un tempfile (pas sur disque intermédiaire)
-# Extraire directement dans ./public/pyodide
+# Download Pyodide from NPM with single network call
+# Read .tgz into tempfile (not intermediate disk)
+# Extract directly to ./public/pyodide
 ```
 
 ---
 
-## Optimisations
+## Optimizations
 
-### 1. Algorithme de recherche CDN: O(n²) → O(n)
+### 1. CDN search algorithm: O(n²) → O(n)
 
-**Avant (lent)**:
+**Before (slow)**:
 ```python
-for pkg_name in packages_to_check:           # 26 itérations
-    for key in cdn_packages.keys():          # 343 itérations
-        if key matches pkg_name:             # Comparaison O(1)
+for pkg_name in packages_to_check:           # 26 iterations
+    for key in cdn_packages.keys():          # 343 iterations
+        if key matches pkg_name:             # O(1) comparison
             packages[pkg_name] = wheel_file
             break
-# Total: 26 × 343 = 8,918 comparaisons
+# Total: 26 × 343 = 8,918 comparisons
 ```
 
-**Après (rapide)**:
+**After (fast)**:
 ```python
-# Build lookup une fois: O(343)
+# Build lookup once: O(343)
 lookup = {key.lower().replace("_", "-"): key for key in cdn_packages}
 
-# Recherche O(1) pour chaque package: O(26)
+# O(1) search for each package: O(26)
 for pkg_name in packages_to_check:
-    if pkg_name.lower() in lookup:  # Lookup dictionary O(1)
+    if pkg_name.lower() in lookup:  # Dictionary lookup O(1)
         packages[pkg_name] = cdn_packages[lookup[pkg_name]].get("file_name")
-# Total: 343 + 26 = 369 opérations
+# Total: 343 + 26 = 369 operations
 ```
 
-**Gain**: 8,918 / 369 = **24× plus rapide** 🚀
+**Gain**: 8,918 / 369 = **24× faster** 🚀
 
-### 2. Suppression des appels redondants
+### 2. Redundant call removal
 
-**Avant**:
+**Before**:
 ```python
 available_packages = get_available_packages_from_cdn()
-mechaphlowers_deps = get_mechaphlowers_dependencies()  # Appelée 2 fois!
+mechaphlowers_deps = get_mechaphlowers_dependencies()  # Called 2 times!
 ```
 
-**Après**:
+**After**:
 ```python
-all_needed_deps = get_mechaphlowers_dependencies()  # Une seule fois
+all_needed_deps = get_mechaphlowers_dependencies()  # Only once
 available_packages = get_available_packages_from_cdn(all_needed_deps)
 ```
 
-### 3. Imports nettoyés
+### 3. Cleaned imports
 
-**Avant**: 12 imports (incluant `re` et `typing` inutilisés)
-**Après**: 10 imports (nettoyage)
+**Before**: 12 imports (including unused `re` and `typing`)
+**After**: 10 imports (cleanup)
 
-**Détail du nettoyage**:
-- Suppression de `import re` (n'était jamais utilisé)
-- Suppression de `from typing import Dict, List` (Python 3.12+ supporte `dict`/`list` natifs)
-- Réduction de la taille du script (669 → 658 lignes)
+**Cleanup details**:
+- Removed `import re` (was never used)
+- Removed `from typing import Dict, List` (Python 3.12+ supports native `dict`/`list`)
+- Reduced script size (669 → 658 lines)
 
-### 4. Fonction utilitaire `normalize_package_name()`
+### 4. `normalize_package_name()` utility function
 
-Centralise la normalisation des noms de packages :
+Centralizes package name normalization:
 ```python
 def normalize_package_name(name: str) -> str:
     """Normalize: PyYAML → pyyaml, pydantic_core → pydantic-core"""
     return name.lower().replace("_", "-")
 ```
 
-Avantages:
-- Élimine la duplication de code (était répété ~8 fois)
-- Point unique de modification si la logique change
-- Code plus lisible et maintenable
+Benefits:
+- Eliminates code duplication (was repeated ~8 times)
+- Single modification point if logic changes
+- More readable and maintainable code
 
-### 5. Compression intelligente
+### 5. Intelligent compression
 
-- ✅ Skip fichiers CDN (déjà optimisés)
-- ✅ Skip petits fichiers (< 1 MB)
-- ✅ Deux niveaux de compression (Brotli + Gzip)
+- ✅ Skip CDN files (already optimized)
+- ✅ Skip small files (< 1 MB)
+- ✅ Two-level compression (Brotli + Gzip)
 
-### 6. Détection de doublons améliorée
+### 6. Improved duplicate detection
 
-- ✅ Normalisation case-insensitive: `PyYAML` = `pyyaml`
-- ✅ Normalisation underscores: `pydantic_core` = `pydantic-core`
-- ✅ Système de priorités: Pyodide optimisé > compilé > générique
-- ✅ Zéro doublons garantis après exécution
+- ✅ Case-insensitive normalization: `PyYAML` = `pyyaml`
+- ✅ Underscore normalization: `pydantic_core` = `pydantic-core`
+- ✅ Priority system: Pyodide optimized > compiled > generic
+- ✅ Zero duplicates guaranteed after execution
 
-### 7. Types modernes Python 3.12+
+### 7. Modern Python 3.12+ types
 
-- ✅ `list[str]` au lieu de `List[str]`
-- ✅ `dict[str, str]` au lieu de `Dict[str, str]`
-- ✅ Utilisation de `set` pour déduplication efficace
+- ✅ `list[str]` instead of `List[str]`
+- ✅ `dict[str, str]` instead of `Dict[str, str]`
+- ✅ Using `set` for efficient deduplication
 
 ---
 
-## Exemples de sortie
+## Output Examples
 
-### Rapport de succès complet
+### Complete success report
 
 ```
 Recreated directory: ./public/pyodide
@@ -521,7 +573,7 @@ DOWNLOADING OPTIMIZED WHEELS FROM Pyodide CDN
     ✓ numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl (2.97 MB)
   Downloading pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl
     ✓ pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl (5.05 MB)
-  [... 12 autres fichiers ...]
+  [... 12 other files ...]
 ✓ Downloaded 14 wheels from CDN
 
 Downloading 12 packages not available on CDN with pip
@@ -550,7 +602,7 @@ Savings: 6.66 MB (26.2%)
 ======================================================================
 ```
 
-### Structure finale de fichiers
+### Final file structure
 
 ```
 public/pyodide/
@@ -569,7 +621,7 @@ public/pyodide/
 ├── plotly-5.24.1-cp312-none-any.whl.br                  (compressed)
 ├── plotly-5.24.1-cp312-none-any.whl.gz                  (fallback)
 │
-└── ... 20 autres wheels ...
+└── ... 20 other wheels ...
 
 src/app/core/services/worker_python/
 └── python-packages.json                                  (config)
@@ -579,101 +631,128 @@ python-packages.json:
   "annotated-types": {"file_name": "annotated_types-0.7.0-py3-none-any.whl", "name": "annotated_types", "source": "local"},
   "numpy": {"file_name": "numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl", "name": "numpy", "source": "local"},
   "pandas": {"file_name": "pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl", "name": "pandas", "source": "local"},
-  ... etc (26 au total)
+  ... etc (26 total)
 }
 ```
 
 ---
 
-## Dépannage
+## Troubleshooting
 
-### ❌ Erreur: "Could not fetch pyodide-lock.json"
+### ❌ Error: "'pyodide' not found in package.json dependencies"
 
-**Cause**: Pas de connexion Internet ou CDN indisponible
+**Cause**: The pyodide dependency is not in package.json
 
 **Solution**:
 ```bash
-# Vérifier la connectivité
+# Check that pyodide is in dependencies
+cat package.json | grep pyodide
+
+# Add if missing
+npm install pyodide@^0.28.3
+```
+
+### ❌ Error: "'mechaphlowers' not found in package.json config section"
+
+**Cause**: The config.mechaphlowers section doesn't exist in package.json
+
+**Solution**:
+```json
+// Add in package.json
+{
+  "config": {
+    "mechaphlowers": "0.5.1"
+  }
+}
+```
+
+### ❌ Error: "Could not fetch pyodide-lock.json"
+
+**Cause**: No Internet connection or CDN unavailable
+
+**Solution**:
+```bash
+# Check connectivity
 curl https://cdn.jsdelivr.net/pyodide/v0.28.3/full/pyodide-lock.json
 
-# Relancer le script
+# Rerun the script
 npm run set-up-mechaphlowers
 ```
 
-### ❌ Erreur: "Some packages may not have been downloaded"
+### ❌ Error: "Some packages may not have been downloaded"
 
-**Cause**: pip n'a pas pu télécharger certains packages
+**Cause**: pip couldn't download some packages
 
 **Solution**:
 ```bash
-# Vérifier les erreurs détaillées
+# Check detailed errors
 npm run set-up-mechaphlowers 2>&1 | grep -A 5 "Warning"
 
-# Relancer avec un index PyPI personnalisé
+# Rerun with custom PyPI index
 npm run set-up-mechaphlowers -- --uv-index https://pypi.org/simple
 ```
 
-### ⚠️ Avertissement: "Found more than one output tag after py-compilation"
+### ⚠️ Warning: "Found more than one output tag after py-compilation"
 
-**Cause**: Les fichiers compilés ont plusieurs tags de plateforme
+**Cause**: Compiled files have multiple platform tags
 
-**Impact**: Aucun - le script choisit le bon automatiquement
+**Impact**: None - the script chooses the right one automatically
 
-**Exemple**:
+**Example**:
 ```
 Found more than one output tag after py-compilation:
 ['cp312-cp312-manylinux_2_17_x86_64', 'cp312-cp312-manylinux2014_x86_64']
 in numpy-2.2.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 ```
 
-### 📊 Vérifier les packages générés
+### 📊 Verify generated packages
 
 ```bash
-# Lister tous les packages
+# List all packages
 ls -lh public/pyodide/*.whl | wc -l
 
-# Vérifier la config
+# Check config
 cat src/app/core/services/worker_python/python-packages.json | jq '.[] | .name' | wc -l
 
-# Voir la taille totale
+# See total size
 du -sh public/pyodide/
 ```
 
-### 🔄 Recréer depuis zéro
+### 🔄 Recreate from scratch
 
 ```bash
-# Nettoyer les répertoires
+# Clean directories
 rm -rf public/pyodide
 rm -f src/app/core/services/worker_python/python-packages.json
 
-# Relancer
+# Rerun
 npm run set-up-mechaphlowers
 ```
 
 ---
 
-## Utilisation
+## Usage
 
-### Exécution simple
+### Simple execution
 
 ```bash
 npm run set-up-mechaphlowers
 ```
 
-### Avec options personnalisées
+### With custom options
 
 ```bash
-# Index PyPI personnalisé
+# Custom PyPI index
 npm run set-up-mechaphlowers -- --uv-index https://my-index.com/simple
 
-# Autre registry NPM
+# Other NPM registry
 npm run set-up-mechaphlowers -- --npm-registry-url https://registry.npmmirror.com/
 
-# Sauter la compression (pour débuguer)
+# Skip compression (for debugging)
 npm run set-up-mechaphlowers -- --skip-compression
 ```
 
-### Script npm.json
+### npm.json script
 
 ```json
 {
@@ -685,25 +764,26 @@ npm run set-up-mechaphlowers -- --skip-compression
 
 ---
 
-## Résumé des points clés
+## Key Points Summary
 
-| Aspect | Détail |
+| Aspect | Detail |
 |--------|--------|
-| **Dépendances** | 26 packages totaux (direct + transitive) |
+| **Configuration** | Versions read from package.json (single source of truth) |
+| **Dependencies** | 26 total packages (direct + transitive) |
 | **CDN coverage** | 14/26 packages (54%) |
-| **Algorithme** | O(n) optimisé avec normalisation case-insensitive, 24× plus rapide |
-| **Doublons** | Détection case-insensitive, système de priorités (Pyodide > compilé > générique) |
-| **Compression** | Brotli + Gzip, 26% de réduction |
-| **Bandwidth économisée** | ~6.7 MB |
-| **Imports** | 10 imports (optimisé, `re` et `typing` supprimés) |
-| **Lignes de code** | 658 lignes (optimisé depuis 669) |
-| **Maintenance** | Zéro - s'adapte automatiquement au CDN |
-| **Performance** | Compilation .pyc pour exécution rapide |
-| **Garanties** | Zéro doublons après exécution |
+| **Algorithm** | O(n) optimized with case-insensitive normalization, 24× faster |
+| **Duplicates** | Case-insensitive detection, priority system (Pyodide > compiled > generic) |
+| **Compression** | Brotli + Gzip, 26% reduction |
+| **Bandwidth saved** | ~6.7 MB |
+| **Imports** | 12 imports (including `re` and `sys` for package.json reading) |
+| **Lines of code** | ~700 lines |
+| **Maintenance** | Zero - versions centralized in package.json |
+| **Performance** | .pyc compilation for fast execution |
+| **Guarantees** | Zero duplicates after execution |
 
 ---
 
-## Ressources
+## Resources
 
 - [Pyodide Documentation](https://pyodide.org/)
 - [mechaphlowers GitHub](https://github.com/phlowers/mechaphlowers)
@@ -712,6 +792,6 @@ npm run set-up-mechaphlowers -- --skip-compression
 
 ---
 
-**Dernière mise à jour**: 6 janvier 2026  
-**Version Pyodide**: 0.28.3  
-**Version mechaphlowers**: 0.5.1
+**Last update**: January 6, 2026  
+**Pyodide version**: Read from `package.json` → `dependencies.pyodide`  
+**mechaphlowers version**: Read from `package.json` → `config.mechaphlowers`
