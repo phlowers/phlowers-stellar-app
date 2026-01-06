@@ -290,7 +290,7 @@
               <p-select
                 inputId="linkLit"
                 [options]="uniqueLitIdr()"
-                [(ngModel)]="section().lit"
+                [(ngModel)]="section().lit_code"
                 optionLabel="lit_idr"
                 optionValue="lit_idr"
                 (ngModelChange)="onSectionChange()"
@@ -309,11 +309,11 @@
               <p-select
                 inputId="linkLit"
                 [options]="uniqueLitAdr()"
-                [(ngModel)]="section().lit"
+                [(ngModel)]="section().lit_name"
                 optionLabel="lit_adr"
-                optionValue="lit_idr"
+                optionValue="lit_adr"
                 (ngModelChange)="onSectionChange()"
-                (onChange)="onLinesSelect($event, 'lit_idr')"
+                (onChange)="onLinesSelect($event, 'lit_adr')"
                 appendTo="body"
                 virtualScroll="true"
                 virtualScrollItemSize="10"
@@ -358,7 +358,7 @@
 
             <div>
               <dt i18n>LIT</dt>
-              <dd class="read-only-info">{{ section().lit }}</dd>
+              <dd class="read-only-info">{{ section().lit_name }}</dd>
             </div>
 
             <div>

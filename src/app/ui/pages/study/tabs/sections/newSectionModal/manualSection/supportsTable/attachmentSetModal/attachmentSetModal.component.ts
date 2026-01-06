@@ -85,7 +85,7 @@ export class AttachmentSetModalComponent implements OnInit {
   constructor(private readonly attachmentService: AttachmentService) {
     effect(() => {
       if (this.isOpen()) {
-        this.resetValues();
+        this.resetValues(true);
         const name = this.support()?.name;
         if (name) {
           this.supportName.set(name);
@@ -133,7 +133,7 @@ export class AttachmentSetModalComponent implements OnInit {
     this.attachmentsFilterTable.set(items);
   }
 
-  resetValues(resetSupportName = false) {
+  resetValues(resetSupportName: boolean) {
     this.armLength.set(undefined);
     this.heightBelowConsole.set(undefined);
     this.attachmentSet.set(undefined);

@@ -151,7 +151,8 @@ describe('ManualSectionComponent', () => {
       maintenance_team_id: undefined,
       maintenance_center_id: undefined,
       link_name: '',
-      lit: '',
+      lit_code: '',
+      lit_name: '',
       branch_name: '',
       voltage_idr: '',
       comment: '',
@@ -422,7 +423,7 @@ describe('ManualSectionComponent', () => {
 
       expect(component.linesFilterTable()).toHaveLength(1);
       expect(mockSection.link_name).toBe('link1');
-      expect(mockSection.lit).toBe('lit1');
+      expect(mockSection.lit_code).toBe('lit1');
       expect(mockSection.branch_name).toBe('branch1');
       expect(mockSection.voltage_idr).toBe('tension1');
     });
@@ -433,7 +434,7 @@ describe('ManualSectionComponent', () => {
       await component.onLinesSelect(event, 'lit_idr');
 
       expect(component.linesFilterTable()).toHaveLength(1);
-      expect(mockSection.lit).toBe('lit1');
+      expect(mockSection.lit_code).toBe('lit1');
     });
 
     it('should filter by voltage_idr and auto-populate related fields', async () => {

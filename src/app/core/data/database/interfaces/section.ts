@@ -36,7 +36,8 @@ export interface Section {
   maintenance_team_id: string | undefined;
   maintenance_center_id: string | undefined;
   link_name: string | undefined;
-  lit: string | undefined;
+  lit_code: string | undefined;
+  lit_name: string | undefined;
   branch_name: string | undefined;
   voltage_idr: string | undefined;
   comment: string | undefined;
