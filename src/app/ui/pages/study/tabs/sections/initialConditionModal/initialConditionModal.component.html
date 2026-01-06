@@ -50,6 +50,7 @@
             <input
               name="initial-condition-name"
               type="text"
+              required
               id="initial-condition-name"
               [attr.aria-invalid]="!isNameUnique()"
               aria-errormessage="initial-condition-name-error-message"
@@ -69,12 +70,14 @@
             }
           </div>
           <div>
-            <label for="initial-condition-base-parameter" i18n>
-              Base parameter
+            <label for="initial-condition-base-parameter">
+              <ng-container i18n>Base parameter</ng-container>
+              <sup class="mandatory">*</sup>
             </label>
             <input
               name="initial-condition-base-parameter"
               step="0.01"
+              required
               [pKeyFilter]="onlyPositiveNumbers"
               type="number"
               id="initial-condition-base-parameter"
@@ -83,12 +86,14 @@
             />
           </div>
           <div>
-            <label for="initial-condition-base-temperature" i18n>
-              Base temperature
+            <label for="initial-condition-base-temperature">
+              <ng-container i18n>Base temperature</ng-container>
+              <sup class="mandatory">*</sup>
             </label>
             <p-inputgroup>
               <input
                 name="initial-condition-base-temperature"
+                required
                 type="number"
                 id="initial-condition-base-temperature"
                 pInputText
