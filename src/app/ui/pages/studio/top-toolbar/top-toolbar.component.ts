@@ -123,7 +123,7 @@ export class StudioTopToolbarComponent implements OnInit {
     { label: $localize`Loads`, value: 'loads' },
     { label: $localize`Obstacles`, value: 'mesh' },
     { label: $localize`Ground`, value: 'ground' },
-    { label: $localize`Angle en ligne`, value: 'angleInLine' },
+    { label: $localize`In line angle`, value: 'angleInLine' },
     { label: $localize`Measure`, value: 'measure' }
   ]);
 
