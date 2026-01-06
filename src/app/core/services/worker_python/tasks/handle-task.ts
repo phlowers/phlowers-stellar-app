@@ -48,6 +48,10 @@ const tasks: Record<
   [Task.calculateGuying]: {
     function: 'calculate_guying',
     externalPackages: []
+  },
+  [Task.setLogLevel]: {
+    function: 'set_log_level',
+    externalPackages: []
   }
 };
 
