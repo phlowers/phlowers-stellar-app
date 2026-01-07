@@ -42,7 +42,22 @@ import { CommonModule } from '@angular/common';
 })
 export class PapotoComponent {
   leftSupportOption = input.required<{ label: string; value: string }[]>();
+  selectedSpan = input.required<number[]>();
   measureData = model.required<FieldMeasure>();
+
+  // Compute the dynamic left support options based on selectedSpan
+  retrievedLeftSupportOptions = computed(() => {
+    const span = this.selectedSpan();
+    if (span?.length !== 2) {
+      return [];
+    }
+
+    const [leftIndex, rightIndex] = span;
+    return [
+      { label: `${leftIndex + 1}`, value: `${leftIndex + 1}` },
+      { label: `${rightIndex + 1}`, value: `${rightIndex + 1}` }
+    ];
+  });
 
   papotoHelpDialog = signal<boolean>(false);
 

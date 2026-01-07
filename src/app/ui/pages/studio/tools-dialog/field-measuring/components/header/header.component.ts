@@ -36,6 +36,7 @@ export class HeaderComponent {
     field: keyof FieldMeasure;
     value: FieldMeasure[keyof FieldMeasure];
   }>();
+  spanChange = output<number[]>();
 
   readonly spans = computed<{ label: string; supports: number[] }[]>(() => {
     const supportsLength =
@@ -69,6 +70,9 @@ export class HeaderComponent {
       if (span?.length !== 2) {
         return;
       }
+
+      // Emit the span change to parent component
+      this.spanChange.emit(span);
 
       const section = this.plotService.section();
       if (!section?.supports) {

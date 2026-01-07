@@ -83,6 +83,8 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     createInitialMeasureData(null, '', null, null)
   );
 
+  selectedSpan = signal<number[]>([]);
+
   activeTab = signal<
     | 'terrainData'
     | 'parameterCalculation'
@@ -178,6 +180,10 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       ...measureData,
       [field]: value
     });
+  }
+
+  onSpanChange(span: number[]) {
+    this.selectedSpan.set(span);
   }
 
   onExport() {
