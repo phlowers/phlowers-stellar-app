@@ -1,4 +1,11 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  output,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -47,7 +54,51 @@ export class HeaderComponent {
 
   selectedSpan = signal<number[] | null>(null);
 
-  constructor(private readonly plotService: PlotService) {}
+  constructor(private readonly plotService: PlotService) {
+    // Initialize selectedSpan with the first span when spans are available
+    effect(() => {
+      const spans = this.spans();
+      if (spans.length > 0 && this.selectedSpan() === null) {
+        this.selectedSpan.set(spans[0].supports);
+      }
+    });
+
+    // Update altitude field with attachment height mid value when selected span changes
+    effect(() => {
+      const span = this.selectedSpan();
+      if (span?.length !== 2) {
+        return;
+      }
+
+      const section = this.plotService.section();
+      if (!section?.supports) {
+        return;
+      }
+
+      const supports = section.supports;
+      const [leftSupportIndex, rightSupportIndex] = span;
+
+      const leftSupport = supports[leftSupportIndex];
+      const rightSupport = supports[rightSupportIndex];
+
+      if (
+        !leftSupport ||
+        !rightSupport ||
+        leftSupport.attachmentHeight === null ||
+        rightSupport.attachmentHeight === null
+      ) {
+        return;
+      }
+
+      // Calculate mid value and round to 2 decimals
+      const midValue =
+        (leftSupport.attachmentHeight + rightSupport.attachmentHeight) / 2;
+      const roundedMidValue = Math.round(midValue * 100) / 100;
+
+      // Update the altitude field
+      this.onFieldChange('altitude', roundedMidValue);
+    });
+  }
 
   onFieldChange(
     field: keyof FieldMeasure,
