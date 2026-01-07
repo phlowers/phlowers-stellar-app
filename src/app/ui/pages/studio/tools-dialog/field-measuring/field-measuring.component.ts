@@ -22,7 +22,6 @@ import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
   LEFT_SUPPORT_OPTIONS,
-  CABLE_OPTIONS,
   SelectOption
 } from './constants';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
@@ -98,7 +97,6 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   );
   readonly skyCoverOptions = signal<SelectOption[]>(SKY_COVER_OPTIONS);
   readonly leftSupportOptions = signal<SelectOption[]>(LEFT_SUPPORT_OPTIONS);
-  readonly cableOptions = signal<SelectOption[]>(CABLE_OPTIONS);
 
   calculationResults = signal<CalculationResults>(INITIAL_CALCULATION_RESULTS);
 
@@ -158,7 +156,8 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       voltage: section.voltage_idr || '',
       spanType: section.type || '',
       phaseNumber: section.electric_phase_number || 0,
-      numberOfConductors: section.cables_amount || 0
+      numberOfConductors: section.cables_amount || 0,
+      cableName: section.cable_name || ''
     });
   }
 

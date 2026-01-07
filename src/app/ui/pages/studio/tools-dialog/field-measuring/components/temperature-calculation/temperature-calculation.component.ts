@@ -41,7 +41,6 @@ import { WorkerPythonService } from '@src/app/core/services/worker_python/worker
   ]
 })
 export class TemperatureCalculationComponent {
-  cableOptions = input.required<{ label: string; value: string }[]>();
   windDirectionOptions = input.required<{ label: string; value: string }[]>();
   skyCoverOptions = input.required<{ label: string; value: string }[]>();
   measureData = model.required<FieldMeasure>();
