@@ -39,17 +39,12 @@ jest.mock('plotly.js-dist-min', () => ({
   Data: jest.fn()
 }));
 
-// export const PROVIDE_TEST = [provideHttpClient()];
-
 const mockMessageService = {
   add: jest.fn()
 } as unknown as MessageService;
 
 export const globalTestSetup = {
-  providers: [
-    // ...PROVIDE_TEST,
-    { provide: MessageService, useValue: mockMessageService }
-  ]
+  providers: [{ provide: MessageService, useValue: mockMessageService }]
 };
 
 // Configure TestBed globally before each test

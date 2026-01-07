@@ -1,4 +1,4 @@
-import { Section } from '@src/app/core/data/database/interfaces/section';
+import { Section } from '@core/data/database/interfaces/section';
 import { FieldMeasure } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -16,10 +16,10 @@ export const createInitialMeasureData = (
     azimuth: null,
     date: null,
     time: null,
-    season: null,
+    season: 'summer',
     ambientTemperature: null,
     windSpeed: null,
-    windSpeedUnit: null,
+    windSpeedUnit: 'kmh',
     windDirection: null,
     skyCover: null,
     calculationMethod: 'papoto',
@@ -50,7 +50,7 @@ export const createInitialMeasureData = (
     ySight3: null,
     transit: null,
     windIncidence: null,
-    windIncidenceMode: null,
+    windIncidenceMode: 'auto',
     diffuseSolarFlux: 123,
     directSolarFlux: null,
     diffuseDirectSolarFlux: 246,
@@ -58,12 +58,12 @@ export const createInitialMeasureData = (
     measuredDiffusedPlusDirectSolarFlux: null,
     measuredDiffusedSolarFlux: null,
     diffusedPlusDirectSolarFlux: null,
-    updateMode15C: null,
+    updateMode15C: 'auto',
     parameterPapoto: null,
     parameterUncertaintyPapoto: null,
     cableTemperature15C: null,
     cableTemperatureUncertainty15C: null,
-    line: section?.cable_name || null,
+    link: section?.link_name || null,
     voltage: section?.voltage_idr || null,
     spanType: section?.type || null,
     phaseNumber: section?.electric_phase_number || null,

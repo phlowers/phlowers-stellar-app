@@ -7,7 +7,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { FieldMeasure } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/types';
+import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { InitialConditionModalComponent } from '@src/app/ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';

@@ -8,11 +8,11 @@ import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolsDialogService } from '../tools-dialog.service';
 import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
 import { MessageService } from 'primeng/api';
-import { SectionService } from '@src/app/core/services/sections/section.service';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
+import { SectionService } from '@core/services/sections/section.service';
+import { StudiesService } from '@core/services/studies/studies.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { BehaviorSubject } from 'rxjs';
-import { Section } from '@src/app/core/data/database/interfaces/section';
+import { Section } from '@core/data/database/interfaces/section';
 
 @Component({
   selector: 'app-button',
@@ -242,11 +242,11 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should preserve other fields when updating one field', () => {
-      const initialLine = component.measureData().line;
+      const initialLine = component.measureData().link;
 
       component.onFieldChange('longitude', 99.999999);
 
-      expect(component.measureData().line).toBe(initialLine);
+      expect(component.measureData().link).toBe(initialLine);
       expect(component.measureData().longitude).toBe(99.999999);
     });
 
@@ -262,8 +262,8 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should handle string field changes', () => {
-      component.onFieldChange('line', 'New Line Name');
-      expect(component.measureData().line).toBe('New Line Name');
+      component.onFieldChange('link', 'New Line Name');
+      expect(component.measureData().link).toBe('New Line Name');
     });
 
     it('should handle null field changes', () => {

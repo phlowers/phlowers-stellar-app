@@ -20,7 +20,7 @@ import { CablesService } from '@src/app/core/services/cables/cables.service';
 import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
-import { SectionService } from '@src/app/core/services/sections/section.service';
+import { SectionService } from '@core/services/sections/section.service';
 
 export const PLOT_ID = 'plotly-output';
 

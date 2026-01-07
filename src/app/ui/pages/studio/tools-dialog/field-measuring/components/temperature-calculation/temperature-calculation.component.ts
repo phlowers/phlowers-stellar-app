@@ -9,7 +9,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { FieldMeasure } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/types';
+import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 
 @Component({

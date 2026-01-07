@@ -6,18 +6,19 @@ import {
   TemplateRef,
   AfterViewInit,
   OnDestroy,
-  OnInit
+  OnInit,
+  DestroyRef
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { ToolsDialogService } from '../../../tools-dialog.service';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { PlotService } from '../../../../services/plot.service';
+import { ToolsDialogService } from '@ui/pages/studio/tools-dialog/tools-dialog.service';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { createInitialMeasureData } from '../../helpers';
 import { MessageModule } from 'primeng/message';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-init',
@@ -37,10 +38,9 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private readonly toolsDialogService = inject(ToolsDialogService);
   private readonly plotService = inject(PlotService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  private readonly subscriptions = new Subscription();
   ngAfterViewInit(): void {
-    console.log('ngAfterViewInit');
     this.toolsDialogService.setTemplates({
       header: this.headerTemplate
     });
@@ -58,17 +58,16 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    this.subscriptions.add(
-      this.newMeasureNameControl.valueChanges.subscribe((value) => {
+    this.newMeasureNameControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
         this.isNameAlreadyTaken.set(
           this.measures().some((measure) => measure.label === value)
         );
-      })
-    );
+      });
   }
   ngOnDestroy(): void {
     this.toolsDialogService.setTemplates({});
-    this.subscriptions.unsubscribe();
   }
 
   measures = signal<{ label: string; value: string }[]>([]);

@@ -11,6 +11,10 @@
       id="measureName"
       type="text"
       [fluid]="true"
+      [attr.aria-invalid]="isNameAlreadyTaken()"
+      [attr.aria-errormessage]="
+        isNameAlreadyTaken() ? 'measure-name-error-message' : null
+      "
       [ngModel]="measureData().name"
       (ngModelChange)="onFieldChange('name', $event)"
       aria-describedby="mandatory-data-field"

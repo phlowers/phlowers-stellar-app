@@ -10,7 +10,7 @@ export const leftSupportOption = [
 export const INITIAL_MEASURE_DATA: FieldMeasure = {
   uuid: '',
   name: '',
-  line: 'Line 225kV Rougemontier - Tourbe #1',
+  link: 'Line 225kV Rougemontier - Tourbe #1',
   voltage: '123 kV',
   spanType: 'Phase',
   phaseNumber: 3,
@@ -55,7 +55,7 @@ export const INITIAL_MEASURE_DATA: FieldMeasure = {
   ySight2: null,
   ySight3: null,
   cableName: 'ASTER570',
-  transit: 'A',
+  transit: 1,
   windIncidence: 47,
   windIncidenceMode: 'auto',
   diffuseSolarFlux: 123,

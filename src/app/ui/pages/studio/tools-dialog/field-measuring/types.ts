@@ -1,7 +1,7 @@
 export interface FieldMeasure {
   uuid: string;
   name: string;
-  line: string | null;
+  link: string | null;
   voltage: string | null;
   spanType: string | null;
   phaseNumber: number | null;
@@ -13,14 +13,14 @@ export interface FieldMeasure {
   azimuth: number | null;
   date: Date | null;
   time: string | null;
-  season: 'summer' | 'winter' | null;
+  season: 'summer' | 'winter';
   ambientTemperature: number | null;
   windSpeed: number | null;
-  windSpeedUnit: 'kmh' | 'ms' | null;
+  windSpeedUnit: 'kmh' | 'ms';
   windDirection: string | null;
   skyCover: string | null;
   // Parameter calculation fields
-  calculationMethod: 'papoto' | 'tangente-aiming' | 'pep' | null;
+  calculationMethod: 'papoto' | 'tangente-aiming' | 'pep';
   // Papoto fields
   leftSupport: string | null;
   spanLength: number | null;
@@ -51,9 +51,9 @@ export interface FieldMeasure {
   ySight3: number | null;
   // Temperature calculation fields
   cableName: string | null;
-  transit: string | null;
+  transit: number | null;
   windIncidence: number | null;
-  windIncidenceMode: 'auto' | 'perpendicular' | null;
+  windIncidenceMode: 'auto' | 'perpendicular';
   diffuseSolarFlux: number | null;
   directSolarFlux: number | null;
   diffuseDirectSolarFlux: number | null;
@@ -62,7 +62,7 @@ export interface FieldMeasure {
   measuredDiffusedSolarFlux: number | null;
   diffusedPlusDirectSolarFlux: number | null;
   // Parameter at 15°C without wind fields
-  updateMode15C: 'auto' | 'manual' | null;
+  updateMode15C: 'auto' | 'manual';
   parameterPapoto: number | null;
   parameterUncertaintyPapoto: number | null;
   cableTemperature15C: number | null;

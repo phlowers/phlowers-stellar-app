@@ -67,15 +67,15 @@ describe('HeaderComponent', () => {
     it('should update when measureData changes', () => {
       const updatedData = {
         ...mockMeasureData,
-        line: 'New Line',
+        link: 'New Line',
         voltage: 400
       };
 
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      expect(component.measureData().line).toBe(mockMeasureData.line);
+      expect(component.measureData().link).toBe(mockMeasureData.link);
 
       fixture.componentRef.setInput('measureData', updatedData);
-      expect(component.measureData().line).toBe('New Line');
+      expect(component.measureData().link).toBe('New Line');
       expect(component.measureData().voltage).toBe(400);
     });
   });
@@ -87,10 +87,10 @@ describe('HeaderComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should display line information', () => {
+    it('should display link information', () => {
       const element = fixture.nativeElement;
       const dlElement = element.querySelector('dl');
-      expect(dlElement.textContent).toContain(mockMeasureData.line);
+      expect(dlElement.textContent).toContain(mockMeasureData.link);
     });
 
     it('should display voltage with kV unit', () => {

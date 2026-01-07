@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { FieldMeasure } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/types';
+import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/types';
 import { Charge } from './charge';
 import { InitialCondition } from './initialCondition';
 import { Support } from './support';

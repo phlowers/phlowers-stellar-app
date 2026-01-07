@@ -18,7 +18,8 @@ export interface InitialConditionFunctionsInput {
   generateState?: boolean;
 }
 
-export interface DuplicateInitialConditionFunctionsInput extends InitialConditionFunctionsInput {
+export interface DuplicateInitialConditionFunctionsInput
+  extends InitialConditionFunctionsInput {
   newUuid: string;
 }
 

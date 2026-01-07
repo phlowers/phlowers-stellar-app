@@ -26,6 +26,10 @@
     aria-describedby="complementary-form-field-measuring-init"
     [formControl]="newMeasureNameControl"
     [class.ng-invalid]="isNameAlreadyTaken()"
+    [attr.aria-invalid]="isNameAlreadyTaken()"
+    [attr.aria-errormessage]="
+      isNameAlreadyTaken() ? 'new-measure-name-error-message' : null
+    "
   />
   @if (isNameAlreadyTaken()) {
     <p-message

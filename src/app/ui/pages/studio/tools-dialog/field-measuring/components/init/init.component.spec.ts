@@ -3,8 +3,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { InitComponent } from './init.component';
-import { PlotService } from '../../../../services/plot.service';
-import { ToolsDialogService } from '../../../tools-dialog.service';
+import { ToolsDialogService } from '@ui/pages/studio/tools-dialog/tools-dialog.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 describe('Init component', () => {
   let component: InitComponent;
