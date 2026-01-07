@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.13,<3.14"
-# dependencies = ["requests == 2.32.3", "pyodide-build == 0.30.6"]
+# dependencies = ["requests == 2.32.3", "pyodide-build == 0.30.6", "brotli == 1.1.0"]
 # ///
 """Configure mechaphlowers for Pyodide browser environment.
 
@@ -28,6 +28,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import shutil
 import subprocess
@@ -38,6 +39,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 import re
 import sys
+
+import brotli
 
 import requests
 from pyodide_build.cli.py_compile import main as pyodide_compile
@@ -492,24 +495,23 @@ def compress_wheels(
     
     total_saved = 0.0
     for wheel_path in sorted(to_compress):
-        original_mb = wheel_path.stat().st_size / (1024 * 1024)
+        original_data = wheel_path.read_bytes()
+        original_mb = len(original_data) / (1024 * 1024)
         
-        # Compress with brotli (best) and gzip (fallback)
-        subprocess.run(
-            ["brotli", "-q", "11", "-k", "-f", str(wheel_path)],
-            capture_output=True, timeout=300,
-        )
-        subprocess.run(
-            ["gzip", "-9", "-k", "-f", str(wheel_path)],
-            capture_output=True, timeout=300,
-        )
-        
+        # Compress with brotli (best compression, quality 11)
         br_path = wheel_path.with_suffix(wheel_path.suffix + ".br")
-        if br_path.exists():
-            compressed_mb = br_path.stat().st_size / (1024 * 1024)
-            saved = original_mb - compressed_mb
-            total_saved += saved
-            print(f"    {wheel_path.name}: {original_mb:.2f} → {compressed_mb:.2f} MB")
+        br_data = brotli.compress(original_data, quality=11)
+        br_path.write_bytes(br_data)
+        
+        # Compress with gzip (fallback, level 9)
+        gz_path = wheel_path.with_suffix(wheel_path.suffix + ".gz")
+        with gzip.open(gz_path, "wb", compresslevel=9) as f:
+            f.write(original_data)
+        
+        compressed_mb = len(br_data) / (1024 * 1024)
+        saved = original_mb - compressed_mb
+        total_saved += saved
+        print(f"    {wheel_path.name}: {original_mb:.2f} → {compressed_mb:.2f} MB")
     
     return total_saved
 
