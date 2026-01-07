@@ -34,6 +34,20 @@ Our application uses a service worker to enable offline capabilities and manage 
 
 The service worker relies on a pre-generated list of assets to cache in order to download the correct assets when an update is available. This list is created during the build process using the `create_assets_list_for_service_worker.py` script.
 
+#### Python Package Management
+
+Python packages (mechaphlowers and dependencies) are managed by the `set_up_mechaphlowers.py` script, which:
+- Automatically detects all dependencies (26 packages)
+- Prefers CDN versions when available (14/26 from Pyodide CDN)
+- Downloads remaining packages via pip (12/26)
+- Optimizes wheels with Brotli/Gzip compression
+- Stores packages locally in `public/pyodide/`
+
+Run the setup script before building:
+```bash
+npm run set-up-mechaphlowers
+```
+
 #### Asset List Commands
 
 We have two commands for generating asset lists, one for each supported language:
@@ -44,8 +58,9 @@ We have two commands for generating asset lists, one for each supported language
 These commands run the Python script that:
 1. Recursively scans the build directory for the specified language
 2. Creates a list of all files (excluding blacklisted items like the service worker itself)
-3. Adds external assets from `scripts/external_assets.json`
+3. Includes Python packages from `public/pyodide/` (managed by `set_up_mechaphlowers.py`)
 4. Generates version information including:
    - Git commit hash
    - Build timestamp
+   - Application version from package.json
 5. Writes the complete asset list to `assets_list.json`
