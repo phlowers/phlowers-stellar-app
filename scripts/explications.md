@@ -197,7 +197,7 @@ uv run scripts/set_up_mechaphlowers.py
 # Sans compression (plus rapide pour dev)
 uv run scripts/set_up_mechaphlowers.py --skip-compression
 
-# Avec une wheel locale (pour tests)
+# Avec une wheel locale (compression auto-skippée pour itération rapide)
 uv run scripts/set_up_mechaphlowers.py --local-wheel ./mechaphlowers-0.5.2-py3-none-any.whl
 
 # Avec un index PyPI custom

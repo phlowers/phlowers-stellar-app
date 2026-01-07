@@ -13,31 +13,34 @@ npm run set-up-mechaphlowers
 Input: package.json (versions) + Pyodide CDN
                 ↓
         ┌───────────────┐
-        │ Read versions │
-        │               │ → pyodide + mechaphlowers from package.json
+        │ Read versions │ → pyodide + mechaphlowers from package.json
         └───────────────┘
                 ↓
         ┌───────────────┐
-        │   Analyze     │
-        │ dependencies  │ → 26 packages (direct + transitive)
+        │  Fetch CDN    │ → Build constraints for NATIVE packages only
+        │  packages     │   (numpy, pandas, pydantic-core, etc.)
         └───────────────┘
                 ↓
         ┌───────────────┐
-        │    Check      │
-        │  Pyodide CDN  │ → 14 packages available
+        │  pip download │ → Download with native constraints
+        │  + constraints│   Pure Python packages resolved freely
         └───────────────┘
                 ↓
         ┌───────────────┐
-        │    Smart      │
-        │   download    │ → CDN (14) + pip (12)
+        │  CDN wheels   │ → Replace manylinux with wasm32 wheels
+        │  download     │   for matching versions
         └───────────────┘
                 ↓
         ┌───────────────┐
-        │ Optimization  │
-        │ & Compression │ → Brotli + Gzip, 26% reduction
+        │ Deduplicate   │
+        │ + Compile     │ → .pyc bytecode compilation
         └───────────────┘
                 ↓
-Output: ./public/pyodide/ (26 optimized wheels)
+        ┌───────────────┐
+        │ Compression   │ → Brotli + Gzip (skipped for local wheels)
+        └───────────────┘
+                ↓
+Output: ./public/pyodide/ (optimized wheels)
         ./src/app/.../python-packages.json (config)
 ```
 
@@ -51,26 +54,28 @@ Output: ./public/pyodide/ (26 optimized wheels)
 
 ## 🔑 Key Features
 
-### 1. Complete automatic detection
+### 1. Native-only constraints
 ```python
-# Extracts all resolved dependencies (direct + transitive)
-get_mechaphlowers_dependencies()  # → 26 packages
+# Constrain ONLY native packages to CDN versions
+NATIVE_PACKAGES = frozenset({
+    "pydantic-core",  # Rust
+    "numpy", "pandas", "pyyaml", "scipy", "pillow", "lxml",  # C/C++
+    "wrapt", "xxhash",  # C
+})
 
-Automatically includes:
-  - numpy, pandas, scipy (large packages)
-  - pydantic, pydantic-core (validation)
-  - All sub-dependencies
+# Pure Python packages (pydantic, pandera, etc.) resolved freely by pip
+# → Ensures compatibility with all dependencies
 ```
 
 ### 2. CDN Intelligence
 ```python
 # Checks CDN for each dependency
-available_packages = get_available_packages_from_cdn()  # → 14 found
+cdn_packages = fetch_cdn_packages(cdn_url)  # → 343 available
 
 Optimized:
-  - numpy → numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl (Pyodide)
-  - pandas → pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl (Pyodide)
-  - Missing packages → downloaded via pip
+  - numpy → numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl (CDN wasm32)
+  - pandas → pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl (CDN wasm32)
+  - pydantic → resolved by pip (pure Python, works everywhere)
 ```
 
 ### 3. Optimal compression
@@ -130,6 +135,9 @@ npm run set-up-mechaphlowers -- --npm-registry-url https://registry.npmmirror.co
 
 # Skip compression (debug)
 npm run set-up-mechaphlowers -- --skip-compression
+
+# Test with a local wheel (compression auto-skipped)
+npm run set-up-mechaphlowers:local ./mechaphlowers-0.5.2b0-py3-none-any.whl
 ```
 
 ## ⚡ Optimized algorithms
@@ -146,30 +154,29 @@ npm run set-up-mechaphlowers -- --skip-compression
 
 ```python
 # Centralized function for normalization
-def normalize_package_name(name: str) -> str:
+def normalize_name(name: str) -> str:
+    """Normalize package name per PEP 503."""
     return name.lower().replace("_", "-")
 
 # BEFORE: .lower().replace("_", "-") repeated 8 times
-# AFTER: normalize_package_name() used everywhere
+# AFTER: normalize_name() used everywhere
 ```
 
 ## 📊 Execution flow
 
 ```
 main()
-├─ get_versions_from_package_json()       Read versions from package.json
-├─ recreate_directory()                    Clean ./public/pyodide
-├─ download_and_extract_tgz()             Download Pyodide (NPM)
-├─ keep_only_needed_files()               Keep only essentials
-├─ get_mechaphlowers_dependencies()       Resolve all deps
-├─ get_available_packages_from_cdn()      Check CDN
-├─ download_optimized_wheels_from_cdn()   Download CDN (14)
-├─ subprocess.run([pip download...])      Download pip (12)
-├─ pyodide_build()                        Compile to .pyc
-├─ remove_duplicate_wheels()              Clean duplicates
-├─ cleanup *.old files                    Remove leftover files
-├─ compress_pyodide_wheels()              Brotli + Gzip
-└─ write_python_packages_json()           Final config
+├─ Config.from_package_json()             Read versions from package.json
+├─ download_pyodide_runtime()             Download Pyodide from NPM
+├─ fetch_cdn_packages()                   Get CDN package list
+├─ build_native_constraints()             Constraints for native packages ONLY
+├─ download_with_pip()                    Download with constraints
+├─ check_version_compatibility()          Warn about potential issues
+├─ download_cdn_wheels()                  Replace manylinux → wasm32
+├─ deduplicate_wheels()                   Remove duplicates (priority system)
+├─ compile_wheels()                       Compile to .pyc
+├─ compress_wheels()                      Brotli + Gzip (skipped for --local-wheel)
+└─ generate_packages_json()               Final config
 ```
 
 ## 🔧 Advanced features
@@ -180,11 +187,11 @@ main()
 # list[str], dict[str, str] instead of List[str], Dict[str, str]
 ```
 
-### Centralized `normalize_package_name()` function
+### Centralized `normalize_name()` function
 ```
 - PyYAML → pyyaml
 - pydantic_core → pydantic-core
-- Eliminates duplication (~8 times → 1 function)
+- PEP 503 compliant normalization
 ```
 
 ### Case-insensitive normalization
@@ -231,6 +238,6 @@ npm run set-up-mechaphlowers
 ---
 
 **Version**: Read from package.json (pyodide: dependencies, mechaphlowers: config)  
-**Date**: January 6, 2026  
-**Script**: ~700 lines, 12 imports  
-**Optimizations**: Versions centralized in package.json, `normalize_package_name()` function, modern Python 3.12+ types, deduplication via `set`
+**Date**: January 7, 2026  
+**Script**: ~680 lines, dataclasses, type hints  
+**Key features**: Native-only constraints, `--local-wheel` option (auto-skips compression), compatibility warnings
