@@ -92,13 +92,10 @@ def main(language):
     print("-" * 50)
     print(f"Total files: {len(files)}")
     output_file = f"dist/{language}/assets_list.json"
-    extra_assets_file = "scripts/external_assets.json"
     package_json_file = "package.json"
     with open(package_json_file, "r") as f:
         package_json = json.load(f)
     version = package_json["version"]
-    with open(extra_assets_file, "r") as f:
-        extra_assets = json.load(f)
     res = {
         "app_version": {
             "git_hash": get_git_revision_hash(),
@@ -107,8 +104,7 @@ def main(language):
             .isoformat(),
             "version": version,
         },
-        "files": [file for file in files if os.path.basename(file) not in blacklist]
-        + extra_assets["files"],
+        "files": [file for file in files if os.path.basename(file) not in blacklist],
     }
     with open(output_file, "w") as f:
         json.dump(res, f, indent=2)

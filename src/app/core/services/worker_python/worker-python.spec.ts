@@ -80,15 +80,16 @@ describe('Worker', () => {
       await import('./worker-python');
 
       // Verify loadPyodide was called with correct parameters
+      const localPythonPackages = [
+        ...Object.values(pythonPackages)
+          .map((pkg) =>
+            pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''
+          )
+          .filter(Boolean)
+      ];
       expect(loadPyodide).toHaveBeenCalledWith({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
-        packages: expect.arrayContaining([
-          'numpy',
-          'pandas',
-          'pydantic',
-          'packaging',
-          'wrapt'
-        ])
+        indexURL: self.name + 'pyodide/',
+        packages: expect.arrayContaining([...localPythonPackages])
       });
 
       // Verify local packages are included
