@@ -9,7 +9,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { FieldMeasureData } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/types';
+import { FieldMeasure } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 
 @Component({
@@ -44,7 +44,7 @@ export class TemperatureCalculationComponent {
   cableOptions = input.required<{ label: string; value: string }[]>();
   windDirectionOptions = input.required<{ label: string; value: string }[]>();
   skyCoverOptions = input.required<{ label: string; value: string }[]>();
-  measureData = model.required<FieldMeasureData>();
+  measureData = model.required<FieldMeasure>();
 
   temperatureResult = signal<{
     cableSolarFlux: number;
@@ -73,10 +73,7 @@ export class TemperatureCalculationComponent {
     return true;
   });
 
-  updateField<K extends keyof FieldMeasureData>(
-    field: K,
-    value: FieldMeasureData[K]
-  ) {
+  updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));
   }
 

@@ -7,7 +7,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { FieldMeasureData } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/types';
+import { FieldMeasure } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { InitialConditionModalComponent } from '@src/app/ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
@@ -48,7 +48,7 @@ import { v4 as uuidv4 } from 'uuid';
   ]
 })
 export class ParameterCalculation15WithoutWindComponent {
-  measureData = model.required<FieldMeasureData>();
+  measureData = model.required<FieldMeasure>();
   parameter15CResult = signal<{
     parameter15CMinusUncertainty: number;
     parameter15C: number;
@@ -97,10 +97,7 @@ export class ParameterCalculation15WithoutWindComponent {
     return true;
   });
 
-  updateField<K extends keyof FieldMeasureData>(
-    field: K,
-    value: FieldMeasureData[K]
-  ) {
+  updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));
   }
 

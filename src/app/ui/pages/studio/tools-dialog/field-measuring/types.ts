@@ -1,25 +1,26 @@
-export interface FieldMeasureData {
-  measureName: string;
-  line: string;
-  voltage: string;
-  spanType: string;
-  phaseNumber: number;
-  numberOfConductors: number;
-  span: string;
-  longitude: number;
-  latitude: number;
-  altitude: number;
-  azimuth: number;
-  date: Date;
-  time: string;
-  season: 'summer' | 'winter';
+export interface FieldMeasure {
+  uuid: string;
+  name: string;
+  line: string | null;
+  voltage: string | null;
+  spanType: string | null;
+  phaseNumber: number | null;
+  numberOfConductors: number | null;
+  span: string | null;
+  longitude: number | null;
+  latitude: number | null;
+  altitude: number | null;
+  azimuth: number | null;
+  date: Date | null;
+  time: string | null;
+  season: 'summer' | 'winter' | null;
   ambientTemperature: number | null;
   windSpeed: number | null;
-  windSpeedUnit: 'kmh' | 'ms';
-  windDirection: string;
-  skyCover: string;
+  windSpeedUnit: 'kmh' | 'ms' | null;
+  windDirection: string | null;
+  skyCover: string | null;
   // Parameter calculation fields
-  calculationMethod: 'papoto' | 'tangente-aiming' | 'pep';
+  calculationMethod: 'papoto' | 'tangente-aiming' | 'pep' | null;
   // Papoto fields
   leftSupport: string | null;
   spanLength: number | null;
@@ -49,10 +50,10 @@ export interface FieldMeasureData {
   ySight2: number | null;
   ySight3: number | null;
   // Temperature calculation fields
-  cableName: string;
-  transit: string;
+  cableName: string | null;
+  transit: string | null;
   windIncidence: number | null;
-  windIncidenceMode: 'auto' | 'perpendicular';
+  windIncidenceMode: 'auto' | 'perpendicular' | null;
   diffuseSolarFlux: number | null;
   directSolarFlux: number | null;
   diffuseDirectSolarFlux: number | null;
@@ -61,7 +62,7 @@ export interface FieldMeasureData {
   measuredDiffusedSolarFlux: number | null;
   diffusedPlusDirectSolarFlux: number | null;
   // Parameter at 15°C without wind fields
-  updateMode15C: 'auto' | 'manual';
+  updateMode15C: 'auto' | 'manual' | null;
   parameterPapoto: number | null;
   parameterUncertaintyPapoto: number | null;
   cableTemperature15C: number | null;

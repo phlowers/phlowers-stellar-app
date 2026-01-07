@@ -1,4 +1,4 @@
-import { FieldMeasureData, CalculationResults } from './types';
+import { FieldMeasure, CalculationResults } from './types';
 
 export const leftSupportOption = [
   { label: '12', value: '12' },
@@ -7,8 +7,9 @@ export const leftSupportOption = [
   { label: '15', value: '15' }
 ];
 
-export const INITIAL_MEASURE_DATA: FieldMeasureData = {
-  measureName: '',
+export const INITIAL_MEASURE_DATA: FieldMeasure = {
+  uuid: '',
+  name: '',
   line: 'Line 225kV Rougemontier - Tourbe #1',
   voltage: '123 kV',
   spanType: 'Phase',

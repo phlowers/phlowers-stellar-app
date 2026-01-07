@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { FieldMeasure } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/types';
 import { Charge } from './charge';
 import { InitialCondition } from './initialCondition';
 import { Support } from './support';
@@ -46,4 +47,6 @@ export interface Section {
   selected_initial_condition_uuid: string | undefined;
   charges: Charge[];
   selected_charge_uuid: string | null;
+  field_measures: FieldMeasure[];
+  selected_field_measure_uuid: string | undefined;
 }

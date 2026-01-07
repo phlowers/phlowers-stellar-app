@@ -6,6 +6,8 @@
  */
 import '@angular/localize/init';
 import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+import { TestBed } from '@angular/core/testing';
+import { MessageService } from 'primeng/api';
 
 window.ResizeObserver =
   window.ResizeObserver ||
@@ -36,3 +38,21 @@ jest.mock('plotly.js-dist-min', () => ({
   relayout: jest.fn().mockResolvedValue({}),
   Data: jest.fn()
 }));
+
+// export const PROVIDE_TEST = [provideHttpClient()];
+
+const mockMessageService = {
+  add: jest.fn()
+} as unknown as MessageService;
+
+export const globalTestSetup = {
+  providers: [
+    // ...PROVIDE_TEST,
+    { provide: MessageService, useValue: mockMessageService }
+  ]
+};
+
+// Configure TestBed globally before each test
+beforeEach(() => {
+  TestBed.configureTestingModule(globalTestSetup);
+});

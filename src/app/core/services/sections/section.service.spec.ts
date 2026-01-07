@@ -57,7 +57,9 @@ const mockSectionData: Section = {
   initial_conditions: [],
   selected_initial_condition_uuid: undefined,
   charges: [],
-  selected_charge_uuid: null
+  selected_charge_uuid: null,
+  field_measures: [],
+  selected_field_measure_uuid: undefined
 };
 
 describe('SectionService', () => {
@@ -150,7 +152,9 @@ describe('SectionService', () => {
         initial_conditions: [],
         selected_initial_condition_uuid: undefined,
         charges: [],
-        selected_charge_uuid: null
+        selected_charge_uuid: null,
+        field_measures: [],
+        selected_field_measure_uuid: undefined
       };
       const studyWithoutNewSection: Study = {
         ...mockStudy,

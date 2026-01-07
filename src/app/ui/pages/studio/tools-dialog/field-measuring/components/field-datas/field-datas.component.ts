@@ -7,13 +7,14 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { FieldMeasureData } from '../../types';
+import { FieldMeasure } from '../../types';
 import {
   TIME_MODE_OPTIONS,
   WIND_SPEED_UNIT_OPTIONS,
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS
 } from '../../constants';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-field-datas',
@@ -25,16 +26,18 @@ import {
     InputGroupModule,
     InputGroupAddonModule,
     SelectModule,
-    IconComponent
+    IconComponent,
+    MessageModule
   ],
   templateUrl: './field-datas.component.html',
   styleUrls: ['./field-datas.component.scss']
 })
 export class FieldDatasComponent {
-  measureData = input.required<FieldMeasureData>();
+  isNameAlreadyTaken = input.required<boolean>();
+  measureData = input.required<FieldMeasure>();
   fieldChange = output<{
-    field: keyof FieldMeasureData;
-    value: FieldMeasureData[keyof FieldMeasureData];
+    field: keyof FieldMeasure;
+    value: FieldMeasure[keyof FieldMeasure];
   }>();
 
   readonly timeModeOptions = TIME_MODE_OPTIONS;
@@ -43,8 +46,8 @@ export class FieldDatasComponent {
   readonly skyCoverOptions = SKY_COVER_OPTIONS;
 
   onFieldChange(
-    field: keyof FieldMeasureData,
-    value: FieldMeasureData[keyof FieldMeasureData]
+    field: keyof FieldMeasure,
+    value: FieldMeasure[keyof FieldMeasure]
   ): void {
     this.fieldChange.emit({ field, value });
   }
