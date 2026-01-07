@@ -7,7 +7,8 @@ import {
   TemplateRef,
   AfterViewInit,
   OnDestroy,
-  computed
+  computed,
+  untracked
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -34,6 +35,7 @@ import { InitialCondition } from '@src/app/core/data/database/interfaces/initial
 import { ParameterCalculation15WithoutWindComponent } from './components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 import { createInitialMeasureData } from './helpers';
 import { INITIAL_CALCULATION_RESULTS } from './mock-data';
+import { LinesService } from '@core/services/lines/lines.service';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -100,7 +102,8 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     public readonly sectionService: SectionService,
-    public readonly studiesService: StudiesService
+    public readonly studiesService: StudiesService,
+    private readonly linesService: LinesService
   ) {
     effect(() => {
       if (this.toolsDialogService.isMainOpen()) {
@@ -118,7 +121,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     return (
       this.plotService
         .section()
-        ?.field_measures.some(
+        ?.field_measures?.some(
           (measure) =>
             measure.name === this.measureData().name &&
             measure.uuid !== this.measureData().uuid
@@ -126,7 +129,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     );
   });
 
-  private initializeMeasureData(): void {
+  private async initializeMeasureData(): Promise<void> {
     const section = this.plotService.section();
     const selectedFieldMeasure = section?.field_measures.find(
       (measure) => measure.uuid === section?.selected_field_measure_uuid
@@ -138,7 +141,23 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.measureData.set(selectedFieldMeasure);
+    // this.measureData.set(selectedFieldMeasure);
+
+    // Fetch link_adr from lines service
+    const linesTable = await this.linesService.getLines();
+    const linkLine = linesTable?.find(
+      (item) => item.link_idr === section.link_name
+    );
+    const linkAdrRead = linkLine?.link_adr || '';
+
+    this.measureData.set({
+      ...untracked(() => this.measureData()),
+      link: linkAdrRead,
+      voltage: section.voltage_idr || '',
+      spanType: section.type || '',
+      phaseNumber: section.electric_phase_number || 0,
+      numberOfConductors: section.cables_amount || 0
+    });
   }
 
   onVisibleChange(visible: boolean) {
