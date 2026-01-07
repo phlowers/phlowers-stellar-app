@@ -54,7 +54,7 @@
     </p-inputgroup>
     <p id="spanLength-calculated" class="spanLength__desc">
       <ng-container i18n> calculated value:</ng-container>
-      &nbsp;123 m
+      &nbsp;{{ calculatedSpanLength() ?? '-' }} m
     </p>
 
     <label for="measuredElevationDifference" i18n class="MED__label">
@@ -74,7 +74,7 @@
     </p-inputgroup>
     <p id="measuredElevationDifference-calculated" class="MED__desc">
       <ng-container i18n>calculated value:</ng-container>
-      &nbsp;123 m
+      &nbsp;{{ calculatedElevation() ?? '-' }} m
     </p>
   </div>
 

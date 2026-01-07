@@ -1,4 +1,4 @@
-import { Component, input, model, signal, computed } from '@angular/core';
+import { Component, input, model, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -12,6 +12,8 @@ import { FieldMeasure } from '../../../types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { Task } from '@src/app/core/services/worker_python/tasks/types';
 import { CommonModule } from '@angular/common';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
+
 @Component({
   selector: 'app-papoto',
   imports: [
@@ -45,6 +47,8 @@ export class PapotoComponent {
   selectedSpan = input.required<number[]>();
   measureData = model.required<FieldMeasure>();
 
+  private readonly plotService = inject(PlotService);
+
   // Compute the dynamic left support options based on selectedSpan
   retrievedLeftSupportOptions = computed(() => {
     const span = this.selectedSpan();
@@ -58,6 +62,27 @@ export class PapotoComponent {
       { label: `${rightIndex + 1}`, value: `${rightIndex + 1}` }
     ];
   });
+
+  // Helper function to get calculated value from litData
+  private getCalculatedValue(field: 'span_length' | 'elevation'): number | null {
+    const span = this.selectedSpan();
+    const litData = this.plotService.litData();
+
+    if (span?.length !== 2 || !litData?.[field]) {
+      return null;
+    }
+
+    const [leftIndex] = span;
+    const value = litData[field][leftIndex];
+
+    return value !== undefined ? Math.round(value * 100) / 100 : null;
+  }
+
+  // Computed property for calculated span length
+  calculatedSpanLength = computed(() => this.getCalculatedValue('span_length'));
+
+  // Computed property for calculated elevation difference
+  calculatedElevation = computed(() => this.getCalculatedValue('elevation'));
 
   papotoHelpDialog = signal<boolean>(false);
 
