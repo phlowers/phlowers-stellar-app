@@ -27,6 +27,27 @@ logger.addHandler(handler)
 
 print(f"mechaphlowers version: {version('mechaphlowers')}")
 
+def convert_jsnull(obj):
+    """Recursively convert JavaScript null (jsnull) to Python None.
+    
+    Pyodide's to_py() converts JS null to a special 'jsnull' object instead of None.
+    This function traverses nested structures and replaces all jsnull with None.
+    """
+    # Check if it's jsnull by comparing string representation
+    if str(type(obj)) == "<class 'pyodide.ffi.JsNull'>" or str(obj) == "jsnull":
+        return None
+    elif isinstance(obj, dict):
+        return {k: convert_jsnull(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_jsnull(item) for item in obj]
+    
+    return obj
+
+
+def js_to_python(js_inputs) -> dict:
+    """Convert JavaScript inputs to Python dict, handling null values."""
+    return convert_jsnull(js_inputs.to_py())
+
 
 def init_config():
     mph.options.graphics.resolution = RESOLUTION
@@ -82,7 +103,6 @@ class Support:
     towerModel: Optional[str] = None
     chainV: Optional[bool] = None
     counterWeight: Optional[float] = None
-    towerModel: Optional[str] = None
     supportFootAltitude: Optional[float] = None
     attachmentPosition: Optional[str] = None
     chainSurface: Optional[float] = None
