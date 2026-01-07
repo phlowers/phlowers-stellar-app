@@ -64,7 +64,9 @@
           (ngModelChange)="updateField('parameterUncertaintyPapoto', $event)"
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
+          disabled
         />
+        <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
     </div>
 
@@ -101,6 +103,7 @@
           "
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
+          disabled
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
@@ -114,9 +117,11 @@
 
       <div class="parameterUncertaintyPapoto">
         <dt id="parameterUncertaintyPapoto-display" i18n>
-          Parameter uncertainty Papoto
+          <del>Parameter uncertainty Papoto</del>
         </dt>
-        <dd>{{ measureData().parameterUncertaintyPapoto }}</dd>
+        <dd>
+          <del>{{ measureData().parameterUncertaintyPapoto }}</del>
+        </dd>
       </div>
 
       <div class="cableTemperature15C">
@@ -126,9 +131,11 @@
 
       <div class="cableTemperatureUncertainty15C">
         <dt id="cableTemperatureUncertainty15C-display" i18n>
-          Cable temperature uncertainty at 15°C
+          <del>Cable temperature uncertainty at 15°C</del>
         </dt>
-        <dd>{{ measureData().cableTemperatureUncertainty15C }} °C</dd>
+        <dd>
+          <del>{{ measureData().cableTemperatureUncertainty15C }} °C</del>
+        </dd>
       </div>
     </dl>
   }

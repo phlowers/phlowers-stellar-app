@@ -26,16 +26,19 @@
 
   <div class="transit">
     <label for="transit" i18n>Transit</label>
-    <input
-      id="transit"
-      type="text"
-      pInputText
-      [ngModel]="measureData().transit"
-      (ngModelChange)="updateField('transit', $event)"
-      [fluid]="true"
-      aria-describedby="mandatory-temperature"
-      required
-    />
+    <p-inputgroup>
+      <input
+        id="transit"
+        type="text"
+        pInputText
+        [ngModel]="measureData().transit"
+        (ngModelChange)="updateField('transit', $event)"
+        [fluid]="true"
+        aria-describedby="mandatory-temperature"
+        required
+      />
+      <p-inputgroup-addon>A</p-inputgroup-addon>
+    </p-inputgroup>
   </div>
 
   <dl class="contents">

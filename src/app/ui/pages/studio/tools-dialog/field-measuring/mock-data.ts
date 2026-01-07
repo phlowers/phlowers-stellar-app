@@ -55,7 +55,7 @@ export const INITIAL_MEASURE_DATA: FieldMeasure = {
   ySight2: null,
   ySight3: null,
   cableName: 'ASTER570',
-  transit: 1,
+  transit: null,
   windIncidence: 47,
   windIncidenceMode: 'auto',
   diffuseSolarFlux: 123,
