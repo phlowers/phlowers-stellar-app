@@ -5,11 +5,9 @@ import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine
 from typing import Optional
 from dataclasses import dataclass
-from typing import List
-import math
 from mechaphlowers.entities.shapes import SupportShape
 from mechaphlowers.data.measures import PapotoParameterMeasure
-
+from functools import wraps
 import logging
 from importlib.metadata import version
 import sys
@@ -27,9 +25,30 @@ logger.addHandler(handler)
 
 print(f"mechaphlowers version: {version('mechaphlowers')}")
 
+def convert_jsnull(obj):
+    """Recursively convert JavaScript null (jsnull) to Python None.
+    
+    Pyodide's to_py() converts JS null to a special 'jsnull' object instead of None.
+    This function traverses nested structures and replaces all jsnull with None.
+    """
+    # Check if it's jsnull by comparing string representation
+    if str(type(obj)) == "<class 'pyodide.ffi.JsNull'>" or str(obj) == "jsnull":
+        return None
+    elif isinstance(obj, dict):
+        return {k: convert_jsnull(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_jsnull(item) for item in obj]
+    
+    return obj
+
+
+def js_to_python(js_inputs) -> dict:
+    """Convert JavaScript inputs to Python dict, handling null values."""
+    return convert_jsnull(js_inputs.to_py())
+
 
 def set_log_level(js_inputs: dict):
-    python_inputs = js_inputs.to_py()
+    python_inputs = js_to_python(js_inputs)
     log_level = python_inputs["activateDebugLogs"]
 
     print("log_level: ", log_level)
@@ -55,7 +74,6 @@ class Support:
     towerModel: Optional[str] = None
     chainV: Optional[bool] = None
     counterWeight: Optional[float] = None
-    towerModel: Optional[str] = None
     supportFootAltitude: Optional[float] = None
     attachmentPosition: Optional[str] = None
     chainSurface: Optional[float] = None
@@ -152,36 +170,6 @@ def generate_section_array(supports: list[Support]):
     return pd.DataFrame(section_data)
 
 
-def add_obstacle(df, x, y, z, type_obstacle, name_obstacle, support):
-    df.x.cumsum()
-    new_df = pd.DataFrame(
-        {
-            "x": [x],
-            "y": [y],
-            "z": [z],
-            "type": [type_obstacle],
-            "support": [support],
-            "section": ["obstacle"],
-        }
-    )
-    return pd.concat([df, new_df], ignore_index=True)
-
-
-def split_points_into_their_spans(data: List[List[float]]) -> List[List[List[float]]]:
-    spans = []
-    new_span = []
-    for row in data:
-        if math.isnan(row[0]) and math.isnan(row[1]) and math.isnan(row[2]):
-            spans.append(new_span)
-            new_span = []
-        else:
-            new_span.append(row)
-    return spans
-
-
-mock_data = """"""
-
-
 engine = None
 plt_line = None
 
@@ -224,14 +212,8 @@ def get_coordinates(
 
 def init_section(js_inputs: dict):
     global engine, plt_line
-    python_inputs = js_inputs.to_py()
+    python_inputs = js_to_python(js_inputs)
     print("python_inputs: ", python_inputs)
-    # import json
-
-    # js_inputs2 = globals()["js_inputs"].to_py()
-    # js_inputs = json.loads(mock_data)
-    # js_inputs = globals()["js_inputs"].to_py()
-    # print("js_inputs: ", json.dumps(js_inputs))
     input_section = python_inputs["section"]
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
@@ -257,17 +239,6 @@ def init_section(js_inputs: dict):
     initial_condition = (
         InitialCondition(**input_initial_condition) if input_initial_condition else None
     )
-    # print("input_cable: ", input_cable)
-    # del input_cable["id"]
-    # del input_cable["diameter_heart"]
-    # del input_cable["section_conductor"]
-    # del input_cable["section_heart"]
-    # del input_cable["solar_absorption"]
-    # del input_cable["emissivity"]
-    # del input_cable["electric_resistance_20"]
-    # del input_cable["linear_resistance_temperature_coef"]
-    # del input_cable["radial_thermal_conductivity"]
-    # del input_cable["has_magnetic_heart"]
     cable = Cable(**input_cable)
 
     if not input_section["supports"]:
@@ -277,7 +248,6 @@ def init_section(js_inputs: dict):
     supports_data = []
     for support_js in input_section["supports"]:
         supports_data.append(Support(**support_js))
-    # np.random.seed(142)
     df = generate_section_array(supports_data)
     mph.options.graphics.resolution = RESOLUTION
 
@@ -288,8 +258,6 @@ def init_section(js_inputs: dict):
     section.sagging_temperature = (
         initial_condition.base_temperature if initial_condition else 15
     )
-
-    # cable_array = sample_cable_catalog.get_as_object([cable.name])
 
     cable_array = CableArray(
         pd.DataFrame(
@@ -329,16 +297,6 @@ def init_section(js_inputs: dict):
         {
             "young_modulus": "MPa",
             "dilatation_coefficient": "1/K",
-            # "a0": "MPa",
-            # "a1": "MPa",
-            # "a2": "MPa",
-            # "a3": "MPa",
-            # "a4": "MPa",
-            # "b0": "MPa",
-            # "b1": "MPa",
-            # "b2": "MPa",
-            # "b3": "MPa",
-            # "b4": "MPa",
         }
     )
 
@@ -360,7 +318,7 @@ def init_section(js_inputs: dict):
 
 def refresh_projection(js_inputs: dict):
     global plt_line
-    python_inputs = js_inputs.to_py()
+    python_inputs = js_to_python(js_inputs)
     start_support = python_inputs["startSupport"]
     end_support = python_inputs["endSupport"]
     view = python_inputs["view"]
@@ -368,23 +326,12 @@ def refresh_projection(js_inputs: dict):
 
 
 def change_climate_load(js_inputs: dict):
-    # import json
-
     global engine, plt_line
-    python_inputs = js_inputs.to_py()
+    python_inputs = js_to_python(js_inputs)
     logger.debug("python_inputs: ", python_inputs)
     wind_pressure = python_inputs["windPressure"]
     cable_temperature = python_inputs["cableTemperature"]
     ice_thickness = python_inputs["iceThickness"] / 100  # in meters in the engine
-    section_length = len(engine.section_array.data)
-    # print(
-    #     "engine.section_array.data: ", json.dumps(engine.section_array.data.to_dict())
-    # )
-    # print("engine.cable_array.data: ", json.dumps(engine.cable_array.data.to_dict()))
-    # print("section_length: ", section_length)
-    # print(
-    #     "engine.section_array.data: ", json.dumps(engine.section_array.data.to_dict())
-    # )
     engine.solve_change_state(
         ice_thickness=ice_thickness,
         new_temperature=cable_temperature,
@@ -394,45 +341,25 @@ def change_climate_load(js_inputs: dict):
 
 
 def get_support_coordinates(js_inputs: dict):
-    python_inputs = js_inputs.to_py()
-    # print("get_support_coordinates: ", python_inputs)
-    # coordinates = python_inputs["coordinates"]
+    python_inputs = js_to_python(js_inputs)
     coordinates = python_inputs["coordinates"]
     shape_values = np.array(coordinates)
-    shape_name = "pyl"
     shape_set_number = np.array(python_inputs["attachmentSetNumbers"])
 
     pyl_shape = SupportShape(
-        name=shape_name,
+        name="pyl",
         xyz_arms=shape_values,
         set_number=shape_set_number,
     )
-    shape_points = pyl_shape.support_points
-    text_display_points = pyl_shape.labels_points
-    text_to_display = pyl_shape.set_number
-
-    # some_support_name = sample_support_catalog.keys()[0]
-    # support_array_list = sample_support_catalog.get_as_object([some_support_name])
-
-    # # data for plotting
-    # shape_points = support_array_list[0].support_points
-    # text_display_points = support_array_list[0].labels_points
-    # text_to_display = support_array_list[0].set_number
-
-    # print(f"{shape_points=}\n {text_display_points=}\n {text_to_display=}")
     return {
-        "shape_points": shape_points,
-        "text_display_points": text_display_points,
-        "text_to_display": text_to_display,
+        "shape_points": pyl_shape.support_points,
+        "text_display_points": pyl_shape.labels_points,
+        "text_to_display": pyl_shape.set_number,
     }
 
 
-# print("im in the main function")
-# result = init_section()
-
-
 def calculate_papoto(js_inputs: dict):
-    python_inputs = js_inputs.to_py()
+    python_inputs = js_to_python(js_inputs)
     spanLength = python_inputs["spanLength"]
     HL = python_inputs["HL"]
     H1 = python_inputs["H1"]
