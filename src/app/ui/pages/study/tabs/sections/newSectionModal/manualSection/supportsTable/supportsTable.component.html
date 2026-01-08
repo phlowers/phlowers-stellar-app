@@ -139,6 +139,11 @@
       >
         Chain surface
       </th>
+      @if (mode() === 'view') {
+        <th id="tower_model">
+          <ng-container i18n>Tower</ng-container>
+        </th>
+      }
 
       @if (mode() === 'create' || mode() === 'edit') {
         <th class="sticky-right" id="actions" i18n>Actions</th>
@@ -524,6 +529,11 @@
           </p>
         }
       </td>
+      @if (mode() === 'view') {
+        <td>
+          {{ support.towerModel }}
+        </td>
+      }
       @if (mode() === 'edit' || mode() === 'create') {
         <td class="sticky-right">
           <button

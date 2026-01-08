@@ -12,6 +12,7 @@ export const createEmptySupport = (): Support => {
     attachmentSet: null,
     attachmentHeight: null,
     heightBelowConsole: null,
+    towerModel: null,
     cableType: null,
     armLength: 0,
     chainName: null,
