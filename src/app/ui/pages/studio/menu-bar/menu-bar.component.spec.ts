@@ -106,7 +106,9 @@ describe('StudioMenuBarComponent', () => {
     initial_conditions: [mockInitialCondition],
     selected_initial_condition_uuid: 'ic-uuid-1',
     charges: [mockCharge1, mockCharge2],
-    selected_charge_uuid: 'charge-uuid-1'
+    selected_charge_uuid: 'charge-uuid-1',
+    field_measures: [],
+    selected_field_measure_uuid: undefined
   };
 
   const mockStudy: Study = {

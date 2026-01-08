@@ -7,15 +7,14 @@ import {
   TemplateRef,
   AfterViewInit,
   OnDestroy,
-  untracked,
-  input
+  computed
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from './components/header/header.component';
-import { CalculationResults, FieldMeasureData } from './types';
+import { CalculationResults, FieldMeasure } from './types';
 import { ToolsDialogService } from '../tools-dialog.service';
 import {
   SPAN_OPTIONS,
@@ -25,17 +24,16 @@ import {
   CABLE_OPTIONS,
   SelectOption
 } from './constants';
-import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
 import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { TemperatureCalculationComponent } from './components/temperature-calculation/temperature-calculation.component';
-import { Study } from '@src/app/core/data/database/interfaces/study';
-import { Section } from '@src/app/core/data/database/interfaces/section';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { ParameterCalculation15WithoutWindComponent } from './components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
+import { createInitialMeasureData } from './helpers';
+import { INITIAL_CALCULATION_RESULTS } from './mock-data';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -58,9 +56,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
 
   private readonly toolsDialogService = inject(ToolsDialogService);
-  private readonly plotService = inject(PlotService);
-  section = input.required<Section>();
-  study = input.required<Study>();
+  public readonly plotService = inject(PlotService);
   initialConditionModalOpen = signal<boolean>(false);
 
   initialConditionInput = signal<InitialCondition>({
@@ -81,7 +77,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  measureData = signal<FieldMeasureData>(INITIAL_MEASURE_DATA);
+  measureData = signal<FieldMeasure>(createInitialMeasureData(null, ''));
 
   activeTab = signal<
     | 'terrainData'
@@ -116,23 +112,31 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     this.toolsDialogService.setTemplates({});
   }
 
+  isNameAlreadyTaken = computed(() => {
+    return (
+      this.plotService
+        .section()
+        ?.field_measures.some(
+          (measure) =>
+            measure.name === this.measureData().name &&
+            measure.uuid !== this.measureData().uuid
+        ) || false
+    );
+  });
+
   private initializeMeasureData(): void {
     const section = this.plotService.section();
+    const selectedFieldMeasure = section?.field_measures.find(
+      (measure) => measure.uuid === section?.selected_field_measure_uuid
+    );
 
-    if (!section) {
+    if (!section || !selectedFieldMeasure) {
       console.warn('No section available');
+      this.toolsDialogService.closeTool();
       return;
     }
 
-    this.measureData.set({
-      ...untracked(() => this.measureData()),
-      line: section.cable_name || '',
-      voltage: section.voltage_idr || '',
-      spanType: section.type || '',
-      phaseNumber: section.electric_phase_number || 0,
-      numberOfConductors: section.cables_amount || 0,
-      cableName: section.cable_name || ''
-    });
+    this.measureData.set(selectedFieldMeasure);
   }
 
   onVisibleChange(visible: boolean) {
@@ -141,12 +145,16 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  onFieldChange(
-    field: keyof FieldMeasureData,
-    value: FieldMeasureData[keyof FieldMeasureData]
+  onFieldChange<K extends keyof FieldMeasure>(
+    field: K,
+    value: FieldMeasure[K]
   ) {
+    const measureData = this.measureData();
+    if (!measureData) {
+      return;
+    }
     this.measureData.set({
-      ...this.measureData(),
+      ...measureData,
       [field]: value
     });
   }
@@ -161,9 +169,26 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     console.log('Report', this.measureData());
   }
 
-  onSave() {
-    // TODO: Implement save functionality
-    console.log('Save', this.measureData());
+  async onSave() {
+    const section = this.plotService.section();
+    const measureData = this.measureData();
+    if (!section || !measureData) {
+      return;
+    }
+    const isExistingMeasure = section.field_measures.find(
+      (measure) => measure.uuid === measureData.uuid
+    );
+    if (isExistingMeasure) {
+      await this.plotService.modifySection({
+        field_measures: section.field_measures.map((measure) =>
+          measure.uuid === measureData.uuid ? measureData : measure
+        )
+      });
+    } else {
+      await this.plotService.modifySection({
+        field_measures: [...(section?.field_measures || []), measureData]
+      });
+    }
     this.toolsDialogService.closeTool();
   }
 

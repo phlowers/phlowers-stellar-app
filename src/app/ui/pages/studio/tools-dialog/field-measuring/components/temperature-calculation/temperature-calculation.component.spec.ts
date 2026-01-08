@@ -45,7 +45,7 @@ describe('TemperatureCalculationComponent', () => {
   it('should initialize form fields from measureData', () => {
     const data = component.measureData();
     expect(data.cableName).toBe('ASTER570');
-    expect(data.transit).toBe('A');
+    expect(data.transit).toBe(1);
     expect(data.windIncidenceMode).toBe('auto');
   });
 
@@ -66,7 +66,7 @@ describe('TemperatureCalculationComponent', () => {
     component.updateField('ambientTemperature', 20);
     component.updateField('longitude', 2.3522);
     component.updateField('latitude', 48.8566);
-    component.updateField('transit', 'A');
+    component.updateField('transit', 1);
     component.updateField('azimuth', 90);
     component.updateField('windSpeed', 5);
     component.updateField('windDirection', 'North');
