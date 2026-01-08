@@ -1,23 +1,24 @@
-export interface FieldMeasureData {
-  measureName: string;
-  line: string;
-  voltage: string;
-  spanType: string;
-  phaseNumber: number;
-  numberOfConductors: number;
-  span: string;
-  longitude: number;
-  latitude: number;
-  altitude: number;
-  azimuth: number;
-  date: Date;
-  time: string;
+export interface FieldMeasure {
+  uuid: string;
+  name: string;
+  link: string | null;
+  voltage: string | null;
+  spanType: string | null;
+  phaseNumber: number | null;
+  numberOfConductors: number | null;
+  span: string | null;
+  longitude: number | null;
+  latitude: number | null;
+  altitude: number | null;
+  azimuth: number | null;
+  date: Date | null;
+  time: string | null;
   season: 'summer' | 'winter';
   ambientTemperature: number | null;
   windSpeed: number | null;
   windSpeedUnit: 'kmh' | 'ms';
-  windDirection: string;
-  skyCover: string;
+  windDirection: string | null;
+  skyCover: string | null;
   // Parameter calculation fields
   calculationMethod: 'papoto' | 'tangente-aiming' | 'pep';
   // Papoto fields
@@ -49,8 +50,8 @@ export interface FieldMeasureData {
   ySight2: number | null;
   ySight3: number | null;
   // Temperature calculation fields
-  cableName: string;
-  transit: string;
+  cableName: string | null;
+  transit: number | null;
   windIncidence: number | null;
   windIncidenceMode: 'auto' | 'perpendicular';
   diffuseSolarFlux: number | null;

@@ -1,4 +1,4 @@
-import { FieldMeasureData, CalculationResults } from './types';
+import { FieldMeasure, CalculationResults } from './types';
 
 export const leftSupportOption = [
   { label: '12', value: '12' },
@@ -7,9 +7,10 @@ export const leftSupportOption = [
   { label: '15', value: '15' }
 ];
 
-export const INITIAL_MEASURE_DATA: FieldMeasureData = {
-  measureName: '',
-  line: 'Line 225kV Rougemontier - Tourbe #1',
+export const INITIAL_MEASURE_DATA: FieldMeasure = {
+  uuid: '',
+  name: '',
+  link: 'Line 225kV Rougemontier - Tourbe #1',
   voltage: '123 kV',
   spanType: 'Phase',
   phaseNumber: 3,
@@ -54,7 +55,7 @@ export const INITIAL_MEASURE_DATA: FieldMeasureData = {
   ySight2: null,
   ySight3: null,
   cableName: 'ASTER570',
-  transit: 'A',
+  transit: 1,
   windIncidence: 47,
   windIncidenceMode: 'auto',
   diffuseSolarFlux: 123,

@@ -4,7 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HeaderComponent } from './header.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { FieldMeasureData } from '../../types';
+import { FieldMeasure } from '../../types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { INITIAL_MEASURE_DATA } from '../../mock-data';
 
@@ -19,7 +19,7 @@ describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
 
-  const mockMeasureData: FieldMeasureData = { ...INITIAL_MEASURE_DATA };
+  const mockMeasureData: FieldMeasure = INITIAL_MEASURE_DATA;
   const mockSpanOptions: SelectOption[] = SPAN_OPTIONS;
 
   beforeEach(async () => {
@@ -67,15 +67,15 @@ describe('HeaderComponent', () => {
     it('should update when measureData changes', () => {
       const updatedData = {
         ...mockMeasureData,
-        line: 'New Line',
+        link: 'New Line',
         voltage: 400
       };
 
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      expect(component.measureData().line).toBe(mockMeasureData.line);
+      expect(component.measureData().link).toBe(mockMeasureData.link);
 
       fixture.componentRef.setInput('measureData', updatedData);
-      expect(component.measureData().line).toBe('New Line');
+      expect(component.measureData().link).toBe('New Line');
       expect(component.measureData().voltage).toBe(400);
     });
   });
@@ -87,10 +87,10 @@ describe('HeaderComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should display line information', () => {
+    it('should display link information', () => {
       const element = fixture.nativeElement;
       const dlElement = element.querySelector('dl');
-      expect(dlElement.textContent).toContain(mockMeasureData.line);
+      expect(dlElement.textContent).toContain(mockMeasureData.link);
     });
 
     it('should display voltage with kV unit', () => {
@@ -114,7 +114,7 @@ describe('HeaderComponent', () => {
       const element = fixture.nativeElement;
       const dlElement = element.querySelector('dl');
       expect(dlElement.textContent).toContain(
-        mockMeasureData.phaseNumber.toString()
+        mockMeasureData.phaseNumber?.toString()
       );
     });
 
@@ -122,7 +122,7 @@ describe('HeaderComponent', () => {
       const element = fixture.nativeElement;
       const dlElement = element.querySelector('dl');
       expect(dlElement.textContent).toContain(
-        mockMeasureData.numberOfConductors.toString()
+        mockMeasureData.numberOfConductors?.toString()
       );
     });
 
@@ -296,7 +296,7 @@ describe('HeaderComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle measure data with null values', () => {
-      const dataWithNulls: FieldMeasureData = {
+      const dataWithNulls: FieldMeasure = {
         ...mockMeasureData,
         longitude: 0,
         latitude: 0,
@@ -321,7 +321,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should display zero values correctly', () => {
-      const dataWithZeros: FieldMeasureData = {
+      const dataWithZeros: FieldMeasure = {
         ...mockMeasureData,
         voltage: '0 kV',
         phaseNumber: 0,

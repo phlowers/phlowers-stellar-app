@@ -24,14 +24,29 @@
     fluid
     required
     aria-describedby="complementary-form-field-measuring-init"
-    [formControl]="newMeasureControl"
+    [formControl]="newMeasureNameControl"
+    [class.ng-invalid]="isNameAlreadyTaken()"
+    [attr.aria-invalid]="isNameAlreadyTaken()"
+    [attr.aria-errormessage]="
+      isNameAlreadyTaken() ? 'new-measure-name-error-message' : null
+    "
   />
+  @if (isNameAlreadyTaken()) {
+    <p-message
+      id="new-measure-name-error-message"
+      severity="error"
+      size="small"
+      variant="simple"
+      i18n
+      >Measure name must be unique.</p-message
+    >
+  }
 
   <div class="mt-4 text-right">
     <button
       app-btn
       type="button"
-      [disabled]="newMeasureControl.invalid"
+      [disabled]="newMeasureNameControl.invalid || isNameAlreadyTaken()"
       (click)="createMeasure()"
     >
       <app-icon icon="add_circle" />

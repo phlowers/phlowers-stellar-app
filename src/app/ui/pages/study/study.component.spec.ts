@@ -104,7 +104,9 @@ describe('StudyComponent', () => {
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined
   };
 
   const mockInitialCondition: InitialCondition = {
