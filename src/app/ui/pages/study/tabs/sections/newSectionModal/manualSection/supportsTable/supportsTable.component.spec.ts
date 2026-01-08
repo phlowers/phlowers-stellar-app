@@ -176,18 +176,15 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'number',
-        value: '1'
+        support: { number: '1' }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'number',
-        value: '2'
+        support: { number: '2' }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'number',
-        value: '3'
+        support: { number: '3' }
       });
     });
 
@@ -197,13 +194,11 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(2);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'spanLength',
-        value: 50.0
+        support: { spanLength: 50.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'spanLength',
-        value: 50.0
+        support: { spanLength: 50.0 }
       });
     });
 
@@ -213,18 +208,15 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'spanAngle',
-        value: 90.0
+        support: { spanAngle: 90.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'spanAngle',
-        value: 90.0
+        support: { spanAngle: 90.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'spanAngle',
-        value: 90.0
+        support: { spanAngle: 90.0 }
       });
     });
 
@@ -235,33 +227,27 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(6);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'attachmentHeight',
-        value: 12.0
+        support: { attachmentHeight: 12.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'supportFootAltitude',
-        value: 0
+        support: { supportFootAltitude: 0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'attachmentHeight',
-        value: 12.0
+        support: { attachmentHeight: 12.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'supportFootAltitude',
-        value: 0
+        support: { supportFootAltitude: 0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'attachmentHeight',
-        value: 12.0
+        support: { attachmentHeight: 12.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'supportFootAltitude',
-        value: 0
+        support: { supportFootAltitude: 0 }
       });
     });
 
@@ -271,18 +257,15 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'attachmentSet',
-        value: 1
+        support: { attachmentSet: 1 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'attachmentSet',
-        value: 1
+        support: { attachmentSet: 1 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'attachmentSet',
-        value: 1
+        support: { attachmentSet: 1 }
       });
     });
 
@@ -292,18 +275,15 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'armLength',
-        value: 2.0
+        support: { armLength: 2.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'armLength',
-        value: 2.0
+        support: { armLength: 2.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'armLength',
-        value: 2.0
+        support: { armLength: 2.0 }
       });
     });
 
@@ -313,18 +293,15 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'name',
-        value: 'Support 1'
+        support: { name: 'Support 1' }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'name',
-        value: 'Support 1'
+        support: { name: 'Support 1' }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'name',
-        value: 'Support 1'
+        support: { name: 'Support 1' }
       });
     });
 
@@ -334,18 +311,15 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainV',
-        value: true
+        support: { chainV: true }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'chainV',
-        value: true
+        support: { chainV: true }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'chainV',
-        value: true
+        support: { chainV: true }
       });
     });
   });
@@ -364,42 +338,35 @@ describe('SupportsTableComponent', () => {
       // Check chainName emissions
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainName',
-        value: 'Chain 1'
+        support: { chainName: 'Chain 1' }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        field: 'chainName',
-        value: 'Chain 1'
+        support: { chainName: 'Chain 1' }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        field: 'chainName',
-        value: 'Chain 1'
+        support: { chainName: 'Chain 1' }
       });
       // Check chainLength emissions
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainLength',
-        value: 10.5
+        support: { chainLength: 10.5 }
       });
       // Check chainWeight emissions
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainWeight',
-        value: 2.3
+        support: { chainWeight: 2.3 }
       });
       // Check chainSurface emissions
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainSurface',
-        value: 0
+        support: { chainSurface: 0 }
       });
       // Check chainV emissions
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainV',
-        value: false
+        support: { chainV: false }
       });
     });
   });
@@ -428,8 +395,7 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(1);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'number',
-        value: '1'
+        support: { number: '1' }
       });
     });
   });
@@ -449,28 +415,23 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(5);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainName',
-        value: 'Chain 1'
+        support: { chainName: 'Chain 1' }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainLength',
-        value: 10.5
+        support: { chainLength: 10.5 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainWeight',
-        value: 2.3
+        support: { chainWeight: 2.3 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainSurface',
-        value: 0
+        support: { chainSurface: 0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainV',
-        value: false
+        support: { chainV: false }
       });
     });
   });
@@ -501,8 +462,7 @@ describe('SupportsTableComponent', () => {
 
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'number',
-        value: 5
+        support: { number: 5 }
       });
     });
 
@@ -512,18 +472,15 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(5);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainName',
-        value: 'Chain 2'
+        support: { chainName: 'Chain 2' }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainLength',
-        value: 15.0
+        support: { chainLength: 15.0 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainWeight',
-        value: 3.1
+        support: { chainWeight: 3.1 }
       });
     });
 
@@ -537,8 +494,7 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).toHaveBeenCalledTimes(1);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        field: 'chainName',
-        value: 'Non-existent Chain'
+        support: { chainName: 'Non-existent Chain' }
       });
     });
   });
@@ -559,7 +515,8 @@ describe('SupportsTableComponent', () => {
         supportName: 'Updated Support 1',
         attachmentSet: 1,
         armLength: 3.0,
-        heightBelowConsole: 2.0
+        heightBelowConsole: 2.0,
+        towerModel: 'D-Type'
       };
 
       component.onValidateFormAttachmentSetModal(event);

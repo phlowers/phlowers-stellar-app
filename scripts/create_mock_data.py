@@ -21,7 +21,7 @@ class Attachment(TypedDict):
     support_catalog_internal_id: str
     support_short_name: str
     support_name: str
-    tower_model: str
+    support_tower: str
     line_angle: float
     support_ground_z: float
     support_ground_x: float
@@ -169,7 +169,7 @@ def generate_attachment(index: int) -> Attachment:
         "support_catalog_internal_id": f"SCAT-{random.randint(1000, 9999)}",
         "support_short_name": f"S{support_number}",
         "support_name": f"Support {support_number}",
-        "tower_model": random.choice(["A-Type", "B-Type", "C-Type", "D-Type"]),
+        "support_tower": random.choice(["A-Type", "B-Type", "C-Type", "D-Type"]),
         "line_angle": random.uniform(0, 45),
         "support_ground_z": random.uniform(100, 500),
         "support_ground_x": random.uniform(-1000, 1000),

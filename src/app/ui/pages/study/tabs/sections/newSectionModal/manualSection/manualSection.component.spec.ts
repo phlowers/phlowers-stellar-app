@@ -278,10 +278,9 @@ describe('ManualSectionComponent', () => {
       mockSection.supports = [s1];
       component.onSupportChange({
         uuid: s1.uuid,
-        field: 'name',
-        value: { name: 'newName' } as Support
+        support: { name: 'newName' }
       });
-      expect(mockSection.supports[0].name).toMatchObject({ name: 'newName' });
+      expect(mockSection.supports[0].name).toBe('newName');
     });
   });
 
