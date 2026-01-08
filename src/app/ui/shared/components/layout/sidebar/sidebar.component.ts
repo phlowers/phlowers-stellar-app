@@ -87,7 +87,7 @@ export class SidebarComponent implements OnInit {
   }
 
   constructor() {
-    if (version === '{BUILD_VERSION}') {
+    if (version.includes('VERSION')) {
       this.appVersion.set('0.0.00');
     } else {
       this.appVersion.set(version);
