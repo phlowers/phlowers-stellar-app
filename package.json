@@ -38,7 +38,7 @@
   },
   "private": true,
   "config": {
-    "mechaphlowers": "0.5.1"
+    "mechaphlowers": "0.5.2"
   },
   "dependencies": {
     "@angular-eslint/eslint-plugin-template": "19.3.0",
