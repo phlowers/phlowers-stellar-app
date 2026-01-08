@@ -7,6 +7,20 @@ export const leftSupportOption = [
   { label: '15', value: '15' }
 ];
 
+/**
+ * Detects if the current date is in Daylight Saving Time (DST/Summer time)
+ * Works internationally by comparing timezone offsets between winter and summer months
+ */
+function isDaylightSavingTime(date: Date = new Date()): boolean {
+  const january = new Date(date.getFullYear(), 0, 1);
+  const july = new Date(date.getFullYear(), 6, 1);
+  const stdTimezoneOffset = Math.max(
+    january.getTimezoneOffset(),
+    july.getTimezoneOffset()
+  );
+  return date.getTimezoneOffset() < stdTimezoneOffset;
+}
+
 export const INITIAL_MEASURE_DATA: FieldMeasure = {
   uuid: '',
   name: '',
@@ -22,7 +36,7 @@ export const INITIAL_MEASURE_DATA: FieldMeasure = {
   azimuth: null,
   date: new Date(),
   time: new Date(),
-  season: 'summer',
+  season: isDaylightSavingTime() ? 'summer' : 'winter',
   ambientTemperature: null,
   windSpeed: null,
   windSpeedUnit: 'kmh',
