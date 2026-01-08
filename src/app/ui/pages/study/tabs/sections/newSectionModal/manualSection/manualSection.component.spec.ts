@@ -104,7 +104,8 @@ const mockLinesData: Line[] = [
     link_idr: 'link1',
     lit_idr: 'lit1',
     lit_adr: 'LIT 1',
-    branch_idr: 'branch1',
+    branch_idr: '1.0',
+    branch_id: 'BRANCH001',
     branch_adr: 'BRANCH 1',
     voltage_idr: 'tension1',
     voltage_adr: '400',
@@ -115,7 +116,8 @@ const mockLinesData: Line[] = [
     link_idr: 'link2',
     lit_idr: 'lit2',
     lit_adr: 'LIT 2',
-    branch_idr: 'branch1',
+    branch_idr: '1.0',
+    branch_id: 'BRANCH001',
     branch_adr: 'BRANCH 1',
     voltage_idr: 'tension2',
     voltage_adr: '225',
@@ -159,6 +161,7 @@ describe('ManualSectionComponent', () => {
       lit_code: '',
       lit_name: '',
       branch_name: '',
+      branch_idr: '',
       voltage_idr: '',
       comment: '',
       supports_comment: '',
@@ -422,6 +425,7 @@ describe('ManualSectionComponent', () => {
   describe('onLinesSelect', () => {
     beforeEach(() => {
       component.linesFilterTable.set(mockLinesData);
+      mockLinesService.getLines.mockResolvedValue(mockLinesData);
     });
 
     it('should filter by link_idr and auto-populate related fields', async () => {
@@ -432,7 +436,8 @@ describe('ManualSectionComponent', () => {
       expect(component.linesFilterTable()).toHaveLength(1);
       expect(mockSection.link_name).toBe('link1');
       expect(mockSection.lit_code).toBe('lit1');
-      expect(mockSection.branch_name).toBe('branch1');
+      expect(mockSection.branch_name).toBe('BRANCH 1');
+      expect(mockSection.branch_idr).toBe('1.0');
       expect(mockSection.voltage_idr).toBe('tension1');
     });
 

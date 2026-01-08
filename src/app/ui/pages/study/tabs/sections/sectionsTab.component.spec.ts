@@ -85,6 +85,7 @@ describe('SectionsTabComponent', () => {
     lit_code: 'LIT123',
     lit_name: 'LIT123',
     branch_name: 'BranchY',
+    branch_idr: 'BranchY',
     voltage_idr: '230V',
     comment: 'Test section comment',
     supports_comment: 'Test supports comment',

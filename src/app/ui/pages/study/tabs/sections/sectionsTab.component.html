@@ -68,11 +68,11 @@
           />
 
           <dl>
-            <div>
+            <div class="contents">
               <dt i18n class="section__title-name">Section Name</dt>
               <dd class="section__text-name">{{ section.name }}</dd>
             </div>
-            <div>
+            <div class="contents">
               <dt i18n class="section__title-type">Section type</dt>
               <dd class="section__text-type">
                 @if (section.type === 'guard') {
@@ -82,11 +82,11 @@
                 }
               </dd>
             </div>
-            <div>
+            <div class="contents">
               <dt i18n class="section__title-lit">LIT</dt>
               <dd class="section__text-lit">{{ section.lit_name }}</dd>
             </div>
-            <div>
+            <div class="contents">
               <dt i18n class="section__title-date">Last modified</dt>
               <dd class="section__text-date">
                 {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}

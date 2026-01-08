@@ -1961,12 +1961,6 @@
         <target>LIT - IDR</target>
       </segment>
     </unit>
-    <unit id="6760730176467866326">
-      <segment state="initial">
-        <source>Branch - ID</source>
-        <target>Branche - IDR</target>
-      </segment>
-    </unit>
     <unit id="3059442917741627872">
       <segment state="initial">
         <source>Arm length</source>

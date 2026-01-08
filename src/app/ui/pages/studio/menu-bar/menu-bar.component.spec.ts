@@ -100,6 +100,7 @@ describe('StudioMenuBarComponent', () => {
     lit_code: 'LIT-001',
     lit_name: 'LIT-001',
     branch_name: 'Branch 1',
+    branch_idr: 'Branch 1',
     voltage_idr: '400kV',
     comment: 'Test comment',
     supports_comment: 'Test supports comment',

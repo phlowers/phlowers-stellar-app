@@ -848,7 +848,7 @@
         <source>Expand details</source>
       </segment>
     </unit>
-    <unit id="3980974174191771572">
+    <unit id="8384742917026482252">
       <segment>
         <source>VTL (under chain)</source>
       </segment>
@@ -1181,11 +1181,6 @@
     <unit id="472586784721739380">
       <segment>
         <source>Link - ID</source>
-      </segment>
-    </unit>
-    <unit id="6760730176467866326">
-      <segment>
-        <source>Branch - ID</source>
       </segment>
     </unit>
     <unit id="7607770781665288883">
@@ -2850,7 +2845,7 @@
     <unit id="6711210390465051476">
       <segment>
         <source>In line angle</source>
-      </segment> 
+      </segment>
     </unit>
     <unit id="2050780142571489753">
       <segment>

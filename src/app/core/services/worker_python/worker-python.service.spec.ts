@@ -83,6 +83,7 @@ describe('WorkerService', () => {
     lit_code: 'lit1',
     lit_name: 'lit1',
     branch_name: 'branch1',
+    branch_idr: 'branch1',
     voltage_idr: '400kV',
     comment: 'Test comment',
     supports_comment: 'Test supports comment',

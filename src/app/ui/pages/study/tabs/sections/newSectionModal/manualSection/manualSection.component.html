@@ -332,11 +332,11 @@
             </div>
 
             <div class="flex flex-col [grid-area:f]">
-              <label for="linkBm" i18n>Branch - ID</label>
+              <label for="linkBm" i18n>Branch</label>
               <p-select
                 inputId="linkBm"
                 [options]="uniqueBranchIdr()"
-                [(ngModel)]="section().branch_name"
+                [(ngModel)]="section().branch_idr"
                 optionLabel="branch_idr"
                 optionValue="branch_idr"
                 (onChange)="onLinesSelect($event, 'branch_idr')"
@@ -375,13 +375,8 @@
             </div>
 
             <div class="[grid-area:e]">
-              <dt i18n>LIT - Name</dt>
-              <dd class="read-only-info">{{ litAdrRead() }}</dd>
-            </div>
-
-            <div class="[grid-area:f]">
-              <dt i18n>Branch - ID</dt>
-              <dd class="read-only-info">{{ section().branch_name }}</dd>
+              <dt i18n>Branch</dt>
+              <dd class="read-only-info">{{ section().branch_idr }}</dd>
             </div>
           </dl>
         }

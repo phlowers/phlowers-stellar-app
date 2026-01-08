@@ -61,7 +61,8 @@ const lineTablePropertiesToSectionProperties: Record<
   link_idr: 'link_name',
   lit_idr: 'lit_code',
   lit_adr: 'lit_name',
-  branch_idr: 'branch_name'
+  branch_idr: 'branch_idr',
+  branch_adr: 'branch_name'
 };
 
 const orderedMaintenanceTableProperties: (
@@ -75,14 +76,16 @@ type LineTableProperties =
   | 'link_idr'
   | 'lit_idr'
   | 'lit_adr'
-  | 'branch_idr';
+  | 'branch_idr'
+  | 'branch_adr';
 
 const orderedLineTableProperties: LineTableProperties[] = [
   'voltage_idr',
   'link_idr',
   'lit_idr',
   'lit_adr',
-  'branch_idr'
+  'branch_idr',
+  'branch_adr'
 ];
 
 @Component({
@@ -222,7 +225,15 @@ export class ManualSectionComponent implements OnInit {
         )?.regional_team || ''
       );
     }
-    const linesTable = await this.linesService.getLines();
+    let linesTable = await this.linesService.getLines();
+    orderedLineTableProperties.forEach((id) => {
+      linesTable = linesTable.filter(
+        (item) =>
+          !this.section()[lineTablePropertiesToSectionProperties[id]] ||
+          item[id] ===
+            this.section()[lineTablePropertiesToSectionProperties[id]]
+      );
+    });
     this.linesFilterTable.set(sortLines(linesTable));
     if (this.mode() === 'view') {
       const linkLine = linesTable.find(
