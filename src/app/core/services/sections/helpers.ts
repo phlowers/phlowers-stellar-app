@@ -62,6 +62,7 @@ export const createEmptySection = (): Section => {
     lit_code: undefined,
     lit_name: undefined,
     branch_name: undefined,
+    branch_idr: undefined,
     comment: undefined,
     supports_comment: undefined,
     initial_conditions: [],

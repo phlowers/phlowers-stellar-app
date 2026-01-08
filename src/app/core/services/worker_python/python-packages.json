@@ -1,9 +1,4 @@
 {
-    "PyYAML": {
-        "file_name": "PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
-        "name": "PyYAML",
-        "source": "local"
-    },
     "annotated-types": {
         "file_name": "annotated_types-0.6.0-py3-none-any.whl",
         "name": "annotated-types",
@@ -60,7 +55,7 @@
         "source": "local"
     },
     "platformdirs": {
-        "file_name": "platformdirs-4.5.0-cp312-none-any.whl",
+        "file_name": "platformdirs-4.5.1-cp312-none-any.whl",
         "name": "platformdirs",
         "source": "local"
     },
@@ -87,6 +82,11 @@
     "pytz": {
         "file_name": "pytz-2024.1-py2.py3-none-any.whl",
         "name": "pytz",
+        "source": "remote"
+    },
+    "pyyaml": {
+        "file_name": "pyyaml-6.0.2-cp312-cp312-pyodide_2024_0_wasm32.whl",
+        "name": "pyyaml",
         "source": "remote"
     },
     "six": {
