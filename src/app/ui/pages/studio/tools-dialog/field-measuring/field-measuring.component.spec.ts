@@ -14,6 +14,7 @@ import { StudiesService } from '@core/services/studies/studies.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { BehaviorSubject } from 'rxjs';
 import { Section } from '@core/data/database/interfaces/section';
+import { LinesService } from '@core/services/lines/lines.service';
 
 @Component({
   selector: 'app-button',
@@ -88,6 +89,10 @@ describe('FieldMeasuringComponent', () => {
       modifySection: jest.fn().mockResolvedValue(undefined)
     } as unknown as PlotService;
 
+    const mockLinesService = {
+      getLines: jest.fn().mockResolvedValue([])
+    } as unknown as LinesService;
+
     await TestBed.configureTestingModule({
       providers: [
         ToolsDialogService,
@@ -97,7 +102,8 @@ describe('FieldMeasuringComponent', () => {
         { provide: MessageService, useValue: mockMessageService },
         { provide: StudiesService, useValue: mockStudiesService },
         { provide: SectionService, useValue: mockSectionService },
-        { provide: PlotService, useValue: mockPlotService }
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: LinesService, useValue: mockLinesService }
       ]
     })
       .overrideComponent(FieldMeasuringComponent, {
@@ -175,7 +181,7 @@ describe('FieldMeasuringComponent', () => {
       expect(setTemplatesSpy).toHaveBeenCalledWith({});
     });
 
-    it('should react to dialog open state in effect', () => {
+    it('should react to dialog open state in effect', async () => {
       toolsDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
@@ -205,6 +211,15 @@ describe('FieldMeasuringComponent', () => {
       expect(component.leftSupportOptions()).toBeDefined();
       expect(Array.isArray(component.leftSupportOptions())).toBe(true);
     });
+
+    it('should have selectedSpan signal initialized', () => {
+      expect(component.selectedSpan()).toBeDefined();
+      expect(Array.isArray(component.selectedSpan())).toBe(true);
+    });
+
+    it('should initialize selectedSpan with empty array', () => {
+      expect(component.selectedSpan()).toEqual([]);
+    });
   });
 
   describe('onVisibleChange', () => {
@@ -222,6 +237,41 @@ describe('FieldMeasuringComponent', () => {
       component.onVisibleChange(true);
 
       expect(closeToolSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onSpanChange', () => {
+    it('should update selectedSpan signal when span changes', () => {
+      const newSpan = [5, 6];
+
+      component.onSpanChange(newSpan);
+
+      expect(component.selectedSpan()).toEqual(newSpan);
+    });
+
+    it('should handle different span values', () => {
+      component.onSpanChange([0, 1]);
+      expect(component.selectedSpan()).toEqual([0, 1]);
+
+      component.onSpanChange([10, 11]);
+      expect(component.selectedSpan()).toEqual([10, 11]);
+
+      component.onSpanChange([3, 4]);
+      expect(component.selectedSpan()).toEqual([3, 4]);
+    });
+
+    it('should update selectedSpan with empty array', () => {
+      component.onSpanChange([]);
+
+      expect(component.selectedSpan()).toEqual([]);
+    });
+
+    it('should update from non-empty to different non-empty span', () => {
+      component.onSpanChange([1, 2]);
+      expect(component.selectedSpan()).toEqual([1, 2]);
+
+      component.onSpanChange([7, 8]);
+      expect(component.selectedSpan()).toEqual([7, 8]);
     });
   });
 
@@ -541,6 +591,87 @@ describe('FieldMeasuringComponent', () => {
       // field-measuring opens init dialog first
       expect(toolsDialogService.isInitOpen()).toBe(true);
       expect(toolsDialogService.isMainOpen()).toBe(false);
+    });
+  });
+
+  describe('initializeMeasureData', () => {
+    it('should call initializeMeasureData when dialog opens to main view', async () => {
+      const linesService = TestBed.inject(LinesService);
+
+      const getLinesSpy = jest.spyOn(linesService, 'getLines');
+
+      toolsDialogService.openTool('field-measuring');
+      toolsDialogService.proceedToMainComponent();
+
+      // Wait for async operations
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      fixture.detectChanges();
+
+      // Verify that getLines was called as part of initialization
+      expect(getLinesSpy).toHaveBeenCalled();
+
+      const measureData = component.measureData();
+      // Verify that data from section was populated
+      expect(measureData.voltage).toBeDefined();
+      expect(measureData.link).toBeDefined();
+    });
+  });
+
+  describe('onFieldChange edge cases', () => {
+    it('should return early when measureData is falsy', () => {
+      component.measureData.set(null as any);
+
+      component.onFieldChange('name', 'New Name');
+
+      expect(component.measureData()).toBeNull();
+    });
+  });
+
+  describe('onSave - adding new measure', () => {
+    let plotService: PlotService;
+
+    beforeEach(() => {
+      plotService = TestBed.inject(PlotService);
+    });
+
+    it('should add new field measure when uuid does not exist', async () => {
+      const existingMeasure = createTestMeasureData({ uuid: 'existing-uuid' });
+      const newMeasure = createTestMeasureData({ uuid: 'new-uuid' });
+
+      const mockSection = {
+        uuid: 'section-789',
+        field_measures: [existingMeasure],
+        selected_field_measure_uuid: 'new-uuid'
+      };
+
+      plotService.section = signal(mockSection as any);
+      component.measureData.set(newMeasure);
+
+      const modifySpy = jest.spyOn(plotService, 'modifySection');
+      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+
+      await component.onSave();
+
+      expect(modifySpy).toHaveBeenCalledWith({
+        field_measures: [existingMeasure, newMeasure]
+      });
+      expect(closeToolSpy).toHaveBeenCalled();
+    });
+
+    it('should return early when measureData is null', async () => {
+      const mockSection = {
+        uuid: 'section-999',
+        field_measures: []
+      };
+
+      plotService.section = signal(mockSection as any);
+      component.measureData.set(null as any);
+
+      const modifySpy = jest.spyOn(plotService, 'modifySection');
+
+      await component.onSave();
+
+      expect(modifySpy).not.toHaveBeenCalled();
     });
   });
 });

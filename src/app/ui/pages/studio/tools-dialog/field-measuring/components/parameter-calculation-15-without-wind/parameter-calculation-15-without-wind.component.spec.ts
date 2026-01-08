@@ -169,4 +169,202 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
     expect(component.isFormValid()).toBe(true);
   });
+
+  it('should validate form correctly for auto mode', () => {
+    component.updateField('updateMode15C', 'auto');
+
+    expect(component.isFormValid()).toBe(true);
+  });
+
+  describe('Initial Condition Creation', () => {
+    beforeEach(async () => {
+      await component.calculateParameter15C();
+    });
+
+    it('should open initial condition modal with minus uncertainty value', () => {
+      expect(component.initialConditionModalOpen()).toBe(false);
+
+      component.onCreateInitialCondition('minus');
+
+      expect(component.initialConditionModalOpen()).toBe(true);
+      expect(component.initialConditionInput().base_parameters).toBe(1885);
+    });
+
+    it('should open initial condition modal with nominal value', () => {
+      expect(component.initialConditionModalOpen()).toBe(false);
+
+      component.onCreateInitialCondition('nominal');
+
+      expect(component.initialConditionModalOpen()).toBe(true);
+      expect(component.initialConditionInput().base_parameters).toBe(1900);
+    });
+
+    it('should open initial condition modal with plus uncertainty value', () => {
+      expect(component.initialConditionModalOpen()).toBe(false);
+
+      component.onCreateInitialCondition('plus');
+
+      expect(component.initialConditionModalOpen()).toBe(true);
+      expect(component.initialConditionInput().base_parameters).toBe(1915);
+    });
+
+    it('should not open modal when parameter15CResult is null', () => {
+      component.parameter15CResult.set(null);
+
+      component.onCreateInitialCondition('minus');
+
+      expect(component.initialConditionModalOpen()).toBe(false);
+    });
+  });
+
+  describe('Add Initial Condition', () => {
+    let mockMessageService: jest.Mocked<MessageService>;
+    let mockStudiesService: jest.Mocked<StudiesService>;
+    let mockInitialConditionService: jest.Mocked<InitialConditionService>;
+
+    beforeEach(() => {
+      mockMessageService = TestBed.inject(
+        MessageService
+      ) as jest.Mocked<MessageService>;
+      mockStudiesService = TestBed.inject(
+        StudiesService
+      ) as jest.Mocked<StudiesService>;
+      mockInitialConditionService = TestBed.inject(
+        InitialConditionService
+      ) as jest.Mocked<InitialConditionService>;
+    });
+
+    it('should add initial condition without generating state', async () => {
+      const mockStudy = { uuid: 'study-123', name: 'Test Study' };
+      const mockSection = { uuid: 'section-123', name: 'Test Section' };
+      const mockInitialCondition = {
+        uuid: '',
+        name: 'Test IC',
+        base_parameters: 2000,
+        base_temperature: 15,
+        cable_pretension: 0,
+        min_temperature: 0,
+        max_wind_pressure: 0,
+        max_frost_width: 0
+      };
+
+      mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
+      mockStudiesService.getStudy.mockResolvedValue(mockStudy as any);
+      mockInitialConditionService.addInitialCondition.mockResolvedValue(
+        undefined
+      );
+
+      await component.addInitialCondition({
+        section: mockSection as any,
+        initialCondition: mockInitialCondition,
+        generateState: false
+      });
+
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
+      expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-123');
+      expect(mockInitialConditionService.setInitialCondition).not.toHaveBeenCalled();
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
+    });
+
+    it('should add initial condition and generate state when requested', async () => {
+      const mockStudy = { uuid: 'study-456', name: 'Test Study 2' };
+      const mockSection = { uuid: 'section-456', name: 'Test Section 2' };
+      const mockInitialCondition = {
+        uuid: '',
+        name: 'Test IC 2',
+        base_parameters: 1900,
+        base_temperature: 15,
+        cable_pretension: 0,
+        min_temperature: 0,
+        max_wind_pressure: 0,
+        max_frost_width: 0
+      };
+
+      mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
+      mockStudiesService.getStudy.mockResolvedValue(mockStudy as any);
+      mockInitialConditionService.addInitialCondition.mockResolvedValue(
+        undefined
+      );
+      mockInitialConditionService.setInitialCondition.mockResolvedValue(
+        undefined
+      );
+
+      await component.addInitialCondition({
+        section: mockSection as any,
+        initialCondition: mockInitialCondition,
+        generateState: true
+      });
+
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
+      expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-456');
+      expect(mockInitialConditionService.setInitialCondition).toHaveBeenCalled();
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
+    });
+
+    it('should return early when currentStudy is null', async () => {
+      const mockSection = { uuid: 'section-789', name: 'Test Section 3' };
+      const mockInitialCondition = {
+        uuid: '',
+        name: 'Test IC 3',
+        base_parameters: 1800,
+        base_temperature: 15,
+        cable_pretension: 0,
+        min_temperature: 0,
+        max_wind_pressure: 0,
+        max_frost_width: 0
+      };
+
+      mockStudiesService.currentStudy.mockReturnValue(null);
+
+      await component.addInitialCondition({
+        section: mockSection as any,
+        initialCondition: mockInitialCondition,
+        generateState: false
+      });
+
+      expect(mockInitialConditionService.addInitialCondition).not.toHaveBeenCalled();
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+
+    it('should return early when getStudy returns null', async () => {
+      const mockStudy = { uuid: 'study-999', name: 'Test Study 4' };
+      const mockSection = { uuid: 'section-999', name: 'Test Section 4' };
+      const mockInitialCondition = {
+        uuid: '',
+        name: 'Test IC 4',
+        base_parameters: 1750,
+        base_temperature: 15,
+        cable_pretension: 0,
+        min_temperature: 0,
+        max_wind_pressure: 0,
+        max_frost_width: 0
+      };
+
+      mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
+      mockStudiesService.getStudy.mockResolvedValue(undefined);
+      mockInitialConditionService.addInitialCondition.mockResolvedValue(
+        undefined
+      );
+
+      await component.addInitialCondition({
+        section: mockSection as any,
+        initialCondition: mockInitialCondition,
+        generateState: false
+      });
+
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
+      expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-999');
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+  });
 });

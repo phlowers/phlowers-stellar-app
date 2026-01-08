@@ -3,6 +3,7 @@ import { ComponentRef } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { signal } from '@angular/core';
 
 import { PapotoComponent } from './papoto.component';
 import { createTestMeasureData } from './../../../helpers';
@@ -12,24 +13,34 @@ import {
   Task,
   TaskError
 } from '@src/app/core/services/worker_python/tasks/types';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 describe('Papoto component', () => {
   let component: PapotoComponent;
   let fixture: ComponentFixture<PapotoComponent>;
   let componentRef: ComponentRef<PapotoComponent>;
   let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
+  let plotServiceMock: jest.Mocked<PlotService>;
 
   beforeEach(async () => {
     workerPythonServiceMock = {
       runTask: jest.fn()
     } as unknown as jest.Mocked<WorkerPythonService>;
 
+    plotServiceMock = {
+      litData: signal({
+        span_length: [100, 150, 200],
+        elevation: [5.5, 10.75, -3.25]
+      })
+    } as unknown as jest.Mocked<PlotService>;
+
     await TestBed.configureTestingModule({
       imports: [PapotoComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: WorkerPythonService, useValue: workerPythonServiceMock }
+        { provide: WorkerPythonService, useValue: workerPythonServiceMock },
+        { provide: PlotService, useValue: plotServiceMock }
       ]
     }).compileComponents();
 
@@ -196,5 +207,172 @@ describe('Papoto component', () => {
     component.updateField('VR', 55);
 
     expect(component.isFormValid()).toBe(true);
+  });
+
+  describe('Dynamic Left Support Options', () => {
+    it('should return empty array when selectedSpan is empty', () => {
+      componentRef.setInput('selectedSpan', []);
+      fixture.detectChanges();
+
+      expect(component.retrievedLeftSupportOptions()).toEqual([]);
+    });
+
+    it('should return empty array when selectedSpan has only one element', () => {
+      componentRef.setInput('selectedSpan', [0]);
+      fixture.detectChanges();
+
+      expect(component.retrievedLeftSupportOptions()).toEqual([]);
+    });
+
+    it('should return correct support options when selectedSpan has two elements', () => {
+      componentRef.setInput('selectedSpan', [12, 13]);
+      fixture.detectChanges();
+
+      expect(component.retrievedLeftSupportOptions()).toEqual([
+        { label: '13', value: '13' },
+        { label: '14', value: '14' }
+      ]);
+    });
+
+    it('should update support options when selectedSpan changes', () => {
+      componentRef.setInput('selectedSpan', [5, 6]);
+      fixture.detectChanges();
+
+      expect(component.retrievedLeftSupportOptions()).toEqual([
+        { label: '6', value: '6' },
+        { label: '7', value: '7' }
+      ]);
+
+      componentRef.setInput('selectedSpan', [10, 11]);
+      fixture.detectChanges();
+
+      expect(component.retrievedLeftSupportOptions()).toEqual([
+        { label: '11', value: '11' },
+        { label: '12', value: '12' }
+      ]);
+    });
+  });
+
+  describe('Calculated Span Length', () => {
+    it('should return null when selectedSpan is empty', () => {
+      componentRef.setInput('selectedSpan', []);
+      fixture.detectChanges();
+
+      expect(component.calculatedSpanLength()).toBeNull();
+    });
+
+    it('should return null when selectedSpan has only one element', () => {
+      componentRef.setInput('selectedSpan', [0]);
+      fixture.detectChanges();
+
+      expect(component.calculatedSpanLength()).toBeNull();
+    });
+
+    it('should return null when litData is not available', () => {
+      plotServiceMock.litData.set(null);
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+
+      expect(component.calculatedSpanLength()).toBeNull();
+    });
+
+    it('should return null when span_length field is not available in litData', () => {
+      plotServiceMock.litData.set({ elevation: [5.5, 10.75] } as any);
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+
+      expect(component.calculatedSpanLength()).toBeNull();
+    });
+
+    it('should return correct span length from litData for given span', () => {
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+
+      expect(component.calculatedSpanLength()).toBe(100);
+    });
+
+    it('should return span length rounded to 2 decimal places', () => {
+      plotServiceMock.litData.set({
+        span_length: [123.456789, 150, 200],
+        elevation: [5.5, 10.75, -3.25]
+      } as any);
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+
+      expect(component.calculatedSpanLength()).toBe(123.46);
+    });
+
+    it('should update when selectedSpan changes to different index', () => {
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+      expect(component.calculatedSpanLength()).toBe(100);
+
+      componentRef.setInput('selectedSpan', [1, 2]);
+      fixture.detectChanges();
+      expect(component.calculatedSpanLength()).toBe(150);
+    });
+  });
+
+  describe('Calculated Elevation', () => {
+    it('should return null when selectedSpan is empty', () => {
+      componentRef.setInput('selectedSpan', []);
+      fixture.detectChanges();
+
+      expect(component.calculatedElevation()).toBeNull();
+    });
+
+    it('should return null when selectedSpan has only one element', () => {
+      componentRef.setInput('selectedSpan', [1]);
+      fixture.detectChanges();
+
+      expect(component.calculatedElevation()).toBeNull();
+    });
+
+    it('should return null when litData is not available', () => {
+      plotServiceMock.litData.set(null);
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+
+      expect(component.calculatedElevation()).toBeNull();
+    });
+
+    it('should return null when elevation field is not available in litData', () => {
+      plotServiceMock.litData.set({ span_length: [100, 150] } as any);
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+
+      expect(component.calculatedElevation()).toBeNull();
+    });
+
+    it('should return correct elevation from litData for given span', () => {
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+
+      expect(component.calculatedElevation()).toBe(5.5);
+    });
+
+    it('should return elevation rounded to 2 decimal places', () => {
+      componentRef.setInput('selectedSpan', [1, 2]);
+      fixture.detectChanges();
+
+      expect(component.calculatedElevation()).toBe(10.75);
+    });
+
+    it('should handle negative elevation values correctly', () => {
+      componentRef.setInput('selectedSpan', [2, 3]);
+      fixture.detectChanges();
+
+      expect(component.calculatedElevation()).toBe(-3.25);
+    });
+
+    it('should update when selectedSpan changes to different index', () => {
+      componentRef.setInput('selectedSpan', [0, 1]);
+      fixture.detectChanges();
+      expect(component.calculatedElevation()).toBe(5.5);
+
+      componentRef.setInput('selectedSpan', [1, 2]);
+      fixture.detectChanges();
+      expect(component.calculatedElevation()).toBe(10.75);
+    });
   });
 });
