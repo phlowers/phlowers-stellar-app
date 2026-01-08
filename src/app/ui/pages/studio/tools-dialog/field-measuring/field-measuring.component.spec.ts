@@ -3,13 +3,16 @@ import { Component, TemplateRef } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { signal } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolsDialogService } from '../tools-dialog.service';
 import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
 import { MessageService } from 'primeng/api';
-import { SectionService } from '@src/app/core/services/sections/section.service';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { SectionService } from '@core/services/sections/section.service';
+import { StudiesService } from '@core/services/studies/studies.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { BehaviorSubject } from 'rxjs';
+import { Section } from '@core/data/database/interfaces/section';
 
 @Component({
   selector: 'app-button',
@@ -68,6 +71,23 @@ describe('FieldMeasuringComponent', () => {
       setCurrentSection: jest.fn()
     } as unknown as SectionService;
 
+    // Create a test measure with a proper UUID
+    const testMeasure = {
+      ...INITIAL_MEASURE_DATA,
+      uuid: 'test-measure-uuid'
+    };
+
+    const mockSection: Section = {
+      uuid: 'test-section-uuid',
+      field_measures: [testMeasure],
+      selected_field_measure_uuid: testMeasure.uuid
+    } as Section;
+
+    const mockPlotService = {
+      section: signal<Section | null>(mockSection),
+      modifySection: jest.fn().mockResolvedValue(undefined)
+    } as unknown as PlotService;
+
     await TestBed.configureTestingModule({
       providers: [
         ToolsDialogService,
@@ -76,7 +96,8 @@ describe('FieldMeasuringComponent', () => {
         provideHttpClientTesting(),
         { provide: MessageService, useValue: mockMessageService },
         { provide: StudiesService, useValue: mockStudiesService },
-        { provide: SectionService, useValue: mockSectionService }
+        { provide: SectionService, useValue: mockSectionService },
+        { provide: PlotService, useValue: mockPlotService }
       ]
     })
       .overrideComponent(FieldMeasuringComponent, {
@@ -109,8 +130,14 @@ describe('FieldMeasuringComponent', () => {
       );
     });
 
-    it('should initialize measureData with INITIAL_MEASURE_DATA', () => {
-      expect(component.measureData()).toEqual(INITIAL_MEASURE_DATA);
+    it('should initialize measureData with createInitialMeasureData result', () => {
+      // Component initializes with createInitialMeasureData(null, '') which creates mostly null values
+      const measureData = component.measureData();
+      expect(measureData).toBeDefined();
+      expect(measureData.calculationMethod).toBe('papoto');
+      expect(measureData.calculationType).toBe('parametre');
+      expect(measureData.diffuseSolarFlux).toBe(123);
+      expect(measureData.diffuseDirectSolarFlux).toBe(246);
     });
 
     it('should initialize activeTab with terrainData', () => {
@@ -215,11 +242,11 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should preserve other fields when updating one field', () => {
-      const initialLine = component.measureData().line;
+      const initialLine = component.measureData().link;
 
       component.onFieldChange('longitude', 99.999999);
 
-      expect(component.measureData().line).toBe(initialLine);
+      expect(component.measureData().link).toBe(initialLine);
       expect(component.measureData().longitude).toBe(99.999999);
     });
 
@@ -235,8 +262,8 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should handle string field changes', () => {
-      component.onFieldChange('line', 'New Line Name');
-      expect(component.measureData().line).toBe('New Line Name');
+      component.onFieldChange('link', 'New Line Name');
+      expect(component.measureData().link).toBe('New Line Name');
     });
 
     it('should handle null field changes', () => {
@@ -272,18 +299,53 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('onSave', () => {
-    it('should log save data', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
-
-      component.onSave();
-
-      expect(consoleSpy).toHaveBeenCalledWith('Save', component.measureData());
-    });
-
-    it('should close tool dialog', () => {
+    it('should call modifySection with updated field_measures and close tool dialog', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
       const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
 
-      component.onSave();
+      // Open main dialog to initialize measureData from PlotService
+      toolsDialogService.openTool('field-measuring');
+      toolsDialogService.proceedToMainComponent();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const measureData = component.measureData();
+      const section = plotService.section();
+
+      await component.onSave();
+
+      expect(modifySectionSpy).toHaveBeenCalledWith({
+        field_measures: [...(section?.field_measures || []), measureData]
+      });
+      expect(closeToolSpy).toHaveBeenCalled();
+    });
+
+    it('should return early if section is not available', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
+      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+
+      // Set section to null using the signal setter
+      const sectionSignal = plotService.section as ReturnType<
+        typeof signal<Section | null>
+      >;
+      sectionSignal.set(null);
+
+      await component.onSave();
+
+      expect(modifySectionSpy).not.toHaveBeenCalled();
+      expect(closeToolSpy).not.toHaveBeenCalled();
+    });
+
+    it('should close tool dialog after saving', async () => {
+      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+
+      // Open main dialog to initialize measureData from PlotService
+      toolsDialogService.openTool('field-measuring');
+      toolsDialogService.proceedToMainComponent();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      await component.onSave();
 
       expect(closeToolSpy).toHaveBeenCalled();
     });
@@ -399,7 +461,7 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('Integration with ToolsDialogService', () => {
-    it('should work with service open state', (done) => {
+    it('should work with service open state', async () => {
       expect(toolsDialogService.isMainOpen()).toBe(false);
 
       toolsDialogService.openTool('field-measuring');
@@ -409,27 +471,23 @@ describe('FieldMeasuringComponent', () => {
       toolsDialogService.proceedToMainComponent();
 
       // Wait for the timeout that opens main dialog
-      setTimeout(() => {
-        expect(toolsDialogService.isMainOpen()).toBe(true);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(toolsDialogService.isMainOpen()).toBe(true);
 
-        component.onSave();
-        expect(toolsDialogService.isMainOpen()).toBe(false);
-        done();
-      }, 200);
+      await component.onSave();
+      expect(toolsDialogService.isMainOpen()).toBe(false);
     });
 
-    it('should work with onVisibleChange integration', (done) => {
+    it('should work with onVisibleChange integration', async () => {
       toolsDialogService.openTool('field-measuring');
       toolsDialogService.proceedToMainComponent();
 
       // Wait for the timeout that opens main dialog
-      setTimeout(() => {
-        expect(toolsDialogService.isMainOpen()).toBe(true);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(toolsDialogService.isMainOpen()).toBe(true);
 
-        component.onVisibleChange(false);
-        expect(toolsDialogService.isMainOpen()).toBe(false);
-        done();
-      }, 200);
+      component.onVisibleChange(false);
+      expect(toolsDialogService.isMainOpen()).toBe(false);
     });
   });
 
@@ -453,12 +511,24 @@ describe('FieldMeasuringComponent', () => {
       expect(component.calculationResults().parameter).toBe(123);
     });
 
-    it('should handle multiple save calls', () => {
+    it('should handle multiple save calls', async () => {
       const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+      // Open main dialog to initialize measureData from PlotService
+      toolsDialogService.openTool('field-measuring');
+      toolsDialogService.proceedToMainComponent();
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      component.onSave();
-      component.onSave();
-      component.onSave();
+      await component.onSave();
+      // Re-open for subsequent calls
+      toolsDialogService.openTool('field-measuring');
+      toolsDialogService.proceedToMainComponent();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await component.onSave();
+      // Re-open for third call
+      toolsDialogService.openTool('field-measuring');
+      toolsDialogService.proceedToMainComponent();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await component.onSave();
 
       expect(closeToolSpy).toHaveBeenCalledTimes(3);
     });

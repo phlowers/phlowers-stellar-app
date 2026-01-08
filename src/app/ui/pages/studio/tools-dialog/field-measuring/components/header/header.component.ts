@@ -6,7 +6,7 @@ import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { FieldMeasureData } from '../../types';
+import { FieldMeasure } from '../../types';
 import { SelectOption } from '../../constants';
 
 @Component({
@@ -23,11 +23,11 @@ import { SelectOption } from '../../constants';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
-  measureData = input.required<FieldMeasureData>();
+  measureData = input.required<FieldMeasure>();
   spanOptions = input.required<SelectOption[]>();
   fieldChange = output<{
-    field: keyof FieldMeasureData;
-    value: FieldMeasureData[keyof FieldMeasureData];
+    field: keyof FieldMeasure;
+    value: FieldMeasure[keyof FieldMeasure];
   }>();
 
   readonly spans = computed<{ label: string; supports: number[] }[]>(() => {
@@ -50,8 +50,8 @@ export class HeaderComponent {
   constructor(private readonly plotService: PlotService) {}
 
   onFieldChange(
-    field: keyof FieldMeasureData,
-    value: FieldMeasureData[keyof FieldMeasureData]
+    field: keyof FieldMeasure,
+    value: FieldMeasure[keyof FieldMeasure]
   ): void {
     this.fieldChange.emit({ field, value });
   }

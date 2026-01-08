@@ -102,7 +102,9 @@ describe('SectionsTabComponent', () => {
     ],
     selected_initial_condition_uuid: 'ic-1',
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined
   };
 
   const mockInitialCondition: InitialCondition = {
