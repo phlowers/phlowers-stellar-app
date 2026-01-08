@@ -75,7 +75,9 @@ describe('InitialConditionService', () => {
     initial_conditions: [mockInitialCondition],
     selected_initial_condition_uuid: 'ic-uuid-1',
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined
   };
 
   const mockStudy: Study = {

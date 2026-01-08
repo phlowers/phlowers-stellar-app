@@ -20,6 +20,7 @@ import { CablesService } from '@src/app/core/services/cables/cables.service';
 import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
+import { SectionService } from '@core/services/sections/section.service';
 
 export const PLOT_ID = 'plotly-output';
 
@@ -86,7 +87,8 @@ export class PlotService {
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
-    private readonly cableService: CablesService
+    private readonly cableService: CablesService,
+    private readonly sectionService: SectionService
   ) {}
 
   resetAll = () => {
@@ -100,6 +102,18 @@ export class PlotService {
     this.camera.set(null);
     this.section.set(null);
     this.study.set(null);
+  };
+
+  modifySection = (sectionData: Partial<Section>) => {
+    const study = this.study();
+    const section = this.section();
+    if (!study || !section) {
+      return;
+    }
+    return this.sectionService.createOrUpdateSection(study, {
+      ...section,
+      ...sectionData
+    });
   };
 
   plotOptionsChange(values: Partial<PlotOptions>) {
