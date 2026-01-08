@@ -173,7 +173,7 @@ def fetch_cdn_packages(cdn_url: str) -> dict[str, CdnPackage]:
         Dict mapping normalized package name to CdnPackage
         
     Raises:
-        Prints warning and returns empty dict on network errors
+        SystemExit if CDN is not accessible (native packages require CDN versions)
     """
     try:
         response = requests.get(f"{cdn_url}/pyodide-lock.json", timeout=30)
@@ -190,8 +190,15 @@ def fetch_cdn_packages(cdn_url: str) -> dict[str, CdnPackage]:
             if p.get("name") and p.get("version") and p.get("file_name")
         }
     except requests.RequestException as e:
-        print(f"⚠ Warning: Could not fetch CDN packages: {e}")
-        return {}
+        sys.exit(
+            f"\n❌ ERROR: Cannot fetch Pyodide CDN packages!\n\n"
+            f"  URL: {cdn_url}/pyodide-lock.json\n"
+            f"  Error: {e}\n\n"
+            f"  Native packages (numpy, pandas, pydantic-core, etc.) MUST use\n"
+            f"  WebAssembly versions from the Pyodide CDN. The versions from pip\n"
+            f"  are compiled for Linux/Windows and will NOT work in the browser.\n\n"
+            f"  Please check your internet connection and try again.\n"
+        )
 
 
 def build_native_constraints(cdn_packages: dict[str, CdnPackage]) -> dict[str, str]:
