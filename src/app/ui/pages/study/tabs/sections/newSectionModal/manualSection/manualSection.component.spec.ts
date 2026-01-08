@@ -35,6 +35,7 @@ import { MaintenanceService } from '@src/app/core/services/maintenance/maintenan
 import { LinesService } from '@src/app/core/services/lines/lines.service';
 import { MaintenanceData } from '@src/app/core/data/database/interfaces/maintenance';
 import { Line } from '@src/app/core/data/database/interfaces/line';
+import { MessageService } from 'primeng/api';
 
 // Mock child component
 @Component({
@@ -72,6 +73,10 @@ const mockMaintenanceService = {
 const mockLinesService = {
   getLines: jest.fn().mockResolvedValue([] as Line[])
 };
+
+const mockMessageService = {
+  add: jest.fn()
+} as unknown as MessageService;
 
 // Mock data
 const mockMaintenanceData: MaintenanceData[] = [
@@ -160,7 +165,9 @@ describe('ManualSectionComponent', () => {
       initial_conditions: [],
       selected_initial_condition_uuid: undefined,
       charges: [],
-      selected_charge_uuid: null
+      selected_charge_uuid: null,
+      field_measures: [],
+      selected_field_measure_uuid: undefined
     };
 
     await TestBed.configureTestingModule({
@@ -174,7 +181,8 @@ describe('ManualSectionComponent', () => {
       ],
       providers: [
         { provide: MaintenanceService, useValue: mockMaintenanceService },
-        { provide: LinesService, useValue: mockLinesService }
+        { provide: LinesService, useValue: mockLinesService },
+        { provide: MessageService, useValue: mockMessageService }
       ]
     }).compileComponents();
 

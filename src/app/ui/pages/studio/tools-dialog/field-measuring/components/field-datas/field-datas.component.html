@@ -11,11 +11,26 @@
       id="measureName"
       type="text"
       [fluid]="true"
-      [ngModel]="measureData().measureName"
-      (ngModelChange)="onFieldChange('measureName', $event)"
+      [attr.aria-invalid]="isNameAlreadyTaken()"
+      [attr.aria-errormessage]="
+        isNameAlreadyTaken() ? 'measure-name-error-message' : null
+      "
+      [ngModel]="measureData().name"
+      (ngModelChange)="onFieldChange('name', $event)"
       aria-describedby="mandatory-data-field"
       required
+      [class.ng-invalid]="isNameAlreadyTaken()"
     />
+    @if (isNameAlreadyTaken()) {
+      <p-message
+        id="measure-name-error-message"
+        severity="error"
+        size="small"
+        variant="simple"
+        i18n
+        >Measure name must be unique.</p-message
+      >
+    }
   </div>
 
   <div class="date">
