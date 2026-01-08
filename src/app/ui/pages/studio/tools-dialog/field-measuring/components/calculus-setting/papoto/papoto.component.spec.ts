@@ -1,9 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { PapotoComponent } from './papoto.component';
-import { INITIAL_MEASURE_DATA, leftSupportOption } from '../../../mock-data';
+import { createTestMeasureData } from './../../../helpers';
+import { leftSupportOption } from '../../../mock-data';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import {
   Task,
@@ -24,6 +27,8 @@ describe('Papoto component', () => {
     await TestBed.configureTestingModule({
       imports: [PapotoComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock }
       ]
     }).compileComponents();
@@ -32,7 +37,8 @@ describe('Papoto component', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
     componentRef.setInput('leftSupportOption', leftSupportOption);
-    componentRef.setInput('measureData', { ...INITIAL_MEASURE_DATA });
+    componentRef.setInput('selectedSpan', []);
+    componentRef.setInput('measureData', createTestMeasureData());
     fixture.detectChanges();
   });
 
@@ -42,7 +48,7 @@ describe('Papoto component', () => {
 
   it('should initialize all form fields from measureData', () => {
     const data = component.measureData();
-    expect(data.leftSupport).toBe('');
+    expect(data.leftSupport).toBeNull();
     expect(data.spanLength).toBeNull();
     expect(data.measuredElevationDifference).toBeNull();
     expect(data.HL).toBeNull();

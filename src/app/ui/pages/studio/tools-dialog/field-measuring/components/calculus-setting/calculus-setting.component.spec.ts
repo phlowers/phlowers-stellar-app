@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { CalculusSettingComponent } from './calculus-setting.component';
-import { INITIAL_MEASURE_DATA } from '../../mock-data';
+import { createTestMeasureData } from '@ui/pages/studio/tools-dialog/field-measuring/helpers';
 
 describe('CalculusSetting component', () => {
   let component: CalculusSettingComponent;
@@ -12,13 +14,18 @@ describe('CalculusSetting component', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CalculusSettingComponent]
+      imports: [CalculusSettingComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CalculusSettingComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    componentRef.setInput('measureData', { ...INITIAL_MEASURE_DATA });
+    componentRef.setInput('measureData', createTestMeasureData());
+    componentRef.setInput('selectedSpan', []);
     fixture.detectChanges();
   });
 

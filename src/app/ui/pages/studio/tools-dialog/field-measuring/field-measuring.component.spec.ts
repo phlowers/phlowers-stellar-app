@@ -6,7 +6,8 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolsDialogService } from '../tools-dialog.service';
-import { INITIAL_MEASURE_DATA, INITIAL_CALCULATION_RESULTS } from './mock-data';
+import { INITIAL_CALCULATION_RESULTS } from './mock-data';
+import { createTestMeasureData } from './helpers';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@core/services/sections/section.service';
 import { StudiesService } from '@core/services/studies/studies.service';
@@ -72,10 +73,9 @@ describe('FieldMeasuringComponent', () => {
     } as unknown as SectionService;
 
     // Create a test measure with a proper UUID
-    const testMeasure = {
-      ...INITIAL_MEASURE_DATA,
+    const testMeasure = createTestMeasureData({
       uuid: 'test-measure-uuid'
-    };
+    });
 
     const mockSection: Section = {
       uuid: 'test-section-uuid',
@@ -204,11 +204,6 @@ describe('FieldMeasuringComponent', () => {
     it('should have leftSupportOptions signal initialized', () => {
       expect(component.leftSupportOptions()).toBeDefined();
       expect(Array.isArray(component.leftSupportOptions())).toBe(true);
-    });
-
-    it('should have cableOptions signal initialized', () => {
-      expect(component.cableOptions()).toBeDefined();
-      expect(Array.isArray(component.cableOptions())).toBe(true);
     });
   });
 

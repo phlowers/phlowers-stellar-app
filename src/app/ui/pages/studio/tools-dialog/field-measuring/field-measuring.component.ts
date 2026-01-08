@@ -141,7 +141,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    // this.measureData.set(selectedFieldMeasure);
+    this.measureData.set(selectedFieldMeasure);
 
     // Fetch link_adr from lines service
     const linesTable = await this.linesService.getLines();

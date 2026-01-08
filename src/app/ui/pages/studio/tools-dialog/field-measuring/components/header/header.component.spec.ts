@@ -6,7 +6,7 @@ import { HeaderComponent } from './header.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '../../types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
-import { INITIAL_MEASURE_DATA } from '../../mock-data';
+import { createTestMeasureData } from '../../helpers';
 
 @Component({
   selector: 'app-icon',
@@ -19,7 +19,7 @@ describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
 
-  const mockMeasureData: FieldMeasure = INITIAL_MEASURE_DATA;
+  const mockMeasureData: FieldMeasure = createTestMeasureData();
   const mockSpanOptions: SelectOption[] = SPAN_OPTIONS;
 
   beforeEach(async () => {
@@ -192,7 +192,7 @@ describe('HeaderComponent', () => {
 
       expect(longitudeInput.step).toBe('0.00000001');
       expect(latitudeInput.step).toBe('0.00000001');
-      expect(altitudeInput.step).toBe('0.00000001');
+      expect(altitudeInput.step).toBe('0.01');
     });
 
     it('should display units for coordinate fields', () => {

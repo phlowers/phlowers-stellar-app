@@ -1,4 +1,4 @@
-import { FieldMeasure, CalculationResults } from './types';
+import { CalculationResults } from './types';
 
 export const leftSupportOption = [
   { label: '12', value: '12' },
@@ -6,85 +6,6 @@ export const leftSupportOption = [
   { label: '14', value: '14' },
   { label: '15', value: '15' }
 ];
-
-/**
- * Detects if the current date is in Daylight Saving Time (DST/Summer time)
- * Works internationally by comparing timezone offsets between winter and summer months
- */
-function isDaylightSavingTime(date: Date = new Date()): boolean {
-  const january = new Date(date.getFullYear(), 0, 1);
-  const july = new Date(date.getFullYear(), 6, 1);
-  const stdTimezoneOffset = Math.max(
-    january.getTimezoneOffset(),
-    july.getTimezoneOffset()
-  );
-  return date.getTimezoneOffset() < stdTimezoneOffset;
-}
-
-export const INITIAL_MEASURE_DATA: FieldMeasure = {
-  uuid: '',
-  name: '',
-  link: 'Line 225kV Rougemontier - Tourbe #1',
-  voltage: '123 kV',
-  spanType: 'Phase',
-  phaseNumber: 3,
-  numberOfConductors: 3,
-  span: [11, 12],
-  longitude: null,
-  latitude: null,
-  altitude: 123.09876523,
-  azimuth: null,
-  date: new Date(),
-  time: new Date(),
-  season: isDaylightSavingTime() ? 'summer' : 'winter',
-  ambientTemperature: null,
-  windSpeed: null,
-  windSpeedUnit: 'kmh',
-  windDirection: 'North',
-  skyCover: '8 (cloudy)',
-  calculationMethod: 'papoto',
-  leftSupport: '',
-  spanLength: null,
-  measuredElevationDifference: null,
-  HL: null,
-  H1: null,
-  H2: null,
-  H3: null,
-  HR: null,
-  VL: null,
-  V1: null,
-  V2: null,
-  V3: null,
-  VR: null,
-  cableHAccDistance: null,
-  cableVerticalAccAngle: null,
-  calculationType: 'parametre',
-  cableTangentAngle: null,
-  lengthBetweenSightGD: null,
-  elevationDifferenceBetweenSightGD: null,
-  xSight1: null,
-  xSight2: null,
-  xSight3: null,
-  ySight1: null,
-  ySight2: null,
-  ySight3: null,
-  cableName: 'ASTER570',
-  transit: null,
-  windIncidence: 47,
-  windIncidenceMode: 'auto',
-  diffuseSolarFlux: 123,
-  directSolarFlux: 123,
-  diffuseDirectSolarFlux: 246,
-  diffusedSolarFlux: 248,
-  measuredDiffusedPlusDirectSolarFlux: null,
-  measuredDiffusedSolarFlux: null,
-  diffusedPlusDirectSolarFlux: null,
-  updateMode15C: 'auto',
-  parameterPapoto: 1700,
-  parameterUncertaintyPapoto: 12,
-  cableTemperature15C: 45,
-  cableTemperatureUncertainty15C: 3
-};
 
 export const INITIAL_CALCULATION_RESULTS: CalculationResults = {
   parameter: null,

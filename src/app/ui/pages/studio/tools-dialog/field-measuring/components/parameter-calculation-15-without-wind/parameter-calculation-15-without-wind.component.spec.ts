@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 
 import { ParameterCalculation15WithoutWindComponent } from './parameter-calculation-15-without-wind.component';
-import { INITIAL_MEASURE_DATA } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/mock-data';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { createTestMeasureData } from '@ui/pages/studio/tools-dialog/field-measuring/helpers';
+import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
@@ -94,7 +94,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     );
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    componentRef.setInput('measureData', { ...INITIAL_MEASURE_DATA });
+    componentRef.setInput('measureData', createTestMeasureData());
     fixture.detectChanges();
   });
 
@@ -105,8 +105,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
   it('should initialize form fields from measureData', () => {
     const data = component.measureData();
     expect(data.updateMode15C).toBe('auto');
-    expect(data.parameterPapoto).toBe(1700);
-    expect(data.parameterUncertaintyPapoto).toBe(12);
+    expect(data.parameterPapoto).toBeNull();
+    expect(data.parameterUncertaintyPapoto).toBeNull();
   });
 
   it('should update measureData when form values change', () => {
