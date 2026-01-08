@@ -19,11 +19,6 @@
     "name": "mechaphlowers",
     "source": "local"
   },
-  "multimethod": {
-    "file_name": "multimethod-2.0.2-cp313-none-any.whl",
-    "name": "multimethod",
-    "source": "local"
-  },
   "mypy-extensions": {
     "file_name": "mypy_extensions-1.1.0-cp313-none-any.whl",
     "name": "mypy_extensions",
@@ -45,7 +40,7 @@
     "source": "cdn"
   },
   "pandera": {
-    "file_name": "pandera-0.21.1-cp313-none-any.whl",
+    "file_name": "pandera-0.23.1-cp313-none-any.whl",
     "name": "pandera",
     "source": "local"
   },
@@ -123,11 +118,6 @@
     "file_name": "tzdata-2025.2-py2.py3-none-any.whl",
     "name": "tzdata",
     "source": "cdn"
-  },
-  "wrapt": {
-    "file_name": "wrapt-1.17.2-cp313-cp313-pyodide_2025_0_wasm32.whl",
-    "name": "wrapt",
-    "source": "local"
   },
   "xxhash": {
     "file_name": "xxhash-3.5.0-cp313-cp313-pyodide_2025_0_wasm32.whl",
