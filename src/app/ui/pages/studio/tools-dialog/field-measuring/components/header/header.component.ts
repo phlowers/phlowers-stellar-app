@@ -4,7 +4,8 @@ import {
   effect,
   input,
   output,
-  signal
+  signal,
+  untracked
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
@@ -136,8 +137,11 @@ export class HeaderComponent {
       (leftSupport.attachmentHeight + rightSupport.attachmentHeight) / 2;
     const roundedMidValue = Math.round(midValue * 100) / 100;
 
-    // Update the altitude field
-    this.onFieldChange('altitude', roundedMidValue);
+    // Only update if the altitude has actually changed to prevent infinite loops
+    const currentAltitude = untracked(() => this.measureData().altitude);
+    if (currentAltitude !== roundedMidValue) {
+      this.onFieldChange('altitude', roundedMidValue);
+    }
   }
 
   onFieldChange(
