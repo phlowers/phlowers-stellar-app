@@ -132,12 +132,18 @@ export class ParameterCalculation15WithoutWindComponent {
   onCreateInitialCondition(type: 'minus' | 'nominal' | 'plus') {
     // TODO: Implement create initial condition functionality
     console.log('Create initial condition:', type);
-    const baseParameter =
-      type === 'minus'
-        ? this.parameter15CResult()?.parameter15CMinusUncertainty
-        : type === 'nominal'
-          ? this.parameter15CResult()?.parameter15C
-          : this.parameter15CResult()?.parameter15CPlusUncertainty;
+
+    const result = this.parameter15CResult();
+    let baseParameter: number | undefined;
+
+    if (type === 'minus') {
+      baseParameter = result?.parameter15CMinusUncertainty;
+    } else if (type === 'nominal') {
+      baseParameter = result?.parameter15C;
+    } else {
+      baseParameter = result?.parameter15CPlusUncertainty;
+    }
+
     if (!baseParameter) {
       return;
     }

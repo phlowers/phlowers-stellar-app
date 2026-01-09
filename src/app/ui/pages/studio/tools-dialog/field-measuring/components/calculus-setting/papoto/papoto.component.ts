@@ -1,4 +1,11 @@
-import { Component, input, model, signal, computed, inject } from '@angular/core';
+import {
+  Component,
+  input,
+  model,
+  signal,
+  computed,
+  inject
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -64,7 +71,9 @@ export class PapotoComponent {
   });
 
   // Helper function to get calculated value from litData
-  private getCalculatedValue(field: 'span_length' | 'elevation'): number | null {
+  private getCalculatedValue(
+    field: 'span_length' | 'elevation'
+  ): number | null {
     const span = this.selectedSpan();
     const litData = this.plotService.litData();
 

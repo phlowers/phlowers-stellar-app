@@ -1,9 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { signal } from '@angular/core';
 
 import { PapotoComponent } from './papoto.component';
 import { createTestMeasureData } from './../../../helpers';
@@ -101,9 +100,9 @@ describe('Papoto component', () => {
   it('should calculate PAPOTO and show results', async () => {
     const mockResult = {
       parameter: 1.5,
-      parameter_1_2: 2.0,
+      parameter_1_2: 2,
       parameter_2_3: 2.5,
-      parameter_1_3: 3.0,
+      parameter_1_3: 3,
       check_validity: true
     };
 

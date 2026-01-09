@@ -38,7 +38,9 @@ export class HeaderComponent {
   }>();
   spanChange = output<number[]>();
 
-  readonly spans = computed<{ label: string; supports: number[] }[]>(() => {
+  readonly spans = computed<
+    { label: string; value: number[]; supports: number[] }[]
+  >(() => {
     const supportsLength =
       this.plotService.plotOptions().endSupport -
       this.plotService.plotOptions().startSupport +
@@ -55,53 +57,87 @@ export class HeaderComponent {
 
   selectedSpan = signal<number[] | null>(null);
 
+  private hasCalculatedInitialAltitude = false;
+
   constructor(private readonly plotService: PlotService) {
-    // Initialize selectedSpan with the first span when spans are available
+    // Initialize span to first available span if measureData has no span set,
+    // and calculate altitude if span exists but altitude is null
     effect(() => {
       const spans = this.spans();
-      if (spans.length > 0 && this.selectedSpan() === null) {
-        this.selectedSpan.set(spans[0].supports);
-      }
-    });
+      const currentSpan = this.measureData().span;
+      const currentAltitude = this.measureData().altitude;
 
-    // Update altitude field with attachment height mid value when selected span changes
-    effect(() => {
-      const span = this.selectedSpan();
-      if (span?.length !== 2) {
+      // If spans are available and no span is set in measureData, set the first one
+      if (spans.length > 0 && !currentSpan) {
+        this.onSpanChange(spans[0].value);
         return;
       }
 
-      // Emit the span change to parent component
-      this.spanChange.emit(span);
-
-      const section = this.plotService.section();
-      if (!section?.supports) {
-        return;
-      }
-
-      const supports = section.supports;
-      const [leftSupportIndex, rightSupportIndex] = span;
-
-      const leftSupport = supports[leftSupportIndex];
-      const rightSupport = supports[rightSupportIndex];
-
+      // If span exists but altitude is null, calculate altitude once (handles load from saved data)
       if (
-        !leftSupport ||
-        !rightSupport ||
-        leftSupport.attachmentHeight === null ||
-        rightSupport.attachmentHeight === null
+        !this.hasCalculatedInitialAltitude &&
+        currentSpan &&
+        Array.isArray(currentSpan) &&
+        currentSpan.length === 2 &&
+        currentAltitude === null
       ) {
+        this.hasCalculatedInitialAltitude = true;
+        this.calculateAltitude(currentSpan);
+      }
+    });
+
+    // Calculate altitude when measureData.span changes
+    effect(() => {
+      const span = this.measureData().span;
+      if (!Array.isArray(span) || span.length !== 2) {
         return;
       }
 
-      // Calculate mid value and round to 2 decimals
-      const midValue =
-        (leftSupport.attachmentHeight + rightSupport.attachmentHeight) / 2;
-      const roundedMidValue = Math.round(midValue * 100) / 100;
-
-      // Update the altitude field
-      this.onFieldChange('altitude', roundedMidValue);
+      // Only recalculate if the span actually changed (not just a re-render)
+      // This prevents unnecessary recalculations
+      this.calculateAltitude(span);
     });
+  }
+
+  onSpanChange(span: number[]): void {
+    // Emit field change for span
+    this.onFieldChange('span', span);
+
+    // Emit span change to parent component
+    this.spanChange.emit(span);
+
+    // Calculate and update altitude
+    this.calculateAltitude(span);
+  }
+
+  private calculateAltitude(span: number[]): void {
+    const section = this.plotService.section();
+    if (!section?.supports) {
+      return;
+    }
+
+    const supports = section.supports;
+    const [leftSupportIndex, rightSupportIndex] = span;
+
+    const leftSupport = supports[leftSupportIndex];
+    const rightSupport = supports[rightSupportIndex];
+
+    if (
+      !leftSupport ||
+      !rightSupport ||
+      leftSupport.attachmentHeight === null ||
+      rightSupport.attachmentHeight === null
+    ) {
+      return;
+    }
+
+    // Calculate mid value and round to 2 decimals
+    const midValue =
+      (leftSupport.attachmentHeight + rightSupport.attachmentHeight) / 2;
+    const roundedMidValue = Math.round(midValue * 100) / 100;
+
+    // Update the altitude field
+    this.onFieldChange('altitude', roundedMidValue);
   }
 
   onFieldChange(

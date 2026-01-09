@@ -260,9 +260,13 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         generateState: false
       });
 
-      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
+      expect(
+        mockInitialConditionService.addInitialCondition
+      ).toHaveBeenCalled();
       expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-123');
-      expect(mockInitialConditionService.setInitialCondition).not.toHaveBeenCalled();
+      expect(
+        mockInitialConditionService.setInitialCondition
+      ).not.toHaveBeenCalled();
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -300,9 +304,13 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         generateState: true
       });
 
-      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
+      expect(
+        mockInitialConditionService.addInitialCondition
+      ).toHaveBeenCalled();
       expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-456');
-      expect(mockInitialConditionService.setInitialCondition).toHaveBeenCalled();
+      expect(
+        mockInitialConditionService.setInitialCondition
+      ).toHaveBeenCalled();
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -332,7 +340,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         generateState: false
       });
 
-      expect(mockInitialConditionService.addInitialCondition).not.toHaveBeenCalled();
+      expect(
+        mockInitialConditionService.addInitialCondition
+      ).not.toHaveBeenCalled();
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });
 
@@ -362,7 +372,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         generateState: false
       });
 
-      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
+      expect(
+        mockInitialConditionService.addInitialCondition
+      ).toHaveBeenCalled();
       expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-999');
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });

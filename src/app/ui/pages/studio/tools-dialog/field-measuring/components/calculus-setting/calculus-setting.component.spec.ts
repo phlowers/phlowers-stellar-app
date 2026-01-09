@@ -15,10 +15,7 @@ describe('CalculusSetting component', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CalculusSettingComponent],
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting()
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CalculusSettingComponent);

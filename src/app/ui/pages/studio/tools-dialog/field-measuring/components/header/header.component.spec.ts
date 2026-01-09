@@ -284,7 +284,7 @@ describe('HeaderComponent', () => {
       component.spanChange.subscribe(spanChangeSpy);
 
       // Change the selected span
-      component.selectedSpan.set([1, 2]);
+      component.onSpanChange([1, 2]);
       fixture.detectChanges();
 
       expect(spanChangeSpy).toHaveBeenCalledWith([1, 2]);
@@ -294,7 +294,7 @@ describe('HeaderComponent', () => {
       const spanChangeSpy = jest.fn();
       component.spanChange.subscribe(spanChangeSpy);
 
-      component.selectedSpan.set([5, 6]);
+      component.onSpanChange([5, 6]);
       fixture.detectChanges();
 
       expect(spanChangeSpy).toHaveBeenCalledWith([5, 6]);
@@ -304,10 +304,10 @@ describe('HeaderComponent', () => {
       const spanChangeSpy = jest.fn();
       component.spanChange.subscribe(spanChangeSpy);
 
-      component.selectedSpan.set([0, 1]);
+      component.onSpanChange([0, 1]);
       fixture.detectChanges();
 
-      component.selectedSpan.set([2, 3]);
+      component.onSpanChange([2, 3]);
       fixture.detectChanges();
 
       expect(spanChangeSpy).toHaveBeenCalledTimes(2);
@@ -315,12 +315,27 @@ describe('HeaderComponent', () => {
       expect(spanChangeSpy).toHaveBeenNthCalledWith(2, [2, 3]);
     });
 
-    it('should initialize selectedSpan when spans are available', () => {
-      // Component should have initialized selectedSpan in the effect
-      expect(component.selectedSpan()).toEqual([0, 1]);
+    it('should emit fieldChange for span initialization when spans are available and no span is set', () => {
+      // Component should have emitted fieldChange for span initialization
+      const fieldChangeSpy = jest.fn();
+
+      // Create a new component instance to capture initialization
+      const newFixture = TestBed.createComponent(HeaderComponent);
+      const newComponent = newFixture.componentInstance;
+
+      newComponent.fieldChange.subscribe(fieldChangeSpy);
+      newFixture.componentRef.setInput('measureData', mockMeasureData);
+      newFixture.componentRef.setInput('spanOptions', mockSpanOptions);
+      newFixture.detectChanges();
+
+      // Should have emitted fieldChange with span set to first span [0, 1]
+      expect(fieldChangeSpy).toHaveBeenCalledWith({
+        field: 'span',
+        value: [0, 1]
+      });
     });
 
-    it('should not emit additional spanChange when setting invalid span after valid one', () => {
+    it('should emit spanChange when onSpanChange is called', () => {
       // Subscribe and track calls
       const spanChangeSpy = jest.fn();
       component.spanChange.subscribe(spanChangeSpy);
@@ -328,11 +343,11 @@ describe('HeaderComponent', () => {
       // Clear any previous calls from initialization
       spanChangeSpy.mockClear();
 
-      // Set to invalid length - should not emit
-      component.selectedSpan.set([1]);
+      // Call onSpanChange directly
+      component.onSpanChange([3, 4]);
       fixture.detectChanges();
 
-      expect(spanChangeSpy).not.toHaveBeenCalled();
+      expect(spanChangeSpy).toHaveBeenCalledWith([3, 4]);
     });
   });
 
@@ -354,14 +369,14 @@ describe('HeaderComponent', () => {
         supports: [
           { attachmentHeight: 10.5 },
           { attachmentHeight: 12.5 },
-          { attachmentHeight: 15.0 }
+          { attachmentHeight: 15 }
         ]
       };
 
       jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
 
       // Change span to [0, 1]
-      component.selectedSpan.set([0, 1]);
+      component.onSpanChange([0, 1]);
       fixture.detectChanges();
 
       // Should calculate (10.5 + 12.5) / 2 = 11.5
@@ -376,15 +391,12 @@ describe('HeaderComponent', () => {
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
-        supports: [
-          { attachmentHeight: 10.333 },
-          { attachmentHeight: 12.667 }
-        ]
+        supports: [{ attachmentHeight: 10.333 }, { attachmentHeight: 12.667 }]
       };
 
       jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
 
-      component.selectedSpan.set([0, 1]);
+      component.onSpanChange([0, 1]);
       fixture.detectChanges();
 
       // Should calculate (10.333 + 12.667) / 2 = 11.5
@@ -466,10 +478,7 @@ describe('HeaderComponent', () => {
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
-        supports: [
-          { attachmentHeight: null },
-          { attachmentHeight: 12.5 }
-        ]
+        supports: [{ attachmentHeight: null }, { attachmentHeight: 12.5 }]
       };
       jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
 
@@ -487,10 +496,7 @@ describe('HeaderComponent', () => {
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
-        supports: [
-          { attachmentHeight: 10.5 },
-          { attachmentHeight: null }
-        ]
+        supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: null }]
       };
       jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
 
@@ -509,17 +515,17 @@ describe('HeaderComponent', () => {
 
       const mockSection = {
         supports: [
-          { attachmentHeight: 10.0 },
-          { attachmentHeight: 15.0 },
-          { attachmentHeight: 20.0 }
+          { attachmentHeight: 10 },
+          { attachmentHeight: 15 },
+          { attachmentHeight: 20 }
         ]
       };
       jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
 
-      component.selectedSpan.set([1, 2]);
+      component.onSpanChange([1, 2]);
       fixture.detectChanges();
 
-      // Should calculate (15.0 + 20.0) / 2 = 17.5
+      // Should calculate (15 + 20) / 2 = 17.5
       expect(fieldChangeSpy).toHaveBeenCalledWith({
         field: 'altitude',
         value: 17.5

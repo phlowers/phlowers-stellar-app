@@ -68,7 +68,6 @@ export class TemperatureCalculationComponent {
   constructor(private readonly workerPythonService: WorkerPythonService) {}
 
   isFormValid = computed(() => {
-    // const data = this.measureData();
     return true;
   });
 
