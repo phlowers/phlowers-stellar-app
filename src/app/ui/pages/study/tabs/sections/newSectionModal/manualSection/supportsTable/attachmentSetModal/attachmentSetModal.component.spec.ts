@@ -67,7 +67,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 2.5,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     },
     {
       uuid: '2',
@@ -78,7 +78,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 3.0,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     },
     {
       uuid: '3',
@@ -89,7 +89,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 2.0,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     }
   ];
 
@@ -153,7 +153,9 @@ describe('AttachmentSetModalComponent', () => {
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined
   };
 
   beforeEach(async () => {
@@ -287,7 +289,7 @@ describe('AttachmentSetModalComponent', () => {
     component.attachmentSet.set(1);
     component.armLength.set(2.5);
     component.heightBelowConsole.set(10.5);
-    component.towerModel.set('D-Type');
+    component.towerModel.set('Tower Model');
 
     // Mock the support input signal
     jest.spyOn(component, 'support').mockReturnValue(mockSupport);
@@ -300,7 +302,7 @@ describe('AttachmentSetModalComponent', () => {
       armLength: 2.5,
       heightBelowConsole: 10.5,
       uuid: 'support-uuid',
-      towerModel: 'D-Type'
+      towerModel: 'Tower Model'
     });
   });
 
@@ -360,7 +362,7 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.attachmentSet()).toBe(1);
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
-      expect(component.towerModel()).toBe('D-Type');
+      expect(component.towerModel()).toBe('Tower Model');
       expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
     });
 
@@ -409,7 +411,7 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.attachmentSet()).toBe(1);
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
-      expect(component.towerModel()).toBe('D-Type');
+      expect(component.towerModel()).toBe('Tower Model');
     });
 
     it('should reset values when modal opens without support', async () => {
