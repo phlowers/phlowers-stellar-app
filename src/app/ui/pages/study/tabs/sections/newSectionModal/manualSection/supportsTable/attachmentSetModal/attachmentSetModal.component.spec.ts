@@ -67,7 +67,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 2.5,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     },
     {
       uuid: '2',
@@ -78,7 +78,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 3.0,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     },
     {
       uuid: '3',
@@ -89,7 +89,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 2.0,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     }
   ];
 
@@ -113,6 +113,49 @@ describe('AttachmentSetModalComponent', () => {
     chainSurface: 10.0,
     attachmentPosition: 'Position 1',
     towerModel: 'Tower Model'
+  };
+
+  const mockSection: Section = {
+    uuid: 'section-uuid',
+    internal_id: 'section-1',
+    name: 'Test Section',
+    short_name: 'TS',
+    created_at: '2023-01-01',
+    updated_at: '2023-01-01',
+    internal_catalog_id: 'catalog-1',
+    type: 'type-1',
+    electric_phase_number: 3,
+    cable_name: 'Cable A',
+    cable_short_name: 'CA',
+    cables_amount: 1,
+    optical_fibers_amount: 0,
+    spans_amount: 1,
+    begin_span_name: 'span-1',
+    last_span_name: 'span-1',
+    first_support_number: 1,
+    last_support_number: 1,
+    first_attachment_set: '1',
+    last_attachment_set: '1',
+    regional_maintenance_center_names: [],
+    maintenance_center_names: [],
+    regional_team_id: undefined,
+    maintenance_team_id: undefined,
+    maintenance_center_id: undefined,
+    link_name: undefined,
+    lit_code: undefined,
+    lit_name: undefined,
+    branch_name: undefined,
+    branch_idr: undefined,
+    voltage_idr: undefined,
+    comment: undefined,
+    supports_comment: undefined,
+    supports: [],
+    initial_conditions: [],
+    selected_initial_condition_uuid: undefined,
+    charges: [],
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined
   };
 
   beforeEach(async () => {
@@ -246,7 +289,7 @@ describe('AttachmentSetModalComponent', () => {
     component.attachmentSet.set(1);
     component.armLength.set(2.5);
     component.heightBelowConsole.set(10.5);
-    component.towerModel.set('D-Type');
+    component.towerModel.set('Tower Model');
 
     // Mock the support input signal
     jest.spyOn(component, 'support').mockReturnValue(mockSupport);
@@ -259,7 +302,7 @@ describe('AttachmentSetModalComponent', () => {
       armLength: 2.5,
       heightBelowConsole: 10.5,
       uuid: 'support-uuid',
-      towerModel: 'D-Type'
+      towerModel: 'Tower Model'
     });
   });
 
@@ -319,7 +362,7 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.attachmentSet()).toBe(1);
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
-      expect(component.towerModel()).toBe('D-Type');
+      expect(component.towerModel()).toBe('Tower Model');
       expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
     });
 
@@ -368,7 +411,7 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.attachmentSet()).toBe(1);
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
-      expect(component.towerModel()).toBe('D-Type');
+      expect(component.towerModel()).toBe('Tower Model');
     });
 
     it('should reset values when modal opens without support', async () => {

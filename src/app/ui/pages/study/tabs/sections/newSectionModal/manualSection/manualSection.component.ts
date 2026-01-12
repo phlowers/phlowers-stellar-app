@@ -241,7 +241,7 @@ export class ManualSectionComponent implements OnInit {
       );
       this.linkAdrRead.set(linkLine?.link_adr || '');
       const litLine = linesTable.find(
-        (item) => item.lit_idr === this.section().lit
+        (item) => item.lit_idr === this.section().lit_code
       );
       this.litAdrRead.set(litLine?.lit_adr || '');
     }
