@@ -77,7 +77,9 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  measureData = signal<FieldMeasure>(createInitialMeasureData(null, ''));
+  measureData = signal<FieldMeasure>(
+    createInitialMeasureData(null, '', null, null)
+  );
 
   activeTab = signal<
     | 'terrainData'
