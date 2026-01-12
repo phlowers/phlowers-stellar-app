@@ -26,8 +26,7 @@ import { createEmptySupport } from '@src/app/core/services/sections/helpers';
 import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
 import { MaintenanceData } from '@src/app/core/data/database/interfaces/maintenance';
-import { debounce, sortBy } from 'lodash';
-import { UniquePipe } from '@src/app/ui/shared/service/autocomplete/unique.pipe';
+import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
 import { Line } from '@src/app/core/data/database/interfaces/line';
 import { LinesService } from '@src/app/core/services/lines/lines.service';
 import { Cable } from '@src/app/core/data/database/interfaces/cable';
@@ -44,12 +43,13 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
 const sortLines = (lines: Line[]) => {
   return lines.sort((a, b) => {
-    const aVoltageAdr = a.voltage_adr || '';
-    const bVoltageAdr = b.voltage_adr || '';
-    return (
-      aVoltageAdr.length - bVoltageAdr.length ||
-      aVoltageAdr.localeCompare(bVoltageAdr || '')
-    );
+    if (a.voltage_idr === '0 KV' || a.voltage_idr === '0') {
+      return -1;
+    }
+    if (b.voltage_idr === '0 KV' || b.voltage_idr === '0') {
+      return 1;
+    }
+    return a.voltage_adr.localeCompare(b.voltage_adr);
   });
 };
 
@@ -59,8 +59,10 @@ const lineTablePropertiesToSectionProperties: Record<
 > = {
   voltage_idr: 'voltage_idr',
   link_idr: 'link_name',
-  lit_idr: 'lit',
-  branch_idr: 'branch_name'
+  lit_idr: 'lit_code',
+  lit_adr: 'lit_name',
+  branch_idr: 'branch_idr',
+  branch_adr: 'branch_name'
 };
 
 const orderedMaintenanceTableProperties: (
@@ -73,13 +75,17 @@ type LineTableProperties =
   | 'voltage_idr'
   | 'link_idr'
   | 'lit_idr'
-  | 'branch_idr';
+  | 'lit_adr'
+  | 'branch_idr'
+  | 'branch_adr';
 
 const orderedLineTableProperties: LineTableProperties[] = [
   'voltage_idr',
   'link_idr',
   'lit_idr',
-  'branch_idr'
+  'lit_adr',
+  'branch_idr',
+  'branch_adr'
 ];
 
 @Component({
@@ -96,7 +102,6 @@ const orderedLineTableProperties: LineTableProperties[] = [
     IconComponent,
     StudioComponent,
     TextareaModule,
-    UniquePipe,
     FormsModule,
     MessageModule,
     ButtonComponent,
@@ -142,13 +147,61 @@ export class ManualSectionComponent implements OnInit {
   maintenanceFilterTable = signal<MaintenanceData[]>([]);
   linesFilterTable = signal<Line[]>([]);
   firstSupport = signal<number>(0);
-  rowsSupport = signal<number>(5);
+  rowsSupport = signal<number>(10);
 
   maintenanceTeamRead = signal<string>('');
   maintenanceCenterRead = signal<string>('');
   regionalTeamRead = signal<string>('');
   linkAdrRead = signal<string>('');
   litAdrRead = signal<string>('');
+
+  readonly uniqueMaintenanceCenters = computed(() =>
+    orderBy(
+      uniqBy(this.maintenanceFilterTable(), 'maintenance_center_id'),
+      ['maintenance_center'],
+      ['asc']
+    )
+  );
+
+  readonly uniqueRegionalTeams = computed(() =>
+    uniqBy(this.maintenanceFilterTable(), 'regional_team_id')
+  );
+
+  readonly uniqueMaintenanceTeams = computed(() =>
+    uniqBy(this.maintenanceFilterTable(), 'maintenance_team_id')
+  );
+
+  readonly uniqueCableNames = computed(() =>
+    uniqBy(this.cablesFilterTable(), 'name')
+  );
+
+  readonly uniqueVoltageIdr = computed(() =>
+    uniqBy(this.linesFilterTable(), 'voltage_idr')
+  );
+
+  readonly uniqueLinkIdr = computed(() =>
+    orderBy(uniqBy(this.linesFilterTable(), 'link_idr'), ['link_idr'], ['asc'])
+  );
+
+  readonly uniqueLinkAdr = computed(() =>
+    orderBy(uniqBy(this.linesFilterTable(), 'link_adr'), ['link_adr'], ['asc'])
+  );
+
+  readonly uniqueLitIdr = computed(() =>
+    orderBy(uniqBy(this.linesFilterTable(), 'lit_idr'), ['lit_idr'], ['asc'])
+  );
+
+  readonly uniqueLitAdr = computed(() =>
+    orderBy(uniqBy(this.linesFilterTable(), 'lit_idr'), ['lit_adr'], ['asc'])
+  );
+
+  readonly uniqueBranchIdr = computed(() =>
+    orderBy(
+      uniqBy(this.linesFilterTable(), 'branch_idr'),
+      ['branch_idr'],
+      ['asc']
+    )
+  );
 
   async setupFilterTables() {
     const table = await this.maintenanceService.getMaintenance();
@@ -172,7 +225,15 @@ export class ManualSectionComponent implements OnInit {
         )?.regional_team || ''
       );
     }
-    const linesTable = await this.linesService.getLines();
+    let linesTable = await this.linesService.getLines();
+    orderedLineTableProperties.forEach((id) => {
+      linesTable = linesTable.filter(
+        (item) =>
+          !this.section()[lineTablePropertiesToSectionProperties[id]] ||
+          item[id] ===
+            this.section()[lineTablePropertiesToSectionProperties[id]]
+      );
+    });
     this.linesFilterTable.set(sortLines(linesTable));
     if (this.mode() === 'view') {
       const linkLine = linesTable.find(
@@ -180,7 +241,7 @@ export class ManualSectionComponent implements OnInit {
       );
       this.linkAdrRead.set(linkLine?.link_adr || '');
       const litLine = linesTable.find(
-        (item) => item.lit_idr === this.section().lit
+        (item) => item.lit_idr === this.section().lit_code
       );
       this.litAdrRead.set(litLine?.lit_adr || '');
     }
@@ -221,7 +282,10 @@ export class ManualSectionComponent implements OnInit {
         )
       ] as Support[];
     } else {
-      this.section().supports = currentSupports.slice(0, amount);
+      const supports = currentSupports.slice(0, amount);
+      const lastSupport = supports[supports.length - 1];
+      lastSupport.spanLength = null;
+      this.section().supports = supports;
     }
     this.onSectionChange();
   }
@@ -279,17 +343,12 @@ export class ManualSectionComponent implements OnInit {
     this.onSectionChange();
   }
 
-  onSupportChange(change: {
-    uuid: string;
-    field: keyof Support;
-    value: Support;
-  }) {
+  onSupportChange(change: { uuid: string; support: Partial<Support> }) {
     const support = this.section().supports?.find(
       (support: Support) => support.uuid === change.uuid
     );
     if (support) {
-      (support as unknown as Record<string, unknown>)[change.field] =
-        change.value;
+      Object.assign(support, change.support);
     }
     this.onSectionChange();
   }
