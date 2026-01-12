@@ -7,7 +7,8 @@ import {
   TemplateRef,
   AfterViewInit,
   OnDestroy,
-  computed
+  computed,
+  untracked
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -21,7 +22,6 @@ import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
   LEFT_SUPPORT_OPTIONS,
-  CABLE_OPTIONS,
   SelectOption
 } from './constants';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
@@ -34,6 +34,7 @@ import { InitialCondition } from '@src/app/core/data/database/interfaces/initial
 import { ParameterCalculation15WithoutWindComponent } from './components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 import { createInitialMeasureData } from './helpers';
 import { INITIAL_CALCULATION_RESULTS } from './mock-data';
+import { LinesService } from '@core/services/lines/lines.service';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -81,6 +82,8 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     createInitialMeasureData(null, '', null, null)
   );
 
+  selectedSpan = signal<number[]>([]);
+
   activeTab = signal<
     | 'terrainData'
     | 'parameterCalculation'
@@ -94,13 +97,13 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   );
   readonly skyCoverOptions = signal<SelectOption[]>(SKY_COVER_OPTIONS);
   readonly leftSupportOptions = signal<SelectOption[]>(LEFT_SUPPORT_OPTIONS);
-  readonly cableOptions = signal<SelectOption[]>(CABLE_OPTIONS);
 
   calculationResults = signal<CalculationResults>(INITIAL_CALCULATION_RESULTS);
 
   constructor(
     public readonly sectionService: SectionService,
-    public readonly studiesService: StudiesService
+    public readonly studiesService: StudiesService,
+    private readonly linesService: LinesService
   ) {
     effect(() => {
       if (this.toolsDialogService.isMainOpen()) {
@@ -118,7 +121,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     return (
       this.plotService
         .section()
-        ?.field_measures.some(
+        ?.field_measures?.some(
           (measure) =>
             measure.name === this.measureData().name &&
             measure.uuid !== this.measureData().uuid
@@ -126,7 +129,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     );
   });
 
-  private initializeMeasureData(): void {
+  private async initializeMeasureData(): Promise<void> {
     const section = this.plotService.section();
     const selectedFieldMeasure = section?.field_measures.find(
       (measure) => measure.uuid === section?.selected_field_measure_uuid
@@ -139,6 +142,23 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     }
 
     this.measureData.set(selectedFieldMeasure);
+
+    // Fetch link_adr from lines service
+    const linesTable = await this.linesService.getLines();
+    const linkLine = linesTable?.find(
+      (item) => item.link_idr === section.link_name
+    );
+    const linkAdrRead = linkLine?.link_adr || '';
+
+    this.measureData.set({
+      ...untracked(() => this.measureData()),
+      link: linkAdrRead,
+      voltage: section.voltage_idr || '',
+      spanType: section.type || '',
+      phaseNumber: section.electric_phase_number || 0,
+      numberOfConductors: section.cables_amount || 0,
+      cableName: section.cable_name || ''
+    });
   }
 
   onVisibleChange(visible: boolean) {
@@ -159,6 +179,10 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       ...measureData,
       [field]: value
     });
+  }
+
+  onSpanChange(span: number[]) {
+    this.selectedSpan.set(span);
   }
 
   onExport() {

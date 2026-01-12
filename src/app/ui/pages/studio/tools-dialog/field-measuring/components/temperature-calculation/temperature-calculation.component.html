@@ -4,38 +4,33 @@
 </p>
 
 <div class="temperature-calculation__form">
-  <div class="conductor">
-    <label for="cableName" i18n>Cable name</label>
-    <p-select
-      inputId="cableName"
-      [options]="cableOptions()"
-      [ngModel]="measureData().cableName"
-      (ngModelChange)="updateField('cableName', $event)"
-      optionLabel="label"
-      optionValue="value"
-      [fluid]="true"
-      aria-describedby="mandatory-temperature"
-      [required]="true"
-    />
-  </div>
+  <dl class="contents">
+    <div class="conductor">
+      <dt i18n>Cable name</dt>
+      <dd>{{ measureData().cableName }}</dd>
+    </div>
 
-  <dl class="ambientTemp">
-    <dt i18n>Ambient temperature (°C)</dt>
-    <dd>{{ measureData().ambientTemperature }} °C</dd>
+    <div class="ambientTemp">
+      <dt i18n>Ambient temperature (°C)</dt>
+      <dd>{{ measureData().ambientTemperature }} °C</dd>
+    </div>
   </dl>
 
   <div class="transit">
     <label for="transit" i18n>Transit</label>
-    <input
-      id="transit"
-      type="text"
-      pInputText
-      [ngModel]="measureData().transit"
-      (ngModelChange)="updateField('transit', $event)"
-      [fluid]="true"
-      aria-describedby="mandatory-temperature"
-      required
-    />
+    <p-inputgroup>
+      <input
+        id="transit"
+        type="text"
+        pInputText
+        [ngModel]="measureData().transit"
+        (ngModelChange)="updateField('transit', $event)"
+        [fluid]="true"
+        aria-describedby="mandatory-temperature"
+        required
+      />
+      <p-inputgroup-addon>A</p-inputgroup-addon>
+    </p-inputgroup>
   </div>
 
   <dl class="contents">
@@ -125,9 +120,8 @@
         (ngModelChange)="
           updateField('measuredDiffusedPlusDirectSolarFlux', $event)
         "
-        aria-describedby="mandatory-temperature solar-fluxs-impact"
         [min]="0"
-        required
+        aria-describedby="solar-fluxs-impact"
       />
       <p-inputgroup-addon>W/m²</p-inputgroup-addon>
     </p-inputgroup>
@@ -146,7 +140,7 @@
 </div>
 
 @if (temperatureResult()) {
-  <div class="temperature-calculation__results" [@expandCollapse]>
+  <div class="temperature-calculation__results" [@expand]>
     <h2 class="temperature-calculation__results__title" i18n>Results :</h2>
 
     <dl class="temperature-calculation__results__list">

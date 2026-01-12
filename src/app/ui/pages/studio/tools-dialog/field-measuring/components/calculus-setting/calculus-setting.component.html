@@ -35,6 +35,7 @@
 @if (selectedCalculusType === 'PAPOTO') {
   <app-papoto
     [leftSupportOption]="leftSupportOption"
+    [selectedSpan]="selectedSpan()"
     [(measureData)]="measureData"
   />
 }
