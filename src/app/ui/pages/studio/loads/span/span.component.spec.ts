@@ -53,7 +53,8 @@ describe('SpanComponent', () => {
     maintenance_team_id: undefined,
     maintenance_center_id: undefined,
     link_name: undefined,
-    lit: undefined,
+    lit_code: undefined,
+    lit_name: undefined,
     branch_name: undefined,
     voltage_idr: undefined,
     comment: undefined,
@@ -64,7 +65,8 @@ describe('SpanComponent', () => {
     charges: [],
     selected_charge_uuid: 'charge-uuid-1',
     field_measures: [],
-    selected_field_measure_uuid: undefined
+    selected_field_measure_uuid: undefined,
+    branch_idr: undefined
   };
 
   beforeEach(async () => {

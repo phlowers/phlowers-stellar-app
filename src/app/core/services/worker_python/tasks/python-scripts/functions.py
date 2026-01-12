@@ -69,7 +69,9 @@ class Support:
     cableType: Optional[str] = None
     armLength: Optional[float] = None
     chainName: Optional[str] = None
+    towerModel: Optional[str] = None
     chainLength: Optional[float] = None
+    towerModel: Optional[str] = None
     chainWeight: Optional[float] = None
     towerModel: Optional[str] = None
     chainV: Optional[bool] = None

@@ -1,7 +1,7 @@
 <p-table
   [paginator]="true"
   [rows]="10"
-  [rowsPerPageOptions]="[10, 20, 50]"
+  [rowsPerPageOptions]="[10, 20, 30]"
   (onSort)="onSort($event)"
   [value]="studies()"
   [showCurrentPageReport]="true"
@@ -44,22 +44,6 @@
           />
         </div>
       </th>
-      <th id="created_at_offline" pSortableColumn="created_at_offline">
-        <div i18n class="flex items-center gap-2">
-          Creation date
-          <app-icon
-            [icon]="
-              $any(
-                sortField() === 'created_at_offline'
-                  ? sortOrder() === 1
-                    ? 'arrow_upward'
-                    : 'arrow_downward'
-                  : 'swap_vert'
-              )
-            "
-          />
-        </div>
-      </th>
       <th id="updated_at_offline" pSortableColumn="updated_at_offline">
         <div i18n class="flex items-center gap-2">
           Modification date
@@ -78,7 +62,7 @@
       </th>
       <th id="lit_code" pSortableColumn="lit_code">
         <div i18n class="flex items-center gap-2">
-          LIT code
+          LIT
           <app-icon
             [icon]="
               $any(
@@ -92,21 +76,8 @@
           />
         </div>
       </th>
-      <th id="shareable" pSortableColumn="shareable">
-        <div i18n class="flex items-center gap-2">
-          Shared
-          <app-icon
-            [icon]="
-              $any(
-                sortField() === 'shareable'
-                  ? sortOrder() === 1
-                    ? 'arrow_upward'
-                    : 'arrow_downward'
-                  : 'swap_vert'
-              )
-            "
-          />
-        </div>
+      <th id="description" pSortableColumn="description">
+        <div i18n class="flex items-center gap-2">Description/comment</div>
       </th>
       <th id="space"></th>
       <th id="actions">
@@ -121,10 +92,13 @@
       </td>
       <td>{{ study.title }}</td>
       <td>{{ study.author_email }}</td>
-      <td>{{ study.created_at_offline | date: 'medium' }}</td>
       <td>{{ study.updated_at_offline | date: 'medium' }}</td>
-      <td>{{ study.quantity }}</td>
-      <td>{{ study.quantity }}</td>
+      <td>{{ study.sections?.[0]?.lit_name }}</td>
+      <td>
+        <p class="line-clamp-3 text-ellipsis overflow-hidden">
+          {{ study.description }}
+        </p>
+      </td>
       <td>
         <a
           [routerLink]="'/study/' + study.uuid"

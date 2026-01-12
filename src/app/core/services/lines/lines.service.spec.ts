@@ -9,6 +9,7 @@ import {
   HttpClientTestingModule,
   HttpTestingController
 } from '@angular/common/http/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
 import { StorageService } from '../storage/storage.service';
@@ -138,7 +139,8 @@ describe('LinesService', () => {
           link_idr: 'LINK001',
           lit_idr: 'LIT001',
           lit_adr: 'LIT_ADR001',
-          branch_idr: 'BRANCH001',
+          branch_idr: '1.0',
+          branch_id: 'BRANCH001',
           branch_adr: 'BRANCH_ADR001',
           voltage_idr: 'TENSION001',
           voltage_adr: 'TENSION_ADR001',
@@ -525,6 +527,139 @@ describe('LinesService', () => {
         expect.any(Array),
         'voltage_adr'
       );
+    });
+
+    it('should handle HTTP error and return empty string', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const mockError = new ErrorEvent('Network error', {
+        message: 'Failed to fetch'
+      });
+
+      // Mock Papa Parse to return empty data when HTTP error occurs
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: [],
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request to fail
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/lines.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.error(mockError);
+
+      await importPromise;
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error importing lines',
+        expect.any(HttpErrorResponse)
+      );
+      expect(mockLinesTable.clear).not.toHaveBeenCalled();
+      expect(mockLinesTable.bulkAdd).not.toHaveBeenCalled();
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should apply default values for missing/null/undefined fields', async () => {
+      const mockCsvData: RteLinesCsvFile[] = [
+        {
+          link_idr: 'LINK001',
+          link_adr: undefined as unknown as string,
+          lit_idr: null as unknown as string,
+          lit_adr: '',
+          branch_id: undefined as unknown as string,
+          branch_idr: null as unknown as string,
+          branch_adr: '',
+          voltage_idr: undefined as unknown as string,
+          voltage_adr: null as unknown as string,
+          section_id: 'SECTION001',
+          section_type: 'SECTION_TYPE001',
+          cable_id: 'CABLE001',
+          cable_idr: 'CABLE_IDR001',
+          cable_adr: 'CABLE_ADR001',
+          electric_phase_number: 1,
+          cable_bundle_amount: 1,
+          opical_fiber_amount: 1,
+          link_id: 'LINK001',
+          lit_id: 'LIT001',
+          voltage_id: 'TENSION001'
+        }
+      ];
+
+      const mockCsvContent =
+        'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,,,BRANCH001,,,';
+      (Papa.parse as jest.Mock).mockImplementation(
+        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+          if (options.complete) {
+            options.complete(
+              {
+                data: mockCsvData,
+                errors: [],
+                meta: {
+                  delimiter: ',',
+                  linebreak: '\n',
+                  aborted: false,
+                  truncated: false,
+                  cursor: 0,
+                  fields: []
+                }
+              },
+              undefined
+            );
+          }
+        }
+      );
+
+      const importPromise = service.importFromFile();
+
+      // Wait for the HTTP request to be made
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Mock the HTTP request
+      const req = httpTestingController.expectOne(
+        `${window.location.origin}/data/lines.csv`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+
+      await importPromise;
+
+      expect(mockLinesTable.bulkAdd).toHaveBeenCalledWith([
+        expect.objectContaining({
+          uuid: 'mock-uuid-123',
+          link_idr: 'LINK001',
+          link_adr: '',
+          lit_idr: '',
+          lit_adr: '',
+          branch_id: '',
+          branch_idr: '',
+          branch_adr: '',
+          voltage_idr: '0 KV',
+          voltage_adr: '0 KV'
+        })
+      ]);
     });
   });
 });

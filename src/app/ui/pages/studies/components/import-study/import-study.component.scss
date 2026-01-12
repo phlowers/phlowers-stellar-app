@@ -69,13 +69,5 @@
         color: var(--main-error);
       }
     }
-
-    &__btns {
-      @apply flex gap-2;
-
-      &__erase-icon {
-        color: var(--main-error);
-      }
-    }
   }
 }

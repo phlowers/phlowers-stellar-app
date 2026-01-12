@@ -63,7 +63,8 @@ export class AttachmentService {
           cross_arm_length: parseFloat(item.L),
           attachment_set_x: parseFloat(item.X),
           attachment_set_y: parseFloat(item.Y),
-          attachment_set_z: parseFloat(item.Z)
+          attachment_set_z: parseFloat(item.Z),
+          support_tower: item.support_tower
         }));
     };
 

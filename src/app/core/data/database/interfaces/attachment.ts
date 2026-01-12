@@ -15,7 +15,7 @@ export interface Attachment {
   support_catalog_internal_id?: string;
   support_short_name?: string;
   support_name?: string;
-  tower_model?: string;
+  support_tower: string;
   line_angle?: number;
   support_ground_z?: number;
   support_ground_x?: number;

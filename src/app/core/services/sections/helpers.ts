@@ -7,11 +7,12 @@ export const createEmptySupport = (): Support => {
     uuid: uuidv4(),
     number: null,
     name: null,
-    spanLength: 0,
+    spanLength: null,
     spanAngle: 0,
     attachmentSet: null,
     attachmentHeight: null,
     heightBelowConsole: null,
+    towerModel: null,
     cableType: null,
     armLength: 0,
     chainName: null,
@@ -21,8 +22,7 @@ export const createEmptySupport = (): Support => {
     counterWeight: 0,
     supportFootAltitude: null,
     attachmentPosition: null,
-    chainSurface: 0,
-    towerModel: null
+    chainSurface: 0
   };
 };
 
@@ -60,8 +60,10 @@ export const createEmptySection = (): Section => {
     maintenance_center_names: [],
     voltage_idr: undefined,
     link_name: undefined,
-    lit: undefined,
+    lit_code: undefined,
+    lit_name: undefined,
     branch_name: undefined,
+    branch_idr: undefined,
     comment: undefined,
     supports_comment: undefined,
     initial_conditions: [],
