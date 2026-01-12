@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
   <file id="ngi18n" original="ng.template">
     <unit id="4768749765465246664">
@@ -694,7 +694,7 @@
     <unit id="928951684182090210">
       <segment state="initial">
         <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
-        <target> Nom du câble <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+        <target> Nom du câble <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;"> *</pc></target>
       </segment>
     </unit>
     <unit id="2981219928115418649">
@@ -3098,7 +3098,7 @@
     <unit id="8065031423203926640">
       <segment state="initial">
         <source>L0 table</source>
-        <target>L0 table</target>
+        <target>Tableau L0</target>
       </segment>
     </unit>
     <unit id="971569449266353120">
@@ -3287,10 +3287,28 @@
         <target>Ajouter un cas de charge</target>
       </segment>
     </unit>
+    <unit id="8690924341268563915">
+      <segment state="initial">
+        <source>Add a load case</source>
+        <target>Ajouter un cas de charge</target>
+      </segment>
+    </unit>
     <unit id="2587240527868724590">
       <segment state="initial">
         <source>CC</source>
         <target>CC</target>
+      </segment>
+    </unit>
+    <unit id="6028011477486800998">
+      <segment state="initial">
+        <source>One span</source>
+        <target>Une portée</target>
+      </segment>
+    </unit>
+    <unit id="2981359641232309364">
+      <segment state="initial">
+        <source>Two spans</source>
+        <target>Deux portées</target>
       </segment>
     </unit>
     <unit id="4443682149844413583">
@@ -3309,6 +3327,12 @@
       <segment state="initial">
         <source>In line angle</source>
         <target>In line angle</target>
+      </segment>
+    </unit>
+    <unit id="2050780142571489753">
+      <segment state="initial">
+        <source>Description/comment</source>
+        <target>Description/commentaire</target>
       </segment>
     </unit>
   </file>
