@@ -1,4 +1,11 @@
-import { Component, input, model, signal, computed } from '@angular/core';
+import {
+  Component,
+  input,
+  model,
+  signal,
+  computed,
+  inject
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -12,6 +19,8 @@ import { FieldMeasure } from '../../../types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { Task } from '@src/app/core/services/worker_python/tasks/types';
 import { CommonModule } from '@angular/common';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
+
 @Component({
   selector: 'app-papoto',
   imports: [
@@ -28,21 +37,57 @@ import { CommonModule } from '@angular/common';
   templateUrl: './papoto.component.html',
   styleUrl: './papoto.component.scss',
   animations: [
-    trigger('expandCollapse', [
+    trigger('expand', [
       transition(':enter', [
         style({ height: 0, opacity: 0, overflow: 'hidden' }),
         animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ overflow: 'hidden' }),
-        animate('300ms ease-in', style({ height: 0, opacity: 0 }))
       ])
     ])
   ]
 })
 export class PapotoComponent {
   leftSupportOption = input.required<{ label: string; value: string }[]>();
+  selectedSpan = input.required<number[]>();
   measureData = model.required<FieldMeasure>();
+
+  private readonly plotService = inject(PlotService);
+
+  // Compute the dynamic left support options based on selectedSpan
+  retrievedLeftSupportOptions = computed(() => {
+    const span = this.selectedSpan();
+    if (span?.length !== 2) {
+      return [];
+    }
+
+    const [leftIndex, rightIndex] = span;
+    return [
+      { label: `${leftIndex + 1}`, value: `${leftIndex + 1}` },
+      { label: `${rightIndex + 1}`, value: `${rightIndex + 1}` }
+    ];
+  });
+
+  // Helper function to get calculated value from litData
+  private getCalculatedValue(
+    field: 'span_length' | 'elevation'
+  ): number | null {
+    const span = this.selectedSpan();
+    const litData = this.plotService.litData();
+
+    if (span?.length !== 2 || !litData?.[field]) {
+      return null;
+    }
+
+    const [leftIndex] = span;
+    const value = litData[field][leftIndex];
+
+    return value ?? null;
+  }
+
+  // Computed property for calculated span length
+  calculatedSpanLength = computed(() => this.getCalculatedValue('span_length'));
+
+  // Computed property for calculated elevation difference
+  calculatedElevation = computed(() => this.getCalculatedValue('elevation'));
 
   papotoHelpDialog = signal<boolean>(false);
 

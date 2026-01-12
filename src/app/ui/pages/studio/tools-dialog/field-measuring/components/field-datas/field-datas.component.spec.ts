@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { FieldDatasComponent } from './field-datas.component';
-import { INITIAL_MEASURE_DATA } from '../../mock-data';
+import { createTestMeasureData } from '../../helpers';
 import { FieldMeasure } from '../../types';
 
 describe('FieldDatasComponent', () => {
@@ -18,7 +18,7 @@ describe('FieldDatasComponent', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
     componentRef.setInput('isNameAlreadyTaken', false);
-    componentRef.setInput('measureData', { ...INITIAL_MEASURE_DATA });
+    componentRef.setInput('measureData', { ...createTestMeasureData() });
     fixture.detectChanges();
   });
 
@@ -150,8 +150,8 @@ describe('FieldDatasComponent', () => {
   describe('Component Rendering', () => {
     it('should display measureData values', () => {
       const data: FieldMeasure = {
-        ...INITIAL_MEASURE_DATA,
-        time: '12:00',
+        ...createTestMeasureData(),
+        time: new Date('2024-01-01T12:00:00'),
         season: 'summer',
         ambientTemperature: 25,
         windSpeed: 10,
@@ -167,7 +167,7 @@ describe('FieldDatasComponent', () => {
 
     it('should update when measureData input changes', () => {
       const updatedData = {
-        ...INITIAL_MEASURE_DATA,
+        ...createTestMeasureData(),
         ambientTemperature: 30,
         windSpeed: 20
       };

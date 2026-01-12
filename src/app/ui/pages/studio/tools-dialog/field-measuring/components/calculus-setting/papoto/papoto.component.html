@@ -25,7 +25,7 @@
     </label>
     <p-select
       inputId="leftSupport"
-      [options]="leftSupportOption()"
+      [options]="retrievedLeftSupportOptions()"
       [ngModel]="measureData().leftSupport"
       (ngModelChange)="updateField('leftSupport', $event)"
       optionLabel="label"
@@ -54,7 +54,12 @@
     </p-inputgroup>
     <p id="spanLength-calculated" class="spanLength__desc">
       <ng-container i18n> calculated value:</ng-container>
-      &nbsp;123 m
+      &nbsp;
+      @if (calculatedSpanLength() !== null) {
+        {{ calculatedSpanLength() | number: '1.0-2' }} m
+      } @else {
+        -
+      }
     </p>
 
     <label for="measuredElevationDifference" i18n class="MED__label">
@@ -74,7 +79,12 @@
     </p-inputgroup>
     <p id="measuredElevationDifference-calculated" class="MED__desc">
       <ng-container i18n>calculated value:</ng-container>
-      &nbsp;123 m
+      &nbsp;
+      @if (calculatedElevation() !== null) {
+        {{ calculatedElevation() | number: '1.0-2' }} m
+      } @else {
+        -
+      }
     </p>
   </div>
 
@@ -247,7 +257,7 @@
 </div>
 
 @if (papotoResult()) {
-  <div class="papoto__results" [@expandCollapse]>
+  <div class="papoto__results" [@expand]>
     <h2 class="papoto__results__title" i18n>results:</h2>
 
     <dl class="papoto__results__list">
@@ -257,8 +267,8 @@
       </div>
 
       <div class="incertainParam">
-        <dt i18n>uncertainty parameter</dt>
-        <dd>123 m</dd>
+        <dt i18n><del>uncertainty parameter</del></dt>
+        <dd><del>-</del></dd>
       </div>
 
       <div class="param12">

@@ -6,7 +6,9 @@ import { HeaderComponent } from './header.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '../../types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
-import { INITIAL_MEASURE_DATA } from '../../mock-data';
+import { createTestMeasureData } from '../../helpers';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { Support } from '@core/data/database/interfaces/support';
 
 @Component({
   selector: 'app-icon',
@@ -19,7 +21,7 @@ describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
 
-  const mockMeasureData: FieldMeasure = INITIAL_MEASURE_DATA;
+  const mockMeasureData: FieldMeasure = createTestMeasureData();
   const mockSpanOptions: SelectOption[] = SPAN_OPTIONS;
 
   beforeEach(async () => {
@@ -192,7 +194,7 @@ describe('HeaderComponent', () => {
 
       expect(longitudeInput.step).toBe('0.00000001');
       expect(latitudeInput.step).toBe('0.00000001');
-      expect(altitudeInput.step).toBe('0.00000001');
+      expect(altitudeInput.step).toBe('0.01');
     });
 
     it('should display units for coordinate fields', () => {
@@ -268,6 +270,268 @@ describe('HeaderComponent', () => {
       component.onFieldChange('altitude', 30);
 
       expect(fieldChangeSpy).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('Span Change Events', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('measureData', mockMeasureData);
+      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
+      fixture.detectChanges();
+    });
+
+    it('should emit spanChange when selectedSpan changes to valid span', () => {
+      const spanChangeSpy = jest.fn();
+      component.spanChange.subscribe(spanChangeSpy);
+
+      // Change the selected span
+      component.onSpanChange([1, 2]);
+      fixture.detectChanges();
+
+      expect(spanChangeSpy).toHaveBeenCalledWith([1, 2]);
+    });
+
+    it('should emit spanChange with correct span indices', () => {
+      const spanChangeSpy = jest.fn();
+      component.spanChange.subscribe(spanChangeSpy);
+
+      component.onSpanChange([5, 6]);
+      fixture.detectChanges();
+
+      expect(spanChangeSpy).toHaveBeenCalledWith([5, 6]);
+    });
+
+    it('should emit spanChange multiple times when span changes between valid values', () => {
+      const spanChangeSpy = jest.fn();
+      component.spanChange.subscribe(spanChangeSpy);
+
+      component.onSpanChange([0, 1]);
+      fixture.detectChanges();
+
+      component.onSpanChange([2, 3]);
+      fixture.detectChanges();
+
+      expect(spanChangeSpy).toHaveBeenCalledTimes(2);
+      expect(spanChangeSpy).toHaveBeenNthCalledWith(1, [0, 1]);
+      expect(spanChangeSpy).toHaveBeenNthCalledWith(2, [2, 3]);
+    });
+
+    it('should emit fieldChange for span initialization when spans are available and no span is set', () => {
+      // Component should have emitted fieldChange for span initialization
+      const fieldChangeSpy = jest.fn();
+
+      // Create a new component instance to capture initialization
+      const newFixture = TestBed.createComponent(HeaderComponent);
+      const newComponent = newFixture.componentInstance;
+      const plotService = TestBed.inject(PlotService);
+
+      // Mock PlotService to return a valid section with supports
+      const mockSection = {
+        supports: [
+          { attachmentHeight: 10 } as Partial<Support>,
+          { attachmentHeight: 12 } as Partial<Support>,
+          { attachmentHeight: 15 } as Partial<Support>
+        ]
+      };
+      jest
+        .spyOn(plotService, 'section')
+        .mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
+      jest
+        .spyOn(plotService, 'plotOptions')
+        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
+          typeof plotService.plotOptions
+        >);
+
+      newComponent.fieldChange.subscribe(fieldChangeSpy);
+
+      // Set measure data without a span
+      const measureDataWithoutSpan = { ...mockMeasureData, span: null };
+      newFixture.componentRef.setInput('measureData', measureDataWithoutSpan);
+      newFixture.componentRef.setInput('spanOptions', mockSpanOptions);
+      newFixture.detectChanges();
+
+      // Should have emitted fieldChange with span set to first span [0, 1]
+      expect(fieldChangeSpy).toHaveBeenCalledWith({
+        field: 'span',
+        value: [0, 1]
+      });
+    });
+
+    it('should emit spanChange when onSpanChange is called', () => {
+      // Subscribe and track calls
+      const spanChangeSpy = jest.fn();
+      component.spanChange.subscribe(spanChangeSpy);
+
+      // Clear any previous calls from initialization
+      spanChangeSpy.mockClear();
+
+      // Call onSpanChange directly
+      component.onSpanChange([3, 4]);
+      fixture.detectChanges();
+
+      expect(spanChangeSpy).toHaveBeenCalledWith([3, 4]);
+    });
+  });
+
+  describe('Altitude Calculation from Attachment Heights', () => {
+    let plotService: any;
+
+    beforeEach(() => {
+      plotService = TestBed.inject(PlotService);
+      fixture.componentRef.setInput('measureData', mockMeasureData);
+      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
+      fixture.detectChanges();
+    });
+
+    it('should calculate and set altitude from attachment heights when span changes', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+
+      const mockSection = {
+        supports: [
+          { attachmentHeight: 10.5 },
+          { attachmentHeight: 12.5 },
+          { attachmentHeight: 15 }
+        ]
+      };
+
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+
+      // Change span to [0, 1]
+      component.onSpanChange([0, 1]);
+      fixture.detectChanges();
+
+      // Should calculate (10.5 + 12.5) / 2 = 11.5
+      expect(fieldChangeSpy).toHaveBeenCalledWith({
+        field: 'altitude',
+        value: 11.5
+      });
+    });
+
+    it('should not set altitude when section is null', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+
+      jest.spyOn(plotService, 'section').mockReturnValue(null);
+
+      // Clear any previous calls
+      fieldChangeSpy.mockClear();
+
+      component.selectedSpan.set([0, 1]);
+      fixture.detectChanges();
+
+      expect(fieldChangeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not set altitude when section has no supports', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+
+      const mockSection = { supports: null };
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+
+      // Clear any previous calls
+      fieldChangeSpy.mockClear();
+
+      component.selectedSpan.set([0, 1]);
+      fixture.detectChanges();
+
+      expect(fieldChangeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not set altitude when left support is missing', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+
+      const mockSection = {
+        supports: [null, { attachmentHeight: 12.5 }]
+      };
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+
+      // Clear any previous calls
+      fieldChangeSpy.mockClear();
+
+      component.selectedSpan.set([0, 1]);
+      fixture.detectChanges();
+
+      expect(fieldChangeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not set altitude when right support is missing', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+
+      const mockSection = {
+        supports: [{ attachmentHeight: 10.5 }, null]
+      };
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+
+      // Clear any previous calls
+      fieldChangeSpy.mockClear();
+
+      component.selectedSpan.set([0, 1]);
+      fixture.detectChanges();
+
+      expect(fieldChangeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not set altitude when left attachment height is null', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+
+      const mockSection = {
+        supports: [{ attachmentHeight: null }, { attachmentHeight: 12.5 }]
+      };
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+
+      // Clear any previous calls
+      fieldChangeSpy.mockClear();
+
+      component.selectedSpan.set([0, 1]);
+      fixture.detectChanges();
+
+      expect(fieldChangeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not set altitude when right attachment height is null', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+
+      const mockSection = {
+        supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: null }]
+      };
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+
+      // Clear any previous calls
+      fieldChangeSpy.mockClear();
+
+      component.selectedSpan.set([0, 1]);
+      fixture.detectChanges();
+
+      expect(fieldChangeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle different span indices correctly', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+
+      const mockSection = {
+        supports: [
+          { attachmentHeight: 10 },
+          { attachmentHeight: 15 },
+          { attachmentHeight: 20 }
+        ]
+      };
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+
+      component.onSpanChange([1, 2]);
+      fixture.detectChanges();
+
+      // Should calculate (15 + 20) / 2 = 17.5
+      expect(fieldChangeSpy).toHaveBeenCalledWith({
+        field: 'altitude',
+        value: 17.5
+      });
     });
   });
 
