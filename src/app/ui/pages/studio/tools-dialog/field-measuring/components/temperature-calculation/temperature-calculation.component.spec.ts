@@ -2,13 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 
 import { TemperatureCalculationComponent } from './temperature-calculation.component';
-import { INITIAL_MEASURE_DATA } from '@src/app/ui/pages/studio/tools-dialog/field-measuring/mock-data';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { createTestMeasureData } from '@ui/pages/studio/tools-dialog/field-measuring/helpers';
+import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import {
-  CABLE_OPTIONS,
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS
-} from '@src/app/ui/pages/studio/tools-dialog/field-measuring/constants';
+} from '@ui/pages/studio/tools-dialog/field-measuring/constants';
 
 describe('TemperatureCalculationComponent', () => {
   let component: TemperatureCalculationComponent;
@@ -31,10 +30,9 @@ describe('TemperatureCalculationComponent', () => {
     fixture = TestBed.createComponent(TemperatureCalculationComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    componentRef.setInput('cableOptions', CABLE_OPTIONS);
     componentRef.setInput('windDirectionOptions', WIND_DIRECTION_OPTIONS);
     componentRef.setInput('skyCoverOptions', SKY_COVER_OPTIONS);
-    componentRef.setInput('measureData', { ...INITIAL_MEASURE_DATA });
+    componentRef.setInput('measureData', createTestMeasureData());
     fixture.detectChanges();
   });
 
@@ -45,7 +43,7 @@ describe('TemperatureCalculationComponent', () => {
   it('should initialize form fields from measureData', () => {
     const data = component.measureData();
     expect(data.cableName).toBe('ASTER570');
-    expect(data.transit).toBe(1);
+    expect(data.transit).toBeNull();
     expect(data.windIncidenceMode).toBe('auto');
   });
 

@@ -3,6 +3,22 @@ import { FieldMeasure } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@src/app/ui/shared/helpers/findMiddleSpan';
 
+/**
+ * Determines if the current date is in Daylight Saving Time (DST)
+ * Compares current timezone offset with standard time offset
+ * @param date - The date to check (defaults to current date)
+ * @returns true if in DST (summer), false otherwise (winter)
+ */
+function isDaylightSavingTime(date: Date = new Date()): boolean {
+  const january = new Date(date.getFullYear(), 0, 1);
+  const july = new Date(date.getFullYear(), 6, 1);
+  const stdTimezoneOffset = Math.max(
+    january.getTimezoneOffset(),
+    july.getTimezoneOffset()
+  );
+  return date.getTimezoneOffset() < stdTimezoneOffset;
+}
+
 export const createInitialMeasureData = (
   section: Section | null,
   name: string,
@@ -13,6 +29,8 @@ export const createInitialMeasureData = (
   if (startSupport !== null && endSupport !== null) {
     span = findMiddleSpan(startSupport, endSupport);
   }
+  const now = new Date();
+
   return {
     uuid: uuidv4(),
     name: name || '',
@@ -21,9 +39,9 @@ export const createInitialMeasureData = (
     latitude: null,
     altitude: null,
     azimuth: null,
-    date: null,
-    time: null,
-    season: 'summer',
+    date: now,
+    time: now,
+    season: isDaylightSavingTime(now) ? 'summer' : 'winter',
     ambientTemperature: null,
     windSpeed: null,
     windSpeedUnit: 'kmh',
@@ -76,5 +94,24 @@ export const createInitialMeasureData = (
     phaseNumber: section?.electric_phase_number || null,
     numberOfConductors: section?.cables_amount || null,
     cableName: section?.cable_name || null
+  };
+};
+
+// Mocked measureData for tests
+export const createTestMeasureData = (
+  overrides?: Partial<FieldMeasure>
+): FieldMeasure => {
+  const mockSection: Partial<Section> = {
+    link_name: 'Line 225kV Rougemontier - Tourbe #1',
+    voltage_idr: '123 kV',
+    type: 'Phase',
+    electric_phase_number: 3,
+    cables_amount: 3,
+    cable_name: 'ASTER570'
+  };
+
+  return {
+    ...createInitialMeasureData(mockSection as Section, '', 11, 12),
+    ...overrides
   };
 };

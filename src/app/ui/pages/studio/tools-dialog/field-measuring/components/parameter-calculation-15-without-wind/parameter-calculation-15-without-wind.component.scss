@@ -26,6 +26,10 @@ dd {
       'updateMode updateMode . . .'
       'parameterPapoto parameterUncertaintyPapoto cableTemperature15C cableTemperatureUncertainty15C .';
 
+    &:has(dl) {
+      align-items: start;
+    }
+
     .updateMode {
       grid-area: updateMode;
     }

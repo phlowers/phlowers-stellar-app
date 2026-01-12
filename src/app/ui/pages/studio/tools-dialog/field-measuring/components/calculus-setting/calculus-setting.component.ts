@@ -1,4 +1,4 @@
-import { Component, model } from '@angular/core';
+import { Component, model, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
@@ -21,6 +21,7 @@ import { leftSupportOption } from '../../mock-data';
 })
 export class CalculusSettingComponent {
   measureData = model.required<FieldMeasure>();
+  selectedSpan = input.required<number[]>();
   selectedCalculusType = 'PAPOTO';
   leftSupportOption = leftSupportOption;
 }

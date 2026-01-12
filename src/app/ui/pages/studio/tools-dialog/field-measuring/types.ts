@@ -12,7 +12,7 @@ export interface FieldMeasure {
   altitude: number | null;
   azimuth: number | null;
   date: Date | null;
-  time: string | null;
+  time: Date | null;
   season: 'summer' | 'winter';
   ambientTemperature: number | null;
   windSpeed: number | null;

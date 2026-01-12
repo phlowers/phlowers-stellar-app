@@ -35,14 +35,10 @@ import { v4 as uuidv4 } from 'uuid';
   templateUrl: './parameter-calculation-15-without-wind.component.html',
   styleUrl: './parameter-calculation-15-without-wind.component.scss',
   animations: [
-    trigger('expandCollapse', [
+    trigger('expand', [
       transition(':enter', [
         style({ height: 0, opacity: 0, overflow: 'hidden' }),
         animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ overflow: 'hidden' }),
-        animate('300ms ease-in', style({ height: 0, opacity: 0 }))
       ])
     ])
   ]
@@ -132,12 +128,18 @@ export class ParameterCalculation15WithoutWindComponent {
   onCreateInitialCondition(type: 'minus' | 'nominal' | 'plus') {
     // TODO: Implement create initial condition functionality
     console.log('Create initial condition:', type);
-    const baseParameter =
-      type === 'minus'
-        ? this.parameter15CResult()?.parameter15CMinusUncertainty
-        : type === 'nominal'
-          ? this.parameter15CResult()?.parameter15C
-          : this.parameter15CResult()?.parameter15CPlusUncertainty;
+
+    const result = this.parameter15CResult();
+    let baseParameter: number | undefined;
+
+    if (type === 'minus') {
+      baseParameter = result?.parameter15CMinusUncertainty;
+    } else if (type === 'nominal') {
+      baseParameter = result?.parameter15C;
+    } else {
+      baseParameter = result?.parameter15CPlusUncertainty;
+    }
+
     if (!baseParameter) {
       return;
     }
