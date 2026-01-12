@@ -47,9 +47,3 @@ export const LEFT_SUPPORT_OPTIONS: SelectOption[] = [
   { label: $localize`Support 2`, value: 'support2' },
   { label: $localize`Support 3`, value: 'support3' }
 ];
-
-export const CABLE_OPTIONS: SelectOption[] = [
-  { label: 'ASTER570', value: 'ASTER570' },
-  { label: 'ASTER490', value: 'ASTER490' },
-  { label: 'ASTER380', value: 'ASTER380' }
-];

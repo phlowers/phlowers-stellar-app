@@ -26,3 +26,8 @@ input[type='number'] {
     margin: 0;
   }
 }
+
+del {
+  text-decoration: none;
+  color: var(--star-dust-400);
+}
