@@ -7,6 +7,7 @@ import {
   signal,
   untracked
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -20,6 +21,7 @@ import { SelectOption } from '../../constants';
 @Component({
   selector: 'app-header',
   imports: [
+    DecimalPipe,
     FormsModule,
     SelectModule,
     InputTextModule,
@@ -132,15 +134,14 @@ export class HeaderComponent {
       return;
     }
 
-    // Calculate mid value and round to 2 decimals
+    // Calculate mid value
     const midValue =
       (leftSupport.attachmentHeight + rightSupport.attachmentHeight) / 2;
-    const roundedMidValue = Math.round(midValue * 100) / 100;
 
     // Only update if the altitude has actually changed to prevent infinite loops
     const currentAltitude = untracked(() => this.measureData().altitude);
-    if (currentAltitude !== roundedMidValue) {
-      this.onFieldChange('altitude', roundedMidValue);
+    if (currentAltitude !== midValue) {
+      this.onFieldChange('altitude', midValue);
     }
   }
 

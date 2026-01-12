@@ -80,7 +80,7 @@ export class PapotoComponent {
     const [leftIndex] = span;
     const value = litData[field][leftIndex];
 
-    return value !== undefined ? Math.round(value * 100) / 100 : null;
+    return value ?? null;
   }
 
   // Computed property for calculated span length

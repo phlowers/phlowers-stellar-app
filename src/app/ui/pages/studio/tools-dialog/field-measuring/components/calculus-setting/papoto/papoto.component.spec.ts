@@ -290,17 +290,6 @@ describe('Papoto component', () => {
       expect(component.calculatedSpanLength()).toBe(100);
     });
 
-    it('should return span length rounded to 2 decimal places', () => {
-      plotServiceMock.litData.set({
-        span_length: [123.456789, 150, 200],
-        elevation: [5.5, 10.75, -3.25]
-      } as any);
-      componentRef.setInput('selectedSpan', [0, 1]);
-      fixture.detectChanges();
-
-      expect(component.calculatedSpanLength()).toBe(123.46);
-    });
-
     it('should update when selectedSpan changes to different index', () => {
       componentRef.setInput('selectedSpan', [0, 1]);
       fixture.detectChanges();

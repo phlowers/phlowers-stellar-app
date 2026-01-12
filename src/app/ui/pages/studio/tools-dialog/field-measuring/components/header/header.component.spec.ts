@@ -8,6 +8,7 @@ import { FieldMeasure } from '../../types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { createTestMeasureData } from '../../helpers';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { Support } from '@core/data/database/interfaces/support';
 
 @Component({
   selector: 'app-icon',
@@ -322,9 +323,30 @@ describe('HeaderComponent', () => {
       // Create a new component instance to capture initialization
       const newFixture = TestBed.createComponent(HeaderComponent);
       const newComponent = newFixture.componentInstance;
+      const plotService = TestBed.inject(PlotService);
+
+      // Mock PlotService to return a valid section with supports
+      const mockSection = {
+        supports: [
+          { attachmentHeight: 10 } as Partial<Support>,
+          { attachmentHeight: 12 } as Partial<Support>,
+          { attachmentHeight: 15 } as Partial<Support>
+        ]
+      };
+      jest
+        .spyOn(plotService, 'section')
+        .mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
+      jest
+        .spyOn(plotService, 'plotOptions')
+        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
+          typeof plotService.plotOptions
+        >);
 
       newComponent.fieldChange.subscribe(fieldChangeSpy);
-      newFixture.componentRef.setInput('measureData', mockMeasureData);
+
+      // Set measure data without a span
+      const measureDataWithoutSpan = { ...mockMeasureData, span: null };
+      newFixture.componentRef.setInput('measureData', measureDataWithoutSpan);
       newFixture.componentRef.setInput('spanOptions', mockSpanOptions);
       newFixture.detectChanges();
 
@@ -380,26 +402,6 @@ describe('HeaderComponent', () => {
       fixture.detectChanges();
 
       // Should calculate (10.5 + 12.5) / 2 = 11.5
-      expect(fieldChangeSpy).toHaveBeenCalledWith({
-        field: 'altitude',
-        value: 11.5
-      });
-    });
-
-    it('should round altitude to 2 decimal places', () => {
-      const fieldChangeSpy = jest.fn();
-      component.fieldChange.subscribe(fieldChangeSpy);
-
-      const mockSection = {
-        supports: [{ attachmentHeight: 10.333 }, { attachmentHeight: 12.667 }]
-      };
-
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
-
-      component.onSpanChange([0, 1]);
-      fixture.detectChanges();
-
-      // Should calculate (10.333 + 12.667) / 2 = 11.5
       expect(fieldChangeSpy).toHaveBeenCalledWith({
         field: 'altitude',
         value: 11.5
