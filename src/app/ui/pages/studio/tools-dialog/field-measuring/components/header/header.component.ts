@@ -16,7 +16,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FieldMeasure } from '../../types';
-import { SelectOption } from '../../constants';
 
 @Component({
   selector: 'app-header',
@@ -34,12 +33,10 @@ import { SelectOption } from '../../constants';
 })
 export class HeaderComponent {
   measureData = input.required<FieldMeasure>();
-  spanOptions = input.required<SelectOption[]>();
   fieldChange = output<{
     field: keyof FieldMeasure;
     value: FieldMeasure[keyof FieldMeasure];
   }>();
-  spanChange = output<number[]>();
 
   readonly spans = computed<
     { label: string; value: number[]; supports: number[] }[]
@@ -105,9 +102,7 @@ export class HeaderComponent {
   onSpanChange(span: number[]): void {
     // Emit field change for span
     this.onFieldChange('span', span);
-
-    // Emit span change to parent component
-    this.spanChange.emit(span);
+    this.onFieldChange('leftSupport', null);
 
     // Calculate and update altitude
     this.calculateAltitude(span);

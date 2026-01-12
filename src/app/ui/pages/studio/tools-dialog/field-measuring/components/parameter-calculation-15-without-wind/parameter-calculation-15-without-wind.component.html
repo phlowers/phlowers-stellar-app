@@ -26,7 +26,7 @@
     <p-selectbutton
       [options]="updateModeOptions"
       [ngModel]="measureData().updateMode15C"
-      (onChange)="updateField('updateMode15C', $event.value)"
+      (onChange)="updateMeasureData('updateMode15C', $event.value)"
       optionLabel="label"
       optionValue="value"
       allowEmpty="false"
@@ -42,8 +42,16 @@
           id="parameterPapoto-input"
           type="number"
           pInputText
-          [ngModel]="measureData().parameterPapoto"
-          (ngModelChange)="updateField('parameterPapoto', $event)"
+          [ngModel]="
+            measureData().manualParameterCalculation15CWithoutWind
+              ?.parameterPapoto ?? null
+          "
+          (ngModelChange)="
+            updateManualParameterCalculation15CWithoutWind(
+              'parameterPapoto',
+              $event
+            )
+          "
           [fluid]="true"
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
@@ -60,11 +68,9 @@
           id="parameterUncertaintyPapoto-input"
           type="number"
           pInputText
-          [ngModel]="measureData().parameterUncertaintyPapoto"
-          (ngModelChange)="updateField('parameterUncertaintyPapoto', $event)"
+          disabled
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
-          disabled
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
@@ -79,8 +85,16 @@
           id="cableTemperature15C-input"
           type="number"
           pInputText
-          [ngModel]="measureData().cableTemperature15C"
-          (ngModelChange)="updateField('cableTemperature15C', $event)"
+          [ngModel]="
+            measureData().manualParameterCalculation15CWithoutWind
+              ?.cableTemperature15C ?? null
+          "
+          (ngModelChange)="
+            updateManualParameterCalculation15CWithoutWind(
+              'cableTemperature15C',
+              $event
+            )
+          "
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
         />
@@ -97,13 +111,18 @@
           id="cableTemperatureUncertainty15C-input"
           type="number"
           pInputText
-          [ngModel]="measureData().cableTemperatureUncertainty15C"
+          [ngModel]="
+            measureData().manualParameterCalculation15CWithoutWind
+              ?.cableTemperatureUncertainty15C ?? null
+          "
           (ngModelChange)="
-            updateField('cableTemperatureUncertainty15C', $event)
+            updateManualParameterCalculation15CWithoutWind(
+              'cableTemperatureUncertainty15C',
+              $event
+            )
           "
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
-          disabled
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
@@ -112,7 +131,12 @@
     <dl class="contents">
       <div class="parameterPapoto">
         <dt id="parameterPapoto-display" i18n>Parameter Papoto</dt>
-        <dd>{{ measureData().parameterPapoto }}</dd>
+        <dd>
+          {{
+            (measureData().outputs.papoto?.parameter | number: '1.0-3') ?? '-'
+          }}
+          m
+        </dd>
       </div>
 
       <div class="parameterUncertaintyPapoto">
@@ -120,13 +144,16 @@
           <del>Parameter uncertainty Papoto</del>
         </dt>
         <dd>
-          <del>{{ measureData().parameterUncertaintyPapoto }}</del>
+          <del>{{ '-' }}</del>
         </dd>
       </div>
 
       <div class="cableTemperature15C">
         <dt id="cableTemperature15C-display" i18n>Cable temperature at 15°C</dt>
-        <dd>{{ measureData().cableTemperature15C }} °C</dd>
+        <dd>
+          {{ measureData().outputs.cableTemperature?.cableTemperature ?? '-' }}
+          °C
+        </dd>
       </div>
 
       <div class="cableTemperatureUncertainty15C">
@@ -134,7 +161,13 @@
           <del>Cable temperature uncertainty at 15°C</del>
         </dt>
         <dd>
-          <del>{{ measureData().cableTemperatureUncertainty15C }} °C</del>
+          <del
+            >{{
+              measureData().outputs.cableTemperature
+                ?.cableTemperatureUncertainty ?? '-'
+            }}
+            °C</del
+          >
         </dd>
       </div>
     </dl>
@@ -148,7 +181,7 @@
   </button>
 </div>
 
-@if (parameter15CResult()) {
+@if (measureData().outputs.parameter15C) {
   <div class="parameter-calculation-15-without-wind__results" [@expand]>
     <h2 class="parameter-calculation-15-without-wind__results__title" i18n>
       Results :
@@ -157,15 +190,19 @@
     <dl class="parameter-calculation-15-without-wind__results__list">
       <div class="parameter15CMinusUncertainty">
         <dt i18n>Parameter at 15°C - uncertainty</dt>
-        <dd>{{ parameter15CResult()?.parameter15CMinusUncertainty }}</dd>
+        <dd>
+          {{ measureData().outputs.parameter15C?.parameter15CMinusUncertainty }}
+        </dd>
       </div>
       <div class="parameter15C">
         <dt i18n>Parameter at 15°C</dt>
-        <dd>{{ parameter15CResult()?.parameter15C }}</dd>
+        <dd>{{ measureData().outputs.parameter15C?.parameter15C }}</dd>
       </div>
       <div class="parameter15CPlusUncertainty">
         <dt i18n>Parameter at 15°C + uncertainty</dt>
-        <dd>{{ parameter15CResult()?.parameter15CPlusUncertainty }}</dd>
+        <dd>
+          {{ measureData().outputs.parameter15C?.parameter15CPlusUncertainty }}
+        </dd>
       </div>
     </dl>
 

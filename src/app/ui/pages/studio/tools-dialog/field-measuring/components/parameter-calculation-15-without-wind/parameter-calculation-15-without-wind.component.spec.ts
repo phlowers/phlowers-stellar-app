@@ -95,6 +95,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
     componentRef.setInput('measureData', createTestMeasureData());
+    componentRef.setInput('papotoResult', null);
+    componentRef.setInput('temperatureCalculationResult', null);
     fixture.detectChanges();
   });
 
@@ -110,9 +112,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
   });
 
   it('should update measureData when form values change', () => {
-    component.updateField('parameterPapoto', 1800);
-    component.updateField('parameterUncertaintyPapoto', 15);
-    component.updateField('cableTemperature15C', 50);
+    component.updateMeasureData('parameterPapoto', 1800);
+    component.updateMeasureData('parameterUncertaintyPapoto', 15);
+    component.updateMeasureData('cableTemperature15C', 50);
 
     const data = component.measureData();
     expect(data.parameterPapoto).toBe(1800);
@@ -123,61 +125,144 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
   it('should toggle update mode', () => {
     expect(component.measureData().updateMode15C).toBe('auto');
 
-    component.updateField('updateMode15C', 'manual');
+    component.updateMeasureData('updateMode15C', 'manual');
     expect(component.measureData().updateMode15C).toBe('manual');
 
-    component.updateField('updateMode15C', 'auto');
+    component.updateMeasureData('updateMode15C', 'auto');
     expect(component.measureData().updateMode15C).toBe('auto');
   });
 
-  it('should calculate parameter 15C and show results', async () => {
-    // Set all required fields for manual mode
-    component.updateField('updateMode15C', 'manual');
-    component.updateField('parameterPapoto', 1700);
-    component.updateField('parameterUncertaintyPapoto', 12);
-    component.updateField('cableTemperature15C', 45);
-    component.updateField('cableTemperatureUncertainty15C', 3);
+  it('should call workerPythonService with correct parameters when calculating parameter 15C', async () => {
+    const mockResult = {
+      parameter15CMinusUncertainty: 1885,
+      parameter15C: 1900,
+      parameter15CPlusUncertainty: 1915
+    };
 
-    expect(component.parameter15CResult()).toBe(null);
-    expect(component.parameter15CError()).toBe(false);
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: mockResult,
+      error: null
+    });
+
+    // Set all required fields for manual mode
+    component.updateMeasureData('updateMode15C', 'manual');
+    component.updateManualParameterCalculation15CWithoutWind(
+      'parameterPapoto',
+      1700
+    );
+    component.updateManualParameterCalculation15CWithoutWind(
+      'cableTemperature15C',
+      45
+    );
+    component.updateManualParameterCalculation15CWithoutWind(
+      'cableTemperatureUncertainty15C',
+      3
+    );
+
+    // Set top-level fields for the calculation to read
+    component.updateMeasureData('parameterPapoto', 1700);
+    component.updateMeasureData('parameterUncertaintyPapoto', 12);
+    component.updateMeasureData('cableTemperature15C', 45);
+    component.updateMeasureData('cableTemperatureUncertainty15C', 3);
+
+    fixture.detectChanges();
 
     await component.calculateParameter15C();
 
-    expect(component.parameter15CResult()).toBeTruthy();
-    expect(component.parameter15CResult()?.parameter15C).toBe(1900);
-    expect(component.parameter15CResult()?.parameter15CMinusUncertainty).toBe(
-      1885
+    expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(
+      expect.any(String),
+      {
+        parameterPapoto: 1700,
+        parameterUncertaintyPapoto: 12,
+        cableTemperature15C: 45,
+        cableTemperatureUncertainty15C: 3
+      }
     );
-    expect(component.parameter15CResult()?.parameter15CPlusUncertainty).toBe(
-      1915
-    );
+    expect(component.parameter15CError()).toBe(false);
   });
 
   it('should validate form correctly for manual mode', () => {
-    component.updateField('updateMode15C', 'manual');
-    component.updateField('parameterPapoto', null);
-    component.updateField('parameterUncertaintyPapoto', null);
-    component.updateField('cableTemperature15C', null);
-    component.updateField('cableTemperatureUncertainty15C', null);
-
+    component.updateMeasureData('updateMode15C', 'manual');
+    // After setting to manual, manualParameterCalculation15CWithoutWind is set to null
+    // So isFormValid should be false
     expect(component.isFormValid()).toBe(false);
 
-    component.updateField('parameterPapoto', 1700);
-    component.updateField('parameterUncertaintyPapoto', 12);
-    component.updateField('cableTemperature15C', 45);
-    component.updateField('cableTemperatureUncertainty15C', 3);
+    // Now set the required fields using the correct method
+    component.updateManualParameterCalculation15CWithoutWind(
+      'parameterPapoto',
+      1700
+    );
+    component.updateManualParameterCalculation15CWithoutWind(
+      'parameterUncertaintyPapoto',
+      12
+    );
+    component.updateManualParameterCalculation15CWithoutWind(
+      'cableTemperature15C',
+      45
+    );
+    component.updateManualParameterCalculation15CWithoutWind(
+      'cableTemperatureUncertainty15C',
+      3
+    );
 
     expect(component.isFormValid()).toBe(true);
   });
 
   it('should validate form correctly for auto mode', () => {
-    component.updateField('updateMode15C', 'auto');
+    component.measureData.update((d) => ({
+      ...d,
+      outputs: {
+        ...d.outputs,
+        papoto: {
+          parameter: 1.5,
+          parameter_1_2: 2,
+          parameter_2_3: 2.5,
+          parameter_1_3: 3,
+          check_validity: true
+        },
+        cableTemperature: {
+          cableSolarFlux: 123,
+          cableTemperature: 50,
+          cableTemperatureUncertainty: 3
+        }
+      }
+    }));
+    component.updateMeasureData('updateMode15C', 'auto');
 
     expect(component.isFormValid()).toBe(true);
   });
 
   describe('Initial Condition Creation', () => {
     beforeEach(async () => {
+      const mockResult = {
+        parameter15CMinusUncertainty: 1885,
+        parameter15C: 1900,
+        parameter15CPlusUncertainty: 1915
+      };
+
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: mockResult,
+        error: null
+      });
+
+      component.updateMeasureData('updateMode15C', 'manual');
+      component.updateManualParameterCalculation15CWithoutWind(
+        'parameterPapoto',
+        1700
+      );
+      component.updateManualParameterCalculation15CWithoutWind(
+        'parameterUncertaintyPapoto',
+        12
+      );
+      component.updateManualParameterCalculation15CWithoutWind(
+        'cableTemperature15C',
+        45
+      );
+      component.updateManualParameterCalculation15CWithoutWind(
+        'cableTemperatureUncertainty15C',
+        3
+      );
+
       await component.calculateParameter15C();
     });
 
@@ -209,7 +294,10 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     });
 
     it('should not open modal when parameter15CResult is null', () => {
-      component.parameter15CResult.set(null);
+      component.measureData.update((d) => ({
+        ...d,
+        outputs: { ...d.outputs, parameter15C: null }
+      }));
 
       component.onCreateInitialCondition('minus');
 

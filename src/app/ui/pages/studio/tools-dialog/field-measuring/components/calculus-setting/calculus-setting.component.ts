@@ -1,11 +1,10 @@
-import { Component, model, input } from '@angular/core';
+import { Component, model, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
 import { TangentAimingComponent } from './tangent-aiming/tangent-aiming.component';
 import { PepComponent } from './pep/pep.component';
 import { FieldMeasure } from '../../types';
-import { leftSupportOption } from '../../mock-data';
 
 @Component({
   selector: 'app-calculus-setting',
@@ -21,7 +20,15 @@ import { leftSupportOption } from '../../mock-data';
 })
 export class CalculusSettingComponent {
   measureData = model.required<FieldMeasure>();
-  selectedSpan = input.required<number[]>();
   selectedCalculusType = 'PAPOTO';
-  leftSupportOption = leftSupportOption;
+  leftSupportOption = computed(() => {
+    const span = this.measureData().span;
+    if (!span) {
+      return [];
+    }
+    return span.map((s) => ({
+      label: (s + 1).toString(),
+      value: s.toString()
+    }));
+  });
 }

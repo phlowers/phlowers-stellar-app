@@ -139,23 +139,38 @@
   </button>
 </div>
 
-@if (temperatureResult()) {
+@if (measureData().outputs.cableTemperature) {
   <div class="temperature-calculation__results" [@expand]>
     <h2 class="temperature-calculation__results__title" i18n>Results :</h2>
 
     <dl class="temperature-calculation__results__list">
       <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
-        <dd>{{ temperatureResult()?.cableTemperature }} °C</dd>
+        <dd>
+          {{ measureData().outputs.cableTemperature?.cableTemperature }} °C
+        </dd>
       </div>
       <div class="incertainCableTemperature">
         <dt i18n>Incertain cable temperature</dt>
-        <dd>{{ temperatureResult()?.cableTemperatureUncertainty }} °C</dd>
+        <dd>
+          {{
+            measureData().outputs.cableTemperature?.cableTemperatureUncertainty
+          }}
+          °C
+        </dd>
       </div>
       <div class="solarFlux">
         <dt i18n>Solar flux on the cable</dt>
-        <dd>{{ temperatureResult()?.cableSolarFlux }} W/m²</dd>
+        <dd>
+          {{ measureData().outputs.cableTemperature?.cableSolarFlux }} W/m²
+        </dd>
       </div>
     </dl>
+  </div>
+}
+
+@if (temperatureCalculationError()) {
+  <div class="temperature-calculation__error" [@expandCollapse]>
+    <p i18n>An error occurred while calculating the temperature</p>
   </div>
 }

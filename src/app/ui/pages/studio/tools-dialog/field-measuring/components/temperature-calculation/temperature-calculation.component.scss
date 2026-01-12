@@ -28,6 +28,7 @@ dd {
 
   &__form {
     @extend %tools-grid-layout;
+    align-items: start;
     grid-template-areas:
       'conductor transit . . .'
       'ambientTemp windSpeed windDirection windIncidence windIncidence'
@@ -132,5 +133,9 @@ dd {
         grid-area: incertainCableTemperature;
       }
     }
+  }
+
+  &__error {
+    @apply text-red-500;
   }
 }
