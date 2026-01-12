@@ -48,12 +48,14 @@ export class AttachmentSetModalComponent implements OnInit {
   supportName = signal<string | undefined>(undefined);
   armLength = signal<number | undefined>(undefined);
   heightBelowConsole = signal<number | undefined>(undefined);
+  towerModel = signal<string | undefined>(undefined);
   validateForm = output<{
     uuid: string;
     supportName: string;
     attachmentSet: number;
     armLength: number;
     heightBelowConsole: number;
+    towerModel: string;
   }>();
   coordinates = signal<(number | undefined)[][]>([]);
   attachmentSetNumbers = signal<number[]>([]);
@@ -85,7 +87,7 @@ export class AttachmentSetModalComponent implements OnInit {
   constructor(private readonly attachmentService: AttachmentService) {
     effect(() => {
       if (this.isOpen()) {
-        this.resetValues();
+        this.resetValues(true);
         const name = this.support()?.name;
         if (name) {
           this.supportName.set(name);
@@ -97,6 +99,7 @@ export class AttachmentSetModalComponent implements OnInit {
           this.heightBelowConsole.set(
             this.support()?.heightBelowConsole ?? undefined
           );
+          this.towerModel.set(this.support()?.towerModel ?? undefined);
         }
       }
     });
@@ -113,7 +116,8 @@ export class AttachmentSetModalComponent implements OnInit {
       attachmentSet: this.attachmentSet() ?? 0,
       armLength: this.armLength() || 0,
       heightBelowConsole: this.heightBelowConsole() || 0,
-      uuid: this.support()?.uuid || ''
+      uuid: this.support()?.uuid || '',
+      towerModel: this.towerModel() || ''
     });
     this.onVisibleChange();
   }
@@ -133,12 +137,15 @@ export class AttachmentSetModalComponent implements OnInit {
     this.attachmentsFilterTable.set(items);
   }
 
-  resetValues() {
+  resetValues(resetSupportName: boolean) {
     this.armLength.set(undefined);
     this.heightBelowConsole.set(undefined);
     this.attachmentSet.set(undefined);
-    this.supportName.set(undefined);
-    this.coordinates.set([]);
+    this.towerModel.set(undefined);
+    if (resetSupportName) {
+      this.supportName.set(undefined);
+      this.coordinates.set([]);
+    }
     this.getData();
   }
 
@@ -148,7 +155,7 @@ export class AttachmentSetModalComponent implements OnInit {
 
   async onAttachnementSelect(event: any, key: keyof Attachment) {
     if (event.value === null || event.value === undefined) {
-      this.resetValues();
+      this.resetValues(key === 'support_name');
       return;
     }
     if (key === 'support_name') {
@@ -169,6 +176,7 @@ export class AttachmentSetModalComponent implements OnInit {
       if (items[0]) {
         this.armLength.set(items[0].cross_arm_length);
         this.heightBelowConsole.set(items[0].attachment_altitude);
+        this.towerModel.set(items[0].support_tower);
       }
     }
   }

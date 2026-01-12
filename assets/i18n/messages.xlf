@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
   <file id="ngi18n" original="ng.template">
     <unit id="3521084103654700903">
@@ -308,7 +308,9 @@
     </unit>
     <unit id="8283592065951885988">
       <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a new study </source>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
+            type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;"
+            dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;" /> Create a new study </source>
       </segment>
     </unit>
     <unit id="983324339375029355">
@@ -323,12 +325,16 @@
     </unit>
     <unit id="6016428309492185040">
       <segment>
-        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></source>
+        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON"
+            equivEnd="CLOSE_TAG_APP_ICON" type="other"
+            dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"
+            dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" /></source>
       </segment>
     </unit>
     <unit id="2640561782983672481">
       <segment>
-        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!</source>
+        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please
+          contact us to share your ideas and feedbacks to help us upgrade this application!</source>
       </segment>
     </unit>
     <unit id="1444333919089743258">
@@ -521,14 +527,166 @@
         <source> File formats: .csv, .clst </source>
       </segment>
     </unit>
+    <unit id="7022070615528435141">
+      <segment>
+        <source>Delete</source>
+      </segment>
+    </unit>
+    <unit id="6621329748219109148">
+      <segment>
+        <source>Duplicate</source>
+      </segment>
+    </unit>
+    <unit id="7585826646011739428">
+      <segment>
+        <source>Edit</source>
+      </segment>
+    </unit>
+    <unit id="6536020395223120161">
+      <segment>
+        <source> Error </source>
+      </segment>
+    </unit>
+    <unit id="6202213245388240559">
+      <segment>
+        <source>Study updated</source>
+      </segment>
+    </unit>
+    <unit id="8337097439903063887">
+      <segment>
+        <source>Study created</source>
+      </segment>
+    </unit>
+    <unit id="1170667643695316061">
+      <segment>
+        <source>Create a study section</source>
+      </segment>
+    </unit>
+    <unit id="928951684182090210">
+      <segment>
+        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
+            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
+          *</pc></source>
+      </segment>
+    </unit>
+    <unit id="1289308098980826210">
+      <segment>
+        <source>Section type</source>
+      </segment>
+    </unit>
+    <unit id="128932358295516526">
+      <segment>
+        <source>Section Deleted</source>
+      </segment>
+    </unit>
+    <unit id="1386766078260547788">
+      <segment>
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
+            type="other"
+            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
+            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
+      </segment>
+    </unit>
+    <unit id="3569799587833040802">
+      <segment>
+        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
+            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
+          *</pc></source>
+      </segment>
+    </unit>
+    <unit id="1599802675385906175">
+      <segment>
+        <source>Add support after</source>
+      </segment>
+    </unit>
+    <unit id="1614612576043079687">
+      <segment>
+        <source>Shrink menu</source>
+      </segment>
+    </unit>
+    <unit id="1653305415865364716">
+      <segment>
+        <source>Study updated successfully</source>
+      </segment>
+    </unit>
+    <unit id="1949800506879332767">
+      <segment>
+        <source>Section Name</source>
+      </segment>
+    </unit>
+    <unit id="2102825898069375693">
+      <segment>
+        <source>Menu</source>
+      </segment>
+    </unit>
+    <unit id="2233560223291461480">
+      <segment>
+        <source>Manual</source>
+      </segment>
+    </unit>
+    <unit id="479690504462006012">
+      <segment>
+        <source>Initial condition</source>
+      </segment>
+    </unit>
+    <unit id="2509141182388535183">
+      <segment>
+        <source>View</source>
+      </segment>
+    </unit>
+    <unit id="2593007815199532062">
+      <segment>
+        <source>Section</source>
+      </segment>
+    </unit>
+    <unit id="2638469548137871317">
+      <segment>
+        <source>Initial condition name</source>
+      </segment>
+    </unit>
+    <unit id="2925129304308690882">
+      <segment>
+        <source>Last modified</source>
+      </segment>
+    </unit>
+    <unit id="2981219928115418649">
+      <segment>
+        <source>Link</source>
+      </segment>
+    </unit>
+    <unit id="3049551355280538164">
+      <segment>
+        <source>Initial Condition Added</source>
+      </segment>
+    </unit>
+    <unit id="3102779920122732727">
+      <segment>
+        <source> Loading </source>
+      </segment>
+    </unit>
+    <unit id="5758842248880389182">
+      <segment>
+        <source> Chain V </source>
+      </segment>
+    </unit>
+    <unit id="3193976279273491157">
+      <segment>
+        <source>Actions</source>
+      </segment>
+    </unit>
+    <unit id="8155429097661917791">
+      <segment>
+        <source> Base parameter </source>
+      </segment>
+    </unit>
+    <unit id="3533138925800017240">
+      <segment>
+        <source>Study Duplicated</source>
+      </segment>
+    </unit>
     <unit id="3799093232488965923">
       <segment>
         <source> Open </source>
-      </segment>
-    </unit>
-    <unit id="8217377030077972135">
-      <segment>
-        <source>delete study</source>
       </segment>
     </unit>
     <unit id="3440092522520088595">
@@ -566,9 +724,12 @@
         <source>Error reading file</source>
       </segment>
     </unit>
-    <unit id="4648900870671159218">
+    <unit id="1170248653308387010">
       <segment>
-        <source>Success</source>
+        <source> LIT designation <pc id="0" equivStart="START_TAG_APP_ICON"
+            equivEnd="CLOSE_TAG_APP_ICON" type="other"
+            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
+            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
       </segment>
     </unit>
     <unit id="1079181845691356032">
@@ -578,7 +739,8 @@
     </unit>
     <unit id="6738867123972990167">
       <segment>
-        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
+        <source>Study <ph id="0" equiv="PH" disp="study.title" /> already exists. Do you want to
+          replace it?</source>
       </segment>
     </unit>
     <unit id="2807800733729323332">
@@ -603,7 +765,9 @@
     </unit>
     <unit id="5231861831935768001">
       <segment>
-        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
+            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
+          *</pc></source>
       </segment>
     </unit>
     <unit id="927660422911816633">
@@ -631,74 +795,30 @@
         <source>Validate</source>
       </segment>
     </unit>
-    <unit id="8337097439903063887">
-      <segment>
-        <source>Study created</source>
-      </segment>
-    </unit>
     <unit id="5519001504653726625">
       <segment>
         <source>Study created successfully</source>
       </segment>
     </unit>
-    <unit id="6202213245388240559">
-      <segment>
-        <source>Study updated</source>
-      </segment>
-    </unit>
-    <unit id="1653305415865364716">
-      <segment>
-        <source>Study updated successfully</source>
-      </segment>
-    </unit>
-    <unit id="1386766078260547788">
-      <segment>
-        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-      </segment>
-    </unit>
     <unit id="7282804341793038828">
       <segment>
-        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-      </segment>
-    </unit>
-    <unit id="6045024918689189924">
-      <segment>
-        <source> Creation date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;created_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
+            type="other"
+            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
+            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
       </segment>
     </unit>
     <unit id="5375905790663497716">
       <segment>
-        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-      </segment>
-    </unit>
-    <unit id="4665164818576576044">
-      <segment>
-        <source> LIT code <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-      </segment>
-    </unit>
-    <unit id="2463238050344760316">
-      <segment>
-        <source> Shared <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;shareable&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-      </segment>
-    </unit>
-    <unit id="3193976279273491157">
-      <segment>
-        <source>Actions</source>
-      </segment>
-    </unit>
-    <unit id="6621329748219109148">
-      <segment>
-        <source>Duplicate</source>
+        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON"
+            equivEnd="CLOSE_TAG_APP_ICON" type="other"
+            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
+            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
       </segment>
     </unit>
     <unit id="7462301153729425254">
       <segment>
         <source>Export</source>
-      </segment>
-    </unit>
-    <unit id="7022070615528435141">
-      <segment>
-        <source>Delete</source>
       </segment>
     </unit>
     <unit id="3922504333199040096">
@@ -719,7 +839,7 @@
     <unit id="187187500641108332">
       <segment>
         <source>
-          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}" />
         </source>
       </segment>
     </unit>
@@ -728,7 +848,7 @@
         <source>Expand details</source>
       </segment>
     </unit>
-    <unit id="3980974174191771572">
+    <unit id="8384742917026482252">
       <segment>
         <source>VTL (under chain)</source>
       </segment>
@@ -1063,11 +1183,6 @@
         <source>Link - ID</source>
       </segment>
     </unit>
-    <unit id="6760730176467866326">
-      <segment>
-        <source>Branch - ID</source>
-      </segment>
-    </unit>
     <unit id="7607770781665288883">
       <segment>
         <source>Create a charge case</source>
@@ -1095,7 +1210,8 @@
     </unit>
     <unit id="2694623513112556993">
       <segment>
-        <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
+        <source> The attachment set and the arm length (m) will be automatically filled in the
+          table. </source>
       </segment>
     </unit>
     <unit id="4262495966859034995">
@@ -1453,16 +1569,6 @@
         <source>Load/marking</source>
       </segment>
     </unit>
-    <unit id="3413004253239957216">
-      <segment>
-        <source>Single</source>
-      </segment>
-    </unit>
-    <unit id="4061312488520540569">
-      <segment>
-        <source>Double</source>
-      </segment>
-    </unit>
     <unit id="1616102757855967475">
       <segment>
         <source>All</source>
@@ -1798,11 +1904,6 @@
         <source>Auto</source>
       </segment>
     </unit>
-    <unit id="2233560223291461480">
-      <segment>
-        <source>Manual</source>
-      </segment>
-    </unit>
     <unit id="7288576464171916715">
       <segment>
         <source>Initial Condition added and state generated</source>
@@ -2040,7 +2141,10 @@
     </unit>
     <unit id="794617384648959179">
       <segment>
-        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></source>
+        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
+            type="other"
+            dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"
+            dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" /></source>
       </segment>
     </unit>
     <unit id="1724907302012419507">
@@ -2058,11 +2162,6 @@
         <source>Ground &amp; obstacles</source>
       </segment>
     </unit>
-    <unit id="3533138925800017240">
-      <segment>
-        <source>Study Duplicated</source>
-      </segment>
-    </unit>
     <unit id="6600961151364207736">
       <segment>
         <source>Section Updated</source>
@@ -2073,11 +2172,6 @@
         <source>Section Created</source>
       </segment>
     </unit>
-    <unit id="128932358295516526">
-      <segment>
-        <source>Section Deleted</source>
-      </segment>
-    </unit>
     <unit id="7697593277738514956">
       <segment>
         <source>Section Duplicated</source>
@@ -2086,11 +2180,6 @@
     <unit id="8157568719212294147">
       <segment>
         <source>Initial Condition Updated</source>
-      </segment>
-    </unit>
-    <unit id="3049551355280538164">
-      <segment>
-        <source>Initial Condition Added</source>
       </segment>
     </unit>
     <unit id="5722345326918734257">
@@ -2143,11 +2232,6 @@
         <source>Base temperature (°C)</source>
       </segment>
     </unit>
-    <unit id="7585826646011739428">
-      <segment>
-        <source>Edit</source>
-      </segment>
-    </unit>
     <unit id="9010681967368917708">
       <segment>
         <source>Create the IC and generate the state</source>
@@ -2173,16 +2257,6 @@
         <source> Graphical view </source>
       </segment>
     </unit>
-    <unit id="2593007815199532062">
-      <segment>
-        <source>Section</source>
-      </segment>
-    </unit>
-    <unit id="3569799587833040802">
-      <segment>
-        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
-      </segment>
-    </unit>
     <unit id="2037406622728640058">
       <segment>
         <source>Section name must be unique.</source>
@@ -2190,7 +2264,9 @@
     </unit>
     <unit id="6414866325880172359">
       <segment>
-        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
+            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
+          *</pc></source>
       </segment>
     </unit>
     <unit id="5532577047370657996">
@@ -2198,19 +2274,11 @@
         <source>Electric phase number</source>
       </segment>
     </unit>
-    <unit id="928951684182090210">
-      <segment>
-        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
-      </segment>
-    </unit>
     <unit id="2715728438895385250">
       <segment>
-        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
-      </segment>
-    </unit>
-    <unit id="1289308098980826210">
-      <segment>
-        <source>Section type</source>
+        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
+            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
+          *</pc></source>
       </segment>
     </unit>
     <unit id="2820133611314033915">
@@ -2226,11 +2294,6 @@
     <unit id="3574421572547202133">
       <segment>
         <source>Maintenance team</source>
-      </segment>
-    </unit>
-    <unit id="2981219928115418649">
-      <segment>
-        <source>Link</source>
       </segment>
     </unit>
     <unit id="5330590276782069905">
@@ -2316,11 +2379,6 @@
     <unit id="7929145588930827141">
       <segment>
         <source> Arm l. </source>
-      </segment>
-    </unit>
-    <unit id="5758842248880389182">
-      <segment>
-        <source> Chain V </source>
       </segment>
     </unit>
     <unit id="5763255287644465636">
@@ -2438,11 +2496,6 @@
         <source>Add support before</source>
       </segment>
     </unit>
-    <unit id="1599802675385906175">
-      <segment>
-        <source>Add support after</source>
-      </segment>
-    </unit>
     <unit id="7434521647283704814">
       <segment>
         <source>Delete support</source>
@@ -2478,11 +2531,6 @@
         <source>Modify a study section</source>
       </segment>
     </unit>
-    <unit id="1170667643695316061">
-      <segment>
-        <source>Create a study section</source>
-      </segment>
-    </unit>
     <unit id="8833276229402617730">
       <segment>
         <source>No existing section</source>
@@ -2490,27 +2538,14 @@
     </unit>
     <unit id="1363022291205513969">
       <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a section </source>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
+            type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;"
+            dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;" /> Create a section </source>
       </segment>
     </unit>
     <unit id="3501835423208116051">
       <segment>
         <source>select this study&apos;s section</source>
-      </segment>
-    </unit>
-    <unit id="1949800506879332767">
-      <segment>
-        <source>Section Name</source>
-      </segment>
-    </unit>
-    <unit id="2925129304308690882">
-      <segment>
-        <source>Last modified</source>
-      </segment>
-    </unit>
-    <unit id="479690504462006012">
-      <segment>
-        <source>Initial condition</source>
       </segment>
     </unit>
     <unit id="8214037487031019515">
@@ -2541,11 +2576,6 @@
     <unit id="9161302603054307750">
       <segment>
         <source>View charges</source>
-      </segment>
-    </unit>
-    <unit id="2509141182388535183">
-      <segment>
-        <source>View</source>
       </segment>
     </unit>
     <unit id="6598075623864682368">
@@ -2598,29 +2628,9 @@
         <source>clear selection</source>
       </segment>
     </unit>
-    <unit id="1614612576043079687">
-      <segment>
-        <source>Shrink menu</source>
-      </segment>
-    </unit>
-    <unit id="2102825898069375693">
-      <segment>
-        <source>Menu</source>
-      </segment>
-    </unit>
-    <unit id="3102779920122732727">
-      <segment>
-        <source> Loading </source>
-      </segment>
-    </unit>
     <unit id="7215759904460573154">
       <segment>
         <source> Ready </source>
-      </segment>
-    </unit>
-    <unit id="6536020395223120161">
-      <segment>
-        <source> Error </source>
       </segment>
     </unit>
     <unit id="1630268381780426388">
@@ -2700,7 +2710,10 @@
     </unit>
     <unit id="5667174251183495987">
       <segment>
-        <source> For a stop or a suspension without pulley, the tension in the guy line allows to balance the longitudinal charges at the console level (no L). For a suspension with a pulley, the tension in the guy line is the maximum tension in all the cables of the bundle and a longitudinal charge appears. </source>
+        <source> For a stop or a suspension without pulley, the tension in the guy line allows to
+          balance the longitudinal charges at the console level (no L). For a suspension with a
+          pulley, the tension in the guy line is the maximum tension in all the cables of the bundle
+          and a longitudinal charge appears. </source>
       </segment>
     </unit>
     <unit id="5819878164896182593">
@@ -2750,7 +2763,8 @@
     </unit>
     <unit id="l0-sum-value">
       <segment>
-        <source> <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}"/> m </source>
+        <source>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}" /> m </source>
       </segment>
     </unit>
     <unit id="4879686808912531747">
@@ -2808,6 +2822,21 @@
         <source>Add a load case</source>
       </segment>
     </unit>
+    <unit id="4648900870671159218">
+      <segment>
+        <source>Success</source>
+      </segment>
+    </unit>
+    <unit id="2981359641232309364">
+      <segment>
+        <source>Two spans</source>
+      </segment>
+    </unit>
+    <unit id="6028011477486800998">
+      <segment>
+        <source>One span</source>
+      </segment>
+    </unit>
     <unit id="9213587357522873966">
       <segment>
         <source>ON</source>
@@ -2816,6 +2845,11 @@
     <unit id="6711210390465051476">
       <segment>
         <source>In line angle</source>
+      </segment>
+    </unit>
+    <unit id="2050780142571489753">
+      <segment>
+        <source>Description/comment</source>
       </segment>
     </unit>
   </file>
