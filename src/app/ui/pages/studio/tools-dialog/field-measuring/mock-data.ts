@@ -15,7 +15,7 @@ export const INITIAL_MEASURE_DATA: FieldMeasure = {
   spanType: 'Phase',
   phaseNumber: 3,
   numberOfConductors: 3,
-  span: '12-13',
+  span: [11, 12],
   longitude: 123.12345678,
   latitude: 123.87654321,
   altitude: 123.09876523,

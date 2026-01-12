@@ -6,7 +6,7 @@ export interface FieldMeasure {
   spanType: string | null;
   phaseNumber: number | null;
   numberOfConductors: number | null;
-  span: string | null;
+  span: number[] | null;
   longitude: number | null;
   latitude: number | null;
   altitude: number | null;
