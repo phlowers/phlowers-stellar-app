@@ -9,6 +9,7 @@
   [value]="supports()"
   [paginator]="true"
   [rows]="rows()"
+  [rowsPerPageOptions]="[10, 20, 30]"
   [first]="first()"
   class="mb-4"
   paginatorStyleClass="!hidden"
@@ -139,7 +140,9 @@
         Chain surface
       </th>
       @if (mode() === 'view') {
-        <th id="tower" i18n class="decimal-column">Tower</th>
+        <th id="tower_model">
+          <ng-container i18n>Tower</ng-container>
+        </th>
       }
 
       @if (mode() === 'create' || mode() === 'edit') {
@@ -483,15 +486,14 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <input
-            pInputText
-            type="number"
-            min="0"
-            step="0.01"
+          <p-select
+            [options]="optionsAttachmentPosition"
+            appendTo="body"
             aria-label="attachment position"
             i18n-aria-label
-            [pKeyFilter]="onlyPositiveNumbersWithDecimal"
             [ngModel]="support.attachmentPosition"
+            optionLabel="label"
+            optionValue="value"
             (ngModelChange)="
               onSupportFieldChange(support.uuid, 'attachmentPosition', $event)
             "
@@ -528,8 +530,8 @@
         }
       </td>
       @if (mode() === 'view') {
-        <td class="text-column">
-          <p class="read-only_info">{{ support.towerModel }}</p>
+        <td>
+          {{ support.towerModel }}
         </td>
       }
       @if (mode() === 'edit' || mode() === 'create') {

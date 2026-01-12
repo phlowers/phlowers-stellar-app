@@ -1,3 +1,34 @@
+// Mock plotly.js-dist-min
+jest.mock('plotly.js-dist-min', () => {
+  const mockPlotly = {
+    newPlot: jest.fn(),
+    update: jest.fn(),
+    purge: jest.fn(),
+    relayout: jest.fn(),
+    restyle: jest.fn(),
+    react: jest.fn(),
+    redraw: jest.fn(),
+    toImage: jest.fn(),
+    downloadImage: jest.fn(),
+    extendTraces: jest.fn(),
+    prependTraces: jest.fn(),
+    addTraces: jest.fn(),
+    deleteTraces: jest.fn(),
+    moveTraces: jest.fn(),
+    animate: jest.fn(),
+    setPlotConfig: jest.fn(),
+    validate: jest.fn(),
+    d3: {
+      select: jest.fn(),
+      selectAll: jest.fn()
+    }
+  };
+  return {
+    __esModule: true,
+    default: mockPlotly
+  };
+});
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
@@ -6,11 +37,25 @@ import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
 import { Attachment } from '@src/app/core/data/database/interfaces/attachment';
 import { Support } from '@src/app/core/data/database/interfaces/support';
+import { Section } from '@src/app/core/data/database/interfaces/section';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+
+// Mock plotly.js-dist-min to prevent errors in SupportPlotComponent
+jest.mock('plotly.js-dist-min', () => ({
+  __esModule: true,
+  default: {
+    purge: jest.fn(),
+    newPlot: jest.fn(),
+    restyle: jest.fn(),
+    relayout: jest.fn()
+  }
+}));
 
 describe('AttachmentSetModalComponent', () => {
   let component: AttachmentSetModalComponent;
   let fixture: ComponentFixture<AttachmentSetModalComponent>;
   let attachmentServiceMock: jest.Mocked<AttachmentService>;
+  let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
 
   const mockAttachments: Attachment[] = [
     {
@@ -21,7 +66,8 @@ describe('AttachmentSetModalComponent', () => {
       attachment_altitude: 10.5,
       cross_arm_length: 2.5,
       created_at: '2023-01-01',
-      updated_at: '2023-01-01'
+      updated_at: '2023-01-01',
+      support_tower: 'Tower Model'
     },
     {
       uuid: '2',
@@ -31,7 +77,8 @@ describe('AttachmentSetModalComponent', () => {
       attachment_altitude: 12.0,
       cross_arm_length: 3.0,
       created_at: '2023-01-01',
-      updated_at: '2023-01-01'
+      updated_at: '2023-01-01',
+      support_tower: 'Tower Model'
     },
     {
       uuid: '3',
@@ -41,7 +88,8 @@ describe('AttachmentSetModalComponent', () => {
       attachment_altitude: 8.5,
       cross_arm_length: 2.0,
       created_at: '2023-01-01',
-      updated_at: '2023-01-01'
+      updated_at: '2023-01-01',
+      support_tower: 'Tower Model'
     }
   ];
 
@@ -67,10 +115,57 @@ describe('AttachmentSetModalComponent', () => {
     towerModel: 'Tower Model'
   };
 
+  const mockSection: Section = {
+    uuid: 'section-uuid',
+    internal_id: 'section-1',
+    name: 'Test Section',
+    short_name: 'TS',
+    created_at: '2023-01-01',
+    updated_at: '2023-01-01',
+    internal_catalog_id: 'catalog-1',
+    type: 'type-1',
+    electric_phase_number: 3,
+    cable_name: 'Cable A',
+    cable_short_name: 'CA',
+    cables_amount: 1,
+    optical_fibers_amount: 0,
+    spans_amount: 1,
+    begin_span_name: 'span-1',
+    last_span_name: 'span-1',
+    first_support_number: 1,
+    last_support_number: 1,
+    first_attachment_set: '1',
+    last_attachment_set: '1',
+    regional_maintenance_center_names: [],
+    maintenance_center_names: [],
+    regional_team_id: undefined,
+    maintenance_team_id: undefined,
+    maintenance_center_id: undefined,
+    link_name: undefined,
+    lit_code: undefined,
+    lit_name: undefined,
+    branch_name: undefined,
+    branch_idr: undefined,
+    voltage_idr: undefined,
+    comment: undefined,
+    supports_comment: undefined,
+    supports: [],
+    initial_conditions: [],
+    selected_initial_condition_uuid: undefined,
+    charges: [],
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined
+  };
+
   beforeEach(async () => {
     attachmentServiceMock = {
       getAttachments: jest.fn().mockResolvedValue(mockAttachments)
     } as unknown as jest.Mocked<AttachmentService>;
+
+    workerPythonServiceMock = {
+      ready: true
+    } as unknown as jest.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -82,12 +177,18 @@ describe('AttachmentSetModalComponent', () => {
         {
           provide: AttachmentService,
           useValue: attachmentServiceMock
+        },
+        {
+          provide: WorkerPythonService,
+          useValue: workerPythonServiceMock
         }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AttachmentSetModalComponent);
     component = fixture.componentInstance;
+    // Set required section input
+    fixture.componentRef.setInput('section', mockSection);
   });
 
   it('should create', () => {
@@ -121,13 +222,15 @@ describe('AttachmentSetModalComponent', () => {
     component.supportName.set('test');
 
     // Simulate modal opening by calling resetValues directly
-    component.resetValues();
+    // resetValues() defaults to resetSupportName = false, so supportName is not reset
+    component.resetValues(false);
     await fixture.whenStable();
 
     expect(component.armLength()).toBeUndefined();
     expect(component.heightBelowConsole()).toBeUndefined();
     expect(component.attachmentSet()).toBeUndefined();
-    expect(component.supportName()).toBeUndefined();
+    // supportName is not reset when resetSupportName is false (default)
+    expect(component.supportName()).toBe('test');
   });
 
   it('should emit isOpenChange when visibility changes', () => {
@@ -175,7 +278,8 @@ describe('AttachmentSetModalComponent', () => {
     expect(component.armLength()).toBeUndefined();
     expect(component.heightBelowConsole()).toBeUndefined();
     expect(component.attachmentSet()).toBeUndefined();
-    expect(component.supportName()).toBeUndefined();
+    // When clearing attachment_set, resetValues(false) is called, so supportName is not reset
+    expect(component.supportName()).toBe('Support A');
   });
 
   it('should emit validateForm with support uuid when support is provided', () => {
@@ -185,6 +289,7 @@ describe('AttachmentSetModalComponent', () => {
     component.attachmentSet.set(1);
     component.armLength.set(2.5);
     component.heightBelowConsole.set(10.5);
+    component.towerModel.set('Tower Model');
 
     // Mock the support input signal
     jest.spyOn(component, 'support').mockReturnValue(mockSupport);
@@ -196,7 +301,8 @@ describe('AttachmentSetModalComponent', () => {
       attachmentSet: 1,
       armLength: 2.5,
       heightBelowConsole: 10.5,
-      uuid: 'support-uuid'
+      uuid: 'support-uuid',
+      towerModel: 'Tower Model'
     });
   });
 
@@ -210,7 +316,8 @@ describe('AttachmentSetModalComponent', () => {
       attachmentSet: 0,
       armLength: 0,
       heightBelowConsole: 0,
-      uuid: ''
+      uuid: '',
+      towerModel: ''
     });
   });
 
@@ -233,5 +340,113 @@ describe('AttachmentSetModalComponent', () => {
 
     // Should not throw error
     await expect(component.getData()).rejects.toThrow('Service error');
+  });
+
+  describe('Effect: isOpen changes', () => {
+    it('should reset values and set support properties when modal opens with full support', async () => {
+      // Set initial values
+      component.armLength.set(5);
+      component.heightBelowConsole.set(10);
+      component.attachmentSet.set(2);
+      component.supportName.set('Old Name');
+      component.towerModel.set('Old Model');
+
+      // Set support input and open modal
+      fixture.componentRef.setInput('support', mockSupport);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify resetValues was called (values should be reset first)
+      expect(component.supportName()).toBe('Test Support');
+      expect(component.attachmentSet()).toBe(1);
+      expect(component.armLength()).toBe(2.5);
+      expect(component.heightBelowConsole()).toBe(10.0);
+      expect(component.towerModel()).toBe('Tower Model');
+      expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
+    });
+
+    it('should reset values and set support name when modal opens with support without attachmentSet', async () => {
+      const supportWithoutAttachmentSet: Support = {
+        ...mockSupport,
+        attachmentSet: null
+      };
+
+      // Set initial values
+      component.armLength.set(5);
+      component.attachmentSet.set(2);
+
+      // Set support input and open modal
+      fixture.componentRef.setInput('support', supportWithoutAttachmentSet);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify supportName is set but attachmentSet related values are not
+      expect(component.supportName()).toBe('Test Support');
+      expect(component.attachmentSet()).toBeUndefined();
+      expect(component.armLength()).toBeUndefined();
+      expect(component.heightBelowConsole()).toBeUndefined();
+      expect(component.towerModel()).toBeUndefined();
+    });
+
+    it('should reset values when modal opens with support without name', async () => {
+      const supportWithoutName: Support = {
+        ...mockSupport,
+        name: null
+      };
+
+      // Set initial values
+      component.supportName.set('Old Name');
+      component.attachmentSet.set(2);
+
+      // Set support input and open modal
+      fixture.componentRef.setInput('support', supportWithoutName);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify supportName is not set (resetValues(true) clears it)
+      expect(component.supportName()).toBeUndefined();
+      expect(component.attachmentSet()).toBe(1);
+      expect(component.armLength()).toBe(2.5);
+      expect(component.heightBelowConsole()).toBe(10.0);
+      expect(component.towerModel()).toBe('Tower Model');
+    });
+
+    it('should reset values when modal opens without support', async () => {
+      // Set initial values
+      component.armLength.set(5);
+      component.supportName.set('Old Name');
+
+      // Open modal without support
+      fixture.componentRef.setInput('support', undefined);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify values are reset but nothing is set from support
+      expect(component.supportName()).toBeUndefined();
+      expect(component.attachmentSet()).toBeUndefined();
+      expect(component.armLength()).toBeUndefined();
+      expect(component.heightBelowConsole()).toBeUndefined();
+      expect(component.towerModel()).toBeUndefined();
+    });
+
+    it('should not run effect when modal is closed', async () => {
+      // Set initial values
+      component.armLength.set(5);
+      component.supportName.set('Old Name');
+
+      // Set support but keep modal closed
+      fixture.componentRef.setInput('support', mockSupport);
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Verify values are not changed (effect only runs when isOpen is true)
+      expect(component.supportName()).toBe('Old Name');
+      expect(component.armLength()).toBe(5);
+    });
   });
 });
