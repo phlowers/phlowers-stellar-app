@@ -34,7 +34,8 @@
       [options]="spans()"
       optionLabel="label"
       optionValue="value"
-      (onChange)="selectedSpan.set($event.value)"
+      [ngModel]="measureData().span"
+      (ngModelChange)="onFieldChange('span', $event)"
       styleClass="w-full"
       [required]="true"
     />
