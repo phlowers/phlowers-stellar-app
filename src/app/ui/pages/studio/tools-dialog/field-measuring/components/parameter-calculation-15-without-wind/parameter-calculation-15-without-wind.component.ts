@@ -35,14 +35,10 @@ import { v4 as uuidv4 } from 'uuid';
   templateUrl: './parameter-calculation-15-without-wind.component.html',
   styleUrl: './parameter-calculation-15-without-wind.component.scss',
   animations: [
-    trigger('expandCollapse', [
+    trigger('expand', [
       transition(':enter', [
         style({ height: 0, opacity: 0, overflow: 'hidden' }),
         animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ overflow: 'hidden' }),
-        animate('300ms ease-in', style({ height: 0, opacity: 0 }))
       ])
     ])
   ]

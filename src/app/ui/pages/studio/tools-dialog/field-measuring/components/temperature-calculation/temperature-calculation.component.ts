@@ -28,14 +28,10 @@ import { WorkerPythonService } from '@src/app/core/services/worker_python/worker
   templateUrl: './temperature-calculation.component.html',
   styleUrl: './temperature-calculation.component.scss',
   animations: [
-    trigger('expandCollapse', [
+    trigger('expand', [
       transition(':enter', [
         style({ height: 0, opacity: 0, overflow: 'hidden' }),
         animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ overflow: 'hidden' }),
-        animate('300ms ease-in', style({ height: 0, opacity: 0 }))
       ])
     ])
   ]
