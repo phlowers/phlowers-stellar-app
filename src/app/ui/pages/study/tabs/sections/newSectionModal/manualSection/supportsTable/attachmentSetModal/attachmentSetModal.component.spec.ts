@@ -198,6 +198,49 @@ describe('AttachmentSetModalComponent', () => {
     vtl_and_guying: undefined
   };
 
+  const mockSection: Section = {
+    uuid: 'section-uuid',
+    internal_id: 'section-1',
+    name: 'Test Section',
+    short_name: 'TS',
+    created_at: '2023-01-01',
+    updated_at: '2023-01-01',
+    internal_catalog_id: 'catalog-1',
+    type: 'type-1',
+    electric_phase_number: 3,
+    cable_name: 'Cable A',
+    cable_short_name: 'CA',
+    cables_amount: 1,
+    optical_fibers_amount: 0,
+    spans_amount: 1,
+    begin_span_name: 'span-1',
+    last_span_name: 'span-1',
+    first_support_number: 1,
+    last_support_number: 1,
+    first_attachment_set: '1',
+    last_attachment_set: '1',
+    regional_maintenance_center_names: [],
+    maintenance_center_names: [],
+    regional_team_id: undefined,
+    maintenance_team_id: undefined,
+    maintenance_center_id: undefined,
+    link_name: undefined,
+    lit_code: undefined,
+    lit_name: undefined,
+    branch_name: undefined,
+    branch_idr: undefined,
+    voltage_idr: undefined,
+    comment: undefined,
+    supports_comment: undefined,
+    supports: [],
+    initial_conditions: [],
+    selected_initial_condition_uuid: undefined,
+    charges: [],
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined
+  };
+
   beforeEach(async () => {
     attachmentServiceMock = {
       getAttachments: jest.fn().mockResolvedValue(mockAttachments)

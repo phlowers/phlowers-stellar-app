@@ -4035,7 +4035,7 @@
     <unit id="8065031423203926640">
       <segment state="initial">
         <source>L0 table</source>
-        <target>L0 table</target>
+        <target>Tableau L0</target>
       </segment>
     </unit>
     <unit id="971569449266353120">
@@ -4224,10 +4224,28 @@
         <target>Ajouter un cas de charge</target>
       </segment>
     </unit>
+    <unit id="8690924341268563915">
+      <segment state="initial">
+        <source>Add a load case</source>
+        <target>Ajouter un cas de charge</target>
+      </segment>
+    </unit>
     <unit id="2587240527868724590">
       <segment state="initial">
         <source>CC</source>
         <target>CC</target>
+      </segment>
+    </unit>
+    <unit id="6028011477486800998">
+      <segment state="initial">
+        <source>One span</source>
+        <target>Une portée</target>
+      </segment>
+    </unit>
+    <unit id="2981359641232309364">
+      <segment state="initial">
+        <source>Two spans</source>
+        <target>Deux portées</target>
       </segment>
     </unit>
     <unit id="4443682149844413583">
@@ -4246,6 +4264,12 @@
       <segment state="initial">
         <source>In line angle</source>
         <target>In line angle</target>
+      </segment>
+    </unit>
+    <unit id="2050780142571489753">
+      <segment state="initial">
+        <source>Description/comment</source>
+        <target>Description/commentaire</target>
       </segment>
     </unit>
   </file>
