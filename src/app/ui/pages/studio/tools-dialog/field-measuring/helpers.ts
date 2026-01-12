@@ -1,15 +1,22 @@
 import { Section } from '@core/data/database/interfaces/section';
 import { FieldMeasure } from './types';
 import { v4 as uuidv4 } from 'uuid';
+import { findMiddleSpan } from '@src/app/ui/shared/helpers/findMiddleSpan';
 
 export const createInitialMeasureData = (
   section: Section | null,
-  name: string
+  name: string,
+  startSupport: number | null,
+  endSupport: number | null
 ): FieldMeasure => {
+  let span: number[] | null = null;
+  if (startSupport !== null && endSupport !== null) {
+    span = findMiddleSpan(startSupport, endSupport);
+  }
   return {
     uuid: uuidv4(),
     name: name || '',
-    span: null,
+    span,
     longitude: null,
     latitude: null,
     altitude: null,

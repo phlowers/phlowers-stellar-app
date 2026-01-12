@@ -83,7 +83,9 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
     const section = this.plotService.section();
     const newMeasure = createInitialMeasureData(
       section,
-      this.newMeasureNameControl.value || ''
+      this.newMeasureNameControl.value || '',
+      this.plotService.plotOptions().startSupport,
+      this.plotService.plotOptions().endSupport
     );
     const allMeasures = [...(section?.field_measures || []), newMeasure];
     await this.plotService.modifySection({
