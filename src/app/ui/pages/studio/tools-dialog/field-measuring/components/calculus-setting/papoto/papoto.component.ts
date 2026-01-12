@@ -47,6 +47,7 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 })
 export class PapotoComponent {
   leftSupportOption = input.required<{ label: string; value: string }[]>();
+  selectedSpan = input.required<number[]>();
   measureData = model.required<FieldMeasure>();
 
   private readonly plotService = inject(PlotService);

@@ -219,6 +219,41 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
+  describe('onSpanChange', () => {
+    it('should update selectedSpan signal when span changes', () => {
+      const newSpan = [5, 6];
+
+      component.onSpanChange(newSpan);
+
+      expect(component.selectedSpan()).toEqual(newSpan);
+    });
+
+    it('should handle different span values', () => {
+      component.onSpanChange([0, 1]);
+      expect(component.selectedSpan()).toEqual([0, 1]);
+
+      component.onSpanChange([10, 11]);
+      expect(component.selectedSpan()).toEqual([10, 11]);
+
+      component.onSpanChange([3, 4]);
+      expect(component.selectedSpan()).toEqual([3, 4]);
+    });
+
+    it('should update selectedSpan with empty array', () => {
+      component.onSpanChange([]);
+
+      expect(component.selectedSpan()).toEqual([]);
+    });
+
+    it('should update from non-empty to different non-empty span', () => {
+      component.onSpanChange([1, 2]);
+      expect(component.selectedSpan()).toEqual([1, 2]);
+
+      component.onSpanChange([7, 8]);
+      expect(component.selectedSpan()).toEqual([7, 8]);
+    });
+  });
+
   describe('onFieldChange', () => {
     it('should update measureData signal with new field value', () => {
       const initialData = component.measureData();

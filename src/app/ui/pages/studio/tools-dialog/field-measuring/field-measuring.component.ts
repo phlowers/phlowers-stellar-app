@@ -200,6 +200,10 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  onSpanChange(span: number[]) {
+    this.selectedSpan.set(span);
+  }
+
   onExport() {
     // TODO: Implement export functionality
     console.log('Export', this.measureData());

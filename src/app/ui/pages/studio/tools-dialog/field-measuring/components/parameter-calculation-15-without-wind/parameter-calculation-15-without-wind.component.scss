@@ -31,6 +31,10 @@ dd {
       align-items: start;
     }
 
+    &:has(dl) {
+      align-items: start;
+    }
+
     .updateMode {
       grid-area: updateMode;
 

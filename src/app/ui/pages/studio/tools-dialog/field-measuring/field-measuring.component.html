@@ -8,6 +8,7 @@
 <app-header
   [measureData]="measureData()"
   (fieldChange)="onFieldChange($event.field, $event.value)"
+  (spanChange)="onSpanChange($event)"
 />
 
 <p-tabs [(value)]="activeTab">
@@ -29,7 +30,10 @@
   </p-tabpanel>
 
   <p-tabpanel value="parameterCalculation">
-    <app-calculus-setting [(measureData)]="measureData" />
+    <app-calculus-setting
+      [(measureData)]="measureData"
+      [selectedSpan]="selectedSpan()"
+    />
   </p-tabpanel>
 
   <p-tabpanel value="temperatureCalculation">
