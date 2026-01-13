@@ -50,16 +50,11 @@ jest.mock('dexie', () => {
               };
             });
             this.attachments = this.tables.attachments;
-            this.branches = this.tables.branches;
             this.lines = this.tables.lines;
-            this.maintenance_centers = this.tables.maintenance_centers;
-            this.regional_maintenance_centers =
-              this.tables.regional_maintenance_centers;
+            this.maintenance = this.tables.maintenance;
             this.sections = this.tables.sections;
-            this.spans = this.tables.spans;
-            this.tensions = this.tables.tensions;
-            this.transit_links = this.tables.transit_links;
             this.cables = this.tables.cables;
+            this.chains = this.tables.chains;
             this.studies = this.tables.studies;
             this.users = this.tables.users;
             return this;
@@ -68,15 +63,11 @@ jest.mock('dexie', () => {
       }
 
       attachments!: MockTable;
-      branches!: MockTable;
       lines!: MockTable;
-      maintenance_centers!: MockTable;
-      regional_maintenance_centers!: MockTable;
+      maintenance!: MockTable;
       sections!: MockTable;
-      spans!: MockTable;
-      tensions!: MockTable;
-      transit_links!: MockTable;
       cables!: MockTable;
+      chains!: MockTable;
       studies!: MockTable;
       users!: MockTable;
     }
@@ -111,14 +102,8 @@ describe('AppDB', () => {
   describe('loadMockDataFromJson', () => {
     const mockJsonContent = {
       attachments: [{ id: 1 }],
-      branches: [{ id: 1 }],
       lines: [{ id: 1 }],
-      maintenance_centers: [{ id: 1 }],
-      regional_maintenance_centers: [{ id: 1 }],
       sections: [{ id: 1 }],
-      spans: [{ id: 1 }],
-      tensions: [{ id: 1 }],
-      transit_links: [{ id: 1 }],
       cables: [{ id: 1 }]
     };
 
@@ -128,19 +113,9 @@ describe('AppDB', () => {
       expect(db.attachments.bulkPut).toHaveBeenCalledWith(
         mockJsonContent.attachments
       );
-      expect(db.branches.bulkPut).toHaveBeenCalledWith(
-        mockJsonContent.branches
-      );
       expect(db.lines.bulkPut).toHaveBeenCalledWith(mockJsonContent.lines);
       expect(db.sections.bulkPut).toHaveBeenCalledWith(
         mockJsonContent.sections
-      );
-      expect(db.spans.bulkPut).toHaveBeenCalledWith(mockJsonContent.spans);
-      expect(db.tensions.bulkPut).toHaveBeenCalledWith(
-        mockJsonContent.tensions
-      );
-      expect(db.transit_links.bulkPut).toHaveBeenCalledWith(
-        mockJsonContent.transit_links
       );
       expect(db.cables.bulkPut).toHaveBeenCalledWith(mockJsonContent.cables);
     });
