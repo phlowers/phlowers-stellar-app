@@ -683,6 +683,15 @@ def main() -> None:
     print(f"  From CDN:  {cdn_count}")
     print(f"  From pip:  {num_packages - cdn_count}")
     print(f"  Config:    {PACKAGES_JSON_PATH}")
+    print("=" * 60)
+    
+    # List all installed packages with versions
+    print(f"\n{'='*60}")
+    print("INSTALLED PACKAGES")
+    print("=" * 60)
+    for name, version in sorted(installed.items()):
+        source = "CDN" if name in cdn_package_names else "pip"
+        print(f"  {name:30} {version:15} ({source})")
     print("=" * 60 + "\n")
 
 

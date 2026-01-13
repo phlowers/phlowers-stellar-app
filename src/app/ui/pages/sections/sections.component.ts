@@ -18,26 +18,13 @@ import { SearchSectionModalComponent } from './components/search-section-modal.c
 @Component({
   standalone: true,
   imports: [
-    // RouterModule,
-    // AvatarModule,
     CommonModule,
-    // TableModule,
     FormsModule,
     ButtonModule,
-    // RippleModule,
-    // ToastModule,
-    // ToolbarModule,
-    // RatingModule,
     InputTextModule,
     TextareaModule,
-    // SelectModule,
-    // RadioButtonModule,
     InputNumberModule,
     DialogModule,
-    // TagModule,
-    // InputIconModule,
-    // IconFieldModule,
-    // ConfirmDialogModule
     SearchSectionModalComponent
   ],
   template: `

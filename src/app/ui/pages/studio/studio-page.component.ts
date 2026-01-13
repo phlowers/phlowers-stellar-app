@@ -95,19 +95,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     };
   });
 
-  // Mock data for span load
-  spanData = [
-    { label: 'Span 1-2', value: 'span1-2', supports: [1, 2] },
-    { label: 'Span 2-3', value: 'span2-3', supports: [2, 3] },
-    { label: 'Span 3-4', value: 'span3-4', supports: [3, 4] }
-  ];
-  supportData = [
-    { label: 'Support 1', value: 1 },
-    { label: 'Support 2', value: 2 },
-    { label: 'Support 3', value: 3 },
-    { label: 'Support 4', value: 4 }
-  ];
-
   toggleSidebar() {
     this.sidebarOpen.set(!this.sidebarOpen());
     this.sidebarWidth.set(this.sidebarOpen() ? 300 : 0);
