@@ -142,6 +142,20 @@ export interface TaskInputs {
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
   };
+  [Task.temperatureCalculation]: {
+    cableName: string;
+    ambientTemperature: number;
+    longitude: number;
+    latitude: number;
+    transit: number;
+    skyCover: string;
+  };
+  [Task.calculateParameter15CWithoutWind]: {
+    parameterPapoto: number;
+    parameterUncertaintyPapoto: number;
+    cableTemperature15C: number;
+    cableTemperatureUncertainty15C: number;
+  };
 }
 
 export interface TaskOutputs {
@@ -199,4 +213,14 @@ export interface TaskOutputs {
     chargeLIfPulley: number;
   };
   [Task.setLogLevel]: undefined;
+  [Task.temperatureCalculation]: {
+    cableSolarFlux: number;
+    cableTemperature: number;
+    cableTemperatureUncertainty: number;
+  };
+  [Task.calculateParameter15CWithoutWind]: {
+    parameter15CMinusUncertainty: number;
+    parameter15C: number;
+    parameter15CPlusUncertainty: number;
+  };
 }

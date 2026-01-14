@@ -3474,15 +3474,9 @@
         <target>Paramètre</target>
       </segment>
     </unit>
-    <unit id="9071236182141230808">
+    <unit id="981945747118080282">
       <segment state="initial">
-        <source>uncertainty parameter</source>
-        <target>paramètre d&apos;incertitude</target>
-      </segment>
-    </unit>
-    <unit id="2744826406336414605">
-      <segment state="initial">
-        <source>Paramter 1-2</source>
+        <source>Parameter 1-2</source>
         <target>Paramètre 1-2</target>
       </segment>
     </unit>
@@ -3556,12 +3550,6 @@
       <segment state="initial">
         <source>Sky cover</source>
         <target>Couverture du ciel</target>
-      </segment>
-    </unit>
-    <unit id="8543119714580512727">
-      <segment state="initial">
-        <source>Line</source>
-        <target>Ligne</target>
       </segment>
     </unit>
     <unit id="5198396305972397137">
@@ -3984,10 +3972,10 @@
         <target>Créer la CI</target>
       </segment>
     </unit>
-    <unit id="4317701172500307440">
+    <unit id="8699047463831885417">
       <segment state="initial">
-        <source>results:</source>
-        <target>résultats:</target>
+        <source>Results:</source>
+        <target>Résultats:</target>
       </segment>
     </unit>
     <unit id="7065464372847182937">
@@ -4018,12 +4006,6 @@
       <segment state="initial">
         <source>Choose</source>
         <target>Choisir</target>
-      </segment>
-    </unit>
-    <unit id="1698502503890694225">
-      <segment state="initial">
-        <source> Parameter uncertainty Papoto </source>
-        <target> Incertitude du paramètre Papoto </target>
       </segment>
     </unit>
     <unit id="1831958434012261940">
@@ -4270,6 +4252,60 @@
       <segment state="initial">
         <source>Description/comment</source>
         <target>Description/commentaire</target>
+      </segment>
+    </unit>
+    <unit id="80889600222732792">
+      <segment state="initial">
+        <source>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
+        </source>
+        <target>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">paramètre d'incertitude</pc>
+        </target>
+      </segment>
+    </unit>
+    <unit id="2900727946848099689">
+      <segment state="initial">
+        <source>Measure name must be unique.</source>
+        <target>Le nom de la mesure doit être unique.</target>
+      </segment>
+    </unit>
+    <unit id="8242752358193979918">
+      <segment state="initial">
+        <source>TM</source>
+        <target>MT</target>
+      </segment>
+    </unit>
+    <unit id="5743768237912701445">
+      <segment state="initial">
+        <source>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Parameter uncertainty Papoto</pc>
+        </source>
+        <target>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Paramètre d'incertitude Papoto</pc>
+        </target>
+      </segment>
+    </unit>
+    <unit id="2115305178603903655">
+      <segment state="initial">
+        <source>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Cable temperature uncertainty at 15°C</pc>
+        </source>
+        <target>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude de la température du câble à 15°C</pc>
+        </target>
+      </segment>
+    </unit>
+    <unit id="5939025002547986929">
+      <segment state="initial">
+        <source>An error occurred while calculating the temperature</source>
+        <target>Une erreur est survenue lors du calcul de la température</target>
+      </segment>
+    </unit>
+    <unit id="8387651464002742246">
+      <segment state="initial">
+        <source>Branch</source>
+        <target>Branche</target>
       </segment>
     </unit>
   </file>

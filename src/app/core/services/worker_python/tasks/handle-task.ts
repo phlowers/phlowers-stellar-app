@@ -68,6 +68,14 @@ const tasks: Record<
   [Task.setLogLevel]: {
     function: 'set_log_level',
     externalPackages: []
+  },
+  [Task.temperatureCalculation]: {
+    function: 'temperature_calculation',
+    externalPackages: []
+  },
+  [Task.calculateParameter15CWithoutWind]: {
+    function: 'parameter_15_without_wind',
+    externalPackages: []
   }
 };
 

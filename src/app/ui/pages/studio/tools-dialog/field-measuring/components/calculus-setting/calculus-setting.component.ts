@@ -20,7 +20,6 @@ import { FieldMeasure } from '../../types';
 })
 export class CalculusSettingComponent {
   measureData = model.required<FieldMeasure>();
-  selectedSpan = input.required<number[]>();
   selectedCalculusType = 'PAPOTO';
   leftSupportOption = computed(() => {
     const span = this.measureData().span;

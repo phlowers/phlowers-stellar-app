@@ -20,7 +20,6 @@ import { isEqual } from 'lodash';
 @Component({
   selector: 'app-header',
   imports: [
-    DecimalPipe,
     FormsModule,
     SelectModule,
     InputTextModule,
@@ -37,7 +36,6 @@ export class HeaderComponent {
     field: keyof FieldMeasure;
     value: FieldMeasure[keyof FieldMeasure];
   }>();
-  spanChange = output<number[]>();
 
   readonly spans = computed<
     { label: string; value: number[]; supports: number[] }[]
