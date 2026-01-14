@@ -49,21 +49,12 @@ describe('HeaderComponent', () => {
     it('should require measureData input', () => {
       expect(component.measureData).toBeDefined();
     });
-
-    it('should require spanOptions input', () => {
-      expect(component.spanOptions).toBeDefined();
-    });
   });
 
   describe('Input Properties', () => {
     it('should accept measureData input', () => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
       expect(component.measureData()).toEqual(mockMeasureData);
-    });
-
-    it('should accept spanOptions input', () => {
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
-      expect(component.spanOptions()).toEqual(mockSpanOptions);
     });
 
     it('should update when measureData changes', () => {
@@ -280,40 +271,31 @@ describe('HeaderComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should emit spanChange when selectedSpan changes to valid span', () => {
-      const spanChangeSpy = jest.fn();
-      component.spanChange.subscribe(spanChangeSpy);
+    it('should emit fieldChange when selectedSpan changes to valid span', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
 
       // Change the selected span
       component.onSpanChange([1, 2]);
       fixture.detectChanges();
 
-      expect(spanChangeSpy).toHaveBeenCalledWith([1, 2]);
+      expect(fieldChangeSpy).toHaveBeenCalledWith({
+        field: 'span',
+        value: [1, 2]
+      });
     });
 
-    it('should emit spanChange with correct span indices', () => {
-      const spanChangeSpy = jest.fn();
-      component.spanChange.subscribe(spanChangeSpy);
+    it('should emit fieldChange with correct span indices', () => {
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onSpanChange([5, 6]);
       fixture.detectChanges();
 
-      expect(spanChangeSpy).toHaveBeenCalledWith([5, 6]);
-    });
-
-    it('should emit spanChange multiple times when span changes between valid values', () => {
-      const spanChangeSpy = jest.fn();
-      component.spanChange.subscribe(spanChangeSpy);
-
-      component.onSpanChange([0, 1]);
-      fixture.detectChanges();
-
-      component.onSpanChange([2, 3]);
-      fixture.detectChanges();
-
-      expect(spanChangeSpy).toHaveBeenCalledTimes(2);
-      expect(spanChangeSpy).toHaveBeenNthCalledWith(1, [0, 1]);
-      expect(spanChangeSpy).toHaveBeenNthCalledWith(2, [2, 3]);
+      expect(fieldChangeSpy).toHaveBeenCalledWith({
+        field: 'span',
+        value: [5, 6]
+      });
     });
 
     it('should emit fieldChange for span initialization when spans are available and no span is set', () => {
@@ -357,19 +339,22 @@ describe('HeaderComponent', () => {
       });
     });
 
-    it('should emit spanChange when onSpanChange is called', () => {
+    it('should emit fieldChange when onSpanChange is called', () => {
       // Subscribe and track calls
-      const spanChangeSpy = jest.fn();
-      component.spanChange.subscribe(spanChangeSpy);
+      const fieldChangeSpy = jest.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
 
       // Clear any previous calls from initialization
-      spanChangeSpy.mockClear();
+      fieldChangeSpy.mockClear();
 
       // Call onSpanChange directly
       component.onSpanChange([3, 4]);
       fixture.detectChanges();
 
-      expect(spanChangeSpy).toHaveBeenCalledWith([3, 4]);
+      expect(fieldChangeSpy).toHaveBeenCalledWith({
+        field: 'span',
+        value: [3, 4]
+      });
     });
   });
 

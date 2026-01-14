@@ -47,14 +47,14 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 })
 export class PapotoComponent {
   leftSupportOption = input.required<{ label: string; value: string }[]>();
-  selectedSpan = input.required<number[]>();
   measureData = model.required<FieldMeasure>();
 
   private readonly plotService = inject(PlotService);
+  private readonly workerPythonService = inject(WorkerPythonService);
 
   // Compute the dynamic left support options based on selectedSpan
   retrievedLeftSupportOptions = computed(() => {
-    const span = this.selectedSpan();
+    const span = this.measureData().span;
     if (span?.length !== 2) {
       return [];
     }
@@ -70,7 +70,7 @@ export class PapotoComponent {
   private getCalculatedValue(
     field: 'span_length' | 'elevation'
   ): number | null {
-    const span = this.selectedSpan();
+    const span = this.measureData().span;
     const litData = this.plotService.litData();
 
     if (span?.length !== 2 || !litData?.[field]) {
@@ -91,17 +91,7 @@ export class PapotoComponent {
 
   papotoHelpDialog = signal<boolean>(false);
 
-  papotoResult = signal<{
-    parameter: number;
-    parameter_1_2: number;
-    parameter_2_3: number;
-    parameter_1_3: number;
-    check_validity: boolean;
-  } | null>(null);
-
   papotoError = signal<boolean>(false);
-
-  constructor(private readonly workerPythonService: WorkerPythonService) {}
 
   isFormValid = computed(() => {
     const data = this.measureData();
@@ -132,6 +122,11 @@ export class PapotoComponent {
 
   async calculatePapoto() {
     const data = this.measureData();
+    this.papotoError.set(false);
+    this.measureData.update((d) => ({
+      ...d,
+      outputs: { ...d.outputs, papoto: null }
+    }));
     const { result, error } = await this.workerPythonService.runTask(
       Task.calculatePapoto,
       {
@@ -153,6 +148,9 @@ export class PapotoComponent {
       this.papotoError.set(true);
     }
 
-    this.papotoResult.set(result);
+    this.measureData.update((d) => ({
+      ...d,
+      outputs: { ...d.outputs, papoto: result }
+    }));
   }
 }

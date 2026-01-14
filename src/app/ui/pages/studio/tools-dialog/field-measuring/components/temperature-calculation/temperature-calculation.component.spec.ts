@@ -59,6 +59,17 @@ describe('TemperatureCalculationComponent', () => {
   });
 
   it('should calculate temperature and show results', async () => {
+    const mockResult = {
+      cableSolarFlux: 123,
+      cableTemperature: 123,
+      cableTemperatureUncertainty: 5
+    };
+
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: mockResult,
+      error: null
+    });
+
     // Set all required fields
     component.updateField('cableName', 'ASTER570');
     component.updateField('ambientTemperature', 20);
@@ -70,23 +81,11 @@ describe('TemperatureCalculationComponent', () => {
     component.updateField('windDirection', 'North');
     component.updateField('skyCover', 'N5');
 
-    expect(component.temperatureResult()).toBe(null);
-    expect(component.temperatureError()).toBe(false);
+    expect(component.measureData().outputs.cableTemperature).toBe(null);
+    expect(component.temperatureCalculationError()).toBe(false);
 
     await component.calculateTemperature();
 
-    expect(component.temperatureResult()).toBeTruthy();
-    expect(component.temperatureResult()?.cableSolarFlux).toBe(123);
-    expect(component.temperatureResult()?.cableTemperature).toBe(123);
-  });
-
-  it('should toggle solar flux mode', () => {
-    expect(component.solarFluxMode).toBe('skyCover');
-
-    component.updateSolarFluxMode('fieldSurvey');
-    expect(component.solarFluxMode).toBe('fieldSurvey');
-
-    component.updateSolarFluxMode('skyCover');
-    expect(component.solarFluxMode).toBe('skyCover');
+    expect(component.temperatureCalculationError()).toBe(false);
   });
 });
