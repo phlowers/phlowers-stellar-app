@@ -10,11 +10,19 @@ import { loadPyodide } from 'pyodide';
 import functions from './tasks/python-scripts/functions.py';
 import loads from './tasks/python-scripts/loads.py';
 import guying from './tasks/python-scripts/guying.py';
+import temperature from './tasks/python-scripts/temperature.py';
+import parameter_15_without_wind from './tasks/python-scripts/parameter_15_without_wind.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [functions, loads, guying];
+const pythonFiles = [
+  functions,
+  loads,
+  guying,
+  temperature,
+  parameter_15_without_wind
+];
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;

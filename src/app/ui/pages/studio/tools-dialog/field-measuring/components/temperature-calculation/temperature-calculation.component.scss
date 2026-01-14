@@ -10,6 +10,7 @@ dt {
 }
 
 dt {
+  @apply min-h-6;
   color: var(--grey-800);
 }
 
@@ -35,6 +36,10 @@ dd {
       'skyCover diffusedSolarFlux directSolarFlux diffusedPlusDirectSolarFlux measuredDiffusedPlusDirectSolarFlux'
       '. . . . measuredDiffusedPlusDirectSolarFluxInfo';
 
+    &:has(dl) {
+      @apply items-start;
+    }
+
     .conductor {
       grid-area: conductor;
     }
@@ -49,10 +54,6 @@ dd {
 
     .windSpeed {
       grid-area: windSpeed;
-
-      &__label {
-        @apply flex items-end gap-1 justify-between;
-      }
     }
 
     .windDirection {
@@ -132,5 +133,9 @@ dd {
         grid-area: incertainCableTemperature;
       }
     }
+  }
+
+  &__error {
+    @apply text-red-500;
   }
 }

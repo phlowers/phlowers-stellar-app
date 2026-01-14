@@ -11,6 +11,8 @@ import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.com
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { WIND_SPEED_UNIT_OPTIONS } from '../../constants';
+import { Task } from '@core/services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-temperature-calculation',
@@ -41,20 +43,9 @@ export class TemperatureCalculationComponent {
   skyCoverOptions = input.required<{ label: string; value: string }[]>();
   measureData = model.required<FieldMeasure>();
 
-  temperatureResult = signal<{
-    cableSolarFlux: number;
-    cableTemperature: number;
-    cableTemperatureUncertainty: number;
-  } | null>(null);
+  temperatureCalculationError = signal<boolean>(false);
 
-  temperatureError = signal<boolean>(false);
-
-  solarFluxMode: 'skyCover' | 'fieldSurvey' = 'skyCover';
-
-  readonly windSpeedUnitOptions = [
-    { label: '(m/s)', value: 'ms' as const },
-    { label: '(km/h)', value: 'kmh' as const }
-  ];
+  readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
   readonly windIncidenceModeOptions = [
     { label: $localize`Auto`, value: 'auto' },
@@ -64,50 +55,41 @@ export class TemperatureCalculationComponent {
   constructor(private readonly workerPythonService: WorkerPythonService) {}
 
   isFormValid = computed(() => {
-    return true;
+    const data = this.measureData();
+    return (
+      data.cableName !== null && data.transit !== null && data.skyCover !== null
+    );
   });
 
   updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));
   }
 
-  updateSolarFluxMode(mode: 'skyCover' | 'fieldSurvey') {
-    this.solarFluxMode = mode;
-  }
-
   async calculateTemperature() {
-    // const data = this.measureData();
-    // TODO: Implement actual temperature calculation when Task is available
-    // For now, this is a placeholder
-    // const { result, error } = await this.workerPythonService.runTask(
-    //   Task.calculateTemperature,
-    //   {
-    //     cableName: data.cableName,
-    //     ambientTemperature: data.ambientTemperature || 0,
-    //     longitude: data.longitude || 0,
-    //     latitude: data.latitude || 0,
-    //     transit: data.transit,
-    //     azimuth: data.azimuth || 0,
-    //     windSpeed: data.windSpeed || 0,
-    //     windSpeedUnit: data.windSpeedUnit,
-    //     windDirection: data.windDirection,
-    //     windIncidence: data.windIncidence || 0,
-    //     windIncidenceMode: data.windIncidenceMode,
-    //     skyCover: data.skyCover,
-    //     diffusedSolarFlux: data.diffusedSolarFlux
-    //   }
-    // );
-    // if (error) {
-    //   this.temperatureError.set(true);
-    //   return;
-    // }
-    // this.temperatureResult.set(result);
-
-    // Placeholder result for UI testing
-    this.temperatureResult.set({
-      cableSolarFlux: 123,
-      cableTemperature: 123,
-      cableTemperatureUncertainty: 123
-    });
+    const data = this.measureData();
+    this.temperatureCalculationError.set(false);
+    this.measureData.update((d) => ({
+      ...d,
+      outputs: { ...d.outputs, cableTemperature: null }
+    }));
+    const { result, error } = await this.workerPythonService.runTask(
+      Task.temperatureCalculation,
+      {
+        cableName: data.cableName!,
+        ambientTemperature: data.ambientTemperature || 0,
+        longitude: data.longitude || 0,
+        latitude: data.latitude || 0,
+        transit: data.transit!,
+        skyCover: data.skyCover!
+      }
+    );
+    if (error) {
+      this.temperatureCalculationError.set(true);
+      return;
+    }
+    this.measureData.update((d) => ({
+      ...d,
+      outputs: { ...d.outputs, cableTemperature: result }
+    }));
   }
 }
