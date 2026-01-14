@@ -7,7 +7,6 @@ import {
   signal,
   untracked
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -16,11 +15,11 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FieldMeasure } from '../../types';
+import { isEqual } from 'lodash';
 
 @Component({
   selector: 'app-header',
   imports: [
-    DecimalPipe,
     FormsModule,
     SelectModule,
     InputTextModule,
@@ -58,6 +57,7 @@ export class HeaderComponent {
   selectedSpan = signal<number[] | null>(null);
 
   private hasCalculatedInitialAltitude = false;
+  private previousSpan = signal<number[] | null>(null);
 
   constructor(private readonly plotService: PlotService) {
     // Initialize span to first available span if measureData has no span set,
@@ -89,10 +89,14 @@ export class HeaderComponent {
     // Calculate altitude when measureData.span changes
     effect(() => {
       const span = this.measureData().span;
-      if (!Array.isArray(span) || span.length !== 2) {
+      if (
+        !Array.isArray(span) ||
+        span.length !== 2 ||
+        isEqual(span, this.previousSpan())
+      ) {
         return;
       }
-
+      this.previousSpan.set(span);
       // Only recalculate if the span actually changed (not just a re-render)
       // This prevents unnecessary recalculations
       this.calculateAltitude(span);
