@@ -7,7 +7,10 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/types';
+import {
+  FieldMeasure,
+  ManualParameterCalculation15CWithoutWind
+} from '@ui/pages/studio/tools-dialog/field-measuring/types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { InitialConditionModalComponent } from '@src/app/ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
@@ -19,6 +22,9 @@ import {
 } from '@src/app/core/services/initial-conditions/initial-condition.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
+import { Task } from '@core/services/worker_python/tasks/types';
+import { DecimalPipe } from '@angular/common';
+import { isNumber } from 'lodash';
 
 @Component({
   selector: 'app-parameter-at-15c-without-wind',
@@ -30,7 +36,8 @@ import { v4 as uuidv4 } from 'uuid';
     InputGroupAddonModule,
     IconComponent,
     ButtonComponent,
-    InitialConditionModalComponent
+    InitialConditionModalComponent,
+    DecimalPipe
   ],
   templateUrl: './parameter-calculation-15-without-wind.component.html',
   styleUrl: './parameter-calculation-15-without-wind.component.scss',
@@ -45,12 +52,6 @@ import { v4 as uuidv4 } from 'uuid';
 })
 export class ParameterCalculation15WithoutWindComponent {
   measureData = model.required<FieldMeasure>();
-  parameter15CResult = signal<{
-    parameter15CMinusUncertainty: number;
-    parameter15C: number;
-    parameter15CPlusUncertainty: number;
-  } | null>(null);
-
   initialConditionModalOpen = signal<boolean>(false);
 
   initialConditionInput = signal<InitialCondition>({
@@ -80,56 +81,89 @@ export class ParameterCalculation15WithoutWindComponent {
   ) {}
 
   isFormValid = computed(() => {
-    const data = this.measureData();
-    if (data.updateMode15C === 'manual') {
+    const isManual = this.measureData().updateMode15C === 'manual';
+    if (isManual) {
+      const manualData =
+        this.measureData().manualParameterCalculation15CWithoutWind;
       return (
-        data.parameterPapoto !== null &&
-        data.parameterUncertaintyPapoto !== null &&
-        data.cableTemperature15C !== null &&
-        data.cableTemperatureUncertainty15C !== null
+        isNumber(manualData?.cableTemperature15C) &&
+        isNumber(manualData?.parameterPapoto) &&
+        isNumber(manualData?.cableTemperatureUncertainty15C)
       );
     }
-    // For auto mode, validation might depend on other fields
-    return true;
+    return (
+      isNumber(this.measureData().outputs.papoto?.parameter) &&
+      // data.parameterUncertaintyPapoto !== null && // TODO: Uncomment when parameterUncertaintyPapoto is available
+      isNumber(this.measureData().outputs.cableTemperature?.cableTemperature) &&
+      isNumber(
+        this.measureData().outputs.cableTemperature?.cableTemperatureUncertainty
+      )
+    );
   });
 
-  updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
-    this.measureData.update((d) => ({ ...d, [field]: value }));
+  updateMeasureData<K extends keyof FieldMeasure>(
+    field: K,
+    value: FieldMeasure[K]
+  ) {
+    if (field === 'updateMode15C') {
+      this.measureData.update((d) => ({
+        ...d,
+        manualParameterCalculation15CWithoutWind: null,
+        [field]: value
+      }));
+    } else {
+      this.measureData.update((d) => ({ ...d, [field]: value }));
+    }
+  }
+
+  updateManualParameterCalculation15CWithoutWind<
+    K extends keyof ManualParameterCalculation15CWithoutWind
+  >(field: K, value: ManualParameterCalculation15CWithoutWind[K]) {
+    this.measureData.update((d) => ({
+      ...d,
+      manualParameterCalculation15CWithoutWind: {
+        ...(d.manualParameterCalculation15CWithoutWind as ManualParameterCalculation15CWithoutWind),
+        [field]: value
+      }
+    }));
   }
 
   async calculateParameter15C() {
-    // const data = this.measureData();
-    // TODO: Implement actual parameter at 15°C calculation when Task is available
-    // For now, this is a placeholder
-    // const { result, error } = await this.workerPythonService.runTask(
-    //   Task.calculateParameter15C,
-    //   {
-    //     parameterPapoto: data.parameterPapoto,
-    //     parameterUncertaintyPapoto: data.parameterUncertaintyPapoto,
-    //     cableTemperature15C: data.cableTemperature15C,
-    //     cableTemperatureUncertainty15C: data.cableTemperatureUncertainty15C,
-    //     updateMode15C: data.updateMode15C
-    //   }
-    // );
-    // if (error) {
-    //   this.parameter15CError.set(true);
-    //   return;
-    // }
-    // this.parameter15CResult.set(result);
-
-    // Placeholder result for UI testing
-    this.parameter15CResult.set({
-      parameter15CMinusUncertainty: 1885,
-      parameter15C: 1900,
-      parameter15CPlusUncertainty: 1915
-    });
+    this.parameter15CError.set(false);
+    this.measureData.update((d) => ({
+      ...d,
+      outputs: { ...d.outputs, parameter15C: null }
+    }));
+    const data = this.measureData();
+    if (!this.isFormValid()) {
+      console.error('Missing required fields for parameter calculation');
+      this.parameter15CError.set(true);
+      return;
+    }
+    const { result, error } = await this.workerPythonService.runTask(
+      Task.calculateParameter15CWithoutWind,
+      {
+        parameterPapoto: data.parameterPapoto!,
+        parameterUncertaintyPapoto: data.parameterUncertaintyPapoto!,
+        cableTemperature15C: data.cableTemperature15C!,
+        cableTemperatureUncertainty15C: data.cableTemperatureUncertainty15C!
+      }
+    );
+    if (error) {
+      this.parameter15CError.set(true);
+      return;
+    }
+    this.measureData.update((d) => ({
+      ...d,
+      outputs: { ...d.outputs, parameter15C: result }
+    }));
   }
 
   onCreateInitialCondition(type: 'minus' | 'nominal' | 'plus') {
     // TODO: Implement create initial condition functionality
     console.log('Create initial condition:', type);
 
-    const result = this.parameter15CResult();
+    const result = this.measureData().outputs.parameter15C;
     let baseParameter: number | undefined;
 
     if (type === 'minus') {

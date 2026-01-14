@@ -6,7 +6,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolsDialogService } from '../tools-dialog.service';
-import { INITIAL_CALCULATION_RESULTS } from './mock-data';
 import { createTestMeasureData } from './helpers';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@core/services/sections/section.service';
@@ -149,12 +148,6 @@ describe('FieldMeasuringComponent', () => {
     it('should initialize activeTab with terrainData', () => {
       expect(component.activeTab()).toBe('terrainData');
     });
-
-    it('should initialize calculationResults with INITIAL_CALCULATION_RESULTS', () => {
-      expect(component.calculationResults()).toEqual(
-        INITIAL_CALCULATION_RESULTS
-      );
-    });
   });
 
   describe('Lifecycle Hooks', () => {
@@ -192,11 +185,6 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('Signal Properties', () => {
-    it('should have spanOptions signal initialized', () => {
-      expect(component.spanOptions()).toBeDefined();
-      expect(Array.isArray(component.spanOptions())).toBe(true);
-    });
-
     it('should have windDirectionOptions signal initialized', () => {
       expect(component.windDirectionOptions()).toBeDefined();
       expect(Array.isArray(component.windDirectionOptions())).toBe(true);
@@ -210,15 +198,6 @@ describe('FieldMeasuringComponent', () => {
     it('should have leftSupportOptions signal initialized', () => {
       expect(component.leftSupportOptions()).toBeDefined();
       expect(Array.isArray(component.leftSupportOptions())).toBe(true);
-    });
-
-    it('should have selectedSpan signal initialized', () => {
-      expect(component.selectedSpan()).toBeDefined();
-      expect(Array.isArray(component.selectedSpan())).toBe(true);
-    });
-
-    it('should initialize selectedSpan with empty array', () => {
-      expect(component.selectedSpan()).toEqual([]);
     });
   });
 
@@ -237,41 +216,6 @@ describe('FieldMeasuringComponent', () => {
       component.onVisibleChange(true);
 
       expect(closeToolSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('onSpanChange', () => {
-    it('should update selectedSpan signal when span changes', () => {
-      const newSpan = [5, 6];
-
-      component.onSpanChange(newSpan);
-
-      expect(component.selectedSpan()).toEqual(newSpan);
-    });
-
-    it('should handle different span values', () => {
-      component.onSpanChange([0, 1]);
-      expect(component.selectedSpan()).toEqual([0, 1]);
-
-      component.onSpanChange([10, 11]);
-      expect(component.selectedSpan()).toEqual([10, 11]);
-
-      component.onSpanChange([3, 4]);
-      expect(component.selectedSpan()).toEqual([3, 4]);
-    });
-
-    it('should update selectedSpan with empty array', () => {
-      component.onSpanChange([]);
-
-      expect(component.selectedSpan()).toEqual([]);
-    });
-
-    it('should update from non-empty to different non-empty span', () => {
-      component.onSpanChange([1, 2]);
-      expect(component.selectedSpan()).toEqual([1, 2]);
-
-      component.onSpanChange([7, 8]);
-      expect(component.selectedSpan()).toEqual([7, 8]);
     });
   });
 
@@ -406,92 +350,6 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
-  describe('onCalculate', () => {
-    it('should set calculation results', () => {
-      component.onCalculate();
-
-      const results = component.calculationResults();
-      expect(results.parameter).toBe(123);
-      expect(results.parameterUncertainty).toBe(123);
-      expect(results.criteria05).toBe(true);
-      expect(results.sideDValid).toBe(true);
-      expect(results.validMeasurement).toBe(true);
-    });
-
-    it('should log calculate data', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
-
-      component.onCalculate();
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Calculate',
-        component.measureData()
-      );
-    });
-
-    it('should set parameter values', () => {
-      component.onCalculate();
-
-      const results = component.calculationResults();
-      expect(results.parameter12).toBe(123);
-      expect(results.parameter23).toBe(123);
-      expect(results.parameter13).toBe(123);
-    });
-
-    it('should set cable temperature values', () => {
-      component.onCalculate();
-
-      const results = component.calculationResults();
-      expect(results.cableTemperature).toBe(123);
-      expect(results.cableTemperatureUncertainty).toBe(3);
-      expect(results.cableSolarFlux).toBe(205);
-    });
-
-    it('should not set parameter 15C values', () => {
-      component.onCalculate();
-
-      const results = component.calculationResults();
-      expect(results.parameter15CMinusUncertainty).toBeNull();
-      expect(results.parameter15C).toBeNull();
-      expect(results.parameter15CPlusUncertainty).toBeNull();
-    });
-  });
-
-  describe('onCalculateParameter15C', () => {
-    beforeEach(() => {
-      // Set initial calculation results
-      component.onCalculate();
-    });
-
-    it('should update calculation results with 15C parameters', () => {
-      component.onCalculateParameter15C();
-
-      const results = component.calculationResults();
-      expect(results.parameter15CMinusUncertainty).toBe(1885);
-      expect(results.parameter15C).toBe(1900);
-      expect(results.parameter15CPlusUncertainty).toBe(1900);
-    });
-
-    it('should preserve existing calculation results', () => {
-      const initialParameter = component.calculationResults().parameter;
-
-      component.onCalculateParameter15C();
-
-      expect(component.calculationResults().parameter).toBe(initialParameter);
-    });
-
-    it('should log calculate parameter at 15C data', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
-
-      component.onCalculateParameter15C();
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Calculate Parameter at 15°C',
-        component.measureData()
-      );
-    });
-  });
-
   describe('Active Tab Management', () => {
     it('should allow changing active tab', () => {
       component.activeTab.set('parameterCalculation');
@@ -537,23 +395,10 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle repeated calculations', () => {
-      component.onCalculate();
-      const firstResults = component.calculationResults();
-
-      component.onCalculate();
-      const secondResults = component.calculationResults();
-
-      expect(secondResults).toEqual(firstResults);
-    });
-
-    it('should handle field changes after calculation', () => {
-      component.onCalculate();
-
+    it('should handle field changes', () => {
       component.onFieldChange('ambientTemperature', 25);
 
       expect(component.measureData().ambientTemperature).toBe(25);
-      expect(component.calculationResults().parameter).toBe(123);
     });
 
     it('should handle multiple save calls', async () => {
