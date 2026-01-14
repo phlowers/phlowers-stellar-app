@@ -13,9 +13,9 @@ import { BehaviorSubject } from 'rxjs';
 import { MaintenanceService } from './maintenance.service';
 import { StorageService } from '../storage/storage.service';
 import {
-  MaintenanceData,
+  CatMaintenanceData,
   RteMaintenanceTeamsCsvFile
-} from '../../data/database/interfaces/maintenance';
+} from '../../data/database/interfaces/catMaintenance';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
@@ -31,8 +31,8 @@ interface MockTable {
 }
 
 interface MockDb {
-  lines: MockTable;
-  maintenance: MockTable;
+  catLines: MockTable;
+  catMaintenance: MockTable;
 }
 
 describe('MaintenanceService', () => {
@@ -51,12 +51,12 @@ describe('MaintenanceService', () => {
     };
 
     mockDb = {
-      lines: {
+      catLines: {
         count: jest.fn().mockResolvedValue(0),
         toArray: jest.fn().mockResolvedValue([]),
         bulkAdd: jest.fn().mockResolvedValue(undefined)
       },
-      maintenance: mockMaintenanceTable
+      catMaintenance: mockMaintenanceTable
     };
 
     // Create spy for StorageService
@@ -95,7 +95,7 @@ describe('MaintenanceService', () => {
 
   describe('getMaintenance', () => {
     it('should return maintenance array from database', async () => {
-      const mockMaintenance: MaintenanceData[] = [
+      const mockMaintenance: CatMaintenanceData[] = [
         {
           maintenance_center: 'Maintenance Center 1',
           maintenance_center_id: 'CM001',

@@ -7,7 +7,10 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { Cable, RteCablesCsvFile } from '../../data/database/interfaces/cable';
+import {
+  CatCable,
+  RteCablesCsvFile
+} from '../../data/database/interfaces/catCable';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
@@ -28,11 +31,14 @@ export class CablesService {
   }
 
   async getCables() {
-    return this.storageService.db?.cables?.toArray();
+    return this.storageService.db?.catCables?.toArray();
   }
 
-  async getCable(name: string): Promise<Cable | undefined> {
-    return this.storageService.db?.cables?.where('name').equals(name).first();
+  async getCable(name: string): Promise<CatCable | undefined> {
+    return this.storageService.db?.catCables
+      ?.where('name')
+      .equals(name)
+      .first();
   }
 
   async importFromFile() {
@@ -47,7 +53,7 @@ export class CablesService {
         })
       );
 
-    const mapData = (data: RteCablesCsvFile[]): Cable[] => {
+    const mapData = (data: RteCablesCsvFile[]): CatCable[] => {
       return data
         .map((item) => ({
           id: item.cable_id,
@@ -107,10 +113,10 @@ export class CablesService {
               resolve();
               return;
             }
-            await this.storageService.db?.cables.clear();
-            const cablesTable: Cable[] = mapData(data);
+            await this.storageService.db?.catCables.clear();
+            const cablesTable: CatCable[] = mapData(data);
             console.log('adding cables data', cablesTable.length);
-            await this.storageService.db?.cables.bulkAdd(cablesTable);
+            await this.storageService.db?.catCables.bulkAdd(cablesTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<RteCablesCsvFile>) => void
         });

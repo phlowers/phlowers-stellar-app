@@ -13,9 +13,9 @@ import { BehaviorSubject } from 'rxjs';
 import { AttachmentService } from './attachment.service';
 import { StorageService } from '../storage/storage.service';
 import {
-  Attachment,
+  CatAttachment,
   RteAttachmentsCsvFile
-} from '../../data/database/interfaces/attachment';
+} from '../../data/database/interfaces/catAttachment';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
@@ -36,8 +36,8 @@ interface MockTable {
 }
 
 interface MockDb {
-  lines: MockTable;
-  attachments: MockTable;
+  catLines: MockTable;
+  catAttachments: MockTable;
 }
 
 describe('AttachmentService', () => {
@@ -56,12 +56,12 @@ describe('AttachmentService', () => {
     };
 
     mockDb = {
-      lines: {
+      catLines: {
         count: jest.fn().mockResolvedValue(0),
         toArray: jest.fn().mockResolvedValue([]),
         bulkAdd: jest.fn().mockResolvedValue(undefined)
       },
-      attachments: mockAttachmentsTable
+      catAttachments: mockAttachmentsTable
     };
 
     // Create spy for StorageService
@@ -100,7 +100,7 @@ describe('AttachmentService', () => {
 
   describe('getAttachments', () => {
     it('should return attachments array from database', async () => {
-      const mockAttachments: Attachment[] = [
+      const mockAttachments: CatAttachment[] = [
         {
           uuid: 'uuid-1',
           updated_at: '2025-01-01T00:00:00.000Z',

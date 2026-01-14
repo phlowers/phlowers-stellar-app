@@ -1,4 +1,4 @@
-import { Cable } from '@core/data/database/interfaces/cable';
+import { CatCable } from '@core/data/database/interfaces/catCable';
 import { Section } from '@core/data/database/interfaces/section';
 import { View } from '@ui/shared/components/studio/section/helpers/types';
 
@@ -51,7 +51,7 @@ export enum LogLevel {
 }
 
 export interface TaskInputs {
-  [Task.getLit]: { section: Section; cable: Cable };
+  [Task.getLit]: { section: Section; cable: CatCable };
   [Task.runTests]: undefined;
   [Task.changeClimateLoad]: {
     windPressure: number;
