@@ -67,22 +67,39 @@ export interface FieldMeasure {
   parameterUncertaintyPapoto: number | null;
   cableTemperature15C: number | null;
   cableTemperatureUncertainty15C: number | null;
+  manualParameterCalculation15CWithoutWind: ManualParameterCalculation15CWithoutWind | null;
+  outputs: FieldMeasureOutputs;
 }
 
-export interface CalculationResults {
-  parameter: number | null;
-  parameterUncertainty: number | null;
-  parameter12: number | null;
-  parameter23: number | null;
-  parameter13: number | null;
-  criteria05: boolean | null;
-  sideDGreaterThan2m: number | null;
-  sideDValid: boolean | null;
-  validMeasurement: boolean | null;
-  cableTemperature: number | null;
-  cableTemperatureUncertainty: number | null;
-  cableSolarFlux: number | null;
-  parameter15CMinusUncertainty: number | null;
-  parameter15C: number | null;
-  parameter15CPlusUncertainty: number | null;
+export interface FieldMeasureOutputs {
+  papoto: PapotoResult | null;
+  cableTemperature: TemperatureCalculationResult | null;
+  parameter15C: Parameter15CResult | null;
+}
+
+export interface Parameter15CResult {
+  parameter15CMinusUncertainty: number;
+  parameter15C: number;
+  parameter15CPlusUncertainty: number;
+}
+
+export interface TemperatureCalculationResult {
+  cableSolarFlux: number;
+  cableTemperature: number;
+  cableTemperatureUncertainty: number;
+}
+
+export interface PapotoResult {
+  parameter: number;
+  parameter_1_2: number;
+  parameter_2_3: number;
+  parameter_1_3: number;
+  check_validity: boolean;
+}
+
+export interface ManualParameterCalculation15CWithoutWind {
+  parameterPapoto: number | null;
+  parameterUncertaintyPapoto: number | null;
+  cableTemperature15C: number | null;
+  cableTemperatureUncertainty15C: number | null;
 }

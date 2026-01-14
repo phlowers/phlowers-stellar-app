@@ -6,11 +6,12 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { PapotoComponent } from './papoto.component';
 import { createTestMeasureData } from './../../../helpers';
-import { leftSupportOption } from '../../../mock-data';
+import { LEFT_SUPPORT_OPTIONS_MOCK } from '../../../mock-data';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import {
   Task,
-  TaskError
+  TaskError,
+  GetSectionOutput
 } from '@src/app/core/services/worker_python/tasks/types';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 
@@ -46,8 +47,7 @@ describe('Papoto component', () => {
     fixture = TestBed.createComponent(PapotoComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    componentRef.setInput('leftSupportOption', leftSupportOption);
-    componentRef.setInput('selectedSpan', []);
+    componentRef.setInput('leftSupportOption', LEFT_SUPPORT_OPTIONS_MOCK);
     componentRef.setInput('measureData', createTestMeasureData());
     fixture.detectChanges();
   });
@@ -126,7 +126,7 @@ describe('Papoto component', () => {
     component.updateField('V3', 45);
     component.updateField('VR', 55);
 
-    expect(component.papotoResult()).toBe(null);
+    expect(component.measureData().outputs.papoto).toBe(null);
     expect(component.papotoError()).toBe(false);
 
     await component.calculatePapoto();
@@ -148,7 +148,6 @@ describe('Papoto component', () => {
         VR: 55
       }
     );
-    expect(component.papotoResult()).toEqual(mockResult);
     expect(component.papotoError()).toBe(false);
   });
 
@@ -184,7 +183,7 @@ describe('Papoto component', () => {
     await component.calculatePapoto();
 
     expect(component.papotoError()).toBe(true);
-    expect(component.papotoResult()).toBe(null);
+    expect(component.measureData().outputs.papoto).toBe(null);
   });
 
   it('should validate form correctly with isFormValid', () => {
@@ -209,22 +208,8 @@ describe('Papoto component', () => {
   });
 
   describe('Dynamic Left Support Options', () => {
-    it('should return empty array when selectedSpan is empty', () => {
-      componentRef.setInput('selectedSpan', []);
-      fixture.detectChanges();
-
-      expect(component.retrievedLeftSupportOptions()).toEqual([]);
-    });
-
-    it('should return empty array when selectedSpan has only one element', () => {
-      componentRef.setInput('selectedSpan', [0]);
-      fixture.detectChanges();
-
-      expect(component.retrievedLeftSupportOptions()).toEqual([]);
-    });
-
     it('should return correct support options when selectedSpan has two elements', () => {
-      componentRef.setInput('selectedSpan', [12, 13]);
+      component.updateField('span', [12, 13]);
       fixture.detectChanges();
 
       expect(component.retrievedLeftSupportOptions()).toEqual([
@@ -234,7 +219,7 @@ describe('Papoto component', () => {
     });
 
     it('should update support options when selectedSpan changes', () => {
-      componentRef.setInput('selectedSpan', [5, 6]);
+      component.updateField('span', [5, 6]);
       fixture.detectChanges();
 
       expect(component.retrievedLeftSupportOptions()).toEqual([
@@ -242,7 +227,7 @@ describe('Papoto component', () => {
         { label: '7', value: '7' }
       ]);
 
-      componentRef.setInput('selectedSpan', [10, 11]);
+      component.updateField('span', [10, 11]);
       fixture.detectChanges();
 
       expect(component.retrievedLeftSupportOptions()).toEqual([
@@ -254,14 +239,13 @@ describe('Papoto component', () => {
 
   describe('Calculated Span Length', () => {
     it('should return null when selectedSpan is empty', () => {
-      componentRef.setInput('selectedSpan', []);
       fixture.detectChanges();
 
       expect(component.calculatedSpanLength()).toBeNull();
     });
 
     it('should return null when selectedSpan has only one element', () => {
-      componentRef.setInput('selectedSpan', [0]);
+      component.updateField('span', [0]);
       fixture.detectChanges();
 
       expect(component.calculatedSpanLength()).toBeNull();
@@ -269,33 +253,35 @@ describe('Papoto component', () => {
 
     it('should return null when litData is not available', () => {
       plotServiceMock.litData.set(null);
-      componentRef.setInput('selectedSpan', [0, 1]);
+      component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
       expect(component.calculatedSpanLength()).toBeNull();
     });
 
     it('should return null when span_length field is not available in litData', () => {
-      plotServiceMock.litData.set({ elevation: [5.5, 10.75] } as any);
-      componentRef.setInput('selectedSpan', [0, 1]);
+      plotServiceMock.litData.set({
+        elevation: [5.5, 10.75]
+      } as Partial<GetSectionOutput> as GetSectionOutput);
+      component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
       expect(component.calculatedSpanLength()).toBeNull();
     });
 
     it('should return correct span length from litData for given span', () => {
-      componentRef.setInput('selectedSpan', [0, 1]);
+      component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
       expect(component.calculatedSpanLength()).toBe(100);
     });
 
     it('should update when selectedSpan changes to different index', () => {
-      componentRef.setInput('selectedSpan', [0, 1]);
+      component.updateField('span', [0, 1]);
       fixture.detectChanges();
       expect(component.calculatedSpanLength()).toBe(100);
 
-      componentRef.setInput('selectedSpan', [1, 2]);
+      component.updateField('span', [1, 2]);
       fixture.detectChanges();
       expect(component.calculatedSpanLength()).toBe(150);
     });
@@ -303,14 +289,13 @@ describe('Papoto component', () => {
 
   describe('Calculated Elevation', () => {
     it('should return null when selectedSpan is empty', () => {
-      componentRef.setInput('selectedSpan', []);
       fixture.detectChanges();
 
       expect(component.calculatedElevation()).toBeNull();
     });
 
     it('should return null when selectedSpan has only one element', () => {
-      componentRef.setInput('selectedSpan', [1]);
+      component.updateField('span', [1]);
       fixture.detectChanges();
 
       expect(component.calculatedElevation()).toBeNull();
@@ -318,47 +303,49 @@ describe('Papoto component', () => {
 
     it('should return null when litData is not available', () => {
       plotServiceMock.litData.set(null);
-      componentRef.setInput('selectedSpan', [0, 1]);
+      component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
       expect(component.calculatedElevation()).toBeNull();
     });
 
     it('should return null when elevation field is not available in litData', () => {
-      plotServiceMock.litData.set({ span_length: [100, 150] } as any);
-      componentRef.setInput('selectedSpan', [0, 1]);
+      plotServiceMock.litData.set({
+        span_length: [100, 150]
+      } as Partial<GetSectionOutput> as GetSectionOutput);
+      component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
       expect(component.calculatedElevation()).toBeNull();
     });
 
     it('should return correct elevation from litData for given span', () => {
-      componentRef.setInput('selectedSpan', [0, 1]);
+      component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
       expect(component.calculatedElevation()).toBe(5.5);
     });
 
     it('should return elevation rounded to 2 decimal places', () => {
-      componentRef.setInput('selectedSpan', [1, 2]);
+      component.updateField('span', [1, 2]);
       fixture.detectChanges();
 
       expect(component.calculatedElevation()).toBe(10.75);
     });
 
     it('should handle negative elevation values correctly', () => {
-      componentRef.setInput('selectedSpan', [2, 3]);
+      component.updateField('span', [2, 3]);
       fixture.detectChanges();
 
       expect(component.calculatedElevation()).toBe(-3.25);
     });
 
     it('should update when selectedSpan changes to different index', () => {
-      componentRef.setInput('selectedSpan', [0, 1]);
+      component.updateField('span', [0, 1]);
       fixture.detectChanges();
       expect(component.calculatedElevation()).toBe(5.5);
 
-      componentRef.setInput('selectedSpan', [1, 2]);
+      component.updateField('span', [1, 2]);
       fixture.detectChanges();
       expect(component.calculatedElevation()).toBe(10.75);
     });

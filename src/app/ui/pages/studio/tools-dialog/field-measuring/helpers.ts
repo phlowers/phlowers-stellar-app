@@ -1,5 +1,5 @@
 import { Section } from '@core/data/database/interfaces/section';
-import { FieldMeasure } from './types';
+import { FieldMeasure, FieldMeasureOutputs } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@src/app/ui/shared/helpers/findMiddleSpan';
 
@@ -88,12 +88,14 @@ export const createInitialMeasureData = (
     parameterUncertaintyPapoto: null,
     cableTemperature15C: null,
     cableTemperatureUncertainty15C: null,
+    manualParameterCalculation15CWithoutWind: null,
     link: section?.link_name || null,
     voltage: section?.voltage_idr || null,
     spanType: section?.type || null,
     phaseNumber: section?.electric_phase_number || null,
     numberOfConductors: section?.cables_amount || null,
-    cableName: section?.cable_name || null
+    cableName: section?.cable_name || null,
+    outputs: initialFieldMeasureOutputs
   };
 };
 
@@ -114,4 +116,10 @@ export const createTestMeasureData = (
     ...createInitialMeasureData(mockSection as Section, '', 11, 12),
     ...overrides
   };
+};
+
+export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
+  papoto: null,
+  cableTemperature: null,
+  parameter15C: null
 };
