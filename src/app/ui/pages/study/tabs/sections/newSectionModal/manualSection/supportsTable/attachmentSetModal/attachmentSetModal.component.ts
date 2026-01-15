@@ -10,7 +10,7 @@ import { DialogModule } from 'primeng/dialog';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Select } from 'primeng/select';
-import { Attachment } from '@core/data/database/interfaces/attachment';
+import { CatAttachment } from '@core/data/database/interfaces/catAttachment';
 import { DividerModule } from 'primeng/divider';
 import { AttachmentService } from '@core/services/attachment/attachment.service';
 import { Support } from '@core/data/database/interfaces/support';
@@ -60,8 +60,8 @@ export class AttachmentSetModalComponent implements OnInit {
   coordinates = signal<(number | undefined)[][]>([]);
   attachmentSetNumbers = signal<number[]>([]);
 
-  supportsFilterTable = signal<Attachment[]>([]);
-  attachmentsFilterTable = signal<Attachment[]>([]);
+  supportsFilterTable = signal<CatAttachment[]>([]);
+  attachmentsFilterTable = signal<CatAttachment[]>([]);
 
   onVisibleChange() {
     this.isOpenChange.emit(false);
@@ -153,7 +153,7 @@ export class AttachmentSetModalComponent implements OnInit {
     this.getData();
   }
 
-  async onAttachnementSelect(event: any, key: keyof Attachment) {
+  async onAttachnementSelect(event: any, key: keyof CatAttachment) {
     if (event.value === null || event.value === undefined) {
       this.resetValues(key === 'support_name');
       return;

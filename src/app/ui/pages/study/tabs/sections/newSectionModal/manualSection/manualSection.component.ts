@@ -25,11 +25,11 @@ import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.com
 import { createEmptySupport } from '@src/app/core/services/sections/helpers';
 import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
-import { MaintenanceData } from '@src/app/core/data/database/interfaces/maintenance';
+import { CatMaintenanceData } from '@src/app/core/data/database/interfaces/catMaintenance';
 import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
-import { Line } from '@src/app/core/data/database/interfaces/line';
+import { CatLine } from '@src/app/core/data/database/interfaces/catLine';
 import { LinesService } from '@src/app/core/services/lines/lines.service';
-import { Cable } from '@src/app/core/data/database/interfaces/cable';
+import { CatCable } from '@src/app/core/data/database/interfaces/catCable';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import { MessageModule } from 'primeng/message';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -41,7 +41,7 @@ import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
-const sortLines = (lines: Line[]) => {
+const sortLines = (lines: CatLine[]) => {
   return lines.sort((a, b) => {
     if (a.voltage_idr === '0 KV' || a.voltage_idr === '0') {
       return -1;
@@ -117,7 +117,7 @@ export class ManualSectionComponent implements OnInit {
   section = input.required<Section>();
   sectionChange = output<Section>();
   studio = viewChild(StudioComponent);
-  cablesFilterTable = signal<Cable[]>([]);
+  cablesFilterTable = signal<CatCable[]>([]);
   public sectionTypes = sectionTypes;
   isNameUnique = input<boolean>();
   constructor(
@@ -144,8 +144,8 @@ export class ManualSectionComponent implements OnInit {
     };
   });
 
-  maintenanceFilterTable = signal<MaintenanceData[]>([]);
-  linesFilterTable = signal<Line[]>([]);
+  maintenanceFilterTable = signal<CatMaintenanceData[]>([]);
+  linesFilterTable = signal<CatLine[]>([]);
   firstSupport = signal<number>(0);
   rowsSupport = signal<number>(10);
 
@@ -375,13 +375,13 @@ export class ManualSectionComponent implements OnInit {
       if (id === type) {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
-            !event.value || item[id as keyof MaintenanceData] === event.value
+            !event.value || item[id as keyof CatMaintenanceData] === event.value
         );
       } else {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
             !this.section()[id as keyof Section] ||
-            item[id as keyof MaintenanceData] ===
+            item[id as keyof CatMaintenanceData] ===
               this.section()[id as keyof Section]
         );
       }
@@ -392,7 +392,7 @@ export class ManualSectionComponent implements OnInit {
     if (maintenanceTable.length === 1) {
       orderedMaintenanceTableProperties.forEach((id) => {
         (this.section() as unknown as Record<string, unknown>)[id] =
-          maintenanceTable[0][id as keyof MaintenanceData];
+          maintenanceTable[0][id as keyof CatMaintenanceData];
       });
     }
   }

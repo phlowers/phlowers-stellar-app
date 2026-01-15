@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export interface Cable {
+export interface CatCable {
   name: string;
   data_source: string;
   section: number;

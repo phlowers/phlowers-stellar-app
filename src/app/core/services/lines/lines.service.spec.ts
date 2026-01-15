@@ -13,7 +13,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
 import { StorageService } from '../storage/storage.service';
-import { Line, RteLinesCsvFile } from '../../data/database/interfaces/line';
+import {
+  CatLine,
+  RteLinesCsvFile
+} from '../../data/database/interfaces/catLine';
 import Papa from 'papaparse';
 import { sortBy } from 'lodash';
 
@@ -51,8 +54,8 @@ interface MockTable {
 }
 
 interface MockDb {
-  lines: MockTable;
-  maintenance: MockTable;
+  catLines: MockTable;
+  catMaintenance: MockTable;
 }
 
 describe('LinesService', () => {
@@ -79,8 +82,8 @@ describe('LinesService', () => {
     };
 
     mockDb = {
-      lines: mockLinesTable,
-      maintenance: mockMaintenanceTable
+      catLines: mockLinesTable,
+      catMaintenance: mockMaintenanceTable
     };
 
     // Create spy for StorageService
@@ -133,7 +136,7 @@ describe('LinesService', () => {
 
   describe('getLines', () => {
     it('should return lines array from database', async () => {
-      const mockLines: Line[] = [
+      const mockLines: CatLine[] = [
         {
           uuid: 'test-uuid-1',
           link_idr: 'LINK001',

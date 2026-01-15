@@ -12,7 +12,10 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { CablesService } from './cables.service';
 import { StorageService } from '../storage/storage.service';
-import { Cable, RteCablesCsvFile } from '../../data/database/interfaces/cable';
+import {
+  CatCable,
+  RteCablesCsvFile
+} from '../../data/database/interfaces/catCable';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
@@ -28,8 +31,8 @@ interface MockTable {
 }
 
 interface MockDb {
-  lines: MockTable;
-  cables: MockTable;
+  catLines: MockTable;
+  catCables: MockTable;
 }
 
 describe('CablesService', () => {
@@ -48,12 +51,12 @@ describe('CablesService', () => {
     };
 
     mockDb = {
-      lines: {
+      catLines: {
         count: jest.fn().mockResolvedValue(0),
         toArray: jest.fn().mockResolvedValue([]),
         bulkAdd: jest.fn().mockResolvedValue(undefined)
       },
-      cables: mockCablesTable
+      catCables: mockCablesTable
     };
 
     // Create spy for StorageService
@@ -92,7 +95,7 @@ describe('CablesService', () => {
 
   describe('getCables', () => {
     it('should return cables array from database', async () => {
-      const mockCables: Cable[] = [
+      const mockCables: CatCable[] = [
         {
           name: 'Cable 1',
           data_source: 'RTE',
