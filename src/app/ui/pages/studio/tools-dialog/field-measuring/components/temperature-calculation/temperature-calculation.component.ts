@@ -61,6 +61,14 @@ export class TemperatureCalculationComponent {
     );
   });
 
+  localizedWindDirection = computed(() => {
+    const windDirection = this.measureData().windDirection;
+    const option = this.windDirectionOptions().find(
+      (opt) => opt.value === windDirection
+    );
+    return option?.label ?? windDirection;
+  });
+
   updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));
   }
