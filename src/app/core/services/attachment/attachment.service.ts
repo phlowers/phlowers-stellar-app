@@ -10,9 +10,9 @@ import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import {
-  Attachment,
+  CatAttachment,
   RteAttachmentsCsvFile
-} from '../../data/database/interfaces/attachment';
+} from '../../data/database/interfaces/catAttachment';
 import { v4 as uuidv4 } from 'uuid';
 import { toNumber } from 'lodash';
 
@@ -32,7 +32,7 @@ export class AttachmentService {
   }
 
   async getAttachments() {
-    return this.storageService.db?.attachments.toArray();
+    return this.storageService.db?.catAttachments.toArray();
   }
 
   /**
@@ -50,7 +50,7 @@ export class AttachmentService {
         })
       );
 
-    const mapData = (data: RteAttachmentsCsvFile[]): Attachment[] => {
+    const mapData = (data: RteAttachmentsCsvFile[]): CatAttachment[] => {
       return data
         .filter((item) => item.support_adr)
         .map((item) => ({
@@ -81,10 +81,12 @@ export class AttachmentService {
               resolve();
               return;
             }
-            await this.storageService.db?.attachments.clear();
-            const attachmentsTable: Attachment[] = mapData(data);
+            await this.storageService.db?.catAttachments.clear();
+            const attachmentsTable: CatAttachment[] = mapData(data);
             console.log('adding attachments data', attachmentsTable.length);
-            await this.storageService.db?.attachments.bulkAdd(attachmentsTable);
+            await this.storageService.db?.catAttachments.bulkAdd(
+              attachmentsTable
+            );
             resolve();
           }) as (jsonResults: Papa.ParseResult<RteAttachmentsCsvFile>) => void
         });
