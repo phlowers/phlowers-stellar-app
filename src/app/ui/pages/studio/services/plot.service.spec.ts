@@ -15,7 +15,7 @@ import {
   DataError
 } from '@src/app/core/services/worker_python/tasks/types';
 import { Section } from '@core/data/database/interfaces/section';
-import { Cable } from '@core/data/database/interfaces/cable';
+import { CatCable } from '@core/data/database/interfaces/catCable';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
@@ -55,7 +55,7 @@ describe('PlotService', () => {
     span_length: []
   };
 
-  const mockCable: Cable = {
+  const mockCable: CatCable = {
     name: 'Test Cable',
     data_source: 'test-source',
     section: 100,

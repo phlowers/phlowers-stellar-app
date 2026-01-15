@@ -35,7 +35,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
-import { Attachment } from '@src/app/core/data/database/interfaces/attachment';
+import { CatAttachment } from '@src/app/core/data/database/interfaces/catAttachment';
 import { Support } from '@src/app/core/data/database/interfaces/support';
 import { Section } from '@src/app/core/data/database/interfaces/section';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
@@ -57,7 +57,7 @@ describe('AttachmentSetModalComponent', () => {
   let attachmentServiceMock: jest.Mocked<AttachmentService>;
   let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
 
-  const mockAttachments: Attachment[] = [
+  const mockAttachments: CatAttachment[] = [
     {
       uuid: '1',
       support_name: 'Support A',

@@ -10,7 +10,7 @@ import { WorkerPythonService } from './worker-python.service';
 import { Task } from './tasks/types';
 import { firstValueFrom } from 'rxjs';
 import { Section } from '@core/data/database/interfaces/section';
-import { Cable } from '@core/data/database/interfaces/cable';
+import { CatCable } from '@core/data/database/interfaces/catCable';
 import { Support } from '@core/data/database/interfaces/support';
 import { InitialCondition } from '@core/data/database/interfaces/initialCondition';
 
@@ -96,7 +96,7 @@ describe('WorkerService', () => {
     selected_field_measure_uuid: undefined
   });
 
-  const createMockCable = (): Cable => ({
+  const createMockCable = (): CatCable => ({
     name: 'Test Cable',
     data_source: 'test-source',
     section: 100,
