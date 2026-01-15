@@ -12,7 +12,10 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { ChainsService } from './chains.service';
 import { StorageService } from '../storage/storage.service';
-import { Chain, RteChainsCsvFile } from '../../data/database/interfaces/chain';
+import {
+  CatChain,
+  RteChainsCsvFile
+} from '../../data/database/interfaces/catChain';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
@@ -28,8 +31,8 @@ interface MockTable {
 }
 
 interface MockDb {
-  lines: MockTable;
-  chains: MockTable;
+  catLines: MockTable;
+  catChains: MockTable;
 }
 
 describe('ChainsService', () => {
@@ -48,12 +51,12 @@ describe('ChainsService', () => {
     };
 
     mockDb = {
-      lines: {
+      catLines: {
         count: jest.fn().mockResolvedValue(0),
         toArray: jest.fn().mockResolvedValue([]),
         bulkAdd: jest.fn().mockResolvedValue(undefined)
       },
-      chains: mockChainsTable
+      catChains: mockChainsTable
     };
 
     // Create spy for StorageService
@@ -92,7 +95,7 @@ describe('ChainsService', () => {
 
   describe('getChains', () => {
     it('should return chains array from database', async () => {
-      const mockChains: Chain[] = [
+      const mockChains: CatChain[] = [
         {
           chain_name: 'Chain 1',
           mean_length: 100.5,

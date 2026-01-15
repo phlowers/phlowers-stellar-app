@@ -8,9 +8,9 @@ import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import {
-  MaintenanceData,
+  CatMaintenanceData,
   RteMaintenanceTeamsCsvFile
-} from '../../data/database/interfaces/maintenance';
+} from '../../data/database/interfaces/catMaintenance';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 
@@ -30,7 +30,7 @@ export class MaintenanceService {
   }
 
   async getMaintenance() {
-    return this.storageService.db?.maintenance.toArray();
+    return this.storageService.db?.catMaintenance.toArray();
   }
 
   async importFromFile() {
@@ -72,10 +72,12 @@ export class MaintenanceService {
               resolve();
               return;
             }
-            await this.storageService.db?.maintenance.clear();
-            const maintenanceTable: MaintenanceData[] = mapData(data);
+            await this.storageService.db?.catMaintenance.clear();
+            const maintenanceTable: CatMaintenanceData[] = mapData(data);
             console.log('adding maintenance data', maintenanceTable.length);
-            await this.storageService.db?.maintenance.bulkAdd(maintenanceTable);
+            await this.storageService.db?.catMaintenance.bulkAdd(
+              maintenanceTable
+            );
             resolve();
           }) as (
             jsonResults: Papa.ParseResult<RteMaintenanceTeamsCsvFile>

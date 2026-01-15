@@ -33,8 +33,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
 import { LinesService } from '@src/app/core/services/lines/lines.service';
-import { MaintenanceData } from '@src/app/core/data/database/interfaces/maintenance';
-import { Line } from '@src/app/core/data/database/interfaces/line';
+import { CatMaintenanceData } from '@src/app/core/data/database/interfaces/catMaintenance';
+import { CatLine } from '@src/app/core/data/database/interfaces/catLine';
 import { MessageService } from 'primeng/api';
 
 // Mock child component
@@ -67,11 +67,11 @@ class MockStudioComponent {
 
 // Mock services
 const mockMaintenanceService = {
-  getMaintenance: jest.fn().mockResolvedValue([] as MaintenanceData[])
+  getMaintenance: jest.fn().mockResolvedValue([] as CatMaintenanceData[])
 };
 
 const mockLinesService = {
-  getLines: jest.fn().mockResolvedValue([] as Line[])
+  getLines: jest.fn().mockResolvedValue([] as CatLine[])
 };
 
 const mockMessageService = {
@@ -79,7 +79,7 @@ const mockMessageService = {
 } as unknown as MessageService;
 
 // Mock data
-const mockMaintenanceData: MaintenanceData[] = [
+const mockMaintenanceData: CatMaintenanceData[] = [
   {
     maintenance_center_id: 'cm1',
     maintenance_center: 'CM 1',
@@ -98,7 +98,7 @@ const mockMaintenanceData: MaintenanceData[] = [
   }
 ];
 
-const mockLinesData: Line[] = [
+const mockLinesData: CatLine[] = [
   {
     uuid: 'line1',
     link_idr: 'link1',
