@@ -8,11 +8,13 @@
     You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export const transitLinkTable = {
-  transit_links: `&uuid,
-    internal_id,
-    name,
-    short_name,
-    created_at,
-    updated_at`
+export const catChainTable = {
+  catChains: `&uuid,
+  chain_name,
+  mean_length,
+  mean_mass,
+  v_chain,
+  chain_type,
+  chain_surface
+  `
 };

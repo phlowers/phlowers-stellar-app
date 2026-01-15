@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export interface Line {
+export interface CatLine {
   uuid: string;
   link_idr: string;
   link_adr: string;

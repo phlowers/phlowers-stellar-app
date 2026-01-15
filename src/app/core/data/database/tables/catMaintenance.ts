@@ -8,11 +8,13 @@
     You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export const branchTable = {
-  branches: `&uuid,
-    internal_id,
-    name,
-    short_name,
-    created_at,
-    updated_at`
+export const catMaintenance = {
+  catMaintenance: `
+  maintenance_team_id,
+   maintenance_center,
+   regional_team,
+   maintenance_team,
+   maintenance_center_id,
+   regional_team_id
+  `
 };

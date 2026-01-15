@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export interface Chain {
+export interface CatChain {
   chain_name: string;
   mean_length: number;
   mean_mass: number;

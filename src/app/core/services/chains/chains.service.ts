@@ -7,7 +7,10 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { Chain, RteChainsCsvFile } from '../../data/database/interfaces/chain';
+import {
+  CatChain,
+  RteChainsCsvFile
+} from '../../data/database/interfaces/catChain';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 
@@ -27,7 +30,7 @@ export class ChainsService {
   }
 
   async getChains() {
-    return this.storageService.db?.chains?.toArray();
+    return this.storageService.db?.catChains?.toArray();
   }
 
   async importFromFile() {
@@ -68,10 +71,10 @@ export class ChainsService {
               resolve();
               return;
             }
-            await this.storageService.db?.chains.clear();
-            const chainsTable: Chain[] = mapData(data);
+            await this.storageService.db?.catChains.clear();
+            const chainsTable: CatChain[] = mapData(data);
             console.log('adding chains data', chainsTable.length);
-            await this.storageService.db?.chains.bulkAdd(chainsTable);
+            await this.storageService.db?.catChains.bulkAdd(chainsTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<RteChainsCsvFile>) => void
         });

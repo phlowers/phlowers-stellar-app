@@ -9,7 +9,10 @@ import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
-import { Line, RteLinesCsvFile } from '../../data/database/interfaces/line';
+import {
+  CatLine,
+  RteLinesCsvFile
+} from '../../data/database/interfaces/catLine';
 import { v4 as uuidv4 } from 'uuid';
 import { sortBy, uniqBy } from 'lodash';
 
@@ -29,11 +32,11 @@ export class LinesService {
   }
 
   async getLinesCount() {
-    return this.storageService.db?.lines.count();
+    return this.storageService.db?.catLines.count();
   }
 
   async getLines() {
-    return this.storageService.db?.lines.toArray();
+    return this.storageService.db?.catLines.toArray();
   }
 
   async importFromFile() {
@@ -75,8 +78,8 @@ export class LinesService {
               resolve();
               return;
             }
-            await this.storageService.db?.lines.clear();
-            const table: Line[] = mapData(data);
+            await this.storageService.db?.catLines.clear();
+            const table: CatLine[] = mapData(data);
             const uniqueTable = uniqBy(table, (element) =>
               [
                 element.voltage_idr,
@@ -86,7 +89,7 @@ export class LinesService {
                 element.branch_idr
               ].join('')
             );
-            await this.storageService.db?.lines.bulkAdd(
+            await this.storageService.db?.catLines.bulkAdd(
               sortBy(uniqueTable, 'voltage_adr')
             );
             resolve();

@@ -5,16 +5,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-interface MaintenanceCenter {
+interface CatMaintenanceCenter {
   internal_id: string;
   name: string;
 }
 
-export interface RegionalMaintenanceCenter extends MaintenanceCenter {
+export interface CatRegionalMaintenanceCenter extends CatMaintenanceCenter {
   maintenance_center_internal_id: string;
 }
 
-export interface MaintenanceTeam extends MaintenanceCenter {
+export interface CatMaintenanceTeam extends CatMaintenanceCenter {
   regional_maintenance_center_internal_id: string;
 }
 
@@ -28,7 +28,7 @@ export interface RteMaintenanceTeamsCsvFile {
   maintenance_team_id: string;
 }
 
-export interface MaintenanceData {
+export interface CatMaintenanceData {
   maintenance_center: string;
   regional_team: string;
   maintenance_team: string;
