@@ -8,8 +8,6 @@ import { Routes } from '@angular/router';
 import { StudiesComponent } from './pages/studies/studies.component';
 import { AdminComponent } from './pages/admin/admin';
 import { StudyComponent } from './pages/study/study.component';
-import { SectionsComponent } from './pages/sections/sections.component';
-import { PlotlyPageComponent } from './pages/plotly-poc/plotly-page/plotly-page.component';
 import { LoggedLayoutComponent } from './shared/components/layout/logged-layout/logged-layout.component';
 import { HomeComponent } from './pages/home/home.component';
 import { NewsComponent } from './pages/news/news.component';
@@ -48,16 +46,6 @@ export const appRoutes: Routes = [
             component: StudioPageComponent
           }
         ]
-      },
-      {
-        path: 'sections',
-        title: $localize`Sections`,
-        component: SectionsComponent
-      },
-      {
-        path: 'plotly',
-        title: $localize`Plotly`,
-        component: PlotlyPageComponent
       },
       {
         path: 'news',

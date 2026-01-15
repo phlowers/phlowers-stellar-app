@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Support } from '@src/app/core/data/database/interfaces/support';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ChainsService } from '@src/app/core/services/chains/chains.service';
-import { Chain } from '@src/app/core/data/database/interfaces/chain';
+import { CatChain } from '@src/app/core/data/database/interfaces/catChain';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
 
@@ -23,7 +23,7 @@ class MockAttachmentSetModalComponent {
 
 // Mock services
 const mockChainsService = {
-  getChains: jest.fn().mockResolvedValue([] as Chain[])
+  getChains: jest.fn().mockResolvedValue([] as CatChain[])
 };
 
 const mockAttachmentService = {
@@ -31,7 +31,7 @@ const mockAttachmentService = {
 };
 
 // Mock data
-const mockChains: Chain[] = [
+const mockChains: CatChain[] = [
   {
     chain_name: 'Chain 1',
     mean_length: 10.5,
