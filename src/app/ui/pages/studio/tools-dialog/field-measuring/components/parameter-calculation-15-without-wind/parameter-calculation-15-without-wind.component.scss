@@ -24,7 +24,8 @@ dd {
     @extend %tools-grid-layout;
     grid-template-areas:
       'updateMode updateMode . . .'
-      'parameterPapoto parameterUncertaintyPapoto cableTemperature15C cableTemperatureUncertainty15C .';
+      'parameterPapoto parameterUncertaintyPapoto . . .'
+      'cableTemperature cableTemperatureUncertainty . . .';
 
     &:has(dl) {
       align-items: start;
@@ -42,12 +43,12 @@ dd {
       grid-area: parameterUncertaintyPapoto;
     }
 
-    .cableTemperature15C {
-      grid-area: cableTemperature15C;
+    .cableTemperature {
+      grid-area: cableTemperature;
     }
 
-    .cableTemperatureUncertainty15C {
-      grid-area: cableTemperatureUncertainty15C;
+    .cableTemperatureUncertainty {
+      grid-area: cableTemperatureUncertainty;
     }
 
     label {
@@ -86,8 +87,8 @@ dd {
     &__actions {
       @extend %tools-grid-layout;
       grid-template-areas: 'createInitialMinus createInitialNominal createInitialPlus . .';
-      row-gap: 0.5rem;
       margin-top: 1.5rem;
+      justify-items: start;
 
       .createInitialMinus {
         grid-area: createInitialMinus;

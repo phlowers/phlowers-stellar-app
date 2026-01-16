@@ -36,7 +36,7 @@
 
   @if (measureData().updateMode15C === 'manual') {
     <div class="parameterPapoto">
-      <label for="parameterPapoto-input" i18n>Parameter Papoto</label>
+      <label for="parameterPapoto-input" i18n>Parameter (Papoto, etc.)</label>
       <p-inputgroup>
         <input
           id="parameterPapoto-input"
@@ -60,9 +60,9 @@
     </div>
 
     <div class="parameterUncertaintyPapoto">
-      <label for="parameterUncertaintyPapoto-input" i18n
-        >Parameter uncertainty Papoto</label
-      >
+      <label for="parameterUncertaintyPapoto-input" i18n>
+        Uncertainty parameter
+      </label>
       <p-inputgroup>
         <input
           id="parameterUncertaintyPapoto-input"
@@ -76,13 +76,11 @@
       </p-inputgroup>
     </div>
 
-    <div class="cableTemperature15C">
-      <label for="cableTemperature15C-input" i18n>
-        Cable temperature at 15°C
-      </label>
+    <div class="cableTemperature">
+      <label for="cableTemperature-input" i18n>Cable temperature</label>
       <p-inputgroup>
         <input
-          id="cableTemperature15C-input"
+          id="cableTemperature-input"
           type="number"
           pInputText
           [ngModel]="
@@ -102,13 +100,13 @@
       </p-inputgroup>
     </div>
 
-    <div class="cableTemperatureUncertainty15C">
-      <label for="cableTemperatureUncertainty15C-input" i18n>
-        Cable temperature uncertainty at 15°C
+    <div class="cableTemperatureUncertainty">
+      <label for="cableTemperatureUncertainty-input" i18n>
+        Uncertainty cable temperature
       </label>
       <p-inputgroup>
         <input
-          id="cableTemperatureUncertainty15C-input"
+          id="cableTemperatureUncertainty-input"
           type="number"
           pInputText
           [ngModel]="
@@ -130,7 +128,7 @@
   } @else {
     <dl class="contents">
       <div class="parameterPapoto">
-        <dt id="parameterPapoto-display" i18n>Parameter Papoto</dt>
+        <dt id="parameterPapoto-display" i18n>Parameter (Papoto, etc.)</dt>
         <dd>
           {{
             (measureData().outputs.papoto?.parameter | number: '1.0-3') ?? '-'
@@ -140,25 +138,27 @@
       </div>
 
       <div class="parameterUncertaintyPapoto">
-        <dt id="parameterUncertaintyPapoto-display" i18n>
-          <del>Parameter uncertainty Papoto</del>
+        <dt id="parameterUncertaintyPapoto-display">
+          <del i18n>
+            Uncertainty parameter
+          </del>
         </dt>
         <dd>
           <del>{{ '-' }}</del>
         </dd>
       </div>
 
-      <div class="cableTemperature15C">
-        <dt id="cableTemperature15C-display" i18n>Cable temperature at 15°C</dt>
+      <div class="cableTemperature">
+        <dt i18n>Cable temperature</dt>
         <dd>
           {{ measureData().outputs.cableTemperature?.cableTemperature ?? '-' }}
           °C
         </dd>
       </div>
 
-      <div class="cableTemperatureUncertainty15C">
-        <dt id="cableTemperatureUncertainty15C-display" i18n>
-          <del>Cable temperature uncertainty at 15°C</del>
+      <div class="cableTemperatureUncertainty">
+        <dt>
+          <del i18n>Uncertainty cable temperature</del>
         </dt>
         <dd>
           <del
@@ -177,7 +177,7 @@
 <div class="text-right mt-8">
   <button app-btn (click)="calculateParameter15C()" [disabled]="!isFormValid()">
     <app-icon icon="rocket_launch" />
-    <ng-container i18n>Calculate</ng-container>
+    <ng-container i18n>Calculate setting parameter at 15°C</ng-container>
   </button>
 </div>
 
@@ -213,7 +213,7 @@
         class="createInitialMinus"
         (click)="onCreateInitialCondition('minus')"
       >
-        <app-icon icon="add" />
+        <app-icon icon="add_circle" />
         <ng-container i18n>Create initial condition</ng-container>
       </button>
 
@@ -223,7 +223,7 @@
         class="createInitialNominal"
         (click)="onCreateInitialCondition('nominal')"
       >
-        <app-icon icon="add" />
+        <app-icon icon="add_circle" />
         <ng-container i18n>Create initial condition</ng-container>
       </button>
 
@@ -233,7 +233,7 @@
         class="createInitialPlus"
         (click)="onCreateInitialCondition('plus')"
       >
-        <app-icon icon="add" />
+        <app-icon icon="add_circle" />
         <ng-container i18n>Create initial condition</ng-container>
       </button>
     </div>
