@@ -124,8 +124,8 @@ export class AttachmentSetModalComponent implements OnInit {
 
   async getData() {
     const attachments = await this.attachmentService.getAttachments();
-    const attachmentsFilterTable = (attachments || []).sort(
-      (a, b) => (a.attachment_set || 0) - (b.attachment_set || 0)
+    const attachmentsFilterTable = (attachments || []).sort((a, b) =>
+      (a.support_name || '').localeCompare(b.support_name || '')
     );
 
     this.supportsFilterTable.set(attachmentsFilterTable);
@@ -137,11 +137,15 @@ export class AttachmentSetModalComponent implements OnInit {
     this.attachmentsFilterTable.set(items);
   }
 
-  resetValues(resetSupportName: boolean) {
+  resetAttachmentSetValues() {
+    this.attachmentSet.set(undefined);
     this.armLength.set(undefined);
     this.heightBelowConsole.set(undefined);
-    this.attachmentSet.set(undefined);
     this.towerModel.set(undefined);
+  }
+
+  resetValues(resetSupportName: boolean) {
+    this.resetAttachmentSetValues();
     if (resetSupportName) {
       this.supportName.set(undefined);
       this.coordinates.set([]);
@@ -153,12 +157,13 @@ export class AttachmentSetModalComponent implements OnInit {
     this.getData();
   }
 
-  async onAttachnementSelect(event: any, key: keyof CatAttachment) {
+  async onAttachmentSelect(event: any, key: keyof CatAttachment) {
     if (event.value === null || event.value === undefined) {
       this.resetValues(key === 'support_name');
       return;
     }
     if (key === 'support_name') {
+      this.resetAttachmentSetValues();
       const attachments = await this.attachmentService.getAttachments();
       const items = (attachments || [])
         .filter((item) => item.support_name === event.value)
