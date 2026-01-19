@@ -7,21 +7,17 @@
     optionLabel="label"
     optionValue="value"
     allowEmpty="false"
-    ariaLabel="switch graph view"
-    i18n-ariaLabel
   />
 
   <hr class="toolbar__separator" />
 
   <div class="flex items-center gap-2">
-    <p id="side" class="text-l-600 m-0" i18n>Side:</p>
     <p-selectbutton
       [options]="sideOptions()"
       [ngModel]="plotService.plotOptions().side"
       (onChange)="plotService.plotOptionsChange({ side: $event.value })"
       optionLabel="label"
       optionValue="value"
-      ariaLabelledBy="side"
       allowEmpty="false"
       [disabled]="plotService.plotOptions().view === '3d'"
     />
