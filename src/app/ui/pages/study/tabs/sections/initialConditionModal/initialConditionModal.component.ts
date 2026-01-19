@@ -49,6 +49,22 @@ const validators = {
   max_frost_width: [0, [Validators.min(0), Validators.max(20)]]
 };
 
+const validators = {
+  name: ['', [Validators.required, Validators.maxLength(40)]],
+  base_parameters: [
+    null,
+    [Validators.required, Validators.min(20), Validators.max(5000)]
+  ],
+  base_temperature: [
+    15,
+    [Validators.required, Validators.min(-50), Validators.max(250)]
+  ],
+  cable_pretension: [0, [Validators.min(0), Validators.max(100)]],
+  min_temperature: [15, [Validators.min(-50), Validators.max(250)]],
+  max_wind_pressure: [0, [Validators.min(0), Validators.max(3000)]],
+  max_frost_width: [0, [Validators.min(0), Validators.max(20)]]
+};
+
 @Component({
   selector: 'app-initial-condition-modal',
   templateUrl: './initialConditionModal.component.html',
