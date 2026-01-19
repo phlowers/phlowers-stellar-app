@@ -3257,5 +3257,11 @@
         <target>Afficher les cas de charge</target>
       </segment>
     </unit>
+    <unit id="509620284258406390">
+      <segment state="initial">
+        <source>NO VOLTAGE</source>
+        <target>HORS TENSION</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
