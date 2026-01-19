@@ -37,124 +37,16 @@
         <target> Mettre à jour vers la version la plus récente </target>
       </segment>
     </unit>
-    <unit id="7658402240953727096">
-      <segment>
-        <source>Name:</source>
-        <target>Nom:</target>
-      </segment>
-    </unit>
-    <unit id="6919207328705792165">
-      <segment>
-        <source>Section CUR:</source>
-        <target>Canton CUR:</target>
-      </segment>
-    </unit>
-    <unit id="1843028621431865126">
-      <segment>
-        <source>Section Short name:</source>
-        <target>Nom court:</target>
-      </segment>
-    </unit>
-    <unit id="5502261281300289989">
-      <segment>
-        <source>Section name:</source>
-        <target>Nom du canton:</target>
-      </segment>
-    </unit>
-    <unit id="2681129456719834482">
-      <segment>
-        <source>Cable short name:</source>
-        <target>Nom court du câble:</target>
-      </segment>
-    </unit>
-    <unit id="6115903835147878111">
-      <segment>
-        <source>Cable name:</source>
-        <target>Nom du câble:</target>
-      </segment>
-    </unit>
-    <unit id="7052646852891832055">
-      <segment>
-        <source>Section type:</source>
-        <target>Type de canton:</target>
-      </segment>
-    </unit>
-    <unit id="3136844473693708275">
-      <segment>
-        <source>Link name:</source>
-        <target>Nom de la liaison:</target>
-      </segment>
-    </unit>
-    <unit id="3738692095093251722">
-      <segment>
-        <source>Branch name:</source>
-        <target>Nom de la branche:</target>
-      </segment>
-    </unit>
-    <unit id="1533968084549174775">
-      <segment>
-        <source>Transit link name:</source>
-        <target>Nom de la LIT:</target>
-      </segment>
-    </unit>
-    <unit id="6238568029904268206">
-      <segment>
-        <source>Voltage name:</source>
-        <target>Nom de la tension:</target>
-      </segment>
-    </unit>
-    <unit id="7716208024960184784">
-      <segment>
-        <source>UUID</source>
-        <target>UUID</target>
-      </segment>
-    </unit>
-    <unit id="5701618810648052610">
-      <segment>
-        <source>Title</source>
-        <target>Titre</target>
-      </segment>
-    </unit>
-    <unit id="1733264802646111587">
-      <segment>
-        <source>Author email</source>
-        <target>Email de l&apos;auteur</target>
-      </segment>
-    </unit>
-    <unit id="1520049505561836231">
-      <segment>
-        <source>Created at</source>
-        <target>Créé le</target>
-      </segment>
-    </unit>
-    <unit id="7447022493696033106">
-      <segment>
-        <source>Updated at</source>
-        <target>Mis à jour le</target>
-      </segment>
-    </unit>
     <unit id="2159130950882492111">
       <segment>
         <source>Cancel</source>
         <target>Annuler</target>
       </segment>
     </unit>
-    <unit id="1071721880474488785">
-      <segment>
-        <source>Import</source>
-        <target>Importer</target>
-      </segment>
-    </unit>
     <unit id="2471229163174544608">
       <segment>
         <source>Sections</source>
         <target>Cantons</target>
-      </segment>
-    </unit>
-    <unit id="4580988005648117665">
-      <segment>
-        <source>Search</source>
-        <target>Rechercher</target>
       </segment>
     </unit>
     <unit id="4902817035128594900">
@@ -239,24 +131,6 @@
       <segment state="initial">
         <source>App version</source>
         <target>Version de l&apos;application</target>
-      </segment>
-    </unit>
-    <unit id="8835813397293521026">
-      <segment state="initial">
-        <source>Reset fields</source>
-        <target>Réinitialiser les champs</target>
-      </segment>
-    </unit>
-    <unit id="8892964333730306563">
-      <segment state="initial">
-        <source>Plotly</source>
-        <target>Plotly</target>
-      </segment>
-    </unit>
-    <unit id="3407827478067561796">
-      <segment state="initial">
-        <source>Change line height</source>
-        <target>Modifier la hauteur de la ligne</target>
       </segment>
     </unit>
     <unit id="2821179408673282599">
@@ -2357,24 +2231,6 @@
         <target>Toutes</target>
       </segment>
     </unit>
-    <unit id="1995462320428563005">
-      <segment state="initial">
-        <source>Charges</source>
-        <target>Charges</target>
-      </segment>
-    </unit>
-    <unit id="27019801939265889">
-      <segment state="initial">
-        <source>Select charges</source>
-        <target>Sélectionner</target>
-      </segment>
-    </unit>
-    <unit id="9161302603054307750">
-      <segment state="initial">
-        <source>View charges</source>
-        <target>Voir</target>
-      </segment>
-    </unit>
     <unit id="2978133532545567808">
       <segment state="initial">
         <source> You can import multiple files, they will be available in the “My studies” tab. </source>
@@ -3404,7 +3260,25 @@
     <unit id="3244879037311223621">
       <segment state="initial">
         <source>Save state</source>
-        <target>Enregistrer l'état</target>
+        <target>Enregistrer l&apos;état</target>
+      </segment>
+    </unit>
+    <unit id="5132528819937680289">
+      <segment state="initial">
+        <source>Charge cases</source>
+        <target>Cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="3185853499027107737">
+      <segment state="initial">
+        <source>Select charge cases</source>
+        <target>Sélectionner un cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="1762161277302505527">
+      <segment state="initial">
+        <source>View charge cases</source>
+        <target>Afficher les cas de charge</target>
       </segment>
     </unit>
   </file>
