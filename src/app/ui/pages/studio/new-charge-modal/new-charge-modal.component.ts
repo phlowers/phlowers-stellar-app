@@ -139,4 +139,12 @@ export class NewChargeModalComponent {
   onClose() {
     this.isOpenChange.emit(false);
   }
+
+  isFormValid(): boolean {
+    const existingLoadCases = this.plotService.section()?.charges;
+    return (
+      this.nameLength() > 0 &&
+      !existingLoadCases?.some((c) => c.name === this.name())
+    );
+  }
 }
