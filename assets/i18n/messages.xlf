@@ -171,11 +171,6 @@
         <source>Sections</source>
       </segment>
     </unit>
-    <unit id="8892964333730306563">
-      <segment>
-        <source>Plotly</source>
-      </segment>
-    </unit>
     <unit id="841934696444961534">
       <segment>
         <source>News</source>
@@ -401,109 +396,9 @@
         <source>No news found</source>
       </segment>
     </unit>
-    <unit id="3407827478067561796">
-      <segment>
-        <source>Change line height</source>
-      </segment>
-    </unit>
-    <unit id="7658402240953727096">
-      <segment>
-        <source>Name:</source>
-      </segment>
-    </unit>
-    <unit id="6919207328705792165">
-      <segment>
-        <source>Section CUR:</source>
-      </segment>
-    </unit>
-    <unit id="1843028621431865126">
-      <segment>
-        <source>Section Short name:</source>
-      </segment>
-    </unit>
-    <unit id="5502261281300289989">
-      <segment>
-        <source>Section name:</source>
-      </segment>
-    </unit>
-    <unit id="2681129456719834482">
-      <segment>
-        <source>Cable short name:</source>
-      </segment>
-    </unit>
-    <unit id="6115903835147878111">
-      <segment>
-        <source>Cable name:</source>
-      </segment>
-    </unit>
-    <unit id="7052646852891832055">
-      <segment>
-        <source>Section type:</source>
-      </segment>
-    </unit>
-    <unit id="3136844473693708275">
-      <segment>
-        <source>Link name:</source>
-      </segment>
-    </unit>
-    <unit id="3738692095093251722">
-      <segment>
-        <source>Branch name:</source>
-      </segment>
-    </unit>
-    <unit id="1533968084549174775">
-      <segment>
-        <source>Transit link name:</source>
-      </segment>
-    </unit>
-    <unit id="6238568029904268206">
-      <segment>
-        <source>Voltage name:</source>
-      </segment>
-    </unit>
-    <unit id="4580988005648117665">
-      <segment>
-        <source>Search</source>
-      </segment>
-    </unit>
-    <unit id="8835813397293521026">
-      <segment>
-        <source>Reset fields</source>
-      </segment>
-    </unit>
-    <unit id="7716208024960184784">
-      <segment>
-        <source>UUID</source>
-      </segment>
-    </unit>
-    <unit id="5701618810648052610">
-      <segment>
-        <source>Title</source>
-      </segment>
-    </unit>
-    <unit id="1733264802646111587">
-      <segment>
-        <source>Author email</source>
-      </segment>
-    </unit>
-    <unit id="1520049505561836231">
-      <segment>
-        <source>Created at</source>
-      </segment>
-    </unit>
-    <unit id="7447022493696033106">
-      <segment>
-        <source>Updated at</source>
-      </segment>
-    </unit>
     <unit id="2159130950882492111">
       <segment>
         <source>Cancel</source>
-      </segment>
-    </unit>
-    <unit id="1071721880474488785">
-      <segment>
-        <source>Import</source>
       </segment>
     </unit>
     <unit id="2978133532545567808">
@@ -4025,21 +3920,6 @@
         <source>View initial conditions</source>
       </segment>
     </unit>
-    <unit id="1995462320428563005">
-      <segment>
-        <source>Charges</source>
-      </segment>
-    </unit>
-    <unit id="27019801939265889">
-      <segment>
-        <source>Select charges</source>
-      </segment>
-    </unit>
-    <unit id="9161302603054307750">
-      <segment>
-        <source>View charges</source>
-      </segment>
-    </unit>
     <unit id="6598075623864682368">
       <segment>
         <source>Add an initial condition</source>
@@ -4359,6 +4239,21 @@
     <unit id="3244879037311223621">
       <segment>
         <source>Save state</source>
+      </segment>
+    </unit>
+    <unit id="1762161277302505527">
+      <segment>
+        <source>View charge cases</source>
+      </segment>
+    </unit>
+    <unit id="3185853499027107737">
+      <segment>
+        <source>Select charge cases</source>
+      </segment>
+    </unit>
+    <unit id="5132528819937680289">
+      <segment>
+        <source>Charge cases</source>
       </segment>
     </unit>
   </file>
