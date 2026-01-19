@@ -5232,14 +5232,14 @@
         <source>Direct solar flux</source>
       </segment>
     </unit>
-    <unit id="7197115832855767963">
+    <unit id="4412456247511617977">
       <segment>
-        <source>Diffused plus direct solar flux</source>
+        <source>Diffused + direct solar flux</source>
       </segment>
     </unit>
-    <unit id="5681976093367495930">
+    <unit id="6052330236106770932">
       <segment>
-        <source> Measured diffused plus direct solar flux (not required) </source>
+        <source> Measured diffused + direct solar flux (not required) </source>
       </segment>
     </unit>
     <unit id="100914384350148711">
