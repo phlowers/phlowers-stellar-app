@@ -659,8 +659,8 @@ describe('LinesService', () => {
           branch_id: '',
           branch_idr: '',
           branch_adr: '',
-          voltage_idr: '0 KV',
-          voltage_adr: '0 KV'
+          voltage_idr: 'NO VOLTAGE',
+          voltage_adr: 'NO_VOLTAGE'
         })
       ]);
     });

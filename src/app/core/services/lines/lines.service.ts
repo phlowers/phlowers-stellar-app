@@ -53,18 +53,27 @@ export class LinesService {
 
     const mapData = (data: RteLinesCsvFile[]) => {
       return data
-        .map((item) => ({
-          uuid: uuidv4(),
-          link_idr: item.link_idr || '',
-          link_adr: item.link_adr || '',
-          lit_idr: item.lit_idr || '',
-          lit_adr: item.lit_adr || '',
-          branch_id: item.branch_id || '',
-          branch_idr: item.branch_idr || '',
-          branch_adr: item.branch_adr || '',
-          voltage_idr: item.voltage_idr || '0 KV',
-          voltage_adr: item.voltage_adr || '0 KV'
-        }))
+        .map((item) => {
+          const hasNoVoltage =
+            !item.voltage_idr ||
+            !item.voltage_adr ||
+            item.voltage_adr === '0.0';
+
+          return {
+            uuid: uuidv4(),
+            link_idr: item.link_idr || '',
+            link_adr: item.link_adr || '',
+            lit_idr: item.lit_idr || '',
+            lit_adr: item.lit_adr || '',
+            branch_id: item.branch_id || '',
+            branch_idr: item.branch_idr || '',
+            branch_adr: item.branch_adr || '',
+            voltage_idr: hasNoVoltage
+              ? $localize`NO VOLTAGE`
+              : item.voltage_idr,
+            voltage_adr: hasNoVoltage ? 'NO_VOLTAGE' : item.voltage_adr
+          };
+        })
         .filter((item) => item.link_idr);
     };
     await new Promise<void>((resolve) => {
