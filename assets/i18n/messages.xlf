@@ -5812,21 +5812,6 @@
         <source>View initial conditions</source>
       </segment>
     </unit>
-    <unit id="1995462320428563005">
-      <segment>
-        <source>Charges</source>
-      </segment>
-    </unit>
-    <unit id="27019801939265889">
-      <segment>
-        <source>Select charges</source>
-      </segment>
-    </unit>
-    <unit id="9161302603054307750">
-      <segment>
-        <source>View charges</source>
-      </segment>
-    </unit>
     <unit id="6598075623864682368">
       <segment>
         <source>Add an initial condition</source>
@@ -6146,6 +6131,21 @@
     <unit id="3244879037311223621">
       <segment>
         <source>Save state</source>
+      </segment>
+    </unit>
+    <unit id="1762161277302505527">
+      <segment>
+        <source>View charge cases</source>
+      </segment>
+    </unit>
+    <unit id="3185853499027107737">
+      <segment>
+        <source>Select charge cases</source>
+      </segment>
+    </unit>
+    <unit id="5132528819937680289">
+      <segment>
+        <source>Charge cases</source>
       </segment>
     </unit>
   </file>

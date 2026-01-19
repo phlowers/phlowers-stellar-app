@@ -4311,7 +4311,25 @@
     <unit id="3244879037311223621">
       <segment state="initial">
         <source>Save state</source>
-        <target>Enregistrer l'état</target>
+        <target>Enregistrer l&apos;état</target>
+      </segment>
+    </unit>
+    <unit id="5132528819937680289">
+      <segment state="initial">
+        <source>Charge cases</source>
+        <target>Cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="3185853499027107737">
+      <segment state="initial">
+        <source>Select charge cases</source>
+        <target>Sélectionner un cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="1762161277302505527">
+      <segment state="initial">
+        <source>View charge cases</source>
+        <target>Afficher les cas de charge</target>
       </segment>
     </unit>
   </file>
