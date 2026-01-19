@@ -24,6 +24,10 @@
       tr:nth-child(even) {
         background: var(--star-dust-50);
       }
+
+      td {
+        @apply h-11; // Will act as a min-height since it's a table cell
+      }
     }
   }
 
@@ -32,48 +36,23 @@
   }
 
   .p-paginator {
-    justify-content: end;
+    @apply justify-end;
   }
 
   .p-paginator-current {
     margin-right: 1.875rem;
     margin-left: 1.875rem;
   }
-}
 
-.l0-table {
-  .p-datatable {
-    border-radius: 0.375rem;
-    border: 1px solid var(--grey-200);
-    overflow: hidden;
-  }
+  &.l0-table {
+    .p-select-label {
+      @apply pr-0;
+    }
 
-  .p-datatable-header {
-    background: var(--grey-0);
-  }
-
-  .p-datatable-thead > tr > th {
-    @extend %text-m-400;
-    background: var(--grey-0);
-    border-bottom: 1px solid var(--grey-200);
-    padding: 0.5rem 0.75rem;
-    font-weight: 500;
-  }
-
-  .p-datatable-tbody > tr > td {
-    @extend %text-m-400;
-    padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid var(--grey-50);
-  }
-
-  .p-datatable-tbody > tr > td:last-child {
-    text-align: right;
-  }
-
-  .p-paginator {
-    @extend %text-s-400;
-    border-top: 1px solid var(--grey-200);
-    padding: 0.5rem;
-    color: var(--grey-600);
+    .p-paginator {
+      background-color: rgb(0 0 0 / 0);
+      padding-right: 0rem;
+      padding-left: 0rem;
+    }
   }
 }
