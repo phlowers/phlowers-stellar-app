@@ -1033,16 +1033,10 @@
         <target>Nom de condition initiale </target>
       </segment>
     </unit>
-    <unit id="1063780443229000887">
-      <segment state="initial">
-        <source>Side:</source>
-        <target>Sens :</target>
-      </segment>
-    </unit>
     <unit id="3652243134148906527">
       <segment state="initial">
         <source>Invert:</source>
-        <target>Inverser le sens :</target>
+        <target>Inverser :</target>
       </segment>
     </unit>
     <unit id="7462301153729425254">
@@ -1445,12 +1439,6 @@
         <target>effacer la sélection</target>
       </segment>
     </unit>
-    <unit id="4195378100574813215">
-      <segment state="initial">
-        <source>switch graph view</source>
-        <target>changer la vue du graphique</target>
-      </segment>
-    </unit>
     <unit id="4323470180912194028">
       <segment state="initial">
         <source>Copy</source>
@@ -1784,7 +1772,7 @@
     <unit id="4266658892163682187">
       <segment state="initial">
         <source>Face</source>
-        <target>Face</target>
+        <target>Ligne</target>
       </segment>
     </unit>
     <unit id="3793363326863773180">
@@ -2078,7 +2066,7 @@
     <unit id="4114020677798356875">
       <segment state="initial">
         <source>Tables</source>
-        <target>Tables</target>
+        <target>Tableau</target>
       </segment>
     </unit>
     <unit id="1684734235599362204">
@@ -2162,7 +2150,7 @@
     <unit id="8365500949716833241">
       <segment state="initial">
         <source>VTL &amp; Guying</source>
-        <target>Haubanage &amp; VHL</target>
+        <target>VHL &amp; Haubanage</target>
       </segment>
     </unit>
     <unit id="810011115797190863">
@@ -3080,7 +3068,7 @@
     <unit id="8065031423203926640">
       <segment state="initial">
         <source>L0 table</source>
-        <target>Tableau L0</target>
+        <target>Tableau des longueurs L0</target>
       </segment>
     </unit>
     <unit id="971569449266353120">
@@ -3323,7 +3311,7 @@
           <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
         </source>
         <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">paramètre d'incertitude</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">paramètre d&apos;incertitude</pc>
         </target>
       </segment>
     </unit>
@@ -3345,7 +3333,7 @@
           <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Parameter uncertainty Papoto</pc>
         </source>
         <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Paramètre d'incertitude Papoto</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Paramètre d&apos;incertitude Papoto</pc>
         </target>
       </segment>
     </unit>
@@ -3369,6 +3357,12 @@
       <segment state="initial">
         <source>Branch</source>
         <target>Branche</target>
+      </segment>
+    </unit>
+    <unit id="3244879037311223621">
+      <segment state="initial">
+        <source>Save state</source>
+        <target>Enregistrer l'état</target>
       </segment>
     </unit>
   </file>

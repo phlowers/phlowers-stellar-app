@@ -3600,16 +3600,6 @@
         <source>Report</source>
       </segment>
     </unit>
-    <unit id="4195378100574813215">
-      <segment>
-        <source>switch graph view</source>
-      </segment>
-    </unit>
-    <unit id="1063780443229000887">
-      <segment>
-        <source>Side:</source>
-      </segment>
-    </unit>
     <unit id="3652243134148906527">
       <segment>
         <source>Invert:</source>
@@ -4364,6 +4354,11 @@
     <unit id="8387651464002742246">
       <segment>
         <source>Branch</source>
+      </segment>
+    </unit>
+    <unit id="3244879037311223621">
+      <segment>
+        <source>Save state</source>
       </segment>
     </unit>
   </file>
