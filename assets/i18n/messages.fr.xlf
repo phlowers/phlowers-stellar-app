@@ -4017,7 +4017,7 @@
     <unit id="8065031423203926640">
       <segment state="initial">
         <source>L0 table</source>
-        <target>Tableau L0</target>
+        <target>Tableau des longueurs L0</target>
       </segment>
     </unit>
     <unit id="971569449266353120">
@@ -4260,7 +4260,7 @@
           <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
         </source>
         <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">paramètre d'incertitude</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">paramètre d&apos;incertitude</pc>
         </target>
       </segment>
     </unit>
@@ -4282,7 +4282,7 @@
           <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Parameter uncertainty Papoto</pc>
         </source>
         <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Paramètre d'incertitude Papoto</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Paramètre d&apos;incertitude Papoto</pc>
         </target>
       </segment>
     </unit>
@@ -4306,6 +4306,12 @@
       <segment state="initial">
         <source>Branch</source>
         <target>Branche</target>
+      </segment>
+    </unit>
+    <unit id="3244879037311223621">
+      <segment state="initial">
+        <source>Save state</source>
+        <target>Enregistrer l'état</target>
       </segment>
     </unit>
   </file>
