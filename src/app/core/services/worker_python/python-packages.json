@@ -30,7 +30,7 @@
     "source": "local"
   },
   "packaging": {
-    "file_name": "packaging-25.0-cp313-none-any.whl",
+    "file_name": "packaging-24.2-cp313-none-any.whl",
     "name": "packaging",
     "source": "local"
   },
@@ -50,7 +50,7 @@
     "source": "local"
   },
   "platformdirs": {
-    "file_name": "platformdirs-4.5.1-cp313-none-any.whl",
+    "file_name": "platformdirs-4.3.6-cp313-none-any.whl",
     "name": "platformdirs",
     "source": "local"
   },
@@ -100,7 +100,7 @@
     "source": "local"
   },
   "typing-extensions": {
-    "file_name": "typing_extensions-4.15.0-cp313-none-any.whl",
+    "file_name": "typing_extensions-4.14.1-cp313-none-any.whl",
     "name": "typing_extensions",
     "source": "local"
   },
@@ -110,7 +110,7 @@
     "source": "local"
   },
   "tzdata": {
-    "file_name": "tzdata-2025.3-cp313-none-any.whl",
+    "file_name": "tzdata-2025.2-cp313-none-any.whl",
     "name": "tzdata",
     "source": "local"
   },
