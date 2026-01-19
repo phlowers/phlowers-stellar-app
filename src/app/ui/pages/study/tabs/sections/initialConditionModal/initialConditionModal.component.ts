@@ -34,6 +34,22 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { Subscription } from 'rxjs';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
 
+const validators = {
+  name: ['', [Validators.required, Validators.maxLength(40)]],
+  base_parameters: [
+    null,
+    [Validators.required, Validators.min(20), Validators.max(5000)]
+  ],
+  base_temperature: [
+    15,
+    [Validators.required, Validators.min(-50), Validators.max(250)]
+  ],
+  cable_pretension: [0, [Validators.min(0), Validators.max(100)]],
+  min_temperature: [15, [Validators.min(-50), Validators.max(250)]],
+  max_wind_pressure: [0, [Validators.min(0), Validators.max(3000)]],
+  max_frost_width: [0, [Validators.min(0), Validators.max(20)]]
+};
+
 @Component({
   selector: 'app-initial-condition-modal',
   templateUrl: './initialConditionModal.component.html',
@@ -74,7 +90,7 @@ export class InitialConditionModalComponent implements OnDestroy {
     base_parameters: null,
     base_temperature: 15,
     cable_pretension: 0,
-    min_temperature: 0,
+    min_temperature: 15,
     max_wind_pressure: 0,
     max_frost_width: 0
   });
@@ -100,21 +116,7 @@ export class InitialConditionModalComponent implements OnDestroy {
     private readonly cablesService: CablesService,
     private readonly initialConditionService: InitialConditionService
   ) {
-    this.form = this.fb.group({
-      name: ['', Validators.required],
-      base_parameters: [
-        null,
-        [Validators.required, Validators.min(50), Validators.max(3500)]
-      ],
-      base_temperature: [
-        15,
-        [Validators.required, Validators.min(-50), Validators.max(200)]
-      ],
-      cable_pretension: [0],
-      min_temperature: [0],
-      max_wind_pressure: [0],
-      max_frost_width: [0]
-    });
+    this.form = this.fb.group(validators);
 
     this.subscriptions.add(
       this.form.get('name')?.valueChanges.subscribe((name) => {
@@ -155,9 +157,9 @@ export class InitialConditionModalComponent implements OnDestroy {
             cableFields.forEach((field) => {
               const control = this.form.get(field);
               if (isNarcisse) {
-                control?.setValidators(Validators.required);
+                control?.addValidators(Validators.required);
               } else {
-                control?.clearValidators();
+                control?.removeValidators(Validators.required);
               }
               control?.updateValueAndValidity();
             });
@@ -256,5 +258,9 @@ export class InitialConditionModalComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  isFormValid(): boolean {
+    return this.form.valid && this.isNameUnique();
   }
 }
