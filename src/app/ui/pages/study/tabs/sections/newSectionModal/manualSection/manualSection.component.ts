@@ -343,6 +343,13 @@ export class ManualSectionComponent implements OnInit {
     this.onSectionChange();
   }
 
+  onSectionTypeChange(event: { value: string }) {
+    if (event.value === 'guard') {
+      this.section().electric_phase_number = 0;
+      this.onSectionChange();
+    }
+  }
+
   onSupportChange(change: { uuid: string; support: Partial<Support> }) {
     const support = this.section().supports?.find(
       (support: Support) => support.uuid === change.uuid
