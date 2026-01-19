@@ -245,7 +245,7 @@ describe('AttachmentSetModalComponent', () => {
     await fixture.whenStable();
 
     const event = { value: 'Support A' };
-    await component.onAttachnementSelect(event, 'support_name');
+    await component.onAttachmentSelect(event, 'support_name');
 
     const filteredAttachments = mockAttachments
       .filter((item) => item.support_name === 'Support A')
@@ -260,7 +260,7 @@ describe('AttachmentSetModalComponent', () => {
     await fixture.whenStable();
 
     const event = { value: 1 };
-    await component.onAttachnementSelect(event, 'attachment_set');
+    await component.onAttachmentSelect(event, 'attachment_set');
 
     expect(component.armLength()).toBe(2.5);
     expect(component.heightBelowConsole()).toBe(10.5);
@@ -273,7 +273,7 @@ describe('AttachmentSetModalComponent', () => {
     component.heightBelowConsole.set(10.5);
 
     const event = { value: null };
-    await component.onAttachnementSelect(event, 'attachment_set');
+    await component.onAttachmentSelect(event, 'attachment_set');
 
     expect(component.armLength()).toBeUndefined();
     expect(component.heightBelowConsole()).toBeUndefined();
@@ -326,7 +326,7 @@ describe('AttachmentSetModalComponent', () => {
     await fixture.whenStable();
 
     const event = { value: 'Set 1' };
-    await component.onAttachnementSelect(event, 'attachment_set');
+    await component.onAttachmentSelect(event, 'attachment_set');
 
     // Should not set arm length and height since no support name is selected
     expect(component.armLength()).toBeUndefined();
