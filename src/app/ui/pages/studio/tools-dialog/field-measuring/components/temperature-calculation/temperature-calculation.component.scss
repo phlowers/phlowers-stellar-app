@@ -64,7 +64,7 @@ dd {
       grid-area: windIncidence;
 
       dt {
-        @apply flex flex-row gap-2 items-center;
+        @apply flex flex-row gap-2 items-start;
       }
     }
 
