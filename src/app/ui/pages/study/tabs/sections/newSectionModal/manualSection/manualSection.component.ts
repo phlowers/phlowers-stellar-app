@@ -43,10 +43,12 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
 const sortLines = (lines: CatLine[]) => {
   return lines.sort((a, b) => {
-    if (a.voltage_idr === '0 KV' || a.voltage_idr === '0') {
+    const aHasNoVoltage = a.voltage_adr === 'NO_VOLTAGE';
+    const bHasNoVoltage = b.voltage_adr === 'NO_VOLTAGE';
+    if (aHasNoVoltage) {
       return -1;
     }
-    if (b.voltage_idr === '0 KV' || b.voltage_idr === '0') {
+    if (bHasNoVoltage) {
       return 1;
     }
     return a.voltage_adr.localeCompare(b.voltage_adr);

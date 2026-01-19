@@ -2719,5 +2719,10 @@
         <source>Charge cases</source>
       </segment>
     </unit>
+    <unit id="509620284258406390">
+      <segment>
+        <source>NO VOLTAGE</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
