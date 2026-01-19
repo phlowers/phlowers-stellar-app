@@ -195,7 +195,7 @@ describe('Service Worker Functions', () => {
 
       await updateApp();
 
-      expect(mockCache.add).not.toHaveBeenCalledWith('/pyodide/file1.py');
+      expect(mockCache.add).not.toHaveBeenCalledWith('/pyodide/file1.whl');
     });
 
     it('should delete old files not in new manifest', async () => {
