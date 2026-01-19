@@ -120,7 +120,7 @@ export interface TaskOutputs {
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
     text_display_points: number[][];
-    text_to_display: string[];
+    text_to_display: number[];
   };
   [Task.addLoad]: {
     coordinates: number[];
