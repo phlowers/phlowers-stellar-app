@@ -21,7 +21,7 @@
     <p-inputgroup>
       <input
         id="transit"
-        type="text"
+        type="number"
         pInputText
         [ngModel]="measureData().transit"
         (ngModelChange)="updateField('transit', $event)"
@@ -44,7 +44,7 @@
 
     <div class="windDirection">
       <dt id="windDirection" i18n>Wind direction (degrees)</dt>
-      <dd>{{ measureData().windDirection }}</dd>
+      <dd>{{ localizedWindDirection() }}</dd>
     </div>
   </dl>
 
@@ -102,14 +102,14 @@
     </div>
 
     <div class="diffusedPlusDirectSolarFlux">
-      <dt i18n>Diffused plus direct solar flux</dt>
+      <dt i18n>Diffused + direct solar flux</dt>
       <dd>{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
     </div>
   </dl>
 
   <div class="measuredDiffusedPlusDirectSolarFlux">
     <label for="measuredDiffusedPlusDirectSolarFlux" i18n>
-      Measured diffused plus direct solar flux (not required)
+      Measured diffused + direct solar flux (not required)
     </label>
     <p-inputgroup>
       <input
