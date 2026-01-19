@@ -2474,7 +2474,7 @@
     <unit id="1214925224648740766">
       <segment state="initial">
         <source>Sky cover</source>
-        <target>Couverture du ciel</target>
+        <target>Nébulosité</target>
       </segment>
     </unit>
     <unit id="5198396305972397137">
@@ -2753,22 +2753,22 @@
         <target>Flux solaire direct</target>
       </segment>
     </unit>
-    <unit id="7197115832855767963">
+    <unit id="4412456247511617977">
       <segment state="initial">
-        <source>Diffused plus direct solar flux</source>
-        <target>Flux solaire diffus plus direct</target>
+        <source>Diffused + direct solar flux</source>
+        <target>Flux solaire diffus + direct</target>
       </segment>
     </unit>
-    <unit id="5681976093367495930">
+    <unit id="6052330236106770932">
       <segment state="initial">
-        <source> Measured diffused plus direct solar flux (not required) </source>
-        <target> Flux solaire diffus plus direct mesuré (non requis) </target>
+        <source> Measured diffused + direct solar flux (not required) </source>
+        <target> Flux solaire diffus + direct mesuré (facultatif) </target>
       </segment>
     </unit>
     <unit id="100914384350148711">
       <segment state="initial">
         <source> It won&apos;t be used in the calculation. </source>
-        <target> Non utilisé dans le calcul. </target>
+        <target> Celui-ci ne sera pas pris en compte dans le calcul. </target>
       </segment>
     </unit>
     <unit id="3911341609936417398">
