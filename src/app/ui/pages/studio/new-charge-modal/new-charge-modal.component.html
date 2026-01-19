@@ -102,7 +102,7 @@
         type="button"
         btnSize="m"
         (click)="onSubmit()"
-        [disabled]="nameLength() === 0"
+        [disabled]="!isFormValid()"
       >
         <app-icon icon="check" />
         <ng-container i18n>Validate</ng-container>
