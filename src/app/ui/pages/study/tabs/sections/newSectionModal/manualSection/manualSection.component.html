@@ -61,6 +61,7 @@
                 optionLabel="name"
                 optionValue="code"
                 required
+                (onChange)="onSectionTypeChange($event)"
                 (ngModelChange)="onSectionChange()"
                 [filter]="true"
                 filterBy="name"
@@ -134,14 +135,14 @@
               </dd>
             </div>
 
-            @if (section().type === 'phase') {
-              <div>
+            <div>
+              @if (section().type === 'phase') {
                 <dt i18n>Electric phase number</dt>
                 <dd class="read-only-info">
                   {{ section().electric_phase_number }}
                 </dd>
-              </div>
-            }
+              }
+            </div>
 
             <div>
               <dt i18n>Cable name</dt>
