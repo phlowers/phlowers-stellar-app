@@ -61,7 +61,8 @@ export async function updateApp() {
   const files = manifest.files || [];
   const cache = await caches.open(CACHE_NAME);
   for (const file of files) {
-    if (file.startsWith('/pyodide')) {
+    // do not redownload wheels if already in cache
+    if (file.startsWith('/pyodide') && file.endsWith('.whl')) {
       if (await cache.match(file)) {
         log('file already in cache, skipping', file);
       } else {
@@ -143,44 +144,6 @@ export async function handleFetch(event: FetchEvent) {
 (self as unknown as ServiceWorkerGlobalScope).addEventListener(
   'fetch',
   handleFetch
-);
-
-(self as unknown as ServiceWorkerGlobalScope).addEventListener(
-  'fetch',
-  async (event: FetchEvent) => {
-    const url = event.request.url;
-    const scope = (self as unknown as ServiceWorkerGlobalScope).registration
-      ?.scope;
-    if (url === scope) {
-      // case for home page
-      const newUrl = scope + 'index.html';
-      event.respondWith(
-        caches.match(newUrl).then((response) => {
-          if (response) {
-            return response;
-          }
-          return fetch(event.request.clone());
-        })
-      );
-    } else if (url.includes('celesteback')) {
-      // redirect to the backend
-      event.respondWith(fetch(event.request.clone()));
-    } else {
-      // all other requests
-      event.respondWith(
-        caches.match(event.request).then((response) => {
-          if (response) {
-            return response;
-          }
-          const fetchRequest = event.request.clone();
-          return fetch(fetchRequest, noCacheHeaders()).catch((error) => {
-            console.error('Fetch failed:', error);
-            return Response.error();
-          });
-        })
-      );
-    }
-  }
 );
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener(

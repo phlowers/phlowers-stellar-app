@@ -122,14 +122,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       storageService.ready$.subscribe(async (ready) => {
         if (ready) {
-          this.userService.getUser().then((user) => {
-            if (!user) {
-              this.userDialog = true;
-            } else {
-              this.userDialog = false;
-            }
-            this.setupData();
-          });
+          const user = await this.userService.getUser();
+          this.userDialog = !user;
+          this.setupData();
         }
       })
     );
