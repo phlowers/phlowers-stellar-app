@@ -1,11 +1,12 @@
 <p-dialog
   dismissableMask="true"
   [visible]="isOpen()"
+  appendTo="body"
   (visibleChange)="onVisibleChange()"
   keepInViewport="false"
   [style]="{
-    width: '44rem',
-    height: '31.25rem',
+    width: '60rem',
+    height: '40rem',
     maxWidth: '100%',
     maxHeight: '100%'
   }"
@@ -33,7 +34,7 @@
             [filter]="true"
             filterBy="support_name"
             [showClear]="true"
-            (onChange)="onAttachnementSelect($event, 'support_name')"
+            (onChange)="onAttachmentSelect($event, 'support_name')"
           />
         </div>
         <div class="flex flex-col gap-1">
@@ -47,7 +48,7 @@
             optionValue="attachment_set"
             appendTo="body"
             [(ngModel)]="attachmentSet"
-            (onChange)="onAttachnementSelect($event, 'attachment_set')"
+            (onChange)="onAttachmentSelect($event, 'attachment_set')"
           />
         </div>
         <p-divider class="!my-2" />
@@ -78,9 +79,10 @@
         </div>
       </div>
       <div
-        class="min-w-[22rem] support-plot-container border flex flex-col items-center justify-center overflow-hidden"
+        class="min-w-[34.375rem] h-[28.125rem] support-plot-container border flex flex-col items-center justify-center overflow-hidden"
       >
         <app-support-plot
+          [selectedAttachmentSetNumber]="attachmentSet()"
           [coordinates]="coordinates()"
           [attachmentSetNumbers]="attachmentSetNumbers()"
         ></app-support-plot>
