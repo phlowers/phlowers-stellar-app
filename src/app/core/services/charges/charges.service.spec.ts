@@ -81,7 +81,8 @@ const mockSectionData: Section = {
   charges: [mockChargeData],
   selected_charge_uuid: 'charge-uuid-1',
   field_measures: [],
-  selected_field_measure_uuid: undefined
+  selected_field_measure_uuid: undefined,
+  vtl_and_guying: undefined
 };
 
 describe('ChargesService', () => {
