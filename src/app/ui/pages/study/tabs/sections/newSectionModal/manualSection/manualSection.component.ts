@@ -37,6 +37,10 @@ import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
+import {
+  DEFAULT_TABLE_ROWS_PER_PAGE,
+  TABLE_ROWS_PER_PAGE_OPTIONS
+} from '@ui/shared/constants/tablePagination';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
@@ -149,7 +153,8 @@ export class ManualSectionComponent implements OnInit {
   maintenanceFilterTable = signal<CatMaintenanceData[]>([]);
   linesFilterTable = signal<CatLine[]>([]);
   firstSupport = signal<number>(0);
-  rowsSupport = signal<number>(10);
+  rowsSupport = signal<number>(DEFAULT_TABLE_ROWS_PER_PAGE);
+  rowsSupportOptions = signal(TABLE_ROWS_PER_PAGE_OPTIONS);
 
   maintenanceTeamRead = signal<string>('');
   maintenanceCenterRead = signal<string>('');
