@@ -66,7 +66,8 @@ describe('SpanComponent', () => {
     selected_charge_uuid: 'charge-uuid-1',
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    branch_idr: undefined
+    branch_idr: undefined,
+    vtl_and_guying: undefined
   };
 
   beforeEach(async () => {
