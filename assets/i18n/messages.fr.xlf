@@ -2900,7 +2900,7 @@
     <unit id="8699047463831885417">
       <segment state="initial">
         <source>Results:</source>
-        <target>Résultats:</target>
+        <target>Résultats :</target>
       </segment>
     </unit>
     <unit id="7065464372847182937">
@@ -2969,12 +2969,6 @@
         <target>Chargement des données L0…</target>
       </segment>
     </unit>
-    <unit id="2288513108450439427">
-      <segment state="initial">
-        <source>Support</source>
-        <target>Support</target>
-      </segment>
-    </unit>
     <unit id="2763143653229759651">
       <segment state="initial">
         <source>Support type:</source>
@@ -3015,18 +3009,6 @@
       <segment state="initial">
         <source>Guying</source>
         <target>Haubanage</target>
-      </segment>
-    </unit>
-    <unit id="4021521782447475905">
-      <segment state="initial">
-        <source>Pulley</source>
-        <target>Poulie</target>
-      </segment>
-    </unit>
-    <unit id="6036308268629413664">
-      <segment state="initial">
-        <source> Results </source>
-        <target> Résultats </target>
       </segment>
     </unit>
     <unit id="5521065577754808188">
@@ -3261,6 +3243,30 @@
       <segment state="initial">
         <source>NO VOLTAGE</source>
         <target>HORS TENSION</target>
+      </segment>
+    </unit>
+    <unit id="922943791833170370">
+      <segment state="initial">
+        <source>Guying span</source>
+        <target>Portée haubanée</target>
+      </segment>
+    </unit>
+    <unit id="4337200314263685406">
+      <segment state="initial">
+        <source>Horizontal distance</source>
+        <target>Distance horizontale</target>
+      </segment>
+    </unit>
+    <unit id="5175853471479908941">
+      <segment state="initial">
+        <source>With pulley</source>
+        <target>Avec poulie</target>
+      </segment>
+    </unit>
+    <unit id="5640313464913831943">
+      <segment state="initial">
+        <source>VTL and guying saved</source>
+        <target>Haubanage et VHL enregistrés</target>
       </segment>
     </unit>
   </file>
