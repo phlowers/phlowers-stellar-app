@@ -1,0 +1,2 @@
+export const DEFAULT_TABLE_ROWS_PER_PAGE = 10;
+export const TABLE_ROWS_PER_PAGE_OPTIONS = [10, 20, 30];

@@ -19,6 +19,10 @@ import { PossibleIconNames } from '@ui/shared/model/icon.model';
 import { ToolsDialogService } from '../tools-dialog.service';
 import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+import {
+  DEFAULT_TABLE_ROWS_PER_PAGE,
+  TABLE_ROWS_PER_PAGE_OPTIONS
+} from '@ui/shared/constants/tablePagination';
 
 interface L0Row {
   span: string;
@@ -56,7 +60,8 @@ export class L0SumComponent implements AfterViewInit {
     () => this.plotService.loading() || !this.plotService.litData()
   );
 
-  readonly rowsPerPage = 10;
+  readonly rowsPerPage = DEFAULT_TABLE_ROWS_PER_PAGE;
+  readonly rowsPerPageOptions = TABLE_ROWS_PER_PAGE_OPTIONS;
 
   readonly sortField = signal<string>('');
   readonly sortOrder = signal<number>(0);

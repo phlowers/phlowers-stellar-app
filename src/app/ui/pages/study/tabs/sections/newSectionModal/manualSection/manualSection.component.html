@@ -447,7 +447,7 @@
             <p-paginator
               (onPageChange)="onSupportsPageChange($event)"
               [totalRecords]="section().supports.length"
-              [rowsPerPageOptions]="[10, 20, 30]"
+              [rowsPerPageOptions]="rowsSupportOptions()"
               [rows]="rowsSupport()"
               [showCurrentPageReport]="true"
               [showPageLinks]="true"
