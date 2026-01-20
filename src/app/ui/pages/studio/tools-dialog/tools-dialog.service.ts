@@ -44,7 +44,7 @@ export class ToolsDialogService {
     },
     'vtl-and-guying': {
       component: VhlAndGuyingComponent,
-      dialogStyle: { 'min-width': '80rem', 'max-width': '90rem' }
+      dialogStyle: { 'min-width': '95vw', 'max-width': '95vw' }
     },
     'other-tool': {
       component: null!

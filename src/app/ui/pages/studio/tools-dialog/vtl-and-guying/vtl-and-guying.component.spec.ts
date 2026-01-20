@@ -13,6 +13,8 @@ import {
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
+import { SectionService } from '@core/services/sections/section.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-button',
@@ -41,6 +43,8 @@ describe('VhlAndGuyingComponent', () => {
   let toolsDialogService: ToolsDialogService;
   let mockPlotService: jest.Mocked<PlotService>;
   let mockWorkerPythonService: jest.Mocked<WorkerPythonService>;
+  let mockSectionService: jest.Mocked<SectionService>;
+  let mockMessageService: jest.Mocked<MessageService>;
 
   beforeEach(async () => {
     const mockLitData = {
@@ -56,10 +60,13 @@ describe('VhlAndGuyingComponent', () => {
       supports: [{ chainV: true }, { chainV: false }]
     };
 
+    const mockStudy = { uuid: 'test-study-uuid', sections: [] };
+
     mockPlotService = {
       loading: signal(false),
       litData: signal(mockLitData),
       section: signal(mockSection),
+      study: signal(mockStudy),
       getSpanOptions: jest
         .fn()
         .mockReturnValue([{ label: 'Span 1', value: [0, 1] }])
@@ -69,13 +76,27 @@ describe('VhlAndGuyingComponent', () => {
       runTask: jest.fn()
     } as unknown as jest.Mocked<WorkerPythonService>;
 
+    mockSectionService = {
+      currentSection: signal({
+        uuid: 'test-section-uuid',
+        supports: [{ chainV: true }, { chainV: false }]
+      }),
+      createOrUpdateSection: jest.fn().mockResolvedValue(undefined)
+    } as unknown as jest.Mocked<SectionService>;
+
+    mockMessageService = {
+      add: jest.fn()
+    } as unknown as jest.Mocked<MessageService>;
+
     await TestBed.configureTestingModule({
       imports: [VhlAndGuyingComponent],
       providers: [
         ToolsDialogService,
         provideHttpClientTesting(),
         { provide: PlotService, useValue: mockPlotService },
-        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+        { provide: SectionService, useValue: mockSectionService },
+        { provide: MessageService, useValue: mockMessageService }
       ]
     })
       .overrideComponent(VhlAndGuyingComponent, {
@@ -130,9 +151,9 @@ describe('VhlAndGuyingComponent', () => {
       error: null
     });
 
-    component.altitude.set(10);
-    component.horizontalDistance.set(5);
-    component.selectedSupport.set(0);
+    component.form.controls.altitude.setValue(10);
+    component.form.controls.horizontalDistance.setValue(5);
+    component.form.controls.selectedSupport.setValue(0);
 
     await component.onCalculate();
 
@@ -148,9 +169,9 @@ describe('VhlAndGuyingComponent', () => {
   });
 
   it('should not calculate when inputs are missing', async () => {
-    component.altitude.set(null);
-    component.horizontalDistance.set(5);
-    component.selectedSupport.set(0);
+    component.form.controls.altitude.setValue(null);
+    component.form.controls.horizontalDistance.setValue(5);
+    component.form.controls.selectedSupport.setValue(0);
 
     await component.onCalculate();
 
@@ -170,9 +191,9 @@ describe('VhlAndGuyingComponent', () => {
       error: TaskError.CALCULATION_ERROR
     });
 
-    component.altitude.set(10);
-    component.horizontalDistance.set(5);
-    component.selectedSupport.set(0);
+    component.form.controls.altitude.setValue(10);
+    component.form.controls.horizontalDistance.setValue(5);
+    component.form.controls.selectedSupport.setValue(0);
 
     await component.onCalculate();
 
@@ -182,20 +203,21 @@ describe('VhlAndGuyingComponent', () => {
 
   it('should compute support type as Suspension when chainV is true', () => {
     // The mock section is already set in beforeEach with supports
-    component.selectedSupport.set(0);
+    component.form.controls.selectedSupport.setValue(0);
     fixture.detectChanges();
     expect(component.supportType()).toBe('Suspension');
   });
 
   it('should compute support type as Anchor when chainV is false', () => {
     // The mock section is already set in beforeEach with supports
-    component.selectedSupport.set(1);
+    component.form.controls.selectedSupport.setValue(1);
     fixture.detectChanges();
     expect(component.supportType()).toBe('Anchor');
   });
 
   it('should compute support options from selected span', () => {
-    component.selectedSpan.set([0, 1]);
+    component.form.controls.selectedSpan.setValue([0, 1]);
+    fixture.detectChanges();
     const options = component.supportOptions();
     expect(options).toEqual([
       { label: '1', value: 0 },
@@ -204,7 +226,8 @@ describe('VhlAndGuyingComponent', () => {
   });
 
   it('should compute vtlWithoutGuying when support is selected', () => {
-    component.selectedSupport.set(0);
+    component.form.controls.selectedSupport.setValue(0);
+    fixture.detectChanges();
     const vtl = component.vtlWithoutGuying();
     expect(vtl).toEqual({
       chargeV: 10,
@@ -220,5 +243,228 @@ describe('VhlAndGuyingComponent', () => {
 
   it('should call onExport', () => {
     expect(() => component.onExport()).not.toThrow();
+  });
+
+  it('should set form values from section when section has vtl_and_guying data', () => {
+    const mockSectionWithData = {
+      uuid: 'test-section-uuid',
+      supports: [{ chainV: true }, { chainV: false }],
+      vtl_and_guying: {
+        inputs: {
+          selectedSpan: [0, 1],
+          selectedSupport: 0,
+          altitude: 10,
+          horizontalDistance: 5,
+          hasPulley: true
+        },
+        outputs: {
+          tensionInGuy: 100,
+          guyAngle: 45,
+          chargeVUnderConsole: 50,
+          chargeHUnderConsole: 30,
+          chargeLIfPulley: 20
+        },
+        comment: 'Test comment'
+      }
+    };
+    Object.defineProperty(mockPlotService, 'section', {
+      value: signal(mockSectionWithData),
+      writable: true,
+      configurable: true
+    });
+    component.setFormValuesFromSection();
+    expect(component.form.controls.selectedSpan.value).toEqual([0, 1]);
+    expect(component.form.controls.selectedSupport.value).toBe(0);
+    expect(component.form.controls.altitude.value).toBe(10);
+    expect(component.form.controls.horizontalDistance.value).toBe(5);
+    expect(component.form.controls.hasPulley.value).toBe(true);
+    expect(component.form.controls.comment.value).toBe('Test comment');
+    expect(component.results()).toEqual({
+      tensionInGuy: 100,
+      guyAngle: 45,
+      chargeVUnderConsole: 50,
+      chargeHUnderConsole: 30,
+      chargeLIfPulley: 20
+    });
+  });
+
+  it('should not set form values when section is null', () => {
+    Object.defineProperty(mockPlotService, 'section', {
+      value: signal(null),
+      writable: true,
+      configurable: true
+    });
+    const initialFormValue = component.form.value;
+    component.setFormValuesFromSection();
+    expect(component.form.value).toEqual(initialFormValue);
+  });
+
+  it('should not set form values when section has no vtl_and_guying inputs', () => {
+    const mockSectionNoData = {
+      uuid: 'test-section-uuid',
+      supports: [{ chainV: true }]
+    };
+    Object.defineProperty(mockPlotService, 'section', {
+      value: signal(mockSectionNoData),
+      writable: true,
+      configurable: true
+    });
+    const initialFormValue = component.form.value;
+    component.setFormValuesFromSection();
+    expect(component.form.value).toEqual(initialFormValue);
+  });
+
+  it('should save form data and call sectionService.createOrUpdateSection', () => {
+    const mockStudyForSave = { uuid: 'test-study-uuid', sections: [] };
+    const mockSectionForSave = {
+      uuid: 'test-section-uuid',
+      supports: [{ chainV: true }]
+    };
+    Object.defineProperty(mockPlotService, 'study', {
+      value: signal(mockStudyForSave),
+      writable: true,
+      configurable: true
+    });
+    Object.defineProperty(mockSectionService, 'currentSection', {
+      value: signal(mockSectionForSave),
+      writable: true,
+      configurable: true
+    });
+    component.form.controls.selectedSpan.setValue([0]);
+    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.altitude.setValue(10);
+    component.form.controls.horizontalDistance.setValue(5);
+    component.form.controls.hasPulley.setValue(true);
+    component.form.controls.comment.setValue('Test comment');
+    component.results.set({
+      tensionInGuy: 100,
+      guyAngle: 45,
+      chargeVUnderConsole: 50,
+      chargeHUnderConsole: 30,
+      chargeLIfPulley: 20
+    });
+
+    const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+    component.onSave();
+
+    expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
+      mockStudyForSave,
+      expect.objectContaining({
+        vtl_and_guying: expect.objectContaining({
+          inputs: {
+            selectedSpan: [0],
+            selectedSupport: 0,
+            altitude: 10,
+            horizontalDistance: 5,
+            hasPulley: true
+          },
+          outputs: {
+            tensionInGuy: 100,
+            guyAngle: 45,
+            chargeVUnderConsole: 50,
+            chargeHUnderConsole: 30,
+            chargeLIfPulley: 20
+          },
+          comment: 'Test comment'
+        })
+      })
+    );
+    expect(mockMessageService.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        severity: 'success',
+        life: 3000
+      })
+    );
+    expect(closeToolSpy).toHaveBeenCalled();
+  });
+
+  it('should not save when study is null', () => {
+    Object.defineProperty(mockPlotService, 'study', {
+      value: signal(null),
+      writable: true,
+      configurable: true
+    });
+    component.onSave();
+    expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+  });
+
+  it('should not save when section is null', () => {
+    const mockStudyForSave = { uuid: 'test-study-uuid', sections: [] };
+    Object.defineProperty(mockPlotService, 'study', {
+      value: signal(mockStudyForSave),
+      writable: true,
+      configurable: true
+    });
+    Object.defineProperty(mockSectionService, 'currentSection', {
+      value: signal(null),
+      writable: true,
+      configurable: true
+    });
+    component.onSave();
+    expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+  });
+
+  it('should return true when form is valid', () => {
+    component.form.controls.altitude.setValue(10);
+    component.form.controls.horizontalDistance.setValue(5);
+    component.form.controls.selectedSupport.setValue(0);
+    expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should return false when altitude is null', () => {
+    component.form.controls.altitude.setValue(null);
+    component.form.controls.horizontalDistance.setValue(5);
+    component.form.controls.selectedSupport.setValue(0);
+    expect(component.isFormValid()).toBe(false);
+  });
+
+  it('should return false when horizontalDistance is null', () => {
+    component.form.controls.altitude.setValue(10);
+    component.form.controls.horizontalDistance.setValue(null);
+    component.form.controls.selectedSupport.setValue(0);
+    expect(component.isFormValid()).toBe(false);
+  });
+
+  it('should reset form and clear all signals', () => {
+    component.form.controls.selectedSpan.setValue([0, 1]);
+    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.altitude.setValue(10);
+    component.form.controls.horizontalDistance.setValue(5);
+    component.form.controls.hasPulley.setValue(true);
+    component.form.controls.comment.setValue('Test comment');
+    component.supportOptions.set([{ label: '1', value: 0 }]);
+    component.supportType.set('Suspension');
+    component.vtlWithoutGuying.set({
+      chargeV: 10,
+      chargeH: 15,
+      chargeL: 5,
+      resultant: 30
+    });
+    component.results.set({
+      tensionInGuy: 100,
+      guyAngle: 45,
+      chargeVUnderConsole: 50,
+      chargeHUnderConsole: 30,
+      chargeLIfPulley: 20
+    });
+
+    component.resetForm();
+
+    expect(component.form.controls.selectedSpan.value).toBeNull();
+    expect(component.form.controls.selectedSupport.value).toBeNull();
+    expect(component.form.controls.altitude.value).toBeNull();
+    expect(component.form.controls.horizontalDistance.value).toBeNull();
+    expect(component.form.controls.hasPulley.value).toBe(false);
+    expect(component.form.controls.comment.value).toBe('');
+    expect(component.supportOptions()).toEqual([]);
+    expect(component.supportType()).toBeNull();
+    expect(component.vtlWithoutGuying()).toBeNull();
+    expect(component.results()).toBeNull();
+  });
+
+  it('should clear selectedSupport when selectedSpan changes', () => {
+    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSpan.setValue([0, 1]);
+    expect(component.form.controls.selectedSupport.value).toBeNull();
   });
 });
