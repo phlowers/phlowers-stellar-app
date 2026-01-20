@@ -2,7 +2,7 @@
 
 // Block
 .vtl-guying {
-  @apply flex gap-8 min-h-[37.5rem] py-2;
+  @apply flex gap-4 min-h-[37.5rem] py-2;
 }
 
 // Elements
@@ -11,15 +11,16 @@
 }
 
 .vtl-guying__right {
-  @apply flex-1 flex flex-col min-w-[25rem] max-w-[25rem];
+  @apply flex-1 flex flex-col min-w-[35rem] max-w-[35rem];
 }
 
-.vtl-guying__support-selection {
-  @apply flex flex-row gap-12;
+.vtl-guying__fields-grid {
+  @apply grid gap-x-4 gap-y-3;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .vtl-guying__form-field {
-  @apply flex flex-col gap-2;
+  @apply flex flex-col gap-1;
 
   label {
     @extend %text-m-400;
@@ -28,6 +29,7 @@
 
   &--checkbox {
     @apply flex items-center gap-2 flex-row mt-2;
+    grid-column: 1;
 
     label {
       @apply m-0;
@@ -89,7 +91,7 @@
 
 .vtl-guying__vtl-value {
   @extend %text-m-400;
-  @apply m-0;
+  @apply m-0 ml-1;
   color: var(--grey-900);
 }
 
@@ -110,16 +112,16 @@
 }
 
 .vtl-guying__results-fields {
-  @apply flex flex-row justify-between gap-3;
-}
-
-.vtl-guying__result-column {
-  @apply flex flex-col gap-3;
-  width: 20%;
+  @apply grid gap-x-4 gap-y-3;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas:
+    'tensionInGuy chargeVUnderConsole comment comment'
+    'guyAngle chargeHUnderConsole comment comment'
+    '. chargeLIfPulley comment comment';
 }
 
 .vtl-guying__result-field {
-  @apply flex flex-col gap-2;
+  @apply flex flex-col gap-1;
 
   dt {
     @extend %text-m-400;
@@ -130,22 +132,41 @@
     @extend %text-m-400;
     @apply m-0;
   }
+}
 
-  &--comment {
-    label {
-      @apply mb-2;
-    }
-  }
+// Grid area assignments for grid-template-areas
+.tensionInGuy {
+  grid-area: tensionInGuy;
+}
+
+.guyAngle {
+  grid-area: guyAngle;
+}
+
+.chargeVUnderConsole {
+  grid-area: chargeVUnderConsole;
+}
+
+.chargeHUnderConsole {
+  grid-area: chargeHUnderConsole;
+}
+
+.chargeLIfPulley {
+  grid-area: chargeLIfPulley;
+}
+
+.comment {
+  grid-area: comment;
 }
 
 .vtl-guying__result-value {
   @extend %text-m-400;
-  @apply m-0;
+  @apply m-0 ml-1;
   color: var(--grey-900);
 }
 
 .vtl-guying__info-text {
-  @apply flex gap-3 mt-2 py-3.5;
+  @apply flex gap-3 mt-2;
 
   p {
     @extend %text-s-400;

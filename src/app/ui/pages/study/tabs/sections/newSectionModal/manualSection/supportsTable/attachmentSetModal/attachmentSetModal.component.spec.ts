@@ -155,7 +155,8 @@ describe('AttachmentSetModalComponent', () => {
     charges: [],
     selected_charge_uuid: null,
     field_measures: [],
-    selected_field_measure_uuid: undefined
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
   };
 
   beforeEach(async () => {

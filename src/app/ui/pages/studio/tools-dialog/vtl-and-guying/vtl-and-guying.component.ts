@@ -4,11 +4,18 @@ import {
   TemplateRef,
   ViewChild,
   computed,
+  effect,
   inject,
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -25,6 +32,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { Task } from '@core/services/worker_python/tasks/types';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { VtlAndGuying } from '@core/data/database/interfaces/vtlAndGuying';
+import { SectionService } from '@core/services/sections/section.service';
+import { MessageService } from 'primeng/api';
 
 interface SupportOption {
   label: string;
@@ -35,7 +45,7 @@ interface SupportOption {
   selector: 'app-vtl-and-guying-tool',
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     DialogModule,
     SelectModule,
     InputNumberModule,
@@ -57,51 +67,31 @@ export class VhlAndGuyingComponent implements AfterViewInit {
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
 
   private readonly toolsDialogService = inject(ToolsDialogService);
+  private readonly sectionService = inject(SectionService);
+  private readonly messageService = inject(MessageService);
   public readonly plotService = inject(PlotService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly fb = inject(FormBuilder);
 
-  // Support selection
-  readonly selectedSpan = signal<number[] | null>(null);
-  readonly selectedSupport = signal<number | null>(null);
-  readonly supportType = computed(() => {
-    const support = this.selectedSupport();
-    if (support === null) {
-      return null;
-    }
-    return this.plotService.section()?.supports[support].chainV === true
-      ? 'Suspension'
-      : 'Anchor';
-  });
+  form: FormGroup<{
+    selectedSpan: FormControl<VtlAndGuying['inputs']['selectedSpan']>;
+    selectedSupport: FormControl<VtlAndGuying['inputs']['selectedSupport']>;
+    altitude: FormControl<VtlAndGuying['inputs']['altitude']>;
+    horizontalDistance: FormControl<
+      VtlAndGuying['inputs']['horizontalDistance']
+    >;
+    hasPulley: FormControl<VtlAndGuying['inputs']['hasPulley']>;
+    comment: FormControl<VtlAndGuying['comment']>;
+  }>;
 
-  // Support options
-  readonly supportOptions = computed<SupportOption[]>(() => {
-    return (
-      this.selectedSpan()?.map((support) => ({
-        label: (support + 1).toString(),
-        value: support
-      })) || []
-    );
-  });
-
-  readonly vtlWithoutGuying = computed(() => {
-    if (this.selectedSupport() === null) {
-      return null;
-    }
-    const vtlUnderChain = this.plotService.litData()?.vtl_under_chain;
-    const rUnderChain = this.plotService.litData()?.r_under_chain;
-    return {
-      chargeV: vtlUnderChain?.[0][this.selectedSupport()!],
-      chargeH: vtlUnderChain?.[1][this.selectedSupport()!],
-      chargeL: vtlUnderChain?.[2][this.selectedSupport()!],
-      resultant: rUnderChain?.[this.selectedSupport()!]
-    };
-  });
-
-  // Guying inputs
-  readonly altitude = signal<number | null>(null); // a in meters
-  readonly horizontalDistance = signal<number | null>(null); // d in meters
-  readonly hasPulley = signal<boolean>(false);
-  readonly comment = signal<string>('');
+  readonly supportType = signal<'Suspension' | 'Anchor' | null>(null);
+  readonly supportOptions = signal<SupportOption[]>([]);
+  readonly vtlWithoutGuying = signal<{
+    chargeV: number | undefined;
+    chargeH: number | undefined;
+    chargeL: number | undefined;
+    resultant: number | undefined;
+  } | null>(null);
 
   results = signal<{
     tensionInGuy: number | null;
@@ -115,7 +105,136 @@ export class VhlAndGuyingComponent implements AfterViewInit {
     () => this.plotService.loading() || !this.plotService.litData()
   );
 
+  constructor() {
+    this.form = this.fb.group({
+      selectedSpan: this.fb.control<number[] | null>(null),
+      selectedSupport: this.fb.control<number | null>(
+        {
+          value: null,
+          disabled: true
+        },
+        [Validators.required]
+      ),
+      altitude: this.fb.control<number | null>(null, [
+        Validators.required,
+        Validators.min(0)
+      ]),
+      horizontalDistance: this.fb.control<number | null>(null, [
+        Validators.required,
+        Validators.min(0)
+      ]),
+      hasPulley: this.fb.control<boolean>(false, { nonNullable: true }),
+      comment: this.fb.control<string>('', { nonNullable: true })
+    });
+
+    // Update computed values when form values change
+    this.form.controls.selectedSpan.valueChanges.subscribe(() => {
+      this.form.controls.selectedSupport.setValue(null, { emitEvent: false });
+      const selectedSpan = this.form.controls.selectedSpan.value;
+
+      // Enable/disable selectedSupport based on selectedSpan value
+      if (selectedSpan === null) {
+        this.form.controls.selectedSupport.disable({ emitEvent: false });
+      } else {
+        this.form.controls.selectedSupport.enable({ emitEvent: false });
+      }
+
+      this.supportOptions.set(
+        selectedSpan?.map((support) => ({
+          label: (support + 1).toString(),
+          value: support
+        })) || []
+      );
+      this.supportType.set(null);
+      this.vtlWithoutGuying.set(null);
+      this.results.set(null);
+    });
+
+    this.form.controls.selectedSupport.valueChanges.subscribe(() => {
+      this.updateSupportType();
+      this.updateVtlWithoutGuying();
+      this.results.set(null);
+    });
+
+    // Also update when plotService data changes
+    effect(() => {
+      this.plotService.litData();
+      this.updateVtlWithoutGuying();
+    });
+
+    this.form.controls.altitude.valueChanges.subscribe(() => {
+      this.results.set(null);
+    });
+
+    this.form.controls.horizontalDistance.valueChanges.subscribe(() => {
+      this.results.set(null);
+    });
+
+    // Initialize computed values
+    this.updateSupportOptions();
+  }
+
+  private updateSupportOptions(): void {
+    const selectedSpan = this.form.controls.selectedSpan.value;
+    this.supportOptions.set(
+      selectedSpan?.map((support) => ({
+        label: (support + 1).toString(),
+        value: support
+      })) || []
+    );
+  }
+
+  private updateSupportType(): void {
+    const support = this.form.controls.selectedSupport.value;
+    if (support === null) {
+      this.supportType.set(null);
+      return;
+    }
+    const supportType =
+      this.plotService.section()?.supports[support].chainV === true
+        ? 'Suspension'
+        : 'Anchor';
+    this.supportType.set(supportType);
+  }
+
+  private updateVtlWithoutGuying(): void {
+    const support = this.form.controls.selectedSupport.value;
+    if (support === null) {
+      this.vtlWithoutGuying.set(null);
+      return;
+    }
+    const vtlUnderChain = this.plotService.litData()?.vtl_under_chain;
+    const rUnderChain = this.plotService.litData()?.r_under_chain;
+    this.vtlWithoutGuying.set({
+      chargeV: vtlUnderChain?.[0][support],
+      chargeH: vtlUnderChain?.[1][support],
+      chargeL: vtlUnderChain?.[2][support],
+      resultant: rUnderChain?.[support]
+    });
+  }
+
+  setFormValuesFromSection(): void {
+    const section = this.plotService.section();
+    if (!section) {
+      return;
+    }
+    const inputs = section.vtl_and_guying?.inputs;
+    const outputs = section.vtl_and_guying?.outputs;
+    if (!inputs) {
+      return;
+    }
+    const controls = this.form.controls;
+    controls.selectedSpan.setValue(inputs.selectedSpan ?? null);
+    controls.selectedSupport.setValue(inputs.selectedSupport ?? null);
+    controls.altitude.setValue(inputs.altitude ?? null);
+    controls.horizontalDistance.setValue(inputs.horizontalDistance ?? null);
+    controls.hasPulley.setValue(inputs.hasPulley ?? false);
+    controls.comment.setValue(section.vtl_and_guying?.comment ?? '');
+    this.results.set(outputs ?? null);
+  }
+
   ngAfterViewInit(): void {
+    this.setFormValuesFromSection();
     this.toolsDialogService.setTemplates({
       header: this.headerTemplate,
       footer: this.footerTemplate
@@ -129,19 +248,16 @@ export class VhlAndGuyingComponent implements AfterViewInit {
   }
 
   onCalculate = async (): Promise<void> => {
-    if (
-      this.altitude() === null ||
-      this.horizontalDistance() === null ||
-      this.selectedSupport() === null
-    ) {
+    if (!this.isFormValid()) {
       return;
     }
+    const formValue = this.form.value;
     const { result, error } = await this.workerPythonService.runTask(
       Task.calculateGuying,
       {
-        altitude: this.altitude()!,
-        horizontalDistance: this.horizontalDistance()!,
-        hasPulley: this.hasPulley()
+        altitude: formValue.altitude!,
+        horizontalDistance: formValue.horizontalDistance!,
+        hasPulley: formValue.hasPulley ?? false
       }
     );
     if (error) {
@@ -157,5 +273,68 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   onExport(): void {
     // TODO: Implement export functionality
+  }
+
+  onSave(): void {
+    const formValue = this.form.value;
+    const study = this.plotService.study();
+    const section = this.sectionService.currentSection();
+    if (!study || !section) {
+      return;
+    }
+    const vtlAndGuying: VtlAndGuying = {
+      inputs: {
+        selectedSpan: formValue.selectedSpan ?? null,
+        selectedSupport: formValue.selectedSupport ?? null,
+        altitude: formValue.altitude ?? null,
+        horizontalDistance: formValue.horizontalDistance ?? null,
+        hasPulley: formValue.hasPulley ?? false
+      },
+      outputs: this.results()
+        ? {
+            tensionInGuy: this.results()?.tensionInGuy ?? null,
+            guyAngle: this.results()?.guyAngle ?? null,
+            chargeVUnderConsole: this.results()?.chargeVUnderConsole ?? null,
+            chargeHUnderConsole: this.results()?.chargeHUnderConsole ?? null,
+            chargeLIfPulley: this.results()?.chargeLIfPulley ?? null
+          }
+        : null,
+      comment: formValue.comment ?? ''
+    };
+    section.vtl_and_guying = vtlAndGuying;
+    this.sectionService.createOrUpdateSection(study, section);
+    this.messageService.add({
+      severity: 'success',
+      summary: $localize`Successful`,
+      detail: $localize`VTL and guying saved`,
+      life: 3000
+    });
+    this.toolsDialogService.closeTool();
+  }
+
+  isFormValid(): boolean {
+    const formValue = this.form.value;
+    return (
+      formValue.altitude !== null &&
+      formValue.horizontalDistance !== null &&
+      formValue.selectedSupport !== null &&
+      this.form.controls.altitude.valid &&
+      this.form.controls.horizontalDistance.valid
+    );
+  }
+
+  resetForm(): void {
+    this.form.reset({
+      selectedSpan: null,
+      selectedSupport: null,
+      altitude: null,
+      horizontalDistance: null,
+      hasPulley: false,
+      comment: ''
+    });
+    this.supportOptions.set([]);
+    this.supportType.set(null);
+    this.vtlWithoutGuying.set(null);
+    this.results.set(null);
   }
 }
