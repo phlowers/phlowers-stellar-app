@@ -1,7 +1,7 @@
 <p-table
   [paginator]="true"
-  [rows]="10"
-  [rowsPerPageOptions]="[10, 20, 30]"
+  [rows]="defaultRowsPerPage"
+  [rowsPerPageOptions]="rowsPerPageOptions"
   (onSort)="onSort($event)"
   [value]="studies()"
   [showCurrentPageReport]="true"
