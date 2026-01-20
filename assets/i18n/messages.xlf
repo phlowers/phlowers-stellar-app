@@ -5897,11 +5897,6 @@
         <source>Charge L</source>
       </segment>
     </unit>
-    <unit id="2288513108450439427">
-      <segment>
-        <source>Support</source>
-      </segment>
-    </unit>
     <unit id="2763143653229759651">
       <segment>
         <source>Support type:</source>
@@ -5927,11 +5922,6 @@
         <source>Angle guy line / Horizon</source>
       </segment>
     </unit>
-    <unit id="4021521782447475905">
-      <segment>
-        <source>Pulley</source>
-      </segment>
-    </unit>
     <unit id="4436770741152429750">
       <segment>
         <source>Sum L0</source>
@@ -5950,11 +5940,6 @@
     <unit id="5819878164896182593">
       <segment>
         <source>Resultant</source>
-      </segment>
-    </unit>
-    <unit id="6036308268629413664">
-      <segment>
-        <source> Results </source>
       </segment>
     </unit>
     <unit id="6175534130375947992">
@@ -6151,6 +6136,26 @@
     <unit id="509620284258406390">
       <segment>
         <source>NO VOLTAGE</source>
+      </segment>
+    </unit>
+    <unit id="4337200314263685406">
+      <segment>
+        <source>Horizontal distance</source>
+      </segment>
+    </unit>
+    <unit id="5175853471479908941">
+      <segment>
+        <source>With pulley</source>
+      </segment>
+    </unit>
+    <unit id="5640313464913831943">
+      <segment>
+        <source>VTL and guying saved</source>
+      </segment>
+    </unit>
+    <unit id="922943791833170370">
+      <segment>
+        <source>Guying span</source>
       </segment>
     </unit>
   </file>
