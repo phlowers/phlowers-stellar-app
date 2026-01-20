@@ -24,6 +24,7 @@ import subprocess
 import tarfile
 import tempfile
 import zipfile
+from functools import cache
 from pathlib import Path
 
 import brotli
@@ -70,12 +71,20 @@ def get_wheels(directory: Path) -> list[str]:
     return [f.name for f in directory.glob("*.whl") if f.is_file()]
 
 
+def run_cmd(cmd: list[str], error_msg: str = "Command failed") -> subprocess.CompletedProcess:
+    """Run a subprocess command and exit on failure."""
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Error: {result.stderr}")
+        raise SystemExit(1)
+    return result
+
+
+@cache
 def get_config() -> tuple[str, str]:
     """Load pyodide and mechaphlowers versions from package.json."""
     data = json.loads(PACKAGE_JSON_PATH.read_text())
-    # pyodide version is in dependencies (e.g., "^0.28.3" -> "0.28.3")
     pyodide_version = data["dependencies"]["pyodide"].lstrip("^~")
-    # mechaphlowers version is in config
     mechaphlowers_version = data["config"]["mechaphlowers"]
     return pyodide_version, mechaphlowers_version
 
@@ -161,15 +170,11 @@ def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
         "--python-version", "3.13",
     ]
     
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    run_cmd(cmd)
     
     # Cleanup temp file
     if temp_req.exists():
         temp_req.unlink()
-    
-    if result.returncode != 0:
-        print(f"Error: {result.stderr}")
-        raise SystemExit(1)
     
     # Parse resolved requirements
     resolved: dict[str, str] = {}
@@ -240,10 +245,7 @@ def download_packages(local_wheel: Path | None = None) -> dict[str, str]:
         "-d", str(PYODIDE_DIR),
     ]
     
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"Error: {result.stderr}")
-        raise SystemExit(1)
+    run_cmd(cmd)
     
     # If using local wheel, replace the downloaded mechaphlowers wheel
     if local_wheel:
@@ -306,10 +308,9 @@ def replace_with_cdn_wheels(
         
         # Check if we have this package and versions match
         if name in downloaded and downloaded[name] == cdn_version:
-            # Remove pip wheel(s)
-            for wheel in PYODIDE_DIR.glob(f"{name.replace('-', '_')}*.whl"):
-                wheel.unlink()
-            for wheel in PYODIDE_DIR.glob(f"{name.replace('-', '_').replace('-', '_')}*.whl"):
+            # Remove pip wheel(s) - use normalized pattern
+            pattern = name.replace("-", "_")
+            for wheel in PYODIDE_DIR.glob(f"{pattern}*.whl"):
                 wheel.unlink()
             
             # Copy from local or download from CDN
@@ -355,19 +356,14 @@ def deduplicate_wheels(cdn_package_names: set[str]) -> int:
         if len(wheels) <= 1:
             continue
         
-        is_cdn_pkg = pkg_name in cdn_package_names
+        # Priority: CDN pkgs prefer pyodide wasm; PyPI pkgs prefer cp313
+        pyodide_wasm = next((w for w in wheels if "pyodide" in w.lower()), None)
+        cp313 = next((w for w in wheels if "-cp313-" in w), None)
         
-        # Priority: pyodide wasm > cp313 > py3
-        pyodide_wasm = [w for w in wheels if "pyodide" in w.lower()]
-        cp313 = [w for w in wheels if "-cp313-" in w]
-        py3 = [w for w in wheels if "-py3-" in w or "-py2.py3-" in w]
-        
-        if is_cdn_pkg:
-            # For CDN packages, prefer pyodide wasm builds
-            keep = (pyodide_wasm or cp313 or wheels)[0]
+        if pkg_name in cdn_package_names:
+            keep = pyodide_wasm or cp313 or wheels[0]
         else:
-            # For PyPI packages, prefer cp313 compiled
-            keep = (cp313 or pyodide_wasm or wheels)[0]
+            keep = cp313 or pyodide_wasm or wheels[0]
         
         for wheel in wheels:
             if wheel != keep:
@@ -389,24 +385,18 @@ def compile_wheels() -> None:
     temp_dir.mkdir(exist_ok=True)
     
     for filename in PYODIDE_CORE_FILES:
-        src = PYODIDE_DIR / filename
-        if src.exists():
+        if (src := PYODIDE_DIR / filename).exists():
             shutil.move(str(src), str(temp_dir / filename))
     
     # Compile using pyodide CLI via uvx (without --keep to replace py3 with cp313)
-    cmd = [
-        "uvx", "--from", "pyodide-build", "pyodide", "py-compile",
-        "--compression-level", "6",
-        str(PYODIDE_DIR),
-    ]
+    cmd = ["uvx", "--from", "pyodide-build", "pyodide", "py-compile", "--compression-level", "6", str(PYODIDE_DIR)]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"  ⚠ Compilation warning: {result.stderr}")
     
     # Restore core files
     for filename in PYODIDE_CORE_FILES:
-        src = temp_dir / filename
-        if src.exists():
+        if (src := temp_dir / filename).exists():
             shutil.move(str(src), str(PYODIDE_DIR / filename))
     temp_dir.rmdir()
     
@@ -422,36 +412,24 @@ def compile_wheels() -> None:
 # =============================================================================
 
 def compress_wheels(cdn_package_names: set[str], min_size_mb: float = 1.0) -> None:
-    """Compress large non-CDN wheels with Brotli and Gzip.
-    
-    Args:
-        cdn_package_names: Set of normalized package names from CDN (skip these)
-    """
+    """Compress large non-CDN wheels with Brotli and Gzip."""
     print("\n[6/6] Compressing large wheels...")
     
-    min_bytes = min_size_mb * 1024 * 1024
+    min_bytes = int(min_size_mb * 1024 * 1024)
+    mb = 1024 * 1024
     
-    to_compress = [
-        f for f in PYODIDE_DIR.glob("*.whl")
-        if parse_wheel(f.name)[0] not in cdn_package_names and f.stat().st_size >= min_bytes
-    ]
-    
-    for wheel_path in sorted(to_compress):
-        original_data = wheel_path.read_bytes()
-        original_mb = len(original_data) / (1024 * 1024)
+    for wheel_path in sorted(PYODIDE_DIR.glob("*.whl")):
+        if parse_wheel(wheel_path.name)[0] in cdn_package_names or wheel_path.stat().st_size < min_bytes:
+            continue
         
-        # Brotli
-        br_path = wheel_path.with_suffix(wheel_path.suffix + ".br")
-        br_data = brotli.compress(original_data, quality=11)
-        br_path.write_bytes(br_data)
+        data = wheel_path.read_bytes()
+        br_data = brotli.compress(data, quality=11)
         
-        # Gzip
-        gz_path = wheel_path.with_suffix(wheel_path.suffix + ".gz")
-        with gzip.open(gz_path, "wb", compresslevel=9) as f:
-            f.write(original_data)
+        wheel_path.with_suffix(".whl.br").write_bytes(br_data)
+        with gzip.open(wheel_path.with_suffix(".whl.gz"), "wb", compresslevel=9) as f:
+            f.write(data)
         
-        compressed_mb = len(br_data) / (1024 * 1024)
-        print(f"  {wheel_path.name}: {original_mb:.2f} → {compressed_mb:.2f} MB")
+        print(f"  {wheel_path.name}: {len(data)/mb:.2f} → {len(br_data)/mb:.2f} MB")
     
     print("  ✓ Done")
 
@@ -459,21 +437,13 @@ def compress_wheels(cdn_package_names: set[str], min_size_mb: float = 1.0) -> No
 def generate_packages_json() -> int:
     """Generate python-packages.json for worker integration."""
     wheels = get_wheels(PYODIDE_DIR)
-    
     packages = {
-        normalize_name(w.split("-")[0]): {
-            "file_name": w,
-            "name": w.split("-")[0],
-            "source": "local",
-        }
+        normalize_name((name := w.split("-")[0])): {"file_name": w, "name": name, "source": "local"}
         for w in wheels
     }
     
     PACKAGES_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PACKAGES_JSON_PATH.write_text(
-        json.dumps(packages, ensure_ascii=False, indent=2, sort_keys=True),
-        encoding="utf-8",
-    )
+    PACKAGES_JSON_PATH.write_text(json.dumps(packages, ensure_ascii=False, indent=2, sort_keys=True))
     
     return len(packages)
 
