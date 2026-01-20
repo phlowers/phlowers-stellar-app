@@ -20,6 +20,7 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { isNumber, uniq } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
 import { AttachmentService } from '@core/services/attachment/attachment.service';
+import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 const calculateSupportNumber = (
   firstSupport: Support,
@@ -81,6 +82,7 @@ export class SupportsTableComponent implements OnInit {
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   first = input.required<number>();
   rows = input.required<number>();
+  rowsPerPageOptions = signal(TABLE_ROWS_PER_PAGE_OPTIONS);
   supportFilterTable = signal<string[]>([]);
   constructor(
     private readonly chainsService: ChainsService,
