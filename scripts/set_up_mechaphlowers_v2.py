@@ -18,10 +18,12 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
+import re
 import shutil
 import subprocess
 import tarfile
 import tempfile
+import zipfile
 from pathlib import Path
 
 import brotli
@@ -83,6 +85,38 @@ def get_cdn_url(pyodide_version: str) -> str:
     return f"https://cdn.jsdelivr.net/pyodide/v{pyodide_version}/full"
 
 
+def get_wheel_dependencies(wheel_path: Path) -> list[str]:
+    """Extract dependencies from a wheel's METADATA file.
+    
+    Args:
+        wheel_path: Path to the wheel file
+        
+    Returns:
+        List of dependency specifiers (e.g., ["numpy>=1.20", "pandas"])
+    """
+    dependencies = []
+    with zipfile.ZipFile(wheel_path, "r") as zf:
+        # Find METADATA file in the wheel
+        metadata_files = [n for n in zf.namelist() if n.endswith("/METADATA")]
+        if not metadata_files:
+            return dependencies
+        
+        metadata = zf.read(metadata_files[0]).decode("utf-8")
+        
+        # Parse Requires-Dist lines
+        for line in metadata.splitlines():
+            if line.startswith("Requires-Dist:"):
+                dep = line[len("Requires-Dist:"):].strip()
+                # Skip optional dependencies (those with markers like ; extra == "dev")
+                if "; extra ==" not in dep and "; extra==" not in dep:
+                    # Remove environment markers for simplicity (keep just package spec)
+                    dep = re.split(r"\s*;\s*", dep)[0].strip()
+                    if dep:
+                        dependencies.append(dep)
+    
+    return dependencies
+
+
 # =============================================================================
 # STEP 1: RESOLVE DEPENDENCIES
 # =============================================================================
@@ -98,10 +132,24 @@ def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
     """
     print("\n[1/6] Resolving dependencies with uv pip compile...")
     
-    # Use local wheel or requirements file
+    temp_req = SCRIPTS_DIR / "requirements-temp.txt"
+    
     if local_wheel:
-        input_file = str(local_wheel)
+        name, version = parse_wheel(local_wheel.name)
         print(f"  Using local wheel: {local_wheel.name}")
+        
+        # Extract dependencies from local wheel
+        wheel_deps = get_wheel_dependencies(local_wheel)
+        print(f"  Wheel dependencies: {', '.join(wheel_deps) if wheel_deps else 'none'}")
+        
+        # Create temp requirements with:
+        # 1. Other packages from requirements.in (excluding the local wheel package)
+        # 2. Dependencies from the local wheel
+        reqs = REQUIREMENTS_FILE.read_text().splitlines()
+        filtered_reqs = [r for r in reqs if r.strip() and not r.strip().lower().startswith(name)]
+        all_reqs = filtered_reqs + wheel_deps
+        temp_req.write_text("\n".join(all_reqs))
+        input_file = str(temp_req)
     else:
         input_file = str(REQUIREMENTS_FILE)
     
@@ -114,6 +162,11 @@ def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
     ]
     
     result = subprocess.run(cmd, capture_output=True, text=True)
+    
+    # Cleanup temp file
+    if temp_req.exists():
+        temp_req.unlink()
+    
     if result.returncode != 0:
         print(f"Error: {result.stderr}")
         raise SystemExit(1)
@@ -123,8 +176,13 @@ def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
     for line in RESOLVED_FILE.read_text().splitlines():
         line = line.strip()
         if line and not line.startswith("#") and "==" in line:
-            name, version = line.split("==")
-            resolved[normalize_name(name)] = version
+            pkg_name, pkg_version = line.split("==")
+            resolved[normalize_name(pkg_name)] = pkg_version
+    
+    # Add local wheel to resolved (it won't be in the compiled output)
+    if local_wheel:
+        name, version = parse_wheel(local_wheel.name)
+        resolved[name] = version
     
     print(f"  ✓ Resolved {len(resolved)} packages")
     return resolved
