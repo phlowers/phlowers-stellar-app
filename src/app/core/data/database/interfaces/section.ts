@@ -9,6 +9,7 @@ import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/type
 import { Charge } from './charge';
 import { InitialCondition } from './initialCondition';
 import { Support } from './support';
+import { VtlAndGuying } from './vtlAndGuying';
 
 export interface Section {
   uuid: string;
@@ -51,4 +52,5 @@ export interface Section {
   selected_charge_uuid: string | null;
   field_measures: FieldMeasure[];
   selected_field_measure_uuid: string | undefined;
+  vtl_and_guying: VtlAndGuying | undefined;
 }
