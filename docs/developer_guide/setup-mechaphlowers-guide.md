@@ -74,9 +74,22 @@ Versions are read from `package.json` (single source of truth):
 
 ## Core Functions
 
+### Utilities
+
 | Function | Purpose |
 |----------|---------|
-| `get_config()` | Load versions from package.json |
+| `normalize_name()` | Normalize package name per PEP 503 |
+| `parse_wheel()` | Extract (name, version) from wheel filename |
+| `get_wheels()` | List all wheel filenames in directory |
+| `run_cmd()` | Run subprocess command with error handling |
+| `get_config()` | Load versions from package.json (cached) |
+| `get_cdn_url()` | Build Pyodide CDN URL |
+| `get_wheel_dependencies()` | Extract dependencies from wheel METADATA |
+
+### Pipeline Steps
+
+| Function | Purpose |
+|----------|---------|
 | `resolve_dependencies()` | Use `uv pip compile` with constraints |
 | `download_pyodide_runtime()` | Download Pyodide runtime from NPM |
 | `download_packages()` | Download resolved packages via pip |
@@ -164,7 +177,7 @@ npm run set-up-mechaphlowers
 | **Deduplication** | Priority: wasm32 > cp313 > py3 |
 | **Compilation** | `pyodide py-compile` (renames py3 → cp313) |
 | **Compression** | Brotli + Gzip for non-CDN wheels > 1MB |
-| **Architecture** | ~500 lines, type hints, no external classes |
+| **Architecture** | ~560 lines, type hints, `@cache` decorator, helper functions |
 
 ---
 
@@ -177,4 +190,4 @@ npm run set-up-mechaphlowers
 
 ---
 
-**Last update**: January 19, 2026
+**Last update**: January 20, 2026
