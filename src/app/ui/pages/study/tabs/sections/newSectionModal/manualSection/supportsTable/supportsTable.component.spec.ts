@@ -2,10 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SupportsTableComponent } from './supportsTable.component';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Support } from '@src/app/core/data/database/interfaces/support';
+import { Support, CatalogChain } from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ChainsService } from '@src/app/core/services/chains/chains.service';
-import { CatChain } from '@src/app/core/data/database/interfaces/catChain';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
 
@@ -23,7 +22,7 @@ class MockAttachmentSetModalComponent {
 
 // Mock services
 const mockChainsService = {
-  getChains: jest.fn().mockResolvedValue([] as CatChain[])
+  getChains: jest.fn().mockResolvedValue([] as CatalogChain[])
 };
 
 const mockAttachmentService = {
@@ -31,7 +30,7 @@ const mockAttachmentService = {
 };
 
 // Mock data
-const mockChains: CatChain[] = [
+const mockChains: CatalogChain[] = [
   {
     chain_name: 'Chain 1',
     mean_length: 10.5,

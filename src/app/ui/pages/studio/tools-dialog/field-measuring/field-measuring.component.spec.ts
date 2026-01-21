@@ -12,7 +12,7 @@ import { SectionService } from '@core/services/sections/section.service';
 import { StudiesService } from '@core/services/studies/studies.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { BehaviorSubject } from 'rxjs';
-import { Section } from '@core/data/database/interfaces/section';
+import { Section } from '@core/domain';
 import { LinesService } from '@core/services/lines/lines.service';
 
 @Component({

@@ -11,7 +11,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { BehaviorSubject } from 'rxjs';
 import { StudiesComponent } from './studies.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { Study } from '@src/app/core/data/database/interfaces/study';
+import { StudyEntity } from '@core/infrastructure/database';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('StudiesComponent', () => {
@@ -22,7 +22,7 @@ describe('StudiesComponent', () => {
   let mockActivatedRoute: jest.Mocked<ActivatedRoute>;
   let mockMessageService: jest.Mocked<MessageService>;
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'test-uuid-1',
     author_email: 'test@example.com',
     title: 'Test Study',
@@ -34,7 +34,7 @@ describe('StudiesComponent', () => {
     sections: []
   };
 
-  const mockStudy2: Study = {
+  const mockStudy2: StudyEntity = {
     uuid: 'test-uuid-2',
     author_email: 'test2@example.com',
     title: 'Test Study 2',
@@ -49,7 +49,7 @@ describe('StudiesComponent', () => {
   beforeEach(async () => {
     // Create mock services
     mockStudiesService = {
-      studies: new BehaviorSubject<Study[]>([]),
+      studies: new BehaviorSubject<StudyEntity[]>([]),
       ready: new BehaviorSubject<boolean>(false),
       getStudies: jest.fn(),
       duplicateStudy: jest.fn(),

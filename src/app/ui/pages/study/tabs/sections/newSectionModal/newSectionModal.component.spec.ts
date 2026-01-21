@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
-import { Section } from '@core/data/database/interfaces/section';
-import { Study } from '@core/data/database/interfaces/study';
+import { Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
@@ -89,7 +89,7 @@ describe('NewSectionModalComponent (Jest)', () => {
     vtl_and_guying: undefined
   };
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'study-uuid',
     author_email: 'test@example.com',
     title: 'Test Study',

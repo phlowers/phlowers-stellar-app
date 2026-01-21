@@ -13,7 +13,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { Charge } from '@src/app/core/data/database/interfaces/charge';
+import { Charge } from '@core/domain';
 import { v4 as uuidv4 } from 'uuid';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
 import { PlotService } from '../services/plot.service';

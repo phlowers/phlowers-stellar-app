@@ -5,7 +5,7 @@ import {
   Injectable,
   signal
 } from '@angular/core';
-import { Study } from '@core/data/database/interfaces/study';
+import { StudyEntity } from '@core/infrastructure/database';
 import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
 import {
   DataError,
@@ -13,7 +13,7 @@ import {
   Task,
   TaskError
 } from '@src/app/core/services/worker_python/tasks/types';
-import { Section } from '@core/data/database/interfaces/section';
+import { Section } from '@core/domain';
 import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
@@ -78,7 +78,7 @@ export class PlotService {
   destroyRef = inject(DestroyRef);
   camera = signal<Camera | null>(null);
 
-  study = signal<Study | null>(null);
+  study = signal<StudyEntity | null>(null);
   section = signal<Section | null>(null);
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions

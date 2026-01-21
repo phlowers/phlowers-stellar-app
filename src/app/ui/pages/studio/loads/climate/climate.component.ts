@@ -15,7 +15,9 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { PlotService } from '../../services/plot.service';
 import { ChargesService } from '@core/services/charges/charges.service';
-import { ClimateCharge } from '@src/app/core/data/database/interfaces/charge';
+import { Charge } from '@core/domain';
+
+export type ClimateCharge = Charge['data']['climate'];
 
 export const defaultClimaticCharge: ClimateCharge = {
   windPressure: 0,

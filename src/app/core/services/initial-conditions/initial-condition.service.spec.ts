@@ -8,9 +8,8 @@
 import { TestBed } from '@angular/core/testing';
 import { InitialConditionService } from './initial-condition.service';
 import { StudiesService } from '../studies/studies.service';
-import { Section } from '../../data/database/interfaces/section';
-import { Study } from '../../data/database/interfaces/study';
-import { InitialCondition } from '../../data/database/interfaces/initialCondition';
+import { Section, InitialCondition } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -81,7 +80,7 @@ describe('InitialConditionService', () => {
     vtl_and_guying: undefined
   };
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'study-uuid-1',
     title: 'Test Study',
     description: 'Test Description',

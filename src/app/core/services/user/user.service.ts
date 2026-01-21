@@ -6,7 +6,7 @@
  */
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
-import { UserModel } from '../../data/models/user.model';
+import { UserModel } from '@core/domain';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 const validateEmail = (email: string): boolean => {

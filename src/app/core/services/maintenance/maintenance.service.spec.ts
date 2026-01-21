@@ -12,10 +12,8 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { MaintenanceService } from './maintenance.service';
 import { StorageService } from '../storage/storage.service';
-import {
-  CatMaintenanceData,
-  RteMaintenanceTeamsCsvFile
-} from '../../data/database/interfaces/catMaintenance';
+import { CatalogMaintenance } from '@core/domain';
+import { MaintenanceCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
@@ -95,7 +93,7 @@ describe('MaintenanceService', () => {
 
   describe('getMaintenance', () => {
     it('should return maintenance array from database', async () => {
-      const mockMaintenance: CatMaintenanceData[] = [
+      const mockMaintenance: CatalogMaintenance[] = [
         {
           maintenance_center: 'Maintenance Center 1',
           maintenance_center_id: 'CM001',
@@ -139,7 +137,7 @@ describe('MaintenanceService', () => {
     });
 
     it('should import maintenance teams from CSV file successfully', async () => {
-      const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
+      const mockCsvData: MaintenanceCsvDto[] = [
         {
           maintenance_center_id: 'CM001',
           maintenance_center: 'Maintenance Center 1',
@@ -165,7 +163,7 @@ describe('MaintenanceService', () => {
       (Papa.parse as jest.Mock).mockImplementation(
         (
           data: string,
-          options: Papa.ParseConfig<RteMaintenanceTeamsCsvFile>
+          options: Papa.ParseConfig<MaintenanceCsvDto>
         ) => {
           if (options.complete) {
             options.complete(
@@ -230,7 +228,7 @@ describe('MaintenanceService', () => {
       (Papa.parse as jest.Mock).mockImplementation(
         (
           data: string,
-          options: Papa.ParseConfig<RteMaintenanceTeamsCsvFile>
+          options: Papa.ParseConfig<MaintenanceCsvDto>
         ) => {
           if (options.complete) {
             options.complete(
@@ -271,7 +269,7 @@ describe('MaintenanceService', () => {
     });
 
     it('should handle CSV data with null/undefined EEL_CUR', async () => {
-      const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
+      const mockCsvData: MaintenanceCsvDto[] = [
         {
           maintenance_center_id: 'CM001',
           maintenance_center: 'Maintenance Center 1',
@@ -296,7 +294,7 @@ describe('MaintenanceService', () => {
       (Papa.parse as jest.Mock).mockImplementation(
         (
           data: string,
-          options: Papa.ParseConfig<RteMaintenanceTeamsCsvFile>
+          options: Papa.ParseConfig<MaintenanceCsvDto>
         ) => {
           if (options.complete) {
             options.complete(
@@ -348,7 +346,7 @@ describe('MaintenanceService', () => {
     it('should handle missing database gracefully', async () => {
       (storageService as unknown as { db: undefined }).db = undefined;
 
-      const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
+      const mockCsvData: MaintenanceCsvDto[] = [
         {
           maintenance_center_id: 'CM001',
           maintenance_center: 'Maintenance Center 1',
@@ -365,7 +363,7 @@ describe('MaintenanceService', () => {
       (Papa.parse as jest.Mock).mockImplementation(
         (
           data: string,
-          options: Papa.ParseConfig<RteMaintenanceTeamsCsvFile>
+          options: Papa.ParseConfig<MaintenanceCsvDto>
         ) => {
           if (options.complete) {
             options.complete(
@@ -404,7 +402,7 @@ describe('MaintenanceService', () => {
     });
 
     it('should handle CSV data with mixed valid and invalid EEL_CUR values', async () => {
-      const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
+      const mockCsvData: MaintenanceCsvDto[] = [
         {
           maintenance_center_id: 'CM001',
           maintenance_center: 'Maintenance Center 1',
@@ -437,7 +435,7 @@ describe('MaintenanceService', () => {
       (Papa.parse as jest.Mock).mockImplementation(
         (
           data: string,
-          options: Papa.ParseConfig<RteMaintenanceTeamsCsvFile>
+          options: Papa.ParseConfig<MaintenanceCsvDto>
         ) => {
           if (options.complete) {
             options.complete(
@@ -495,7 +493,7 @@ describe('MaintenanceService', () => {
     });
 
     it('should clear maintenance table before adding new data', async () => {
-      const mockCsvData: RteMaintenanceTeamsCsvFile[] = [
+      const mockCsvData: MaintenanceCsvDto[] = [
         {
           maintenance_center_id: 'CM001',
           maintenance_center: 'Maintenance Center 1',
@@ -512,7 +510,7 @@ describe('MaintenanceService', () => {
       (Papa.parse as jest.Mock).mockImplementation(
         (
           data: string,
-          options: Papa.ParseConfig<RteMaintenanceTeamsCsvFile>
+          options: Papa.ParseConfig<MaintenanceCsvDto>
         ) => {
           if (options.complete) {
             options.complete(

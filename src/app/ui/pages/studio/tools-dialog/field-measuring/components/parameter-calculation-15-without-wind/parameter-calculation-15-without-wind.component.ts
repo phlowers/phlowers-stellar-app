@@ -13,7 +13,7 @@ import {
 } from '@ui/pages/studio/tools-dialog/field-measuring/types';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { InitialConditionModalComponent } from '@src/app/ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { InitialCondition } from '@core/domain';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import {

@@ -3,7 +3,7 @@ import { ImportStudyComponent } from './import-study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import Papa from 'papaparse';
-import { Study } from '@core/data/database/interfaces/study';
+import { StudyEntity } from '@core/infrastructure/database';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 
@@ -16,10 +16,10 @@ describe('ImportStudyComponent', () => {
 
   beforeEach(async () => {
     studiesServiceMock = {
-      createStudyFromProtoV4: jest.fn().mockResolvedValue({} as Study),
+      createStudyFromProtoV4: jest.fn().mockResolvedValue({} as StudyEntity),
       deleteStudy: jest.fn().mockResolvedValue(undefined),
       createStudy: jest.fn().mockResolvedValue('test-uuid'),
-      getStudy: jest.fn().mockResolvedValue({ uuid: 'test-uuid' } as Study)
+      getStudy: jest.fn().mockResolvedValue({ uuid: 'test-uuid' } as StudyEntity)
     } as unknown as jest.Mocked<StudiesService>;
     mockMessageService = {
       add: jest.fn()
@@ -1380,9 +1380,9 @@ describe('ImportStudyComponent', () => {
 
   describe('deleteStudy', () => {
     it('should delete a study and remove it from newStudies', async () => {
-      const study1 = { uuid: 'uuid-1', title: 'Study 1' } as Study;
-      const study2 = { uuid: 'uuid-2', title: 'Study 2' } as Study;
-      const study3 = { uuid: 'uuid-3', title: 'Study 3' } as Study;
+      const study1 = { uuid: 'uuid-1', title: 'Study 1' } as StudyEntity;
+      const study2 = { uuid: 'uuid-2', title: 'Study 2' } as StudyEntity;
+      const study3 = { uuid: 'uuid-3', title: 'Study 3' } as StudyEntity;
 
       component.newStudies.set([study1, study2, study3]);
 
@@ -1393,7 +1393,7 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should handle deleting a study that does not exist in newStudies', async () => {
-      const study1 = { uuid: 'uuid-1', title: 'Study 1' } as Study;
+      const study1 = { uuid: 'uuid-1', title: 'Study 1' } as StudyEntity;
       component.newStudies.set([study1]);
 
       await component.deleteStudy('non-existent-uuid');
@@ -1476,7 +1476,7 @@ describe('ImportStudyComponent', () => {
         uuid: 'test-uuid',
         title: 'Test Study',
         description: 'Test Description'
-      } as Study;
+      } as StudyEntity;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
       studiesServiceMock.getStudy = jest
@@ -1519,7 +1519,7 @@ describe('ImportStudyComponent', () => {
       const mockCreatedStudy = {
         uuid: 'test-uuid',
         title: 'Test Study'
-      } as Study;
+      } as StudyEntity;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
       studiesServiceMock.getStudy = jest
@@ -1645,7 +1645,7 @@ describe('ImportStudyComponent', () => {
         uuid: 'test-uuid',
         title: 'Custom Title',
         description: 'Custom Description'
-      } as Study;
+      } as StudyEntity;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
       studiesServiceMock.getStudy = jest
@@ -1790,13 +1790,13 @@ describe('ImportStudyComponent', () => {
       const studyData = createMockStudyData();
       const base64Content = encodeStudyToBase64(studyData);
       const newUuid = 'new-study-uuid';
-      const createdStudy: Study = {
+      const createdStudy: StudyEntity = {
         ...studyData,
         uuid: newUuid,
         created_at_offline: '2025-01-01T00:00:00Z',
         updated_at_offline: '2025-01-01T00:00:00Z',
         saved: true
-      } as Study;
+      } as StudyEntity;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
       studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
@@ -1849,14 +1849,14 @@ describe('ImportStudyComponent', () => {
         created_at_offline: '2025-01-01T00:00:00Z',
         updated_at_offline: '2025-01-01T00:00:00Z',
         saved: true
-      } as unknown as Study;
+      } as unknown as StudyEntity;
       const createdStudy = {
         ...studyData,
         uuid: newUuid,
         created_at_offline: '2025-01-01T00:00:00Z',
         updated_at_offline: '2025-01-01T00:00:00Z',
         saved: true
-      } as unknown as Study;
+      } as unknown as StudyEntity;
 
       studiesServiceMock.getStudy = jest
         .fn()
@@ -1917,7 +1917,7 @@ describe('ImportStudyComponent', () => {
         created_at_offline: '2025-01-01T00:00:00Z',
         updated_at_offline: '2025-01-01T00:00:00Z',
         saved: true
-      } as unknown as Study;
+      } as unknown as StudyEntity;
 
       studiesServiceMock.getStudy = jest.fn().mockResolvedValue(existingStudy);
       studiesServiceMock.createStudy = jest.fn();
@@ -1973,7 +1973,7 @@ describe('ImportStudyComponent', () => {
         created_at_offline: '2025-01-01T00:00:00Z',
         updated_at_offline: '2025-01-01T00:00:00Z',
         saved: true
-      } as unknown as Study;
+      } as unknown as StudyEntity;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
       studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
@@ -2143,7 +2143,7 @@ describe('ImportStudyComponent', () => {
         created_at_offline: '2025-01-01T00:00:00Z',
         updated_at_offline: '2025-01-01T00:00:00Z',
         saved: true
-      } as unknown as Study;
+      } as unknown as StudyEntity;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
       studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
@@ -2177,7 +2177,7 @@ describe('ImportStudyComponent', () => {
 
   describe('promptIfStudyAlreadyExists', () => {
     const testUuid = 'test-uuid-123';
-    const mockStudy: Study = {
+    const mockStudy: StudyEntity = {
       uuid: testUuid,
       title: 'Test Study',
       author_email: 'test@example.com',
@@ -2186,7 +2186,7 @@ describe('ImportStudyComponent', () => {
       updated_at_offline: '2025-01-01T00:00:00Z',
       saved: true,
       sections: []
-    } as Study;
+    } as StudyEntity;
 
     it('should return true when study does not exist', async () => {
       studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);

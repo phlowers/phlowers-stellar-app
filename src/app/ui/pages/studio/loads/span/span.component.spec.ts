@@ -4,8 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PlotService } from '../../services/plot.service';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
 import { signal, computed } from '@angular/core';
-import { Study } from '@core/data/database/interfaces/study';
-import { Section } from '@core/data/database/interfaces/section';
+import { StudyEntity } from '@core/infrastructure/database';
+import { Section } from '@core/domain';
 import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
 
 describe('SpanComponent', () => {
@@ -14,7 +14,7 @@ describe('SpanComponent', () => {
   let mockPlotService: jest.Mocked<PlotService>;
   let mockChargesService: jest.Mocked<ChargesService>;
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'study-uuid-1',
     title: 'Test Study',
     description: 'Test Description',
@@ -81,7 +81,7 @@ describe('SpanComponent', () => {
     });
     mockPlotService = {
       plotOptions: plotOptionsSignal,
-      study: signal<Study | null>(mockStudy),
+      study: signal<StudyEntity | null>(mockStudy),
       section: signal<Section | null>(mockSection),
       getSpanOptions: computed(() => {
         const options = plotOptionsSignal();

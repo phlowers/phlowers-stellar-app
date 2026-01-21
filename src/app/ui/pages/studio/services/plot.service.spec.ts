@@ -14,12 +14,11 @@ import {
   TaskError,
   DataError
 } from '@src/app/core/services/worker_python/tasks/types';
-import { Section } from '@core/data/database/interfaces/section';
-import { CatCable } from '@core/data/database/interfaces/catCable';
+import { CatalogCable, Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
-import { Study } from '@core/data/database/interfaces/study';
 import { Camera } from 'plotly.js-dist-min';
 
 // Mock plotly
@@ -55,7 +54,7 @@ describe('PlotService', () => {
     span_length: []
   };
 
-  const mockCable: CatCable = {
+  const mockCable: CatalogCable = {
     name: 'Test Cable',
     data_source: 'test-source',
     section: 100,
@@ -672,7 +671,7 @@ describe('PlotService', () => {
     });
 
     it('should reset study to null', () => {
-      const mockStudy: Study = {
+      const mockStudy: StudyEntity = {
         uuid: 'study-uuid-1',
         author_email: 'test@example.com',
         title: 'Test Study',
@@ -694,7 +693,7 @@ describe('PlotService', () => {
     });
 
     it('should reset all state properties at once', () => {
-      const mockStudy: Study = {
+      const mockStudy: StudyEntity = {
         uuid: 'study-uuid-1',
         author_email: 'test@example.com',
         title: 'Test Study',
