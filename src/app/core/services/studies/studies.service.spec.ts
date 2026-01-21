@@ -8,7 +8,7 @@
 import { TestBed } from '@angular/core/testing';
 import { StudiesService } from './studies.service';
 import { StorageService } from '../storage/storage.service';
-import { StudyModel, ProtoV4Support, ProtoV4Parameters } from '@core/domain';
+import { ProtoV4Support, ProtoV4Parameters } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { BehaviorSubject } from 'rxjs';
 import { MessageService } from 'primeng/api';
@@ -46,7 +46,7 @@ describe('StudiesService', () => {
   };
 
   const mockStudy: Pick<
-    StudyModel,
+    StudyEntity,
     'title' | 'description' | 'shareable' | 'sections' | 'author_email'
   > = {
     title: 'Test Study',

@@ -14,7 +14,6 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { ButtonModule } from 'primeng/button';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { isNumber, uniq } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
@@ -62,7 +61,6 @@ const calculateSupportNumber = (
     InputIconModule,
     InputGroupModule,
     InputGroupAddonModule,
-    ButtonModule,
     KeyFilterModule,
     PaginatorModule
   ],

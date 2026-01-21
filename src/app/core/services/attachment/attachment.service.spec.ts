@@ -12,7 +12,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { AttachmentService } from './attachment.service';
 import { StorageService } from '../storage/storage.service';
-import { CatalogAttachment } from '@core/domain';
+import { CatalogAttachmentEntity } from '@core/infrastructure/database';
 import { AttachmentCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 
@@ -98,7 +98,7 @@ describe('AttachmentService', () => {
 
   describe('getAttachments', () => {
     it('should return attachments array from database', async () => {
-      const mockAttachments: CatalogAttachment[] = [
+      const mockAttachments: CatalogAttachmentEntity[] = [
         {
           uuid: 'uuid-1',
           updated_at: '2025-01-01T00:00:00.000Z',

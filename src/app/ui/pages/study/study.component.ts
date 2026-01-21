@@ -8,8 +8,7 @@ import {
   InitialConditionFunctionsInput,
   InitialConditionService
 } from '@src/app/core/services/initial-conditions/initial-condition.service';
-import { Section } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { Section, StudyModel } from '@core/domain';
 import { TabsModule } from 'primeng/tabs';
 import { AccordionModule } from 'primeng/accordion';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -44,7 +43,7 @@ import { Subscription } from 'dexie';
   styleUrl: './study.component.scss'
 })
 export class StudyComponent implements OnInit, OnDestroy {
-  study: StudyEntity | null = null;
+  study: StudyModel | null = null;
   isNewStudyModalOpen = signal<boolean>(false);
   subscription: Subscription | null = null;
 
@@ -85,7 +84,7 @@ export class StudyComponent implements OnInit, OnDestroy {
     if (uuid && this.studiesService.ready.value) {
       this.subscription = this.studiesService
         .getStudyAsObservable(uuid)
-        .subscribe((study: StudyEntity | undefined) => {
+        .subscribe((study: StudyModel | undefined) => {
           if (study) {
             study.sections = study.sections.sort(
               (a, b) => -a.created_at.localeCompare(b.created_at)

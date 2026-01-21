@@ -9,7 +9,7 @@ import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
-import { CatalogAttachment } from '@core/domain';
+import { CatalogAttachmentEntity } from '@core/infrastructure/database';
 import { AttachmentCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { toNumber } from 'lodash';
@@ -48,7 +48,7 @@ export class AttachmentService {
         })
       );
 
-    const mapData = (data: AttachmentCsvDto[]): CatalogAttachment[] => {
+    const mapData = (data: AttachmentCsvDto[]): CatalogAttachmentEntity[] => {
       return data
         .filter((item) => item.support_adr)
         .map((item) => ({
@@ -80,7 +80,7 @@ export class AttachmentService {
               return;
             }
             await this.storageService.db?.catAttachments.clear();
-            const attachmentsTable: CatalogAttachment[] = mapData(data);
+            const attachmentsTable: CatalogAttachmentEntity[] = mapData(data);
             console.log('adding attachments data', attachmentsTable.length);
             await this.storageService.db?.catAttachments.bulkAdd(
               attachmentsTable

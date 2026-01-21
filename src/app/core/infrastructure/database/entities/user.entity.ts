@@ -9,8 +9,6 @@ import { UserModel } from '@core/domain';
 
 /**
  * User entity for Dexie storage
- * Extends the domain model with persistence-specific fields
+ * Uses the domain model directly as no additional persistence fields are needed
  */
-export interface UserEntity extends UserModel {
-  saved?: boolean;
-}
+export type UserEntity = UserModel;

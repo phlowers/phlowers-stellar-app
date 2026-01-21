@@ -120,7 +120,9 @@ describe('WorkerService', () => {
     solar_absorption: undefined,
     emissivity: undefined,
     electric_resistance_20: undefined,
-    linear_resistance_temperature_coef: undefined
+    linear_resistance_temperature_coef: undefined,
+    radial_thermal_conductivity: undefined,
+    has_magnetic_heart: undefined
   });
 
   beforeEach(() => {

@@ -9,8 +9,6 @@ import { StudyModel } from '@core/domain';
 
 /**
  * Study entity for Dexie storage
- * Extends the domain model with persistence-specific fields
+ * Uses the domain model directly as no additional persistence fields are needed
  */
-export interface StudyEntity extends StudyModel {
-  saved: boolean;
-}
+export type StudyEntity = StudyModel;

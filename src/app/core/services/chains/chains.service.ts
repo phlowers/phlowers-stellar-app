@@ -7,7 +7,7 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { CatalogChain } from '@core/domain';
+import { CatalogChainEntity } from '@core/infrastructure/database';
 import { ChainCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
@@ -61,16 +61,14 @@ export class ChainsService {
         Papa.parse(chains, {
           header: true,
           skipEmptyLines: true,
-          complete: (async (
-            jsonResults: Papa.ParseResult<ChainCsvDto>
-          ) => {
+          complete: (async (jsonResults: Papa.ParseResult<ChainCsvDto>) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
               return;
             }
             await this.storageService.db?.catChains.clear();
-            const chainsTable: CatalogChain[] = mapData(data);
+            const chainsTable: CatalogChainEntity[] = mapData(data);
             console.log('adding chains data', chainsTable.length);
             await this.storageService.db?.catChains.bulkAdd(chainsTable);
             resolve();

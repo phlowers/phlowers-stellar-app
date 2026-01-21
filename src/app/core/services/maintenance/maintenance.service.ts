@@ -7,7 +7,7 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { CatalogMaintenance } from '@core/domain';
+import { CatalogMaintenanceEntity } from '@core/infrastructure/database';
 import { MaintenanceCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
@@ -71,15 +71,13 @@ export class MaintenanceService {
               return;
             }
             await this.storageService.db?.catMaintenance.clear();
-            const maintenanceTable: CatalogMaintenance[] = mapData(data);
+            const maintenanceTable: CatalogMaintenanceEntity[] = mapData(data);
             console.log('adding maintenance data', maintenanceTable.length);
             await this.storageService.db?.catMaintenance.bulkAdd(
               maintenanceTable
             );
             resolve();
-          }) as (
-            jsonResults: Papa.ParseResult<MaintenanceCsvDto>
-          ) => void
+          }) as (jsonResults: Papa.ParseResult<MaintenanceCsvDto>) => void
         });
       });
     });

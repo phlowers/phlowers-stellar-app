@@ -6,7 +6,7 @@
  */
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
-import { UserModel } from '@core/domain';
+import { UserEntity } from '@core/infrastructure/database';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 const validateEmail = (email: string): boolean => {
@@ -20,8 +20,8 @@ const validateEmail = (email: string): boolean => {
   providedIn: 'root'
 })
 export class UserService {
-  private readonly userSubject = new BehaviorSubject<UserModel | null>(null);
-  public user$: Observable<UserModel | null> = this.userSubject.asObservable();
+  private readonly userSubject = new BehaviorSubject<UserEntity | null>(null);
+  public user$: Observable<UserEntity | null> = this.userSubject.asObservable();
 
   constructor(private readonly storageService: StorageService) {
     this.storageService.ready$.subscribe((ready) => {
@@ -39,7 +39,7 @@ export class UserService {
    * Create a new user
    * @param user The user to create
    */
-  async createUser(user: UserModel) {
+  async createUser(user: UserEntity) {
     const users = await this.storageService.db?.users.toArray();
     if (users?.length !== 0) {
       throw new Error('User already exists');

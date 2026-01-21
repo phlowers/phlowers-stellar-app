@@ -13,7 +13,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
 import { StorageService } from '../storage/storage.service';
-import { CatalogLine } from '@core/domain';
+import { CatalogLineEntity } from '@core/infrastructure/database';
 import { LineCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { sortBy } from 'lodash';
@@ -134,7 +134,7 @@ describe('LinesService', () => {
 
   describe('getLines', () => {
     it('should return lines array from database', async () => {
-      const mockLines: CatalogLine[] = [
+      const mockLines: CatalogLineEntity[] = [
         {
           uuid: 'test-uuid-1',
           link_idr: 'LINK001',

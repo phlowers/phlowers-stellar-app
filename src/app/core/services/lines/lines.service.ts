@@ -9,7 +9,7 @@ import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
-import { CatalogLine } from '@core/domain';
+import { CatalogLineEntity } from '@core/infrastructure/database';
 import { LineCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { sortBy, uniqBy } from 'lodash';
@@ -86,7 +86,7 @@ export class LinesService {
               return;
             }
             await this.storageService.db?.catLines.clear();
-            const table: CatalogLine[] = mapData(data);
+            const table: CatalogLineEntity[] = mapData(data);
             const uniqueTable = uniqBy(table, (element) =>
               [
                 element.voltage_idr,

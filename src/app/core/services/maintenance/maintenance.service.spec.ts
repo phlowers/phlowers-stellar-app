@@ -12,7 +12,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { MaintenanceService } from './maintenance.service';
 import { StorageService } from '../storage/storage.service';
-import { CatalogMaintenance } from '@core/domain';
+import { CatalogMaintenanceEntity } from '@core/infrastructure/database';
 import { MaintenanceCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 
@@ -93,7 +93,7 @@ describe('MaintenanceService', () => {
 
   describe('getMaintenance', () => {
     it('should return maintenance array from database', async () => {
-      const mockMaintenance: CatalogMaintenance[] = [
+      const mockMaintenance: CatalogMaintenanceEntity[] = [
         {
           maintenance_center: 'Maintenance Center 1',
           maintenance_center_id: 'CM001',
@@ -161,10 +161,7 @@ describe('MaintenanceService', () => {
 
       // Mock Papa Parse to call complete callback
       (Papa.parse as jest.Mock).mockImplementation(
-        (
-          data: string,
-          options: Papa.ParseConfig<MaintenanceCsvDto>
-        ) => {
+        (data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -226,10 +223,7 @@ describe('MaintenanceService', () => {
 
       // Mock Papa Parse to call complete callback with empty data
       (Papa.parse as jest.Mock).mockImplementation(
-        (
-          data: string,
-          options: Papa.ParseConfig<MaintenanceCsvDto>
-        ) => {
+        (data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -292,10 +286,7 @@ describe('MaintenanceService', () => {
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,EEL002,Team 2';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (
-          data: string,
-          options: Papa.ParseConfig<MaintenanceCsvDto>
-        ) => {
+        (data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -361,10 +352,7 @@ describe('MaintenanceService', () => {
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (
-          data: string,
-          options: Papa.ParseConfig<MaintenanceCsvDto>
-        ) => {
+        (data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -433,10 +421,7 @@ describe('MaintenanceService', () => {
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,,Team 2\nCM003,Maintenance Center 3,GMR003,Regional Center 3,EEL003,Team 3';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (
-          data: string,
-          options: Papa.ParseConfig<MaintenanceCsvDto>
-        ) => {
+        (data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -508,10 +493,7 @@ describe('MaintenanceService', () => {
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (
-          data: string,
-          options: Papa.ParseConfig<MaintenanceCsvDto>
-        ) => {
+        (data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
           if (options.complete) {
             options.complete(
               {

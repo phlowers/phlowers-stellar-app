@@ -12,7 +12,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { CablesService } from './cables.service';
 import { StorageService } from '../storage/storage.service';
-import { CatalogCable } from '@core/domain';
+import { CatalogCableEntity } from '@core/infrastructure/database';
 import { CableCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 
@@ -93,7 +93,7 @@ describe('CablesService', () => {
 
   describe('getCables', () => {
     it('should return cables array from database', async () => {
-      const mockCables: CatalogCable[] = [
+      const mockCables: CatalogCableEntity[] = [
         {
           name: 'Cable 1',
           data_source: 'RTE',
@@ -120,7 +120,9 @@ describe('CablesService', () => {
           solar_absorption: undefined,
           emissivity: undefined,
           electric_resistance_20: undefined,
-          linear_resistance_temperature_coef: undefined
+          linear_resistance_temperature_coef: undefined,
+          radial_thermal_conductivity: undefined,
+          has_magnetic_heart: undefined
         },
         {
           name: 'Cable 2',
@@ -148,7 +150,9 @@ describe('CablesService', () => {
           solar_absorption: undefined,
           emissivity: undefined,
           electric_resistance_20: undefined,
-          linear_resistance_temperature_coef: undefined
+          linear_resistance_temperature_coef: undefined,
+          radial_thermal_conductivity: undefined,
+          has_magnetic_heart: undefined
         }
       ];
       mockCablesTable.toArray.mockResolvedValue(mockCables);

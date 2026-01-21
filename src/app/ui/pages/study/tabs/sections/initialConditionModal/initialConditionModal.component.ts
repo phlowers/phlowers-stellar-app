@@ -28,7 +28,7 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { isNumber } from 'lodash';
 import { CablesService } from '@core/services/cables/cables.service';
 import { v4 as uuidv4 } from 'uuid';
-import { StudyEntity } from '@core/infrastructure/database';
+import { StudyModel } from '@core/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { Subscription } from 'rxjs';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
@@ -72,7 +72,7 @@ export class InitialConditionModalComponent implements OnDestroy {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
   section = input.required<Section>();
-  study = input.required<StudyEntity | null>();
+  study = input.required<StudyModel | null>();
   mode = input.required<'view' | 'edit' | 'create'>();
   changeMode = output<'view' | 'edit' | 'create'>();
   addInitialCondition = output<InitialConditionFunctionsInput>();

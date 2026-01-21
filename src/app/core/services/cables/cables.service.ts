@@ -7,7 +7,7 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { CatalogCable } from '@core/domain';
+import { CatalogCableEntity } from '@core/infrastructure/database';
 import { CableCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
@@ -32,7 +32,7 @@ export class CablesService {
     return this.storageService.db?.catCables?.toArray();
   }
 
-  async getCable(name: string): Promise<CatalogCable | undefined> {
+  async getCable(name: string): Promise<CatalogCableEntity | undefined> {
     return this.storageService.db?.catCables
       ?.where('name')
       .equals(name)
@@ -51,7 +51,7 @@ export class CablesService {
         })
       );
 
-    const mapData = (data: CableCsvDto[]): CatalogCable[] => {
+    const mapData = (data: CableCsvDto[]): CatalogCableEntity[] => {
       return data
         .map((item) => ({
           id: item.cable_id,
@@ -103,16 +103,14 @@ export class CablesService {
         Papa.parse(cables, {
           header: true,
           skipEmptyLines: true,
-          complete: (async (
-            jsonResults: Papa.ParseResult<CableCsvDto>
-          ) => {
+          complete: (async (jsonResults: Papa.ParseResult<CableCsvDto>) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
               return;
             }
             await this.storageService.db?.catCables.clear();
-            const cablesTable: CatalogCable[] = mapData(data);
+            const cablesTable: CatalogCableEntity[] = mapData(data);
             console.log('adding cables data', cablesTable.length);
             await this.storageService.db?.catCables.bulkAdd(cablesTable);
             resolve();
