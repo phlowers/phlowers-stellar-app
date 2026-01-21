@@ -9,9 +9,8 @@ import { TestBed } from '@angular/core/testing';
 import { ChargesService } from './charges.service';
 import { StudiesService } from '../studies/studies.service';
 import { MessageService } from 'primeng/api';
-import { Charge } from '../../data/database/interfaces/charge';
-import { Section } from '../../data/database/interfaces/section';
-import { Study } from '../../data/database/interfaces/study';
+import { Charge, Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -102,7 +101,7 @@ describe('ChargesService', () => {
     charges: [mockCharge]
   };
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'study-uuid-1',
     title: 'Test Study',
     description: 'Test Description',
@@ -163,7 +162,7 @@ describe('ChargesService', () => {
         }
       };
 
-      const studyWithoutNewCharge: Study = {
+      const studyWithoutNewCharge: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -253,7 +252,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };
@@ -316,7 +315,7 @@ describe('ChargesService', () => {
         }
       };
 
-      const studyWithMultipleCharges: Study = {
+      const studyWithMultipleCharges: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -381,7 +380,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };
@@ -400,7 +399,7 @@ describe('ChargesService', () => {
 
   describe('duplicateCharge', () => {
     it('should duplicate a charge with a new UUID', async () => {
-      const freshStudy: Study = {
+      const freshStudy: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -455,7 +454,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };
@@ -472,7 +471,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when charge is not found', async () => {
-      const studyWithoutCharge: Study = {
+      const studyWithoutCharge: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -528,7 +527,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };
@@ -547,7 +546,7 @@ describe('ChargesService', () => {
 
   describe('getCharge', () => {
     it('should return a charge when it exists', async () => {
-      const freshStudy: Study = {
+      const freshStudy: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -569,7 +568,7 @@ describe('ChargesService', () => {
     });
 
     it('should return null when charge does not exist', async () => {
-      const studyWithoutCharge: Study = {
+      const studyWithoutCharge: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -603,7 +602,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };

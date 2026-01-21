@@ -3,7 +3,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TagComponent } from '@ui/shared/components/atoms/tag/tag.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { AccordionModule } from 'primeng/accordion';
-import { Study } from '@src/app/core/data/database/interfaces/study';
+import { StudyEntity } from '@core/infrastructure/database';
 import { CommonModule, DatePipe } from '@angular/common';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { ExportDialogComponent } from './export-dialog/export-dialog.component';
@@ -26,7 +26,7 @@ export class StudyHeaderComponent {
   public isDetailOpen = signal<boolean>(false);
 
   public activeDetail = signal<string>('');
-  public study = input.required<Study | null>();
+  public study = input.required<StudyEntity | null>();
   public duplicateStudy = output<string>();
   public openModifyStudyModal = output<void>();
   public dateFormat = $localize`dd/MM:yyyy at HH'h'mm`;

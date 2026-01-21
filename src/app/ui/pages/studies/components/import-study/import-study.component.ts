@@ -1,17 +1,19 @@
 import { Component, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
 import {
   ProtoV4Parameters,
-  ProtoV4Support
-} from '@src/app/core/data/database/interfaces/protoV4';
+  ProtoV4Support,
+  Section,
+  Support
+} from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 import Papa from 'papaparse';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { RouterLink } from '@angular/router';
-import { Study } from '@src/app/core/data/database/interfaces/study';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { CablesService } from '@src/app/core/services/cables/cables.service';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
 import { createEmptyStudy } from '../new-study-modal/new-study-modal.component';
@@ -19,8 +21,6 @@ import {
   createEmptySection,
   createEmptySupport
 } from '@src/app/core/services/sections/helpers';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { Support } from '@src/app/core/data/database/interfaces/support';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -113,7 +113,7 @@ const importSuccessMessage = {
 })
 export class ImportStudyComponent {
   loading = signal<boolean>(false);
-  newStudies = signal<Study[]>([]);
+  newStudies = signal<StudyEntity[]>([]);
   erroredFiles = signal<string[]>([]);
 
   constructor(
@@ -172,7 +172,7 @@ export class ImportStudyComponent {
 
   private buildStudyFromParsedData(
     parsedResult: Record<string, unknown>
-  ): Study {
+  ): StudyEntity {
     const sections = Array.isArray(parsedResult.sections)
       ? this.transformSections(parsedResult.sections)
       : [];
@@ -181,10 +181,10 @@ export class ImportStudyComponent {
       ...createEmptyStudy(),
       ...parsedResult,
       sections
-    } as Study;
+    } as StudyEntity;
   }
 
-  private async createAndAddStudy(study: Study): Promise<void> {
+  private async createAndAddStudy(study: StudyEntity): Promise<void> {
     // Check if study with same UUID already exists
     const hasValidUuid = study.uuid && study.uuid.trim() !== '';
     if (hasValidUuid) {

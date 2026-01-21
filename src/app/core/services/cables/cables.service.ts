@@ -7,10 +7,8 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import {
-  CatCable,
-  RteCablesCsvFile
-} from '../../data/database/interfaces/catCable';
+import { CatalogCable } from '@core/domain';
+import { CableCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
@@ -34,7 +32,7 @@ export class CablesService {
     return this.storageService.db?.catCables?.toArray();
   }
 
-  async getCable(name: string): Promise<CatCable | undefined> {
+  async getCable(name: string): Promise<CatalogCable | undefined> {
     return this.storageService.db?.catCables
       ?.where('name')
       .equals(name)
@@ -53,7 +51,7 @@ export class CablesService {
         })
       );
 
-    const mapData = (data: RteCablesCsvFile[]): CatCable[] => {
+    const mapData = (data: CableCsvDto[]): CatalogCable[] => {
       return data
         .map((item) => ({
           id: item.cable_id,
@@ -106,7 +104,7 @@ export class CablesService {
           header: true,
           skipEmptyLines: true,
           complete: (async (
-            jsonResults: Papa.ParseResult<RteCablesCsvFile>
+            jsonResults: Papa.ParseResult<CableCsvDto>
           ) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
@@ -114,11 +112,11 @@ export class CablesService {
               return;
             }
             await this.storageService.db?.catCables.clear();
-            const cablesTable: CatCable[] = mapData(data);
+            const cablesTable: CatalogCable[] = mapData(data);
             console.log('adding cables data', cablesTable.length);
             await this.storageService.db?.catCables.bulkAdd(cablesTable);
             resolve();
-          }) as (jsonResults: Papa.ParseResult<RteCablesCsvFile>) => void
+          }) as (jsonResults: Papa.ParseResult<CableCsvDto>) => void
         });
       });
     });

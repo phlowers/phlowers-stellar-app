@@ -14,7 +14,7 @@ import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
-import { Study } from '@src/app/core/data/database/interfaces/study';
+import { StudyEntity } from '@core/infrastructure/database';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { StudiesService } from '@core/services/studies/studies.service';
@@ -44,7 +44,7 @@ import {
 export class StudiesTableComponent {
   defaultRowsPerPage = DEFAULT_TABLE_ROWS_PER_PAGE;
   rowsPerPageOptions = TABLE_ROWS_PER_PAGE_OPTIONS;
-  studies = input.required<Study[]>();
+  studies = input.required<StudyEntity[]>();
   sortField = signal<string>('');
   sortOrder = signal<number>(1);
   deleteStudy = output<string>();

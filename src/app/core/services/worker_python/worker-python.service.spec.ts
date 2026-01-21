@@ -9,10 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { WorkerPythonService } from './worker-python.service';
 import { Task } from './tasks/types';
 import { firstValueFrom } from 'rxjs';
-import { Section } from '@core/data/database/interfaces/section';
-import { CatCable } from '@core/data/database/interfaces/catCable';
-import { Support } from '@core/data/database/interfaces/support';
-import { InitialCondition } from '@core/data/database/interfaces/initialCondition';
+import { CatalogCable, InitialCondition, Section, Support } from '@core/domain';
 
 describe('WorkerService', () => {
   let service: WorkerPythonService;
@@ -97,7 +94,7 @@ describe('WorkerService', () => {
     vtl_and_guying: undefined
   });
 
-  const createMockCable = (): CatCable => ({
+  const createMockCable = (): CatalogCable => ({
     name: 'Test Cable',
     data_source: 'test-source',
     section: 100,

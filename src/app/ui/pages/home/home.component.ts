@@ -12,7 +12,7 @@ import { Subscription, combineLatest } from 'rxjs';
 import { CardState } from '@ui/shared/model/card-info.model';
 import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { StudyModel } from '@src/app/core/data/models/study.model';
+import { StudyModel } from '@core/domain';
 import TimeAgo from 'javascript-time-ago';
 import fr from 'javascript-time-ago/locale/fr';
 import en from 'javascript-time-ago/locale/en';

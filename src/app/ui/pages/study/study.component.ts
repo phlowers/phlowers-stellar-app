@@ -8,7 +8,8 @@ import {
   InitialConditionFunctionsInput,
   InitialConditionService
 } from '@src/app/core/services/initial-conditions/initial-condition.service';
-import { Study } from '@src/app/core/data/database/interfaces/study';
+import { Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 import { TabsModule } from 'primeng/tabs';
 import { AccordionModule } from 'primeng/accordion';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -17,7 +18,6 @@ import { ButtonModule } from 'primeng/button';
 import { StepperModule } from 'primeng/stepper';
 import { InputTextModule } from 'primeng/inputtext';
 import { SectionsTabComponent } from './tabs/sections/sectionsTab.component';
-import { Section } from '@src/app/core/data/database/interfaces/section';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { NewStudyModalComponent } from '../studies/components/new-study-modal/new-study-modal.component';
@@ -44,7 +44,7 @@ import { Subscription } from 'dexie';
   styleUrl: './study.component.scss'
 })
 export class StudyComponent implements OnInit, OnDestroy {
-  study: Study | null = null;
+  study: StudyEntity | null = null;
   isNewStudyModalOpen = signal<boolean>(false);
   subscription: Subscription | null = null;
 
@@ -85,7 +85,7 @@ export class StudyComponent implements OnInit, OnDestroy {
     if (uuid && this.studiesService.ready.value) {
       this.subscription = this.studiesService
         .getStudyAsObservable(uuid)
-        .subscribe((study: Study | undefined) => {
+        .subscribe((study: StudyEntity | undefined) => {
           if (study) {
             study.sections = study.sections.sort(
               (a, b) => -a.created_at.localeCompare(b.created_at)

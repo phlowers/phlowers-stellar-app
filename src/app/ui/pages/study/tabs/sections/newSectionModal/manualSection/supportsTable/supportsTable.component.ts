@@ -6,8 +6,7 @@ import { CreateEditView } from '@src/app/ui/shared/types';
 import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
-import { Support } from 'src/app/core/data/database/interfaces/support';
-import { CatChain } from '@src/app/core/data/database/interfaces/catChain';
+import { Support, CatalogChain } from '@core/domain';
 import { ChainsService } from '@src/app/core/services/chains/chains.service';
 import { SelectModule } from 'primeng/select';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
@@ -77,7 +76,7 @@ export class SupportsTableComponent implements OnInit {
   deleteSupport = output<string>();
   duplicateSupport = output<string>();
   supportChange = output<{ uuid: string; support: Partial<Support> }>();
-  chains = signal<CatChain[]>([]);
+  chains = signal<CatalogChain[]>([]);
   attachmentSetModalOpen = signal<boolean>(false);
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   first = input.required<number>();

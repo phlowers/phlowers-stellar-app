@@ -7,10 +7,8 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import {
-  CatMaintenanceData,
-  RteMaintenanceTeamsCsvFile
-} from '../../data/database/interfaces/catMaintenance';
+import { CatalogMaintenance } from '@core/domain';
+import { MaintenanceCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 
@@ -45,7 +43,7 @@ export class MaintenanceService {
         })
       );
 
-    const mapData = (data: RteMaintenanceTeamsCsvFile[]) => {
+    const mapData = (data: MaintenanceCsvDto[]) => {
       return data
         .map((item) => ({
           maintenance_center_id:
@@ -65,7 +63,7 @@ export class MaintenanceService {
           header: true,
           skipEmptyLines: true,
           complete: (async (
-            jsonResults: Papa.ParseResult<RteMaintenanceTeamsCsvFile>
+            jsonResults: Papa.ParseResult<MaintenanceCsvDto>
           ) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
@@ -73,14 +71,14 @@ export class MaintenanceService {
               return;
             }
             await this.storageService.db?.catMaintenance.clear();
-            const maintenanceTable: CatMaintenanceData[] = mapData(data);
+            const maintenanceTable: CatalogMaintenance[] = mapData(data);
             console.log('adding maintenance data', maintenanceTable.length);
             await this.storageService.db?.catMaintenance.bulkAdd(
               maintenanceTable
             );
             resolve();
           }) as (
-            jsonResults: Papa.ParseResult<RteMaintenanceTeamsCsvFile>
+            jsonResults: Papa.ParseResult<MaintenanceCsvDto>
           ) => void
         });
       });

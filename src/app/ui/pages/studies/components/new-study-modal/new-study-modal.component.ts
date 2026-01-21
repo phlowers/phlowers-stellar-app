@@ -6,7 +6,7 @@ import {
   signal,
   effect
 } from '@angular/core';
-import { StudyModel } from '@src/app/core/data/models/study.model';
+import { StudyModel } from '@core/domain';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';

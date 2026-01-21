@@ -6,7 +6,8 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import { Section } from '@src/app/core/data/database/interfaces/section';
+import { Section, InitialCondition } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
@@ -17,7 +18,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { InitialConditionModalComponent } from './initialConditionModal/initialConditionModal.component';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { DividerModule } from 'primeng/divider';
 import {
   DuplicateInitialConditionFunctionsInput,
@@ -27,7 +27,6 @@ import { CreateEditView } from '@src/app/ui/shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
 import { createEmptySection } from '@src/app/core/services/sections/helpers';
 import { RouterLink } from '@angular/router';
-import { Study } from '@src/app/core/data/database/interfaces/study';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
@@ -53,7 +52,7 @@ import { ChargesService } from '@src/app/core/services/charges/charges.service';
   styleUrl: './sectionsTab.component.scss'
 })
 export class SectionsTabComponent {
-  study = input<Study | null>(null);
+  study = input<StudyEntity | null>(null);
   createOrUpdateSection = output<Section>();
   deleteSection = output<Section>();
   duplicateSection = output<Section>();

@@ -1,14 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewChargeModalComponent } from './new-charge-modal.component';
-import { Charge } from '@src/app/core/data/database/interfaces/charge';
+import { Charge, Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
 import { PlotService } from '../services/plot.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
-import { Study } from '@core/data/database/interfaces/study';
-import { Section } from '@core/data/database/interfaces/section';
 
 class MockChargesService {
   getCharge = jest.fn();
@@ -16,7 +15,7 @@ class MockChargesService {
 }
 
 class MockPlotService {
-  study = signal<Study | null>(null);
+  study = signal<StudyEntity | null>(null);
   section = signal<Section | null>(null);
 }
 
@@ -44,7 +43,7 @@ describe('NewChargeModalComponent (Jest)', () => {
     }
   };
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'study-uuid',
     author_email: 'test@example.com',
     title: 'Test Study',

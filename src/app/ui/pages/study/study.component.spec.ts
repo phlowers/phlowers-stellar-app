@@ -9,9 +9,8 @@ import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { SectionService } from '@src/app/core/services/sections/section.service';
 import { InitialConditionService } from '@src/app/core/services/initial-conditions/initial-condition.service';
 import { CablesService } from '@core/services/cables/cables.service';
-import { Study } from '@src/app/core/data/database/interfaces/study';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { Section, InitialCondition } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 // Mock uuid
@@ -56,7 +55,7 @@ describe('StudyComponent', () => {
   let readySubject: BehaviorSubject<boolean>;
   let paramsSubject: BehaviorSubject<{ uuid: string }>;
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'test-uuid-1',
     author_email: 'test@example.com',
     title: 'Test Study',

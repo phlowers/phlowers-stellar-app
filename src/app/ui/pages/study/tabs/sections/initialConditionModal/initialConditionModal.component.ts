@@ -9,10 +9,9 @@ import {
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
-import { Section } from '@src/app/core/data/database/interfaces/section';
+import { Section, InitialCondition } from '@core/domain';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import {
   FormBuilder,
   FormGroup,
@@ -29,7 +28,7 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { isNumber } from 'lodash';
 import { CablesService } from '@core/services/cables/cables.service';
 import { v4 as uuidv4 } from 'uuid';
-import { Study } from '@core/data/database/interfaces/study';
+import { StudyEntity } from '@core/infrastructure/database';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { Subscription } from 'rxjs';
 import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
@@ -73,7 +72,7 @@ export class InitialConditionModalComponent implements OnDestroy {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
   section = input.required<Section>();
-  study = input.required<Study | null>();
+  study = input.required<StudyEntity | null>();
   mode = input.required<'view' | 'edit' | 'create'>();
   changeMode = output<'view' | 'edit' | 'create'>();
   addInitialCondition = output<InitialConditionFunctionsInput>();

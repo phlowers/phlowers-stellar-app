@@ -8,13 +8,9 @@
 import { TestBed } from '@angular/core/testing';
 import { StudiesService } from './studies.service';
 import { StorageService } from '../storage/storage.service';
-import { StudyModel } from '../../data/models/study.model';
-import { Study } from '../../data/database/interfaces/study';
+import { StudyModel, ProtoV4Support, ProtoV4Parameters } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 import { BehaviorSubject } from 'rxjs';
-import {
-  ProtoV4Support,
-  ProtoV4Parameters
-} from '../../data/database/interfaces/protoV4';
 import { MessageService } from 'primeng/api';
 
 // Mock uuid
@@ -60,7 +56,7 @@ describe('StudiesService', () => {
     author_email: 'test@example.com'
   };
 
-  const mockStudyFromDb: Study = {
+  const mockStudyFromDb: StudyEntity = {
     ...mockStudy,
     uuid: 'existing-uuid-123',
     author_email: 'test@example.com',
@@ -229,7 +225,7 @@ describe('StudiesService', () => {
   describe('deleteStudy', () => {
     it('should delete a study successfully', async () => {
       const studiesSpy = jest.spyOn(service.studies, 'next');
-      const remainingStudies: Study[] = [];
+      const remainingStudies: StudyEntity[] = [];
       mockDb.studies.toArray.mockResolvedValue(remainingStudies);
 
       await service.deleteStudy('existing-uuid-123');
@@ -280,7 +276,7 @@ describe('StudiesService', () => {
 
   describe('BehaviorSubject emissions', () => {
     it('should emit updated studies after createStudy', async () => {
-      const mockStudies: Study[] = [mockStudyFromDb];
+      const mockStudies: StudyEntity[] = [mockStudyFromDb];
       mockDb.studies.toArray.mockResolvedValue(mockStudies);
 
       const studiesEmissionSpy = jest.fn();
@@ -292,7 +288,7 @@ describe('StudiesService', () => {
     });
 
     it('should emit updated studies after duplicateStudy', async () => {
-      const mockStudies: Study[] = [mockStudyFromDb];
+      const mockStudies: StudyEntity[] = [mockStudyFromDb];
       mockDb.studies.toArray.mockResolvedValue(mockStudies);
 
       const studiesEmissionSpy = jest.fn();
@@ -304,7 +300,7 @@ describe('StudiesService', () => {
     });
 
     it('should emit updated studies after deleteStudy', async () => {
-      const mockStudies: Study[] = [];
+      const mockStudies: StudyEntity[] = [];
       mockDb.studies.toArray.mockResolvedValue(mockStudies);
 
       const studiesEmissionSpy = jest.fn();

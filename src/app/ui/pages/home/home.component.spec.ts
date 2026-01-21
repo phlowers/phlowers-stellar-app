@@ -6,7 +6,7 @@ import {
   ServerStatus
 } from '@src/app/core/services/online/online.service';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { StudyModel } from '@src/app/core/data/models/study.model';
+import { StudyModel } from '@core/domain';
 import { BehaviorSubject } from 'rxjs';
 import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
 import { CardInfoComponent } from '@src/app/ui/shared/components/atoms/card-info/card-info.component';

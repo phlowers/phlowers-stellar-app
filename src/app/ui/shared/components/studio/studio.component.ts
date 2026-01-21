@@ -13,7 +13,7 @@ import {
   TaskError
 } from '@src/app/core/services/worker_python/tasks/types';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Section } from '@core/data/database/interfaces/section';
+import { Section } from '@core/domain';
 import { OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';

@@ -32,7 +32,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { Task } from '@core/services/worker_python/tasks/types';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
-import { VtlAndGuying } from '@core/data/database/interfaces/vtlAndGuying';
+import { VtlAndGuying } from '@core/domain';
 import { SectionService } from '@core/services/sections/section.service';
 import { MessageService } from 'primeng/api';
 

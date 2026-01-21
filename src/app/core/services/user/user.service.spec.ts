@@ -1,5 +1,5 @@
 import { UserService } from './user.service';
-import { UserModel } from '../../data/models/user.model';
+import { UserModel } from '@core/domain';
 import { BehaviorSubject } from 'rxjs';
 
 describe('UserService', () => {

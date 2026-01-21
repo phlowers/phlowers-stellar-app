@@ -1,4 +1,4 @@
-import { Section } from '@core/data/database/interfaces/section';
+import { Section } from '@core/domain';
 import { FieldMeasure, FieldMeasureOutputs } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@src/app/ui/shared/helpers/findMiddleSpan';

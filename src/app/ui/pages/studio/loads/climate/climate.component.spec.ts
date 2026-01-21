@@ -10,7 +10,7 @@ import { WorkerPythonService } from '@src/app/core/services/worker_python/worker
 import { MessageService } from 'primeng/api';
 import { ChargesService } from '@core/services/charges/charges.service';
 import { signal } from '@angular/core';
-import { Charge } from '@core/data/database/interfaces/charge';
+import { Charge } from '@core/domain';
 
 describe('ClimateComponent (Jest)', () => {
   let component: ClimateComponent;
