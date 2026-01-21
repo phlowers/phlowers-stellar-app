@@ -6,8 +6,7 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import { Section, InitialCondition } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { Section, InitialCondition, StudyModel } from '@core/domain';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
@@ -52,7 +51,7 @@ import { ChargesService } from '@src/app/core/services/charges/charges.service';
   styleUrl: './sectionsTab.component.scss'
 })
 export class SectionsTabComponent {
-  study = input<StudyEntity | null>(null);
+  study = input<StudyModel | null>(null);
   createOrUpdateSection = output<Section>();
   deleteSection = output<Section>();
   duplicateSection = output<Section>();

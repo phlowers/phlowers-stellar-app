@@ -14,8 +14,7 @@ import {
   TaskError,
   DataError
 } from '@src/app/core/services/worker_python/tasks/types';
-import { CatalogCable, Section } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { CatalogCable, Section, StudyModel } from '@core/domain';
 import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
@@ -80,7 +79,9 @@ describe('PlotService', () => {
     solar_absorption: undefined,
     emissivity: undefined,
     electric_resistance_20: undefined,
-    linear_resistance_temperature_coef: undefined
+    linear_resistance_temperature_coef: undefined,
+    radial_thermal_conductivity: undefined,
+    has_magnetic_heart: undefined
   };
 
   const mockSection: Section = {
@@ -671,7 +672,7 @@ describe('PlotService', () => {
     });
 
     it('should reset study to null', () => {
-      const mockStudy: StudyEntity = {
+      const mockStudy: StudyModel = {
         uuid: 'study-uuid-1',
         author_email: 'test@example.com',
         title: 'Test Study',
@@ -693,7 +694,7 @@ describe('PlotService', () => {
     });
 
     it('should reset all state properties at once', () => {
-      const mockStudy: StudyEntity = {
+      const mockStudy: StudyModel = {
         uuid: 'study-uuid-1',
         author_email: 'test@example.com',
         title: 'Test Study',

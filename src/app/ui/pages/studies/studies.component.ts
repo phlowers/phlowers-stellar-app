@@ -16,7 +16,7 @@ import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
-import { StudyEntity } from '@core/infrastructure/database';
+import { StudyModel } from '@core/domain';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { CommonModule } from '@angular/common';
 import { StudiesTableComponent } from './components/studies-table/studies-table.component';
@@ -46,7 +46,7 @@ import { ExportDialogComponent } from '../study/study-header/export-dialog/expor
 })
 export class StudiesComponent implements OnInit {
   isNewStudyModalOpen = false;
-  studies: StudyEntity[] = [];
+  studies: StudyModel[] = [];
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -58,7 +58,7 @@ export class StudiesComponent implements OnInit {
     });
   }
 
-  sortStudies(studies: StudyEntity[]) {
+  sortStudies(studies: StudyModel[]) {
     return studies.sort((a, b) => {
       return (
         new Date(b.created_at_offline).getTime() -

@@ -9,6 +9,7 @@
  * Catalog cable domain model
  */
 export interface CatalogCable {
+  id?: string;
   name: string;
   data_source: string;
   section: number;
@@ -35,4 +36,6 @@ export interface CatalogCable {
   emissivity: number | undefined;
   electric_resistance_20: number | undefined;
   linear_resistance_temperature_coef: number | undefined;
+  radial_thermal_conductivity: number | undefined;
+  has_magnetic_heart: boolean | undefined;
 }

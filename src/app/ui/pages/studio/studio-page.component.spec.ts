@@ -6,7 +6,7 @@ import { ElementRef } from '@angular/core';
 import { PlotService } from './services/plot.service';
 import { StudiesService } from '@core/services/studies/studies.service';
 import { SectionService } from '@src/app/core/services/sections/section.service';
-import { StudyEntity } from '@core/infrastructure/database';
+import { StudyModel } from '@core/domain';
 
 interface Section {
   uuid: string;
@@ -145,7 +145,7 @@ describe('StudioPageComponent', () => {
         { uuid: 'other', supports: [1] },
         { uuid: sectionUuid, supports: [1, 2, 3] }
       ]
-    } as unknown as StudyEntity;
+    } as unknown as StudyModel;
 
     (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
       of(study)
@@ -179,7 +179,9 @@ describe('StudioPageComponent', () => {
       'missing-section'
     );
 
-    const study = { sections: [{ uuid: 'a', supports: [1] }] } as unknown as StudyEntity;
+    const study = {
+      sections: [{ uuid: 'a', supports: [1] }]
+    } as unknown as StudyModel;
     (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
       of(study)
     );

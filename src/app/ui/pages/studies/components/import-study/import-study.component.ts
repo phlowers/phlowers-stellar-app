@@ -5,9 +5,9 @@ import {
   ProtoV4Parameters,
   ProtoV4Support,
   Section,
-  Support
+  Support,
+  StudyModel
 } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
 import Papa from 'papaparse';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
@@ -113,7 +113,7 @@ const importSuccessMessage = {
 })
 export class ImportStudyComponent {
   loading = signal<boolean>(false);
-  newStudies = signal<StudyEntity[]>([]);
+  newStudies = signal<StudyModel[]>([]);
   erroredFiles = signal<string[]>([]);
 
   constructor(
@@ -172,7 +172,7 @@ export class ImportStudyComponent {
 
   private buildStudyFromParsedData(
     parsedResult: Record<string, unknown>
-  ): StudyEntity {
+  ): StudyModel {
     const sections = Array.isArray(parsedResult.sections)
       ? this.transformSections(parsedResult.sections)
       : [];
@@ -181,10 +181,10 @@ export class ImportStudyComponent {
       ...createEmptyStudy(),
       ...parsedResult,
       sections
-    } as StudyEntity;
+    } as StudyModel;
   }
 
-  private async createAndAddStudy(study: StudyEntity): Promise<void> {
+  private async createAndAddStudy(study: StudyModel): Promise<void> {
     // Check if study with same UUID already exists
     const hasValidUuid = study.uuid && study.uuid.trim() !== '';
     if (hasValidUuid) {

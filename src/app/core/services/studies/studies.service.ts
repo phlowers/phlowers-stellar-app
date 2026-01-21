@@ -6,7 +6,6 @@
  */
 import { Injectable, signal } from '@angular/core';
 import {
-  StudyModel,
   ProtoV4Parameters,
   ProtoV4Support,
   Support,
@@ -51,7 +50,7 @@ export class StudiesService {
    */
   async createStudy(
     study: Pick<
-      StudyModel,
+      StudyEntity,
       'title' | 'description' | 'shareable' | 'sections' | 'author_email'
     >,
     newUuid?: string

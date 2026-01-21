@@ -12,7 +12,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { ChainsService } from './chains.service';
 import { StorageService } from '../storage/storage.service';
-import { CatalogChain } from '@core/domain';
+import { CatalogChainEntity } from '@core/infrastructure/database';
 import { ChainCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 
@@ -93,7 +93,7 @@ describe('ChainsService', () => {
 
   describe('getChains', () => {
     it('should return chains array from database', async () => {
-      const mockChains: CatalogChain[] = [
+      const mockChains: CatalogChainEntity[] = [
         {
           chain_name: 'Chain 1',
           mean_length: 100.5,
