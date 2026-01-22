@@ -6,15 +6,7 @@ import { ElementRef } from '@angular/core';
 import { PlotService } from './services/plot.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { SectionService } from '@services/sections/section.service';
-import { Study } from '@core/domain';
-
-interface Section {
-  uuid: string;
-  supports: number[];
-}
-interface Study {
-  sections: Section[];
-}
+import { Section, Study } from '@core/domain';
 
 interface SignalFn<T> {
   (): T;
