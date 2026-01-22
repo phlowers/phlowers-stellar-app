@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
 import plotly, { Data } from 'plotly.js-dist-min';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { Task } from '@src/app/core/services/worker_python/tasks/types';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 
 interface FormattedTextData {
   textToDisplay: string[];

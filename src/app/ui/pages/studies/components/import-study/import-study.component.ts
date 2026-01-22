@@ -1,26 +1,26 @@
 import { Component, signal } from '@angular/core';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { RouterLink } from '@angular/router';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import {
   ProtoV4Parameters,
-  ProtoV4Support
-} from '@src/app/core/data/database/interfaces/protoV4';
+  ProtoV4Support,
+  Section,
+  Support,
+  Study
+} from '@core/domain';
 import Papa from 'papaparse';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { RouterLink } from '@angular/router';
-import { Study } from '@src/app/core/data/database/interfaces/study';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { ToastModule } from 'primeng/toast';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { CablesService } from '@services/cables/cables.service';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
 import { createEmptyStudy } from '../new-study-modal/new-study-modal.component';
 import {
   createEmptySection,
   createEmptySupport
-} from '@src/app/core/services/sections/helpers';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { Support } from '@src/app/core/data/database/interfaces/support';
+} from '@services/sections/helpers';
 
 /**
  * Parse a ISO 8859-1 base64 string

@@ -8,7 +8,7 @@ import {
 } from '@angular/animations';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { round } from 'lodash';
 
 interface DataField {

@@ -5,14 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable } from '@angular/core';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
-import {
-  CatLine,
-  RteLinesCsvFile
-} from '../../data/database/interfaces/catLine';
+import { CatalogLineEntity } from '@core/infrastructure/database';
+import { LineCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { sortBy, uniqBy } from 'lodash';
 
@@ -51,7 +49,7 @@ export class LinesService {
         })
       );
 
-    const mapData = (data: RteLinesCsvFile[]) => {
+    const mapData = (data: LineCsvDto[]) => {
       return data
         .map((item) => {
           const hasNoVoltage =
@@ -81,14 +79,14 @@ export class LinesService {
         Papa.parse(linesDataCsv, {
           header: true,
           skipEmptyLines: true,
-          complete: (async (jsonResults: Papa.ParseResult<RteLinesCsvFile>) => {
+          complete: (async (jsonResults: Papa.ParseResult<LineCsvDto>) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
               return;
             }
             await this.storageService.db?.catLines.clear();
-            const table: CatLine[] = mapData(data);
+            const table: CatalogLineEntity[] = mapData(data);
             const uniqueTable = uniqBy(table, (element) =>
               [
                 element.voltage_idr,
@@ -102,7 +100,7 @@ export class LinesService {
               sortBy(uniqueTable, 'voltage_adr')
             );
             resolve();
-          }) as (jsonResults: Papa.ParseResult<RteLinesCsvFile>) => void
+          }) as (jsonResults: Papa.ParseResult<LineCsvDto>) => void
         });
       });
     });

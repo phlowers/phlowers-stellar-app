@@ -1,7 +1,7 @@
 import { createPlotData } from './createPlotData';
 import { PlotOptions } from './types';
 import { createDataObject } from './createPlotDataObject';
-import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 // Mock the createDataObject function
 jest.mock('./createPlotDataObject');

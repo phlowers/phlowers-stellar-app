@@ -7,12 +7,12 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PapotoComponent } from './papoto.component';
 import { createTestMeasureData } from './../../../helpers';
 import { LEFT_SUPPORT_OPTIONS_MOCK } from '../../../mock-data';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import {
   Task,
   TaskError,
   GetSectionOutput
-} from '@src/app/core/services/worker_python/tasks/types';
+} from '@services/worker_python/tasks/types';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 describe('Papoto component', () => {

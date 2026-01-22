@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioMenuBarComponent } from './menu-bar.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
-import { ChargesService } from '@core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -11,10 +11,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { signal } from '@angular/core';
-import { Section } from '@core/data/database/interfaces/section';
-import { Study } from '@core/data/database/interfaces/study';
-import { Charge } from '@core/data/database/interfaces/charge';
-import { InitialCondition } from '@core/data/database/interfaces/initialCondition';
+import { Charge, InitialCondition, Section, Study } from '@core/domain';
 import { ActivatedRoute } from '@angular/router';
 
 describe('StudioMenuBarComponent', () => {

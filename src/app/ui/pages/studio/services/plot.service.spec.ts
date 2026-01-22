@@ -7,19 +7,17 @@
 
 import { TestBed } from '@angular/core/testing';
 import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { CablesService } from '@services/cables/cables.service';
 import {
   Task,
   TaskError,
   DataError
-} from '@src/app/core/services/worker_python/tasks/types';
-import { Section } from '@core/data/database/interfaces/section';
-import { CatCable } from '@core/data/database/interfaces/catCable';
-import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+} from '@services/worker_python/tasks/types';
+import { CatalogCable, Section, Study } from '@core/domain';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
-import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
-import { Study } from '@core/data/database/interfaces/study';
+import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import { Camera } from 'plotly.js-dist-min';
 
 // Mock plotly
@@ -55,7 +53,7 @@ describe('PlotService', () => {
     span_length: []
   };
 
-  const mockCable: CatCable = {
+  const mockCable: CatalogCable = {
     name: 'Test Cable',
     data_source: 'test-source',
     section: 100,
@@ -81,7 +79,9 @@ describe('PlotService', () => {
     solar_absorption: undefined,
     emissivity: undefined,
     electric_resistance_20: undefined,
-    linear_resistance_temperature_coef: undefined
+    linear_resistance_temperature_coef: undefined,
+    radial_thermal_conductivity: undefined,
+    has_magnetic_heart: undefined
   };
 
   const mockSection: Section = {

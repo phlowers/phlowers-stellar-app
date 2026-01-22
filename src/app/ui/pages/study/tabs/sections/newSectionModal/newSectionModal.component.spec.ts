@@ -1,15 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
-import { Section } from '@core/data/database/interfaces/section';
-import { Study } from '@core/data/database/interfaces/study';
+import { Section, Study } from '@core/domain';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
-import { LinesService } from '@core/services/lines/lines.service';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
+import { LinesService } from '@services/lines/lines.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ChainsService } from '@core/services/chains/chains.service';
-import { AttachmentService } from '@core/services/attachment/attachment.service';
-import { SectionService } from '@core/services/sections/section.service';
+import { ChainsService } from '@services/chains/chains.service';
+import { AttachmentService } from '@services/attachment/attachment.service';
+import { SectionService } from '@services/sections/section.service';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };

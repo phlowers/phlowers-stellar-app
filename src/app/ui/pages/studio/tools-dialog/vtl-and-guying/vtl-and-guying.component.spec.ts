@@ -2,18 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { VhlAndGuyingComponent } from './vtl-and-guying.component';
 import { ToolsDialogService } from '../tools-dialog.service';
-import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
-import {
-  Task,
-  TaskError
-} from '@src/app/core/services/worker_python/tasks/types';
+import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
-import { SectionService } from '@core/services/sections/section.service';
+import { SectionService } from '@services/sections/section.service';
 import { MessageService } from 'primeng/api';
 
 @Component({

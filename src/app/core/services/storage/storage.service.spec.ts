@@ -7,12 +7,12 @@
 
 import { TestBed } from '@angular/core/testing';
 import { StorageService } from './storage.service';
-import { AppDB } from '@core/data/database';
+import { AppDatabase } from '@core/infrastructure/database';
 
-// Mock AppDB
-jest.mock('@core/data/database', () => {
+// Mock AppDatabase
+jest.mock('@core/infrastructure/database', () => {
   return {
-    AppDB: jest.fn().mockImplementation(() => {
+    AppDatabase: jest.fn().mockImplementation(() => {
       return {};
     })
   };
@@ -26,7 +26,7 @@ describe('StorageService', () => {
     // Save original navigator
     originalNavigator = global.navigator;
 
-    // Reset AppDB mock
+    // Reset AppDatabase mock
     jest.clearAllMocks();
 
     TestBed.configureTestingModule({});
@@ -54,7 +54,7 @@ describe('StorageService', () => {
 
     await service.createDatabase();
 
-    expect(AppDB).toHaveBeenCalled();
+    expect(AppDatabase).toHaveBeenCalled();
     expect(service.db).toBeDefined();
     expect(readySpy).toHaveBeenCalledWith(true);
 

@@ -5,14 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable } from '@angular/core';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
-import {
-  CatAttachment,
-  RteAttachmentsCsvFile
-} from '../../data/database/interfaces/catAttachment';
+import { CatalogAttachmentEntity } from '@core/infrastructure/database';
+import { AttachmentCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { toNumber } from 'lodash';
 
@@ -50,7 +48,7 @@ export class AttachmentService {
         })
       );
 
-    const mapData = (data: RteAttachmentsCsvFile[]): CatAttachment[] => {
+    const mapData = (data: AttachmentCsvDto[]): CatalogAttachmentEntity[] => {
       return data
         .filter((item) => item.support_adr)
         .map((item) => ({
@@ -74,7 +72,7 @@ export class AttachmentService {
           header: true,
           skipEmptyLines: true,
           complete: (async (
-            jsonResults: Papa.ParseResult<RteAttachmentsCsvFile>
+            jsonResults: Papa.ParseResult<AttachmentCsvDto>
           ) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
@@ -82,13 +80,13 @@ export class AttachmentService {
               return;
             }
             await this.storageService.db?.catAttachments.clear();
-            const attachmentsTable: CatAttachment[] = mapData(data);
+            const attachmentsTable: CatalogAttachmentEntity[] = mapData(data);
             console.log('adding attachments data', attachmentsTable.length);
             await this.storageService.db?.catAttachments.bulkAdd(
               attachmentsTable
             );
             resolve();
-          }) as (jsonResults: Papa.ParseResult<RteAttachmentsCsvFile>) => void
+          }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
         });
       });
     });

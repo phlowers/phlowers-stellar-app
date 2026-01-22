@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ImportStudyComponent } from './import-study.component';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import Papa from 'papaparse';
-import { Study } from '@core/data/database/interfaces/study';
+import { Study } from '@core/domain';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { CablesService } from '@services/cables/cables.service';
 
 describe('ImportStudyComponent', () => {
   let component: ImportStudyComponent;

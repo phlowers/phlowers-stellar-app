@@ -31,6 +31,9 @@
       "@core/*": [
         "./src/app/core/*"
       ],
+      "@services/*": [
+        "./src/app/core/services/*"
+      ],
       "@ui/*": [
         "./src/app/ui/*"
       ],

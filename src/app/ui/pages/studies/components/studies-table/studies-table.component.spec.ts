@@ -9,7 +9,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { SortEvent } from 'primeng/api';
 import { StudiesTableComponent } from './studies-table.component';
-import { Study } from '@src/app/core/data/database/interfaces/study';
+import { Study } from '@core/domain';
 import { MessageService } from 'primeng/api';
 
 describe('StudiesTableComponent', () => {

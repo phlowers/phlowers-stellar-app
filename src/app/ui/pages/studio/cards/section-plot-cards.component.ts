@@ -7,8 +7,8 @@ import {
   animate
 } from '@angular/animations';
 import { SectionPlotCardComponent } from './card/section-plot-card.component';
-import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
-import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-section-plot-cards',

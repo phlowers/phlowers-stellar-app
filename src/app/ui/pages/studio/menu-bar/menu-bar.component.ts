@@ -1,14 +1,13 @@
 import { Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ChargesService } from '@core/services/charges/charges.service';
-import { Study } from '@core/data/database/interfaces/study';
+import { ChargesService } from '@services/charges/charges.service';
+import { Section, Study } from '@core/domain';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
-import { Section } from '@core/data/database/interfaces/section';
 import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
