@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { debounce } from 'lodash';
-import { StudiesService } from '@core/services/studies/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { Subscription } from 'dexie';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
@@ -28,7 +28,7 @@ import { SpanComponent } from './loads/span/span.component';
 import { NewChargeModalComponent } from './new-charge-modal/new-charge-modal.component';
 import { ToolsDialogComponent } from './tools-dialog/tools-dialog.component';
 import { PlotService } from './services/plot.service';
-import { SectionService } from '@src/app/core/services/sections/section.service';
+import { SectionService } from '@services/sections/section.service';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;

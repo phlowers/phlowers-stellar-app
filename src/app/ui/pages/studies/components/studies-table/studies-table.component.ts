@@ -14,10 +14,10 @@ import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
-import { Study } from '@src/app/core/data/database/interfaces/study';
+import { Study } from '@core/domain';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { StudiesService } from '@core/services/studies/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import {
   DEFAULT_TABLE_ROWS_PER_PAGE,
   TABLE_ROWS_PER_PAGE_OPTIONS
