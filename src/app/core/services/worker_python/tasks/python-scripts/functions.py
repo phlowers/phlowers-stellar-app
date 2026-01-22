@@ -329,19 +329,6 @@ def refresh_projection(js_inputs: dict):
     return get_coordinates(plt_line, view == "2d", start_support, end_support)
 
 
-def change_climate_load(js_inputs: dict):
-    global engine, plt_line
-    python_inputs = js_to_python(js_inputs)
-    logger.debug("python_inputs: ", python_inputs)
-    wind_pressure = python_inputs["windPressure"]
-    cable_temperature = python_inputs["cableTemperature"]
-    ice_thickness = python_inputs["iceThickness"] / 100  # in meters in the engine
-    engine.solve_change_state(
-        ice_thickness=ice_thickness,
-        new_temperature=cable_temperature,
-        wind_pressure=wind_pressure,
-    )
-    return get_coordinates(plt_line)
 
 
 def get_support_coordinates(js_inputs: dict):
