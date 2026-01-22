@@ -448,14 +448,38 @@ describe('createPlot', () => {
     });
 
     it('should configure xaxis with autorange false for face side', () => {
-      createPlot('test-plot-id', mockData, false, false, '2d', null, 'face');
+      createPlot({
+        plotId: 'test-plot-id',
+        data: mockData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'face',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData,
+        startSupport: 0,
+        endSupport: 0
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.xaxis.autorange).toBe(false);
     });
 
     it('should configure xaxis with common properties', () => {
-      createPlot('test-plot-id', mockData, false, false, '2d', null, 'profile');
+      createPlot({
+        plotId: 'test-plot-id',
+        data: mockData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'profile',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData,
+        startSupport: 0,
+        endSupport: 0
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.xaxis.backgroundcolor).toBe('gainsboro');
@@ -467,7 +491,19 @@ describe('createPlot', () => {
     });
 
     it('should configure yaxis with scaleratio and scaleanchor for face side', () => {
-      createPlot('test-plot-id', mockData, false, false, '2d', null, 'face');
+      createPlot({
+        plotId: 'test-plot-id',
+        data: mockData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'face',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData,
+        startSupport: 0,
+        endSupport: 0
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.scaleratio).toBe(0.2);
@@ -475,7 +511,19 @@ describe('createPlot', () => {
     });
 
     it('should configure yaxis without scaleratio and scaleanchor for profile side', () => {
-      createPlot('test-plot-id', mockData, false, false, '2d', null, 'profile');
+      createPlot({
+        plotId: 'test-plot-id',
+        data: mockData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'profile',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData,
+        startSupport: 0,
+        endSupport: 0
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.scaleratio).toBeUndefined();
@@ -483,7 +531,19 @@ describe('createPlot', () => {
     });
 
     it('should configure yaxis with common properties', () => {
-      createPlot('test-plot-id', mockData, false, false, '2d', null, 'profile');
+      createPlot({
+        plotId: 'test-plot-id',
+        data: mockData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'profile',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData,
+        startSupport: 0,
+        endSupport: 0
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.backgroundcolor).toBe('gainsboro');
@@ -495,7 +555,19 @@ describe('createPlot', () => {
     });
 
     it('should not have scene property in 2d layout', () => {
-      createPlot('test-plot-id', mockData, false, false, '2d', null, 'profile');
+      createPlot({
+        plotId: 'test-plot-id',
+        data: mockData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'profile',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData,
+        startSupport: 0,
+        endSupport: 0
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.scene).toBeUndefined();
@@ -511,15 +583,19 @@ describe('createPlot', () => {
         }
       ];
 
-      createPlot(
-        'test-plot-id',
-        differentData,
-        false,
-        false,
-        '2d',
-        null,
-        'face'
-      );
+      createPlot({
+        plotId: 'test-plot-id',
+        data: differentData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'face',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData,
+        startSupport: 0,
+        endSupport: 0
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
@@ -528,7 +604,19 @@ describe('createPlot', () => {
     });
 
     it('should work with invert parameter set to true', () => {
-      createPlot('test-plot-id', mockData, false, true, '2d', null, 'profile');
+      createPlot({
+        plotId: 'test-plot-id',
+        data: mockData,
+        isSupportZoom: false,
+        invert: true,
+        view: '2d',
+        camera: null,
+        side: 'profile',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData,
+        startSupport: 0,
+        endSupport: 0
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
@@ -536,7 +624,19 @@ describe('createPlot', () => {
     });
 
     it('should work with invert parameter set to false', () => {
-      createPlot('test-plot-id', mockData, false, false, '2d', null, 'face');
+      createPlot({
+        startSupport: 0,
+        endSupport: 0,
+        plotId: 'test-plot-id',
+        data: mockData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'face',
+        spanLoads: mockSpanLoads,
+        litData: mockLitData
+      });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);

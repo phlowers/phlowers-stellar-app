@@ -151,10 +151,10 @@ export interface TaskInputs {
     skyCover: string;
   };
   [Task.calculateParameter15CWithoutWind]: {
-    parameterPapoto: number;
-    parameterUncertaintyPapoto: number;
-    cableTemperature15C: number;
-    cableTemperatureUncertainty15C: number;
+    parameterPapoto: number | null;
+    parameterUncertaintyPapoto: number | null;
+    cableTemperature15C: number | null;
+    cableTemperatureUncertainty15C: number | null;
   };
 }
 
