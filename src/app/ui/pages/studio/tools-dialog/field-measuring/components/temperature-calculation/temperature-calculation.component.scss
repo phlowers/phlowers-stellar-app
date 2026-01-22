@@ -39,11 +39,11 @@ dd {
       '. . . . measuredDiffusedPlusDirectSolarFluxInfo';
     row-gap: 0rem;
 
-    [class*="__label"] {
+    [class*='__label'] {
       align-self: end;
     }
 
-    [class*="__value"] {
+    [class*='__value'] {
       @apply self-center;
     }
 

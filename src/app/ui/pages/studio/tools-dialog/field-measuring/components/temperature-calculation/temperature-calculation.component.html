@@ -9,7 +9,9 @@
     <dd class="conductor__value">{{ measureData().cableName }}</dd>
 
     <dt i18n class="ambientTemp__label">Ambient temperature (°C)</dt>
-    <dd class="ambientTemp__value">{{ measureData().ambientTemperature }} °C</dd>
+    <dd class="ambientTemp__value">
+      {{ measureData().ambientTemperature }} °C
+    </dd>
   </dl>
 
   <label for="transit" i18n class="transit__label">Transit</label>
@@ -79,16 +81,28 @@
 
   <dl class="contents">
     <dt i18n class="diffusedSolarFlux__label">Diffused solar flux</dt>
-    <dd class="diffusedSolarFlux__value">{{ measureData().diffusedSolarFlux }} W/m²</dd>
+    <dd class="diffusedSolarFlux__value">
+      {{ measureData().diffusedSolarFlux }} W/m²
+    </dd>
 
     <dt i18n class="directSolarFlux__label">Direct solar flux</dt>
-    <dd class="directSolarFlux__value">{{ measureData().directSolarFlux }} W/m²</dd>
+    <dd class="directSolarFlux__value">
+      {{ measureData().directSolarFlux }} W/m²
+    </dd>
 
-    <dt i18n  class="diffusedPlusDirectSolarFlux__label">Diffused + direct solar flux</dt>
-    <dd  class="diffusedPlusDirectSolarFlux__value">{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
+    <dt i18n class="diffusedPlusDirectSolarFlux__label">
+      Diffused + direct solar flux
+    </dt>
+    <dd class="diffusedPlusDirectSolarFlux__value">
+      {{ measureData().diffusedPlusDirectSolarFlux }} W/m²
+    </dd>
   </dl>
 
-  <label for="measuredDiffusedPlusDirectSolarFlux" i18n class="measuredDiffusedPlusDirectSolarFlux__label">
+  <label
+    for="measuredDiffusedPlusDirectSolarFlux"
+    i18n
+    class="measuredDiffusedPlusDirectSolarFlux__label"
+  >
     Measured diffused + direct solar flux (not required)
   </label>
   <p-inputgroup class="measuredDiffusedPlusDirectSolarFlux__value">
@@ -131,14 +145,13 @@
       </div>
       <div class="uncertaintyCableTemperature">
         <dt>
-          <del i18n>
-            Uncertainty cable temperature
-          </del>
+          <del i18n> Uncertainty cable temperature </del>
         </dt>
         <dd>
           <del>
             {{
-              measureData().outputs.cableTemperature?.cableTemperatureUncertainty
+              measureData().outputs.cableTemperature
+                ?.cableTemperatureUncertainty
             }}
             °C
           </del>
