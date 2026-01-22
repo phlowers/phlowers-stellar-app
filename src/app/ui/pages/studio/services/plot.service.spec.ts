@@ -7,17 +7,17 @@
 
 import { TestBed } from '@angular/core/testing';
 import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { CablesService } from '@services/cables/cables.service';
 import {
   Task,
   TaskError,
   DataError
-} from '@src/app/core/services/worker_python/tasks/types';
-import { CatalogCable, Section, StudyModel } from '@core/domain';
-import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+} from '@services/worker_python/tasks/types';
+import { CatalogCable, Section, Study } from '@core/domain';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
-import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
+import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import { Camera } from 'plotly.js-dist-min';
 
 // Mock plotly
@@ -672,7 +672,7 @@ describe('PlotService', () => {
     });
 
     it('should reset study to null', () => {
-      const mockStudy: StudyModel = {
+      const mockStudy: Study = {
         uuid: 'study-uuid-1',
         author_email: 'test@example.com',
         title: 'Test Study',
@@ -694,7 +694,7 @@ describe('PlotService', () => {
     });
 
     it('should reset all state properties at once', () => {
-      const mockStudy: StudyModel = {
+      const mockStudy: Study = {
         uuid: 'study-uuid-1',
         author_email: 'test@example.com',
         title: 'Test Study',

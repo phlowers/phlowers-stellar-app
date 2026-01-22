@@ -2,17 +2,17 @@ import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { CardInfoComponent } from '@src/app/ui/shared/components/atoms/card-info/card-info.component';
-import { UpdateService } from '@src/app/core/services/worker_update/worker_update.service';
+import { CardInfoComponent } from '@ui/shared/components/atoms/card-info/card-info.component';
+import { UpdateService } from '@services/worker_update/worker_update.service';
 import {
   OnlineService,
   ServerStatus
-} from '@src/app/core/services/online/online.service';
+} from '@services/online/online.service';
 import { Subscription, combineLatest } from 'rxjs';
 import { CardState } from '@ui/shared/model/card-info.model';
 import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { StudyModel } from '@core/domain';
+import { StudiesService } from '@services/studies/studies.service';
+import { Study } from '@core/domain';
 import TimeAgo from 'javascript-time-ago';
 import fr from 'javascript-time-ago/locale/fr';
 import en from 'javascript-time-ago/locale/en';
@@ -76,7 +76,7 @@ type ServerStates = CardState;
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
-  public latestStudies = signal<StudyModel[]>([]);
+  public latestStudies = signal<Study[]>([]);
 
   public homeText = signal<HomeTexts>(defaultTexts);
 

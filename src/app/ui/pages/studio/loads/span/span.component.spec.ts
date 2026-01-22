@@ -2,10 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SpanComponent } from './span.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PlotService } from '../../services/plot.service';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { signal, computed } from '@angular/core';
-import { Section, StudyModel } from '@core/domain';
-import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
+import { Section, Study } from '@core/domain';
+import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 
 describe('SpanComponent', () => {
   let component: SpanComponent;
@@ -13,7 +13,7 @@ describe('SpanComponent', () => {
   let mockPlotService: jest.Mocked<PlotService>;
   let mockChargesService: jest.Mocked<ChargesService>;
 
-  const mockStudy: StudyModel = {
+  const mockStudy: Study = {
     uuid: 'study-uuid-1',
     title: 'Test Study',
     description: 'Test Description',
@@ -80,7 +80,7 @@ describe('SpanComponent', () => {
     });
     mockPlotService = {
       plotOptions: plotOptionsSignal,
-      study: signal<StudyModel | null>(mockStudy),
+      study: signal<Study | null>(mockStudy),
       section: signal<Section | null>(mockSection),
       getSpanOptions: computed(() => {
         const options = plotOptionsSignal();

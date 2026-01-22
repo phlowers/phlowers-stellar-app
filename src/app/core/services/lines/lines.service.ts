@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable } from '@angular/core';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';

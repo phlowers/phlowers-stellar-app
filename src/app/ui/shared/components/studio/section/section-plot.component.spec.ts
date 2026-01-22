@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SectionPlotComponent } from './section-plot.component';
-import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
 import { Data } from 'plotly.js-dist-min';
 import { PlotOptions } from './helpers/types';
-import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 // Mock the helper functions
 jest.mock('./helpers/createPlot');

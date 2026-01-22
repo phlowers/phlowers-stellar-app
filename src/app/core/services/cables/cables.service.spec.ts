@@ -11,7 +11,7 @@ import {
 } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { CablesService } from './cables.service';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { CatalogCableEntity } from '@core/infrastructure/database';
 import { CableCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';

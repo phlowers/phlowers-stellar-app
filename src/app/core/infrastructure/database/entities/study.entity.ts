@@ -5,10 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { StudyModel } from '@core/domain';
+import { Study } from '@core/domain';
 
 /**
  * Study entity for Dexie storage
  * Uses the domain model directly as no additional persistence fields are needed
  */
-export type StudyEntity = StudyModel;
+export type StudyEntity = Study;

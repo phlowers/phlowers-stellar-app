@@ -57,26 +57,3 @@ export interface Section {
   selected_field_measure_uuid: string | undefined;
   vtl_and_guying: VtlAndGuying | undefined;
 }
-
-/**
- * Model for modifying section properties
- */
-export interface ModifySectionModel {
-  author_email?: string | null;
-  title?: string | null;
-  description?: string | null;
-  created_at_offline?: string | null;
-  updated_at_offline?: string | null;
-}
-
-/**
- * Model for searching sections
- */
-export interface SearchSectionModel {
-  uuid?: string | null;
-  author_email?: string | null;
-  title?: string | null;
-  description?: string | null;
-  created_after?: string | null;
-  created_before?: string | null;
-}

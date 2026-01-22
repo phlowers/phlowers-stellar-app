@@ -9,7 +9,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { SortEvent } from 'primeng/api';
 import { StudiesTableComponent } from './studies-table.component';
-import { StudyModel } from '@core/domain';
+import { Study } from '@core/domain';
 import { MessageService } from 'primeng/api';
 
 describe('StudiesTableComponent', () => {
@@ -17,7 +17,7 @@ describe('StudiesTableComponent', () => {
   let fixture: ComponentFixture<StudiesTableComponent>;
   let mockMessageService: jest.Mocked<MessageService>;
 
-  const mockStudy1: StudyModel = {
+  const mockStudy1: Study = {
     uuid: 'test-uuid-1',
     author_email: 'test1@example.com',
     title: 'Test Study 1',
@@ -29,7 +29,7 @@ describe('StudiesTableComponent', () => {
     sections: []
   };
 
-  const mockStudy2: StudyModel = {
+  const mockStudy2: Study = {
     uuid: 'test-uuid-2',
     author_email: 'test2@example.com',
     title: 'Test Study 2',
@@ -41,7 +41,7 @@ describe('StudiesTableComponent', () => {
     sections: []
   };
 
-  const mockStudies: StudyModel[] = [mockStudy1, mockStudy2];
+  const mockStudies: Study[] = [mockStudy1, mockStudy2];
 
   beforeEach(async () => {
     mockMessageService = {
@@ -211,20 +211,20 @@ describe('StudiesTableComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle studies with missing properties', () => {
-      const incompleteStudy: Partial<StudyModel> = {
+      const incompleteStudy: Partial<Study> = {
         uuid: 'incomplete-uuid',
         title: 'Incomplete Study'
       };
 
-      fixture.componentRef.setInput('studies', [incompleteStudy as StudyModel]);
+      fixture.componentRef.setInput('studies', [incompleteStudy as Study]);
       fixture.detectChanges();
 
       expect(component).toBeTruthy();
-      expect(component.studies()).toEqual([incompleteStudy as StudyModel]);
+      expect(component.studies()).toEqual([incompleteStudy as Study]);
     });
 
     it('should handle null or undefined study properties gracefully', () => {
-      const nullStudy: StudyModel = {
+      const nullStudy: Study = {
         uuid: 'null-uuid',
         author_email: null as any,
         title: null as any,
@@ -243,7 +243,7 @@ describe('StudiesTableComponent', () => {
     });
 
     it('should handle empty string values', () => {
-      const emptyStudy: StudyModel = {
+      const emptyStudy: Study = {
         uuid: 'empty-uuid',
         author_email: '',
         title: '',
@@ -262,7 +262,7 @@ describe('StudiesTableComponent', () => {
     });
 
     it('should handle very large study arrays', () => {
-      const largeStudyArray: StudyModel[] = Array.from(
+      const largeStudyArray: Study[] = Array.from(
         { length: 1000 },
         (_, index) => ({
           uuid: `study-${index}`,

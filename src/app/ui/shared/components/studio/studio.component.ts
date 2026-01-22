@@ -7,16 +7,13 @@ import {
   signal
 } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
-import {
-  DataError,
-  TaskError
-} from '@src/app/core/services/worker_python/tasks/types';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { DataError, TaskError } from '@services/worker_python/tasks/types';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Section } from '@core/domain';
 import { OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 @Component({
   selector: 'app-studio',

@@ -16,23 +16,29 @@ import { DividerModule } from 'primeng/divider';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { Section, Support, CatalogMaintenance, CatalogLine, CatalogCable } from '@core/domain';
+import {
+  Section,
+  Support,
+  CatalogMaintenance,
+  CatalogLine,
+  CatalogCable
+} from '@core/domain';
 import { SupportsTableComponent } from './supportsTable/supportsTable.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { CreateEditView } from '@src/app/ui/shared/types';
-import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.component';
-import { createEmptySupport } from '@src/app/core/services/sections/helpers';
+import { CreateEditView } from '@ui/shared/types';
+import { StudioComponent } from '@ui/shared/components/studio/studio.component';
+import { createEmptySupport } from '@services/sections/helpers';
 import { sectionTypes } from './section-mock';
-import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
-import { LinesService } from '@src/app/core/services/lines/lines.service';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { LinesService } from '@services/lines/lines.service';
+import { CablesService } from '@services/cables/cables.service';
 import { MessageModule } from 'primeng/message';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import {
   DEFAULT_TABLE_ROWS_PER_PAGE,
   TABLE_ROWS_PER_PAGE_OPTIONS

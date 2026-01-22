@@ -11,7 +11,7 @@ import {
 } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { AttachmentService } from './attachment.service';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { CatalogAttachmentEntity } from '@core/infrastructure/database';
 import { AttachmentCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';

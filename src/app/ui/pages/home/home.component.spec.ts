@@ -1,15 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HomeComponent } from './home.component';
-import { UpdateService } from '@src/app/core/services/worker_update/worker_update.service';
+import { UpdateService } from '@services/worker_update/worker_update.service';
 import {
   OnlineService,
   ServerStatus
-} from '@src/app/core/services/online/online.service';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { StudyModel } from '@core/domain';
+} from '@services/online/online.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { Study } from '@core/domain';
 import { BehaviorSubject } from 'rxjs';
 import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
-import { CardInfoComponent } from '@src/app/ui/shared/components/atoms/card-info/card-info.component';
+import { CardInfoComponent } from '@ui/shared/components/atoms/card-info/card-info.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -21,7 +21,7 @@ describe('HomeComponent', () => {
   let onlineServiceMock: jest.Mocked<OnlineService>;
   let studiesServiceMock: jest.Mocked<StudiesService>;
 
-  const mockStudies: StudyModel[] = [
+  const mockStudies: Study[] = [
     {
       uuid: '1',
       title: 'Test Study 1',

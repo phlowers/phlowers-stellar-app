@@ -3,14 +3,14 @@ import { ComponentRef } from '@angular/core';
 
 import { ParameterCalculation15WithoutWindComponent } from './parameter-calculation-15-without-wind.component';
 import { createTestMeasureData } from '@ui/pages/studio/tools-dialog/field-measuring/helpers';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';
-import { SectionService } from '@src/app/core/services/sections/section.service';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { InitialConditionService } from '@src/app/core/services/initial-conditions/initial-condition.service';
+import { SectionService } from '@services/sections/section.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { InitialConditionService } from '@services/initial-conditions/initial-condition.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
-import { StorageService } from '@src/app/core/services/storage/storage.service';
+import { CablesService } from '@services/cables/cables.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 
 interface SignalFn<T> {

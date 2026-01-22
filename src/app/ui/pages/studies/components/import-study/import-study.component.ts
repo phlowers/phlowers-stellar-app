@@ -1,26 +1,26 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import {
   ProtoV4Parameters,
   ProtoV4Support,
   Section,
   Support,
-  StudyModel
+  Study
 } from '@core/domain';
 import Papa from 'papaparse';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { CablesService } from '@services/cables/cables.service';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
 import { createEmptyStudy } from '../new-study-modal/new-study-modal.component';
 import {
   createEmptySection,
   createEmptySupport
-} from '@src/app/core/services/sections/helpers';
+} from '@services/sections/helpers';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -113,7 +113,7 @@ const importSuccessMessage = {
 })
 export class ImportStudyComponent {
   loading = signal<boolean>(false);
-  newStudies = signal<StudyModel[]>([]);
+  newStudies = signal<Study[]>([]);
   erroredFiles = signal<string[]>([]);
 
   constructor(
@@ -172,7 +172,7 @@ export class ImportStudyComponent {
 
   private buildStudyFromParsedData(
     parsedResult: Record<string, unknown>
-  ): StudyModel {
+  ): Study {
     const sections = Array.isArray(parsedResult.sections)
       ? this.transformSections(parsedResult.sections)
       : [];
@@ -181,10 +181,10 @@ export class ImportStudyComponent {
       ...createEmptyStudy(),
       ...parsedResult,
       sections
-    } as StudyModel;
+    } as Study;
   }
 
-  private async createAndAddStudy(study: StudyModel): Promise<void> {
+  private async createAndAddStudy(study: Study): Promise<void> {
     // Check if study with same UUID already exists
     const hasValidUuid = study.uuid && study.uuid.trim() !== '';
     if (hasValidUuid) {

@@ -5,24 +5,24 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import {
   FieldMeasure,
   ManualParameterCalculation15CWithoutWind
 } from '@ui/pages/studio/tools-dialog/field-measuring/types';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { InitialConditionModalComponent } from '@src/app/ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { InitialConditionModalComponent } from '@ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@core/domain';
-import { SectionService } from '@src/app/core/services/sections/section.service';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { SectionService } from '@services/sections/section.service';
+import { StudiesService } from '@services/studies/studies.service';
 import {
   InitialConditionFunctionsInput,
   InitialConditionService
-} from '@src/app/core/services/initial-conditions/initial-condition.service';
+} from '@services/initial-conditions/initial-condition.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
-import { Task } from '@core/services/worker_python/tasks/types';
+import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
 

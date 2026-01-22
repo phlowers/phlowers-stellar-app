@@ -3,7 +3,7 @@ import { ComponentRef } from '@angular/core';
 
 import { TemperatureCalculationComponent } from './temperature-calculation.component';
 import { createTestMeasureData } from '@ui/pages/studio/tools-dialog/field-measuring/helpers';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS

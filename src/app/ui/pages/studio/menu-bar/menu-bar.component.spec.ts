@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioMenuBarComponent } from './menu-bar.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
-import { ChargesService } from '@core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -11,7 +11,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { signal } from '@angular/core';
-import { Charge, InitialCondition, Section, StudyModel } from '@core/domain';
+import { Charge, InitialCondition, Section, Study } from '@core/domain';
 import { ActivatedRoute } from '@angular/router';
 
 describe('StudioMenuBarComponent', () => {
@@ -111,7 +111,7 @@ describe('StudioMenuBarComponent', () => {
     vtl_and_guying: undefined
   };
 
-  const mockStudy: StudyModel = {
+  const mockStudy: Study = {
     uuid: 'study-uuid-1',
     author_email: 'test@example.com',
     title: 'Test Study',
@@ -275,7 +275,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should return null when no charge is selected', () => {
-      const studyWithoutSelectedCharge: StudyModel = {
+      const studyWithoutSelectedCharge: Study = {
         ...mockStudy,
         sections: [
           {
@@ -292,7 +292,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should return null when section is not found in study', () => {
-      const studyWithDifferentSection: StudyModel = {
+      const studyWithDifferentSection: Study = {
         ...mockStudy,
         sections: [
           {
@@ -373,7 +373,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should return false when selected charge has personnelPresence false', () => {
-      const studyWithCharge2Selected: StudyModel = {
+      const studyWithCharge2Selected: Study = {
         ...mockStudy,
         sections: [
           {
@@ -390,7 +390,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should return false when no charge is selected', () => {
-      const studyWithoutSelectedCharge: StudyModel = {
+      const studyWithoutSelectedCharge: Study = {
         ...mockStudy,
         sections: [
           {
@@ -407,7 +407,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should return false when selected charge is not found', () => {
-      const studyWithNonExistentCharge: StudyModel = {
+      const studyWithNonExistentCharge: Study = {
         ...mockStudy,
         sections: [
           {
@@ -661,7 +661,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should handle study with empty sections array', () => {
-      const studyWithEmptySections: StudyModel = {
+      const studyWithEmptySections: Study = {
         ...mockStudy,
         sections: []
       };

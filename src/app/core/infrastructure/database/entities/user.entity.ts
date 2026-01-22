@@ -5,10 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { UserModel } from '@core/domain';
+import { User } from '@core/domain';
 
 /**
  * User entity for Dexie storage
  * Uses the domain model directly as no additional persistence fields are needed
  */
-export type UserEntity = UserModel;
+export type UserEntity = User;

@@ -27,13 +27,13 @@ import { FieldDatasComponent } from './components/field-datas/field-datas.compon
 import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { TemperatureCalculationComponent } from './components/temperature-calculation/temperature-calculation.component';
-import { SectionService } from '@src/app/core/services/sections/section.service';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { SectionService } from '@services/sections/section.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { InitialCondition } from '@core/domain';
 import { ParameterCalculation15WithoutWindComponent } from './components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 import { createInitialMeasureData } from './helpers';
-import { LinesService } from '@core/services/lines/lines.service';
-import { CablesService } from '@core/services/cables/cables.service';
+import { LinesService } from '@services/lines/lines.service';
+import { CablesService } from '@services/cables/cables.service';
 
 @Component({
   selector: 'app-field-measuring-tool',

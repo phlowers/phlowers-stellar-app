@@ -18,11 +18,11 @@ import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
 import { ManualSectionComponent } from './manualSection/manualSection.component';
 import { CommonModule } from '@angular/common';
-import { Section, StudyModel } from '@core/domain';
+import { Section, Study } from '@core/domain';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { isNil } from 'lodash';
-import { SectionService } from '@core/services/sections/section.service';
+import { SectionService } from '@services/sections/section.service';
 
 const areAllRequiredFieldsFilled = (section: Section) => {
   const nameCondition = !!section.name.trim();
@@ -85,7 +85,7 @@ export class NewSectionModalComponent {
   setSection = output<Section>();
   source = 'manual';
   section = input.required<Section>();
-  study = input.required<StudyModel | null>();
+  study = input.required<Study | null>();
   sectionChange = output<Section>();
   outputSection = output<Section>();
   mode = input.required<'create' | 'edit' | 'view'>();

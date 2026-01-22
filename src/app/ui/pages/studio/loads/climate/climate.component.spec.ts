@@ -4,11 +4,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { PlotService } from '../../services/plot.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';
-import { ChargesService } from '@core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { signal } from '@angular/core';
 import { Charge } from '@core/domain';
 

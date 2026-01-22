@@ -10,7 +10,7 @@ import {
   DestroyRef
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ToolsDialogService } from '@ui/pages/studio/tools-dialog/tools-dialog.service';
