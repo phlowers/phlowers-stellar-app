@@ -1,10 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HomeComponent } from './home.component';
 import { UpdateService } from '@services/worker_update/worker_update.service';
-import {
-  OnlineService,
-  ServerStatus
-} from '@services/online/online.service';
+import { OnlineService, ServerStatus } from '@services/online/online.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@core/domain';
 import { BehaviorSubject } from 'rxjs';

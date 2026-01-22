@@ -15,7 +15,10 @@ import { StudyEntity } from '@core/infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
-import { createEmptySection, createEmptySupport } from '@services/sections/helpers';
+import {
+  createEmptySection,
+  createEmptySupport
+} from '@services/sections/helpers';
 import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
