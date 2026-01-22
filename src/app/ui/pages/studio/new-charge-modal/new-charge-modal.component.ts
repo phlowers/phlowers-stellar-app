@@ -26,7 +26,8 @@ const newCharge = (currentCharges: Charge[]): Charge => {
     personnelPresence: false,
     description: '',
     data: {
-      climate: { ...defaultClimaticCharge }
+      climate: { ...defaultClimaticCharge },
+      spanLoads: []
     }
   };
 };
@@ -109,14 +110,14 @@ export class NewChargeModalComponent {
   async onSubmit() {
     const chargeUuid =
       this.isEditMode() && this.uuidInput() ? this.uuidInput() : uuidv4();
-
     const charge: Charge = {
       uuid: chargeUuid ?? '',
       name: this.name(),
       personnelPresence: this.personnelPresence(),
       description: this.description(),
       data: {
-        climate: { ...defaultClimaticCharge }
+        climate: { ...defaultClimaticCharge },
+        spanLoads: []
       }
     };
 

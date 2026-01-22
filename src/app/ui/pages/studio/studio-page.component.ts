@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  signal
-} from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
@@ -118,9 +111,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly studiesService: StudiesService,
-    private readonly sectionService: SectionService,
-    private readonly elementRef: ElementRef
+    private readonly sectionService: SectionService
   ) {}
+
+  previousSectionUuid = signal<string | null>(null);
 
   ngOnInit() {
     const studyUuid = this.route.snapshot.paramMap.get('uuid');
@@ -142,9 +136,13 @@ export class StudioPageComponent implements OnInit, OnDestroy {
               if (section) {
                 this.plotService.section.set(section);
                 this.sectionService.setCurrentSection(section);
-                this.plotService.plotOptionsChange({
-                  endSupport: section.supports.length - 1
-                });
+                if (this.previousSectionUuid() !== section.uuid) {
+                  this.plotService.plotOptionsChange({
+                    endSupport: section.supports.length - 1,
+                    startSupport: 0
+                  });
+                  this.previousSectionUuid.set(section.uuid);
+                }
               } else {
                 this.router.navigate(['/studies']);
               }

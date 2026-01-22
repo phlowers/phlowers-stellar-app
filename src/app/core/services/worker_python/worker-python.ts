@@ -7,8 +7,8 @@
 /// <reference lib="webworker" />
 
 import { loadPyodide } from 'pyodide';
+import change_state from './tasks/python-scripts/change_state.py';
 import functions from './tasks/python-scripts/functions.py';
-import loads from './tasks/python-scripts/loads.py';
 import guying from './tasks/python-scripts/guying.py';
 import temperature from './tasks/python-scripts/temperature.py';
 import parameter_15_without_wind from './tasks/python-scripts/parameter_15_without_wind.py';
@@ -18,7 +18,7 @@ import { Task, TaskError, TaskInputs } from './tasks/types';
 
 const pythonFiles = [
   functions,
-  loads,
+  change_state,
   guying,
   temperature,
   parameter_15_without_wind

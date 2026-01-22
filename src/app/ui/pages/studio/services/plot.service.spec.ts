@@ -19,6 +19,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import { Camera } from 'plotly.js-dist-min';
+import { BehaviorSubject } from 'rxjs';
 
 // Mock plotly
 jest.mock('plotly.js-dist-min', () => ({
@@ -172,14 +173,19 @@ describe('PlotService', () => {
   };
 
   beforeEach(() => {
-    let readyValue = true;
+    let readyValue = false;
+    const readySubject = new BehaviorSubject<boolean>(readyValue);
     mockWorkerPythonService = {
       get ready() {
         return readyValue;
       },
+      get ready$() {
+        return readySubject.asObservable();
+      },
       runTask: jest.fn(),
       setReady: (value: boolean) => {
         readyValue = value;
+        readySubject.next(value);
       }
     };
 
@@ -255,90 +261,6 @@ describe('PlotService', () => {
     it('should update invert option', () => {
       service.plotOptionsChange({ invert: true });
       expect(service.plotOptions().invert).toBe(true);
-    });
-  });
-
-  describe('calculateCharge', () => {
-    it('should call workerPythonService.runTask with correct parameters', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
-        error: null
-      });
-
-      await service.calculateCharge(100, 20, 5);
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.changeClimateLoad,
-        {
-          windPressure: 100,
-          cableTemperature: 20,
-          iceThickness: 5
-        }
-      );
-    });
-
-    it('should set loading to true at start', async () => {
-      let loadingState = false;
-      mockWorkerPythonService.runTask.mockImplementation(() => {
-        loadingState = service.loading();
-        return Promise.resolve({ result: mockGetSectionOutput, error: null });
-      });
-
-      await service.calculateCharge(100, 20, 5);
-
-      expect(loadingState).toBe(true);
-    });
-
-    it('should set loading to false after completion', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
-        error: null
-      });
-
-      await service.calculateCharge(100, 20, 5);
-
-      expect(service.loading()).toBe(false);
-    });
-
-    it('should set litData with result when successful', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
-        error: null
-      });
-
-      await service.calculateCharge(100, 20, 5);
-
-      expect(service.litData()).toEqual(mockGetSectionOutput);
-    });
-
-    it('should set error when task fails', async () => {
-      const taskError = TaskError.CALCULATION_ERROR;
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
-        error: taskError
-      });
-
-      await service.calculateCharge(100, 20, 5);
-
-      expect(service.error()).toBe(taskError);
-    });
-
-    it('should handle different parameter values', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
-        error: null
-      });
-
-      await service.calculateCharge(50, 15, 2);
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.changeClimateLoad,
-        {
-          windPressure: 50,
-          cableTemperature: 15,
-          iceThickness: 2
-        }
-      );
     });
   });
 
@@ -525,7 +447,7 @@ describe('PlotService', () => {
 
       const plotOptions = service.plotOptions();
       expect(plotOptions.startSupport).toBe(0);
-      expect(plotOptions.endSupport).toBe(-1); // length - 1 = -1
+      expect(plotOptions.endSupport).toBe(1); // default value, refreshSection doesn't update plotOptions
     });
   });
 

@@ -9,6 +9,7 @@ import { PlotService } from '../../services/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';
 import { ChargesService } from '@services/charges/charges.service';
+import { LoadFormsService } from '../loadForms.service';
 import { signal } from '@angular/core';
 import { Charge } from '@core/domain';
 
@@ -30,7 +31,8 @@ describe('ClimateComponent (Jest)', () => {
         frontierSupportNumber: null,
         iceThicknessBefore: null,
         iceThicknessAfter: null
-      }
+      },
+      spanLoads: []
     }
   };
 
@@ -38,7 +40,21 @@ describe('ClimateComponent (Jest)', () => {
     const plotServiceMock = {
       study: signal({ uuid: 'study-uuid-1' }),
       section: signal({ uuid: 'section-uuid-1' }),
-      calculateCharge: jest.fn()
+      calculateCharge: jest.fn(),
+      refreshCamera: jest.fn(),
+      loading: signal(false),
+      temporaryLoadData: {
+        climate: {
+          windPressure: 0,
+          cableTemperature: 15,
+          symmetryType: 'symmetric',
+          iceThickness: 0,
+          frontierSupportNumber: null,
+          iceThicknessBefore: null,
+          iceThicknessAfter: null
+        },
+        spanLoads: []
+      }
     } as unknown as PlotService;
     const messageServiceMock = {
       add: jest.fn()
@@ -47,8 +63,16 @@ describe('ClimateComponent (Jest)', () => {
     const chargesServiceMock = {
       getCharge: jest.fn().mockResolvedValue(mockCharge),
       createOrUpdateCharge: jest.fn().mockResolvedValue(undefined),
-      deleteCharge: jest.fn().mockResolvedValue(undefined)
+      deleteCharge: jest.fn().mockResolvedValue(undefined),
+      getSelectedChargeCase: jest.fn().mockResolvedValue(mockCharge)
     } as unknown as ChargesService;
+
+    const loadFormsServiceMock = {
+      calculateLoad: jest.fn().mockResolvedValue(undefined),
+      saveTemporaryLoadDataInSection: jest.fn().mockResolvedValue(undefined),
+      initTemporaryLoadData: jest.fn(),
+      deleteLoad: jest.fn()
+    } as unknown as LoadFormsService;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -63,7 +87,8 @@ describe('ClimateComponent (Jest)', () => {
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
         { provide: MessageService, useValue: messageServiceMock },
-        { provide: ChargesService, useValue: chargesServiceMock }
+        { provide: ChargesService, useValue: chargesServiceMock },
+        { provide: LoadFormsService, useValue: loadFormsServiceMock }
       ]
     }).compileComponents();
 
@@ -113,59 +138,9 @@ describe('ClimateComponent (Jest)', () => {
     });
   });
 
-  describe('getVisibleFormValues', () => {
-    it('should return only symmetric fields even if others are filled', () => {
-      component.form.patchValue({
-        symmetryType: 'symmetric',
-        windPressure: 12,
-        cableTemperature: 25,
-        iceThickness: 6,
-        frontierSupportNumber: null,
-        iceThicknessBefore: null,
-        iceThicknessAfter: null
-      });
-
-      const result = component.getVisibleFormValues();
-
-      expect(result).toEqual({
-        windPressure: 12,
-        cableTemperature: 25,
-        symmetryType: 'symmetric',
-        iceThickness: 6
-      });
-      expect(result).not.toHaveProperty('frontierSupportNumber');
-      expect(result).not.toHaveProperty('iceThicknessBefore');
-      expect(result).not.toHaveProperty('iceThicknessAfter');
-    });
-
-    it('should return only dis_symmetric fields even if others are filled', () => {
-      component.form.patchValue({
-        symmetryType: 'dis_symmetric',
-        windPressure: 15,
-        cableTemperature: 30,
-        frontierSupportNumber: null,
-        iceThicknessBefore: null,
-        iceThicknessAfter: null,
-        iceThickness: 7
-      });
-
-      const result = component.getVisibleFormValues();
-
-      expect(result).toEqual({
-        windPressure: 15,
-        cableTemperature: 30,
-        symmetryType: 'dis_symmetric',
-        frontierSupportNumber: null,
-        iceThicknessBefore: null,
-        iceThicknessAfter: null
-      });
-      expect(result).not.toHaveProperty('iceThickness');
-    });
-  });
-
   describe('button actions', () => {
     it('should call submitForm when submit button is clicked', () => {
-      const spy = jest.spyOn(component, 'submitForm');
+      const spy = jest.spyOn(component, 'saveForm');
       const submitButton = fixture.nativeElement.querySelector(
         'button[type="submit"]'
       );
@@ -174,7 +149,7 @@ describe('ClimateComponent (Jest)', () => {
     });
 
     it('should call calculForm when calculate button is clicked', () => {
-      const spy = jest.spyOn(component, 'calculForm');
+      const spy = jest.spyOn(component, 'calculateForm');
       const buttons = [
         ...fixture.nativeElement.querySelectorAll('button')
       ] as HTMLElement[];

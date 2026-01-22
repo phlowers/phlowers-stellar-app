@@ -36,7 +36,8 @@ const mockChargeData: Charge = {
       frontierSupportNumber: null,
       iceThicknessBefore: null,
       iceThicknessAfter: null
-    }
+    },
+    spanLoads: []
   }
 };
 
@@ -158,7 +159,8 @@ describe('ChargesService', () => {
             frontierSupportNumber: null,
             iceThicknessBefore: null,
             iceThicknessAfter: null
-          }
+          },
+          spanLoads: []
         }
       };
 
@@ -311,7 +313,8 @@ describe('ChargesService', () => {
             frontierSupportNumber: null,
             iceThicknessBefore: null,
             iceThicknessAfter: null
-          }
+          },
+          spanLoads: []
         }
       };
 

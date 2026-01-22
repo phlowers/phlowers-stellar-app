@@ -35,10 +35,12 @@ export class StudioMenuBarComponent {
     mode: 'create' | 'edit' | 'view';
     uuid: string | null;
   }>();
-  chargeCases = computed(
+  charges = computed(
     () =>
-      this.section()?.charges?.map((c) => ({ label: c.name, value: c.uuid })) ??
-      []
+      this.section()?.charges?.map((c) => ({
+        label: c.name,
+        value: c.uuid
+      })) ?? []
   );
   selectedChargeCaseUuid = computed(() => {
     return (
@@ -82,33 +84,33 @@ export class StudioMenuBarComponent {
     }
   }
 
-  selectChargeCase(chargeCase?: { label: string; value: string }) {
+  selectChargeCase(charge?: { label: string; value: string }) {
     this.launchChargeFunction(
       this.chargesService.setSelectedCharge.bind(this.chargesService),
-      chargeCase?.value ?? ''
+      charge?.value ?? ''
     );
   }
 
-  deleteChargeCase(chargeCase?: { label: string; value: string }) {
+  deleteChargeCase(charge?: { label: string; value: string }) {
     this.launchChargeFunction(
       this.chargesService.deleteCharge.bind(this.chargesService),
-      chargeCase?.value ?? ''
+      charge?.value ?? ''
     );
   }
 
-  duplicateChargeCase(chargeCase?: { label: string; value: string }) {
+  duplicateChargeCase(charge?: { label: string; value: string }) {
     this.launchChargeFunction(
       this.chargesService.duplicateCharge.bind(this.chargesService),
-      chargeCase?.value ?? ''
+      charge?.value ?? ''
     );
   }
 
   viewOrEditChargeCase(
-    chargeCase: { label: string; value: string },
+    charge: { label: string; value: string },
     mode: 'view' | 'edit'
   ) {
-    if (chargeCase?.value) {
-      this.openNewChargeModal.emit({ mode, uuid: chargeCase.value });
+    if (charge?.value) {
+      this.openNewChargeModal.emit({ mode, uuid: charge.value });
     }
   }
 }
