@@ -3351,7 +3351,7 @@
     <unit id="7632588300330135571">
       <segment state="initial">
         <source>Tangent aiming</source>
-        <target>Visée tangente</target>
+        <target>Visées tangentes</target>
       </segment>
     </unit>
     <unit id="7053072293973747391">
@@ -3375,19 +3375,19 @@
     <unit id="4449607081524618909">
       <segment state="initial">
         <source>All fields are mandatory for calculus setting</source>
-        <target>Tous les champs sont obligatoires pour le calcul</target>
+        <target>Toutes les données sont obligatoires pour le calcul du paramètre.</target>
       </segment>
     </unit>
     <unit id="4372504809293098890">
       <segment state="initial">
         <source> Left support </source>
-        <target> Support gauche </target>
+        <target> Support de gauche </target>
       </segment>
     </unit>
     <unit id="8566581441957557985">
       <segment state="initial">
         <source> Measured span length </source>
-        <target> Longueur de la portée mesurée </target>
+        <target> Longueur de portée mesurée </target>
       </segment>
     </unit>
     <unit id="5088621818536959590">
@@ -3399,7 +3399,7 @@
     <unit id="2147039543508081675">
       <segment state="initial">
         <source> Elevation diff. of measured attach. </source>
-        <target> Diff. d&apos;élévation de l&apos;accroche mesurée </target>
+        <target> Dénivelé des accr. mesuré </target>
       </segment>
     </unit>
     <unit id="571757945706473817">
@@ -3495,7 +3495,7 @@
     <unit id="6673871987217292573">
       <segment state="initial">
         <source>0.5% criterion</source>
-        <target>critère 0.5%</target>
+        <target>Critère 0.5%</target>
       </segment>
     </unit>
     <unit id="5479852114667655535">
@@ -3507,7 +3507,7 @@
     <unit id="3275519279768264405">
       <segment state="initial">
         <source>All fields are mandatory</source>
-        <target>Tous les champs sont obligatoires</target>
+        <target>Toutes les données sont obligatoires.</target>
       </segment>
     </unit>
     <unit id="1546856207674794665">
@@ -3555,19 +3555,19 @@
     <unit id="5198396305972397137">
       <segment state="initial">
         <source>Voltage</source>
-        <target>Tension</target>
+        <target>Tension électrique</target>
       </segment>
     </unit>
     <unit id="57361994969699356">
       <segment state="initial">
         <source>Span type</source>
-        <target>Type de portée</target>
+        <target>Type de canton</target>
       </segment>
     </unit>
     <unit id="3968142117594394855">
       <segment state="initial">
         <source>Phase number</source>
-        <target>Numéro de phase</target>
+        <target>Numéro de phase électrique</target>
       </segment>
     </unit>
     <unit id="5174359152122758396">
@@ -3597,7 +3597,7 @@
     <unit id="7445879416935051036">
       <segment state="initial">
         <source>Azimuth (clockwise — 0° North/South) </source>
-        <target>Azimut (sens horaire — 0° Nord/Sud) </target>
+        <target>Azimut (sens horaire - 0° Nord/Sud) </target>
       </segment>
     </unit>
     <unit id="3999096471992552378">
@@ -3723,19 +3723,19 @@
     <unit id="6365666220420105100">
       <segment state="initial">
         <source>Parameter calculation</source>
-        <target>Calcul du paramètre</target>
+        <target>Calcul de paramètre</target>
       </segment>
     </unit>
     <unit id="78111435214333571">
       <segment state="initial">
         <source>Temperature calculation</source>
-        <target>Calcul de la température</target>
+        <target>Calcul de température</target>
       </segment>
     </unit>
     <unit id="3344297091974909478">
       <segment state="initial">
         <source>Parameter at 15°C without wind</source>
-        <target>Paramètre à 15°C sans vent</target>
+        <target>Calcul du paramètre à 15°C sans vent</target>
       </segment>
     </unit>
     <unit id="7008439939460403347">
@@ -3789,19 +3789,13 @@
     <unit id="6161150769798431069">
       <segment state="initial">
         <source>Ambient temperature (°C)</source>
-        <target>Température ambiante (°C)</target>
+        <target>Température ambiante</target>
       </segment>
     </unit>
     <unit id="6054510843574670830">
       <segment state="initial">
         <source>Transit</source>
         <target>Transit</target>
-      </segment>
-    </unit>
-    <unit id="4699707792929776525">
-      <segment state="initial">
-        <source>Wind direction (degrees)</source>
-        <target>Direction du vent (degrés)</target>
       </segment>
     </unit>
     <unit id="2198417033022962728">
@@ -3828,10 +3822,10 @@
         <target>Flux solaire direct</target>
       </segment>
     </unit>
-    <unit id="4412456247511617977">
+    <unit id="4167437424910371998">
       <segment state="initial">
-        <source>Diffused + direct solar flux</source>
-        <target>Flux solaire diffus + direct</target>
+        <source> Diffused + direct solar flux </source>
+        <target> Flux solaire diffus + direct </target>
       </segment>
     </unit>
     <unit id="6052330236106770932">
@@ -3846,22 +3840,10 @@
         <target> Celui-ci ne sera pas pris en compte dans le calcul. </target>
       </segment>
     </unit>
-    <unit id="3911341609936417398">
-      <segment state="initial">
-        <source>Results :</source>
-        <target>Résultats :</target>
-      </segment>
-    </unit>
     <unit id="1629692616024358810">
       <segment state="initial">
         <source>Cable temperature</source>
         <target>Température du câble</target>
-      </segment>
-    </unit>
-    <unit id="606296209858589287">
-      <segment state="initial">
-        <source>Incertain cable temperature</source>
-        <target>Incertitude de la température du câble</target>
       </segment>
     </unit>
     <unit id="5327011370475378063">
@@ -3873,37 +3855,13 @@
     <unit id="4417879210680246482">
       <segment state="initial">
         <source>All fields are mandatory for parameter calculation at 15°C</source>
-        <target>Tous les champs sont obligatoires pour le calcul du paramètre à 15°C</target>
+        <target>Toutes les données sont obligatoires pour le calcul du paramètre à 15°C.</target>
       </segment>
     </unit>
     <unit id="3177280644106670130">
       <segment state="initial">
         <source>Update mode</source>
-        <target>Mode de mise à jour</target>
-      </segment>
-    </unit>
-    <unit id="2126467800557253860">
-      <segment state="initial">
-        <source>Parameter Papoto</source>
-        <target>Paramètre Papoto</target>
-      </segment>
-    </unit>
-    <unit id="8448503906316835592">
-      <segment state="initial">
-        <source>Parameter uncertainty Papoto</source>
-        <target>Incertitude du paramètre Papoto</target>
-      </segment>
-    </unit>
-    <unit id="7296322989741811450">
-      <segment state="initial">
-        <source>Cable temperature at 15°C</source>
-        <target>Température du câble à 15°C</target>
-      </segment>
-    </unit>
-    <unit id="5478452081175426719">
-      <segment state="initial">
-        <source> Cable temperature uncertainty at 15°C </source>
-        <target> Incertitude de la température du câble à 15°C </target>
+        <target>Mise à jour des valeurs</target>
       </segment>
     </unit>
     <unit id="4659361480509875242">
@@ -3915,7 +3873,7 @@
     <unit id="3044790599387992172">
       <segment state="initial">
         <source>Parameter at 15°C - uncertainty</source>
-        <target>Paramètre à 15°C - incertitude</target>
+        <target>Paramètre à 15°C moins l&apos;incertitude</target>
       </segment>
     </unit>
     <unit id="7477006503326420990">
@@ -3927,7 +3885,7 @@
     <unit id="8360415002925335916">
       <segment state="initial">
         <source>Parameter at 15°C + uncertainty</source>
-        <target>Paramètre à 15°C + incertitude</target>
+        <target>Paramètre à 15°C plus l&apos;incertitude</target>
       </segment>
     </unit>
     <unit id="3090494322722231527">
@@ -4212,12 +4170,6 @@
         <target>Deux portées</target>
       </segment>
     </unit>
-    <unit id="4443682149844413583">
-      <segment state="initial">
-        <source> Cable temperature at 15°C </source>
-        <target> Température du câble à 15°C </target>
-      </segment>
-    </unit>
     <unit id="5463714848868355880">
       <segment state="initial">
         <source>Tower</source>
@@ -4242,7 +4194,7 @@
           <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
         </source>
         <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">paramètre d&apos;incertitude</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude paramètre</pc>
         </target>
       </segment>
     </unit>
@@ -4258,24 +4210,10 @@
         <target>MT</target>
       </segment>
     </unit>
-    <unit id="5743768237912701445">
+    <unit id="1974465944242849442">
       <segment state="initial">
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Parameter uncertainty Papoto</pc>
-        </source>
-        <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Paramètre d&apos;incertitude Papoto</pc>
-        </target>
-      </segment>
-    </unit>
-    <unit id="2115305178603903655">
-      <segment state="initial">
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Cable temperature uncertainty at 15°C</pc>
-        </source>
-        <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude de la température du câble à 15°C</pc>
-        </target>
+        <source> Uncertainty cable temperature </source>
+        <target> Incertitude température du câble </target>
       </segment>
     </unit>
     <unit id="5939025002547986929">
@@ -4342,6 +4280,36 @@
       <segment state="initial">
         <source>VTL and guying saved</source>
         <target>Haubanage et VHL enregistrés</target>
+      </segment>
+    </unit>
+    <unit id="7384950308158654962">
+      <segment state="initial">
+        <source>Uncertainty cable temperature</source>
+        <target>Incertitude température du câble</target>
+      </segment>
+    </unit>
+    <unit id="2271602410584964197">
+      <segment state="initial">
+        <source>Calculate setting parameter at 15°C</source>
+        <target>Calcul du paramètre de réglage à 15°C</target>
+      </segment>
+    </unit>
+    <unit id="875667397146608317">
+      <segment state="initial">
+        <source>Parameter (Papoto, etc.)</source>
+        <target>Paramètre (Papoto, etc.)</target>
+      </segment>
+    </unit>
+    <unit id="7070151077841866543">
+      <segment state="initial">
+        <source> Uncertainty parameter </source>
+        <target> Incertitude paramètre </target>
+      </segment>
+    </unit>
+    <unit id="6408021470602185042">
+      <segment state="initial">
+        <source>All fields are mandatory for temperature calculation.</source>
+        <target>Toutes les données sont obligatoires pour le calcul de température.</target>
       </segment>
     </unit>
   </file>

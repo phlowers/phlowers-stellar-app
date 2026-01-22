@@ -5132,26 +5132,6 @@
         <source>Update mode</source>
       </segment>
     </unit>
-    <unit id="2126467800557253860">
-      <segment>
-        <source>Parameter Papoto</source>
-      </segment>
-    </unit>
-    <unit id="8448503906316835592">
-      <segment>
-        <source>Parameter uncertainty Papoto</source>
-      </segment>
-    </unit>
-    <unit id="7296322989741811450">
-      <segment>
-        <source>Cable temperature at 15°C</source>
-      </segment>
-    </unit>
-    <unit id="5478452081175426719">
-      <segment>
-        <source> Cable temperature uncertainty at 15°C </source>
-      </segment>
-    </unit>
     <unit id="4659361480509875242">
       <segment>
         <source> Results : </source>
@@ -5207,11 +5187,6 @@
         <source>Transit</source>
       </segment>
     </unit>
-    <unit id="4699707792929776525">
-      <segment>
-        <source>Wind direction (degrees)</source>
-      </segment>
-    </unit>
     <unit id="2198417033022962728">
       <segment>
         <source>Wind incidence (degrees)</source>
@@ -5232,9 +5207,9 @@
         <source>Direct solar flux</source>
       </segment>
     </unit>
-    <unit id="4412456247511617977">
+    <unit id="4167437424910371998">
       <segment>
-        <source>Diffused + direct solar flux</source>
+        <source> Diffused + direct solar flux </source>
       </segment>
     </unit>
     <unit id="6052330236106770932">
@@ -5247,19 +5222,9 @@
         <source> It won&apos;t be used in the calculation. </source>
       </segment>
     </unit>
-    <unit id="3911341609936417398">
-      <segment>
-        <source>Results :</source>
-      </segment>
-    </unit>
     <unit id="1629692616024358810">
       <segment>
         <source>Cable temperature</source>
-      </segment>
-    </unit>
-    <unit id="606296209858589287">
-      <segment>
-        <source>Incertain cable temperature</source>
       </segment>
     </unit>
     <unit id="5327011370475378063">
@@ -6012,11 +5977,6 @@
         <source>OFF</source>
       </segment>
     </unit>
-    <unit id="4443682149844413583">
-      <segment>
-        <source> Cable temperature at 15°C </source>
-      </segment>
-    </unit>
     <unit id="5093495639955235689">
       <segment>
         <source>Python logs deactivated</source>
@@ -6067,11 +6027,9 @@
         <source>Description/comment</source>
       </segment>
     </unit>
-    <unit id="2115305178603903655">
+    <unit id="1974465944242849442">
       <segment>
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Cable temperature uncertainty at 15°C</pc>
-        </source>
+        <source> Uncertainty cable temperature </source>
       </segment>
     </unit>
     <unit id="2900727946848099689">
@@ -6082,13 +6040,6 @@
     <unit id="3980974174191771572">
       <segment>
         <source>VTL (under chain)</source>
-      </segment>
-    </unit>
-    <unit id="5743768237912701445">
-      <segment>
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Parameter uncertainty Papoto</pc>
-        </source>
       </segment>
     </unit>
     <unit id="5939025002547986929">
@@ -6156,6 +6107,31 @@
     <unit id="922943791833170370">
       <segment>
         <source>Guying span</source>
+      </segment>
+    </unit>
+    <unit id="2271602410584964197">
+      <segment>
+        <source>Calculate setting parameter at 15°C</source>
+      </segment>
+    </unit>
+    <unit id="7384950308158654962">
+      <segment>
+        <source>Uncertainty cable temperature</source>
+      </segment>
+    </unit>
+    <unit id="7070151077841866543">
+      <segment>
+        <source> Uncertainty parameter </source>
+      </segment>
+    </unit>
+    <unit id="875667397146608317">
+      <segment>
+        <source>Parameter (Papoto, etc.)</source>
+      </segment>
+    </unit>
+    <unit id="6408021470602185042">
+      <segment>
+        <source>All fields are mandatory for temperature calculation.</source>
       </segment>
     </unit>
   </file>
