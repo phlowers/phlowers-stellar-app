@@ -10,8 +10,8 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
 import { Section, InitialCondition } from '@core/domain';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import {
   FormBuilder,
   FormGroup,
@@ -21,17 +21,17 @@ import {
 import {
   InitialConditionFunctionsInput,
   InitialConditionService
-} from '@core/services/initial-conditions/initial-condition.service';
+} from '@services/initial-conditions/initial-condition.service';
 import { MessageModule } from 'primeng/message';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { isNumber } from 'lodash';
-import { CablesService } from '@core/services/cables/cables.service';
+import { CablesService } from '@services/cables/cables.service';
 import { v4 as uuidv4 } from 'uuid';
-import { StudyModel } from '@core/domain';
+import { Study } from '@core/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { Subscription } from 'rxjs';
-import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 
 const validators = {
   name: ['', [Validators.required, Validators.maxLength(40)]],
@@ -72,7 +72,7 @@ export class InitialConditionModalComponent implements OnDestroy {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
   section = input.required<Section>();
-  study = input.required<StudyModel | null>();
+  study = input.required<Study | null>();
   mode = input.required<'view' | 'edit' | 'create'>();
   changeMode = output<'view' | 'edit' | 'create'>();
   addInitialCondition = output<InitialConditionFunctionsInput>();

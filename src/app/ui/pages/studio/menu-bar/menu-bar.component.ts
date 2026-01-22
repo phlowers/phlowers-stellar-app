@@ -1,8 +1,8 @@
 import { Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ChargesService } from '@core/services/charges/charges.service';
-import { Section, StudyModel } from '@core/domain';
+import { ChargesService } from '@services/charges/charges.service';
+import { Section, Study } from '@core/domain';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
@@ -30,7 +30,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 })
 export class StudioMenuBarComponent {
   section = input.required<Section | null>();
-  study = input.required<StudyModel | null>();
+  study = input.required<Study | null>();
   openNewChargeModal = output<{
     mode: 'create' | 'edit' | 'view';
     uuid: string | null;

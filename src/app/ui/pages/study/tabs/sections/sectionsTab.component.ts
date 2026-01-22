@@ -6,12 +6,12 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import { Section, InitialCondition, StudyModel } from '@core/domain';
+import { Section, InitialCondition, Study } from '@core/domain';
 import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { NewSectionModalComponent } from './newSectionModal/newSectionModal.component';
-import { CardComponent } from '@src/app/ui/shared/components/atoms/card/card.component';
+import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { Popover, PopoverModule } from 'primeng/popover';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectModule } from 'primeng/select';
@@ -21,14 +21,14 @@ import { DividerModule } from 'primeng/divider';
 import {
   DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput
-} from '@core/services/initial-conditions/initial-condition.service';
-import { CreateEditView } from '@src/app/ui/shared/types';
+} from '@services/initial-conditions/initial-condition.service';
+import { CreateEditView } from '@ui/shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
-import { createEmptySection } from '@src/app/core/services/sections/helpers';
+import { createEmptySection } from '@services/sections/helpers';
 import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 
 @Component({
   selector: 'app-sections-tab',
@@ -51,7 +51,7 @@ import { ChargesService } from '@src/app/core/services/charges/charges.service';
   styleUrl: './sectionsTab.component.scss'
 })
 export class SectionsTabComponent {
-  study = input<StudyModel | null>(null);
+  study = input<Study | null>(null);
   createOrUpdateSection = output<Section>();
   deleteSection = output<Section>();
   duplicateSection = output<Section>();

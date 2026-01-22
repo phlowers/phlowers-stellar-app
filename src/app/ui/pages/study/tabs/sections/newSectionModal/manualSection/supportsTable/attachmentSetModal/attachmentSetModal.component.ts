@@ -12,7 +12,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { Select } from 'primeng/select';
 import { CatalogAttachment, Section, Support } from '@core/domain';
 import { DividerModule } from 'primeng/divider';
-import { AttachmentService } from '@core/services/attachment/attachment.service';
+import { AttachmentService } from '@services/attachment/attachment.service';
 import { FormsModule } from '@angular/forms';
 import { UniquePipe } from '@ui/shared/service/autocomplete/unique.pipe';
 import { IconFieldModule } from 'primeng/iconfield';

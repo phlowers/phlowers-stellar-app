@@ -7,7 +7,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { StudiesService } from './studies.service';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { ProtoV4Support, ProtoV4Parameters } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { BehaviorSubject } from 'rxjs';

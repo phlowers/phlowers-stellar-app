@@ -10,8 +10,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { BehaviorSubject } from 'rxjs';
 import { StudiesComponent } from './studies.component';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { StudyModel } from '@core/domain';
+import { StudiesService } from '@services/studies/studies.service';
+import { Study } from '@core/domain';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('StudiesComponent', () => {
@@ -22,7 +22,7 @@ describe('StudiesComponent', () => {
   let mockActivatedRoute: jest.Mocked<ActivatedRoute>;
   let mockMessageService: jest.Mocked<MessageService>;
 
-  const mockStudy: StudyModel = {
+  const mockStudy: Study = {
     uuid: 'test-uuid-1',
     author_email: 'test@example.com',
     title: 'Test Study',
@@ -34,7 +34,7 @@ describe('StudiesComponent', () => {
     sections: []
   };
 
-  const mockStudy2: StudyModel = {
+  const mockStudy2: Study = {
     uuid: 'test-uuid-2',
     author_email: 'test2@example.com',
     title: 'Test Study 2',
@@ -49,7 +49,7 @@ describe('StudiesComponent', () => {
   beforeEach(async () => {
     // Create mock services
     mockStudiesService = {
-      studies: new BehaviorSubject<StudyModel[]>([]),
+      studies: new BehaviorSubject<Study[]>([]),
       ready: new BehaviorSubject<boolean>(false),
       getStudies: jest.fn(),
       duplicateStudy: jest.fn(),

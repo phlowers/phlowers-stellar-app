@@ -9,9 +9,9 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { PageTitleService } from '@ui/shared/service/page-title/page-title.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
-import { UserService } from '@src/app/core/services/user/user.service';
-import { UserModel } from '@core/domain';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { UserService } from '@services/user/user.service';
+import { User } from '@core/domain';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
 @Component({
   selector: 'app-topbar',
@@ -24,7 +24,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   public currentPageTitle = signal<string>('');
   public workerReady = signal<boolean>(true);
   public readonly workerError = signal<boolean>(false);
-  public user = signal<UserModel | null>(null);
+  public user = signal<User | null>(null);
 
   constructor(
     private readonly pageTitleService: PageTitleService,

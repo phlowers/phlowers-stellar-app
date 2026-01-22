@@ -10,7 +10,7 @@ import { Section } from './section.model';
 /**
  * Study domain model - represents a power line study
  */
-export interface StudyModel {
+export interface Study {
   uuid: string;
   author_email: string;
   title: string;
@@ -20,27 +20,4 @@ export interface StudyModel {
   updated_at_offline: string;
   saved: boolean;
   sections: Section[];
-}
-
-/**
- * Model for modifying study properties
- */
-export interface ModifyStudyModel {
-  author_email?: string | null;
-  title?: string | null;
-  description?: string | null;
-  created_at_offline?: string | null;
-  updated_at_offline?: string | null;
-}
-
-/**
- * Model for searching studies
- */
-export interface SearchStudyModel {
-  uuid?: string | null;
-  author_email?: string | null;
-  title?: string | null;
-  description?: string | null;
-  created_after?: string | null;
-  created_before?: string | null;
 }

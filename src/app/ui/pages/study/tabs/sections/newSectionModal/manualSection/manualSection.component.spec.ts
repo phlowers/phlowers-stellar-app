@@ -27,11 +27,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ManualSectionComponent } from './manualSection.component';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Section, Support, CatalogMaintenance, CatalogLine } from '@core/domain';
+import {
+  Section,
+  Support,
+  CatalogMaintenance,
+  CatalogLine
+} from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
-import { LinesService } from '@src/app/core/services/lines/lines.service';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
+import { LinesService } from '@services/lines/lines.service';
 import { MessageService } from 'primeng/api';
 
 // Mock child component

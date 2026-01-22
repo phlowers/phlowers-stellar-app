@@ -8,17 +8,9 @@
 // Domain models barrel export
 
 // Core domain models
-export type { UserModel } from './user.model';
-export type {
-  StudyModel,
-  ModifyStudyModel,
-  SearchStudyModel
-} from './study.model';
-export type {
-  Section,
-  ModifySectionModel,
-  SearchSectionModel
-} from './section.model';
+export type { User } from './user.model';
+export type { Study } from './study.model';
+export type { Section } from './section.model';
 export type { Support } from './support.model';
 export type { Charge, ClimateCharge } from './charge.model';
 export type { InitialCondition } from './initial-condition.model';

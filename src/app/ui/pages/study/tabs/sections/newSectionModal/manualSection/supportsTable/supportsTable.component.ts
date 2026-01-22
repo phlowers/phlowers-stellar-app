@@ -1,13 +1,13 @@
 import { Component, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
-import { CreateEditView } from '@src/app/ui/shared/types';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { CreateEditView } from '@ui/shared/types';
 import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
 import { Support, CatalogChain } from '@core/domain';
-import { ChainsService } from '@src/app/core/services/chains/chains.service';
+import { ChainsService } from '@services/chains/chains.service';
 import { SelectModule } from 'primeng/select';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -17,7 +17,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { isNumber, uniq } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
-import { AttachmentService } from '@core/services/attachment/attachment.service';
+import { AttachmentService } from '@services/attachment/attachment.service';
 import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 const calculateSupportNumber = (

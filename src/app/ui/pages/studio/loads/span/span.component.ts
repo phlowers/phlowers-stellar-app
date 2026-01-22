@@ -15,10 +15,10 @@ import { SelectModule } from 'primeng/select';
 import { Subscription } from 'rxjs';
 import { PlotService } from '../../services/plot.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { LoadsService } from '../../services/loads.service';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
-import { Task } from '@src/app/core/services/worker_python/tasks/types';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 
 interface SupportOption {
   label: string;

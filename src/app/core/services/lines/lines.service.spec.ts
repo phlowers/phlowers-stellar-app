@@ -12,7 +12,7 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { CatalogLineEntity } from '@core/infrastructure/database';
 import { LineCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';

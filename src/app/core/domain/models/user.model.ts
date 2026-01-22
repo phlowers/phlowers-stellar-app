@@ -5,13 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { StudyModel } from './study.model';
+import { Study } from './study.model';
 
 /**
  * User domain model representing application users
  */
-export interface UserModel {
+export interface User {
   uuid?: string;
   email: string;
-  studies?: StudyModel[];
+  studies?: Study[];
 }

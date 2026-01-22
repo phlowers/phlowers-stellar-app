@@ -15,7 +15,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Charge } from '@core/domain';
 import { v4 as uuidv4 } from 'uuid';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '../services/plot.service';
 import { defaultClimaticCharge } from '../loads/climate/climate.component';
 

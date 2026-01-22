@@ -13,10 +13,10 @@ import {
 } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
-import { createEmptySection, createEmptySupport } from '../sections/helpers';
-import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+import { createEmptySection, createEmptySupport } from '@services/sections/helpers';
+import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
 import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/new-study-modal.component';

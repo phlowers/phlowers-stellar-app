@@ -4,9 +4,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Support, CatalogChain } from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ChainsService } from '@src/app/core/services/chains/chains.service';
+import { ChainsService } from '@services/chains/chains.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
+import { AttachmentService } from '@services/attachment/attachment.service';
 
 // Mock child component
 @Component({

@@ -1,7 +1,7 @@
 import { Section } from '@core/domain';
 import { FieldMeasure, FieldMeasureOutputs } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { findMiddleSpan } from '@src/app/ui/shared/helpers/findMiddleSpan';
+import { findMiddleSpan } from '@ui/shared/helpers/findMiddleSpan';
 
 /**
  * Determines if the current date is in Daylight Saving Time (DST)

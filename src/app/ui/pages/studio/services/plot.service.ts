@@ -5,21 +5,21 @@ import {
   Injectable,
   signal
 } from '@angular/core';
-import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
+import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import {
   DataError,
   GetSectionOutput,
   Task,
   TaskError
-} from '@src/app/core/services/worker_python/tasks/types';
-import { Section, StudyModel } from '@core/domain';
+} from '@services/worker_python/tasks/types';
+import { Section, Study } from '@core/domain';
 import { Subscription } from 'rxjs';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { CablesService } from '@services/cables/cables.service';
 import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
-import { SectionService } from '@core/services/sections/section.service';
+import { SectionService } from '@services/sections/section.service';
 
 export const PLOT_ID = 'plotly-output';
 
@@ -77,7 +77,7 @@ export class PlotService {
   destroyRef = inject(DestroyRef);
   camera = signal<Camera | null>(null);
 
-  study = signal<StudyModel | null>(null);
+  study = signal<Study | null>(null);
   section = signal<Section | null>(null);
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions
