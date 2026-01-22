@@ -16,9 +16,8 @@
     <label for="spanSelect" i18n>Span</label>
     <p-select
       inputId="spanSelect"
-      [options]="plotService.getSpanOptions()"
+      [options]="spansOptions()"
       fluid
-      (onChange)="selectedSpan.set($event.value)"
       formControlName="spanSelect"
       optionLabel="label"
       optionValue="value"
@@ -26,25 +25,24 @@
   </div>
 
   <div>
-    <label for="supportNumber" i18n>Reference support</label>
+    <label for="referenceSupport" i18n>Reference support</label>
     <p-select
-      inputId="supportNumber"
-      [options]="supports()"
+      inputId="referenceSupport"
+      [options]="supportsOptions()"
       fluid
-      (onChange)="selectedSupport.set($event.value)"
-      formControlName="supportNumber"
+      formControlName="referenceSupport"
       optionLabel="label"
       optionValue="value"
     />
   </div>
 
   <div class="col-span-2">
-    <label for="loadType" i18n>Load type</label>
+    <label for="type" i18n>Load type</label>
     <p-select
-      inputId="loadType"
+      inputId="type"
       fluid
       [options]="loadTypeOptions"
-      formControlName="loadType"
+      formControlName="type"
       optionLabel="label"
       optionValue="value"
     />
@@ -55,31 +53,33 @@
   </div>
 
   <div>
-    <label for="pointLoadDist" i18n>Dist. to ref. support</label>
+    <label for="loadPosition" i18n>Dist. to ref. support</label>
     <p-inputgroup>
       <input
         pInputText
         type="number"
-        id="pointLoadDist"
+        id="loadPosition"
         fluid
-        formControlName="pointLoadDist"
+        formControlName="loadPosition"
       />
       <p-inputgroup-addon i18n>m</p-inputgroup-addon>
     </p-inputgroup>
   </div>
-  <div>
-    <label for="spanLoad" i18n>Load</label>
-    <p-inputgroup>
-      <input
-        pInputText
-        type="number"
-        id="spanLoad"
-        fluid
-        formControlName="spanLoad"
-      />
-      <p-inputgroup-addon i18n>N</p-inputgroup-addon>
-    </p-inputgroup>
-  </div>
+  @if (form.get('type')?.value === 'punctual') {
+    <div>
+      <label for="loadWeight" i18n>Load</label>
+      <p-inputgroup>
+        <input
+          pInputText
+          type="number"
+          id="loadWeight"
+          fluid
+          formControlName="loadWeight"
+        />
+        <p-inputgroup-addon i18n>N</p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+  }
 
   <div class="span__btns">
     <button
@@ -88,7 +88,7 @@
       type="button"
       aria-label="erase load case"
       i18n-aria-label
-      (click)="deleteLoadCase()"
+      (click)="deleteCharge()"
     >
       <app-icon icon="delete" />
     </button>
@@ -106,9 +106,9 @@
 
     <button
       app-btn
+      [disabled]="isFormInvalid()"
       type="button"
       (click)="calculateLoadCase()"
-      [disabled]="isFormInvalid()"
     >
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>

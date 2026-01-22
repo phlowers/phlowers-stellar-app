@@ -120,12 +120,35 @@ export class StudioTopToolbarComponent implements OnInit {
       value: string;
     }[]
   >([
-    { label: $localize`Loads`, value: 'loads' },
-    { label: $localize`Obstacles`, value: 'mesh' },
-    { label: $localize`Ground`, value: 'ground' },
-    { label: $localize`In line angle`, value: 'angleInLine' },
-    { label: $localize`Measure`, value: 'measure' }
+    { label: $localize`Loads`, value: 'loads' }
+    // { label: $localize`Obstacles`, value: 'mesh' },
+    // { label: $localize`Ground`, value: 'ground' },
+    // { label: $localize`In line angle`, value: 'angleInLine' },
+    // { label: $localize`Measure`, value: 'measure' }
   ]);
+
+  selectedDisplayOptions = computed(() =>
+    Object.keys(this.plotService.selectedDisplayOptions()).map((key) => ({
+      label: key,
+      value: key
+    }))
+  );
+
+  selectedDisplayValues = computed(() => {
+    const values = [];
+    for (const key in this.plotService.selectedDisplayOptions()) {
+      if ((this.plotService.selectedDisplayOptions() as any)[key]) {
+        values.push(key);
+      }
+    }
+    return values;
+  });
+
+  setSelectedDisplayOptions(displayOptions: string[]): void {
+    this.plotService.selectedDisplayOptions.set({
+      loads: displayOptions.includes('loads')
+    });
+  }
 
   displayOptionsStatus = signal<boolean>(false);
 
