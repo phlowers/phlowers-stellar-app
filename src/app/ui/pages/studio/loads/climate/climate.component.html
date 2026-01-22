@@ -131,7 +131,7 @@
       app-btn
       type="submit"
       btnStyle="outlined"
-      (click)="submitForm()"
+      (click)="saveForm()"
       [disabled]="!isFormValid()"
     >
       <app-icon icon="save" />
@@ -141,7 +141,7 @@
     <button
       app-btn
       type="button"
-      (click)="calculForm()"
+      (click)="calculateForm()"
       [disabled]="!isFormValid()"
     >
       <app-icon icon="rocket_launch" />

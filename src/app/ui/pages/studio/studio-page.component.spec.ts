@@ -161,7 +161,8 @@ describe('StudioPageComponent', () => {
       study.sections[1]
     );
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
-      endSupport: 2
+      endSupport: 2,
+      startSupport: 0
     });
   });
 

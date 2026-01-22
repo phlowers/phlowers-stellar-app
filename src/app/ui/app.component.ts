@@ -38,7 +38,7 @@ import { AttachmentService } from '@services/attachment/attachment.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { LoadsService } from './pages/studio/services/loads.service';
+import { LoadFormsService } from './pages/studio/loads/loadForms.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -78,7 +78,7 @@ const modules = [
     PlotService,
     AttachmentService,
     ChargesService,
-    LoadsService
+    LoadFormsService
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

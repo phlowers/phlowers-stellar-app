@@ -38,7 +38,8 @@ describe('NewChargeModalComponent (Jest)', () => {
         frontierSupportNumber: null,
         iceThicknessBefore: null,
         iceThicknessAfter: null
-      }
+      },
+      spanLoads: []
     }
   };
 

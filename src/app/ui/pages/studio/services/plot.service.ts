@@ -1,6 +1,7 @@
 import {
   computed,
   DestroyRef,
+  effect,
   inject,
   Injectable,
   signal
@@ -20,13 +21,16 @@ import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
+import { ChargeData } from '@src/app/core/domain/models/charge.model';
 
 export const PLOT_ID = 'plotly-output';
 
 export interface SpanOption {
   label: string;
-  value: number[];
-  supports: number[];
+  value: {
+    index: number;
+    uuid: string;
+  };
 }
 
 export const checkIfProjectionNeedRefresh = (
@@ -65,10 +69,19 @@ export const defaultPlotOptions: PlotOptions = {
   invert: false
 };
 
+const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
+  loads: true
+};
+
+export interface SelectedDisplayOptions {
+  loads: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class PlotService {
+  temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
   litData = signal<GetSectionOutput | null>(null);
   loading = signal<boolean>(true);
@@ -82,13 +95,25 @@ export class PlotService {
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions
   });
+  selectedDisplayOptions = signal<SelectedDisplayOptions>({
+    ...defaultSelectedDisplayOptions
+  });
   isSidebarOpen = signal(false);
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
     private readonly cableService: CablesService,
     private readonly sectionService: SectionService
-  ) {}
+  ) {
+    this.subscription = this.workerPythonService.ready$.subscribe((value) => {
+      this.workerReady.set(value);
+    });
+    effect(() => {
+      if (this.workerReady() && this.section()) {
+        this.refreshSection(this.section()!);
+      }
+    });
+  }
 
   resetAll = () => {
     this.purgePlot();
@@ -125,26 +150,6 @@ export class PlotService {
     }
   }
 
-  calculateCharge = async (
-    windPressure: number,
-    cableTemperature: number,
-    iceThickness: number
-  ) => {
-    this.refreshCamera();
-    this.loading.set(true);
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.changeClimateLoad,
-      {
-        windPressure,
-        cableTemperature,
-        iceThickness
-      }
-    );
-    this.litData.set(result);
-    this.error.set(error);
-    this.loading.set(false);
-  };
-
   refreshSection = async (section: Section) => {
     this.error.set(null);
     this.litData.set(null);
@@ -167,12 +172,6 @@ export class PlotService {
       Task.getLit,
       { section, cable }
     );
-    this.plotOptions.set({
-      ...this.plotOptions(),
-      startSupport: 0,
-      endSupport: section.supports.length - 1,
-      invert: false
-    });
     this.litData.set(result);
     this.error.set(error);
     this.loading.set(false);
@@ -225,14 +224,18 @@ export class PlotService {
   };
 
   getSpanOptions = computed<SpanOption[]>(() => {
-    const supportsLength =
-      this.plotOptions().endSupport - this.plotOptions().startSupport + 1;
-    const spanAmount = Math.max(supportsLength - 1, 0);
+    const startSupport = this.plotOptions().startSupport;
+    const endSupport = this.plotOptions().endSupport;
+    const supportsLength = endSupport - startSupport;
+    const spanAmount = Math.max(supportsLength, 0);
+    const supports = this.section()?.supports ?? [];
     // create an array the length of spanAmount
     const spans = Array.from({ length: spanAmount }, (_, index) => ({
-      label: `${index + 1} - ${index + 2}`,
-      value: [index, index + 1],
-      supports: [index, index + 1]
+      label: `${index + startSupport + 1} - ${index + startSupport + 2}`,
+      value: {
+        index: index,
+        uuid: supports[index + startSupport]?.uuid ?? ''
+      }
     }));
     return spans;
   });
