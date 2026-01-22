@@ -33,6 +33,12 @@ dd {
 
     .updateMode {
       grid-area: updateMode;
+
+      @apply flex items-center justify-start gap-2;
+
+      p {
+        padding: 0.125rem 0.25rem;
+      }
     }
 
     .parameterPapoto {

@@ -29,7 +29,7 @@
     <p-inputgroup-addon>A</p-inputgroup-addon>
   </p-inputgroup>
 
-  <dl class="contents">
+  <dl class="contents with-mt-labels">
     <dt for="windSpeed" i18n class="windSpeed__label">Wind speed</dt>
     <dd class="windSpeed__value">
       {{ measureData().windSpeed }}
@@ -38,9 +38,7 @@
 
     <dt id="windDirection" i18n class="windDirection__label">Wind direction</dt>
     <dd class="windDirection__value">{{ localizedWindDirection() }}</dd>
-  </dl>
 
-  <dl class="contents">
     <dt class="windIncidence__label">
       <p id="windIncidenceLabel" class="mb-0" i18n>Wind incidence (degrees)</p>
       <p-selectbutton

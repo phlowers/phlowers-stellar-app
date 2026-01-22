@@ -39,6 +39,10 @@ dd {
       '. . . . measuredDiffusedPlusDirectSolarFluxInfo';
     row-gap: 0rem;
 
+    .with-mt-labels dt {
+      @apply mt-3;
+    }
+
     [class*='__label'] {
       align-self: end;
     }
@@ -99,7 +103,7 @@ dd {
     .solar {
       grid-area: solar;
       @apply mb-3;
-      @extend %heading-s;
+      @extend %heading-xs;
       color: var(--star-dust-950);
     }
 
@@ -156,13 +160,14 @@ dd {
     border-color: var(--star-dust-300);
 
     &__title {
-      @apply mt-4 mb-0;
+      @apply mt-3 mb-0;
       @extend %heading-s;
       color: var(--star-dust-950);
     }
 
     &__list {
       @extend %tools-grid-layout;
+      @apply mt-3;
       grid-template-areas:
         'cableTemperature uncertaintyCableTemperature . . .'
         'solarFlux . . . .';
