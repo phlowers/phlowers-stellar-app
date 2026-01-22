@@ -172,12 +172,12 @@ describe('ToolsDialogService', () => {
       const initStyle = service.getInitDialogStyle();
       const mainStyle = service.getMainDialogStyle();
       expect(initStyle).toEqual({
-        'min-width': '29rem',
+        width: '29rem',
         'max-width': '90%'
       });
       expect(mainStyle).toEqual({
-        'min-width': '90%',
-        'max-width': '72.5rem'
+        width: '72.5rem',
+        'max-width': '90%'
       });
     });
 
@@ -187,12 +187,12 @@ describe('ToolsDialogService', () => {
       const initStyle = service.getInitDialogStyle();
       const mainStyle = service.getMainDialogStyle();
       expect(initStyle).toEqual({
-        'min-width': '29rem',
+        width: '29rem',
         'max-width': '90%'
       });
       expect(mainStyle).toEqual({
-        'min-width': '90%',
-        'max-width': '72.5rem'
+        width: '72.5rem',
+        'max-width': '90%'
       });
     });
 
@@ -212,12 +212,12 @@ describe('ToolsDialogService', () => {
       const initStyleDuringClose = service.getInitDialogStyle();
       const mainStyleDuringClose = service.getMainDialogStyle();
       expect(initStyleDuringClose).toEqual({
-        'min-width': '29rem',
+        width: '29rem',
         'max-width': '90%'
       });
       expect(mainStyleDuringClose).toEqual({
-        'min-width': '90%',
-        'max-width': '72.5rem'
+        width: '72.5rem',
+        'max-width': '90%'
       });
     });
   });
