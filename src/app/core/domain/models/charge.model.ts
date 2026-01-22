@@ -42,3 +42,16 @@ export interface SpanLoad {
   supportUuid: string;
   referenceSupport: 'LEFT' | 'RIGHT';
 }
+
+/**
+ * Charge domain model - represents load conditions
+ */
+export interface Charge {
+  uuid: string;
+  name: string;
+  personnelPresence: boolean;
+  description: string;
+  data: {
+    climate: ClimateCharge;
+  };
+}
