@@ -4,15 +4,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+export interface ChargeData {
+  climate: ClimateCharge;
+  spanLoads: SpanLoad[];
+}
 
-/**
- * Climate charge data for calculations
- */
 export interface ClimateCharge {
-  windPressure: number;
-  cableTemperature: number;
+  windPressure: number | null;
+  cableTemperature: number | null;
   symmetryType: string;
-  iceThickness: number;
+  iceThickness: number | null;
   frontierSupportNumber: null;
   iceThicknessBefore: null;
   iceThicknessAfter: null;
@@ -26,7 +27,18 @@ export interface Charge {
   name: string;
   personnelPresence: boolean;
   description: string;
-  data: {
-    climate: ClimateCharge;
-  };
+  data: ChargeData;
+}
+
+export enum LoadType {
+  PUNCTUAL = 'punctual',
+  MARKING = 'marking'
+}
+
+export interface SpanLoad {
+  loadPosition: number;
+  loadWeight: number;
+  type: LoadType;
+  supportUuid: string;
+  referenceSupport: 'LEFT' | 'RIGHT';
 }
