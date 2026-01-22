@@ -76,7 +76,11 @@
 
   @if (staffIsPresent() !== undefined) {
     <p class="text-s-600 flex items-center gap-2 mb-0">
-      <app-icon class="text-primary" icon="engineering" [fill]="true" />
+      <app-icon
+        [class]="staffIsPresent() ? 'icon-present' : 'icon-absent'"
+        icon="engineering"
+        [fill]="true"
+      />
       @if (staffIsPresent() === true) {
         <ng-container i18n>Staff is present</ng-container>
       } @else if (staffIsPresent() === false) {
