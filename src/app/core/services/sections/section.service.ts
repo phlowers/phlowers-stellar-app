@@ -25,7 +25,10 @@ export class SectionService {
    * @param section The section to create or update
    * @returns Promise that resolves when the operation is complete
    */
-  async createOrUpdateSection(study: StudyEntity, section: Section): Promise<void> {
+  async createOrUpdateSection(
+    study: StudyEntity,
+    section: Section
+  ): Promise<void> {
     const existingSection = study.sections.find(
       (s) => s?.uuid === section?.uuid
     );
@@ -65,7 +68,10 @@ export class SectionService {
    * @param section The section to duplicate
    * @returns Promise that resolves when the operation is complete
    */
-  async duplicateSection(study: StudyEntity, section: Section): Promise<Section> {
+  async duplicateSection(
+    study: StudyEntity,
+    section: Section
+  ): Promise<Section> {
     const newSection = {
       ...section,
       uuid: uuidv4(),

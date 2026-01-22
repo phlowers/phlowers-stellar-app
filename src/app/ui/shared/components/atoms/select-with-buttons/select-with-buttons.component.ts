@@ -26,9 +26,9 @@ import { ButtonComponent } from '../button/button.component';
   templateUrl: './select-with-buttons.component.html',
   styleUrl: './select-with-buttons.component.scss'
 })
-export class SelectWithButtonsComponent<
-  T extends Record<string, any>
-> implements OnInit {
+export class SelectWithButtonsComponent<T extends Record<string, any>>
+  implements OnInit
+{
   @ViewChild('selectComponent') selectComponent!: Select;
   options = input.required<T[]>();
   selectedOption = input.required<string | undefined | null>();
