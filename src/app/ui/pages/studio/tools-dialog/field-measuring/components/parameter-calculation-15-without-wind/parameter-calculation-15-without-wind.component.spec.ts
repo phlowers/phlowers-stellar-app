@@ -173,7 +173,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       expect.any(String),
       {
         parameterPapoto: 1700,
-        parameterUncertaintyPapoto: 12,
+        parameterUncertaintyPapoto: null,
         cableTemperature15C: 45,
         cableTemperatureUncertainty15C: 3
       }

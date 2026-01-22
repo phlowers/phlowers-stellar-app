@@ -29,7 +29,8 @@ describe('StudioTopToolbarComponent', () => {
         invert: false
       }),
       loading: signal(false),
-      plotOptionsChange: jest.fn()
+      plotOptionsChange: jest.fn(),
+      selectedDisplayOptions: signal({ loads: false })
     } as any;
 
     // Mock ToolsDialogService
@@ -94,14 +95,8 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should initialize displayOptions signal', () => {
       const options = component.displayOptions();
-      expect(options).toHaveLength(5);
-      expect(options.map((o) => o.value)).toEqual([
-        'loads',
-        'mesh',
-        'ground',
-        'angleInLine',
-        'measure'
-      ]);
+      expect(options).toHaveLength(1);
+      expect(options.map((o) => o.value)).toEqual(['loads']);
     });
 
     it('should initialize toolsItems with 7 items', () => {

@@ -140,14 +140,20 @@ export class ParameterCalculation15WithoutWindComponent {
       this.parameter15CError.set(true);
       return;
     }
+    const isManual = data.updateMode15C === 'manual';
+    const manualData = data.manualParameterCalculation15CWithoutWind;
+    const manualDataToSend = {
+      parameterPapoto: manualData?.parameterPapoto || null,
+      parameterUncertaintyPapoto:
+        manualData?.parameterUncertaintyPapoto || null,
+      cableTemperature15C: manualData?.cableTemperature15C || null,
+      cableTemperatureUncertainty15C:
+        manualData?.cableTemperatureUncertainty15C || null
+    };
+    const dataToSend = isManual ? manualDataToSend : data;
     const { result, error } = await this.workerPythonService.runTask(
       Task.calculateParameter15CWithoutWind,
-      {
-        parameterPapoto: data.parameterPapoto!,
-        parameterUncertaintyPapoto: data.parameterUncertaintyPapoto!,
-        cableTemperature15C: data.cableTemperature15C!,
-        cableTemperatureUncertainty15C: data.cableTemperatureUncertainty15C!
-      }
+      dataToSend
     );
     if (error) {
       this.parameter15CError.set(true);

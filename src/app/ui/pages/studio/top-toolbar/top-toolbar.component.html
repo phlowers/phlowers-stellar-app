@@ -43,13 +43,15 @@
     [filter]="false"
     [showToggleAll]="false"
     [options]="displayOptions()"
+    [ngModel]="selectedDisplayValues()"
+    (ngModelChange)="setSelectedDisplayOptions($event)"
     optionLabel="label"
+    optionValue="value"
     class="toolbar-multiselect"
     [class.toolbar-multiselect--active]="displayOptionsStatus()"
     panelStyleClass="toolbar-multiselect-overlay"
     (onPanelShow)="displayOptionsStatus.set(true)"
     (onPanelHide)="displayOptionsStatus.set(false)"
-    optionDisabled="label"
   >
     <ng-template #selecteditems let-value>
       @if (value?.length) {

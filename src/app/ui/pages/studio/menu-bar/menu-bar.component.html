@@ -26,11 +26,11 @@
 
   <hr class="menubar__separator" />
 
-  @if (chargeCases().length > 0) {
+  @if (charges().length > 0) {
     <div class="flex items-center gap-1">
       <p class="mb-0 text-s-600 whitespace-nowrap" i18n>CC :</p>
       <app-select-with-buttons
-        [options]="chargeCases()"
+        [options]="charges()"
         [selectedOption]="selectedChargeCaseUuid()"
         (selectOption)="selectChargeCase($event)"
         (deleteOption)="deleteChargeCase($event)"

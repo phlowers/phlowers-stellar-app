@@ -25,8 +25,8 @@ const tasks: Record<
     function: 'init_section',
     externalPackages: []
   },
-  [Task.changeClimateLoad]: {
-    function: 'change_climate_load',
+  [Task.changeState]: {
+    function: 'change_state',
     externalPackages: []
   },
   [Task.getSupportCoordinates]: {
@@ -35,10 +35,6 @@ const tasks: Record<
   },
   [Task.refreshProjection]: {
     function: 'refresh_projection',
-    externalPackages: []
-  },
-  [Task.addLoad]: {
-    function: 'add_load',
     externalPackages: []
   },
   [Task.calculatePapoto]: {

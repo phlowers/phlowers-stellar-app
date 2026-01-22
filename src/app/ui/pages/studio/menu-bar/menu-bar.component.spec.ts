@@ -34,7 +34,8 @@ describe('StudioMenuBarComponent', () => {
         frontierSupportNumber: null,
         iceThicknessBefore: null,
         iceThicknessAfter: null
-      }
+      },
+      spanLoads: []
     }
   };
 
@@ -44,6 +45,7 @@ describe('StudioMenuBarComponent', () => {
     personnelPresence: false,
     description: 'Test charge 2',
     data: {
+      spanLoads: [],
       climate: {
         windPressure: 0,
         cableTemperature: 15,
@@ -203,15 +205,15 @@ describe('StudioMenuBarComponent', () => {
     });
   });
 
-  describe('chargeCases computed signal', () => {
+  describe('charges computed signal', () => {
     it('should map charges to label-value pairs', () => {
-      const chargeCases = component.chargeCases();
-      expect(chargeCases).toHaveLength(2);
-      expect(chargeCases[0]).toEqual({
+      const charges = component.charges();
+      expect(charges).toHaveLength(2);
+      expect(charges[0]).toEqual({
         label: 'Charge 1',
         value: 'charge-uuid-1'
       });
-      expect(chargeCases[1]).toEqual({
+      expect(charges[1]).toEqual({
         label: 'Charge 2',
         value: 'charge-uuid-2'
       });
@@ -221,8 +223,8 @@ describe('StudioMenuBarComponent', () => {
       fixture.componentRef.setInput('section', null);
       fixture.detectChanges();
 
-      const chargeCases = component.chargeCases();
-      expect(chargeCases).toEqual([]);
+      const charges = component.charges();
+      expect(charges).toEqual([]);
     });
 
     it('should return empty array when charges is undefined', () => {
@@ -236,8 +238,8 @@ describe('StudioMenuBarComponent', () => {
       );
       fixture.detectChanges();
 
-      const chargeCases = component.chargeCases();
-      expect(chargeCases).toEqual([]);
+      const charges = component.charges();
+      expect(charges).toEqual([]);
     });
 
     it('should return empty array when charges is empty', () => {
@@ -248,13 +250,13 @@ describe('StudioMenuBarComponent', () => {
       fixture.componentRef.setInput('section', sectionWithEmptyCharges);
       fixture.detectChanges();
 
-      const chargeCases = component.chargeCases();
-      expect(chargeCases).toEqual([]);
+      const charges = component.charges();
+      expect(charges).toEqual([]);
     });
 
     it('should update reactively when section changes', () => {
-      let chargeCases = component.chargeCases();
-      expect(chargeCases).toHaveLength(2);
+      let charges = component.charges();
+      expect(charges).toHaveLength(2);
 
       const newSection: Section = {
         ...mockSection,
@@ -263,8 +265,8 @@ describe('StudioMenuBarComponent', () => {
       fixture.componentRef.setInput('section', newSection);
       fixture.detectChanges();
 
-      chargeCases = component.chargeCases();
-      expect(chargeCases).toHaveLength(1);
+      charges = component.charges();
+      expect(charges).toHaveLength(1);
     });
   });
 
@@ -493,9 +495,9 @@ describe('StudioMenuBarComponent', () => {
 
   describe('selectChargeCase', () => {
     it('should call setSelectedCharge with charge case value', () => {
-      const chargeCase = { label: 'Charge 1', value: 'charge-uuid-1' };
+      const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
 
-      component.selectChargeCase(chargeCase);
+      component.selectChargeCase(charge);
 
       expect(mockChargesService.setSelectedCharge).toHaveBeenCalledWith(
         'study-uuid-1',
@@ -504,27 +506,27 @@ describe('StudioMenuBarComponent', () => {
       );
     });
 
-    it('should not call setSelectedCharge when chargeCase is undefined', () => {
+    it('should not call setSelectedCharge when charge is undefined', () => {
       component.selectChargeCase(undefined);
 
       expect(mockChargesService.setSelectedCharge).not.toHaveBeenCalled();
     });
 
-    it('should not call setSelectedCharge when chargeCase value is undefined', () => {
-      const chargeCase = {
+    it('should not call setSelectedCharge when charge value is undefined', () => {
+      const charge = {
         label: 'Charge 1',
         value: undefined as unknown as string
       };
 
-      component.selectChargeCase(chargeCase);
+      component.selectChargeCase(charge);
 
       expect(mockChargesService.setSelectedCharge).not.toHaveBeenCalled();
     });
 
-    it('should not call setSelectedCharge when chargeCase value is empty string', () => {
-      const chargeCase = { label: 'Charge 1', value: '' };
+    it('should not call setSelectedCharge when charge value is empty string', () => {
+      const charge = { label: 'Charge 1', value: '' };
 
-      component.selectChargeCase(chargeCase);
+      component.selectChargeCase(charge);
 
       expect(mockChargesService.setSelectedCharge).not.toHaveBeenCalled();
     });
@@ -532,9 +534,9 @@ describe('StudioMenuBarComponent', () => {
 
   describe('deleteChargeCase', () => {
     it('should call deleteCharge with charge case value', () => {
-      const chargeCase = { label: 'Charge 1', value: 'charge-uuid-1' };
+      const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
 
-      component.deleteChargeCase(chargeCase);
+      component.deleteChargeCase(charge);
 
       expect(mockChargesService.deleteCharge).toHaveBeenCalledWith(
         'study-uuid-1',
@@ -543,16 +545,16 @@ describe('StudioMenuBarComponent', () => {
       );
     });
 
-    it('should not call deleteCharge when chargeCase is undefined', () => {
+    it('should not call deleteCharge when charge is undefined', () => {
       component.deleteChargeCase(undefined);
 
       expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
     });
 
-    it('should not call deleteCharge when chargeCase value is empty string', () => {
-      const chargeCase = { label: 'Charge 1', value: '' };
+    it('should not call deleteCharge when charge value is empty string', () => {
+      const charge = { label: 'Charge 1', value: '' };
 
-      component.deleteChargeCase(chargeCase);
+      component.deleteChargeCase(charge);
 
       expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
     });
@@ -560,9 +562,9 @@ describe('StudioMenuBarComponent', () => {
 
   describe('duplicateChargeCase', () => {
     it('should call duplicateCharge with charge case value', () => {
-      const chargeCase = { label: 'Charge 1', value: 'charge-uuid-1' };
+      const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
 
-      component.duplicateChargeCase(chargeCase);
+      component.duplicateChargeCase(charge);
 
       expect(mockChargesService.duplicateCharge).toHaveBeenCalledWith(
         'study-uuid-1',
@@ -571,16 +573,16 @@ describe('StudioMenuBarComponent', () => {
       );
     });
 
-    it('should not call duplicateCharge when chargeCase is undefined', () => {
+    it('should not call duplicateCharge when charge is undefined', () => {
       component.duplicateChargeCase(undefined);
 
       expect(mockChargesService.duplicateCharge).not.toHaveBeenCalled();
     });
 
-    it('should not call duplicateCharge when chargeCase value is empty string', () => {
-      const chargeCase = { label: 'Charge 1', value: '' };
+    it('should not call duplicateCharge when charge value is empty string', () => {
+      const charge = { label: 'Charge 1', value: '' };
 
-      component.duplicateChargeCase(chargeCase);
+      component.duplicateChargeCase(charge);
 
       expect(mockChargesService.duplicateCharge).not.toHaveBeenCalled();
     });
@@ -589,9 +591,9 @@ describe('StudioMenuBarComponent', () => {
   describe('viewOrEditChargeCase', () => {
     it('should emit openNewChargeModal with view mode and charge uuid', () => {
       const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
-      const chargeCase = { label: 'Charge 1', value: 'charge-uuid-1' };
+      const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
 
-      component.viewOrEditChargeCase(chargeCase, 'view');
+      component.viewOrEditChargeCase(charge, 'view');
 
       expect(emitSpy).toHaveBeenCalledWith({
         mode: 'view',
@@ -601,9 +603,9 @@ describe('StudioMenuBarComponent', () => {
 
     it('should emit openNewChargeModal with edit mode and charge uuid', () => {
       const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
-      const chargeCase = { label: 'Charge 1', value: 'charge-uuid-1' };
+      const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
 
-      component.viewOrEditChargeCase(chargeCase, 'edit');
+      component.viewOrEditChargeCase(charge, 'edit');
 
       expect(emitSpy).toHaveBeenCalledWith({
         mode: 'edit',
@@ -611,28 +613,28 @@ describe('StudioMenuBarComponent', () => {
       });
     });
 
-    it('should not emit when chargeCase value is empty string', () => {
+    it('should not emit when charge value is empty string', () => {
       const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
-      const chargeCase = { label: 'Charge 1', value: '' };
+      const charge = { label: 'Charge 1', value: '' };
 
-      component.viewOrEditChargeCase(chargeCase, 'view');
+      component.viewOrEditChargeCase(charge, 'view');
 
       expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('should not emit when chargeCase value is undefined', () => {
+    it('should not emit when charge value is undefined', () => {
       const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
-      const chargeCase = {
+      const charge = {
         label: 'Charge 1',
         value: undefined as unknown as string
       };
 
-      component.viewOrEditChargeCase(chargeCase, 'view');
+      component.viewOrEditChargeCase(charge, 'view');
 
       expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('should not emit when chargeCase is undefined', () => {
+    it('should not emit when charge is undefined', () => {
       const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
 
       component.viewOrEditChargeCase(
@@ -656,8 +658,8 @@ describe('StudioMenuBarComponent', () => {
       );
       fixture.detectChanges();
 
-      const chargeCases = component.chargeCases();
-      expect(chargeCases).toEqual([]);
+      const charges = component.charges();
+      expect(charges).toEqual([]);
     });
 
     it('should handle study with empty sections array', () => {
@@ -697,10 +699,10 @@ describe('StudioMenuBarComponent', () => {
       fixture.componentRef.setInput('section', sectionWithDuplicateNames);
       fixture.detectChanges();
 
-      const chargeCases = component.chargeCases();
-      expect(chargeCases).toHaveLength(2);
-      expect(chargeCases[0].label).toBe('Charge 1');
-      expect(chargeCases[1].label).toBe('Charge 1');
+      const charges = component.charges();
+      expect(charges).toHaveLength(2);
+      expect(charges[0].label).toBe('Charge 1');
+      expect(charges[1].label).toBe('Charge 1');
     });
   });
 });

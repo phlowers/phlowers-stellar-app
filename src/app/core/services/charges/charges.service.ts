@@ -189,4 +189,24 @@ export class ChargesService {
 
     return section.charges?.find((c) => c?.uuid === chargeUuid) ?? null;
   }
+
+  /**
+   * Get the selected charge case by uuid
+   * @param studyUuid The uuid of the study containing the section
+   * @param sectionUuid The uuid of the section containing the charge
+   * @returns The selected charge case
+   */
+  async getSelectedChargeCase(
+    studyUuid: string,
+    sectionUuid: string
+  ): Promise<Charge | null> {
+    const { section } = await this.getStudyAndSection(studyUuid, sectionUuid);
+    if (!section.selected_charge_uuid) {
+      return null;
+    }
+    return (
+      section.charges?.find((c) => c?.uuid === section.selected_charge_uuid) ??
+      null
+    );
+  }
 }

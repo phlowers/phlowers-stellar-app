@@ -21,7 +21,8 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
   imports: [SectionPlotComponent, ProgressSpinnerModule]
 })
 export class StudioComponent implements OnInit, OnDestroy {
-  section = input.required<Section | null>();
+  section = input<Section | null>();
+  isPreview = input.required<boolean>();
   isSupportZoom = input.required<boolean>();
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
@@ -46,7 +47,11 @@ export class StudioComponent implements OnInit, OnDestroy {
     public readonly plotService: PlotService
   ) {
     effect(() => {
-      if (this.workerReady() && this.section()) {
+      if (this.workerReady() && this.section() && this.isPreview()) {
+        this.plotService.plotOptionsChange({
+          startSupport: 0,
+          endSupport: this.section()!.supports.length - 1
+        });
         this.plotService.refreshSection(this.section()!);
       }
     });
