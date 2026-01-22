@@ -1,13 +1,12 @@
-import { CatalogCable, Section } from '@core/domain';
+import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@core/domain';
 import { View } from '@ui/shared/components/studio/section/helpers/types';
 
 export enum Task {
   runTests = 'runTests',
   getLit = 'getLit',
-  changeClimateLoad = 'changeClimateLoad',
+  changeState = 'changeState',
   refreshProjection = 'refreshProjection',
   getSupportCoordinates = 'getSupportCoordinates',
-  addLoad = 'addLoad',
   calculatePapoto = 'calculatePapoto',
   calculateGuying = 'calculateGuying',
   setLogLevel = 'setLogLevel',
@@ -54,10 +53,9 @@ export enum LogLevel {
 export interface TaskInputs {
   [Task.getLit]: { section: Section; cable: CatalogCable };
   [Task.runTests]: undefined;
-  [Task.changeClimateLoad]: {
-    windPressure: number;
-    cableTemperature: number;
-    iceThickness: number;
+  [Task.changeState]: {
+    climate: ClimateCharge;
+    spanLoads: SpanLoad[];
   };
   [Task.refreshProjection]: {
     startSupport: number;
@@ -67,11 +65,6 @@ export interface TaskInputs {
   [Task.getSupportCoordinates]: {
     coordinates: (number | undefined)[][];
     attachmentSetNumbers: number[];
-  };
-  [Task.addLoad]: {
-    supportNumber: number;
-    pointLoadDist: number;
-    spanLoad: number;
   };
   [Task.calculatePapoto]: {
     spanLength: number;
@@ -104,25 +97,22 @@ export interface TaskInputs {
     skyCover: string;
   };
   [Task.calculateParameter15CWithoutWind]: {
-    parameterPapoto: number;
-    parameterUncertaintyPapoto: number;
-    cableTemperature15C: number;
-    cableTemperatureUncertainty15C: number;
+    parameterPapoto: number | null;
+    parameterUncertaintyPapoto: number | null;
+    cableTemperature15C: number | null;
+    cableTemperatureUncertainty15C: number | null;
   };
 }
 
 export interface TaskOutputs {
   [Task.getLit]: GetSectionOutput;
   [Task.runTests]: undefined;
-  [Task.changeClimateLoad]: GetSectionOutput;
+  [Task.changeState]: GetSectionOutput;
   [Task.refreshProjection]: GetSectionOutput;
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
     text_display_points: number[][];
     text_to_display: number[];
-  };
-  [Task.addLoad]: {
-    coordinates: number[];
   };
   [Task.calculatePapoto]: {
     parameter: number;

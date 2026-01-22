@@ -1,4 +1,4 @@
-import { Component, computed, OnDestroy, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -16,13 +16,13 @@ import { Subscription } from 'rxjs';
 import { PlotService } from '../../services/plot.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ChargesService } from '@services/charges/charges.service';
-import { LoadsService } from '../../services/loads.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
+import { LoadFormsService } from '../loadForms.service';
+import { emptySpanLoad } from '../helpers';
 
 interface SupportOption {
   label: string;
-  value: number;
+  value: 'LEFT' | 'RIGHT';
 }
 
 @Component({
@@ -43,101 +43,106 @@ interface SupportOption {
 })
 export class SpanComponent implements OnDestroy {
   private readonly subscriptions = new Subscription();
+  private readonly fb = inject(FormBuilder);
 
-  readonly spans = computed(() => {
+  readonly spansOptions = computed(() => {
     return this.plotService.getSpanOptions();
   });
 
-  readonly supports = computed<SupportOption[]>(() => {
-    return (
-      this.selectedSpan()?.map((support) => ({
-        label: (support + 1).toString(),
-        value: support
-      })) || []
-    );
+  readonly supportsOptions = signal<SupportOption[]>([]);
+
+  form: FormGroup = this.fb.group({
+    spanSelect: [null, Validators.required],
+    referenceSupport: [{ value: null, disabled: true }, Validators.required],
+    type: [null, Validators.required],
+    loadWeight: [null],
+    cableLengthChange: [null],
+    loadPosition: [null]
   });
-
-  selectedSpan = signal<number[] | null>(null);
-  selectedSupport = signal<number | null>(null);
-
-  form: FormGroup;
 
   loadTypeOptions = [
     { label: $localize`Punctual`, value: 'punctual' },
     { label: $localize`Marking`, value: 'marking' }
   ];
 
+  findSelectedLoad = () => {
+    const uuidToFind = this.form.get('spanSelect')?.value?.uuid;
+    let load = undefined;
+    if (uuidToFind) {
+      load = this.plotService.temporaryLoadData?.spanLoads.find(
+        (spanLoad) => spanLoad.supportUuid === uuidToFind
+      );
+    }
+    return load;
+  };
+
   constructor(
-    private readonly fb: FormBuilder,
     public readonly plotService: PlotService,
     public readonly chargesService: ChargesService,
-    public readonly loadsService: LoadsService,
+    public readonly loadFormsService: LoadFormsService,
     public readonly workerPythonService: WorkerPythonService
   ) {
-    this.form = this.fb.group({
-      spanSelect: [null, Validators.required],
-      supportNumber: [{ value: null, disabled: true }, Validators.required],
-      loadType: [null, Validators.required],
-      spanLoad: [null],
-      cableLengthChange: [null],
-      pointLoadDist: [null]
-    });
-
     this.subscriptions.add(
-      this.form.get('spanSelect')?.valueChanges.subscribe((value) => {
-        this.selectedSpan.set(value);
-        // Enable supportNumber when a span is selected, disable when cleared
-        if (value) {
-          this.form.get('supportNumber')?.enable();
-        } else {
-          this.form.get('supportNumber')?.disable();
-        }
-      })
+      this.form
+        .get('spanSelect')
+        ?.valueChanges.subscribe((value: { index: number; uuid: string }) => {
+          this.supportsOptions.set([
+            {
+              label: (value.index + 1).toString(),
+              value: 'LEFT'
+            },
+            {
+              label: (value.index + 2).toString(),
+              value: 'RIGHT'
+            }
+          ]);
+          if (value) {
+            this.form.get('referenceSupport')?.enable();
+          } else {
+            this.form.get('referenceSupport')?.disable();
+          }
+          const load = this.findSelectedLoad();
+          if (load !== undefined) {
+            this.form.get('referenceSupport')?.setValue(load?.referenceSupport);
+            this.form.get('type')?.setValue(load!.type);
+            this.form.get('loadWeight')?.setValue(load?.loadWeight ?? 0);
+            this.form.get('loadPosition')?.setValue(load?.loadPosition ?? 0);
+          }
+        })
     );
-
-    this.subscriptions.add(
-      this.form.get('supportNumber')?.valueChanges.subscribe((value) => {
-        this.selectedSupport.set(value);
-      })
+    ['loadPosition', 'loadWeight', 'type', 'referenceSupport'].forEach(
+      (controlName) => {
+        this.subscriptions.add(
+          this.form.get(controlName)?.valueChanges.subscribe((value) => {
+            const load = this.findSelectedLoad();
+            if (load) {
+              (load as any)[controlName] =
+                value ?? (emptySpanLoad as any)[controlName];
+            }
+          })
+        );
+      }
     );
   }
 
   resetForm() {
     this.form.reset();
-    this.selectedSpan.set(null);
-    this.selectedSupport.set(null);
+    this.loadFormsService.initTemporaryLoadData();
   }
 
-  deleteLoadCase() {
-    const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
-    const chargeUuid = this.plotService.section()?.selected_charge_uuid;
-    if (!studyUuid || !sectionUuid || !chargeUuid) return;
+  deleteCharge() {
     this.resetForm();
-    this.chargesService.deleteCharge(studyUuid, sectionUuid, chargeUuid);
+    this.loadFormsService.deleteLoad();
   }
 
   saveLoadCase() {
     if (this.form.invalid) return;
-
-    // .value automatically excludes disabled fields
-    console.log('Submit (save):', this.form.value);
+    this.loadFormsService.saveTemporaryLoadDataInSection();
   }
 
   async calculateLoadCase() {
     if (this.form.invalid) return;
-
-    const { result } = await this.workerPythonService.runTask(Task.addLoad, {
-      supportNumber: this.form.get('supportNumber')?.value ?? 0,
-      pointLoadDist: this.form.get('pointLoadDist')?.value ?? 0,
-      spanLoad: this.form.get('spanLoad')?.value ?? 0
-    });
-    this.loadsService.addLoadAnnotation(
-      result?.coordinates ?? [],
-      this.form.get('loadType')?.value
-    );
-
-    console.log('Calculus values:', this.form.value);
+    this.loadFormsService.calculateLoad();
   }
 
   isFormInvalid(): boolean {
