@@ -13,11 +13,11 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DialogModule } from 'primeng/dialog';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { FieldMeasure } from '../../../types';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { Task } from '@src/app/core/services/worker_python/tasks/types';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 import { CommonModule } from '@angular/common';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 

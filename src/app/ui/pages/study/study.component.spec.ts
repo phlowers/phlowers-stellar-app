@@ -5,13 +5,11 @@ import { of, BehaviorSubject, Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 
 import { StudyComponent } from './study.component';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { SectionService } from '@src/app/core/services/sections/section.service';
-import { InitialConditionService } from '@src/app/core/services/initial-conditions/initial-condition.service';
-import { CablesService } from '@core/services/cables/cables.service';
-import { Study } from '@src/app/core/data/database/interfaces/study';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { StudiesService } from '@services/studies/studies.service';
+import { SectionService } from '@services/sections/section.service';
+import { InitialConditionService } from '@services/initial-conditions/initial-condition.service';
+import { CablesService } from '@services/cables/cables.service';
+import { Section, InitialCondition, Study } from '@core/domain';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 // Mock uuid

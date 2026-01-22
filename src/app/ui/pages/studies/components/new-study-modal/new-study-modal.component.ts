@@ -6,7 +6,7 @@ import {
   signal,
   effect
 } from '@angular/core';
-import { StudyModel } from '@src/app/core/data/models/study.model';
+import { Study } from '@core/domain';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -16,13 +16,13 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { StudiesService } from '@services/studies/studies.service';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Router } from '@angular/router';
 import { FileUploadModule } from 'primeng/fileupload';
 
-export const createEmptyStudy = (): StudyModel => {
+export const createEmptyStudy = (): Study => {
   return {
     title: '',
     description: '',

@@ -1,25 +1,23 @@
 import { Component, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
-import { CreateEditView } from '@src/app/ui/shared/types';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { CreateEditView } from '@ui/shared/types';
 import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
-import { Support } from 'src/app/core/data/database/interfaces/support';
-import { CatChain } from '@src/app/core/data/database/interfaces/catChain';
-import { ChainsService } from '@src/app/core/services/chains/chains.service';
+import { Support, CatalogChain } from '@core/domain';
+import { ChainsService } from '@services/chains/chains.service';
 import { SelectModule } from 'primeng/select';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { ButtonModule } from 'primeng/button';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { isNumber, uniq } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
-import { AttachmentService } from '@core/services/attachment/attachment.service';
+import { AttachmentService } from '@services/attachment/attachment.service';
 import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 const calculateSupportNumber = (
@@ -63,7 +61,6 @@ const calculateSupportNumber = (
     InputIconModule,
     InputGroupModule,
     InputGroupAddonModule,
-    ButtonModule,
     KeyFilterModule,
     PaginatorModule
   ],
@@ -77,7 +74,7 @@ export class SupportsTableComponent implements OnInit {
   deleteSupport = output<string>();
   duplicateSupport = output<string>();
   supportChange = output<{ uuid: string; support: Partial<Support> }>();
-  chains = signal<CatChain[]>([]);
+  chains = signal<CatalogChain[]>([]);
   attachmentSetModalOpen = signal<boolean>(false);
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   first = input.required<number>();
