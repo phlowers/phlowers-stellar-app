@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { L0SumComponent } from './l0-sum.component';
 import { ToolsDialogService } from '../tools-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 @Component({
   selector: 'app-button',

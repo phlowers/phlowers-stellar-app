@@ -27,14 +27,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ManualSectionComponent } from './manualSection.component';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { Support } from '@src/app/core/data/database/interfaces/support';
+import {
+  Section,
+  Support,
+  CatalogMaintenance,
+  CatalogLine
+} from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
-import { LinesService } from '@src/app/core/services/lines/lines.service';
-import { CatMaintenanceData } from '@src/app/core/data/database/interfaces/catMaintenance';
-import { CatLine } from '@src/app/core/data/database/interfaces/catLine';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
+import { LinesService } from '@services/lines/lines.service';
 import { MessageService } from 'primeng/api';
 
 // Mock child component
@@ -67,11 +69,11 @@ class MockStudioComponent {
 
 // Mock services
 const mockMaintenanceService = {
-  getMaintenance: jest.fn().mockResolvedValue([] as CatMaintenanceData[])
+  getMaintenance: jest.fn().mockResolvedValue([] as CatalogMaintenance[])
 };
 
 const mockLinesService = {
-  getLines: jest.fn().mockResolvedValue([] as CatLine[])
+  getLines: jest.fn().mockResolvedValue([] as CatalogLine[])
 };
 
 const mockMessageService = {
@@ -79,7 +81,7 @@ const mockMessageService = {
 } as unknown as MessageService;
 
 // Mock data
-const mockMaintenanceData: CatMaintenanceData[] = [
+const mockMaintenanceData: CatalogMaintenance[] = [
   {
     maintenance_center_id: 'cm1',
     maintenance_center: 'CM 1',
@@ -98,7 +100,7 @@ const mockMaintenanceData: CatMaintenanceData[] = [
   }
 ];
 
-const mockLinesData: CatLine[] = [
+const mockLinesData: CatalogLine[] = [
   {
     uuid: 'line1',
     link_idr: 'link1',

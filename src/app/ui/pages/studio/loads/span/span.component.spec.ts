@@ -2,11 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SpanComponent } from './span.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PlotService } from '../../services/plot.service';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { signal, computed } from '@angular/core';
-import { Study } from '@core/data/database/interfaces/study';
-import { Section } from '@core/data/database/interfaces/section';
-import { PlotOptions } from '@src/app/ui/shared/components/studio/section/helpers/types';
+import { Section, Study } from '@core/domain';
+import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 
 describe('SpanComponent', () => {
   let component: SpanComponent;

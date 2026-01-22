@@ -1,5 +1,4 @@
-import { Section } from '../../data/database/interfaces/section';
-import { Support } from '../../data/database/interfaces/support';
+import { Section, Support } from '@core/domain';
 import { v4 as uuidv4 } from 'uuid';
 
 export const createEmptySupport = (): Support => {

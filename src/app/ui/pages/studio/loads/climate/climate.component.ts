@@ -7,15 +7,17 @@ import {
   Validators
 } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotService } from '../../services/plot.service';
-import { ChargesService } from '@core/services/charges/charges.service';
-import { ClimateCharge } from '@src/app/core/data/database/interfaces/charge';
+import { ChargesService } from '@services/charges/charges.service';
+import { Charge } from '@core/domain';
+
+export type ClimateCharge = Charge['data']['climate'];
 
 export const defaultClimaticCharge: ClimateCharge = {
   windPressure: 0,

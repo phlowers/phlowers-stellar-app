@@ -1,7 +1,7 @@
 import { Data } from 'plotly.js-dist-min';
 import { PlotObjectsType, PlotOptions } from './types';
 import { createDataObject } from './createPlotDataObject';
-import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 export const createPlotData = (
   params: GetSectionOutput,

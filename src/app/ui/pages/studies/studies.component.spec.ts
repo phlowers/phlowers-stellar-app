@@ -10,8 +10,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { BehaviorSubject } from 'rxjs';
 import { StudiesComponent } from './studies.component';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { Study } from '@src/app/core/data/database/interfaces/study';
+import { StudiesService } from '@services/studies/studies.service';
+import { Study } from '@core/domain';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('StudiesComponent', () => {

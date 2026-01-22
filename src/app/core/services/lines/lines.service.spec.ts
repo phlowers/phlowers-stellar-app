@@ -12,11 +12,9 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
-import { StorageService } from '../storage/storage.service';
-import {
-  CatLine,
-  RteLinesCsvFile
-} from '../../data/database/interfaces/catLine';
+import { StorageService } from '@services/storage/storage.service';
+import { CatalogLineEntity } from '@core/infrastructure/database';
+import { LineCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { sortBy } from 'lodash';
 
@@ -136,7 +134,7 @@ describe('LinesService', () => {
 
   describe('getLines', () => {
     it('should return lines array from database', async () => {
-      const mockLines: CatLine[] = [
+      const mockLines: CatalogLineEntity[] = [
         {
           uuid: 'test-uuid-1',
           link_idr: 'LINK001',
@@ -176,7 +174,7 @@ describe('LinesService', () => {
     });
 
     it('should import lines from CSV file successfully', async () => {
-      const mockCsvData: RteLinesCsvFile[] = [
+      const mockCsvData: LineCsvDto[] = [
         {
           link_idr: 'LINK001',
           lit_idr: 'LIT001',
@@ -206,7 +204,7 @@ describe('LinesService', () => {
 
       // Mock Papa Parse to call complete callback
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -251,7 +249,7 @@ describe('LinesService', () => {
 
       // Mock Papa Parse to call complete callback with empty data
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -291,7 +289,7 @@ describe('LinesService', () => {
     });
 
     it('should handle CSV data with null/undefined LIAISON_IDR', async () => {
-      const mockCsvData: RteLinesCsvFile[] = [
+      const mockCsvData: LineCsvDto[] = [
         {
           link_idr: '',
           lit_idr: 'LIT001',
@@ -342,7 +340,7 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001\nLINK002,LIT002,LIT_ADR002,BRANCH002,BRANCH_ADR002,TENSION002,TENSION_ADR002';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -395,7 +393,7 @@ describe('LinesService', () => {
     it('should handle missing database gracefully', async () => {
       (storageService as unknown as { db: undefined }).db = undefined;
 
-      const mockCsvData: RteLinesCsvFile[] = [
+      const mockCsvData: LineCsvDto[] = [
         {
           link_idr: '',
           lit_idr: 'LIT001',
@@ -424,7 +422,7 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -462,7 +460,7 @@ describe('LinesService', () => {
     });
 
     it('should sort lines by electric_tension_level_adr', async () => {
-      const mockCsvData: RteLinesCsvFile[] = [
+      const mockCsvData: LineCsvDto[] = [
         {
           link_idr: '',
           lit_idr: 'LIT001',
@@ -491,7 +489,7 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -540,7 +538,7 @@ describe('LinesService', () => {
 
       // Mock Papa Parse to return empty data when HTTP error occurs
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -586,7 +584,7 @@ describe('LinesService', () => {
     });
 
     it('should apply default values for missing/null/undefined fields', async () => {
-      const mockCsvData: RteLinesCsvFile[] = [
+      const mockCsvData: LineCsvDto[] = [
         {
           link_idr: 'LINK001',
           link_adr: undefined as unknown as string,
@@ -614,7 +612,7 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,,,BRANCH001,,,';
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteLinesCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
           if (options.complete) {
             options.complete(
               {

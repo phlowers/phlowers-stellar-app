@@ -1,11 +1,11 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ChangelogService } from '@src/app/core/services/changelog/changelog.service';
-import { ChangelogItem } from '@src/app/core/services/changelog/types';
+import { ChangelogService } from '@services/changelog/changelog.service';
+import { ChangelogItem } from '@services/changelog/types';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MarkdownModule } from 'ngx-markdown';
 import { DatePipe } from '@angular/common';
 import { PanelModule } from 'primeng/panel';
-import { OnlineService } from '@src/app/core/services/online/online.service';
+import { OnlineService } from '@services/online/online.service';
 
 @Component({
   selector: 'app-changelog',

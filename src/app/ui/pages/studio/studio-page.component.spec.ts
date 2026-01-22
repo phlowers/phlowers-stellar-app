@@ -4,16 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { ElementRef } from '@angular/core';
 import { PlotService } from './services/plot.service';
-import { StudiesService } from '@core/services/studies/studies.service';
-import { SectionService } from '@src/app/core/services/sections/section.service';
-
-interface Section {
-  uuid: string;
-  supports: number[];
-}
-interface Study {
-  sections: Section[];
-}
+import { StudiesService } from '@services/studies/studies.service';
+import { SectionService } from '@services/sections/section.service';
+import { Section, Study } from '@core/domain';
 
 interface SignalFn<T> {
   (): T;
@@ -139,12 +132,12 @@ describe('StudioPageComponent', () => {
       sectionUuid
     );
 
-    const study: Study = {
+    const study = {
       sections: [
         { uuid: 'other', supports: [1] },
         { uuid: sectionUuid, supports: [1, 2, 3] }
       ]
-    };
+    } as unknown as Study;
 
     (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
       of(study)
@@ -178,7 +171,9 @@ describe('StudioPageComponent', () => {
       'missing-section'
     );
 
-    const study: Study = { sections: [{ uuid: 'a', supports: [1] }] };
+    const study = {
+      sections: [{ uuid: 'a', supports: [1] }]
+    } as unknown as Study;
     (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
       of(study)
     );

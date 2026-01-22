@@ -7,12 +7,12 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { RadioButtonModule } from 'primeng/radiobutton';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/types';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { WIND_SPEED_UNIT_OPTIONS } from '../../constants';
-import { Task } from '@core/services/worker_python/tasks/types';
+import { Task } from '@services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-temperature-calculation',

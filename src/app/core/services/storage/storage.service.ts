@@ -7,14 +7,14 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AppDB } from '@core/data/database';
+import { AppDatabase } from '@core/infrastructure/database';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
-  public db!: AppDB;
+  public db!: AppDatabase;
 
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
@@ -39,7 +39,7 @@ export class StorageService {
 
   async createDatabase(): Promise<void> {
     try {
-      this.db = new AppDB();
+      this.db = new AppDatabase();
       this._ready.next(true);
     } catch (error) {
       console.error('StorageService createDatabase - error:', error);

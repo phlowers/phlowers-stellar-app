@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { NewsService } from '@src/app/core/services/news/news.service';
-import { OnlineService } from '@src/app/core/services/online/online.service';
+import { NewsService } from '@services/news/news.service';
+import { OnlineService } from '@services/online/online.service';
 import { MarkdownModule } from 'ngx-markdown';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 

@@ -16,27 +16,29 @@ import { DividerModule } from 'primeng/divider';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { Section } from '@src/app/core/data/database/interfaces/section';
+import {
+  Section,
+  Support,
+  CatalogMaintenance,
+  CatalogLine,
+  CatalogCable
+} from '@core/domain';
 import { SupportsTableComponent } from './supportsTable/supportsTable.component';
-import { Support } from '@src/app/core/data/database/interfaces/support';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { CreateEditView } from '@src/app/ui/shared/types';
-import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.component';
-import { createEmptySupport } from '@src/app/core/services/sections/helpers';
+import { CreateEditView } from '@ui/shared/types';
+import { StudioComponent } from '@ui/shared/components/studio/studio.component';
+import { createEmptySupport } from '@services/sections/helpers';
 import { sectionTypes } from './section-mock';
-import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
-import { CatMaintenanceData } from '@src/app/core/data/database/interfaces/catMaintenance';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
-import { CatLine } from '@src/app/core/data/database/interfaces/catLine';
-import { LinesService } from '@src/app/core/services/lines/lines.service';
-import { CatCable } from '@src/app/core/data/database/interfaces/catCable';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { LinesService } from '@services/lines/lines.service';
+import { CablesService } from '@services/cables/cables.service';
 import { MessageModule } from 'primeng/message';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { PlotService } from '@src/app/ui/pages/studio/services/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import {
   DEFAULT_TABLE_ROWS_PER_PAGE,
   TABLE_ROWS_PER_PAGE_OPTIONS
@@ -45,7 +47,7 @@ import {
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
-const sortLines = (lines: CatLine[]) => {
+const sortLines = (lines: CatalogLine[]) => {
   return lines.sort((a, b) => {
     const aHasNoVoltage = a.voltage_adr === 'NO_VOLTAGE';
     const bHasNoVoltage = b.voltage_adr === 'NO_VOLTAGE';
@@ -123,7 +125,7 @@ export class ManualSectionComponent implements OnInit {
   section = input.required<Section>();
   sectionChange = output<Section>();
   studio = viewChild(StudioComponent);
-  cablesFilterTable = signal<CatCable[]>([]);
+  cablesFilterTable = signal<CatalogCable[]>([]);
   public sectionTypes = sectionTypes;
   isNameUnique = input<boolean>();
   constructor(
@@ -150,8 +152,8 @@ export class ManualSectionComponent implements OnInit {
     };
   });
 
-  maintenanceFilterTable = signal<CatMaintenanceData[]>([]);
-  linesFilterTable = signal<CatLine[]>([]);
+  maintenanceFilterTable = signal<CatalogMaintenance[]>([]);
+  linesFilterTable = signal<CatalogLine[]>([]);
   firstSupport = signal<number>(0);
   rowsSupport = signal<number>(DEFAULT_TABLE_ROWS_PER_PAGE);
   rowsSupportOptions = signal(TABLE_ROWS_PER_PAGE_OPTIONS);
@@ -389,13 +391,13 @@ export class ManualSectionComponent implements OnInit {
       if (id === type) {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
-            !event.value || item[id as keyof CatMaintenanceData] === event.value
+            !event.value || item[id as keyof CatalogMaintenance] === event.value
         );
       } else {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
             !this.section()[id as keyof Section] ||
-            item[id as keyof CatMaintenanceData] ===
+            item[id as keyof CatalogMaintenance] ===
               this.section()[id as keyof Section]
         );
       }
@@ -406,7 +408,7 @@ export class ManualSectionComponent implements OnInit {
     if (maintenanceTable.length === 1) {
       orderedMaintenanceTableProperties.forEach((id) => {
         (this.section() as unknown as Record<string, unknown>)[id] =
-          maintenanceTable[0][id as keyof CatMaintenanceData];
+          maintenanceTable[0][id as keyof CatalogMaintenance];
       });
     }
   }

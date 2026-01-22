@@ -8,19 +8,19 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { TableModule } from 'primeng/table';
-import { UpdateService } from '@core/services/worker_update/worker_update.service';
+import { UpdateService } from '@services/worker_update/worker_update.service';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { StudiesService } from '@src/app/core/services/studies/studies.service';
-import { StorageService } from '@src/app/core/services/storage/storage.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { StorageService } from '@services/storage/storage.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonComponent } from '../../shared/components/atoms/button/button.component';
-import { OnlineService } from '@src/app/core/services/online/online.service';
+import { OnlineService } from '@services/online/online.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { LogLevel, Task } from '@core/services/worker_python/tasks/types';
+import { LogLevel, Task } from '@services/worker_python/tasks/types';
 import { ToggleSwitch } from 'primeng/toggleswitch';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
 const CACHE_NAME = 'app-assets';
 
