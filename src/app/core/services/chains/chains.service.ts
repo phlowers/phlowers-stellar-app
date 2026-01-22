@@ -5,12 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable } from '@angular/core';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import {
-  CatChain,
-  RteChainsCsvFile
-} from '../../data/database/interfaces/catChain';
+import { CatalogChainEntity } from '@core/infrastructure/database';
+import { ChainCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 
@@ -44,7 +42,7 @@ export class ChainsService {
           return of('');
         })
       );
-    const mapData = (data: RteChainsCsvFile[]) => {
+    const mapData = (data: ChainCsvDto[]) => {
       return data
         .map((item) => ({
           uuid: item.uuid,
@@ -63,20 +61,18 @@ export class ChainsService {
         Papa.parse(chains, {
           header: true,
           skipEmptyLines: true,
-          complete: (async (
-            jsonResults: Papa.ParseResult<RteChainsCsvFile>
-          ) => {
+          complete: (async (jsonResults: Papa.ParseResult<ChainCsvDto>) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
               return;
             }
             await this.storageService.db?.catChains.clear();
-            const chainsTable: CatChain[] = mapData(data);
+            const chainsTable: CatalogChainEntity[] = mapData(data);
             console.log('adding chains data', chainsTable.length);
             await this.storageService.db?.catChains.bulkAdd(chainsTable);
             resolve();
-          }) as (jsonResults: Papa.ParseResult<RteChainsCsvFile>) => void
+          }) as (jsonResults: Papa.ParseResult<ChainCsvDto>) => void
         });
       });
     });

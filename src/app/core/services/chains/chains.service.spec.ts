@@ -11,11 +11,9 @@ import {
 } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { ChainsService } from './chains.service';
-import { StorageService } from '../storage/storage.service';
-import {
-  CatChain,
-  RteChainsCsvFile
-} from '../../data/database/interfaces/catChain';
+import { StorageService } from '@services/storage/storage.service';
+import { CatalogChainEntity } from '@core/infrastructure/database';
+import { ChainCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
@@ -95,7 +93,7 @@ describe('ChainsService', () => {
 
   describe('getChains', () => {
     it('should return chains array from database', async () => {
-      const mockChains: CatChain[] = [
+      const mockChains: CatalogChainEntity[] = [
         {
           chain_name: 'Chain 1',
           mean_length: 100.5,
@@ -141,7 +139,7 @@ describe('ChainsService', () => {
     });
 
     it('should import chains from CSV file successfully', async () => {
-      const mockCsvData: RteChainsCsvFile[] = [
+      const mockCsvData: ChainCsvDto[] = [
         {
           chain_name: 'Chain 1',
           mean_length: '100,5',
@@ -167,7 +165,7 @@ describe('ChainsService', () => {
 
       // Mock Papa Parse to call complete callback
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteChainsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -230,7 +228,7 @@ describe('ChainsService', () => {
 
       // Mock Papa Parse to call complete callback with empty data
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteChainsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -270,7 +268,7 @@ describe('ChainsService', () => {
     });
 
     it('should handle CSV data with null/undefined name', async () => {
-      const mockCsvData: RteChainsCsvFile[] = [
+      const mockCsvData: ChainCsvDto[] = [
         {
           chain_name: '',
           mean_length: '100,5',
@@ -295,7 +293,7 @@ describe('ChainsService', () => {
         'name,length,weight\n,100,5,2,3\nChain 2,150,0,3,1';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteChainsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -347,7 +345,7 @@ describe('ChainsService', () => {
     it('should handle missing database gracefully', async () => {
       (storageService as unknown as { db: undefined }).db = undefined;
 
-      const mockCsvData: RteChainsCsvFile[] = [
+      const mockCsvData: ChainCsvDto[] = [
         {
           chain_name: 'Chain 1',
           mean_length: '100,5',
@@ -362,7 +360,7 @@ describe('ChainsService', () => {
       const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteChainsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -400,7 +398,7 @@ describe('ChainsService', () => {
     });
 
     it('should handle CSV data with mixed valid and invalid name values', async () => {
-      const mockCsvData: RteChainsCsvFile[] = [
+      const mockCsvData: ChainCsvDto[] = [
         {
           chain_name: 'Chain 1',
           mean_length: '100,5',
@@ -434,7 +432,7 @@ describe('ChainsService', () => {
         'name,length,weight,surface,v\nChain 1,100,5,2,3,false\n,150,0,3,1,true\nChain 3,200,0,4,2,false';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteChainsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -493,7 +491,7 @@ describe('ChainsService', () => {
     });
 
     it('should clear chains table before adding new data', async () => {
-      const mockCsvData: RteChainsCsvFile[] = [
+      const mockCsvData: ChainCsvDto[] = [
         {
           chain_name: 'Chain 1',
           mean_length: '100,5',
@@ -508,7 +506,7 @@ describe('ChainsService', () => {
       const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteChainsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
