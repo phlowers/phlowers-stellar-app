@@ -10,15 +10,13 @@ import { DialogModule } from 'primeng/dialog';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Select } from 'primeng/select';
-import { CatAttachment } from '@core/data/database/interfaces/catAttachment';
+import { CatalogAttachment, Section, Support } from '@core/domain';
 import { DividerModule } from 'primeng/divider';
-import { AttachmentService } from '@core/services/attachment/attachment.service';
-import { Support } from '@core/data/database/interfaces/support';
+import { AttachmentService } from '@services/attachment/attachment.service';
 import { FormsModule } from '@angular/forms';
 import { UniquePipe } from '@ui/shared/service/autocomplete/unique.pipe';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { Section } from '@core/data/database/interfaces/section';
 import { SupportPlotComponent } from '@ui/shared/components/studio/support/support-plot.component';
 import { uniq } from 'lodash';
 
@@ -60,8 +58,8 @@ export class AttachmentSetModalComponent implements OnInit {
   coordinates = signal<(number | undefined)[][]>([]);
   attachmentSetNumbers = signal<number[]>([]);
 
-  supportsFilterTable = signal<CatAttachment[]>([]);
-  attachmentsFilterTable = signal<CatAttachment[]>([]);
+  supportsFilterTable = signal<CatalogAttachment[]>([]);
+  attachmentsFilterTable = signal<CatalogAttachment[]>([]);
 
   onVisibleChange() {
     this.isOpenChange.emit(false);
@@ -157,7 +155,7 @@ export class AttachmentSetModalComponent implements OnInit {
     this.getData();
   }
 
-  async onAttachmentSelect(event: any, key: keyof CatAttachment) {
+  async onAttachmentSelect(event: any, key: keyof CatalogAttachment) {
     if (event.value === null || event.value === undefined) {
       this.resetValues(key === 'support_name');
       return;

@@ -5,11 +5,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable, signal } from '@angular/core';
-import { Section } from '../../data/database/interfaces/section';
-import { Study } from '../../data/database/interfaces/study';
-import { StudiesService } from '../studies/studies.service';
+import { Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
+import { StudiesService } from '@services/studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
-import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
 @Injectable({
@@ -25,7 +25,10 @@ export class SectionService {
    * @param section The section to create or update
    * @returns Promise that resolves when the operation is complete
    */
-  async createOrUpdateSection(study: Study, section: Section): Promise<void> {
+  async createOrUpdateSection(
+    study: StudyEntity,
+    section: Section
+  ): Promise<void> {
     const existingSection = study.sections.find(
       (s) => s?.uuid === section?.uuid
     );
@@ -54,7 +57,7 @@ export class SectionService {
    * @param section The section to delete
    * @returns Promise that resolves when the operation is complete
    */
-  async deleteSection(study: Study, section: Section): Promise<void> {
+  async deleteSection(study: StudyEntity, section: Section): Promise<void> {
     study.sections = study.sections.filter((s) => s?.uuid !== section?.uuid);
     await this.studiesService.updateStudy(study);
   }
@@ -65,7 +68,10 @@ export class SectionService {
    * @param section The section to duplicate
    * @returns Promise that resolves when the operation is complete
    */
-  async duplicateSection(study: Study, section: Section): Promise<Section> {
+  async duplicateSection(
+    study: StudyEntity,
+    section: Section
+  ): Promise<Section> {
     const newSection = {
       ...section,
       uuid: uuidv4(),

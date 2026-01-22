@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InitialConditionModalComponent } from './initialConditionModal.component';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { Section, InitialCondition } from '@core/domain';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { CablesService } from '@core/services/cables/cables.service';
-import { StorageService } from '@core/services/storage/storage.service';
-import { StudiesService } from '@core/services/studies/studies.service';
+import { CablesService } from '@services/cables/cables.service';
+import { StorageService } from '@services/storage/storage.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { BehaviorSubject } from 'rxjs';
 
 describe('InitialConditionModalComponent', () => {

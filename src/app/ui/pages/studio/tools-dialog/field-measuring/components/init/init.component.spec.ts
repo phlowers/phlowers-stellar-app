@@ -5,7 +5,7 @@ import { signal } from '@angular/core';
 import { InitComponent } from './init.component';
 import { ToolsDialogService } from '@ui/pages/studio/tools-dialog/tools-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
-import { Section } from '@core/data/database/interfaces/section';
+import { Section } from '@core/domain';
 
 describe('Init component', () => {
   let component: InitComponent;
