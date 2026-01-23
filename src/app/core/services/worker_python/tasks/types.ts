@@ -40,6 +40,7 @@ export interface GetSectionOutput {
   load_angle: number[];
   displacement: number[][];
   span_length: number[];
+  loads_coords: number[][];
 }
 
 export enum LogLevel {

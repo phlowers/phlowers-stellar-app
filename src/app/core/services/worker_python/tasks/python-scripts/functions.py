@@ -193,6 +193,9 @@ def get_coordinates(
     vtl_under_chain = list(engine.balance_model.vhl_under_chain().vhl)
     vtl_under_console = list(engine.balance_model.vhl_under_console().vhl)
     # vtl = vtl_under_chain.vtl)
+
+    loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span).tolist()
+    print(f"{loads_coords=}")
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
@@ -208,6 +211,7 @@ def get_coordinates(
         "displacement": engine.get_displacement().tolist(),
         "load_angle": engine.cable_loads.load_angle.tolist(),
         "span_length": engine.section_array.data.span_length.tolist(),
+        "loads_coords" : loads_coords
     }
     return result
 
@@ -303,9 +307,16 @@ def init_section(js_inputs: dict):
     )
 
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
+    loads_list = input_charge["data"]["spanLoads"]
+    if len(loads_list) != 0:
+        load_position_meters = np.array([span["loadPosition"] for span in loads_list])
+        load_weight = np.array([span["loadWeight"] for span in loads_list])
+        engine.add_loads(load_position_meters, load_weight)
+    
     plt_line = PlotEngine.builder_from_balance_engine(engine)
     engine.solve_adjustment()
     engine.solve_change_state()
+    print(f"{input_charge=}")
 
     if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
         climate = input_charge["data"]["climate"]

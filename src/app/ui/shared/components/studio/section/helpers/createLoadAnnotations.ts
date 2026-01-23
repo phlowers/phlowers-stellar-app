@@ -40,19 +40,20 @@ export const createLoadAnnotations = (
     plotParams.endSupport + 1
   );
   console.log('spans length is', plotParams.litData.spans.length);
+  console.log(plotParams.litData.loads_coords);
   plotParams.spanLoads.forEach((spanLoad, index) => {
-    if (spanLoad) {
-      const span = currentSpans[index];
-      const middlePoint = span[Math.round((span.length - 1) / 2)];
+    const current_load_coord = plotParams.litData.loads_coords[index];
+    if (spanLoad && current_load_coord) {
+      console.log(current_load_coord);
       annotations.push({
         ...BASE_ANNOTATION,
-        x: middlePoint[0],
-        y: plotParams.view === '2d' ? middlePoint[2] : middlePoint[1],
+        x: current_load_coord[0],
+        y: plotParams.view === '2d' ? current_load_coord[2] : current_load_coord[1],
         //@ts-expect-error Plotly.js-dist-min does not support z axis
-        z: middlePoint[2],
+        z: current_load_coord[2],
         text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON
       });
-    }
+  }
   });
   return annotations;
 };
