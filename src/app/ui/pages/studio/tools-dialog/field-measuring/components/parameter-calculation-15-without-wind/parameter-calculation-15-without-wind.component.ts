@@ -86,9 +86,9 @@ export class ParameterCalculation15WithoutWindComponent {
       const manualData =
         this.measureData().manualParameterCalculation15CWithoutWind;
       return (
-        isNumber(manualData?.cableTemperature15C) &&
+        isNumber(manualData?.cableTemperatureCalibration) &&
         isNumber(manualData?.parameterPapoto) &&
-        isNumber(manualData?.cableTemperatureUncertainty15C)
+        isNumber(manualData?.cableTemperatureCalibrationUncertainty)
       );
     }
     return (
@@ -146,14 +146,14 @@ export class ParameterCalculation15WithoutWindComponent {
       parameterPapoto: manualData?.parameterPapoto || null,
       parameterUncertaintyPapoto:
         manualData?.parameterUncertaintyPapoto || null,
-      cableTemperature15C: manualData?.cableTemperature15C || null,
-      cableTemperatureUncertainty15C:
-        manualData?.cableTemperatureUncertainty15C || null
+      cableTemperatureCalibration: manualData?.cableTemperatureCalibration || null,
+      cableTemperatureCalibrationUncertainty:
+        manualData?.cableTemperatureCalibrationUncertainty || null,
     };
     const dataToSend = isManual ? manualDataToSend : data;
     const { result, error } = await this.workerPythonService.runTask(
       Task.calculateParameter15CWithoutWind,
-      dataToSend
+      {...dataToSend, span_index: data.span?.[0] ?? null}
     );
     if (error) {
       this.parameter15CError.set(true);

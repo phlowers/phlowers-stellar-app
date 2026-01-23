@@ -85,11 +85,11 @@
           pInputText
           [ngModel]="
             measureData().manualParameterCalculation15CWithoutWind
-              ?.cableTemperature15C ?? null
+              ?.cableTemperatureCalibration ?? null
           "
           (ngModelChange)="
             updateManualParameterCalculation15CWithoutWind(
-              'cableTemperature15C',
+              'cableTemperatureCalibration',
               $event
             )
           "
@@ -111,11 +111,11 @@
           pInputText
           [ngModel]="
             measureData().manualParameterCalculation15CWithoutWind
-              ?.cableTemperatureUncertainty15C ?? null
+              ?.cableTemperatureCalibrationUncertainty ?? null
           "
           (ngModelChange)="
             updateManualParameterCalculation15CWithoutWind(
-              'cableTemperatureUncertainty15C',
+              'cableTemperatureCalibrationUncertainty',
               $event
             )
           "

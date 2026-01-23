@@ -99,8 +99,9 @@ export interface TaskInputs {
   [Task.calculateParameter15CWithoutWind]: {
     parameterPapoto: number | null;
     parameterUncertaintyPapoto: number | null;
-    cableTemperature15C: number | null;
-    cableTemperatureUncertainty15C: number | null;
+    cableTemperatureCalibration: number | null;
+    cableTemperatureCalibrationUncertainty: number | null;
+    span_index: number | null
   };
 }
 
