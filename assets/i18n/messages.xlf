@@ -1298,11 +1298,6 @@
         <source>Inf tension acc. :</source>
       </segment>
     </unit>
-    <unit id="1029122298839770722">
-      <segment>
-        <source>reset</source>
-      </segment>
-    </unit>
     <unit id="6613300769068333223">
       <segment>
         <source>Wind Pressure</source>
@@ -1403,9 +1398,9 @@
         <source>Staff is absent</source>
       </segment>
     </unit>
-    <unit id="1035207489563002235">
+    <unit id="3899641059154911141">
       <segment>
-        <source> fold back </source>
+        <source> Fold back </source>
       </segment>
     </unit>
     <unit id="2721513819199429371">
@@ -2733,6 +2728,11 @@
     <unit id="914576298220560599">
       <segment>
         <source>Frontier support</source>
+      </segment>
+    </unit>
+    <unit id="7808756054397155068">
+      <segment>
+        <source>Reset</source>
       </segment>
     </unit>
   </file>
