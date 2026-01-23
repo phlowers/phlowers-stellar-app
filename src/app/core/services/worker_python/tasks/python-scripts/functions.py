@@ -25,6 +25,10 @@ logger.addHandler(handler)
 
 print(f"mechaphlowers version: {version('mechaphlowers')}")
 
+
+def init_config():
+    mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
+
 def convert_jsnull(obj):
     """Recursively convert JavaScript null (jsnull) to Python None.
     
@@ -383,3 +387,5 @@ def calculate_papoto(js_inputs: dict):
         "parameter_1_3": papoto.parameter_1_3[0],
         "check_validity": bool(papoto.check_validity()[0]),
     }
+
+init_config()
