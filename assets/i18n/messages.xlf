@@ -1313,29 +1313,9 @@
         <source>Cable Temperature</source>
       </segment>
     </unit>
-    <unit id="6360407171073312357">
+    <unit id="5423101655447195400">
       <segment>
-        <source>Symmetry Type</source>
-      </segment>
-    </unit>
-    <unit id="8204555453748282582">
-      <segment>
-        <source>Ice Thickness</source>
-      </segment>
-    </unit>
-    <unit id="4588982619541413952">
-      <segment>
-        <source> Frontier Support Number </source>
-      </segment>
-    </unit>
-    <unit id="2802938289697505873">
-      <segment>
-        <source> Ice Thickness (Before Frontier) </source>
-      </segment>
-    </unit>
-    <unit id="6079274139415183182">
-      <segment>
-        <source> Ice Thickness (After Frontier) </source>
+        <source>Ice thickness</source>
       </segment>
     </unit>
     <unit id="5204909450862821423">
@@ -2718,6 +2698,41 @@
     <unit id="8878227880393471056">
       <segment>
         <source>No measures found</source>
+      </segment>
+    </unit>
+    <unit id="1709313240781435252">
+      <segment>
+        <source>Maximum allowed value:</source>
+      </segment>
+    </unit>
+    <unit id="2104405463703805846">
+      <segment>
+        <source> Value must be a whole number </source>
+      </segment>
+    </unit>
+    <unit id="6771413606625426683">
+      <segment>
+        <source>Minimum allowed value:</source>
+      </segment>
+    </unit>
+    <unit id="399524330429754869">
+      <segment>
+        <source>Ice indicator</source>
+      </segment>
+    </unit>
+    <unit id="7478743037636719773">
+      <segment>
+        <source> Ice thickness before support frontier </source>
+      </segment>
+    </unit>
+    <unit id="8939108734321665925">
+      <segment>
+        <source> Ice thickness after support frontier </source>
+      </segment>
+    </unit>
+    <unit id="914576298220560599">
+      <segment>
+        <source>Frontier support</source>
       </segment>
     </unit>
   </file>
