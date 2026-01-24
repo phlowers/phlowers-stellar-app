@@ -27,6 +27,7 @@ print(f"mechaphlowers version: {version('mechaphlowers')}")
 
 
 def init_config():
+    mph.options.graphics.resolution = RESOLUTION
     mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
 
 def convert_jsnull(obj):
@@ -255,7 +256,6 @@ def init_section(js_inputs: dict):
     for support_js in input_section["supports"]:
         supports_data.append(Support(**support_js))
     df = generate_section_array(supports_data)
-    mph.options.graphics.resolution = RESOLUTION
 
     section = SectionArray(df)
     # set sagging parameter and temperatur

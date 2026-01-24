@@ -67,7 +67,7 @@ def temperature_calculation(js_inputs):
     temperature_result = thermal_engine.steady_temperature()
     print(temperature_result)
     return {
-        "cableSolarFlux": 123,
+        "cableSolarFlux": None,
         "cableTemperature": temperature_result.data["t_core"].iloc[0],
-        "cableTemperatureUncertainty": 123
+        "cableTemperatureUncertainty": None
     }
