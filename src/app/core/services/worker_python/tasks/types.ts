@@ -101,7 +101,7 @@ export interface TaskInputs {
     parameterUncertaintyPapoto: number | null;
     cableTemperatureCalibration: number | null;
     cableTemperatureCalibrationUncertainty: number | null;
-    span_index: number | null
+    span_index: number | null;
   };
 }
 

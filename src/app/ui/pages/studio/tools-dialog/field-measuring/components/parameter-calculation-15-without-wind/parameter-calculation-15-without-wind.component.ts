@@ -146,14 +146,15 @@ export class ParameterCalculation15WithoutWindComponent {
       parameterPapoto: manualData?.parameterPapoto || null,
       parameterUncertaintyPapoto:
         manualData?.parameterUncertaintyPapoto || null,
-      cableTemperatureCalibration: manualData?.cableTemperatureCalibration || null,
+      cableTemperatureCalibration:
+        manualData?.cableTemperatureCalibration || null,
       cableTemperatureCalibrationUncertainty:
-        manualData?.cableTemperatureCalibrationUncertainty || null,
+        manualData?.cableTemperatureCalibrationUncertainty || null
     };
     const dataToSend = isManual ? manualDataToSend : data;
     const { result, error } = await this.workerPythonService.runTask(
       Task.calculateParameter15CWithoutWind,
-      {...dataToSend, span_index: data.span?.[0] ?? null}
+      { ...dataToSend, span_index: data.span?.[0] ?? null }
     );
     if (error) {
       this.parameter15CError.set(true);
