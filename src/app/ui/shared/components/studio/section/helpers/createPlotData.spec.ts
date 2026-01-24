@@ -32,7 +32,8 @@ describe('createPlotData', () => {
       ground_altitude: [],
       load_angle: [],
       displacement: [],
-      span_length: []
+      span_length: [],
+      loads_coords: []
     };
 
     mockOptions = {
@@ -188,7 +189,8 @@ describe('createPlotData', () => {
         ground_altitude: [],
         load_angle: [],
         displacement: [],
-        span_length: []
+        span_length: [],
+        loads_coords: []
       };
 
       const result = createPlotData(emptyParams, mockOptions);

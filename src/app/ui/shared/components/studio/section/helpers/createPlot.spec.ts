@@ -66,7 +66,8 @@ describe('createPlot', () => {
     ground_altitude: [1, 2, 3],
     load_angle: [1, 2, 3],
     displacement: [[1, 2, 3]],
-    span_length: [1, 2, 3]
+    span_length: [1, 2, 3],
+    loads_coords: [[1, 2, 3]]
   };
 
   const mockSpanLoads: (SpanLoad | null)[] = [];

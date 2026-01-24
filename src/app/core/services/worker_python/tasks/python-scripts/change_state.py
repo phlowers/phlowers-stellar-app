@@ -53,9 +53,6 @@ def change_state(js_inputs: dict):
     load_position_meters = np.array([span["loadPosition"] for span in punctual_load])
     load_weight = np.array([span["loadWeight"] for span in punctual_load])
 
-    print("aaaaaaaaaa")
-    print(load_position_meters)
-    print(load_weight)
 
     # Small optimization if no loads
     if (load_position_meters != 0).any() and (load_position_meters != 0).any():

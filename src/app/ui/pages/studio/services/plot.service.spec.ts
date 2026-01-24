@@ -51,7 +51,8 @@ describe('PlotService', () => {
     ground_altitude: [],
     load_angle: [],
     displacement: [],
-    span_length: []
+    span_length: [],
+    loads_coords: []
   };
 
   const mockCable: CatalogCable = {

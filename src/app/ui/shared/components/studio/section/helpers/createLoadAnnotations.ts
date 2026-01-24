@@ -1,5 +1,6 @@
 import * as Plotly from 'plotly.js-dist-min';
 import { CreatePlotParams } from './createPlot';
+import { cloneDeep } from 'lodash';
 
 const LOAD_COLOR = '#4A355A';
 const LOAD_ICON = '&#xf5cd;';
@@ -35,25 +36,24 @@ export const createLoadAnnotations = (
   plotParams: CreatePlotParams
 ): Plotly.Annotations[] => {
   const annotations: Plotly.Annotations[] = [];
-  const currentSpans = plotParams.litData.spans.slice(
-    plotParams.startSupport,
-    plotParams.endSupport + 1
-  );
-  console.log('spans length is', plotParams.litData.spans.length);
-  console.log(plotParams.litData.loads_coords);
-  plotParams.spanLoads.forEach((spanLoad, index) => {
-    const current_load_coord = plotParams.litData.loads_coords[index];
-    if (spanLoad && current_load_coord) {
-      console.log(current_load_coord);
-      annotations.push({
-        ...BASE_ANNOTATION,
-        x: current_load_coord[0],
-        y: plotParams.view === '2d' ? current_load_coord[2] : current_load_coord[1],
-        //@ts-expect-error Plotly.js-dist-min does not support z axis
-        z: current_load_coord[2],
-        text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON
-      });
-  }
+  const load_coords = cloneDeep(plotParams.litData.loads_coords);
+  plotParams.spanLoads.forEach((spanLoad) => {
+    if (spanLoad) {
+      const current_load_coord = load_coords.shift();
+      if (current_load_coord) {
+        annotations.push({
+          ...BASE_ANNOTATION,
+          x: current_load_coord[0],
+          y:
+            plotParams.view === '2d'
+              ? current_load_coord[2]
+              : current_load_coord[1],
+          //@ts-expect-error Plotly.js-dist-min does not support z axis
+          z: current_load_coord[2],
+          text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON
+        });
+      }
+    }
   });
   return annotations;
 };
