@@ -6149,5 +6149,45 @@
         <source>No measures found</source>
       </segment>
     </unit>
+    <unit id="1709313240781435252">
+      <segment>
+        <source>Maximum allowed value:</source>
+      </segment>
+    </unit>
+    <unit id="2104405463703805846">
+      <segment>
+        <source> Value must be a whole number </source>
+      </segment>
+    </unit>
+    <unit id="6771413606625426683">
+      <segment>
+        <source>Minimum allowed value:</source>
+      </segment>
+    </unit>
+    <unit id="399524330429754869">
+      <segment>
+        <source>Ice indicator</source>
+      </segment>
+    </unit>
+    <unit id="7478743037636719773">
+      <segment>
+        <source> Ice thickness before support frontier </source>
+      </segment>
+    </unit>
+    <unit id="8939108734321665925">
+      <segment>
+        <source> Ice thickness after support frontier </source>
+      </segment>
+    </unit>
+    <unit id="914576298220560599">
+      <segment>
+        <source>Frontier support</source>
+      </segment>
+    </unit>
+    <unit id="7808756054397155068">
+      <segment>
+        <source>Reset</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

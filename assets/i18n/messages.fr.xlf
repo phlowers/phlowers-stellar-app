@@ -4340,5 +4340,53 @@
         <target>Pas de mesure</target>
       </segment>
     </unit>
+    <unit id="2104405463703805846">
+      <segment state="initial">
+        <source> Value must be a whole number </source>
+        <target> La valeur saisie doit être un nombre entier </target>
+      </segment>
+    </unit>
+    <unit id="6771413606625426683">
+      <segment state="initial">
+        <source>Minimum allowed value:</source>
+        <target>Valeur minimum admissible :</target>
+      </segment>
+    </unit>
+    <unit id="1709313240781435252">
+      <segment state="initial">
+        <source>Maximum allowed value:</source>
+        <target>Valeur maximum admissible :</target>
+      </segment>
+    </unit>
+    <unit id="399524330429754869">
+      <segment state="initial">
+        <source>Ice indicator</source>
+        <target>Indicateur de givre</target>
+      </segment>
+    </unit>
+    <unit id="914576298220560599">
+      <segment state="initial">
+        <source>Frontier support</source>
+        <target>Support frontière</target>
+      </segment>
+    </unit>
+    <unit id="7478743037636719773">
+      <segment state="initial">
+        <source> Ice thickness before support frontier </source>
+        <target> Épaisseur du givre avant le support frontière </target>
+      </segment>
+    </unit>
+    <unit id="8939108734321665925">
+      <segment state="initial">
+        <source> Ice thickness after support frontier </source>
+        <target> Épaisseur du givre après le support frontière </target>
+      </segment>
+    </unit>
+    <unit id="7808756054397155068">
+      <segment state="initial">
+        <source>Reset</source>
+        <target>Réinitialiser</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
