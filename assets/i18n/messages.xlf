@@ -6134,5 +6134,20 @@
         <source>All fields are mandatory for temperature calculation.</source>
       </segment>
     </unit>
+    <unit id="4396866374643971390">
+      <segment>
+        <source>No measures</source>
+      </segment>
+    </unit>
+    <unit id="7141835298693653605">
+      <segment>
+        <source>Choose an existing measure</source>
+      </segment>
+    </unit>
+    <unit id="8878227880393471056">
+      <segment>
+        <source>No measures found</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

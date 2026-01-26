@@ -3507,7 +3507,7 @@
     <unit id="3275519279768264405">
       <segment state="initial">
         <source>All fields are mandatory</source>
-        <target>Toutes les données sont obligatoires.</target>
+        <target>Toutes les données sont obligatoires pour le calcul de la température.</target>
       </segment>
     </unit>
     <unit id="1546856207674794665">
@@ -3992,8 +3992,10 @@
     </unit>
     <unit id="l0-sum-value">
       <segment state="initial">
-        <source> <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}"/> m </source>
-        <target> <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}"/> m </target>
+        <source>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}" /> m </source>
+        <target>
+          <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}" /> m </target>
       </segment>
     </unit>
     <unit id="8198413691907314778">
@@ -4082,8 +4084,14 @@
     </unit>
     <unit id="5667174251183495987">
       <segment state="initial">
-        <source> For a stop or a suspension without pulley, the tension in the guy line allows to balance the longitudinal charges at the console level (no L). For a suspension with a pulley, the tension in the guy line is the maximum tension in all the cables of the bundle and a longitudinal charge appears. </source>
-        <target> Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet d’équilibrer les charges longitudinales au niveau de la console (pas de L). Pour une suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles du faisceau et une charge longitudinale apparaît.</target>
+        <source> For a stop or a suspension without pulley, the tension in the guy line allows to
+          balance the longitudinal charges at the console level (no L). For a suspension with a
+          pulley, the tension in the guy line is the maximum tension in all the cables of the bundle
+          and a longitudinal charge appears. </source>
+        <target> Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet
+          d’équilibrer les charges longitudinales au niveau de la console (pas de L). Pour une
+          suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles
+          du faisceau et une charge longitudinale apparaît.</target>
       </segment>
     </unit>
     <unit id="8828649339346559125">
@@ -4191,10 +4199,12 @@
     <unit id="80889600222732792">
       <segment state="initial">
         <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other"
+            dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
         </source>
         <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude paramètre</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other"
+            dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude paramètre</pc>
         </target>
       </segment>
     </unit>
@@ -4310,6 +4320,24 @@
       <segment state="initial">
         <source>All fields are mandatory for temperature calculation.</source>
         <target>Toutes les données sont obligatoires pour le calcul de température.</target>
+      </segment>
+    </unit>
+    <unit id="7141835298693653605">
+      <segment state="initial">
+        <source>Choose an existing measure</source>
+        <target>Choisir une mesure existante</target>
+      </segment>
+    </unit>
+    <unit id="8878227880393471056">
+      <segment state="initial">
+        <source>No measures found</source>
+        <target>Pas de mesure trouvée</target>
+      </segment>
+    </unit>
+    <unit id="4396866374643971390">
+      <segment state="initial">
+        <source>No measures</source>
+        <target>Pas de mesure</target>
       </segment>
     </unit>
   </file>
