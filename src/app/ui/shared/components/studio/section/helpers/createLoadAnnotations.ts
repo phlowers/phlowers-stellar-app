@@ -40,16 +40,16 @@ export const createLoadAnnotations = (
   plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
     if (spanLoad && spanIndex in load_coords) {
       const current_load_coord = load_coords[spanIndex];
-        annotations.push({
-          ...BASE_ANNOTATION,
-          x: current_load_coord[0],
-          y:
-            plotParams.view === '2d'
-              ? current_load_coord[2]
-              : current_load_coord[1],
-          //@ts-expect-error Plotly.js-dist-min does not support z axis
-          z: current_load_coord[2],
-          text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON
+      annotations.push({
+        ...BASE_ANNOTATION,
+        x: current_load_coord[0],
+        y:
+          plotParams.view === '2d'
+            ? current_load_coord[2]
+            : current_load_coord[1],
+        //@ts-expect-error Plotly.js-dist-min does not support z axis
+        z: current_load_coord[2],
+        text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON
       });
     }
   });
