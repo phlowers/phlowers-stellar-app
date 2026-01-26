@@ -1236,12 +1236,6 @@
         <target>Th - T0 :</target>
       </segment>
     </unit>
-    <unit id="1029122298839770722">
-      <segment state="initial">
-        <source>reset</source>
-        <target>réinitialiser</target>
-      </segment>
-    </unit>
     <unit id="6613300769068333223">
       <segment state="initial">
         <source>Wind Pressure</source>
@@ -1254,34 +1248,10 @@
         <target>Température du câble</target>
       </segment>
     </unit>
-    <unit id="6360407171073312357">
+    <unit id="5423101655447195400">
       <segment state="initial">
-        <source>Symmetry Type</source>
-        <target>Symétrie</target>
-      </segment>
-    </unit>
-    <unit id="8204555453748282582">
-      <segment state="initial">
-        <source>Ice Thickness</source>
-        <target>Épaisseur de la glace</target>
-      </segment>
-    </unit>
-    <unit id="4588982619541413952">
-      <segment state="initial">
-        <source> Frontier Support Number </source>
-        <target> N° de support frontière </target>
-      </segment>
-    </unit>
-    <unit id="2802938289697505873">
-      <segment state="initial">
-        <source> Ice Thickness (Before Frontier) </source>
-        <target> Épaisseur de la glace (avant la frontière) </target>
-      </segment>
-    </unit>
-    <unit id="6079274139415183182">
-      <segment state="initial">
-        <source> Ice Thickness (After Frontier) </source>
-        <target> Épaisseur de la glace (après la frontière) </target>
+        <source>Ice thickness</source>
+        <target>Épaisseur du givre</target>
       </segment>
     </unit>
     <unit id="5204909450862821423">
@@ -1296,10 +1266,10 @@
         <target>Calculer</target>
       </segment>
     </unit>
-    <unit id="1035207489563002235">
+    <unit id="3899641059154911141">
       <segment state="initial">
-        <source> fold back </source>
-        <target> replier </target>
+        <source> Fold back </source>
+        <target> Replier </target>
       </segment>
     </unit>
     <unit id="7410825966608756111">
@@ -3335,6 +3305,54 @@
       <segment state="initial">
         <source>No measures</source>
         <target>Pas de mesure</target>
+      </segment>
+    </unit>
+    <unit id="2104405463703805846">
+      <segment state="initial">
+        <source> Value must be a whole number </source>
+        <target> La valeur saisie doit être un nombre entier </target>
+      </segment>
+    </unit>
+    <unit id="6771413606625426683">
+      <segment state="initial">
+        <source>Minimum allowed value:</source>
+        <target>Valeur minimum admissible :</target>
+      </segment>
+    </unit>
+    <unit id="1709313240781435252">
+      <segment state="initial">
+        <source>Maximum allowed value:</source>
+        <target>Valeur maximum admissible :</target>
+      </segment>
+    </unit>
+    <unit id="399524330429754869">
+      <segment state="initial">
+        <source>Ice indicator</source>
+        <target>Indicateur de givre</target>
+      </segment>
+    </unit>
+    <unit id="914576298220560599">
+      <segment state="initial">
+        <source>Frontier support</source>
+        <target>Support frontière</target>
+      </segment>
+    </unit>
+    <unit id="7478743037636719773">
+      <segment state="initial">
+        <source> Ice thickness before support frontier </source>
+        <target> Épaisseur du givre avant le support frontière </target>
+      </segment>
+    </unit>
+    <unit id="8939108734321665925">
+      <segment state="initial">
+        <source> Ice thickness after support frontier </source>
+        <target> Épaisseur du givre après le support frontière </target>
+      </segment>
+    </unit>
+    <unit id="7808756054397155068">
+      <segment state="initial">
+        <source>Reset</source>
+        <target>Réinitialiser</target>
       </segment>
     </unit>
   </file>
