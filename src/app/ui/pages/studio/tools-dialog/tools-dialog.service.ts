@@ -48,11 +48,11 @@ export class ToolsDialogService {
     },
     'l0-sum': {
       component: L0SumComponent,
-      dialogStyle: { 'min-width': '50rem', 'max-width': '50rem' }
+      dialogStyle: { width: '40rem', 'max-width': '90%' }
     },
     'vtl-and-guying': {
       component: VhlAndGuyingComponent,
-      dialogStyle: { 'min-width': '95vw', 'max-width': '95vw' }
+      dialogStyle: { width: '86.5625rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!
