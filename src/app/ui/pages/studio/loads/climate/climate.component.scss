@@ -13,8 +13,57 @@
 
   &__divided-line {
     @apply grid grid-cols-2;
+    grid-template-areas:
+      'windLabel tempLabel'
+      'windInput tampInput'
+      'windError tempError';
     column-gap: 0.625rem;
-    align-items: end;
+  }
+
+  %_align-top {
+    align-self: start;
+  }
+
+  %_align-center {
+    align-self: center;
+  }
+
+  %_align-end {
+    align-self: end;
+  }
+
+  %_error-layout {
+    @apply flex flex-col gap-1 pt-1;
+  }
+
+  .wind-label {
+    grid-area: windLabel;
+    @extend %_align-end;
+  }
+
+  .wind-input {
+    grid-area: windInput;
+    @extend %_align-center;
+  }
+
+  .wind-error {
+    grid-area: windError;
+    @extend %_align-top, %_error-layout;
+  }
+
+  .temp-label {
+    grid-area: tempLabel;
+    @extend %_align-end;
+  }
+
+  .temp-input {
+    grid-area: tampInput;
+    @extend %_align-center;
+  }
+
+  .temp-error {
+    grid-area: tempError;
+    @extend %_align-top, %_error-layout;
   }
 
   &__btn-wrapper {
