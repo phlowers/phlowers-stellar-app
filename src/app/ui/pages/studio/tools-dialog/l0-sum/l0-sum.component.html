@@ -5,9 +5,9 @@
   </p>
 </ng-template>
 
-<div class="l0-sum-container" *ngIf="!loading(); else loadingTpl">
-  <section class="l0-table-section">
-    <h3 class="l0-table-title underline-text" i18n>L0 table</h3>
+<div class="l0-sum" *ngIf="!loading(); else loadingTpl">
+  <section>
+    <h3 class="heading-xs underline-text" i18n>L0 table</h3>
 
     <p-table
       [value]="l0Rows()"
@@ -17,30 +17,22 @@
       [showCurrentPageReport]="true"
       currentPageReportTemplate="{currentPage} sur {totalPages}"
       styleClass="l0-table"
-      [tableStyle]="{ 'min-width': '100%' }"
       [customSort]="true"
       (sortFunction)="customSort($event)"
     >
       <ng-template pTemplate="header">
         <tr>
-          <th id="span-header" pSortableColumn="span" style="width: 50%">
+          <th id="span-header" pSortableColumn="span">
             <div class="flex items-center gap-2">
               <span i18n>Span</span>
               <app-icon [icon]="getSortIcon('span')" />
             </div>
           </th>
-          <th
-            id="l0-header"
-            pSortableColumn="l0"
-            style="width: 50%; text-align: right"
-          >
-            <div class="flex items-center gap-2 justify-end">
-              <span i18n>L0</span>
-              <app-icon [icon]="getSortIcon('l0')" />
-            </div>
-          </th>
+
+          <th id="l0-header" i18n>L0</th>
         </tr>
       </ng-template>
+
       <ng-template pTemplate="body" let-row>
         <tr>
           <td>
@@ -54,32 +46,30 @@
     </p-table>
   </section>
 
-  <section class="l0-summary-section">
-    <h3 class="l0-summary-title" i18n>Sum L0</h3>
-    <p class="l0-summary-value" i18n="@@l0-sum-value">
+  <dl class="l0-sum__section-summary">
+    <dt class="l0-sum__section-summary__title" i18n>Sum L0</dt>
+    <dd class="l0-sum__section-summary__value">
       {{ totalL0() | number: '1.3-3' }}&nbsp;m
-    </p>
-  </section>
+    </dd>
+  </dl>
 </div>
 
 <ng-template #loadingTpl>
-  <div class="l0-loading">
+  <div class="l0-sum__loading">
     <p-progressSpinner />
-    <span class="l0-loading-text" i18n>Loading L0 data…</span>
+    <span class="l0-sum__loading__text" i18n>Loading L0 data…</span>
   </div>
 </ng-template>
 
 <ng-template #footer>
-  <div class="dialog-footer">
-    <button
-      disabled="true"
-      app-btn
-      type="button"
-      btnSize="m"
-      (click)="onExport()"
-    >
-      <app-icon icon="download" />
-      <span i18n>Export</span>
-    </button>
-  </div>
+  <button
+    disabled="true"
+    app-btn
+    type="button"
+    btnSize="m"
+    (click)="onExport()"
+  >
+    <app-icon icon="download" />
+    <span i18n>Export</span>
+  </button>
 </ng-template>
