@@ -21,7 +21,7 @@ import { MessageModule } from 'primeng/message';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-init',
+  selector: 'app-field-measuring-init',
   imports: [
     IconComponent,
     InputText,
@@ -46,8 +46,7 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
     });
     const section = this.plotService.section();
     const measures = section?.field_measures;
-    const newMeasureName =
-      $localize`TM` + ' - ' + ((measures?.length || 0) + 1);
+    const newMeasureName = $localize`TM ` + ((measures?.length || 0) + 1);
     this.newMeasureNameControl.setValue(newMeasureName);
     this.measures.set(
       measures?.map((measure) => ({
