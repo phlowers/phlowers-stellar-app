@@ -66,7 +66,13 @@ describe('VhlAndGuyingComponent', () => {
       study: signal(mockStudy),
       getSpanOptions: jest
         .fn()
-        .mockReturnValue([{ label: 'Span 1', value: [0, 1] }])
+        .mockReturnValue([
+          { label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }
+        ]),
+      getSupportOptions: jest.fn().mockReturnValue([
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
+      ])
     } as unknown as jest.Mocked<PlotService>;
 
     mockWorkerPythonService = {
@@ -150,7 +156,7 @@ describe('VhlAndGuyingComponent', () => {
 
     component.form.controls.altitude.setValue(10);
     component.form.controls.horizontalDistance.setValue(5);
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSupport.setValue('LEFT');
 
     await component.onCalculate();
 
@@ -168,7 +174,7 @@ describe('VhlAndGuyingComponent', () => {
   it('should not calculate when inputs are missing', async () => {
     component.form.controls.altitude.setValue(null);
     component.form.controls.horizontalDistance.setValue(5);
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSupport.setValue('LEFT');
 
     await component.onCalculate();
 
@@ -190,7 +196,7 @@ describe('VhlAndGuyingComponent', () => {
 
     component.form.controls.altitude.setValue(10);
     component.form.controls.horizontalDistance.setValue(5);
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSupport.setValue('LEFT');
 
     await component.onCalculate();
 
@@ -200,30 +206,45 @@ describe('VhlAndGuyingComponent', () => {
 
   it('should compute support type as Suspension when chainV is true', () => {
     // The mock section is already set in beforeEach with supports
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSpan.setValue({
+      index: 0,
+      uuid: 'span-uuid-1'
+    });
+    component.form.controls.selectedSupport.setValue('LEFT');
     fixture.detectChanges();
     expect(component.supportType()).toBe('Suspension');
   });
 
   it('should compute support type as Anchor when chainV is false', () => {
     // The mock section is already set in beforeEach with supports
-    component.form.controls.selectedSupport.setValue(1);
+    component.form.controls.selectedSpan.setValue({
+      index: 0,
+      uuid: 'span-uuid-1'
+    });
+    component.form.controls.selectedSupport.setValue('RIGHT');
     fixture.detectChanges();
     expect(component.supportType()).toBe('Anchor');
   });
 
   it('should compute support options from selected span', () => {
-    component.form.controls.selectedSpan.setValue([0, 1]);
+    component.form.controls.selectedSpan.setValue({
+      index: 0,
+      uuid: 'span-uuid-1'
+    });
     fixture.detectChanges();
     const options = component.supportOptions();
     expect(options).toEqual([
-      { label: '1', value: 0 },
-      { label: '2', value: 1 }
+      { label: 1, value: 'LEFT' },
+      { label: 2, value: 'RIGHT' }
     ]);
   });
 
   it('should compute vtlWithoutGuying when support is selected', () => {
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSpan.setValue({
+      index: 0,
+      uuid: 'span-uuid-1'
+    });
+    component.form.controls.selectedSupport.setValue('LEFT');
     fixture.detectChanges();
     const vtl = component.vtlWithoutGuying();
     expect(vtl).toEqual({
@@ -248,8 +269,8 @@ describe('VhlAndGuyingComponent', () => {
       supports: [{ chainV: true }, { chainV: false }],
       vtl_and_guying: {
         inputs: {
-          selectedSpan: [0, 1],
-          selectedSupport: 0,
+          selectedSpan: { index: 0, uuid: 'span-uuid-1' },
+          selectedSupport: 'LEFT',
           altitude: 10,
           horizontalDistance: 5,
           hasPulley: true
@@ -270,8 +291,11 @@ describe('VhlAndGuyingComponent', () => {
       configurable: true
     });
     component.setFormValuesFromSection();
-    expect(component.form.controls.selectedSpan.value).toEqual([0, 1]);
-    expect(component.form.controls.selectedSupport.value).toBe(0);
+    expect(component.form.controls.selectedSpan.value).toEqual({
+      index: 0,
+      uuid: 'span-uuid-1'
+    });
+    expect(component.form.controls.selectedSupport.value).toBe('LEFT');
     expect(component.form.controls.altitude.value).toBe(10);
     expect(component.form.controls.horizontalDistance.value).toBe(5);
     expect(component.form.controls.hasPulley.value).toBe(true);
@@ -327,8 +351,11 @@ describe('VhlAndGuyingComponent', () => {
       writable: true,
       configurable: true
     });
-    component.form.controls.selectedSpan.setValue([0]);
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSpan.setValue({
+      index: 0,
+      uuid: 'span-uuid-1'
+    });
+    component.form.controls.selectedSupport.setValue('LEFT');
     component.form.controls.altitude.setValue(10);
     component.form.controls.horizontalDistance.setValue(5);
     component.form.controls.hasPulley.setValue(true);
@@ -349,8 +376,8 @@ describe('VhlAndGuyingComponent', () => {
       expect.objectContaining({
         vtl_and_guying: expect.objectContaining({
           inputs: {
-            selectedSpan: [0],
-            selectedSupport: 0,
+            selectedSpan: { index: 0, uuid: 'span-uuid-1' },
+            selectedSupport: 'LEFT',
             altitude: 10,
             horizontalDistance: 5,
             hasPulley: true
@@ -404,32 +431,35 @@ describe('VhlAndGuyingComponent', () => {
   it('should return true when form is valid', () => {
     component.form.controls.altitude.setValue(10);
     component.form.controls.horizontalDistance.setValue(5);
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSupport.setValue('LEFT');
     expect(component.isFormValid()).toBe(true);
   });
 
   it('should return false when altitude is null', () => {
     component.form.controls.altitude.setValue(null);
     component.form.controls.horizontalDistance.setValue(5);
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSupport.setValue('LEFT');
     expect(component.isFormValid()).toBe(false);
   });
 
   it('should return false when horizontalDistance is null', () => {
     component.form.controls.altitude.setValue(10);
     component.form.controls.horizontalDistance.setValue(null);
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSupport.setValue('LEFT');
     expect(component.isFormValid()).toBe(false);
   });
 
   it('should reset form and clear all signals', () => {
-    component.form.controls.selectedSpan.setValue([0, 1]);
-    component.form.controls.selectedSupport.setValue(0);
+    component.form.controls.selectedSpan.setValue({
+      index: 0,
+      uuid: 'span-uuid-1'
+    });
+    component.form.controls.selectedSupport.setValue('LEFT');
     component.form.controls.altitude.setValue(10);
     component.form.controls.horizontalDistance.setValue(5);
     component.form.controls.hasPulley.setValue(true);
     component.form.controls.comment.setValue('Test comment');
-    component.supportOptions.set([{ label: '1', value: 0 }]);
+    component.supportOptions.set([{ label: 1, value: 'LEFT' }]);
     component.supportType.set('Suspension');
     component.vtlWithoutGuying.set({
       chargeV: 10,
@@ -460,8 +490,11 @@ describe('VhlAndGuyingComponent', () => {
   });
 
   it('should clear selectedSupport when selectedSpan changes', () => {
-    component.form.controls.selectedSupport.setValue(0);
-    component.form.controls.selectedSpan.setValue([0, 1]);
+    component.form.controls.selectedSupport.setValue('LEFT');
+    component.form.controls.selectedSpan.setValue({
+      index: 0,
+      uuid: 'span-uuid-1'
+    });
     expect(component.form.controls.selectedSupport.value).toBeNull();
   });
 });
