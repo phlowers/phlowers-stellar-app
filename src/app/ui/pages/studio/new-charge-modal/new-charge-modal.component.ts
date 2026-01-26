@@ -143,9 +143,12 @@ export class NewChargeModalComponent {
 
   isFormValid(): boolean {
     const existingLoadCases = this.plotService.section()?.charges;
+    const currentUuid = this.uuidInput();
     return (
       this.nameLength() > 0 &&
-      !existingLoadCases?.some((c) => c.name === this.name())
+      !existingLoadCases?.some(
+        (c) => c.name === this.name() && c.uuid !== currentUuid
+      )
     );
   }
 }

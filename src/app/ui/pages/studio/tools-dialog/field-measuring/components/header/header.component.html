@@ -13,8 +13,10 @@
       <dd class="capitalize">{{ measureData().spanType }}</dd>
     </div>
     <div class="header-info">
-      <dt i18n>Phase number</dt>
-      <dd>{{ measureData().phaseNumber }}</dd>
+      @if (measureData().spanType === 'phase') {
+        <dt i18n>Phase number</dt>
+        <dd>{{ measureData().phaseNumber }}</dd>
+      }
     </div>
     <div class="header-info">
       <dt i18n>Cable amount</dt>
