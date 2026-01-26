@@ -59,8 +59,7 @@
 
 <div>
   <label for="choose-measure">
-    <ng-container i18n>Measure's name</ng-container>
-    <sup class="mandatory">*</sup>
+    <ng-container i18n>Choose an existing measure</ng-container>
   </label>
   <p-select
     inputId="choose-measure"
@@ -68,6 +67,10 @@
     fluid
     showClear
     appendTo="body"
+    emptyFilterMessage="No measures found"
+    i18n-emptyFilterMessage
+    emptyMessage="No measures"
+    i18n-emptyMessage
     ariaLabelledBy="complementary-form-field-measuring-init"
     [options]="measures()"
     optionLabel="label"

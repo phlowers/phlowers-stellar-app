@@ -34,6 +34,7 @@ import { ParameterCalculation15WithoutWindComponent } from './components/paramet
 import { createInitialMeasureData } from './helpers';
 import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
+import { isNumber } from 'lodash';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -133,6 +134,18 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
             measure.uuid !== this.measureData().uuid
         ) || false
     );
+  });
+
+  isFormValid = computed(() => {
+    const measureData = this.measureData();
+    const isValid =
+      measureData.name &&
+      measureData.span &&
+      isNumber(measureData.longitude) &&
+      isNumber(measureData.latitude) &&
+      isNumber(measureData.altitude) &&
+      isNumber(measureData.azimuth);
+    return isValid && !this.isNameAlreadyTaken();
   });
 
   private async initializeMeasureData(): Promise<void> {
