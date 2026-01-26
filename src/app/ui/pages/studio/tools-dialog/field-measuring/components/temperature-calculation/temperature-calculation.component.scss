@@ -1,15 +1,7 @@
 @use 'abstract.extracts' as app;
 
-%_common-label-terms-context-spacing {
-  margin: 0.125rem 0.25rem;
-}
-
-label,
 dt {
-  @extend %text-s-400, %_common-label-terms-context-spacing;
-}
-
-dt {
+  @extend %label-style;
   color: var(--grey-800);
 }
 
@@ -150,7 +142,7 @@ dd {
     .solar-fluxs-impact {
       @apply self-start;
       grid-area: measuredDiffusedPlusDirectSolarFluxInfo;
-      @extend %text-s-600, %_common-label-terms-context-spacing;
+      @extend %text-s-600, %label-spacing;
       color: var(--star-dust-900);
     }
   }

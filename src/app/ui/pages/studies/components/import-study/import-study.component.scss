@@ -57,8 +57,6 @@
 
     &__label {
       @apply flex items-center gap-1 mb-0;
-      @extend %text-s-400;
-      color: var(--grey-750);
     }
 
     &__icon {
