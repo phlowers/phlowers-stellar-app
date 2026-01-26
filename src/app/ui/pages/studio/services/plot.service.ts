@@ -4,7 +4,8 @@ import {
   effect,
   inject,
   Injectable,
-  signal
+  signal,
+  untracked
 } from '@angular/core';
 import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import {
@@ -141,11 +142,17 @@ export class PlotService {
   };
 
   plotOptionsChange(values: Partial<PlotOptions>) {
-    const oldOptions = this.plotOptions();
+    const oldOptions = untracked(() => this.plotOptions());
     const newOptions = { ...oldOptions, ...values };
     this.plotOptions.set(newOptions);
     this.refreshCamera();
-    if (checkIfProjectionNeedRefresh(oldOptions, newOptions, this.loading())) {
+    if (
+      checkIfProjectionNeedRefresh(
+        oldOptions,
+        newOptions,
+        untracked(() => this.loading())
+      )
+    ) {
       this.refreshProjection();
     }
   }
@@ -187,7 +194,12 @@ export class PlotService {
 
   refreshCamera = (): Camera | null => {
     const camera = this.getCamera();
-    if (!isEqual(camera, this.camera())) {
+    if (
+      !isEqual(
+        camera,
+        untracked(() => this.camera())
+      )
+    ) {
       this.camera.set(camera);
     }
     return camera;
@@ -239,4 +251,23 @@ export class PlotService {
     }));
     return spans;
   });
+
+  getSupportOptions = (
+    selectedSpan: SpanOption['value'] | null
+  ): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
+    if (selectedSpan === null) {
+      return [];
+    }
+    const spanIndex = selectedSpan.index;
+    return [
+      {
+        label: spanIndex + 1,
+        value: 'LEFT'
+      },
+      {
+        label: spanIndex + 2,
+        value: 'RIGHT'
+      }
+    ];
+  };
 }
