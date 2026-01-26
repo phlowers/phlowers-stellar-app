@@ -10,10 +10,7 @@ body {
 }
 
 label {
-  @extend %text-m-400;
-  @extend %label-spacing;
-  display: inline-block;
-  color: var(--grey-800);
+  @extend %label-style;
 }
 
 input[type='number'] {

@@ -56,11 +56,6 @@ dd {
     .cableTemperatureUncertainty {
       grid-area: cableTemperatureUncertainty;
     }
-
-    label {
-      @extend %text-s-400;
-      margin: 0.125rem 0.25rem;
-    }
   }
 
   &__results {

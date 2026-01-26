@@ -1,9 +1,5 @@
 @use 'abstract.extracts' as app;
 
-%_label-margin {
-  margin: 0.125rem 0.25rem;
-}
-
 .field-datas {
   &__mandatory-msg {
     @apply flex items-center gap-1 my-4;
@@ -49,17 +45,12 @@
     .wind {
       &__label {
         @apply flex items-end justify-between gap-1;
-        @extend %_label-margin;
+        @extend %label-spacing;
 
         label {
           margin: 0rem;
         }
       }
-    }
-
-    label {
-      @extend %text-s-400;
-      @extend %_label-margin;
     }
   }
 }
