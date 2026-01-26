@@ -34,17 +34,17 @@ export class ToolsDialogService {
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
       component: FieldMeasuringComponent,
-      dialogStyle: { 'min-width': '90%', 'max-width': '72.5rem' },
+      dialogStyle: { width: '72.5rem', 'max-width': '90%' },
       initComponent: InitComponent,
-      initDialogStyle: { 'min-width': '29rem', 'max-width': '90%' }
+      initDialogStyle: { width: '29rem', 'max-width': '90%' }
     },
     'l0-sum': {
       component: L0SumComponent,
-      dialogStyle: { 'min-width': '50rem', 'max-width': '50rem' }
+      dialogStyle: { width: '40rem', 'max-width': '90%' }
     },
     'vtl-and-guying': {
       component: VhlAndGuyingComponent,
-      dialogStyle: { 'min-width': '95vw', 'max-width': '95vw' }
+      dialogStyle: { width: '86.5625rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!
