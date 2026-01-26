@@ -37,10 +37,9 @@ export const createLoadAnnotations = (
 ): Plotly.Annotations[] => {
   const annotations: Plotly.Annotations[] = [];
   const load_coords = cloneDeep(plotParams.litData.loads_coords);
-  plotParams.spanLoads.forEach((spanLoad) => {
-    if (spanLoad) {
-      const current_load_coord = load_coords.shift();
-      if (current_load_coord) {
+  plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
+    if (spanLoad && spanIndex in load_coords) {
+      const current_load_coord = load_coords[spanIndex];
         annotations.push({
           ...BASE_ANNOTATION,
           x: current_load_coord[0],
@@ -51,8 +50,7 @@ export const createLoadAnnotations = (
           //@ts-expect-error Plotly.js-dist-min does not support z axis
           z: current_load_coord[2],
           text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON
-        });
-      }
+      });
     }
   });
   return annotations;

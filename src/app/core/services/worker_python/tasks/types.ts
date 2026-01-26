@@ -1,5 +1,6 @@
 import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@core/domain';
 import { View } from '@ui/shared/components/studio/section/helpers/types';
+import { Dictionary } from 'lodash';
 
 export enum Task {
   runTests = 'runTests',
@@ -40,7 +41,7 @@ export interface GetSectionOutput {
   load_angle: number[];
   displacement: number[][];
   span_length: number[];
-  loads_coords: number[][];
+  loads_coords: Dictionary<number[]>;
 }
 
 export enum LogLevel {

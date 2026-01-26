@@ -39,7 +39,6 @@ def change_state(js_inputs: dict):
     change_state_inputs = js_to_python(js_inputs) # type: ignore
     print("change_state_inputs", change_state_inputs)
     climate = ClimateCharge(**change_state_inputs["climate"])
-    # punctual_load = PunctualLoad(**change_state_inputs["punctualLoad"])
     print(change_state_inputs)
     logger.debug("python_inputs: ", change_state_inputs)
     wind_pressure = climate.windPressure
@@ -47,10 +46,16 @@ def change_state(js_inputs: dict):
     ice_thickness = climate.iceThickness / 100  # in meters in the engine
 
     punctual_load = change_state_inputs["spanLoads"]
-
-    print(f"{punctual_load=}")
-    # use pandas instead?
-    load_position_meters = np.array([span["loadPosition"] for span in punctual_load])
+    load_position_list = []
+    for index, span in enumerate(punctual_load):
+        if span['referenceSupport'] == 'LEFT':
+            load_position_list.append(span["loadPosition"])
+        elif span['referenceSupport'] == 'RIGHT':
+            span_length = engine.section_array.data["span_length"].to_numpy()[index]
+            load_position_list.append(span_length - span["loadPosition"])
+        else:
+            load_position_list.append(0)
+    load_position_meters = np.array(load_position_list)
     load_weight = np.array([span["loadWeight"] for span in punctual_load])
 
 

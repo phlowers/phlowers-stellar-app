@@ -71,9 +71,7 @@ class Support:
     chainName: Optional[str] = None
     towerModel: Optional[str] = None
     chainLength: Optional[float] = None
-    towerModel: Optional[str] = None
     chainWeight: Optional[float] = None
-    towerModel: Optional[str] = None
     chainV: Optional[bool] = None
     counterWeight: Optional[float] = None
     supportFootAltitude: Optional[float] = None
@@ -193,8 +191,7 @@ def get_coordinates(
     vtl_under_console = list(engine.balance_model.vhl_under_console().vhl)
     # vtl = vtl_under_chain.vtl)
 
-    loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span).tolist()
-    print(f"{loads_coords=}")
+    loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span)
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
