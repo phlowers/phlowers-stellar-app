@@ -128,12 +128,7 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (
     },
     xaxis: {
       ...axis,
-      autorange:
-        plotParams.side === 'face'
-          ? false
-          : plotParams.invert
-            ? 'reversed'
-            : true,
+      autorange: plotParams.invert ? 'reversed' : true,
       showticklabels: true,
       showgrid: true,
       showline: true
