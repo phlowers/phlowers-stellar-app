@@ -22,11 +22,6 @@
 .vtl-guying__form-field {
   @apply flex flex-col gap-1;
 
-  label {
-    @extend %text-m-400;
-    @apply m-0;
-  }
-
   &--checkbox {
     @apply flex items-center gap-2 flex-row mt-2;
     grid-column: 1;
@@ -78,14 +73,7 @@
   @apply flex flex-col gap-1.5;
 
   dt {
-    @extend %text-m-400;
-    @apply m-0;
-  }
-
-  label {
-    @extend %text-s-400;
-    @apply m-0;
-    color: var(--grey-600);
+    @extend %label-style;
   }
 }
 
@@ -124,13 +112,7 @@
   @apply flex flex-col gap-1;
 
   dt {
-    @extend %text-m-400;
-    @apply m-0;
-  }
-
-  label {
-    @extend %text-m-400;
-    @apply m-0;
+    @extend %label-style;
   }
 }
 
