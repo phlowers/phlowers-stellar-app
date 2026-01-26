@@ -151,7 +151,19 @@ export class ParameterCalculation15WithoutWindComponent {
       cableTemperatureCalibrationUncertainty:
         manualData?.cableTemperatureCalibrationUncertainty || null
     };
-    const dataToSend = isManual ? manualDataToSend : data;
+    const autoDataToSend = {
+      parameterPapoto: data.outputs.papoto?.parameter || null,
+      parameterUncertaintyPapoto: data.outputs.papoto?.parameter_1_2 || null,
+      cableTemperature15C:
+        data.outputs.cableTemperature?.cableTemperature || null,
+      cableTemperatureUncertainty15C:
+        data.outputs.cableTemperature?.cableTemperatureUncertainty || null,
+      cableTemperatureCalibration:
+        data.outputs.cableTemperature?.cableTemperature || null,
+      cableTemperatureCalibrationUncertainty:
+        data.outputs.cableTemperature?.cableTemperatureUncertainty || null
+    };
+    const dataToSend = isManual ? manualDataToSend : autoDataToSend;
     const { result, error } = await this.workerPythonService.runTask(
       Task.calculateParameter15CWithoutWind,
       { ...dataToSend, span_index: data.span?.[0] ?? null }
