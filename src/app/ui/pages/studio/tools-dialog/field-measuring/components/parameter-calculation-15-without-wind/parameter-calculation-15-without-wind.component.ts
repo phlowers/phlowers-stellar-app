@@ -153,11 +153,8 @@ export class ParameterCalculation15WithoutWindComponent {
     };
     const autoDataToSend = {
       parameterPapoto: data.outputs.papoto?.parameter || null,
-      parameterUncertaintyPapoto: data.outputs.papoto?.parameter_1_2 || null,
-      cableTemperature15C:
-        data.outputs.cableTemperature?.cableTemperature || null,
-      cableTemperatureUncertainty15C:
-        data.outputs.cableTemperature?.cableTemperatureUncertainty || null,
+      // Uncertainties currently unused
+      parameterUncertaintyPapoto: data.parameterUncertaintyPapoto || null,
       cableTemperatureCalibration:
         data.outputs.cableTemperature?.cableTemperature || null,
       cableTemperatureCalibrationUncertainty:
