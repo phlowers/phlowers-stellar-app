@@ -25,7 +25,7 @@ export interface ToolTemplates {
 @Injectable({
   providedIn: 'root'
 })
-export class ToolsDialogService {
+export class ToolbarDialogService {
   readonly currentTool = signal<Tool | null>(null);
   readonly isInitOpen = signal(false);
   readonly isMainOpen = signal(false);

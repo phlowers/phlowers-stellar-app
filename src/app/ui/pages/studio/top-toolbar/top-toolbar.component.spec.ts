@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioTopToolbarComponent } from './top-toolbar.component';
-import { ToolsDialogService } from '../tools-dialog/tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
@@ -18,7 +18,7 @@ describe('StudioTopToolbarComponent', () => {
   let component: StudioTopToolbarComponent;
   let fixture: ComponentFixture<StudioTopToolbarComponent>;
   let mockPlotService: jest.Mocked<PlotService>;
-  let mockToolsDialogService: jest.Mocked<ToolsDialogService>;
+  let mockToolbarDialogService: jest.Mocked<ToolbarDialogService>;
 
   beforeEach(async () => {
     // Mock PlotService
@@ -33,8 +33,8 @@ describe('StudioTopToolbarComponent', () => {
       selectedDisplayOptions: signal({ loads: false })
     } as any;
 
-    // Mock ToolsDialogService
-    mockToolsDialogService = {
+    // Mock ToolbarDialogService
+    mockToolbarDialogService = {
       openTool: jest.fn()
     } as any;
 
@@ -54,7 +54,7 @@ describe('StudioTopToolbarComponent', () => {
       ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
-        { provide: ToolsDialogService, useValue: mockToolsDialogService }
+        { provide: ToolbarDialogService, useValue: mockToolbarDialogService }
       ]
     }).compileComponents();
 
@@ -137,7 +137,7 @@ describe('StudioTopToolbarComponent', () => {
       const tables = component.tablesDropdown();
 
       tables?.[1].command?.({});
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith('l0-sum');
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('l0-sum');
     });
 
     it('should execute tablesDropdown command for Pose table', () => {
@@ -186,7 +186,7 @@ describe('StudioTopToolbarComponent', () => {
       const tools = component.toolsDropdown();
 
       tools?.[0].command?.({});
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
         'field-measuring'
       );
     });
@@ -372,7 +372,7 @@ describe('StudioTopToolbarComponent', () => {
       const items = component.toolsItems();
 
       items[0].action();
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
         'field-measuring'
       );
     });
@@ -381,7 +381,7 @@ describe('StudioTopToolbarComponent', () => {
       const items = component.toolsItems();
 
       items[1].action();
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
         'vtl-and-guying'
       );
     });
@@ -446,7 +446,7 @@ describe('StudioTopToolbarComponent', () => {
       }
 
       // First two tools call service, remaining 5 call alert
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledTimes(2);
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(2);
       expect(alertSpy).toHaveBeenCalledTimes(5);
       alertSpy.mockRestore();
     });

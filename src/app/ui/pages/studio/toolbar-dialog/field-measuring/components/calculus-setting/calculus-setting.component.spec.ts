@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { CalculusSettingComponent } from './calculus-setting.component';
-import { createTestMeasureData } from '@ui/pages/studio/tools-dialog/field-measuring/helpers';
+import { createTestMeasureData } from '@ui/pages/studio/toolbar-dialog/field-measuring/helpers';
 
 describe('CalculusSetting component', () => {
   let component: CalculusSettingComponent;

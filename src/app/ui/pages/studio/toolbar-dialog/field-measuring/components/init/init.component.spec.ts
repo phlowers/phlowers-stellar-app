@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { InitComponent } from './init.component';
-import { ToolsDialogService } from '@ui/pages/studio/tools-dialog/tools-dialog.service';
+import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { Section } from '@core/domain';
 
@@ -11,7 +11,7 @@ describe('Init component', () => {
   let component: InitComponent;
   let fixture: ComponentFixture<InitComponent>;
   let mockPlotService: Partial<PlotService>;
-  let toolsDialogService: ToolsDialogService;
+  let toolbarDialogService: ToolbarDialogService;
 
   beforeEach(async () => {
     mockPlotService = {
@@ -29,7 +29,7 @@ describe('Init component', () => {
     await TestBed.configureTestingModule({
       imports: [InitComponent],
       providers: [
-        ToolsDialogService,
+        ToolbarDialogService,
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: PlotService, useValue: mockPlotService }
@@ -38,7 +38,7 @@ describe('Init component', () => {
 
     fixture = TestBed.createComponent(InitComponent);
     component = fixture.componentInstance;
-    toolsDialogService = TestBed.inject(ToolsDialogService);
+    toolbarDialogService = TestBed.inject(ToolbarDialogService);
     fixture.detectChanges();
   });
 
@@ -78,7 +78,7 @@ describe('Init component', () => {
       };
       mockPlotService.section = signal<Section | null>(mockSection as Section);
       const proceedSpy = jest.spyOn(
-        toolsDialogService,
+        toolbarDialogService,
         'proceedToMainComponent'
       );
 
@@ -97,7 +97,7 @@ describe('Init component', () => {
       };
       mockPlotService.section = signal<Section | null>(mockSection as Section);
       const proceedSpy = jest.spyOn(
-        toolsDialogService,
+        toolbarDialogService,
         'proceedToMainComponent'
       );
 

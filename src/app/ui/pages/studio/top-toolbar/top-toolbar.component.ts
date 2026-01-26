@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ToolsDialogService } from '../tools-dialog/tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -31,7 +31,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
   ]
 })
 export class StudioTopToolbarComponent implements OnInit {
-  private readonly toolsDialogService = inject(ToolsDialogService);
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
 
   items = signal<MenuItem[] | null>(null);
   tablesDropdown = signal<MenuItem[] | null>(null);
@@ -57,7 +57,7 @@ export class StudioTopToolbarComponent implements OnInit {
         label: $localize`L0 table`, // Tableau L0
         disabled: false,
         command: () => {
-          this.toolsDialogService.openTool('l0-sum');
+          this.toolbarDialogService.openTool('l0-sum');
         }
       },
       {
@@ -167,7 +167,7 @@ export class StudioTopToolbarComponent implements OnInit {
       checked: false,
       disabled: false,
       action: () => {
-        this.toolsDialogService.openTool('field-measuring');
+        this.toolbarDialogService.openTool('field-measuring');
       }
     },
     {
@@ -176,7 +176,7 @@ export class StudioTopToolbarComponent implements OnInit {
       checked: false,
       disabled: false,
       action: () => {
-        this.toolsDialogService.openTool('vtl-and-guying');
+        this.toolbarDialogService.openTool('vtl-and-guying');
       }
     },
     {

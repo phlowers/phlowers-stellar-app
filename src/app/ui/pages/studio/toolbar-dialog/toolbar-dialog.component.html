@@ -1,0 +1,69 @@
+<!-- Dialog Init -->
+<p-dialog
+  dismissableMask="false"
+  [visible]="toolbarDialogService.isInitOpen()"
+  (visibleChange)="toolbarDialogService.isInitOpen.set($event)"
+  [modal]="true"
+  [style]="toolbarDialogService.getInitDialogStyle()"
+  closeAriaLabel="Close"
+  i18n-closeAriaLabel
+  (onHide)="onInitDialogHide()"
+>
+  @if (toolbarDialogService.templates().header) {
+    <ng-template #header>
+      <ng-container
+        *ngTemplateOutlet="toolbarDialogService.templates().header!"
+      />
+    </ng-template>
+  }
+  @if (toolbarDialogService.isInitOpen()) {
+    <ng-container
+      *ngComponentOutlet="
+        toolbarDialogService.getInitComponent();
+        injector: injector
+      "
+    />
+  }
+</p-dialog>
+
+<!-- Dialog Main -->
+<p-dialog
+  dismissableMask="false"
+  [visible]="toolbarDialogService.isMainOpen()"
+  (visibleChange)="toolbarDialogService.isMainOpen.set($event)"
+  [modal]="true"
+  [style]="
+    toolbarDialogService.getMainDialogStyle() || {
+      'min-width': '60vw',
+      'max-width': '75rem'
+    }
+  "
+  closeAriaLabel="Close"
+  i18n-closeAriaLabel
+  (onHide)="toolbarDialogService.closeTool()"
+>
+  @if (toolbarDialogService.templates().header) {
+    <ng-template #header>
+      <ng-container
+        *ngTemplateOutlet="toolbarDialogService.templates().header!"
+      />
+    </ng-template>
+  }
+
+  @if (toolbarDialogService.isMainOpen()) {
+    <ng-container
+      *ngComponentOutlet="
+        toolbarDialogService.getMainComponent();
+        injector: injector
+      "
+    />
+  }
+
+  @if (toolbarDialogService.templates().footer) {
+    <ng-template #footer>
+      <ng-container
+        *ngTemplateOutlet="toolbarDialogService.templates().footer!"
+      />
+    </ng-template>
+  }
+</p-dialog>

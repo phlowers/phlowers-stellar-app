@@ -16,7 +16,7 @@ import { SortEvent } from 'primeng/api';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { PossibleIconNames } from '@ui/shared/model/icon.model';
-import { ToolsDialogService } from '../tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import {
@@ -47,7 +47,7 @@ export class L0SumComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
 
-  private readonly toolsDialogService = inject(ToolsDialogService);
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly plotService = inject(PlotService);
 
   readonly l0Rows = signal<L0Row[]>([]);
@@ -89,7 +89,7 @@ export class L0SumComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.toolsDialogService.setTemplates({
+    this.toolbarDialogService.setTemplates({
       header: this.headerTemplate,
       footer: this.footerTemplate
     });
@@ -97,7 +97,7 @@ export class L0SumComponent implements AfterViewInit {
 
   onVisibleChange(visible: boolean) {
     if (!visible) {
-      this.toolsDialogService.closeTool();
+      this.toolbarDialogService.closeTool();
     }
   }
 

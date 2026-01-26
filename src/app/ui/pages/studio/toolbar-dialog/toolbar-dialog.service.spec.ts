@@ -1,15 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { TemplateRef } from '@angular/core';
-import { ToolsDialogService } from './tools-dialog.service';
+import { ToolbarDialogService } from './toolbar-dialog.service';
 import { FieldMeasuringComponent } from './field-measuring/field-measuring.component';
 import { InitComponent } from './field-measuring/components/init/init.component';
 
-describe('ToolsDialogService', () => {
-  let service: ToolsDialogService;
+describe('ToolbarDialogService', () => {
+  let service: ToolbarDialogService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(ToolsDialogService);
+    service = TestBed.inject(ToolbarDialogService);
   });
 
   describe('Service Creation', () => {

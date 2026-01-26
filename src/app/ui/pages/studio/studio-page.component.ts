@@ -19,7 +19,7 @@ import { SideTabComponent } from './side-tabs/side-tab/side-tab.component';
 import { ClimateComponent } from './loads/climate/climate.component';
 import { SpanComponent } from './loads/span/span.component';
 import { NewChargeModalComponent } from './new-charge-modal/new-charge-modal.component';
-import { ToolsDialogComponent } from './tools-dialog/tools-dialog.component';
+import { ToolbarDialogComponent } from './toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from './services/plot.service';
 import { SectionService } from '@services/sections/section.service';
 
@@ -45,7 +45,7 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
     ClimateComponent,
     SpanComponent,
     NewChargeModalComponent,
-    ToolsDialogComponent
+    ToolbarDialogComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
