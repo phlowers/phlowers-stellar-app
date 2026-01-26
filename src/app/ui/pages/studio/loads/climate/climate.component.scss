@@ -70,11 +70,6 @@
     @apply flex justify-end items-center gap-4 pt-5 pr-3;
   }
 
-  label {
-    @extend %text-s-400;
-    margin: 0.125rem 0.25rem;
-  }
-
   input {
     @apply w-full;
   }
