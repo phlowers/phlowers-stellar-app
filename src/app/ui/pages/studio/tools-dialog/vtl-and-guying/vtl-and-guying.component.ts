@@ -37,8 +37,8 @@ import { SectionService } from '@services/sections/section.service';
 import { MessageService } from 'primeng/api';
 
 interface SupportOption {
-  label: string;
-  value: number;
+  label: number;
+  value: 'LEFT' | 'RIGHT';
 }
 
 @Component({
@@ -107,8 +107,10 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   constructor() {
     this.form = this.fb.group({
-      selectedSpan: this.fb.control<number[] | null>(null),
-      selectedSupport: this.fb.control<number | null>(
+      selectedSpan: this.fb.control<{ index: number; uuid: string } | null>(
+        null
+      ),
+      selectedSupport: this.fb.control<'LEFT' | 'RIGHT' | null>(
         {
           value: null,
           disabled: true
@@ -139,12 +141,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
         this.form.controls.selectedSupport.enable({ emitEvent: false });
       }
 
-      this.supportOptions.set(
-        selectedSpan?.map((support) => ({
-          label: (support + 1).toString(),
-          value: support
-        })) || []
-      );
+      this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan));
       this.supportType.set(null);
       this.vtlWithoutGuying.set(null);
       this.results.set(null);
@@ -176,22 +173,20 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   private updateSupportOptions(): void {
     const selectedSpan = this.form.controls.selectedSpan.value;
-    this.supportOptions.set(
-      selectedSpan?.map((support) => ({
-        label: (support + 1).toString(),
-        value: support
-      })) || []
-    );
+    this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan));
   }
 
   private updateSupportType(): void {
     const support = this.form.controls.selectedSupport.value;
+    const span = this.form.controls.selectedSpan.value;
+    const spanIndex = span?.index ?? 0;
+    const supportIndex = support === 'LEFT' ? spanIndex : spanIndex + 1;
     if (support === null) {
       this.supportType.set(null);
       return;
     }
     const supportType =
-      this.plotService.section()?.supports[support].chainV === true
+      this.plotService.section()?.supports[supportIndex].chainV === true
         ? 'Suspension'
         : 'Anchor';
     this.supportType.set(supportType);
@@ -199,6 +194,9 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   private updateVtlWithoutGuying(): void {
     const support = this.form.controls.selectedSupport.value;
+    const span = this.form.controls.selectedSpan.value;
+    const spanIndex = span?.index ?? 0;
+    const supportIndex = support === 'LEFT' ? spanIndex : spanIndex + 1;
     if (support === null) {
       this.vtlWithoutGuying.set(null);
       return;
@@ -206,10 +204,10 @@ export class VhlAndGuyingComponent implements AfterViewInit {
     const vtlUnderChain = this.plotService.litData()?.vtl_under_chain;
     const rUnderChain = this.plotService.litData()?.r_under_chain;
     this.vtlWithoutGuying.set({
-      chargeV: vtlUnderChain?.[0][support],
-      chargeH: vtlUnderChain?.[1][support],
-      chargeL: vtlUnderChain?.[2][support],
-      resultant: rUnderChain?.[support]
+      chargeV: vtlUnderChain?.[0][supportIndex],
+      chargeH: vtlUnderChain?.[1][supportIndex],
+      chargeL: vtlUnderChain?.[2][supportIndex],
+      resultant: rUnderChain?.[supportIndex]
     });
   }
 
