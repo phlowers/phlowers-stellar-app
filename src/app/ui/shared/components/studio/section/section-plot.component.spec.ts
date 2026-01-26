@@ -43,7 +43,7 @@ describe('SectionPlotComponent', () => {
     load_angle: [],
     displacement: [],
     span_length: [],
-    loads_coords: []
+    loads_coords: {}
   };
 
   // Mock plotOptions signal
@@ -377,7 +377,7 @@ describe('SectionPlotComponent', () => {
         load_angle: [],
         displacement: [],
         span_length: [],
-        loads_coords: []
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', emptyData);
@@ -412,7 +412,7 @@ describe('SectionPlotComponent', () => {
         load_angle: [],
         displacement: [],
         span_length: [],
-        loads_coords: []
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', dataWithNulls);
@@ -447,7 +447,7 @@ describe('SectionPlotComponent', () => {
         load_angle: [],
         displacement: [],
         span_length: [],
-        loads_coords: []
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', largeData);

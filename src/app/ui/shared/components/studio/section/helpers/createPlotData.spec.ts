@@ -33,7 +33,7 @@ describe('createPlotData', () => {
       load_angle: [],
       displacement: [],
       span_length: [],
-      loads_coords: []
+      loads_coords: {}
     };
 
     mockOptions = {
@@ -190,7 +190,7 @@ describe('createPlotData', () => {
         load_angle: [],
         displacement: [],
         span_length: [],
-        loads_coords: []
+        loads_coords: {}
       };
 
       const result = createPlotData(emptyParams, mockOptions);

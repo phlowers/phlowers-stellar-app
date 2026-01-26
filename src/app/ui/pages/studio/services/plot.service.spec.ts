@@ -52,7 +52,7 @@ describe('PlotService', () => {
     load_angle: [],
     displacement: [],
     span_length: [],
-    loads_coords: []
+    loads_coords: {}
   };
 
   const mockCable: CatalogCable = {
