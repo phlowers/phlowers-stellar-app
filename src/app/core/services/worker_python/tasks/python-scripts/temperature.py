@@ -34,10 +34,8 @@ def temperature_calculation(js_inputs):
     python_inputs = js_inputs.to_py(default_converter=default_converter)
     temp_inputs = TemperatureCalculationInputs(**python_inputs)
     thermal_engine = ThermalEngine()
-
     unit_map = {"kmh": "km/h", "ms": "m/s"}
     wind_speed = units(temp_inputs.windSpeed, unit_map[temp_inputs.windSpeedUnit]).to("m/s").m
-
     direction_map = {
         'North': 0,
         'North-East': 45,
@@ -49,15 +47,14 @@ def temperature_calculation(js_inputs):
         'North-West': 315,
     }
     wind_angle = direction_map[temp_inputs.windDirection]
-
     thermal_engine.set(
         cable_array=engine.cable_array,
         latitude=np.array([temp_inputs.latitude]),
         longitude=np.array([temp_inputs.longitude]),
         altitude=np.array([temp_inputs.altitude]),
         azimuth=np.array([temp_inputs.azimuth]),
-        month=np.array([temp_inputs.time.month]),
-        day=np.array([temp_inputs.time.day]),
+        month=np.array([temp_inputs.date.month]),
+        day=np.array([temp_inputs.date.day]),
         hour=np.array([temp_inputs.time.hour]),
         intensity=np.array([temp_inputs.transit]),
         ambient_temp=np.array([temp_inputs.ambientTemperature]),
