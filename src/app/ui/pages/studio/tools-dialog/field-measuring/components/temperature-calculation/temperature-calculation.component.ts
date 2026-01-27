@@ -13,7 +13,7 @@ import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/type
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { WIND_SPEED_UNIT_OPTIONS } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';
-
+import { DecimalPipe } from '@angular/common';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -25,7 +25,8 @@ import { Task } from '@services/worker_python/tasks/types';
     SelectButtonModule,
     RadioButtonModule,
     IconComponent,
-    ButtonComponent
+    ButtonComponent,
+    DecimalPipe
   ],
   templateUrl: './temperature-calculation.component.html',
   styleUrl: './temperature-calculation.component.scss',
@@ -87,8 +88,15 @@ export class TemperatureCalculationComponent {
         ambientTemperature: data.ambientTemperature || 0,
         longitude: data.longitude || 0,
         latitude: data.latitude || 0,
+        altitude: data.altitude ?? 0,
+        azimuth: data.azimuth ?? 0,
         transit: data.transit!,
-        skyCover: data.skyCover!
+        date: data.date ?? null,
+        time: data.time ?? null,
+        windSpeed: data.windSpeed ?? 0,
+        windSpeedUnit: data.windSpeedUnit ?? 'kmh',
+        windDirection: data.windDirection ?? 'North',
+        skyCover: data.skyCover ?? ''
       }
     );
     if (error) {
