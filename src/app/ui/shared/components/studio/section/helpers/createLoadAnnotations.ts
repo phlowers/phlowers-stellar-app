@@ -1,5 +1,6 @@
 import * as Plotly from 'plotly.js-dist-min';
 import { CreatePlotParams } from './createPlot';
+import { cloneDeep } from 'lodash';
 
 const LOAD_COLOR = '#4A355A';
 const LOAD_ICON = '&#xf5cd;';
@@ -35,21 +36,19 @@ export const createLoadAnnotations = (
   plotParams: CreatePlotParams
 ): Plotly.Annotations[] => {
   const annotations: Plotly.Annotations[] = [];
-  const currentSpans = plotParams.litData.spans.slice(
-    plotParams.startSupport,
-    plotParams.endSupport + 1
-  );
-  console.log('spans length is', plotParams.litData.spans.length);
-  plotParams.spanLoads.forEach((spanLoad, index) => {
-    if (spanLoad) {
-      const span = currentSpans[index];
-      const middlePoint = span[Math.round((span.length - 1) / 2)];
+  const load_coords = cloneDeep(plotParams.litData.loads_coords);
+  plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
+    if (spanLoad && spanIndex in load_coords) {
+      const current_load_coord = load_coords[spanIndex];
       annotations.push({
         ...BASE_ANNOTATION,
-        x: middlePoint[0],
-        y: plotParams.view === '2d' ? middlePoint[2] : middlePoint[1],
+        x: current_load_coord[0],
+        y:
+          plotParams.view === '2d'
+            ? current_load_coord[2]
+            : current_load_coord[1],
         //@ts-expect-error Plotly.js-dist-min does not support z axis
-        z: middlePoint[2],
+        z: current_load_coord[2],
         text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON
       });
     }

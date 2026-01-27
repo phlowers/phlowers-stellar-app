@@ -73,9 +73,7 @@ class Support:
     chainName: Optional[str] = None
     towerModel: Optional[str] = None
     chainLength: Optional[float] = None
-    towerModel: Optional[str] = None
     chainWeight: Optional[float] = None
-    towerModel: Optional[str] = None
     chainV: Optional[bool] = None
     counterWeight: Optional[float] = None
     supportFootAltitude: Optional[float] = None
@@ -181,7 +179,6 @@ plt_line = None
 def get_section_middle_span(start_support: int, end_support: int):
     return (start_support + end_support) // 2
 
-
 def get_coordinates(
     plt_line: PlotEngine,
     project: bool = False,
@@ -195,6 +192,8 @@ def get_coordinates(
     vtl_under_chain = list(engine.balance_model.vhl_under_chain().vhl)
     vtl_under_console = list(engine.balance_model.vhl_under_console().vhl)
     # vtl = vtl_under_chain.vtl)
+
+    loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span)
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
@@ -210,6 +209,7 @@ def get_coordinates(
         "displacement": engine.get_displacement().tolist(),
         "load_angle": engine.cable_loads.load_angle.tolist(),
         "span_length": engine.section_array.data.span_length.tolist(),
+        "loads_coords" : loads_coords
     }
     return result
 
@@ -305,9 +305,17 @@ def init_section(js_inputs: dict):
     )
 
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
+    if input_charge and "data" in input_charge and "spanLoads" in input_charge["data"]:
+        loads_list = input_charge["data"]["spanLoads"]
+        if len(loads_list) != 0:
+            load_position_meters = np.array([span["loadPosition"] for span in loads_list])
+            load_weight = np.array([span["loadWeight"] for span in loads_list])
+            engine.add_loads(load_position_meters, load_weight)
+        
     plt_line = PlotEngine.builder_from_balance_engine(engine)
     engine.solve_adjustment()
     engine.solve_change_state()
+    print(f"{input_charge=}")
 
     if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
         climate = input_charge["data"]["climate"]
