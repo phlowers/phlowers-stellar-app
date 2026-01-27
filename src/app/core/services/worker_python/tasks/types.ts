@@ -95,7 +95,14 @@ export interface TaskInputs {
     ambientTemperature: number;
     longitude: number;
     latitude: number;
+    altitude: number;
+    azimuth: number;
     transit: number;
+    date: Date | null;
+    time: Date | null;
+    windSpeed: number;
+    windSpeedUnit: 'kmh' | 'ms';
+    windDirection: string;
     skyCover: string;
   };
   [Task.calculateParameter15CWithoutWind]: {
