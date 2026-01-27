@@ -27,6 +27,11 @@ logger.addHandler(handler)
 
 print(f"mechaphlowers version: {version('mechaphlowers')}")
 
+
+def init_config():
+    mph.options.graphics.resolution = RESOLUTION
+    mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
+
 def convert_jsnull(obj):
     """Recursively convert JavaScript null (jsnull) to Python None.
     
@@ -253,7 +258,6 @@ def init_section(js_inputs: dict):
     for support_js in input_section["supports"]:
         supports_data.append(Support(**support_js))
     df = generate_section_array(supports_data)
-    mph.options.graphics.resolution = RESOLUTION
 
     section = SectionArray(df)
     # set sagging parameter and temperatur
@@ -393,3 +397,5 @@ def calculate_papoto(js_inputs: dict):
         "parameter_1_3": papoto.parameter_1_3[0],
         "check_validity": bool(papoto.check_validity()[0]),
     }
+
+init_config()
