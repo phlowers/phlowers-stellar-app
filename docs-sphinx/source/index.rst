@@ -17,25 +17,3 @@ using `sphinx-js <https://sphinx-js.readthedocs.io/>`_.
 
    api/index
 
-.. toctree::
-   :maxdepth: 2
-   :caption: User Guide:
-
-   user-docs/index
-   user-docs/home/home
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Developer Guide:
-
-   user-docs/developer_guide/developer_install
-   user-docs/developer_guide/application_update
-   user-docs/developer_guide/custom_components
-   user-docs/developer_guide/documentation
-   user-docs/developer_guide/engine_worker
-   user-docs/developer_guide/offline_database
-   user-docs/developer_guide/setup-mechaphlowers-guide
-   user-docs/developer_guide/theme_styles
-   user-docs/developer_guide/plot/index
-   user-docs/developer_guide/plot/objects
-
