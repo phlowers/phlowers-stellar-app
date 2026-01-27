@@ -149,7 +149,10 @@
       <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
         <dd>
-          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
+          {{
+            (measureData().outputs.cableTemperature?.cableTemperature
+              | number: '1.0-2') ?? '-'
+          }}
           °C
         </dd>
       </div>
