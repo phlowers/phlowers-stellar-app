@@ -16,13 +16,14 @@
       />
     </ng-template>
   }
-
-  <ng-container
-    *ngComponentOutlet="
-      toolsDialogService.getInitComponent();
-      injector: injector
-    "
-  />
+  @if (toolsDialogService.isInitOpen()) {
+    <ng-container
+      *ngComponentOutlet="
+        toolsDialogService.getInitComponent();
+        injector: injector
+      "
+    />
+  }
 </p-dialog>
 
 <!-- Dialog Main -->
@@ -49,12 +50,14 @@
     </ng-template>
   }
 
-  <ng-container
-    *ngComponentOutlet="
-      toolsDialogService.getMainComponent();
-      injector: injector
-    "
-  />
+  @if (toolsDialogService.isMainOpen()) {
+    <ng-container
+      *ngComponentOutlet="
+        toolsDialogService.getMainComponent();
+        injector: injector
+      "
+    />
+  }
 
   @if (toolsDialogService.templates().footer) {
     <ng-template #footer>

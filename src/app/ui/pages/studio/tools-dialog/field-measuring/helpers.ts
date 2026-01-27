@@ -106,7 +106,7 @@ export const createTestMeasureData = (
   const mockSection: Partial<Section> = {
     link_name: 'Line 225kV Rougemontier - Tourbe #1',
     voltage_idr: '123 kV',
-    type: 'Phase',
+    type: 'phase',
     electric_phase_number: 3,
     cables_amount: 3,
     cable_name: 'ASTER570'

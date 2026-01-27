@@ -123,6 +123,7 @@ describe('HeaderComponent', () => {
       const updatedData = {
         ...mockMeasureData,
         voltage: '400 kV',
+        spanType: 'phase', // Required for phase number to be displayed
         phaseNumber: 6
       };
 

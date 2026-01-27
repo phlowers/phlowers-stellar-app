@@ -9,8 +9,11 @@
  * VTL and Guying input parameters
  */
 export interface VtlAndGuyingInputs {
-  selectedSpan: number[] | null;
-  selectedSupport: number | null;
+  selectedSpan: {
+    index: number;
+    uuid: string;
+  } | null;
+  selectedSupport: 'LEFT' | 'RIGHT' | null;
   altitude: number | null;
   horizontalDistance: number | null;
   hasPulley: boolean;

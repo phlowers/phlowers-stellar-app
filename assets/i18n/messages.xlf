@@ -1298,11 +1298,6 @@
         <source>Inf tension acc. :</source>
       </segment>
     </unit>
-    <unit id="1029122298839770722">
-      <segment>
-        <source>reset</source>
-      </segment>
-    </unit>
     <unit id="6613300769068333223">
       <segment>
         <source>Wind Pressure</source>
@@ -1313,29 +1308,9 @@
         <source>Cable Temperature</source>
       </segment>
     </unit>
-    <unit id="6360407171073312357">
+    <unit id="5423101655447195400">
       <segment>
-        <source>Symmetry Type</source>
-      </segment>
-    </unit>
-    <unit id="8204555453748282582">
-      <segment>
-        <source>Ice Thickness</source>
-      </segment>
-    </unit>
-    <unit id="4588982619541413952">
-      <segment>
-        <source> Frontier Support Number </source>
-      </segment>
-    </unit>
-    <unit id="2802938289697505873">
-      <segment>
-        <source> Ice Thickness (Before Frontier) </source>
-      </segment>
-    </unit>
-    <unit id="6079274139415183182">
-      <segment>
-        <source> Ice Thickness (After Frontier) </source>
+        <source>Ice thickness</source>
       </segment>
     </unit>
     <unit id="5204909450862821423">
@@ -1423,9 +1398,9 @@
         <source>Staff is absent</source>
       </segment>
     </unit>
-    <unit id="1035207489563002235">
+    <unit id="3899641059154911141">
       <segment>
-        <source> fold back </source>
+        <source> Fold back </source>
       </segment>
     </unit>
     <unit id="2721513819199429371">
@@ -2703,6 +2678,61 @@
     <unit id="6408021470602185042">
       <segment>
         <source>All fields are mandatory for temperature calculation.</source>
+      </segment>
+    </unit>
+    <unit id="4396866374643971390">
+      <segment>
+        <source>No measures</source>
+      </segment>
+    </unit>
+    <unit id="7141835298693653605">
+      <segment>
+        <source>Choose an existing measure</source>
+      </segment>
+    </unit>
+    <unit id="8878227880393471056">
+      <segment>
+        <source>No measures found</source>
+      </segment>
+    </unit>
+    <unit id="1709313240781435252">
+      <segment>
+        <source>Maximum allowed value:</source>
+      </segment>
+    </unit>
+    <unit id="2104405463703805846">
+      <segment>
+        <source> Value must be a whole number </source>
+      </segment>
+    </unit>
+    <unit id="6771413606625426683">
+      <segment>
+        <source>Minimum allowed value:</source>
+      </segment>
+    </unit>
+    <unit id="399524330429754869">
+      <segment>
+        <source>Ice indicator</source>
+      </segment>
+    </unit>
+    <unit id="7478743037636719773">
+      <segment>
+        <source> Ice thickness before support frontier </source>
+      </segment>
+    </unit>
+    <unit id="8939108734321665925">
+      <segment>
+        <source> Ice thickness after support frontier </source>
+      </segment>
+    </unit>
+    <unit id="914576298220560599">
+      <segment>
+        <source>Frontier support</source>
+      </segment>
+    </unit>
+    <unit id="7808756054397155068">
+      <segment>
+        <source>Reset</source>
       </segment>
     </unit>
   </file>

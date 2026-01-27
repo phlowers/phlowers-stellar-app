@@ -8,13 +8,11 @@
     class="climate__reset"
   >
     <app-icon icon="refresh" />
-    <ng-container i18n>reset</ng-container>
+    <ng-container i18n>Reset</ng-container>
   </button>
 
   <div class="climate__divided-line">
-    <label for="windPressure" class="wind" i18n>Wind Pressure</label>
-
-    <label for="cableTemperature" class="temp" i18n>Cable Temperature</label>
+    <label for="windPressure" class="wind-label" i18n>Wind Pressure</label>
 
     <p-inputgroup>
       <input
@@ -22,10 +20,60 @@
         type="number"
         id="windPressure"
         formControlName="windPressure"
-        class="wind"
+        class="wind-input"
+        [min]="constraints.windPressure.min"
+        [max]="constraints.windPressure.max"
+        step="1"
+        required
+        [attr.aria-invalid]="form.controls.windPressure.invalid || null"
+        [attr.aria-errormessage]="
+          getErrorIds('windPressure', ['min', 'max', 'integer'])
+        "
       />
       <p-inputgroup-addon>Pa</p-inputgroup-addon>
     </p-inputgroup>
+
+    @if (form.controls.windPressure.errors) {
+      <div class="wind-error">
+        @if (form.controls.windPressure.errors['min']) {
+          <p-message
+            id="windPressure-error-min"
+            severity="error"
+            size="small"
+            variant="simple"
+          >
+            <ng-container i18n>Minimum allowed value:</ng-container>
+            {{ constraints.windPressure.min }}
+          </p-message>
+        }
+        @if (form.controls.windPressure.errors['max']) {
+          <p-message
+            id="windPressure-error-max"
+            severity="error"
+            size="small"
+            variant="simple"
+          >
+            <ng-container i18n>Maximum allowed value:</ng-container>
+            {{ constraints.windPressure.max }}
+          </p-message>
+        }
+        @if (form.controls.windPressure.errors['integer']) {
+          <p-message
+            id="windPressure-error-integer"
+            severity="error"
+            size="small"
+            variant="simple"
+            i18n
+          >
+            Value must be a whole number
+          </p-message>
+        }
+      </div>
+    }
+
+    <label for="cableTemperature" class="temp-label" i18n
+      >Cable Temperature</label
+    >
 
     <p-inputgroup>
       <input
@@ -33,14 +81,60 @@
         type="number"
         id="cableTemperature"
         formControlName="cableTemperature"
-        class="temp"
+        class="temp-input"
+        [min]="constraints.cableTemperature.min"
+        [max]="constraints.cableTemperature.max"
+        step="1"
+        required
+        [attr.aria-invalid]="form.controls.cableTemperature.invalid || null"
+        [attr.aria-errormessage]="
+          getErrorIds('cableTemperature', ['min', 'max', 'integer'])
+        "
       />
       <p-inputgroup-addon>°C</p-inputgroup-addon>
     </p-inputgroup>
+
+    @if (form.controls.cableTemperature.errors) {
+      <div class="temp-error">
+        @if (form.controls.cableTemperature.errors['min']) {
+          <p-message
+            id="cableTemperature-error-min"
+            severity="error"
+            size="small"
+            variant="simple"
+          >
+            <ng-container i18n>Minimum allowed value:</ng-container>
+            {{ constraints.cableTemperature.min }}
+          </p-message>
+        }
+        @if (form.controls.cableTemperature.errors['max']) {
+          <p-message
+            id="cableTemperature-error-max"
+            severity="error"
+            size="small"
+            variant="simple"
+          >
+            <ng-container i18n>Maximum allowed value:</ng-container>
+            {{ constraints.cableTemperature.max }}
+          </p-message>
+        }
+        @if (form.controls.cableTemperature.errors['integer']) {
+          <p-message
+            id="cableTemperature-error-integer"
+            severity="error"
+            size="small"
+            variant="simple"
+            i18n
+          >
+            Value must be a whole number
+          </p-message>
+        }
+      </div>
+    }
   </div>
 
   <div class="climate__form-item">
-    <label for="symmetryType" class="symmetry" i18n>Symmetry Type</label>
+    <label for="symmetryType" class="symmetry" i18n>Ice indicator</label>
     <p-select
       inputId="symmetryType"
       [options]="symmetryOptions"
@@ -53,36 +147,62 @@
 
   @if (form.value.symmetryType === 'symmetric') {
     <div class="climate__form-item">
-      <label for="iceThickness" class="ice" i18n>Ice Thickness</label>
+      <label for="iceThickness" i18n>Ice thickness</label>
       <p-inputgroup>
         <input
           pInputText
           type="number"
           id="iceThickness"
           formControlName="iceThickness"
-          class="ice"
+          [min]="constraints.iceThickness.min"
+          [max]="constraints.iceThickness.max"
+          step="0.1"
+          required
+          [attr.aria-invalid]="form.controls.iceThickness.invalid || null"
+          [attr.aria-errormessage]="getErrorIds('iceThickness', ['min', 'max'])"
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
+      @if (form.controls.iceThickness.errors?.['min']) {
+        <p-message
+          id="iceThickness-error-min"
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          <ng-container i18n>Minimum allowed value:</ng-container>
+          {{ constraints.iceThickness.min }}
+        </p-message>
+      }
+      @if (form.controls.iceThickness.errors?.['max']) {
+        <p-message
+          id="iceThickness-error-max"
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          <ng-container i18n>Maximum allowed value:</ng-container>
+          {{ constraints.iceThickness.max }}
+        </p-message>
+      }
     </div>
   } @else if (form.value.symmetryType === 'dis_symmetric') {
     <div class="climate__form-item">
-      <label for="frontierSupportNumber" class="support-number" i18n>
-        Frontier Support Number
-      </label>
+      <label for="frontierSupportNumber" i18n>Frontier support</label>
       <p-select
         inputId="frontierSupportNumber"
         [options]="frontierSupportOptions"
         formControlName="frontierSupportNumber"
         optionLabel="label"
         optionValue="value"
-        class="support-number"
       />
     </div>
 
     <div class="climate__form-item">
-      <label for="iceThicknessBefore" class="ice-before" i18n>
-        Ice Thickness (Before Frontier)
+      <label for="iceThicknessBefore" i18n>
+        Ice thickness before support frontier
       </label>
 
       <p-inputgroup>
@@ -91,15 +211,47 @@
           type="number"
           id="iceThicknessBefore"
           formControlName="iceThicknessBefore"
-          class="ice-before"
+          [min]="constraints.iceThickness.min"
+          [max]="constraints.iceThickness.max"
+          step="0.1"
+          required
+          [attr.aria-invalid]="form.controls.iceThicknessBefore.invalid || null"
+          [attr.aria-errormessage]="
+            getErrorIds('iceThicknessBefore', ['min', 'max'])
+          "
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
+
+      @if (form.controls.iceThicknessBefore.errors?.['min']) {
+        <p-message
+          id="iceThicknessBefore-error-min"
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          <ng-container i18n>Minimum allowed value:</ng-container>
+          {{ constraints.iceThickness.min }}
+        </p-message>
+      }
+      @if (form.controls.iceThicknessBefore.errors?.['max']) {
+        <p-message
+          id="iceThicknessBefore-error-max"
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          <ng-container i18n>Maximum allowed value:</ng-container>
+          {{ constraints.iceThickness.max }}
+        </p-message>
+      }
     </div>
 
     <div class="climate__form-item">
-      <label for="iceThicknessAfter" class="ice-after" i18n>
-        Ice Thickness (After Frontier)
+      <label for="iceThicknessAfter" i18n>
+        Ice thickness after support frontier
       </label>
 
       <p-inputgroup>
@@ -108,10 +260,42 @@
           type="number"
           id="iceThicknessAfter"
           formControlName="iceThicknessAfter"
-          class="ice-after"
+          [min]="constraints.iceThickness.min"
+          [max]="constraints.iceThickness.max"
+          step="0.1"
+          required
+          [attr.aria-invalid]="form.controls.iceThicknessAfter.invalid || null"
+          [attr.aria-errormessage]="
+            getErrorIds('iceThicknessAfter', ['min', 'max'])
+          "
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
+
+      @if (form.controls.iceThicknessAfter.errors?.['min']) {
+        <p-message
+          id="iceThicknessAfter-error-min"
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          <ng-container i18n>Minimum allowed value:</ng-container>
+          {{ constraints.iceThickness.min }}
+        </p-message>
+      }
+      @if (form.controls.iceThicknessAfter.errors?.['max']) {
+        <p-message
+          id="iceThicknessAfter-error-max"
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          <ng-container i18n>Maximum allowed value:</ng-container>
+          {{ constraints.iceThickness.max }}
+        </p-message>
+      }
     </div>
   }
 
