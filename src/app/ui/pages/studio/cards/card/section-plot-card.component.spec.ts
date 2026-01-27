@@ -33,7 +33,8 @@ const mockLitData: GetSectionOutput = {
     [4, 5, 6],
     [7, 8, 9]
   ],
-  span_length: [100, 200, 300]
+  span_length: [100, 200, 300],
+  loads_coords: { 0: [1, 2, 3] }
 };
 
 @Component({
