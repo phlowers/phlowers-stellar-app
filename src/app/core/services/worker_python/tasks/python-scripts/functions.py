@@ -27,6 +27,11 @@ logger.addHandler(handler)
 
 print(f"mechaphlowers version: {version('mechaphlowers')}")
 
+
+def init_config():
+    mph.options.graphics.resolution = RESOLUTION
+    mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
+
 def convert_jsnull(obj):
     """Recursively convert JavaScript null (jsnull) to Python None.
     

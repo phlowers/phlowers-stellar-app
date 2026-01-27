@@ -148,6 +148,11 @@ export interface TaskInputs {
     longitude: number;
     latitude: number;
     transit: number;
+    date: Date | null;
+    time: Date | null;
+    windSpeed: number;
+    windSpeedUnit: 'kmh' | 'ms';
+    windDirection: string;
     skyCover: string;
   };
   [Task.calculateParameter15CWithoutWind]: {
