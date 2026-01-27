@@ -48,9 +48,9 @@ export class StudioTopToolbarComponent implements OnInit {
     this.tablesDropdown.set([
       {
         label: $localize`Loads table`, // Tableau de charges
-        disabled: true,
+        disabled: false,
         command: () => {
-          console.log('Add action triggered');
+          this.toolbarDialogService.openTool('load-table');
         }
       },
       {

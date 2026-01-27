@@ -1,0 +1,89 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="assignment_turned_in" />
+    <span i18n>Loads table</span>
+  </p>
+</ng-template>
+
+<section class="base-info">
+  @if (mode() === 'view') {
+    <dl class="contents">
+      <dt i18n class="load-name-label">Load case name</dt>
+      <dd class="load-name-value">{{ name() }}</dd>
+
+      <dt i18n class="load-desc-label">Description</dt>
+      <dd class="load-desc-value">{{ description() || '-' }}</dd>
+    </dl>
+  } @else {
+    <label for="loadName" class="load-name-label" i18n>Load case name</label>
+    <input
+      type="text"
+      class="load-name-value"
+      pInputText
+      id="loadName"
+      maxlength="100"
+      [ngModel]="name()"
+      (ngModelChange)="updateName($event)"
+      fluid
+    />
+
+    <label for="description" class="load-desc-label" i18n>
+      Description
+      <span>{{ descriptionLength() }}/240</span>
+    </label>
+    <textarea
+      pTextarea
+      class="load-desc-value"
+      id="description"
+      maxlength="240"
+      [ngModel]="description()"
+      (ngModelChange)="updateDescription($event)"
+      fluid
+    ></textarea>
+  }
+
+  <label for="personnelPresence" class="load-person-label" i18n>
+    Personnel presence
+  </label>
+  <p-toggleswitch
+    inputId="personnelPresence"
+    name="personnelPresence"
+    class="load-person-value"
+    [ngModel]="personnelPresence()"
+    (onChange)="updatePersonnelPresence($event.checked)"
+    [readonly]="mode() === 'view'"
+  />
+</section>
+
+<section>
+  <h2 class="title underline-text" i18n>Climate condition</h2>
+</section>
+
+<ng-template #footer>
+  @if (mode() === 'view') {
+    <button app-btn disabled type="button" btnStyle="text">
+      <app-icon icon="description" />
+      <ng-container i18n>Report</ng-container>
+    </button>
+
+    <button app-btn type="button" (click)="switchToEditMode()">
+      <app-icon icon="edit" />
+      <ng-container i18n>Change</ng-container>
+    </button>
+  } @else {
+    <button app-btn type="button" btnStyle="outlined" (click)="cancelEdit()">
+      <app-icon icon="close" />
+      <ng-container i18n>Cancel</ng-container>
+    </button>
+
+    <button
+      app-btn
+      type="button"
+      (click)="saveChanges()"
+      [disabled]="!isFormValid()"
+    >
+      <app-icon icon="save" />
+      <ng-container i18n>Save</ng-container>
+    </button>
+  }
+</ng-template>

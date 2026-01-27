@@ -69,7 +69,7 @@ export class L0SumComponent implements AfterViewInit {
   constructor() {
     effect(() => {
       const litData: GetSectionOutput | null = this.plotService.litData();
-      if (!litData || !litData.L0) {
+      if (!litData?.L0) {
         this.l0Rows.set([]);
         return;
       }

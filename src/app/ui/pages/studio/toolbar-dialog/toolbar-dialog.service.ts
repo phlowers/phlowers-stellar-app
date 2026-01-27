@@ -3,11 +3,13 @@ import { FieldMeasuringComponent } from './field-measuring/field-measuring.compo
 import { InitComponent } from './field-measuring/components/init/init.component';
 import { L0SumComponent } from './l0-sum/l0-sum.component';
 import { VhlAndGuyingComponent } from './vtl-and-guying/vtl-and-guying.component';
+import { LoadsTableComponent } from './loads-table/loads-table.component';
 
 export type Tool =
   | 'field-measuring'
   | 'l0-sum'
   | 'vtl-and-guying'
+  | 'load-table'
   | 'other-tool';
 
 export interface ToolConfig {
@@ -22,6 +24,11 @@ export interface ToolTemplates {
   footer?: TemplateRef<unknown>;
 }
 
+export interface LoadTableContext {
+  mode: 'view' | 'edit';
+  chargeUuid: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,6 +37,7 @@ export class ToolbarDialogService {
   readonly isInitOpen = signal(false);
   readonly isMainOpen = signal(false);
   readonly templates = signal<ToolTemplates>({});
+  readonly loadTableContext = signal<LoadTableContext | null>(null);
 
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
@@ -46,14 +54,24 @@ export class ToolbarDialogService {
       component: VhlAndGuyingComponent,
       dialogStyle: { width: '86.5625rem', 'max-width': '90%' }
     },
+    'load-table': {
+      component: LoadsTableComponent,
+      dialogStyle: { width: '83.125rem', 'max-width': '90%' }
+    },
     'other-tool': {
       component: null!
     }
   };
 
-  openTool(tool: Tool): void {
+  openTool(tool: Tool, context?: LoadTableContext): void {
     this.currentTool.set(tool);
     const config = this.toolMap[tool];
+
+    if (tool === 'load-table' && context) {
+      this.loadTableContext.set(context);
+    } else if (tool === 'load-table') {
+      this.loadTableContext.set(null);
+    }
 
     if (config.initComponent) {
       this.isInitOpen.set(true);
@@ -70,6 +88,7 @@ export class ToolbarDialogService {
 
     setTimeout(() => {
       this.currentTool.set(null);
+      this.loadTableContext.set(null);
     }, 300);
   }
 

@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ChargesService } from '@services/charges/charges.service';
@@ -11,6 +11,7 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
 
 @Component({
   selector: 'app-studio-menu-bar',
@@ -62,6 +63,8 @@ export class StudioMenuBarComponent {
     const charge = section.charges?.find((c) => c.uuid === selectedChargeUuid);
     return charge?.personnelPresence;
   });
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
+
   constructor(
     public readonly plotService: PlotService,
     private readonly chargesService: ChargesService
@@ -110,7 +113,10 @@ export class StudioMenuBarComponent {
     mode: 'view' | 'edit'
   ) {
     if (charge?.value) {
-      this.openNewChargeModal.emit({ mode, uuid: charge.value });
+      this.toolbarDialogService.openTool('load-table', {
+        mode,
+        chargeUuid: charge.value
+      });
     }
   }
 }
