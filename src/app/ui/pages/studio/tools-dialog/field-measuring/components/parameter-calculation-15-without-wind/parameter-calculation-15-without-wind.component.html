@@ -131,7 +131,7 @@
         <dt id="parameterPapoto-display" i18n>Parameter (Papoto, etc.)</dt>
         <dd>
           {{
-            (measureData().outputs.papoto?.parameter | number: '1.0-3') ?? '-'
+            (measureData().outputs.papoto?.parameter | number: '1.0-2') ?? '-'
           }}
           m
         </dd>
@@ -149,7 +149,7 @@
       <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
         <dd>
-          {{ measureData().outputs.cableTemperature?.cableTemperature ?? '-' }}
+          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
           °C
         </dd>
       </div>
