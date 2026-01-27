@@ -1,9 +1,11 @@
 import { Component, DestroyRef, effect, inject, input } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators
 } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -16,8 +18,19 @@ import { PlotService } from '../../services/plot.service';
 import { ChargesService } from '@core/services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '../loadForms.service';
-import { ClimateCharge } from '@src/app/core';
-import { ChargeData } from '@src/app/core/domain/models/charge.model';
+import { ChargeData, ClimateCharge } from '@core/domain/models/charge.model';
+import { MessageModule } from 'primeng/message';
+
+function integerValidator(control: AbstractControl): ValidationErrors | null {
+  if (control.value === null || control.value === undefined) {
+    return null;
+  }
+  const value = control.value;
+  if (!Number.isInteger(value)) {
+    return { integer: true };
+  }
+  return null;
+}
 
 export const defaultClimaticCharge: ClimateCharge = {
   windPressure: 0,
@@ -29,6 +42,12 @@ export const defaultClimaticCharge: ClimateCharge = {
   iceThicknessAfter: null
 };
 
+export const climateConstraints = {
+  windPressure: { min: -3000, max: 3000 },
+  cableTemperature: { min: -50, max: 250 },
+  iceThickness: { min: 0, max: 20 }
+} as const;
+
 @Component({
   selector: 'app-climate',
   imports: [
@@ -37,6 +56,7 @@ export const defaultClimaticCharge: ClimateCharge = {
     InputGroupModule,
     InputGroupAddonModule,
     SelectModule,
+    MessageModule,
     ButtonComponent,
     IconComponent
   ],
@@ -46,6 +66,7 @@ export const defaultClimaticCharge: ClimateCharge = {
 export class ClimateComponent {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  readonly constraints = climateConstraints;
 
   form: FormGroup<{
     windPressure: FormControl<number | null>;
@@ -58,17 +79,45 @@ export class ClimateComponent {
   }> = this.fb.group({
     windPressure: [
       defaultClimaticCharge.windPressure,
-      [Validators.required, Validators.min(-1600), Validators.max(1600)]
+      [
+        Validators.required,
+        Validators.min(this.constraints.windPressure.min),
+        Validators.max(this.constraints.windPressure.max),
+        integerValidator
+      ]
     ],
     cableTemperature: [
       defaultClimaticCharge.cableTemperature,
-      [Validators.required, Validators.min(-50), Validators.max(1000)]
+      [
+        Validators.required,
+        Validators.min(this.constraints.cableTemperature.min),
+        Validators.max(this.constraints.cableTemperature.max),
+        integerValidator
+      ]
     ],
     symmetryType: [defaultClimaticCharge.symmetryType, Validators.required],
-    iceThickness: [defaultClimaticCharge.iceThickness],
+    iceThickness: [
+      defaultClimaticCharge.iceThickness,
+      [
+        Validators.min(this.constraints.iceThickness.min),
+        Validators.max(this.constraints.iceThickness.max)
+      ]
+    ],
     frontierSupportNumber: [defaultClimaticCharge.frontierSupportNumber],
-    iceThicknessBefore: [defaultClimaticCharge.iceThicknessBefore],
-    iceThicknessAfter: [defaultClimaticCharge.iceThicknessAfter]
+    iceThicknessBefore: [
+      defaultClimaticCharge.iceThicknessBefore,
+      [
+        Validators.min(this.constraints.iceThickness.min),
+        Validators.max(this.constraints.iceThickness.max)
+      ]
+    ],
+    iceThicknessAfter: [
+      defaultClimaticCharge.iceThicknessAfter,
+      [
+        Validators.min(this.constraints.iceThickness.min),
+        Validators.max(this.constraints.iceThickness.max)
+      ]
+    ]
   });
   chargeUuid = input.required<string>();
 
@@ -157,5 +206,16 @@ export class ClimateComponent {
 
   isFormValid(): boolean {
     return this.form.valid;
+  }
+
+  getErrorIds(controlName: string, errorTypes: string[]): string | null {
+    const control = this.form.get(controlName);
+    if (!control?.errors) {
+      return null;
+    }
+    const ids = errorTypes
+      .filter((type) => control.errors?.[type])
+      .map((type) => `${controlName}-error-${type}`);
+    return ids.length > 0 ? ids.join(' ') : null;
   }
 }

@@ -244,7 +244,7 @@ describe('createPlot', () => {
       expect(layoutArg.xaxis.autorange).toBe(true);
     });
 
-    it('should configure xaxis with autorange false for face side', () => {
+    it('should configure xaxis with autorange true for face side', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
@@ -260,7 +260,7 @@ describe('createPlot', () => {
       });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
-      expect(layoutArg.xaxis.autorange).toBe(false);
+      expect(layoutArg.xaxis.autorange).toBe(true);
     });
 
     it('should configure xaxis with common properties', () => {
@@ -396,7 +396,7 @@ describe('createPlot', () => {
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
-      expect(layoutArg.xaxis.autorange).toBe(false);
+      expect(layoutArg.xaxis.autorange).toBe(true);
       expect(layoutArg.yaxis.scaleratio).toBe(0.2);
     });
 
@@ -437,7 +437,7 @@ describe('createPlot', () => {
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
-      expect(layoutArg.xaxis.autorange).toBe(false);
+      expect(layoutArg.xaxis.autorange).toBe(true);
     });
   });
 });
