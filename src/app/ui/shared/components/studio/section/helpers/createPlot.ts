@@ -58,7 +58,9 @@ const axis = {
   showbackground: true
 };
 
-const createScene = (plotParams: CreatePlotParams) => {
+const createScene = (
+  plotParams: CreatePlotParams
+): Partial<Layout['scene']> => {
   if (plotParams.camera) {
     const y = Math.abs(plotParams.camera.eye?.y || 0);
     plotParams.camera.eye = {
@@ -69,7 +71,7 @@ const createScene = (plotParams: CreatePlotParams) => {
   return {
     aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
     xaxis: axis,
-    yaxis: { ...axis, scaleanchor: 'x', scaleratio: 1 },
+    yaxis: axis,
     zaxis: axis,
     aspectratio: {
       x: 3,
@@ -128,12 +130,7 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (
     },
     xaxis: {
       ...axis,
-      autorange:
-        plotParams.side === 'face'
-          ? false
-          : plotParams.invert
-            ? 'reversed'
-            : true,
+      autorange: plotParams.invert ? 'reversed' : true,
       showticklabels: true,
       showgrid: true,
       showline: true

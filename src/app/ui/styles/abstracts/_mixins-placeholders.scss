@@ -44,7 +44,15 @@
 }
 
 %label-spacing {
-  margin: 0.125rem 0.5rem;
+  margin: 0.125rem 0.25rem;
+}
+
+%label-style {
+  @apply inline-block;
+  @extend %label-spacing;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--star-dust-900);
 }
 
 %focus-state {

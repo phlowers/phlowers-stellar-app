@@ -42,7 +42,8 @@ describe('SectionPlotComponent', () => {
     ground_altitude: [],
     load_angle: [],
     displacement: [],
-    span_length: []
+    span_length: [],
+    loads_coords: {}
   };
 
   // Mock plotOptions signal
@@ -375,7 +376,8 @@ describe('SectionPlotComponent', () => {
         ground_altitude: [],
         load_angle: [],
         displacement: [],
-        span_length: []
+        span_length: [],
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', emptyData);
@@ -409,7 +411,8 @@ describe('SectionPlotComponent', () => {
         ground_altitude: [],
         load_angle: [],
         displacement: [],
-        span_length: []
+        span_length: [],
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', dataWithNulls);
@@ -443,7 +446,8 @@ describe('SectionPlotComponent', () => {
         ground_altitude: [],
         load_angle: [],
         displacement: [],
-        span_length: []
+        span_length: [],
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', largeData);
