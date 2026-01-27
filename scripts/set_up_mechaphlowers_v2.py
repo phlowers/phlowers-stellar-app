@@ -168,6 +168,7 @@ def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
         input_file,
         "-o", str(RESOLVED_FILE),
         "--python-version", "3.13",
+        "--prerelease=explicit",
     ]
     
     run_cmd(cmd)
