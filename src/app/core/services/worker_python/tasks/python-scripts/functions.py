@@ -99,9 +99,7 @@ class Support:
     chainName: Optional[str] = None
     towerModel: Optional[str] = None
     chainLength: Optional[float] = None
-    towerModel: Optional[str] = None
     chainWeight: Optional[float] = None
-    towerModel: Optional[str] = None
     chainV: Optional[bool] = None
     counterWeight: Optional[float] = None
     supportFootAltitude: Optional[float] = None
