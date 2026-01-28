@@ -281,6 +281,39 @@ def fetch_cdn_lock(cdn_url: str, local_cdn_dir: Path | None = None) -> dict[str,
     return response.json().get("packages", {})
 
 
+def find_wheel_in_dir(directory: Path, filename: str) -> Path | None:
+    """Find a wheel file in directory, trying compiled variants.
+    
+    pyodide py-compile renames wheels from py3-none-any to cp313-none-any.
+    This function tries the exact filename first, then tries variants.
+    
+    Args:
+        directory: Directory to search in
+        filename: Original filename from pyodide-lock.json
+        
+    Returns:
+        Path to found wheel file, or None if not found
+    """
+    # Try exact filename first
+    exact = directory / filename
+    if exact.exists():
+        return exact
+    
+    # Try compiled variants (py3 -> cp313, py2.py3 -> cp313)
+    variants = [
+        filename.replace("-py3-none-any.whl", "-cp313-none-any.whl"),
+        filename.replace("-py2.py3-none-any.whl", "-cp313-none-any.whl"),
+    ]
+    
+    for variant in variants:
+        if variant != filename:
+            path = directory / variant
+            if path.exists():
+                return path
+    
+    return None
+
+
 def replace_with_cdn_wheels(
     downloaded: dict[str, str],
     cdn_url: str,
@@ -295,12 +328,16 @@ def replace_with_cdn_wheels(
     
     Returns:
         Set of CDN wheel filenames copied/downloaded
+        
+    Raises:
+        SystemExit: If local_cdn_dir is specified and required wheels are missing
     """
-    source = f"local ({local_cdn_dir})" if local_cdn_dir else "CDN"
+    source = f"local CDN ({local_cdn_dir})" if local_cdn_dir else "CDN"
     print(f"\n[4/6] Replacing with {source} wheels...")
     
     cdn_packages = fetch_cdn_lock(cdn_url, local_cdn_dir)
     cdn_wheel_names: set[str] = set()
+    missing_wheels: list[tuple[str, str]] = []  # List of (name, filename) for missing wheels
     
     for pkg_data in cdn_packages.values():
         name = normalize_name(pkg_data.get("name", ""))
@@ -317,12 +354,14 @@ def replace_with_cdn_wheels(
             # Copy from local or download from CDN
             try:
                 if local_cdn_dir:
-                    src = local_cdn_dir / cdn_filename
-                    if src.exists():
-                        shutil.copy(src, PYODIDE_DIR / cdn_filename)
-                        cdn_wheel_names.add(cdn_filename)
+                    # Try to find wheel with exact name or compiled variant
+                    src = find_wheel_in_dir(local_cdn_dir, cdn_filename)
+                    if src:
+                        shutil.copy(src, PYODIDE_DIR / src.name)
+                        cdn_wheel_names.add(src.name)
                         print(f"  ✓ {name} ({cdn_version})")
                     else:
+                        missing_wheels.append((name, cdn_filename))
                         print(f"  ✗ {name}: {cdn_filename} not found in local CDN")
                 else:
                     response = requests.get(f"{cdn_url}/{cdn_filename}", timeout=60)
@@ -334,6 +373,16 @@ def replace_with_cdn_wheels(
                 print(f"  ✗ {name}: {e}")
     
     print(f"  ✓ Replaced {len(cdn_wheel_names)} packages with {source} versions")
+    
+    # In local CDN mode, missing wheels are a fatal error
+    if local_cdn_dir and missing_wheels:
+        print(f"\n  ✗ ERROR: {len(missing_wheels)} required wheel(s) missing from local CDN:")
+        for name, filename in missing_wheels:
+            print(f"    - {name}: {filename}")
+        print("\n  The application will not work correctly with missing dependencies.")
+        print("  Please ensure all required wheels are present in the local CDN directory.")
+        raise SystemExit(1)
+    
     return cdn_wheel_names
 
 
@@ -449,6 +498,53 @@ def generate_packages_json() -> int:
     return len(packages)
 
 
+def verify_dependencies(resolved: dict[str, str]) -> None:
+    """Verify all resolved dependencies are installed in the output directory.
+    
+    Args:
+        resolved: Dict of resolved packages {name: version}
+        
+    Raises:
+        SystemExit: If any required dependency is missing
+    """
+    print("\n[7/7] Verifying dependencies...")
+    
+    # Get installed packages from wheels
+    installed: dict[str, str] = {}
+    for wheel in get_wheels(PYODIDE_DIR):
+        name, version = parse_wheel(wheel)
+        installed[name] = version
+    
+    # Check all resolved dependencies are installed
+    missing: list[tuple[str, str]] = []
+    version_mismatch: list[tuple[str, str, str]] = []
+    
+    for pkg_name, pkg_version in resolved.items():
+        if pkg_name not in installed:
+            missing.append((pkg_name, pkg_version))
+        elif installed[pkg_name] != pkg_version:
+            version_mismatch.append((pkg_name, pkg_version, installed[pkg_name]))
+    
+    # Report issues
+    if missing or version_mismatch:
+        print(f"\n  ✗ ERROR: Dependency verification failed!")
+        
+        if missing:
+            print(f"\n  Missing packages ({len(missing)}):")
+            for name, version in sorted(missing):
+                print(f"    - {name}=={version}")
+        
+        if version_mismatch:
+            print(f"\n  Version mismatch ({len(version_mismatch)}):")
+            for name, expected, actual in sorted(version_mismatch):
+                print(f"    - {name}: expected {expected}, got {actual}")
+        
+        print("\n  The application will not work correctly with missing or incorrect dependencies.")
+        raise SystemExit(1)
+    
+    print(f"  ✓ All {len(resolved)} dependencies verified")
+
+
 # =============================================================================
 # MAIN
 # =============================================================================
@@ -518,6 +614,9 @@ def main() -> None:
         compress_wheels(cdn_package_names)
     
     num_packages = generate_packages_json()
+    
+    # Verify all resolved dependencies are installed
+    verify_dependencies(resolved)
     
     # Summary with package details
     print("\n" + "=" * 50)
