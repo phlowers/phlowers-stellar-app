@@ -66,5 +66,5 @@ def temperature_calculation(js_inputs):
     return {
         "cableSolarFlux": None,
         "cableTemperature": temperature_result.data["t_core"].iloc[0],
-        "cableTemperatureUncertainty": None
+        "cableTemperatureUncertainty": 0
     }
