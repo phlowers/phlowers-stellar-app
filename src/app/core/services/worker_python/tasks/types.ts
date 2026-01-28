@@ -120,6 +120,11 @@ export interface GetSectionWithBaseOutput {
   base: GetSectionOutput | null;
 }
 
+/**
+ * Log level values for Python logging.
+ *
+ * @category Worker Types
+ */
 export enum LogLevel {
   /** Detailed debug information */
   DEBUG = 10,
