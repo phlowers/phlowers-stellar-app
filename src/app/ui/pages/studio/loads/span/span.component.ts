@@ -20,8 +20,14 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { LoadFormsService } from '../loadForms.service';
 import { emptySpanLoad } from '../helpers';
 
+/**
+ * Option for selecting left or right support in span calculations.
+ * @internal
+ */
 interface SupportOption {
+  /** Display label for the option */
   label: string;
+  /** Value indicating which support side */
   value: 'LEFT' | 'RIGHT';
 }
 

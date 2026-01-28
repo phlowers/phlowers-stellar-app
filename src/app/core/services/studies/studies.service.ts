@@ -24,14 +24,43 @@ import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
 import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/new-study-modal.component';
 
+/**
+ * Service for managing power line studies.
+ *
+ * @remarks
+ * This service provides CRUD operations for studies stored in IndexedDB.
+ * It handles study creation, retrieval, update, deletion, and export.
+ *
+ * @example
+ * ```typescript
+ * constructor(private studiesService: StudiesService) {
+ *   // Create a new study
+ *   const uuid = await studiesService.createStudy({
+ *     title: 'My Study',
+ *     description: 'Analysis of line ABC',
+ *     shareable: false,
+ *     sections: [],
+ *     author_email: 'user@example.com'
+ *   });
+ * }
+ * ```
+ *
+ * @category Services
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class StudiesService {
+  /** Observable indicating whether the service is ready */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
+  /** Observable stream of all studies */
   public readonly studies = new BehaviorSubject<StudyEntity[]>([]);
+
+  /** Signal containing the currently selected study */
   public readonly currentStudy = signal<StudyEntity | null>(null);
+
+  /** Signal for export dialog state */
   public readonly exportDialogData = signal<{
     uuid: string;
     title: string;

@@ -79,6 +79,10 @@ const orderedMaintenanceTableProperties: (
   | 'maintenance_team_id'
 )[] = ['maintenance_center_id', 'regional_team_id', 'maintenance_team_id'];
 
+/**
+ * Property names from the line catalog table used for filtering.
+ * @internal
+ */
 type LineTableProperties =
   | 'voltage_idr'
   | 'link_idr'
