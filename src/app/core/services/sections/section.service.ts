@@ -12,6 +12,28 @@ import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
+/**
+ * Service for managing sections within studies.
+ *
+ * @remarks
+ * The SectionService provides CRUD operations for sections, which are
+ * the primary organizational unit for grouping supports, charges, and
+ * initial conditions within a study.
+ *
+ * @example
+ * ```typescript
+ * // Injecting and using the service
+ * constructor(private sectionService: SectionService) {}
+ *
+ * // Create a new section
+ * await this.sectionService.createOrUpdateSection(study, newSection);
+ *
+ * // Get current section from signal
+ * const section = this.sectionService.currentSection();
+ * ```
+ *
+ * @category Services
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -32,8 +32,14 @@ import { SectionService } from '@services/sections/section.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+/**
+ * Option for selecting support index in VTL and guying calculations.
+ * @internal
+ */
 interface SupportOption {
+  /** Support number label */
   label: number;
+  /** Side identifier for the support */
   value: 'LEFT' | 'RIGHT';
 }
 

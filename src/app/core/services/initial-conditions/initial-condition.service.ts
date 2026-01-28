@@ -11,9 +11,17 @@ import { StudiesService } from '@services/studies/studies.service';
 import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
+/**
+ * Input parameters for initial condition operations.
+ *
+ * @category Types
+ */
 export interface InitialConditionFunctionsInput {
+  /** The section containing the initial condition */
   section: Section;
+  /** The initial condition data */
   initialCondition: InitialCondition;
+  /** Whether to generate state data (optional) */
   generateState?: boolean;
 }
 
@@ -21,6 +29,26 @@ export interface DuplicateInitialConditionFunctionsInput extends InitialConditio
   newUuid: string;
 }
 
+/**
+ * Service for managing initial conditions within sections.
+ *
+ * @remarks
+ * The InitialConditionService provides CRUD operations for initial conditions,
+ * which define the baseline state parameters (temperature, stress, etc.) for
+ * mechanical calculations. Each section can have multiple initial conditions
+ * with one selected as active.
+ *
+ * @example
+ * ```typescript
+ * // Add a new initial condition
+ * await this.initialConditionService.addInitialCondition(study, section, condition);
+ *
+ * // Set the active initial condition
+ * await this.initialConditionService.setInitialCondition(study, section, conditionUuid);
+ * ```
+ *
+ * @category Services
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -154,10 +182,11 @@ export class InitialConditionService {
   }
 
   /**
-   * Set an initial condition as the selected initial condition in a section
-   * @param study The study containing the section
-   * @param section The section containing the initial condition
-   * @param initialCondition The initial condition to set as the selected initial condition
+   * Set an initial condition as the selected initial condition in a section.
+   *
+   * @param study - The study containing the section
+   * @param section - The section to update
+   * @param initialConditionUuid - The UUID of the initial condition to select
    * @returns Promise that resolves when the operation is complete
    */
   async setInitialCondition(study: StudyEntity, section: Section, initialConditionUuid: string): Promise<void> {

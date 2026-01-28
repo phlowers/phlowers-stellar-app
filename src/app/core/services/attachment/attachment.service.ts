@@ -14,10 +14,31 @@ import { AttachmentCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { toNumber } from 'lodash';
 
+/**
+ * Service for managing attachment point catalog data.
+ *
+ * @remarks
+ * The AttachmentService handles loading, storing, and querying attachment
+ * point data from CSV files into the IndexedDB database. Attachments
+ * represent the physical connection points on support structures where
+ * conductors are attached.
+ *
+ * @example
+ * ```typescript
+ * // Get all available attachments
+ * const attachments = await this.attachmentService.getAttachments();
+ * ```
+ *
+ * @category Services
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class AttachmentService {
+  /**
+   * BehaviorSubject indicating whether the service is ready to use.
+   * Becomes true when the storage service is initialized.
+   */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   constructor(
@@ -29,12 +50,28 @@ export class AttachmentService {
     });
   }
 
+  /**
+   * Retrieve all attachment points from the catalog.
+   *
+   * @returns Promise resolving to an array of all attachment entities
+   */
   async getAttachments() {
     return this.storageService.db?.catAttachments.toArray();
   }
 
   /**
-   * Import attachments from csv file
+   * Import attachment catalog data from a CSV file.
+   *
+   * @remarks
+   * This method fetches the attachments.csv file from the server, parses it,
+   * transforms the data into the appropriate entity format, and stores
+   * the results in the IndexedDB database.
+   *
+   * The CSV should contain columns: support_adr, position, X, Y, Z, L,
+   * support_tower representing the 3D coordinates and physical properties
+   * of each attachment point.
+   *
+   * @returns Promise that resolves when import is complete
    */
   async importFromFile() {
     const attachments = this.http

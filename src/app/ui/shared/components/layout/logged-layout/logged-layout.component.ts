@@ -5,8 +5,14 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { SidebarItem } from '../sidebar/sidebar.model';
 import { filter } from 'rxjs/operators';
 
+/**
+ * Navigation structure for the sidebar component.
+ * @internal
+ */
 interface SidebarNavigation {
+  /** Main navigation items */
   main: SidebarItem[];
+  /** Footer navigation items */
   footer: SidebarItem[];
 }
 

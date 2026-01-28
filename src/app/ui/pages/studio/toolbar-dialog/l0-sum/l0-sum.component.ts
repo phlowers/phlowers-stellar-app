@@ -12,9 +12,16 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
+/**
+ * Row data for the L0 sum table display.
+ * @internal
+ */
 interface L0Row {
+  /** Span identifier */
   span: string;
+  /** L0 value for the span */
   l0: number;
+  /** Index position in the section */
   index: number;
 }
 

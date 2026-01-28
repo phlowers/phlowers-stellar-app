@@ -44,15 +44,28 @@ const defaultTexts = {
   serverText: $localize`Trying to reach the servers!` // i18n Nous essayons de contacter les serveurs
 };
 
+/**
+ * Text content configuration for the home page cards.
+ * @internal
+ */
 interface HomeTexts {
+  /** Title for the news card */
   newsTitle: string;
+  /** Content text for the news card */
   newsText: string;
+  /** Link text for viewing all news */
   newsLinkText: string;
+  /** Title for the update/changelog card */
   updateTitle: string;
+  /** Content text for the update card */
   updateText: string;
+  /** Link text for the update card */
   updateLinkText: string;
+  /** Explicit link text for accessibility */
   updateLinkExplicitText: string;
+  /** Title for the server status card */
   serverTitle: string;
+  /** Content text for the server status card */
   serverText: string;
 }
 

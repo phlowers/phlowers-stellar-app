@@ -4,14 +4,18 @@ import { uniqBy } from 'lodash';
 /**
  * A pipe that removes duplicate items from an array based on a specified property.
  *
- * @example
- * // In template:
- * // Assuming items is an array of objects with a 'name' property
- * {{ items | unique:'name' }}
- *
- * @usageNotes
+ * @remarks
  * This pipe uses lodash's uniqBy function to filter out duplicate values.
  * It is marked as impure to ensure it runs on every change detection cycle.
+ *
+ * @example
+ * ```html
+ * <!-- In template: -->
+ * <!-- Assuming items is an array of objects with a 'name' property -->
+ * <div *ngFor="let item of items | unique:'name'">{{ item.name }}</div>
+ * ```
+ *
+ * @category Pipes
  */
 @Pipe({
   name: 'unique',
@@ -21,7 +25,7 @@ export class UniquePipe implements PipeTransform {
   /**
    * Transforms an array by removing duplicate items based on a specified property.
    *
-   * @param value - The array to remove duplicates from
+   * @param items - The array to remove duplicates from
    * @param label - The property name to use for uniqueness comparison
    * @returns An array with duplicate items removed based on the specified property
    */
