@@ -85,11 +85,11 @@
           pInputText
           [ngModel]="
             measureData().manualParameterCalculation15CWithoutWind
-              ?.cableTemperature15C ?? null
+              ?.cableTemperatureCalibration ?? null
           "
           (ngModelChange)="
             updateManualParameterCalculation15CWithoutWind(
-              'cableTemperature15C',
+              'cableTemperatureCalibration',
               $event
             )
           "
@@ -111,11 +111,11 @@
           pInputText
           [ngModel]="
             measureData().manualParameterCalculation15CWithoutWind
-              ?.cableTemperatureUncertainty15C ?? null
+              ?.cableTemperatureCalibrationUncertainty ?? null
           "
           (ngModelChange)="
             updateManualParameterCalculation15CWithoutWind(
-              'cableTemperatureUncertainty15C',
+              'cableTemperatureCalibrationUncertainty',
               $event
             )
           "
@@ -131,7 +131,7 @@
         <dt id="parameterPapoto-display" i18n>Parameter (Papoto, etc.)</dt>
         <dd>
           {{
-            (measureData().outputs.papoto?.parameter | number: '1.0-3') ?? '-'
+            (measureData().outputs.papoto?.parameter | number: '1.0-2') ?? '-'
           }}
           m
         </dd>
@@ -149,7 +149,10 @@
       <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
         <dd>
-          {{ measureData().outputs.cableTemperature?.cableTemperature ?? '-' }}
+          {{
+            (measureData().outputs.cableTemperature?.cableTemperature
+              | number: '1.0-2') ?? '-'
+          }}
           °C
         </dd>
       </div>
@@ -189,17 +192,31 @@
       <div class="parameter15CMinusUncertainty">
         <dt i18n>Parameter at 15°C - uncertainty</dt>
         <dd>
-          {{ measureData().outputs.parameter15C?.parameter15CMinusUncertainty }}
+          {{
+            (measureData().outputs.parameter15C?.parameter15CMinusUncertainty
+              | number: '1.0-3') ?? '-'
+          }}
+          m
         </dd>
       </div>
       <div class="parameter15C">
         <dt i18n>Parameter at 15°C</dt>
-        <dd>{{ measureData().outputs.parameter15C?.parameter15C }}</dd>
+        <dd>
+          {{
+            (measureData().outputs.parameter15C?.parameter15C
+              | number: '1.0-3') ?? '-'
+          }}
+          m
+        </dd>
       </div>
       <div class="parameter15CPlusUncertainty">
         <dt i18n>Parameter at 15°C + uncertainty</dt>
         <dd>
-          {{ measureData().outputs.parameter15C?.parameter15CPlusUncertainty }}
+          {{
+            (measureData().outputs.parameter15C?.parameter15CPlusUncertainty
+              | number: '1.0-3') ?? '-'
+          }}
+          m
         </dd>
       </div>
     </dl>
