@@ -281,6 +281,39 @@ def fetch_cdn_lock(cdn_url: str, local_cdn_dir: Path | None = None) -> dict[str,
     return response.json().get("packages", {})
 
 
+def find_wheel_in_dir(directory: Path, filename: str) -> Path | None:
+    """Find a wheel file in directory, trying compiled variants.
+    
+    pyodide py-compile renames wheels from py3-none-any to cp313-none-any.
+    This function tries the exact filename first, then tries variants.
+    
+    Args:
+        directory: Directory to search in
+        filename: Original filename from pyodide-lock.json
+        
+    Returns:
+        Path to found wheel file, or None if not found
+    """
+    # Try exact filename first
+    exact = directory / filename
+    if exact.exists():
+        return exact
+    
+    # Try compiled variants (py3 -> cp313, py2.py3 -> cp313)
+    variants = [
+        filename.replace("-py3-none-any.whl", "-cp313-none-any.whl"),
+        filename.replace("-py2.py3-none-any.whl", "-cp313-none-any.whl"),
+    ]
+    
+    for variant in variants:
+        if variant != filename:
+            path = directory / variant
+            if path.exists():
+                return path
+    
+    return None
+
+
 def replace_with_cdn_wheels(
     downloaded: dict[str, str],
     cdn_url: str,
@@ -321,10 +354,11 @@ def replace_with_cdn_wheels(
             # Copy from local or download from CDN
             try:
                 if local_cdn_dir:
-                    src = local_cdn_dir / cdn_filename
-                    if src.exists():
-                        shutil.copy(src, PYODIDE_DIR / cdn_filename)
-                        cdn_wheel_names.add(cdn_filename)
+                    # Try to find wheel with exact name or compiled variant
+                    src = find_wheel_in_dir(local_cdn_dir, cdn_filename)
+                    if src:
+                        shutil.copy(src, PYODIDE_DIR / src.name)
+                        cdn_wheel_names.add(src.name)
                         print(f"  ✓ {name} ({cdn_version})")
                     else:
                         missing_wheels.append((name, cdn_filename))
