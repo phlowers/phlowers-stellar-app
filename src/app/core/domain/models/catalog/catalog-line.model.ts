@@ -6,17 +6,33 @@
  */
 
 /**
- * Catalog line domain model
+ * Catalog line domain model - represents power line metadata.
+ *
+ * @remarks
+ * Contains identification information for power lines including
+ * link, LIT, branch, and voltage references.
+ *
+ * @category Catalog Models
  */
 export interface CatalogLine {
+  /** Unique identifier (UUID v4) */
   uuid: string;
+  /** Link IDR reference */
   link_idr: string;
+  /** Link ADR reference */
   link_adr: string;
+  /** LIT IDR reference */
   lit_idr: string;
+  /** LIT ADR reference */
   lit_adr: string;
+  /** Branch ID */
   branch_id: string;
+  /** Branch IDR reference */
   branch_idr: string;
+  /** Branch ADR reference */
   branch_adr: string;
+  /** Voltage IDR reference */
   voltage_idr: string;
+  /** Voltage ADR reference */
   voltage_adr: string;
 }

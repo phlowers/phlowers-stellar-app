@@ -6,26 +6,63 @@
  */
 
 /**
- * Support domain model - represents a power line support structure
+ * Support domain model - represents a power line support structure (tower/pole).
+ *
+ * @remarks
+ * A support is a structure that holds the power line cables. It contains
+ * all geometric and mechanical properties needed for sag-tension calculations.
+ *
+ * @example
+ * ```typescript
+ * const support: Support = {
+ *   uuid: '123e4567-e89b-12d3-a456-426614174000',
+ *   number: '42',
+ *   name: 'Support 42',
+ *   spanLength: 350,
+ *   attachmentHeight: 25,
+ *   // ... other properties
+ * };
+ * ```
+ *
+ * @category Domain Models
  */
 export interface Support {
+  /** Unique identifier (UUID v4) */
   uuid: string;
+  /** Support number/identifier on the line */
   number: string | null;
+  /** Display name of the support */
   name: string | null;
+  /** Length of the span to the next support (meters) */
   spanLength: number | null;
+  /** Angle of the span (degrees) */
   spanAngle: number | null;
+  /** Attachment set number */
   attachmentSet: number | null;
+  /** Height of cable attachment point (meters) */
   attachmentHeight: number | null;
+  /** Height below the console (meters) */
   heightBelowConsole: number | null;
+  /** Tower model/type identifier */
   towerModel: string | null;
+  /** Type of cable attached */
   cableType: string | null;
+  /** Length of the arm/crossarm (meters) */
   armLength: number | null;
+  /** Name of the insulator chain */
   chainName: string | null;
+  /** Length of the insulator chain (meters) */
   chainLength: number | null;
+  /** Weight of the insulator chain (kg) */
   chainWeight: number | null;
+  /** Whether the chain is V-shaped */
   chainV: boolean | null;
+  /** Counter weight value (kg) */
   counterWeight: number | null;
+  /** Altitude at the support foot (meters) */
   supportFootAltitude: number | null;
+  /** Position of the attachment (e.g., 'left', 'right', 'center') */
   attachmentPosition: string | null;
+  /** Surface area of the insulator chain (m²) */
   chainSurface: number | null;
 }

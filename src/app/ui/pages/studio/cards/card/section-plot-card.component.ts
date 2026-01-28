@@ -11,15 +11,29 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { round } from 'lodash';
 
+/**
+ * Represents a single data field with label, value, and unit.
+ * @internal
+ */
 interface DataField {
+  /** Display label for the field */
   label: string;
+  /** Value to display (number or formatted string) */
   value: string | number;
+  /** Unit of measurement */
   unit: string;
 }
 
+/**
+ * Represents a section of related data fields.
+ * @internal
+ */
 interface DataSection {
+  /** Optional title for the section */
   title?: string;
+  /** Array of data fields in this section */
   fields: DataField[];
+  /** Whether to indent the section */
   indent?: boolean;
 }
 
