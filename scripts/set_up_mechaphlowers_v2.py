@@ -10,6 +10,7 @@ then downloads and prepares them for Pyodide.
 Usage:
     uv run scripts/set_up_mechaphlowers_v2.py
     uv run scripts/set_up_mechaphlowers_v2.py --skip-compression
+    uv run scripts/set_up_mechaphlowers_v2.py --zip-cdn
     uv run scripts/set_up_mechaphlowers_v2.py --local-cdn-dir /path/to/cdn
     uv run scripts/set_up_mechaphlowers_v2.py --local-wheel /path/to/mechaphlowers.whl
 """
@@ -423,20 +424,35 @@ def deduplicate_wheels(cdn_package_names: set[str]) -> int:
     return removed
 
 
-def compile_wheels() -> None:
+def compile_wheels(cdn_package_names: set[str]) -> None:
     """Compile wheels to .pyc bytecode using pyodide py-compile.
     
+    CDN wheels are already pre-compiled for Pyodide and are excluded.
     This renames py3-none-any wheels to cp313-none-any after compilation.
+    
+    Args:
+        cdn_package_names: Set of normalized package names from CDN (to exclude)
     """
     print("\n[5/6] Compiling wheels...")
     
-    # Protect core files
-    temp_dir = PYODIDE_DIR / ".core_temp"
+    # Protect core files and CDN wheels (already compiled for Pyodide)
+    temp_dir = PYODIDE_DIR / ".protected_temp"
     temp_dir.mkdir(exist_ok=True)
     
     for filename in PYODIDE_CORE_FILES:
         if (src := PYODIDE_DIR / filename).exists():
             shutil.move(str(src), str(temp_dir / filename))
+    
+    # Move CDN wheels to temp dir (they are already compiled for Pyodide)
+    cdn_wheels_moved: list[str] = []
+    for wheel_path in PYODIDE_DIR.glob("*.whl"):
+        name, _ = parse_wheel(wheel_path.name)
+        if name in cdn_package_names:
+            shutil.move(str(wheel_path), str(temp_dir / wheel_path.name))
+            cdn_wheels_moved.append(wheel_path.name)
+    
+    if cdn_wheels_moved:
+        print(f"  Skipping {len(cdn_wheels_moved)} CDN wheels (already compiled)")
     
     # Compile using pyodide CLI via uvx (without --keep to replace py3 with cp313)
     cmd = ["uvx", "--from", "pyodide-build", "pyodide", "py-compile", "--compression-level", "6", str(PYODIDE_DIR)]
@@ -448,6 +464,11 @@ def compile_wheels() -> None:
     for filename in PYODIDE_CORE_FILES:
         if (src := temp_dir / filename).exists():
             shutil.move(str(src), str(PYODIDE_DIR / filename))
+    
+    # Restore CDN wheels
+    for wheel_name in cdn_wheels_moved:
+        shutil.move(str(temp_dir / wheel_name), str(PYODIDE_DIR / wheel_name))
+    
     temp_dir.rmdir()
     
     # Cleanup .old files
@@ -484,13 +505,81 @@ def compress_wheels(cdn_package_names: set[str], min_size_mb: float = 1.0) -> No
     print("  ✓ Done")
 
 
-def generate_packages_json() -> int:
-    """Generate python-packages.json for worker integration."""
+def zip_cdn_wheels(cdn_package_names: set[str]) -> int:
+    """Zip all CDN wheels into a single cdn.zip file.
+    
+    Args:
+        cdn_package_names: Set of normalized package names from CDN
+    
+    Returns:
+        Number of wheels zipped
+    """
+    print("\n[+] Zipping CDN dependencies into cdn.zip...")
+    
+    cdn_zip_path = PYODIDE_DIR / "cdn.zip"
+    mb = 1024 * 1024
+    zipped_count = 0
+    total_original_size = 0
+    
+    with zipfile.ZipFile(cdn_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+        for wheel_path in sorted(PYODIDE_DIR.glob("*.whl")):
+            name, version = parse_wheel(wheel_path.name)
+            if name in cdn_package_names:
+                zf.write(wheel_path, wheel_path.name)
+                total_original_size += wheel_path.stat().st_size
+                zipped_count += 1
+                print(f"  + {wheel_path.name}")
+    
+    if zipped_count > 0:
+        # Remove original CDN wheel files after zipping
+        for wheel_path in PYODIDE_DIR.glob("*.whl"):
+            name, _ = parse_wheel(wheel_path.name)
+            if name in cdn_package_names:
+                wheel_path.unlink()
+        
+        zip_size = cdn_zip_path.stat().st_size
+        print(f"  ✓ Created cdn.zip: {zipped_count} wheels ({total_original_size/mb:.2f} → {zip_size/mb:.2f} MB)")
+    else:
+        # Remove empty zip if no CDN wheels
+        cdn_zip_path.unlink(missing_ok=True)
+        print("  ✓ No CDN wheels to zip")
+    
+    return zipped_count
+
+
+def generate_packages_json(cdn_package_names: set[str], zipped: bool = False) -> int:
+    """Generate python-packages.json for worker integration.
+    
+    Args:
+        cdn_package_names: Set of normalized package names from CDN
+        zipped: Whether CDN packages are stored in cdn.zip
+    
+    Returns:
+        Total number of packages
+    """
     wheels = get_wheels(PYODIDE_DIR)
-    packages = {
-        normalize_name((name := w.split("-")[0])): {"file_name": w, "name": name, "source": "local"}
-        for w in wheels
-    }
+    packages: dict[str, dict] = {}
+    
+    # Add wheels from directory
+    for w in wheels:
+        name = normalize_name(w.split("-")[0])
+        source = "cdn" if name in cdn_package_names else "local"
+        packages[name] = {"file_name": w, "name": w.split("-")[0], "source": source}
+    
+    # Add CDN packages from cdn.zip if zipped mode
+    if zipped:
+        cdn_zip_path = PYODIDE_DIR / "cdn.zip"
+        if cdn_zip_path.exists():
+            with zipfile.ZipFile(cdn_zip_path, "r") as zf:
+                for wheel_name in zf.namelist():
+                    if wheel_name.endswith(".whl"):
+                        name = normalize_name(wheel_name.split("-")[0])
+                        packages[name] = {
+                            "file_name": wheel_name,
+                            "name": wheel_name.split("-")[0],
+                            "source": "cdn",
+                            "archive": "cdn.zip",
+                        }
     
     PACKAGES_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
     PACKAGES_JSON_PATH.write_text(json.dumps(packages, ensure_ascii=False, indent=2, sort_keys=True))
@@ -555,6 +644,11 @@ def main() -> None:
     parser.add_argument("--npm-registry-url", default="https://registry.npmjs.org/")
     parser.add_argument("--skip-compression", action="store_true")
     parser.add_argument(
+        "--zip-cdn",
+        action="store_true",
+        help="Zip all CDN wheels into a single cdn.zip file",
+    )
+    parser.add_argument(
         "--local-cdn-dir",
         type=Path,
         help="Local directory containing CDN wheels (instead of downloading from CDN)",
@@ -607,13 +701,17 @@ def main() -> None:
     cdn_package_names = {parse_wheel(w)[0] for w in cdn_wheels}
     
     deduplicate_wheels(cdn_package_names)
-    compile_wheels()
+    compile_wheels(cdn_package_names)
     deduplicate_wheels(cdn_package_names)  # Post-compilation cleanup
     
     if not args.skip_compression:
         compress_wheels(cdn_package_names)
     
-    num_packages = generate_packages_json()
+    # Optionally zip CDN wheels into cdn.zip
+    if args.zip_cdn:
+        zip_cdn_wheels(cdn_package_names)
+    
+    num_packages = generate_packages_json(cdn_package_names, zipped=args.zip_cdn)
     
     # Verify all resolved dependencies are installed
     verify_dependencies(resolved)
@@ -623,22 +721,35 @@ def main() -> None:
     print("INSTALLED PACKAGES")
     print("=" * 50)
     
-    final_wheels = sorted(get_wheels(PYODIDE_DIR))
     cdn_count = 0
     pypi_count = 0
     
-    for wheel in final_wheels:
+    # List wheels from directory
+    for wheel in sorted(get_wheels(PYODIDE_DIR)):
         name, version = parse_wheel(wheel)
         if name in cdn_package_names:
-            source = "CDN"
+            print(f"  {name:30} {version:15} [CDN]")
             cdn_count += 1
         else:
-            source = "PyPI"
+            print(f"  {name:30} {version:15} [PyPI]")
             pypi_count += 1
-        print(f"  {name:30} {version:15} [{source}]")
+    
+    # List CDN wheels from cdn.zip if zipped mode
+    if args.zip_cdn:
+        cdn_zip_path = PYODIDE_DIR / "cdn.zip"
+        if cdn_zip_path.exists():
+            with zipfile.ZipFile(cdn_zip_path, "r") as zf:
+                for wheel_name in sorted(zf.namelist()):
+                    if wheel_name.endswith(".whl"):
+                        name, version = parse_wheel(wheel_name)
+                        print(f"  {name:30} {version:15} [CDN → cdn.zip]")
+                        cdn_count += 1
     
     print("=" * 50)
-    print(f"✓ Setup complete: {num_packages} packages ({cdn_count} CDN, {pypi_count} PyPI)")
+    if args.zip_cdn:
+        print(f"✓ Setup complete: {num_packages} packages ({cdn_count} CDN in cdn.zip, {pypi_count} PyPI)")
+    else:
+        print(f"✓ Setup complete: {num_packages} packages ({cdn_count} CDN, {pypi_count} PyPI)")
     print(f"  Config: {PACKAGES_JSON_PATH}")
     print("=" * 50)
 
