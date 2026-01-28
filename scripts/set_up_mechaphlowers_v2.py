@@ -716,6 +716,9 @@ def main() -> None:
     # Verify all resolved dependencies are installed
     verify_dependencies(resolved)
     
+    # Verify all resolved dependencies are installed
+    verify_dependencies(resolved)
+    
     # Summary with package details
     print("\n" + "=" * 50)
     print("INSTALLED PACKAGES")
