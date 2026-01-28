@@ -332,7 +332,7 @@ def replace_with_cdn_wheels(
     Raises:
         SystemExit: If local_cdn_dir is specified and required wheels are missing
     """
-    source = "local (CDN)" if local_cdn_dir else "CDN"
+    source = f"local CDN ({local_cdn_dir})" if local_cdn_dir else "CDN"
     print(f"\n[4/6] Replacing with {source} wheels...")
     
     cdn_packages = fetch_cdn_lock(cdn_url, local_cdn_dir)
