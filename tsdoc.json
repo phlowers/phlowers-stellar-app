@@ -1,0 +1,45 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+  "extends": ["typedoc/tsdoc.json"],
+  "noStandardTags": false,
+  "tagDefinitions": [
+    {
+      "tagName": "@category",
+      "syntaxKind": "block"
+    },
+    {
+      "tagName": "@internal",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@packageDocumentation",
+      "syntaxKind": "modifier"
+    }
+  ],
+  "supportForTags": {
+    "@alpha": true,
+    "@beta": true,
+    "@category": true,
+    "@decorator": true,
+    "@defaultValue": true,
+    "@deprecated": true,
+    "@example": true,
+    "@experimental": true,
+    "@inheritDoc": true,
+    "@internal": true,
+    "@link": true,
+    "@override": true,
+    "@packageDocumentation": true,
+    "@param": true,
+    "@privateRemarks": true,
+    "@public": true,
+    "@readonly": true,
+    "@remarks": true,
+    "@returns": true,
+    "@sealed": true,
+    "@see": true,
+    "@throws": true,
+    "@typeParam": true,
+    "@virtual": true
+  }
+}
