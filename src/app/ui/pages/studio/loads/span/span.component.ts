@@ -21,8 +21,14 @@ import { LoadFormsService } from '../loadForms.service';
 import { emptySpanLoad } from '../helpers';
 import { LoadType } from '@core/domain/models/charge.model';
 
+/**
+ * Option for selecting left or right support in span calculations.
+ * @internal
+ */
 interface SupportOption {
+  /** Display label for the option */
   label: string;
+  /** Value indicating which support side */
   value: 'LEFT' | 'RIGHT';
 }
 

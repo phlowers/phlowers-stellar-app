@@ -1,43 +1,111 @@
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@core/domain';
 import { View } from '@ui/shared/components/studio/section/helpers/types';
 import { Dictionary } from 'lodash';
 
+/**
+ * Available calculation tasks for the Python worker.
+ *
+ * @remarks
+ * Each task corresponds to a specific calculation or operation
+ * that can be performed by the mechaphlowers Python library.
+ *
+ * @category Worker Types
+ */
 export enum Task {
+  /** Run unit tests in Python environment */
   runTests = 'runTests',
+  /** Calculate line geometry (LIT - Ligne Informatisée de Transport) */
   getLit = 'getLit',
+  /** Change climate/load state and recalculate */
   changeState = 'changeState',
+  /** Refresh the projection view */
   refreshProjection = 'refreshProjection',
+  /** Get coordinates for support display */
   getSupportCoordinates = 'getSupportCoordinates',
+  /** Calculate PAPOTO (field measurement) parameters */
   calculatePapoto = 'calculatePapoto',
+  /** Calculate guying forces and angles */
   calculateGuying = 'calculateGuying',
+  /** Set Python logging level */
   setLogLevel = 'setLogLevel',
+  /** Calculate cable temperature from ambient conditions */
   temperatureCalculation = 'temperatureCalculation',
+  /** Calculate parameter at 15°C without wind */
   calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind'
 }
 
+/**
+ * Error codes for data-related issues.
+ *
+ * @category Worker Types
+ */
 export enum DataError {
+  /** Cable not found in catalog */
   NO_CABLE_FOUND = 'NO_CABLE_FOUND'
 }
 
+/**
+ * Error codes for task execution failures.
+ *
+ * @category Worker Types
+ */
 export enum TaskError {
+  /** Failed to load Pyodide runtime */
   PYODIDE_LOAD_ERROR = 'PYODIDE_LOAD_ERROR',
+  /** Error during calculation execution */
   CALCULATION_ERROR = 'CALCULATION_ERROR',
+  /** Numerical solver did not converge */
   SOLVER_DID_NOT_CONVERGE = 'SOLVER_DID_NOT_CONVERGE',
+  /** Unspecified error occurred */
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
 
+/**
+ * Output structure from section geometry calculations.
+ *
+ * @remarks
+ * Contains all geometric data needed to display the power line section,
+ * including span curves, support positions, and calculated forces.
+ *
+ * @category Worker Types
+ */
 export interface GetSectionOutput {
+  /** 3D coordinates of span catenary curves */
   spans: number[][][];
+  /** 3D coordinates of insulator chains */
   insulators: number[][][];
+  /** 3D coordinates of support structures */
   supports: number[][][];
+  /** L0 parameter values for each span */
+  L0: number[];
+  /** Elevation values at each support */
+  elevation: number[];
+  /** Line angle at each support (degrees) */
   line_angle: number[];
+  /** VTL under chain for each support */
   vtl_under_chain: number[][];
+  /** VTL under console for each support */
   vtl_under_console: number[][];
+  /** Resultant force under chain */
   r_under_chain: number[];
+  /** Resultant force under console */
   r_under_console: number[];
+  /** Ground altitude at each support */
   ground_altitude: number[];
+  /** Load angle at each support */
   load_angle: number[];
+  /** Cable displacement values */
   displacement: number[][];
+  /** Span lengths */
+  span_length: number[];
+  /** Coordinates of applied loads by support UUID */
   loads_coords: Dictionary<number[]>;
   span_length: number[];
   elevation: number[];
@@ -50,30 +118,54 @@ export interface GetSectionOutput {
   T_h: number[];
 }
 
+/**
+ * Log level values for Python logging.
+ *
+ * @category Worker Types
+ */
 export enum LogLevel {
+  /** Detailed debug information */
   DEBUG = 10,
+  /** General information messages */
   INFO = 20,
+  /** Warning messages */
   WARNING = 30,
+  /** Error messages */
   ERROR = 40,
+  /** Critical error messages */
   CRITICAL = 50
 }
 
+/**
+ * Input type mapping for each task.
+ *
+ * @remarks
+ * Defines the expected input structure for each calculation task.
+ *
+ * @category Worker Types
+ */
 export interface TaskInputs {
+  /** Inputs for getLit task */
   [Task.getLit]: { section: Section; cable: CatalogCable };
+  /** Inputs for runTests task */
   [Task.runTests]: undefined;
+  /** Inputs for changeState task */
   [Task.changeState]: {
     climate: ClimateCharge;
     spanLoads: SpanLoad[];
   };
+  /** Inputs for refreshProjection task */
   [Task.refreshProjection]: {
     startSupport: number;
     endSupport: number;
     view: View;
   };
+  /** Inputs for getSupportCoordinates task */
   [Task.getSupportCoordinates]: {
     coordinates: (number | undefined)[][];
     attachmentSetNumbers: number[];
   };
+  /** Inputs for calculatePapoto task */
   [Task.calculatePapoto]: {
     spanLength: number;
     measuredElevationDifference: number;
@@ -88,6 +180,7 @@ export interface TaskInputs {
     V3: number;
     VR: number;
   };
+  /** Inputs for calculateGuying task */
   [Task.calculateGuying]: {
     altitude: number;
     horizontalDistance: number;
@@ -95,11 +188,11 @@ export interface TaskInputs {
     selectedSpanIndex: number;
     selectedSupport: 'LEFT' | 'RIGHT' | null;
   };
-  // Use the same interface? Or create a new one?
-  // [Task.calculateGuying]: VtlAndGuyingInputs;
+  /** Inputs for setLogLevel task */
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
   };
+  /** Inputs for temperatureCalculation task */
   [Task.temperatureCalculation]: {
     cableName: string;
     ambientTemperature: number;
@@ -115,6 +208,7 @@ export interface TaskInputs {
     windDirection: string;
     skyCover: string;
   };
+  /** Inputs for calculateParameter15CWithoutWind task */
   [Task.calculateParameter15CWithoutWind]: {
     parameterPapoto: number | null;
     parameterUncertaintyPapoto: number | null;
@@ -124,16 +218,30 @@ export interface TaskInputs {
   };
 }
 
+/**
+ * Output type mapping for each task.
+ *
+ * @remarks
+ * Defines the expected output structure for each calculation task.
+ *
+ * @category Worker Types
+ */
 export interface TaskOutputs {
+  /** Output from getLit task */
   [Task.getLit]: GetSectionOutput;
+  /** Output from runTests task */
   [Task.runTests]: undefined;
+  /** Output from changeState task */
   [Task.changeState]: GetSectionOutput;
+  /** Output from refreshProjection task */
   [Task.refreshProjection]: GetSectionOutput;
+  /** Output from getSupportCoordinates task */
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
     text_display_points: number[][];
     text_to_display: number[];
   };
+  /** Output from calculatePapoto task */
   [Task.calculatePapoto]: {
     parameter: number;
     // uncertainty_parameter: number;
@@ -142,6 +250,7 @@ export interface TaskOutputs {
     parameter_1_3: number;
     check_validity: boolean;
   };
+  /** Output from calculateGuying task */
   [Task.calculateGuying]: {
     tensionInGuy: number;
     guyAngle: number;
@@ -149,12 +258,15 @@ export interface TaskOutputs {
     chargeHUnderConsole: number;
     chargeLIfPulley: number;
   };
+  /** Output from setLogLevel task */
   [Task.setLogLevel]: undefined;
+  /** Output from temperatureCalculation task */
   [Task.temperatureCalculation]: {
     cableSolarFlux: number;
     cableTemperature: number;
     cableTemperatureUncertainty: number;
   };
+  /** Output from calculateParameter15CWithoutWind task */
   [Task.calculateParameter15CWithoutWind]: {
     parameter15CMinusUncertainty: number;
     parameter15C: number;

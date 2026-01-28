@@ -7,16 +7,31 @@ import plotly, { Data } from 'plotly.js-dist-min';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 
+/**
+ * Formatted text data for plot annotations.
+ * @internal
+ */
 interface FormattedTextData {
+  /** Array of text strings to display */
   textToDisplay: string[];
+  /** 2D array of coordinates for text placement */
   textDisplayPoints: number[][];
 }
 
+/**
+ * Data structure for rendering support plots.
+ * @internal
+ */
 interface PlotData {
+  /** 2D array of shape coordinates */
   shapePoints: number[][];
+  /** 2D array of text display coordinates */
   textDisplayPoints: number[][];
+  /** Array of text strings to display */
   textToDisplay: string[];
+  /** Currently selected attachment set number */
   selectedAttachmentSetNumber: number | undefined;
+  /** Coordinates of the attachment set point */
   attachmentSetPoints: number[];
 }
 
