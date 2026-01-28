@@ -17,11 +17,6 @@ export interface ChargeData {
   spanLoads: SpanLoad[];
 }
 
-export enum SymmetryType {
-  SYMMETRIC = 'symmetric',
-  DIS_SYMMETRIC = 'dis_symmetric'
-}
-
 /**
  * Climate conditions for mechanical calculations.
  *
@@ -36,7 +31,9 @@ export interface ClimateCharge {
   windPressure: number | null;
   /** Cable temperature in °C */
   cableTemperature: number | null;
-  symmetryType: SymmetryType;
+  /** Type of symmetry for ice loading */
+  symmetryType: string;
+  /** Ice thickness in mm */
   iceThickness: number | null;
   /** Support number at frontier (for asymmetric loading) */
   frontierSupportNumber: null;
