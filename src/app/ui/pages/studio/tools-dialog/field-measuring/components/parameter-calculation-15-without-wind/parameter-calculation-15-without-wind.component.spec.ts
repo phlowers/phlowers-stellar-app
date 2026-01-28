@@ -114,12 +114,12 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
   it('should update measureData when form values change', () => {
     component.updateMeasureData('parameterPapoto', 1800);
     component.updateMeasureData('parameterUncertaintyPapoto', 15);
-    component.updateMeasureData('cableTemperature15C', 50);
+    component.updateMeasureData('cableTemperatureCalibration', 50);
 
     const data = component.measureData();
     expect(data.parameterPapoto).toBe(1800);
     expect(data.parameterUncertaintyPapoto).toBe(15);
-    expect(data.cableTemperature15C).toBe(50);
+    expect(data.cableTemperatureCalibration).toBe(50);
   });
 
   it('should toggle update mode', () => {
@@ -151,19 +151,17 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       1700
     );
     component.updateManualParameterCalculation15CWithoutWind(
-      'cableTemperature15C',
+      'cableTemperatureCalibration',
       45
     );
     component.updateManualParameterCalculation15CWithoutWind(
-      'cableTemperatureUncertainty15C',
+      'cableTemperatureCalibrationUncertainty',
       3
     );
 
     // Set top-level fields for the calculation to read
     component.updateMeasureData('parameterPapoto', 1700);
     component.updateMeasureData('parameterUncertaintyPapoto', 12);
-    component.updateMeasureData('cableTemperature15C', 45);
-    component.updateMeasureData('cableTemperatureUncertainty15C', 3);
 
     fixture.detectChanges();
 
@@ -174,8 +172,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       {
         parameterPapoto: 1700,
         parameterUncertaintyPapoto: null,
-        cableTemperature15C: 45,
-        cableTemperatureUncertainty15C: 3
+        cableTemperatureCalibration: 45,
+        cableTemperatureCalibrationUncertainty: 3,
+        span_index: 11
       }
     );
     expect(component.parameter15CError()).toBe(false);
@@ -197,11 +196,11 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       12
     );
     component.updateManualParameterCalculation15CWithoutWind(
-      'cableTemperature15C',
+      'cableTemperatureCalibration',
       45
     );
     component.updateManualParameterCalculation15CWithoutWind(
-      'cableTemperatureUncertainty15C',
+      'cableTemperatureCalibrationUncertainty',
       3
     );
 
@@ -255,11 +254,11 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         12
       );
       component.updateManualParameterCalculation15CWithoutWind(
-        'cableTemperature15C',
+        'cableTemperatureCalibration',
         45
       );
       component.updateManualParameterCalculation15CWithoutWind(
-        'cableTemperatureUncertainty15C',
+        'cableTemperatureCalibrationUncertainty',
         3
       );
 

@@ -65,8 +65,8 @@ export interface FieldMeasure {
   updateMode15C: 'auto' | 'manual';
   parameterPapoto: number | null;
   parameterUncertaintyPapoto: number | null;
-  cableTemperature15C: number | null;
-  cableTemperatureUncertainty15C: number | null;
+  cableTemperatureCalibration: number | null;
+  cableTemperatureCalibrationUncertainty: number | null;
   manualParameterCalculation15CWithoutWind: ManualParameterCalculation15CWithoutWind | null;
   outputs: FieldMeasureOutputs;
 }
@@ -100,6 +100,6 @@ export interface PapotoResult {
 export interface ManualParameterCalculation15CWithoutWind {
   parameterPapoto: number | null;
   parameterUncertaintyPapoto: number | null;
-  cableTemperature15C: number | null;
-  cableTemperatureUncertainty15C: number | null;
+  cableTemperatureCalibration: number | null;
+  cableTemperatureCalibrationUncertainty: number | null;
 }
