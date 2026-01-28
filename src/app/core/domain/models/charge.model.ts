@@ -22,6 +22,15 @@ export enum SymmetryType {
   DIS_SYMMETRIC = 'dis_symmetric'
 }
 
+/**
+ * Climate conditions for mechanical calculations.
+ *
+ * @remarks
+ * Defines environmental conditions like wind, temperature, and ice
+ * that affect cable tension calculations.
+ *
+ * @category Domain Models
+ */
 export interface ClimateCharge {
   /** Wind pressure in Pa (Pascal) */
   windPressure: number | null;
