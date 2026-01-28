@@ -32,10 +32,7 @@ import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
 export class StudioMenuBarComponent {
   section = input.required<Section | null>();
   study = input.required<Study | null>();
-  openNewChargeModal = output<{
-    mode: 'create' | 'edit' | 'view';
-    uuid: string | null;
-  }>();
+  openNewChargeModal = output<void>();
   charges = computed(
     () =>
       this.section()?.charges?.map((c) => ({

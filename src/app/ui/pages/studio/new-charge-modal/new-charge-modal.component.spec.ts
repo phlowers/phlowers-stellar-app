@@ -9,7 +9,6 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 
 class MockChargesService {
-  getCharge = jest.fn();
   createOrUpdateCharge = jest.fn().mockResolvedValue(undefined);
 }
 
@@ -117,9 +116,7 @@ describe('NewChargeModalComponent (Jest)', () => {
     fixture = TestBed.createComponent(NewChargeModalComponent);
     component = fixture.componentInstance;
 
-    fixture.componentRef.setInput('mode', 'create');
     fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('uuidInput', null);
 
     fixture.detectChanges();
 
@@ -133,38 +130,13 @@ describe('NewChargeModalComponent (Jest)', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display create title when mode=create', () => {
+  it('should display create title', () => {
     fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'create');
     fixture.componentRef.setInput('isOpen', true);
     fixture.detectChanges();
 
     const header = fixture.debugElement.nativeElement.querySelector('p span');
     expect(header.textContent).toContain('Create a charge case');
-  });
-
-  it('should display edit title when mode=edit', () => {
-    chargesService.getCharge.mockResolvedValue(mockCharge);
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'edit');
-    fixture.componentRef.setInput('uuidInput', 'charge-uuid-1');
-    fixture.componentRef.setInput('isOpen', true);
-    fixture.detectChanges();
-
-    const header = fixture.debugElement.nativeElement.querySelector('p span');
-    expect(header.textContent).toContain('Edit charge case');
-  });
-
-  it('should display view title when mode=view', () => {
-    chargesService.getCharge.mockResolvedValue(mockCharge);
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'view');
-    fixture.componentRef.setInput('uuidInput', 'charge-uuid-1');
-    fixture.componentRef.setInput('isOpen', true);
-    fixture.detectChanges();
-
-    const header = fixture.debugElement.nativeElement.querySelector('p span');
-    expect(header.textContent).toContain('View charge case');
   });
 
   it('should emit isOpenChange(false) when onClose() is called', () => {
@@ -183,7 +155,6 @@ describe('NewChargeModalComponent (Jest)', () => {
   it('should update name when updateName is called', () => {
     component.updateName('New Name');
     expect(component.name()).toBe('New Name');
-    expect(component.nameLength()).toBe(8);
   });
 
   it('should update personnelPresence when updatePersonnelPresence is called', () => {
@@ -197,41 +168,9 @@ describe('NewChargeModalComponent (Jest)', () => {
     expect(component.descriptionLength()).toBe(15);
   });
 
-  it('should compute nameLength correctly', () => {
-    component.updateName('Test');
-    expect(component.nameLength()).toBe(4);
-  });
-
   it('should compute descriptionLength correctly', () => {
     component.updateDescription('Test Description');
     expect(component.descriptionLength()).toBe(16);
-  });
-
-  it('should compute isViewMode correctly', () => {
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'view');
-    fixture.detectChanges();
-    expect(component.isViewMode()).toBe(true);
-    expect(component.isEditMode()).toBe(false);
-    expect(component.isCreateMode()).toBe(false);
-  });
-
-  it('should compute isEditMode correctly', () => {
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'edit');
-    fixture.detectChanges();
-    expect(component.isEditMode()).toBe(true);
-    expect(component.isViewMode()).toBe(false);
-    expect(component.isCreateMode()).toBe(false);
-  });
-
-  it('should compute isCreateMode correctly', () => {
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'create');
-    fixture.detectChanges();
-    expect(component.isCreateMode()).toBe(true);
-    expect(component.isViewMode()).toBe(false);
-    expect(component.isEditMode()).toBe(false);
   });
 
   it('should disable validate button if name is empty', () => {
@@ -254,69 +193,13 @@ describe('NewChargeModalComponent (Jest)', () => {
     expect(button.nativeElement.disabled).toBe(false);
   });
 
-  it('should not show validate button in view mode', async () => {
-    chargesService.getCharge.mockResolvedValue(mockCharge);
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'view');
-    fixture.componentRef.setInput('uuidInput', 'charge-uuid-1');
-    fixture.componentRef.setInput('isOpen', true);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const buttons = fixture.debugElement.queryAll(
-      By.css('button[app-btn][type="button"]:not([btnStyle="text"])')
-    );
-    expect(buttons.length).toBe(0);
-  });
-
-  it('should load charge data when mode is edit and isOpen is true', async () => {
-    chargesService.getCharge.mockResolvedValue(mockCharge);
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'edit');
-    fixture.componentRef.setInput('uuidInput', 'charge-uuid-1');
-    fixture.componentRef.setInput('isOpen', true);
-    fixture.detectChanges();
-
-    // Wait for effect to complete
-    await fixture.whenStable();
-
-    expect(chargesService.getCharge).toHaveBeenCalledWith(
-      'study-uuid',
-      'section-uuid',
-      'charge-uuid-1'
-    );
-    expect(component.name()).toBe('Test Charge');
-    expect(component.personnelPresence()).toBe(true);
-    expect(component.description()).toBe('Test charge description');
-  });
-
-  it('should load charge data when mode is view and isOpen is true', async () => {
-    chargesService.getCharge.mockResolvedValue(mockCharge);
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'view');
-    fixture.componentRef.setInput('uuidInput', 'charge-uuid-1');
-    fixture.componentRef.setInput('isOpen', true);
-    fixture.detectChanges();
-
-    // Wait for effect to complete
-    await fixture.whenStable();
-
-    expect(chargesService.getCharge).toHaveBeenCalledWith(
-      'study-uuid',
-      'section-uuid',
-      'charge-uuid-1'
-    );
-    expect(component.name()).toBe('Test Charge');
-  });
-
-  it('should reset form when mode is create and isOpen is true', async () => {
+  it('should reset form when isOpen becomes true', async () => {
     // Set some initial values
     component.updateName('Initial Name');
     component.updatePersonnelPresence(true);
     component.updateDescription('Initial Description');
 
     fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'create');
     fixture.componentRef.setInput('isOpen', true);
     fixture.detectChanges();
 
@@ -329,16 +212,13 @@ describe('NewChargeModalComponent (Jest)', () => {
     expect(component.description()).toBe('');
   });
 
-  it('should emit validate and call createOrUpdateCharge on onSubmit in create mode', async () => {
+  it('should emit validate and call createOrUpdateCharge on onSubmit', async () => {
     component.updateName('New Charge');
     component.updatePersonnelPresence(false);
     component.updateDescription('New Description');
 
     const validateSpy = jest.spyOn(component.validate, 'emit');
     const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
-
-    fixture.componentRef.setInput('mode', 'create');
-    fixture.detectChanges();
 
     await component.onSubmit();
 
@@ -361,38 +241,6 @@ describe('NewChargeModalComponent (Jest)', () => {
     expect(isOpenChangeSpy).toHaveBeenCalledWith(false);
   });
 
-  it('should emit validate and call createOrUpdateCharge on onSubmit in edit mode', async () => {
-    chargesService.getCharge.mockResolvedValue(mockCharge);
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'edit');
-    fixture.componentRef.setInput('uuidInput', 'charge-uuid-1');
-    fixture.componentRef.setInput('isOpen', true);
-    fixture.detectChanges();
-
-    await fixture.whenStable();
-
-    component.updateName('Updated Charge');
-    const validateSpy = jest.spyOn(component.validate, 'emit');
-    const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
-
-    await component.onSubmit();
-
-    expect(validateSpy).toHaveBeenCalled();
-    const emittedCharge = validateSpy.mock.calls[0][0];
-    expect(emittedCharge.uuid).toBe('charge-uuid-1');
-    expect(emittedCharge.name).toBe('Updated Charge');
-
-    expect(chargesService.createOrUpdateCharge).toHaveBeenCalledWith(
-      'study-uuid',
-      'section-uuid',
-      expect.objectContaining({
-        uuid: 'charge-uuid-1',
-        name: 'Updated Charge'
-      })
-    );
-    expect(isOpenChangeSpy).toHaveBeenCalledWith(false);
-  });
-
   it('should throw error if study or section is not found on onSubmit', async () => {
     plotService.study.set(null);
     component.updateName('Test Charge');
@@ -402,9 +250,8 @@ describe('NewChargeModalComponent (Jest)', () => {
     );
   });
 
-  it('should enable inputs in create mode', () => {
+  it('should have inputs enabled', () => {
     fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'create');
     fixture.componentRef.setInput('isOpen', true);
     fixture.detectChanges();
 
@@ -419,29 +266,8 @@ describe('NewChargeModalComponent (Jest)', () => {
     expect(descriptionTextarea.nativeElement.disabled).toBe(false);
   });
 
-  it('should enable inputs in edit mode', async () => {
-    chargesService.getCharge.mockResolvedValue(mockCharge);
+  it('should display description length counter', async () => {
     fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'edit');
-    fixture.componentRef.setInput('uuidInput', 'charge-uuid-1');
-    fixture.componentRef.setInput('isOpen', true);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const nameInput = fixture.debugElement.query(By.css('#chargeName'));
-    const toggleSwitch = fixture.debugElement.query(By.css('p-toggleswitch'));
-    const descriptionTextarea = fixture.debugElement.query(
-      By.css('#description')
-    );
-
-    expect(nameInput.nativeElement.disabled).toBe(false);
-    expect(toggleSwitch.componentInstance.disabled).toBe(false);
-    expect(descriptionTextarea.nativeElement.disabled).toBe(false);
-  });
-
-  it('should display description length counter when not in view mode', async () => {
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'create');
     fixture.componentRef.setInput('isOpen', true);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -455,16 +281,14 @@ describe('NewChargeModalComponent (Jest)', () => {
     expect(lengthCounter.nativeElement.textContent).toContain('4/240');
   });
 
-  it('should not display description length counter in view mode', async () => {
-    chargesService.getCharge.mockResolvedValue(mockCharge);
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('mode', 'view');
-    fixture.componentRef.setInput('uuidInput', 'charge-uuid-1');
-    fixture.componentRef.setInput('isOpen', true);
-    fixture.detectChanges();
-    await fixture.whenStable();
+  it('should invalidate form if name already exists', () => {
+    // mockSection has a charge named 'Test Charge'
+    component.updateName('Test Charge');
+    expect(component.isFormValid()).toBe(false);
+  });
 
-    const lengthCounter = fixture.debugElement.query(By.css('.input-length'));
-    expect(lengthCounter).toBeFalsy();
+  it('should validate form if name is unique', () => {
+    component.updateName('Unique Charge Name');
+    expect(component.isFormValid()).toBe(true);
   });
 });

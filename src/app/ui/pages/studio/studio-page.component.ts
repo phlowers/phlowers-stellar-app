@@ -67,8 +67,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   subscription: Subscription | null = null;
   plotStudioHeight = signal<string>('21.875rem');
   isNewChargeModalOpen = signal(false);
-  newChargeModalMode = signal<'create' | 'edit' | 'view'>('create');
-  newChargeModalUuid = signal<string | null>(null);
   private resizeObserver?: ResizeObserver;
 
   sliderOptions = computed<Options>(() => {
@@ -192,18 +190,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  openNewChargeModal(
-    {
-      mode,
-      uuid
-    }: { mode: 'create' | 'edit' | 'view'; uuid: string | null } = {
-      mode: 'create',
-      uuid: null
-    }
-  ) {
+  openNewChargeModal() {
     this.isNewChargeModalOpen.set(true);
-    this.newChargeModalMode.set(mode);
-    this.newChargeModalUuid.set(uuid);
   }
 
   onSelectPlotOptions(value: string) {

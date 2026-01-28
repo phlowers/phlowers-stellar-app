@@ -122,14 +122,13 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Loads table', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       component.ngOnInit();
       const tables = component.tablesDropdown();
 
       tables?.[0].command?.({});
-      expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
-
-      consoleSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
+        'load-table'
+      );
     });
 
     it('should execute tablesDropdown command for L0 table', () => {
@@ -487,6 +486,78 @@ describe('StudioTopToolbarComponent', () => {
       expect(options.view).toBe('3d');
       expect(options.side).toBe('profile');
       expect(options.invert).toBe(false);
+    });
+  });
+
+  describe('selectedDisplayOptions computed', () => {
+    it('should return mapped display options from plotService', () => {
+      mockPlotService.selectedDisplayOptions.set({ loads: true });
+
+      const options = component.selectedDisplayOptions();
+
+      expect(options).toEqual([{ label: 'loads', value: 'loads' }]);
+    });
+
+    it('should handle empty display options', () => {
+      mockPlotService.selectedDisplayOptions.set({} as any);
+
+      const options = component.selectedDisplayOptions();
+
+      expect(options).toEqual([]);
+    });
+  });
+
+  describe('selectedDisplayValues computed', () => {
+    it('should return keys with truthy values', () => {
+      mockPlotService.selectedDisplayOptions.set({ loads: true });
+
+      const values = component.selectedDisplayValues();
+
+      expect(values).toEqual(['loads']);
+    });
+
+    it('should exclude keys with falsy values', () => {
+      mockPlotService.selectedDisplayOptions.set({ loads: false });
+
+      const values = component.selectedDisplayValues();
+
+      expect(values).toEqual([]);
+    });
+
+    it('should handle mixed truthy and falsy values', () => {
+      mockPlotService.selectedDisplayOptions.set({
+        loads: true,
+        mesh: false
+      } as any);
+
+      const values = component.selectedDisplayValues();
+
+      expect(values).toContain('loads');
+      expect(values).not.toContain('mesh');
+    });
+  });
+
+  describe('setSelectedDisplayOptions', () => {
+    it('should set loads to true when included in displayOptions', () => {
+      component.setSelectedDisplayOptions(['loads']);
+
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({ loads: true });
+    });
+
+    it('should set loads to false when not included in displayOptions', () => {
+      component.setSelectedDisplayOptions([]);
+
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+        loads: false
+      });
+    });
+
+    it('should set loads to false when other options are selected', () => {
+      component.setSelectedDisplayOptions(['mesh', 'ground']);
+
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+        loads: false
+      });
     });
   });
 
