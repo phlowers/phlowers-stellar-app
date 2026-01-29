@@ -12,7 +12,13 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { signal } from '@angular/core';
-import { Charge, InitialCondition, Section, Study } from '@core/domain';
+import {
+  Charge,
+  InitialCondition,
+  Section,
+  Study,
+  SymmetryType
+} from '@core/domain';
 import { ActivatedRoute } from '@angular/router';
 
 describe('StudioMenuBarComponent', () => {
@@ -31,7 +37,7 @@ describe('StudioMenuBarComponent', () => {
       climate: {
         windPressure: 0,
         cableTemperature: 15,
-        symmetryType: 'symmetric',
+        symmetryType: SymmetryType.SYMMETRIC,
         iceThickness: 0,
         frontierSupportNumber: null,
         iceThicknessBefore: null,
@@ -51,7 +57,7 @@ describe('StudioMenuBarComponent', () => {
       climate: {
         windPressure: 0,
         cableTemperature: 15,
-        symmetryType: 'symmetric',
+        symmetryType: SymmetryType.SYMMETRIC,
         iceThickness: 0,
         frontierSupportNumber: null,
         iceThicknessBefore: null,

@@ -5,7 +5,9 @@ import { LoadsTableComponent } from './loads-table.component';
 import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '../../services/plot.service';
-import { Charge, Section, Study } from '@core/domain';
+import { Charge, Section, Study, SymmetryType } from '@core/domain';
+import { LoadType } from '@core/domain/models/charge.model';
+import { Support } from '@core/domain/models/support.model';
 
 describe('LoadsTableComponent', () => {
   let component: LoadsTableComponent;
@@ -14,6 +16,72 @@ describe('LoadsTableComponent', () => {
   let mockChargesService: Partial<ChargesService>;
   let mockPlotService: Partial<PlotService>;
 
+  const mockSupports: Support[] = [
+    {
+      uuid: 'support-uuid-1',
+      number: '1',
+      name: 'S1',
+      spanLength: 100,
+      spanAngle: 0,
+      attachmentSet: 1,
+      attachmentHeight: 10,
+      heightBelowConsole: 5,
+      towerModel: null,
+      cableType: null,
+      armLength: null,
+      chainName: null,
+      chainLength: null,
+      chainWeight: null,
+      chainV: null,
+      counterWeight: null,
+      supportFootAltitude: null,
+      attachmentPosition: null,
+      chainSurface: null
+    },
+    {
+      uuid: 'support-uuid-2',
+      number: '2',
+      name: 'S2',
+      spanLength: 150,
+      spanAngle: 0,
+      attachmentSet: 1,
+      attachmentHeight: 12,
+      heightBelowConsole: 6,
+      towerModel: null,
+      cableType: null,
+      armLength: null,
+      chainName: null,
+      chainLength: null,
+      chainWeight: null,
+      chainV: null,
+      counterWeight: null,
+      supportFootAltitude: null,
+      attachmentPosition: null,
+      chainSurface: null
+    },
+    {
+      uuid: 'support-uuid-3',
+      number: '3',
+      name: 'S3',
+      spanLength: 120,
+      spanAngle: 0,
+      attachmentSet: 1,
+      attachmentHeight: 11,
+      heightBelowConsole: 5,
+      towerModel: null,
+      cableType: null,
+      armLength: null,
+      chainName: null,
+      chainLength: null,
+      chainWeight: null,
+      chainV: null,
+      counterWeight: null,
+      supportFootAltitude: null,
+      attachmentPosition: null,
+      chainSurface: null
+    }
+  ];
+
   const mockCharge: Charge = {
     uuid: 'charge-uuid-1',
     name: 'Test Charge',
@@ -21,15 +89,30 @@ describe('LoadsTableComponent', () => {
     description: 'Test description',
     data: {
       climate: {
-        windPressure: 0,
+        windPressure: 240,
         cableTemperature: 15,
-        symmetryType: 'symmetric',
-        iceThickness: 0,
+        symmetryType: SymmetryType.SYMMETRIC,
+        iceThickness: 2,
         frontierSupportNumber: null,
         iceThicknessBefore: null,
         iceThicknessAfter: null
       },
-      spanLoads: []
+      spanLoads: [
+        {
+          loadPosition: 50,
+          loadWeight: 100,
+          type: LoadType.PUNCTUAL,
+          supportUuid: 'support-uuid-1',
+          referenceSupport: 'LEFT'
+        },
+        {
+          loadPosition: 75,
+          loadWeight: 200,
+          type: LoadType.MARKING,
+          supportUuid: 'support-uuid-2',
+          referenceSupport: 'RIGHT'
+        }
+      ]
     }
   };
 
@@ -79,7 +162,7 @@ describe('LoadsTableComponent', () => {
     voltage_idr: undefined,
     comment: undefined,
     supports_comment: undefined,
-    supports: [],
+    supports: mockSupports,
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [mockCharge],
@@ -133,6 +216,22 @@ describe('LoadsTableComponent', () => {
       expect(component.personnelPresence()).toBe(false);
       expect(component.description()).toBe('');
       expect(component.chargeUuid()).toBeNull();
+    });
+
+    it('should initialize climate as null', () => {
+      expect(component.climate()).toBeNull();
+    });
+
+    it('should initialize spanLoads as empty array', () => {
+      expect(component.spanLoads()).toEqual([]);
+    });
+
+    it('should initialize climateRows as empty array', () => {
+      expect(component.climateRows()).toEqual([]);
+    });
+
+    it('should initialize spanLoadRows as empty array', () => {
+      expect(component.spanLoadRows()).toEqual([]);
     });
 
     it('should compute nameLength correctly', () => {
@@ -242,6 +341,139 @@ describe('LoadsTableComponent', () => {
       await component.saveChanges();
 
       expect(mockChargesService.createOrUpdateCharge).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('climate and span loads data loading', () => {
+    it('should populate climate signal after loading charge data', async () => {
+      (mockToolbarDialogService.isMainOpen as any).set(true);
+      (mockToolbarDialogService.currentTool as any).set('load-table');
+      (mockToolbarDialogService.loadTableContext as any).set({
+        mode: 'view',
+        chargeUuid: 'charge-uuid-1'
+      });
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.climate()).toEqual(mockCharge.data.climate);
+    });
+
+    it('should populate spanLoads signal after loading charge data', async () => {
+      (mockToolbarDialogService.isMainOpen as any).set(true);
+      (mockToolbarDialogService.currentTool as any).set('load-table');
+      (mockToolbarDialogService.loadTableContext as any).set({
+        mode: 'view',
+        chargeUuid: 'charge-uuid-1'
+      });
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.spanLoads()).toEqual(mockCharge.data.spanLoads);
+    });
+
+    it('should handle null charge data gracefully', async () => {
+      (mockChargesService.getCharge as jest.Mock).mockResolvedValue({
+        ...mockCharge,
+        data: undefined
+      });
+
+      (mockToolbarDialogService.isMainOpen as any).set(true);
+      (mockToolbarDialogService.currentTool as any).set('load-table');
+      (mockToolbarDialogService.loadTableContext as any).set({
+        mode: 'view',
+        chargeUuid: 'charge-uuid-1'
+      });
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.climate()).toBeNull();
+      expect(component.spanLoads()).toEqual([]);
+    });
+  });
+
+  describe('climateRows', () => {
+    it('should return empty array when climate is null', () => {
+      component.climate.set(null);
+      expect(component.climateRows()).toEqual([]);
+    });
+
+    it('should return single-element array when climate data is present', () => {
+      component.climate.set(mockCharge.data.climate);
+
+      const rows = component.climateRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].windPressure).toBe(240);
+      expect(rows[0].cableTemperature).toBe(15);
+      expect(rows[0].symmetryType).toBe(SymmetryType.SYMMETRIC);
+      expect(rows[0].iceThickness).toBe(2);
+    });
+  });
+
+  describe('spanLoadRows', () => {
+    it('should return empty array when spanLoads is empty', () => {
+      component.spanLoads.set([]);
+      expect(component.spanLoadRows()).toEqual([]);
+    });
+
+    it('should compute spanLoadRows with resolved span labels', () => {
+      component.spanLoads.set(mockCharge.data.spanLoads);
+
+      const rows = component.spanLoadRows();
+      expect(rows).toHaveLength(2);
+      expect(rows[0].spanLabel).toBe('1 - 2');
+      expect(rows[0].referenceSupport).toBe('LEFT');
+      expect(rows[0].type).toBe(LoadType.PUNCTUAL);
+      expect(rows[0].loadWeight).toBe(100);
+      expect(rows[0].loadPosition).toBe(50);
+      expect(rows[1].spanLabel).toBe('2 - 3');
+      expect(rows[1].referenceSupport).toBe('RIGHT');
+      expect(rows[1].type).toBe(LoadType.MARKING);
+    });
+
+    it('should show dash for unknown supportUuid in span label', () => {
+      component.spanLoads.set([
+        {
+          loadPosition: 10,
+          loadWeight: 50,
+          type: LoadType.PUNCTUAL,
+          supportUuid: 'unknown-uuid',
+          referenceSupport: 'LEFT'
+        }
+      ]);
+
+      const rows = component.spanLoadRows();
+      expect(rows[0].spanLabel).toBe('-');
+    });
+  });
+
+  describe('getSymmetryLabel', () => {
+    it('should return Symmetric for SYMMETRIC type', () => {
+      expect(component.getSymmetryLabel(SymmetryType.SYMMETRIC)).toBe(
+        'Symmetric'
+      );
+    });
+
+    it('should return Dis Symmetric for DIS_SYMMETRIC type', () => {
+      expect(component.getSymmetryLabel(SymmetryType.DIS_SYMMETRIC)).toBe(
+        'Dis Symmetric'
+      );
+    });
+  });
+
+  describe('getLoadTypeLabel', () => {
+    it('should return Punctual for PUNCTUAL type', () => {
+      expect(component.getLoadTypeLabel(LoadType.PUNCTUAL)).toBe('Punctual');
+    });
+
+    it('should return Marking for MARKING type', () => {
+      expect(component.getLoadTypeLabel(LoadType.MARKING)).toBe('Marking');
+    });
+
+    it('should return raw value for unknown type', () => {
+      expect(component.getLoadTypeLabel('unknown')).toBe('unknown');
     });
   });
 

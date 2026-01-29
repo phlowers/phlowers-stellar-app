@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewChargeModalComponent } from './new-charge-modal.component';
-import { Charge, Section, Study } from '@core/domain';
+import { Charge, Section, Study, SymmetryType } from '@core/domain';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ChargesService } from '@services/charges/charges.service';
@@ -32,7 +32,7 @@ describe('NewChargeModalComponent (Jest)', () => {
       climate: {
         windPressure: 0,
         cableTemperature: 15,
-        symmetryType: 'symmetric',
+        symmetryType: SymmetryType.SYMMETRIC,
         iceThickness: 0,
         frontierSupportNumber: null,
         iceThicknessBefore: null,

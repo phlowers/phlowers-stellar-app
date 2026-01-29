@@ -4,9 +4,8 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
 import { Task } from '@src/app/core/services/worker_python/tasks/types';
-import { Section, Charge } from '@core/domain';
-import { ChargeData } from '@core/domain/models/charge.model';
-import { LoadType } from '@core/domain/models/charge.model';
+import { Section, Charge, SymmetryType } from '@core/domain';
+import { ChargeData, LoadType } from '@core/domain/models/charge.model';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
@@ -93,7 +92,7 @@ describe('LoadFormsService', () => {
     climate: {
       windPressure: 100,
       cableTemperature: 20,
-      symmetryType: 'symmetric',
+      symmetryType: SymmetryType.SYMMETRIC,
       iceThickness: null,
       frontierSupportNumber: null,
       iceThicknessBefore: null,

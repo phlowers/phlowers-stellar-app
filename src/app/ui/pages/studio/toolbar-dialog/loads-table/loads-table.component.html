@@ -55,9 +55,75 @@
   />
 </section>
 
-<section>
-  <h2 class="title underline-text" i18n>Climate condition</h2>
-</section>
+@if (climateRows().length > 0) {
+  <section>
+    <h2 class="title underline-text" i18n>Climate condition</h2>
+
+    <p-table [value]="climateRows()">
+      <ng-template pTemplate="header">
+        <tr>
+          <th id="wind-pressure-col" i18n>Wind pressure</th>
+          <th id="cable-temp-col" i18n>Cable temperature</th>
+          <th id="ice-indicator-col" i18n>Ice indicator</th>
+          @if (climate()?.symmetryType === SymmetryType.SYMMETRIC) {
+            <th id="ice-thickness-col" i18n>Ice thickness</th>
+          }
+          @if (climate()?.symmetryType === SymmetryType.DIS_SYMMETRIC) {
+            <th id="frontier-support-col" i18n>Frontier support</th>
+            <th id="ice-before-col" i18n>Ice thickness before</th>
+            <th id="ice-after-col" i18n>Ice thickness after</th>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.windPressure ?? '-' }}&nbsp;Pa</td>
+          <td>{{ row.cableTemperature ?? '-' }}&nbsp;°C</td>
+          <td>{{ getSymmetryLabel(row.symmetryType) }}</td>
+          @if (row.symmetryType === SymmetryType.SYMMETRIC) {
+            <td>{{ row.iceThickness ?? '-' }}&nbsp;cm</td>
+          }
+          @if (row.symmetryType === SymmetryType.DIS_SYMMETRIC) {
+            <td>{{ row.frontierSupportNumber ?? '-' }}</td>
+            <td>{{ row.iceThicknessBefore ?? '-' }}&nbsp;cm</td>
+            <td>{{ row.iceThicknessAfter ?? '-' }}&nbsp;cm</td>
+          }
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+}
+
+@if (spanLoadRows().length > 0) {
+  <section>
+    <h2 class="title underline-text" i18n>Span loads</h2>
+
+    <p-table [value]="spanLoadRows()">
+      <ng-template pTemplate="header">
+        <tr>
+          <th id="index-col" i18n>N°</th>
+          <th id="span-col" i18n>Span</th>
+          <th id="ref-support-col" i18n>Ref. support</th>
+          <th id="type-col" i18n>Type</th>
+          <th id="weight-col" i18n>Load</th>
+          <th id="position-col" i18n>Position</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ row.spanLabel }}</td>
+          <td>{{ row.referenceSupport }}</td>
+          <td>{{ getLoadTypeLabel(row.type) }}</td>
+          <td>{{ row.loadWeight }}&nbsp;N</td>
+          <td>{{ row.loadPosition }}&nbsp;m</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+}
 
 <ng-template #footer>
   @if (mode() === 'view') {

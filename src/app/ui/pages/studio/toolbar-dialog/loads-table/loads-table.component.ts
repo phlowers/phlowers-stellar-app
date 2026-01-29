@@ -15,8 +15,33 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
+import { TableModule } from 'primeng/table';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '../../services/plot.service';
+import {
+  ClimateCharge,
+  LoadType,
+  SpanLoad,
+  SymmetryType
+} from '@core/domain/models/charge.model';
+
+interface ClimateRow {
+  windPressure: number | null;
+  cableTemperature: number | null;
+  symmetryType: SymmetryType;
+  iceThickness: number | null;
+  frontierSupportNumber: number | null;
+  iceThicknessBefore: number | null;
+  iceThicknessAfter: number | null;
+}
+
+interface SpanLoadRow {
+  spanLabel: string;
+  referenceSupport: 'LEFT' | 'RIGHT';
+  type: string;
+  loadWeight: number;
+  loadPosition: number;
+}
 
 @Component({
   selector: 'app-loads-table',
@@ -26,7 +51,8 @@ import { PlotService } from '../../services/plot.service';
     ToggleSwitchModule,
     InputTextModule,
     TextareaModule,
-    FormsModule
+    FormsModule,
+    TableModule
   ],
   templateUrl: './loads-table.component.html',
   styleUrl: './loads-table.component.scss'
@@ -44,9 +70,51 @@ export class LoadsTableComponent implements AfterViewInit {
   personnelPresence = signal<boolean>(false);
   description = signal<string>('');
   chargeUuid = signal<string | null>(null);
+  climate = signal<ClimateCharge | null>(null);
+  spanLoads = signal<SpanLoad[]>([]);
 
   nameLength = computed(() => this.name().length ?? 0);
   descriptionLength = computed(() => this.description().length ?? 0);
+
+  readonly SymmetryType = SymmetryType;
+
+  climateRows = computed<ClimateRow[]>(() => {
+    const climate = this.climate();
+    if (!climate) return [];
+    return [
+      {
+        windPressure: climate.windPressure,
+        cableTemperature: climate.cableTemperature,
+        symmetryType: climate.symmetryType,
+        iceThickness: climate.iceThickness,
+        frontierSupportNumber: climate.frontierSupportNumber,
+        iceThicknessBefore: climate.iceThicknessBefore,
+        iceThicknessAfter: climate.iceThicknessAfter
+      }
+    ];
+  });
+
+  spanLoadRows = computed<SpanLoadRow[]>(() => {
+    const loads = this.spanLoads();
+    const supports = this.plotService.section()?.supports ?? [];
+
+    return loads.map((load) => {
+      const supportIndex = supports.findIndex(
+        (s) => s.uuid === load.supportUuid
+      );
+      const spanLabel =
+        supportIndex >= 0
+          ? `${supportIndex + 1} - ${supportIndex + 2}`
+          : '-';
+      return {
+        spanLabel,
+        referenceSupport: load.referenceSupport,
+        type: load.type,
+        loadWeight: load.loadWeight,
+        loadPosition: load.loadPosition
+      };
+    });
+  });
 
   constructor() {
     effect(async () => {
@@ -88,6 +156,8 @@ export class LoadsTableComponent implements AfterViewInit {
       this.name.set(charge.name);
       this.personnelPresence.set(charge.personnelPresence);
       this.description.set(charge.description);
+      this.climate.set(charge.data?.climate ?? null);
+      this.spanLoads.set(charge.data?.spanLoads ?? []);
     }
   }
 
@@ -146,6 +216,26 @@ export class LoadsTableComponent implements AfterViewInit {
       updatedCharge
     );
     this.mode.set('view');
+  }
+
+  getSymmetryLabel(type: SymmetryType): string {
+    switch (type) {
+      case SymmetryType.SYMMETRIC:
+        return $localize`Symmetric`;
+      case SymmetryType.DIS_SYMMETRIC:
+        return $localize`Dis Symmetric`;
+    }
+  }
+
+  getLoadTypeLabel(type: string): string {
+    switch (type) {
+      case LoadType.PUNCTUAL:
+        return $localize`Punctual`;
+      case LoadType.MARKING:
+        return $localize`Marking`;
+      default:
+        return type;
+    }
   }
 
   isFormValid(): boolean {
