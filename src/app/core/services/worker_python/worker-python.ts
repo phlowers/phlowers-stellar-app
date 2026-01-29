@@ -29,17 +29,13 @@ let pyodide: PyodideAPI;
 
 async function loadPyodideAndPackages() {
   try {
-    const localPythonPackages = [
-      ...Object.values(pythonPackages)
-        .map((pkg) =>
-          pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''
-        )
-        .filter(Boolean)
-    ];
+    const allPythonPackages = Object.values(pythonPackages).map(
+      (pkg) => self.name + 'pyodide/' + pkg.file_name
+    );
     const start = performance.now();
     pyodide = await loadPyodide({
       indexURL: self.name + 'pyodide/',
-      packages: [...localPythonPackages]
+      packages: allPythonPackages
     });
     const loadEnd = performance.now();
     postMessage({ loadTime: loadEnd - start });
