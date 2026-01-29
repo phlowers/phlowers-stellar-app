@@ -453,7 +453,7 @@
               [showPageLinks]="true"
               [showJumpToPageDropdown]="false"
               i18n-currentPageReportTemplate
-              currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
+              [currentPageReportTemplate]="currentPageReportTemplate"
             />
           </div>
         } @else if (mode() === 'view') {

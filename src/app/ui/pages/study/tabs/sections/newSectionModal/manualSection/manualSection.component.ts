@@ -128,6 +128,8 @@ export class ManualSectionComponent implements OnInit {
   cablesFilterTable = signal<CatalogCable[]>([]);
   public sectionTypes = sectionTypes;
   isNameUnique = input<boolean>();
+  currentPageReportTemplate = $localize`Support ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
+
   constructor(
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,
