@@ -2038,24 +2038,6 @@
         <target>Charges</target>
       </segment>
     </unit>
-    <unit id="3228612487814937552">
-      <segment state="initial">
-        <source>Obstacles</source>
-        <target>Obstacles</target>
-      </segment>
-    </unit>
-    <unit id="6629591556260898648">
-      <segment state="initial">
-        <source>Ground</source>
-        <target>Sol</target>
-      </segment>
-    </unit>
-    <unit id="770492681595827297">
-      <segment state="initial">
-        <source>Measure</source>
-        <target>Mesure</target>
-      </segment>
-    </unit>
     <unit id="2938335127110015653">
       <segment state="initial">
         <source>Field measurements</source>
@@ -2957,14 +2939,6 @@
         <target>Somme L0</target>
       </segment>
     </unit>
-    <unit id="l0-sum-value">
-      <segment state="initial">
-        <source>
-          <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}" /> m </source>
-        <target>
-          <ph id="0" equiv="INTERPOLATION" disp="{{ totalL0() | number: &apos;1.3-3&apos; }}" /> m </target>
-      </segment>
-    </unit>
     <unit id="8198413691907314778">
       <segment state="initial">
         <source>Loading L0 data…</source>
@@ -3151,12 +3125,6 @@
         <target>Tower</target>
       </segment>
     </unit>
-    <unit id="6711210390465051476">
-      <segment state="initial">
-        <source>In line angle</source>
-        <target>In line angle</target>
-      </segment>
-    </unit>
     <unit id="2050780142571489753">
       <segment state="initial">
         <source>Description/comment</source>
@@ -3181,10 +3149,10 @@
         <target>Le nom de la mesure doit être unique.</target>
       </segment>
     </unit>
-    <unit id="8242752358193979918">
+    <unit id="5503038325545336483">
       <segment state="initial">
-        <source>TM</source>
-        <target>MT</target>
+        <source>TM </source>
+        <target>MT </target>
       </segment>
     </unit>
     <unit id="1974465944242849442">
@@ -3353,6 +3321,25 @@
       <segment state="initial">
         <source>Reset</source>
         <target>Réinitialiser</target>
+      </segment>
+    </unit>
+    <unit id="744159181527045596">
+      <segment state="initial">
+        <source>Study <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} to <ph id="1" equiv="PH_1"
+            disp="&apos;{&apos;" />last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;" />
+          totalRecords}</source>
+        <target>Étude <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} à <ph id="1" equiv="PH_1"
+            disp="&apos;{&apos;" />last} sur <ph id="2" equiv="PH_2" disp="&apos;{&apos;" />totalRecords}</target>
+      </segment>
+    </unit>
+    <unit id="668947737201625404">
+      <segment state="initial">
+        <source>Support <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} to <ph id="1"
+            equiv="PH_1" disp="&apos;{&apos;" />last} of <ph id="2" equiv="PH_2"
+            disp="&apos;{&apos;" />totalRecords}</source>
+        <target>Support <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} à <ph id="1"
+            equiv="PH_1" disp="&apos;{&apos;" />last} sur <ph id="2" equiv="PH_2"
+            disp="&apos;{&apos;" />totalRecords}</target>
       </segment>
     </unit>
   </file>

@@ -5,7 +5,7 @@
   (onSort)="onSort($event)"
   [value]="studies()"
   [showCurrentPageReport]="true"
-  [currentPageReportTemplate]="'Object {first} to {last} of {totalRecords}'"
+  [currentPageReportTemplate]="currentPageReportTemplate"
   [tableStyleClass]="'w-full mt-6'"
 >
   <ng-template #header>
