@@ -6,6 +6,7 @@
  */
 
 /**
+<<<<<<<< HEAD:src/app/core/domain/models/catalog/catalog-cable.model.ts
  * Catalog cable domain model
  */
 export interface CatalogCable {
@@ -38,4 +39,38 @@ export interface CatalogCable {
   linear_resistance_temperature_coef: number | undefined;
   radial_thermal_conductivity: number | undefined;
   has_magnetic_heart: boolean | undefined;
+========
+ * DTO for importing cables from RTE CSV files
+ */
+export interface CableCsvDto {
+  cable_id: string;
+  name: string;
+  data_source: string;
+  section: string;
+  diameter: string;
+  young_modulus: string;
+  linear_mass: string;
+  dilatation_coefficient: string;
+  temperature_reference: string;
+  stress_strain_a0: string | undefined;
+  stress_strain_a1: string | undefined;
+  stress_strain_a2: string | undefined;
+  stress_strain_a3: string | undefined;
+  stress_strain_a4: string | undefined;
+  stress_strain_b0: string | undefined;
+  stress_strain_b1: string | undefined;
+  stress_strain_b2: string | undefined;
+  stress_strain_b3: string | undefined;
+  stress_strain_b4: string | undefined;
+  is_polynomial: string;
+  diameter_heart: string;
+  section_conductor: string;
+  section_heart: string;
+  solar_absorption: string;
+  emissivity: string;
+  electric_resistance_20: string;
+  linear_resistance_temperature_coef: string;
+  radial_thermal_conductivity: string;
+  has_magnetic_heart: string;
+>>>>>>>> d3a674f332aba58a817259a454bff7339d2f1c29:src/app/core/infrastructure/dto/cable-csv.dto.ts
 }

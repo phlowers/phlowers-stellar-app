@@ -431,16 +431,6 @@
         <source>Edit</source>
       </segment>
     </unit>
-    <unit id="3768927257183755959">
-      <segment>
-        <source>Save</source>
-      </segment>
-    </unit>
-    <unit id="3317759112793075512">
-      <segment>
-        <source>Studies deleted</source>
-      </segment>
-    </unit>
     <unit id="6536020395223120161">
       <segment>
         <source> Error </source>
@@ -456,39 +446,9 @@
         <source>Study created</source>
       </segment>
     </unit>
-    <unit id="3521084103654700903">
-      <segment>
-        <source>Successful</source>
-      </segment>
-    </unit>
-    <unit id="3676810969871565173">
-      <segment>
-        <source>App version</source>
-      </segment>
-    </unit>
-    <unit id="8835813397293521026">
-      <segment>
-        <source>Reset fields</source>
-      </segment>
-    </unit>
-    <unit id="3407827478067561796">
-      <segment>
-        <source>Change line height</source>
-      </segment>
-    </unit>
-    <unit id="8892964333730306563">
-      <segment>
-        <source>Plotly</source>
-      </segment>
-    </unit>
     <unit id="1170667643695316061">
       <segment>
         <source>Create a study section</source>
-      </segment>
-    </unit>
-    <unit id="1267728769006543252">
-      <segment>
-        <source> Delete all studies </source>
       </segment>
     </unit>
     <unit id="928951684182090210">
@@ -509,11 +469,6 @@
     <unit id="1386766078260547788">
       <segment>
         <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-      </segment>
-    </unit>
-    <unit id="1444333919089743258">
-      <segment>
-        <source>View all news</source>
       </segment>
     </unit>
     <unit id="3569799587833040802">
@@ -551,21 +506,6 @@
         <source>Manual</source>
       </segment>
     </unit>
-    <unit id="2250155903065806087">
-      <segment>
-        <source>Study</source>
-      </segment>
-    </unit>
-    <unit id="2269840927612671406">
-      <segment>
-        <source>A new application update is available!</source>
-      </segment>
-    </unit>
-    <unit id="2275328567992347600">
-      <segment>
-        <source>Page not found</source>
-      </segment>
-    </unit>
     <unit id="479690504462006012">
       <segment>
         <source>Initial condition</source>
@@ -586,11 +526,6 @@
         <source>View</source>
       </segment>
     </unit>
-    <unit id="2547571169649786686">
-      <segment>
-        <source>Danger zone</source>
-      </segment>
-    </unit>
     <unit id="2593007815199532062">
       <segment>
         <source>Section</source>
@@ -599,16 +534,6 @@
     <unit id="2638469548137871317">
       <segment>
         <source>Initial condition name</source>
-      </segment>
-    </unit>
-    <unit id="2668751339669907539">
-      <segment>
-        <source>Learn more about latest updates</source>
-      </segment>
-    </unit>
-    <unit id="2821179408673282599">
-      <segment>
-        <source>Home</source>
       </segment>
     </unit>
     <unit id="2925129304308690882">
@@ -636,24 +561,9 @@
         <source> Chain V </source>
       </segment>
     </unit>
-    <unit id="3159332545494825825">
-      <segment>
-        <source>Server connexion success!</source>
-      </segment>
-    </unit>
     <unit id="3193976279273491157">
       <segment>
         <source>Actions</source>
-      </segment>
-    </unit>
-    <unit id="8155429097661917791">
-      <segment>
-        <source> Base parameter </source>
-      </segment>
-    </unit>
-    <unit id="3510960524643312912">
-      <segment>
-        <source>Trying to reach the servers.</source>
       </segment>
     </unit>
     <unit id="3533138925800017240">
@@ -1870,9 +1780,9 @@
         <source>°C</source>
       </segment>
     </unit>
-    <unit id="8987297903552443142">
+    <unit id="8662695338423847831">
       <segment>
-        <source> Base temperature </source>
+        <source>Base temperature</source>
       </segment>
     </unit>
     <unit id="902828700910058336">
@@ -2010,19 +1920,9 @@
         <source>supports comment</source>
       </segment>
     </unit>
-    <unit id="70265843712811398">
-      <segment>
-        <source>Electric tension</source>
-      </segment>
-    </unit>
     <unit id="7819314041543176992">
       <segment>
         <source>Close</source>
-      </segment>
-    </unit>
-    <unit id="8387651464002742246">
-      <segment>
-        <source>Branch</source>
       </segment>
     </unit>
     <unit id="2657043015926552641">
@@ -2080,11 +1980,6 @@
         <source>Span</source>
       </segment>
     </unit>
-    <unit id="1019591151849311353">
-      <segment>
-        <source>Charge created</source>
-      </segment>
-    </unit>
     <unit id="1339958536387081724">
       <segment>
         <source>Add a charge case</source>
@@ -2120,29 +2015,14 @@
         <source>LIT - ID</source>
       </segment>
     </unit>
-    <unit id="344013254935185191">
-      <segment>
-        <source>Charge updated</source>
-      </segment>
-    </unit>
     <unit id="4142858945350399408">
       <segment>
         <source>Height below console</source>
       </segment>
     </unit>
-    <unit id="4807396535461926931">
-      <segment>
-        <source>Charge deleted</source>
-      </segment>
-    </unit>
     <unit id="5004217118094368051">
       <segment>
         <source>Ver.MAJ</source>
-      </segment>
-    </unit>
-    <unit id="5351632617142518313">
-      <segment>
-        <source>App version checked</source>
       </segment>
     </unit>
     <unit id="557544842878781608">
@@ -2180,11 +2060,6 @@
         <source> Personnel presence </source>
       </segment>
     </unit>
-    <unit id="858950043240201803">
-      <segment>
-        <source>IC 1</source>
-      </segment>
-    </unit>
     <unit id="8736414220975972324">
       <segment>
         <source>Generalities</source>
@@ -2215,46 +2090,6 @@
         <source>%CRA</source>
       </segment>
     </unit>
-    <unit id="4021752662928002901">
-      <segment>
-        <source>Update</source>
-      </segment>
-    </unit>
-    <unit id="5827348953140111224">
-      <segment>
-        <source> The update of your application is in progress </source>
-      </segment>
-    </unit>
-    <unit id="7102821621439027980">
-      <segment>
-        <source> The new version of your application is available! </source>
-      </segment>
-    </unit>
-    <unit id="9026083618139453880">
-      <segment>
-        <source>Later</source>
-      </segment>
-    </unit>
-    <unit id="145833412581392848">
-      <segment>
-        <source> Thank you for not closing the app when the update is in progress. </source>
-      </segment>
-    </unit>
-    <unit id="2694240619944418764">
-      <segment>
-        <source>Version :</source>
-      </segment>
-    </unit>
-    <unit id="391362148889807983">
-      <segment>
-        <source>Hash :</source>
-      </segment>
-    </unit>
-    <unit id="2222955931547347463">
-      <segment>
-        <source>Update now</source>
-      </segment>
-    </unit>
     <unit id="1271914484753735123">
       <segment>
         <source>Cable adjustment</source>
@@ -2280,19 +2115,9 @@
         <source>Inset</source>
       </segment>
     </unit>
-    <unit id="3228612487814937552">
-      <segment>
-        <source>Obstacles</source>
-      </segment>
-    </unit>
     <unit id="3493980964958188572">
       <segment>
         <source>Obstacles table</source>
-      </segment>
-    </unit>
-    <unit id="3625719233264880082">
-      <segment>
-        <source>L0 sum</source>
       </segment>
     </unit>
     <unit id="3627508489639881021">
@@ -2315,16 +2140,6 @@
         <source>Strand RRTS</source>
       </segment>
     </unit>
-    <unit id="6629591556260898648">
-      <segment>
-        <source>Ground</source>
-      </segment>
-    </unit>
-    <unit id="6800398544280479151">
-      <segment>
-        <source>Angle en ligne</source>
-      </segment>
-    </unit>
     <unit id="6812930637022637485">
       <segment>
         <source>Display</source>
@@ -2343,11 +2158,6 @@
     <unit id="7536890634485426754">
       <segment>
         <source>Select which elements to display on the studio.</source>
-      </segment>
-    </unit>
-    <unit id="770492681595827297">
-      <segment>
-        <source>Measure</source>
       </segment>
     </unit>
     <unit id="7801621976146528131">
@@ -2373,16 +2183,6 @@
     <unit id="8826026204967028707">
       <segment>
         <source>Select and organise the tools with quick access (maximum 5).</source>
-      </segment>
-    </unit>
-    <unit id="1834844445344817694">
-      <segment>
-        <source>Unauthorized</source>
-      </segment>
-    </unit>
-    <unit id="4124418045778511362">
-      <segment>
-        <source>You cannot update a study that you did not create, please duplicate it instead.</source>
       </segment>
     </unit>
     <unit id="1146602380315581259">
