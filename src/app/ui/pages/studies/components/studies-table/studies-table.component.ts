@@ -49,6 +49,7 @@ export class StudiesTableComponent {
   sortOrder = signal<number>(1);
   deleteStudy = output<string>();
   duplicateStudy = output<string>();
+  currentPageReportTemplate = $localize`Study ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
 
   constructor(public readonly studiesService: StudiesService) {}
 
