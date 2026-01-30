@@ -59,7 +59,7 @@
   <section>
     <h2 class="title underline-text" i18n>Climate condition</h2>
 
-    <p-table [value]="climateRows()">
+    <p-table [value]="climateRows()" [tableStyle]="{ width: 'auto' }">
       <ng-template pTemplate="header">
         <tr>
           <th id="wind-pressure-col" i18n>Wind pressure</th>
@@ -103,7 +103,7 @@
   <section>
     <h2 class="title underline-text" i18n>load / marking</h2>
 
-    <p-table [value]="spanLoadRows()">
+    <p-table [value]="spanLoadRows()" [tableStyle]="{ width: 'auto' }">
       <ng-template pTemplate="header">
         <tr>
           <th id="index-col" i18n>N°</th>

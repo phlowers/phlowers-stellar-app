@@ -80,7 +80,9 @@ describe('ToolbarDialogComponent', () => {
 
     it('should inject ToolbarDialogService', () => {
       expect(component.toolbarDialogService).toBeDefined();
-      expect(component.toolbarDialogService).toBeInstanceOf(ToolbarDialogService);
+      expect(component.toolbarDialogService).toBeInstanceOf(
+        ToolbarDialogService
+      );
     });
 
     it('should inject Injector', () => {
