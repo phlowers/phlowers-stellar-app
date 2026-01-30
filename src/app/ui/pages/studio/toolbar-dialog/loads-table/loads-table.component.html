@@ -117,7 +117,11 @@
           <td>{{ row.spanLabel }}</td>
           <td>{{ row.referenceSupport }}</td>
           <td>{{ getLoadTypeLabel(row.type) }}</td>
-          <td>{{ row.loadWeight }}&nbsp;N</td>
+          @if (row.type === LoadType.MARKING) {
+            <td>-</td>
+          } @else {
+            <td>{{ row.loadWeight }}&nbsp;N</td>
+          }
           <td>{{ row.loadPosition }}&nbsp;m</td>
         </tr>
       </ng-template>

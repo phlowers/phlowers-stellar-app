@@ -37,7 +37,7 @@ interface ClimateRow {
 
 interface SpanLoadRow {
   spanLabel: string;
-  referenceSupport: 'LEFT' | 'RIGHT';
+  referenceSupport: number;
   type: string;
   loadWeight: number;
   loadPosition: number;
@@ -77,6 +77,7 @@ export class LoadsTableComponent implements AfterViewInit {
   descriptionLength = computed(() => this.description().length ?? 0);
 
   readonly SymmetryType = SymmetryType;
+  readonly LoadType = LoadType;
 
   climateRows = computed<ClimateRow[]>(() => {
     const climate = this.climate();
@@ -98,22 +99,34 @@ export class LoadsTableComponent implements AfterViewInit {
     const loads = this.spanLoads();
     const supports = this.plotService.section()?.supports ?? [];
 
-    return loads.map((load) => {
-      const supportIndex = supports.findIndex(
-        (s) => s.uuid === load.supportUuid
-      );
-      const spanLabel =
-        supportIndex >= 0
+    return loads
+      .filter((load) => {
+        if (load.type === LoadType.MARKING) {
+          return load.loadPosition !== 0;
+        }
+        return load.loadWeight !== 0 || load.loadPosition !== 0;
+      })
+      .map((load) => {
+        const supportIndex = supports.findIndex(
+          (s) => s.uuid === load.supportUuid
+        );
+        const hasNextSupport =
+          supportIndex >= 0 && supportIndex + 1 < supports.length;
+        const spanLabel = hasNextSupport
           ? `${supportIndex + 1} - ${supportIndex + 2}`
           : '-';
-      return {
-        spanLabel,
-        referenceSupport: load.referenceSupport,
-        type: load.type,
-        loadWeight: load.loadWeight,
-        loadPosition: load.loadPosition
-      };
-    });
+        const referenceSupport =
+          load.referenceSupport === 'LEFT'
+            ? supportIndex + 1
+            : supportIndex + 2;
+        return {
+          spanLabel,
+          referenceSupport,
+          type: load.type,
+          loadWeight: load.loadWeight,
+          loadPosition: load.loadPosition
+        };
+      });
   });
 
   constructor() {

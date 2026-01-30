@@ -5,8 +5,8 @@ import { LoadsTableComponent } from './loads-table.component';
 import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '../../services/plot.service';
-import { Charge, Section, Study, SymmetryType } from '@core/domain';
-import { LoadType } from '@core/domain/models/charge.model';
+import { Charge, Section, Study } from '@core/domain';
+import { LoadType, SymmetryType } from '@core/domain/models/charge.model';
 import { Support } from '@core/domain/models/support.model';
 
 describe('LoadsTableComponent', () => {
@@ -424,12 +424,12 @@ describe('LoadsTableComponent', () => {
       const rows = component.spanLoadRows();
       expect(rows).toHaveLength(2);
       expect(rows[0].spanLabel).toBe('1 - 2');
-      expect(rows[0].referenceSupport).toBe('LEFT');
+      expect(rows[0].referenceSupport).toBe(1);
       expect(rows[0].type).toBe(LoadType.PUNCTUAL);
       expect(rows[0].loadWeight).toBe(100);
       expect(rows[0].loadPosition).toBe(50);
       expect(rows[1].spanLabel).toBe('2 - 3');
-      expect(rows[1].referenceSupport).toBe('RIGHT');
+      expect(rows[1].referenceSupport).toBe(3);
       expect(rows[1].type).toBe(LoadType.MARKING);
     });
 
@@ -446,6 +446,97 @@ describe('LoadsTableComponent', () => {
 
       const rows = component.spanLoadRows();
       expect(rows[0].spanLabel).toBe('-');
+    });
+
+    it('should show dash when supportUuid references the last support', () => {
+      component.spanLoads.set([
+        {
+          loadPosition: 10,
+          loadWeight: 50,
+          type: LoadType.PUNCTUAL,
+          supportUuid: 'support-uuid-3',
+          referenceSupport: 'LEFT'
+        }
+      ]);
+
+      const rows = component.spanLoadRows();
+      expect(rows[0].spanLabel).toBe('-');
+    });
+
+    it('should filter out punctual loads with zero weight and zero position', () => {
+      component.spanLoads.set([
+        {
+          loadPosition: 0,
+          loadWeight: 0,
+          type: LoadType.PUNCTUAL,
+          supportUuid: 'support-uuid-1',
+          referenceSupport: 'LEFT'
+        }
+      ]);
+
+      expect(component.spanLoadRows()).toEqual([]);
+    });
+
+    it('should keep punctual load when loadWeight is non-zero even if position is zero', () => {
+      component.spanLoads.set([
+        {
+          loadPosition: 0,
+          loadWeight: 100,
+          type: LoadType.PUNCTUAL,
+          supportUuid: 'support-uuid-1',
+          referenceSupport: 'LEFT'
+        }
+      ]);
+
+      const rows = component.spanLoadRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].loadWeight).toBe(100);
+    });
+
+    it('should keep punctual load when loadPosition is non-zero even if weight is zero', () => {
+      component.spanLoads.set([
+        {
+          loadPosition: 50,
+          loadWeight: 0,
+          type: LoadType.PUNCTUAL,
+          supportUuid: 'support-uuid-1',
+          referenceSupport: 'LEFT'
+        }
+      ]);
+
+      const rows = component.spanLoadRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].loadPosition).toBe(50);
+    });
+
+    it('should filter out marking loads with zero position', () => {
+      component.spanLoads.set([
+        {
+          loadPosition: 0,
+          loadWeight: 0,
+          type: LoadType.MARKING,
+          supportUuid: 'support-uuid-1',
+          referenceSupport: 'LEFT'
+        }
+      ]);
+
+      expect(component.spanLoadRows()).toEqual([]);
+    });
+
+    it('should keep marking loads when loadPosition is non-zero', () => {
+      component.spanLoads.set([
+        {
+          loadPosition: 30,
+          loadWeight: 0,
+          type: LoadType.MARKING,
+          supportUuid: 'support-uuid-1',
+          referenceSupport: 'LEFT'
+        }
+      ]);
+
+      const rows = component.spanLoadRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].loadPosition).toBe(30);
     });
   });
 
