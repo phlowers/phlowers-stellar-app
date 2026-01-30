@@ -63,15 +63,19 @@
       <ng-template pTemplate="header">
         <tr>
           <th id="wind-pressure-col" i18n>Wind pressure</th>
-          <th id="cable-temp-col" i18n>Cable temperature</th>
+          <th id="cable-temp-col" i18n>Cable temp.</th>
           <th id="ice-indicator-col" i18n>Ice indicator</th>
           @if (climate()?.symmetryType === SymmetryType.SYMMETRIC) {
             <th id="ice-thickness-col" i18n>Ice thickness</th>
           }
           @if (climate()?.symmetryType === SymmetryType.DIS_SYMMETRIC) {
             <th id="frontier-support-col" i18n>Frontier support</th>
-            <th id="ice-before-col" i18n>Ice thickness before</th>
-            <th id="ice-after-col" i18n>Ice thickness after</th>
+            <th id="ice-before-col" i18n>
+              Ice thickness before support frontier
+            </th>
+            <th id="ice-after-col" i18n>
+              Ice thickness after support frontier
+            </th>
           }
         </tr>
       </ng-template>
@@ -97,7 +101,7 @@
 
 @if (spanLoadRows().length > 0) {
   <section>
-    <h2 class="title underline-text" i18n>Span loads</h2>
+    <h2 class="title underline-text" i18n>load / marking</h2>
 
     <p-table [value]="spanLoadRows()">
       <ng-template pTemplate="header">
@@ -105,9 +109,9 @@
           <th id="index-col" i18n>N°</th>
           <th id="span-col" i18n>Span</th>
           <th id="ref-support-col" i18n>Ref. support</th>
-          <th id="type-col" i18n>Type</th>
+          <th id="type-col" i18n>Load type</th>
+          <th id="position-col" i18n>Distance to ref. support</th>
           <th id="weight-col" i18n>Load</th>
-          <th id="position-col" i18n>Position</th>
         </tr>
       </ng-template>
 
@@ -117,12 +121,12 @@
           <td>{{ row.spanLabel }}</td>
           <td>{{ row.referenceSupport }}</td>
           <td>{{ getLoadTypeLabel(row.type) }}</td>
+          <td>{{ row.loadPosition }}&nbsp;m</td>
           @if (row.type === LoadType.MARKING) {
             <td>-</td>
           } @else {
             <td>{{ row.loadWeight }}&nbsp;N</td>
           }
-          <td>{{ row.loadPosition }}&nbsp;m</td>
         </tr>
       </ng-template>
     </p-table>
@@ -138,7 +142,7 @@
 
     <button app-btn type="button" (click)="switchToEditMode()">
       <app-icon icon="edit" />
-      <ng-container i18n>Change</ng-container>
+      <ng-container i18n>Modify</ng-container>
     </button>
   } @else {
     <button app-btn type="button" btnStyle="outlined" (click)="cancelEdit()">
