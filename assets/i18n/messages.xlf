@@ -1438,19 +1438,14 @@
         <source> Measured span length </source>
       </segment>
     </unit>
-    <unit id="5088621818536959590">
+    <unit id="3499511783369638929">
       <segment>
-        <source> calculated value:</source>
+        <source> Calculated value:</source>
       </segment>
     </unit>
     <unit id="2147039543508081675">
       <segment>
         <source> Elevation diff. of measured attach. </source>
-      </segment>
-    </unit>
-    <unit id="571757945706473817">
-      <segment>
-        <source>calculated value:</source>
       </segment>
     </unit>
     <unit id="6008615727838547074">
