@@ -245,7 +245,7 @@ export class PlotService {
     const spans = Array.from({ length: spanAmount }, (_, index) => ({
       label: `${index + startSupport + 1} - ${index + startSupport + 2}`,
       value: {
-        index: index,
+        index: index + startSupport,
         uuid: supports[index + startSupport]?.uuid ?? ''
       }
     }));
