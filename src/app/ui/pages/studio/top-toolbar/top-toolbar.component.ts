@@ -34,8 +34,49 @@ export class StudioTopToolbarComponent implements OnInit {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
 
   items = signal<MenuItem[] | null>(null);
-  tablesDropdown = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
+
+  private readonly hasCharges = computed(
+    () => !!this.plotService.section()?.charges?.length
+  );
+
+  tablesDropdown = computed<MenuItem[]>(() => [
+    {
+      label: $localize`Loads table`, // Tableau de charges
+      disabled: !this.hasCharges(),
+      command: () => {
+        this.toolbarDialogService.openTool('load-table');
+      }
+    },
+    {
+      label: $localize`L0 table`, // Tableau L0
+      disabled: false,
+      command: () => {
+        this.toolbarDialogService.openTool('l0-sum');
+      }
+    },
+    {
+      label: $localize`Pose table`, // Tableau de pose
+      disabled: true,
+      command: () => {
+        console.log('Add action triggered');
+      }
+    },
+    {
+      label: $localize`Obstacles table`, // Tableau d'obstacles
+      disabled: true,
+      command: () => {
+        console.log('Add action triggered');
+      }
+    },
+    {
+      label: $localize`Grounds table`, // Tableau de sols
+      disabled: true,
+      command: () => {
+        console.log('Add action triggered');
+      }
+    }
+  ]);
 
   shortcutsModal = signal<boolean>(false);
   shortcutsCount = signal<number>(0);
@@ -44,44 +85,6 @@ export class StudioTopToolbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadToolsItemsState();
-
-    this.tablesDropdown.set([
-      {
-        label: $localize`Loads table`, // Tableau de charges
-        disabled: false,
-        command: () => {
-          this.toolbarDialogService.openTool('load-table');
-        }
-      },
-      {
-        label: $localize`L0 table`, // Tableau L0
-        disabled: false,
-        command: () => {
-          this.toolbarDialogService.openTool('l0-sum');
-        }
-      },
-      {
-        label: $localize`Pose table`, // Tableau de pose
-        disabled: true,
-        command: () => {
-          console.log('Add action triggered');
-        }
-      },
-      {
-        label: $localize`Obstacles table`, // Tableau d'obstacles
-        disabled: true,
-        command: () => {
-          console.log('Add action triggered');
-        }
-      },
-      {
-        label: $localize`Grounds table`, // Tableau de sols
-        disabled: true,
-        command: () => {
-          console.log('Add action triggered');
-        }
-      }
-    ]);
 
     this.toolsDropdown.set(
       this.toolsItems().map((item) => ({

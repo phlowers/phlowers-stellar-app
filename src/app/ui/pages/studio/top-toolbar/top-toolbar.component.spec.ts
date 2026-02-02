@@ -30,7 +30,8 @@ describe('StudioTopToolbarComponent', () => {
       }),
       loading: signal(false),
       plotOptionsChange: jest.fn(),
-      selectedDisplayOptions: signal({ loads: false })
+      selectedDisplayOptions: signal({ loads: false }),
+      section: signal(null)
     } as any;
 
     // Mock ToolbarDialogService
@@ -75,7 +76,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should initialize with correct default values', () => {
       expect(component.shortcutsModal()).toBe(false);
       expect(component.shortcutsCount()).toBe(0);
-      expect(component.tablesDropdown()).toBeNull();
+      expect(component.tablesDropdown()).toHaveLength(5);
       expect(component.toolsDropdown()).toBeNull();
     });
 
@@ -114,37 +115,53 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should initialize tablesDropdown with 5 items', () => {
-      component.ngOnInit();
       const tables = component.tablesDropdown();
       expect(tables).toHaveLength(5);
-      expect(tables?.[0].label).toBeDefined();
-      expect(tables?.[0].command).toBeDefined();
+      expect(tables[0].label).toBeDefined();
+      expect(tables[0].command).toBeDefined();
+    });
+
+    it('should disable Loads table when section has no charges', () => {
+      mockPlotService.section.set(null);
+      const tables = component.tablesDropdown();
+      expect(tables[0].disabled).toBe(true);
+    });
+
+    it('should disable Loads table when section has empty charges', () => {
+      mockPlotService.section.set({ charges: [] } as any);
+      const tables = component.tablesDropdown();
+      expect(tables[0].disabled).toBe(true);
+    });
+
+    it('should enable Loads table when section has charges', () => {
+      mockPlotService.section.set({
+        charges: [{ uuid: '1', name: 'Charge 1' }]
+      } as any);
+      const tables = component.tablesDropdown();
+      expect(tables[0].disabled).toBe(false);
     });
 
     it('should execute tablesDropdown command for Loads table', () => {
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[0].command?.({});
+      tables[0].command?.({});
       expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
         'load-table'
       );
     });
 
     it('should execute tablesDropdown command for L0 table', () => {
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[1].command?.({});
+      tables[1].command?.({});
       expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('l0-sum');
     });
 
     it('should execute tablesDropdown command for Pose table', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[2].command?.({});
+      tables[2].command?.({});
       expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
 
       consoleSpy.mockRestore();
@@ -152,10 +169,9 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should execute tablesDropdown command for Obstacles table', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[3].command?.({});
+      tables[3].command?.({});
       expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
 
       consoleSpy.mockRestore();
@@ -163,10 +179,9 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should execute tablesDropdown command for Grounds table', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[4].command?.({});
+      tables[4].command?.({});
       expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
 
       consoleSpy.mockRestore();
