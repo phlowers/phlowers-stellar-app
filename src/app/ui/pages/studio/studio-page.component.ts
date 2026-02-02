@@ -226,9 +226,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   onSupportButtonClick(direction: 'left' | 'right') {
     const supportButton = this.supports();
     if (supportButton === 'all') return;
-    const incrementValue =
-      supportButton === 'single' ? 1 : supportButton === 'double' ? 2 : 0;
-    const increment = direction === 'left' ? -incrementValue : incrementValue;
+    const increment = direction === 'left' ? -1 : 1;
     const options = this.plotService.plotOptions();
     this.plotService.plotOptionsChange({
       startSupport: Math.max(options.startSupport + increment, 0),
