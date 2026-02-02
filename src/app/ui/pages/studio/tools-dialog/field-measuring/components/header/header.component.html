@@ -10,7 +10,13 @@
     </div>
     <div class="header-info">
       <dt i18n>Span type</dt>
-      <dd class="capitalize">{{ measureData().spanType }}</dd>
+      <dd class="capitalize">
+        @if (measureData().spanType === 'phase') {
+          <ng-container i18n>Phase</ng-container>
+        } @else {
+          <ng-container i18n>Guard</ng-container>
+        }
+      </dd>
     </div>
     <div class="header-info">
       @if (measureData().spanType === 'phase') {
@@ -57,6 +63,8 @@
         id="longitude"
         type="number"
         step="0.00000001"
+        min="-180"
+        max="180"
         [ngModel]="measureData().longitude"
         (ngModelChange)="onFieldChange('longitude', $event)"
         required
@@ -79,6 +87,8 @@
         id="latitude"
         type="number"
         step="0.00000001"
+        min="-90"
+        max="90"
         [ngModel]="measureData().latitude"
         (ngModelChange)="onFieldChange('latitude', $event)"
         required
@@ -98,6 +108,8 @@
         id="altitude"
         type="number"
         step="0.01"
+        min="-100"
+        max="9000"
         [ngModel]="measureData().altitude"
         (ngModelChange)="onFieldChange('altitude', $event)"
         required
@@ -118,6 +130,8 @@
         pInputText
         id="azimuth"
         type="number"
+        min="-180"
+        max="180"
         [ngModel]="measureData().azimuth"
         (ngModelChange)="onFieldChange('azimuth', $event)"
         required
