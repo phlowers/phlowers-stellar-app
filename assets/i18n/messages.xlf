@@ -2670,21 +2670,6 @@
         <source>No measures found</source>
       </segment>
     </unit>
-    <unit id="1709313240781435252">
-      <segment>
-        <source>Maximum allowed value:</source>
-      </segment>
-    </unit>
-    <unit id="2104405463703805846">
-      <segment>
-        <source> Value must be a whole number </source>
-      </segment>
-    </unit>
-    <unit id="6771413606625426683">
-      <segment>
-        <source>Minimum allowed value:</source>
-      </segment>
-    </unit>
     <unit id="399524330429754869">
       <segment>
         <source>Ice indicator</source>
@@ -2718,6 +2703,21 @@
     <unit id="744159181527045596">
       <segment>
         <source>Study <ph id="0" equiv="PH" disp="&apos;{&apos;"/>first} to <ph id="1" equiv="PH_1" disp="&apos;{&apos;"/>last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;"/>totalRecords}</source>
+      </segment>
+    </unit>
+    <unit id="136732925281726551">
+      <segment>
+        <source>Minimum value:</source>
+      </segment>
+    </unit>
+    <unit id="5549776374941114664">
+      <segment>
+        <source> Whole number required </source>
+      </segment>
+    </unit>
+    <unit id="9120411489526633764">
+      <segment>
+        <source>Maximum value:</source>
       </segment>
     </unit>
   </file>
