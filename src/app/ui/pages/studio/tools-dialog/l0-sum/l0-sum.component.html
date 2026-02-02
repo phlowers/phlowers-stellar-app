@@ -18,6 +18,7 @@
       currentPageReportTemplate="{currentPage} sur {totalPages}"
       styleClass="l0-table"
       [customSort]="true"
+      paginatorDropdownAppendTo="body"
       (sortFunction)="customSort($event)"
     >
       <ng-template pTemplate="header">
