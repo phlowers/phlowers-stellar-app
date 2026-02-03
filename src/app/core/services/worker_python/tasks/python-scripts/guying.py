@@ -16,12 +16,12 @@ def calculate_guying(js_inputs: dict):
     print("python_inputs: ", js_inputs.to_py())
     guying_inputs = GuyingInputs(**js_inputs.to_py())
     guying = Guying(engine)
-    guying_results = guying.get_guying_results(
-        support_index=guying_inputs.selectedSpanIndex,
-        guying_side=guying_inputs.selectedSupport.lower(),
+    guying_results = guying.get_guying_results_span_view(
+        span_index=guying_inputs.selectedSpanIndex,
         with_pulley=guying_inputs.hasPulley,
         guying_altitude=guying_inputs.altitude,
         guying_horizontal_distance=guying_inputs.horizontalDistance,
+        selected_support=guying_inputs.selectedSupport.lower(),
     )
     print(guying_results)
     print(guying_results.value_dict)
