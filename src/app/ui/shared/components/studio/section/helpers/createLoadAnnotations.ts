@@ -38,8 +38,9 @@ export const createLoadAnnotations = (
   const annotations: Plotly.Annotations[] = [];
   const load_coords = cloneDeep(plotParams.litData.loads_coords);
   plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
-    if (spanLoad && spanIndex in load_coords) {
-      const current_load_coord = load_coords[spanIndex];
+    if (spanLoad && spanIndex + plotParams.startSupport in load_coords) {
+      const current_load_coord =
+        load_coords[spanIndex + plotParams.startSupport];
       annotations.push({
         ...BASE_ANNOTATION,
         x: current_load_coord[0],

@@ -118,6 +118,10 @@ export class SpanComponent implements OnDestroy {
             if (load) {
               (load as any)[controlName] =
                 value ?? (emptySpanLoad as any)[controlName];
+              if (controlName === 'type') {
+                // reset load weight when type is changed
+                this.form.get('loadWeight')?.setValue(0);
+              }
             }
           })
         );
