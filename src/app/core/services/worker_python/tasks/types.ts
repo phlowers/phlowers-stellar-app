@@ -86,7 +86,10 @@ export interface TaskInputs {
     altitude: number;
     horizontalDistance: number;
     hasPulley: boolean;
+    selectedSpanIndex: number;
+    selectedSupport: 'LEFT' | 'RIGHT' | null;
   };
+  // [Task.calculateGuying]: VtlAndGuyingInputs;
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
   };

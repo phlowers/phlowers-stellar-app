@@ -250,12 +250,16 @@ export class VhlAndGuyingComponent implements AfterViewInit {
       return;
     }
     const formValue = this.form.value;
+    console.log("-----------------")
+    console.log(formValue)
     const { result, error } = await this.workerPythonService.runTask(
       Task.calculateGuying,
       {
         altitude: formValue.altitude!,
         horizontalDistance: formValue.horizontalDistance!,
-        hasPulley: formValue.hasPulley ?? false
+        hasPulley: formValue.hasPulley ?? false,
+        selectedSpanIndex: formValue.selectedSpan?.index || 0,
+        selectedSupport: formValue.selectedSupport || null
       }
     );
     if (error) {
