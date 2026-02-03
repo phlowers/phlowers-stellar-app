@@ -60,7 +60,8 @@ def change_state(js_inputs: dict):
         if span['type'] == 'punctual':
             load_weight_list.append(span["loadWeight"])
         else:
-            load_weight_list.append(0)
+            # Temporary work around to factor in marking
+            load_weight_list.append(0.01)
             
     load_position_meters = np.array(load_position_list)
     load_weight = np.array(load_weight_list)
