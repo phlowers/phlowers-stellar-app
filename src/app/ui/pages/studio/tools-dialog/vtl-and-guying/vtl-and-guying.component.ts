@@ -187,9 +187,9 @@ export class VhlAndGuyingComponent implements AfterViewInit {
     }
     const supportType =
       this.plotService.section()?.supports[supportIndex].chainV === true
-        ? 'Suspension'
-        : 'Anchor';
-    this.supportType.set(supportType);
+        ? $localize`Suspension`
+        : $localize`Anchor`;
+    this.supportType.set(supportType as 'Suspension' | 'Anchor');
   }
 
   private updateVtlWithoutGuying(): void {

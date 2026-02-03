@@ -34,7 +34,7 @@
         <dl class="vtl-guying__support-type">
           <div class="flex items-center gap-2">
             <dt class="vtl-guying__support-type-label" i18n>Support type:</dt>
-            <app-icon icon="info" />
+            <app-icon icon="info" class="vtl-guying__support-type-info-icon" />
           </div>
           <dd class="vtl-guying__support-type-value">
             {{ supportType() ?? '-' }}
@@ -210,7 +210,7 @@
                 [rows]="3"
                 i18n-placeholder
                 placeholder="Add a comment for the export."
-                class="w-full h-full"
+                class="w-full h-full comment-textarea"
               ></textarea>
             </div>
           </dl>

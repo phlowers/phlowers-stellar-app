@@ -34,13 +34,18 @@
 }
 
 .vtl-guying__support-type {
-  @apply flex flex-col gap-2 mt-1;
+  @apply flex flex-col gap-1;
   @extend %text-m-400;
 }
 
 .vtl-guying__support-type-label {
-  @extend %text-m-400;
+  @extend %label-style;
   @apply m-0;
+}
+
+.vtl-guying__support-type-info-icon {
+  color: var(--star-dust-700);
+  cursor: help;
 }
 
 .vtl-guying__support-type-value {
@@ -172,4 +177,8 @@
 
 .vtl-guying__dialog-footer {
   @apply flex gap-3 justify-end w-full;
+}
+
+.comment-textarea {
+  @extend %text-m-400;
 }

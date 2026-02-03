@@ -2720,5 +2720,15 @@
         <source>Study <ph id="0" equiv="PH" disp="&apos;{&apos;"/>first} to <ph id="1" equiv="PH_1" disp="&apos;{&apos;"/>last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;"/>totalRecords}</source>
       </segment>
     </unit>
+    <unit id="1971546395781227984">
+      <segment>
+        <source>Anchor</source>
+      </segment>
+    </unit>
+    <unit id="7695209021302072052">
+      <segment>
+        <source>Suspension</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
