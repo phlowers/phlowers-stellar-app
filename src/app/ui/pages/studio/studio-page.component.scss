@@ -58,12 +58,17 @@
       background-color 0.3s linear,
       outline 0.3s linear;
 
-    &:hover {
+    &:not(:disabled):hover {
       background-color: var(--primary-100);
     }
 
     &:focus-visible {
       @extend %focus-state;
+    }
+
+    &:disabled {
+      background-color: var(--grey-0);
+      color: var(--grey-300);
     }
 
     &__icon {
