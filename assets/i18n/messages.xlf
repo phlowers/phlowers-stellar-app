@@ -2768,5 +2768,10 @@
         <source>Maximum value:</source>
       </segment>
     </unit>
+    <unit id="2185228394767497497">
+      <segment>
+        <source>Data saved successfully</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

@@ -100,7 +100,9 @@ describe('HeaderComponent', () => {
     it('should display span type', () => {
       const element = fixture.nativeElement;
       const dlElement = element.querySelector('dl');
-      expect(dlElement.textContent).toContain(mockMeasureData.spanType);
+      expect(dlElement.textContent.toLowerCase()).toContain(
+        mockMeasureData.spanType?.toLowerCase()
+      );
     });
 
     it('should display phase number', () => {

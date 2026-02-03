@@ -83,8 +83,8 @@
         pInputText
         id="ambientTemperature"
         type="number"
-        [min]="-80"
-        [max]="80"
+        [min]="-50"
+        [max]="99"
         [ngModel]="measureData().ambientTemperature"
         (ngModelChange)="onFieldChange('ambientTemperature', $event)"
         aria-describedby="mandatory-data-field"
@@ -114,6 +114,7 @@
       type="number"
       [fluid]="true"
       [min]="0"
+      [max]="50"
       [ngModel]="measureData().windSpeed"
       (ngModelChange)="onFieldChange('windSpeed', $event)"
       aria-describedby="mandatory-data-field"
