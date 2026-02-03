@@ -288,10 +288,9 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('onSave', () => {
-    it('should call modifySection with updated field_measures and close tool dialog', async () => {
+    it('should call modifySection with updated field_measures', async () => {
       const plotService = TestBed.inject(PlotService);
       const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
-      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
 
       // Open main dialog to initialize measureData from PlotService
       toolsDialogService.openTool('field-measuring');
@@ -306,7 +305,6 @@ describe('FieldMeasuringComponent', () => {
       expect(modifySectionSpy).toHaveBeenCalledWith({
         field_measures: [...(section?.field_measures || []), measureData]
       });
-      expect(closeToolSpy).toHaveBeenCalled();
     });
 
     it('should return early if section is not available', async () => {
@@ -326,7 +324,7 @@ describe('FieldMeasuringComponent', () => {
       expect(closeToolSpy).not.toHaveBeenCalled();
     });
 
-    it('should close tool dialog after saving', async () => {
+    it('should not close tool dialog after saving (shows success message instead)', async () => {
       const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
 
       // Open main dialog to initialize measureData from PlotService
@@ -336,7 +334,8 @@ describe('FieldMeasuringComponent', () => {
 
       await component.onSave();
 
-      expect(closeToolSpy).toHaveBeenCalled();
+      // onSave no longer closes the tool - it shows a success message instead
+      expect(closeToolSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -378,7 +377,8 @@ describe('FieldMeasuringComponent', () => {
       expect(toolsDialogService.isMainOpen()).toBe(true);
 
       await component.onSave();
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      // onSave no longer closes the dialog - it shows a success message instead
+      expect(toolsDialogService.isMainOpen()).toBe(true);
     });
 
     it('should work with onVisibleChange integration', async () => {
@@ -402,25 +402,19 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should handle multiple save calls', async () => {
-      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
+
       // Open main dialog to initialize measureData from PlotService
       toolsDialogService.openTool('field-measuring');
       toolsDialogService.proceedToMainComponent();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       await component.onSave();
-      // Re-open for subsequent calls
-      toolsDialogService.openTool('field-measuring');
-      toolsDialogService.proceedToMainComponent();
-      await new Promise((resolve) => setTimeout(resolve, 100));
       await component.onSave();
-      // Re-open for third call
-      toolsDialogService.openTool('field-measuring');
-      toolsDialogService.proceedToMainComponent();
-      await new Promise((resolve) => setTimeout(resolve, 100));
       await component.onSave();
 
-      expect(closeToolSpy).toHaveBeenCalledTimes(3);
+      expect(modifySectionSpy).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -493,14 +487,12 @@ describe('FieldMeasuringComponent', () => {
       component.measureData.set(newMeasure);
 
       const modifySpy = jest.spyOn(plotService, 'modifySection');
-      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
 
       await component.onSave();
 
       expect(modifySpy).toHaveBeenCalledWith({
         field_measures: [existingMeasure, newMeasure]
       });
-      expect(closeToolSpy).toHaveBeenCalled();
     });
 
     it('should return early when measureData is null', async () => {

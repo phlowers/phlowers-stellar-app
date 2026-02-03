@@ -47,11 +47,23 @@
 
 <ng-template #footer>
   <div class="dialog-footer">
-    <button app-btn type="button" btnStyle="outlined" (click)="onReport()">
+    <button
+      app-btn
+      type="button"
+      [disabled]="true"
+      btnStyle="outlined"
+      (click)="onReport()"
+    >
       <app-icon icon="description" />
       <span i18n>Report</span>
     </button>
-    <button app-btn type="button" btnStyle="outlined" (click)="onExport()">
+    <button
+      app-btn
+      type="button"
+      [disabled]="true"
+      btnStyle="outlined"
+      (click)="onExport()"
+    >
       <app-icon icon="download" />
       <span i18n>Export</span>
     </button>

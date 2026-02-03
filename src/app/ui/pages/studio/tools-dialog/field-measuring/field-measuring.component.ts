@@ -35,6 +35,7 @@ import { createInitialMeasureData } from './helpers';
 import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
 import { isNumber } from 'lodash';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-field-measuring-tool',
@@ -102,7 +103,8 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     public readonly sectionService: SectionService,
     public readonly studiesService: StudiesService,
     private readonly linesService: LinesService,
-    public readonly cableService: CablesService
+    public readonly cableService: CablesService,
+    private readonly messageService: MessageService
   ) {
     effect(() => {
       if (this.toolsDialogService.isMainOpen()) {
@@ -142,9 +144,25 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       measureData.name &&
       measureData.span &&
       isNumber(measureData.longitude) &&
+      measureData.longitude >= -180 &&
+      measureData.longitude <= 180 &&
       isNumber(measureData.latitude) &&
+      measureData.latitude >= -90 &&
+      measureData.latitude <= 90 &&
       isNumber(measureData.altitude) &&
-      isNumber(measureData.azimuth);
+      measureData.altitude >= -100 &&
+      measureData.altitude <= 9000 &&
+      isNumber(measureData.azimuth) &&
+      measureData.azimuth >= -180 &&
+      measureData.azimuth <= 180 &&
+      isNumber(measureData.windSpeed) &&
+      measureData.windSpeed >= 0 &&
+      measureData.windSpeed <= 50 &&
+      isNumber(measureData.ambientTemperature) &&
+      measureData.ambientTemperature >= -50 &&
+      measureData.ambientTemperature <= 99 &&
+      measureData.windDirection &&
+      measureData.skyCover;
     return isValid && !this.isNameAlreadyTaken();
   });
 
@@ -230,7 +248,11 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
         field_measures: [...(section?.field_measures || []), measureData]
       });
     }
-    this.toolsDialogService.closeTool();
+    this.messageService.add({
+      severity: 'success',
+      summary: $localize`Success`,
+      detail: $localize`Data saved successfully`
+    });
   }
 
   onImportStationData() {

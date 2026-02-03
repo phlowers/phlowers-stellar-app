@@ -2477,7 +2477,7 @@
     <unit id="3275519279768264405">
       <segment state="initial">
         <source>All fields are mandatory</source>
-        <target>Toutes les données sont obligatoires pour le calcul de la température.</target>
+        <target>Toutes les données sont obligatoires.</target>
       </segment>
     </unit>
     <unit id="1546856207674794665">
@@ -2633,31 +2633,31 @@
     <unit id="6145928415540193222">
       <segment state="initial">
         <source>N1 - Sunny</source>
-        <target>N1 - Soleil</target>
+        <target>N1 - Ensoleillé</target>
       </segment>
     </unit>
     <unit id="4192982166698299789">
       <segment state="initial">
         <source>N2 - partly cloudy</source>
-        <target>N2 - partiellement nuageux</target>
+        <target>N2 - Peu nuageux</target>
       </segment>
     </unit>
     <unit id="959518481042894436">
       <segment state="initial">
         <source>N5 - Cloudy</source>
-        <target>N5 - Nuageux</target>
+        <target>N5 - Voilé</target>
       </segment>
     </unit>
     <unit id="3236954287106088041">
       <segment state="initial">
         <source>N6 - Covered sky</source>
-        <target>N6 - Ciel couvert</target>
+        <target>N6 - Très nuageux</target>
       </segment>
     </unit>
     <unit id="8475559139207580230">
       <segment state="initial">
         <source>N8 - covered - smoky</source>
-        <target>N8 - couvert - fumé</target>
+        <target>N8 - Couvert / Brouillard</target>
       </segment>
     </unit>
     <unit id="3870240363377114184">
@@ -3374,6 +3374,12 @@
       <segment state="initial">
         <source>Anchor</source>
         <target>Ancrage</target>
+      </segment>
+    </unit>
+    <unit id="2185228394767497497">
+      <segment state="initial">
+        <source>Data saved successfully</source>
+        <target>Données enregistrées avec succès</target>
       </segment>
     </unit>
   </file>
