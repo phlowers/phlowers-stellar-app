@@ -3296,24 +3296,6 @@
         <target>Pas de mesure</target>
       </segment>
     </unit>
-    <unit id="2104405463703805846">
-      <segment state="initial">
-        <source> Value must be a whole number </source>
-        <target> La valeur saisie doit être un nombre entier </target>
-      </segment>
-    </unit>
-    <unit id="6771413606625426683">
-      <segment state="initial">
-        <source>Minimum allowed value:</source>
-        <target>Valeur minimum admissible :</target>
-      </segment>
-    </unit>
-    <unit id="1709313240781435252">
-      <segment state="initial">
-        <source>Maximum allowed value:</source>
-        <target>Valeur maximum admissible :</target>
-      </segment>
-    </unit>
     <unit id="399524330429754869">
       <segment state="initial">
         <source>Ice indicator</source>
@@ -3362,6 +3344,24 @@
         <target>Support <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} à <ph id="1"
             equiv="PH_1" disp="&apos;{&apos;" />last} sur <ph id="2" equiv="PH_2"
             disp="&apos;{&apos;" />totalRecords}</target>
+      </segment>
+    </unit>
+    <unit id="136732925281726551">
+      <segment state="initial">
+        <source>Minimum value:</source>
+        <target>Valeur minimale :</target>
+      </segment>
+    </unit>
+    <unit id="9120411489526633764">
+      <segment state="initial">
+        <source>Maximum value:</source>
+        <target>Valeur maximale :</target>
+      </segment>
+    </unit>
+    <unit id="5549776374941114664">
+      <segment state="initial">
+        <source> Whole number required </source>
+        <target> Nombre entier requis </target>
       </segment>
     </unit>
     <unit id="7695209021302072052">
