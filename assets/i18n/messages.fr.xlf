@@ -2366,22 +2366,16 @@
         <target> Longueur de portée mesurée </target>
       </segment>
     </unit>
-    <unit id="5088621818536959590">
+    <unit id="3499511783369638929">
       <segment state="initial">
-        <source> calculated value:</source>
-        <target> valeur calculée :</target>
+        <source> Calculated value:</source>
+        <target> Valeur calculée :</target>
       </segment>
     </unit>
     <unit id="2147039543508081675">
       <segment state="initial">
         <source> Elevation diff. of measured attach. </source>
         <target> Dénivelé des accr. mesuré </target>
-      </segment>
-    </unit>
-    <unit id="571757945706473817">
-      <segment state="initial">
-        <source>calculated value:</source>
-        <target>valeur calculée :</target>
       </segment>
     </unit>
     <unit id="6008615727838547074">
