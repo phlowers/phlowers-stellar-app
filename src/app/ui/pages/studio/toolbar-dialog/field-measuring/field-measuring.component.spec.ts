@@ -291,7 +291,6 @@ describe('FieldMeasuringComponent', () => {
     it('should call modifySection with updated field_measures', async () => {
       const plotService = TestBed.inject(PlotService);
       const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
-      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
 
       // Open main dialog to initialize measureData from PlotService
       toolbarDialogService.openTool('field-measuring');
