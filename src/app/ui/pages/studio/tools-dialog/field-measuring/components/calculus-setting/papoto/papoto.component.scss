@@ -57,6 +57,7 @@
 
       &__desc {
         @apply mb-0 font-semibold;
+        margin: 0.125rem 0.25rem;
         grid-area: lengthDesc;
         color: var(--star-dust-900);
       }
@@ -74,6 +75,7 @@
 
       &__desc {
         @apply mb-0 font-semibold;
+        margin: 0.125rem 0.25rem;
         grid-area: elevationDesc;
         color: var(--star-dust-900);
       }
