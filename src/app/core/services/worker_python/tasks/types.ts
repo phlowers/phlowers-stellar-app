@@ -1,13 +1,18 @@
-import { Cable } from '@core/data/database/interfaces/cable';
-import { Section } from '@core/data/database/interfaces/section';
+import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@core/domain';
 import { View } from '@ui/shared/components/studio/section/helpers/types';
+import { Dictionary } from 'lodash';
 
 export enum Task {
   runTests = 'runTests',
   getLit = 'getLit',
-  changeClimateLoad = 'changeClimateLoad',
+  changeState = 'changeState',
   refreshProjection = 'refreshProjection',
-  getSupportCoordinates = 'getSupportCoordinates'
+  getSupportCoordinates = 'getSupportCoordinates',
+  calculatePapoto = 'calculatePapoto',
+  calculateGuying = 'calculateGuying',
+  setLogLevel = 'setLogLevel',
+  temperatureCalculation = 'temperatureCalculation',
+  calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind'
 }
 
 export enum DataError {
@@ -28,23 +33,31 @@ export interface GetSectionOutput {
   L0: number[];
   elevation: number[];
   line_angle: number[];
-  vhl_under_chain: number[][];
-  vhl_under_console: number[][];
+  vtl_under_chain: number[][];
+  vtl_under_console: number[][];
   r_under_chain: number[];
   r_under_console: number[];
   ground_altitude: number[];
   load_angle: number[];
   displacement: number[][];
   span_length: number[];
+  loads_coords: Dictionary<number[]>;
+}
+
+export enum LogLevel {
+  DEBUG = 10,
+  INFO = 20,
+  WARNING = 30,
+  ERROR = 40,
+  CRITICAL = 50
 }
 
 export interface TaskInputs {
-  [Task.getLit]: { section: Section; cable: Cable };
+  [Task.getLit]: { section: Section; cable: CatalogCable };
   [Task.runTests]: undefined;
-  [Task.changeClimateLoad]: {
-    windPressure: number;
-    cableTemperature: number;
-    iceThickness: number;
+  [Task.changeState]: {
+    climate: ClimateCharge;
+    spanLoads: SpanLoad[];
   };
   [Task.refreshProjection]: {
     startSupport: number;
@@ -55,16 +68,86 @@ export interface TaskInputs {
     coordinates: (number | undefined)[][];
     attachmentSetNumbers: number[];
   };
+  [Task.calculatePapoto]: {
+    spanLength: number;
+    measuredElevationDifference: number;
+    HL: number;
+    H1: number;
+    H2: number;
+    H3: number;
+    HR: number;
+    VL: number;
+    V1: number;
+    V2: number;
+    V3: number;
+    VR: number;
+  };
+  [Task.calculateGuying]: {
+    altitude: number;
+    horizontalDistance: number;
+    hasPulley: boolean;
+  };
+  [Task.setLogLevel]: {
+    activateDebugLogs: boolean;
+  };
+  [Task.temperatureCalculation]: {
+    cableName: string;
+    ambientTemperature: number;
+    longitude: number;
+    latitude: number;
+    altitude: number;
+    azimuth: number;
+    transit: number;
+    date: Date | null;
+    time: Date | null;
+    windSpeed: number;
+    windSpeedUnit: 'kmh' | 'ms';
+    windDirection: string;
+    skyCover: string;
+  };
+  [Task.calculateParameter15CWithoutWind]: {
+    parameterPapoto: number | null;
+    parameterUncertaintyPapoto: number | null;
+    cableTemperatureCalibration: number | null;
+    cableTemperatureCalibrationUncertainty: number | null;
+    span_index: number | null;
+  };
 }
 
 export interface TaskOutputs {
   [Task.getLit]: GetSectionOutput;
   [Task.runTests]: undefined;
-  [Task.changeClimateLoad]: GetSectionOutput;
+  [Task.changeState]: GetSectionOutput;
   [Task.refreshProjection]: GetSectionOutput;
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
     text_display_points: number[][];
-    text_to_display: string[];
+    text_to_display: number[];
+  };
+  [Task.calculatePapoto]: {
+    parameter: number;
+    // uncertainty_parameter: number;
+    parameter_1_2: number;
+    parameter_2_3: number;
+    parameter_1_3: number;
+    check_validity: boolean;
+  };
+  [Task.calculateGuying]: {
+    tensionInGuy: number;
+    guyAngle: number;
+    chargeVUnderConsole: number;
+    chargeHUnderConsole: number;
+    chargeLIfPulley: number;
+  };
+  [Task.setLogLevel]: undefined;
+  [Task.temperatureCalculation]: {
+    cableSolarFlux: number;
+    cableTemperature: number;
+    cableTemperatureUncertainty: number;
+  };
+  [Task.calculateParameter15CWithoutWind]: {
+    parameter15CMinusUncertainty: number;
+    parameter15C: number;
+    parameter15CPlusUncertainty: number;
   };
 }

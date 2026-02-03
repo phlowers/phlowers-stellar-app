@@ -23,6 +23,32 @@ You should match global and local project CLI by watching current version in `pa
 
 3. Launch local server with `ng serve` or `npm run start`
 
+## TypeScript Path Aliases
+
+The project uses TypeScript path aliases to simplify imports and improve code readability. These aliases are configured in `tsconfig.json` and `tsconfig.spec.json`.
+
+| Alias | Path | Description |
+|-------|------|-------------|
+| `@src/*` | `./src/*` | Root source folder |
+| `@app/*` | `./src/app/*` | Application folder |
+| `@core/*` | `./src/app/core/*` | Core module (domain, infrastructure) |
+| `@services/*` | `./src/app/core/services/*` | Application services |
+| `@ui/*` | `./src/app/ui/*` | UI components and pages |
+| `@plugins/*` | `./src/app/plugins/*` | Plugin modules |
+| `@adapters/*` | `./src/app/adapters/*` | Adapter modules |
+
+### Usage examples
+
+```typescript
+// Instead of relative imports like:
+import { StorageService } from '../../../core/services/storage/storage.service';
+
+// Use alias imports:
+import { StorageService } from '@services/storage/storage.service';
+import { Study } from '@core/domain';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+```
+
 ## Import lines and maintenance data
 
 1. lines data should be put inside a `public/data/lines.csv` file with the following columns:

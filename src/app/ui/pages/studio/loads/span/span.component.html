@@ -1,4 +1,4 @@
-<form [formGroup]="form" class="span">
+<form [formGroup]="form" class="span__form">
   <div class="span__reset">
     <button
       app-btn
@@ -8,74 +8,78 @@
       (click)="resetForm()"
     >
       <app-icon icon="refresh" />
-      <ng-container i18n>reset</ng-container>
+      <ng-container i18n>Reset</ng-container>
     </button>
   </div>
 
-  <div class="span__form">
+  <div>
     <label for="spanSelect" i18n>Span</label>
-    <label for="supportNumber" i18n>Support n°</label>
-
     <p-select
       inputId="spanSelect"
-      [options]="availableSpans()"
+      [options]="spansOptions()"
+      fluid
       formControlName="spanSelect"
       optionLabel="label"
       optionValue="value"
     />
+  </div>
 
+  <div>
+    <label for="referenceSupport" i18n>Reference support</label>
     <p-select
-      inputId="supportNumber"
-      [options]="availableSupports()"
-      formControlName="supportNumber"
+      inputId="referenceSupport"
+      [options]="supportsOptions()"
+      fluid
+      formControlName="referenceSupport"
       optionLabel="label"
       optionValue="value"
     />
+  </div>
 
-    <label for="loadType" i18n>Load type</label>
-    <label for="spanLoad" i18n>Span load</label>
-
+  <div class="col-span-2">
+    <label for="type" i18n>Load type</label>
     <p-select
-      inputId="loadType"
+      inputId="type"
+      fluid
       [options]="loadTypeOptions"
-      formControlName="loadType"
+      formControlName="type"
       optionLabel="label"
       optionValue="value"
     />
+  </div>
+  <div class="col-span-2 flex items-center">
+    <p-toggleswitch disabled inputId="freePositioning" name="freePositioning" />
+    <label for="freePositioning" i18n> Free positioning </label>
+  </div>
 
+  <div>
+    <label for="loadPosition" i18n>Dist. to ref. support</label>
     <p-inputgroup>
       <input
         pInputText
         type="number"
-        id="spanLoad"
-        formControlName="spanLoad"
+        id="loadPosition"
+        fluid
+        formControlName="loadPosition"
       />
-      <p-inputgroup-addon>kg</p-inputgroup-addon>
-    </p-inputgroup>
-
-    <label for="cableLengthChange" i18n>Short. or lengthen. Cable (+ -)</label>
-    <label for="pointLoadDist" i18n>Dist. to point load</label>
-
-    <p-inputgroup>
-      <input
-        pInputText
-        type="number"
-        id="cableLengthChange"
-        formControlName="cableLengthChange"
-      />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
-    </p-inputgroup>
-
-    <p-inputgroup>
-      <input
-        pInputText
-        type="number"
-        id="pointLoadDist"
-        formControlName="pointLoadDist"
-      />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
+      <p-inputgroup-addon i18n>m</p-inputgroup-addon>
     </p-inputgroup>
   </div>
+  @if (form.get('type')?.value === 'punctual') {
+    <div>
+      <label for="loadWeight" i18n>Load</label>
+      <p-inputgroup>
+        <input
+          pInputText
+          type="number"
+          id="loadWeight"
+          fluid
+          formControlName="loadWeight"
+        />
+        <p-inputgroup-addon i18n>N</p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+  }
 
   <div class="span__btns">
     <button
@@ -84,7 +88,7 @@
       type="button"
       aria-label="erase load case"
       i18n-aria-label
-      (click)="eraseForm()"
+      (click)="deleteCharge()"
     >
       <app-icon icon="delete" />
     </button>
@@ -93,7 +97,7 @@
       app-btn
       type="submit"
       btnStyle="outlined"
-      (click)="submitForm()"
+      (click)="saveLoadCase()"
       [disabled]="isFormInvalid()"
     >
       <app-icon icon="save" />
@@ -102,9 +106,9 @@
 
     <button
       app-btn
-      type="button"
-      (click)="calculForm()"
       [disabled]="isFormInvalid()"
+      type="button"
+      (click)="calculateLoadCase()"
     >
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>

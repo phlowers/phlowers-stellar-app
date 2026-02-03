@@ -80,24 +80,21 @@ describe('Worker', () => {
       await import('./worker-python');
 
       // Verify loadPyodide was called with correct parameters
+      const allPythonPackages = Object.values(pythonPackages).map(
+        (pkg) => self.name + 'pyodide/' + pkg.file_name
+      );
       expect(loadPyodide).toHaveBeenCalledWith({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
-        packages: expect.arrayContaining([
-          'numpy',
-          'pandas',
-          'pydantic',
-          'packaging',
-          'wrapt'
-        ])
+        indexURL: self.name + 'pyodide/',
+        packages: expect.arrayContaining(allPythonPackages)
       });
 
-      // Verify local packages are included
-      const localPackages = Object.values(pythonPackages)
-        .filter((pkg: any) => pkg.source === 'local')
-        .map((pkg: any) => 'test/pyodide/' + pkg.file_name);
+      // Verify all packages are included
+      const allPackages = Object.values(pythonPackages).map(
+        (pkg: any) => 'test/pyodide/' + pkg.file_name
+      );
 
       const callArgs = (loadPyodide as jest.Mock).mock.calls[0][0];
-      expect(callArgs.packages).toEqual(expect.arrayContaining(localPackages));
+      expect(callArgs.packages).toEqual(expect.arrayContaining(allPackages));
     });
 
     // it('should post load time message after Pyodide loads', async () => {

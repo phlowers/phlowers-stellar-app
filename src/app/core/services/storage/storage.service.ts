@@ -7,14 +7,14 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AppDB } from '@core/data/database';
+import { AppDatabase } from '@core/infrastructure/database';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
-  public db!: AppDB;
+  public db!: AppDatabase;
 
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
@@ -30,7 +30,10 @@ export class StorageService {
       let isPersisted = await navigator.storage.persisted();
       if (!isPersisted) {
         isPersisted = await navigator.storage.persist();
-        console.log(`Persisted storage granted: ${isPersisted}`);
+        console.log(
+          `Persisted storage granted: ${await navigator.storage.persisted()}`
+        );
+        console.log('estimate', await navigator.storage.estimate());
       } else {
         console.log('Persisted storage has already been granted');
       }
@@ -39,7 +42,7 @@ export class StorageService {
 
   async createDatabase(): Promise<void> {
     try {
-      this.db = new AppDB();
+      this.db = new AppDatabase();
       this._ready.next(true);
     } catch (error) {
       console.error('StorageService createDatabase - error:', error);

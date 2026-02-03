@@ -55,3 +55,5 @@ public/data/maintenance-teams.csv
 public/data/lines.csv
 public/data/attachments.csv
 report-task.txt
+scripts/__pycache__/
+scripts/requirements-resolved.txt

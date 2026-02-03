@@ -5,20 +5,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable, signal } from '@angular/core';
-import { StudyModel } from '../../data/models/study.model';
-import { v4 as uuidv4 } from 'uuid';
-import { StorageService } from '../storage/storage.service';
-import { BehaviorSubject } from 'rxjs';
-import { Study } from '../../data/database/interfaces/study';
 import {
   ProtoV4Parameters,
-  ProtoV4Support
-} from '../../data/database/interfaces/protoV4';
-import { createEmptySection, createEmptySupport } from '../sections/helpers';
-import { Support } from '../../data/database/interfaces/support';
-import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+  ProtoV4Support,
+  Support,
+  InitialCondition
+} from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
+import { v4 as uuidv4 } from 'uuid';
+import { StorageService } from '@services/storage/storage.service';
+import { BehaviorSubject } from 'rxjs';
+import {
+  createEmptySection,
+  createEmptySupport
+} from '@services/sections/helpers';
+import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
-import { InitialCondition } from '../../data/database/interfaces/initialCondition';
 import { MessageService } from 'primeng/api';
 import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/new-study-modal.component';
 
@@ -28,7 +30,8 @@ import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/n
 export class StudiesService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
-  public readonly studies = new BehaviorSubject<Study[]>([]);
+  public readonly studies = new BehaviorSubject<StudyEntity[]>([]);
+  public readonly currentStudy = signal<StudyEntity | null>(null);
   public readonly exportDialogData = signal<{
     uuid: string;
     title: string;
@@ -50,11 +53,12 @@ export class StudiesService {
    */
   async createStudy(
     study: Pick<
-      StudyModel,
+      StudyEntity,
       'title' | 'description' | 'shareable' | 'sections' | 'author_email'
-    >
+    >,
+    newUuid?: string
   ): Promise<string> {
-    const uuid = uuidv4();
+    const uuid = newUuid || uuidv4();
     const user = (await this.storageService.db?.users.toArray())?.[0];
     await this.storageService.db?.studies.add({
       ...study,
@@ -90,7 +94,7 @@ export class StudiesService {
    * Duplicate a study
    * @param uuid The uuid of the study to duplicate
    */
-  async duplicateStudy(uuid: string): Promise<Study | null> {
+  async duplicateStudy(uuid: string): Promise<StudyEntity | null> {
     const study = await this.storageService.db?.studies.get(uuid);
     if (!study) {
       return null;
@@ -151,7 +155,7 @@ export class StudiesService {
    * @param study The study to update
    */
   async updateStudy(
-    study: { uuid: string; author_email: string } & Partial<Study>,
+    study: { uuid: string; author_email: string } & Partial<StudyEntity>,
     overrideAuthorCheck = false
   ) {
     const user = await this.storageService.db?.users.toArray();
@@ -179,7 +183,7 @@ export class StudiesService {
   async createStudyFromProtoV4(
     protoV4Supports: ProtoV4Support[],
     parameters: ProtoV4Parameters
-  ): Promise<Study> {
+  ): Promise<StudyEntity> {
     const section = createEmptySection();
     section.name = parameters.section_name;
     section.type = 'phase';
@@ -195,13 +199,11 @@ export class StudiesService {
         attachmentHeight: support.alt_acc,
         cableType: parameters.conductor,
         armLength: support.long_bras,
-        chainName: support.suspension
-          ? $localize`suspension`
-          : $localize`chain`,
         chainLength: support.long_ch,
         chainWeight: support.pds_ch,
         counterWeight: support.ctr_poids,
         chainV: support.ch_en_V,
+        chainSurface: support.surf_ch,
         supportFootAltitude: support.alt_acc - 30 > 0 ? support.alt_acc - 30 : 0
       };
     });
@@ -259,5 +261,13 @@ export class StudiesService {
    */
   getStudyAsObservable(uuid: string) {
     return liveQuery(() => this.storageService.db?.studies.get(uuid));
+  }
+
+  /**
+   * Set the current study
+   * @param study The study to set as the current study
+   */
+  setCurrentStudy(study: StudyEntity) {
+    this.currentStudy.set(study);
   }
 }

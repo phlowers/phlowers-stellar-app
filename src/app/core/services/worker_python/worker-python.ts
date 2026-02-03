@@ -7,38 +7,41 @@
 /// <reference lib="webworker" />
 
 import { loadPyodide } from 'pyodide';
-import importScript from './tasks/python-scripts/functions.py';
+import change_state from './tasks/python-scripts/change_state.py';
+import functions from './tasks/python-scripts/functions.py';
+import guying from './tasks/python-scripts/guying.py';
+import temperature from './tasks/python-scripts/temperature.py';
+import parameter_15_without_wind from './tasks/python-scripts/parameter_15_without_wind.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
+
+const pythonFiles = [
+  functions,
+  change_state,
+  guying,
+  temperature,
+  parameter_15_without_wind
+];
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;
 
 async function loadPyodideAndPackages() {
   try {
-    const localPythonPackages = [
-      ...Object.values(pythonPackages)
-        .map((pkg) =>
-          pkg.source === 'local' ? self.name + 'pyodide/' + pkg.file_name : ''
-        )
-        .filter(Boolean)
-    ];
+    const allPythonPackages = Object.values(pythonPackages).map(
+      (pkg) => self.name + 'pyodide/' + pkg.file_name
+    );
     const start = performance.now();
     pyodide = await loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full',
-      packages: [
-        'numpy',
-        'pandas',
-        'pydantic',
-        'packaging',
-        'wrapt',
-        ...localPythonPackages
-      ]
+      indexURL: self.name + 'pyodide/',
+      packages: allPythonPackages
     });
     const loadEnd = performance.now();
     postMessage({ loadTime: loadEnd - start });
-    await pyodide.runPython(importScript);
+    for (const file of pythonFiles) {
+      await pyodide.runPython(file);
+    }
     const importEnd = performance.now();
     postMessage({ importTime: importEnd - loadEnd });
   } catch (error) {

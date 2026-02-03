@@ -2,10 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SectionsTabComponent } from './sectionsTab.component';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Section } from '@core/data/database/interfaces/section';
-import { InitialCondition } from '@core/data/database/interfaces/initialCondition';
-import { MaintenanceService } from '@core/services/maintenance/maintenance.service';
-import { LinesService } from '@core/services/lines/lines.service';
+import { InitialCondition, Section } from '@core/domain';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
+import { LinesService } from '@services/lines/lines.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -104,7 +103,10 @@ describe('SectionsTabComponent', () => {
     ],
     selected_initial_condition_uuid: 'ic-1',
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
   };
 
   const mockInitialCondition: InitialCondition = {

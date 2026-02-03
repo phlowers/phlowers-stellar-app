@@ -18,26 +18,27 @@ import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { OnlineService } from '@core/services/online/online.service';
-import { StorageService } from '@core/services/storage/storage.service';
+import { OnlineService } from '@services/online/online.service';
+import { StorageService } from '@services/storage/storage.service';
 import { IconComponent } from './shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from './shared/components/atoms/button/button.component';
-import { UserService } from '@core/services/user/user.service';
-import { StudiesService } from '../core/services/studies/studies.service';
-import { SectionService } from '@src/app/core/services/sections/section.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { InitialConditionService } from '../core/services/initial-conditions/initial-condition.service';
-import { UpdateService } from '../core/services/worker_update/worker_update.service';
+import { UserService } from '@services/user/user.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { SectionService } from '@services/sections/section.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { InitialConditionService } from '@services/initial-conditions/initial-condition.service';
+import { UpdateService } from '@services/worker_update/worker_update.service';
 import { Subscription } from 'rxjs';
-import { MaintenanceService } from '../core/services/maintenance/maintenance.service';
-import { LinesService } from '../core/services/lines/lines.service';
-import { CablesService } from '../core/services/cables/cables.service';
-import { ChainsService } from '../core/services/chains/chains.service';
-import { PlotService } from './pages/studio/plot.service';
-import { AttachmentService } from '../core/services/attachment/attachment.service';
-import { ChargesService } from '../core/services/charges/charges.service';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
+import { LinesService } from '@services/lines/lines.service';
+import { CablesService } from '@services/cables/cables.service';
+import { ChainsService } from '@services/chains/chains.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { AttachmentService } from '@services/attachment/attachment.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { LoadFormsService } from './pages/studio/loads/loadForms.service';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -76,7 +77,8 @@ const modules = [
     CablesService,
     PlotService,
     AttachmentService,
-    ChargesService
+    ChargesService,
+    LoadFormsService
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -120,14 +122,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       storageService.ready$.subscribe(async (ready) => {
         if (ready) {
-          this.userService.getUser().then((user) => {
-            if (!user) {
-              this.userDialog = true;
-            } else {
-              this.userDialog = false;
-            }
-            this.setupData();
-          });
+          const user = await this.userService.getUser();
+          this.userDialog = !user;
+          this.setupData();
         }
       })
     );

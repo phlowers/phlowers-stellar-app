@@ -5,12 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable } from '@angular/core';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import {
-  MaintenanceData,
-  RteMaintenanceTeamsCsvFile
-} from '../../data/database/interfaces/maintenance';
+import { CatalogMaintenanceEntity } from '@core/infrastructure/database';
+import { MaintenanceCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 
@@ -30,7 +28,7 @@ export class MaintenanceService {
   }
 
   async getMaintenance() {
-    return this.storageService.db?.maintenance.toArray();
+    return this.storageService.db?.catMaintenance.toArray();
   }
 
   async importFromFile() {
@@ -45,7 +43,7 @@ export class MaintenanceService {
         })
       );
 
-    const mapData = (data: RteMaintenanceTeamsCsvFile[]) => {
+    const mapData = (data: MaintenanceCsvDto[]) => {
       return data
         .map((item) => ({
           maintenance_center_id:
@@ -65,21 +63,21 @@ export class MaintenanceService {
           header: true,
           skipEmptyLines: true,
           complete: (async (
-            jsonResults: Papa.ParseResult<RteMaintenanceTeamsCsvFile>
+            jsonResults: Papa.ParseResult<MaintenanceCsvDto>
           ) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
               return;
             }
-            await this.storageService.db?.maintenance.clear();
-            const maintenanceTable: MaintenanceData[] = mapData(data);
+            await this.storageService.db?.catMaintenance.clear();
+            const maintenanceTable: CatalogMaintenanceEntity[] = mapData(data);
             console.log('adding maintenance data', maintenanceTable.length);
-            await this.storageService.db?.maintenance.bulkAdd(maintenanceTable);
+            await this.storageService.db?.catMaintenance.bulkAdd(
+              maintenanceTable
+            );
             resolve();
-          }) as (
-            jsonResults: Papa.ParseResult<RteMaintenanceTeamsCsvFile>
-          ) => void
+          }) as (jsonResults: Papa.ParseResult<MaintenanceCsvDto>) => void
         });
       });
     });

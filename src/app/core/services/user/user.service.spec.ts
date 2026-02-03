@@ -1,5 +1,5 @@
 import { UserService } from './user.service';
-import { UserModel } from '../../data/models/user.model';
+import { UserEntity } from '@core/infrastructure/database';
 import { BehaviorSubject } from 'rxjs';
 
 describe('UserService', () => {
@@ -8,7 +8,7 @@ describe('UserService', () => {
   let usersTableMock: any;
   let readySubject: BehaviorSubject<boolean>;
 
-  const testUser: UserModel = { email: 'test@example.com' };
+  const testUser: UserEntity = { email: 'test@example.com' };
 
   beforeEach(() => {
     usersTableMock = {
@@ -44,7 +44,7 @@ describe('UserService', () => {
       usersTableMock.toArray.mockResolvedValue([]);
       const invalidUser = { email: 'invalid' };
       await expect(
-        service.createUser(invalidUser as UserModel)
+        service.createUser(invalidUser as UserEntity)
       ).rejects.toThrow('Invalid email');
       expect(usersTableMock.add).not.toHaveBeenCalled();
     });

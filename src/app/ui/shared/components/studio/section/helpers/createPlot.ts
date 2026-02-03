@@ -2,12 +2,28 @@ import Plotly, {
   Camera,
   Data,
   Layout,
-  ModeBarDefaultButtons,
-  ScatterData
+  ModeBarDefaultButtons
 } from 'plotly.js-dist-min';
 import { Side, View } from './types';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { createLoadAnnotations } from './createLoadAnnotations';
+import { SpanLoad } from '@core/domain';
 
-const normalCamera = (invert: boolean) => ({
+export interface CreatePlotParams {
+  plotId: string;
+  data: Data[];
+  litData: GetSectionOutput;
+  isSupportZoom: boolean;
+  invert: boolean;
+  view: View;
+  camera: Camera | null;
+  side: Side;
+  spanLoads: (SpanLoad | null)[];
+  startSupport: number;
+  endSupport: number;
+}
+
+const normalCamera = () => ({
   center: {
     x: 0,
     y: 0,
@@ -15,7 +31,7 @@ const normalCamera = (invert: boolean) => ({
   },
   eye: {
     x: 0.02,
-    y: invert ? 2 : -2,
+    y: -3.5,
     z: 0.2
   }
 });
@@ -42,24 +58,34 @@ const axis = {
   showbackground: true
 };
 
-const scene = (
-  isSupportZoom: boolean,
-  invert: boolean,
-  camera: Camera | null
-) => ({
-  aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
-  xaxis: axis,
-  yaxis: axis,
-  zaxis: axis,
-  aspectratio: {
-    x: 3,
-    y: 0.2,
-    z: 0.5
-  },
-  camera: camera ?? {
-    ...(isSupportZoom ? supportCamera : normalCamera(invert))
+const createScene = (
+  plotParams: CreatePlotParams
+): Partial<Layout['scene']> => {
+  if (plotParams.camera) {
+    const y = Math.abs(plotParams.camera.eye?.y || 0);
+    plotParams.camera.eye = {
+      ...plotParams.camera.eye,
+      y: plotParams.invert ? y : y * -1
+    };
   }
-});
+  return {
+    aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+    xaxis: axis,
+    yaxis: axis,
+    zaxis: axis,
+    aspectratio: {
+      x: 3,
+      y: 0.2,
+      z: 0.5
+    },
+    annotations: createLoadAnnotations(plotParams),
+    camera: plotParams.camera
+      ? plotParams.camera
+      : {
+          ...(plotParams.isSupportZoom ? supportCamera : normalCamera())
+        }
+  };
+};
 
 const config = {
   displayModeBar: true,
@@ -77,11 +103,7 @@ const config = {
   ] as ModeBarDefaultButtons[]
 };
 
-const layout3d = (
-  isSupportZoom: boolean,
-  invert: boolean,
-  camera: Camera | null
-) => ({
+const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
   autosize: true,
   showlegend: false,
   margin: {
@@ -90,25 +112,12 @@ const layout3d = (
     t: 0,
     b: 0
   },
-  scene: scene(isSupportZoom, invert, camera)
+  scene: createScene(plotParams)
 });
 
-const layout2d: (
-  invert: boolean,
-  data: Data[],
-  side: Side
-) => Partial<Layout> = (invert: boolean, data: Data[], side: Side) => {
-  let xMin = 0;
-  let xMax = 0;
-  if (side === 'face') {
-    const allXValues = data.flatMap(
-      (d) => ((d as ScatterData).x as number[]) ?? []
-    ) as number[];
-    xMin = Math.min(...allXValues);
-    xMax = Math.max(...allXValues);
-    xMin -= 1;
-    xMax += 1;
-  }
+const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (
+  plotParams
+) => {
   return {
     autosize: true,
     showlegend: false,
@@ -121,38 +130,30 @@ const layout2d: (
     },
     xaxis: {
       ...axis,
-      autorange: side === 'face' ? false : true,
+      autorange: plotParams.invert ? 'reversed' : true,
       showticklabels: true,
       showgrid: true,
-      showline: true,
-      range: side === 'face' ? [xMin, xMax] : undefined
+      showline: true
     },
     yaxis: {
       ...axis,
       showticklabels: true,
       showgrid: true,
-      showline: true
-    }
+      showline: true,
+      scaleratio: plotParams.side === 'face' ? 0.2 : undefined,
+      scaleanchor: plotParams.side === 'face' ? 'x' : undefined
+    },
+    annotations: createLoadAnnotations(plotParams)
   };
 };
 
-export const createPlot = (
-  plotId: string,
-  data: Data[],
-  isSupportZoom: boolean,
-  invert: boolean,
-  view: View,
-  camera: Camera | null,
-  side: Side
-) => {
+export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
-  if (!document.getElementById(plotId)) {
+  if (!document.getElementById(plotParams.plotId)) {
     return undefined;
   }
   const baseLayout =
-    view === '3d'
-      ? layout3d(isSupportZoom, invert, camera)
-      : layout2d(invert, data, side);
+    plotParams.view === '3d' ? layout3d(plotParams) : layout2d(plotParams);
 
-  return Plotly.newPlot(plotId, data, baseLayout, config);
+  return Plotly.newPlot(plotParams.plotId, plotParams.data, baseLayout, config);
 };

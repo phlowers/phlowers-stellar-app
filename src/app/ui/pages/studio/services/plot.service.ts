@@ -1,0 +1,273 @@
+import {
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  Injectable,
+  signal,
+  untracked
+} from '@angular/core';
+import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
+import {
+  DataError,
+  GetSectionOutput,
+  Task,
+  TaskError
+} from '@services/worker_python/tasks/types';
+import { Section, Study } from '@core/domain';
+import { Subscription } from 'rxjs';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { CablesService } from '@services/cables/cables.service';
+import * as plotly from 'plotly.js-dist-min';
+import { Camera } from 'plotly.js-dist-min';
+import { isEqual } from 'lodash';
+import { SectionService } from '@services/sections/section.service';
+import { ChargeData } from '@src/app/core/domain/models/charge.model';
+
+export const PLOT_ID = 'plotly-output';
+
+export interface SpanOption {
+  label: string;
+  value: {
+    index: number;
+    uuid: string;
+  };
+}
+
+export const checkIfProjectionNeedRefresh = (
+  oldOptions: PlotOptions,
+  newOptions: PlotOptions,
+  loading: boolean
+) => {
+  if (loading) {
+    return false;
+  }
+  const oldView = oldOptions.view;
+  const newView = newOptions.view;
+  const oldSide = oldOptions.side;
+  const newSide = newOptions.side;
+  if (oldView !== newView || oldSide !== newSide) {
+    return true;
+  }
+  if (newView !== '2d') {
+    return false;
+  }
+  const oldStartSupport = oldOptions.startSupport;
+  const oldEndSupport = oldOptions.endSupport;
+  const newStartSupport = newOptions.startSupport;
+  const newEndSupport = newOptions.endSupport;
+  if (oldStartSupport !== newStartSupport || oldEndSupport !== newEndSupport) {
+    return true;
+  }
+  return false;
+};
+
+export const defaultPlotOptions: PlotOptions = {
+  view: '3d',
+  side: 'profile',
+  startSupport: 0,
+  endSupport: 1,
+  invert: false
+};
+
+const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
+  loads: true
+};
+
+export interface SelectedDisplayOptions {
+  loads: boolean;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PlotService {
+  temporaryLoadData: ChargeData | null = null;
+  error = signal<TaskError | DataError | null>(null);
+  litData = signal<GetSectionOutput | null>(null);
+  loading = signal<boolean>(true);
+  subscription: Subscription | null = null;
+  workerReady = signal<boolean>(false);
+  destroyRef = inject(DestroyRef);
+  camera = signal<Camera | null>(null);
+
+  study = signal<Study | null>(null);
+  section = signal<Section | null>(null);
+  plotOptions = signal<PlotOptions>({
+    ...defaultPlotOptions
+  });
+  selectedDisplayOptions = signal<SelectedDisplayOptions>({
+    ...defaultSelectedDisplayOptions
+  });
+  isSidebarOpen = signal(false);
+
+  constructor(
+    private readonly workerPythonService: WorkerPythonService,
+    private readonly cableService: CablesService,
+    private readonly sectionService: SectionService
+  ) {
+    this.subscription = this.workerPythonService.ready$.subscribe((value) => {
+      this.workerReady.set(value);
+    });
+    effect(() => {
+      if (this.workerReady() && this.section()) {
+        this.refreshSection(this.section()!);
+      }
+    });
+  }
+
+  resetAll = () => {
+    this.purgePlot();
+    this.error.set(null);
+    this.litData.set(null);
+    this.loading.set(false);
+    this.plotOptions.set({
+      ...defaultPlotOptions
+    });
+    this.camera.set(null);
+    this.section.set(null);
+    this.study.set(null);
+  };
+
+  modifySection = (sectionData: Partial<Section>) => {
+    const study = this.study();
+    const section = this.section();
+    if (!study || !section) {
+      return;
+    }
+    return this.sectionService.createOrUpdateSection(study, {
+      ...section,
+      ...sectionData
+    });
+  };
+
+  plotOptionsChange(values: Partial<PlotOptions>) {
+    const oldOptions = untracked(() => this.plotOptions());
+    const newOptions = { ...oldOptions, ...values };
+    this.plotOptions.set(newOptions);
+    this.refreshCamera();
+    if (
+      checkIfProjectionNeedRefresh(
+        oldOptions,
+        newOptions,
+        untracked(() => this.loading())
+      )
+    ) {
+      this.refreshProjection();
+    }
+  }
+
+  refreshSection = async (section: Section) => {
+    this.error.set(null);
+    this.litData.set(null);
+    this.section.set(section);
+    if (!this.workerPythonService.ready || !section || !section.cable_name) {
+      console.error('refreshSection error');
+      this.error.set(DataError.NO_CABLE_FOUND);
+      this.loading.set(false);
+      return;
+    }
+    this.loading.set(true);
+    const cable = await this.cableService.getCable(section.cable_name);
+    if (!cable) {
+      console.error('no cable found: ', section.cable_name);
+      this.loading.set(false);
+      this.error.set(DataError.NO_CABLE_FOUND);
+      return;
+    }
+    const { result, error } = await this.workerPythonService.runTask(
+      Task.getLit,
+      { section, cable }
+    );
+    this.litData.set(result);
+    this.error.set(error);
+    this.loading.set(false);
+  };
+
+  getCamera = () => {
+    const plot = document.getElementById(PLOT_ID);
+    if (!plot) {
+      return null;
+    }
+    return (plot as any)._fullLayout?.scene?.camera;
+  };
+
+  refreshCamera = (): Camera | null => {
+    const camera = this.getCamera();
+    if (
+      !isEqual(
+        camera,
+        untracked(() => this.camera())
+      )
+    ) {
+      this.camera.set(camera);
+    }
+    return camera;
+  };
+
+  refreshProjection = async () => {
+    this.loading.set(true);
+    const { result, error } = await this.workerPythonService.runTask(
+      Task.refreshProjection,
+      {
+        startSupport: this.plotOptions().startSupport,
+        endSupport: this.plotOptions().endSupport,
+        view: this.plotOptions().view
+      }
+    );
+    this.litData.set(result);
+    this.error.set(error);
+    this.loading.set(false);
+  };
+
+  purgePlot = () => {
+    if (!document.getElementById(PLOT_ID)) {
+      return;
+    }
+    plotly.purge(PLOT_ID);
+    this.litData.set(null);
+    this.error.set(null);
+    this.loading.set(false);
+  };
+
+  setSidebarOpen = () => {
+    this.refreshCamera();
+    this.isSidebarOpen.set(!this.isSidebarOpen());
+  };
+
+  getSpanOptions = computed<SpanOption[]>(() => {
+    const startSupport = this.plotOptions().startSupport;
+    const endSupport = this.plotOptions().endSupport;
+    const supportsLength = endSupport - startSupport;
+    const spanAmount = Math.max(supportsLength, 0);
+    const supports = this.section()?.supports ?? [];
+    // create an array the length of spanAmount
+    const spans = Array.from({ length: spanAmount }, (_, index) => ({
+      label: `${index + startSupport + 1} - ${index + startSupport + 2}`,
+      value: {
+        index: index + startSupport,
+        uuid: supports[index + startSupport]?.uuid ?? ''
+      }
+    }));
+    return spans;
+  });
+
+  getSupportOptions = (
+    selectedSpan: SpanOption['value'] | null
+  ): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
+    if (selectedSpan === null) {
+      return [];
+    }
+    const spanIndex = selectedSpan.index;
+    return [
+      {
+        label: spanIndex + 1,
+        value: 'LEFT'
+      },
+      {
+        label: spanIndex + 2,
+        value: 'RIGHT'
+      }
+    ];
+  };
+}

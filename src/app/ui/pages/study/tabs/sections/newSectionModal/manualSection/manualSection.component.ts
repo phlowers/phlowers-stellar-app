@@ -16,37 +16,45 @@ import { DividerModule } from 'primeng/divider';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { Section } from '@src/app/core/data/database/interfaces/section';
+import {
+  Section,
+  Support,
+  CatalogMaintenance,
+  CatalogLine,
+  CatalogCable
+} from '@core/domain';
 import { SupportsTableComponent } from './supportsTable/supportsTable.component';
-import { Support } from '@src/app/core/data/database/interfaces/support';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { CreateEditView } from '@src/app/ui/shared/types';
-import { StudioComponent } from '@src/app/ui/shared/components/studio/studio.component';
-import { createEmptySupport } from '@src/app/core/services/sections/helpers';
+import { CreateEditView } from '@ui/shared/types';
+import { StudioComponent } from '@ui/shared/components/studio/studio.component';
+import { createEmptySupport } from '@services/sections/helpers';
 import { sectionTypes } from './section-mock';
-import { MaintenanceService } from '@src/app/core/services/maintenance/maintenance.service';
-import { MaintenanceData } from '@src/app/core/data/database/interfaces/maintenance';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
-import { Line } from '@src/app/core/data/database/interfaces/line';
-import { LinesService } from '@src/app/core/services/lines/lines.service';
-import { Cable } from '@src/app/core/data/database/interfaces/cable';
-import { CablesService } from '@src/app/core/services/cables/cables.service';
+import { LinesService } from '@services/lines/lines.service';
+import { CablesService } from '@services/cables/cables.service';
 import { MessageModule } from 'primeng/message';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
+import {
+  DEFAULT_TABLE_ROWS_PER_PAGE,
+  TABLE_ROWS_PER_PAGE_OPTIONS
+} from '@ui/shared/constants/tablePagination';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
-const sortLines = (lines: Line[]) => {
+const sortLines = (lines: CatalogLine[]) => {
   return lines.sort((a, b) => {
-    if (a.voltage_idr === '0 KV' || a.voltage_idr === '0') {
+    const aHasNoVoltage = a.voltage_adr === 'NO_VOLTAGE';
+    const bHasNoVoltage = b.voltage_adr === 'NO_VOLTAGE';
+    if (aHasNoVoltage) {
       return -1;
     }
-    if (b.voltage_idr === '0 KV' || b.voltage_idr === '0') {
+    if (bHasNoVoltage) {
       return 1;
     }
     return a.voltage_adr.localeCompare(b.voltage_adr);
@@ -117,9 +125,11 @@ export class ManualSectionComponent implements OnInit {
   section = input.required<Section>();
   sectionChange = output<Section>();
   studio = viewChild(StudioComponent);
-  cablesFilterTable = signal<Cable[]>([]);
+  cablesFilterTable = signal<CatalogCable[]>([]);
   public sectionTypes = sectionTypes;
   isNameUnique = input<boolean>();
+  currentPageReportTemplate = $localize`Support ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
+
   constructor(
     private readonly maintenanceService: MaintenanceService,
     private readonly linesService: LinesService,
@@ -144,14 +154,17 @@ export class ManualSectionComponent implements OnInit {
     };
   });
 
-  maintenanceFilterTable = signal<MaintenanceData[]>([]);
-  linesFilterTable = signal<Line[]>([]);
+  maintenanceFilterTable = signal<CatalogMaintenance[]>([]);
+  linesFilterTable = signal<CatalogLine[]>([]);
   firstSupport = signal<number>(0);
-  rowsSupport = signal<number>(10);
+  rowsSupport = signal<number>(DEFAULT_TABLE_ROWS_PER_PAGE);
+  rowsSupportOptions = signal(TABLE_ROWS_PER_PAGE_OPTIONS);
 
   maintenanceTeamRead = signal<string>('');
   maintenanceCenterRead = signal<string>('');
   regionalTeamRead = signal<string>('');
+  linkAdrRead = signal<string>('');
+  litAdrRead = signal<string>('');
 
   readonly uniqueMaintenanceCenters = computed(() =>
     orderBy(
@@ -233,6 +246,16 @@ export class ManualSectionComponent implements OnInit {
       );
     });
     this.linesFilterTable.set(sortLines(linesTable));
+    if (this.mode() === 'view') {
+      const linkLine = linesTable.find(
+        (item) => item.link_idr === this.section().link_name
+      );
+      this.linkAdrRead.set(linkLine?.link_adr || '');
+      const litLine = linesTable.find(
+        (item) => item.lit_idr === this.section().lit_code
+      );
+      this.litAdrRead.set(litLine?.lit_adr || '');
+    }
     const cablesTable = await this.cablesService.getCables();
     this.cablesFilterTable.set(sortBy(cablesTable, 'name'));
   }
@@ -331,6 +354,13 @@ export class ManualSectionComponent implements OnInit {
     this.onSectionChange();
   }
 
+  onSectionTypeChange(event: { value: string }) {
+    if (event.value === 'guard') {
+      this.section().electric_phase_number = 0;
+      this.onSectionChange();
+    }
+  }
+
   onSupportChange(change: { uuid: string; support: Partial<Support> }) {
     const support = this.section().supports?.find(
       (support: Support) => support.uuid === change.uuid
@@ -363,13 +393,13 @@ export class ManualSectionComponent implements OnInit {
       if (id === type) {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
-            !event.value || item[id as keyof MaintenanceData] === event.value
+            !event.value || item[id as keyof CatalogMaintenance] === event.value
         );
       } else {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
             !this.section()[id as keyof Section] ||
-            item[id as keyof MaintenanceData] ===
+            item[id as keyof CatalogMaintenance] ===
               this.section()[id as keyof Section]
         );
       }
@@ -380,7 +410,7 @@ export class ManualSectionComponent implements OnInit {
     if (maintenanceTable.length === 1) {
       orderedMaintenanceTableProperties.forEach((id) => {
         (this.section() as unknown as Record<string, unknown>)[id] =
-          maintenanceTable[0][id as keyof MaintenanceData];
+          maintenanceTable[0][id as keyof CatalogMaintenance];
       });
     }
   }
@@ -436,7 +466,7 @@ export class ManualSectionComponent implements OnInit {
 
   debounceUpdateSliderOptions = debounce(
     (key: 'endSupport' | 'startSupport', value: number) => {
-      this.plotService.plotOptionsChange(key, value);
+      this.plotService.plotOptionsChange({ [key]: value });
     },
     DEBOUNCED_REFRESH_STUDIO_DELAY
   );

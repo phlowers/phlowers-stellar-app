@@ -61,6 +61,7 @@
                 optionLabel="name"
                 optionValue="code"
                 required
+                (onChange)="onSectionTypeChange($event)"
                 (ngModelChange)="onSectionChange()"
                 [filter]="true"
                 filterBy="name"
@@ -125,14 +126,22 @@
 
             <div>
               <dt i18n>Section type</dt>
-              <dd class="read-only-info">{{ section().type }}</dd>
+              <dd class="read-only-info">
+                @if (section().type === 'phase') {
+                  <ng-container i18n>Phase</ng-container>
+                } @else if (section().type === 'guard') {
+                  <ng-container i18n>Guard</ng-container>
+                }
+              </dd>
             </div>
 
             <div>
-              <dt i18n>Electric phase number</dt>
-              <dd class="read-only-info">
-                {{ section().electric_phase_number }}
-              </dd>
+              @if (section().type === 'phase') {
+                <dt i18n>Electric phase number</dt>
+                <dd class="read-only-info">
+                  {{ section().electric_phase_number }}
+                </dd>
+              }
             </div>
 
             <div>
@@ -343,25 +352,30 @@
             </div>
           </div>
         } @else if (mode() === 'view') {
-          <dl class="section-form-part-grid">
-            <div>
-              <dt i18n>Electric tension</dt>
+          <dl class="section-form-part-grid lines-form-grid">
+            <div class="[grid-area:a]">
+              <dt i18n>Electric tension level</dt>
               <dd class="read-only-info">
                 {{ section().voltage_idr }}
               </dd>
             </div>
 
-            <div>
-              <dt i18n>Link</dt>
+            <div class="[grid-area:b]">
+              <dt i18n>Link - ID</dt>
               <dd class="read-only-info">{{ section().link_name }}</dd>
             </div>
 
-            <div>
-              <dt i18n>LIT</dt>
+            <div class="[grid-area:c]">
+              <dt i18n>Link - Name</dt>
+              <dd class="read-only-info">{{ linkAdrRead() }}</dd>
+            </div>
+
+            <div class="[grid-area:d]">
+              <dt i18n>LIT - ID</dt>
               <dd class="read-only-info">{{ section().lit_name }}</dd>
             </div>
 
-            <div>
+            <div class="[grid-area:e]">
               <dt i18n>Branch</dt>
               <dd class="read-only-info">{{ section().branch_idr }}</dd>
             </div>
@@ -433,13 +447,13 @@
             <p-paginator
               (onPageChange)="onSupportsPageChange($event)"
               [totalRecords]="section().supports.length"
-              [rowsPerPageOptions]="[10, 20, 30]"
+              [rowsPerPageOptions]="rowsSupportOptions()"
               [rows]="rowsSupport()"
               [showCurrentPageReport]="true"
               [showPageLinks]="true"
               [showJumpToPageDropdown]="false"
               i18n-currentPageReportTemplate
-              currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
+              [currentPageReportTemplate]="currentPageReportTemplate"
             />
           </div>
         } @else if (mode() === 'view') {
@@ -506,6 +520,7 @@
         <div class="mt-2 h-full flex flex-col gap-2">
           <div class="h-[100%]">
             <app-studio
+              [isPreview]="true"
               [section]="section()"
               [isSupportZoom]="false"
             ></app-studio>

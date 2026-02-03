@@ -1,5 +1,4 @@
-import { Section } from '../../data/database/interfaces/section';
-import { Support } from '../../data/database/interfaces/support';
+import { Section, Support } from '@core/domain';
 import { v4 as uuidv4 } from 'uuid';
 
 export const createEmptySupport = (): Support => {
@@ -69,6 +68,9 @@ export const createEmptySection = (): Section => {
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
   };
 };

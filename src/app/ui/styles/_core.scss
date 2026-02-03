@@ -10,10 +10,7 @@ body {
 }
 
 label {
-  @extend %text-m-400;
-  @extend %label-spacing;
-  display: inline-block;
-  color: var(--grey-800);
+  @extend %label-style;
 }
 
 input[type='number'] {
@@ -25,4 +22,9 @@ input[type='number'] {
     -webkit-appearance: none;
     margin: 0;
   }
+}
+
+del {
+  text-decoration: none;
+  color: var(--star-dust-400);
 }

@@ -7,16 +7,13 @@ import {
   signal
 } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
-import {
-  DataError,
-  TaskError
-} from '@src/app/core/services/worker_python/tasks/types';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { DataError, TaskError } from '@services/worker_python/tasks/types';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Section } from '@core/data/database/interfaces/section';
+import { Section } from '@core/domain';
 import { OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 @Component({
   selector: 'app-studio',
@@ -24,7 +21,8 @@ import { PlotService } from '@src/app/ui/pages/studio/plot.service';
   imports: [SectionPlotComponent, ProgressSpinnerModule]
 })
 export class StudioComponent implements OnInit, OnDestroy {
-  section = input.required<Section | null>();
+  section = input<Section | null>();
+  isPreview = input.required<boolean>();
   isSupportZoom = input.required<boolean>();
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
@@ -49,7 +47,11 @@ export class StudioComponent implements OnInit, OnDestroy {
     public readonly plotService: PlotService
   ) {
     effect(() => {
-      if (this.workerReady() && this.section()) {
+      if (this.workerReady() && this.section() && this.isPreview()) {
+        this.plotService.plotOptionsChange({
+          startSupport: 0,
+          endSupport: this.section()!.supports.length - 1
+        });
         this.plotService.refreshSection(this.section()!);
       }
     });
@@ -65,7 +67,6 @@ export class StudioComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    this.plotService.purgePlot();
-    this.plotService.camera.set(null);
+    this.plotService.resetAll();
   }
 }

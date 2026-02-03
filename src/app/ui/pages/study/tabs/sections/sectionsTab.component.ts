@@ -6,31 +6,29 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import { Section } from '@src/app/core/data/database/interfaces/section';
+import { Section, InitialCondition, Study } from '@core/domain';
 import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '@src/app/ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { NewSectionModalComponent } from './newSectionModal/newSectionModal.component';
-import { CardComponent } from '@src/app/ui/shared/components/atoms/card/card.component';
+import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { Popover, PopoverModule } from 'primeng/popover';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { InitialConditionModalComponent } from './initialConditionModal/initialConditionModal.component';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
 import { DividerModule } from 'primeng/divider';
 import {
   DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput
-} from '@core/services/initial-conditions/initial-condition.service';
-import { CreateEditView } from '@src/app/ui/shared/types';
+} from '@services/initial-conditions/initial-condition.service';
+import { CreateEditView } from '@ui/shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
-import { createEmptySection } from '@src/app/core/services/sections/helpers';
+import { createEmptySection } from '@services/sections/helpers';
 import { RouterLink } from '@angular/router';
-import { Study } from '@src/app/core/data/database/interfaces/study';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 
 @Component({
   selector: 'app-sections-tab',
@@ -80,7 +78,7 @@ export class SectionsTabComponent {
     return {
       uuid: uuidv4(),
       name: $localize`IC` + ' ' + (currentInitialConditions.length + 1),
-      base_parameters: 2000,
+      base_parameters: null,
       base_temperature: 15,
       cable_pretension: 0,
       min_temperature: 0,

@@ -7,11 +7,10 @@
 
 import { TestBed } from '@angular/core/testing';
 import { ChargesService } from './charges.service';
-import { StudiesService } from '../studies/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { MessageService } from 'primeng/api';
-import { Charge } from '../../data/database/interfaces/charge';
-import { Section } from '../../data/database/interfaces/section';
-import { Study } from '../../data/database/interfaces/study';
+import { Charge, Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -19,7 +18,7 @@ jest.mock('uuid', () => ({
 }));
 
 // Mock findDuplicateTitle
-jest.mock('@src/app/ui/shared/helpers/duplicate', () => ({
+jest.mock('@ui/shared/helpers/duplicate', () => ({
   findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
 }));
 
@@ -37,7 +36,8 @@ const mockChargeData: Charge = {
       frontierSupportNumber: null,
       iceThicknessBefore: null,
       iceThicknessAfter: null
-    }
+    },
+    spanLoads: []
   }
 };
 
@@ -79,7 +79,10 @@ const mockSectionData: Section = {
   initial_conditions: [],
   selected_initial_condition_uuid: undefined,
   charges: [mockChargeData],
-  selected_charge_uuid: 'charge-uuid-1'
+  selected_charge_uuid: 'charge-uuid-1',
+  field_measures: [],
+  selected_field_measure_uuid: undefined,
+  vtl_and_guying: undefined
 };
 
 describe('ChargesService', () => {
@@ -99,7 +102,7 @@ describe('ChargesService', () => {
     charges: [mockCharge]
   };
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'study-uuid-1',
     title: 'Test Study',
     description: 'Test Description',
@@ -156,11 +159,12 @@ describe('ChargesService', () => {
             frontierSupportNumber: null,
             iceThicknessBefore: null,
             iceThicknessAfter: null
-          }
+          },
+          spanLoads: []
         }
       };
 
-      const studyWithoutNewCharge: Study = {
+      const studyWithoutNewCharge: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -250,7 +254,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };
@@ -309,11 +313,12 @@ describe('ChargesService', () => {
             frontierSupportNumber: null,
             iceThicknessBefore: null,
             iceThicknessAfter: null
-          }
+          },
+          spanLoads: []
         }
       };
 
-      const studyWithMultipleCharges: Study = {
+      const studyWithMultipleCharges: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -378,7 +383,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };
@@ -397,7 +402,7 @@ describe('ChargesService', () => {
 
   describe('duplicateCharge', () => {
     it('should duplicate a charge with a new UUID', async () => {
-      const freshStudy: Study = {
+      const freshStudy: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -452,7 +457,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };
@@ -469,7 +474,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when charge is not found', async () => {
-      const studyWithoutCharge: Study = {
+      const studyWithoutCharge: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -525,7 +530,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };
@@ -544,7 +549,7 @@ describe('ChargesService', () => {
 
   describe('getCharge', () => {
     it('should return a charge when it exists', async () => {
-      const freshStudy: Study = {
+      const freshStudy: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -566,7 +571,7 @@ describe('ChargesService', () => {
     });
 
     it('should return null when charge does not exist', async () => {
-      const studyWithoutCharge: Study = {
+      const studyWithoutCharge: StudyEntity = {
         ...mockStudy,
         sections: [
           {
@@ -600,7 +605,7 @@ describe('ChargesService', () => {
     });
 
     it('should throw an error when section is not found', async () => {
-      const studyWithoutSection: Study = {
+      const studyWithoutSection: StudyEntity = {
         ...mockStudy,
         sections: []
       };

@@ -5,11 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable } from '@angular/core';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
-import { Line, RteLinesCsvFile } from '../../data/database/interfaces/line';
+import { CatalogLineEntity } from '@core/infrastructure/database';
+import { LineCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { sortBy, uniqBy } from 'lodash';
 
@@ -29,11 +30,11 @@ export class LinesService {
   }
 
   async getLinesCount() {
-    return this.storageService.db?.lines.count();
+    return this.storageService.db?.catLines.count();
   }
 
   async getLines() {
-    return this.storageService.db?.lines.toArray();
+    return this.storageService.db?.catLines.toArray();
   }
 
   async importFromFile() {
@@ -48,20 +49,29 @@ export class LinesService {
         })
       );
 
-    const mapData = (data: RteLinesCsvFile[]) => {
+    const mapData = (data: LineCsvDto[]) => {
       return data
-        .map((item) => ({
-          uuid: uuidv4(),
-          link_idr: item.link_idr || '',
-          link_adr: item.link_adr || '',
-          lit_idr: item.lit_idr || '',
-          lit_adr: item.lit_adr || '',
-          branch_id: item.branch_id || '',
-          branch_idr: item.branch_idr || '',
-          branch_adr: item.branch_adr || '',
-          voltage_idr: item.voltage_idr || '0 KV',
-          voltage_adr: item.voltage_adr || '0 KV'
-        }))
+        .map((item) => {
+          const hasNoVoltage =
+            !item.voltage_idr ||
+            !item.voltage_adr ||
+            item.voltage_adr === '0.0';
+
+          return {
+            uuid: uuidv4(),
+            link_idr: item.link_idr || '',
+            link_adr: item.link_adr || '',
+            lit_idr: item.lit_idr || '',
+            lit_adr: item.lit_adr || '',
+            branch_id: item.branch_id || '',
+            branch_idr: item.branch_idr || '',
+            branch_adr: item.branch_adr || '',
+            voltage_idr: hasNoVoltage
+              ? $localize`NO VOLTAGE`
+              : item.voltage_idr,
+            voltage_adr: hasNoVoltage ? 'NO_VOLTAGE' : item.voltage_adr
+          };
+        })
         .filter((item) => item.link_idr);
     };
     await new Promise<void>((resolve) => {
@@ -69,14 +79,14 @@ export class LinesService {
         Papa.parse(linesDataCsv, {
           header: true,
           skipEmptyLines: true,
-          complete: (async (jsonResults: Papa.ParseResult<RteLinesCsvFile>) => {
+          complete: (async (jsonResults: Papa.ParseResult<LineCsvDto>) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
               return;
             }
-            await this.storageService.db?.lines.clear();
-            const table: Line[] = mapData(data);
+            await this.storageService.db?.catLines.clear();
+            const table: CatalogLineEntity[] = mapData(data);
             const uniqueTable = uniqBy(table, (element) =>
               [
                 element.voltage_idr,
@@ -86,11 +96,11 @@ export class LinesService {
                 element.branch_idr
               ].join('')
             );
-            await this.storageService.db?.lines.bulkAdd(
+            await this.storageService.db?.catLines.bulkAdd(
               sortBy(uniqueTable, 'voltage_adr')
             );
             resolve();
-          }) as (jsonResults: Papa.ParseResult<RteLinesCsvFile>) => void
+          }) as (jsonResults: Papa.ParseResult<LineCsvDto>) => void
         });
       });
     });

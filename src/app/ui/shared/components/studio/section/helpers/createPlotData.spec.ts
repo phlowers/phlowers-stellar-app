@@ -1,7 +1,7 @@
 import { createPlotData } from './createPlotData';
 import { PlotOptions } from './types';
 import { createDataObject } from './createPlotDataObject';
-import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 // Mock the createDataObject function
 jest.mock('./createPlotDataObject');
@@ -25,14 +25,15 @@ describe('createPlotData', () => {
       L0: [],
       elevation: [],
       line_angle: [],
-      vhl_under_chain: [],
-      vhl_under_console: [],
+      vtl_under_chain: [],
+      vtl_under_console: [],
       r_under_chain: [],
       r_under_console: [],
       ground_altitude: [],
       load_angle: [],
       displacement: [],
-      span_length: []
+      span_length: [],
+      loads_coords: {}
     };
 
     mockOptions = {
@@ -181,14 +182,15 @@ describe('createPlotData', () => {
         L0: [],
         elevation: [],
         line_angle: [],
-        vhl_under_chain: [],
-        vhl_under_console: [],
+        vtl_under_chain: [],
+        vtl_under_console: [],
         r_under_chain: [],
         r_under_console: [],
         ground_altitude: [],
         load_angle: [],
         displacement: [],
-        span_length: []
+        span_length: [],
+        loads_coords: {}
       };
 
       const result = createPlotData(emptyParams, mockOptions);

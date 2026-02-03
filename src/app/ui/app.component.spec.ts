@@ -7,18 +7,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { MessageService } from 'primeng/api';
-import { OnlineService } from '@core/services/online/online.service';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
-import { StorageService } from '@core/services/storage/storage.service';
+import { OnlineService } from '@services/online/online.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { UserService } from '../core/services/user/user.service';
-import { UpdateService } from '../core/services/worker_update/worker_update.service';
+import { UserService } from '@services/user/user.service';
+import { UpdateService } from '@services/worker_update/worker_update.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MaintenanceService } from '../core/services/maintenance/maintenance.service';
-import { LinesService } from '../core/services/lines/lines.service';
+import { MaintenanceService } from '@services/maintenance/maintenance.service';
+import { LinesService } from '@services/lines/lines.service';
 
 class Worker {
   url: string;

@@ -1,32 +1,27 @@
-import {
-  Component,
-  computed,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  signal
-} from '@angular/core';
-import { StudioComponent } from '@ui/shared/components/studio/studio.component';
-import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { InputNumberModule } from 'primeng/inputnumber';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { StudioTopToolbarComponent } from '@ui/shared/components/studio/top-toolbar/top-toolbar.component';
-import { SelectModule } from 'primeng/select';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { PlotService } from './plot.service';
-import { StudioMenuBarComponent } from '@ui/shared/components/studio/menu-bar/menu-bar.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { StudiesService } from '@core/services/studies/studies.service';
+import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
+import { debounce } from 'lodash';
+import { StudiesService } from '@services/studies/studies.service';
 import { Subscription } from 'dexie';
-import { SectionPlotCardsComponent } from '@ui/shared/components/studio/section/cards/section-plot-cards.component';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { TabsModule } from 'primeng/tabs';
+import { StudioComponent } from '@ui/shared/components/studio/studio.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { StudioTopToolbarComponent } from './top-toolbar/top-toolbar.component';
+import { StudioMenuBarComponent } from './menu-bar/menu-bar.component';
+import { SectionPlotCardsComponent } from './cards/section-plot-cards.component';
 import { SideTabsComponent } from './side-tabs/side-tabs.component';
 import { SideTabComponent } from './side-tabs/side-tab/side-tab.component';
-import { TabsModule } from 'primeng/tabs';
 import { ClimateComponent } from './loads/climate/climate.component';
 import { SpanComponent } from './loads/span/span.component';
-import { debounce } from 'lodash';
-import { ButtonComponent } from '../../shared/components/atoms/button/button.component';
 import { NewChargeModalComponent } from './new-charge-modal/new-charge-modal.component';
+import { ToolsDialogComponent } from './tools-dialog/tools-dialog.component';
+import { PlotService } from './services/plot.service';
+import { SectionService } from '@services/sections/section.service';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
@@ -34,22 +29,23 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 @Component({
   selector: 'app-studio-page',
   imports: [
-    StudioComponent,
+    FormsModule,
     NgxSliderModule,
     InputNumberModule,
-    FormsModule,
-    StudioTopToolbarComponent,
     SelectModule,
+    TabsModule,
+    StudioComponent,
+    ButtonComponent,
     IconComponent,
+    StudioTopToolbarComponent,
     StudioMenuBarComponent,
     SectionPlotCardsComponent,
     SideTabsComponent,
     SideTabComponent,
-    TabsModule,
     ClimateComponent,
     SpanComponent,
-    ButtonComponent,
-    NewChargeModalComponent
+    NewChargeModalComponent,
+    ToolsDialogComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
@@ -57,7 +53,7 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 export class StudioPageComponent implements OnInit, OnDestroy {
   sidebarWidth = signal(300);
   sidebarOpen = signal(false);
-  supports = signal<string>('single');
+  supports = signal<string>('all');
   supportsOptions = signal<
     {
       label: string;
@@ -115,8 +111,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly studiesService: StudiesService,
-    private readonly elementRef: ElementRef
+    private readonly sectionService: SectionService
   ) {}
+
+  previousSectionUuid = signal<string | null>(null);
 
   ngOnInit() {
     const studyUuid = this.route.snapshot.paramMap.get('uuid');
@@ -131,15 +129,20 @@ export class StudioPageComponent implements OnInit, OnDestroy {
           .subscribe((study) => {
             if (study) {
               this.plotService.study.set(study);
+              this.studiesService.setCurrentStudy(study);
               const section = study.sections.find(
                 (s) => s.uuid === sectionUuid
               );
               if (section) {
                 this.plotService.section.set(section);
-                this.plotService.plotOptionsChange(
-                  'endSupport',
-                  section.supports.length - 1
-                );
+                this.sectionService.setCurrentSection(section);
+                if (this.previousSectionUuid() !== section.uuid) {
+                  this.plotService.plotOptionsChange({
+                    endSupport: section.supports.length - 1,
+                    startSupport: 0
+                  });
+                  this.previousSectionUuid.set(section.uuid);
+                }
               } else {
                 this.router.navigate(['/studies']);
               }
@@ -163,7 +166,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   debounceUpdateSliderOptions = debounce(
     (key: 'endSupport' | 'startSupport', value: number) => {
-      this.plotService.plotOptionsChange(key, value);
+      this.plotService.plotOptionsChange({ [key]: value });
       const options = this.plotService.plotOptions();
       const diff = Math.abs(options.endSupport - options.startSupport);
       this.supports.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
@@ -209,32 +212,25 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const maxSupport = (this.plotService.section()?.supports.length ?? 0) - 1;
     const offset = value === 'single' ? 1 : value === 'double' ? 2 : null;
     if (offset !== null) {
-      this.plotService.plotOptionsChange(
-        'endSupport',
-        Math.min(startSupport + offset, maxSupport)
-      );
+      this.plotService.plotOptionsChange({
+        endSupport: Math.min(startSupport + offset, maxSupport)
+      });
     } else {
-      this.plotService.plotOptionsChange('startSupport', 0);
-      this.plotService.plotOptionsChange('endSupport', maxSupport);
+      this.plotService.plotOptionsChange({
+        startSupport: 0,
+        endSupport: maxSupport
+      });
     }
   }
 
   onSupportButtonClick(direction: 'left' | 'right') {
     const supportButton = this.supports();
     if (supportButton === 'all') return;
-    const incrementValue =
-      supportButton === 'single' ? 1 : supportButton === 'double' ? 2 : 0;
-    const increment = direction === 'left' ? -incrementValue : incrementValue;
+    const increment = direction === 'left' ? -1 : 1;
     const options = this.plotService.plotOptions();
-    const updateOrder: ('startSupport' | 'endSupport')[] =
-      direction === 'left'
-        ? ['startSupport', 'endSupport']
-        : ['endSupport', 'startSupport'];
-    updateOrder.forEach((key) => {
-      this.plotService.plotOptionsChange(
-        key,
-        Math.max(options[key] + increment, 0)
-      );
+    this.plotService.plotOptionsChange({
+      startSupport: Math.max(options.startSupport + increment, 0),
+      endSupport: Math.max(options.endSupport + increment, 0)
     });
   }
 }

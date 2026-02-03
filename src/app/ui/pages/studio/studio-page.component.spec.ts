@@ -3,16 +3,10 @@ import { StudioPageComponent } from './studio-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { ElementRef } from '@angular/core';
-import { PlotService } from './plot.service';
-import { StudiesService } from '@core/services/studies/studies.service';
-
-interface Section {
-  uuid: string;
-  supports: number[];
-}
-interface Study {
-  sections: Section[];
-}
+import { PlotService } from './services/plot.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { SectionService } from '@services/sections/section.service';
+import { Section, Study } from '@core/domain';
 
 interface SignalFn<T> {
   (): T;
@@ -42,6 +36,7 @@ class PlotServiceMock {
 class StudiesServiceMock {
   ready = new Subject<boolean>();
   getStudyAsObservable = jest.fn();
+  setCurrentStudy = jest.fn();
 }
 
 describe('StudioPageComponent', () => {
@@ -51,10 +46,14 @@ describe('StudioPageComponent', () => {
   let route: ActivatedRoute;
   let plotService: PlotServiceMock;
   let studiesService: StudiesServiceMock;
+  let sectionService: jest.Mocked<SectionService>;
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
     studiesService = new StudiesServiceMock();
+    sectionService = {
+      setCurrentSection: jest.fn()
+    } as unknown as jest.Mocked<SectionService>;
 
     await TestBed.configureTestingModule({
       imports: [StudioPageComponent],
@@ -71,6 +70,7 @@ describe('StudioPageComponent', () => {
         },
         { provide: PlotService, useValue: plotService },
         { provide: StudiesService, useValue: studiesService },
+        { provide: SectionService, useValue: sectionService },
         {
           provide: ElementRef,
           useValue: {
@@ -132,27 +132,38 @@ describe('StudioPageComponent', () => {
       sectionUuid
     );
 
-    const study: Study = {
+    const study = {
       sections: [
         { uuid: 'other', supports: [1] },
         { uuid: sectionUuid, supports: [1, 2, 3] }
       ]
-    };
+    } as unknown as Study;
 
     (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
       of(study)
     );
 
     const sectionSetSpy = jest.spyOn(plotService.section, 'set');
+    const studySetSpy = jest.spyOn(plotService.study, 'set');
 
     component.ngOnInit();
 
-    // Emit ready
+    // Emit ready - this triggers the subscription
     studiesService.ready.next(true);
 
-    expect(typeof plotService.study.set).toBe('function');
+    // Wait for async operations
+    fixture.detectChanges();
+
+    expect(studySetSpy).toHaveBeenCalledWith(study);
+    expect(studiesService.setCurrentStudy).toHaveBeenCalledWith(study);
     expect(sectionSetSpy).toHaveBeenCalledWith(study.sections[1]);
-    expect(plotService.plotOptionsChange).toHaveBeenCalledWith('endSupport', 2);
+    expect(sectionService.setCurrentSection).toHaveBeenCalledWith(
+      study.sections[1]
+    );
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      endSupport: 2,
+      startSupport: 0
+    });
   });
 
   it('ngOnInit should navigate if section not found', () => {
@@ -161,13 +172,18 @@ describe('StudioPageComponent', () => {
       'missing-section'
     );
 
-    const study: Study = { sections: [{ uuid: 'a', supports: [1] }] };
+    const study = {
+      sections: [{ uuid: 'a', supports: [1] }]
+    } as unknown as Study;
     (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
       of(study)
     );
 
     component.ngOnInit();
     studiesService.ready.next(true);
+
+    // Wait for async operations
+    fixture.detectChanges();
 
     expect(router.navigate).toHaveBeenCalledWith(['/studies']);
   });
@@ -178,10 +194,253 @@ describe('StudioPageComponent', () => {
     expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(300);
-    expect(plotService.plotOptionsChange).toHaveBeenCalledWith(
-      'startSupport',
-      1
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 1
+    });
+  });
+
+  it('debounceUpdateSliderOptions should set supports to single when diff is 1', () => {
+    jest.useFakeTimers();
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 2,
+      endSupport: 3
+    });
+
+    component.debounceUpdateSliderOptions('endSupport', 3);
+    jest.advanceTimersByTime(300);
+
+    expect(component.supports()).toBe('single');
+  });
+
+  it('debounceUpdateSliderOptions should set supports to double when diff is 2', () => {
+    jest.useFakeTimers();
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 1,
+      endSupport: 3
+    });
+
+    component.debounceUpdateSliderOptions('endSupport', 3);
+    jest.advanceTimersByTime(300);
+
+    expect(component.supports()).toBe('double');
+  });
+
+  it('sliderOptions translate callback should return value + 1 as string', () => {
+    const translate = component.sliderOptions().translate;
+    expect(translate!(0, 0)).toBe('1');
+    expect(translate!(4, 0)).toBe('5');
+  });
+
+  it('ngOnInit should navigate when study is null', () => {
+    (route.snapshot.paramMap.get as jest.Mock).mockReturnValue('study-1');
+    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue(
+      'section-1'
     );
+
+    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
+      of(null)
+    );
+
+    component.ngOnInit();
+    studiesService.ready.next(true);
+    fixture.detectChanges();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/studies']);
+  });
+
+  it('updateSliderOptions should debounce startSupport changes', () => {
+    jest.useFakeTimers();
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 0,
+      endSupport: 3
+    });
+
+    component.updateSliderOptions({ value: 1, highValue: 3 });
+
+    jest.advanceTimersByTime(300);
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 1
+    });
+  });
+
+  it('updateSliderOptions should debounce endSupport changes', () => {
+    jest.useFakeTimers();
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 0,
+      endSupport: 3
+    });
+
+    component.updateSliderOptions({ value: 0, highValue: 5 });
+
+    jest.advanceTimersByTime(300);
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      endSupport: 5
+    });
+  });
+
+  it('updateSliderOptions should not call debounce when values unchanged', () => {
+    jest.useFakeTimers();
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 0,
+      endSupport: 3
+    });
+
+    component.updateSliderOptions({ value: 0, highValue: 3 });
+
+    jest.advanceTimersByTime(300);
+
+    expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
+  });
+
+  it('openNewChargeModal should set modal open with default create mode', () => {
+    component.openNewChargeModal();
+
+    expect(component.isNewChargeModalOpen()).toBe(true);
+    expect(component.newChargeModalMode()).toBe('create');
+    expect(component.newChargeModalUuid()).toBeNull();
+  });
+
+  it('openNewChargeModal should set modal open with specified mode and uuid', () => {
+    component.openNewChargeModal({ mode: 'edit', uuid: 'charge-1' });
+
+    expect(component.isNewChargeModalOpen()).toBe(true);
+    expect(component.newChargeModalMode()).toBe('edit');
+    expect(component.newChargeModalUuid()).toBe('charge-1');
+  });
+
+  it('onSelectPlotOptions should set single span offset', () => {
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 1,
+      endSupport: 5
+    });
+    plotService.section.set({
+      supports: [1, 2, 3, 4, 5, 6]
+    } as unknown as Section);
+
+    component.onSelectPlotOptions('single');
+
+    expect(component.supports()).toBe('single');
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      endSupport: 2
+    });
+  });
+
+  it('onSelectPlotOptions should set double span offset', () => {
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 1,
+      endSupport: 5
+    });
+    plotService.section.set({
+      supports: [1, 2, 3, 4, 5, 6]
+    } as unknown as Section);
+
+    component.onSelectPlotOptions('double');
+
+    expect(component.supports()).toBe('double');
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      endSupport: 3
+    });
+  });
+
+  it('onSelectPlotOptions should reset to all supports', () => {
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 1,
+      endSupport: 3
+    });
+    plotService.section.set({
+      supports: [1, 2, 3, 4, 5, 6]
+    } as unknown as Section);
+
+    component.onSelectPlotOptions('all');
+
+    expect(component.supports()).toBe('all');
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 0,
+      endSupport: 5
+    });
+  });
+
+  it('onSelectPlotOptions single should clamp to maxSupport', () => {
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 4,
+      endSupport: 5
+    });
+    plotService.section.set({
+      supports: [1, 2, 3, 4, 5]
+    } as unknown as Section);
+
+    component.onSelectPlotOptions('single');
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      endSupport: 4
+    });
+  });
+
+  it('onSupportButtonClick right should increment supports', () => {
+    component.supports.set('single');
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 1,
+      endSupport: 2
+    });
+
+    component.onSupportButtonClick('right');
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 2,
+      endSupport: 3
+    });
+  });
+
+  it('onSupportButtonClick left should decrement supports', () => {
+    component.supports.set('double');
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 2,
+      endSupport: 4
+    });
+
+    component.onSupportButtonClick('left');
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 1,
+      endSupport: 3
+    });
+  });
+
+  it('onSupportButtonClick left should clamp to zero', () => {
+    component.supports.set('single');
+    plotService.plotOptions.mockReturnValue({
+      invert: false,
+      startSupport: 0,
+      endSupport: 1
+    });
+
+    component.onSupportButtonClick('left');
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 0,
+      endSupport: 0
+    });
+  });
+
+  it('onSupportButtonClick should do nothing when supports is all', () => {
+    component.supports.set('all');
+
+    component.onSupportButtonClick('right');
+
+    expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
   });
 
   it('ngOnDestroy should clean up subscription, section, and resizeObserver', () => {

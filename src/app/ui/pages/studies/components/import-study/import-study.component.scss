@@ -22,8 +22,13 @@
     }
 
     &__txt {
-      @extend %text-l-400;
-      color: var(--grey-850);
+      @extend %text-l-600;
+      color: var(--grey-600);
+      text-align: center;
+
+      & .small-txt {
+        @extend %text-m-400;
+      }
     }
 
     &__input {
@@ -52,19 +57,13 @@
 
     &__label {
       @apply flex items-center gap-1 mb-0;
-      @extend %text-s-400;
-      color: var(--grey-750);
     }
 
     &__icon {
       font-size: 1rem;
       color: var(--success-700);
-    }
 
-    &__btns {
-      @apply flex gap-2;
-
-      &__erase-icon {
+      &.error {
         color: var(--main-error);
       }
     }

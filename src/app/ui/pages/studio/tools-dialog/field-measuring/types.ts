@@ -1,0 +1,105 @@
+export interface FieldMeasure {
+  uuid: string;
+  name: string;
+  link: string | null;
+  voltage: string | null;
+  spanType: string | null;
+  phaseNumber: number | null;
+  numberOfConductors: number | null;
+  span: number[] | null;
+  longitude: number | null;
+  latitude: number | null;
+  altitude: number | null;
+  azimuth: number | null;
+  date: Date | null;
+  time: Date | null;
+  season: 'summer' | 'winter';
+  ambientTemperature: number | null;
+  windSpeed: number | null;
+  windSpeedUnit: 'kmh' | 'ms';
+  windDirection: string | null;
+  skyCover: string | null;
+  // Parameter calculation fields
+  calculationMethod: 'papoto' | 'tangente-aiming' | 'pep';
+  // Papoto fields
+  leftSupport: string | null;
+  spanLength: number | null;
+  measuredElevationDifference: number | null;
+  HL: number | null;
+  H1: number | null;
+  H2: number | null;
+  H3: number | null;
+  HR: number | null;
+  VL: number | null;
+  V1: number | null;
+  V2: number | null;
+  V3: number | null;
+  VR: number | null;
+  // Visées tangentes fields
+  cableHAccDistance: number | null;
+  cableVerticalAccAngle: number | null;
+  calculationType: 'parametre' | 'tangente';
+  cableTangentAngle: number | null;
+  // PEP fields
+  lengthBetweenSightGD: number | null;
+  elevationDifferenceBetweenSightGD: number | null;
+  xSight1: number | null;
+  xSight2: number | null;
+  xSight3: number | null;
+  ySight1: number | null;
+  ySight2: number | null;
+  ySight3: number | null;
+  // Temperature calculation fields
+  cableName: string | null;
+  transit: number | null;
+  windIncidence: number | null;
+  windIncidenceMode: 'auto' | 'perpendicular';
+  diffuseSolarFlux: number | null;
+  directSolarFlux: number | null;
+  diffuseDirectSolarFlux: number | null;
+  diffusedSolarFlux: number | null;
+  measuredDiffusedPlusDirectSolarFlux: number | null;
+  measuredDiffusedSolarFlux: number | null;
+  diffusedPlusDirectSolarFlux: number | null;
+  // Parameter at 15°C without wind fields
+  updateMode15C: 'auto' | 'manual';
+  parameterPapoto: number | null;
+  parameterUncertaintyPapoto: number | null;
+  cableTemperatureCalibration: number | null;
+  cableTemperatureCalibrationUncertainty: number | null;
+  manualParameterCalculation15CWithoutWind: ManualParameterCalculation15CWithoutWind | null;
+  outputs: FieldMeasureOutputs;
+}
+
+export interface FieldMeasureOutputs {
+  papoto: PapotoResult | null;
+  cableTemperature: TemperatureCalculationResult | null;
+  parameter15C: Parameter15CResult | null;
+}
+
+export interface Parameter15CResult {
+  parameter15CMinusUncertainty: number;
+  parameter15C: number;
+  parameter15CPlusUncertainty: number;
+}
+
+export interface TemperatureCalculationResult {
+  cableSolarFlux: number;
+  cableTemperature: number;
+  cableTemperatureUncertainty: number;
+}
+
+export interface PapotoResult {
+  parameter: number;
+  parameter_1_2: number;
+  parameter_2_3: number;
+  parameter_1_3: number;
+  check_validity: boolean;
+}
+
+export interface ManualParameterCalculation15CWithoutWind {
+  parameterPapoto: number | null;
+  parameterUncertaintyPapoto: number | null;
+  cableTemperatureCalibration: number | null;
+  cableTemperatureCalibrationUncertainty: number | null;
+}

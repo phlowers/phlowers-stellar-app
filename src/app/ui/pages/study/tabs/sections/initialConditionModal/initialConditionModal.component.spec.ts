@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InitialConditionModalComponent } from './initialConditionModal.component';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { InitialCondition } from '@src/app/core/data/database/interfaces/initialCondition';
+import { Section, InitialCondition } from '@core/domain';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { CablesService } from '@core/services/cables/cables.service';
-import { StorageService } from '@core/services/storage/storage.service';
-import { StudiesService } from '@core/services/studies/studies.service';
+import { CablesService } from '@services/cables/cables.service';
+import { StorageService } from '@services/storage/storage.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { BehaviorSubject } from 'rxjs';
 
 describe('InitialConditionModalComponent', () => {
@@ -50,13 +49,16 @@ describe('InitialConditionModalComponent', () => {
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
   };
 
   const mockInitialCondition: InitialCondition = {
     uuid: 'ic-1',
     name: 'Cond 1',
-    base_parameters: 0,
+    base_parameters: 2000,
     base_temperature: 20,
     cable_pretension: 0,
     min_temperature: 0,
@@ -103,6 +105,8 @@ describe('InitialConditionModalComponent', () => {
       'initialConditionInput',
       mockInitialCondition
     );
+    fixture.componentRef.setInput('initialConditions', []);
+    fixture.componentRef.setInput('study', null);
     fixture.detectChanges();
   });
 
@@ -133,15 +137,30 @@ describe('InitialConditionModalComponent', () => {
       fixture.componentRef.setInput('mode', 'create');
       fixture.detectChanges();
 
+      // Ensure form is valid by patching it with valid values
+      component.form.patchValue({
+        name: mockInitialCondition.name,
+        base_parameters: mockInitialCondition.base_parameters,
+        base_temperature: mockInitialCondition.base_temperature,
+        cable_pretension: mockInitialCondition.cable_pretension,
+        min_temperature: mockInitialCondition.min_temperature,
+        max_wind_pressure: mockInitialCondition.max_wind_pressure,
+        max_frost_width: mockInitialCondition.max_frost_width
+      });
+
       const spyAdd = jest.spyOn(component.addInitialCondition, 'emit');
       const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
 
-      component.onSubmit();
+      component.onSubmit(false);
 
       expect(spyOpen).toHaveBeenCalledWith(false);
       expect(spyAdd).toHaveBeenCalledWith({
         section: mockSection,
-        initialCondition: mockInitialCondition
+        initialCondition: expect.objectContaining({
+          ...mockInitialCondition,
+          ...component.form.value
+        }),
+        generateState: false
       });
     });
 
@@ -149,15 +168,30 @@ describe('InitialConditionModalComponent', () => {
       fixture.componentRef.setInput('mode', 'edit');
       fixture.detectChanges();
 
+      // Ensure form is valid by patching it with valid values
+      component.form.patchValue({
+        name: mockInitialCondition.name,
+        base_parameters: mockInitialCondition.base_parameters,
+        base_temperature: mockInitialCondition.base_temperature,
+        cable_pretension: mockInitialCondition.cable_pretension,
+        min_temperature: mockInitialCondition.min_temperature,
+        max_wind_pressure: mockInitialCondition.max_wind_pressure,
+        max_frost_width: mockInitialCondition.max_frost_width
+      });
+
       const spyUpdate = jest.spyOn(component.updateInitialCondition, 'emit');
       const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
 
-      component.onSubmit();
+      component.onSubmit(false);
 
       expect(spyOpen).toHaveBeenCalledWith(false);
       expect(spyUpdate).toHaveBeenCalledWith({
         section: mockSection,
-        initialCondition: mockInitialCondition
+        initialCondition: expect.objectContaining({
+          ...mockInitialCondition,
+          ...component.form.value
+        }),
+        generateState: false
       });
     });
 
@@ -165,11 +199,22 @@ describe('InitialConditionModalComponent', () => {
       fixture.componentRef.setInput('mode', 'view');
       fixture.detectChanges();
 
+      // Ensure form is valid by patching it with valid values
+      component.form.patchValue({
+        name: mockInitialCondition.name,
+        base_parameters: mockInitialCondition.base_parameters,
+        base_temperature: mockInitialCondition.base_temperature,
+        cable_pretension: mockInitialCondition.cable_pretension,
+        min_temperature: mockInitialCondition.min_temperature,
+        max_wind_pressure: mockInitialCondition.max_wind_pressure,
+        max_frost_width: mockInitialCondition.max_frost_width
+      });
+
       const spyAdd = jest.spyOn(component.addInitialCondition, 'emit');
       const spyUpdate = jest.spyOn(component.updateInitialCondition, 'emit');
       const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
 
-      component.onSubmit();
+      component.onSubmit(false);
 
       expect(spyOpen).toHaveBeenCalledWith(false);
       expect(spyAdd).not.toHaveBeenCalled();
@@ -210,7 +255,7 @@ describe('InitialConditionModalComponent', () => {
         {
           uuid: 'ic-2',
           name: 'Existing Condition',
-          base_parameters: 0,
+          base_parameters: 2000,
           base_temperature: 25,
           cable_pretension: 0,
           min_temperature: 0,

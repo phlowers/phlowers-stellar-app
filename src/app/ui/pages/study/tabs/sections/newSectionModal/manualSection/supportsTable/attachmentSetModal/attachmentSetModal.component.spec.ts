@@ -34,11 +34,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 
 import { AttachmentSetModalComponent } from './attachmentSetModal.component';
-import { AttachmentService } from '@src/app/core/services/attachment/attachment.service';
-import { Attachment } from '@src/app/core/data/database/interfaces/attachment';
-import { Support } from '@src/app/core/data/database/interfaces/support';
-import { Section } from '@src/app/core/data/database/interfaces/section';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { AttachmentService } from '@services/attachment/attachment.service';
+import { CatalogAttachment, Support, Section } from '@core/domain';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
 // Mock plotly.js-dist-min to prevent errors in SupportPlotComponent
 jest.mock('plotly.js-dist-min', () => ({
@@ -57,7 +55,7 @@ describe('AttachmentSetModalComponent', () => {
   let attachmentServiceMock: jest.Mocked<AttachmentService>;
   let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
 
-  const mockAttachments: Attachment[] = [
+  const mockAttachments: CatalogAttachment[] = [
     {
       uuid: '1',
       support_name: 'Support A',
@@ -67,7 +65,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 2.5,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     },
     {
       uuid: '2',
@@ -78,7 +76,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 3.0,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     },
     {
       uuid: '3',
@@ -89,7 +87,7 @@ describe('AttachmentSetModalComponent', () => {
       cross_arm_length: 2.0,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
-      support_tower: 'D-Type'
+      support_tower: 'Tower Model'
     }
   ];
 
@@ -112,7 +110,7 @@ describe('AttachmentSetModalComponent', () => {
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
     attachmentPosition: 'Position 1',
-    towerModel: 'D-Type'
+    towerModel: 'Tower Model'
   };
 
   const mockSection: Section = {
@@ -153,7 +151,10 @@ describe('AttachmentSetModalComponent', () => {
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
   };
 
   beforeEach(async () => {
@@ -243,7 +244,7 @@ describe('AttachmentSetModalComponent', () => {
     await fixture.whenStable();
 
     const event = { value: 'Support A' };
-    await component.onAttachnementSelect(event, 'support_name');
+    await component.onAttachmentSelect(event, 'support_name');
 
     const filteredAttachments = mockAttachments
       .filter((item) => item.support_name === 'Support A')
@@ -258,7 +259,7 @@ describe('AttachmentSetModalComponent', () => {
     await fixture.whenStable();
 
     const event = { value: 1 };
-    await component.onAttachnementSelect(event, 'attachment_set');
+    await component.onAttachmentSelect(event, 'attachment_set');
 
     expect(component.armLength()).toBe(2.5);
     expect(component.heightBelowConsole()).toBe(10.5);
@@ -271,7 +272,7 @@ describe('AttachmentSetModalComponent', () => {
     component.heightBelowConsole.set(10.5);
 
     const event = { value: null };
-    await component.onAttachnementSelect(event, 'attachment_set');
+    await component.onAttachmentSelect(event, 'attachment_set');
 
     expect(component.armLength()).toBeUndefined();
     expect(component.heightBelowConsole()).toBeUndefined();
@@ -287,7 +288,7 @@ describe('AttachmentSetModalComponent', () => {
     component.attachmentSet.set(1);
     component.armLength.set(2.5);
     component.heightBelowConsole.set(10.5);
-    component.towerModel.set('D-Type');
+    component.towerModel.set('Tower Model');
 
     // Mock the support input signal
     jest.spyOn(component, 'support').mockReturnValue(mockSupport);
@@ -300,7 +301,7 @@ describe('AttachmentSetModalComponent', () => {
       armLength: 2.5,
       heightBelowConsole: 10.5,
       uuid: 'support-uuid',
-      towerModel: 'D-Type'
+      towerModel: 'Tower Model'
     });
   });
 
@@ -324,7 +325,7 @@ describe('AttachmentSetModalComponent', () => {
     await fixture.whenStable();
 
     const event = { value: 'Set 1' };
-    await component.onAttachnementSelect(event, 'attachment_set');
+    await component.onAttachmentSelect(event, 'attachment_set');
 
     // Should not set arm length and height since no support name is selected
     expect(component.armLength()).toBeUndefined();
@@ -360,7 +361,7 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.attachmentSet()).toBe(1);
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
-      expect(component.towerModel()).toBe('D-Type');
+      expect(component.towerModel()).toBe('Tower Model');
       expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
     });
 
@@ -409,7 +410,7 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.attachmentSet()).toBe(1);
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
-      expect(component.towerModel()).toBe('D-Type');
+      expect(component.towerModel()).toBe('Tower Model');
     });
 
     it('should reset values when modal opens without support', async () => {

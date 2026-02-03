@@ -13,9 +13,10 @@
       "@src/*": ["./src/*"],
       "@app/*": ["./src/app/*"],
       "@core/*": ["./src/app/core/*"],
+      "@services/*": ["./src/app/core/services/*"],
       "@ui/*": ["./src/app/ui/*"],
       "@plugins/*": ["./src/app/plugins/*"],
-      "@adapters/*": ["./src/app/adapters/*"],
+      "@adapters/*": ["./src/app/adapters/*"]
     },
   },
   "files": [

@@ -11,11 +11,9 @@ import {
 } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { AttachmentService } from './attachment.service';
-import { StorageService } from '../storage/storage.service';
-import {
-  Attachment,
-  RteAttachmentsCsvFile
-} from '../../data/database/interfaces/attachment';
+import { StorageService } from '@services/storage/storage.service';
+import { CatalogAttachmentEntity } from '@core/infrastructure/database';
+import { AttachmentCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
@@ -36,8 +34,8 @@ interface MockTable {
 }
 
 interface MockDb {
-  lines: MockTable;
-  attachments: MockTable;
+  catLines: MockTable;
+  catAttachments: MockTable;
 }
 
 describe('AttachmentService', () => {
@@ -56,12 +54,12 @@ describe('AttachmentService', () => {
     };
 
     mockDb = {
-      lines: {
+      catLines: {
         count: jest.fn().mockResolvedValue(0),
         toArray: jest.fn().mockResolvedValue([]),
         bulkAdd: jest.fn().mockResolvedValue(undefined)
       },
-      attachments: mockAttachmentsTable
+      catAttachments: mockAttachmentsTable
     };
 
     // Create spy for StorageService
@@ -100,7 +98,7 @@ describe('AttachmentService', () => {
 
   describe('getAttachments', () => {
     it('should return attachments array from database', async () => {
-      const mockAttachments: Attachment[] = [
+      const mockAttachments: CatalogAttachmentEntity[] = [
         {
           uuid: 'uuid-1',
           updated_at: '2025-01-01T00:00:00.000Z',
@@ -150,7 +148,7 @@ describe('AttachmentService', () => {
     });
 
     it('should import attachments from CSV file successfully', async () => {
-      const mockCsvData: RteAttachmentsCsvFile[] = [
+      const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'catalog1',
           support_idr: 'idr1',
@@ -182,7 +180,7 @@ describe('AttachmentService', () => {
 
       // Mock Papa Parse to call complete callback
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -254,7 +252,7 @@ describe('AttachmentService', () => {
 
       // Mock Papa Parse to call complete callback with empty data
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -294,7 +292,7 @@ describe('AttachmentService', () => {
     });
 
     it('should filter out attachments with missing support_adr', async () => {
-      const mockCsvData: RteAttachmentsCsvFile[] = [
+      const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
           support_idr: 'idr1',
@@ -337,7 +335,7 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncat2,idr2,,tower2,Family 2,2,0,0,11.0,2.5\ncat3,idr3,Support 3,tower3,Family 3,3,0,0,12.0,3.0';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -406,7 +404,7 @@ describe('AttachmentService', () => {
     it('should handle missing database gracefully', async () => {
       (storageService as unknown as { db: undefined }).db = undefined;
 
-      const mockCsvData: RteAttachmentsCsvFile[] = [
+      const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
           support_idr: 'idr1',
@@ -425,7 +423,7 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -463,7 +461,7 @@ describe('AttachmentService', () => {
     });
 
     it('should handle CSV data with mixed valid and invalid support_adr values', async () => {
-      const mockCsvData: RteAttachmentsCsvFile[] = [
+      const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
           support_idr: 'idr1',
@@ -518,7 +516,7 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,,2,11.0,2.5\nFamily 3,Support 3,3,12.0,3.0\nFamily 4,,4,13.0,3.5';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -585,7 +583,7 @@ describe('AttachmentService', () => {
     });
 
     it('should clear attachments table before adding new data', async () => {
-      const mockCsvData: RteAttachmentsCsvFile[] = [
+      const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
           support_idr: 'idr1',
@@ -604,7 +602,7 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -647,7 +645,7 @@ describe('AttachmentService', () => {
     it('should handle HTTP errors gracefully', async () => {
       // Mock Papa Parse to call complete callback with empty data when HTTP error occurs
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
           if (options.complete) {
             options.complete(
               {
@@ -687,7 +685,7 @@ describe('AttachmentService', () => {
     });
 
     it('should parse numeric values correctly', async () => {
-      const mockCsvData: RteAttachmentsCsvFile[] = [
+      const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
           support_idr: 'idr1',
@@ -718,7 +716,7 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,Support 2,2,11,2.5';
 
       (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<RteAttachmentsCsvFile>) => {
+        (data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
           if (options.complete) {
             options.complete(
               {

@@ -1,0 +1,184 @@
+@use 'abstract.extracts' as app;
+
+dt {
+  @extend %label-style;
+  color: var(--grey-800);
+}
+
+dd {
+  @extend %text-m-400;
+  color: var(--star-dust-950);
+  padding: 0.375rem 0.5rem;
+}
+
+.temperature-calculation {
+  &__mandatory-msg {
+    @apply flex items-center gap-1 my-4;
+    @extend %text-s-600;
+    color: var(--star-dust-950);
+  }
+
+  &__form {
+    @extend %tools-grid-layout;
+    grid-template-areas:
+      'conductor__label transit__label . . .'
+      'conductor__value transit__value . . .'
+      'ambientTemp__label windSpeed__label windDirection__label windIncidence__label windIncidence__label'
+      'ambientTemp__value windSpeed__value windDirection__value windIncidence__value windIncidence__value'
+      'solar solar solar solar solar'
+      'skyCover__label diffusedSolarFlux__label directSolarFlux__label diffusedPlusDirectSolarFlux__label measuredDiffusedPlusDirectSolarFlux__label'
+      'skyCover__value diffusedSolarFlux__value directSolarFlux__value diffusedPlusDirectSolarFlux__value measuredDiffusedPlusDirectSolarFlux__value'
+      '. . . . measuredDiffusedPlusDirectSolarFluxInfo';
+    row-gap: 0rem;
+
+    .with-mt-labels dt {
+      @apply mt-3;
+    }
+
+    [class*='__label'] {
+      align-self: end;
+    }
+
+    [class*='__value'] {
+      @apply self-center;
+    }
+
+    .conductor__label {
+      grid-area: conductor__label;
+    }
+
+    .conductor__value {
+      grid-area: conductor__value;
+    }
+
+    .ambientTemp__label {
+      grid-area: ambientTemp__label;
+    }
+
+    .ambientTemp__value {
+      grid-area: ambientTemp__value;
+    }
+
+    .transit__label {
+      grid-area: transit__label;
+    }
+
+    .transit__value {
+      grid-area: transit__value;
+    }
+
+    .windSpeed__label {
+      grid-area: windSpeed__label;
+    }
+
+    .windSpeed__value {
+      grid-area: windSpeed__value;
+    }
+
+    .windDirection__label {
+      grid-area: windDirection__label;
+    }
+
+    .windDirection__value {
+      grid-area: windDirection__value;
+    }
+
+    .windIncidence__label {
+      grid-area: windIncidence__label;
+      @apply flex flex-row gap-2 items-center;
+    }
+
+    .windIncidence__value {
+      grid-area: windIncidence__value;
+    }
+
+    .solar {
+      grid-area: solar;
+      @apply mb-3;
+      @extend %heading-xs;
+      color: var(--star-dust-950);
+    }
+
+    .skyCover__label {
+      grid-area: skyCover__label;
+    }
+
+    .skyCover__value {
+      grid-area: skyCover__value;
+    }
+
+    .diffusedSolarFlux__label {
+      grid-area: diffusedSolarFlux__label;
+    }
+
+    .diffusedSolarFlux__value {
+      grid-area: diffusedSolarFlux__value;
+    }
+
+    .directSolarFlux__label {
+      grid-area: directSolarFlux__label;
+    }
+
+    .directSolarFlux__value {
+      grid-area: directSolarFlux__value;
+    }
+
+    .diffusedPlusDirectSolarFlux__label {
+      grid-area: diffusedPlusDirectSolarFlux__label;
+    }
+
+    .diffusedPlusDirectSolarFlux__value {
+      grid-area: diffusedPlusDirectSolarFlux__value;
+    }
+
+    .measuredDiffusedPlusDirectSolarFlux__label {
+      grid-area: measuredDiffusedPlusDirectSolarFlux__label;
+    }
+
+    .measuredDiffusedPlusDirectSolarFlux__value {
+      grid-area: measuredDiffusedPlusDirectSolarFlux__value;
+    }
+
+    .solar-fluxs-impact {
+      @apply self-start;
+      grid-area: measuredDiffusedPlusDirectSolarFluxInfo;
+      @extend %text-s-600, %label-spacing;
+      color: var(--star-dust-900);
+    }
+  }
+
+  &__results {
+    @apply border-t mt-3;
+    border-color: var(--star-dust-300);
+
+    &__title {
+      @apply mt-3 mb-0;
+      @extend %heading-s;
+      color: var(--star-dust-950);
+    }
+
+    &__list {
+      @extend %tools-grid-layout;
+      @apply mt-3;
+      grid-template-areas:
+        'cableTemperature uncertaintyCableTemperature . . .'
+        'solarFlux . . . .';
+
+      .solarFlux {
+        grid-area: solarFlux;
+      }
+
+      .cableTemperature {
+        grid-area: cableTemperature;
+      }
+
+      .uncertaintyCableTemperature {
+        grid-area: uncertaintyCableTemperature;
+      }
+    }
+  }
+
+  &__error {
+    color: var(--error-700);
+  }
+}

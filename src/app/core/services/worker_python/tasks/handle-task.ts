@@ -6,8 +6,6 @@
  */
 import { loadPyodide } from 'pyodide';
 import type { PyProxy } from 'pyodide/ffi';
-import functions from './python-scripts/functions.py';
-import testsScript from './python-scripts/tests.py';
 import { Task, TaskError, TaskInputs, TaskOutputs } from './types';
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
@@ -16,33 +14,47 @@ const tasks: Record<
   Task,
   {
     function: string;
-    script: string | (() => Promise<void> | void);
     externalPackages: string[];
   }
 > = {
   [Task.runTests]: {
-    script: testsScript,
     function: 'run_tests',
     externalPackages: ['pytest']
   },
   [Task.getLit]: {
-    script: functions,
     function: 'init_section',
     externalPackages: []
   },
-  [Task.changeClimateLoad]: {
-    script: functions,
-    function: 'change_climate_load',
+  [Task.changeState]: {
+    function: 'change_state',
     externalPackages: []
   },
   [Task.getSupportCoordinates]: {
-    script: functions,
     function: 'get_support_coordinates',
     externalPackages: []
   },
   [Task.refreshProjection]: {
-    script: functions,
     function: 'refresh_projection',
+    externalPackages: []
+  },
+  [Task.calculatePapoto]: {
+    function: 'calculate_papoto',
+    externalPackages: []
+  },
+  [Task.calculateGuying]: {
+    function: 'calculate_guying',
+    externalPackages: []
+  },
+  [Task.setLogLevel]: {
+    function: 'set_log_level',
+    externalPackages: []
+  },
+  [Task.temperatureCalculation]: {
+    function: 'temperature_calculation',
+    externalPackages: []
+  },
+  [Task.calculateParameter15CWithoutWind]: {
+    function: 'parameter_15_without_wind',
     externalPackages: []
   }
 };

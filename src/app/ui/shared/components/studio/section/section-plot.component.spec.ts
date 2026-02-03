@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SectionPlotComponent } from './section-plot.component';
-import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
 import { Data } from 'plotly.js-dist-min';
 import { PlotOptions } from './helpers/types';
-import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 // Mock the helper functions
 jest.mock('./helpers/createPlot');
@@ -35,14 +35,15 @@ describe('SectionPlotComponent', () => {
     L0: [],
     elevation: [],
     line_angle: [],
-    vhl_under_chain: [],
-    vhl_under_console: [],
+    vtl_under_chain: [],
+    vtl_under_console: [],
     r_under_chain: [],
     r_under_console: [],
     ground_altitude: [],
     load_angle: [],
     displacement: [],
-    span_length: []
+    span_length: [],
+    loads_coords: {}
   };
 
   // Mock plotOptions signal
@@ -57,6 +58,8 @@ describe('SectionPlotComponent', () => {
   const mockPlotData: Data[] = [
     { type: 'scatter3d', x: [1, 2], y: [10, 20], z: [100, 200] } as Data
   ];
+
+  const mockSelectedDisplayOptions = { loads: false };
 
   beforeEach(async () => {
     // Reset all mocks
@@ -111,7 +114,8 @@ describe('SectionPlotComponent', () => {
         null,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
 
       expect(result).toBeUndefined();
@@ -120,37 +124,57 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should call helper functions with correct parameters when litData is provided', async () => {
-      await component.refreshPlot(mockLitData, mockPlotOptions, false, false);
+      await component.refreshPlot(
+        mockLitData,
+        mockPlotOptions,
+        false,
+        false,
+        mockSelectedDisplayOptions
+      );
 
       expect(mockCreatePlotData).toHaveBeenCalledWith(
         mockLitData,
         mockPlotOptions
       );
-      expect(mockCreatePlot).toHaveBeenCalledWith(
-        'plotly-output',
-        mockPlotData,
-        false,
-        false,
-        '2d',
-        null,
-        'profile'
-      );
+      expect(mockCreatePlot).toHaveBeenCalledWith({
+        plotId: 'plotly-output',
+        data: mockPlotData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'profile',
+        spanLoads: [],
+        litData: mockLitData,
+        startSupport: 1,
+        endSupport: 2
+      });
     });
 
     it('should handle missing DOM element gracefully', async () => {
       jest.spyOn(document, 'getElementById').mockReturnValue(null);
 
-      await component.refreshPlot(mockLitData, mockPlotOptions, false, false);
-
-      expect(mockCreatePlot).toHaveBeenCalledWith(
-        'plotly-output',
-        mockPlotData,
+      await component.refreshPlot(
+        mockLitData,
+        mockPlotOptions,
         false,
         false,
-        '2d',
-        null,
-        'profile'
+        mockSelectedDisplayOptions
       );
+
+      expect(mockCreatePlot).toHaveBeenCalledWith({
+        plotId: 'plotly-output',
+        data: mockPlotData,
+        isSupportZoom: false,
+        invert: false,
+        view: '2d',
+        camera: null,
+        side: 'profile',
+        spanLoads: [],
+        litData: mockLitData,
+        startSupport: 1,
+        endSupport: 2
+      });
     });
 
     it('should use provided plotOptions when calling createPlotData', async () => {
@@ -162,21 +186,31 @@ describe('SectionPlotComponent', () => {
         invert: true
       };
 
-      await component.refreshPlot(mockLitData, customPlotOptions, true, false);
+      await component.refreshPlot(
+        mockLitData,
+        customPlotOptions,
+        true,
+        false,
+        mockSelectedDisplayOptions
+      );
 
       expect(mockCreatePlotData).toHaveBeenCalledWith(
         mockLitData,
         customPlotOptions
       );
-      expect(mockCreatePlot).toHaveBeenCalledWith(
-        'plotly-output',
-        mockPlotData,
-        true,
-        true,
-        '3d',
-        null,
-        'face'
-      );
+      expect(mockCreatePlot).toHaveBeenCalledWith({
+        plotId: 'plotly-output',
+        data: mockPlotData,
+        isSupportZoom: true,
+        invert: true,
+        view: '3d',
+        camera: null,
+        side: 'face',
+        spanLoads: [],
+        litData: mockLitData,
+        startSupport: 2,
+        endSupport: 4
+      });
     });
   });
 
@@ -185,13 +219,20 @@ describe('SectionPlotComponent', () => {
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
 
       // Test the method directly since effect testing is complex
-      await component.refreshPlot(mockLitData, mockPlotOptions, false, false);
+      await component.refreshPlot(
+        mockLitData,
+        mockPlotOptions,
+        false,
+        false,
+        mockSelectedDisplayOptions
+      );
 
       expect(refreshSpy).toHaveBeenCalledWith(
         mockLitData,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
     });
 
@@ -199,13 +240,20 @@ describe('SectionPlotComponent', () => {
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
 
       // Test the method directly
-      await component.refreshPlot(null, mockPlotOptions, false, false);
+      await component.refreshPlot(
+        null,
+        mockPlotOptions,
+        false,
+        false,
+        mockSelectedDisplayOptions
+      );
 
       expect(refreshSpy).toHaveBeenCalledWith(
         null,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
       expect(mockCreatePlotData).not.toHaveBeenCalled();
     });
@@ -214,13 +262,20 @@ describe('SectionPlotComponent', () => {
       fixture.componentRef.setInput('isSupportZoom', true);
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
 
-      await component.refreshPlot(mockLitData, mockPlotOptions, true, false);
+      await component.refreshPlot(
+        mockLitData,
+        mockPlotOptions,
+        true,
+        false,
+        mockSelectedDisplayOptions
+      );
 
       expect(refreshSpy).toHaveBeenCalledWith(
         mockLitData,
         mockPlotOptions,
         true,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
     });
   });
@@ -233,12 +288,19 @@ describe('SectionPlotComponent', () => {
 
       // Test refreshPlot method directly
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
-      await component.refreshPlot(mockLitData, mockPlotOptions, false, false);
+      await component.refreshPlot(
+        mockLitData,
+        mockPlotOptions,
+        false,
+        false,
+        mockSelectedDisplayOptions
+      );
       expect(refreshSpy).toHaveBeenCalledWith(
         mockLitData,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
     });
 
@@ -257,12 +319,19 @@ describe('SectionPlotComponent', () => {
 
       // Test that refreshPlot works with new plotOptions
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
-      await component.refreshPlot(mockLitData, customPlotOptions, true, false);
+      await component.refreshPlot(
+        mockLitData,
+        customPlotOptions,
+        true,
+        false,
+        mockSelectedDisplayOptions
+      );
       expect(refreshSpy).toHaveBeenCalledWith(
         mockLitData,
         customPlotOptions,
         true,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
     });
 
@@ -275,14 +344,16 @@ describe('SectionPlotComponent', () => {
         null,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
 
       expect(refreshSpy).toHaveBeenCalledWith(
         null,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
       expect(result).toBeUndefined();
       expect(mockCreatePlotData).not.toHaveBeenCalled();
@@ -298,14 +369,15 @@ describe('SectionPlotComponent', () => {
         L0: [],
         elevation: [],
         line_angle: [],
-        vhl_under_chain: [],
-        vhl_under_console: [],
+        vtl_under_chain: [],
+        vtl_under_console: [],
         r_under_chain: [],
         r_under_console: [],
         ground_altitude: [],
         load_angle: [],
         displacement: [],
-        span_length: []
+        span_length: [],
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', emptyData);
@@ -314,7 +386,8 @@ describe('SectionPlotComponent', () => {
         emptyData,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
       expect(result).toBeDefined();
       expect(mockCreatePlotData).toHaveBeenCalledWith(
@@ -331,14 +404,15 @@ describe('SectionPlotComponent', () => {
         L0: [],
         elevation: [],
         line_angle: [],
-        vhl_under_chain: [],
-        vhl_under_console: [],
+        vtl_under_chain: [],
+        vtl_under_console: [],
         r_under_chain: [],
         r_under_console: [],
         ground_altitude: [],
         load_angle: [],
         displacement: [],
-        span_length: []
+        span_length: [],
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', dataWithNulls);
@@ -347,7 +421,8 @@ describe('SectionPlotComponent', () => {
         dataWithNulls,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
       expect(result).toBeDefined();
       expect(mockCreatePlotData).toHaveBeenCalledWith(
@@ -364,14 +439,15 @@ describe('SectionPlotComponent', () => {
         L0: [],
         elevation: [],
         line_angle: [],
-        vhl_under_chain: [],
-        vhl_under_console: [],
+        vtl_under_chain: [],
+        vtl_under_console: [],
         r_under_chain: [],
         r_under_console: [],
         ground_altitude: [],
         load_angle: [],
         displacement: [],
-        span_length: []
+        span_length: [],
+        loads_coords: {}
       };
 
       fixture.componentRef.setInput('litData', largeData);
@@ -380,7 +456,8 @@ describe('SectionPlotComponent', () => {
         largeData,
         mockPlotOptions,
         false,
-        false
+        false,
+        mockSelectedDisplayOptions
       );
       expect(result).toBeDefined();
       expect(mockCreatePlotData).toHaveBeenCalledWith(

@@ -17,19 +17,16 @@
     }
   }
 
+  dt {
+    @extend %label-style;
+  }
+
   label,
   dt {
-    @extend %text-s-400;
-    color: var(--grey-700);
-
     &.extreme-historical-conditions {
       @extend %text-s-600;
       color: var(--star-dust-950);
     }
-  }
-
-  dt {
-    @extend %label-spacing;
   }
 
   input {

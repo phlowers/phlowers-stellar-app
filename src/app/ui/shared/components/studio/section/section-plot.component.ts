@@ -1,5 +1,5 @@
 import { Component, effect, input } from '@angular/core';
-import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,12 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
-import { PlotService } from '@src/app/ui/pages/studio/plot.service';
+import {
+  PlotService,
+  SelectedDisplayOptions
+} from '@src/app/ui/pages/studio/services/plot.service';
+import { SpanLoad } from '@src/app/core';
+import { LoadType } from './helpers/createLoadAnnotations';
 
 @Component({
   selector: 'app-section-plot',
@@ -20,26 +25,66 @@ export class SectionPlotComponent {
 
   constructor(public readonly plotService: PlotService) {}
 
+  getSpanLoadsToDisplay = (
+    selectedDisplayOptions: SelectedDisplayOptions,
+    plotOptions: PlotOptions
+  ) => {
+    if (!selectedDisplayOptions.loads) {
+      return [];
+    }
+    const section = this.plotService.section();
+    if (!section) {
+      return [];
+    }
+    const supportsUuids = section.supports
+      .slice(plotOptions.startSupport, plotOptions.endSupport + 1)
+      .map((support) => support.uuid);
+    const spanLoads =
+      this.plotService.temporaryLoadData?.spanLoads?.filter(
+        (load) =>
+          !!load && (!!load.loadWeight || load.type === LoadType.MARKING)
+      ) ?? [];
+    const result: (SpanLoad | null)[] = [];
+    for (const supportUuid of supportsUuids) {
+      const load = spanLoads.find((load) => load.supportUuid === supportUuid);
+      if (load) {
+        result.push(load);
+      } else {
+        result.push(null);
+      }
+    }
+    return result;
+  };
+
   async refreshPlot(
     litData: GetSectionOutput | null,
     plotOptions: PlotOptions,
     isSupportZoom: boolean,
-    _isSidebarOpen: boolean // eslint-disable-line @typescript-eslint/no-unused-vars
+    _isSidebarOpen: boolean, // eslint-disable-line @typescript-eslint/no-unused-vars
+    selectedDisplayOptions: { loads: boolean }
   ) {
     if (!litData) {
       return;
     }
+    const spanLoads = this.getSpanLoadsToDisplay(
+      selectedDisplayOptions,
+      plotOptions
+    );
     const plotData = createPlotData(litData, plotOptions);
     const camera = this.plotService.camera();
-    return createPlot(
-      'plotly-output',
-      plotData,
+    return createPlot({
+      plotId: 'plotly-output',
+      data: plotData,
       isSupportZoom,
-      plotOptions.invert,
-      plotOptions.view,
+      invert: plotOptions.invert,
+      view: plotOptions.view,
       camera,
-      plotOptions.side
-    );
+      side: plotOptions.side,
+      spanLoads,
+      litData,
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport
+    });
   }
 
   readonly effect = effect(() => {
@@ -47,7 +92,8 @@ export class SectionPlotComponent {
       this.litData(),
       this.plotService.plotOptions(),
       this.isSupportZoom(),
-      this.plotService.isSidebarOpen()
+      this.plotService.isSidebarOpen(),
+      this.plotService.selectedDisplayOptions()
     );
   });
 }

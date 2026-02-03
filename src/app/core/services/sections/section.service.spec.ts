@@ -7,9 +7,9 @@
 
 import { TestBed } from '@angular/core/testing';
 import { SectionService } from './section.service';
-import { StudiesService } from '../studies/studies.service';
-import { Section } from '../../data/database/interfaces/section';
-import { Study } from '../../data/database/interfaces/study';
+import { StudiesService } from '@services/studies/studies.service';
+import { Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -17,7 +17,7 @@ jest.mock('uuid', () => ({
 }));
 
 // Mock findDuplicateTitle
-jest.mock('@src/app/ui/shared/helpers/duplicate', () => ({
+jest.mock('@ui/shared/helpers/duplicate', () => ({
   findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
 }));
 
@@ -59,7 +59,10 @@ const mockSectionData: Section = {
   initial_conditions: [],
   selected_initial_condition_uuid: undefined,
   charges: [],
-  selected_charge_uuid: null
+  selected_charge_uuid: null,
+  field_measures: [],
+  selected_field_measure_uuid: undefined,
+  vtl_and_guying: undefined
 };
 
 describe('SectionService', () => {
@@ -74,7 +77,7 @@ describe('SectionService', () => {
     short_name: 'S1'
   };
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'study-uuid-1',
     title: 'Test Study',
     description: 'Test Description',
@@ -154,9 +157,12 @@ describe('SectionService', () => {
         initial_conditions: [],
         selected_initial_condition_uuid: undefined,
         charges: [],
-        selected_charge_uuid: null
+        selected_charge_uuid: null,
+        field_measures: [],
+        selected_field_measure_uuid: undefined,
+        vtl_and_guying: undefined
       };
-      const studyWithoutNewSection: Study = {
+      const studyWithoutNewSection: StudyEntity = {
         ...mockStudy,
         sections: [mockSection]
       };

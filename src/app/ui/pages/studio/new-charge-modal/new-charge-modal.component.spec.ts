@@ -1,14 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewChargeModalComponent } from './new-charge-modal.component';
-import { Charge } from '@src/app/core/data/database/interfaces/charge';
+import { Charge, Section, Study } from '@core/domain';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
-import { PlotService } from '../plot.service';
+import { ChargesService } from '@services/charges/charges.service';
+import { PlotService } from '../services/plot.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
-import { Study } from '@core/data/database/interfaces/study';
-import { Section } from '@core/data/database/interfaces/section';
 
 class MockChargesService {
   getCharge = jest.fn();
@@ -40,7 +38,8 @@ describe('NewChargeModalComponent (Jest)', () => {
         frontierSupportNumber: null,
         iceThicknessBefore: null,
         iceThicknessAfter: null
-      }
+      },
+      spanLoads: []
     }
   };
 
@@ -94,7 +93,10 @@ describe('NewChargeModalComponent (Jest)', () => {
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [mockCharge],
-    selected_charge_uuid: 'charge-uuid-1'
+    selected_charge_uuid: 'charge-uuid-1',
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
   };
 
   beforeEach(async () => {
@@ -321,7 +323,8 @@ describe('NewChargeModalComponent (Jest)', () => {
     // Wait for effect to complete
     await fixture.whenStable();
 
-    expect(component.name()).toBe('');
+    // newCharge generates a name based on existing charges count (mockSection has 1 charge, so new one is "CC 2")
+    expect(component.name()).toBe('CC 2');
     expect(component.personnelPresence()).toBe(false);
     expect(component.description()).toBe('');
   });

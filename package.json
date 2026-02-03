@@ -1,9 +1,10 @@
 {
   "name": "phlowers-stellar-app",
-  "version": "0.0.0",
+  "version": "1.3.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4200",
+    "start:fr": "ng serve --port 4200 --configuration=fr",
     "build:service-worker": "tsc -p tsconfig.worker.json && sed -i 's/export //g' public/service-worker.js",
     "build": "npm run build:service-worker && ng build --configuration=production",
     "build:fr": "npm run build:service-worker && ng build --output-mode=static --configuration=production,fr && npm run set-env-variables && npm run create-assets-list-for-service-worker:fr",
@@ -12,9 +13,13 @@
     "format": "prettier --write \"**/*.{js,mjs,ts,mts,d.ts,html}\" --cache",
     "prettier-check": "prettier --check \"**/*.{js,mjs,ts,mts,d.ts,html}\"",
     "lint-check": "eslint .",
+    "type-check": "tsc --noEmit",
     "test": "jest",
     "coverage": "jest --coverage --collectCoverageFrom 'src/**/*.ts'",
-    "set-up-mechaphlowers": "uv run --prerelease=allow ./scripts/set_up_mechaphlowers.py",
+    "set-up-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers_v2.py",
+    "set-up-mechaphlowers:skip-compression": "uv run ./scripts/set_up_mechaphlowers_v2.py --skip-compression",
+    "set-up-mechaphlowers:local-cdn": "uv run ./scripts/set_up_mechaphlowers_v2.py --local-cdn-dir",
+    "set-up-mechaphlowers:local-wheel": "uv run ./scripts/set_up_mechaphlowers_v2.py --local-wheel",
     "set-env-variables": "uv run ./scripts/set-env-variables.py",
     "create-mock-data": "uv run ./scripts/create_mock_data.py",
     "create-assets-list-for-service-worker:fr": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language fr",
@@ -35,6 +40,9 @@
     "node:url": false
   },
   "private": true,
+  "config": {
+    "mechaphlowers": "0.5.3rc0"
+  },
   "dependencies": {
     "@angular-eslint/eslint-plugin-template": "19.3.0",
     "@angular-slider/ngx-slider": "^19.0.0",
@@ -47,7 +55,7 @@
     "@angular/platform-browser-dynamic": "19.2.4",
     "@angular/router": "19.2.4",
     "@eslint/js": "^9.27.0",
-    "@fortawesome/angular-fontawesome": "^1.0.0",
+    "@fortawesome/fontawesome-free": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@primeng/themes": "19.1.4",
     "@types/plotly.js-dist-min": "^2.3.4",
@@ -68,7 +76,7 @@
     "primeclt": "^0.1.5",
     "primeicons": "^7.0.0",
     "primeng": "19.1.4",
-    "pyodide": "0.27.4",
+    "pyodide": "^0.28.3",
     "raw-loader": "^4.0.2",
     "rxjs": "~7.8.0",
     "tailwindcss-primeui": "^0.5.1",
@@ -105,7 +113,7 @@
     "jsdom": "^26.0.0",
     "ng-extract-i18n-merge": "^2.14.3",
     "postcss": "^8.4.49",
-    "prettier": "^3.0.0",
+    "prettier": "3.5.3",
     "random-words-commonjs": "^2.0.1",
     "tailwindcss": "^3.4.17",
     "typedoc": "^0.28.3",

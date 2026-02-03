@@ -9,10 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { WorkerPythonService } from './worker-python.service';
 import { Task } from './tasks/types';
 import { firstValueFrom } from 'rxjs';
-import { Section } from '@core/data/database/interfaces/section';
-import { Cable } from '@core/data/database/interfaces/cable';
-import { Support } from '@core/data/database/interfaces/support';
-import { InitialCondition } from '@core/data/database/interfaces/initialCondition';
+import { CatalogCable, InitialCondition, Section, Support } from '@core/domain';
 
 describe('WorkerService', () => {
   let service: WorkerPythonService;
@@ -39,7 +36,7 @@ describe('WorkerService', () => {
     supportFootAltitude: 100,
     attachmentPosition: 'top',
     chainSurface: 0.1,
-    towerModel: 'D-Type'
+    towerModel: 'Tower Model'
   });
 
   const createMockInitialCondition = (): InitialCondition => ({
@@ -91,10 +88,13 @@ describe('WorkerService', () => {
     initial_conditions: [createMockInitialCondition()],
     selected_initial_condition_uuid: 'ic-uuid-1',
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
   });
 
-  const createMockCable = (): Cable => ({
+  const createMockCable = (): CatalogCable => ({
     name: 'Test Cable',
     data_source: 'test-source',
     section: 100,
@@ -120,7 +120,9 @@ describe('WorkerService', () => {
     solar_absorption: undefined,
     emissivity: undefined,
     electric_resistance_20: undefined,
-    linear_resistance_temperature_coef: undefined
+    linear_resistance_temperature_coef: undefined,
+    radial_thermal_conductivity: undefined,
+    has_magnetic_heart: undefined
   });
 
   beforeEach(() => {

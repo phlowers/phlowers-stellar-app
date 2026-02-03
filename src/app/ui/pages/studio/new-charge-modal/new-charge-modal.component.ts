@@ -13,20 +13,21 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { Charge } from '@src/app/core/data/database/interfaces/charge';
+import { Charge } from '@core/domain';
 import { v4 as uuidv4 } from 'uuid';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
-import { PlotService } from '../plot.service';
+import { ChargesService } from '@services/charges/charges.service';
+import { PlotService } from '../services/plot.service';
 import { defaultClimaticCharge } from '../loads/climate/climate.component';
 
-const newCharge = (): Charge => {
+const newCharge = (currentCharges: Charge[]): Charge => {
   return {
     uuid: uuidv4(),
-    name: '',
+    name: $localize`CC` + ' ' + (currentCharges.length + 1),
     personnelPresence: false,
     description: '',
     data: {
-      climate: { ...defaultClimaticCharge }
+      climate: { ...defaultClimaticCharge },
+      spanLoads: []
     }
   };
 };
@@ -83,7 +84,9 @@ export class NewChargeModalComponent {
           this.personnelPresence.set(charge.personnelPresence);
           this.description.set(charge.description);
         } else {
-          const emptyCase = newCharge();
+          const emptyCase = newCharge(
+            this.plotService.section()?.charges ?? []
+          );
           this.name.set(emptyCase.name);
           this.personnelPresence.set(emptyCase.personnelPresence);
           this.description.set(emptyCase.description);
@@ -107,14 +110,14 @@ export class NewChargeModalComponent {
   async onSubmit() {
     const chargeUuid =
       this.isEditMode() && this.uuidInput() ? this.uuidInput() : uuidv4();
-
     const charge: Charge = {
       uuid: chargeUuid ?? '',
       name: this.name(),
       personnelPresence: this.personnelPresence(),
       description: this.description(),
       data: {
-        climate: { ...defaultClimaticCharge }
+        climate: { ...defaultClimaticCharge },
+        spanLoads: []
       }
     };
 
@@ -136,5 +139,16 @@ export class NewChargeModalComponent {
 
   onClose() {
     this.isOpenChange.emit(false);
+  }
+
+  isFormValid(): boolean {
+    const existingLoadCases = this.plotService.section()?.charges;
+    const currentUuid = this.uuidInput();
+    return (
+      this.nameLength() > 0 &&
+      !existingLoadCases?.some(
+        (c) => c.name === this.name() && c.uuid !== currentUuid
+      )
+    );
   }
 }

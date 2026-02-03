@@ -5,16 +5,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable } from '@angular/core';
-import { Section } from '../../data/database/interfaces/section';
-import { Study } from '../../data/database/interfaces/study';
-import { InitialCondition } from '../../data/database/interfaces/initialCondition';
-import { StudiesService } from '../studies/studies.service';
-import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+import { Section, InitialCondition } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
+import { StudiesService } from '@services/studies/studies.service';
+import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
 export interface InitialConditionFunctionsInput {
   section: Section;
   initialCondition: InitialCondition;
+  generateState?: boolean;
 }
 
 export interface DuplicateInitialConditionFunctionsInput
@@ -35,8 +35,8 @@ export class InitialConditionService {
    * @returns Promise that resolves when the operation is complete
    */
   private async updateStudyWithModification(
-    study: Study,
-    modifier: (studyCopy: Study) => void,
+    study: StudyEntity,
+    modifier: (studyCopy: StudyEntity) => void,
     overrideAuthorCheck = false
   ): Promise<void> {
     const studyCopy = cloneDeep(study);
@@ -52,7 +52,7 @@ export class InitialConditionService {
    * @returns Promise that resolves when the operation is complete
    */
   async updateInitialCondition(
-    study: Study,
+    study: StudyEntity,
     section: Section,
     initialCondition: InitialCondition
   ): Promise<void> {
@@ -78,7 +78,7 @@ export class InitialConditionService {
    * @returns Promise that resolves when the operation is complete
    */
   async addInitialCondition(
-    study: Study,
+    study: StudyEntity,
     section: Section,
     initialCondition: InitialCondition
   ): Promise<void> {
@@ -105,7 +105,7 @@ export class InitialConditionService {
    * @returns Promise that resolves when the operation is complete
    */
   async deleteInitialCondition(
-    study: Study,
+    study: StudyEntity,
     section: Section,
     initialCondition: InitialCondition
   ): Promise<void> {
@@ -135,7 +135,7 @@ export class InitialConditionService {
    * @returns Promise that resolves when the operation is complete
    */
   async duplicateInitialCondition(
-    study: Study,
+    study: StudyEntity,
     section: Section,
     initialCondition: InitialCondition,
     newUuid: string
@@ -171,7 +171,7 @@ export class InitialConditionService {
    * @returns Promise that resolves when the operation is complete
    */
   async setInitialCondition(
-    study: Study,
+    study: StudyEntity,
     section: Section,
     initialConditionUuid: string
   ): Promise<void> {

@@ -7,10 +7,9 @@
 
 import { TestBed } from '@angular/core/testing';
 import { InitialConditionService } from './initial-condition.service';
-import { StudiesService } from '../studies/studies.service';
-import { Section } from '../../data/database/interfaces/section';
-import { Study } from '../../data/database/interfaces/study';
-import { InitialCondition } from '../../data/database/interfaces/initialCondition';
+import { StudiesService } from '@services/studies/studies.service';
+import { Section, InitialCondition } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -18,7 +17,7 @@ jest.mock('uuid', () => ({
 }));
 
 // Mock findDuplicateTitle
-jest.mock('@src/app/ui/shared/helpers/duplicate', () => ({
+jest.mock('@ui/shared/helpers/duplicate', () => ({
   findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
 }));
 
@@ -75,10 +74,13 @@ describe('InitialConditionService', () => {
     initial_conditions: [mockInitialCondition],
     selected_initial_condition_uuid: 'ic-uuid-1',
     charges: [],
-    selected_charge_uuid: null
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
   };
 
-  const mockStudy: Study = {
+  const mockStudy: StudyEntity = {
     uuid: 'study-uuid-1',
     title: 'Test Study',
     description: 'Test Description',

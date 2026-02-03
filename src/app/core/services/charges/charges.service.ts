@@ -5,13 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable } from '@angular/core';
-import { Charge } from '../../data/database/interfaces/charge';
-import { StudiesService } from '../studies/studies.service';
+import { Charge, Section } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
+import { StudiesService } from '@services/studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
-import { findDuplicateTitle } from '@src/app/ui/shared/helpers/duplicate';
+import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { MessageService } from 'primeng/api';
-import { Study } from '../../data/database/interfaces/study';
-import { Section } from '../../data/database/interfaces/section';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +30,7 @@ export class ChargesService {
   private async getStudyAndSection(
     studyUuid: string,
     sectionUuid: string
-  ): Promise<{ study: Study; section: Section }> {
+  ): Promise<{ study: StudyEntity; section: Section }> {
     const study = await this.studiesService.getStudy(studyUuid);
     if (!study) {
       throw new Error(`Study with uuid ${studyUuid} not found`);
@@ -189,5 +188,25 @@ export class ChargesService {
     const { section } = await this.getStudyAndSection(studyUuid, sectionUuid);
 
     return section.charges?.find((c) => c?.uuid === chargeUuid) ?? null;
+  }
+
+  /**
+   * Get the selected charge case by uuid
+   * @param studyUuid The uuid of the study containing the section
+   * @param sectionUuid The uuid of the section containing the charge
+   * @returns The selected charge case
+   */
+  async getSelectedChargeCase(
+    studyUuid: string,
+    sectionUuid: string
+  ): Promise<Charge | null> {
+    const { section } = await this.getStudyAndSection(studyUuid, sectionUuid);
+    if (!section.selected_charge_uuid) {
+      return null;
+    }
+    return (
+      section.charges?.find((c) => c?.uuid === section.selected_charge_uuid) ??
+      null
+    );
   }
 }
