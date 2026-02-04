@@ -93,7 +93,7 @@
             i18n-aria-label
             [ngModel]="support.number"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'number', $event)"
-            [id]="'supportNumber' + rowIndex + 1"
+            [id]="'supportNumber' + rowIndex"
           />
         } @else {
           <p class="read-only_info">{{ support.number }}</p>
@@ -113,12 +113,7 @@
               [ngModel]="support.spanLength"
               [disabled]="rowIndex === supports().length - 1"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
-              [id]="'spanLength' + rowIndex + 1"
-              [attr.aria-invalid]="spanLengthInput.dirty && spanLengthInput.invalid"
-              [attr.aria-errormessage]="
-                spanLengthInput.dirty && spanLengthInput.invalid ? 'spanLengthError' + rowIndex : null
-              "
-              #spanLengthInput="ngModel"
+              [id]="'spanLength' + rowIndex"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
@@ -145,7 +140,7 @@
               [ngModel]="support.attachmentHeight"
               (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
-              [id]="'attachmentHeight' + rowIndex + 1"
+              [id]="'attachmentHeight' + rowIndex"
               [attr.aria-invalid]="attachmentHeightInput.dirty && attachmentHeightInput.invalid"
               [attr.aria-errormessage]="
                 attachmentHeightInput.dirty && attachmentHeightInput.invalid ? 'attachmentHeightError' + rowIndex : null
@@ -186,7 +181,7 @@
               [ngModel]="support.spanAngle"
               (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
-              [id]="'spanAngle' + rowIndex + 1"
+              [id]="'spanAngle' + rowIndex"
               [attr.aria-invalid]="spanAngleInput.dirty && spanAngleInput.invalid"
               [attr.aria-errormessage]="
                 spanAngleInput.dirty && spanAngleInput.invalid ? 'spanAngleError' + rowIndex : null
@@ -230,7 +225,7 @@
             [filter]="true"
             filterBy="chain_name"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'chainName', $event)"
-            [inputId]="'chainName' + rowIndex + 1"
+            [inputId]="'chainName' + rowIndex"
           />
         } @else {
           <p class="read-only_info">
@@ -254,7 +249,7 @@
               i18n-aria-label
               [ngModel]="support.chainLength"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
-              [id]="'chainLength' + rowIndex + 1"
+              [id]="'chainLength' + rowIndex"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
@@ -280,7 +275,7 @@
               i18n-aria-label
               [ngModel]="support.chainWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
-              [id]="'chainWeight' + rowIndex + 1"
+              [id]="'chainWeight' + rowIndex"
             />
             <p-inputgroup-addon>kg</p-inputgroup-addon>
           </p-inputgroup>
@@ -304,7 +299,7 @@
             appendTo="body"
             [filter]="true"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
-            [inputId]="'supportName' + rowIndex + 1"
+            [inputId]="'supportName' + rowIndex"
           />
         } @else {
           <p class="read-only_info one-line-text">{{ support.name }}</p>
@@ -322,7 +317,7 @@
               i18n-aria-label
               [ngModel]="support.attachmentSet"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentSet', $event)"
-              [id]="'attachmentSet' + rowIndex + 1"
+              [id]="'attachmentSet' + rowIndex"
             />
             <p-inputicon>
               <button
@@ -356,7 +351,7 @@
               [ngModel]="support.armLength"
               (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
-              [id]="'armLength' + rowIndex + 1"
+              [id]="'armLength' + rowIndex"
               [attr.aria-invalid]="armLengthInput.dirty && armLengthInput.invalid"
               [attr.aria-errormessage]="
                 armLengthInput.dirty && armLengthInput.invalid ? 'armLengthError' + rowIndex : null
@@ -395,7 +390,7 @@
             optionLabel="label"
             optionValue="value"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'chainV', $event)"
-            [inputId]="'chainV' + rowIndex + 1"
+            [inputId]="'chainV' + rowIndex"
           />
         } @else {
           <p class="read-only_info">
@@ -416,7 +411,7 @@
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.counterWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
-              [id]="'counterWeight' + rowIndex + 1"
+              [id]="'counterWeight' + rowIndex"
             />
             <p-inputgroup-addon>kg</p-inputgroup-addon>
           </p-inputgroup>
@@ -443,7 +438,7 @@
               [ngModel]="support.supportFootAltitude"
               (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
-              [id]="'supportFootAltitude' + rowIndex + 1"
+              [id]="'supportFootAltitude' + rowIndex"
               [attr.aria-invalid]="supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid"
               [attr.aria-errormessage]="
                 supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid
@@ -483,7 +478,7 @@
             optionLabel="label"
             optionValue="value"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentPosition', $event)"
-            [inputId]="'attachmentPosition' + rowIndex + 1"
+            [inputId]="'attachmentPosition' + rowIndex"
           />
         } @else {
           <p class="read-only_info">{{ support.attachmentPosition }}</p>
@@ -502,7 +497,7 @@
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.chainSurface"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
-              [id]="'chainSurface' + rowIndex + 1"
+              [id]="'chainSurface' + rowIndex"
             />
             <p-inputgroup-addon>m²</p-inputgroup-addon>
           </p-inputgroup>

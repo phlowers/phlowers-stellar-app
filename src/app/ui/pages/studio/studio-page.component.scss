@@ -23,12 +23,8 @@
 }
 
 .quick-measures {
-  @apply flex justify-center py-2;
-
-  &__card {
-    @apply inline-flex items-start gap-2 p-2 h-12 max-h-12 rounded-sm;
-    box-shadow: var(--elevation-neutral-2);
-  }
+  @apply inline-flex items-start gap-2 p-2 h-12 max-h-12 rounded-sm;
+  box-shadow: var(--elevation-neutral-2);
 
   &__title {
     @apply block;

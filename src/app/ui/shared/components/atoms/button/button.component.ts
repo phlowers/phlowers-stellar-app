@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, effect, ElementRef, input, OnDestroy, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { IconComponent } from '../icon/icon.component';
 
 @Component({
@@ -19,7 +19,19 @@ import { IconComponent } from '../icon/icon.component';
 export class ButtonComponent implements OnInit, OnDestroy {
   private clickListener?: (e: Event) => void;
 
-  constructor(private readonly elementRef: ElementRef<HTMLButtonElement | HTMLLinkElement>) {}
+  constructor(private readonly elementRef: ElementRef<HTMLButtonElement | HTMLLinkElement>) {
+    effect((): void => {
+      const classes: string[] = [];
+
+      classes.push(
+        `app-btn-${this.btnSize()}`,
+        `app-btn-${this.btnStyle()}`,
+        ...(this.btnLoading() ? ['disabled app-btn-loading'] : '')
+      );
+
+      this.classesList.set(classes.join(' '));
+    });
+  }
 
   /** Button size: 's' (small), 'm' (medium), or 'l' (large). */
   btnSize = input<'s' | 'm' | 'l'>('m');
@@ -28,17 +40,7 @@ export class ButtonComponent implements OnInit, OnDestroy {
   /** Whether the button is in a loading state, disabling click events. */
   btnLoading = input<boolean>(false);
 
-  classesList = computed(() => {
-    const classes: string[] = [];
-
-    classes.push(`app-btn-${this.btnSize()}`);
-    classes.push(`app-btn-${this.btnStyle()}`);
-    if (this.btnLoading()) {
-      classes.push('disabled app-btn-loading');
-    }
-
-    return classes.join(' ');
-  });
+  classesList = signal<string>('');
 
   ngOnInit(): void {
     this.clickListener = (e: Event) => {

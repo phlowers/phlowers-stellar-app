@@ -10,6 +10,9 @@
       </p>
     </div>
   } @else {
-    <app-section-plot class="h-full" [litData]="plotService.litData()"></app-section-plot>
+    <figure class="contents m-0">
+      <app-section-plot class="h-full" [litData]="plotService.litData()"></app-section-plot>
+      <figcaption i18n class="sr-only">Study's section graph view</figcaption>
+    </figure>
   }
 </div>
