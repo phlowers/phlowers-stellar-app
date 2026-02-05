@@ -3,12 +3,16 @@ import { FieldMeasuringComponent } from './field-measuring/field-measuring.compo
 import { InitComponent } from './field-measuring/components/init/init.component';
 import { L0SumComponent } from './l0-sum/l0-sum.component';
 import { VhlAndGuyingComponent } from './vtl-and-guying/vtl-and-guying.component';
+import { LoadsTableComponent } from './loads-table/loads-table.component';
 
 export type Tool =
   | 'field-measuring'
   | 'l0-sum'
   | 'vtl-and-guying'
+  | 'load-table'
   | 'other-tool';
+
+export type DialogPhase = 'init' | 'main';
 
 export interface ToolConfig {
   component: Type<unknown>;
@@ -22,14 +26,22 @@ export interface ToolTemplates {
   footer?: TemplateRef<unknown>;
 }
 
+export interface LoadTableContext {
+  mode: 'view' | 'edit';
+  chargeUuid: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
-export class ToolsDialogService {
+export class ToolbarDialogService {
   readonly currentTool = signal<Tool | null>(null);
-  readonly isInitOpen = signal(false);
-  readonly isMainOpen = signal(false);
+  readonly isOpen = signal(false);
+  readonly phase = signal<DialogPhase>('main');
   readonly templates = signal<ToolTemplates>({});
+  readonly loadTableContext = signal<LoadTableContext | null>(null);
+
+  private transitioning = false;
 
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
@@ -46,63 +58,72 @@ export class ToolsDialogService {
       component: VhlAndGuyingComponent,
       dialogStyle: { width: '86.5625rem', 'max-width': '90%' }
     },
+    'load-table': {
+      component: LoadsTableComponent,
+      dialogStyle: { width: '83.125rem', 'max-width': '90%' }
+    },
     'other-tool': {
       component: null!
     }
   };
 
-  openTool(tool: Tool): void {
+  openTool(tool: Tool, context?: LoadTableContext): void {
     this.currentTool.set(tool);
     const config = this.toolMap[tool];
 
-    if (config.initComponent) {
-      this.isInitOpen.set(true);
-      this.isMainOpen.set(false);
-    } else {
-      this.isInitOpen.set(false);
-      this.isMainOpen.set(true);
+    if (tool === 'load-table' && context) {
+      this.loadTableContext.set(context);
+    } else if (tool === 'load-table') {
+      this.loadTableContext.set(null);
     }
+
+    if (config.initComponent) {
+      this.phase.set('init');
+    } else {
+      this.phase.set('main');
+    }
+    this.isOpen.set(true);
   }
 
   closeTool(): void {
-    this.isInitOpen.set(false);
-    this.isMainOpen.set(false);
+    this.isOpen.set(false);
 
     setTimeout(() => {
       this.currentTool.set(null);
+      this.loadTableContext.set(null);
     }, 300);
   }
 
   proceedToMainComponent(): void {
-    this.isInitOpen.set(false);
-    // Attendre la fermeture complète du dialog init avant d'ouvrir le main
+    this.transitioning = true;
+    this.isOpen.set(false);
     setTimeout(() => {
-      this.isMainOpen.set(true);
+      this.phase.set('main');
+      this.isOpen.set(true);
+      this.transitioning = false;
     }, 150);
   }
 
-  getInitComponent(): Type<unknown> | null {
+  isTransitioning(): boolean {
+    return this.transitioning;
+  }
+
+  getComponent(): Type<unknown> | null {
     const tool = this.currentTool();
     if (!tool) return null;
-    return this.toolMap[tool].initComponent || null;
+    const config = this.toolMap[tool];
+    return this.phase() === 'init'
+      ? config.initComponent || null
+      : config.component;
   }
 
-  getMainComponent(): Type<unknown> | null {
-    const tool = this.currentTool();
-    if (!tool) return null;
-    return this.toolMap[tool].component;
-  }
-
-  getInitDialogStyle(): Record<string, string> {
+  getDialogStyle(): Record<string, string> {
     const tool = this.currentTool();
     if (!tool) return {};
-    return this.toolMap[tool].initDialogStyle || {};
-  }
-
-  getMainDialogStyle(): Record<string, string> {
-    const tool = this.currentTool();
-    if (!tool) return {};
-    return this.toolMap[tool].dialogStyle || {};
+    const config = this.toolMap[tool];
+    return this.phase() === 'init'
+      ? config.initDialogStyle || {}
+      : config.dialogStyle || {};
   }
 
   setTemplates(templates: ToolTemplates): void {

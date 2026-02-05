@@ -13,7 +13,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { ToolsDialogService } from '@ui/pages/studio/tools-dialog/tools-dialog.service';
+import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.service';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { createInitialMeasureData } from '../../helpers';
@@ -36,12 +36,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
 
-  private readonly toolsDialogService = inject(ToolsDialogService);
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly plotService = inject(PlotService);
   private readonly destroyRef = inject(DestroyRef);
 
   ngAfterViewInit(): void {
-    this.toolsDialogService.setTemplates({
+    this.toolbarDialogService.setTemplates({
       header: this.headerTemplate
     });
     const section = this.plotService.section();
@@ -66,7 +66,7 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
       });
   }
   ngOnDestroy(): void {
-    this.toolsDialogService.setTemplates({});
+    this.toolbarDialogService.setTemplates({});
   }
 
   measures = signal<{ label: string; value: string }[]>([]);
@@ -92,7 +92,7 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
       selected_field_measure_uuid: newMeasure.uuid
     });
     if (this.newMeasureNameControl.valid) {
-      this.toolsDialogService.proceedToMainComponent();
+      this.toolbarDialogService.proceedToMainComponent();
     }
   }
 
@@ -102,7 +102,7 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
       await this.plotService.modifySection({
         selected_field_measure_uuid: value
       });
-      this.toolsDialogService.proceedToMainComponent();
+      this.toolbarDialogService.proceedToMainComponent();
     }
   }
 }

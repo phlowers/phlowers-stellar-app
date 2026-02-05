@@ -1028,11 +1028,6 @@
         <source> In order to add charges, you need to create a charge case. </source>
       </segment>
     </unit>
-    <unit id="2813428855529635901">
-      <segment>
-        <source>View charge case</source>
-      </segment>
-    </unit>
     <unit id="3059442917741627872">
       <segment>
         <source>Arm length</source>
@@ -1051,11 +1046,6 @@
     <unit id="5004217118094368051">
       <segment>
         <source>Ver.MAJ</source>
-      </segment>
-    </unit>
-    <unit id="557544842878781608">
-      <segment>
-        <source>Edit charge case</source>
       </segment>
     </unit>
     <unit id="581758079292144535">
@@ -2624,16 +2614,6 @@
         <source>Save state</source>
       </segment>
     </unit>
-    <unit id="1762161277302505527">
-      <segment>
-        <source>View charge cases</source>
-      </segment>
-    </unit>
-    <unit id="3185853499027107737">
-      <segment>
-        <source>Select charge cases</source>
-      </segment>
-    </unit>
     <unit id="5132528819937680289">
       <segment>
         <source>Charge cases</source>
@@ -2771,6 +2751,51 @@
     <unit id="2185228394767497497">
       <segment>
         <source>Data saved successfully</source>
+      </segment>
+    </unit>
+    <unit id="5667839260849056594">
+      <segment>
+        <source>N°</source>
+      </segment>
+    </unit>
+    <unit id="6509563701224725941">
+      <segment>
+        <source>Load case name</source>
+      </segment>
+    </unit>
+    <unit id="7450321450712565157">
+      <segment>
+        <source> Description <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span&gt;" dispEnd="&lt;/span&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ descriptionLength() }}"/>/240</pc></source>
+      </segment>
+    </unit>
+    <unit id="8484530075062955140">
+      <segment>
+        <source>Ref. support</source>
+      </segment>
+    </unit>
+    <unit id="8632108336747094747">
+      <segment>
+        <source>Wind pressure</source>
+      </segment>
+    </unit>
+    <unit id="1386303765424324449">
+      <segment>
+        <source>Distance to ref. support</source>
+      </segment>
+    </unit>
+    <unit id="1592892612383369831">
+      <segment>
+        <source>Cable temp.</source>
+      </segment>
+    </unit>
+    <unit id="3759359101166219663">
+      <segment>
+        <source>load / marking</source>
+      </segment>
+    </unit>
+    <unit id="3251759404563225821">
+      <segment>
+        <source>Modify</source>
       </segment>
     </unit>
   </file>

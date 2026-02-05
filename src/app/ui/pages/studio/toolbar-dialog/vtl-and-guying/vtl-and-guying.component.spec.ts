@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { VhlAndGuyingComponent } from './vtl-and-guying.component';
-import { ToolsDialogService } from '../tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -37,7 +37,7 @@ class MockCardComponent {}
 describe('VhlAndGuyingComponent', () => {
   let component: VhlAndGuyingComponent;
   let fixture: ComponentFixture<VhlAndGuyingComponent>;
-  let toolsDialogService: ToolsDialogService;
+  let toolbarDialogService: ToolbarDialogService;
   let mockPlotService: jest.Mocked<PlotService>;
   let mockWorkerPythonService: jest.Mocked<WorkerPythonService>;
   let mockSectionService: jest.Mocked<SectionService>;
@@ -94,7 +94,7 @@ describe('VhlAndGuyingComponent', () => {
     await TestBed.configureTestingModule({
       imports: [VhlAndGuyingComponent],
       providers: [
-        ToolsDialogService,
+        ToolbarDialogService,
         provideHttpClientTesting(),
         { provide: PlotService, useValue: mockPlotService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
@@ -114,7 +114,7 @@ describe('VhlAndGuyingComponent', () => {
 
     fixture = TestBed.createComponent(VhlAndGuyingComponent);
     component = fixture.componentInstance;
-    toolsDialogService = TestBed.inject(ToolsDialogService);
+    toolbarDialogService = TestBed.inject(ToolbarDialogService);
     fixture.detectChanges();
   });
 
@@ -123,19 +123,19 @@ describe('VhlAndGuyingComponent', () => {
   });
 
   it('should set templates in ngAfterViewInit', () => {
-    const setTemplatesSpy = jest.spyOn(toolsDialogService, 'setTemplates');
+    const setTemplatesSpy = jest.spyOn(toolbarDialogService, 'setTemplates');
     component.ngAfterViewInit();
     expect(setTemplatesSpy).toHaveBeenCalled();
   });
 
   it('should close tool when visible changes to false', () => {
-    const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+    const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
     component.onVisibleChange(false);
     expect(closeToolSpy).toHaveBeenCalled();
   });
 
   it('should not close tool when visible changes to true', () => {
-    const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+    const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
     component.onVisibleChange(true);
     expect(closeToolSpy).not.toHaveBeenCalled();
   });
@@ -368,7 +368,7 @@ describe('VhlAndGuyingComponent', () => {
       chargeLIfPulley: 20
     });
 
-    const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+    const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
     component.onSave();
 
     expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(

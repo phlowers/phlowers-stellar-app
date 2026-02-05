@@ -13,6 +13,7 @@ export type { Study } from './study.model';
 export type { Section } from './section.model';
 export type { Support } from './support.model';
 export type { Charge, ClimateCharge, SpanLoad } from './charge.model';
+export { SymmetryType } from './charge.model';
 export type { InitialCondition } from './initial-condition.model';
 export type {
   VtlAndGuying,

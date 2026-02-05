@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ToolsDialogService } from '../tools-dialog/tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -31,11 +31,52 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
   ]
 })
 export class StudioTopToolbarComponent implements OnInit {
-  private readonly toolsDialogService = inject(ToolsDialogService);
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
 
   items = signal<MenuItem[] | null>(null);
-  tablesDropdown = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
+
+  private readonly hasCharges = computed(
+    () => !!this.plotService.section()?.charges?.length
+  );
+
+  tablesDropdown = computed<MenuItem[]>(() => [
+    {
+      label: $localize`Loads table`, // Tableau de charges
+      disabled: !this.hasCharges(),
+      command: () => {
+        this.toolbarDialogService.openTool('load-table');
+      }
+    },
+    {
+      label: $localize`L0 table`, // Tableau L0
+      disabled: false,
+      command: () => {
+        this.toolbarDialogService.openTool('l0-sum');
+      }
+    },
+    {
+      label: $localize`Pose table`, // Tableau de pose
+      disabled: true,
+      command: () => {
+        console.log('Add action triggered');
+      }
+    },
+    {
+      label: $localize`Obstacles table`, // Tableau d'obstacles
+      disabled: true,
+      command: () => {
+        console.log('Add action triggered');
+      }
+    },
+    {
+      label: $localize`Grounds table`, // Tableau de sols
+      disabled: true,
+      command: () => {
+        console.log('Add action triggered');
+      }
+    }
+  ]);
 
   shortcutsModal = signal<boolean>(false);
   shortcutsCount = signal<number>(0);
@@ -44,44 +85,6 @@ export class StudioTopToolbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadToolsItemsState();
-
-    this.tablesDropdown.set([
-      {
-        label: $localize`Loads table`, // Tableau de charges
-        disabled: true,
-        command: () => {
-          console.log('Add action triggered');
-        }
-      },
-      {
-        label: $localize`L0 table`, // Tableau L0
-        disabled: false,
-        command: () => {
-          this.toolsDialogService.openTool('l0-sum');
-        }
-      },
-      {
-        label: $localize`Pose table`, // Tableau de pose
-        disabled: true,
-        command: () => {
-          console.log('Add action triggered');
-        }
-      },
-      {
-        label: $localize`Obstacles table`, // Tableau d'obstacles
-        disabled: true,
-        command: () => {
-          console.log('Add action triggered');
-        }
-      },
-      {
-        label: $localize`Grounds table`, // Tableau de sols
-        disabled: true,
-        command: () => {
-          console.log('Add action triggered');
-        }
-      }
-    ]);
 
     this.toolsDropdown.set(
       this.toolsItems().map((item) => ({
@@ -167,7 +170,7 @@ export class StudioTopToolbarComponent implements OnInit {
       checked: false,
       disabled: false,
       action: () => {
-        this.toolsDialogService.openTool('field-measuring');
+        this.toolbarDialogService.openTool('field-measuring');
       }
     },
     {
@@ -176,7 +179,7 @@ export class StudioTopToolbarComponent implements OnInit {
       checked: false,
       disabled: false,
       action: () => {
-        this.toolsDialogService.openTool('vtl-and-guying');
+        this.toolbarDialogService.openTool('vtl-and-guying');
       }
     },
     {

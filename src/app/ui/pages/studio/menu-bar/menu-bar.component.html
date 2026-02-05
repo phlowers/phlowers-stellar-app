@@ -54,16 +54,13 @@
       app-btn
       btnStyle="outlined"
       btnSize="s"
-      (click)="openNewChargeModal.emit({ mode: 'create', uuid: null })"
+      (click)="openNewChargeModal.emit()"
     >
       <app-icon icon="add_circle" />
     </button>
   } @else {
     <button
-      (click)="
-        $event.stopPropagation();
-        openNewChargeModal.emit({ mode: 'create', uuid: null })
-      "
+      (click)="openNewChargeModal.emit()"
       app-btn
       btnSize="s"
       btnStyle="outlined"

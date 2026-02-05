@@ -171,19 +171,22 @@
           @if (section.charges && section.charges.length > 0) {
             <p i18n class="mb-0 section__title-charges">Charge cases</p>
             <div class="section__content-charges w-[12.5rem]">
-              <p-select
-                [options]="section.charges"
-                [ngModel]="section.selected_charge_uuid"
+              <app-select-with-buttons
+                onKeyDown="$event.stopPropagation()"
                 (keydown)="$event.stopPropagation()"
                 (click)="$event.stopPropagation()"
-                ariaLabel="Select charge cases"
-                [fluid]="true"
-                optionLabel="name"
-                optionValue="uuid"
+                [options]="getChargesOptions(section)"
+                [selectedOption]="section.selected_charge_uuid"
+                (selectOption)="selectChargeCase($event, section)"
+                (deleteOption)="deleteChargeCase($event, section)"
+                (duplicateOption)="duplicateChargeCase($event, section)"
+                (viewOption)="viewOrEditChargeCase($event, 'view')"
+                (editOption)="viewOrEditChargeCase($event, 'edit')"
+                optionLabel="label"
+                optionValue="value"
+                ariaLabel="Select charge case"
                 i18n-ariaLabel
-                placeholder="View charge cases"
-                (onChange)="onChargeChange(section, $event)"
-                i18n-placeholder
+                [showClear]="false"
               />
             </div>
           }
@@ -291,3 +294,5 @@
     </a>
   </div>
 }
+
+<app-toolbar-dialog />

@@ -299,22 +299,6 @@ describe('StudioPageComponent', () => {
     expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
   });
 
-  it('openNewChargeModal should set modal open with default create mode', () => {
-    component.openNewChargeModal();
-
-    expect(component.isNewChargeModalOpen()).toBe(true);
-    expect(component.newChargeModalMode()).toBe('create');
-    expect(component.newChargeModalUuid()).toBeNull();
-  });
-
-  it('openNewChargeModal should set modal open with specified mode and uuid', () => {
-    component.openNewChargeModal({ mode: 'edit', uuid: 'charge-1' });
-
-    expect(component.isNewChargeModalOpen()).toBe(true);
-    expect(component.newChargeModalMode()).toBe('edit');
-    expect(component.newChargeModalUuid()).toBe('charge-1');
-  });
-
   it('onSelectPlotOptions should set single span offset', () => {
     plotService.plotOptions.mockReturnValue({
       invert: false,

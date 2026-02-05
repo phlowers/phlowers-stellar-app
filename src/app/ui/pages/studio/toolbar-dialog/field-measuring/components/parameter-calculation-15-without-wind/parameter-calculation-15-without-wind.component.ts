@@ -10,7 +10,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import {
   FieldMeasure,
   ManualParameterCalculation15CWithoutWind
-} from '@ui/pages/studio/tools-dialog/field-measuring/types';
+} from '@ui/pages/studio/toolbar-dialog/field-measuring/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { InitialConditionModalComponent } from '@ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@core/domain';

@@ -10,15 +10,15 @@
     padding-top: 2.875rem;
 
     &__title {
-      @extend %text-m-600;
+      @extend %text-s-400;
       color: var(--star-dust-900);
-      padding: 2px 4px;
+      padding: 0.125rem 0.25rem;
     }
 
     &__value {
       @extend %text-m-400;
       color: var(--star-dust-950);
-      padding: 0.25rem 0.5rem;
+      padding: 0.375rem 0.5rem;
     }
   }
 

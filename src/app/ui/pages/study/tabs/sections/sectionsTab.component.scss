@@ -11,8 +11,7 @@
 
 .section {
   display: grid;
-  grid-template-columns:
-    min-content 2fr auto 1fr 1fr 2fr 2fr min-content;
+  grid-template-columns: min-content 2fr auto 1fr 1fr 2fr 2fr min-content;
   grid-template-rows: repeat(2, auto);
   grid-template-areas:
     'selector nameTitle typeTitle litTitle modifiedTitle initTitle chargesTitle actionTitle'
@@ -91,7 +90,8 @@
 
   dt,
   &__title-init,
-  &__title-action {
+  &__title-action,
+  &__title-charges {
     @extend %text-s-400;
     color: var(--grey-700);
   }
@@ -108,6 +108,8 @@
 
 .sticky-btn-wrapper {
   @apply sticky text-right p-6 -bottom-6 -inset-x-6 -mx-6 flex gap-2 justify-end;
-  background-image: linear-gradient(rgb(from var(--grey-white) r g b / 0),
-      rgb(from var(--grey-white) r g b / 0.9) 70%);
+  background-image: linear-gradient(
+    rgb(from var(--grey-white) r g b / 0),
+    rgb(from var(--grey-white) r g b / 0.9) 70%
+  );
 }

@@ -16,7 +16,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from './components/header/header.component';
 import { FieldMeasure } from './types';
-import { ToolsDialogService } from '../tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog.service';
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
@@ -57,7 +57,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
 
-  private readonly toolsDialogService = inject(ToolsDialogService);
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
   public readonly plotService = inject(PlotService);
   initialConditionModalOpen = signal<boolean>(false);
 
@@ -73,7 +73,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   });
 
   ngAfterViewInit(): void {
-    this.toolsDialogService.setTemplates({
+    this.toolbarDialogService.setTemplates({
       header: this.headerTemplate,
       footer: this.footerTemplate
     });
@@ -107,7 +107,10 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     private readonly messageService: MessageService
   ) {
     effect(() => {
-      if (this.toolsDialogService.isMainOpen()) {
+      if (
+        this.toolbarDialogService.isOpen() &&
+        this.toolbarDialogService.phase() === 'main'
+      ) {
         // Initialize data from PlotService when dialog opens
         this.initializeMeasureData();
         this.cableService.getCables().then((cables) => {
@@ -123,7 +126,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.toolsDialogService.setTemplates({});
+    this.toolbarDialogService.setTemplates({});
   }
 
   isNameAlreadyTaken = computed(() => {
@@ -174,7 +177,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
 
     if (!section || !selectedFieldMeasure) {
       console.warn('No section available');
-      this.toolsDialogService.closeTool();
+      this.toolbarDialogService.closeTool();
       return;
     }
 
@@ -200,7 +203,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
 
   onVisibleChange(visible: boolean) {
     if (!visible) {
-      this.toolsDialogService.closeTool();
+      this.toolbarDialogService.closeTool();
     }
   }
 

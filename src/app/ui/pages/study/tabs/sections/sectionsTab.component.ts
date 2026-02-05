@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -29,6 +30,8 @@ import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
+import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.service';
+import { ToolbarDialogComponent } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.component';
 
 @Component({
   selector: 'app-sections-tab',
@@ -45,7 +48,8 @@ import { ChargesService } from '@services/charges/charges.service';
     DividerModule,
     CheckboxModule,
     RouterLink,
-    SelectWithButtonsComponent
+    SelectWithButtonsComponent,
+    ToolbarDialogComponent
   ],
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss'
@@ -70,6 +74,7 @@ export class SectionsTabComponent {
   initialConditionModalMode = signal<CreateEditView>('create');
   selectedSection = signal<string>('');
   @ViewChild('popover') popover!: Popover;
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
 
   constructor(private readonly chargesService: ChargesService) {}
 
@@ -230,11 +235,51 @@ export class SectionsTabComponent {
     return cloneDeep(initialConditions).reverse();
   };
 
-  onChargeChange(section: Section, event: any) {
+  getChargesOptions(section: Section) {
+    return (
+      section.charges?.map((c) => ({
+        label: c.name,
+        value: c.uuid
+      })) ?? []
+    );
+  }
+
+  selectChargeCase(charge: { label: string; value: string }, section: Section) {
     this.chargesService.setSelectedCharge(
       this.study()?.uuid ?? '',
       section.uuid,
-      event.value
+      charge?.value ?? ''
     );
+  }
+
+  deleteChargeCase(charge: { label: string; value: string }, section: Section) {
+    this.chargesService.deleteCharge(
+      this.study()?.uuid ?? '',
+      section.uuid,
+      charge?.value ?? ''
+    );
+  }
+
+  duplicateChargeCase(
+    charge: { label: string; value: string },
+    section: Section
+  ) {
+    this.chargesService.duplicateCharge(
+      this.study()?.uuid ?? '',
+      section.uuid,
+      charge?.value ?? ''
+    );
+  }
+
+  viewOrEditChargeCase(
+    charge: { label: string; value: string },
+    mode: 'view' | 'edit'
+  ) {
+    if (charge?.value) {
+      this.toolbarDialogService.openTool('load-table', {
+        mode,
+        chargeUuid: charge.value
+      });
+    }
   }
 }

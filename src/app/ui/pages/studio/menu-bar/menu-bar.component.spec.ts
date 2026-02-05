@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { StudioMenuBarComponent } from './menu-bar.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { ChargesService } from '@services/charges/charges.service';
+import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -11,7 +12,13 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { signal } from '@angular/core';
-import { Charge, InitialCondition, Section, Study } from '@core/domain';
+import {
+  Charge,
+  InitialCondition,
+  Section,
+  Study,
+  SymmetryType
+} from '@core/domain';
 import { ActivatedRoute } from '@angular/router';
 
 describe('StudioMenuBarComponent', () => {
@@ -19,6 +26,7 @@ describe('StudioMenuBarComponent', () => {
   let fixture: ComponentFixture<StudioMenuBarComponent>;
   let mockPlotService: Partial<PlotService>;
   let mockChargesService: Partial<ChargesService>;
+  let mockToolbarDialogService: Partial<ToolbarDialogService>;
 
   const mockCharge1: Charge = {
     uuid: 'charge-uuid-1',
@@ -29,7 +37,7 @@ describe('StudioMenuBarComponent', () => {
       climate: {
         windPressure: 0,
         cableTemperature: 15,
-        symmetryType: 'symmetric',
+        symmetryType: SymmetryType.SYMMETRIC,
         iceThickness: 0,
         frontierSupportNumber: null,
         iceThicknessBefore: null,
@@ -49,7 +57,7 @@ describe('StudioMenuBarComponent', () => {
       climate: {
         windPressure: 0,
         cableTemperature: 15,
-        symmetryType: 'symmetric',
+        symmetryType: SymmetryType.SYMMETRIC,
         iceThickness: 0,
         frontierSupportNumber: null,
         iceThicknessBefore: null,
@@ -146,6 +154,11 @@ describe('StudioMenuBarComponent', () => {
       duplicateCharge: jest.fn().mockResolvedValue(mockCharge1)
     };
 
+    // Mock ToolbarDialogService
+    mockToolbarDialogService = {
+      openTool: jest.fn()
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         StudioMenuBarComponent,
@@ -163,6 +176,10 @@ describe('StudioMenuBarComponent', () => {
         {
           provide: ChargesService,
           useValue: mockChargesService as ChargesService
+        },
+        {
+          provide: ToolbarDialogService,
+          useValue: mockToolbarDialogService as ToolbarDialogService
         },
         {
           provide: ActivatedRoute,
@@ -589,41 +606,43 @@ describe('StudioMenuBarComponent', () => {
   });
 
   describe('viewOrEditChargeCase', () => {
-    it('should emit openNewChargeModal with view mode and charge uuid', () => {
-      const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
+    it('should open toolbar dialog with view mode and charge uuid', () => {
       const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
 
       component.viewOrEditChargeCase(charge, 'view');
 
-      expect(emitSpy).toHaveBeenCalledWith({
-        mode: 'view',
-        uuid: 'charge-uuid-1'
-      });
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
+        'load-table',
+        {
+          mode: 'view',
+          chargeUuid: 'charge-uuid-1'
+        }
+      );
     });
 
-    it('should emit openNewChargeModal with edit mode and charge uuid', () => {
-      const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
+    it('should open toolbar dialog with edit mode and charge uuid', () => {
       const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
 
       component.viewOrEditChargeCase(charge, 'edit');
 
-      expect(emitSpy).toHaveBeenCalledWith({
-        mode: 'edit',
-        uuid: 'charge-uuid-1'
-      });
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
+        'load-table',
+        {
+          mode: 'edit',
+          chargeUuid: 'charge-uuid-1'
+        }
+      );
     });
 
-    it('should not emit when charge value is empty string', () => {
-      const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
+    it('should not open toolbar dialog when charge value is empty string', () => {
       const charge = { label: 'Charge 1', value: '' };
 
       component.viewOrEditChargeCase(charge, 'view');
 
-      expect(emitSpy).not.toHaveBeenCalled();
+      expect(mockToolbarDialogService.openTool).not.toHaveBeenCalled();
     });
 
-    it('should not emit when charge value is undefined', () => {
-      const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
+    it('should not open toolbar dialog when charge value is undefined', () => {
       const charge = {
         label: 'Charge 1',
         value: undefined as unknown as string
@@ -631,18 +650,16 @@ describe('StudioMenuBarComponent', () => {
 
       component.viewOrEditChargeCase(charge, 'view');
 
-      expect(emitSpy).not.toHaveBeenCalled();
+      expect(mockToolbarDialogService.openTool).not.toHaveBeenCalled();
     });
 
-    it('should not emit when charge is undefined', () => {
-      const emitSpy = jest.spyOn(component.openNewChargeModal, 'emit');
-
+    it('should not open toolbar dialog when charge is undefined', () => {
       component.viewOrEditChargeCase(
         undefined as unknown as { label: string; value: string },
         'view'
       );
 
-      expect(emitSpy).not.toHaveBeenCalled();
+      expect(mockToolbarDialogService.openTool).not.toHaveBeenCalled();
     });
   });
 

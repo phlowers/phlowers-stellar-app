@@ -9,10 +9,15 @@ export interface ChargeData {
   spanLoads: SpanLoad[];
 }
 
+export enum SymmetryType {
+  SYMMETRIC = 'symmetric',
+  DIS_SYMMETRIC = 'dis_symmetric'
+}
+
 export interface ClimateCharge {
   windPressure: number | null;
   cableTemperature: number | null;
-  symmetryType: string;
+  symmetryType: SymmetryType;
   iceThickness: number | null;
   frontierSupportNumber: null;
   iceThicknessBefore: null;
