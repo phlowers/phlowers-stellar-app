@@ -103,53 +103,60 @@ describe('ToolbarDialogComponent', () => {
   });
 
   describe('Template Rendering', () => {
-    it('should render p-dialog components', () => {
-      const element = fixture.nativeElement;
-      const dialogs = element.querySelectorAll('p-dialog');
-      expect(dialogs.length).toBe(2); // Init and Main dialogs
-    });
-
-    it('should bind visible property to service isInitOpen signal for init dialog', () => {
-      toolbarDialogService.isInitOpen.set(true);
+    it('should bind visible property to service isOpen signal', () => {
+      toolbarDialogService.isOpen.set(true);
       fixture.detectChanges();
 
-      const dialogs = fixture.nativeElement.querySelectorAll('p-dialog');
-      expect(dialogs[0].getAttribute('ng-reflect-visible')).toBe('true');
+      const dialog = fixture.nativeElement.querySelector('p-dialog');
+      expect(dialog.getAttribute('ng-reflect-visible')).toBe('true');
     });
 
-    it('should display init dialog when tool with initComponent is opened', () => {
+    it('should display dialog in init phase when tool with initComponent is opened', () => {
       toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      expect(toolbarDialogService.isInitOpen()).toBe(true);
-      expect(toolbarDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
     });
   });
 
   describe('Dialog State Management', () => {
     it('should reflect service state changes', () => {
-      expect(toolbarDialogService.isInitOpen()).toBe(false);
-      expect(toolbarDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(false);
 
       toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
-      expect(toolbarDialogService.isInitOpen()).toBe(true);
-      expect(toolbarDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
 
       toolbarDialogService.closeTool();
       fixture.detectChanges();
-      expect(toolbarDialogService.isInitOpen()).toBe(false);
-      expect(toolbarDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(false);
     });
 
     it('should render dynamic components based on current tool', () => {
       toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      const initComponent = toolbarDialogService.getInitComponent();
-      const mainComponent = toolbarDialogService.getMainComponent();
-      expect(initComponent).toBeDefined();
-      expect(mainComponent).toBeDefined();
+      const component = toolbarDialogService.getComponent();
+      expect(component).toBeDefined();
+    });
+  });
+
+  describe('onDialogHide', () => {
+    it('should call closeTool when not transitioning', () => {
+      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      component.onDialogHide();
+      expect(closeToolSpy).toHaveBeenCalled();
+    });
+
+    it('should not call closeTool when transitioning', () => {
+      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+
+      component.onDialogHide();
+      expect(closeToolSpy).not.toHaveBeenCalled();
     });
   });
 });

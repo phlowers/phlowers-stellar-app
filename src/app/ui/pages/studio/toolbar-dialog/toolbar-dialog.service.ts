@@ -12,6 +12,8 @@ export type Tool =
   | 'load-table'
   | 'other-tool';
 
+export type DialogPhase = 'init' | 'main';
+
 export interface ToolConfig {
   component: Type<unknown>;
   dialogStyle?: Record<string, string>;
@@ -34,10 +36,12 @@ export interface LoadTableContext {
 })
 export class ToolbarDialogService {
   readonly currentTool = signal<Tool | null>(null);
-  readonly isInitOpen = signal(false);
-  readonly isMainOpen = signal(false);
+  readonly isOpen = signal(false);
+  readonly phase = signal<DialogPhase>('main');
   readonly templates = signal<ToolTemplates>({});
   readonly loadTableContext = signal<LoadTableContext | null>(null);
+
+  private transitioning = false;
 
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
@@ -74,17 +78,15 @@ export class ToolbarDialogService {
     }
 
     if (config.initComponent) {
-      this.isInitOpen.set(true);
-      this.isMainOpen.set(false);
+      this.phase.set('init');
     } else {
-      this.isInitOpen.set(false);
-      this.isMainOpen.set(true);
+      this.phase.set('main');
     }
+    this.isOpen.set(true);
   }
 
   closeTool(): void {
-    this.isInitOpen.set(false);
-    this.isMainOpen.set(false);
+    this.isOpen.set(false);
 
     setTimeout(() => {
       this.currentTool.set(null);
@@ -93,35 +95,35 @@ export class ToolbarDialogService {
   }
 
   proceedToMainComponent(): void {
-    this.isInitOpen.set(false);
-    // Attendre la fermeture complète du dialog init avant d'ouvrir le main
+    this.transitioning = true;
+    this.isOpen.set(false);
     setTimeout(() => {
-      this.isMainOpen.set(true);
+      this.phase.set('main');
+      this.isOpen.set(true);
+      this.transitioning = false;
     }, 150);
   }
 
-  getInitComponent(): Type<unknown> | null {
+  isTransitioning(): boolean {
+    return this.transitioning;
+  }
+
+  getComponent(): Type<unknown> | null {
     const tool = this.currentTool();
     if (!tool) return null;
-    return this.toolMap[tool].initComponent || null;
+    const config = this.toolMap[tool];
+    return this.phase() === 'init'
+      ? config.initComponent || null
+      : config.component;
   }
 
-  getMainComponent(): Type<unknown> | null {
-    const tool = this.currentTool();
-    if (!tool) return null;
-    return this.toolMap[tool].component;
-  }
-
-  getInitDialogStyle(): Record<string, string> {
+  getDialogStyle(): Record<string, string> {
     const tool = this.currentTool();
     if (!tool) return {};
-    return this.toolMap[tool].initDialogStyle || {};
-  }
-
-  getMainDialogStyle(): Record<string, string> {
-    const tool = this.currentTool();
-    if (!tool) return {};
-    return this.toolMap[tool].dialogStyle || {};
+    const config = this.toolMap[tool];
+    return this.phase() === 'init'
+      ? config.initDialogStyle || {}
+      : config.dialogStyle || {};
   }
 
   setTemplates(templates: ToolTemplates): void {

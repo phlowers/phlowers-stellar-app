@@ -107,7 +107,10 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     private readonly messageService: MessageService
   ) {
     effect(() => {
-      if (this.toolbarDialogService.isMainOpen()) {
+      if (
+        this.toolbarDialogService.isOpen() &&
+        this.toolbarDialogService.phase() === 'main'
+      ) {
         // Initialize data from PlotService when dialog opens
         this.initializeMeasureData();
         this.cableService.getCables().then((cables) => {

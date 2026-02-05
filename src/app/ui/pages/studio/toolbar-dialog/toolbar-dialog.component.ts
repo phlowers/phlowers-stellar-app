@@ -12,8 +12,8 @@ export class ToolbarDialogComponent {
   readonly toolbarDialogService = inject(ToolbarDialogService);
   readonly injector = inject(Injector);
 
-  onInitDialogHide(): void {
-    if (this.toolbarDialogService.isInitOpen()) {
+  onDialogHide(): void {
+    if (!this.toolbarDialogService.isTransitioning()) {
       this.toolbarDialogService.closeTool();
     }
   }

@@ -174,7 +174,8 @@ describe('LoadsTableComponent', () => {
 
   beforeEach(async () => {
     mockToolbarDialogService = {
-      isMainOpen: signal(false),
+      isOpen: signal(false),
+      phase: signal('main' as const),
       currentTool: signal(null),
       loadTableContext: signal(null),
       setTemplates: jest.fn(),
@@ -346,7 +347,7 @@ describe('LoadsTableComponent', () => {
 
   describe('climate and span loads data loading', () => {
     it('should populate climate signal after loading charge data', async () => {
-      (mockToolbarDialogService.isMainOpen as any).set(true);
+      (mockToolbarDialogService.isOpen as any).set(true);
       (mockToolbarDialogService.currentTool as any).set('load-table');
       (mockToolbarDialogService.loadTableContext as any).set({
         mode: 'view',
@@ -360,7 +361,7 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should populate spanLoads signal after loading charge data', async () => {
-      (mockToolbarDialogService.isMainOpen as any).set(true);
+      (mockToolbarDialogService.isOpen as any).set(true);
       (mockToolbarDialogService.currentTool as any).set('load-table');
       (mockToolbarDialogService.loadTableContext as any).set({
         mode: 'view',
@@ -379,7 +380,7 @@ describe('LoadsTableComponent', () => {
         data: undefined
       });
 
-      (mockToolbarDialogService.isMainOpen as any).set(true);
+      (mockToolbarDialogService.isOpen as any).set(true);
       (mockToolbarDialogService.currentTool as any).set('load-table');
       (mockToolbarDialogService.loadTableContext as any).set({
         mode: 'view',
@@ -606,7 +607,7 @@ describe('LoadsTableComponent', () => {
 
   describe('effect - load charge data', () => {
     it('should load charge data when tool opens with context', async () => {
-      (mockToolbarDialogService.isMainOpen as any).set(true);
+      (mockToolbarDialogService.isOpen as any).set(true);
       (mockToolbarDialogService.currentTool as any).set('load-table');
       (mockToolbarDialogService.loadTableContext as any).set({
         mode: 'edit',
@@ -621,7 +622,7 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should load selected charge when tool opens without context', async () => {
-      (mockToolbarDialogService.isMainOpen as any).set(true);
+      (mockToolbarDialogService.isOpen as any).set(true);
       (mockToolbarDialogService.currentTool as any).set('load-table');
       (mockToolbarDialogService.loadTableContext as any).set(null);
 

@@ -1,46 +1,12 @@
-<!-- Dialog Init -->
 <p-dialog
   dismissableMask="false"
-  [visible]="toolbarDialogService.isInitOpen()"
-  (visibleChange)="toolbarDialogService.isInitOpen.set($event)"
+  [visible]="toolbarDialogService.isOpen()"
+  (visibleChange)="toolbarDialogService.isOpen.set($event)"
   [modal]="true"
-  [style]="toolbarDialogService.getInitDialogStyle()"
+  [style]="toolbarDialogService.getDialogStyle()"
   closeAriaLabel="Close"
   i18n-closeAriaLabel
-  (onHide)="onInitDialogHide()"
->
-  @if (toolbarDialogService.templates().header) {
-    <ng-template #header>
-      <ng-container
-        *ngTemplateOutlet="toolbarDialogService.templates().header!"
-      />
-    </ng-template>
-  }
-  @if (toolbarDialogService.isInitOpen()) {
-    <ng-container
-      *ngComponentOutlet="
-        toolbarDialogService.getInitComponent();
-        injector: injector
-      "
-    />
-  }
-</p-dialog>
-
-<!-- Dialog Main -->
-<p-dialog
-  dismissableMask="false"
-  [visible]="toolbarDialogService.isMainOpen()"
-  (visibleChange)="toolbarDialogService.isMainOpen.set($event)"
-  [modal]="true"
-  [style]="
-    toolbarDialogService.getMainDialogStyle() || {
-      'min-width': '60vw',
-      'max-width': '75rem'
-    }
-  "
-  closeAriaLabel="Close"
-  i18n-closeAriaLabel
-  (onHide)="toolbarDialogService.closeTool()"
+  (onHide)="onDialogHide()"
 >
   @if (toolbarDialogService.templates().header) {
     <ng-template #header>
@@ -50,16 +16,19 @@
     </ng-template>
   }
 
-  @if (toolbarDialogService.isMainOpen()) {
+  @if (toolbarDialogService.isOpen()) {
     <ng-container
       *ngComponentOutlet="
-        toolbarDialogService.getMainComponent();
+        toolbarDialogService.getComponent();
         injector: injector
       "
     />
   }
 
-  @if (toolbarDialogService.templates().footer) {
+  @if (
+    toolbarDialogService.phase() === 'main' &&
+    toolbarDialogService.templates().footer
+  ) {
     <ng-template #footer>
       <ng-container
         *ngTemplateOutlet="toolbarDialogService.templates().footer!"

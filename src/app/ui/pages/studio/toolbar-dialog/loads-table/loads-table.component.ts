@@ -132,7 +132,8 @@ export class LoadsTableComponent implements AfterViewInit {
   constructor() {
     effect(async () => {
       if (
-        this.toolbarDialogService.isMainOpen() &&
+        this.toolbarDialogService.isOpen() &&
+        this.toolbarDialogService.phase() === 'main' &&
         this.toolbarDialogService.currentTool() === 'load-table'
       ) {
         const context = this.toolbarDialogService.loadTableContext();

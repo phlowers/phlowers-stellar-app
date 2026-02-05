@@ -178,9 +178,9 @@ describe('FieldMeasuringComponent', () => {
       toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      // field-measuring opens init dialog first
-      expect(toolbarDialogService.isInitOpen()).toBe(true);
-      expect(toolbarDialogService.isMainOpen()).toBe(false);
+      // field-measuring opens init phase first
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
     });
   });
 
@@ -364,21 +364,24 @@ describe('FieldMeasuringComponent', () => {
 
   describe('Integration with ToolbarDialogService', () => {
     it('should work with service open state', async () => {
-      expect(toolbarDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(false);
 
       toolbarDialogService.openTool('field-measuring');
-      expect(toolbarDialogService.isInitOpen()).toBe(true);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
 
       // Proceed to main component
       toolbarDialogService.proceedToMainComponent();
 
       // Wait for the timeout that opens main dialog
       await new Promise((resolve) => setTimeout(resolve, 200));
-      expect(toolbarDialogService.isMainOpen()).toBe(true);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('main');
 
       await component.onSave();
       // onSave no longer closes the dialog - it shows a success message instead
-      expect(toolbarDialogService.isMainOpen()).toBe(true);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('main');
     });
 
     it('should work with onVisibleChange integration', async () => {
@@ -387,10 +390,11 @@ describe('FieldMeasuringComponent', () => {
 
       // Wait for the timeout that opens main dialog
       await new Promise((resolve) => setTimeout(resolve, 200));
-      expect(toolbarDialogService.isMainOpen()).toBe(true);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('main');
 
       component.onVisibleChange(false);
-      expect(toolbarDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(false);
     });
   });
 
@@ -435,9 +439,9 @@ describe('FieldMeasuringComponent', () => {
       toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      // field-measuring opens init dialog first
-      expect(toolbarDialogService.isInitOpen()).toBe(true);
-      expect(toolbarDialogService.isMainOpen()).toBe(false);
+      // field-measuring opens init phase first
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
     });
   });
 
