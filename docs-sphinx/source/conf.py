@@ -59,21 +59,21 @@ html_favicon = '_static/favicon.png'
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_book_theme'
+html_theme = 'furo'
 html_static_path = ['_static']
 
-# Wiki-like theme options
+# Furo theme options
 html_theme_options = {
-    "repository_url": "https://github.com/your-org/phlowers-stellar-app",
-    "use_repository_button": True,
-    "use_edit_page_button": True,
-    "use_source_button": True,
-    "use_issues_button": True,
-    "use_download_button": True,
-    "show_toc_level": 2,
+    "light_css_variables": {
+        "color-brand-primary": "#2962ff",
+        "color-brand-content": "#2962ff",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#82b1ff",
+        "color-brand-content": "#82b1ff",
+    },
+    "sidebar_hide_name": False,
     "navigation_with_keys": True,
-    "show_navbar_depth": 2,
-    "home_page_in_toc": True,
 }
 
-html_title = "Stellar Wiki"
+html_title = "Stellar Documentation"
