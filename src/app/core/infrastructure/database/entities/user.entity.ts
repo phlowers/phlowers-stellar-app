@@ -8,7 +8,12 @@
 import { User } from '@core/domain';
 
 /**
- * User entity for Dexie storage
- * Uses the domain model directly as no additional persistence fields are needed
+ * User entity for Dexie storage.
+ *
+ * @remarks
+ * Uses the domain model directly as no additional persistence fields
+ * are needed. Represents the logged-in user stored in IndexedDB.
+ *
+ * @category Database Entities
  */
 export type UserEntity = User;

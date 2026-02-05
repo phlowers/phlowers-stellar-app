@@ -8,7 +8,12 @@
 import { CatalogChain } from '@core/domain';
 
 /**
- * Catalog chain entity for Dexie storage
- * Uses the domain model directly as no additional persistence fields are needed
+ * Catalog chain entity for Dexie storage.
+ *
+ * @remarks
+ * Uses the domain model directly as no additional persistence fields
+ * are needed. Contains insulator chain specifications.
+ *
+ * @category Database Entities
  */
 export type CatalogChainEntity = CatalogChain;
