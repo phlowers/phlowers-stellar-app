@@ -6,12 +6,34 @@
  */
 
 /**
- * Catalog attachment domain model
+ * Catalog attachment domain model - represents cable attachment points on supports.
+ *
+ * @remarks
+ * An attachment defines the geometric position where a cable connects to a
+ * support structure. It includes support information, chain specifications,
+ * and 3D coordinates for the attachment point.
+ *
+ * @example
+ * ```typescript
+ * const attachment: CatalogAttachment = {
+ *   uuid: '123e4567-e89b-12d3-a456-426614174000',
+ *   support_tower: 'P42',
+ *   attachment_altitude: 25.5,
+ *   cross_arm_length: 3.2,
+ *   // ... other properties
+ * };
+ * ```
+ *
+ * @category Catalog Models
  */
 export interface CatalogAttachment {
+  /** Unique identifier (UUID v4) */
   uuid: string;
+  /** ISO 8601 timestamp of last update */
   updated_at: string;
+  /** ISO 8601 timestamp of creation */
   created_at: string;
+  /** Internal ID of the support */
   support_internal_id?: string;
   support_order?: number;
   support_number?: number;

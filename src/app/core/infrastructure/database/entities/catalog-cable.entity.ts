@@ -8,7 +8,12 @@
 import { CatalogCable } from '@core/domain';
 
 /**
- * Catalog cable entity for Dexie storage
- * Uses the domain model directly as no additional persistence fields are needed
+ * Catalog cable entity for Dexie storage.
+ *
+ * @remarks
+ * Uses the domain model directly as no additional persistence fields
+ * are needed. Contains cable/conductor specifications for calculations.
+ *
+ * @category Database Entities
  */
 export type CatalogCableEntity = CatalogCable;
