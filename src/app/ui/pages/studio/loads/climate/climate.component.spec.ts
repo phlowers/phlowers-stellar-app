@@ -11,7 +11,7 @@ import { MessageService } from 'primeng/api';
 import { ChargesService } from '@services/charges/charges.service';
 import { LoadFormsService } from '../loadForms.service';
 import { signal } from '@angular/core';
-import { Charge } from '@core/domain';
+import { Charge, SymmetryType } from '@core/domain';
 
 const mockCharge: Charge = {
   uuid: 'test-charge-uuid',
@@ -22,7 +22,7 @@ const mockCharge: Charge = {
     climate: {
       windPressure: 0,
       cableTemperature: 15,
-      symmetryType: 'symmetric',
+      symmetryType: SymmetryType.SYMMETRIC,
       iceThickness: 0,
       frontierSupportNumber: null,
       iceThicknessBefore: null,
@@ -127,7 +127,7 @@ describe('ClimateComponent (Jest)', () => {
       climate: {
         windPressure: 0,
         cableTemperature: 15,
-        symmetryType: 'symmetric',
+        symmetryType: SymmetryType.SYMMETRIC,
         iceThickness: 0,
         frontierSupportNumber: null,
         iceThicknessBefore: null,
@@ -148,7 +148,7 @@ describe('ClimateComponent (Jest)', () => {
         climate: {
           windPressure: 0,
           cableTemperature: 15,
-          symmetryType: 'symmetric',
+          symmetryType: SymmetryType.SYMMETRIC,
           iceThickness: 0,
           frontierSupportNumber: null,
           iceThicknessBefore: null,
@@ -207,7 +207,7 @@ describe('ClimateComponent (Jest)', () => {
     expect(component.form.value).toEqual({
       windPressure: 0,
       cableTemperature: 15,
-      symmetryType: 'symmetric',
+      symmetryType: SymmetryType.SYMMETRIC,
       iceThickness: 0,
       frontierSupportNumber: null,
       iceThicknessBefore: null,
@@ -219,7 +219,7 @@ describe('ClimateComponent (Jest)', () => {
     component.form.patchValue({
       windPressure: 50,
       cableTemperature: 25,
-      symmetryType: 'dis_symmetric',
+      symmetryType: SymmetryType.DIS_SYMMETRIC,
       iceThickness: 10,
       frontierSupportNumber: null,
       iceThicknessBefore: null,
@@ -231,7 +231,7 @@ describe('ClimateComponent (Jest)', () => {
     expect(component.form.value).toEqual({
       windPressure: 0,
       cableTemperature: 15,
-      symmetryType: 'symmetric',
+      symmetryType: SymmetryType.SYMMETRIC,
       iceThickness: 0,
       frontierSupportNumber: null,
       iceThicknessBefore: null,
@@ -368,7 +368,7 @@ describe('ClimateComponent (Jest)', () => {
       component.form.patchValue({
         windPressure: 100,
         cableTemperature: 20,
-        symmetryType: 'symmetric',
+        symmetryType: SymmetryType.SYMMETRIC,
         iceThickness: 5
       });
 

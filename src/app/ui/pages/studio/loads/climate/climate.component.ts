@@ -18,7 +18,11 @@ import { PlotService } from '../../services/plot.service';
 import { ChargesService } from '@core/services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '../loadForms.service';
-import { ChargeData, ClimateCharge } from '@core/domain/models/charge.model';
+import {
+  ChargeData,
+  ClimateCharge,
+  SymmetryType
+} from '@core/domain/models/charge.model';
 import { MessageModule } from 'primeng/message';
 
 function integerValidator(control: AbstractControl): ValidationErrors | null {
@@ -35,7 +39,7 @@ function integerValidator(control: AbstractControl): ValidationErrors | null {
 export const defaultClimaticCharge: ClimateCharge = {
   windPressure: 0,
   cableTemperature: 15,
-  symmetryType: 'symmetric',
+  symmetryType: SymmetryType.SYMMETRIC,
   iceThickness: 0,
   frontierSupportNumber: null,
   iceThicknessBefore: null,
@@ -71,7 +75,7 @@ export class ClimateComponent {
   form: FormGroup<{
     windPressure: FormControl<number | null>;
     cableTemperature: FormControl<number | null>;
-    symmetryType: FormControl<string | null>;
+    symmetryType: FormControl<SymmetryType | null>;
     iceThickness: FormControl<number | null>;
     frontierSupportNumber: FormControl<null>;
     iceThicknessBefore: FormControl<null>;
@@ -122,8 +126,8 @@ export class ClimateComponent {
   chargeUuid = input.required<string>();
 
   symmetryOptions = [
-    { label: $localize`Symmetric`, value: 'symmetric' },
-    { label: $localize`Dis Symmetric`, value: 'dis_symmetric' }
+    { label: $localize`Symmetric`, value: SymmetryType.SYMMETRIC },
+    { label: $localize`Dis Symmetric`, value: SymmetryType.DIS_SYMMETRIC }
   ];
 
   frontierSupportOptions: { label: string; value: number }[] = [];
@@ -167,7 +171,7 @@ export class ClimateComponent {
         this.plotService.temporaryLoadData = {
           ...this.plotService.temporaryLoadData!,
           climate: {
-            ...(this.plotService.temporaryLoadData?.climate ?? {}),
+            ...this.plotService.temporaryLoadData?.climate,
             ...value
           } as ClimateCharge
         } as ChargeData;

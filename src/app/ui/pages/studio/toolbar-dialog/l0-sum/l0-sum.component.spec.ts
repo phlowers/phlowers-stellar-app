@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { L0SumComponent } from './l0-sum.component';
-import { ToolsDialogService } from '../tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 
@@ -22,7 +22,7 @@ class MockIconComponent {}
 describe('L0SumComponent', () => {
   let component: L0SumComponent;
   let fixture: ComponentFixture<L0SumComponent>;
-  let toolsDialogService: ToolsDialogService;
+  let toolbarDialogService: ToolbarDialogService;
 
   beforeEach(async () => {
     const mockLitData = {
@@ -49,7 +49,7 @@ describe('L0SumComponent', () => {
 
     await TestBed.configureTestingModule({
       providers: [
-        ToolsDialogService,
+        ToolbarDialogService,
         provideHttpClientTesting(),
         { provide: PlotService, useValue: mockPlotService }
       ]
@@ -63,7 +63,7 @@ describe('L0SumComponent', () => {
 
     fixture = TestBed.createComponent(L0SumComponent);
     component = fixture.componentInstance;
-    toolsDialogService = TestBed.inject(ToolsDialogService);
+    toolbarDialogService = TestBed.inject(ToolbarDialogService);
     fixture.detectChanges();
   });
 
@@ -76,7 +76,7 @@ describe('L0SumComponent', () => {
     expect(component.totalL0()).toBeGreaterThan(0);
   });
 
-  it('should inject ToolsDialogService', () => {
-    expect(toolsDialogService).toBeDefined();
+  it('should inject ToolbarDialogService', () => {
+    expect(toolbarDialogService).toBeDefined();
   });
 });

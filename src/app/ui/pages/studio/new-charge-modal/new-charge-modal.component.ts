@@ -49,19 +49,12 @@ const newCharge = (currentCharges: Charge[]): Charge => {
 export class NewChargeModalComponent {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
-  mode = input.required<'create' | 'edit' | 'view'>();
-
-  uuidInput = input<string | null>(null);
 
   name = signal<string>('');
   personnelPresence = signal<boolean>(false);
   description = signal<string>('');
 
-  nameLength = computed(() => this.name().length ?? 0);
   descriptionLength = computed(() => this.description().length ?? 0);
-  isViewMode = computed(() => this.mode() === 'view');
-  isEditMode = computed(() => this.mode() === 'edit');
-  isCreateMode = computed(() => this.mode() === 'create');
 
   validate = output<Charge>();
 
@@ -69,28 +62,12 @@ export class NewChargeModalComponent {
     private readonly chargesService: ChargesService,
     private readonly plotService: PlotService
   ) {
-    effect(async () => {
+    effect(() => {
       if (this.isOpen()) {
-        if (this.mode() === 'edit' || this.mode() === 'view') {
-          const charge = await this.chargesService.getCharge(
-            this.plotService.study()?.uuid ?? '',
-            this.plotService.section()?.uuid ?? '',
-            this.uuidInput() ?? ''
-          );
-          if (!charge) {
-            throw new Error(`Charge with uuid ${this.uuidInput()} not found`);
-          }
-          this.name.set(charge.name);
-          this.personnelPresence.set(charge.personnelPresence);
-          this.description.set(charge.description);
-        } else {
-          const emptyCase = newCharge(
-            this.plotService.section()?.charges ?? []
-          );
-          this.name.set(emptyCase.name);
-          this.personnelPresence.set(emptyCase.personnelPresence);
-          this.description.set(emptyCase.description);
-        }
+        const emptyCase = newCharge(this.plotService.section()?.charges ?? []);
+        this.name.set(emptyCase.name);
+        this.personnelPresence.set(emptyCase.personnelPresence);
+        this.description.set(emptyCase.description);
       }
     });
   }
@@ -108,10 +85,8 @@ export class NewChargeModalComponent {
   }
 
   async onSubmit() {
-    const chargeUuid =
-      this.isEditMode() && this.uuidInput() ? this.uuidInput() : uuidv4();
     const charge: Charge = {
-      uuid: chargeUuid ?? '',
+      uuid: uuidv4(),
       name: this.name(),
       personnelPresence: this.personnelPresence(),
       description: this.description(),
@@ -143,12 +118,9 @@ export class NewChargeModalComponent {
 
   isFormValid(): boolean {
     const existingLoadCases = this.plotService.section()?.charges;
-    const currentUuid = this.uuidInput();
     return (
-      this.nameLength() > 0 &&
-      !existingLoadCases?.some(
-        (c) => c.name === this.name() && c.uuid !== currentUuid
-      )
+      this.name().length > 0 &&
+      !existingLoadCases?.some((c) => c.name === this.name())
     );
   }
 }

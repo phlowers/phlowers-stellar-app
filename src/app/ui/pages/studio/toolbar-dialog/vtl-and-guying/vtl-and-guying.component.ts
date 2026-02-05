@@ -24,7 +24,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { ToolsDialogService } from '../tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
@@ -66,7 +66,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
 
-  private readonly toolsDialogService = inject(ToolsDialogService);
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
   public readonly plotService = inject(PlotService);
@@ -233,7 +233,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.setFormValuesFromSection();
-    this.toolsDialogService.setTemplates({
+    this.toolbarDialogService.setTemplates({
       header: this.headerTemplate,
       footer: this.footerTemplate
     });
@@ -241,7 +241,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   onVisibleChange(visible: boolean) {
     if (!visible) {
-      this.toolsDialogService.closeTool();
+      this.toolbarDialogService.closeTool();
     }
   }
 
@@ -307,7 +307,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
       detail: $localize`VTL and guying saved`,
       life: 3000
     });
-    this.toolsDialogService.closeTool();
+    this.toolbarDialogService.closeTool();
   }
 
   isFormValid(): boolean {

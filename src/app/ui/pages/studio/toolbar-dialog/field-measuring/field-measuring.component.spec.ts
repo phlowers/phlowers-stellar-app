@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring.component';
-import { ToolsDialogService } from '../tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { createTestMeasureData } from './helpers';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/sections/section.service';
@@ -53,7 +53,7 @@ class MockCalculusSettingComponent {}
 describe('FieldMeasuringComponent', () => {
   let component: FieldMeasuringComponent;
   let fixture: ComponentFixture<FieldMeasuringComponent>;
-  let toolsDialogService: ToolsDialogService;
+  let toolbarDialogService: ToolbarDialogService;
 
   beforeEach(async () => {
     const mockMessageService = {
@@ -94,7 +94,7 @@ describe('FieldMeasuringComponent', () => {
 
     await TestBed.configureTestingModule({
       providers: [
-        ToolsDialogService,
+        ToolbarDialogService,
         provideAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -120,7 +120,7 @@ describe('FieldMeasuringComponent', () => {
 
     fixture = TestBed.createComponent(FieldMeasuringComponent);
     component = fixture.componentInstance;
-    toolsDialogService = TestBed.inject(ToolsDialogService);
+    toolbarDialogService = TestBed.inject(ToolbarDialogService);
   });
 
   describe('Component Creation', () => {
@@ -128,10 +128,10 @@ describe('FieldMeasuringComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should inject ToolsDialogService', () => {
-      expect(component['toolsDialogService']).toBeDefined();
-      expect(component['toolsDialogService']).toBeInstanceOf(
-        ToolsDialogService
+    it('should inject ToolbarDialogService', () => {
+      expect(component['toolbarDialogService']).toBeDefined();
+      expect(component['toolbarDialogService']).toBeInstanceOf(
+        ToolbarDialogService
       );
     });
 
@@ -152,7 +152,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('Lifecycle Hooks', () => {
     it('should set templates on ngAfterViewInit', () => {
-      const setTemplatesSpy = jest.spyOn(toolsDialogService, 'setTemplates');
+      const setTemplatesSpy = jest.spyOn(toolbarDialogService, 'setTemplates');
 
       // Create mock templates
       component.headerTemplate = {} as TemplateRef<unknown>;
@@ -167,7 +167,7 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should clear templates on ngOnDestroy', () => {
-      const setTemplatesSpy = jest.spyOn(toolsDialogService, 'setTemplates');
+      const setTemplatesSpy = jest.spyOn(toolbarDialogService, 'setTemplates');
 
       component.ngOnDestroy();
 
@@ -175,12 +175,12 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should react to dialog open state in effect', async () => {
-      toolsDialogService.openTool('field-measuring');
+      toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      // field-measuring opens init dialog first
-      expect(toolsDialogService.isInitOpen()).toBe(true);
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      // field-measuring opens init phase first
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
     });
   });
 
@@ -203,7 +203,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('onVisibleChange', () => {
     it('should close tool when visible is false', () => {
-      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
 
       component.onVisibleChange(false);
 
@@ -211,7 +211,7 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should not close tool when visible is true', () => {
-      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
 
       component.onVisibleChange(true);
 
@@ -293,8 +293,8 @@ describe('FieldMeasuringComponent', () => {
       const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
 
       // Open main dialog to initialize measureData from PlotService
-      toolsDialogService.openTool('field-measuring');
-      toolsDialogService.proceedToMainComponent();
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const measureData = component.measureData();
@@ -310,7 +310,7 @@ describe('FieldMeasuringComponent', () => {
     it('should return early if section is not available', async () => {
       const plotService = TestBed.inject(PlotService);
       const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
-      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
 
       // Set section to null using the signal setter
       const sectionSignal = plotService.section as ReturnType<
@@ -324,12 +324,12 @@ describe('FieldMeasuringComponent', () => {
       expect(closeToolSpy).not.toHaveBeenCalled();
     });
 
-    it('should not close tool dialog after saving (shows success message instead)', async () => {
-      const closeToolSpy = jest.spyOn(toolsDialogService, 'closeTool');
+    it('should close tool dialog after saving', async () => {
+      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
 
       // Open main dialog to initialize measureData from PlotService
-      toolsDialogService.openTool('field-measuring');
-      toolsDialogService.proceedToMainComponent();
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       await component.onSave();
@@ -362,35 +362,39 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
-  describe('Integration with ToolsDialogService', () => {
+  describe('Integration with ToolbarDialogService', () => {
     it('should work with service open state', async () => {
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(false);
 
-      toolsDialogService.openTool('field-measuring');
-      expect(toolsDialogService.isInitOpen()).toBe(true);
+      toolbarDialogService.openTool('field-measuring');
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
 
       // Proceed to main component
-      toolsDialogService.proceedToMainComponent();
+      toolbarDialogService.proceedToMainComponent();
 
       // Wait for the timeout that opens main dialog
       await new Promise((resolve) => setTimeout(resolve, 200));
-      expect(toolsDialogService.isMainOpen()).toBe(true);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('main');
 
       await component.onSave();
       // onSave no longer closes the dialog - it shows a success message instead
-      expect(toolsDialogService.isMainOpen()).toBe(true);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('main');
     });
 
     it('should work with onVisibleChange integration', async () => {
-      toolsDialogService.openTool('field-measuring');
-      toolsDialogService.proceedToMainComponent();
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
 
       // Wait for the timeout that opens main dialog
       await new Promise((resolve) => setTimeout(resolve, 200));
-      expect(toolsDialogService.isMainOpen()).toBe(true);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('main');
 
       component.onVisibleChange(false);
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(false);
     });
   });
 
@@ -406,12 +410,20 @@ describe('FieldMeasuringComponent', () => {
       const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
 
       // Open main dialog to initialize measureData from PlotService
-      toolsDialogService.openTool('field-measuring');
-      toolsDialogService.proceedToMainComponent();
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       await component.onSave();
+      // Re-open for subsequent calls
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      await new Promise((resolve) => setTimeout(resolve, 100));
       await component.onSave();
+      // Re-open for third call
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      await new Promise((resolve) => setTimeout(resolve, 100));
       await component.onSave();
 
       expect(modifySectionSpy).toHaveBeenCalledTimes(3);
@@ -424,12 +436,12 @@ describe('FieldMeasuringComponent', () => {
       expect(component).toBeTruthy();
 
       // Opening the dialog should trigger the effect
-      toolsDialogService.openTool('field-measuring');
+      toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      // field-measuring opens init dialog first
-      expect(toolsDialogService.isInitOpen()).toBe(true);
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      // field-measuring opens init phase first
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
     });
   });
 
@@ -439,8 +451,8 @@ describe('FieldMeasuringComponent', () => {
 
       const getLinesSpy = jest.spyOn(linesService, 'getLines');
 
-      toolsDialogService.openTool('field-measuring');
-      toolsDialogService.proceedToMainComponent();
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
 
       // Wait for async operations
       await new Promise((resolve) => setTimeout(resolve, 200));

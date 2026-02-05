@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ToolsDialogComponent } from './tools-dialog.component';
-import { ToolsDialogService } from './tools-dialog.service';
+import { ToolbarDialogComponent } from './toolbar-dialog.component';
+import { ToolbarDialogService } from './toolbar-dialog.service';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/sections/section.service';
 import { StudiesService } from '@services/studies/studies.service';
@@ -25,10 +25,10 @@ function createSignalMock<T>(initialValue: T): SignalFn<T> {
   return fn;
 }
 
-describe('ToolsDialogComponent', () => {
-  let component: ToolsDialogComponent;
-  let fixture: ComponentFixture<ToolsDialogComponent>;
-  let toolsDialogService: ToolsDialogService;
+describe('ToolbarDialogComponent', () => {
+  let component: ToolbarDialogComponent;
+  let fixture: ComponentFixture<ToolbarDialogComponent>;
+  let toolbarDialogService: ToolbarDialogService;
 
   beforeEach(async () => {
     const mockMessageService = {
@@ -55,7 +55,7 @@ describe('ToolsDialogComponent', () => {
     } as unknown as CablesService;
 
     await TestBed.configureTestingModule({
-      imports: [ToolsDialogComponent],
+      imports: [ToolbarDialogComponent],
       providers: [
         provideAnimations(),
         provideHttpClient(),
@@ -67,9 +67,9 @@ describe('ToolsDialogComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ToolsDialogComponent);
+    fixture = TestBed.createComponent(ToolbarDialogComponent);
     component = fixture.componentInstance;
-    toolsDialogService = TestBed.inject(ToolsDialogService);
+    toolbarDialogService = TestBed.inject(ToolbarDialogService);
     fixture.detectChanges();
   });
 
@@ -78,9 +78,11 @@ describe('ToolsDialogComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should inject ToolsDialogService', () => {
-      expect(component.toolsDialogService).toBeDefined();
-      expect(component.toolsDialogService).toBeInstanceOf(ToolsDialogService);
+    it('should inject ToolbarDialogService', () => {
+      expect(component.toolbarDialogService).toBeDefined();
+      expect(component.toolbarDialogService).toBeInstanceOf(
+        ToolbarDialogService
+      );
     });
 
     it('should inject Injector', () => {
@@ -91,63 +93,70 @@ describe('ToolsDialogComponent', () => {
 
   describe('Service Integration', () => {
     it('should have the same service instance as TestBed', () => {
-      expect(component.toolsDialogService).toBe(toolsDialogService);
+      expect(component.toolbarDialogService).toBe(toolbarDialogService);
     });
 
     it('should be able to use injector to get services', () => {
-      const service = component.injector.get(ToolsDialogService);
-      expect(service).toBe(toolsDialogService);
+      const service = component.injector.get(ToolbarDialogService);
+      expect(service).toBe(toolbarDialogService);
     });
   });
 
   describe('Template Rendering', () => {
-    it('should render p-dialog components', () => {
-      const element = fixture.nativeElement;
-      const dialogs = element.querySelectorAll('p-dialog');
-      expect(dialogs.length).toBe(2); // Init and Main dialogs
-    });
-
-    it('should bind visible property to service isInitOpen signal for init dialog', () => {
-      toolsDialogService.isInitOpen.set(true);
+    it('should bind visible property to service isOpen signal', () => {
+      toolbarDialogService.isOpen.set(true);
       fixture.detectChanges();
 
-      const dialogs = fixture.nativeElement.querySelectorAll('p-dialog');
-      expect(dialogs[0].getAttribute('ng-reflect-visible')).toBe('true');
+      const dialog = fixture.nativeElement.querySelector('p-dialog');
+      expect(dialog.getAttribute('ng-reflect-visible')).toBe('true');
     });
 
-    it('should display init dialog when tool with initComponent is opened', () => {
-      toolsDialogService.openTool('field-measuring');
+    it('should display dialog in init phase when tool with initComponent is opened', () => {
+      toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      expect(toolsDialogService.isInitOpen()).toBe(true);
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
     });
   });
 
   describe('Dialog State Management', () => {
     it('should reflect service state changes', () => {
-      expect(toolsDialogService.isInitOpen()).toBe(false);
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(false);
 
-      toolsDialogService.openTool('field-measuring');
+      toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
-      expect(toolsDialogService.isInitOpen()).toBe(true);
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(true);
+      expect(toolbarDialogService.phase()).toBe('init');
 
-      toolsDialogService.closeTool();
+      toolbarDialogService.closeTool();
       fixture.detectChanges();
-      expect(toolsDialogService.isInitOpen()).toBe(false);
-      expect(toolsDialogService.isMainOpen()).toBe(false);
+      expect(toolbarDialogService.isOpen()).toBe(false);
     });
 
     it('should render dynamic components based on current tool', () => {
-      toolsDialogService.openTool('field-measuring');
+      toolbarDialogService.openTool('field-measuring');
       fixture.detectChanges();
 
-      const initComponent = toolsDialogService.getInitComponent();
-      const mainComponent = toolsDialogService.getMainComponent();
-      expect(initComponent).toBeDefined();
-      expect(mainComponent).toBeDefined();
+      const component = toolbarDialogService.getComponent();
+      expect(component).toBeDefined();
+    });
+  });
+
+  describe('onDialogHide', () => {
+    it('should call closeTool when not transitioning', () => {
+      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      component.onDialogHide();
+      expect(closeToolSpy).toHaveBeenCalled();
+    });
+
+    it('should not call closeTool when transitioning', () => {
+      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+
+      component.onDialogHide();
+      expect(closeToolSpy).not.toHaveBeenCalled();
     });
   });
 });
