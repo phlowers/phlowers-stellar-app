@@ -13,7 +13,6 @@ class GuyingInputs:
 
 
 def calculate_guying(js_inputs: dict):
-    print("python_inputs: ", js_inputs.to_py())
     guying_inputs = GuyingInputs(**js_inputs.to_py())
     guying = Guying(engine)
     guying_results = guying.compute(

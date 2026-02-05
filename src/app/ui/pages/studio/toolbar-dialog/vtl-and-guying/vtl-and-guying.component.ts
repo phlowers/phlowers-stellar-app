@@ -250,8 +250,6 @@ export class VhlAndGuyingComponent implements AfterViewInit {
       return;
     }
     const formValue = this.form.value;
-    console.log("-----------------")
-    console.log(formValue)
     const { result, error } = await this.workerPythonService.runTask(
       Task.calculateGuying,
       {
