@@ -5,7 +5,7 @@
   --p-form-field-placeholder-color: var(--grey-450);
   --p-textarea-shadow: #{map.get(app.$elevation, neutral-inner)};
   --p-textarea-focus-ring-shadow: var(--p-textarea-shadow);
-  --p-textarea-border-radius: 0.5rem 0.5rem 0.25rem 0.5rem;
+  --p-textarea-border-radius: 0.25rem;
   --p-textarea-border-color: var(--grey-400);
   --p-textarea-focus-border-color: var(--p-textarea-border-color);
   --p-textarea-color: var(--grey-900);

@@ -9,7 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { ChargesService } from './charges.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { MessageService } from 'primeng/api';
-import { Charge, Section } from '@core/domain';
+import { Charge, Section, SymmetryType } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 
 // Mock uuid
@@ -31,7 +31,7 @@ const mockChargeData: Charge = {
     climate: {
       windPressure: 0,
       cableTemperature: 15,
-      symmetryType: 'symmetric',
+      symmetryType: SymmetryType.SYMMETRIC,
       iceThickness: 0,
       frontierSupportNumber: null,
       iceThicknessBefore: null,
@@ -154,7 +154,7 @@ describe('ChargesService', () => {
           climate: {
             windPressure: 0,
             cableTemperature: 15,
-            symmetryType: 'symmetric',
+            symmetryType: SymmetryType.SYMMETRIC,
             iceThickness: 0,
             frontierSupportNumber: null,
             iceThicknessBefore: null,
@@ -308,7 +308,7 @@ describe('ChargesService', () => {
           climate: {
             windPressure: 0,
             cableTemperature: 15,
-            symmetryType: 'symmetric',
+            symmetryType: SymmetryType.SYMMETRIC,
             iceThickness: 0,
             frontierSupportNumber: null,
             iceThicknessBefore: null,

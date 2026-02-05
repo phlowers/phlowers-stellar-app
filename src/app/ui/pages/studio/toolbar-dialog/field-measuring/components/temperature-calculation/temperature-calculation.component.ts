@@ -9,7 +9,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { FieldMeasure } from '@ui/pages/studio/tools-dialog/field-measuring/types';
+import { FieldMeasure } from '@ui/pages/studio/toolbar-dialog/field-measuring/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { WIND_SPEED_UNIT_OPTIONS } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';

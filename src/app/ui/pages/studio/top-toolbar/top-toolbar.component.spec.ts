@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioTopToolbarComponent } from './top-toolbar.component';
-import { ToolsDialogService } from '../tools-dialog/tools-dialog.service';
+import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
@@ -18,7 +18,7 @@ describe('StudioTopToolbarComponent', () => {
   let component: StudioTopToolbarComponent;
   let fixture: ComponentFixture<StudioTopToolbarComponent>;
   let mockPlotService: jest.Mocked<PlotService>;
-  let mockToolsDialogService: jest.Mocked<ToolsDialogService>;
+  let mockToolbarDialogService: jest.Mocked<ToolbarDialogService>;
 
   beforeEach(async () => {
     // Mock PlotService
@@ -30,11 +30,12 @@ describe('StudioTopToolbarComponent', () => {
       }),
       loading: signal(false),
       plotOptionsChange: jest.fn(),
-      selectedDisplayOptions: signal({ loads: false })
+      selectedDisplayOptions: signal({ loads: false }),
+      section: signal(null)
     } as any;
 
-    // Mock ToolsDialogService
-    mockToolsDialogService = {
+    // Mock ToolbarDialogService
+    mockToolbarDialogService = {
       openTool: jest.fn()
     } as any;
 
@@ -54,7 +55,7 @@ describe('StudioTopToolbarComponent', () => {
       ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
-        { provide: ToolsDialogService, useValue: mockToolsDialogService }
+        { provide: ToolbarDialogService, useValue: mockToolbarDialogService }
       ]
     }).compileComponents();
 
@@ -75,7 +76,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should initialize with correct default values', () => {
       expect(component.shortcutsModal()).toBe(false);
       expect(component.shortcutsCount()).toBe(0);
-      expect(component.tablesDropdown()).toBeNull();
+      expect(component.tablesDropdown()).toHaveLength(5);
       expect(component.toolsDropdown()).toBeNull();
     });
 
@@ -114,38 +115,53 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should initialize tablesDropdown with 5 items', () => {
-      component.ngOnInit();
       const tables = component.tablesDropdown();
       expect(tables).toHaveLength(5);
-      expect(tables?.[0].label).toBeDefined();
-      expect(tables?.[0].command).toBeDefined();
+      expect(tables[0].label).toBeDefined();
+      expect(tables[0].command).toBeDefined();
+    });
+
+    it('should disable Loads table when section has no charges', () => {
+      mockPlotService.section.set(null);
+      const tables = component.tablesDropdown();
+      expect(tables[0].disabled).toBe(true);
+    });
+
+    it('should disable Loads table when section has empty charges', () => {
+      mockPlotService.section.set({ charges: [] } as any);
+      const tables = component.tablesDropdown();
+      expect(tables[0].disabled).toBe(true);
+    });
+
+    it('should enable Loads table when section has charges', () => {
+      mockPlotService.section.set({
+        charges: [{ uuid: '1', name: 'Charge 1' }]
+      } as any);
+      const tables = component.tablesDropdown();
+      expect(tables[0].disabled).toBe(false);
     });
 
     it('should execute tablesDropdown command for Loads table', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[0].command?.({});
-      expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
-
-      consoleSpy.mockRestore();
+      tables[0].command?.({});
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
+        'load-table'
+      );
     });
 
     it('should execute tablesDropdown command for L0 table', () => {
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[1].command?.({});
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith('l0-sum');
+      tables[1].command?.({});
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('l0-sum');
     });
 
     it('should execute tablesDropdown command for Pose table', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[2].command?.({});
+      tables[2].command?.({});
       expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
 
       consoleSpy.mockRestore();
@@ -153,10 +169,9 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should execute tablesDropdown command for Obstacles table', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[3].command?.({});
+      tables[3].command?.({});
       expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
 
       consoleSpy.mockRestore();
@@ -164,10 +179,9 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should execute tablesDropdown command for Grounds table', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      component.ngOnInit();
       const tables = component.tablesDropdown();
 
-      tables?.[4].command?.({});
+      tables[4].command?.({});
       expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
 
       consoleSpy.mockRestore();
@@ -186,7 +200,7 @@ describe('StudioTopToolbarComponent', () => {
       const tools = component.toolsDropdown();
 
       tools?.[0].command?.({});
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
         'field-measuring'
       );
     });
@@ -372,7 +386,7 @@ describe('StudioTopToolbarComponent', () => {
       const items = component.toolsItems();
 
       items[0].action();
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
         'field-measuring'
       );
     });
@@ -381,7 +395,7 @@ describe('StudioTopToolbarComponent', () => {
       const items = component.toolsItems();
 
       items[1].action();
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledWith(
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
         'vtl-and-guying'
       );
     });
@@ -446,7 +460,7 @@ describe('StudioTopToolbarComponent', () => {
       }
 
       // First two tools call service, remaining 5 call alert
-      expect(mockToolsDialogService.openTool).toHaveBeenCalledTimes(2);
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(2);
       expect(alertSpy).toHaveBeenCalledTimes(5);
       alertSpy.mockRestore();
     });
@@ -487,6 +501,78 @@ describe('StudioTopToolbarComponent', () => {
       expect(options.view).toBe('3d');
       expect(options.side).toBe('profile');
       expect(options.invert).toBe(false);
+    });
+  });
+
+  describe('selectedDisplayOptions computed', () => {
+    it('should return mapped display options from plotService', () => {
+      mockPlotService.selectedDisplayOptions.set({ loads: true });
+
+      const options = component.selectedDisplayOptions();
+
+      expect(options).toEqual([{ label: 'loads', value: 'loads' }]);
+    });
+
+    it('should handle empty display options', () => {
+      mockPlotService.selectedDisplayOptions.set({} as any);
+
+      const options = component.selectedDisplayOptions();
+
+      expect(options).toEqual([]);
+    });
+  });
+
+  describe('selectedDisplayValues computed', () => {
+    it('should return keys with truthy values', () => {
+      mockPlotService.selectedDisplayOptions.set({ loads: true });
+
+      const values = component.selectedDisplayValues();
+
+      expect(values).toEqual(['loads']);
+    });
+
+    it('should exclude keys with falsy values', () => {
+      mockPlotService.selectedDisplayOptions.set({ loads: false });
+
+      const values = component.selectedDisplayValues();
+
+      expect(values).toEqual([]);
+    });
+
+    it('should handle mixed truthy and falsy values', () => {
+      mockPlotService.selectedDisplayOptions.set({
+        loads: true,
+        mesh: false
+      } as any);
+
+      const values = component.selectedDisplayValues();
+
+      expect(values).toContain('loads');
+      expect(values).not.toContain('mesh');
+    });
+  });
+
+  describe('setSelectedDisplayOptions', () => {
+    it('should set loads to true when included in displayOptions', () => {
+      component.setSelectedDisplayOptions(['loads']);
+
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({ loads: true });
+    });
+
+    it('should set loads to false when not included in displayOptions', () => {
+      component.setSelectedDisplayOptions([]);
+
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+        loads: false
+      });
+    });
+
+    it('should set loads to false when other options are selected', () => {
+      component.setSelectedDisplayOptions(['mesh', 'ground']);
+
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+        loads: false
+      });
     });
   });
 

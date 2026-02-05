@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 
 import { ParameterCalculation15WithoutWindComponent } from './parameter-calculation-15-without-wind.component';
-import { createTestMeasureData } from '@ui/pages/studio/tools-dialog/field-measuring/helpers';
+import { createTestMeasureData } from '@ui/pages/studio/toolbar-dialog/field-measuring/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/sections/section.service';
