@@ -8,7 +8,13 @@
 import { Study } from '@core/domain';
 
 /**
- * Study entity for Dexie storage
- * Uses the domain model directly as no additional persistence fields are needed
+ * Study entity for Dexie storage.
+ *
+ * @remarks
+ * Uses the domain model directly as no additional persistence fields
+ * are needed. The Study interface contains all required properties
+ * for IndexedDB storage.
+ *
+ * @category Database Entities
  */
 export type StudyEntity = Study;

@@ -1,6 +1,36 @@
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 import { Section, Support } from '@core/domain';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Helper functions for creating section and support objects.
+ *
+ * @remarks
+ * These factory functions provide default values for creating
+ * new sections and supports with proper UUIDs.
+ *
+ * @packageDocumentation
+ * @category Helpers
+ */
+
+/**
+ * Creates an empty support with default values.
+ *
+ * @returns A new Support object with a generated UUID and null/default values
+ *
+ * @example
+ * ```typescript
+ * const support = createEmptySupport();
+ * support.number = '42';
+ * support.attachmentHeight = 25;
+ * ```
+ */
 export const createEmptySupport = (): Support => {
   return {
     uuid: uuidv4(),
@@ -25,10 +55,28 @@ export const createEmptySupport = (): Support => {
   };
 };
 
+/**
+ * Creates a pair of supports for section boundaries.
+ *
+ * @returns Array containing first and last support
+ * @internal
+ */
 const createFirstAndLastSupport = (): Support[] => {
   return [createEmptySupport(), { ...createEmptySupport(), spanLength: null }];
 };
 
+/**
+ * Creates an empty section with default values.
+ *
+ * @returns A new Section object with a generated UUID, empty supports, and default values
+ *
+ * @example
+ * ```typescript
+ * const section = createEmptySection();
+ * section.name = 'New Section';
+ * section.cable_name = 'ASTER_570';
+ * ```
+ */
 export const createEmptySection = (): Section => {
   return {
     uuid: uuidv4(),

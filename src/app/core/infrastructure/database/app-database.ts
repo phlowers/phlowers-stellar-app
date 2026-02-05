@@ -28,19 +28,37 @@ import {
 } from './schemas';
 
 /**
- * Application database class using Dexie (IndexedDB wrapper)
- * Centralizes all data persistence for the application
+ * Application database class using Dexie (IndexedDB wrapper).
+ *
+ * @remarks
+ * This class centralizes all data persistence for the application using
+ * IndexedDB through the Dexie.js library. It defines tables for domain
+ * entities (users, studies) and catalog data (cables, chains, lines, etc.).
+ *
+ * @example
+ * ```typescript
+ * const db = new AppDatabase();
+ * const studies = await db.studies.toArray();
+ * const cable = await db.catCables.where('name').equals('ASTER_570').first();
+ * ```
+ *
+ * @category Infrastructure
  */
 export class AppDatabase extends Dexie {
-  // Domain tables
+  /** Table storing user accounts */
   users!: Table<UserEntity, number>;
+  /** Table storing power line studies */
   studies!: Table<StudyEntity, string>;
 
-  // Catalog tables
+  /** Table storing attachment catalog data */
   catAttachments!: Table<CatalogAttachmentEntity, string>;
+  /** Table storing cable/conductor catalog data */
   catCables!: Table<CatalogCableEntity, string>;
+  /** Table storing insulator chain catalog data */
   catChains!: Table<CatalogChainEntity, string>;
+  /** Table storing power line catalog data */
   catLines!: Table<CatalogLineEntity, string>;
+  /** Table storing maintenance organization catalog data */
   catMaintenance!: Table<CatalogMaintenanceEntity, string>;
 
   constructor() {
