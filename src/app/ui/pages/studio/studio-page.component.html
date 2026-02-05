@@ -1,12 +1,10 @@
 <app-new-charge-modal
   [isOpen]="isNewChargeModalOpen()"
   (isOpenChange)="isNewChargeModalOpen.set($event)"
-  [mode]="newChargeModalMode()"
-  [uuidInput]="newChargeModalUuid()"
 />
 
 <app-studio-menu-bar
-  (openNewChargeModal)="openNewChargeModal($event)"
+  (openNewChargeModal)="openNewChargeModal()"
   [section]="plotService.section()"
   [study]="plotService.study()"
 ></app-studio-menu-bar>
@@ -153,7 +151,7 @@
                 app-btn
                 btnStyle="outlined"
                 btnSize="s"
-                (click)="openNewChargeModal({ mode: 'create', uuid: null })"
+                (click)="openNewChargeModal()"
               >
                 <app-icon icon="add_circle" />
                 <ng-container i18n>Add a charge case</ng-container>
@@ -232,4 +230,4 @@
   </app-side-tabs>
 </div>
 
-<app-tools-dialog />
+<app-toolbar-dialog />

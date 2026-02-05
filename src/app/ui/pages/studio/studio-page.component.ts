@@ -19,7 +19,7 @@ import { SideTabComponent } from './side-tabs/side-tab/side-tab.component';
 import { ClimateComponent } from './loads/climate/climate.component';
 import { SpanComponent } from './loads/span/span.component';
 import { NewChargeModalComponent } from './new-charge-modal/new-charge-modal.component';
-import { ToolsDialogComponent } from './tools-dialog/tools-dialog.component';
+import { ToolbarDialogComponent } from './toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from './services/plot.service';
 import { SectionService } from '@services/sections/section.service';
 
@@ -45,7 +45,7 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
     ClimateComponent,
     SpanComponent,
     NewChargeModalComponent,
-    ToolsDialogComponent
+    ToolbarDialogComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
@@ -67,8 +67,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   subscription: Subscription | null = null;
   plotStudioHeight = signal<string>('21.875rem');
   isNewChargeModalOpen = signal(false);
-  newChargeModalMode = signal<'create' | 'edit' | 'view'>('create');
-  newChargeModalUuid = signal<string | null>(null);
   private resizeObserver?: ResizeObserver;
 
   sliderOptions = computed<Options>(() => {
@@ -192,18 +190,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  openNewChargeModal(
-    {
-      mode,
-      uuid
-    }: { mode: 'create' | 'edit' | 'view'; uuid: string | null } = {
-      mode: 'create',
-      uuid: null
-    }
-  ) {
+  openNewChargeModal() {
     this.isNewChargeModalOpen.set(true);
-    this.newChargeModalMode.set(mode);
-    this.newChargeModalUuid.set(uuid);
   }
 
   onSelectPlotOptions(value: string) {
@@ -226,9 +214,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   onSupportButtonClick(direction: 'left' | 'right') {
     const supportButton = this.supports();
     if (supportButton === 'all') return;
-    const incrementValue =
-      supportButton === 'single' ? 1 : supportButton === 'double' ? 2 : 0;
-    const increment = direction === 'left' ? -incrementValue : incrementValue;
+    const increment = direction === 'left' ? -1 : 1;
     const options = this.plotService.plotOptions();
     this.plotService.plotOptionsChange({
       startSupport: Math.max(options.startSupport + increment, 0),

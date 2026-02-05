@@ -249,12 +249,8 @@
     </unit>
     <unit id="8283592065951885988">
       <segment state="initial">
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;" /> Create a new study </source>
-        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;" /> Créer une nouvelle étude </target>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a new study </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Créer une nouvelle étude </target>
       </segment>
     </unit>
     <unit id="983324339375029355">
@@ -271,23 +267,14 @@
     </unit>
     <unit id="6016428309492185040">
       <segment state="initial">
-        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON"
-            equivEnd="CLOSE_TAG_APP_ICON" type="other"
-            dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" /></source>
-        <target> Aller à mes études <pc id="0" equivStart="START_TAG_APP_ICON"
-            equivEnd="CLOSE_TAG_APP_ICON" type="other"
-            dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" /></target>
+        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></source>
+        <target> Aller à mes études <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></target>
       </segment>
     </unit>
     <unit id="2640561782983672481">
       <segment state="initial">
-        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please
-          contact us to share your ideas and feedbacks to help us upgrade this application!</source>
-        <target>Bienvenue sur Celeste! Nous sommes ravis de vous présenter cette nouvelle
-          application. Veuillez nous contacter pour partager vos idées et vos retours pour nous
-          aider à améliorer cette application!</target>
+        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!</source>
+        <target>Bienvenue sur Celeste! Nous sommes ravis de vous présenter cette nouvelle application. Veuillez nous contacter pour partager vos idées et vos retours pour nous aider à améliorer cette application!</target>
       </segment>
     </unit>
     <unit id="1444333919089743258">
@@ -370,12 +357,8 @@
     </unit>
     <unit id="5231861831935768001">
       <segment state="initial">
-        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
-        <target> Nom de l&apos;étude <pc id="0" equivStart="START_SUPERSCRIPT"
-            equivEnd="CLOSE_SUPERSCRIPT" type="other"
-            dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom de l&apos;étude <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
     <unit id="5712660129975085658">
@@ -404,50 +387,26 @@
     </unit>
     <unit id="1386766078260547788">
       <segment state="initial">
-        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
-        <target> Titre <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></target>
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Titre <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
       </segment>
     </unit>
     <unit id="7282804341793038828">
       <segment state="initial">
-        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
-        <target> Auteur <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></target>
+        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Auteur <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
       </segment>
     </unit>
     <unit id="5375905790663497716">
       <segment state="initial">
-        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON"
-            equivEnd="CLOSE_TAG_APP_ICON" type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
-        <target> Date de modification <pc id="0" equivStart="START_TAG_APP_ICON"
-            equivEnd="CLOSE_TAG_APP_ICON" type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></target>
+        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> Date de modification <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
       </segment>
     </unit>
     <unit id="1170248653308387010">
       <segment state="initial">
-        <source> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
-        <target> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></target>
+        <source> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <target> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
       </segment>
     </unit>
     <unit id="3799093232488965923">
@@ -590,42 +549,26 @@
     </unit>
     <unit id="3569799587833040802">
       <segment state="initial">
-        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
-        <target> Nom du canton <pc id="0" equivStart="START_SUPERSCRIPT"
-            equivEnd="CLOSE_SUPERSCRIPT" type="other"
-            dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom du canton <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
     <unit id="6414866325880172359">
       <segment state="initial">
-        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
-        <target> Type de canton <pc id="0" equivStart="START_SUPERSCRIPT"
-            equivEnd="CLOSE_SUPERSCRIPT" type="other"
-            dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Type de canton <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
     <unit id="2715728438895385250">
       <segment state="initial">
-        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
-        <target> Nombre de câbles <pc id="0" equivStart="START_SUPERSCRIPT"
-            equivEnd="CLOSE_SUPERSCRIPT" type="other"
-            dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
+        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nombre de câbles <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></target>
       </segment>
     </unit>
     <unit id="928951684182090210">
       <segment state="initial">
-        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
-        <target> Nom du câble <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></target>
+        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+        <target> Nom du câble <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;"> *</pc></target>
       </segment>
     </unit>
     <unit id="2981219928115418649">
@@ -714,12 +657,8 @@
     </unit>
     <unit id="1363022291205513969">
       <segment state="initial">
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;" /> Create a section </source>
-        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;" /> Créer un canton </target>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a section </source>
+        <target><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Créer un canton </target>
       </segment>
     </unit>
     <unit id="1949800506879332767">
@@ -784,14 +723,8 @@
     </unit>
     <unit id="794617384648959179">
       <segment state="initial">
-        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" /></source>
-        <target> Détails <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" /></target>
+        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></source>
+        <target> Détails <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></target>
       </segment>
     </unit>
     <unit id="3102779920122732727">
@@ -1169,10 +1102,10 @@
     <unit id="187187500641108332">
       <segment state="initial">
         <source>
-          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}" />
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
         </source>
         <target>
-          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}" />
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
         </target>
       </segment>
     </unit>
@@ -1611,8 +1544,7 @@
     <unit id="8502839014739399542">
       <segment state="initial">
         <source>Double click on a column to copy the value to all supports</source>
-        <target>Faites un double clique sur le nom de la colonne pour copier la valeur de la 1ère
-          ligne sur toute la colonne.</target>
+        <target>Faites un double clique sur le nom de la colonne pour copier la valeur de la 1ère ligne sur toute la colonne.</target>
       </segment>
     </unit>
     <unit id="8792569904201285826">
@@ -1783,18 +1715,6 @@
         <target>Version de l&apos;application vérifiée</target>
       </segment>
     </unit>
-    <unit id="2813428855529635901">
-      <segment state="initial">
-        <source>View charge case</source>
-        <target>Voir le cas de charge</target>
-      </segment>
-    </unit>
-    <unit id="557544842878781608">
-      <segment state="initial">
-        <source>Edit charge case</source>
-        <target>Modifier le cas de charge</target>
-      </segment>
-    </unit>
     <unit id="7607770781665288883">
       <segment state="initial">
         <source>Create a charge case</source>
@@ -1900,16 +1820,13 @@
     <unit id="7726078135791017446">
       <segment state="initial">
         <source> Choose the attachment set in the list or on the graph to find the right arm length. </source>
-        <target> Choisissez le set d’accroche dans la liste ou sur le graphique afin de trouver la
-          bonne longueur du bras. </target>
+        <target> Choisissez le set d’accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras. </target>
       </segment>
     </unit>
     <unit id="2694623513112556993">
       <segment state="initial">
-        <source> The attachment set and the arm length (m) will be automatically filled in the
-          table. </source>
-        <target> Le Set d’accroche et la valeur de L. bras (m) sera automatiquement renseigné dans
-          le tableau. </target>
+        <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
+        <target> Le Set d’accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau. </target>
       </segment>
     </unit>
     <unit id="4893374109940250877">
@@ -2089,8 +2006,7 @@
     <unit id="4124418045778511362">
       <segment state="initial">
         <source>You cannot update a study that you did not create, please duplicate it instead.</source>
-        <target>Vous ne pouvez pas mettre à jour une étude que vous n&apos;avez pas créée, veuillez
-          la dupliquer.</target>
+        <target>Vous ne pouvez pas mettre à jour une étude que vous n&apos;avez pas créée, veuillez la dupliquer.</target>
       </segment>
     </unit>
     <unit id="9006227511499022859">
@@ -2258,8 +2174,7 @@
     <unit id="2978133532545567808">
       <segment state="initial">
         <source> You can import multiple files, they will be available in the “My studies” tab. </source>
-        <target> Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l&apos;onglet
-          &quot;Mes études&quot;. </target>
+        <target> Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l&apos;onglet &quot;Mes études&quot;. </target>
       </segment>
     </unit>
     <unit id="292067144793702032">
@@ -2312,10 +2227,8 @@
     </unit>
     <unit id="6738867123972990167">
       <segment state="initial">
-        <source>Study <ph id="0" equiv="PH" disp="study.title" /> already exists. Do you want to
-          replace it?</source>
-        <target>L&apos;étude <ph id="0" equiv="PH" disp="study.title" /> existe déjà. Souhaitez-vous
-          la remplacer ?</target>
+        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
+        <target>L&apos;étude <ph id="0" equiv="PH" disp="study.title"/> existe déjà. Souhaitez-vous la remplacer ?</target>
       </segment>
     </unit>
     <unit id="1203647783433086430">
@@ -2366,22 +2279,16 @@
         <target> Longueur de portée mesurée </target>
       </segment>
     </unit>
-    <unit id="5088621818536959590">
+    <unit id="3499511783369638929">
       <segment state="initial">
-        <source> calculated value:</source>
-        <target> valeur calculée :</target>
+        <source> Calculated value:</source>
+        <target> Valeur calculée :</target>
       </segment>
     </unit>
     <unit id="2147039543508081675">
       <segment state="initial">
         <source> Elevation diff. of measured attach. </source>
         <target> Dénivelé des accr. mesuré </target>
-      </segment>
-    </unit>
-    <unit id="571757945706473817">
-      <segment state="initial">
-        <source>calculated value:</source>
-        <target>valeur calculée :</target>
       </segment>
     </unit>
     <unit id="6008615727838547074">
@@ -2483,7 +2390,7 @@
     <unit id="3275519279768264405">
       <segment state="initial">
         <source>All fields are mandatory</source>
-        <target>Toutes les données sont obligatoires pour le calcul de la température.</target>
+        <target>Toutes les données sont obligatoires.</target>
       </segment>
     </unit>
     <unit id="1546856207674794665">
@@ -2639,31 +2546,31 @@
     <unit id="6145928415540193222">
       <segment state="initial">
         <source>N1 - Sunny</source>
-        <target>N1 - Soleil</target>
+        <target>N1 - Ensoleillé</target>
       </segment>
     </unit>
     <unit id="4192982166698299789">
       <segment state="initial">
         <source>N2 - partly cloudy</source>
-        <target>N2 - partiellement nuageux</target>
+        <target>N2 - Peu nuageux</target>
       </segment>
     </unit>
     <unit id="959518481042894436">
       <segment state="initial">
         <source>N5 - Cloudy</source>
-        <target>N5 - Nuageux</target>
+        <target>N5 - Voilé</target>
       </segment>
     </unit>
     <unit id="3236954287106088041">
       <segment state="initial">
         <source>N6 - Covered sky</source>
-        <target>N6 - Ciel couvert</target>
+        <target>N6 - Très nuageux</target>
       </segment>
     </unit>
     <unit id="8475559139207580230">
       <segment state="initial">
         <source>N8 - covered - smoky</source>
-        <target>N8 - couvert - fumé</target>
+        <target>N8 - Couvert / Brouillard</target>
       </segment>
     </unit>
     <unit id="3870240363377114184">
@@ -3052,14 +2959,8 @@
     </unit>
     <unit id="5667174251183495987">
       <segment state="initial">
-        <source> For a stop or a suspension without pulley, the tension in the guy line allows to
-          balance the longitudinal charges at the console level (no L). For a suspension with a
-          pulley, the tension in the guy line is the maximum tension in all the cables of the bundle
-          and a longitudinal charge appears. </source>
-        <target> Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet
-          d’équilibrer les charges longitudinales au niveau de la console (pas de L). Pour une
-          suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles
-          du faisceau et une charge longitudinale apparaît.</target>
+        <source> For a stop or a suspension without pulley, the tension in the guy line allows to balance the longitudinal charges at the console level (no L). For a suspension with a pulley, the tension in the guy line is the maximum tension in all the cables of the bundle and a longitudinal charge appears. </source>
+        <target> Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet d’équilibrer les charges longitudinales au niveau de la console (pas de L). Pour une suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles du faisceau et une charge longitudinale apparaît.</target>
       </segment>
     </unit>
     <unit id="8828649339346559125">
@@ -3161,12 +3062,10 @@
     <unit id="80889600222732792">
       <segment state="initial">
         <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other"
-            dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
         </source>
         <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other"
-            dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude paramètre</pc>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude paramètre</pc>
         </target>
       </segment>
     </unit>
@@ -3210,18 +3109,6 @@
       <segment state="initial">
         <source>Charge cases</source>
         <target>Cas de charge</target>
-      </segment>
-    </unit>
-    <unit id="3185853499027107737">
-      <segment state="initial">
-        <source>Select charge cases</source>
-        <target>Sélectionner un cas de charge</target>
-      </segment>
-    </unit>
-    <unit id="1762161277302505527">
-      <segment state="initial">
-        <source>View charge cases</source>
-        <target>Afficher les cas de charge</target>
       </segment>
     </unit>
     <unit id="509620284258406390">
@@ -3302,24 +3189,6 @@
         <target>Pas de mesure</target>
       </segment>
     </unit>
-    <unit id="2104405463703805846">
-      <segment state="initial">
-        <source> Value must be a whole number </source>
-        <target> La valeur saisie doit être un nombre entier </target>
-      </segment>
-    </unit>
-    <unit id="6771413606625426683">
-      <segment state="initial">
-        <source>Minimum allowed value:</source>
-        <target>Valeur minimum admissible :</target>
-      </segment>
-    </unit>
-    <unit id="1709313240781435252">
-      <segment state="initial">
-        <source>Maximum allowed value:</source>
-        <target>Valeur maximum admissible :</target>
-      </segment>
-    </unit>
     <unit id="399524330429754869">
       <segment state="initial">
         <source>Ice indicator</source>
@@ -3352,21 +3221,104 @@
     </unit>
     <unit id="744159181527045596">
       <segment state="initial">
-        <source>Study <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} to <ph id="1" equiv="PH_1"
-            disp="&apos;{&apos;" />last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;" />
-          totalRecords}</source>
-        <target>Étude <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} à <ph id="1" equiv="PH_1"
-            disp="&apos;{&apos;" />last} sur <ph id="2" equiv="PH_2" disp="&apos;{&apos;" />totalRecords}</target>
+        <source>Study <ph id="0" equiv="PH" disp="&apos;{&apos;"/>first} to <ph id="1" equiv="PH_1" disp="&apos;{&apos;"/>last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;"/>totalRecords}</source>
+        <target>Étude <ph id="0" equiv="PH" disp="&apos;{&apos;"/>first} à <ph id="1" equiv="PH_1" disp="&apos;{&apos;"/>last} sur <ph id="2" equiv="PH_2" disp="&apos;{&apos;"/>totalRecords}</target>
       </segment>
     </unit>
     <unit id="668947737201625404">
       <segment state="initial">
-        <source>Support <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} to <ph id="1"
-            equiv="PH_1" disp="&apos;{&apos;" />last} of <ph id="2" equiv="PH_2"
-            disp="&apos;{&apos;" />totalRecords}</source>
-        <target>Support <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} à <ph id="1"
-            equiv="PH_1" disp="&apos;{&apos;" />last} sur <ph id="2" equiv="PH_2"
-            disp="&apos;{&apos;" />totalRecords}</target>
+        <source>Support <ph id="0" equiv="PH" disp="&apos;{&apos;"/>first} to <ph id="1" equiv="PH_1" disp="&apos;{&apos;"/>last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;"/>totalRecords}</source>
+        <target>Support <ph id="0" equiv="PH" disp="&apos;{&apos;"/>first} à <ph id="1" equiv="PH_1" disp="&apos;{&apos;"/>last} sur <ph id="2" equiv="PH_2" disp="&apos;{&apos;"/>totalRecords}</target>
+      </segment>
+    </unit>
+    <unit id="6509563701224725941">
+      <segment state="initial">
+        <source>Load case name</source>
+        <target>Nom de Cas de Charge</target>
+      </segment>
+    </unit>
+    <unit id="7450321450712565157">
+      <segment state="initial">
+        <source> Description <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span&gt;" dispEnd="&lt;/span&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ descriptionLength() }}"/>/240</pc></source>
+        <target> Description <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span&gt;" dispEnd="&lt;/span&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ descriptionLength() }}"/>/240</pc></target>
+      </segment>
+    </unit>
+    <unit id="8632108336747094747">
+      <segment state="initial">
+        <source>Wind pressure</source>
+        <target>Pression du vent</target>
+      </segment>
+    </unit>
+    <unit id="5667839260849056594">
+      <segment state="initial">
+        <source>N°</source>
+        <target>N°</target>
+      </segment>
+    </unit>
+    <unit id="8484530075062955140">
+      <segment state="initial">
+        <source>Ref. support</source>
+        <target>Support réf.</target>
+      </segment>
+    </unit>
+    <unit id="1592892612383369831">
+      <segment state="initial">
+        <source>Cable temp.</source>
+        <target>Temp. câble</target>
+      </segment>
+    </unit>
+    <unit id="3759359101166219663">
+      <segment state="initial">
+        <source>load / marking</source>
+        <target>Charge / Marquage</target>
+      </segment>
+    </unit>
+    <unit id="1386303765424324449">
+      <segment state="initial">
+        <source>Distance to ref. support</source>
+        <target>Distance au support de réf.</target>
+      </segment>
+    </unit>
+    <unit id="3251759404563225821">
+      <segment state="initial">
+        <source>Modify</source>
+        <target>Modifier</target>
+      </segment>
+    </unit>
+    <unit id="136732925281726551">
+      <segment state="initial">
+        <source>Minimum value:</source>
+        <target>Valeur minimale :</target>
+      </segment>
+    </unit>
+    <unit id="9120411489526633764">
+      <segment state="initial">
+        <source>Maximum value:</source>
+        <target>Valeur maximale :</target>
+      </segment>
+    </unit>
+    <unit id="5549776374941114664">
+      <segment state="initial">
+        <source> Whole number required </source>
+        <target> Nombre entier requis </target>
+      </segment>
+    </unit>
+    <unit id="7695209021302072052">
+      <segment state="initial">
+        <source>Suspension</source>
+        <target>Suspension</target>
+      </segment>
+    </unit>
+    <unit id="1971546395781227984">
+      <segment state="initial">
+        <source>Anchor</source>
+        <target>Ancrage</target>
+      </segment>
+    </unit>
+    <unit id="2185228394767497497">
+      <segment state="initial">
+        <source>Data saved successfully</source>
+        <target>Données enregistrées avec succès</target>
       </segment>
     </unit>
   </file>
