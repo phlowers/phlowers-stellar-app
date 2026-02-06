@@ -37,12 +37,6 @@ source_suffix = {
 templates_path = ['_templates']
 exclude_patterns = []
 
-# Include the docs folder in the source path
-import os
-import sys
-# Create symlink or copy docs content - we'll reference them directly
-docs_path = os.path.abspath('../../docs')
-
 # Language configuration
 language = 'en'
 
