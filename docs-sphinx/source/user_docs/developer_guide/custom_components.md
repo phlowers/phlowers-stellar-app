@@ -8,7 +8,7 @@ However we do have to respect it's design to date (and to a degree). Therefore w
 **PossibleIconNames** type reference an array of all possible values from material symbols font loaded from `public/` folder
 
 implementation ex:  
-``` HTML
+```text
 <app-icon icon="electric_bolt" />
 <app-icon [icon]="dynamicImplementationValue" />
 ```
@@ -29,7 +29,7 @@ Icons used through `<app-icon>` component or the OOCSS `.app-icon` will go on th
 All other projected contents will be in text oriented wrapper.
 
 implementation ex:  
-``` HTML
+```text
 <button icon="electric_bolt">
   <span class="app-icon" iconRight>android</span> <!-- icon is on right side of button -->
   my button label
@@ -48,7 +48,7 @@ tabindex is dynamicaly added for role `button` and `link`. It is not implemented
 All It's content is projected.
 
 implementation ex:
-```HTML
+```text
 <app-card role="button" (click)="alertClick()" (keyup)="EnterKey($event)">
   I'm a button card
 </app-card>

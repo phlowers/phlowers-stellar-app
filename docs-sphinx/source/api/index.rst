@@ -5,7 +5,9 @@ This section contains the TypeScript API documentation for the Stellar applicati
 
 .. toctree::
    :maxdepth: 2
-   :caption: Modules:
+   :caption: Core:
 
    models
+   catalog
+   infrastructure
    services
