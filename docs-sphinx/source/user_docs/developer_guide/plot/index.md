@@ -19,7 +19,7 @@ When you give `StudioComponent` a section, it automatically:
 
 Just use the `StudioComponent` in your template:
 
-```html
+```text
 <app-studio
   [section]="mySection"
   [isSupportZoom]="true"
