@@ -17,7 +17,6 @@ using `sphinx-js <https://sphinx-js.readthedocs.io/>`_.
    :caption: User Guide:
 
    user_docs/index
-   user_docs/home/home
 
 .. toctree::
    :maxdepth: 2
@@ -36,6 +35,6 @@ using `sphinx-js <https://sphinx-js.readthedocs.io/>`_.
 
 .. toctree::
    :maxdepth: 2
-   :caption: API:
+   :caption: API Reference:
 
    api/index
