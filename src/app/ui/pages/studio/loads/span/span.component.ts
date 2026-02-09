@@ -19,6 +19,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { LoadFormsService } from '../loadForms.service';
 import { emptySpanLoad } from '../helpers';
+import { LoadType } from '@core/domain/models/charge.model';
 
 interface SupportOption {
   label: string;
@@ -103,10 +104,16 @@ export class SpanComponent implements OnDestroy {
           }
           const load = this.findSelectedLoad();
           if (load !== undefined) {
-            this.form.get('referenceSupport')?.setValue(load?.referenceSupport);
-            this.form.get('type')?.setValue(load!.type);
-            this.form.get('loadWeight')?.setValue(load?.loadWeight ?? 0);
-            this.form.get('loadPosition')?.setValue(load?.loadPosition ?? 0);
+            this.form
+              .get('referenceSupport')
+              ?.setValue(load?.referenceSupport, { emitEvent: false });
+            this.form.get('type')?.setValue(load!.type, { emitEvent: false });
+            this.form
+              .get('loadWeight')
+              ?.setValue(load?.loadWeight ?? 0, { emitEvent: false });
+            this.form
+              .get('loadPosition')
+              ?.setValue(load?.loadPosition ?? 0, { emitEvent: false });
           }
         })
     );
@@ -118,7 +125,7 @@ export class SpanComponent implements OnDestroy {
             if (load) {
               (load as any)[controlName] =
                 value ?? (emptySpanLoad as any)[controlName];
-              if (controlName === 'type') {
+              if (controlName === 'type' && value === LoadType.MARKING) {
                 // reset load weight when type is changed
                 this.form.get('loadWeight')?.setValue(0);
               }

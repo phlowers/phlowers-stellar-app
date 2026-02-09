@@ -236,17 +236,15 @@ export class PlotService {
   };
 
   getSpanOptions = computed<SpanOption[]>(() => {
-    const startSupport = this.plotOptions().startSupport;
-    const endSupport = this.plotOptions().endSupport;
-    const supportsLength = endSupport - startSupport;
-    const spanAmount = Math.max(supportsLength, 0);
     const supports = this.section()?.supports ?? [];
+    const supportsAmount = supports.length ?? 0;
+    const spanAmount = Math.max(supportsAmount - 1, 0);
     // create an array the length of spanAmount
     const spans = Array.from({ length: spanAmount }, (_, index) => ({
-      label: `${index + startSupport + 1} - ${index + startSupport + 2}`,
+      label: `${index + 1} - ${index + 2}`,
       value: {
-        index: index + startSupport,
-        uuid: supports[index + startSupport]?.uuid ?? ''
+        index: index,
+        uuid: supports[index]?.uuid ?? ''
       }
     }));
     return spans;
