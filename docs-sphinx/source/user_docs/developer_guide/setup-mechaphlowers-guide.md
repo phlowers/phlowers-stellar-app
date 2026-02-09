@@ -1,4 +1,4 @@
-# set_up_mechaphlowers_v2.py Guide
+# Set-up Mechaphlowers Guide
 
 ## Overview
 
