@@ -1,6 +1,3 @@
-API Reference
-=============
-
 This section contains the TypeScript API documentation for the Stellar application.
 
 .. toctree::
