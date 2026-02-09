@@ -310,8 +310,10 @@ def init_section(js_inputs: dict):
     if input_charge and "data" in input_charge and "spanLoads" in input_charge["data"]:
         loads_list = input_charge["data"]["spanLoads"]
         if len(loads_list) != 0:
-            load_position_meters = np.array([span["loadPosition"] for span in loads_list])
-            load_weight = np.array([span["loadWeight"] for span in loads_list])
+            load_position_meters = np.array(
+                [span["loadPosition"] for span in loads_list])
+            load_weight = np.array(
+                [span["loadWeight"] if span['type'] == 'punctual' else 0.01 for span in loads_list])
             engine.add_loads(load_position_meters, load_weight)
         
     plt_line = PlotEngine.builder_from_balance_engine(engine)

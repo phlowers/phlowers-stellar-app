@@ -6,6 +6,11 @@ import { ChargesService } from '@services/charges/charges.service';
 import { signal, computed } from '@angular/core';
 import { Section, Study } from '@core/domain';
 import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
+import {
+  type ChargeData,
+  LoadType,
+  type SpanLoad
+} from '@core/domain/models/charge.model';
 
 describe('SpanComponent', () => {
   let component: SpanComponent;
@@ -291,6 +296,71 @@ describe('SpanComponent', () => {
       component.form.get('spanSelect')?.setValue(spanValue);
 
       expect(component.form.get('spanSelect')?.value).toEqual(spanValue);
+    });
+
+    it('should set form values from existing temporary span load when spanSelect changes', () => {
+      const temporaryLoadData = {
+        climate: {
+          windPressure: null,
+          cableTemperature: null,
+          symmetryType: '',
+          iceThickness: null,
+          frontierSupportNumber: null,
+          iceThicknessBefore: null,
+          iceThicknessAfter: null
+        },
+        spanLoads: [
+          {
+            supportUuid: 'test-uuid',
+            referenceSupport: 'RIGHT',
+            type: LoadType.PUNCTUAL,
+            loadWeight: 123,
+            loadPosition: 7
+          }
+        ]
+      } satisfies ChargeData;
+
+      mockPlotService.temporaryLoadData = temporaryLoadData;
+
+      component.form
+        .get('spanSelect')
+        ?.setValue({ index: 0, uuid: 'test-uuid' });
+
+      expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
+      expect(component.form.get('type')?.value).toBe(LoadType.PUNCTUAL);
+      expect(component.form.get('loadWeight')?.value).toBe(123);
+      expect(component.form.get('loadPosition')?.value).toBe(7);
+    });
+
+    it('should default loadWeight and loadPosition to 0 when existing load has no values', () => {
+      const spanLoadWithoutValues = {
+        supportUuid: 'test-uuid',
+        referenceSupport: 'LEFT',
+        type: LoadType.MARKING
+        // loadWeight + loadPosition intentionally omitted to hit ?? 0 branches
+      } as unknown as SpanLoad;
+
+      mockPlotService.temporaryLoadData = {
+        climate: {
+          windPressure: null,
+          cableTemperature: null,
+          symmetryType: '',
+          iceThickness: null,
+          frontierSupportNumber: null,
+          iceThicknessBefore: null,
+          iceThicknessAfter: null
+        },
+        spanLoads: [spanLoadWithoutValues]
+      };
+
+      component.form
+        .get('spanSelect')
+        ?.setValue({ index: 0, uuid: 'test-uuid' });
+
+      expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
+      expect(component.form.get('type')?.value).toBe(LoadType.MARKING);
+      expect(component.form.get('loadWeight')?.value).toBe(0);
+      expect(component.form.get('loadPosition')?.value).toBe(0);
     });
 
     it('should enable referenceSupport when spanSelect has a value', () => {

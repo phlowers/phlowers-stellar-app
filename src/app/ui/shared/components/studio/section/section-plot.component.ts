@@ -37,7 +37,7 @@ export class SectionPlotComponent {
       return [];
     }
     const supportsUuids = section.supports
-      .slice(plotOptions.startSupport, plotOptions.endSupport + 1)
+      .slice(plotOptions.startSupport, plotOptions.endSupport)
       .map((support) => support.uuid);
     const spanLoads =
       this.plotService.temporaryLoadData?.spanLoads?.filter(
