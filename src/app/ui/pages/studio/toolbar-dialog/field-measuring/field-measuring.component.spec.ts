@@ -14,6 +14,7 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { BehaviorSubject } from 'rxjs';
 import { Section } from '@core/domain';
 import { LinesService } from '@services/lines/lines.service';
+import { CablesService } from '@services/cables/cables.service';
 
 @Component({
   selector: 'app-button',
@@ -92,6 +93,11 @@ describe('FieldMeasuringComponent', () => {
       getLines: jest.fn().mockResolvedValue([])
     } as unknown as LinesService;
 
+    const mockCablesService = {
+      getCables: jest.fn().mockResolvedValue([]),
+      ready: new BehaviorSubject<boolean>(true)
+    } as unknown as CablesService;
+
     await TestBed.configureTestingModule({
       providers: [
         ToolbarDialogService,
@@ -102,7 +108,8 @@ describe('FieldMeasuringComponent', () => {
         { provide: StudiesService, useValue: mockStudiesService },
         { provide: SectionService, useValue: mockSectionService },
         { provide: PlotService, useValue: mockPlotService },
-        { provide: LinesService, useValue: mockLinesService }
+        { provide: LinesService, useValue: mockLinesService },
+        { provide: CablesService, useValue: mockCablesService }
       ]
     })
       .overrideComponent(FieldMeasuringComponent, {
@@ -370,11 +377,9 @@ describe('FieldMeasuringComponent', () => {
       expect(toolbarDialogService.isOpen()).toBe(true);
       expect(toolbarDialogService.phase()).toBe('init');
 
-      // Proceed to main component
+      // Proceed to main component (event-driven transition)
       toolbarDialogService.proceedToMainComponent();
-
-      // Wait for the timeout that opens main dialog
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      toolbarDialogService.completePendingTransition();
       expect(toolbarDialogService.isOpen()).toBe(true);
       expect(toolbarDialogService.phase()).toBe('main');
 
@@ -384,12 +389,10 @@ describe('FieldMeasuringComponent', () => {
       expect(toolbarDialogService.phase()).toBe('main');
     });
 
-    it('should work with onVisibleChange integration', async () => {
+    it('should work with onVisibleChange integration', () => {
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
-
-      // Wait for the timeout that opens main dialog
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      toolbarDialogService.completePendingTransition();
       expect(toolbarDialogService.isOpen()).toBe(true);
       expect(toolbarDialogService.phase()).toBe('main');
 
@@ -412,18 +415,18 @@ describe('FieldMeasuringComponent', () => {
       // Open main dialog to initialize measureData from PlotService
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      toolbarDialogService.completePendingTransition();
 
       await component.onSave();
       // Re-open for subsequent calls
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      toolbarDialogService.completePendingTransition();
       await component.onSave();
       // Re-open for third call
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      toolbarDialogService.completePendingTransition();
       await component.onSave();
 
       expect(modifySectionSpy).toHaveBeenCalledTimes(3);
@@ -453,9 +456,11 @@ describe('FieldMeasuringComponent', () => {
 
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
 
-      // Wait for async operations
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Wait for async operations (getLines, getCables)
+      await new Promise((resolve) => setTimeout(resolve, 50));
       fixture.detectChanges();
 
       // Verify that getLines was called as part of initialization

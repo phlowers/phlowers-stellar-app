@@ -12,8 +12,17 @@ export class ToolbarDialogComponent {
   readonly toolbarDialogService = inject(ToolbarDialogService);
   readonly injector = inject(Injector);
 
+  onVisibleChange(visible: boolean): void {
+    if (!visible && this.toolbarDialogService.isTransitioning()) {
+      return;
+    }
+    this.toolbarDialogService.isOpen.set(visible);
+  }
+
   onDialogHide(): void {
-    if (!this.toolbarDialogService.isTransitioning()) {
+    if (this.toolbarDialogService.isTransitioning()) {
+      this.toolbarDialogService.completePendingTransition();
+    } else {
       this.toolbarDialogService.closeTool();
     }
   }
