@@ -70,21 +70,16 @@ describe('ToolbarDialogService', () => {
       expect(service.phase()).toBe('main');
     });
 
-    it('should reset to init phase when reopening tool with initComponent', (done) => {
+    it('should reset to init phase when reopening tool with initComponent', () => {
       service.openTool('field-measuring');
       service.proceedToMainComponent();
-      expect(service.isOpen()).toBe(false);
+      service.completePendingTransition();
+      expect(service.isOpen()).toBe(true);
+      expect(service.phase()).toBe('main');
 
-      // Wait for the timeout that opens main dialog
-      setTimeout(() => {
-        expect(service.isOpen()).toBe(true);
-        expect(service.phase()).toBe('main');
-
-        service.openTool('field-measuring');
-        expect(service.isOpen()).toBe(true);
-        expect(service.phase()).toBe('init');
-        done();
-      }, 200);
+      service.openTool('field-measuring');
+      expect(service.isOpen()).toBe(true);
+      expect(service.phase()).toBe('init');
     });
   });
 
@@ -135,14 +130,11 @@ describe('ToolbarDialogService', () => {
       expect(service.getComponent()).toBe(InitComponent);
     });
 
-    it('should return FieldMeasuringComponent after proceeding to main phase', (done) => {
+    it('should return FieldMeasuringComponent after proceeding to main phase', () => {
       service.openTool('field-measuring');
       service.proceedToMainComponent();
-
-      setTimeout(() => {
-        expect(service.getComponent()).toBe(FieldMeasuringComponent);
-        done();
-      }, 200);
+      service.completePendingTransition();
+      expect(service.getComponent()).toBe(FieldMeasuringComponent);
     });
 
     it('should return null for other-tool in init phase check', () => {
@@ -173,17 +165,14 @@ describe('ToolbarDialogService', () => {
       });
     });
 
-    it('should return main style after proceeding from init', (done) => {
+    it('should return main style after proceeding from init', () => {
       service.openTool('field-measuring');
       service.proceedToMainComponent();
-
-      setTimeout(() => {
-        expect(service.getDialogStyle()).toEqual({
-          width: '72.5rem',
-          'max-width': '90%'
-        });
-        done();
-      }, 200);
+      service.completePendingTransition();
+      expect(service.getDialogStyle()).toEqual({
+        width: '72.5rem',
+        'max-width': '90%'
+      });
     });
 
     it('should return empty object for other-tool with no custom style', () => {
@@ -204,44 +193,43 @@ describe('ToolbarDialogService', () => {
   });
 
   describe('proceedToMainComponent', () => {
-    it('should close dialog and reopen in main phase', (done) => {
+    it('should close dialog and set transitioning flag', () => {
       service.openTool('field-measuring');
       expect(service.isOpen()).toBe(true);
       expect(service.phase()).toBe('init');
 
       service.proceedToMainComponent();
       expect(service.isOpen()).toBe(false);
-
-      // Wait for the timeout that opens main dialog
-      setTimeout(() => {
-        expect(service.isOpen()).toBe(true);
-        expect(service.phase()).toBe('main');
-        done();
-      }, 200);
+      expect(service.isTransitioning()).toBe(true);
+      expect(service.phase()).toBe('init');
     });
 
-    it('should not affect other state when called', () => {
+    it('should not affect currentTool when called', () => {
       service.openTool('field-measuring');
       service.proceedToMainComponent();
 
       expect(service.currentTool()).toBe('field-measuring');
     });
+  });
 
-    it('should set transitioning flag during transition', () => {
+  describe('completePendingTransition', () => {
+    it('should switch to main phase and reopen dialog', () => {
       service.openTool('field-measuring');
       service.proceedToMainComponent();
 
-      expect(service.isTransitioning()).toBe(true);
+      service.completePendingTransition();
+      expect(service.isOpen()).toBe(true);
+      expect(service.phase()).toBe('main');
+      expect(service.isTransitioning()).toBe(false);
     });
 
-    it('should clear transitioning flag after transition completes', (done) => {
+    it('should do nothing if no transition is pending', () => {
       service.openTool('field-measuring');
-      service.proceedToMainComponent();
+      expect(service.phase()).toBe('init');
 
-      setTimeout(() => {
-        expect(service.isTransitioning()).toBe(false);
-        done();
-      }, 200);
+      service.completePendingTransition();
+      expect(service.phase()).toBe('init');
+      expect(service.isOpen()).toBe(true);
     });
   });
 
@@ -313,7 +301,7 @@ describe('ToolbarDialogService', () => {
       expect(service.isOpen()).toBe(false);
     });
 
-    it('should update phase signal value when transitioning to main', (done) => {
+    it('should update phase signal value when transitioning to main', () => {
       expect(service.isOpen()).toBe(false);
 
       service.openTool('field-measuring');
@@ -322,12 +310,12 @@ describe('ToolbarDialogService', () => {
 
       service.proceedToMainComponent();
       expect(service.isOpen()).toBe(false);
+      expect(service.isTransitioning()).toBe(true);
 
-      setTimeout(() => {
-        expect(service.isOpen()).toBe(true);
-        expect(service.phase()).toBe('main');
-        done();
-      }, 200);
+      service.completePendingTransition();
+      expect(service.isOpen()).toBe(true);
+      expect(service.phase()).toBe('main');
+      expect(service.isTransitioning()).toBe(false);
     });
   });
 

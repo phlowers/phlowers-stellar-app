@@ -41,8 +41,6 @@ export class ToolbarDialogService {
   readonly templates = signal<ToolTemplates>({});
   readonly loadTableContext = signal<LoadTableContext | null>(null);
 
-  private transitioning = false;
-
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
       component: FieldMeasuringComponent,
@@ -94,14 +92,19 @@ export class ToolbarDialogService {
     }, 300);
   }
 
+  private transitioning = false;
+
   proceedToMainComponent(): void {
     this.transitioning = true;
     this.isOpen.set(false);
-    setTimeout(() => {
+  }
+
+  completePendingTransition(): void {
+    if (this.transitioning) {
+      this.transitioning = false;
       this.phase.set('main');
       this.isOpen.set(true);
-      this.transitioning = false;
-    }, 150);
+    }
   }
 
   isTransitioning(): boolean {
