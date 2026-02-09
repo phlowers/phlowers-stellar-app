@@ -265,6 +265,29 @@ describe('PlotService', () => {
     });
   });
 
+  describe('getSpanOptions', () => {
+    it('should compute spans from section supports uuids', () => {
+      const supports = [
+        { ...mockSection.supports[0], uuid: 'support-uuid-a', number: '1' },
+        { ...mockSection.supports[1], uuid: 'support-uuid-b', number: '2' },
+        { ...mockSection.supports[0], uuid: 'support-uuid-c', number: '3' }
+      ];
+      service.section.set({ ...mockSection, supports });
+
+      const spans = service.getSpanOptions();
+
+      expect(spans).toHaveLength(2);
+      expect(spans[0]).toEqual({
+        label: '1 - 2',
+        value: { index: 0, uuid: 'support-uuid-a' }
+      });
+      expect(spans[1]).toEqual({
+        label: '2 - 3',
+        value: { index: 1, uuid: 'support-uuid-b' }
+      });
+    });
+  });
+
   describe('refreshSection', () => {
     it('should clear error and litData at start', async () => {
       service.error.set(TaskError.CALCULATION_ERROR);
