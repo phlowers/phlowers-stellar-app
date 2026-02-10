@@ -31,7 +31,6 @@ export class StudiesService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   public readonly studies = new BehaviorSubject<StudyEntity[]>([]);
-  public readonly currentStudy = signal<StudyEntity | null>(null);
   public readonly exportDialogData = signal<{
     uuid: string;
     title: string;
@@ -261,13 +260,5 @@ export class StudiesService {
    */
   getStudyAsObservable(uuid: string) {
     return liveQuery(() => this.storageService.db?.studies.get(uuid));
-  }
-
-  /**
-   * Set the current study
-   * @param study The study to set as the current study
-   */
-  setCurrentStudy(study: StudyEntity) {
-    this.currentStudy.set(study);
   }
 }

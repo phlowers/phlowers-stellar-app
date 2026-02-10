@@ -41,6 +41,7 @@ export const createEmptySection = (): Section => {
     maintenance_team_id: undefined,
     maintenance_center_id: undefined,
     supports: createFirstAndLastSupport(),
+    obstacles: [],
     internal_id: '',
     short_name: '',
     created_at: new Date().toISOString(),

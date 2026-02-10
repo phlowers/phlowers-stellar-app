@@ -168,6 +168,7 @@ describe('ManualSectionComponent', () => {
       comment: '',
       supports_comment: '',
       supports: [],
+      obstacles: [],
       initial_conditions: [],
       selected_initial_condition_uuid: undefined,
       charges: [],

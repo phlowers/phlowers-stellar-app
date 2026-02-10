@@ -6,7 +6,8 @@ from typing import List
 import numpy as np
 
 logger = logging.getLogger("mechaphlowers")
-logger.setLevel(logging.WARNING)  # Set logger level to INFO so info messages are shown
+# Set logger level to WARNING so info messages are shown
+logger.setLevel(logging.WARNING)
 
 
 @dataclass
@@ -22,24 +23,24 @@ class ClimateCharge:
 
 @dataclass
 class SpanLoad:
-  loadPosition: float
-  loadWeight: float
+    loadPosition: float
+    loadWeight: float
 
 
 @dataclass
 class ChangeStateInput:
     climate: ClimateCharge
     spanLoads: List[SpanLoad]
-    
+
 
 def change_state(js_inputs: dict):
     global engine, plt_line, js_to_python
 
     # logger.debug("python_inputs: ", str(js_inputs))
-    change_state_inputs = js_to_python(js_inputs) # type: ignore
-    print("change_state_inputs", change_state_inputs)
+    change_state_inputs = js_to_python(js_inputs)  # type: ignore
+    # print("change_state_inputs", change_state_inputs)
     climate = ClimateCharge(**change_state_inputs["climate"])
-    print(change_state_inputs)
+    # print(change_state_inputs)
     logger.debug("python_inputs: ", change_state_inputs)
     wind_pressure = climate.windPressure
     cable_temperature = climate.cableTemperature
@@ -49,20 +50,21 @@ def change_state(js_inputs: dict):
     load_position_list = []
     load_weight_list = []
     for index, span in enumerate(punctual_load):
-        if span['referenceSupport'] == 'LEFT':
+        if span["referenceSupport"] == "LEFT":
             load_position_list.append(span["loadPosition"])
-        elif span['referenceSupport'] == 'RIGHT':
-            span_length = engine.section_array.data["span_length"].to_numpy()[index]
+        elif span["referenceSupport"] == "RIGHT":
+            span_length = engine.section_array.data["span_length"].to_numpy()[
+                index]
             load_position_list.append(span_length - span["loadPosition"])
         else:
             load_position_list.append(0)
 
-        if span['type'] == 'punctual':
+        if span["type"] == "punctual":
             load_weight_list.append(span["loadWeight"])
         else:
             # Temporary work around to factor in marking
             load_weight_list.append(0.01)
-            
+
     load_position_meters = np.array(load_position_list)
     load_weight = np.array(load_weight_list)
 

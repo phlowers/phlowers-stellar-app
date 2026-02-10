@@ -141,7 +141,9 @@ export class VhlAndGuyingComponent implements AfterViewInit {
         this.form.controls.selectedSupport.enable({ emitEvent: false });
       }
 
-      this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan));
+      this.supportOptions.set(
+        this.plotService.getSupportOptions(selectedSpan?.uuid ?? null)
+      );
       this.supportType.set(null);
       this.vtlWithoutGuying.set(null);
       this.results.set(null);
@@ -173,7 +175,9 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   private updateSupportOptions(): void {
     const selectedSpan = this.form.controls.selectedSpan.value;
-    this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan));
+    this.supportOptions.set(
+      this.plotService.getSupportOptions(selectedSpan?.uuid ?? null)
+    );
   }
 
   private updateSupportType(): void {
@@ -276,7 +280,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
   onSave(): void {
     const formValue = this.form.value;
     const study = this.plotService.study();
-    const section = this.sectionService.currentSection();
+    const section = this.plotService.section();
     if (!study || !section) {
       return;
     }

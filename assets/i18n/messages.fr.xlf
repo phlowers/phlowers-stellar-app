@@ -3321,5 +3321,173 @@
         <target>Données enregistrées avec succès</target>
       </segment>
     </unit>
+    <unit id="7009794897351276069">
+      <segment state="initial">
+        <source>Obstacle type</source>
+        <target>Type d&apos;obstacle</target>
+      </segment>
+    </unit>
+    <unit id="1131253797808406443">
+      <segment state="initial">
+        <source>Obstacle name</source>
+        <target>Nom de l&apos;obstacle</target>
+      </segment>
+    </unit>
+    <unit id="5268710126531471758">
+      <segment state="initial">
+        <source>Obstacle altitude type</source>
+        <target>Type d&apos;altitude d&apos;obstacle</target>
+      </segment>
+    </unit>
+    <unit id="557727381317439046">
+      <segment state="initial">
+        <source>Lateral distance type</source>
+        <target>Type de distance latérale</target>
+      </segment>
+    </unit>
+    <unit id="9072710812131117366">
+      <segment state="initial">
+        <source>Free positioning</source>
+        <target>Positionnement libre</target>
+      </segment>
+    </unit>
+    <unit id="5200268001024215420">
+      <segment state="initial">
+        <source>Alt. point (m)</source>
+        <target>Alt. point (m)</target>
+      </segment>
+    </unit>
+    <unit id="7478955611020967674">
+      <segment state="initial">
+        <source>Dist. supp. réf. (m)</source>
+        <target>Dist. supp. réf. (m)</target>
+      </segment>
+    </unit>
+    <unit id="2925979774521322109">
+      <segment state="initial">
+        <source>Dist. axe ligne</source>
+        <target>Dist. axe ligne</target>
+      </segment>
+    </unit>
+    <unit id="8244905429888828226">
+      <segment state="initial">
+        <source>AT-CCGLA</source>
+        <target>AT-CCGLA</target>
+      </segment>
+    </unit>
+    <unit id="5469472899799340456">
+      <segment state="initial">
+        <source>Calculate and save</source>
+        <target>Calculer et enregistrer</target>
+      </segment>
+    </unit>
+    <unit id="6954812763575269213">
+      <segment state="initial">
+        <source>Oblique</source>
+        <target>Oblique</target>
+      </segment>
+    </unit>
+    <unit id="160958144287367985">
+      <segment state="initial">
+        <source>Vertical</source>
+        <target>Verticale</target>
+      </segment>
+    </unit>
+    <unit id="8382375758916799432">
+      <segment state="initial">
+        <source>Horizontal</source>
+        <target>Horizontale</target>
+      </segment>
+    </unit>
+    <unit id="1125666118611359006">
+      <segment state="initial">
+        <source>House</source>
+        <target>Maison</target>
+      </segment>
+    </unit>
+    <unit id="5782981899482871069">
+      <segment state="initial">
+        <source>Building</source>
+        <target>Bâtiment</target>
+      </segment>
+    </unit>
+    <unit id="5139118152626940877">
+      <segment state="initial">
+        <source>Tree</source>
+        <target>Arbre</target>
+      </segment>
+    </unit>
+    <unit id="8693603235657020323">
+      <segment state="initial">
+        <source>Other</source>
+        <target>Autre</target>
+      </segment>
+    </unit>
+    <unit id="6474791459744892295">
+      <segment state="initial">
+        <source>Absolute (NGF)</source>
+        <target>Absolue (NGF)</target>
+      </segment>
+    </unit>
+    <unit id="3757513599773924778">
+      <segment state="initial">
+        <source>Relative to support</source>
+        <target>Relative au support</target>
+      </segment>
+    </unit>
+    <unit id="4305399083978919436">
+      <segment state="initial">
+        <source>Span axis</source>
+        <target>Axe de la portée</target>
+      </segment>
+    </unit>
+    <unit id="4441055613955460887">
+      <segment state="initial">
+        <source>Line axis</source>
+        <target>Axe de la ligne</target>
+      </segment>
+    </unit>
+    <unit id="381912160634740127">
+      <segment state="initial">
+        <source>Add point</source>
+        <target>Add point</target>
+      </segment>
+    </unit>
+    <unit id="3563524107874537314">
+      <segment state="initial">
+        <source>delete point</source>
+        <target>delete point</target>
+      </segment>
+    </unit>
+    <unit id="5037464174861244391">
+      <segment state="initial">
+        <source>Obstacle saved</source>
+        <target>Obstacle saved</target>
+      </segment>
+    </unit>
+    <unit id="3490467566453662140">
+      <segment state="initial">
+        <source>Return to span</source>
+        <target>Retour à la portée</target>
+      </segment>
+    </unit>
+    <unit id="8897211906922465937">
+      <segment state="initial">
+        <source>Create new obstacle</source>
+        <target>Créer un nouvel obstacle</target>
+      </segment>
+    </unit>
+    <unit id="1498958297880085534">
+      <segment state="initial">
+        <source>delete obstacle</source>
+        <target>Supprimer l&apos;obstacle</target>
+      </segment>
+    </unit>
+    <unit id="3989668595571335837">
+      <segment state="initial">
+        <source>Obstacle deleted</source>
+        <target>Obstacle supprimé</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

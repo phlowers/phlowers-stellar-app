@@ -1,6 +1,5 @@
 import Plotly, {
   Camera,
-  Data,
   Layout,
   ModeBarDefaultButtons
 } from 'plotly.js-dist-min';
@@ -8,12 +7,14 @@ import { Side, View } from './types';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { SpanLoad } from '@core/domain';
+import { Obstacle } from '@core/domain/models/obstacle.model';
+import { DataObject } from './createPlotDataObject';
+import { createObstaclesAnnotations } from './obstacles';
 
 export interface CreatePlotParams {
   plotId: string;
-  data: Data[];
+  data: DataObject[];
   litData: GetSectionOutput;
-  isSupportZoom: boolean;
   invert: boolean;
   view: View;
   camera: Camera | null;
@@ -21,6 +22,9 @@ export interface CreatePlotParams {
   spanLoads: (SpanLoad | null)[];
   startSupport: number;
   endSupport: number;
+  obstacles: Obstacle[];
+  currentObstacleUuid: string | null;
+  currentObstaclePointIndex: number;
 }
 
 const normalCamera = () => ({
@@ -35,22 +39,6 @@ const normalCamera = () => ({
     z: 0.2
   }
 });
-
-const supportCamera = {
-  up: { x: 0, y: 0, z: 1 },
-  // TODO: replace magic numbers
-  center: {
-    x: -0.97,
-    y: -0.73,
-    z: 0.07
-  },
-  eye: {
-    x: 0.9,
-    y: 0.1,
-    z: -0.1
-  },
-  projection: { type: 'perspective' }
-};
 
 const axis = {
   backgroundcolor: 'gainsboro',
@@ -78,11 +66,14 @@ const createScene = (
       y: 0.2,
       z: 0.5
     },
-    annotations: createLoadAnnotations(plotParams),
+    annotations: [
+      ...createLoadAnnotations(plotParams),
+      ...createObstaclesAnnotations(plotParams)
+    ],
     camera: plotParams.camera
       ? plotParams.camera
       : {
-          ...(plotParams.isSupportZoom ? supportCamera : normalCamera())
+          ...normalCamera()
         }
   };
 };
@@ -143,14 +134,18 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (
       scaleratio: plotParams.side === 'face' ? 0.2 : undefined,
       scaleanchor: plotParams.side === 'face' ? 'x' : undefined
     },
-    annotations: createLoadAnnotations(plotParams)
+    annotations: [
+      ...createLoadAnnotations(plotParams),
+      ...createObstaclesAnnotations(plotParams)
+    ]
   };
 };
 
 export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
   if (!document.getElementById(plotParams.plotId)) {
-    return undefined;
+    console.warn(`Plot element not found: ${plotParams.plotId}`);
+    return;
   }
   const baseLayout =
     plotParams.view === '3d' ? layout3d(plotParams) : layout2d(plotParams);

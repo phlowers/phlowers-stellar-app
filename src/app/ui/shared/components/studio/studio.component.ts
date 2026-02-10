@@ -1,72 +1,40 @@
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  OnDestroy,
-  signal
-} from '@angular/core';
+import { Component, computed, DestroyRef, inject, input } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { DataError, TaskError } from '@services/worker_python/tasks/types';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Section } from '@core/domain';
-import { OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { combineLatest } from 'rxjs';
+
 import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { formatStudioError } from './helpers/errors';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-studio',
   templateUrl: './studio.component.html',
   imports: [SectionPlotComponent, ProgressSpinnerModule]
 })
-export class StudioComponent implements OnInit, OnDestroy {
-  section = input<Section | null>();
-  isPreview = input.required<boolean>();
-  isSupportZoom = input.required<boolean>();
-  subscription: Subscription | null = null;
-  workerReady = signal<boolean>(false);
+export class StudioComponent {
+  isPreview = input.required<boolean>(); // preview mode in the manual section modal
 
   getErrorString = computed(() => {
-    switch (this.plotService.error()) {
-      case DataError.NO_CABLE_FOUND:
-        return $localize`No cable found`;
-      case TaskError.CALCULATION_ERROR:
-        return $localize`Calculation error`;
-      case TaskError.SOLVER_DID_NOT_CONVERGE:
-        return $localize`Calculation error: 'Solver did not converge'`;
-      case TaskError.PYODIDE_LOAD_ERROR:
-        return $localize`Pyodide load error`;
-      default:
-        return $localize`Unknown error`;
-    }
+    return formatStudioError(this.plotService.error());
   });
+
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
     public readonly plotService: PlotService
   ) {
-    effect(() => {
-      if (this.workerReady() && this.section() && this.isPreview()) {
-        this.plotService.plotOptionsChange({
-          startSupport: 0,
-          endSupport: this.section()!.supports.length - 1
-        });
-        this.plotService.refreshSection(this.section()!);
-      }
-    });
-  }
-
-  ngOnInit() {
-    this.subscription = this.workerPythonService.ready$.subscribe((value) => {
-      this.workerReady.set(value);
-    });
-  }
-
-  ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    this.plotService.resetAll();
+    combineLatest([
+      this.workerPythonService.ready$,
+      toObservable(this.plotService.section)
+    ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(([workerReady, section]) => {
+        if (workerReady && section && this.isPreview()) {
+          this.plotService.refreshSection(section!);
+        }
+      });
   }
 }

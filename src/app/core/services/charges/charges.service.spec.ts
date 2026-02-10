@@ -76,6 +76,7 @@ const mockSectionData: Section = {
   comment: 'Test comment',
   supports_comment: 'Test supports comment',
   supports: [],
+  obstacles: [],
   initial_conditions: [],
   selected_initial_condition_uuid: undefined,
   charges: [mockChargeData],

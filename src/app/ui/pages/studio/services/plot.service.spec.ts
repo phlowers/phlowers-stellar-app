@@ -164,6 +164,7 @@ describe('PlotService', () => {
         towerModel: 'Tower Model'
       }
     ],
+    obstacles: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],
@@ -224,7 +225,6 @@ describe('PlotService', () => {
       expect(service.workerReady()).toBe(false);
       expect(service.study()).toBeNull();
       expect(service.section()).toBeNull();
-      expect(service.isSidebarOpen()).toBe(false);
     });
 
     it('should initialize plotOptions with default values', () => {
@@ -276,14 +276,10 @@ describe('PlotService', () => {
 
       const spans = service.getSpanOptions();
 
-      expect(spans).toHaveLength(2);
+      expect(spans).toHaveLength(1);
       expect(spans[0]).toEqual({
         label: '1 - 2',
-        value: { index: 0, uuid: 'support-uuid-a' }
-      });
-      expect(spans[1]).toEqual({
-        label: '2 - 3',
-        value: { index: 1, uuid: 'support-uuid-b' }
+        value: 'support-uuid-a'
       });
     });
   });

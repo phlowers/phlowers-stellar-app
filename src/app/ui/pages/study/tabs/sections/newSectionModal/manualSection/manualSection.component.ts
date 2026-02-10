@@ -266,6 +266,13 @@ export class ManualSectionComponent implements OnInit {
 
   tabValueChange = (event: string | number) => {
     this.tabValue.set(String(event));
+    if (event === 'graphical') {
+      this.plotService.section.set(this.section());
+      this.plotService.plotOptionsChange({
+        startSupport: 0,
+        endSupport: this.section().supports?.length ?? 0
+      });
+    }
   };
 
   onNextTab() {

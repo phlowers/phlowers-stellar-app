@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SideTabsComponent } from './side-tabs.component';
 import { PlotService } from '../services/plot.service';
+import { SideTabsService } from './side-tabs.service';
 import { SideTabComponent } from './side-tab/side-tab.component';
 
 @Component({
@@ -17,22 +18,23 @@ class TestHostComponent {}
 
 describe('SideTabsComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
-  let plotServiceMock: { isSidebarOpen: jest.Mock; setSidebarOpen: jest.Mock };
+  let plotServiceMock: { refreshCamera: jest.Mock };
+  let sideTabsService: SideTabsService;
 
   beforeEach(async () => {
-    const isSidebarOpenMock = Object.assign(jest.fn().mockReturnValue(false), {
-      set: jest.fn()
-    });
     plotServiceMock = {
-      isSidebarOpen: isSidebarOpenMock,
-      setSidebarOpen: jest.fn()
+      refreshCamera: jest.fn()
     };
 
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [{ provide: PlotService, useValue: plotServiceMock }]
+      providers: [
+        { provide: PlotService, useValue: plotServiceMock },
+        SideTabsService
+      ]
     }).compileComponents();
 
+    sideTabsService = TestBed.inject(SideTabsService);
     fixture = TestBed.createComponent(TestHostComponent);
     fixture.detectChanges();
   });
@@ -130,7 +132,7 @@ describe('SideTabsComponent', () => {
     const component = fixture.debugElement.query(
       By.directive(SideTabsComponent)
     ).componentInstance;
-    component.sideTabs.set('');
+    sideTabsService.sideTabs.set(null);
     component['updateWidth']();
     expect(component.panelWidth()).toBe('0px');
   });
@@ -141,7 +143,7 @@ describe('SideTabsComponent', () => {
     ).componentInstance;
 
     // Set a tab to be open
-    component.sideTabs.set(0);
+    sideTabsService.sideTabs.set(0);
 
     // Mock the panel element with offsetWidth
     const mockPanel = {
@@ -228,7 +230,7 @@ describe('SideTabsComponent', () => {
     );
   });
 
-  it('toggleTab calls plotService.setSidebarOpen after delay', (done) => {
+  it('toggleTab calls plotService.refreshCamera after delay', (done) => {
     const buttons = getButtons();
 
     buttons[0].click();
@@ -236,7 +238,7 @@ describe('SideTabsComponent', () => {
 
     // Wait for the REFRESH_STUDIO_DELAY (400ms)
     setTimeout(() => {
-      expect(plotServiceMock.setSidebarOpen).toHaveBeenCalled();
+      expect(plotServiceMock.refreshCamera).toHaveBeenCalled();
       done();
     }, 450);
   });

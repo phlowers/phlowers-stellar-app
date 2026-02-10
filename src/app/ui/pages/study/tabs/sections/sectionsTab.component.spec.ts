@@ -89,6 +89,7 @@ describe('SectionsTabComponent', () => {
     comment: 'Test section comment',
     supports_comment: 'Test supports comment',
     supports: [],
+    obstacles: [],
     initial_conditions: [
       {
         uuid: 'ic-1',

@@ -6,8 +6,9 @@
  */
 
 import { createPlot } from './createPlot';
-import Plotly, { Data } from 'plotly.js-dist-min';
+import Plotly from 'plotly.js-dist-min';
 import { SpanLoad } from '@core/domain';
+import { DataObject } from './createPlotDataObject';
 
 // Mock Plotly
 jest.mock('plotly.js-dist-min', () => ({
@@ -43,12 +44,13 @@ describe('createPlot', () => {
     document.getElementById = originalGetElementById;
   });
 
-  const mockData: Data[] = [
+  const mockData: DataObject[] = [
     {
       x: [1, 2, 3],
       y: [10, 20, 30],
       type: 'scatter',
-      mode: 'lines'
+      mode: 'lines',
+      supportUuid: 's0'
     }
   ];
 
@@ -77,7 +79,6 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
         invert: false,
         view: '3d',
         camera: null,
@@ -85,7 +86,10 @@ describe('createPlot', () => {
         spanLoads: mockSpanLoads,
         litData: mockLitData,
         startSupport: 0,
-        endSupport: 0
+        endSupport: 0,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0
       });
 
       expect(document.getElementById).toHaveBeenCalledWith('test-plot-id');
@@ -96,7 +100,6 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
         invert: false,
         view: '3d',
         camera: null,
@@ -104,7 +107,10 @@ describe('createPlot', () => {
         spanLoads: mockSpanLoads,
         litData: mockLitData,
         startSupport: 0,
-        endSupport: 0
+        endSupport: 0,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0
       });
 
       expect(Plotly.newPlot).toHaveBeenCalledWith(
@@ -119,7 +125,6 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
         invert: false,
         view: '3d',
         camera: null,
@@ -127,7 +132,10 @@ describe('createPlot', () => {
         spanLoads: mockSpanLoads,
         litData: mockLitData,
         startSupport: 0,
-        endSupport: 0
+        endSupport: 0,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0
       });
 
       expect(Plotly.newPlot).toHaveBeenCalledWith(
@@ -144,7 +152,6 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
         invert: false,
         view: '3d',
         camera: null,
@@ -152,7 +159,10 @@ describe('createPlot', () => {
         spanLoads: mockSpanLoads,
         litData: mockLitData,
         startSupport: 0,
-        endSupport: 0
+        endSupport: 0,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0
       });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
@@ -163,7 +173,6 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
         invert: false,
         view: '3d',
         camera: null,
@@ -171,7 +180,10 @@ describe('createPlot', () => {
         spanLoads: mockSpanLoads,
         litData: mockLitData,
         startSupport: 0,
-        endSupport: 0
+        endSupport: 0,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0
       });
 
       const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
@@ -184,7 +196,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -205,7 +219,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -229,7 +245,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -248,7 +266,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -267,7 +287,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -291,7 +313,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -311,7 +335,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -331,7 +357,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -355,7 +383,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -371,19 +401,22 @@ describe('createPlot', () => {
     });
 
     it('should work with different data arrays', () => {
-      const differentData: Data[] = [
+      const differentData: DataObject[] = [
         {
           x: [10, 20, 30, 40],
           y: [100, 200, 300, 400],
           type: 'scatter',
-          mode: 'markers'
+          mode: 'markers',
+          supportUuid: 's1'
         }
       ];
 
       createPlot({
         plotId: 'test-plot-id',
         data: differentData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,
@@ -404,7 +437,9 @@ describe('createPlot', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: true,
         view: '2d',
         camera: null,
@@ -426,7 +461,9 @@ describe('createPlot', () => {
         endSupport: 0,
         plotId: 'test-plot-id',
         data: mockData,
-        isSupportZoom: false,
+        obstacles: [],
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0,
         invert: false,
         view: '2d',
         camera: null,

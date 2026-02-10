@@ -85,6 +85,7 @@ describe('WorkerService', () => {
     comment: 'Test comment',
     supports_comment: 'Test supports comment',
     supports: [createMockSupport()],
+    obstacles: [],
     initial_conditions: [createMockInitialCondition()],
     selected_initial_condition_uuid: 'ic-uuid-1',
     charges: [],

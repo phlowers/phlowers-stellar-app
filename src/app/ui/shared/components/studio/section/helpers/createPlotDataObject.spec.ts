@@ -1,5 +1,114 @@
 import { createDataObject } from './createPlotDataObject';
 import { PlotObjectsType } from './types';
+import { Support } from '@core/domain/models/support.model';
+
+const mockSupports: Support[] = [
+  {
+    uuid: 's0',
+    number: '0',
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentSet: null,
+    attachmentHeight: null,
+    heightBelowConsole: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null,
+    towerModel: null
+  },
+  {
+    uuid: 's1',
+    number: '1',
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentSet: null,
+    attachmentHeight: null,
+    heightBelowConsole: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null,
+    towerModel: null
+  },
+  {
+    uuid: 's2',
+    number: '2',
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentSet: null,
+    attachmentHeight: null,
+    heightBelowConsole: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null,
+    towerModel: null
+  },
+  {
+    uuid: 's3',
+    number: '3',
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentSet: null,
+    attachmentHeight: null,
+    heightBelowConsole: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null,
+    towerModel: null
+  },
+  {
+    uuid: 's4',
+    number: '4',
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentSet: null,
+    attachmentHeight: null,
+    heightBelowConsole: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null,
+    towerModel: null
+  }
+];
 
 describe('createPlotDataObject', () => {
   describe('getColor function', () => {
@@ -16,7 +125,15 @@ describe('createPlotDataObject', () => {
     ];
 
     it('should return red color for spans type', () => {
-      const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        1,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,7 +148,8 @@ describe('createPlotDataObject', () => {
         1,
         'supports',
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       expect(
@@ -47,7 +165,8 @@ describe('createPlotDataObject', () => {
         1,
         'insulators',
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       expect(
@@ -67,7 +186,8 @@ describe('createPlotDataObject', () => {
         1,
         'unknown' as PlotObjectsType,
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       expect(
@@ -100,7 +220,8 @@ describe('createPlotDataObject', () => {
         1,
         'supports',
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       expect(
@@ -110,7 +231,15 @@ describe('createPlotDataObject', () => {
     });
 
     it('should return lines mode for spans type', () => {
-      const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        1,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,7 +254,8 @@ describe('createPlotDataObject', () => {
         1,
         'insulators',
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       expect(
@@ -155,7 +285,15 @@ describe('createPlotDataObject', () => {
     ];
 
     it('should create data objects for each data point group', () => {
-      const result = createDataObject(testData, 0, 2, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        2,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       expect(result).toHaveLength(2); // endSupport - startSupport for spans
       expect(result[0]).toBeDefined();
@@ -163,7 +301,15 @@ describe('createPlotDataObject', () => {
     });
 
     it('should handle 3d view correctly', () => {
-      const result = createDataObject(testData, 0, 1, 'spans', '3d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        1,
+        'spans',
+        '3d',
+        'profile',
+        mockSupports
+      );
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -184,7 +330,15 @@ describe('createPlotDataObject', () => {
     });
 
     it('should handle face side correctly in 2d view', () => {
-      const result = createDataObject(testData, 0, 1, 'spans', '2d', 'face');
+      const result = createDataObject(
+        testData,
+        0,
+        1,
+        'spans',
+        '2d',
+        'face',
+        mockSupports
+      );
 
       // In face side with 2d view, x should use y coordinates and y should use z coordinates
       expect(
@@ -198,7 +352,15 @@ describe('createPlotDataObject', () => {
     });
 
     it('should include text properties', () => {
-      const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        1,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -211,7 +373,15 @@ describe('createPlotDataObject', () => {
     });
 
     it('should handle spans type with correct slicing', () => {
-      const result = createDataObject(testData, 0, 2, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        2,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       // For spans, it should slice from startSupport to endSupport (exclusive)
       expect(result).toHaveLength(2);
@@ -224,7 +394,8 @@ describe('createPlotDataObject', () => {
         2,
         'supports',
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       // For non-spans, it should slice from startSupport to endSupport + 1 (inclusive)
@@ -232,7 +403,15 @@ describe('createPlotDataObject', () => {
     });
 
     it('should map coordinates correctly for profile side in 2d view', () => {
-      const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        1,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -245,7 +424,15 @@ describe('createPlotDataObject', () => {
     });
 
     it('should map coordinates correctly for 3d view', () => {
-      const result = createDataObject(testData, 0, 1, 'spans', '3d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        1,
+        'spans',
+        '3d',
+        'profile',
+        mockSupports
+      );
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -271,7 +458,8 @@ describe('createPlotDataObject', () => {
         0,
         'spans',
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       expect(result).toHaveLength(0);
@@ -285,7 +473,8 @@ describe('createPlotDataObject', () => {
         1,
         'spans',
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       expect(result).toHaveLength(1);
@@ -310,7 +499,15 @@ describe('createPlotDataObject', () => {
           [10, 11, 12]
         ]
       ];
-      const result = createDataObject(testData, 1, 1, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        1,
+        1,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       expect(result).toHaveLength(0); // endSupport - startSupport = 0
     });
@@ -332,7 +529,8 @@ describe('createPlotDataObject', () => {
         1,
         'supports',
         '2d',
-        'profile'
+        'profile',
+        mockSupports
       );
 
       expect(result).toHaveLength(1); // endSupport + 1 - startSupport = 1
@@ -349,7 +547,15 @@ describe('createPlotDataObject', () => {
           [10, 11, 12]
         ]
       ];
-      const result = createDataObject(testData, 2, 1, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        2,
+        1,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       expect(result).toHaveLength(0); // Negative slice length
     });
@@ -362,7 +568,15 @@ describe('createPlotDataObject', () => {
           [4, 5, 6]
         ]
       ];
-      const result = createDataObject(testData, 0, 2, 'spans', '2d', 'profile');
+      const result = createDataObject(
+        testData,
+        0,
+        2,
+        'spans',
+        '2d',
+        'profile',
+        mockSupports
+      );
 
       expect(result).toHaveLength(2);
       expect(

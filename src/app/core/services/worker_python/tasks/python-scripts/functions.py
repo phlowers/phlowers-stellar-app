@@ -15,11 +15,13 @@ import sys
 RESOLUTION = 100
 # init a logger to print to stdout
 logger = logging.getLogger("mechaphlowers")
-logger.setLevel(logging.WARNING)  # Set logger level to INFO so info messages are shown
+# Set logger level to INFO so info messages are shown
+logger.setLevel(logging.WARNING)
 
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -30,9 +32,10 @@ def init_config():
     mph.options.graphics.resolution = RESOLUTION
     mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
 
+
 def convert_jsnull(obj):
     """Recursively convert JavaScript null (jsnull) to Python None.
-    
+
     Pyodide's to_py() converts JS null to a special 'jsnull' object instead of None.
     This function traverses nested structures and replaces all jsnull with None.
     """
@@ -43,7 +46,7 @@ def convert_jsnull(obj):
         return {k: convert_jsnull(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [convert_jsnull(item) for item in obj]
-    
+
     return obj
 
 
@@ -182,6 +185,7 @@ plt_line = None
 def get_section_middle_span(start_support: int, end_support: int):
     return (start_support + end_support) // 2
 
+
 def get_coordinates(
     plt_line: PlotEngine,
     project: bool = False,
@@ -196,7 +200,8 @@ def get_coordinates(
     vtl_under_console = list(engine.balance_model.vhl_under_console().vhl)
     # vtl = vtl_under_chain.vtl)
 
-    loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span)
+    loads_coords = plt_line.get_loads_coords(
+        project=project, frame_index=middle_span)
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
@@ -212,7 +217,7 @@ def get_coordinates(
         "displacement": engine.get_displacement().tolist(),
         "load_angle": engine.cable_loads.load_angle.tolist(),
         "span_length": engine.section_array.data.span_length.tolist(),
-        "loads_coords" : loads_coords
+        "loads_coords": loads_coords,
     }
     return result
 
@@ -220,7 +225,6 @@ def get_coordinates(
 def init_section(js_inputs: dict):
     global engine, plt_line
     python_inputs = js_to_python(js_inputs)
-    print("python_inputs: ", python_inputs)
     input_section = python_inputs["section"]
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
@@ -233,7 +237,8 @@ def init_section(js_inputs: dict):
             if condition["uuid"] == input_section["selected_initial_condition_uuid"]
         )
     )
-    input_charges = input_section["charges"] if "charges" in input_section else []
+    input_charges = input_section["charges"] if "charges" in input_section else [
+    ]
     input_charge = (
         None
         if not input_charges
@@ -244,7 +249,8 @@ def init_section(js_inputs: dict):
         )
     )
     initial_condition = (
-        InitialCondition(**input_initial_condition) if input_initial_condition else None
+        InitialCondition(
+            **input_initial_condition) if input_initial_condition else None
     )
     cable = Cable(**input_cable)
 
@@ -315,11 +321,10 @@ def init_section(js_inputs: dict):
             load_weight = np.array(
                 [span["loadWeight"] if span['type'] == 'punctual' else 0.01 for span in loads_list])
             engine.add_loads(load_position_meters, load_weight)
-        
+
     plt_line = PlotEngine.builder_from_balance_engine(engine)
     engine.solve_adjustment()
     engine.solve_change_state()
-    print(f"{input_charge=}")
 
     if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
         climate = input_charge["data"]["climate"]
@@ -339,8 +344,6 @@ def refresh_projection(js_inputs: dict):
     end_support = python_inputs["endSupport"]
     view = python_inputs["view"]
     return get_coordinates(plt_line, view == "2d", start_support, end_support)
-
-
 
 
 def get_support_coordinates(js_inputs: dict):
@@ -397,5 +400,6 @@ def calculate_papoto(js_inputs: dict):
         "parameter_1_3": papoto.parameter_1_3[0],
         "check_validity": bool(papoto.check_validity()[0]),
     }
+
 
 init_config()

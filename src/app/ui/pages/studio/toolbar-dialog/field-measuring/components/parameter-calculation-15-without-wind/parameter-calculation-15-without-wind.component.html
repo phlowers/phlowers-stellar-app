@@ -3,11 +3,9 @@
   (isOpenChange)="initialConditionModalOpen.set($event)"
   [mode]="'create'"
   [initialConditionInput]="initialConditionInput()"
-  [initialConditions]="
-    sectionService.currentSection()?.initial_conditions ?? []
-  "
-  [section]="sectionService.currentSection()!"
-  [study]="studiesService.currentStudy()"
+  [initialConditions]="this.plotService.section()?.initial_conditions ?? []"
+  [section]="this.plotService.section()!"
+  [study]="this.plotService.study()"
   [isInsideToolsDialog]="true"
   (addInitialCondition)="addInitialCondition($event)"
 />

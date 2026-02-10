@@ -1,0 +1,232 @@
+@use 'abstract.extracts' as app;
+
+:host {
+    width: 25rem;
+    display: flex;
+    flex-direction: column;
+    padding: 0 1rem;
+    height: 100%;
+}
+
+.obstacles-form {
+    @apply flex flex-col gap-3 items-stretch;
+    flex: 1;
+    min-height: 0;
+
+    &__positions-container {
+        @apply flex flex-col gap-3;
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+    }
+
+    &__sticky-bottom {
+        @apply flex flex-col gap-3;
+        flex-shrink: 0;
+        background-color: var(--surface-ground);
+        height: 12.5rem;
+    }
+
+    &__reset {
+        align-self: flex-end;
+    }
+
+    &__buttons {
+        @apply flex flex-row justify-between items-center;
+    }
+
+    &__return {
+        align-self: flex-start;
+    }
+
+    &__field {
+        @apply flex flex-col items-stretch;
+        gap: 0.5rem;
+
+        &--toggle-and-add-point {
+            @apply flex flex-row justify-between items-center gap-2;
+        }
+
+        &-toggle {
+            @apply flex flex-row items-center gap-2;
+        }
+
+        label {
+            font-weight: 500;
+        }
+    }
+
+    &__point-header {
+        @apply flex flex-row justify-between items-center mb-1;
+    }
+
+    &__point-label {
+        @extend %text-xl-400;
+        margin: 0;
+    }
+
+    &__point {
+        border: 1px solid transparent;
+        border-radius: 4px;
+        padding: 0.5rem;
+    }
+
+    &__point--active {
+        border-color: var(--primary-color);
+    }
+
+    &__divided-line {
+        @apply grid grid-cols-2;
+        grid-template-areas:
+            'leftLabel rightLabel'
+            'leftInput rightInput'
+            'leftError rightError';
+        column-gap: 0.625rem;
+
+        &--three {
+            @apply grid-cols-3;
+            grid-template-areas:
+                'altPointLabel distRefLabel distAxisLabel'
+                'altPointInput distRefInput distAxisInput'
+                'altPointError distRefError distAxisError';
+        }
+    }
+
+    %_align-top {
+        align-self: start;
+    }
+
+    %_align-center {
+        align-self: center;
+    }
+
+    %_align-end {
+        align-self: end;
+    }
+
+    %_error-layout {
+        @apply flex flex-col gap-1 pt-1;
+    }
+
+    .name-label,
+    .span-label,
+    .alt-label {
+        grid-area: leftLabel;
+        @extend %_align-end;
+    }
+
+    .name-input,
+    .span-input,
+    .alt-input {
+        grid-area: leftInput;
+        @extend %_align-center;
+    }
+
+    .name-error {
+        grid-area: leftError;
+        @extend %_align-top, %_error-layout;
+    }
+
+    .type-label,
+    .ref-label,
+    .lat-label {
+        grid-area: rightLabel;
+        @extend %_align-end;
+    }
+
+    .type-input,
+    .ref-input,
+    .lat-input {
+        grid-area: rightInput;
+        @extend %_align-center;
+    }
+
+    .alt-point-label {
+        grid-area: altPointLabel;
+        @extend %_align-end;
+    }
+
+    .alt-point-input {
+        grid-area: altPointInput;
+        @extend %_align-center;
+    }
+
+    .alt-point-error {
+        grid-area: altPointError;
+        @extend %_align-top, %_error-layout;
+    }
+
+    .dist-ref-label {
+        grid-area: distRefLabel;
+        @extend %_align-end;
+    }
+
+    .dist-ref-input {
+        grid-area: distRefInput;
+        @extend %_align-center;
+    }
+
+    .dist-ref-error {
+        grid-area: distRefError;
+        @extend %_align-top, %_error-layout;
+    }
+
+    .dist-axis-label {
+        grid-area: distAxisLabel;
+        @extend %_align-end;
+    }
+
+    .dist-axis-input {
+        grid-area: distAxisInput;
+        @extend %_align-center;
+    }
+
+    .dist-axis-error {
+        grid-area: distAxisError;
+        @extend %_align-top, %_error-layout;
+    }
+
+    &__btn-wrapper {
+        @apply flex justify-end items-center gap-4 pr-3;
+
+        .app-btn {
+            @apply px-1;
+
+            .app-btn-label {
+                @apply px-0;
+            }
+        }
+    }
+
+    &__divider {
+        margin: 0;
+        border: none;
+        border-top: 1px solid var(--surface-border);
+    }
+
+    &__results {
+        margin-top: 0;
+        padding: 0;
+        background-color: var(--surface-ground);
+        border-radius: 4px;
+
+        &-label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        &-grid {
+            @apply grid grid-cols-3;
+            column-gap: 1rem;
+        }
+
+        &-item {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+
+    input {
+        @apply w-full;
+    }
+}

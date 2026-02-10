@@ -127,13 +127,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
           .subscribe((study) => {
             if (study) {
               this.plotService.study.set(study);
-              this.studiesService.setCurrentStudy(study);
               const section = study.sections.find(
                 (s) => s.uuid === sectionUuid
               );
               if (section) {
                 this.plotService.section.set(section);
-                this.sectionService.setCurrentSection(section);
                 if (this.previousSectionUuid() !== section.uuid) {
                   this.plotService.plotOptionsChange({
                     endSupport: section.supports.length - 1,

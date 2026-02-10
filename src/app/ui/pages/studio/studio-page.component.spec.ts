@@ -51,9 +51,7 @@ describe('StudioPageComponent', () => {
   beforeEach(async () => {
     plotService = new PlotServiceMock();
     studiesService = new StudiesServiceMock();
-    sectionService = {
-      setCurrentSection: jest.fn()
-    } as unknown as jest.Mocked<SectionService>;
+    sectionService = {} as unknown as jest.Mocked<SectionService>;
 
     await TestBed.configureTestingModule({
       imports: [StudioPageComponent],
@@ -155,11 +153,7 @@ describe('StudioPageComponent', () => {
     fixture.detectChanges();
 
     expect(studySetSpy).toHaveBeenCalledWith(study);
-    expect(studiesService.setCurrentStudy).toHaveBeenCalledWith(study);
     expect(sectionSetSpy).toHaveBeenCalledWith(study.sections[1]);
-    expect(sectionService.setCurrentSection).toHaveBeenCalledWith(
-      study.sections[1]
-    );
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 2,
       startSupport: 0
