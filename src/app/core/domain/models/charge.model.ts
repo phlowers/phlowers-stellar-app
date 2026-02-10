@@ -17,8 +17,15 @@ export interface ChargeData {
   spanLoads: SpanLoad[];
 }
 
+/**
+ * Type of symmetry for climate loading conditions.
+ *
+ * @category Domain Models
+ */
 export enum SymmetryType {
+  /** Symmetric loading on both sides of the span */
   SYMMETRIC = 'symmetric',
+  /** Asymmetric loading with different conditions on each side */
   DIS_SYMMETRIC = 'dis_symmetric'
 }
 
@@ -36,7 +43,9 @@ export interface ClimateCharge {
   windPressure: number | null;
   /** Cable temperature in °C */
   cableTemperature: number | null;
+  /** Type of symmetry for loading conditions */
   symmetryType: SymmetryType;
+  /** Ice thickness in mm (for symmetric loading) */
   iceThickness: number | null;
   /** Support number at frontier (for asymmetric loading) */
   frontierSupportNumber: null;
@@ -88,9 +97,9 @@ export interface Charge {
  * @category Domain Models
  */
 export enum LoadType {
-  /** Point load at a specific position */
+  /** Point load at a specific position on the span */
   PUNCTUAL = 'punctual',
-  /** Marking/signage load */
+  /** Marking/signage load such as aircraft warning markers */
   MARKING = 'marking'
 }
 
@@ -106,7 +115,7 @@ export enum LoadType {
 export interface SpanLoad {
   /** Position along the span (0-100%) */
   loadPosition: number;
-  /** Weight of the load in kg */
+  /** Weight of the load in N (Newtons) */
   loadWeight: number;
   /** Type of load (punctual or marking) */
   type: LoadType;
