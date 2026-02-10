@@ -303,7 +303,7 @@ describe('SpanComponent', () => {
         climate: {
           windPressure: null,
           cableTemperature: null,
-          symmetryType: '',
+          symmetryType: 'SYMMETRIC',
           iceThickness: null,
           frontierSupportNumber: null,
           iceThicknessBefore: null,
@@ -344,7 +344,7 @@ describe('SpanComponent', () => {
         climate: {
           windPressure: null,
           cableTemperature: null,
-          symmetryType: '',
+          symmetryType: 'SYMMETRIC',
           iceThickness: null,
           frontierSupportNumber: null,
           iceThicknessBefore: null,
