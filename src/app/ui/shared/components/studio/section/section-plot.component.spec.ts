@@ -22,6 +22,9 @@ const mockCreatePlotData = createPlotData as jest.MockedFunction<
   typeof createPlotData
 >;
 
+/** Plotly-style element returned by createPlot; component calls plot.on() in addEventListenersToPlot */
+const mockPlotElement = { on: jest.fn() };
+
 const mockSupports = [
   { uuid: 's0', number: 1 } as any,
   { uuid: 's1', number: 2 } as any
@@ -156,7 +159,7 @@ describe('SectionPlotComponent', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
-    mockCreatePlot.mockResolvedValue({} as any);
+    mockCreatePlot.mockResolvedValue(mockPlotElement as any);
 
     litDataSignal.set(mockLitData);
     plotOptionsSignal.set(mockPlotOptions);
