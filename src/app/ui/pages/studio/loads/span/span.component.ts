@@ -67,14 +67,13 @@ export class SpanComponent implements OnDestroy {
   ];
 
   findSelectedLoad = () => {
-    const uuidToFind = this.form.get('spanSelect')?.value?.uuid;
-    let load = undefined;
-    if (uuidToFind) {
-      load = this.plotService.temporaryLoadData?.spanLoads.find(
-        (spanLoad) => spanLoad.supportUuid === uuidToFind
-      );
+    const uuidToFind = this.form.get('spanSelect')?.value;
+    if (!uuidToFind) {
+      return undefined;
     }
-    return load;
+    return this.plotService.temporaryLoadData?.spanLoads.find(
+      (spanLoad) => spanLoad.supportUuid === uuidToFind
+    );
   };
 
   constructor(
@@ -84,38 +83,44 @@ export class SpanComponent implements OnDestroy {
     public readonly workerPythonService: WorkerPythonService
   ) {
     this.subscriptions.add(
-      this.form
-        .get('spanSelect')
-        ?.valueChanges.subscribe((value: { index: number; uuid: string }) => {
-          this.supportsOptions.set([
-            {
-              label: (value.index + 1).toString(),
-              value: 'LEFT'
-            },
-            {
-              label: (value.index + 2).toString(),
-              value: 'RIGHT'
-            }
-          ]);
-          if (value) {
-            this.form.get('referenceSupport')?.enable();
-          } else {
-            this.form.get('referenceSupport')?.disable();
+      this.form.get('spanSelect')?.valueChanges.subscribe((value: string) => {
+        const index = this.plotService.getSupportIndex(value) ?? null;
+        if (index === null) {
+          return;
+        }
+        this.supportsOptions.set([
+          {
+            label: (index + 1).toString(),
+            value: 'LEFT'
+          },
+          {
+            label: (index + 2).toString(),
+            value: 'RIGHT'
           }
-          const load = this.findSelectedLoad();
-          if (load !== undefined) {
-            this.form
-              .get('referenceSupport')
-              ?.setValue(load?.referenceSupport, { emitEvent: false });
-            this.form.get('type')?.setValue(load!.type, { emitEvent: false });
-            this.form
-              .get('loadWeight')
-              ?.setValue(load?.loadWeight ?? 0, { emitEvent: false });
-            this.form
-              .get('loadPosition')
-              ?.setValue(load?.loadPosition ?? 0, { emitEvent: false });
-          }
-        })
+        ]);
+        if (value) {
+          this.form.get('referenceSupport')?.enable();
+        } else {
+          this.form.get('referenceSupport')?.disable();
+        }
+        this.plotService.plotOptionsChange({
+          startSupport: index,
+          endSupport: index + 1
+        });
+        const load = this.findSelectedLoad();
+        if (load !== undefined) {
+          this.form
+            .get('referenceSupport')
+            ?.setValue(load?.referenceSupport, { emitEvent: false });
+          this.form.get('type')?.setValue(load!.type, { emitEvent: false });
+          this.form
+            .get('loadWeight')
+            ?.setValue(load?.loadWeight ?? 0, { emitEvent: false });
+          this.form
+            .get('loadPosition')
+            ?.setValue(load?.loadPosition ?? 0, { emitEvent: false });
+        }
+      })
     );
     ['loadPosition', 'loadWeight', 'type', 'referenceSupport'].forEach(
       (controlName) => {

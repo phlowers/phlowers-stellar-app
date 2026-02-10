@@ -31,6 +31,13 @@ describe('SpanComponent', () => {
     sections: []
   };
 
+  const mockSupports = [
+    { uuid: 'test-uuid', number: 1 } as any,
+    { uuid: 'test-uuid-2', number: 2 } as any,
+    { uuid: 'test-uuid-3', number: 3 } as any,
+    { uuid: 'test-uuid-4', number: 4 } as any
+  ];
+
   const mockSection: Section = {
     uuid: 'section-uuid-1',
     internal_id: 'int1',
@@ -64,7 +71,7 @@ describe('SpanComponent', () => {
     voltage_idr: undefined,
     comment: undefined,
     supports_comment: undefined,
-    supports: [],
+    supports: mockSupports,
     obstacles: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
@@ -77,7 +84,8 @@ describe('SpanComponent', () => {
   };
 
   beforeEach(async () => {
-    // Mock PlotService
+    // Mock PlotService - getSpanOptions returns { label, value: supportUuid }; getSupportIndex(uuid) returns index
+    const sectionSignal = signal<Section | null>(mockSection);
     const plotOptionsSignal = signal<PlotOptions>({
       view: '3d',
       side: 'profile',
@@ -88,23 +96,23 @@ describe('SpanComponent', () => {
     mockPlotService = {
       plotOptions: plotOptionsSignal,
       study: signal<Study | null>(mockStudy),
-      section: signal<Section | null>(mockSection),
+      section: sectionSignal,
       getSpanOptions: computed(() => {
-        const options = plotOptionsSignal();
-        const supportsLength = options.endSupport - options.startSupport + 1;
-        const spanAmount = Math.max(supportsLength - 1, 0);
-        return Array.from({ length: spanAmount }, (_, index) => ({
+        const supports = sectionSignal()?.supports ?? [];
+        const spanAmount = Math.max((supports.length ?? 0) - 1, 0);
+        const spans = Array.from({ length: spanAmount }, (_, index) => ({
           label: `${index + 1} - ${index + 2}`,
-          value: [
-            options.startSupport + index,
-            options.startSupport + index + 1
-          ],
-          supports: [
-            options.startSupport + index,
-            options.startSupport + index + 1
-          ]
+          value: supports[index]?.uuid ?? null
         }));
-      })
+        spans.pop();
+        return spans;
+      }),
+      getSupportIndex: jest.fn((uuid: string | null | undefined) => {
+        const section = sectionSignal();
+        const idx = section?.supports?.findIndex((s) => s.uuid === uuid) ?? -1;
+        return idx >= 0 ? idx : undefined;
+      }),
+      plotOptionsChange: jest.fn()
     } as unknown as jest.Mocked<PlotService>;
 
     // Mock ChargesService
@@ -179,37 +187,28 @@ describe('SpanComponent', () => {
 
   describe('Computed Properties', () => {
     describe('spans', () => {
-      it('should compute spans based on plotOptions startSupport and endSupport', () => {
-        mockPlotService.plotOptions.set({
-          view: '3d',
-          side: 'profile',
-          startSupport: 0,
-          endSupport: 2,
-          invert: false
-        });
+      it('should compute spans from section supports', () => {
         fixture.detectChanges();
 
         const spans = component.spansOptions();
-        expect(spans).toHaveLength(2); // 2 spans between 3 supports (0, 1, 2)
+        // 4 supports => 3 span slots, getSpanOptions pops one => 2 spans
+        expect(spans).toHaveLength(2);
         expect(spans[0]).toEqual({
           label: '1 - 2',
-          value: [0, 1],
-          supports: [0, 1]
+          value: 'test-uuid'
         });
         expect(spans[1]).toEqual({
           label: '2 - 3',
-          value: [1, 2],
-          supports: [1, 2]
+          value: 'test-uuid-2'
         });
       });
 
-      it('should return empty array when endSupport equals startSupport', () => {
-        mockPlotService.plotOptions.set({
-          view: '3d',
-          side: 'profile',
-          startSupport: 0,
-          endSupport: 0,
-          invert: false
+      it('should return empty array when section has no supports', () => {
+        (
+          mockPlotService.section as ReturnType<typeof signal<Section | null>>
+        ).set({
+          ...mockSection,
+          supports: []
         });
         fixture.detectChanges();
 
@@ -217,13 +216,12 @@ describe('SpanComponent', () => {
         expect(spans).toHaveLength(0);
       });
 
-      it('should return empty array when endSupport is less than startSupport', () => {
-        mockPlotService.plotOptions.set({
-          view: '3d',
-          side: 'profile',
-          startSupport: 2,
-          endSupport: 0,
-          invert: false
+      it('should return empty array when section has single support', () => {
+        (
+          mockPlotService.section as ReturnType<typeof signal<Section | null>>
+        ).set({
+          ...mockSection,
+          supports: [mockSupports[0]]
         });
         fixture.detectChanges();
 
@@ -232,20 +230,28 @@ describe('SpanComponent', () => {
       });
 
       it('should compute spans correctly for larger support ranges', () => {
-        mockPlotService.plotOptions.set({
-          view: '3d',
-          side: 'profile',
-          startSupport: 0,
-          endSupport: 5,
-          invert: false
+        const sixSupports = [
+          { uuid: 's1', number: 1 },
+          { uuid: 's2', number: 2 },
+          { uuid: 's3', number: 3 },
+          { uuid: 's4', number: 4 },
+          { uuid: 's5', number: 5 },
+          { uuid: 's6', number: 6 }
+        ] as any;
+        (
+          mockPlotService.section as ReturnType<typeof signal<Section | null>>
+        ).set({
+          ...mockSection,
+          supports: sixSupports
         });
         fixture.detectChanges();
 
         const spans = component.spansOptions();
-        expect(spans).toHaveLength(5);
+        // 6 supports => 5 span slots, getSpanOptions pops one => 4 spans
+        expect(spans).toHaveLength(4);
         expect(spans[0].label).toBe('1 - 2');
-        expect(spans[4].label).toBe('5 - 6');
-        expect(spans[4].value).toEqual([4, 5]);
+        expect(spans[3].label).toBe('4 - 5');
+        expect(spans[3].value).toBe('s4');
       });
     });
 
@@ -259,9 +265,7 @@ describe('SpanComponent', () => {
       });
 
       it('should compute supports based on selected span', () => {
-        component.form
-          .get('spanSelect')
-          ?.setValue({ index: 0, uuid: 'test-uuid' });
+        component.form.get('spanSelect')?.setValue('test-uuid');
         fixture.detectChanges();
 
         const supports = component.supportsOptions();
@@ -277,9 +281,7 @@ describe('SpanComponent', () => {
       });
 
       it('should compute supports correctly for different span values', () => {
-        component.form
-          .get('spanSelect')
-          ?.setValue({ index: 2, uuid: 'test-uuid' });
+        component.form.get('spanSelect')?.setValue('test-uuid-3');
         fixture.detectChanges();
 
         const supports = component.supportsOptions();
@@ -294,7 +296,7 @@ describe('SpanComponent', () => {
 
   describe('Form Value Changes', () => {
     it('should update selectedSpan signal when spanSelect value changes', () => {
-      const spanValue = { index: 0, uuid: 'test-uuid' };
+      const spanValue = 'test-uuid';
       component.form.get('spanSelect')?.setValue(spanValue);
 
       expect(component.form.get('spanSelect')?.value).toEqual(spanValue);
@@ -314,7 +316,7 @@ describe('SpanComponent', () => {
         spanLoads: [
           {
             supportUuid: 'test-uuid',
-            referenceSupport: 'RIGHT',
+            referenceSupport: 'LEFT',
             type: LoadType.PUNCTUAL,
             loadWeight: 123,
             loadPosition: 7
@@ -324,9 +326,7 @@ describe('SpanComponent', () => {
 
       mockPlotService.temporaryLoadData = temporaryLoadData;
 
-      component.form
-        .get('spanSelect')
-        ?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
 
       expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
       expect(component.form.get('type')?.value).toBe(LoadType.PUNCTUAL);
@@ -355,9 +355,7 @@ describe('SpanComponent', () => {
         spanLoads: [spanLoadWithoutValues]
       };
 
-      component.form
-        .get('spanSelect')
-        ?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
 
       expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
       expect(component.form.get('type')?.value).toBe(LoadType.MARKING);
@@ -366,16 +364,14 @@ describe('SpanComponent', () => {
     });
 
     it('should enable referenceSupport when spanSelect has a value', () => {
-      const spanValue = { index: 0, uuid: 'test-uuid' };
-      component.form.get('spanSelect')?.setValue(spanValue);
+      component.form.get('spanSelect')?.setValue('test-uuid');
 
       const referenceSupportControl = component.form.get('referenceSupport');
       expect(referenceSupportControl?.enabled).toBe(true);
     });
 
     it('should disable referenceSupport when spanSelect is cleared', () => {
-      const spanValue = { index: 0, uuid: 'test-uuid' };
-      component.form.get('spanSelect')?.setValue(spanValue);
+      component.form.get('spanSelect')?.setValue('test-uuid');
       fixture.detectChanges();
 
       // Verify it's enabled when spanSelect has a value
@@ -397,24 +393,18 @@ describe('SpanComponent', () => {
     });
 
     it('should update selectedSupport signal when referenceSupport value changes', () => {
-      const spanValue = { index: 0, uuid: 'test-uuid' };
-      component.form.get('spanSelect')?.setValue(spanValue);
+      component.form.get('spanSelect')?.setValue('test-uuid');
       component.form.get('referenceSupport')?.setValue('LEFT');
 
       expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
     });
 
     it('should handle multiple value changes correctly', () => {
-      component.form
-        .get('spanSelect')
-        ?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
       component.form.get('referenceSupport')?.setValue('LEFT');
       component.form.get('type')?.setValue('punctual');
 
-      expect(component.form.get('spanSelect')?.value).toEqual({
-        index: 0,
-        uuid: 'test-uuid'
-      });
+      expect(component.form.get('spanSelect')?.value).toEqual('test-uuid');
       expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
       expect(component.form.get('type')?.value).toBe('punctual');
     });
@@ -423,14 +413,12 @@ describe('SpanComponent', () => {
   describe('resetForm', () => {
     it('should reset form values', () => {
       component.form.patchValue({
-        spanSelect: { index: 0, uuid: 'test-uuid' },
+        spanSelect: 'test-uuid',
         referenceSupport: 'LEFT',
         type: 'punctual',
         loadWeight: 100
       });
-      component.form
-        .get('spanSelect')
-        ?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
 
       component.resetForm();
       fixture.detectChanges();
@@ -441,9 +429,7 @@ describe('SpanComponent', () => {
     });
 
     it('should reset selectedSpan signal to null', () => {
-      component.form
-        .get('spanSelect')
-        ?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
 
       component.resetForm();
 
@@ -459,9 +445,7 @@ describe('SpanComponent', () => {
     });
 
     it('should disable referenceSupport after reset', () => {
-      component.form
-        .get('spanSelect')
-        ?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
       fixture.detectChanges();
       component.form.get('referenceSupport')?.setValue('LEFT');
       fixture.detectChanges();
@@ -496,7 +480,7 @@ describe('SpanComponent', () => {
       });
 
       component.form.patchValue({
-        spanSelect: { index: 0, uuid: 'test-uuid' },
+        spanSelect: 'test-uuid',
         referenceSupport: 'LEFT',
         type: 'punctual'
       });
@@ -562,7 +546,7 @@ describe('SpanComponent', () => {
 
     it('should exclude disabled fields from logged value', () => {
       component.form.patchValue({
-        spanSelect: { index: 0, uuid: 'test-uuid' },
+        spanSelect: 'test-uuid',
         referenceSupport: 'LEFT',
         type: 'punctual'
       });
@@ -570,14 +554,12 @@ describe('SpanComponent', () => {
       // Let's test with referenceSupport disabled
       component.form.get('spanSelect')?.setValue(null);
       component.form.get('referenceSupport')?.setValue('LEFT');
-      component.form
-        .get('spanSelect')
-        ?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
 
       // Actually, when spanSelect has value, referenceSupport is enabled
       // So let's test the actual behavior
       component.form.patchValue({
-        spanSelect: { index: 0, uuid: 'test-uuid' },
+        spanSelect: 'test-uuid',
         referenceSupport: 'LEFT',
         type: 'punctual'
       });
@@ -615,9 +597,7 @@ describe('SpanComponent', () => {
     });
 
     it('should prevent memory leaks by unsubscribing', () => {
-      component.form
-        .get('spanSelect')
-        ?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
       component.form.get('referenceSupport')?.setValue('LEFT');
 
       component.ngOnDestroy();
@@ -631,7 +611,7 @@ describe('SpanComponent', () => {
   describe('Integration Tests', () => {
     it('should handle complete workflow: select span, select support, set load type, and save', () => {
       // Setup
-      mockPlotService.plotOptions.set({
+      (mockPlotService.plotOptions as ReturnType<typeof signal>).set({
         view: '3d',
         side: 'profile',
         startSupport: 0,
@@ -640,9 +620,10 @@ describe('SpanComponent', () => {
       });
       fixture.detectChanges();
 
-      // Select span
+      // Select span (value is support uuid string)
       const spans = component.spansOptions();
       component.form.get('spanSelect')?.setValue(spans[0].value);
+      fixture.detectChanges();
 
       expect(component.form.get('spanSelect')?.value).toEqual(spans[0].value);
       expect(component.form.get('referenceSupport')?.enabled).toBe(true);
@@ -674,7 +655,7 @@ describe('SpanComponent', () => {
 
       // Fill form
       component.form.patchValue({
-        spanSelect: { index: 0, uuid: 'test-uuid' },
+        spanSelect: 'test-uuid',
         referenceSupport: 'LEFT',
         type: 'punctual',
         loadWeight: 100

@@ -17,12 +17,11 @@ import { LoadType } from './helpers/createLoadAnnotations';
 import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { combineLatest, debounceTime, of, startWith } from 'rxjs';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { DEBOUNCED_REFRESH_STUDIO_DELAY } from '../free-positioning/free-positioning.component';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
 import { Obstacle } from '@src/app/core/domain/models/obstacle.model';
 import { appendExistingObstaclesWithFormObstacle } from './helpers/obstacles';
 import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
-
-const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
 @Component({
   selector: 'app-section-plot',
@@ -89,10 +88,6 @@ export class SectionPlotComponent {
   };
 
   refreshPlot = async () => {
-    console.log(
-      'refreshPlot is called',
-      this.obstaclesService.currentPointIndex()
-    );
     const litData = this.plotService.litData();
     const plotOptions = this.plotService.plotOptions();
     const selectedDisplayOptions = this.plotService.selectedDisplayOptions();

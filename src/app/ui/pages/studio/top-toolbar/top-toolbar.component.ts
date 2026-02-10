@@ -147,9 +147,9 @@ export class StudioTopToolbarComponent implements OnInit {
     return values;
   });
 
-  setSelectedDisplayOptions(displayOptions: string[]): void {
+  setSelectedDisplayOptions(selectedDisplayOptions: string[]): void {
     this.plotService.selectedDisplayOptions.set({
-      loads: displayOptions.includes('loads')
+      loads: selectedDisplayOptions.includes('loads')
     });
   }
 
