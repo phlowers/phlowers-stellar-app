@@ -43,7 +43,7 @@ export interface VtlAndGuyingInputs {
 export interface VtlAndGuyingOutputs {
   /** Tension force in the guy wire (kN) */
   tensionInGuy: number | null;
-  /** Angle of the guy wire (degrees) */
+  /** Angle of the guy wire (gradient) */
   guyAngle: number | null;
   /** Vertical load under the console (kN) */
   chargeVUnderConsole: number | null;

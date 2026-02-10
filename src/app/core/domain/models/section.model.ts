@@ -15,7 +15,7 @@ import { VtlAndGuying } from './vtl-and-guying.model';
  * Section domain model - represents a power line section.
  *
  * @remarks
- * A section is a contiguous portion of a power line between two supports.
+ * A section is a contiguous portion of a power line between two anchor supports.
  * It contains all the technical data required for mechanical calculations
  * including supports, cables, initial conditions, and charges.
  *

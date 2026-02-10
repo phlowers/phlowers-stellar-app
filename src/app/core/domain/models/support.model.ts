@@ -35,7 +35,7 @@ export interface Support {
   name: string | null;
   /** Length of the span to the next support (meters) */
   spanLength: number | null;
-  /** Angle of the span (degrees) */
+  /** Angle of the span (gradients) */
   spanAngle: number | null;
   /** Attachment set number */
   attachmentSet: number | null;
