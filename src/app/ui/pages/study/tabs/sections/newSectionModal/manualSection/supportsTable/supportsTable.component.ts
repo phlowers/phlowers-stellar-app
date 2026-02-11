@@ -1,4 +1,11 @@
-import { Component, input, OnInit, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  OnInit,
+  output,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -15,36 +22,18 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { KeyFilterModule } from 'primeng/keyfilter';
-import { isNumber, uniq } from 'lodash';
+import { isNumber } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
 import { AttachmentService } from '@services/attachment/attachment.service';
 import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
-
-const calculateSupportNumber = (
-  firstSupport: Support,
-  header: keyof Support
-) => {
-  if (header !== 'number') {
-    return { firstNumber: null, restOfString: '', isNumberField: false };
-  }
-  let firstNumber = null;
-  let restOfString = '';
-  let isNumberField = false;
-  let unit = 1;
-  while (
-    /^[0-9]+$/.test(firstSupport['number']?.slice(-unit) || '') &&
-    unit <= (firstSupport['number']?.length || 0)
-  ) {
-    unit++;
-  }
-  if (unit > 1) {
-    unit = unit - 1;
-    firstNumber = Number(firstSupport['number']?.slice(-unit));
-    restOfString = firstSupport['number']?.slice(0, -unit) || '';
-    isNumberField = true;
-  }
-  return { firstNumber, restOfString, isNumberField };
-};
+import {
+  buildCopyColumnChanges,
+  buildFieldChangeUpdates,
+  buildSupportNameFilterTables,
+  buildSupplementaryChains,
+  findSupplementaryNames,
+  getSupportFieldValues
+} from './helpers';
 
 @Component({
   selector: 'app-supports-table',
@@ -74,13 +63,23 @@ export class SupportsTableComponent implements OnInit {
   deleteSupport = output<string>();
   duplicateSupport = output<string>();
   supportChange = output<{ uuid: string; support: Partial<Support> }>();
-  chains = signal<CatalogChain[]>([]);
+  chainsOptions = signal<CatalogChain[]>([]);
+  supplementaryChainsOptions = signal<CatalogChain[]>([]);
+  allChainsOptions = computed(() => [
+    ...this.chainsOptions(),
+    ...this.supplementaryChainsOptions()
+  ]);
   attachmentSetModalOpen = signal<boolean>(false);
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   first = input.required<number>();
   rows = input.required<number>();
   rowsPerPageOptions = signal(TABLE_ROWS_PER_PAGE_OPTIONS);
   supportFilterTable = signal<string[]>([]);
+  supplementarySupportFilterTable = signal<string[]>([]);
+  allSupportFilterTable = computed(() => [
+    ...this.supportFilterTable(),
+    ...this.supplementarySupportFilterTable()
+  ]);
   constructor(
     private readonly chainsService: ChainsService,
     private readonly attachmentService: AttachmentService
@@ -99,115 +98,60 @@ export class SupportsTableComponent implements OnInit {
   ];
 
   async getData() {
-    const chains = await this.chainsService.getChains();
-    this.chains.set(chains || []);
-    const attachments = await this.attachmentService.getAttachments();
-    this.supportFilterTable.set(
-      uniq(
-        (attachments || []).map((attachment) => attachment.support_name || '')
+    const chains = (await this.chainsService.getChains()) || [];
+    this.chainsOptions.set(
+      chains.sort((a, b) => a.chain_name.localeCompare(b.chain_name))
+    );
+    this.supplementaryChainsOptions.set(
+      buildSupplementaryChains(
+        getSupportFieldValues(this.supports(), 'chainName'),
+        chains.map((c) => c.chain_name)
       )
     );
+    const attachments = (await this.attachmentService.getAttachments()) || [];
+    const { catalogSupportNames, supplementarySupportNames } =
+      buildSupportNameFilterTables(this.supports(), attachments);
+    this.supportFilterTable.set(catalogSupportNames);
+    this.supplementarySupportFilterTable.set(supplementarySupportNames);
   }
 
   ngOnInit() {
     this.getData();
   }
 
-  calculateSupportFootAltitude(attachmentHeight: number) {
-    return attachmentHeight - 30 > 0 ? attachmentHeight - 30 : 0;
+  onChainNameFilter(event: { filter: string }) {
+    const supplementaryChains = buildSupplementaryChains(
+      [...getSupportFieldValues(this.supports(), 'chainName'), event.filter],
+      this.chainsOptions().map((c) => c.chain_name)
+    );
+    if (supplementaryChains.length) {
+      this.supplementaryChainsOptions.set(supplementaryChains);
+    }
   }
 
-  onSupportFieldChange(uuid: string, field: keyof Support, value: any) {
-    if (field === 'chainName') {
-      const chain = this.chains().find((chain) => chain.chain_name === value);
-      if (chain) {
-        this.supportChange.emit({
-          uuid,
-          support: { chainLength: chain.mean_length }
-        });
-        this.supportChange.emit({
-          uuid,
-          support: { chainWeight: chain.mean_mass }
-        });
-        this.supportChange.emit({
-          uuid,
-          support: { chainSurface: 0 }
-        });
-        this.supportChange.emit({
-          uuid,
-          support: { chainV: false }
-        });
-      }
+  onSupportNameFilter(event: { filter: string }) {
+    const notFoundNames = findSupplementaryNames(
+      [...getSupportFieldValues(this.supports(), 'name'), event.filter],
+      this.supportFilterTable()
+    );
+    if (notFoundNames.length) {
+      this.supplementarySupportFilterTable.set(notFoundNames);
     }
-    if (field === 'attachmentHeight') {
-      this.supportChange.emit({
-        uuid,
-        support: {
-          supportFootAltitude: this.calculateSupportFootAltitude(value)
-        }
-      });
-    }
-    this.supportChange.emit({ uuid, support: { [field]: value } });
+  }
+
+  onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
+    const changes = buildFieldChangeUpdates(
+      uuid,
+      field,
+      value,
+      this.chainsOptions()
+    );
+    changes.forEach((change) => this.supportChange.emit(change));
   }
 
   copyColumn(header: keyof Support) {
-    const firstSupport = this.supports()[0];
-    if (!firstSupport) return;
-    const isChainName = header === 'chainName';
-    const isSpanLength = header === 'spanLength';
-    const isAttachmentHeight = header === 'attachmentHeight';
-    const { firstNumber, restOfString, isNumberField } = calculateSupportNumber(
-      firstSupport,
-      header
-    );
-    for (const [index, support] of this.supports().entries()) {
-      if (isSpanLength && index === this.supports().length - 1) {
-        continue;
-      }
-
-      if (isNumberField && isNumber(firstNumber)) {
-        this.supportChange.emit({
-          uuid: support.uuid,
-          support: { [header]: restOfString + String(firstNumber + index) }
-        });
-        continue;
-      }
-      this.supportChange.emit({
-        uuid: support.uuid,
-        support: { [header]: firstSupport[header] }
-      });
-      if (isChainName) {
-        this.supportChange.emit({
-          uuid: support.uuid,
-          support: { chainLength: firstSupport['chainLength'] }
-        });
-        this.supportChange.emit({
-          uuid: support.uuid,
-          support: { chainWeight: firstSupport['chainWeight'] }
-        });
-        this.supportChange.emit({
-          uuid: support.uuid,
-          support: { chainSurface: 0 }
-        });
-        this.supportChange.emit({
-          uuid: support.uuid,
-          support: { chainV: false }
-        });
-      }
-      if (isAttachmentHeight) {
-        if (firstSupport['attachmentHeight'] === null) {
-          continue;
-        }
-        this.supportChange.emit({
-          uuid: support.uuid,
-          support: {
-            supportFootAltitude: this.calculateSupportFootAltitude(
-              firstSupport['attachmentHeight']
-            )
-          }
-        });
-      }
-    }
+    const changes = buildCopyColumnChanges(this.supports(), header);
+    changes.forEach((change) => this.supportChange.emit(change));
   }
 
   onSupportNumberDoubleClick(header: keyof Support) {
@@ -244,7 +188,7 @@ export class SupportsTableComponent implements OnInit {
     }
   }
 
-  isNumber(value: any) {
+  isNumber(value: unknown) {
     return isNumber(value);
   }
 }
