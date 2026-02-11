@@ -188,7 +188,7 @@ export class SectionPlotCardComponent {
       {
         fields: [
           {
-            label: $localize`Angle balencement :`,
+            label: $localize`Angle balancement :`,
             value: formatNumber(loadAngle?.[this.index()]),
             unit: '°'
           },
@@ -204,10 +204,12 @@ export class SectionPlotCardComponent {
 
   // Data structure for span type
   spanData = computed((): DataField[] => {
-    const spanLength = this.litData()?.span_length;
-    const elevation = this.litData()?.elevation;
-    const L0 = this.litData()?.L0;
-
+    const litData = this.litData();
+    const spanLength = litData?.span_length;
+    const elevation = litData?.elevation;
+    const L0 = litData?.L0;
+    const parameter = litData?.parameter;
+    const tensionSup = litData?.tension_sup;
     return [
       {
         label: $localize`Span length :`,
@@ -219,9 +221,18 @@ export class SectionPlotCardComponent {
         value: formatNumber(elevation?.[this.index()]),
         unit: 'm'
       },
-      { label: $localize`Supp tension (Max) :`, value: '-', unit: 'daN' },
       {
-        label: $localize`Natural length LO :`,
+        label: $localize`Parameter (m) :`,
+        value: formatNumber(parameter?.[this.index()]),
+        unit: 'm'
+      },
+      {
+        label: $localize`Supp tension (Max) :`,
+        value: formatNumber(tensionSup?.[this.index()]),
+        unit: 'daN'
+      },
+      {
+        label: $localize`Natural length L0 :`,
         value: formatNumber(L0?.[this.index()]),
         unit: 'm'
       }
@@ -229,12 +240,19 @@ export class SectionPlotCardComponent {
   });
 
   // Expanded data for span type
-  spanExpandedData = computed((): DataField[] => [
-    { label: $localize`Arrow F1 :`, value: '-', unit: 'm' },
-    { label: $localize`Arrow F2 :`, value: '-', unit: 'm' },
-    { label: $localize`Horizontal dist. acc. :`, value: '-', unit: 'm' },
-    { label: $localize`Arc length LA :`, value: '-', unit: 'm' },
-    { label: $localize`Th - T0 :`, value: '-', unit: 'daN' },
-    { label: $localize`Inf tension  acc. :`, value: '-', unit: 'daN' }
-  ]);
+  spanExpandedData = computed((): DataField[] => {
+    const litData = this.litData();
+    const horizontalDistance = litData?.horizontal_distance;
+    const arcLength = litData?.arc_length;
+    const th = litData?.T_h;
+    const tensionInf = litData?.tension_inf;
+    return [
+      { label: $localize`Arrow F1 :`, value: '-', unit: 'm' },
+      { label: $localize`Arrow F2 :`, value: '-', unit: 'm' },
+      { label: $localize`Horizontal dist. acc. :`, value: formatNumber(horizontalDistance?.[this.index()]), unit: 'm' },
+      { label: $localize`Arc length LA :`, value: formatNumber(arcLength?.[this.index()]), unit: 'm' },
+      { label: $localize`Th - T0 :`, value: formatNumber(th?.[this.index()]), unit: 'daN' },
+      { label: $localize`Inf tension  acc. :`, value: formatNumber(tensionInf?.[this.index()]), unit: 'daN' }
+    ];
+  });
 }

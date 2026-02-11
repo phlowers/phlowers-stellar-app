@@ -1157,10 +1157,10 @@
         <target>Z :</target>
       </segment>
     </unit>
-    <unit id="3070039934798240648">
+    <unit id="3765909838425303067">
       <segment state="initial">
-        <source>Angle balencement :</source>
-        <target>Angle balencement :</target>
+        <source>Angle balancement :</source>
+        <target>Angle balancement :</target>
       </segment>
     </unit>
     <unit id="2469542949998183645">
@@ -2117,10 +2117,10 @@
         <target>Tension supp (Max) :</target>
       </segment>
     </unit>
-    <unit id="2637772256766666872">
+    <unit id="5897832109796472859">
       <segment state="initial">
-        <source>Natural length LO :</source>
-        <target>Longueur naturelle LO :</target>
+        <source>Natural length L0 :</source>
+        <target>Longueur naturelle L0 :</target>
       </segment>
     </unit>
     <unit id="839778022983023928">
@@ -3319,6 +3319,12 @@
       <segment state="initial">
         <source>Data saved successfully</source>
         <target>Données enregistrées avec succès</target>
+      </segment>
+    </unit>
+    <unit id="5523093772635483717">
+      <segment state="initial">
+        <source>Parameter (m) :</source>
+        <target>Paramètre (m) :</target>
       </segment>
     </unit>
   </file>

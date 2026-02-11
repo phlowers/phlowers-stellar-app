@@ -11,8 +11,6 @@ const mockLitData: GetSectionOutput = {
   supports: [[[1, 2, 3]]],
   insulators: [[[4, 5, 6]]],
   spans: [[[7, 8, 9]]],
-  L0: [100, 200, 300],
-  elevation: [10, 20, 30],
   line_angle: [0.1, 0.2, 0.3],
   vtl_under_chain: [
     [1, 2, 3],
@@ -33,8 +31,16 @@ const mockLitData: GetSectionOutput = {
     [4, 5, 6],
     [7, 8, 9]
   ],
+  loads_coords: { 0: [1, 2, 3] },
   span_length: [100, 200, 300],
-  loads_coords: { 0: [1, 2, 3] }
+  elevation: [10, 20, 30],
+  parameter: [1900, 2000, 2100],
+  tension_sup: [5000, 4000, 3000],
+  tension_inf: [4000, 3000, 2000],
+  L0: [100, 200, 300],
+  horizontal_distance: [99, 199, 299],
+  arc_length: [101, 201, 301],
+  T_h: [3000, 2000, 1000]
 };
 
 @Component({

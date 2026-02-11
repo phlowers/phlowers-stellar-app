@@ -30,8 +30,6 @@ export interface GetSectionOutput {
   spans: number[][][];
   insulators: number[][][];
   supports: number[][][];
-  L0: number[];
-  elevation: number[];
   line_angle: number[];
   vtl_under_chain: number[][];
   vtl_under_console: number[][];
@@ -40,8 +38,16 @@ export interface GetSectionOutput {
   ground_altitude: number[];
   load_angle: number[];
   displacement: number[][];
-  span_length: number[];
   loads_coords: Dictionary<number[]>;
+  span_length: number[];
+  elevation: number[];
+  parameter: number[];
+  tension_sup: number[];
+  tension_inf: number[];
+  L0: number[];
+  horizontal_distance: number[];
+  arc_length: number[];
+  T_h: number[];
 }
 
 export enum LogLevel {
