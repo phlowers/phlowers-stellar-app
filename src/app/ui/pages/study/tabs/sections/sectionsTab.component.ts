@@ -32,6 +32,7 @@ import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.service';
 import { ToolbarDialogComponent } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.component';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 @Component({
   selector: 'app-sections-tab',
@@ -75,6 +76,8 @@ export class SectionsTabComponent {
   selectedSection = signal<string>('');
   @ViewChild('popover') popover!: Popover;
   private readonly toolbarDialogService = inject(ToolbarDialogService);
+
+  private readonly plotService = inject(PlotService);
 
   constructor(private readonly chargesService: ChargesService) {}
 
@@ -273,9 +276,12 @@ export class SectionsTabComponent {
 
   viewOrEditChargeCase(
     charge: { label: string; value: string },
-    mode: 'view' | 'edit'
+    mode: 'view' | 'edit',
+    section: Section
   ) {
     if (charge?.value) {
+      this.plotService.study.set(this.study());
+      this.plotService.section.set(section);
       this.toolbarDialogService.openTool('load-table', {
         mode,
         chargeUuid: charge.value
