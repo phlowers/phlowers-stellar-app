@@ -9,7 +9,8 @@ import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types'
 import {
   type ChargeData,
   LoadType,
-  type SpanLoad
+  type SpanLoad,
+  SymmetryType
 } from '@core/domain/models/charge.model';
 
 describe('SpanComponent', () => {
@@ -303,7 +304,7 @@ describe('SpanComponent', () => {
         climate: {
           windPressure: null,
           cableTemperature: null,
-          symmetryType: 'SYMMETRIC',
+          symmetryType: SymmetryType.SYMMETRIC,
           iceThickness: null,
           frontierSupportNumber: null,
           iceThicknessBefore: null,
@@ -344,7 +345,7 @@ describe('SpanComponent', () => {
         climate: {
           windPressure: null,
           cableTemperature: null,
-          symmetryType: 'SYMMETRIC',
+          symmetryType: SymmetryType.SYMMETRIC,
           iceThickness: null,
           frontierSupportNumber: null,
           iceThicknessBefore: null,
