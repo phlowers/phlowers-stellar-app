@@ -82,16 +82,16 @@
 
       <ng-template pTemplate="body" let-row>
         <tr>
-          <td>{{ row.windPressure ?? '-' }}&nbsp;Pa</td>
-          <td>{{ row.cableTemperature ?? '-' }}&nbsp;°C</td>
+          <td>{{ row.windPressure }}&nbsp;Pa</td>
+          <td>{{ row.cableTemperature }}&nbsp;°C</td>
           <td>{{ getSymmetryLabel(row.symmetryType) }}</td>
           @if (row.symmetryType === SymmetryType.SYMMETRIC) {
-            <td>{{ row.iceThickness ?? '-' }}&nbsp;cm</td>
+            <td>{{ row.iceThickness }}&nbsp;cm</td>
           }
           @if (row.symmetryType === SymmetryType.DIS_SYMMETRIC) {
-            <td>{{ row.frontierSupportNumber ?? '-' }}</td>
-            <td>{{ row.iceThicknessBefore ?? '-' }}&nbsp;cm</td>
-            <td>{{ row.iceThicknessAfter ?? '-' }}&nbsp;cm</td>
+            <td>{{ row.frontierSupportNumber }}</td>
+            <td>{{ row.iceThicknessBefore }}&nbsp;cm</td>
+            <td>{{ row.iceThicknessAfter }}&nbsp;cm</td>
           }
         </tr>
       </ng-template>
