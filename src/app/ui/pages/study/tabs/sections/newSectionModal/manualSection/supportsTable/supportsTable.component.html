@@ -254,12 +254,13 @@
       <td class="text-column">
         @if (mode() !== 'view') {
           <p-select
-            [options]="chains()"
+            [options]="allChainsOptions()"
             aria-label="chain name"
             i18n-aria-label
             [ngModel]="support.chainName"
             optionLabel="chain_name"
             type="text"
+            (onFilter)="onChainNameFilter($event)"
             [showClear]="true"
             optionValue="chain_name"
             appendTo="body"
@@ -336,7 +337,8 @@
         @if (mode() !== 'view') {
           <p-select
             class="w-full"
-            [options]="supportFilterTable()"
+            [options]="allSupportFilterTable()"
+            (onFilter)="onSupportNameFilter($event)"
             [(ngModel)]="support.name"
             [showClear]="true"
             appendTo="body"
@@ -366,6 +368,9 @@
               <button
                 app-btn
                 btnSize="s"
+                [disabled]="
+                  supplementarySupportFilterTable().includes(support.name || '')
+                "
                 btnStyle="text"
                 aria-label="open attachment set modal"
                 i18n-aria-label
