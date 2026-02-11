@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { of } from 'rxjs';
 import { SectionPlotComponent } from './section-plot.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
@@ -7,6 +9,11 @@ import { createShadowPlotData } from './helpers/createShadowPlotData';
 import { Data } from 'plotly.js-dist-min';
 import { PlotOptions } from './helpers/types';
 import { PlotService, SelectedDisplayOptions } from '@ui/pages/studio/services/plot.service';
+import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
+import { ObstacleFormService } from '@ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
+import { ObstaclesService } from '@ui/pages/studio/obstacles/obstacles.service';
+import { DataObject } from './helpers/createPlotDataObject';
+import { Section } from '@core/domain';
 
 // Mock the helper functions
 jest.mock('./helpers/createPlot');
@@ -17,20 +24,57 @@ const mockCreatePlot = createPlot as jest.MockedFunction<typeof createPlot>;
 const mockCreatePlotData = createPlotData as jest.MockedFunction<typeof createPlotData>;
 const mockCreateShadowPlotData = createShadowPlotData as jest.MockedFunction<typeof createShadowPlotData>;
 
-// Mock PlotService
-const mockPlotService = {
-  plotOptions: jest.fn(),
-  camera: jest.fn().mockReturnValue(null),
-  isSidebarOpen: jest.fn().mockReturnValue(false),
-  baseLitData: jest.fn().mockReturnValue(null),
-  selectedDisplayOptions: jest.fn().mockReturnValue({ loads: false, baseState: false })
+const mockSupports = [{ uuid: 's0', number: 1 } as any, { uuid: 's1', number: 2 } as any];
+
+const mockSection: Section = {
+  uuid: 'sec-1',
+  internal_id: '1',
+  name: 'Section',
+  short_name: 'S1',
+  created_at: '',
+  updated_at: '',
+  internal_catalog_id: '',
+  type: '',
+  electric_phase_number: 1,
+  cable_name: '',
+  cable_short_name: '',
+  cables_amount: 1,
+  optical_fibers_amount: 1,
+  spans_amount: 1,
+  begin_span_name: '',
+  last_span_name: '',
+  first_support_number: 1,
+  last_support_number: 2,
+  first_attachment_set: '',
+  last_attachment_set: '',
+  regional_maintenance_center_names: [],
+  maintenance_center_names: [],
+  regional_team_id: undefined,
+  maintenance_team_id: undefined,
+  maintenance_center_id: undefined,
+  link_name: undefined,
+  lit_code: undefined,
+  lit_name: undefined,
+  branch_name: undefined,
+  branch_idr: undefined,
+  voltage_idr: undefined,
+  comment: undefined,
+  supports_comment: undefined,
+  supports: mockSupports,
+  obstacles: [],
+  initial_conditions: [],
+  selected_initial_condition_uuid: undefined,
+  charges: [],
+  selected_charge_uuid: null,
+  field_measures: [],
+  selected_field_measure_uuid: undefined,
+  vtl_and_guying: undefined
 };
 
 describe('SectionPlotComponent', () => {
   let component: SectionPlotComponent;
   let fixture: ComponentFixture<SectionPlotComponent>;
 
-  // Mock data for testing
   const mockLitData: GetSectionOutput = {
     supports: [[[1, 2, 3, 4, 5]]],
     insulators: [[[10, 20, 30, 40, 50]]],
@@ -55,7 +99,6 @@ describe('SectionPlotComponent', () => {
     T_h: []
   };
 
-  // Mock plotOptions signal
   const mockPlotOptions: PlotOptions = {
     view: '2d',
     side: 'profile',
@@ -64,7 +107,15 @@ describe('SectionPlotComponent', () => {
     invert: false
   };
 
-  const mockPlotData: Data[] = [{ type: 'scatter3d', x: [1, 2], y: [10, 20], z: [100, 200] } as Data];
+  const mockPlotData: DataObject[] = [
+    {
+      type: 'scatter3d',
+      x: [1, 2],
+      y: [10, 20],
+      z: [100, 200],
+      supportUuid: 's0'
+    } as DataObject
+  ];
 
   const mockSelectedDisplayOptions: SelectedDisplayOptions = {
     loads: false,
@@ -80,23 +131,68 @@ describe('SectionPlotComponent', () => {
     } as Data
   ];
 
-  beforeEach(async () => {
-    // Reset all mocks
-    jest.clearAllMocks();
+  const litDataSignal = signal<GetSectionOutput | null>(null);
+  const baseLitDataSignal = signal<GetSectionOutput | null>(null);
+  const plotOptionsSignal = signal<PlotOptions>(mockPlotOptions);
+  const selectedDisplayOptionsSignal = signal(mockSelectedDisplayOptions);
+  const sectionSignal = signal<Section | null>(mockSection);
+  const cameraSignal = signal<unknown>(null);
+  const isFreePositioningModeSignal = signal(false);
 
-    // Setup mock implementations
+  const mockPlotService = {
+    litData: litDataSignal,
+    baseLitData: baseLitDataSignal,
+    plotOptions: plotOptionsSignal,
+    selectedDisplayOptions: selectedDisplayOptionsSignal,
+    section: sectionSignal,
+    camera: cameraSignal,
+    isFreePositioningMode: isFreePositioningModeSignal,
+    temporaryLoadData: undefined
+  };
+
+  const mockSideTabsService = {
+    sideTabs: signal<number | null>(null)
+  };
+
+  const mockObstaclesService = {
+    currentPointIndex: signal(0)
+  };
+
+  const mockObstacleFormService = {
+    form: {
+      get: (key: string) =>
+        key === 'positions'
+          ? { valueChanges: of([]) }
+          : key === 'name'
+            ? { valueChanges: of('') }
+            : key === 'uuid'
+              ? { value: null }
+              : { value: null, valueChanges: of(null) },
+      value: { uuid: null }
+    }
+  };
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
     mockCreateShadowPlotData.mockReturnValue(mockShadowPlotData);
     mockCreatePlot.mockResolvedValue({} as any);
 
-    // Setup PlotService mock
-    mockPlotService.plotOptions.mockReturnValue(mockPlotOptions);
+    litDataSignal.set(mockLitData);
+    baseLitDataSignal.set(null);
+    plotOptionsSignal.set(mockPlotOptions);
+    selectedDisplayOptionsSignal.set(mockSelectedDisplayOptions);
+    sectionSignal.set(mockSection);
+    cameraSignal.set(null);
 
     await TestBed.configureTestingModule({
       imports: [SectionPlotComponent],
       providers: [
         { provide: 'provideAnimations', useValue: () => ({}) },
-        { provide: PlotService, useValue: mockPlotService }
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: SideTabsService, useValue: mockSideTabsService },
+        { provide: ObstacleFormService, useValue: mockObstacleFormService },
+        { provide: ObstaclesService, useValue: mockObstaclesService }
       ]
     }).compileComponents();
 
@@ -114,9 +210,7 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should have default input values', () => {
-      fixture.componentRef.setInput('isSupportZoom', false);
       expect(component.litData()).toBeNull();
-      expect(component.isSupportZoom()).toBe(false);
     });
 
     it('should have PlotService injected', () => {
@@ -125,12 +219,9 @@ describe('SectionPlotComponent', () => {
   });
 
   describe('refreshPlot Method', () => {
-    beforeEach(() => {
-      fixture.componentRef.setInput('litData', mockLitData);
-    });
-
     it('should return early when litData is null', async () => {
-      const result = await component.refreshPlot(null, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
+      litDataSignal.set(null);
+      const result = await component.refreshPlot();
 
       expect(result).toBeUndefined();
       expect(mockCreatePlotData).not.toHaveBeenCalled();
@@ -138,13 +229,13 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should call helper functions with correct parameters when litData is provided', async () => {
-      await component.refreshPlot(mockLitData, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
+      litDataSignal.set(mockLitData);
+      await component.refreshPlot();
 
-      expect(mockCreatePlotData).toHaveBeenCalledWith(mockLitData, mockPlotOptions);
+      expect(mockCreatePlotData).toHaveBeenCalledWith(mockLitData, mockPlotOptions, mockSupports);
       expect(mockCreatePlot).toHaveBeenCalledWith({
         plotId: 'plotly-output',
         data: mockPlotData,
-        isSupportZoom: false,
         invert: false,
         view: '2d',
         camera: null,
@@ -152,19 +243,22 @@ describe('SectionPlotComponent', () => {
         spanLoads: [],
         litData: mockLitData,
         startSupport: 1,
-        endSupport: 2
+        endSupport: 2,
+        obstacles: expect.any(Array),
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0
       });
     });
 
     it('should handle missing DOM element gracefully', async () => {
       jest.spyOn(document, 'getElementById').mockReturnValue(null);
+      litDataSignal.set(mockLitData);
 
-      await component.refreshPlot(mockLitData, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
+      await component.refreshPlot();
 
       expect(mockCreatePlot).toHaveBeenCalledWith({
         plotId: 'plotly-output',
         data: mockPlotData,
-        isSupportZoom: false,
         invert: false,
         view: '2d',
         camera: null,
@@ -172,7 +266,10 @@ describe('SectionPlotComponent', () => {
         spanLoads: [],
         litData: mockLitData,
         startSupport: 1,
-        endSupport: 2
+        endSupport: 2,
+        obstacles: expect.any(Array),
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0
       });
     });
 
@@ -184,14 +281,15 @@ describe('SectionPlotComponent', () => {
         endSupport: 4,
         invert: true
       };
+      plotOptionsSignal.set(customPlotOptions);
+      litDataSignal.set(mockLitData);
 
-      await component.refreshPlot(mockLitData, null, customPlotOptions, true, false, mockSelectedDisplayOptions);
+      await component.refreshPlot();
 
-      expect(mockCreatePlotData).toHaveBeenCalledWith(mockLitData, customPlotOptions);
+      expect(mockCreatePlotData).toHaveBeenCalledWith(mockLitData, customPlotOptions, mockSupports);
       expect(mockCreatePlot).toHaveBeenCalledWith({
         plotId: 'plotly-output',
         data: mockPlotData,
-        isSupportZoom: true,
         invert: true,
         view: '3d',
         camera: null,
@@ -199,7 +297,10 @@ describe('SectionPlotComponent', () => {
         spanLoads: [],
         litData: mockLitData,
         startSupport: 2,
-        endSupport: 4
+        endSupport: 4,
+        obstacles: expect.any(Array),
+        currentObstacleUuid: null,
+        currentObstaclePointIndex: 0
       });
     });
 
@@ -209,14 +310,10 @@ describe('SectionPlotComponent', () => {
         baseState: true
       };
 
-      await component.refreshPlot(
-        mockLitData,
-        mockLitData, // Using same data as baseLitData for test
-        mockPlotOptions,
-        false,
-        false,
-        displayOptionsWithBase
-      );
+      baseLitDataSignal.set(mockLitData); // Using same data as baseLitData for test
+      selectedDisplayOptionsSignal.set(displayOptionsWithBase);
+      litDataSignal.set(mockLitData);
+      await component.refreshPlot();
 
       expect(mockCreateShadowPlotData).toHaveBeenCalledWith(mockLitData, mockPlotOptions);
       // Plot data should include shadow traces prepended
@@ -233,7 +330,10 @@ describe('SectionPlotComponent', () => {
         baseState: false
       };
 
-      await component.refreshPlot(mockLitData, mockLitData, mockPlotOptions, false, false, displayOptionsWithoutBase);
+      baseLitDataSignal.set(mockLitData);
+      selectedDisplayOptionsSignal.set(displayOptionsWithoutBase);
+      litDataSignal.set(mockLitData);
+      await component.refreshPlot();
 
       expect(mockCreateShadowPlotData).not.toHaveBeenCalled();
       expect(mockCreatePlot).toHaveBeenCalledWith(
@@ -249,14 +349,10 @@ describe('SectionPlotComponent', () => {
         baseState: true
       };
 
-      await component.refreshPlot(
-        mockLitData,
-        null, // baseLitData is null
-        mockPlotOptions,
-        false,
-        false,
-        displayOptionsWithBase
-      );
+      baseLitDataSignal.set(null); // baseLitData is null
+      selectedDisplayOptionsSignal.set(displayOptionsWithBase);
+      litDataSignal.set(mockLitData);
+      await component.refreshPlot();
 
       expect(mockCreateShadowPlotData).not.toHaveBeenCalled();
       expect(mockCreatePlot).toHaveBeenCalledWith(
@@ -268,72 +364,37 @@ describe('SectionPlotComponent', () => {
   });
 
   describe('Effect', () => {
-    it('should call refreshPlot when inputs change', async () => {
+    it('should call refreshPlot when invoked', async () => {
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
+      litDataSignal.set(mockLitData);
 
-      // Test the method directly since effect testing is complex
-      await component.refreshPlot(mockLitData, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
+      await component.refreshPlot();
 
-      expect(refreshSpy).toHaveBeenCalledWith(
-        mockLitData,
-        null,
-        mockPlotOptions,
-        false,
-        false,
-        mockSelectedDisplayOptions
-      );
+      expect(refreshSpy).toHaveBeenCalled();
     });
 
     it('should handle null litData in refreshPlot', async () => {
-      const refreshSpy = jest.spyOn(component, 'refreshPlot');
+      litDataSignal.set(null);
 
-      // Test the method directly
-      await component.refreshPlot(null, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
+      const result = await component.refreshPlot();
 
-      expect(refreshSpy).toHaveBeenCalledWith(null, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
+      expect(result).toBeUndefined();
       expect(mockCreatePlotData).not.toHaveBeenCalled();
-    });
-
-    it('should call refreshPlot with isSupportZoom parameter', async () => {
-      fixture.componentRef.setInput('isSupportZoom', true);
-      const refreshSpy = jest.spyOn(component, 'refreshPlot');
-
-      await component.refreshPlot(mockLitData, null, mockPlotOptions, true, false, mockSelectedDisplayOptions);
-
-      expect(refreshSpy).toHaveBeenCalledWith(
-        mockLitData,
-        null,
-        mockPlotOptions,
-        true,
-        false,
-        mockSelectedDisplayOptions
-      );
     });
   });
 
   describe('Integration Tests', () => {
     it('should handle complete workflow with valid data', async () => {
-      // Set input data
-      fixture.componentRef.setInput('litData', mockLitData);
-      fixture.componentRef.setInput('isSupportZoom', false);
-
-      // Test refreshPlot method directly
+      litDataSignal.set(mockLitData);
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
-      await component.refreshPlot(mockLitData, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
-      expect(refreshSpy).toHaveBeenCalledWith(
-        mockLitData,
-        null,
-        mockPlotOptions,
-        false,
-        false,
-        mockSelectedDisplayOptions
-      );
+
+      await component.refreshPlot();
+
+      expect(refreshSpy).toHaveBeenCalled();
+      expect(mockCreatePlot).toHaveBeenCalled();
     });
 
     it('should handle workflow with different plotOptions', async () => {
-      fixture.componentRef.setInput('litData', mockLitData);
-
-      // Change plotOptions via PlotService mock
       const customPlotOptions: PlotOptions = {
         view: '3d',
         side: 'face',
@@ -341,29 +402,19 @@ describe('SectionPlotComponent', () => {
         endSupport: 4,
         invert: true
       };
-      mockPlotService.plotOptions.mockReturnValue(customPlotOptions);
+      plotOptionsSignal.set(customPlotOptions);
+      litDataSignal.set(mockLitData);
 
-      // Test that refreshPlot works with new plotOptions
-      const refreshSpy = jest.spyOn(component, 'refreshPlot');
-      await component.refreshPlot(mockLitData, null, customPlotOptions, true, false, mockSelectedDisplayOptions);
-      expect(refreshSpy).toHaveBeenCalledWith(
-        mockLitData,
-        null,
-        customPlotOptions,
-        true,
-        false,
-        mockSelectedDisplayOptions
-      );
+      await component.refreshPlot();
+
+      expect(mockCreatePlotData).toHaveBeenCalledWith(mockLitData, customPlotOptions, mockSupports);
     });
 
     it('should handle null litData gracefully', async () => {
-      fixture.componentRef.setInput('litData', null);
-      fixture.componentRef.setInput('isSupportZoom', false);
+      litDataSignal.set(null);
 
-      const refreshSpy = jest.spyOn(component, 'refreshPlot');
-      const result = await component.refreshPlot(null, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
+      const result = await component.refreshPlot();
 
-      expect(refreshSpy).toHaveBeenCalledWith(null, null, mockPlotOptions, false, false, mockSelectedDisplayOptions);
       expect(result).toBeUndefined();
       expect(mockCreatePlotData).not.toHaveBeenCalled();
     });
@@ -394,19 +445,12 @@ describe('SectionPlotComponent', () => {
         arc_length: [],
         T_h: []
       };
+      litDataSignal.set(emptyData);
 
-      fixture.componentRef.setInput('litData', emptyData);
+      const result = await component.refreshPlot();
 
-      const result = await component.refreshPlot(
-        emptyData,
-        null,
-        mockPlotOptions,
-        false,
-        false,
-        mockSelectedDisplayOptions
-      );
       expect(result).toBeDefined();
-      expect(mockCreatePlotData).toHaveBeenCalledWith(emptyData, mockPlotOptions);
+      expect(mockCreatePlotData).toHaveBeenCalledWith(emptyData, mockPlotOptions, mockSupports);
     });
 
     it('should handle litData with null values', async () => {
@@ -433,19 +477,12 @@ describe('SectionPlotComponent', () => {
         arc_length: [],
         T_h: []
       };
+      litDataSignal.set(dataWithNulls);
 
-      fixture.componentRef.setInput('litData', dataWithNulls);
+      const result = await component.refreshPlot();
 
-      const result = await component.refreshPlot(
-        dataWithNulls,
-        null,
-        mockPlotOptions,
-        false,
-        false,
-        mockSelectedDisplayOptions
-      );
       expect(result).toBeDefined();
-      expect(mockCreatePlotData).toHaveBeenCalledWith(dataWithNulls, mockPlotOptions);
+      expect(mockCreatePlotData).toHaveBeenCalledWith(dataWithNulls, mockPlotOptions, mockSupports);
     });
 
     it('should handle very large support numbers', async () => {
@@ -472,19 +509,12 @@ describe('SectionPlotComponent', () => {
         arc_length: [],
         T_h: []
       };
+      litDataSignal.set(largeData);
 
-      fixture.componentRef.setInput('litData', largeData);
+      const result = await component.refreshPlot();
 
-      const result = await component.refreshPlot(
-        largeData,
-        null,
-        mockPlotOptions,
-        false,
-        false,
-        mockSelectedDisplayOptions
-      );
       expect(result).toBeDefined();
-      expect(mockCreatePlotData).toHaveBeenCalledWith(largeData, mockPlotOptions);
+      expect(mockCreatePlotData).toHaveBeenCalledWith(largeData, mockPlotOptions, mockSupports);
     });
   });
 });

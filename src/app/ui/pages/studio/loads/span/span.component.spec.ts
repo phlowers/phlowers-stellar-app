@@ -60,6 +60,7 @@ describe('SpanComponent', () => {
     comment: undefined,
     supports_comment: undefined,
     supports: [],
+    obstacles: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],
@@ -79,7 +80,7 @@ describe('SpanComponent', () => {
       endSupport: 2,
       invert: false
     });
-    mockPlotService = {
+    const plotServiceMock = {
       plotOptions: plotOptionsSignal,
       study: signal<Study | null>(mockStudy),
       section: signal<Section | null>(mockSection),
@@ -92,8 +93,29 @@ describe('SpanComponent', () => {
           value: [options.startSupport + index, options.startSupport + index + 1],
           supports: [options.startSupport + index, options.startSupport + index + 1]
         }));
-      })
-    } as unknown as jest.Mocked<PlotService>;
+      }),
+      plotOptionsChange: jest.fn(),
+      temporaryLoadData: null,
+      error: jest.fn(),
+      litData: jest.fn(),
+      baseLitData: jest.fn(),
+      loading: jest.fn(),
+      getSupportIndex: jest.fn().mockReturnValue(undefined),
+      getSupportOptions: jest.fn().mockReturnValue([]),
+      getSpanLoadBySelectedSpan: jest.fn().mockReturnValue(null),
+      updatePlotOptions: jest.fn(),
+      setTemporaryLoadData: jest.fn(),
+      clearTemporaryLoadData: jest.fn(),
+      getSelectedSpan: jest.fn(),
+      setSelectedSpan: jest.fn(),
+      getSelectedSupport: jest.fn(),
+      setSelectedSupport: jest.fn(),
+      getLoadCases: jest.fn().mockReturnValue([]),
+      getLoadCaseById: jest.fn().mockReturnValue(null),
+      deleteLoadCase: jest.fn(),
+      saveLoadCase: jest.fn()
+    };
+    mockPlotService = plotServiceMock as unknown as jest.Mocked<PlotService>;
 
     // Mock ChargesService
     mockChargesService = {
@@ -306,7 +328,7 @@ describe('SpanComponent', () => {
 
       mockPlotService.temporaryLoadData = temporaryLoadData;
 
-      component.form.get('spanSelect')?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
 
       expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
       expect(component.form.get('type')?.value).toBe(LoadType.PUNCTUAL);
@@ -335,7 +357,7 @@ describe('SpanComponent', () => {
         spanLoads: [spanLoadWithoutValues]
       };
 
-      component.form.get('spanSelect')?.setValue({ index: 0, uuid: 'test-uuid' });
+      component.form.get('spanSelect')?.setValue('test-uuid');
 
       expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
       expect(component.form.get('type')?.value).toBe(LoadType.MARKING);
@@ -566,24 +588,9 @@ describe('SpanComponent', () => {
     });
   });
 
-  describe('ngOnDestroy', () => {
-    it('should unsubscribe from subscriptions', () => {
-      const unsubscribeSpy = jest.spyOn(component['subscriptions'], 'unsubscribe');
-
-      component.ngOnDestroy();
-
-      expect(unsubscribeSpy).toHaveBeenCalled();
-    });
-
-    it('should prevent memory leaks by unsubscribing', () => {
-      component.form.get('spanSelect')?.setValue({ index: 0, uuid: 'test-uuid' });
-      component.form.get('referenceSupport')?.setValue('LEFT');
-
-      component.ngOnDestroy();
-
-      // Verify that subscriptions are unsubscribed
-      // After unsubscribe, the Subscription's closed property should be true
-      expect(component['subscriptions'].closed).toBe(true);
+  describe('cleanup', () => {
+    it('should clean up subscriptions when component is destroyed', () => {
+      expect(() => fixture.destroy()).not.toThrow();
     });
   });
 

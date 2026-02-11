@@ -163,6 +163,7 @@ describe('LoadsTableComponent', () => {
     comment: undefined,
     supports_comment: undefined,
     supports: mockSupports,
+    obstacles: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [mockCharge],

@@ -1,4 +1,4 @@
-import { computed, effect, Injectable, signal, untracked } from '@angular/core';
+import { computed, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
 import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import { DataError, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
 import { Section, Study } from '@core/domain';
@@ -9,16 +9,16 @@ import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
-import { ChargeData } from '@src/app/core/domain/models/charge.model';
+import { ChargeData } from '@core/domain/models/charge.model';
+import { SideTabsService } from '../side-tabs/side-tabs.service';
+import { ObstaclesService } from '../obstacles/obstacles.service';
+import { ObstacleFormService } from '../obstacles/obstaclesForm/obstaclesForm.service';
 
 export const PLOT_ID = 'plotly-output';
 
 export interface SpanOption {
   label: string;
-  value: {
-    index: number;
-    uuid: string;
-  };
+  value: string | null;
 }
 
 export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions: PlotOptions, loading: boolean) => {
@@ -79,18 +79,23 @@ export class PlotService {
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
+  spanAmountChoice = signal<'single' | 'double' | 'all'>('all');
+
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions
   });
   selectedDisplayOptions = signal<SelectedDisplayOptions>({
     ...defaultSelectedDisplayOptions
   });
-  isSidebarOpen = signal(false);
+
+  private readonly injector = inject(Injector);
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
     private readonly cableService: CablesService,
-    private readonly sectionService: SectionService
+    private readonly sectionService: SectionService,
+    private readonly sideTabsService: SideTabsService,
+    private readonly obstaclesService: ObstaclesService
   ) {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
@@ -115,6 +120,10 @@ export class PlotService {
     this.isStudioActive.set(false);
     this.section.set(null);
     this.study.set(null);
+    this.spanAmountChoice.set('all');
+    this.injector.get(ObstacleFormService).clearPositions();
+    this.obstaclesService.resetCurrentPointIndex();
+    this.sideTabsService.sideTabs.set(null);
   };
 
   modifySection = (sectionData: Partial<Section>) => {
@@ -216,40 +225,39 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  setSidebarOpen = () => {
-    this.refreshCamera();
-    this.isSidebarOpen.set(!this.isSidebarOpen());
-  };
-
   getSpanOptions = computed<SpanOption[]>(() => {
     const supports = this.section()?.supports ?? [];
     const supportsAmount = supports.length ?? 0;
     const spanAmount = Math.max(supportsAmount - 1, 0);
-    // create an array the length of spanAmount
     const spans = Array.from({ length: spanAmount }, (_, index) => ({
       label: `${index + 1} - ${index + 2}`,
-      value: {
-        index: index,
-        uuid: supports[index]?.uuid ?? ''
-      }
+      value: supports[index]?.uuid ?? null
     }));
+    spans.pop();
     return spans;
   });
 
-  getSupportOptions = (selectedSpan: SpanOption['value'] | null): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
-    if (selectedSpan === null) {
+  getSupportIndex = (supportUuid: string): number => {
+    return this.section()?.supports?.findIndex((s) => s.uuid === supportUuid) ?? -1;
+  };
+
+  getSupportOptions = (supportUuid: string | null): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
+    if (supportUuid === null) {
       return [];
     }
-    const spanIndex = selectedSpan.index;
-    return [
-      {
-        label: spanIndex + 1,
-        value: 'LEFT'
-      },
-      {
-        label: spanIndex + 2,
-        value: 'RIGHT'
-      }
-    ];
+    const spanIndex = this.section()?.supports?.findIndex((s) => s.uuid === supportUuid);
+    if (spanIndex !== undefined && spanIndex >= 0) {
+      return [
+        {
+          label: spanIndex + 1,
+          value: 'LEFT'
+        },
+        {
+          label: spanIndex + 2,
+          value: 'RIGHT'
+        }
+      ];
+    }
+    return [];
   };
 }

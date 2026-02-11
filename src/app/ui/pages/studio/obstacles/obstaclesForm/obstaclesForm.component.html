@@ -1,0 +1,283 @@
+<form [formGroup]="obstacleFormService.form" class="obstacles-form">
+  <div class="obstacles-form__buttons">
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      [disabled]="!supportUuidValue()"
+      (click)="obstacleFormService.returnToSpan()"
+      btnSize="s"
+      class="obstacles-form__return"
+    >
+      <ng-container i18n>Return to span</ng-container>
+    </button>
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="obstacleFormService.resetFormForNewObstacle(null)"
+    >
+      <app-icon icon="add_circle" />
+      <ng-container i18n>Create new obstacle</ng-container>
+    </button>
+  </div>
+  <div class="obstacles-form__divided-line">
+    <label for="span" class="span-label" i18n>Span</label>
+
+    <p-select
+      inputId="span"
+      [options]="spansOptions()"
+      formControlName="supportUuid"
+      optionLabel="label"
+      optionValue="value"
+      class="span-input"
+    />
+
+    <label for="obstacleType" class="type-label" i18n>Obstacle type</label>
+
+    <p-select
+      inputId="obstacleType"
+      [options]="obstacleTypeOptions"
+      formControlName="type"
+      optionLabel="label"
+      optionValue="value"
+      class="type-input"
+    />
+  </div>
+
+  <div class="obstacles-form__divided-line">
+    <label for="obstacleName" class="name-label" i18n>Obstacle name</label>
+
+    <input
+      pInputText
+      type="text"
+      id="obstacleName"
+      formControlName="name"
+      class="name-input"
+      [attr.aria-invalid]="
+        obstacleFormService.form.controls.name.invalid || null
+      "
+    />
+
+    <label for="referenceSupport" class="ref-label" i18n
+      >Reference support</label
+    >
+
+    <p-select
+      inputId="referenceSupport"
+      [options]="obstacleFormService.supportsOptions()"
+      formControlName="referenceSupport"
+      optionLabel="label"
+      optionValue="value"
+      class="ref-input"
+    />
+  </div>
+
+  <div class="obstacles-form__divided-line">
+    <label for="altitudeType" class="alt-label" i18n
+      >Obstacle altitude type</label
+    >
+
+    <p-select
+      inputId="altitudeType"
+      [options]="altitudeTypeOptions"
+      formControlName="altitudeType"
+      optionLabel="label"
+      optionValue="value"
+      class="alt-input"
+    />
+
+    <label for="lateralDistanceType" class="lat-label" i18n
+      >Lateral distance type</label
+    >
+
+    <p-select
+      inputId="lateralDistanceType"
+      [options]="lateralDistanceTypeOptions"
+      formControlName="lateralDistanceType"
+      optionLabel="label"
+      optionValue="value"
+      class="lat-input"
+    />
+  </div>
+
+  <div class="obstacles-form__field">
+    <div class="obstacles-form__field-toggle">
+      <p-toggleswitch [disabled]="true" />
+      <label for="freePositioning" i18n>Free positioning</label>
+    </div>
+
+    <button
+      [disabled]="
+        obstacleFormService.form.get('supportUuid')?.value === null ||
+        !obstacleFormService.form.get('name')?.value
+      "
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      (click)="obstacleFormService.addPosition()"
+    >
+      <app-icon icon="add_circle" />
+      <ng-container i18n>Add point</ng-container>
+    </button>
+  </div>
+
+  <div class="obstacles-form__positions-container">
+    @for (obstacle of obstacleFormService.positions.controls; track $index) {
+      <div
+        (click)="setCurrentObstaclePoint($index)"
+        (keyup.enter)="setCurrentObstaclePoint($index)"
+        (keydown.space)="
+          setCurrentObstaclePoint($index); $event.preventDefault()
+        "
+        [class.obstacles-form__point--active]="
+          obstaclesService.currentPointIndex() === $index
+        "
+        class="obstacles-form__point"
+        role="button"
+        tabindex="0"
+      >
+        <div class="obstacles-form__point-header">
+          <p class="obstacles-form__point-label">Point {{ $index + 1 }}</p>
+          <button
+            app-btn
+            btnStyle="danger"
+            btnSize="s"
+            type="button"
+            (click)="
+              obstacleFormService.deletePoint($index); $event.stopPropagation()
+            "
+            aria-label="delete point"
+            i18n-aria-label
+          >
+            <app-icon icon="delete" />
+          </button>
+        </div>
+        <div
+          class="obstacles-form__divided-line obstacles-form__divided-line--three"
+        >
+          <label for="altitudePoint" class="alt-point-label" i18n
+            >Alt. point (m)</label
+          >
+
+          <p-inputgroup>
+            <input
+              (input)="onPositionInput($event, 'z')"
+              pInputText
+              [disabled]="!obstacleFormService.form.get('name')?.value"
+              type="number"
+              id="altitudePoint"
+              [value]="obstacle.value.z"
+              class="alt-point-input"
+              step="0.01"
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
+
+          <label for="distanceToRefSupport" class="dist-ref-label" i18n
+            >Dist. supp. réf. (m)</label
+          >
+
+          <p-inputgroup>
+            <input
+              pInputText
+              (input)="onPositionInput($event, 'x')"
+              [disabled]="!obstacleFormService.form.get('name')?.value"
+              type="number"
+              id="distanceToRefSupport"
+              [value]="obstacle.value.x"
+              class="dist-ref-input"
+              step="0.01"
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
+
+          <label for="distanceToLineAxis" class="dist-axis-label" i18n
+            >Dist. axe ligne</label
+          >
+
+          <p-inputgroup>
+            <input
+              pInputText
+              (input)="onPositionInput($event, 'y')"
+              [disabled]="!obstacleFormService.form.get('name')?.value"
+              type="number"
+              id="distanceToLineAxis"
+              [value]="obstacle.value.y"
+              class="dist-axis-input"
+              step="0.01"
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="obstacles-form__sticky-bottom">
+    <div class="obstacles-form__btn-wrapper">
+      <button
+        app-btn
+        btnStyle="danger"
+        type="button"
+        [disabled]="!obstacleFormService.form.get('uuid')?.value"
+        (click)="obstacleFormService.deleteObstacle()"
+        aria-label="delete obstacle"
+        i18n-aria-label
+      >
+        <app-icon icon="delete" />
+      </button>
+
+      <button
+        app-btn
+        btnStyle="outlined"
+        type="button"
+        class="p-0"
+        (click)="obstacleFormService.saveObstacle()"
+        [disabled]="true"
+      >
+        <ng-container i18n>AT-CCGLA</ng-container>
+      </button>
+
+      <button
+        app-btn
+        type="button"
+        (click)="obstacleFormService.calculateAndSave()"
+        [disabled]="!obstacleFormService.canCalculateAndSave()"
+      >
+        <app-icon icon="rocket_launch" />
+        <ng-container i18n>Calculate and save</ng-container>
+      </button>
+    </div>
+
+    <hr class="obstacles-form__divider" />
+
+    <div class="obstacles-form__results">
+      <div class="obstacles-form__results-label" i18n>Results:</div>
+      <div class="obstacles-form__results-grid">
+        <div class="obstacles-form__results-item">
+          <span i18n>Oblique</span>
+          <span
+            >{{ obstacleFormService.results().oblique ?? 'N/A' }}
+            <ng-container i18n>m</ng-container></span
+          >
+        </div>
+        <div class="obstacles-form__results-item">
+          <span i18n>Vertical</span>
+          <span
+            >{{ obstacleFormService.results().verticale ?? 'N/A' }}
+            <ng-container i18n>m</ng-container></span
+          >
+        </div>
+        <div class="obstacles-form__results-item">
+          <span i18n>Horizontal</span>
+          <span
+            >{{ obstacleFormService.results().horizontale ?? 'N/A' }}
+            <ng-container i18n>m</ng-container></span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
