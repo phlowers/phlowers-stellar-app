@@ -120,6 +120,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     if (!studyUuid || !sectionUuid) {
       this.router.navigate(['/studies']);
     }
+    this.plotService.isStudioActive.set(true);
     this.studiesService.ready.subscribe((ready) => {
       if (ready && studyUuid) {
         this.subscription = this.studiesService
@@ -153,6 +154,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.plotService.isStudioActive.set(false);
     this.plotService.section.set(null);
     if (this.subscription) {
       this.subscription.unsubscribe();

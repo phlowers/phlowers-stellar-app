@@ -25,6 +25,7 @@ function createSignalMock<T>(initialValue: T): SignalFn<T> {
 
 // PlotService mock shape used by the component
 class PlotServiceMock {
+  isStudioActive: SignalFn<boolean> = createSignalMock<boolean>(false);
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
   section: SignalFn<Section | null> = createSignalMock<Section | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
