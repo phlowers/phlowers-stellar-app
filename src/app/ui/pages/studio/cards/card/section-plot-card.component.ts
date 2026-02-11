@@ -249,10 +249,26 @@ export class SectionPlotCardComponent {
     return [
       { label: $localize`Arrow F1 :`, value: '-', unit: 'm' },
       { label: $localize`Arrow F2 :`, value: '-', unit: 'm' },
-      { label: $localize`Horizontal dist. acc. :`, value: formatNumber(horizontalDistance?.[this.index()]), unit: 'm' },
-      { label: $localize`Arc length LA :`, value: formatNumber(arcLength?.[this.index()]), unit: 'm' },
-      { label: $localize`Th - T0 :`, value: formatNumber(th?.[this.index()]), unit: 'daN' },
-      { label: $localize`Inf tension  acc. :`, value: formatNumber(tensionInf?.[this.index()]), unit: 'daN' }
+      {
+        label: $localize`Horizontal dist. acc. :`,
+        value: formatNumber(horizontalDistance?.[this.index()]),
+        unit: 'm'
+      },
+      {
+        label: $localize`Arc length LA :`,
+        value: formatNumber(arcLength?.[this.index()]),
+        unit: 'm'
+      },
+      {
+        label: $localize`Th - T0 :`,
+        value: formatNumber(th?.[this.index()]),
+        unit: 'daN'
+      },
+      {
+        label: $localize`Inf tension  acc. :`,
+        value: formatNumber(tensionInf?.[this.index()]),
+        unit: 'daN'
+      }
     ];
   });
 }

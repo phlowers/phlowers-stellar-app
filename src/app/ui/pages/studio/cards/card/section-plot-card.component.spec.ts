@@ -207,11 +207,13 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     fixture.componentRef.setInput('index', 0);
     fixture.componentRef.setInput('litData', mockLitData);
     const support = component.supportData();
-    const span = component.spanData();
+    const spanData = component.spanData();
+    const spanExpandedData = component.spanExpandedData();
 
     expect(support.length).toBe(2);
-    expect(span.length).toBe(4);
+    expect(spanData.length).toBe(5);
     expect(support[0].fields.length).toBe(4);
-    expect(span[0].label).toContain('Span length');
+    expect(spanData[0].label).toContain('Span length');
+    expect(spanExpandedData.length).toBe(6);
   });
 });

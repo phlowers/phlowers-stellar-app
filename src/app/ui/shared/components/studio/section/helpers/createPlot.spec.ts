@@ -8,6 +8,7 @@
 import { createPlot } from './createPlot';
 import Plotly, { Data } from 'plotly.js-dist-min';
 import { SpanLoad } from '@core/domain';
+import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
 
 // Mock Plotly
 jest.mock('plotly.js-dist-min', () => ({
@@ -52,7 +53,7 @@ describe('createPlot', () => {
     }
   ];
 
-  const mockLitData = {
+  const mockLitData: GetSectionOutput = {
     spans: [[[1, 2, 3]]],
     insulators: [[[1, 2, 3]]],
     supports: [[[1, 2, 3]]],
@@ -67,7 +68,13 @@ describe('createPlot', () => {
     load_angle: [1, 2, 3],
     displacement: [[1, 2, 3]],
     span_length: [1, 2, 3],
-    loads_coords: { 0: [1, 2, 3] }
+    loads_coords: { 0: [1, 2, 3] },
+    parameter: [1, 2, 3],
+    tension_sup: [1, 2, 3],
+    tension_inf: [1, 2, 3],
+    horizontal_distance: [1, 2, 3],
+    arc_length: [1, 2, 3],
+    T_h: [1, 2, 3]
   };
 
   const mockSpanLoads: (SpanLoad | null)[] = [];
