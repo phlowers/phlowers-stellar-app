@@ -447,13 +447,13 @@ describe('SupportsTableComponent', () => {
     it('should load chains data', async () => {
       mockChainsService.getChains.mockResolvedValue(mockChains);
       await component.getData();
-      expect(component.chains()).toEqual(mockChains);
+      expect(component.chainsOptions()).toEqual(mockChains);
     });
   });
 
   describe('onSupportFieldChange', () => {
     beforeEach(() => {
-      component.chains.set(mockChains);
+      component.chainsOptions.set(mockChains);
     });
 
     it('should emit supportChange for non-chainName fields', () => {
