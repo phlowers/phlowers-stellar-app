@@ -156,6 +156,10 @@ describe('VhlAndGuyingComponent', () => {
 
     component.form.controls.altitude.setValue(10);
     component.form.controls.horizontalDistance.setValue(5);
+    component.form.controls.selectedSpan.setValue({
+      index: 1,
+      uuid: 'mock-uuid'
+    });
     component.form.controls.selectedSupport.setValue('LEFT');
 
     await component.onCalculate();
@@ -165,7 +169,9 @@ describe('VhlAndGuyingComponent', () => {
       {
         altitude: 10,
         horizontalDistance: 5,
-        hasPulley: false
+        hasPulley: false,
+        selectedSpanIndex: 1,
+        selectedSupport: 'LEFT'
       }
     );
     expect(component.results()).toEqual(mockResult);
