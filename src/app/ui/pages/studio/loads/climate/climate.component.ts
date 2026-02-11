@@ -137,7 +137,7 @@ export class ClimateComponent {
     const frontierSupportOptions =
       supports?.map((_, index) => ({
         label: (index + 1).toString(),
-        value: index
+        value: index + 1
       })) ?? [];
     frontierSupportOptions.shift();
     frontierSupportOptions.pop();

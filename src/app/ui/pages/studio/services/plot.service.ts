@@ -91,6 +91,7 @@ export class PlotService {
   destroyRef = inject(DestroyRef);
   camera = signal<Camera | null>(null);
 
+  isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
   plotOptions = signal<PlotOptions>({
@@ -110,7 +111,7 @@ export class PlotService {
       this.workerReady.set(value);
     });
     effect(() => {
-      if (this.workerReady() && this.section()) {
+      if (this.isStudioActive() && this.workerReady() && this.section()) {
         this.refreshSection(this.section()!);
       }
     });
@@ -125,6 +126,7 @@ export class PlotService {
       ...defaultPlotOptions
     });
     this.camera.set(null);
+    this.isStudioActive.set(false);
     this.section.set(null);
     this.study.set(null);
   };
