@@ -718,24 +718,19 @@
         <source>Phase</source>
       </segment>
     </unit>
-    <unit id="5106156601844390550">
+    <unit id="4740697952012289999">
       <segment>
-        <source>V :</source>
+        <source>V:</source>
       </segment>
     </unit>
-    <unit id="6094941777760276714">
+    <unit id="2705138319949054840">
       <segment>
-        <source>H :</source>
+        <source>L:</source>
       </segment>
     </unit>
-    <unit id="2063533551447007651">
+    <unit id="5979575883644533575">
       <segment>
-        <source>L :</source>
-      </segment>
-    </unit>
-    <unit id="6878706142952083204">
-      <segment>
-        <source>Resultant :</source>
+        <source>Resultant:</source>
       </segment>
     </unit>
     <unit id="2153962924756003345">
@@ -1178,14 +1173,14 @@
         <source>Select and organise the tools with quick access (maximum 5).</source>
       </segment>
     </unit>
-    <unit id="1146602380315581259">
+    <unit id="2639795872572346193">
       <segment>
-        <source>Arc length LA :</source>
+        <source>Arc length LA:</source>
       </segment>
     </unit>
-    <unit id="1455021675803464772">
+    <unit id="8349857961550718385">
       <segment>
-        <source>Line angle :</source>
+        <source>Line angle:</source>
       </segment>
     </unit>
     <unit id="4708771953728158073">
@@ -1193,9 +1188,9 @@
         <source>VTL (under console)</source>
       </segment>
     </unit>
-    <unit id="758471193876128020">
+    <unit id="6121502146470957419">
       <segment>
-        <source>Alt. supp foot :</source>
+        <source>Alt. supp foot:</source>
       </segment>
     </unit>
     <unit id="7621171811584493753">
@@ -1203,74 +1198,74 @@
         <source>Chain displacement acc.</source>
       </segment>
     </unit>
-    <unit id="8989863100638695277">
+    <unit id="6647993578581916132">
       <segment>
-        <source>X :</source>
+        <source>X:</source>
       </segment>
     </unit>
-    <unit id="4397785445453423100">
+    <unit id="6711011769866868472">
       <segment>
-        <source>Y :</source>
+        <source>Y:</source>
       </segment>
     </unit>
-    <unit id="9049520591622775104">
+    <unit id="8718363274279881048">
       <segment>
-        <source>Z :</source>
+        <source>Z:</source>
       </segment>
     </unit>
-    <unit id="3765909838425303067">
+    <unit id="5835264165658173521">
       <segment>
-        <source>Angle balancement :</source>
+        <source>Angle balancement:</source>
       </segment>
     </unit>
-    <unit id="7034395083246764527">
+    <unit id="8617343657467703647">
       <segment>
-        <source>Cable slope acc. :</source>
+        <source>Cable slope acc.:</source>
       </segment>
     </unit>
-    <unit id="3228204757532465885">
+    <unit id="7700218431791238836">
       <segment>
-        <source>Span length :</source>
+        <source>Span length:</source>
       </segment>
     </unit>
-    <unit id="5015532824363367508">
+    <unit id="1136763922457847411">
       <segment>
-        <source>Elevation (m) :</source>
+        <source>Elevation (m):</source>
       </segment>
     </unit>
-    <unit id="5045082531574334615">
+    <unit id="6126902002679300027">
       <segment>
-        <source>Supp tension (Max) :</source>
+        <source>Supp tension (Max):</source>
       </segment>
     </unit>
-    <unit id="5897832109796472859">
+    <unit id="2440401383013553378">
       <segment>
-        <source>Natural length L0 :</source>
+        <source>Natural length L0:</source>
       </segment>
     </unit>
-    <unit id="839778022983023928">
+    <unit id="6190921202800487628">
       <segment>
-        <source>Arrow F1 :</source>
+        <source>Arrow F1:</source>
       </segment>
     </unit>
-    <unit id="8940150942032374654">
+    <unit id="3295562727778117963">
       <segment>
-        <source>Arrow F2 :</source>
+        <source>Arrow F2:</source>
       </segment>
     </unit>
-    <unit id="20555684131803245">
+    <unit id="2407710047755196792">
       <segment>
-        <source>Horizontal dist. acc. :</source>
+        <source>Horizontal dist. acc.:</source>
       </segment>
     </unit>
-    <unit id="2469542949998183645">
+    <unit id="9108177438626507742">
       <segment>
-        <source>Th - T0 :</source>
+        <source>Th - T0:</source>
       </segment>
     </unit>
-    <unit id="1754428445982279363">
+    <unit id="7388239002522879954">
       <segment>
-        <source>Inf tension acc. :</source>
+        <source>Inf tension acc.:</source>
       </segment>
     </unit>
     <unit id="6613300769068333223">
@@ -2458,9 +2453,9 @@
         <source>L0</source>
       </segment>
     </unit>
-    <unit id="4879686808912531747">
+    <unit id="1580807911042419380">
       <segment>
-        <source>T :</source>
+        <source>T:</source>
       </segment>
     </unit>
     <unit id="1839839226703008167">
@@ -2755,9 +2750,9 @@
         <source>Modify</source>
       </segment>
     </unit>
-    <unit id="5523093772635483717">
+    <unit id="2331707475777242948">
       <segment>
-        <source>Parameter (m) :</source>
+        <source>Parameter (m):</source>
       </segment>
     </unit>
   </file>

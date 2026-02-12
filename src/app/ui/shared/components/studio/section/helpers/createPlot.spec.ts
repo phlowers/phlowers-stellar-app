@@ -8,7 +8,7 @@
 import { createPlot } from './createPlot';
 import Plotly, { Data } from 'plotly.js-dist-min';
 import { SpanLoad } from '@core/domain';
-import { GetSectionOutput } from '@src/app/core/services/worker_python/tasks/types';
+import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 
 // Mock Plotly
 jest.mock('plotly.js-dist-min', () => ({

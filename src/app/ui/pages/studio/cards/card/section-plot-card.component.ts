@@ -86,22 +86,22 @@ export class SectionPlotCardComponent {
         title: $localize`VTL (under chain)`,
         fields: [
           {
-            label: $localize`V :`,
+            label: $localize`V:`,
             value: formatNumber(vtl_under_chain?.[0][this.index()]),
             unit: 'daN'
           },
           {
-            label: $localize`T :`,
+            label: $localize`T:`,
             value: formatNumber(vtl_under_chain?.[1][this.index()]),
             unit: 'daN'
           },
           {
-            label: $localize`L :`,
+            label: $localize`L:`,
             value: formatNumber(vtl_under_chain?.[2][this.index()]),
             unit: 'daN'
           },
           {
-            label: $localize`Resultant :`,
+            label: $localize`Resultant:`,
             value: formatNumber(r_under_chain?.[this.index()]),
             unit: 'daN'
           }
@@ -111,7 +111,7 @@ export class SectionPlotCardComponent {
       {
         fields: [
           {
-            label: $localize`Line angle :`,
+            label: $localize`Line angle:`,
             value: formatNumber(lineAngle?.[this.index()]),
             unit: 'gr'
           }
@@ -133,22 +133,22 @@ export class SectionPlotCardComponent {
         title: $localize`VTL (under console)`,
         fields: [
           {
-            label: $localize`V :`,
+            label: $localize`V:`,
             value: formatNumber(vtl_under_console?.[0][this.index()]),
             unit: 'daN'
           },
           {
-            label: $localize`H :`,
+            label: $localize`T:`,
             value: formatNumber(vtl_under_console?.[1][this.index()]),
             unit: 'daN'
           },
           {
-            label: $localize`L :`,
+            label: $localize`L:`,
             value: formatNumber(vtl_under_console?.[2][this.index()]),
             unit: 'daN'
           },
           {
-            label: $localize`Resultant :`,
+            label: $localize`Resultant:`,
             value: formatNumber(r_under_console?.[this.index()]),
             unit: 'daN'
           }
@@ -158,7 +158,7 @@ export class SectionPlotCardComponent {
       {
         fields: [
           {
-            label: $localize`Alt. supp foot :`,
+            label: $localize`Alt. supp foot:`,
             value: formatNumber(groundAltitude?.[this.index()]),
             unit: 'm'
           }
@@ -168,17 +168,17 @@ export class SectionPlotCardComponent {
         title: $localize`Chain displacement acc.`,
         fields: [
           {
-            label: $localize`X :`,
+            label: $localize`X:`,
             value: formatNumber(displacement?.[this.index()]?.[0]),
             unit: 'm'
           },
           {
-            label: $localize`Y :`,
+            label: $localize`Y:`,
             value: formatNumber(displacement?.[this.index()]?.[1]),
             unit: 'm'
           },
           {
-            label: $localize`Z :`,
+            label: $localize`Z:`,
             value: formatNumber(displacement?.[this.index()]?.[2]),
             unit: 'm'
           }
@@ -188,12 +188,12 @@ export class SectionPlotCardComponent {
       {
         fields: [
           {
-            label: $localize`Angle balancement :`,
+            label: $localize`Angle balancement:`,
             value: formatNumber(loadAngle?.[this.index()]),
             unit: '°'
           },
           {
-            label: $localize`Cable slope acc. :`,
+            label: $localize`Cable slope acc.:`,
             value: formatNumber(loadAngle?.[this.index()]),
             unit: '°'
           }
@@ -212,27 +212,27 @@ export class SectionPlotCardComponent {
     const tensionSup = litData?.tension_sup;
     return [
       {
-        label: $localize`Span length :`,
+        label: $localize`Span length:`,
         value: formatNumber(spanLength?.[this.index()]),
         unit: 'm'
       },
       {
-        label: $localize`Elevation (m) :`,
+        label: $localize`Elevation (m):`,
         value: formatNumber(elevation?.[this.index()]),
         unit: 'm'
       },
       {
-        label: $localize`Parameter (m) :`,
+        label: $localize`Parameter (m):`,
         value: formatNumber(parameter?.[this.index()]),
         unit: 'm'
       },
       {
-        label: $localize`Supp tension (Max) :`,
+        label: $localize`Supp tension (Max):`,
         value: formatNumber(tensionSup?.[this.index()]),
         unit: 'daN'
       },
       {
-        label: $localize`Natural length L0 :`,
+        label: $localize`Natural length L0:`,
         value: formatNumber(L0?.[this.index()]),
         unit: 'm'
       }
@@ -247,25 +247,25 @@ export class SectionPlotCardComponent {
     const th = litData?.T_h;
     const tensionInf = litData?.tension_inf;
     return [
-      { label: $localize`Arrow F1 :`, value: '-', unit: 'm' },
-      { label: $localize`Arrow F2 :`, value: '-', unit: 'm' },
+      { label: $localize`Arrow F1:`, value: '-', unit: 'm' },
+      { label: $localize`Arrow F2:`, value: '-', unit: 'm' },
       {
-        label: $localize`Horizontal dist. acc. :`,
+        label: $localize`Horizontal dist. acc.:`,
         value: formatNumber(horizontalDistance?.[this.index()]),
         unit: 'm'
       },
       {
-        label: $localize`Arc length LA :`,
+        label: $localize`Arc length LA:`,
         value: formatNumber(arcLength?.[this.index()]),
         unit: 'm'
       },
       {
-        label: $localize`Th - T0 :`,
+        label: $localize`Th - T0:`,
         value: formatNumber(th?.[this.index()]),
         unit: 'daN'
       },
       {
-        label: $localize`Inf tension  acc. :`,
+        label: $localize`Inf tension  acc.:`,
         value: formatNumber(tensionInf?.[this.index()]),
         unit: 'daN'
       }
