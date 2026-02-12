@@ -23,13 +23,6 @@ interface DataSection {
   indent?: boolean;
 }
 
-const formatNumber = (value: number | undefined): number | string => {
-  if (value === undefined) {
-    return '-';
-  }
-  return round(value, 2);
-};
-
 @Component({
   selector: 'app-section-plot-card',
   templateUrl: './section-plot-card.component.html',
@@ -74,6 +67,15 @@ export class SectionPlotCardComponent {
     this.type() === 'support' ? 'icon-wrapper--support' : 'icon-wrapper--line'
   );
 
+  private getFormatedNumberIndex = (
+    value: number[] | undefined
+  ): number | string => {
+    if (value === undefined) {
+      return '-';
+    }
+    return round(value?.[this.index()], 2);
+  };
+
   // Data structure for support type
   supportData = computed((): DataSection[] => {
     const vtl_under_chain = this.litData()?.vtl_under_chain;
@@ -87,22 +89,22 @@ export class SectionPlotCardComponent {
         fields: [
           {
             label: $localize`V:`,
-            value: formatNumber(vtl_under_chain?.[0][this.index()]),
+            value: this.getFormatedNumberIndex(vtl_under_chain?.[0]),
             unit: 'daN'
           },
           {
             label: $localize`T:`,
-            value: formatNumber(vtl_under_chain?.[1][this.index()]),
+            value: this.getFormatedNumberIndex(vtl_under_chain?.[1]),
             unit: 'daN'
           },
           {
             label: $localize`L:`,
-            value: formatNumber(vtl_under_chain?.[2][this.index()]),
+            value: this.getFormatedNumberIndex(vtl_under_chain?.[2]),
             unit: 'daN'
           },
           {
             label: $localize`Resultant:`,
-            value: formatNumber(r_under_chain?.[this.index()]),
+            value: this.getFormatedNumberIndex(r_under_chain),
             unit: 'daN'
           }
         ],
@@ -112,7 +114,7 @@ export class SectionPlotCardComponent {
         fields: [
           {
             label: $localize`Line angle:`,
-            value: formatNumber(lineAngle?.[this.index()]),
+            value: this.getFormatedNumberIndex(lineAngle),
             unit: 'gr'
           }
         ]
@@ -134,22 +136,22 @@ export class SectionPlotCardComponent {
         fields: [
           {
             label: $localize`V:`,
-            value: formatNumber(vtl_under_console?.[0][this.index()]),
+            value: this.getFormatedNumberIndex(vtl_under_console?.[0]),
             unit: 'daN'
           },
           {
             label: $localize`T:`,
-            value: formatNumber(vtl_under_console?.[1][this.index()]),
+            value: this.getFormatedNumberIndex(vtl_under_console?.[1]),
             unit: 'daN'
           },
           {
             label: $localize`L:`,
-            value: formatNumber(vtl_under_console?.[2][this.index()]),
+            value: this.getFormatedNumberIndex(vtl_under_console?.[2]),
             unit: 'daN'
           },
           {
             label: $localize`Resultant:`,
-            value: formatNumber(r_under_console?.[this.index()]),
+            value: this.getFormatedNumberIndex(r_under_console),
             unit: 'daN'
           }
         ],
@@ -159,7 +161,7 @@ export class SectionPlotCardComponent {
         fields: [
           {
             label: $localize`Alt. supp foot:`,
-            value: formatNumber(groundAltitude?.[this.index()]),
+            value: this.getFormatedNumberIndex(groundAltitude),
             unit: 'm'
           }
         ]
@@ -169,17 +171,17 @@ export class SectionPlotCardComponent {
         fields: [
           {
             label: $localize`X:`,
-            value: formatNumber(displacement?.[this.index()]?.[0]),
+            value: this.getFormatedNumberIndex(displacement?.[0]),
             unit: 'm'
           },
           {
             label: $localize`Y:`,
-            value: formatNumber(displacement?.[this.index()]?.[1]),
+            value: this.getFormatedNumberIndex(displacement?.[1]),
             unit: 'm'
           },
           {
             label: $localize`Z:`,
-            value: formatNumber(displacement?.[this.index()]?.[2]),
+            value: this.getFormatedNumberIndex(displacement?.[2]),
             unit: 'm'
           }
         ],
@@ -189,12 +191,12 @@ export class SectionPlotCardComponent {
         fields: [
           {
             label: $localize`Angle balancement:`,
-            value: formatNumber(loadAngle?.[this.index()]),
+            value: this.getFormatedNumberIndex(loadAngle),
             unit: '°'
           },
           {
             label: $localize`Cable slope acc.:`,
-            value: formatNumber(loadAngle?.[this.index()]),
+            value: this.getFormatedNumberIndex(loadAngle),
             unit: '°'
           }
         ]
@@ -213,27 +215,27 @@ export class SectionPlotCardComponent {
     return [
       {
         label: $localize`Span length:`,
-        value: formatNumber(spanLength?.[this.index()]),
+        value: this.getFormatedNumberIndex(spanLength),
         unit: 'm'
       },
       {
         label: $localize`Elevation (m):`,
-        value: formatNumber(elevation?.[this.index()]),
+        value: this.getFormatedNumberIndex(elevation),
         unit: 'm'
       },
       {
         label: $localize`Parameter (m):`,
-        value: formatNumber(parameter?.[this.index()]),
+        value: this.getFormatedNumberIndex(parameter),
         unit: 'm'
       },
       {
         label: $localize`Supp tension (Max):`,
-        value: formatNumber(tensionSup?.[this.index()]),
+        value: this.getFormatedNumberIndex(tensionSup),
         unit: 'daN'
       },
       {
         label: $localize`Natural length L0:`,
-        value: formatNumber(L0?.[this.index()]),
+        value: this.getFormatedNumberIndex(L0),
         unit: 'm'
       }
     ];
@@ -251,22 +253,22 @@ export class SectionPlotCardComponent {
       { label: $localize`Arrow F2:`, value: '-', unit: 'm' },
       {
         label: $localize`Horizontal dist. acc.:`,
-        value: formatNumber(horizontalDistance?.[this.index()]),
+        value: this.getFormatedNumberIndex(horizontalDistance),
         unit: 'm'
       },
       {
         label: $localize`Arc length LA:`,
-        value: formatNumber(arcLength?.[this.index()]),
+        value: this.getFormatedNumberIndex(arcLength),
         unit: 'm'
       },
       {
         label: $localize`Th - T0:`,
-        value: formatNumber(th?.[this.index()]),
+        value: this.getFormatedNumberIndex(th),
         unit: 'daN'
       },
       {
         label: $localize`Inf tension  acc.:`,
-        value: formatNumber(tensionInf?.[this.index()]),
+        value: this.getFormatedNumberIndex(tensionInf),
         unit: 'daN'
       }
     ];
