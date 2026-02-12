@@ -7,6 +7,7 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
+import { createShadowPlotData } from './helpers/createShadowPlotData';
 import {
   PlotService,
   SelectedDisplayOptions
@@ -58,10 +59,11 @@ export class SectionPlotComponent {
 
   async refreshPlot(
     litData: GetSectionOutput | null,
+    baseLitData: GetSectionOutput | null,
     plotOptions: PlotOptions,
     isSupportZoom: boolean,
-    _isSidebarOpen: boolean, // eslint-disable-line @typescript-eslint/no-unused-vars
-    selectedDisplayOptions: { loads: boolean }
+    _isSidebarOpen: boolean,
+    selectedDisplayOptions: SelectedDisplayOptions
   ) {
     if (!litData) {
       return;
@@ -70,7 +72,14 @@ export class SectionPlotComponent {
       selectedDisplayOptions,
       plotOptions
     );
-    const plotData = createPlotData(litData, plotOptions);
+    let plotData = createPlotData(litData, plotOptions);
+
+    // Add shadow traces for base state if enabled
+    if (selectedDisplayOptions.baseState && baseLitData) {
+      const shadowData = createShadowPlotData(baseLitData, plotOptions);
+      plotData = [...shadowData, ...plotData];
+    }
+
     const camera = this.plotService.camera();
     return createPlot({
       plotId: 'plotly-output',
@@ -90,6 +99,7 @@ export class SectionPlotComponent {
   readonly effect = effect(() => {
     this.refreshPlot(
       this.litData(),
+      this.plotService.baseLitData(),
       this.plotService.plotOptions(),
       this.isSupportZoom(),
       this.plotService.isSidebarOpen(),

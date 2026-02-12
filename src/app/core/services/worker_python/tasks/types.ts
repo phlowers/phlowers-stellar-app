@@ -44,6 +44,11 @@ export interface GetSectionOutput {
   loads_coords: Dictionary<number[]>;
 }
 
+export interface GetSectionWithBaseOutput {
+  current: GetSectionOutput;
+  base: GetSectionOutput | null;
+}
+
 export enum LogLevel {
   DEBUG = 10,
   INFO = 20,
@@ -115,10 +120,10 @@ export interface TaskInputs {
 }
 
 export interface TaskOutputs {
-  [Task.getLit]: GetSectionOutput;
+  [Task.getLit]: GetSectionWithBaseOutput;
   [Task.runTests]: undefined;
-  [Task.changeState]: GetSectionOutput;
-  [Task.refreshProjection]: GetSectionOutput;
+  [Task.changeState]: GetSectionWithBaseOutput;
+  [Task.refreshProjection]: GetSectionWithBaseOutput;
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
     text_display_points: number[][];

@@ -3,24 +3,36 @@ import { SectionPlotComponent } from './section-plot.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
+import { createShadowPlotData } from './helpers/createShadowPlotData';
 import { Data } from 'plotly.js-dist-min';
 import { PlotOptions } from './helpers/types';
-import { PlotService } from '@ui/pages/studio/services/plot.service';
+import {
+  PlotService,
+  SelectedDisplayOptions
+} from '@ui/pages/studio/services/plot.service';
 
 // Mock the helper functions
 jest.mock('./helpers/createPlot');
 jest.mock('./helpers/createPlotData');
+jest.mock('./helpers/createShadowPlotData');
 
 const mockCreatePlot = createPlot as jest.MockedFunction<typeof createPlot>;
 const mockCreatePlotData = createPlotData as jest.MockedFunction<
   typeof createPlotData
+>;
+const mockCreateShadowPlotData = createShadowPlotData as jest.MockedFunction<
+  typeof createShadowPlotData
 >;
 
 // Mock PlotService
 const mockPlotService = {
   plotOptions: jest.fn(),
   camera: jest.fn().mockReturnValue(null),
-  isSidebarOpen: jest.fn().mockReturnValue(false)
+  isSidebarOpen: jest.fn().mockReturnValue(false),
+  baseLitData: jest.fn().mockReturnValue(null),
+  selectedDisplayOptions: jest
+    .fn()
+    .mockReturnValue({ loads: false, baseState: false })
 };
 
 describe('SectionPlotComponent', () => {
@@ -59,7 +71,19 @@ describe('SectionPlotComponent', () => {
     { type: 'scatter3d', x: [1, 2], y: [10, 20], z: [100, 200] } as Data
   ];
 
-  const mockSelectedDisplayOptions = { loads: false };
+  const mockSelectedDisplayOptions: SelectedDisplayOptions = {
+    loads: false,
+    baseState: false
+  };
+  const mockShadowPlotData: Data[] = [
+    {
+      type: 'scatter3d',
+      x: [1, 2],
+      y: [10, 20],
+      z: [100, 200],
+      line: { dash: 'solid' }
+    } as Data
+  ];
 
   beforeEach(async () => {
     // Reset all mocks
@@ -67,6 +91,7 @@ describe('SectionPlotComponent', () => {
 
     // Setup mock implementations
     mockCreatePlotData.mockReturnValue(mockPlotData);
+    mockCreateShadowPlotData.mockReturnValue(mockShadowPlotData);
     mockCreatePlot.mockResolvedValue({} as any);
 
     // Setup PlotService mock
@@ -112,6 +137,7 @@ describe('SectionPlotComponent', () => {
     it('should return early when litData is null', async () => {
       const result = await component.refreshPlot(
         null,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -126,6 +152,7 @@ describe('SectionPlotComponent', () => {
     it('should call helper functions with correct parameters when litData is provided', async () => {
       await component.refreshPlot(
         mockLitData,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -156,6 +183,7 @@ describe('SectionPlotComponent', () => {
 
       await component.refreshPlot(
         mockLitData,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -188,6 +216,7 @@ describe('SectionPlotComponent', () => {
 
       await component.refreshPlot(
         mockLitData,
+        null,
         customPlotOptions,
         true,
         false,
@@ -212,6 +241,79 @@ describe('SectionPlotComponent', () => {
         endSupport: 4
       });
     });
+
+    it('should include shadow traces when baseState is enabled', async () => {
+      const displayOptionsWithBase: SelectedDisplayOptions = {
+        loads: false,
+        baseState: true
+      };
+
+      await component.refreshPlot(
+        mockLitData,
+        mockLitData, // Using same data as baseLitData for test
+        mockPlotOptions,
+        false,
+        false,
+        displayOptionsWithBase
+      );
+
+      expect(mockCreateShadowPlotData).toHaveBeenCalledWith(
+        mockLitData,
+        mockPlotOptions
+      );
+      // Plot data should include shadow traces prepended
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: [...mockShadowPlotData, ...mockPlotData]
+        })
+      );
+    });
+
+    it('should not include shadow traces when baseState is disabled', async () => {
+      const displayOptionsWithoutBase: SelectedDisplayOptions = {
+        loads: false,
+        baseState: false
+      };
+
+      await component.refreshPlot(
+        mockLitData,
+        mockLitData,
+        mockPlotOptions,
+        false,
+        false,
+        displayOptionsWithoutBase
+      );
+
+      expect(mockCreateShadowPlotData).not.toHaveBeenCalled();
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: mockPlotData
+        })
+      );
+    });
+
+    it('should not include shadow traces when baseLitData is null', async () => {
+      const displayOptionsWithBase: SelectedDisplayOptions = {
+        loads: false,
+        baseState: true
+      };
+
+      await component.refreshPlot(
+        mockLitData,
+        null, // baseLitData is null
+        mockPlotOptions,
+        false,
+        false,
+        displayOptionsWithBase
+      );
+
+      expect(mockCreateShadowPlotData).not.toHaveBeenCalled();
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: mockPlotData
+        })
+      );
+    });
   });
 
   describe('Effect', () => {
@@ -221,6 +323,7 @@ describe('SectionPlotComponent', () => {
       // Test the method directly since effect testing is complex
       await component.refreshPlot(
         mockLitData,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -229,6 +332,7 @@ describe('SectionPlotComponent', () => {
 
       expect(refreshSpy).toHaveBeenCalledWith(
         mockLitData,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -242,6 +346,7 @@ describe('SectionPlotComponent', () => {
       // Test the method directly
       await component.refreshPlot(
         null,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -249,6 +354,7 @@ describe('SectionPlotComponent', () => {
       );
 
       expect(refreshSpy).toHaveBeenCalledWith(
+        null,
         null,
         mockPlotOptions,
         false,
@@ -264,6 +370,7 @@ describe('SectionPlotComponent', () => {
 
       await component.refreshPlot(
         mockLitData,
+        null,
         mockPlotOptions,
         true,
         false,
@@ -272,6 +379,7 @@ describe('SectionPlotComponent', () => {
 
       expect(refreshSpy).toHaveBeenCalledWith(
         mockLitData,
+        null,
         mockPlotOptions,
         true,
         false,
@@ -290,6 +398,7 @@ describe('SectionPlotComponent', () => {
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
       await component.refreshPlot(
         mockLitData,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -297,6 +406,7 @@ describe('SectionPlotComponent', () => {
       );
       expect(refreshSpy).toHaveBeenCalledWith(
         mockLitData,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -321,6 +431,7 @@ describe('SectionPlotComponent', () => {
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
       await component.refreshPlot(
         mockLitData,
+        null,
         customPlotOptions,
         true,
         false,
@@ -328,6 +439,7 @@ describe('SectionPlotComponent', () => {
       );
       expect(refreshSpy).toHaveBeenCalledWith(
         mockLitData,
+        null,
         customPlotOptions,
         true,
         false,
@@ -342,6 +454,7 @@ describe('SectionPlotComponent', () => {
       const refreshSpy = jest.spyOn(component, 'refreshPlot');
       const result = await component.refreshPlot(
         null,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -349,6 +462,7 @@ describe('SectionPlotComponent', () => {
       );
 
       expect(refreshSpy).toHaveBeenCalledWith(
+        null,
         null,
         mockPlotOptions,
         false,
@@ -384,6 +498,7 @@ describe('SectionPlotComponent', () => {
 
       const result = await component.refreshPlot(
         emptyData,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -419,6 +534,7 @@ describe('SectionPlotComponent', () => {
 
       const result = await component.refreshPlot(
         dataWithNulls,
+        null,
         mockPlotOptions,
         false,
         false,
@@ -454,6 +570,7 @@ describe('SectionPlotComponent', () => {
 
       const result = await component.refreshPlot(
         largeData,
+        null,
         mockPlotOptions,
         false,
         false,
