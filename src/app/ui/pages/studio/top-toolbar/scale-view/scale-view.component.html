@@ -1,0 +1,110 @@
+<p-button
+  i18n-label
+  label="Vue"
+  [styleClass]="
+    'view-button toolbar-speed-dial' +
+    (popoverOpen() ? ' view-button--active' : '')
+  "
+  aria-haspopup="dialog"
+  (onClick)="togglePopover($event)"
+>
+  <ng-template #icon>
+    <app-icon icon="image_aspect_ratio" />
+  </ng-template>
+</p-button>
+
+<p-popover appendTo="body" styleClass="scale-view-popover" #popover>
+  <form
+    class="view-config"
+    [formGroup]="formScaleView"
+    aria-label="Configuration de la vue"
+    i18n-aria-label
+  >
+    <fieldset class="view-config__section">
+      <legend class="view-config__label text-xs-200" i18n>
+        Sélectionner l'échelle d'affichage.
+      </legend>
+
+      <div
+        class="view-config__radio-group"
+        role="radiogroup"
+        aria-label="Échelle d'affichage"
+        i18n-aria-label
+      >
+        <div class="view-config__radio-item">
+          <p-radioButton
+            name="scale"
+            value="plan"
+            formControlName="scale"
+            inputId="plan"
+          ></p-radioButton>
+          <label for="plan" i18n>Plan (x/5, y, z)</label>
+        </div>
+
+        <div class="view-config__radio-item">
+          <p-radioButton
+            name="scale"
+            value="geo"
+            formControlName="scale"
+            inputId="geo"
+          ></p-radioButton>
+          <label for="geo" i18n>Géographique (x, y, z)</label>
+        </div>
+
+        <div class="view-config__radio-item">
+          <p-radioButton
+            name="scale"
+            value="celeste"
+            formControlName="scale"
+            inputId="celeste"
+          ></p-radioButton>
+          <label for="celeste" i18n>Céleste (x, y, z/2)</label>
+        </div>
+      </div>
+    </fieldset>
+
+    <hr class="view-config__divider" aria-hidden="true" />
+
+    <fieldset class="view-config__section">
+      <legend class="view-config__label text-sm-200" i18n>
+        Choisir le nombre de points à afficher par portée.
+      </legend>
+
+      <div class="view-config__controls flex flex-between items-center gap-8">
+        <div class="view-config__slider-wrapper w-[70%]">
+          <span class="view-config__limit" aria-hidden="true">25</span>
+          <p-slider
+            formControlName="sliderPointsCount"
+            [min]="25"
+            [max]="250"
+            class="view-config__slider"
+            aria-label="Nombre de points par portée"
+            i18n-aria-label
+          ></p-slider>
+          <span class="view-config__limit" aria-hidden="true">250</span>
+        </div>
+
+        <app-input-number
+          formControlName="pointsCount"
+          [min]="10"
+          [max]="200"
+          aria-label="Nombre de points"
+          i18n-aria-label
+        ></app-input-number>
+      </div>
+    </fieldset>
+
+    <footer class="view-config__footer">
+      <p-button
+        i18n-label
+        label="Valider"
+        (onClick)="onValidate()"
+        styleClass="view-config__submit-btn"
+      >
+        <ng-template #icon>
+          <app-icon icon="check_small" />
+        </ng-template>
+      </p-button>
+    </footer>
+  </form>
+</p-popover>
