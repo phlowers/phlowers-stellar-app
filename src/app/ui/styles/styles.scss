@@ -5,6 +5,7 @@
 @forward './utils';
 @forward './vendor-extension/vendor-extension.extract.scss';
 @forward './component/component.extracts';
+@forward './vendor-extension/override/override.extracts';
 
 @import './tailwind.css';
 @import 'primeicons/primeicons.css';
