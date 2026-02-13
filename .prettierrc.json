@@ -10,7 +10,7 @@
     "overrides": [
         {
             "files": ["*.ts", "*.mts", "*.d.ts"],
-            "options": {
+                "options": {
                 "parser": "typescript"
             }
         },
