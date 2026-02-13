@@ -1,0 +1,174 @@
+@use 'abstract.extracts' as app;
+
+:host {
+  display: block;
+}
+
+// ─── Block: .stepper ───
+.stepper {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.125rem;
+
+  // ── Element: Label ──
+  &__label {
+    @extend %label-style;
+    margin: 0 0.25rem 0.125rem;
+    transition: color var(--transition-duration);
+  }
+
+  // ── Element: Field (input + controls row) ──
+  &__field {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--grey-white);
+    border: 0.0625rem solid var(--star-dust-300);
+    border-radius: var(--content-border-radius);
+    height: 2.5rem;
+    width: 8.75rem;
+    padding: 0 0.25rem;
+    transition:
+      border-color var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1),
+      outline-color var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+
+    // ── 1. Hover ──
+    &:hover {
+      border-color: var(--star-dust-400);
+    }
+
+    // ── 2. Focus / Typing ──
+    &:focus-within {
+      border-color: var(--primary-600);
+      outline: 0.0625rem solid var(--primary-600);
+      outline-offset: 0.0625rem;
+    }
+  }
+
+  // ── Element: Input ──
+  &__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    text-align: left;
+    padding-left: 0.75rem;
+    font: 400 1rem/1.5 var(--p-font-family, 'Nunito', Arial, sans-serif);
+    color: var(--star-dust-950);
+    width: 2.5rem;
+    outline: none;
+
+    &::placeholder {
+      color: var(--star-dust-400);
+    }
+
+    // Masque les flèches natives
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    appearance: none;
+    -moz-appearance: textfield;
+
+    &:disabled {
+      color: var(--star-dust-300);
+      cursor: not-allowed;
+
+      &::placeholder {
+        color: var(--star-dust-300);
+      }
+    }
+  }
+
+  // ── Element: Controls container ──
+  &__controls {
+    display: flex;
+    align-items: center;
+    height: 70%;
+  }
+
+  // ── Element: Buttons ──
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--star-dust-600);
+    transition: color var(--transition-duration);
+
+    &:hover:not(:disabled) {
+      color: var(--primary-600);
+    }
+
+    &:disabled {
+      color: var(--star-dust-300);
+      cursor: not-allowed;
+    }
+
+    .pi {
+      font-size: 0.75rem;
+    }
+  }
+
+  // ── Element: Divider ──
+  &__divider {
+    width: 0.0625rem;
+    height: 1.25rem;
+    background-color: var(--star-dust-200);
+    margin: 0 0.125rem;
+  }
+
+  // ── Element: Assistive text ──
+  &__assistive {
+    @extend %text-s-400;
+    color: var(--star-dust-600);
+    margin: 0.125rem 0.25rem 0;
+
+    // ── Modifier: Error ──
+    &--error {
+      @extend %text-s-600;
+      color: var(--error-600);
+    }
+  }
+
+  // ── Modifier: Error state ──
+  &--error &__field {
+    border-color: var(--error-600);
+
+    &:hover {
+      border-color: var(--error-700);
+    }
+
+    &:focus-within {
+      outline-color: var(--error-600);
+    }
+  }
+
+  // ── Modifier: Disabled state ──
+  &--disabled &__field {
+    background-color: var(--star-dust-50);
+    border-color: var(--star-dust-200);
+    cursor: not-allowed;
+
+    &:hover {
+      border-color: var(--star-dust-200);
+    }
+
+    &:focus-within {
+      outline: none;
+    }
+  }
+
+  &--disabled &__label {
+    color: var(--star-dust-400);
+  }
+
+  &--disabled &__assistive {
+    color: var(--star-dust-400);
+  }
+}
