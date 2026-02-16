@@ -175,8 +175,8 @@ def generate_section_array(supports: list[Support]):
     return pd.DataFrame(section_data)
 
 
-engine = None
-plt_line = None
+engine: BalanceEngine
+plt_line: PlotEngine
 
 
 def get_section_middle_span(start_support: int, end_support: int):

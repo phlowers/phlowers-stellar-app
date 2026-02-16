@@ -92,7 +92,11 @@ export interface TaskInputs {
     altitude: number;
     horizontalDistance: number;
     hasPulley: boolean;
+    selectedSpanIndex: number;
+    selectedSupport: 'LEFT' | 'RIGHT' | null;
   };
+  // Use the same interface? Or create a new one?
+  // [Task.calculateGuying]: VtlAndGuyingInputs;
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
   };

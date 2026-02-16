@@ -255,7 +255,9 @@ export class VhlAndGuyingComponent implements AfterViewInit {
       {
         altitude: formValue.altitude!,
         horizontalDistance: formValue.horizontalDistance!,
-        hasPulley: formValue.hasPulley ?? false
+        hasPulley: formValue.hasPulley ?? false,
+        selectedSpanIndex: formValue.selectedSpan?.index || 0,
+        selectedSupport: formValue.selectedSupport || null
       }
     );
     if (error) {
