@@ -55,6 +55,11 @@ export interface GetSectionWithBaseOutput {
   base: GetSectionOutput | null;
 }
 
+export interface GetSectionWithBaseOutput {
+  current: GetSectionOutput;
+  base: GetSectionOutput | null;
+}
+
 export enum LogLevel {
   DEBUG = 10,
   INFO = 20,

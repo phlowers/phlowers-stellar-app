@@ -67,6 +67,11 @@ describe('PlotService', () => {
     base: mockGetSectionOutput
   };
 
+  const mockGetSectionWithBaseOutput: GetSectionWithBaseOutput = {
+    current: mockGetSectionOutput,
+    base: mockGetSectionOutput
+  };
+
   const mockCable: CatalogCable = {
     name: 'Test Cable',
     data_source: 'test-source',
