@@ -175,8 +175,8 @@ def generate_section_array(supports: list[Support]):
     return pd.DataFrame(section_data)
 
 
-engine = None
-plt_line = None
+engine: BalanceEngine
+plt_line: PlotEngine
 
 
 def get_section_middle_span(start_support: int, end_support: int):
@@ -204,10 +204,10 @@ def get_coordinates(
         "L0": engine.L_ref.tolist(),
         "elevation": engine.section_array.data.elevation_difference.tolist(),
         "line_angle": engine.section_array.data.line_angle.tolist(),
-        "vtl_under_chain": [v.value.tolist() for v in vtl_under_chain],
-        "vtl_under_console": [v.value.tolist() for v in vtl_under_console],
-        "r_under_chain": engine.balance_model.vhl_under_chain().R.value.tolist(),
-        "r_under_console": engine.balance_model.vhl_under_console().R.value.tolist(),
+        "vtl_under_chain": [v.value().tolist() for v in vtl_under_chain],
+        "vtl_under_console": [v.value().tolist() for v in vtl_under_console],
+        "r_under_chain": engine.balance_model.vhl_under_chain().R.value().tolist(),
+        "r_under_console": engine.balance_model.vhl_under_console().R.value().tolist(),
         "ground_altitude": engine.section_array.data.ground_altitude.tolist(),
         "displacement": engine.get_displacement().tolist(),
         "load_angle": engine.cable_loads.load_angle.tolist(),
