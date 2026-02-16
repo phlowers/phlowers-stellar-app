@@ -22,8 +22,6 @@ describe('createPlotData', () => {
       supports: [[[1, 2, 3, 4, 5]]],
       insulators: [[[10, 20, 30, 40, 50]]],
       spans: [[[100, 200, 300, 400, 500]]],
-      L0: [],
-      elevation: [],
       line_angle: [],
       vtl_under_chain: [],
       vtl_under_console: [],
@@ -32,8 +30,16 @@ describe('createPlotData', () => {
       ground_altitude: [],
       load_angle: [],
       displacement: [],
+      loads_coords: {},
       span_length: [],
-      loads_coords: {}
+      elevation: [],
+      parameter: [],
+      tension_sup: [],
+      tension_inf: [],
+      L0: [],
+      horizontal_distance: [],
+      arc_length: [],
+      T_h: []
     };
 
     mockOptions = {
@@ -179,8 +185,6 @@ describe('createPlotData', () => {
         supports: [],
         insulators: [],
         spans: [],
-        L0: [],
-        elevation: [],
         line_angle: [],
         vtl_under_chain: [],
         vtl_under_console: [],
@@ -189,8 +193,16 @@ describe('createPlotData', () => {
         ground_altitude: [],
         load_angle: [],
         displacement: [],
+        loads_coords: {},
         span_length: [],
-        loads_coords: {}
+        elevation: [],
+        parameter: [],
+        tension_sup: [],
+        tension_inf: [],
+        L0: [],
+        horizontal_distance: [],
+        arc_length: [],
+        T_h: []
       };
 
       const result = createPlotData(emptyParams, mockOptions);

@@ -32,8 +32,6 @@ describe('SectionPlotComponent', () => {
     supports: [[[1, 2, 3, 4, 5]]],
     insulators: [[[10, 20, 30, 40, 50]]],
     spans: [[[100, 200, 300, 400, 500]]],
-    L0: [],
-    elevation: [],
     line_angle: [],
     vtl_under_chain: [],
     vtl_under_console: [],
@@ -42,8 +40,16 @@ describe('SectionPlotComponent', () => {
     ground_altitude: [],
     load_angle: [],
     displacement: [],
+    loads_coords: {},
     span_length: [],
-    loads_coords: {}
+    elevation: [],
+    parameter: [],
+    tension_sup: [],
+    tension_inf: [],
+    L0: [],
+    horizontal_distance: [],
+    arc_length: [],
+    T_h: []
   };
 
   // Mock plotOptions signal
@@ -366,8 +372,6 @@ describe('SectionPlotComponent', () => {
         supports: [],
         insulators: [],
         spans: [],
-        L0: [],
-        elevation: [],
         line_angle: [],
         vtl_under_chain: [],
         vtl_under_console: [],
@@ -376,8 +380,16 @@ describe('SectionPlotComponent', () => {
         ground_altitude: [],
         load_angle: [],
         displacement: [],
+        loads_coords: {},
         span_length: [],
-        loads_coords: {}
+        elevation: [],
+        parameter: [],
+        tension_sup: [],
+        tension_inf: [],
+        L0: [],
+        horizontal_distance: [],
+        arc_length: [],
+        T_h: []
       };
 
       fixture.componentRef.setInput('litData', emptyData);
@@ -401,8 +413,6 @@ describe('SectionPlotComponent', () => {
         supports: [[[1, 2]]],
         insulators: [[[10, 20]]],
         spans: [[[100, 200]]],
-        L0: [],
-        elevation: [],
         line_angle: [],
         vtl_under_chain: [],
         vtl_under_console: [],
@@ -411,8 +421,16 @@ describe('SectionPlotComponent', () => {
         ground_altitude: [],
         load_angle: [],
         displacement: [],
+        loads_coords: {},
         span_length: [],
-        loads_coords: {}
+        elevation: [],
+        parameter: [],
+        tension_sup: [],
+        tension_inf: [],
+        L0: [],
+        horizontal_distance: [],
+        arc_length: [],
+        T_h: []
       };
 
       fixture.componentRef.setInput('litData', dataWithNulls);
@@ -436,8 +454,6 @@ describe('SectionPlotComponent', () => {
         supports: [[[999999]]],
         insulators: [[[10]]],
         spans: [[[100]]],
-        L0: [],
-        elevation: [],
         line_angle: [],
         vtl_under_chain: [],
         vtl_under_console: [],
@@ -446,8 +462,16 @@ describe('SectionPlotComponent', () => {
         ground_altitude: [],
         load_angle: [],
         displacement: [],
+        loads_coords: {},
         span_length: [],
-        loads_coords: {}
+        elevation: [],
+        parameter: [],
+        tension_sup: [],
+        tension_inf: [],
+        L0: [],
+        horizontal_distance: [],
+        arc_length: [],
+        T_h: []
       };
 
       fixture.componentRef.setInput('litData', largeData);

@@ -5,8 +5,6 @@ import pint
 import numpy as np
 from mechaphlowers import ThermalEngine, units
 
-Q_ = pint.UnitRegistry().Quantity
-
 @dataclass
 class TemperatureCalculationInputs:
     cableName: str
