@@ -1228,11 +1228,6 @@
         <source>Span length:</source>
       </segment>
     </unit>
-    <unit id="1136763922457847411">
-      <segment>
-        <source>Elevation (m):</source>
-      </segment>
-    </unit>
     <unit id="6126902002679300027">
       <segment>
         <source>Supp tension (Max):</source>
@@ -2750,9 +2745,14 @@
         <source>Modify</source>
       </segment>
     </unit>
-    <unit id="2331707475777242948">
+    <unit id="7345748523571536840">
       <segment>
-        <source>Parameter (m):</source>
+        <source>Elevation:</source>
+      </segment>
+    </unit>
+    <unit id="7518486444185721115">
+      <segment>
+        <source>Parameter:</source>
       </segment>
     </unit>
   </file>

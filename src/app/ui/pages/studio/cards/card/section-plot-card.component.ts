@@ -219,12 +219,12 @@ export class SectionPlotCardComponent {
         unit: 'm'
       },
       {
-        label: $localize`Elevation (m):`,
+        label: $localize`Elevation:`,
         value: this.getFormatedNumberIndex(elevation),
         unit: 'm'
       },
       {
-        label: $localize`Parameter (m):`,
+        label: $localize`Parameter:`,
         value: this.getFormatedNumberIndex(parameter),
         unit: 'm'
       },

@@ -2099,12 +2099,6 @@
         <target>Longueur portée :</target>
       </segment>
     </unit>
-    <unit id="1136763922457847411">
-      <segment state="initial">
-        <source>Elevation (m):</source>
-        <target>Dénivelé (m) :</target>
-      </segment>
-    </unit>
     <unit id="6126902002679300027">
       <segment state="initial">
         <source>Supp tension (Max):</source>
@@ -3315,10 +3309,16 @@
         <target>Données enregistrées avec succès</target>
       </segment>
     </unit>
-    <unit id="2331707475777242948">
+    <unit id="7345748523571536840">
       <segment state="initial">
-        <source>Parameter (m):</source>
-        <target>Paramètre (m) :</target>
+        <source>Elevation:</source>
+        <target>Dénivelé :</target>
+      </segment>
+    </unit>
+    <unit id="7518486444185721115">
+      <segment state="initial">
+        <source>Parameter:</source>
+        <target>Paramètre :</target>
       </segment>
     </unit>
   </file>
