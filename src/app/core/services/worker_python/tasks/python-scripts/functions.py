@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from mechaphlowers.entities.arrays import SectionArray, CableArray
 import mechaphlowers as mph
-from mechaphlowers import BalanceEngine, PlotEngine
+from mechaphlowers import BalanceEngine, PlotEngine, units
 from typing import Optional
 from dataclasses import dataclass
 from mechaphlowers.entities.shapes import SupportShape
@@ -197,13 +197,12 @@ def get_coordinates(
     # vtl = vtl_under_chain.vtl)
 
     loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span)
+    line_angle_rad = engine.section_array.data.line_angle.to_numpy()
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
         "supports": supports.coords,
-        "L0": engine.L_ref.tolist(),
-        "elevation": engine.section_array.data.elevation_difference.tolist(),
-        "line_angle": engine.section_array.data.line_angle.tolist(),
+        "line_angle": units(line_angle_rad, 'rad').to('grad').m.tolist(),
         "vtl_under_chain": [v.value().tolist() for v in vtl_under_chain],
         "vtl_under_console": [v.value().tolist() for v in vtl_under_console],
         "r_under_chain": engine.balance_model.vhl_under_chain().R.value().tolist(),
@@ -211,9 +210,10 @@ def get_coordinates(
         "ground_altitude": engine.section_array.data.ground_altitude.tolist(),
         "displacement": engine.get_displacement().tolist(),
         "load_angle": engine.cable_loads.load_angle.tolist(),
-        "span_length": engine.section_array.data.span_length.tolist(),
         "loads_coords" : loads_coords
     }
+    result_spans = engine.get_data_spans()
+    result.update(result_spans)
     return result
 
 
