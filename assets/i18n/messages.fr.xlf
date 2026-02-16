@@ -3456,24 +3456,6 @@
         <target>Positionnement libre</target>
       </segment>
     </unit>
-    <unit id="5200268001024215420">
-      <segment state="initial">
-        <source>Alt. point (m)</source>
-        <target>Alt. point (m)</target>
-      </segment>
-    </unit>
-    <unit id="7478955611020967674">
-      <segment state="initial">
-        <source>Dist. supp. réf. (m)</source>
-        <target>Dist. supp. réf. (m)</target>
-      </segment>
-    </unit>
-    <unit id="2925979774521322109">
-      <segment state="initial">
-        <source>Dist. axe ligne</source>
-        <target>Dist. axe ligne</target>
-      </segment>
-    </unit>
     <unit id="8244905429888828226">
       <segment state="initial">
         <source>AT-CCGLA</source>
@@ -3597,3 +3579,32 @@
  </file>
 </xliff>
 
+        <target>Obstacle supprimé</target>
+      </segment>
+    </unit>
+    <unit id="2005931237680290696">
+      <segment state="initial">
+        <source>Select point</source>
+        <target>Sélectionner le point</target>
+      </segment>
+    </unit>
+    <unit id="8394386160100993545">
+      <segment state="initial">
+        <source> Alt. point </source>
+        <target> Alt. point </target>
+      </segment>
+    </unit>
+    <unit id="4761670130264103669">
+      <segment state="initial">
+        <source> Ref. supp. dist. </source>
+        <target> Dist. supp. réf. </target>
+      </segment>
+    </unit>
+    <unit id="1173626964516754828">
+      <segment state="initial">
+        <source> Line axe dist. </source>
+        <target> Dist. axe ligne </target>
+      </segment>
+    </unit>
+  </file>
+</xliff>

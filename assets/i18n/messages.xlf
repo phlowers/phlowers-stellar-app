@@ -2810,11 +2810,6 @@
         <source>Vertical</source>
       </segment>
     </unit>
-    <unit id="2925979774521322109">
-      <segment>
-        <source>Dist. axe ligne</source>
-      </segment>
-    </unit>
     <unit id="3757513599773924778">
       <segment>
         <source>Relative to support</source>
@@ -2833,11 +2828,6 @@
     <unit id="5139118152626940877">
       <segment>
         <source>Tree</source>
-      </segment>
-    </unit>
-    <unit id="5200268001024215420">
-      <segment>
-        <source>Alt. point (m)</source>
       </segment>
     </unit>
     <unit id="5268710126531471758">
@@ -2873,11 +2863,6 @@
     <unit id="7009794897351276069">
       <segment>
         <source>Obstacle type</source>
-      </segment>
-    </unit>
-    <unit id="7478955611020967674">
-      <segment>
-        <source>Dist. supp. réf. (m)</source>
       </segment>
     </unit>
     <unit id="8244905429888828226">
@@ -2949,6 +2934,24 @@
     <unit id="3192753641165405448">
       <segment>
         <source>Base</source>
+    <unit id="1173626964516754828">
+      <segment>
+        <source> Line axe dist. </source>
+      </segment>
+    </unit>
+    <unit id="2005931237680290696">
+      <segment>
+        <source>Select point</source>
+      </segment>
+    </unit>
+    <unit id="4761670130264103669">
+      <segment>
+        <source> Ref. supp. dist. </source>
+      </segment>
+    </unit>
+    <unit id="8394386160100993545">
+      <segment>
+        <source> Alt. point </source>
       </segment>
     </unit>
   </file>

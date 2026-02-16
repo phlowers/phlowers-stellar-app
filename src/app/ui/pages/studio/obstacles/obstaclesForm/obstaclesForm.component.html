@@ -7,10 +7,10 @@
       [disabled]="!supportUuidValue()"
       (click)="obstacleFormService.returnToSpan()"
       btnSize="s"
-      class="obstacles-form__return"
     >
       <ng-container i18n>Return to span</ng-container>
     </button>
+
     <button
       app-btn
       type="button"
@@ -22,7 +22,8 @@
       <ng-container i18n>Create new obstacle</ng-container>
     </button>
   </div>
-  <div class="obstacles-form__divided-line">
+
+  <div class="obstacles-form__grid-2-cols">
     <label for="span" class="span-label" i18n>Span</label>
 
     <p-select
@@ -46,7 +47,7 @@
     />
   </div>
 
-  <div class="obstacles-form__divided-line">
+  <div class="obstacles-form__grid-2-cols">
     <label for="obstacleName" class="name-label" i18n>Obstacle name</label>
 
     <input
@@ -74,7 +75,7 @@
     />
   </div>
 
-  <div class="obstacles-form__divided-line">
+  <div class="obstacles-form__grid-2-cols">
     <label for="altitudeType" class="alt-label" i18n
       >Obstacle altitude type</label
     >
@@ -103,7 +104,7 @@
   </div>
 
   <div class="obstacles-form__field">
-    <div class="obstacles-form__field-toggle">
+    <div class="obstacles-form__field__toggle">
       <p-toggleswitch [disabled]="true" />
       <label for="freePositioning" i18n>Free positioning</label>
     </div>
@@ -123,28 +124,39 @@
     </button>
   </div>
 
-  <div class="obstacles-form__positions-container">
+  <ul class="obstacles-form__points">
     @for (obstacle of obstacleFormService.positions.controls; track $index) {
-      <div
-        (click)="setCurrentObstaclePoint($index)"
-        (keyup.enter)="setCurrentObstaclePoint($index)"
-        (keydown.space)="
-          setCurrentObstaclePoint($index); $event.preventDefault()
-        "
-        [class.obstacles-form__point--active]="
+      <li
+        [class.obstacles-form__points__point--active]="
           obstaclesService.currentPointIndex() === $index
         "
-        class="obstacles-form__point"
-        role="button"
-        tabindex="0"
+        [ariaSelected]="
+          obstaclesService.currentPointIndex() === $index ? 'true' : 'false'
+        "
+        class="obstacles-form__points__point"
       >
-        <div class="obstacles-form__point-header">
-          <p class="obstacles-form__point-label">Point {{ $index + 1 }}</p>
+        <button
+          type="button"
+          class="obstacles-form__points__point__select"
+          (click)="setCurrentObstaclePoint($index)"
+        >
+          <span class="sr-only"
+            ><ng-container i18n>Select point</ng-container>&nbsp;{{
+              $index + 1
+            }}</span
+          >
+        </button>
+
+        <div class="obstacles-form__points__point__header">
+          <p class="obstacles-form__points__point__header__label">
+            Point {{ $index + 1 }}
+          </p>
           <button
             app-btn
             btnStyle="danger"
             btnSize="s"
             type="button"
+            class="obstacles-form__points__point__header__btn"
             (click)="
               obstacleFormService.deletePoint($index); $event.stopPropagation()
             "
@@ -154,69 +166,83 @@
             <app-icon icon="delete" />
           </button>
         </div>
-        <div
-          class="obstacles-form__divided-line obstacles-form__divided-line--three"
-        >
-          <label for="altitudePoint" class="alt-point-label" i18n
-            >Alt. point (m)</label
-          >
 
-          <p-inputgroup>
+        <div class="obstacles-form__points__point__form">
+          <label
+            [for]="'altitudePoint' + $index"
+            class="obstacles-form__points__point__form__label alt-point-label"
+            i18n
+          >
+            Alt. point
+          </label>
+
+          <p-inputgroup class="obstacles-form__points__point__form__input">
             <input
               (input)="onPositionInput($event, 'z')"
               pInputText
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
-              id="altitudePoint"
+              [id]="'altitudePoint' + $index"
               [value]="obstacle.value.z"
               class="alt-point-input"
               step="0.01"
+              (focus)="setCurrentObstaclePoint($index)"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
 
-          <label for="distanceToRefSupport" class="dist-ref-label" i18n
-            >Dist. supp. réf. (m)</label
+          <label
+            [for]="'distanceToRefSupport' + $index"
+            class="obstacles-form__points__point__form__label dist-ref-label"
+            i18n
           >
+            Ref. supp. dist.
+          </label>
 
-          <p-inputgroup>
+          <p-inputgroup class="obstacles-form__points__point__form__input">
             <input
               pInputText
               (input)="onPositionInput($event, 'x')"
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
-              id="distanceToRefSupport"
+              [id]="'distanceToRefSupport' + $index"
               [value]="obstacle.value.x"
               class="dist-ref-input"
               step="0.01"
+              (focus)="setCurrentObstaclePoint($index)"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
 
-          <label for="distanceToLineAxis" class="dist-axis-label" i18n
-            >Dist. axe ligne</label
+          <label
+            [for]="'distanceToLineAxis' + $index"
+            class="obstacles-form__points__point__form__label dist-axis-label"
+            i18n
           >
+            Line axe dist.
+          </label>
 
-          <p-inputgroup>
+          <p-inputgroup class="obstacles-form__points__point__form__input">
             <input
               pInputText
               (input)="onPositionInput($event, 'y')"
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
-              id="distanceToLineAxis"
+              [id]="'distanceToLineAxis' + $index"
               [value]="obstacle.value.y"
               class="dist-axis-input"
               step="0.01"
+              (focus)="setCurrentObstaclePoint($index)"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
         </div>
-      </div>
+      </li>
     }
-  </div>
+  </ul>
 
-  <div class="obstacles-form__sticky-bottom">
-    <div class="obstacles-form__btn-wrapper">
+  <div class="obstacles-form__sticky">
+    <div class="obstacles-form__sticky__btns">
       <button
         app-btn
         btnStyle="danger"
@@ -251,33 +277,42 @@
       </button>
     </div>
 
-    <hr class="obstacles-form__divider" />
+    <hr class="obstacles-form__sticky__divider" />
 
-    <div class="obstacles-form__results">
-      <div class="obstacles-form__results-label" i18n>Results:</div>
-      <div class="obstacles-form__results-grid">
-        <div class="obstacles-form__results-item">
-          <span i18n>Oblique</span>
-          <span
-            >{{ obstacleFormService.results().oblique ?? 'N/A' }}
-            <ng-container i18n>m</ng-container></span
-          >
+    <div class="obstacles-form__sticky__results">
+      <h2 class="obstacles-form__sticky__results__title" i18n>Results:</h2>
+
+      <dl class="obstacles-form__sticky__results__grid">
+        <div class="obstacles-form__sticky__results__grid__item">
+          <dt class="obstacles-form__sticky__results__grid__item__term" i18n>
+            Oblique
+          </dt>
+          <dd class="obstacles-form__sticky__results__grid__item__def">
+            {{ obstacleFormService.results().oblique ?? 'N/A' }}
+            <ng-container i18n>m</ng-container>
+          </dd>
         </div>
-        <div class="obstacles-form__results-item">
-          <span i18n>Vertical</span>
-          <span
-            >{{ obstacleFormService.results().verticale ?? 'N/A' }}
-            <ng-container i18n>m</ng-container></span
-          >
+
+        <div class="obstacles-form__sticky__results__grid__item">
+          <dt class="obstacles-form__sticky__results__grid__item__term" i18n>
+            Vertical
+          </dt>
+          <dd class="obstacles-form__sticky__results__grid__item__def">
+            {{ obstacleFormService.results().verticale ?? 'N/A' }}
+            <ng-container i18n>m</ng-container>
+          </dd>
         </div>
-        <div class="obstacles-form__results-item">
-          <span i18n>Horizontal</span>
-          <span
-            >{{ obstacleFormService.results().horizontale ?? 'N/A' }}
-            <ng-container i18n>m</ng-container></span
-          >
+
+        <div class="obstacles-form__sticky__results__grid__item">
+          <dt class="obstacles-form__sticky__results__grid__item__term" i18n>
+            Horizontal
+          </dt>
+          <dd class="obstacles-form__sticky__results__grid__item__def">
+            {{ obstacleFormService.results().horizontale ?? 'N/A' }}
+            <ng-container i18n>m</ng-container>
+          </dd>
         </div>
-      </div>
+      </dl>
     </div>
   </div>
 </form>
