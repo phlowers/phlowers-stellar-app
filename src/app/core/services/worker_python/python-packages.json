@@ -15,7 +15,7 @@
     "source": "local"
   },
   "mechaphlowers": {
-    "file_name": "mechaphlowers-0.5.3rc0.post34-cp313-none-any.whl",
+    "file_name": "mechaphlowers-0.5.3-cp313-none-any.whl",
     "name": "mechaphlowers",
     "source": "local"
   },
@@ -90,12 +90,12 @@
     "source": "cdn"
   },
   "tenacity": {
-    "file_name": "tenacity-9.1.2-cp313-none-any.whl",
+    "file_name": "tenacity-9.1.4-cp313-none-any.whl",
     "name": "tenacity",
     "source": "local"
   },
   "thermohl": {
-    "file_name": "thermohl-1.4.0rc1-cp313-none-any.whl",
+    "file_name": "thermohl-1.4.0-cp313-none-any.whl",
     "name": "thermohl",
     "source": "local"
   },
