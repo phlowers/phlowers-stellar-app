@@ -20,7 +20,7 @@
       [attr.min]="min()"
       [attr.max]="max()"
       [placeholder]="placeholder()"
-      [attr.aria-describedby]="assistiveId()"
+      [attr.aria-errormessage]="assistiveId()"
       [attr.aria-invalid]="hasError()"
       readonly
       (blur)="markTouched()"
@@ -32,6 +32,7 @@
       <button
         type="button"
         class="stepper__btn"
+        [class.stepper__btn--disabled]="disabled() || isAtMin()"
         [disabled]="disabled() || isAtMin()"
         [attr.aria-label]="'Diminuer'"
         i18n-aria-label
@@ -45,6 +46,7 @@
       <button
         type="button"
         class="stepper__btn"
+        [class.stepper__btn--disabled]="disabled() || isAtMax()"
         [disabled]="disabled() || isAtMax()"
         [attr.aria-label]="'Augmenter'"
         i18n-aria-label

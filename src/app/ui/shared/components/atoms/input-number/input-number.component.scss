@@ -100,6 +100,11 @@
     cursor: pointer;
     color: var(--star-dust-600);
     transition: color var(--transition-duration);
+    &--disabled {
+      color: var(--star-dust-300);
+      background-color: var(--star-dust-300);
+      cursor: not-allowed;
+    }
 
     &:hover:not(:disabled) {
       color: var(--primary-600);

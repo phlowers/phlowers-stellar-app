@@ -1,4 +1,11 @@
-import { Component, computed, forwardRef, input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  forwardRef,
+  input,
+  signal
+} from '@angular/core';
 import {
   ControlValueAccessor,
   FormControl,
@@ -25,43 +32,43 @@ let nextId = 0;
   ]
 })
 export class InputNumberComponent implements ControlValueAccessor {
-  /** Valeur minimale autorisée */
   readonly min = input(25);
-  /** Valeur maximale autorisée */
   readonly max = input(250);
-  /** Label affiché au-dessus du champ */
   readonly label = input('');
-  /** Placeholder affiché quand le champ est vide */
   readonly placeholder = input('');
-  /** Texte d'aide affiché sous le champ */
+  /** Assistive text displayed below the field */
   readonly assistiveText = input('');
-  /** Message d'erreur affiché sous le champ */
   readonly errorMessage = input('');
-  /** Indique si le champ est en état d'erreur */
+  /** Indicates whether the field is in an error state */
   readonly hasError = input(false);
 
   readonly inputId = `input-number-${nextId++}`;
   readonly disabled = signal(false);
   readonly pointsCountControl = new FormControl<number | null>(null);
+  readonly pointsCountValue = signal<number | null>(
+    this.pointsCountControl.value
+  );
 
-  /** ID de l'élément assistif pour aria-describedby */
+  /** ID of the assistive element for aria-describedby */
   readonly assistiveId = computed(() =>
     this.assistiveText() || this.errorMessage()
       ? `${this.inputId}-assistive`
       : null
   );
 
-  /** Texte affiché sous le champ (erreur prioritaire sur assistif) */
+  /** Text displayed below the field (error takes priority over assistive) */
+
   readonly displayedAssistiveText = computed(() =>
     this.hasError() ? this.errorMessage() : this.assistiveText()
   );
 
   readonly isAtMin = computed(
-    () => (this.pointsCountControl.value ?? 0) <= this.min()
+    () => (this.pointsCountValue() ?? 0) === this.min()
   );
-  readonly isAtMax = computed(
-    () => (this.pointsCountControl.value ?? 0) >= this.max()
-  );
+  readonly isAtMax = computed(() => {
+    console.log('isAtMax computed:', this.pointsCountValue());
+    return (this.pointsCountValue() ?? 0) === this.max();
+  });
 
   private onChange: (value: number | null) => void = () => {
     // Callback will be set by registerOnChange
@@ -71,7 +78,9 @@ export class InputNumberComponent implements ControlValueAccessor {
   };
 
   writeValue(value: number | null): void {
-    this.pointsCountControl.setValue(this.clamp(value), { emitEvent: false });
+    const next = this.clamp(value);
+    this.pointsCountControl.setValue(next, { emitEvent: false });
+    this.pointsCountValue.set(next);
   }
 
   registerOnChange(fn: (value: number | null) => void): void {
@@ -118,6 +127,7 @@ export class InputNumberComponent implements ControlValueAccessor {
   private updateValue(value: number | null): void {
     const next = this.clamp(value);
     this.pointsCountControl.setValue(next);
+    this.pointsCountValue.set(next);
     this.onChange(next);
   }
 
