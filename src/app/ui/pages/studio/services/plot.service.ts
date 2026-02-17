@@ -53,6 +53,9 @@ export const defaultPlotOptions: PlotOptions = {
   invert: false
 };
 
+const DEFAULT_RESOLUTION = 100;
+const RESOLUTION_STORAGE_KEY = 'plotResolution';
+
 const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   loads: true,
   baseState: false
@@ -82,6 +85,8 @@ export class PlotService {
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions
   });
+  resolution = signal<number>(DEFAULT_RESOLUTION);
+  appliedResolution = signal<number | null>(null);
   selectedDisplayOptions = signal<SelectedDisplayOptions>({
     ...defaultSelectedDisplayOptions
   });
@@ -92,12 +97,21 @@ export class PlotService {
     private readonly cableService: CablesService,
     private readonly sectionService: SectionService
   ) {
+    const storedResolution = Number(localStorage.getItem(RESOLUTION_STORAGE_KEY));
+    if (Number.isFinite(storedResolution) && storedResolution > 0) {
+      this.resolution.set(storedResolution);
+    }
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
     });
     effect(() => {
       if (this.isStudioActive() && this.workerReady() && this.section()) {
         this.refreshSection(this.section()!);
+      }
+    });
+    effect(() => {
+      if (this.workerReady()) {
+        this.applyResolution(this.resolution());
       }
     });
   }
@@ -116,6 +130,38 @@ export class PlotService {
     this.section.set(null);
     this.study.set(null);
   };
+
+  private normalizeResolution(value: number): number {
+    if (!Number.isFinite(value)) {
+      return DEFAULT_RESOLUTION;
+    }
+    return Math.max(1, Math.round(value));
+  }
+
+  async applyResolution(value: number): Promise<void> {
+    if (!this.workerPythonService.ready) {
+      return;
+    }
+    const normalizedResolution = this.normalizeResolution(value);
+    if (this.appliedResolution() === normalizedResolution) {
+      return;
+    }
+    const { error } = await this.workerPythonService.runTask(Task.setResolution, {
+      resolution: normalizedResolution
+    });
+    if (!error) {
+      this.appliedResolution.set(normalizedResolution);
+    }
+  }
+
+  setResolution(value: number): void {
+    const normalizedResolution = this.normalizeResolution(value);
+    if (normalizedResolution === this.resolution()) {
+      return;
+    }
+    this.resolution.set(normalizedResolution);
+    localStorage.setItem(RESOLUTION_STORAGE_KEY, normalizedResolution.toString());
+  }
 
   modifySection = (sectionData: Partial<Section>) => {
     const study = this.study();
