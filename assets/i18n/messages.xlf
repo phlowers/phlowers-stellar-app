@@ -2760,5 +2760,10 @@
         <source>Base</source>
       </segment>
     </unit>
+    <unit id="1035708454595696483">
+      <segment>
+        <source>The initial condition name must be unique.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

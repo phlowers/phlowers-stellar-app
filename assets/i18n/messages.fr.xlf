@@ -3327,5 +3327,11 @@
         <target>Base</target>
       </segment>
     </unit>
+    <unit id="1035708454595696483">
+      <segment state="initial">
+        <source>The initial condition name must be unique.</source>
+        <target>Le nom de la condition initiale doit être unique.</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
