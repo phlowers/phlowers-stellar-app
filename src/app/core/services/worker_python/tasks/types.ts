@@ -107,12 +107,9 @@ export interface GetSectionOutput {
   span_length: number[];
   /** Coordinates of applied loads by support UUID */
   loads_coords: Dictionary<number[]>;
-  span_length: number[];
-  elevation: number[];
   parameter: number[];
   tension_sup: number[];
   tension_inf: number[];
-  L0: number[];
   horizontal_distance: number[];
   arc_length: number[];
   T_h: number[];
