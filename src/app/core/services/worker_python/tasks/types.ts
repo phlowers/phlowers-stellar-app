@@ -11,6 +11,7 @@ export enum Task {
   calculatePapoto = 'calculatePapoto',
   calculateGuying = 'calculateGuying',
   setLogLevel = 'setLogLevel',
+  setResolution = 'setResolution',
   temperatureCalculation = 'temperatureCalculation',
   calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind'
 }
@@ -105,6 +106,9 @@ export interface TaskInputs {
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
   };
+  [Task.setResolution]: {
+    resolution: number;
+  };
   [Task.temperatureCalculation]: {
     cableName: string;
     ambientTemperature: number;
@@ -155,6 +159,10 @@ export interface TaskOutputs {
     chargeLIfPulley: number;
   };
   [Task.setLogLevel]: undefined;
+  [Task.setResolution]: {
+    success: boolean;
+    resolution: number;
+  };
   [Task.temperatureCalculation]: {
     cableSolarFlux: number;
     cableTemperature: number;

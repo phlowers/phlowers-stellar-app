@@ -61,6 +61,24 @@ def set_log_level(js_inputs: dict):
     return {"success": True}
 
 
+def set_resolution(js_inputs: dict):
+    global RESOLUTION
+    python_inputs = js_to_python(js_inputs)
+    resolution_value = python_inputs.get("resolution")
+
+    if resolution_value is None:
+        return {"success": False, "resolution": RESOLUTION}
+
+    try:
+        normalized_resolution = max(1, int(resolution_value))
+    except (TypeError, ValueError):
+        return {"success": False, "resolution": RESOLUTION}
+
+    RESOLUTION = normalized_resolution
+    mph.options.graphics.resolution = RESOLUTION
+    return {"success": True, "resolution": RESOLUTION}
+
+
 @dataclass
 class Support:
     uuid: str

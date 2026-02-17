@@ -49,6 +49,10 @@ const tasks: Record<
     function: 'set_log_level',
     externalPackages: []
   },
+  [Task.setResolution]: {
+    function: 'set_resolution',
+    externalPackages: []
+  },
   [Task.temperatureCalculation]: {
     function: 'temperature_calculation',
     externalPackages: []
