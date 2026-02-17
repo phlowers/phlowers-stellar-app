@@ -32,6 +32,8 @@ jobs:
           # Install a specific version of uv.
           version: "0.5.24"
           python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "stellar-engine/**/pyproject.toml"
 
       - name: ⚙️ Check uv version
         run: |
