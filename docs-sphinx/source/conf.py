@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Stellar'
-copyright = '2026, Adrien Goeller'
-author = 'Adrien Goeller'
+copyright = 'Copyright (c) 2026, RTE (http://www.rte-france.com)'
+
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -49,17 +49,17 @@ html_theme = 'sphinx_material'
 # Material theme options
 html_theme_options = {
     "nav_title": "Stellar",
-    "base_url": "https://stellar.readthedocs.io/",
-    "repo_url": "https://github.com/phlowers/stellar",
-    "repo_name": "Stellar",
+    "base_url": "https://phlowers.readthedocs.io/projects/Stellar",
+    "repo_url": "https://github.com/phlowers/phlowers-stellar-app",
+    "repo_name": "phlowers-stellar-app",
     "google_analytics_account": "",
     "html_minify": False,
     "css_minify": False,
     "globaltoc_depth": 3,
     "globaltoc_collapse": True,
     "globaltoc_includehidden": True,
-    "color_primary": "blue",
-    "color_accent": "light-blue",
+    "color_primary": "indigo",
+    "color_accent": "purple",
 }
 
 # Required for sphinx-material
