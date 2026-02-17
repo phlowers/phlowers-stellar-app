@@ -72,6 +72,8 @@ __pycache__/
 *.egg-info/
 .eggs/
 .pdm-build/
+coverage.xml
+htmlcov/
 
 # vscode
 .vscode
