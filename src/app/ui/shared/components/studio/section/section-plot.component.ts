@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, effect, inject, input } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
@@ -18,7 +18,6 @@ import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstacle
 import { Obstacle } from '@src/app/core/domain/models/obstacle.model';
 import { appendExistingObstaclesWithFormObstacle } from './helpers/obstacles';
 import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
-import { DataObject } from './helpers/createPlotDataObject';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -28,13 +27,29 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
   imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
 })
 export class SectionPlotComponent {
+  // Input
   litData = input<GetSectionOutput | null>(null);
-  private readonly destroyRef = inject(DestroyRef);
 
+  // Services
+  private readonly plotService = inject(PlotService);
+  private readonly sideTabsService = inject(SideTabsService);
   private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly obstaclesService = inject(ObstaclesService);
 
-  rawState = computed(() => ({
+  // Signals
+  private readonly isPlotRefreshing = signal(false);
+
+  // Form values as signals
+  private readonly currentObstaclePositions = toSignal(this.obstacleFormService.form.get('positions')!.valueChanges, {
+    initialValue: []
+  });
+
+  private readonly currentObstacleName = toSignal(this.obstacleFormService.form.get('name')!.valueChanges, {
+    initialValue: ''
+  });
+
+  // Computed state
+  private readonly plotState = computed(() => ({
     litData: this.litData(),
     baseLitData: this.plotService.baseLitData(),
     plotOptions: this.plotService.plotOptions(),
@@ -45,96 +60,105 @@ export class SectionPlotComponent {
     name: this.currentObstacleName()
   }));
 
-  constructor(
-    public readonly plotService: PlotService,
-    public readonly sideTabsService: SideTabsService
-  ) {
-    const debouncedState = toSignal(
-      toObservable(this.rawState).pipe(
-        debounceTime(DEBOUNCED_REFRESH_STUDIO_DELAY),
-        tap(() => this.refreshPlot())
-      ),
-      { initialValue: this.rawState() }
-    );
+  // Debounced plot refresh with signal
+  private readonly debouncedPlotState = toSignal(
+    toObservable(this.plotState).pipe(
+      debounceTime(DEBOUNCED_REFRESH_STUDIO_DELAY),
+      tap(() => this.refreshPlot())
+    ),
+    { initialValue: this.plotState() }
+  );
 
-    effect(() => {
-      debouncedState();
-    });
+  constructor() {
+    // Setup effect for debounced state change
+    effect(
+      () => {
+        this.debouncedPlotState();
+      },
+      { allowSignalWrites: true }
+    );
   }
 
-  currentObstaclePositions = toSignal(this.obstacleFormService.form.get('positions')!.valueChanges, {
-    initialValue: []
-  });
-  currentObstacleName = toSignal(this.obstacleFormService.form.get('name')!.valueChanges, {
-    initialValue: ''
-  });
+  /**
+   * Get span loads to display based on selected options and plot view
+   */
+  private getSpanLoadsToDisplay(
+    selectedDisplayOptions: SelectedDisplayOptions,
+    plotOptions: PlotOptions
+  ): (SpanLoad | null)[] {
+    const section = this.plotService.section();
 
-  getSpanLoadsToDisplay = (selectedDisplayOptions: SelectedDisplayOptions, plotOptions: PlotOptions) => {
-    const section = this.plotService.section()!;
     if (!selectedDisplayOptions.loads || !section) {
       return [];
     }
+
     const supportsUuids = section.supports
       .slice(plotOptions.startSupport, plotOptions.endSupport)
       .map((support) => support.uuid);
+
     const spanLoads =
       this.plotService.temporaryLoadData?.spanLoads?.filter(
         (load) => !!load && (!!load.loadWeight || load.type === LoadType.MARKING)
       ) ?? [];
-    const result: (SpanLoad | null)[] = [];
-    for (const supportUuid of supportsUuids) {
-      const load = spanLoads.find((load) => load.supportUuid === supportUuid);
-      if (load) {
-        result.push(load);
-      } else {
-        result.push(null);
-      }
-    }
-    return result;
-  };
 
-  refreshPlot = async () => {
-    const litData = this.plotService.litData();
-    const baseLitData = this.plotService.baseLitData();
-    const plotOptions = this.plotService.plotOptions();
-    const selectedDisplayOptions = this.plotService.selectedDisplayOptions();
-    if (!litData) {
-      return;
-    }
-    const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
+    return supportsUuids.map((supportUuid) => spanLoads.find((load) => load.supportUuid === supportUuid) ?? null);
+  }
+
+  private buildObstacleList(): Obstacle[] {
     const currentObstacle = this.obstacleFormService.form.value as Obstacle;
-    const obstacles = appendExistingObstaclesWithFormObstacle(
-      this.plotService.section()?.obstacles ?? [],
-      currentObstacle
-    );
-    let plotData = createPlotData(litData, plotOptions, this.plotService.section()?.supports ?? []);
+    const existingObstacles = this.plotService.section()?.obstacles ?? [];
+    return appendExistingObstaclesWithFormObstacle(existingObstacles, currentObstacle);
+  }
 
-    // Add shadow traces for base state if enabled
-    if (selectedDisplayOptions.baseState && baseLitData) {
-      const shadowData = createShadowPlotData(baseLitData, plotOptions);
-      const shadowDataWithSupport: DataObject[] = shadowData.map((trace) => ({
-        ...trace,
-        supportUuid: undefined
-      }));
-      plotData = [...shadowDataWithSupport, ...plotData];
+  private getSupportsList() {
+    return this.plotService.section()?.supports ?? [];
+  }
+
+  private getCurrentObstacleUuid(): string | null {
+    return this.obstacleFormService.form.get('uuid')?.value ?? null;
+  }
+
+  async refreshPlot(): Promise<void> {
+    const litData = this.plotService.litData();
+    if (!litData) return;
+
+    try {
+      this.isPlotRefreshing.set(true);
+      const plotOptions = this.plotService.plotOptions();
+      const selectedDisplayOptions = this.plotService.selectedDisplayOptions();
+      const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
+      const obstacles = this.buildObstacleList();
+      const supports = this.getSupportsList();
+      let plotData = createPlotData(litData, plotOptions, supports);
+
+      if (selectedDisplayOptions.baseState && this.plotService.baseLitData()) {
+        const shadowData = createShadowPlotData(this.plotService.baseLitData()!, plotOptions);
+        plotData = [...(shadowData as typeof plotData), ...plotData];
+      }
+
+      const camera = this.plotService.camera();
+      const currentObstacleUuid = this.getCurrentObstacleUuid();
+      const currentObstaclePointIndex = this.obstaclesService.currentPointIndex();
+
+      await createPlot({
+        plotId: PLOT_ID,
+        data: plotData,
+        invert: plotOptions.invert,
+        view: plotOptions.view,
+        camera,
+        side: plotOptions.side,
+        spanLoads,
+        litData,
+        startSupport: plotOptions.startSupport,
+        endSupport: plotOptions.endSupport,
+        currentObstacleUuid,
+        currentObstaclePointIndex,
+        obstacles
+      });
+    } catch (error) {
+      console.error('Error refreshing plot:', error);
+    } finally {
+      this.isPlotRefreshing.set(false);
     }
-
-    const camera = this.plotService.camera();
-    const plot = await createPlot({
-      plotId: PLOT_ID,
-      data: plotData,
-      invert: plotOptions.invert,
-      view: plotOptions.view,
-      camera,
-      side: plotOptions.side,
-      spanLoads,
-      litData,
-      startSupport: plotOptions.startSupport,
-      endSupport: plotOptions.endSupport,
-      currentObstacleUuid: this.obstacleFormService.form.get('uuid')?.value ?? null,
-      currentObstaclePointIndex: this.obstaclesService.currentPointIndex(),
-      obstacles
-    });
-    return plot;
-  };
+  }
 }

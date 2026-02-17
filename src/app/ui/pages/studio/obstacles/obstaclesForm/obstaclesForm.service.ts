@@ -1,18 +1,7 @@
-import { inject, Injectable, signal } from '@angular/core';
-import {
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators
-} from '@angular/forms';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { PlotService } from '../../services/plot.service';
-import {
-  LateralDistanceType,
-  Obstacle,
-  Position3D,
-  ReferenceSupport
-} from '@core/domain/models/obstacle.model';
+import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
 import { SectionService } from '@core/services/sections/section.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
@@ -35,37 +24,39 @@ export class ObstacleFormService {
     name: [defaultObstacleForm.name, Validators.required],
     type: [defaultObstacleForm.type, Validators.required],
     supportUuid: [defaultObstacleForm.supportUuid, Validators.required],
-    referenceSupport: [
-      defaultObstacleForm.referenceSupport,
-      Validators.required
-    ],
+    referenceSupport: [defaultObstacleForm.referenceSupport, Validators.required],
     altitudeType: [defaultObstacleForm.altitudeType, Validators.required],
-    lateralDistanceType: [
-      defaultObstacleForm.lateralDistanceType,
-      Validators.required
-    ],
+    lateralDistanceType: [defaultObstacleForm.lateralDistanceType, Validators.required],
     positions: this.fb.array<
       FormGroup<{
         x: FormControl<number | null>;
         y: FormControl<number | null>;
         z: FormControl<number | null>;
       }>
-    >(
-      this.fb.array(
-        defaultObstacleForm.positions.map((position) =>
-          this.createPositionGroup(position)
-        )
-      ).controls
-    )
+    >(this.fb.array(this.buildPositionControls(defaultObstacleForm.positions)).controls)
   });
+
+  private buildPositionControls(positions: Position3D[]): FormGroup<{
+    x: FormControl<number | null>;
+    y: FormControl<number | null>;
+    z: FormControl<number | null>;
+  }>[] {
+    const controls: FormGroup<{
+      x: FormControl<number | null>;
+      y: FormControl<number | null>;
+      z: FormControl<number | null>;
+    }>[] = [];
+    for (const position of positions) {
+      controls.push(this.createPositionGroup(position));
+    }
+    return controls;
+  }
 
   get positions(): FormArray {
     return this.form.get('positions') as FormArray;
   }
 
-  createPositionGroup(
-    position: Position3D = { x: null, y: null, z: null }
-  ): FormGroup<{
+  createPositionGroup(position: Position3D = { x: null, y: null, z: null }): FormGroup<{
     x: FormControl<number | null>;
     y: FormControl<number | null>;
     z: FormControl<number | null>;
@@ -114,7 +105,7 @@ export class ObstacleFormService {
 
   readonly supportsOptions = signal<{ label: number; value: number }[]>([]);
 
-  results = signal<{
+  readonly results = signal<{
     oblique: number | null;
     verticale: number | null;
     horizontale: number | null;
@@ -122,6 +113,18 @@ export class ObstacleFormService {
     oblique: null,
     verticale: null,
     horizontale: null
+  });
+
+  readonly isFormValidSignal = computed(() => this.form.valid);
+
+  readonly canCalculateAndSaveSignal = computed(() => {
+    return (
+      this.form.valid &&
+      this.positions.length > 0 &&
+      this.positions.value.every(
+        (position: Position3D) => position.x !== null && position.y !== null && position.z !== null
+      )
+    );
   });
 
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
@@ -185,26 +188,19 @@ export class ObstacleFormService {
     if (!support) {
       return;
     }
-    const isInSpanOptions = this.plotService
-      .getSpanOptions()
-      .some((s) => s.value === obstacle.supportUuid);
+    const isInSpanOptions = this.plotService.getSpanOptions().some((s) => s.value === obstacle.supportUuid);
     if (!isInSpanOptions) {
       return;
     }
     this.form.patchValue({
       supportUuid: obstacle.supportUuid,
-      referenceSupport:
-        support.uuid === obstacle.supportUuid
-          ? ReferenceSupport.LEFT
-          : ReferenceSupport.RIGHT,
+      referenceSupport: support.uuid === obstacle.supportUuid ? ReferenceSupport.LEFT : ReferenceSupport.RIGHT,
       name: `Obstacle ${uuid.substring(0, 8)}`
     });
   }
 
   private findSupportForObstacle(obstacle: Obstacle) {
-    return this.plotService
-      .section()
-      ?.supports?.find((s) => s.uuid === obstacle.supportUuid);
+    return this.plotService.section()?.supports?.find((s) => s.uuid === obstacle.supportUuid);
   }
 
   deletePoint(index?: number): void {
@@ -276,8 +272,7 @@ export class ObstacleFormService {
       name: formValue.name ?? '',
       type: formValue.type ?? '',
       altitudeType: formValue.altitudeType ?? '',
-      lateralDistanceType:
-        formValue.lateralDistanceType ?? LateralDistanceType.SPAN_AXIS,
+      lateralDistanceType: formValue.lateralDistanceType ?? LateralDistanceType.SPAN_AXIS,
       referenceSupport: formValue.referenceSupport ?? ReferenceSupport.LEFT,
       positions: this.positions.value as Position3D[]
     };
@@ -308,18 +303,11 @@ export class ObstacleFormService {
   }
 
   isFormValid(): boolean {
-    return this.form.valid;
+    return this.isFormValidSignal();
   }
 
   canCalculateAndSave(): boolean {
-    return (
-      this.form.valid &&
-      this.positions.length > 0 &&
-      this.positions.value.every(
-        (position: Position3D) =>
-          position.x !== null && position.y !== null && position.z !== null
-      )
-    );
+    return this.canCalculateAndSaveSignal();
   }
 
   getErrorIds(controlName: string, errorTypes: string[]): string | null {
@@ -327,9 +315,7 @@ export class ObstacleFormService {
     if (!control?.errors) {
       return null;
     }
-    const ids = errorTypes
-      .filter((type) => control.errors?.[type])
-      .map((type) => `${controlName}-error-${type}`);
+    const ids = errorTypes.filter((type) => control.errors?.[type]).map((type) => `${controlName}-error-${type}`);
     return ids.length > 0 ? ids.join(' ') : null;
   }
 

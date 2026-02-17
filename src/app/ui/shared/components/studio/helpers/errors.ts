@@ -1,16 +1,12 @@
 import { TaskError, DataError } from '@core/services/worker_python/tasks/types';
 
+const ERROR_MESSAGES = {
+  [DataError.NO_CABLE_FOUND]: $localize`No cable found`,
+  [TaskError.CALCULATION_ERROR]: $localize`Calculation error`,
+  [TaskError.SOLVER_DID_NOT_CONVERGE]: $localize`Calculation error: 'Solver did not converge'`,
+  [TaskError.PYODIDE_LOAD_ERROR]: $localize`Pyodide load error`
+} as const;
+
 export const formatStudioError = (error: TaskError | DataError | null) => {
-  switch (error) {
-    case DataError.NO_CABLE_FOUND:
-      return $localize`No cable found`;
-    case TaskError.CALCULATION_ERROR:
-      return $localize`Calculation error`;
-    case TaskError.SOLVER_DID_NOT_CONVERGE:
-      return $localize`Calculation error: 'Solver did not converge'`;
-    case TaskError.PYODIDE_LOAD_ERROR:
-      return $localize`Pyodide load error`;
-    default:
-      return $localize`Unknown error`;
-  }
+  return ERROR_MESSAGES[error as keyof typeof ERROR_MESSAGES] ?? $localize`Unknown error`;
 };

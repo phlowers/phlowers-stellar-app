@@ -1,12 +1,9 @@
-import { Component, computed, DestroyRef, inject, input } from '@angular/core';
+import { Component, computed, effect, inject, input } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
-import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { combineLatest } from 'rxjs';
 
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { formatStudioError } from './helpers/errors';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-studio',
@@ -14,24 +11,23 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
   imports: [SectionPlotComponent, ProgressSpinnerModule]
 })
 export class StudioComponent {
-  isPreview = input.required<boolean>(); // preview mode in the manual section modal
+  // Inputs
+  readonly isPreview = input.required<boolean>();
 
-  getErrorString = computed(() => {
-    return formatStudioError(this.plotService.error());
+  // Services
+  protected readonly plotService = inject(PlotService);
+
+  // Computed
+  readonly errorString = computed(() => formatStudioError(this.plotService.error()));
+
+  // Effects
+  private readonly previewRefreshEffect = effect(() => {
+    const section = this.plotService.section();
+    const workerReady = this.plotService.workerReady();
+    const isPreview = this.isPreview();
+
+    if (workerReady && section && isPreview) {
+      this.plotService.refreshSection(section);
+    }
   });
-
-  private readonly destroyRef = inject(DestroyRef);
-
-  constructor(
-    private readonly workerPythonService: WorkerPythonService,
-    public readonly plotService: PlotService
-  ) {
-    combineLatest([this.workerPythonService.ready$, toObservable(this.plotService.section)])
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(([workerReady, section]) => {
-        if (workerReady && section && this.isPreview()) {
-          this.plotService.refreshSection(section!);
-        }
-      });
-  }
 }

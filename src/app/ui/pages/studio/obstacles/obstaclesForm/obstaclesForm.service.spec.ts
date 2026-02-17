@@ -1,23 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { ObstacleFormService } from './obstaclesForm.service';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { ObstaclesService } from '../obstacles.service';
 import { SectionService } from '@core/services/sections/section.service';
 import { MessageService } from 'primeng/api';
 import { signal } from '@angular/core';
-import {
-  LateralDistanceType,
-  Obstacle,
-  Position3D,
-  ReferenceSupport
-} from '@core/domain/models/obstacle.model';
-import { Section, Study } from '@core/domain';
+import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
+import { Section, Study, Support } from '@core/domain';
+import { ObstacleFormService } from './obstaclesForm.service';
 
-const mockSupports = [
-  { uuid: 'sup-1', number: 1 } as any,
-  { uuid: 'sup-2', number: 2 } as any
-];
+const mockSupports = [{ uuid: 'sup-1', number: 1 } as any, { uuid: 'sup-2', number: 2 } as any];
 
 const mockSection: Section = {
   uuid: 'sec-1',
@@ -104,9 +96,7 @@ describe('ObstacleFormService', () => {
         { label: 1, value: 'LEFT' as any },
         { label: 2, value: 'RIGHT' as any }
       ]),
-      getSpanOptions: jest
-        .fn()
-        .mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]),
+      getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]),
       plotOptionsChange: jest.fn(),
       spanAmountChoice: spanAmountChoiceSignal,
       section: sectionSignal,
@@ -161,6 +151,18 @@ describe('ObstacleFormService', () => {
       expect(group.get('x')?.value).toBe(1);
       expect(group.get('y')?.value).toBe(2);
       expect(group.get('z')?.value).toBe(3);
+    });
+  });
+
+  describe('buildPositionControls', () => {
+    it('should build controls from positions list', () => {
+      const controls = (
+        service as unknown as {
+          buildPositionControls: (positions: Position3D[]) => FormGroup[];
+        }
+      ).buildPositionControls([{ x: 1, y: 2, z: 3 }]);
+      expect(controls).toHaveLength(1);
+      expect(controls[0].get('x')?.value).toBe(1);
     });
   });
 
@@ -241,6 +243,12 @@ describe('ObstacleFormService', () => {
       expect(mockPlotService.spanAmountChoice.set).toBeDefined();
       expect(service.supportsOptions().length).toBeGreaterThanOrEqual(0);
     });
+    it('should avoid plot change when support index is invalid', () => {
+      (mockPlotService.getSupportIndex as jest.Mock).mockReturnValue(-1);
+      service.resetFormForNewObstacle('sup-1');
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+      expect(service.supportsOptions().length).toBeGreaterThanOrEqual(0);
+    });
   });
 
   describe('loadObstacle', () => {
@@ -248,6 +256,41 @@ describe('ObstacleFormService', () => {
       mockPlotService.section.set({ ...mockSection, obstacles: [] });
       service.loadObstacle('nonexistent');
       expect(service.form.get('name')?.value).toBeFalsy();
+    });
+    it('should do nothing when support is not found', () => {
+      const obstacles: Obstacle[] = [
+        {
+          uuid: 'obs-1',
+          supportUuid: 'missing-support',
+          name: 'Obstacle 1',
+          type: 'House',
+          altitudeType: 'absolute',
+          lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+          referenceSupport: ReferenceSupport.LEFT,
+          positions: []
+        }
+      ];
+      mockPlotService.section.set({ ...mockSection, supports: [], obstacles });
+      service.loadObstacle('obs-1');
+      expect(service.form.get('supportUuid')?.value).toBeNull();
+    });
+    it('should do nothing when obstacle is not in span options', () => {
+      const obstacles: Obstacle[] = [
+        {
+          uuid: 'obs-1',
+          supportUuid: 'sup-1',
+          name: 'Obstacle 1',
+          type: 'House',
+          altitudeType: 'absolute',
+          lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+          referenceSupport: ReferenceSupport.LEFT,
+          positions: []
+        }
+      ];
+      mockPlotService.section.set({ ...mockSection, obstacles });
+      mockPlotService.getSpanOptions.mockReturnValue([{ label: '2 - 3', value: 'sup-2' }]);
+      service.loadObstacle('obs-1');
+      expect(service.form.get('supportUuid')?.value).toBeNull();
     });
     it('should patch form when obstacle and support found', () => {
       const obstacles: Obstacle[] = [
@@ -263,12 +306,33 @@ describe('ObstacleFormService', () => {
         }
       ];
       mockPlotService.section.set({ ...mockSection, obstacles });
-      mockPlotService.getSpanOptions.mockReturnValue([
-        { label: '1 - 2', value: 'sup-1' }
-      ]);
+      mockPlotService.getSpanOptions.mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]);
       service.loadObstacle('obs-1');
       expect(service.form.get('supportUuid')?.value).toBe('sup-1');
       expect(service.form.get('name')?.value).toContain('Obstacle');
+    });
+    it('should set referenceSupport to RIGHT when support differs', () => {
+      const obstacles: Obstacle[] = [
+        {
+          uuid: 'obs-1',
+          supportUuid: 'sup-1',
+          name: 'Obstacle 1',
+          type: 'House',
+          altitudeType: 'absolute',
+          lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+          referenceSupport: ReferenceSupport.LEFT,
+          positions: []
+        }
+      ];
+      mockPlotService.section.set({ ...mockSection, obstacles });
+      mockPlotService.getSpanOptions.mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]);
+      jest
+        .spyOn(service as unknown as { findSupportForObstacle: () => Support | undefined }, 'findSupportForObstacle')
+        .mockReturnValue({ uuid: 'sup-2', number: 2 } as unknown as Support);
+
+      service.loadObstacle('obs-1');
+
+      expect(service.form.get('referenceSupport')?.value).toBe(ReferenceSupport.RIGHT);
     });
   });
 
@@ -301,6 +365,22 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
       expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
     });
+    it('should return early when obstacle is missing in section', async () => {
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      service.form.patchValue({ uuid: 'missing-uuid' });
+      await service.deleteObstacle();
+      expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+    });
+    it('should handle undefined obstacles collection safely', async () => {
+      const section = { ...mockSection, obstacles: undefined } as unknown as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      service.form.patchValue({ uuid: 'missing-uuid' });
+      await service.deleteObstacle();
+      expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+    });
     it('should remove obstacle and call sectionService when obstacle exists', async () => {
       const obstacles: Obstacle[] = [
         {
@@ -320,10 +400,7 @@ describe('ObstacleFormService', () => {
       service.form.patchValue({ uuid: 'obs-1' });
       await service.deleteObstacle();
       expect(section.obstacles.length).toBe(0);
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
-        mockStudy,
-        section
-      );
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
       expect(mockMessageService.add).toHaveBeenCalledWith(
         expect.objectContaining({
           severity: 'success',
@@ -341,6 +418,17 @@ describe('ObstacleFormService', () => {
       service.form.markAllAsTouched();
       await service.saveObstacle();
       // No throw, just early return
+    });
+    it('should allow save when form is valid', async () => {
+      service.form.patchValue({
+        name: 'Obstacle',
+        supportUuid: 'sup-1',
+        type: 'House',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      await service.saveObstacle();
     });
   });
 
@@ -363,6 +451,24 @@ describe('ObstacleFormService', () => {
       service.form.updateValueAndValidity();
       await service.calculateAndSave();
       expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+    });
+    it('should skip saving when study or section is missing', async () => {
+      service.form.patchValue({
+        uuid: 'new-uuid',
+        name: 'New Obstacle',
+        type: 'House',
+        supportUuid: 'sup-1',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      mockPlotService.study.set(null);
+
+      await service.calculateAndSave();
+
+      expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+      expect(service.results().oblique).toBe(123);
     });
     it('should create new obstacle and save when no existing obstacle for support', async () => {
       service.form.patchValue({
@@ -391,10 +497,7 @@ describe('ObstacleFormService', () => {
       // New obstacle is built from resetFormForNewObstacle (reset form values) then positions/uuid are set
       expect(section.obstacles[0].uuid).toBe('new-uuid');
       expect(section.obstacles[0].positions).toHaveLength(1);
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
-        mockStudy,
-        section
-      );
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
       expect(service.results().oblique).toBe(123);
       expect(mockMessageService.add).toHaveBeenCalled();
     });
@@ -426,16 +529,59 @@ describe('ObstacleFormService', () => {
       expect(existing.name).toBe('Updated Name');
       expect(existing.type).toBe('Tree');
       expect(existing.positions.length).toBe(1);
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
-        mockStudy,
-        section
-      );
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
     });
   });
 
   describe('isFormValid', () => {
     it('should return form.valid', () => {
       expect(typeof service.isFormValid()).toBe('boolean');
+    });
+    it('should reflect computed form validity', () => {
+      service.form.patchValue({ name: null });
+      service.form.updateValueAndValidity();
+      expect(service.isFormValid()).toBe(false);
+    });
+  });
+
+  describe('canCalculateAndSave', () => {
+    it('should return false when positions are empty', () => {
+      service.positions.clear();
+      service.form.patchValue({
+        name: 'Obstacle',
+        supportUuid: 'sup-1',
+        type: 'House',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      expect(service.canCalculateAndSave()).toBe(false);
+    });
+    it('should return false when any position coordinate is null', () => {
+      service.positions.clear();
+      service.addPosition({ x: 1, y: null, z: 3 });
+      service.form.patchValue({
+        name: 'Obstacle',
+        supportUuid: 'sup-1',
+        type: 'House',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      expect(service.canCalculateAndSave()).toBe(false);
+    });
+    it('should return true when all requirements are met', () => {
+      service.positions.clear();
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      service.form.patchValue({
+        name: 'Obstacle',
+        supportUuid: 'sup-1',
+        type: 'House',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      expect(service.canCalculateAndSave()).toBe(true);
     });
   });
 
@@ -449,11 +595,76 @@ describe('ObstacleFormService', () => {
       expect(ids).toContain('error');
       expect(ids).toContain('required');
     });
+    it('should return null when control has no errors', () => {
+      service.form.get('name')?.setValue('Valid');
+      service.form.get('name')?.updateValueAndValidity();
+      const ids = service.getErrorIds('name', ['required']);
+      expect(ids).toBeNull();
+    });
+    it('should include multiple error ids when present', () => {
+      service.form.get('name')?.setErrors({ required: true, custom: true });
+      const ids = service.getErrorIds('name', ['required', 'custom']);
+      expect(ids).toBe('name-error-required name-error-custom');
+    });
+    it('should return null when no matching error types exist', () => {
+      service.form.get('name')?.setErrors({ custom: true });
+      const ids = service.getErrorIds('name', ['required']);
+      expect(ids).toBeNull();
+    });
+  });
+
+  describe('buildObstacleFromForm', () => {
+    it('should fallback to defaults for null form values', () => {
+      service.form.patchValue({
+        uuid: null,
+        name: null,
+        type: null,
+        supportUuid: 'sup-1',
+        referenceSupport: null,
+        altitudeType: null,
+        lateralDistanceType: null
+      });
+
+      const obstacle = (service as unknown as { buildObstacleFromForm: () => Obstacle }).buildObstacleFromForm();
+
+      expect(obstacle.uuid).toBeTruthy();
+      expect(obstacle.name).toBe('');
+      expect(obstacle.type).toBe('');
+      expect(obstacle.altitudeType).toBe('');
+      expect(obstacle.lateralDistanceType).toBe(LateralDistanceType.SPAN_AXIS);
+      expect(obstacle.referenceSupport).toBe(ReferenceSupport.LEFT);
+    });
+  });
+
+  describe('upsertObstacleInSection', () => {
+    it('should handle missing section safely', () => {
+      mockPlotService.section.set(null);
+      const obstacle: Obstacle = {
+        uuid: 'obs-1',
+        supportUuid: 'sup-1',
+        name: 'Obstacle 1',
+        type: 'House',
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+        referenceSupport: ReferenceSupport.LEFT,
+        positions: []
+      };
+
+      (service as unknown as { upsertObstacleInSection: (o: Obstacle) => void }).upsertObstacleInSection(obstacle);
+
+      expect(mockPlotService.section()).toBeNull();
+    });
   });
 
   describe('returnToSpan', () => {
     it('should return early when no supportUuid', () => {
       service.form.patchValue({ supportUuid: null });
+      service.returnToSpan();
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+    });
+    it('should not update plot when support index is invalid', () => {
+      mockPlotService.getSupportIndex.mockReturnValue(-1);
+      service.form.patchValue({ supportUuid: 'sup-1' });
       service.returnToSpan();
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });

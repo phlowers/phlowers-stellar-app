@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -7,7 +7,7 @@ import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '../../services/plot.service';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { debounce } from 'lodash';
@@ -34,7 +34,6 @@ import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
   styleUrl: './obstaclesForm.component.scss'
 })
 export class ObstaclesFormComponent {
-  private readonly destroyRef = inject(DestroyRef);
   private readonly plotService = inject(PlotService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
@@ -60,33 +59,21 @@ export class ObstaclesFormComponent {
     return this.plotService.getSpanOptions();
   });
 
-  readonly supportUuidValue = toSignal(
-    this.obstacleFormService.form.get('supportUuid')!.valueChanges,
-    {
-      initialValue:
-        this.obstacleFormService.form.get('supportUuid')?.value ?? null
+  readonly supportUuidValue = toSignal(this.obstacleFormService.form.get('supportUuid')!.valueChanges, {
+    initialValue: this.obstacleFormService.form.get('supportUuid')?.value ?? null
+  });
+
+  private readonly debouncedUpdatePoint = debounce((key: 'x' | 'y' | 'z', value: number) => {
+    const currentIndex = this.obstaclesService.currentPointIndex();
+    const positionGroup = this.obstacleFormService.positions.at(currentIndex);
+    if (positionGroup) {
+      positionGroup.get(key)?.setValue(value);
     }
-  );
+  }, DEBOUNCED_UPDATE_POINT_DELAY);
 
-  private readonly debouncedUpdatePoint = debounce(
-    (key: 'x' | 'y' | 'z', value: number) => {
-      const currentIndex = this.obstaclesService.currentPointIndex();
-      const positionGroup = this.obstacleFormService.positions.at(currentIndex);
-      if (positionGroup) {
-        positionGroup.get(key)?.setValue(value);
-      }
-    },
-    DEBOUNCED_UPDATE_POINT_DELAY
-  );
-
-  constructor() {
-    this.obstacleFormService.form
-      .get('supportUuid')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) =>
-        this.obstacleFormService.resetFormForNewObstacle(value)
-      );
-  }
+  private readonly supportUuidEffect = effect(() => {
+    this.obstacleFormService.resetFormForNewObstacle(this.supportUuidValue());
+  });
 
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {
     const targetValue = (event.target as HTMLInputElement).value;
