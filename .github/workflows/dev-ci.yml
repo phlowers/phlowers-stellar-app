@@ -27,14 +27,13 @@ jobs:
           fetch-depth: 0 # Disable shallow clones to improve sonarcloud analysis
 
       - name: ⚙️ Install uv and Set up Python
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
         with:
           # Install a specific version of uv.
           working-directory: stellar-engine
           version: "0.5.24"
           python-version: ${{ matrix.python-version }}
           enable-cache: true
-          cache-dependency-glob: "stellar-engine/**/pyproject.toml"
 
       - name: ⚙️ Check uv version
         run: |
