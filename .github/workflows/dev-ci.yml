@@ -37,6 +37,10 @@ jobs:
         run: |
           uv --version
 
+      - name: ⚙️ cd into stellar-engine
+        run: |
+          cd stellar-engine
+    
       - name: ⚙️ Install dependencies
         run: |
           uv sync --group all
