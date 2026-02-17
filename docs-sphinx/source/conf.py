@@ -40,6 +40,15 @@ exclude_patterns = []
 # Language configuration
 language = 'en'
 
+# Static files (images, style sheets, etc.)
+html_static_path = ['_static']
+
+# Custom CSS
+html_css_files = ['custom.css']
+
+# Logo and favicon
+html_logo = '_static/logo.svg'
+html_favicon = '_static/favicon.png'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -48,7 +57,6 @@ html_theme = 'sphinx_material'
 
 # Material theme options
 html_theme_options = {
-    "nav_title": "Stellar",
     "base_url": "https://phlowers.readthedocs.io/projects/Stellar",
     "repo_url": "https://github.com/phlowers/phlowers-stellar-app",
     "repo_name": "phlowers-stellar-app",
