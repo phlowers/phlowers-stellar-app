@@ -57,5 +57,22 @@ public/data/attachments.csv
 report-task.txt
 scripts/__pycache__/
 scripts/requirements-resolved.txt
-docs-sphinx/build/
+
+# python
 .venv
+venv
+dist
+.coverage
+.pytest_cache
+.ruff_cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.pdm-build/
+
+# vscode
+.vscode
+docs-sphinx/build/
