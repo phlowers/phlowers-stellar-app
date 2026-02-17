@@ -24,7 +24,13 @@ describe('createShadowPlotData', () => {
     load_angle: [],
     displacement: [],
     span_length: [],
-    loads_coords: {}
+    loads_coords: {},
+    parameter: [],
+    tension_sup: [],
+    tension_inf: [],
+    horizontal_distance: [],
+    arc_length: [],
+    T_h: []
   };
 
   const defaultPlotOptions: PlotOptions = {
