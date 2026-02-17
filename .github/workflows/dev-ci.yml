@@ -25,6 +25,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Disable shallow clones to improve sonarcloud analysis
+          
+      - name: ⚙️ cd into stellar-engine
+        run: |
+          cd stellar-engine
 
       - name: ⚙️ Install uv and Set up Python
         uses: astral-sh/setup-uv@v5
@@ -36,10 +40,6 @@ jobs:
       - name: ⚙️ Check uv version
         run: |
           uv --version
-
-      - name: ⚙️ cd into stellar-engine
-        run: |
-          cd stellar-engine
     
       - name: ⚙️ Install dependencies
         run: |
