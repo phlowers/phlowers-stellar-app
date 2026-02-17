@@ -1,0 +1,25 @@
+/* Custom CSS for Stellar documentation */
+
+/* Add logo in the header navigation bar next to the title */
+.md-header-nav .md-header-nav__button.md-logo {
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.md-header-nav .md-header-nav__button.md-logo::before {
+  content: '';
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  background-image: url('logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-top: -12px;
+}
+
+/* Ensure title is visible */
+.md-header-nav__title {
+  overflow: visible;
+}
