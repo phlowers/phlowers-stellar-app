@@ -9,6 +9,7 @@ import { Button } from 'primeng/button';
 
 import { InputNumberComponent } from '@src/app/ui/shared/components/atoms/input-number/input-number.component';
 import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.component';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 @Component({
   selector: 'app-scale-view',
@@ -28,8 +29,11 @@ import { IconComponent } from '@src/app/ui/shared/components/atoms/icon/icon.com
 })
 export class ScaleViewComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly plotService = inject(PlotService);
   readonly popoverOpen = signal(false);
   readonly popoverRef = viewChild<Popover>('popover');
+  readonly scaleMax = 250;
+  readonly scaleMin = 25;
 
   readonly sliderControl = new FormControl<number>(30, {
     nonNullable: true
@@ -60,6 +64,7 @@ export class ScaleViewComponent {
 
   constructor() {
     this.setupControlsSynchronization();
+    this.setupResolutionSync();
   }
 
   private setupControlsSynchronization(): void {
@@ -80,12 +85,28 @@ export class ScaleViewComponent {
     });
   }
 
+  private setupResolutionSync(): void {
+    const initialResolution = this.plotService.resolution();
+    this.sliderControl.setValue(initialResolution, { emitEvent: false });
+    this.pointsControl.setValue(initialResolution, { emitEvent: false });
+
+    effect(() => {
+      const resolution = this.plotService.resolution();
+      if (resolution !== this.sliderControl.value) {
+        this.sliderControl.setValue(resolution, { emitEvent: false });
+      }
+      if (resolution !== this.pointsControl.value) {
+        this.pointsControl.setValue(resolution, { emitEvent: false });
+      }
+    });
+  }
+
   public togglePopover(event: Event): void {
     this.popoverOpen.update((open) => !open);
     this.popoverRef()?.toggle(event);
   }
 
   public onValidate(): void {
-    console.log('validate', this.formScaleView.value);
+    this.plotService.setResolution(this.pointsControl.value);
   }
 }

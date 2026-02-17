@@ -72,22 +72,26 @@
 
       <div class="view-config__controls flex flex-between items-center gap-8">
         <div class="view-config__slider-wrapper w-[70%]">
-          <span class="view-config__limit" aria-hidden="true">25</span>
+          <span class="view-config__limit" aria-hidden="true">{{
+            scaleMin
+          }}</span>
           <p-slider
             formControlName="sliderPointsCount"
-            [min]="25"
-            [max]="250"
+            [min]="scaleMin"
+            [max]="scaleMax"
             class="view-config__slider"
             aria-label="Nombre de points par portée"
             i18n-aria-label
           ></p-slider>
-          <span class="view-config__limit" aria-hidden="true">250</span>
+          <span class="view-config__limit" aria-hidden="true">{{
+            scaleMax
+          }}</span>
         </div>
 
         <app-input-number
           formControlName="pointsCount"
-          [min]="10"
-          [max]="200"
+          [min]="scaleMin"
+          [max]="scaleMax"
           aria-label="Nombre de points"
           i18n-aria-label
         ></app-input-number>
