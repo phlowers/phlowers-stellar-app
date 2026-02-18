@@ -70,7 +70,6 @@ export class ObstaclesFormComponent {
     if (positionGroup) {
       positionGroup.get(key)?.setValue(value);
     }
-    this.cdr.markForCheck();
   }, DEBOUNCED_UPDATE_POINT_DELAY);
 
   private readonly supportUuidEffect = effect(() => {

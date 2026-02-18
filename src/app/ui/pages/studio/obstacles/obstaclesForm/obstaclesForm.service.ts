@@ -6,8 +6,9 @@ import { SectionService } from '@core/services/sections/section.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { ObstaclesService } from '../obstacles.service';
-import { defaultObstacleForm } from './constants';
+import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from './constants';
 import { ObstacleFormGroupData } from './interfaces';
+import { debounce } from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -140,8 +141,10 @@ export class ObstacleFormService {
 
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
     this.focusPlotOnSupport(supportUuid);
-    // this.resetForm(supportUuid);
-    //  this.resetResults();
+    debounce(() => {
+      this.resetForm(supportUuid);
+      this.resetResults();
+    }, DEBOUNCED_UPDATE_POINT_DELAY)();
     return this.form.value as Obstacle;
   }
 

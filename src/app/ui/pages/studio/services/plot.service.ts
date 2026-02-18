@@ -228,18 +228,14 @@ export class PlotService {
 
   getSpanOptions = computed<SpanOption[]>(() => {
     const supports = this.section()?.supports ?? [];
-    console.log('supports: ', supports);
-    const supportRealNumber = supports.length + 1;
-    const supportsAmount = supportRealNumber ?? 0;
+    const supportRealNumberLength = supports.length + 1;
+    const supportsAmount = supportRealNumberLength ?? 0;
     const spanAmount = Math.max(supportsAmount - 1, 0);
     const spans = Array.from({ length: spanAmount }, (_, index) => ({
       label: `${index + 1} - ${index + 2}`,
       value: supports[index]?.uuid ?? null
     }));
-    console.log('spans: ', spans);
-
     spans.pop();
-    console.log('spans: ', spans);
     return spans;
   });
 
