@@ -36,6 +36,18 @@ export class ObstacleFormService {
     >(this.fb.array(this.buildPositionControls(defaultObstacleForm.positions)).controls)
   });
 
+  private readonly positionsSnapshot = signal<Position3D[]>([]);
+
+  constructor() {
+    // Subscribe aux changements du FormArray
+    this.positions.valueChanges.subscribe((positions) => {
+      this.positionsSnapshot.set(positions as Position3D[]);
+    });
+
+    // Initialise le snapshot
+    this.positionsSnapshot.set(this.positions.value as Position3D[]);
+  }
+
   private buildPositionControls(positions: Position3D[]): FormGroup<{
     x: FormControl<number | null>;
     y: FormControl<number | null>;
@@ -103,7 +115,7 @@ export class ObstacleFormService {
     this.obstaclesService.setCurrentPointIndex(index);
   }
 
-  readonly supportsOptions = signal<{ label: number; value: number }[]>([]);
+  readonly supportsOptions = signal<{ label: number; value: string }[]>([]);
 
   readonly results = signal<{
     oblique: number | null;
@@ -118,19 +130,18 @@ export class ObstacleFormService {
   readonly isFormValidSignal = computed(() => this.form.valid);
 
   readonly canCalculateAndSaveSignal = computed(() => {
+    const positions = this.positionsSnapshot();
     return (
       this.form.valid &&
-      this.positions.length > 0 &&
-      this.positions.value.every(
-        (position: Position3D) => position.x !== null && position.y !== null && position.z !== null
-      )
+      positions.length > 0 &&
+      positions.every((position: Position3D) => position.x !== null && position.y !== null && position.z !== null)
     );
   });
 
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
     this.focusPlotOnSupport(supportUuid);
-    this.resetForm(supportUuid);
-    this.resetResults();
+    // this.resetForm(supportUuid);
+    //  this.resetResults();
     return this.form.value as Obstacle;
   }
 
@@ -147,10 +158,11 @@ export class ObstacleFormService {
       this.plotService.spanAmountChoice.set('single');
     }
     const supports = this.plotService.getSupportOptions(supportUuid);
+    console.log('Supports for obstacle form', supports);
     this.supportsOptions.set(
       supports.map((s) => ({
         label: s.label,
-        value: s.label
+        value: s.value
       }))
     );
   }

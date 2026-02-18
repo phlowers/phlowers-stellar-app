@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, computed, effect, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -37,12 +37,13 @@ export class ObstaclesFormComponent {
   private readonly plotService = inject(PlotService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly obstacleTypeOptions = [
-    { label: $localize`House`, value: 'Maison' },
-    { label: $localize`Building`, value: 'Batiment' },
-    { label: $localize`Tree`, value: 'Arbre' },
-    { label: $localize`Other`, value: 'Autre' }
+    { label: $localize`House`, value: 'House' },
+    { label: $localize`Building`, value: 'Building' },
+    { label: $localize`Tree`, value: 'Tree' },
+    { label: $localize`Other`, value: 'Other' }
   ];
 
   readonly altitudeTypeOptions = [
@@ -69,6 +70,7 @@ export class ObstaclesFormComponent {
     if (positionGroup) {
       positionGroup.get(key)?.setValue(value);
     }
+    this.cdr.markForCheck();
   }, DEBOUNCED_UPDATE_POINT_DELAY);
 
   private readonly supportUuidEffect = effect(() => {
