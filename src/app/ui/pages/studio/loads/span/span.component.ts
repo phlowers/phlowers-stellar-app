@@ -62,7 +62,7 @@ export class SpanComponent implements OnDestroy {
   });
 
   loadTypeOptions = [
-    { label: $localize`Punctual`, value: 'punctual' },
+    { label: $localize`Punctual charge`, value: 'punctual' },
     { label: $localize`Marking`, value: 'marking' }
   ];
 
