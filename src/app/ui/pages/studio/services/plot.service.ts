@@ -1,12 +1,4 @@
-import {
-  computed,
-  DestroyRef,
-  effect,
-  inject,
-  Injectable,
-  signal,
-  untracked
-} from '@angular/core';
+import { computed, effect, Injectable, signal, untracked } from '@angular/core';
 import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import {
   DataError,
@@ -71,11 +63,13 @@ export const defaultPlotOptions: PlotOptions = {
 };
 
 const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
-  loads: true
+  loads: true,
+  baseState: false
 };
 
 export interface SelectedDisplayOptions {
   loads: boolean;
+  baseState: boolean;
 }
 
 @Injectable({
@@ -85,10 +79,10 @@ export class PlotService {
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
   litData = signal<GetSectionOutput | null>(null);
+  baseLitData = signal<GetSectionOutput | null>(null);
   loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
-  destroyRef = inject(DestroyRef);
   camera = signal<Camera | null>(null);
 
   isStudioActive = signal<boolean>(false);
@@ -121,6 +115,7 @@ export class PlotService {
     this.purgePlot();
     this.error.set(null);
     this.litData.set(null);
+    this.baseLitData.set(null);
     this.loading.set(false);
     this.plotOptions.set({
       ...defaultPlotOptions
@@ -162,6 +157,7 @@ export class PlotService {
   refreshSection = async (section: Section) => {
     this.error.set(null);
     this.litData.set(null);
+    this.baseLitData.set(null);
     this.section.set(section);
     if (!this.workerPythonService.ready || !section || !section.cable_name) {
       console.error('refreshSection error');
@@ -181,7 +177,8 @@ export class PlotService {
       Task.getLit,
       { section, cable }
     );
-    this.litData.set(result);
+    this.litData.set(result?.current ?? null);
+    this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
     this.loading.set(false);
   };
@@ -217,7 +214,8 @@ export class PlotService {
         view: this.plotOptions().view
       }
     );
-    this.litData.set(result);
+    this.litData.set(result?.current ?? null);
+    this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
     this.loading.set(false);
   };
@@ -228,6 +226,7 @@ export class PlotService {
     }
     plotly.purge(PLOT_ID);
     this.litData.set(null);
+    this.baseLitData.set(null);
     this.error.set(null);
     this.loading.set(false);
   };

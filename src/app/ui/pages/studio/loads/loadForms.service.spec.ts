@@ -124,6 +124,7 @@ describe('LoadFormsService', () => {
       temporaryLoadData: null,
       loading: createSignalMock(false),
       litData: createSignalMock(null),
+      baseLitData: createSignalMock(null),
       error: createSignalMock(null),
       refreshCamera: jest.fn()
     } as unknown as jest.Mocked<PlotService>;
@@ -305,20 +306,38 @@ describe('LoadFormsService', () => {
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
     });
 
-    it('should set litData and error from task result', async () => {
-      const mockResult = { test: 'data' } as any;
+    it('should set litData and baseLitData from task result', async () => {
+      const mockCurrentData = { spans: [[]] } as any;
+      const mockBaseData = { spans: [[]] } as any;
       const mockError = 'test-error' as any;
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.section.mockReturnValue(mockSection);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockResult,
+        result: { current: mockCurrentData, base: mockBaseData },
         error: mockError
       });
 
       await service.calculateLoad();
 
-      expect(mockPlotService.litData.set).toHaveBeenCalledWith(mockResult);
+      expect(mockPlotService.litData.set).toHaveBeenCalledWith(mockCurrentData);
+      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(
+        mockBaseData
+      );
       expect(mockPlotService.error.set).toHaveBeenCalledWith(mockError);
+    });
+
+    it('should set litData to null when result is null', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockPlotService.section.mockReturnValue(mockSection);
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null as any,
+        error: null
+      });
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.litData.set).toHaveBeenCalledWith(null);
+      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(null);
     });
   });
 

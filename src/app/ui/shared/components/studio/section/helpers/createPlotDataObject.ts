@@ -1,4 +1,5 @@
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
+import { SPAN_COLOR } from './plot.constants';
 import { PlotObjectsType, Side, View } from './types';
 
 const getLine = (
@@ -12,7 +13,7 @@ const getLine = (
   switch (type) {
     case 'spans':
       return {
-        color: 'dodgerblue',
+        color: SPAN_COLOR,
         dash: 'solid',
         width: view === '3d' ? 8 : 4
       };
@@ -37,9 +38,9 @@ const getText = (
 ): string[] => {
   if (type !== 'supports') return [];
   const highestPointIndex = points.findIndex(
-    (point) => point[2] === Math.max(...points.map((point) => point[2]))
+    (point) => point[2] === Math.max(...points.map((p) => p[2]))
   );
-  return points.map((point, index) =>
+  return points.map((_, index) =>
     index === highestPointIndex ? (supportIndex + 1).toString() : ''
   );
 };

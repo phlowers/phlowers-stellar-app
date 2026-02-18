@@ -79,6 +79,7 @@ export class LoadFormsService {
     }
     this.plotService.refreshCamera();
     this.plotService.loading.set(true);
+
     const currentSection = this.plotService.section();
     const { result, error } = await this.workerPythonService.runTask(
       Task.changeState,
@@ -90,7 +91,8 @@ export class LoadFormsService {
         )
       }
     );
-    this.plotService.litData.set(result);
+    this.plotService.litData.set(result?.current ?? null);
+    this.plotService.baseLitData.set(result?.base ?? null);
     this.plotService.error.set(error);
     this.plotService.loading.set(false);
   };

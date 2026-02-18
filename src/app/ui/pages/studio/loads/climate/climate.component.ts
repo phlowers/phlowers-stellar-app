@@ -36,14 +36,39 @@ function integerValidator(control: AbstractControl): ValidationErrors | null {
   return null;
 }
 
+export const DEFAULT_BASE_TEMPERATURE = 15;
+
 export const defaultClimaticCharge: ClimateCharge = {
   windPressure: 0,
-  cableTemperature: 15,
+  cableTemperature: DEFAULT_BASE_TEMPERATURE,
   symmetryType: SymmetryType.SYMMETRIC,
   iceThickness: 0,
   frontierSupportNumber: null,
   iceThicknessBefore: null,
   iceThicknessAfter: null
+};
+
+/**
+ * Returns the base climate values that match the base state calculation.
+ * The base state uses the initial condition's base_temperature (or 15 if none),
+ * with no wind pressure and no ice.
+ */
+export const getBaseClimate = (
+  section: {
+    initial_conditions: { uuid: string; base_temperature: number }[];
+    selected_initial_condition_uuid?: string;
+  } | null
+): ClimateCharge => {
+  const selectedInitialCondition = section?.initial_conditions?.find(
+    (ic) => ic.uuid === section.selected_initial_condition_uuid
+  );
+  const baseTemperature =
+    selectedInitialCondition?.base_temperature ?? DEFAULT_BASE_TEMPERATURE;
+
+  return {
+    ...defaultClimaticCharge,
+    cableTemperature: baseTemperature
+  };
 };
 
 export const climateConstraints = {
@@ -182,8 +207,13 @@ export class ClimateComponent {
   }
 
   resetForm() {
-    this.form.reset({ ...defaultClimaticCharge });
-    this.loadFormsService.initTemporaryLoadData();
+    const baseClimate = getBaseClimate(this.plotService.section());
+    this.form.reset({ ...baseClimate });
+    // Update temporaryLoadData with the base climate values
+    this.plotService.temporaryLoadData = {
+      ...this.plotService.temporaryLoadData!,
+      climate: baseClimate
+    } as ChargeData;
   }
 
   deleteCharge() {

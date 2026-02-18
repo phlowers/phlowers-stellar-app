@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 import logging
-from typing import List
 
 import numpy as np
 
@@ -20,20 +19,8 @@ class ClimateCharge:
     iceThicknessAfter: float
 
 
-@dataclass
-class SpanLoad:
-  loadPosition: float
-  loadWeight: float
-
-
-@dataclass
-class ChangeStateInput:
-    climate: ClimateCharge
-    spanLoads: List[SpanLoad]
-    
-
 def change_state(js_inputs: dict):
-    global engine, plt_line, js_to_python
+    global engine, plt_line, base_plt_line, base_engine, js_to_python
 
     # logger.debug("python_inputs: ", str(js_inputs))
     change_state_inputs = js_to_python(js_inputs) # type: ignore
@@ -77,4 +64,9 @@ def change_state(js_inputs: dict):
         new_temperature=cable_temperature,
         wind_pressure=wind_pressure,
     )
-    return get_coordinates(plt_line)
+    section_length = len(engine.section_array.data)
+    base_section_length = len(base_engine.section_array.data) if base_engine else section_length
+    return {
+        "current": get_coordinates(plt_line, False, 0, section_length - 1),
+        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1) if base_plt_line else None
+    }

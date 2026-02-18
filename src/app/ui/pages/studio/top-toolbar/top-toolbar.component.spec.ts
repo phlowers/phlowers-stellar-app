@@ -96,8 +96,8 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should initialize displayOptions signal', () => {
       const options = component.displayOptions();
-      expect(options).toHaveLength(1);
-      expect(options.map((o) => o.value)).toEqual(['loads']);
+      expect(options).toHaveLength(2);
+      expect(options.map((o) => o.value)).toEqual(['loads', 'baseState']);
     });
 
     it('should initialize toolsItems with 7 items', () => {
@@ -506,11 +506,17 @@ describe('StudioTopToolbarComponent', () => {
 
   describe('selectedDisplayOptions computed', () => {
     it('should return mapped display options from plotService', () => {
-      mockPlotService.selectedDisplayOptions.set({ loads: true });
+      mockPlotService.selectedDisplayOptions.set({
+        loads: true,
+        baseState: false
+      });
 
       const options = component.selectedDisplayOptions();
 
-      expect(options).toEqual([{ label: 'loads', value: 'loads' }]);
+      expect(options).toEqual([
+        { label: 'loads', value: 'loads' },
+        { label: 'baseState', value: 'baseState' }
+      ]);
     });
 
     it('should handle empty display options', () => {
@@ -524,7 +530,10 @@ describe('StudioTopToolbarComponent', () => {
 
   describe('selectedDisplayValues computed', () => {
     it('should return keys with truthy values', () => {
-      mockPlotService.selectedDisplayOptions.set({ loads: true });
+      mockPlotService.selectedDisplayOptions.set({
+        loads: true,
+        baseState: false
+      });
 
       const values = component.selectedDisplayValues();
 
@@ -532,7 +541,10 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should exclude keys with falsy values', () => {
-      mockPlotService.selectedDisplayOptions.set({ loads: false });
+      mockPlotService.selectedDisplayOptions.set({
+        loads: false,
+        baseState: false
+      });
 
       const values = component.selectedDisplayValues();
 
@@ -556,14 +568,18 @@ describe('StudioTopToolbarComponent', () => {
     it('should set loads to true when included in displayOptions', () => {
       component.setSelectedDisplayOptions(['loads']);
 
-      expect(mockPlotService.selectedDisplayOptions()).toEqual({ loads: true });
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+        loads: true,
+        baseState: false
+      });
     });
 
     it('should set loads to false when not included in displayOptions', () => {
       component.setSelectedDisplayOptions([]);
 
       expect(mockPlotService.selectedDisplayOptions()).toEqual({
-        loads: false
+        loads: false,
+        baseState: false
       });
     });
 
@@ -571,7 +587,26 @@ describe('StudioTopToolbarComponent', () => {
       component.setSelectedDisplayOptions(['mesh', 'ground']);
 
       expect(mockPlotService.selectedDisplayOptions()).toEqual({
-        loads: false
+        loads: false,
+        baseState: false
+      });
+    });
+
+    it('should set baseState to true when included in displayOptions', () => {
+      component.setSelectedDisplayOptions(['baseState']);
+
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+        loads: false,
+        baseState: true
+      });
+    });
+
+    it('should set both loads and baseState when both included', () => {
+      component.setSelectedDisplayOptions(['loads', 'baseState']);
+
+      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+        loads: true,
+        baseState: true
       });
     });
   });

@@ -155,5 +155,7 @@ export const createPlot = (plotParams: CreatePlotParams) => {
   const baseLayout =
     plotParams.view === '3d' ? layout3d(plotParams) : layout2d(plotParams);
 
-  return Plotly.newPlot(plotParams.plotId, plotParams.data, baseLayout, config);
+  // Use Plotly.react to update data without resetting camera/zoom
+  // It will create the plot if it doesn't exist, or update it if it does
+  return Plotly.react(plotParams.plotId, plotParams.data, baseLayout, config);
 };

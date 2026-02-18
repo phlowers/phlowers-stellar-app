@@ -175,8 +175,10 @@ def generate_section_array(supports: list[Support]):
     return pd.DataFrame(section_data)
 
 
-engine: BalanceEngine
-plt_line: PlotEngine
+engine = None
+plt_line = None
+base_engine = None
+base_plt_line = None
 
 
 def get_section_middle_span(start_support: int, end_support: int):
@@ -218,7 +220,7 @@ def get_coordinates(
 
 
 def init_section(js_inputs: dict):
-    global engine, plt_line
+    global engine, plt_line, base_engine, base_plt_line
     python_inputs = js_to_python(js_inputs)
     print("python_inputs: ", python_inputs)
     input_section = python_inputs["section"]
@@ -319,6 +321,20 @@ def init_section(js_inputs: dict):
     plt_line = PlotEngine.builder_from_balance_engine(engine)
     engine.solve_adjustment()
     engine.solve_change_state()
+    
+    # Create base engine state (before any climate changes)
+    # by creating a separate BalanceEngine with same initial params
+    base_section = SectionArray(df.copy())
+    if initial_condition:
+        base_section.sagging_parameter = initial_condition.base_parameters
+    base_section.sagging_temperature = (
+        initial_condition.base_temperature if initial_condition else 15
+    )
+    base_engine = BalanceEngine(cable_array=cable_array, section_array=base_section)
+    base_plt_line = PlotEngine.builder_from_balance_engine(base_engine)
+    base_engine.solve_adjustment()
+    base_engine.solve_change_state()
+    
     print(f"{input_charge=}")
 
     if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
@@ -329,18 +345,28 @@ def init_section(js_inputs: dict):
             wind_pressure=climate["windPressure"],
         )
     section_length = len(engine.section_array.data)
-    return get_coordinates(plt_line, False, 0, section_length - 1)
+    base_section_length = len(base_engine.section_array.data)
+    return {
+        "current": get_coordinates(plt_line, False, 0, section_length - 1),
+        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
+    }
 
 
 def refresh_projection(js_inputs: dict):
-    global plt_line
+    global plt_line, base_plt_line
     python_inputs = js_to_python(js_inputs)
     start_support = python_inputs["startSupport"]
     end_support = python_inputs["endSupport"]
     view = python_inputs["view"]
-    return get_coordinates(plt_line, view == "2d", start_support, end_support)
-
-
+    project = view == "2d"
+    
+    current_coords = get_coordinates(plt_line, project, start_support, end_support)
+    base_coords = get_coordinates(base_plt_line, project, start_support, end_support) if base_plt_line else None
+    
+    return {
+        "current": current_coords,
+        "base": base_coords
+    }
 
 
 def get_support_coordinates(js_inputs: dict):
