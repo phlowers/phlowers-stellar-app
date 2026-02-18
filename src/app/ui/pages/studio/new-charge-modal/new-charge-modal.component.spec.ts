@@ -196,7 +196,7 @@ describe('NewChargeModalComponent (Jest)', () => {
   it('should reset form when isOpen becomes true', async () => {
     // Set some initial values
     component.updateName('Initial Name');
-    component.updatePersonnelPresence(true);
+    component.updatePersonnelPresence(false);
     component.updateDescription('Initial Description');
 
     fixture.componentRef.setInput('isOpen', false);
@@ -208,7 +208,7 @@ describe('NewChargeModalComponent (Jest)', () => {
 
     // newCharge generates a name based on existing charges count (mockSection has 1 charge, so new one is "CC 2")
     expect(component.name()).toBe('CC 2');
-    expect(component.personnelPresence()).toBe(false);
+    expect(component.personnelPresence()).toBe(true);
     expect(component.description()).toBe('');
   });
 
