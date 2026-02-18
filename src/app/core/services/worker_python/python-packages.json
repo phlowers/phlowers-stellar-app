@@ -89,6 +89,11 @@
     "name": "six",
     "source": "cdn"
   },
+  "stellar-engine": {
+    "file_name": "stellar_engine-0.1.0-cp313-none-any.whl",
+    "name": "stellar_engine",
+    "source": "local"
+  },
   "tenacity": {
     "file_name": "tenacity-9.1.2-cp313-none-any.whl",
     "name": "tenacity",

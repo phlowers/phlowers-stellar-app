@@ -2,38 +2,46 @@
 
 ## Overview
 
-The `set_up_mechaphlowers_v2.py` script automates the configuration of **mechaphlowers with Pyodide** for this Angular web application.
+The `set_up_mechaphlowers_v2.py` script automates the configuration of **Python packages for Pyodide** in this Angular web application.
 
 **Key features:**
 
+- Automatic build and integration of **stellar-engine** (local Python middleware)
 - Simplified dependency resolution using `uv pip compile` with constraints
 - CDN-first approach: prefers Pyodide-optimized wasm32 wheels
 - Brotli/Gzip compression (~26% bandwidth reduction)
 - Bytecode `.pyc` compilation for faster execution (wheels renamed to cp313)
-- Support for local CDN directory and local wheel testing
+- Support for local CDN directory and local mechaphlowers wheel testing
 
 ---
 
 ## Architecture
 
 ```
-Phase 1: RESOLVE DEPENDENCIES
-  └─ Use uv pip compile with constraints.in to resolve all dependencies
+Phase 1: BUILD STELLAR-ENGINE
+  └─ Build the stellar-engine wheel using uv build
 
-Phase 2: PYODIDE SETUP
+Phase 2: RESOLVE DEPENDENCIES
+  └─ Use uv pip compile with constraints.in to resolve all dependencies
+      (from stellar-engine deps + thermohl from package.json config)
+
+Phase 3: PYODIDE SETUP
   └─ Download runtime from NPM (pyodide.asm.wasm, pyodide.asm.js, python_stdlib.zip, pyodide-lock.json)
 
-Phase 3: DOWNLOAD PACKAGES
-  └─ Download resolved packages via pip (optionally use local wheel)
+Phase 4: DOWNLOAD PACKAGES
+  └─ Download resolved packages via pip, add stellar-engine wheel
 
-Phase 4: REPLACE WITH CDN WHEELS
+Phase 5: REPLACE WITH CDN WHEELS
   └─ Replace pip wheels with wasm32 versions from CDN (or local CDN directory)
 
-Phase 5: COMPILE & DEDUPLICATE
+Phase 6: COMPILE & DEDUPLICATE
   └─ Deduplicate (wasm32 > cp313 > py3), compile to .pyc (renames py3 → cp313)
 
-Phase 6: COMPRESS & CONFIG
+Phase 7: COMPRESS & CONFIG
   └─ Compress large files (>1MB), generate python-packages.json
+
+Phase 8: VERIFY
+  └─ Verify all resolved dependencies are installed
 ```
 
 ---
@@ -48,7 +56,8 @@ Versions are read from `package.json` (single source of truth):
     "pyodide": "^0.28.3"
   },
   "config": {
-    "mechaphlowers": "0.5.2"
+    "mechaphlowers": "0.5.3",
+    "thermohl": "1.4.0"
   }
 }
 ```
@@ -59,8 +68,8 @@ Versions are read from `package.json` (single source of truth):
 
 | File | Purpose |
 |------|---------|
+| `stellar-engine/` | Local Python middleware package (auto-built) |
 | `scripts/constraints.in` | Version constraints for Pyodide CDN compatibility |
-| `scripts/requirements.in` | Direct dependencies (mechaphlowers, thermohl, etc.) |
 | `scripts/requirements-resolved.txt` | Auto-generated resolved dependencies |
 
 ### Key constants
@@ -90,6 +99,7 @@ Versions are read from `package.json` (single source of truth):
 
 | Function | Purpose |
 |----------|---------|
+| `build_stellar_engine()` | Build stellar-engine wheel using `uv build` |
 | `resolve_dependencies()` | Use `uv pip compile` with constraints |
 | `download_pyodide_runtime()` | Download Pyodide runtime from NPM |
 | `download_packages()` | Download resolved packages via pip |
@@ -115,7 +125,7 @@ npm run set-up-mechaphlowers:skip-compression
 npm run set-up-mechaphlowers:local-cdn -- /path/to/cdn
 
 # Test with local mechaphlowers wheel
-npm run set-up-mechaphlowers:local-wheel -- ./mechaphlowers-0.5.2b0-py3-none-any.whl
+npm run set-up-mechaphlowers:local-mechaphlowers -- ./mechaphlowers-0.5.3-py3-none-any.whl
 
 # With custom NPM registry
 npm run set-up-mechaphlowers -- --npm-registry-url https://registry.npmmirror.com/
@@ -130,7 +140,8 @@ public/pyodide/
 ├── pyodide.asm.wasm, pyodide.asm.js, python_stdlib.zip, pyodide-lock.json
 ├── numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl     (CDN)
 ├── pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl    (CDN)
-├── mechaphlowers-0.5.2-cp313-none-any.whl                (PyPI, compiled)
+├── mechaphlowers-0.5.3-cp313-none-any.whl                (PyPI, compiled)
+├── stellar_engine-0.1.0-cp313-none-any.whl               (LOCAL, compiled)
 ├── plotly-5.24.1-cp313-none-any.whl                      (PyPI, compiled)
 ├── plotly-5.24.1-cp313-none-any.whl.br                   (compressed)
 └── ... other wheels ...

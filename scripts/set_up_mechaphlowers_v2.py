@@ -2,17 +2,21 @@
 # requires-python = ">=3.13,<3.14"
 # dependencies = ["requests == 2.32.3", "brotli == 1.1.0"]
 # ///
-"""Configure mechaphlowers for Pyodide browser environment (simplified version).
+"""Configure Python packages for Pyodide browser environment.
 
-This script uses uv pip compile with constraints to resolve dependencies,
-then downloads and prepares them for Pyodide.
+This script builds stellar-engine, resolves dependencies using uv pip compile,
+then downloads and prepares all wheels for Pyodide.
+
+Package versions are managed in package.json under the "config" section:
+- mechaphlowers: version of the main computation library
+- thermohl: version of the thermal library
 
 Usage:
     uv run scripts/set_up_mechaphlowers_v2.py
     uv run scripts/set_up_mechaphlowers_v2.py --skip-compression
     uv run scripts/set_up_mechaphlowers_v2.py --zip-cdn
     uv run scripts/set_up_mechaphlowers_v2.py --local-cdn-dir /path/to/cdn
-    uv run scripts/set_up_mechaphlowers_v2.py --local-wheel /path/to/mechaphlowers.whl
+    uv run scripts/set_up_mechaphlowers_v2.py --local-mechaphlowers /path/to/mechaphlowers.whl
 """
 from __future__ import annotations
 
@@ -36,12 +40,13 @@ import requests
 # =============================================================================
 
 SCRIPTS_DIR = Path(__file__).parent
-PACKAGE_JSON_PATH = SCRIPTS_DIR.parent / "package.json"
+PROJECT_ROOT = SCRIPTS_DIR.parent
+PACKAGE_JSON_PATH = PROJECT_ROOT / "package.json"
 PYODIDE_DIR = Path("./public/pyodide")
 PACKAGES_JSON_PATH = Path("./src/app/core/services/worker_python/python-packages.json")
 
+STELLAR_ENGINE_DIR = PROJECT_ROOT / "stellar-engine"
 CONSTRAINTS_FILE = SCRIPTS_DIR / "constraints.in"
-REQUIREMENTS_FILE = SCRIPTS_DIR / "requirements.in"
 RESOLVED_FILE = SCRIPTS_DIR / "requirements-resolved.txt"
 
 PYODIDE_CORE_FILES = (
@@ -82,12 +87,18 @@ def run_cmd(cmd: list[str], error_msg: str = "Command failed") -> subprocess.Com
 
 
 @cache
-def get_config() -> tuple[str, str]:
-    """Load pyodide and mechaphlowers versions from package.json."""
+def get_config() -> dict:
+    """Load configuration from package.json.
+    
+    Returns:
+        Dict with keys: pyodide_version, mechaphlowers_version, thermohl_version
+    """
     data = json.loads(PACKAGE_JSON_PATH.read_text())
-    pyodide_version = data["dependencies"]["pyodide"].lstrip("^~")
-    mechaphlowers_version = data["config"]["mechaphlowers"]
-    return pyodide_version, mechaphlowers_version
+    return {
+        "pyodide_version": data["dependencies"]["pyodide"].lstrip("^~"),
+        "mechaphlowers_version": data["config"]["mechaphlowers"],
+        "thermohl_version": data["config"]["thermohl"],
+    }
 
 
 def get_cdn_url(pyodide_version: str) -> str:
@@ -127,46 +138,112 @@ def get_wheel_dependencies(wheel_path: Path) -> list[str]:
     return dependencies
 
 
+def build_stellar_engine() -> Path:
+    """Build stellar-engine wheel using uv build.
+    
+    Returns:
+        Path to the built wheel file
+        
+    Raises:
+        SystemExit: If build fails or no wheel is produced
+    """
+    print("\n[1/8] Building stellar-engine...")
+    
+    if not STELLAR_ENGINE_DIR.exists():
+        print(f"  ✗ Error: stellar-engine directory not found at {STELLAR_ENGINE_DIR}")
+        raise SystemExit(1)
+    
+    dist_dir = STELLAR_ENGINE_DIR / "dist"
+    
+    # Clean previous builds
+    if dist_dir.exists():
+        shutil.rmtree(dist_dir)
+    
+    # Build using uv
+    cmd = ["uv", "build", "--directory", str(STELLAR_ENGINE_DIR)]
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=STELLAR_ENGINE_DIR)
+    
+    if result.returncode != 0:
+        print(f"  ✗ Build failed: {result.stderr}")
+        raise SystemExit(1)
+    
+    # Find the built wheel
+    wheels = list(dist_dir.glob("*.whl"))
+    if not wheels:
+        print("  ✗ No wheel produced by build")
+        raise SystemExit(1)
+    
+    wheel_path = wheels[0]
+    name, version = parse_wheel(wheel_path.name)
+    print(f"  ✓ Built {name} v{version}")
+    
+    return wheel_path
+
+
 # =============================================================================
 # STEP 1: RESOLVE DEPENDENCIES
 # =============================================================================
 
-def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
-    """Use uv pip compile to resolve dependencies with constraints.
+def resolve_dependencies(
+    stellar_engine_wheel: Path,
+    local_mechaphlowers_wheel: Path | None = None,
+) -> dict[str, str]:
+    """Resolve all dependencies using uv pip compile with constraints.
+    
+    Requirements are generated from:
+    - package.json config (mechaphlowers, thermohl versions)
+    - stellar-engine wheel dependencies
     
     Args:
-        local_wheel: Optional path to local mechaphlowers wheel
+        stellar_engine_wheel: Path to the built stellar-engine wheel
+        local_mechaphlowers_wheel: Optional path to local mechaphlowers wheel
     
     Returns:
         Dict mapping package name to version
     """
-    print("\n[1/6] Resolving dependencies with uv pip compile...")
+    print("\n[2/8] Resolving dependencies with uv pip compile...")
     
+    config = get_config()
     temp_req = SCRIPTS_DIR / "requirements-temp.txt"
     
-    if local_wheel:
-        name, version = parse_wheel(local_wheel.name)
-        print(f"  Using local wheel: {local_wheel.name}")
+    # Extract dependencies from stellar-engine
+    stellar_deps = get_wheel_dependencies(stellar_engine_wheel)
+    print(f"  stellar-engine dependencies: {len(stellar_deps)} packages")
+    
+    # Build requirements list
+    requirements: list[str] = []
+    
+    # Add thermohl from config (mechaphlowers comes from stellar-engine deps)
+    requirements.append(f"thermohl=={config['thermohl_version']}")
+    
+    # Handle mechaphlowers: use local wheel deps or config version
+    if local_mechaphlowers_wheel:
+        local_name, local_version = parse_wheel(local_mechaphlowers_wheel.name)
+        print(f"  Using local mechaphlowers: {local_mechaphlowers_wheel.name}")
         
-        # Extract dependencies from local wheel
-        wheel_deps = get_wheel_dependencies(local_wheel)
-        print(f"  Wheel dependencies: {', '.join(wheel_deps) if wheel_deps else 'none'}")
+        # Extract dependencies from local mechaphlowers wheel
+        local_deps = get_wheel_dependencies(local_mechaphlowers_wheel)
+        print(f"  Local mechaphlowers dependencies: {', '.join(local_deps) if local_deps else 'none'}")
         
-        # Create temp requirements with:
-        # 1. Other packages from requirements.in (excluding the local wheel package)
-        # 2. Dependencies from the local wheel
-        reqs = REQUIREMENTS_FILE.read_text().splitlines()
-        filtered_reqs = [r for r in reqs if r.strip() and not r.strip().lower().startswith(name)]
-        all_reqs = filtered_reqs + wheel_deps
-        temp_req.write_text("\n".join(all_reqs))
-        input_file = str(temp_req)
+        # Add local wheel dependencies
+        requirements.extend(local_deps)
+        
+        # Add stellar-engine deps but exclude mechaphlowers (we use local)
+        for dep in stellar_deps:
+            dep_name = normalize_name(dep.split("[")[0].split(">=")[0].split("==")[0].split("<")[0].strip())
+            if dep_name != "mechaphlowers":
+                requirements.append(dep)
     else:
-        input_file = str(REQUIREMENTS_FILE)
+        # Add all stellar-engine dependencies (includes mechaphlowers with pinned version)
+        requirements.extend(stellar_deps)
+    
+    # Write temporary requirements file
+    temp_req.write_text("\n".join(requirements))
     
     cmd = [
         "uv", "pip", "compile",
         "--constraint", str(CONSTRAINTS_FILE),
-        input_file,
+        str(temp_req),
         "-o", str(RESOLVED_FILE),
         "--python-version", "3.13",
         "--prerelease=explicit",
@@ -175,8 +252,7 @@ def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
     run_cmd(cmd)
     
     # Cleanup temp file
-    if temp_req.exists():
-        temp_req.unlink()
+    temp_req.unlink(missing_ok=True)
     
     # Parse resolved requirements
     resolved: dict[str, str] = {}
@@ -186,10 +262,13 @@ def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
             pkg_name, pkg_version = line.split("==")
             resolved[normalize_name(pkg_name)] = pkg_version
     
-    # Add local wheel to resolved (it won't be in the compiled output)
-    if local_wheel:
-        name, version = parse_wheel(local_wheel.name)
-        resolved[name] = version
+    # Add local wheels to resolved (they won't be in the compiled output)
+    stellar_name, stellar_version = parse_wheel(stellar_engine_wheel.name)
+    resolved[stellar_name] = stellar_version
+    
+    if local_mechaphlowers_wheel:
+        mecha_name, mecha_version = parse_wheel(local_mechaphlowers_wheel.name)
+        resolved[mecha_name] = mecha_version
     
     print(f"  ✓ Resolved {len(resolved)} packages")
     return resolved
@@ -201,7 +280,7 @@ def resolve_dependencies(local_wheel: Path | None = None) -> dict[str, str]:
 
 def download_pyodide_runtime(version: str, npm_registry: str) -> None:
     """Download and extract Pyodide runtime from NPM."""
-    print(f"\n[2/6] Downloading Pyodide runtime v{version}...")
+    print(f"\n[3/8] Downloading Pyodide runtime v{version}...")
     
     url = f"{npm_registry}/pyodide/-/pyodide-{version}.tgz"
     
@@ -230,16 +309,20 @@ def download_pyodide_runtime(version: str, npm_registry: str) -> None:
 # STEP 3: DOWNLOAD PACKAGES
 # =============================================================================
 
-def download_packages(local_wheel: Path | None = None) -> dict[str, str]:
-    """Download resolved packages with pip.
+def download_packages(
+    stellar_engine_wheel: Path,
+    local_mechaphlowers_wheel: Path | None = None,
+) -> dict[str, str]:
+    """Download resolved packages and copy local wheels.
     
     Args:
-        local_wheel: Optional path to local mechaphlowers wheel (will be copied)
+        stellar_engine_wheel: Path to the built stellar-engine wheel
+        local_mechaphlowers_wheel: Optional path to local mechaphlowers wheel
     
     Returns:
         Dict mapping package name to version
     """
-    print("\n[3/6] Downloading packages...")
+    print("\n[4/8] Downloading packages...")
     
     cmd = [
         "uvx", "--python", ">=3.13,<3.14", "pip", "download",
@@ -249,13 +332,17 @@ def download_packages(local_wheel: Path | None = None) -> dict[str, str]:
     
     run_cmd(cmd)
     
-    # If using local wheel, replace the downloaded mechaphlowers wheel
-    if local_wheel:
-        local_name, _ = parse_wheel(local_wheel.name)
+    # Copy stellar-engine wheel
+    shutil.copy(stellar_engine_wheel, PYODIDE_DIR / stellar_engine_wheel.name)
+    print(f"  Added stellar-engine: {stellar_engine_wheel.name}")
+    
+    # If using local mechaphlowers wheel, replace the downloaded one
+    if local_mechaphlowers_wheel:
+        local_name, _ = parse_wheel(local_mechaphlowers_wheel.name)
         for wheel in PYODIDE_DIR.glob(f"{local_name.replace('-', '_')}*.whl"):
             wheel.unlink()
-        shutil.copy(local_wheel, PYODIDE_DIR / local_wheel.name)
-        print(f"  Using local wheel: {local_wheel.name}")
+        shutil.copy(local_mechaphlowers_wheel, PYODIDE_DIR / local_mechaphlowers_wheel.name)
+        print(f"  Using local mechaphlowers: {local_mechaphlowers_wheel.name}")
     
     # Parse downloaded wheels
     downloaded: dict[str, str] = {}
@@ -334,7 +421,7 @@ def replace_with_cdn_wheels(
         SystemExit: If local_cdn_dir is specified and required wheels are missing
     """
     source = f"local CDN ({local_cdn_dir})" if local_cdn_dir else "CDN"
-    print(f"\n[4/6] Replacing with {source} wheels...")
+    print(f"\n[5/8] Replacing with {source} wheels...")
     
     cdn_packages = fetch_cdn_lock(cdn_url, local_cdn_dir)
     cdn_wheel_names: set[str] = set()
@@ -433,7 +520,7 @@ def compile_wheels(cdn_package_names: set[str]) -> None:
     Args:
         cdn_package_names: Set of normalized package names from CDN (to exclude)
     """
-    print("\n[5/6] Compiling wheels...")
+    print("\n[6/8] Compiling wheels...")
     
     # Protect core files and CDN wheels (already compiled for Pyodide)
     temp_dir = PYODIDE_DIR / ".protected_temp"
@@ -484,7 +571,7 @@ def compile_wheels(cdn_package_names: set[str]) -> None:
 
 def compress_wheels(cdn_package_names: set[str], min_size_mb: float = 1.0) -> None:
     """Compress large non-CDN wheels with Brotli and Gzip."""
-    print("\n[6/6] Compressing large wheels...")
+    print("\n[7/8] Compressing large wheels...")
     
     min_bytes = int(min_size_mb * 1024 * 1024)
     mb = 1024 * 1024
@@ -596,7 +683,7 @@ def verify_dependencies(resolved: dict[str, str]) -> None:
     Raises:
         SystemExit: If any required dependency is missing
     """
-    print("\n[7/7] Verifying dependencies...")
+    print("\n[8/8] Verifying dependencies...")
     
     # Get installed packages from wheels
     installed: dict[str, str] = {}
@@ -640,7 +727,9 @@ def verify_dependencies(resolved: dict[str, str]) -> None:
 
 def main() -> None:
     """Entry point."""
-    parser = argparse.ArgumentParser(description="Set up mechaphlowers for Pyodide")
+    parser = argparse.ArgumentParser(
+        description="Set up Python packages for Pyodide (includes stellar-engine)"
+    )
     parser.add_argument("--npm-registry-url", default="https://registry.npmjs.org/")
     parser.add_argument("--skip-compression", action="store_true")
     parser.add_argument(
@@ -654,7 +743,7 @@ def main() -> None:
         help="Local directory containing CDN wheels (instead of downloading from CDN)",
     )
     parser.add_argument(
-        "--local-wheel",
+        "--local-mechaphlowers",
         type=Path,
         help="Path to local mechaphlowers wheel (for testing custom builds)",
     )
@@ -665,25 +754,28 @@ def main() -> None:
         print(f"Error: {args.local_cdn_dir}/pyodide-lock.json not found")
         raise SystemExit(1)
     
-    # Validate local wheel
-    if args.local_wheel and (not args.local_wheel.exists() or args.local_wheel.suffix != ".whl"):
-        print(f"Error: {args.local_wheel} is not a valid wheel file")
+    # Validate local mechaphlowers wheel
+    if args.local_mechaphlowers and (
+        not args.local_mechaphlowers.exists() or args.local_mechaphlowers.suffix != ".whl"
+    ):
+        print(f"Error: {args.local_mechaphlowers} is not a valid wheel file")
         raise SystemExit(1)
     
     # Load config
-    pyodide_version, mechaphlowers_version = get_config()
-    cdn_url = get_cdn_url(pyodide_version)
+    config = get_config()
+    cdn_url = get_cdn_url(config["pyodide_version"])
     
     # Override mechaphlowers version display if using local wheel
-    if args.local_wheel:
-        _, local_version = parse_wheel(args.local_wheel.name)
+    if args.local_mechaphlowers:
+        _, local_version = parse_wheel(args.local_mechaphlowers.name)
         mechaphlowers_display = f"{local_version} (local)"
     else:
-        mechaphlowers_display = mechaphlowers_version
+        mechaphlowers_display = config["mechaphlowers_version"]
     
-    print("=" * 50)
-    print(f"Pyodide: {pyodide_version} | Mechaphlowers: {mechaphlowers_display}")
-    print("=" * 50)
+    print("=" * 60)
+    print(f"Pyodide: {config['pyodide_version']}")
+    print(f"Mechaphlowers: {mechaphlowers_display} | Thermohl: {config['thermohl_version']}")
+    print("=" * 60)
     
     # Prepare output directory
     if PYODIDE_DIR.exists():
@@ -692,9 +784,10 @@ def main() -> None:
     PACKAGES_JSON_PATH.unlink(missing_ok=True)
     
     # Execute steps
-    resolved = resolve_dependencies(args.local_wheel)
-    download_pyodide_runtime(pyodide_version, args.npm_registry_url)
-    downloaded = download_packages(args.local_wheel)
+    stellar_engine_wheel = build_stellar_engine()
+    resolved = resolve_dependencies(stellar_engine_wheel, args.local_mechaphlowers)
+    download_pyodide_runtime(config["pyodide_version"], args.npm_registry_url)
+    downloaded = download_packages(stellar_engine_wheel, args.local_mechaphlowers)
     cdn_wheels = replace_with_cdn_wheels(downloaded, cdn_url, args.local_cdn_dir)
     
     # Track CDN package names for deduplication and summary
@@ -717,12 +810,13 @@ def main() -> None:
     verify_dependencies(resolved)
     
     # Summary with package details
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print("INSTALLED PACKAGES")
-    print("=" * 50)
+    print("=" * 60)
     
     cdn_count = 0
     pypi_count = 0
+    local_count = 0
     
     # List wheels from directory
     for wheel in sorted(get_wheels(PYODIDE_DIR)):
@@ -730,6 +824,9 @@ def main() -> None:
         if name in cdn_package_names:
             print(f"  {name:30} {version:15} [CDN]")
             cdn_count += 1
+        elif name == "stellar-engine":
+            print(f"  {name:30} {version:15} [LOCAL]")
+            local_count += 1
         else:
             print(f"  {name:30} {version:15} [PyPI]")
             pypi_count += 1
@@ -745,13 +842,13 @@ def main() -> None:
                         print(f"  {name:30} {version:15} [CDN → cdn.zip]")
                         cdn_count += 1
     
-    print("=" * 50)
+    print("=" * 60)
     if args.zip_cdn:
-        print(f"✓ Setup complete: {num_packages} packages ({cdn_count} CDN in cdn.zip, {pypi_count} PyPI)")
+        print(f"✓ Setup complete: {num_packages} packages ({cdn_count} CDN in cdn.zip, {pypi_count} PyPI, {local_count} local)")
     else:
-        print(f"✓ Setup complete: {num_packages} packages ({cdn_count} CDN, {pypi_count} PyPI)")
+        print(f"✓ Setup complete: {num_packages} packages ({cdn_count} CDN, {pypi_count} PyPI, {local_count} local)")
     print(f"  Config: {PACKAGES_JSON_PATH}")
-    print("=" * 50)
+    print("=" * 60)
 
 
 if __name__ == "__main__":
