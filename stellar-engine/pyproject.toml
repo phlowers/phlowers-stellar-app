@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.12,<3.14"
+requires-python = "==3.13.*"
 authors = [
     {name = "Adrien Goeller"},
     { name = "Jeremy Wang" },
@@ -120,10 +120,6 @@ exclude = [
 ]
 
 ## Test framework
-[tool.pytest]
-testpaths = [
-    "test",
-]
 
 [tool.pytest.ini_options]
 junit_family = "xunit2"
