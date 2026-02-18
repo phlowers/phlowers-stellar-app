@@ -1,5 +1,5 @@
 import { Injectable, isDevMode, signal } from '@angular/core';
-import { Router } from '@angular/router';
+
 import { environment } from '@src/environments/environment';
 import { isEqual } from 'lodash';
 import { MessageService } from 'primeng/api';
@@ -39,10 +39,7 @@ export class UpdateService {
   updateLoading = signal(false);
   needUpdate$ = new BehaviorSubject<boolean>(false);
 
-  constructor(
-    private readonly messageService: MessageService,
-    private readonly router: Router
-  ) {
+  constructor(private readonly messageService: MessageService) {
     navigator.serviceWorker.addEventListener('message', async (event) => {
       console.log(`Message from service worker:`, event.data);
       if (event.data.message) {

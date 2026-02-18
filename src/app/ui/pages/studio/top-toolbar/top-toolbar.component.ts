@@ -123,7 +123,8 @@ export class StudioTopToolbarComponent implements OnInit {
       value: string;
     }[]
   >([
-    { label: $localize`Loads`, value: 'loads' }
+    { label: $localize`Loads`, value: 'loads' },
+    { label: $localize`Base`, value: 'baseState' }
     // { label: $localize`Obstacles`, value: 'mesh' },
     // { label: $localize`Ground`, value: 'ground' },
     // { label: $localize`In line angle`, value: 'angleInLine' },
@@ -149,7 +150,8 @@ export class StudioTopToolbarComponent implements OnInit {
 
   setSelectedDisplayOptions(displayOptions: string[]): void {
     this.plotService.selectedDisplayOptions.set({
-      loads: displayOptions.includes('loads')
+      loads: displayOptions.includes('loads'),
+      baseState: displayOptions.includes('baseState')
     });
   }
 

@@ -12,7 +12,8 @@ import { CablesService } from '@services/cables/cables.service';
 import {
   Task,
   TaskError,
-  DataError
+  DataError,
+  GetSectionWithBaseOutput
 } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study } from '@core/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
@@ -59,6 +60,11 @@ describe('PlotService', () => {
     horizontal_distance: [],
     arc_length: [],
     T_h: []
+  };
+
+  const mockGetSectionWithBaseOutput: GetSectionWithBaseOutput = {
+    current: mockGetSectionOutput,
+    base: mockGetSectionOutput
   };
 
   const mockCable: CatalogCable = {
@@ -302,7 +308,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -345,7 +351,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -358,7 +364,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -377,7 +383,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -396,7 +402,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -414,7 +420,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -428,7 +434,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: taskError
       });
 
@@ -443,7 +449,10 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation(() => {
         loadingState = service.loading();
-        return Promise.resolve({ result: mockGetSectionOutput, error: null });
+        return Promise.resolve({
+          result: mockGetSectionWithBaseOutput,
+          error: null
+        });
       });
 
       await service.refreshSection(mockSection);
@@ -455,7 +464,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -469,7 +478,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -508,8 +517,20 @@ describe('PlotService', () => {
       expect(service.litData()).toBeNull();
     });
 
+    it('should clear baseLitData', () => {
+      service.baseLitData.set(mockGetSectionOutput);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.purgePlot();
+
+      expect(service.baseLitData()).toBeNull();
+    });
+
     it('should clear all state when plotly-output exists', () => {
       service.litData.set(mockGetSectionOutput);
+      service.baseLitData.set(mockGetSectionOutput);
       service.error.set(TaskError.CALCULATION_ERROR);
       service.loading.set(true);
       (document.getElementById as jest.Mock).mockReturnValue({
@@ -520,6 +541,7 @@ describe('PlotService', () => {
 
       expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
       expect(service.litData()).toBeNull();
+      expect(service.baseLitData()).toBeNull();
       expect(service.error()).toBeNull();
       expect(service.loading()).toBe(false);
     });
@@ -561,6 +583,17 @@ describe('PlotService', () => {
       service.resetAll();
 
       expect(service.litData()).toBeNull();
+    });
+
+    it('should reset baseLitData to null', () => {
+      service.baseLitData.set(mockGetSectionOutput);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(service.baseLitData()).toBeNull();
     });
 
     it('should set loading to false', () => {
