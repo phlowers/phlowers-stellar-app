@@ -24,7 +24,7 @@ const newCharge = (currentCharges: Charge[]): Charge => {
   return {
     uuid: uuidv4(),
     name: $localize`CC` + ' ' + (currentCharges.length + 1),
-    personnelPresence: false,
+    personnelPresence: true,
     description: '',
     data: {
       climate: { ...defaultClimaticCharge },
@@ -53,7 +53,7 @@ export class NewChargeModalComponent {
   isOpenChange = output<boolean>();
 
   name = signal<string>('');
-  personnelPresence = signal<boolean>(false);
+  personnelPresence = signal<boolean>(true);
   description = signal<string>('');
 
   descriptionLength = computed(() => this.description().length);
