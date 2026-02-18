@@ -158,7 +158,6 @@ export class ObstacleFormService {
       this.plotService.spanAmountChoice.set('single');
     }
     const supports = this.plotService.getSupportOptions(supportUuid);
-    console.log('Supports for obstacle form', supports);
     this.supportsOptions.set(
       supports.map((s) => ({
         label: s.label,
