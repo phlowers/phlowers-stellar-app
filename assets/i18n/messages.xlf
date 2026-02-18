@@ -1313,11 +1313,6 @@
         <source>Load</source>
       </segment>
     </unit>
-    <unit id="2986159287834234807">
-      <segment>
-        <source>N</source>
-      </segment>
-    </unit>
     <unit id="7722549882037437502">
       <segment>
         <source>Marking</source>
@@ -1368,9 +1363,9 @@
         <source> Fold back </source>
       </segment>
     </unit>
-    <unit id="2721513819199429371">
+    <unit id="1583307941081347908">
       <segment>
-        <source>Load/marking</source>
+        <source>Load / marking</source>
       </segment>
     </unit>
     <unit id="1616102757855967475">
@@ -2763,6 +2758,11 @@
     <unit id="1035708454595696483">
       <segment>
         <source>The initial condition name must be unique.</source>
+      </segment>
+    </unit>
+    <unit id="3141736705077915112">
+      <segment>
+        <source>Punctual charge</source>
       </segment>
     </unit>
   </file>
