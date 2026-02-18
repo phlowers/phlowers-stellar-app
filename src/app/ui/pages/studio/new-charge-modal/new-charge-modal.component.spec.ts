@@ -291,4 +291,79 @@ describe('NewChargeModalComponent (Jest)', () => {
     component.updateName('Unique Charge Name');
     expect(component.isFormValid()).toBe(true);
   });
+
+  it('should detect duplicate name via isNameDuplicate', () => {
+    component.updateName('Test Charge');
+    expect(component.isNameDuplicate()).toBe(true);
+
+    component.updateName('Unique Name');
+    expect(component.isNameDuplicate()).toBe(false);
+  });
+
+  it('should show error message when name is duplicate', () => {
+    component.updateName('Test Charge');
+    fixture.detectChanges();
+
+    const errorMessage = fixture.debugElement.query(
+      By.css('#charge-name-error-message')
+    );
+    expect(errorMessage).toBeTruthy();
+    expect(errorMessage.nativeElement.textContent).toContain(
+      'The initial condition name must be unique.'
+    );
+  });
+
+  it('should not show error message when name is unique', () => {
+    component.updateName('Unique Name');
+    fixture.detectChanges();
+
+    const errorMessage = fixture.debugElement.query(
+      By.css('#charge-name-error-message')
+    );
+    expect(errorMessage).toBeNull();
+  });
+
+  it('should set aria-invalid and aria-errormessage when name is duplicate', () => {
+    component.updateName('Test Charge');
+    fixture.detectChanges();
+
+    const nameInput = fixture.debugElement.query(
+      By.css('#chargeName')
+    ).nativeElement;
+    expect(nameInput.getAttribute('aria-invalid')).toBe('true');
+    expect(nameInput.getAttribute('aria-errormessage')).toBe(
+      'charge-name-error-message'
+    );
+  });
+
+  it('should not set aria-invalid or aria-errormessage when name is unique', () => {
+    component.updateName('Unique Name');
+    fixture.detectChanges();
+
+    const nameInput = fixture.debugElement.query(
+      By.css('#chargeName')
+    ).nativeElement;
+    expect(nameInput.getAttribute('aria-invalid')).toBe('false');
+    expect(nameInput.getAttribute('aria-errormessage')).toBeNull();
+  });
+
+  it('should return false for isNameDuplicate when section has no charges', () => {
+    plotService.section.set({ ...mockSection, charges: [] });
+    component.updateName('Any Name');
+    expect(component.isNameDuplicate()).toBe(false);
+  });
+
+  it('should reset form when section has no charges defined', async () => {
+    plotService.section.set({
+      ...mockSection,
+      charges: undefined
+    } as unknown as Section);
+
+    fixture.componentRef.setInput('isOpen', false);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.name()).toBe('CC 1');
+  });
 });

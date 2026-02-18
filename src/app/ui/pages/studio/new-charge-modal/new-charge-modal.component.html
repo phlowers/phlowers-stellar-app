@@ -30,9 +30,24 @@
           i18n-placeholder
           [ngModel]="name()"
           (ngModelChange)="updateName($event)"
+          [class.ng-invalid]="isNameDuplicate()"
+          [attr.aria-invalid]="isNameDuplicate()"
+          [attr.aria-errormessage]="
+            isNameDuplicate() ? 'charge-name-error-message' : null
+          "
           required
           fluid
         />
+        @if (isNameDuplicate()) {
+          <p-message
+            id="charge-name-error-message"
+            severity="error"
+            size="small"
+            variant="simple"
+            i18n
+            >The initial condition name must be unique.</p-message
+          >
+        }
       </div>
 
       <div class="personnel-presence">
