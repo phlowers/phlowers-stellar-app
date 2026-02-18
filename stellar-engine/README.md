@@ -23,7 +23,7 @@ Go to uv documentation for installation instructions: https://docs.astral.sh/uv/
 For Linux users, run the following command in the terminal to create and activate a virtual environment:
 
 ```bash
-uv venv --python 3.12
+uv venv --python 3.13
 source ./venv/bin/activate
 ```
 
