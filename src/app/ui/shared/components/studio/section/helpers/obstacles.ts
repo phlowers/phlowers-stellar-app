@@ -52,13 +52,11 @@ export const appendExistingObstaclesWithFormObstacle = (
   existingObstacles: Obstacle[],
   formObstacle: Obstacle | null
 ): Obstacle[] => {
-  if (!formObstacle?.uuid) {
+  if (!formObstacle) {
     return existingObstacles;
   }
   return [
-    ...existingObstacles.filter(
-      (obstacle) => obstacle.uuid !== formObstacle.uuid
-    ),
+    ...existingObstacles,
     formObstacle
   ];
 };
