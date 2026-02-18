@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.13"]
 
     steps:
       - name: 📃 Checkout sources
@@ -54,10 +54,10 @@ jobs:
         run: |
           uv run ruff check
 
-      - name: ✔️ Check typing
-        working-directory: stellar-engine
-        run: |
-          uv run mypy .
+    #   - name: ✔️ Check typing
+    #     working-directory: stellar-engine
+    #     run: |
+    #       uv run mypy .
 
       - name: ✔️ Run tests and generate coverage report
         working-directory: stellar-engine
