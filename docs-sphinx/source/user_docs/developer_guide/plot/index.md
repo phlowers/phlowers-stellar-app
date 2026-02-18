@@ -2,6 +2,12 @@
 
 A quick guide to using the plot system to visualize section data in 2D or 3D.
 
+```{toctree}
+:maxdepth: 2
+
+objects
+```
+
 ## The Basics
 
 The plot system has three main pieces:

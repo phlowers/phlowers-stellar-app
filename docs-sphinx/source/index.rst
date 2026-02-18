@@ -22,16 +22,9 @@ using `sphinx-js <https://sphinx-js.readthedocs.io/>`_.
    :maxdepth: 2
    :caption: Developer Guide:
 
-   user_docs/developer_guide/developer_install
-   user_docs/developer_guide/application_update
-   user_docs/developer_guide/custom_components
-   user_docs/developer_guide/documentation
-   user_docs/developer_guide/engine_worker
-   user_docs/developer_guide/offline_database
-   user_docs/developer_guide/setup-mechaphlowers-guide
-   user_docs/developer_guide/theme_styles
+   user_docs/developer_guide/installation/index
+   user_docs/developer_guide/app/index
    user_docs/developer_guide/plot/index
-   user_docs/developer_guide/plot/objects
 
 .. toctree::
    :maxdepth: 2
