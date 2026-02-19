@@ -214,9 +214,10 @@ export class ImportStudyComponent {
     });
   }
 
-  checkIfCableExists(conductor: string): Promise<boolean> {
+  findCableInDatabase(conductor: string): Promise<string | null> {
     return this.cablesService.getCables().then((cables) => {
-      return !!cables?.find((cable) => cable.name === conductor);
+      const cable = cables?.find((cable) => cable.name === conductor || cable.name.replace(' ', '') === conductor);
+      return cable?.name ?? null;
     });
   }
 
@@ -277,11 +278,12 @@ export class ImportStudyComponent {
     return { csvSupports, rawParameters };
   }
 
-  private async validateCable(conductor: string): Promise<void> {
-    const cableExists = await this.checkIfCableExists(conductor);
-    if (!cableExists) {
+  private async validateCable(conductor: string): Promise<string> {
+    const cable = await this.findCableInDatabase(conductor);
+    if (!cable) {
       throw new Error('cableNotFound');
     }
+    return cable;
   }
 
   private handlePapaParseComplete(
@@ -329,7 +331,8 @@ export class ImportStudyComponent {
     const { csvSupports, rawParameters } = this.parseCsvContent(decodedContent);
     const parameters = formatProtoV4Parameters(rawParameters, fileName);
 
-    await this.validateCable(parameters.conductor);
+    const cable = await this.validateCable(parameters.conductor);
+    parameters.conductor = cable;
 
     Papa.parse(csvSupports, {
       header: true,
