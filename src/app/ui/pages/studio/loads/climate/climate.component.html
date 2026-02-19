@@ -21,7 +21,7 @@
         [attr.aria-invalid]="form.controls.windPressure.invalid || null"
         [attr.aria-errormessage]="getErrorIds('windPressure', ['min', 'max', 'integer'])"
       />
-      <p-inputgroup-addon>Pa</p-inputgroup-addon>
+      <p-inputgroup-addon i18n>Pa</p-inputgroup-addon>
     </p-inputgroup>
 
     @if (form.controls.windPressure.errors) {
@@ -62,7 +62,7 @@
         [attr.aria-invalid]="form.controls.cableTemperature.invalid || null"
         [attr.aria-errormessage]="getErrorIds('cableTemperature', ['min', 'max', 'integer'])"
       />
-      <p-inputgroup-addon>°C</p-inputgroup-addon>
+      <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
     </p-inputgroup>
 
     @if (form.controls.cableTemperature.errors) {
@@ -116,7 +116,7 @@
           [attr.aria-invalid]="form.controls.iceThickness.invalid || null"
           [attr.aria-errormessage]="getErrorIds('iceThickness', ['min', 'max'])"
         />
-        <p-inputgroup-addon>cm</p-inputgroup-addon>
+        <p-inputgroup-addon i18n>cm</p-inputgroup-addon>
       </p-inputgroup>
       @if (form.controls.iceThickness.errors?.['min']) {
         <p-message id="iceThickness-error-min" severity="error" size="small" variant="simple" class="pt-1">
@@ -159,7 +159,7 @@
           [attr.aria-invalid]="form.controls.iceThicknessBefore.invalid || null"
           [attr.aria-errormessage]="getErrorIds('iceThicknessBefore', ['min', 'max'])"
         />
-        <p-inputgroup-addon>cm</p-inputgroup-addon>
+        <p-inputgroup-addon i18n>cm</p-inputgroup-addon>
       </p-inputgroup>
 
       @if (form.controls.iceThicknessBefore.errors?.['min']) {
@@ -192,7 +192,7 @@
           [attr.aria-invalid]="form.controls.iceThicknessAfter.invalid || null"
           [attr.aria-errormessage]="getErrorIds('iceThicknessAfter', ['min', 'max'])"
         />
-        <p-inputgroup-addon>cm</p-inputgroup-addon>
+        <p-inputgroup-addon i18n>cm</p-inputgroup-addon>
       </p-inputgroup>
 
       @if (form.controls.iceThicknessAfter.errors?.['min']) {

@@ -8,8 +8,8 @@ import { SideTabComponent } from './side-tab/side-tab.component';
 
 @Component({
   template: `<app-side-tabs>
-    <app-side-tab label="One">Content One</app-side-tab>
-    <app-side-tab label="Two">Content Two</app-side-tab>
+    <app-side-tab i18n label="One">Content One</app-side-tab>
+    <app-side-tab i18n label="Two">Content Two</app-side-tab>
   </app-side-tabs>`,
   imports: [SideTabsComponent, SideTabComponent],
   standalone: true
