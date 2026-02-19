@@ -22,11 +22,9 @@ export class LoggedLayoutComponent implements OnInit {
   constructor(private readonly router: Router) {}
 
   ngOnInit(): void {
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        this.currentRoute = event.url;
-      });
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event: NavigationEnd) => {
+      this.currentRoute = event.url;
+    });
   }
   public readonly sideBarNav = signal<SidebarNavigation>({
     main: [

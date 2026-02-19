@@ -45,10 +45,7 @@ describe('StudiesService', () => {
     uuid: 'user-uuid-123'
   };
 
-  const mockStudy: Pick<
-    StudyEntity,
-    'title' | 'description' | 'shareable' | 'sections' | 'author_email'
-  > = {
+  const mockStudy: Pick<StudyEntity, 'title' | 'description' | 'shareable' | 'sections' | 'author_email'> = {
     title: 'Test Study',
     description: 'Test Description',
     shareable: true,
@@ -146,9 +143,7 @@ describe('StudiesService', () => {
       mockDb.studies.add.mockRejectedValue(error);
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      await expect(service.createStudy(mockStudy)).rejects.toThrow(
-        'Database error'
-      );
+      await expect(service.createStudy(mockStudy)).rejects.toThrow('Database error');
 
       consoleErrorSpy.mockRestore();
     });
@@ -177,10 +172,7 @@ describe('StudiesService', () => {
   describe('duplicateStudy', () => {
     it('should duplicate a study successfully', async () => {
       const studiesSpy = jest.spyOn(service.studies, 'next');
-      const mockDuplicatedStudies = [
-        mockStudyFromDb,
-        { ...mockStudyFromDb, uuid: 'new-uuid' }
-      ];
+      const mockDuplicatedStudies = [mockStudyFromDb, { ...mockStudyFromDb, uuid: 'new-uuid' }];
       mockDb.studies.toArray.mockResolvedValue(mockDuplicatedStudies);
 
       await service.duplicateStudy('existing-uuid-123');
@@ -214,9 +206,7 @@ describe('StudiesService', () => {
       mockDb.studies.get.mockRejectedValue(error);
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      await expect(service.duplicateStudy('existing-uuid-123')).rejects.toThrow(
-        'Database error'
-      );
+      await expect(service.duplicateStudy('existing-uuid-123')).rejects.toThrow('Database error');
 
       consoleErrorSpy.mockRestore();
     });
@@ -240,9 +230,7 @@ describe('StudiesService', () => {
       mockDb.studies.delete.mockRejectedValue(error);
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      await expect(service.deleteStudy('existing-uuid-123')).rejects.toThrow(
-        'Database error'
-      );
+      await expect(service.deleteStudy('existing-uuid-123')).rejects.toThrow('Database error');
 
       consoleErrorSpy.mockRestore();
     });
@@ -342,10 +330,7 @@ describe('StudiesService', () => {
     };
 
     it('should create a study from proto v4 with valid inputs', async () => {
-      const result = await service.createStudyFromProtoV4(
-        [mockProtoV4Support],
-        mockProtoV4Parameters
-      );
+      const result = await service.createStudyFromProtoV4([mockProtoV4Support], mockProtoV4Parameters);
 
       expect(result).toEqual({
         author_email: 'test@example.com',
@@ -361,10 +346,7 @@ describe('StudiesService', () => {
     });
 
     it('should return correct structure with sections and shareable properties', async () => {
-      const result = await service.createStudyFromProtoV4(
-        [mockProtoV4Support],
-        mockProtoV4Parameters
-      );
+      const result = await service.createStudyFromProtoV4([mockProtoV4Support], mockProtoV4Parameters);
 
       expect(result).toHaveProperty('sections');
       expect(result).toHaveProperty('shareable');

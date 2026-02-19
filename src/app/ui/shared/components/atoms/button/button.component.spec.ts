@@ -12,13 +12,7 @@ class MockIconComponent {}
   standalone: true,
   imports: [ButtonComponent, MockIconComponent],
   template: `
-    <button
-      app-btn
-      [btnSize]="size"
-      [btnStyle]="style"
-      [btnLoading]="loading"
-      (click)="onButtonClick()"
-    >
+    <button app-btn [btnSize]="size" [btnStyle]="style" [btnLoading]="loading" (click)="onButtonClick()">
       <app-icon class="app-icon">Left Icon</app-icon>
       Button Text
       <app-icon class="app-icon" iconRight>Right Icon</app-icon>
@@ -100,12 +94,7 @@ describe('ButtonComponent', () => {
 
     it('should generate correct classes for all combinations', () => {
       const sizes: ('s' | 'm' | 'l')[] = ['s', 'm', 'l'];
-      const styles: ('base' | 'outlined' | 'text' | 'danger')[] = [
-        'base',
-        'outlined',
-        'text',
-        'danger'
-      ];
+      const styles: ('base' | 'outlined' | 'text' | 'danger')[] = ['base', 'outlined', 'text', 'danger'];
 
       sizes.forEach((size) => {
         styles.forEach((style) => {
@@ -153,34 +142,20 @@ describe('ButtonComponent', () => {
 
   describe('Event Listener Management', () => {
     it('should add click event listener on init', () => {
-      const addEventListenerSpy = jest.spyOn(
-        fixture.nativeElement,
-        'addEventListener'
-      );
+      const addEventListenerSpy = jest.spyOn(fixture.nativeElement, 'addEventListener');
 
       component.ngOnInit();
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        'click',
-        expect.any(Function),
-        true
-      );
+      expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function), true);
     });
 
     it('should remove click event listener on destroy', () => {
-      const removeEventListenerSpy = jest.spyOn(
-        fixture.nativeElement,
-        'removeEventListener'
-      );
+      const removeEventListenerSpy = jest.spyOn(fixture.nativeElement, 'removeEventListener');
 
       component.ngOnInit();
       component.ngOnDestroy();
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'click',
-        expect.any(Function),
-        true
-      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function), true);
     });
 
     it('should handle destroy when no listener exists', () => {
@@ -218,10 +193,7 @@ describe('ButtonComponent', () => {
       });
       const preventDefaultSpy = jest.spyOn(clickEvent, 'preventDefault');
       const stopPropagationSpy = jest.spyOn(clickEvent, 'stopPropagation');
-      const stopImmediatePropagationSpy = jest.spyOn(
-        clickEvent,
-        'stopImmediatePropagation'
-      );
+      const stopImmediatePropagationSpy = jest.spyOn(clickEvent, 'stopImmediatePropagation');
 
       buttonElement.dispatchEvent(clickEvent);
 
@@ -264,9 +236,7 @@ describe('ButtonComponent', () => {
       hostComponent.loading = true;
       hostFixture.detectChanges();
 
-      const iconElement = hostFixture.nativeElement.querySelector(
-        'app-icon[icon="progress_activity"]'
-      );
+      const iconElement = hostFixture.nativeElement.querySelector('app-icon[icon="progress_activity"]');
       expect(iconElement).toBeTruthy();
     });
   });
@@ -318,8 +288,7 @@ describe('ButtonComponent', () => {
         const selectorFixture = TestBed.createComponent(TestSelectorComponent);
         selectorFixture.detectChanges();
 
-        const buttonElement =
-          selectorFixture.nativeElement.querySelector('button');
+        const buttonElement = selectorFixture.nativeElement.querySelector('button');
         expect(buttonElement.classList.contains('app-btn')).toBeTruthy();
       }
     });
@@ -347,9 +316,7 @@ describe('ButtonComponent', () => {
 
       // Add loading
       fixture.componentRef.setInput('btnLoading', true);
-      expect(component.classesList()).toBe(
-        'app-btn-s app-btn-outlined disabled app-btn-loading'
-      );
+      expect(component.classesList()).toBe('app-btn-s app-btn-outlined disabled app-btn-loading');
 
       // Change all
       fixture.componentRef.setInput('btnSize', 'l');

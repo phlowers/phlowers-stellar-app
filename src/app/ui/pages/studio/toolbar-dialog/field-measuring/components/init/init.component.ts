@@ -22,14 +22,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-field-measuring-init',
-  imports: [
-    IconComponent,
-    InputText,
-    Select,
-    ReactiveFormsModule,
-    ButtonComponent,
-    MessageModule
-  ],
+  imports: [IconComponent, InputText, Select, ReactiveFormsModule, ButtonComponent, MessageModule],
   templateUrl: './init.component.html',
   styleUrl: './init.component.scss'
 })
@@ -57,13 +50,9 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    this.newMeasureNameControl.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        this.isNameAlreadyTaken.set(
-          this.measures().some((measure) => measure.label === value)
-        );
-      });
+    this.newMeasureNameControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+      this.isNameAlreadyTaken.set(this.measures().some((measure) => measure.label === value));
+    });
   }
   ngOnDestroy(): void {
     this.toolbarDialogService.setTemplates({});
@@ -73,10 +62,7 @@ export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
 
   newMeasureNameControl = new FormControl('', Validators.required);
   isNameAlreadyTaken = signal(false);
-  chooseMeasureControl = new FormControl<string | null>(
-    null,
-    Validators.required
-  );
+  chooseMeasureControl = new FormControl<string | null>(null, Validators.required);
 
   async createMeasure(): Promise<void> {
     const section = this.plotService.section();

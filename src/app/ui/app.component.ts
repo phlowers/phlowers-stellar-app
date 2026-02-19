@@ -6,13 +6,7 @@
  */
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import {
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
@@ -107,10 +101,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly attachmentService: AttachmentService
   ) {
     this.form = new FormGroup({
-      email: new FormControl<string>('', [
-        Validators.required,
-        Validators.pattern(emailRegex)
-      ])
+      email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])
     });
     this.subscriptions.add(
       this.onlineService.online$.subscribe((online) => {
@@ -150,17 +141,15 @@ export class AppComponent implements OnInit, OnDestroy {
   async saveUser() {
     this.submitted = true;
     if (this.form.valid) {
-      await this.userService
-        .createUser({ email: this.form.value.email! })
-        .catch((err) => {
-          console.error('Error creating user', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: $localize`Error`,
-            detail: $localize`Error creating user`,
-            life: 3000
-          });
+      await this.userService.createUser({ email: this.form.value.email! }).catch((err) => {
+        console.error('Error creating user', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: $localize`Error`,
+          detail: $localize`Error creating user`,
+          life: 3000
         });
+      });
       this.messageService.add({
         severity: 'success',
         summary: $localize`Successful`,

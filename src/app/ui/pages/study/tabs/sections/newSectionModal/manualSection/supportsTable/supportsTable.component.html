@@ -17,102 +17,39 @@
   <ng-template pTemplate="header">
     <tr>
       <th class="sticky-left" id="position" class="position-column" i18n></th>
-      <th
-        id="support_number"
-        (dblclick)="onSupportNumberDoubleClick('number')"
-        class="integer-column"
-      >
+      <th id="support_number" (dblclick)="onSupportNumberDoubleClick('number')" class="integer-column">
         <ng-container i18n>N° supp.</ng-container>
         <sup class="mandatory">*</sup>
       </th>
-      <th
-        id="span_length"
-        (dblclick)="onSupportNumberDoubleClick('spanLength')"
-        class="decimal-column"
-      >
+      <th id="span_length" (dblclick)="onSupportNumberDoubleClick('spanLength')" class="decimal-column">
         <ng-container i18n>Span l.</ng-container>
         <sup class="mandatory">*</sup>
       </th>
-      <th
-        id="attachment_height"
-        (dblclick)="onSupportNumberDoubleClick('attachmentHeight')"
-        class="decimal-column"
-      >
+      <th id="attachment_height" (dblclick)="onSupportNumberDoubleClick('attachmentHeight')" class="decimal-column">
         <ng-container i18n>Attachment alt. (NGF)</ng-container>
         <sup class="mandatory">*</sup>
       </th>
-      <th
-        id="span_angle"
-        (dblclick)="onSupportNumberDoubleClick('spanAngle')"
-        class="decimal-column"
-      >
+      <th id="span_angle" (dblclick)="onSupportNumberDoubleClick('spanAngle')" class="decimal-column">
         <ng-container i18n>Angle</ng-container>
         <sup class="mandatory">*</sup>
       </th>
-      <th
-        id="chain_name"
-        (dblclick)="onSupportNumberDoubleClick('chainName')"
-        i18n
-        class="text-column"
-      >
-        Chain name
-      </th>
-      <th
-        id="chain_length"
-        (dblclick)="onSupportNumberDoubleClick('chainLength')"
-        class="decimal-column"
-      >
+      <th id="chain_name" (dblclick)="onSupportNumberDoubleClick('chainName')" i18n class="text-column">Chain name</th>
+      <th id="chain_length" (dblclick)="onSupportNumberDoubleClick('chainLength')" class="decimal-column">
         <ng-container i18n>Chain l.</ng-container>
         <sup class="mandatory">*</sup>
       </th>
-      <th
-        id="chain_weight"
-        (dblclick)="onSupportNumberDoubleClick('chainWeight')"
-        i18n
-        class="decimal-column"
-      >
+      <th id="chain_weight" (dblclick)="onSupportNumberDoubleClick('chainWeight')" i18n class="decimal-column">
         Chain w.
       </th>
-      <th
-        id="support_name"
-        (dblclick)="onSupportNumberDoubleClick('name')"
-        i18n
-        class="text-column"
-      >
-        Support name
-      </th>
+      <th id="support_name" (dblclick)="onSupportNumberDoubleClick('name')" i18n class="text-column">Support name</th>
 
-      <th
-        id="attachment_set"
-        (dblclick)="onSupportNumberDoubleClick('attachmentSet')"
-        i18n
-        class="integer-column"
-      >
+      <th id="attachment_set" (dblclick)="onSupportNumberDoubleClick('attachmentSet')" i18n class="integer-column">
         Attachment set
       </th>
-      <th
-        id="arm_length"
-        (dblclick)="onSupportNumberDoubleClick('armLength')"
-        i18n
-        class="decimal-column"
-      >
-        Arm l.
-      </th>
+      <th id="arm_length" (dblclick)="onSupportNumberDoubleClick('armLength')" i18n class="decimal-column">Arm l.</th>
 
-      <th
-        id="chain_v"
-        (dblclick)="onSupportNumberDoubleClick('chainV')"
-        i18n
-        class="boolean-column"
-      >
-        Chain V
-      </th>
-      <th
-        id="counter_weight"
-        (dblclick)="onSupportNumberDoubleClick('counterWeight')"
-        i18n
-        class="decimal-column"
-      >
+      <th id="chain_v" (dblclick)="onSupportNumberDoubleClick('chainV')" i18n class="boolean-column">Chain V</th>
+      <th id="counter_weight" (dblclick)="onSupportNumberDoubleClick('counterWeight')" i18n class="decimal-column">
         Counter weight
       </th>
       <th
@@ -131,12 +68,7 @@
       >
         Attachment pos.
       </th>
-      <th
-        id="chain_surface"
-        (dblclick)="onSupportNumberDoubleClick('chainSurface')"
-        i18n
-        class="decimal-column"
-      >
+      <th id="chain_surface" (dblclick)="onSupportNumberDoubleClick('chainSurface')" i18n class="decimal-column">
         Chain surface
       </th>
       @if (mode() === 'view') {
@@ -162,9 +94,7 @@
             aria-label="support number"
             i18n-aria-label
             [ngModel]="support.number"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'number', $event)
-            "
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'number', $event)"
           />
         } @else {
           <p class="read-only_info">{{ support.number }}</p>
@@ -182,9 +112,7 @@
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.spanLength"
               [disabled]="rowIndex === supports().length - 1"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'spanLength', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
@@ -208,9 +136,7 @@
               i18n-aria-label
               [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
               [ngModel]="support.attachmentHeight"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'attachmentHeight', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
@@ -235,9 +161,7 @@
               [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
               i18n-aria-label
               [ngModel]="support.spanAngle"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'spanAngle', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
             />
             <p-inputgroup-addon i18n>Gr</p-inputgroup-addon>
           </p-inputgroup>
@@ -266,9 +190,7 @@
             appendTo="body"
             [filter]="true"
             filterBy="chain_name"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'chainName', $event)
-            "
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'chainName', $event)"
           />
         } @else {
           <p class="read-only_info">
@@ -291,9 +213,7 @@
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               i18n-aria-label
               [ngModel]="support.chainLength"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'chainLength', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
@@ -318,9 +238,7 @@
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               i18n-aria-label
               [ngModel]="support.chainWeight"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'chainWeight', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
             />
             <p-inputgroup-addon i18n>kg</p-inputgroup-addon>
           </p-inputgroup>
@@ -360,17 +278,13 @@
               aria-label="attachment set"
               i18n-aria-label
               [ngModel]="support.attachmentSet"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'attachmentSet', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentSet', $event)"
             />
             <p-inputicon>
               <button
                 app-btn
                 btnSize="s"
-                [disabled]="
-                  supplementarySupportFilterTable().includes(support.name || '')
-                "
+                [disabled]="supplementarySupportFilterTable().includes(support.name || '')"
                 btnStyle="text"
                 aria-label="open attachment set modal"
                 i18n-aria-label
@@ -394,9 +308,7 @@
               i18n-aria-label
               [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
               [ngModel]="support.armLength"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'armLength', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
@@ -420,15 +332,11 @@
             [ngModel]="support.chainV"
             optionLabel="label"
             optionValue="value"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'chainV', $event)
-            "
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'chainV', $event)"
           />
         } @else {
           <p class="read-only_info">
-            {{
-              support.chainV ? optionsChainV[0].label : optionsChainV[1].label
-            }}
+            {{ support.chainV ? optionsChainV[0].label : optionsChainV[1].label }}
           </p>
         }
       </td>
@@ -444,9 +352,7 @@
               i18n-aria-label
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.counterWeight"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'counterWeight', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
             />
             <p-inputgroup-addon i18n>kg</p-inputgroup-addon>
           </p-inputgroup>
@@ -470,13 +376,7 @@
               i18n-aria-label
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.supportFootAltitude"
-              (ngModelChange)="
-                onSupportFieldChange(
-                  support.uuid,
-                  'supportFootAltitude',
-                  $event
-                )
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
             />
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
@@ -499,9 +399,7 @@
             [ngModel]="support.attachmentPosition"
             optionLabel="label"
             optionValue="value"
-            (ngModelChange)="
-              onSupportFieldChange(support.uuid, 'attachmentPosition', $event)
-            "
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentPosition', $event)"
           />
         } @else {
           <p class="read-only_info">{{ support.attachmentPosition }}</p>
@@ -519,9 +417,7 @@
               i18n-aria-label
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.chainSurface"
-              (ngModelChange)="
-                onSupportFieldChange(support.uuid, 'chainSurface', $event)
-              "
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
             />
             <p-inputgroup-addon i18n>m²</p-inputgroup-addon>
           </p-inputgroup>
@@ -541,13 +437,7 @@
       }
       @if (mode() === 'edit' || mode() === 'create') {
         <td class="sticky-right">
-          <button
-            app-btn
-            btnSize="s"
-            btnStyle="text"
-            class="w-auto"
-            (click)="popover.toggle($event)"
-          >
+          <button app-btn btnSize="s" btnStyle="text" class="w-auto" (click)="popover.toggle($event)">
             <span class="pi pi-ellipsis-h"></span>
           </button>
           <p-popover #popover>
@@ -557,9 +447,7 @@
                   app-btn
                   btnSize="s"
                   btnStyle="text"
-                  (click)="
-                    addSupport.emit({ index: rowIndex, position: 'before' })
-                  "
+                  (click)="addSupport.emit({ index: rowIndex, position: 'before' })"
                 >
                   <app-icon icon="add" />
                   <span i18n>Add support before</span>
@@ -568,19 +456,12 @@
                   app-btn
                   btnSize="s"
                   btnStyle="text"
-                  (click)="
-                    addSupport.emit({ index: rowIndex, position: 'after' })
-                  "
+                  (click)="addSupport.emit({ index: rowIndex, position: 'after' })"
                 >
                   <app-icon icon="add" />
                   <span i18n>Add support after</span>
                 </button>
-                <button
-                  app-btn
-                  btnSize="s"
-                  btnStyle="text"
-                  (click)="duplicateSupport.emit(support.uuid)"
-                >
+                <button app-btn btnSize="s" btnStyle="text" (click)="duplicateSupport.emit(support.uuid)">
                   <app-icon icon="content_copy" />
                   <span i18n>Duplicate</span>
                 </button>

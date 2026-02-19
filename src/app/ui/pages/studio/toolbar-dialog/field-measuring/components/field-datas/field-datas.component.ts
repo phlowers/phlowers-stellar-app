@@ -8,12 +8,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '../../types';
-import {
-  TIME_MODE_OPTIONS,
-  WIND_SPEED_UNIT_OPTIONS,
-  WIND_DIRECTION_OPTIONS,
-  SKY_COVER_OPTIONS
-} from '../../constants';
+import { TIME_MODE_OPTIONS, WIND_SPEED_UNIT_OPTIONS, WIND_DIRECTION_OPTIONS, SKY_COVER_OPTIONS } from '../../constants';
 import { MessageModule } from 'primeng/message';
 
 @Component({
@@ -45,10 +40,7 @@ export class FieldDatasComponent {
   readonly windDirectionOptions = WIND_DIRECTION_OPTIONS;
   readonly skyCoverOptions = SKY_COVER_OPTIONS;
 
-  onFieldChange(
-    field: keyof FieldMeasure,
-    value: FieldMeasure[keyof FieldMeasure]
-  ): void {
+  onFieldChange(field: keyof FieldMeasure, value: FieldMeasure[keyof FieldMeasure]): void {
     this.fieldChange.emit({ field, value });
   }
 }

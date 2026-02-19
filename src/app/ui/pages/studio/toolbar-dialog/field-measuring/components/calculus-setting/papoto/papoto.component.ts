@@ -1,11 +1,4 @@
-import {
-  Component,
-  input,
-  model,
-  signal,
-  computed,
-  inject
-} from '@angular/core';
+import { Component, input, model, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -67,9 +60,7 @@ export class PapotoComponent {
   });
 
   // Helper function to get calculated value from litData
-  private getCalculatedValue(
-    field: 'span_length' | 'elevation'
-  ): number | null {
+  private getCalculatedValue(field: 'span_length' | 'elevation'): number | null {
     const span = this.measureData().span;
     const litData = this.plotService.litData();
 
@@ -127,23 +118,20 @@ export class PapotoComponent {
       ...d,
       outputs: { ...d.outputs, papoto: null }
     }));
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.calculatePapoto,
-      {
-        spanLength: data.spanLength || 0,
-        measuredElevationDifference: data.measuredElevationDifference || 0,
-        HL: data.HL || 0,
-        H1: data.H1 || 0,
-        H2: data.H2 || 0,
-        H3: data.H3 || 0,
-        HR: data.HR || 0,
-        VL: data.VL || 0,
-        V1: data.V1 || 0,
-        V2: data.V2 || 0,
-        V3: data.V3 || 0,
-        VR: data.VR || 0
-      }
-    );
+    const { result, error } = await this.workerPythonService.runTask(Task.calculatePapoto, {
+      spanLength: data.spanLength || 0,
+      measuredElevationDifference: data.measuredElevationDifference || 0,
+      HL: data.HL || 0,
+      H1: data.H1 || 0,
+      H2: data.H2 || 0,
+      H3: data.H3 || 0,
+      HR: data.HR || 0,
+      VL: data.VL || 0,
+      V1: data.V1 || 0,
+      V2: data.V2 || 0,
+      V3: data.V3 || 0,
+      VR: data.VR || 0
+    });
     if (error) {
       this.papotoError.set(true);
     }

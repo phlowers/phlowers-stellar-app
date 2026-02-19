@@ -64,11 +64,7 @@ describe('VhlAndGuyingComponent', () => {
       litData: signal(mockLitData),
       section: signal(mockSection),
       study: signal(mockStudy),
-      getSpanOptions: jest
-        .fn()
-        .mockReturnValue([
-          { label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }
-        ]),
+      getSpanOptions: jest.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
       getSupportOptions: jest.fn().mockReturnValue([
         { label: 1, value: 'LEFT' },
         { label: 2, value: 'RIGHT' }
@@ -164,16 +160,13 @@ describe('VhlAndGuyingComponent', () => {
 
     await component.onCalculate();
 
-    expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-      Task.calculateGuying,
-      {
-        altitude: 10,
-        horizontalDistance: 5,
-        hasPulley: false,
-        selectedSpanIndex: 1,
-        selectedSupport: 'LEFT'
-      }
-    );
+    expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.calculateGuying, {
+      altitude: 10,
+      horizontalDistance: 5,
+      hasPulley: false,
+      selectedSpanIndex: 1,
+      selectedSupport: 'LEFT'
+    });
     expect(component.results()).toEqual(mockResult);
   });
 

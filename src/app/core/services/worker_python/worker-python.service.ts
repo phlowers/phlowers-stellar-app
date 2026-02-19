@@ -26,8 +26,7 @@ export class WorkerPythonService {
     importTime: 0,
     runTime: 0
   });
-  handlerMap: Record<string, (result: any, error: TaskError | null) => void> =
-    {};
+  handlerMap: Record<string, (result: any, error: TaskError | null) => void> = {};
 
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
@@ -47,8 +46,7 @@ export class WorkerPythonService {
       } else if (data.importTime) {
         this.times.set({ ...this.times(), importTime: data.importTime });
         this._ready.next(true);
-        const activateDebugLogs =
-          localStorage.getItem('activateDebugLogs') === 'true';
+        const activateDebugLogs = localStorage.getItem('activateDebugLogs') === 'true';
         this.runTask(Task.setLogLevel, { activateDebugLogs });
       } else if (data.id) {
         this.handlerMap[data.id](data.result, data.error);
@@ -63,10 +61,7 @@ export class WorkerPythonService {
     const id = uuidv4();
     return new Promise((resolve) => {
       this.worker?.postMessage({ task, inputs, id });
-      this.handlerMap[id] = (
-        result: TaskOutputs[taskId],
-        error: TaskError | null
-      ) => {
+      this.handlerMap[id] = (result: TaskOutputs[taskId], error: TaskError | null) => {
         delete this.handlerMap[id];
         resolve({ result, error });
       };

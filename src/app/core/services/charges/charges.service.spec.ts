@@ -176,11 +176,7 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithoutNewCharge);
 
-      await service.createOrUpdateCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        newCharge
-      );
+      await service.createOrUpdateCharge('study-uuid-1', 'section-uuid-1', newCharge);
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -209,11 +205,7 @@ describe('ChargesService', () => {
         description: 'Updated description'
       };
 
-      await service.createOrUpdateCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        updatedCharge
-      );
+      await service.createOrUpdateCharge('study-uuid-1', 'section-uuid-1', updatedCharge);
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -244,13 +236,9 @@ describe('ChargesService', () => {
     it('should throw an error when study is not found', async () => {
       mockStudiesService.getStudy.mockResolvedValue(undefined);
 
-      await expect(
-        service.createOrUpdateCharge(
-          'non-existent-study',
-          'section-uuid-1',
-          mockCharge
-        )
-      ).rejects.toThrow('Study with uuid non-existent-study not found');
+      await expect(service.createOrUpdateCharge('non-existent-study', 'section-uuid-1', mockCharge)).rejects.toThrow(
+        'Study with uuid non-existent-study not found'
+      );
     });
 
     it('should throw an error when section is not found', async () => {
@@ -261,23 +249,15 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithoutSection);
 
-      await expect(
-        service.createOrUpdateCharge(
-          'study-uuid-1',
-          'non-existent-section',
-          mockCharge
-        )
-      ).rejects.toThrow('Section with uuid non-existent-section not found');
+      await expect(service.createOrUpdateCharge('study-uuid-1', 'non-existent-section', mockCharge)).rejects.toThrow(
+        'Section with uuid non-existent-section not found'
+      );
     });
   });
 
   describe('deleteCharge', () => {
     it('should delete a charge from the section', async () => {
-      await service.deleteCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        'charge-uuid-1'
-      );
+      await service.deleteCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -331,11 +311,7 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithMultipleCharges);
 
-      await service.deleteCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        'charge-uuid-1'
-      );
+      await service.deleteCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -351,11 +327,7 @@ describe('ChargesService', () => {
     });
 
     it('should set selected_charge_uuid to null when deleting the last charge', async () => {
-      await service.deleteCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        'charge-uuid-1'
-      );
+      await service.deleteCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -373,13 +345,9 @@ describe('ChargesService', () => {
     it('should throw an error when study is not found', async () => {
       mockStudiesService.getStudy.mockResolvedValue(undefined);
 
-      await expect(
-        service.deleteCharge(
-          'non-existent-study',
-          'section-uuid-1',
-          'charge-uuid-1'
-        )
-      ).rejects.toThrow('Study with uuid non-existent-study not found');
+      await expect(service.deleteCharge('non-existent-study', 'section-uuid-1', 'charge-uuid-1')).rejects.toThrow(
+        'Study with uuid non-existent-study not found'
+      );
     });
 
     it('should throw an error when section is not found', async () => {
@@ -390,13 +358,9 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithoutSection);
 
-      await expect(
-        service.deleteCharge(
-          'study-uuid-1',
-          'non-existent-section',
-          'charge-uuid-1'
-        )
-      ).rejects.toThrow('Section with uuid non-existent-section not found');
+      await expect(service.deleteCharge('study-uuid-1', 'non-existent-section', 'charge-uuid-1')).rejects.toThrow(
+        'Section with uuid non-existent-section not found'
+      );
     });
   });
 
@@ -414,11 +378,7 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(freshStudy);
 
-      const result = await service.duplicateCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        'charge-uuid-1'
-      );
+      const result = await service.duplicateCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
 
       expect(result.uuid).toBe('mock-uuid-123');
       expect(result.name).toBe('Charge 1 (Copy 1)');
@@ -447,13 +407,9 @@ describe('ChargesService', () => {
     it('should throw an error when study is not found', async () => {
       mockStudiesService.getStudy.mockResolvedValue(undefined);
 
-      await expect(
-        service.duplicateCharge(
-          'non-existent-study',
-          'section-uuid-1',
-          'charge-uuid-1'
-        )
-      ).rejects.toThrow('Study with uuid non-existent-study not found');
+      await expect(service.duplicateCharge('non-existent-study', 'section-uuid-1', 'charge-uuid-1')).rejects.toThrow(
+        'Study with uuid non-existent-study not found'
+      );
     });
 
     it('should throw an error when section is not found', async () => {
@@ -464,13 +420,9 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithoutSection);
 
-      await expect(
-        service.duplicateCharge(
-          'study-uuid-1',
-          'non-existent-section',
-          'charge-uuid-1'
-        )
-      ).rejects.toThrow('Section with uuid non-existent-section not found');
+      await expect(service.duplicateCharge('study-uuid-1', 'non-existent-section', 'charge-uuid-1')).rejects.toThrow(
+        'Section with uuid non-existent-section not found'
+      );
     });
 
     it('should throw an error when charge is not found', async () => {
@@ -486,23 +438,15 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithoutCharge);
 
-      await expect(
-        service.duplicateCharge(
-          'study-uuid-1',
-          'section-uuid-1',
-          'non-existent-charge'
-        )
-      ).rejects.toThrow('Charge with uuid non-existent-charge not found');
+      await expect(service.duplicateCharge('study-uuid-1', 'section-uuid-1', 'non-existent-charge')).rejects.toThrow(
+        'Charge with uuid non-existent-charge not found'
+      );
     });
   });
 
   describe('setSelectedCharge', () => {
     it('should set the selected charge uuid', async () => {
-      await service.setSelectedCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        'charge-uuid-1'
-      );
+      await service.setSelectedCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -520,13 +464,9 @@ describe('ChargesService', () => {
     it('should throw an error when study is not found', async () => {
       mockStudiesService.getStudy.mockResolvedValue(undefined);
 
-      await expect(
-        service.setSelectedCharge(
-          'non-existent-study',
-          'section-uuid-1',
-          'charge-uuid-1'
-        )
-      ).rejects.toThrow('Study with uuid non-existent-study not found');
+      await expect(service.setSelectedCharge('non-existent-study', 'section-uuid-1', 'charge-uuid-1')).rejects.toThrow(
+        'Study with uuid non-existent-study not found'
+      );
     });
 
     it('should throw an error when section is not found', async () => {
@@ -537,13 +477,9 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithoutSection);
 
-      await expect(
-        service.setSelectedCharge(
-          'study-uuid-1',
-          'non-existent-section',
-          'charge-uuid-1'
-        )
-      ).rejects.toThrow('Section with uuid non-existent-section not found');
+      await expect(service.setSelectedCharge('study-uuid-1', 'non-existent-section', 'charge-uuid-1')).rejects.toThrow(
+        'Section with uuid non-existent-section not found'
+      );
     });
   });
 
@@ -561,11 +497,7 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(freshStudy);
 
-      const result = await service.getCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        'charge-uuid-1'
-      );
+      const result = await service.getCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
 
       expect(result).toEqual(mockCharge);
     });
@@ -583,11 +515,7 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithoutCharge);
 
-      const result = await service.getCharge(
-        'study-uuid-1',
-        'section-uuid-1',
-        'non-existent-charge'
-      );
+      const result = await service.getCharge('study-uuid-1', 'section-uuid-1', 'non-existent-charge');
 
       expect(result).toBeNull();
     });
@@ -595,13 +523,9 @@ describe('ChargesService', () => {
     it('should throw an error when study is not found', async () => {
       mockStudiesService.getStudy.mockResolvedValue(undefined);
 
-      await expect(
-        service.getCharge(
-          'non-existent-study',
-          'section-uuid-1',
-          'charge-uuid-1'
-        )
-      ).rejects.toThrow('Study with uuid non-existent-study not found');
+      await expect(service.getCharge('non-existent-study', 'section-uuid-1', 'charge-uuid-1')).rejects.toThrow(
+        'Study with uuid non-existent-study not found'
+      );
     });
 
     it('should throw an error when section is not found', async () => {
@@ -612,13 +536,9 @@ describe('ChargesService', () => {
 
       mockStudiesService.getStudy.mockResolvedValue(studyWithoutSection);
 
-      await expect(
-        service.getCharge(
-          'study-uuid-1',
-          'non-existent-section',
-          'charge-uuid-1'
-        )
-      ).rejects.toThrow('Section with uuid non-existent-section not found');
+      await expect(service.getCharge('study-uuid-1', 'non-existent-section', 'charge-uuid-1')).rejects.toThrow(
+        'Section with uuid non-existent-section not found'
+      );
     });
   });
 });

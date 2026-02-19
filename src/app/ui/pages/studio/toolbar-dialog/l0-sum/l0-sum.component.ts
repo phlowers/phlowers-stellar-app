@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  TemplateRef,
-  ViewChild,
-  computed,
-  effect,
-  inject,
-  signal
-} from '@angular/core';
+import { AfterViewInit, Component, TemplateRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
@@ -19,10 +10,7 @@ import { PossibleIconNames } from '@ui/shared/model/icon.model';
 import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import {
-  DEFAULT_TABLE_ROWS_PER_PAGE,
-  TABLE_ROWS_PER_PAGE_OPTIONS
-} from '@ui/shared/constants/tablePagination';
+import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 interface L0Row {
   span: string;
@@ -32,14 +20,7 @@ interface L0Row {
 
 @Component({
   selector: 'app-l0-sum-tool',
-  imports: [
-    CommonModule,
-    DialogModule,
-    TableModule,
-    ProgressSpinnerModule,
-    ButtonComponent,
-    IconComponent
-  ],
+  imports: [CommonModule, DialogModule, TableModule, ProgressSpinnerModule, ButtonComponent, IconComponent],
   templateUrl: './l0-sum.component.html',
   styleUrls: ['./l0-sum.component.scss']
 })
@@ -52,13 +33,9 @@ export class L0SumComponent implements AfterViewInit {
 
   readonly l0Rows = signal<L0Row[]>([]);
 
-  readonly totalL0 = computed(() =>
-    this.l0Rows().reduce((sum, row) => sum + row.l0, 0)
-  );
+  readonly totalL0 = computed(() => this.l0Rows().reduce((sum, row) => sum + row.l0, 0));
 
-  readonly loading = computed(
-    () => this.plotService.loading() || !this.plotService.litData()
-  );
+  readonly loading = computed(() => this.plotService.loading() || !this.plotService.litData());
 
   readonly rowsPerPage = DEFAULT_TABLE_ROWS_PER_PAGE;
   readonly rowsPerPageOptions = TABLE_ROWS_PER_PAGE_OPTIONS;

@@ -32,26 +32,17 @@ const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
   arrowwidth: 1
 };
 
-export const createLoadAnnotations = (
-  plotParams: CreatePlotParams
-): Plotly.Annotations[] => {
+export const createLoadAnnotations = (plotParams: CreatePlotParams): Plotly.Annotations[] => {
   const { side, view } = plotParams;
   const annotations: Plotly.Annotations[] = [];
   const load_coords = cloneDeep(plotParams.litData.loads_coords);
   plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
     if (spanLoad && spanIndex + plotParams.startSupport in load_coords) {
-      const current_load_coord =
-        load_coords[spanIndex + plotParams.startSupport];
+      const current_load_coord = load_coords[spanIndex + plotParams.startSupport];
       annotations.push({
         ...BASE_ANNOTATION,
-        x:
-          side === 'face' && view === '2d'
-            ? current_load_coord[1]
-            : current_load_coord[0],
-        y:
-          plotParams.view === '2d'
-            ? current_load_coord[2]
-            : current_load_coord[1],
+        x: side === 'face' && view === '2d' ? current_load_coord[1] : current_load_coord[0],
+        y: plotParams.view === '2d' ? current_load_coord[2] : current_load_coord[1],
         //@ts-expect-error Plotly.js-dist-min does not support z axis
         z: current_load_coord[2],
         text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON

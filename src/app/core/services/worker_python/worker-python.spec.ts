@@ -80,18 +80,14 @@ describe('Worker', () => {
       await import('./worker-python');
 
       // Verify loadPyodide was called with correct parameters
-      const allPythonPackages = Object.values(pythonPackages).map(
-        (pkg) => self.name + 'pyodide/' + pkg.file_name
-      );
+      const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
       expect(loadPyodide).toHaveBeenCalledWith({
         indexURL: self.name + 'pyodide/',
         packages: expect.arrayContaining(allPythonPackages)
       });
 
       // Verify all packages are included
-      const allPackages = Object.values(pythonPackages).map(
-        (pkg: any) => 'test/pyodide/' + pkg.file_name
-      );
+      const allPackages = Object.values(pythonPackages).map((pkg: any) => 'test/pyodide/' + pkg.file_name);
 
       const callArgs = (loadPyodide as jest.Mock).mock.calls[0][0];
       expect(callArgs.packages).toEqual(expect.arrayContaining(allPackages));

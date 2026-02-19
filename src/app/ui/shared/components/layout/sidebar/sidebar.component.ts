@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  input,
-  OnInit,
-  signal,
-  ViewEncapsulation
-} from '@angular/core';
+import { Component, computed, input, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { SidebarItem } from './sidebar.model';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { environment } from '@src/environments/environment';
@@ -35,9 +28,7 @@ export class SidebarComponent implements OnInit {
   public appLogoRoot = signal<string>('in-app-logo/');
 
   sidebarClass = computed(() => {
-    return this.expandedStatus()
-      ? 'stellar-sidebar stellar-sidebar--expanded'
-      : 'stellar-sidebar';
+    return this.expandedStatus() ? 'stellar-sidebar stellar-sidebar--expanded' : 'stellar-sidebar';
   });
 
   private getInitialExpandedStatus(): boolean {
@@ -61,19 +52,13 @@ export class SidebarComponent implements OnInit {
       }
     }
 
-    localStorage.setItem(
-      'expandedStatus',
-      JSON.stringify(this.expandedStatus())
-    );
+    localStorage.setItem('expandedStatus', JSON.stringify(this.expandedStatus()));
   }
 
   toggleMenu(): void {
     this.expandedStatus.set(!this.expandedStatus());
 
-    localStorage.setItem(
-      'expandedStatus',
-      JSON.stringify(this.expandedStatus())
-    );
+    localStorage.setItem('expandedStatus', JSON.stringify(this.expandedStatus()));
 
     if (this.bodyTag()) {
       if (this.expandedStatus()) {

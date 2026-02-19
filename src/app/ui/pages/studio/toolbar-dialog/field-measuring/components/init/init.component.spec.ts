@@ -77,10 +77,7 @@ describe('Init component', () => {
         field_measures: []
       };
       mockPlotService.section = signal<Section | null>(mockSection as Section);
-      const proceedSpy = jest.spyOn(
-        toolbarDialogService,
-        'proceedToMainComponent'
-      );
+      const proceedSpy = jest.spyOn(toolbarDialogService, 'proceedToMainComponent');
 
       component.newMeasureNameControl.setValue('Valid Measure');
       component.newMeasureNameControl.markAsTouched();
@@ -96,10 +93,7 @@ describe('Init component', () => {
         field_measures: []
       };
       mockPlotService.section = signal<Section | null>(mockSection as Section);
-      const proceedSpy = jest.spyOn(
-        toolbarDialogService,
-        'proceedToMainComponent'
-      );
+      const proceedSpy = jest.spyOn(toolbarDialogService, 'proceedToMainComponent');
 
       component.newMeasureNameControl.setValue('');
       component.newMeasureNameControl.markAsTouched();

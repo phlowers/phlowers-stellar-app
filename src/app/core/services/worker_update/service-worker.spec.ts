@@ -1,10 +1,4 @@
-import {
-  checkIfAppInstalled,
-  installApp,
-  updateApp,
-  handleFetch,
-  handleMessage
-} from './service-worker';
+import { checkIfAppInstalled, installApp, updateApp, handleFetch, handleMessage } from './service-worker';
 
 // Mock browser APIs
 const mockCache = {
@@ -109,10 +103,7 @@ describe('Service Worker Functions', () => {
       mockFetch.mockResolvedValue({
         json: jest.fn().mockResolvedValue(mockManifest)
       });
-      mockClients.matchAll.mockResolvedValue([
-        { postMessage: jest.fn() },
-        { postMessage: jest.fn() }
-      ]);
+      mockClients.matchAll.mockResolvedValue([{ postMessage: jest.fn() }, { postMessage: jest.fn() }]);
     });
 
     it('should install app successfully', async () => {
@@ -246,9 +237,7 @@ describe('Service Worker Functions', () => {
 
       await handleFetch(mockEvent);
 
-      expect((global.caches as any).match).toHaveBeenCalledWith(
-        'https://example.com/index.html'
-      );
+      expect((global.caches as any).match).toHaveBeenCalledWith('https://example.com/index.html');
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 
@@ -267,9 +256,7 @@ describe('Service Worker Functions', () => {
 
       await handleFetch(mockEvent);
 
-      expect((global.caches as any).match).toHaveBeenCalledWith(
-        mockEvent.request
-      );
+      expect((global.caches as any).match).toHaveBeenCalledWith(mockEvent.request);
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 

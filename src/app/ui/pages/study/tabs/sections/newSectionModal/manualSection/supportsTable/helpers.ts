@@ -20,9 +20,7 @@ export const createEmptyChain = (chainName?: string): CatalogChain => {
   };
 };
 
-export const getUniqueSortedSupportNamesFromAttachments = (
-  attachments: CatalogAttachment[]
-): string[] => {
+export const getUniqueSortedSupportNamesFromAttachments = (attachments: CatalogAttachment[]): string[] => {
   return uniq((attachments || []).map((a) => a.support_name || ''))
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
@@ -32,15 +30,11 @@ export const buildSupportNameFilterTables = (
   supports: Support[],
   attachments: CatalogAttachment[]
 ): { catalogSupportNames: string[]; supplementarySupportNames: string[] } => {
-  const catalogSupportNames = getUniqueSortedSupportNamesFromAttachments(
-    attachments || []
-  );
+  const catalogSupportNames = getUniqueSortedSupportNamesFromAttachments(attachments || []);
   const supportNamesInStudy = uniq((supports || []).map((s) => s.name || ''))
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
-  const supplementarySupportNames = supportNamesInStudy.filter(
-    (name) => !catalogSupportNames.includes(name)
-  );
+  const supplementarySupportNames = supportNamesInStudy.filter((name) => !catalogSupportNames.includes(name));
 
   return { catalogSupportNames, supplementarySupportNames };
 };
@@ -60,10 +54,7 @@ export const calculateSupportNumber = (
   let restOfString = '';
   let isNumberField = false;
   let unit = 1;
-  while (
-    /^[0-9]+$/.test(firstSupport['number']?.slice(-unit) || '') &&
-    unit <= (firstSupport['number']?.length || 0)
-  ) {
+  while (/^[0-9]+$/.test(firstSupport['number']?.slice(-unit) || '') && unit <= (firstSupport['number']?.length || 0)) {
     unit++;
   }
   if (unit > 1) {
@@ -75,9 +66,7 @@ export const calculateSupportNumber = (
   return { firstNumber, restOfString, isNumberField };
 };
 
-export const calculateSupportFootAltitude = (
-  attachmentHeight: number
-): number => {
+export const calculateSupportFootAltitude = (attachmentHeight: number): number => {
   return Math.max(attachmentHeight - 30, 0);
 };
 
@@ -92,20 +81,14 @@ export const buildChainFieldChanges = (
   { uuid, support: { chainV: false } }
 ];
 
-export const buildCopyColumnChanges = (
-  supports: Support[],
-  header: keyof Support
-): SupportFieldChange[] => {
+export const buildCopyColumnChanges = (supports: Support[], header: keyof Support): SupportFieldChange[] => {
   const firstSupport = supports[0];
   if (!firstSupport) return [];
 
   const isChainName = header === 'chainName';
   const isSpanLength = header === 'spanLength';
   const isAttachmentHeight = header === 'attachmentHeight';
-  const { firstNumber, restOfString, isNumberField } = calculateSupportNumber(
-    firstSupport,
-    header
-  );
+  const { firstNumber, restOfString, isNumberField } = calculateSupportNumber(firstSupport, header);
 
   const changes: SupportFieldChange[] = [];
 
@@ -128,22 +111,14 @@ export const buildCopyColumnChanges = (
     });
 
     if (isChainName) {
-      changes.push(
-        ...buildChainFieldChanges(
-          support.uuid,
-          firstSupport.chainLength,
-          firstSupport.chainWeight
-        )
-      );
+      changes.push(...buildChainFieldChanges(support.uuid, firstSupport.chainLength, firstSupport.chainWeight));
     }
 
     if (isAttachmentHeight && firstSupport.attachmentHeight !== null) {
       changes.push({
         uuid: support.uuid,
         support: {
-          supportFootAltitude: calculateSupportFootAltitude(
-            firstSupport.attachmentHeight
-          )
+          supportFootAltitude: calculateSupportFootAltitude(firstSupport.attachmentHeight)
         }
       });
     }
@@ -163,9 +138,7 @@ export const buildFieldChangeUpdates = (
   if (field === 'chainName') {
     const chain = chainsOptions.find((c) => c.chain_name === value);
     if (chain) {
-      changes.push(
-        ...buildChainFieldChanges(uuid, chain.mean_length, chain.mean_mass)
-      );
+      changes.push(...buildChainFieldChanges(uuid, chain.mean_length, chain.mean_mass));
     }
   }
 
@@ -183,30 +156,14 @@ export const buildFieldChangeUpdates = (
   return changes;
 };
 
-export const findSupplementaryNames = (
-  names: string[],
-  catalogNames: string[]
-): string[] => {
-  const lowerCaseCatalogNames = new Set(
-    catalogNames.map((n) => n.toLowerCase())
-  );
-  return uniq(
-    names.filter(
-      (name) => name && !lowerCaseCatalogNames.has(name.toLowerCase())
-    )
-  );
+export const findSupplementaryNames = (names: string[], catalogNames: string[]): string[] => {
+  const lowerCaseCatalogNames = new Set(catalogNames.map((n) => n.toLowerCase()));
+  return uniq(names.filter((name) => name && !lowerCaseCatalogNames.has(name.toLowerCase())));
 };
 
-export const buildSupplementaryChains = (
-  names: string[],
-  catalogChainNames: string[]
-): CatalogChain[] => {
-  return findSupplementaryNames(names, catalogChainNames).map((name) =>
-    createEmptyChain(name)
-  );
+export const buildSupplementaryChains = (names: string[], catalogChainNames: string[]): CatalogChain[] => {
+  return findSupplementaryNames(names, catalogChainNames).map((name) => createEmptyChain(name));
 };
 
-export const getSupportFieldValues = (
-  supports: Support[],
-  field: 'chainName' | 'name'
-): string[] => supports.map((s) => s[field] || '');
+export const getSupportFieldValues = (supports: Support[], field: 'chainName' | 'name'): string[] =>
+  supports.map((s) => s[field] || '');

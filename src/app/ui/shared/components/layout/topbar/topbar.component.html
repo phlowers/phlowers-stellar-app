@@ -29,25 +29,11 @@
       ></app-icon>
     </span>
 
-    <span
-      i18n
-      class="calculation__txt"
-      [class.show]="!workerReady() && !workerError()"
-    >
-      Loading
-    </span>
+    <span i18n class="calculation__txt" [class.show]="!workerReady() && !workerError()"> Loading </span>
 
-    <span
-      i18n
-      class="calculation__txt"
-      [class.show]="workerReady() && !workerError()"
-    >
-      Ready
-    </span>
+    <span i18n class="calculation__txt" [class.show]="workerReady() && !workerError()"> Ready </span>
 
-    <span i18n class="calculation__txt" [class.show]="workerError()">
-      Error
-    </span>
+    <span i18n class="calculation__txt" [class.show]="workerError()"> Error </span>
   </p>
 
   <p class="user">{{ user()?.email ?? 'No user' }}</p>

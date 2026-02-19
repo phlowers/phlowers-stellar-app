@@ -30,9 +30,7 @@ export class StorageService {
       let isPersisted = await navigator.storage.persisted();
       if (!isPersisted) {
         isPersisted = await navigator.storage.persist();
-        console.log(
-          `Persisted storage granted: ${await navigator.storage.persisted()}`
-        );
+        console.log(`Persisted storage granted: ${await navigator.storage.persisted()}`);
         console.log('estimate', await navigator.storage.estimate());
       } else {
         console.log('Persisted storage has already been granted');

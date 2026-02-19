@@ -12,13 +12,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { signal } from '@angular/core';
-import {
-  Charge,
-  InitialCondition,
-  Section,
-  Study,
-  SymmetryType
-} from '@core/domain';
+import { Charge, InitialCondition, Section, Study, SymmetryType } from '@core/domain';
 import { ActivatedRoute } from '@angular/router';
 
 describe('StudioMenuBarComponent', () => {
@@ -249,10 +243,7 @@ describe('StudioMenuBarComponent', () => {
         ...mockSection,
         charges: [] // Use empty array instead of undefined to avoid errors in staffIsPresent computed
       };
-      fixture.componentRef.setInput(
-        'section',
-        sectionWithoutCharges as Section
-      );
+      fixture.componentRef.setInput('section', sectionWithoutCharges as Section);
       fixture.detectChanges();
 
       const charges = component.charges();
@@ -458,11 +449,7 @@ describe('StudioMenuBarComponent', () => {
 
       component.launchChargeFunction(mockFunction, value);
 
-      expect(mockFunction).toHaveBeenCalledWith(
-        'study-uuid-1',
-        'section-uuid-1',
-        'test-value'
-      );
+      expect(mockFunction).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'test-value');
     });
 
     it('should not call function when value is empty string', () => {
@@ -488,11 +475,7 @@ describe('StudioMenuBarComponent', () => {
       const mockFunction = jest.fn();
       component.launchChargeFunction(mockFunction, 'test-value');
 
-      expect(mockFunction).toHaveBeenCalledWith(
-        '',
-        'section-uuid-1',
-        'test-value'
-      );
+      expect(mockFunction).toHaveBeenCalledWith('', 'section-uuid-1', 'test-value');
     });
 
     it('should use empty string for section uuid when section is null', () => {
@@ -502,11 +485,7 @@ describe('StudioMenuBarComponent', () => {
       const mockFunction = jest.fn();
       component.launchChargeFunction(mockFunction, 'test-value');
 
-      expect(mockFunction).toHaveBeenCalledWith(
-        'study-uuid-1',
-        '',
-        'test-value'
-      );
+      expect(mockFunction).toHaveBeenCalledWith('study-uuid-1', '', 'test-value');
     });
   });
 
@@ -555,11 +534,7 @@ describe('StudioMenuBarComponent', () => {
 
       component.deleteChargeCase(charge);
 
-      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith(
-        'study-uuid-1',
-        'section-uuid-1',
-        'charge-uuid-1'
-      );
+      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
     });
 
     it('should not call deleteCharge when charge is undefined', () => {
@@ -611,13 +586,10 @@ describe('StudioMenuBarComponent', () => {
 
       component.viewOrEditChargeCase(charge, 'view');
 
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
-        'load-table',
-        {
-          mode: 'view',
-          chargeUuid: 'charge-uuid-1'
-        }
-      );
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('load-table', {
+        mode: 'view',
+        chargeUuid: 'charge-uuid-1'
+      });
     });
 
     it('should open toolbar dialog with edit mode and charge uuid', () => {
@@ -625,13 +597,10 @@ describe('StudioMenuBarComponent', () => {
 
       component.viewOrEditChargeCase(charge, 'edit');
 
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
-        'load-table',
-        {
-          mode: 'edit',
-          chargeUuid: 'charge-uuid-1'
-        }
-      );
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('load-table', {
+        mode: 'edit',
+        chargeUuid: 'charge-uuid-1'
+      });
     });
 
     it('should not open toolbar dialog when charge value is empty string', () => {
@@ -654,10 +623,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should not open toolbar dialog when charge is undefined', () => {
-      component.viewOrEditChargeCase(
-        undefined as unknown as { label: string; value: string },
-        'view'
-      );
+      component.viewOrEditChargeCase(undefined as unknown as { label: string; value: string }, 'view');
 
       expect(mockToolbarDialogService.openTool).not.toHaveBeenCalled();
     });
@@ -669,10 +635,7 @@ describe('StudioMenuBarComponent', () => {
         ...mockSection,
         charges: [] // Use empty array instead of null to avoid errors in staffIsPresent computed
       };
-      fixture.componentRef.setInput(
-        'section',
-        sectionWithNullCharges as Section
-      );
+      fixture.componentRef.setInput('section', sectionWithNullCharges as Section);
       fixture.detectChanges();
 
       const charges = component.charges();

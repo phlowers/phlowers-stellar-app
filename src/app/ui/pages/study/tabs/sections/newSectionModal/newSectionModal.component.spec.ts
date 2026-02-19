@@ -163,9 +163,7 @@ describe('NewSectionModalComponent (Jest)', () => {
     fixture.componentRef.setInput('section', { ...mockSection, name: '' });
     fixture.detectChanges();
 
-    const button = fixture.debugElement.query(
-      By.css('button[app-btn][type="button"]:not([btnStyle="outlined"])')
-    );
+    const button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="outlined"])'));
     expect(button.nativeElement.disabled).toBe(true);
   });
 
@@ -183,9 +181,7 @@ describe('NewSectionModalComponent (Jest)', () => {
     fixture.componentRef.setInput('mode', 'edit');
     fixture.detectChanges();
 
-    const button = fixture.debugElement.nativeElement.querySelector(
-      'button.app-btn-base span'
-    );
+    const button = fixture.debugElement.nativeElement.querySelector('button.app-btn-base span');
     expect(button.textContent.toLowerCase()).toContain('update section');
   });
 
@@ -193,9 +189,7 @@ describe('NewSectionModalComponent (Jest)', () => {
     fixture.componentRef.setInput('mode', 'create');
     fixture.detectChanges();
 
-    const button = fixture.debugElement.nativeElement.querySelector(
-      'button.app-btn-base span'
-    );
+    const button = fixture.debugElement.nativeElement.querySelector('button.app-btn-base span');
     expect(button.textContent.toLowerCase()).toContain('create section');
   });
 });

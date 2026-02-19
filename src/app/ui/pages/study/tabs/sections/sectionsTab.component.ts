@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  inject,
-  input,
-  output,
-  signal,
-  ViewChild
-} from '@angular/core';
+import { Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
 import { Section, InitialCondition, Study } from '@core/domain';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -66,9 +58,7 @@ export class SectionsTabComponent {
   duplicateInitialCondition = output<DuplicateInitialConditionFunctionsInput>();
   setInitialCondition = output<InitialConditionFunctionsInput>();
   currentSection = signal<Section>(createEmptySection());
-  currentInitialCondition = signal<InitialCondition>(
-    this.createInitialCondition(this.currentSection())
-  );
+  currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
   isNewSectionModalOpen = signal<boolean>(false);
   newSectionModalMode = signal<CreateEditView>('create');
   isInitialConditionModalOpen = signal<boolean>(false);
@@ -121,11 +111,7 @@ export class SectionsTabComponent {
     this.isNewSectionModalOpen.set(isOpen);
   }
 
-  openInitialConditionModal(
-    section: Section,
-    initialCondition: InitialCondition,
-    mode: CreateEditView
-  ) {
+  openInitialConditionModal(section: Section, initialCondition: InitialCondition, mode: CreateEditView) {
     this.currentSection.set(section);
     this.currentInitialCondition.set(initialCondition);
     this.initialConditionModalMode.set(mode);
@@ -157,16 +143,11 @@ export class SectionsTabComponent {
   }
 
   getSelectedInitialConditionUuid = computed(() => {
-    const section = this.study()?.sections.find(
-      (s) => s.uuid === this.selectedSection()
-    );
-    const selectedInitialConditionUuid =
-      section?.selected_initial_condition_uuid;
+    const section = this.study()?.sections.find((s) => s.uuid === this.selectedSection());
+    const selectedInitialConditionUuid = section?.selected_initial_condition_uuid;
     if (
       selectedInitialConditionUuid &&
-      section?.initial_conditions
-        .map((ic) => ic.uuid)
-        .includes(selectedInitialConditionUuid)
+      section?.initial_conditions.map((ic) => ic.uuid).includes(selectedInitialConditionUuid)
     ) {
       return selectedInitialConditionUuid;
     }
@@ -248,37 +229,18 @@ export class SectionsTabComponent {
   }
 
   selectChargeCase(charge: { label: string; value: string }, section: Section) {
-    this.chargesService.setSelectedCharge(
-      this.study()?.uuid ?? '',
-      section.uuid,
-      charge?.value ?? ''
-    );
+    this.chargesService.setSelectedCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
   }
 
   deleteChargeCase(charge: { label: string; value: string }, section: Section) {
-    this.chargesService.deleteCharge(
-      this.study()?.uuid ?? '',
-      section.uuid,
-      charge?.value ?? ''
-    );
+    this.chargesService.deleteCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
   }
 
-  duplicateChargeCase(
-    charge: { label: string; value: string },
-    section: Section
-  ) {
-    this.chargesService.duplicateCharge(
-      this.study()?.uuid ?? '',
-      section.uuid,
-      charge?.value ?? ''
-    );
+  duplicateChargeCase(charge: { label: string; value: string }, section: Section) {
+    this.chargesService.duplicateCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
   }
 
-  viewOrEditChargeCase(
-    charge: { label: string; value: string },
-    mode: 'view' | 'edit',
-    section: Section
-  ) {
+  viewOrEditChargeCase(charge: { label: string; value: string }, mode: 'view' | 'edit', section: Section) {
     if (charge?.value) {
       this.plotService.study.set(this.study());
       this.plotService.section.set(section);

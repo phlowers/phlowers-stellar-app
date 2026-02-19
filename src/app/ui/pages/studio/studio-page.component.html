@@ -1,7 +1,4 @@
-<app-new-charge-modal
-  [isOpen]="isNewChargeModalOpen()"
-  (isOpenChange)="isNewChargeModalOpen.set($event)"
-/>
+<app-new-charge-modal [isOpen]="isNewChargeModalOpen()" (isOpenChange)="isNewChargeModalOpen.set($event)" />
 
 <app-studio-menu-bar
   (openNewChargeModal)="openNewChargeModal()"
@@ -59,18 +56,11 @@
     <div class="flex gap-6 items-start pl-4">
       <div class="supports-select">
         <button
-          [disabled]="
-            supports() === 'all' ||
-            plotService.loading() ||
-            plotService.plotOptions().startSupport === 0
-          "
+          [disabled]="supports() === 'all' || plotService.loading() || plotService.plotOptions().startSupport === 0"
           (click)="onSupportButtonClick('left')"
           class="supports-select__buttons supports-select__buttons--left"
         >
-          <app-icon
-            icon="chevron_left"
-            class="supports-select__buttons__icon"
-          />
+          <app-icon icon="chevron_left" class="supports-select__buttons__icon" />
         </button>
 
         <p-select
@@ -87,16 +77,12 @@
           [disabled]="
             supports() === 'all' ||
             plotService.loading() ||
-            plotService.plotOptions().endSupport ===
-              (this.plotService.section()?.supports?.length ?? 0) - 1
+            plotService.plotOptions().endSupport === (this.plotService.section()?.supports?.length ?? 0) - 1
           "
           (click)="onSupportButtonClick('right')"
           class="supports-select__buttons supports-select__buttons--right"
         >
-          <app-icon
-            icon="chevron_right"
-            class="supports-select__buttons__icon"
-          />
+          <app-icon icon="chevron_right" class="supports-select__buttons__icon" />
         </button>
       </div>
 
@@ -121,38 +107,19 @@
       <ng-template>
         <p-tabs value="0" class="load-tabs">
           <p-tablist>
-            <p-tab
-              value="0"
-              [disabled]="!plotService.section()?.selected_charge_uuid"
-              i18n
-              >Climate condition</p-tab
-            >
-            <p-tab
-              value="1"
-              [disabled]="!plotService.section()?.selected_charge_uuid"
-              i18n
-              >Load / marking</p-tab
-            >
-            <p-tab value="2" [disabled]="true" i18n
-              >Cable manip. at support</p-tab
-            >
+            <p-tab value="0" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Climate condition</p-tab>
+            <p-tab value="1" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Load / marking</p-tab>
+            <p-tab value="2" [disabled]="true" i18n>Cable manip. at support</p-tab>
             <p-tab value="3" [disabled]="true" i18n>Cable manip. at span</p-tab>
           </p-tablist>
 
           @if (!plotService.section()?.charges?.length) {
             <div class="flex items-center justify-center gap-1 my-4">
               <app-icon icon="info" />
-              <p i18n>
-                In order to add charges, you need to create a charge case.
-              </p>
+              <p i18n>In order to add charges, you need to create a charge case.</p>
             </div>
             <div class="flex justify-center">
-              <button
-                app-btn
-                btnStyle="outlined"
-                btnSize="s"
-                (click)="openNewChargeModal()"
-              >
+              <button app-btn btnStyle="outlined" btnSize="s" (click)="openNewChargeModal()">
                 <app-icon icon="add_circle" />
                 <ng-container i18n>Add a charge case</ng-container>
               </button>
@@ -162,11 +129,7 @@
           @if (plotService.section()?.selected_charge_uuid) {
             <p-tabpanels>
               <p-tabpanel value="0">
-                <app-climate
-                  [chargeUuid]="
-                    plotService.section()?.selected_charge_uuid ?? ''
-                  "
-                />
+                <app-climate [chargeUuid]="plotService.section()?.selected_charge_uuid ?? ''" />
               </p-tabpanel>
 
               <p-tabpanel value="1">
@@ -175,23 +138,19 @@
 
               <p-tabpanel value="2">
                 <p class="m-0">
-                  At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                  blanditiis praesentium voluptatum deleniti atque corrupti quos
-                  dolores et quas molestias excepturi sint occaecati cupiditate
-                  non provident, similique sunt in culpa qui officia deserunt
-                  mollitia animi, id est laborum et dolorum fuga. Et harum
-                  quidem rerum facilis est et expedita distinctio. Nam libero
-                  tempore, cum soluta nobis est eligendi optio cumque nihil
-                  impedit quo minus.
+                  At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
+                  deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
+                  provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
+                  fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
+                  est eligendi optio cumque nihil impedit quo minus.
                 </p>
               </p-tabpanel>
 
               <p-tabpanel value="3">
                 <p class="m-0">
-                  Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                  Cumque consequuntur vero, iste ducimus ipsam soluta ab libero
-                  maxime, excepturi quia, veniam nostrum. Debitis necessitatibus
-                  veritatis mollitia numquam? Optio, minus cum.
+                  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cumque consequuntur vero, iste ducimus ipsam
+                  soluta ab libero maxime, excepturi quia, veniam nostrum. Debitis necessitatibus veritatis mollitia
+                  numquam? Optio, minus cum.
                 </p>
               </p-tabpanel>
             </p-tabpanels>

@@ -41,15 +41,10 @@ export class StudioMenuBarComponent {
       })) ?? []
   );
   selectedChargeCaseUuid = computed(() => {
-    return (
-      this.study()?.sections.find((s) => s?.uuid === this.section()?.uuid)
-        ?.selected_charge_uuid ?? null
-    );
+    return this.study()?.sections.find((s) => s?.uuid === this.section()?.uuid)?.selected_charge_uuid ?? null;
   });
   initialCondition = computed(() =>
-    this.section()?.initial_conditions.find(
-      (ic) => ic.uuid === this.section()?.selected_initial_condition_uuid
-    )
+    this.section()?.initial_conditions.find((ic) => ic.uuid === this.section()?.selected_initial_condition_uuid)
   );
   staffIsPresent = computed(() => {
     const section = this.section();
@@ -68,47 +63,27 @@ export class StudioMenuBarComponent {
   ) {}
 
   launchChargeFunction(
-    functionToLaunch: (
-      studyUuid: string,
-      sectionUuid: string,
-      value: string
-    ) => void,
+    functionToLaunch: (studyUuid: string, sectionUuid: string, value: string) => void,
     value: string
   ) {
     if (value) {
-      functionToLaunch(
-        this.study()?.uuid ?? '',
-        this.section()?.uuid ?? '',
-        value
-      );
+      functionToLaunch(this.study()?.uuid ?? '', this.section()?.uuid ?? '', value);
     }
   }
 
   selectChargeCase(charge?: { label: string; value: string }) {
-    this.launchChargeFunction(
-      this.chargesService.setSelectedCharge.bind(this.chargesService),
-      charge?.value ?? ''
-    );
+    this.launchChargeFunction(this.chargesService.setSelectedCharge.bind(this.chargesService), charge?.value ?? '');
   }
 
   deleteChargeCase(charge?: { label: string; value: string }) {
-    this.launchChargeFunction(
-      this.chargesService.deleteCharge.bind(this.chargesService),
-      charge?.value ?? ''
-    );
+    this.launchChargeFunction(this.chargesService.deleteCharge.bind(this.chargesService), charge?.value ?? '');
   }
 
   duplicateChargeCase(charge?: { label: string; value: string }) {
-    this.launchChargeFunction(
-      this.chargesService.duplicateCharge.bind(this.chargesService),
-      charge?.value ?? ''
-    );
+    this.launchChargeFunction(this.chargesService.duplicateCharge.bind(this.chargesService), charge?.value ?? '');
   }
 
-  viewOrEditChargeCase(
-    charge: { label: string; value: string },
-    mode: 'view' | 'edit'
-  ) {
+  viewOrEditChargeCase(charge: { label: string; value: string }, mode: 'view' | 'edit') {
     if (charge?.value) {
       this.toolbarDialogService.openTool('load-table', {
         mode,

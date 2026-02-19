@@ -5,10 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { CablesService } from './cables.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -65,10 +62,7 @@ describe('CablesService', () => {
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [
-        CablesService,
-        { provide: StorageService, useValue: storageServiceSpy }
-      ]
+      providers: [CablesService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(CablesService);
@@ -250,27 +244,25 @@ describe('CablesService', () => {
         'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\nCable 2,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<CableCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<CableCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -278,9 +270,7 @@ describe('CablesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/cables.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/cables.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -358,27 +348,25 @@ describe('CablesService', () => {
         'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<CableCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: [],
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<CableCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: [],
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -386,9 +374,7 @@ describe('CablesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/cables.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/cables.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -467,27 +453,25 @@ describe('CablesService', () => {
       const mockCsvContent =
         'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\n,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\nCable 2,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<CableCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<CableCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -495,9 +479,7 @@ describe('CablesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/cables.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/cables.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -579,27 +561,25 @@ describe('CablesService', () => {
       const mockCsvContent =
         'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<CableCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<CableCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -607,9 +587,7 @@ describe('CablesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/cables.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/cables.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -717,27 +695,25 @@ describe('CablesService', () => {
       const mockCsvContent =
         'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005\n,RTE,150,12.0,180000,0.6,0.000011,20,1.1,0.11,0.011,0.0011,0.00011,0.55,0.055,0.0055,0.00055,0.000055\nCable 3,RTE,200,15.0,190000,0.7,0.000010,20,1.2,0.12,0.012,0.0012,0.00012,0.6,0.06,0.006,0.0006,0.00006';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<CableCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<CableCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -745,9 +721,7 @@ describe('CablesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/cables.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/cables.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -858,27 +832,25 @@ describe('CablesService', () => {
       const mockCsvContent =
         'name,data_source,section,diameter,young_modulus,linear_mass,dilatation_coefficient,temperature_reference,stress_strain_a0,stress_strain_a1,stress_strain_a2,stress_strain_a3,stress_strain_a4,stress_strain_b0,stress_strain_b1,stress_strain_b2,stress_strain_b3,stress_strain_b4\nCable 1,RTE,100,10.5,200000,0.5,0.000012,20,1.0,0.1,0.01,0.001,0.0001,0.5,0.05,0.005,0.0005,0.00005';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<CableCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<CableCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -886,9 +858,7 @@ describe('CablesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/cables.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/cables.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
