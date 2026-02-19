@@ -37,9 +37,7 @@ export async function installApp() {
     })
   );
   log('app installed');
-  for (const client of await (
-    self as unknown as ServiceWorkerGlobalScope
-  ).clients.matchAll({
+  for (const client of await (self as unknown as ServiceWorkerGlobalScope).clients.matchAll({
     includeUncontrolled: true,
     type: 'window'
   })) {
@@ -54,9 +52,7 @@ export async function installApp() {
 
 export async function updateApp() {
   log('update requested');
-  const manifest = await fetchLatestManifest().then((manifest) =>
-    manifest.json()
-  );
+  const manifest = await fetchLatestManifest().then((manifest) => manifest.json());
   log('updating service worker with manifest', manifest);
   const files = manifest.files || [];
   const cache = await caches.open(CACHE_NAME);
@@ -74,12 +70,8 @@ export async function updateApp() {
       await cache.add(file);
     }
   }
-  const cacheKeys = (await cache.keys()).map((key) =>
-    key.url.replace(self.location.origin, '')
-  );
-  const keysToDelete = cacheKeys.filter(
-    (key) => key !== '/app_version' && !files.includes(key)
-  );
+  const cacheKeys = (await cache.keys()).map((key) => key.url.replace(self.location.origin, ''));
+  const keysToDelete = cacheKeys.filter((key) => key !== '/app_version' && !files.includes(key));
   for (const key of keysToDelete) {
     log('deleting file', key);
     await cache.delete(key);
@@ -108,8 +100,7 @@ const noCacheHeaders = () => {
 
 export async function handleFetch(event: FetchEvent) {
   const url = event.request.url;
-  const scope = (self as unknown as ServiceWorkerGlobalScope).registration
-    ?.scope;
+  const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
   if (url === scope) {
     // case for home page
     const newUrl = scope + 'index.html';
@@ -141,17 +132,11 @@ export async function handleFetch(event: FetchEvent) {
   }
 }
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener(
-  'fetch',
-  handleFetch
-);
+(self as unknown as ServiceWorkerGlobalScope).addEventListener('fetch', handleFetch);
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener(
-  'install',
-  async () => {
-    log('installing service worker');
-  }
-);
+(self as unknown as ServiceWorkerGlobalScope).addEventListener('install', async () => {
+  log('installing service worker');
+});
 
 export async function handleMessage(event: ExtendableMessageEvent) {
   log('message in service worker', event);
@@ -181,21 +166,15 @@ export async function handleMessage(event: ExtendableMessageEvent) {
   }
 }
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener(
-  'activate',
-  async () => {
-    log('activating service worker');
-    const installed = await checkIfAppInstalled();
-    if (installed) {
-      log('app is installed');
-    } else {
-      log('app is not installed');
-      await installApp();
-    }
+(self as unknown as ServiceWorkerGlobalScope).addEventListener('activate', async () => {
+  log('activating service worker');
+  const installed = await checkIfAppInstalled();
+  if (installed) {
+    log('app is installed');
+  } else {
+    log('app is not installed');
+    await installApp();
   }
-);
+});
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener(
-  'message',
-  handleMessage
-);
+(self as unknown as ServiceWorkerGlobalScope).addEventListener('message', handleMessage);

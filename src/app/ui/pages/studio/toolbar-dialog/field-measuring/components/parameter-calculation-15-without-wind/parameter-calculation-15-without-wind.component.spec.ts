@@ -89,9 +89,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(
-      ParameterCalculation15WithoutWindComponent
-    );
+    fixture = TestBed.createComponent(ParameterCalculation15WithoutWindComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
     componentRef.setInput('measureData', createTestMeasureData());
@@ -146,18 +144,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
     // Set all required fields for manual mode
     component.updateMeasureData('updateMode15C', 'manual');
-    component.updateManualParameterCalculation15CWithoutWind(
-      'parameterPapoto',
-      1700
-    );
-    component.updateManualParameterCalculation15CWithoutWind(
-      'cableTemperatureCalibration',
-      45
-    );
-    component.updateManualParameterCalculation15CWithoutWind(
-      'cableTemperatureCalibrationUncertainty',
-      3
-    );
+    component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
 
     // Set top-level fields for the calculation to read
     component.updateMeasureData('parameterPapoto', 1700);
@@ -167,16 +156,13 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
     await component.calculateParameter15C();
 
-    expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(
-      expect.any(String),
-      {
-        parameterPapoto: 1700,
-        parameterUncertaintyPapoto: null,
-        cableTemperatureCalibration: 45,
-        cableTemperatureCalibrationUncertainty: 3,
-        span_index: 11
-      }
-    );
+    expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(expect.any(String), {
+      parameterPapoto: 1700,
+      parameterUncertaintyPapoto: null,
+      cableTemperatureCalibration: 45,
+      cableTemperatureCalibrationUncertainty: 3,
+      span_index: 11
+    });
     expect(component.parameter15CError()).toBe(false);
   });
 
@@ -187,22 +173,10 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     expect(component.isFormValid()).toBe(false);
 
     // Now set the required fields using the correct method
-    component.updateManualParameterCalculation15CWithoutWind(
-      'parameterPapoto',
-      1700
-    );
-    component.updateManualParameterCalculation15CWithoutWind(
-      'parameterUncertaintyPapoto',
-      12
-    );
-    component.updateManualParameterCalculation15CWithoutWind(
-      'cableTemperatureCalibration',
-      45
-    );
-    component.updateManualParameterCalculation15CWithoutWind(
-      'cableTemperatureCalibrationUncertainty',
-      3
-    );
+    component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+    component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
 
     expect(component.isFormValid()).toBe(true);
   });
@@ -245,22 +219,10 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       });
 
       component.updateMeasureData('updateMode15C', 'manual');
-      component.updateManualParameterCalculation15CWithoutWind(
-        'parameterPapoto',
-        1700
-      );
-      component.updateManualParameterCalculation15CWithoutWind(
-        'parameterUncertaintyPapoto',
-        12
-      );
-      component.updateManualParameterCalculation15CWithoutWind(
-        'cableTemperatureCalibration',
-        45
-      );
-      component.updateManualParameterCalculation15CWithoutWind(
-        'cableTemperatureCalibrationUncertainty',
-        3
-      );
+      component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
 
       await component.calculateParameter15C();
     });
@@ -310,15 +272,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     let mockInitialConditionService: jest.Mocked<InitialConditionService>;
 
     beforeEach(() => {
-      mockMessageService = TestBed.inject(
-        MessageService
-      ) as jest.Mocked<MessageService>;
-      mockStudiesService = TestBed.inject(
-        StudiesService
-      ) as jest.Mocked<StudiesService>;
-      mockInitialConditionService = TestBed.inject(
-        InitialConditionService
-      ) as jest.Mocked<InitialConditionService>;
+      mockMessageService = TestBed.inject(MessageService) as jest.Mocked<MessageService>;
+      mockStudiesService = TestBed.inject(StudiesService) as jest.Mocked<StudiesService>;
+      mockInitialConditionService = TestBed.inject(InitialConditionService) as jest.Mocked<InitialConditionService>;
     });
 
     it('should add initial condition without generating state', async () => {
@@ -337,9 +293,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
       mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
       mockStudiesService.getStudy.mockResolvedValue(mockStudy as any);
-      mockInitialConditionService.addInitialCondition.mockResolvedValue(
-        undefined
-      );
+      mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
 
       await component.addInitialCondition({
         section: mockSection as any,
@@ -347,13 +301,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         generateState: false
       });
 
-      expect(
-        mockInitialConditionService.addInitialCondition
-      ).toHaveBeenCalled();
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
       expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-123');
-      expect(
-        mockInitialConditionService.setInitialCondition
-      ).not.toHaveBeenCalled();
+      expect(mockInitialConditionService.setInitialCondition).not.toHaveBeenCalled();
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -378,12 +328,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
       mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
       mockStudiesService.getStudy.mockResolvedValue(mockStudy as any);
-      mockInitialConditionService.addInitialCondition.mockResolvedValue(
-        undefined
-      );
-      mockInitialConditionService.setInitialCondition.mockResolvedValue(
-        undefined
-      );
+      mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
+      mockInitialConditionService.setInitialCondition.mockResolvedValue(undefined);
 
       await component.addInitialCondition({
         section: mockSection as any,
@@ -391,13 +337,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         generateState: true
       });
 
-      expect(
-        mockInitialConditionService.addInitialCondition
-      ).toHaveBeenCalled();
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
       expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-456');
-      expect(
-        mockInitialConditionService.setInitialCondition
-      ).toHaveBeenCalled();
+      expect(mockInitialConditionService.setInitialCondition).toHaveBeenCalled();
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -427,9 +369,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         generateState: false
       });
 
-      expect(
-        mockInitialConditionService.addInitialCondition
-      ).not.toHaveBeenCalled();
+      expect(mockInitialConditionService.addInitialCondition).not.toHaveBeenCalled();
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });
 
@@ -449,9 +389,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
       mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
       mockStudiesService.getStudy.mockResolvedValue(undefined);
-      mockInitialConditionService.addInitialCondition.mockResolvedValue(
-        undefined
-      );
+      mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
 
       await component.addInitialCondition({
         section: mockSection as any,
@@ -459,9 +397,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         generateState: false
       });
 
-      expect(
-        mockInitialConditionService.addInitialCondition
-      ).toHaveBeenCalled();
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
       expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-999');
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });

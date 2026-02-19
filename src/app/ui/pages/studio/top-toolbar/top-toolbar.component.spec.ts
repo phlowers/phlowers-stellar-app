@@ -145,9 +145,7 @@ describe('StudioTopToolbarComponent', () => {
       const tables = component.tablesDropdown();
 
       tables[0].command?.({});
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
-        'load-table'
-      );
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('load-table');
     });
 
     it('should execute tablesDropdown command for L0 table', () => {
@@ -200,9 +198,7 @@ describe('StudioTopToolbarComponent', () => {
       const tools = component.toolsDropdown();
 
       tools?.[0].command?.({});
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
-        'field-measuring'
-      );
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('field-measuring');
     });
   });
 
@@ -331,10 +327,7 @@ describe('StudioTopToolbarComponent', () => {
 
       component.ngOnInit();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error loading tools items state:',
-        expect.any(Error)
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Error loading tools items state:', expect.any(Error));
 
       consoleSpy.mockRestore();
     });
@@ -386,18 +379,14 @@ describe('StudioTopToolbarComponent', () => {
       const items = component.toolsItems();
 
       items[0].action();
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
-        'field-measuring'
-      );
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('field-measuring');
     });
 
     it('should execute action for tool item 2 - VTL & Guying', () => {
       const items = component.toolsItems();
 
       items[1].action();
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith(
-        'vtl-and-guying'
-      );
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('vtl-and-guying');
     });
 
     it('should execute action for tool item 3 - Cable marking', () => {
@@ -666,10 +655,7 @@ describe('StudioTopToolbarComponent', () => {
 
       component.ngOnInit();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error loading tools items state:',
-        expect.any(Error)
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Error loading tools items state:', expect.any(Error));
       consoleSpy.mockRestore();
     });
 

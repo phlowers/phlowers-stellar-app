@@ -9,13 +9,8 @@ import { PlotObjectsType, PlotOptions } from './types';
 import { createShadowDataObject } from './createShadowDataObject';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
-export const createShadowPlotData = (
-  params: GetSectionOutput,
-  options: PlotOptions
-): Data[] => {
-  const data = (
-    ['spans', 'supports', 'insulators'] as (keyof GetSectionOutput)[]
-  ).map((type) => {
+export const createShadowPlotData = (params: GetSectionOutput, options: PlotOptions): Data[] => {
+  const data = (['spans', 'supports', 'insulators'] as (keyof GetSectionOutput)[]).map((type) => {
     return createShadowDataObject(
       params[type as keyof GetSectionOutput] as number[][][],
       options.startSupport,

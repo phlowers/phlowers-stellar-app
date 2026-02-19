@@ -1,10 +1,5 @@
 import { Component, input, effect } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -29,9 +24,7 @@ import { SelectModule } from 'primeng/select';
   styleUrl: './export-dialog.component.scss'
 })
 export class ExportDialogComponent {
-  exportFormats = input<{ label: string; value: string }[]>([
-    { label: '.clst', value: 'clst' }
-  ]);
+  exportFormats = input<{ label: string; value: string }[]>([{ label: '.clst', value: 'clst' }]);
 
   form: FormGroup<{
     filename: FormControl<string | null>;
@@ -41,10 +34,7 @@ export class ExportDialogComponent {
   constructor(public readonly studiesService: StudiesService) {
     this.form = new FormGroup({
       filename: new FormControl<string>('', [Validators.required]),
-      exportFormat: new FormControl<string>(
-        this.exportFormats()[0]?.value || '',
-        [Validators.required]
-      )
+      exportFormat: new FormControl<string>(this.exportFormats()[0]?.value || '', [Validators.required])
     });
 
     effect(() => {
@@ -53,9 +43,7 @@ export class ExportDialogComponent {
         this.studiesService.exportDialogData()?.title &&
         this.studiesService.exportDialogData()?.uuid
       ) {
-        const defaultFilename = this.studiesService
-          .exportDialogData()
-          ?.title.replace(/\.clst$/, '');
+        const defaultFilename = this.studiesService.exportDialogData()?.title.replace(/\.clst$/, '');
         this.form.patchValue({ filename: defaultFilename });
       }
     });

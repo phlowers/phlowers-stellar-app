@@ -129,9 +129,7 @@ describe('StudioPageComponent', () => {
     const studyUuid = 'study-1';
     const sectionUuid = 'section-1';
     (route.snapshot.paramMap.get as jest.Mock).mockReturnValue(studyUuid);
-    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue(
-      sectionUuid
-    );
+    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue(sectionUuid);
 
     const study = {
       sections: [
@@ -140,9 +138,7 @@ describe('StudioPageComponent', () => {
       ]
     } as unknown as Study;
 
-    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
-      of(study)
-    );
+    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(of(study));
 
     const sectionSetSpy = jest.spyOn(plotService.section, 'set');
     const studySetSpy = jest.spyOn(plotService.study, 'set');
@@ -158,9 +154,7 @@ describe('StudioPageComponent', () => {
     expect(studySetSpy).toHaveBeenCalledWith(study);
     expect(studiesService.setCurrentStudy).toHaveBeenCalledWith(study);
     expect(sectionSetSpy).toHaveBeenCalledWith(study.sections[1]);
-    expect(sectionService.setCurrentSection).toHaveBeenCalledWith(
-      study.sections[1]
-    );
+    expect(sectionService.setCurrentSection).toHaveBeenCalledWith(study.sections[1]);
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 2,
       startSupport: 0
@@ -169,16 +163,12 @@ describe('StudioPageComponent', () => {
 
   it('ngOnInit should navigate if section not found', () => {
     (route.snapshot.paramMap.get as jest.Mock).mockReturnValue('study-1');
-    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue(
-      'missing-section'
-    );
+    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue('missing-section');
 
     const study = {
       sections: [{ uuid: 'a', supports: [1] }]
     } as unknown as Study;
-    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
-      of(study)
-    );
+    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(of(study));
 
     component.ngOnInit();
     studiesService.ready.next(true);
@@ -236,13 +226,9 @@ describe('StudioPageComponent', () => {
 
   it('ngOnInit should navigate when study is null', () => {
     (route.snapshot.paramMap.get as jest.Mock).mockReturnValue('study-1');
-    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue(
-      'section-1'
-    );
+    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue('section-1');
 
-    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(
-      of(null)
-    );
+    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(of(null));
 
     component.ngOnInit();
     studiesService.ready.next(true);
@@ -430,12 +416,10 @@ describe('StudioPageComponent', () => {
 
   it('ngOnDestroy should clean up subscription, section, and resizeObserver', () => {
     const unsubscribe = jest.fn();
-    (
-      component as unknown as { subscription: { unsubscribe: () => void } }
-    ).subscription = { unsubscribe };
-    (
-      component as unknown as { resizeObserver: { disconnect: () => void } }
-    ).resizeObserver = { disconnect: jest.fn() } as { disconnect: () => void };
+    (component as unknown as { subscription: { unsubscribe: () => void } }).subscription = { unsubscribe };
+    (component as unknown as { resizeObserver: { disconnect: () => void } }).resizeObserver = {
+      disconnect: jest.fn()
+    } as { disconnect: () => void };
 
     const sectionSetSpy = jest.spyOn(plotService.section, 'set');
 
@@ -444,8 +428,7 @@ describe('StudioPageComponent', () => {
     expect(sectionSetSpy).toHaveBeenCalledWith(null);
     expect(unsubscribe).toHaveBeenCalled();
     expect(
-      (component as unknown as { resizeObserver: { disconnect: jest.Mock } })
-        .resizeObserver.disconnect
+      (component as unknown as { resizeObserver: { disconnect: jest.Mock } }).resizeObserver.disconnect
     ).toHaveBeenCalled();
   });
 });

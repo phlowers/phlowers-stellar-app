@@ -17,13 +17,7 @@
           Title
           <app-icon
             [icon]="
-              $any(
-                sortField() === 'title'
-                  ? sortOrder() === 1
-                    ? 'arrow_upward'
-                    : 'arrow_downward'
-                  : 'swap_vert'
-              )
+              $any(sortField() === 'title' ? (sortOrder() === 1 ? 'arrow_upward' : 'arrow_downward') : 'swap_vert')
             "
           />
         </div>
@@ -34,11 +28,7 @@
           <app-icon
             [icon]="
               $any(
-                sortField() === 'author_email'
-                  ? sortOrder() === 1
-                    ? 'arrow_upward'
-                    : 'arrow_downward'
-                  : 'swap_vert'
+                sortField() === 'author_email' ? (sortOrder() === 1 ? 'arrow_upward' : 'arrow_downward') : 'swap_vert'
               )
             "
           />
@@ -65,13 +55,7 @@
           LIT
           <app-icon
             [icon]="
-              $any(
-                sortField() === 'lit_code'
-                  ? sortOrder() === 1
-                    ? 'arrow_upward'
-                    : 'arrow_downward'
-                  : 'swap_vert'
-              )
+              $any(sortField() === 'lit_code' ? (sortOrder() === 1 ? 'arrow_upward' : 'arrow_downward') : 'swap_vert')
             "
           />
         </div>
@@ -100,52 +84,23 @@
         </p>
       </td>
       <td>
-        <a
-          [routerLink]="'/study/' + study.uuid"
-          app-btn
-          btnStyle="base"
-          btnSize="s"
-          i18n
-        >
-          Open
-        </a>
+        <a [routerLink]="'/study/' + study.uuid" app-btn btnStyle="base" btnSize="s" i18n> Open </a>
       </td>
       <td>
-        <button
-          (click)="popover.toggle($event)"
-          app-btn
-          btnSize="l"
-          btnStyle="text"
-        >
+        <button (click)="popover.toggle($event)" app-btn btnSize="l" btnStyle="text">
           <app-icon icon="more_horiz" />
         </button>
         <p-popover #popover>
           <ng-template pTemplate="content">
-            <button
-              app-btn
-              btnSize="s"
-              btnStyle="text"
-              (click)="duplicateStudy.emit(study.uuid)"
-            >
+            <button app-btn btnSize="s" btnStyle="text" (click)="duplicateStudy.emit(study.uuid)">
               <app-icon icon="content_copy" />
               <span i18n>Duplicate</span>
             </button>
-            <button
-              app-btn
-              btnSize="s"
-              btnStyle="text"
-              (click)="openExportDialog(study.uuid)"
-            >
+            <button app-btn btnSize="s" btnStyle="text" (click)="openExportDialog(study.uuid)">
               <app-icon icon="download" />
               <ng-container i18n>Export</ng-container>
             </button>
-            <button
-              app-btn
-              btnSize="s"
-              btnStyle="text"
-              class="erase-btn"
-              (click)="deleteStudy.emit(study.uuid)"
-            >
+            <button app-btn btnSize="s" btnStyle="text" class="erase-btn" (click)="deleteStudy.emit(study.uuid)">
               <app-icon icon="delete" />
               <span i18n>Delete</span>
             </button>

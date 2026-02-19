@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  input,
-  OnInit,
-  output,
-  signal
-} from '@angular/core';
+import { Component, computed, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -65,10 +58,7 @@ export class SupportsTableComponent implements OnInit {
   supportChange = output<{ uuid: string; support: Partial<Support> }>();
   chainsOptions = signal<CatalogChain[]>([]);
   supplementaryChainsOptions = signal<CatalogChain[]>([]);
-  allChainsOptions = computed(() => [
-    ...this.chainsOptions(),
-    ...this.supplementaryChainsOptions()
-  ]);
+  allChainsOptions = computed(() => [...this.chainsOptions(), ...this.supplementaryChainsOptions()]);
   attachmentSetModalOpen = signal<boolean>(false);
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   first = input.required<number>();
@@ -76,10 +66,7 @@ export class SupportsTableComponent implements OnInit {
   rowsPerPageOptions = signal(TABLE_ROWS_PER_PAGE_OPTIONS);
   supportFilterTable = signal<string[]>([]);
   supplementarySupportFilterTable = signal<string[]>([]);
-  allSupportFilterTable = computed(() => [
-    ...this.supportFilterTable(),
-    ...this.supplementarySupportFilterTable()
-  ]);
+  allSupportFilterTable = computed(() => [...this.supportFilterTable(), ...this.supplementarySupportFilterTable()]);
   constructor(
     private readonly chainsService: ChainsService,
     private readonly attachmentService: AttachmentService
@@ -99,9 +86,7 @@ export class SupportsTableComponent implements OnInit {
 
   async getData() {
     const chains = (await this.chainsService.getChains()) || [];
-    this.chainsOptions.set(
-      chains.sort((a, b) => a.chain_name.localeCompare(b.chain_name))
-    );
+    this.chainsOptions.set(chains.sort((a, b) => a.chain_name.localeCompare(b.chain_name)));
     this.supplementaryChainsOptions.set(
       buildSupplementaryChains(
         getSupportFieldValues(this.supports(), 'chainName'),
@@ -109,8 +94,10 @@ export class SupportsTableComponent implements OnInit {
       )
     );
     const attachments = (await this.attachmentService.getAttachments()) || [];
-    const { catalogSupportNames, supplementarySupportNames } =
-      buildSupportNameFilterTables(this.supports(), attachments);
+    const { catalogSupportNames, supplementarySupportNames } = buildSupportNameFilterTables(
+      this.supports(),
+      attachments
+    );
     this.supportFilterTable.set(catalogSupportNames);
     this.supplementarySupportFilterTable.set(supplementarySupportNames);
   }
@@ -140,12 +127,7 @@ export class SupportsTableComponent implements OnInit {
   }
 
   onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
-    const changes = buildFieldChangeUpdates(
-      uuid,
-      field,
-      value,
-      this.chainsOptions()
-    );
+    const changes = buildFieldChangeUpdates(uuid, field, value, this.chainsOptions());
     changes.forEach((change) => this.supportChange.emit(change));
   }
 
@@ -162,9 +144,7 @@ export class SupportsTableComponent implements OnInit {
   }
 
   openAttachmentSetModal(uuid: string) {
-    this.supportForAttachmentSetModal.set(
-      this.supports().find((support) => support.uuid === uuid)
-    );
+    this.supportForAttachmentSetModal.set(this.supports().find((support) => support.uuid === uuid));
     this.attachmentSetModalOpen.set(true);
   }
 
@@ -176,9 +156,7 @@ export class SupportsTableComponent implements OnInit {
     heightBelowConsole: number;
     towerModel: string;
   }) {
-    const support = this.supports().find(
-      (support) => support.uuid === event.uuid
-    );
+    const support = this.supports().find((support) => support.uuid === event.uuid);
     if (support) {
       support.name = event.supportName;
       support.attachmentSet = event.attachmentSet;

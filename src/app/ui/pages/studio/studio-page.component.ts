@@ -123,32 +123,28 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.plotService.isStudioActive.set(true);
     this.studiesService.ready.subscribe((ready) => {
       if (ready && studyUuid) {
-        this.subscription = this.studiesService
-          .getStudyAsObservable(studyUuid)
-          .subscribe((study) => {
-            if (study) {
-              this.plotService.study.set(study);
-              this.studiesService.setCurrentStudy(study);
-              const section = study.sections.find(
-                (s) => s.uuid === sectionUuid
-              );
-              if (section) {
-                this.plotService.section.set(section);
-                this.sectionService.setCurrentSection(section);
-                if (this.previousSectionUuid() !== section.uuid) {
-                  this.plotService.plotOptionsChange({
-                    endSupport: section.supports.length - 1,
-                    startSupport: 0
-                  });
-                  this.previousSectionUuid.set(section.uuid);
-                }
-              } else {
-                this.router.navigate(['/studies']);
+        this.subscription = this.studiesService.getStudyAsObservable(studyUuid).subscribe((study) => {
+          if (study) {
+            this.plotService.study.set(study);
+            this.studiesService.setCurrentStudy(study);
+            const section = study.sections.find((s) => s.uuid === sectionUuid);
+            if (section) {
+              this.plotService.section.set(section);
+              this.sectionService.setCurrentSection(section);
+              if (this.previousSectionUuid() !== section.uuid) {
+                this.plotService.plotOptionsChange({
+                  endSupport: section.supports.length - 1,
+                  startSupport: 0
+                });
+                this.previousSectionUuid.set(section.uuid);
               }
             } else {
               this.router.navigate(['/studies']);
             }
-          });
+          } else {
+            this.router.navigate(['/studies']);
+          }
+        });
       }
     });
   }
@@ -164,23 +160,14 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  debounceUpdateSliderOptions = debounce(
-    (key: 'endSupport' | 'startSupport', value: number) => {
-      this.plotService.plotOptionsChange({ [key]: value });
-      const options = this.plotService.plotOptions();
-      const diff = Math.abs(options.endSupport - options.startSupport);
-      this.supports.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
-    },
-    DEBOUNCED_REFRESH_STUDIO_DELAY
-  );
+  debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {
+    this.plotService.plotOptionsChange({ [key]: value });
+    const options = this.plotService.plotOptions();
+    const diff = Math.abs(options.endSupport - options.startSupport);
+    this.supports.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
+  }, DEBOUNCED_REFRESH_STUDIO_DELAY);
 
-  updateSliderOptions({
-    value,
-    highValue
-  }: {
-    value?: number | undefined;
-    highValue?: number | undefined;
-  }) {
+  updateSliderOptions({ value, highValue }: { value?: number | undefined; highValue?: number | undefined }) {
     const options = this.plotService.plotOptions();
     [
       { val: value, key: 'startSupport' as const, opt: options.startSupport },

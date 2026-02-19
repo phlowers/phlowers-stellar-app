@@ -45,13 +45,7 @@ describe('IconComponent', () => {
 
   describe('Input Properties', () => {
     it('should accept valid icon names', () => {
-      const validIcons: PossibleIconNames[] = [
-        'home',
-        'search',
-        'menu',
-        'close',
-        'settings'
-      ];
+      const validIcons: PossibleIconNames[] = ['home', 'search', 'menu', 'close', 'settings'];
 
       validIcons.forEach((iconName) => {
         fixture.componentRef.setInput('icon', iconName);
@@ -100,13 +94,7 @@ describe('IconComponent', () => {
     });
 
     it('should render different icon names correctly', () => {
-      const testIcons: PossibleIconNames[] = [
-        'home',
-        'search',
-        'close',
-        'add',
-        'delete'
-      ];
+      const testIcons: PossibleIconNames[] = ['home', 'search', 'close', 'add', 'delete'];
 
       testIcons.forEach((iconName) => {
         fixture.componentRef.setInput('icon', iconName);
@@ -164,9 +152,7 @@ describe('IconComponent', () => {
       fixture.componentRef.setInput('icon', 'home');
       fixture.detectChanges();
 
-      expect(mockDocumentFonts.check).toHaveBeenCalledWith(
-        '1em "Material Symbols Rounded"'
-      );
+      expect(mockDocumentFonts.check).toHaveBeenCalledWith('1em "Material Symbols Rounded"');
     });
 
     it('should set symbolsReady to true after font loads successfully', async () => {
@@ -178,27 +164,20 @@ describe('IconComponent', () => {
 
       await fixture.whenStable();
 
-      expect(mockDocumentFonts.load).toHaveBeenCalledWith(
-        '1em "Material Symbols Rounded"'
-      );
+      expect(mockDocumentFonts.load).toHaveBeenCalledWith('1em "Material Symbols Rounded"');
       expect(component.symbolsReady()).toBe(true);
     });
 
     it('should handle font loading failure gracefully', async () => {
       mockDocumentFonts.check.mockReturnValue(false);
-      mockDocumentFonts.load.mockRejectedValue(
-        new Error('Font loading failed')
-      );
+      mockDocumentFonts.load.mockRejectedValue(new Error('Font loading failed'));
 
       fixture.componentRef.setInput('icon', 'home');
       fixture.detectChanges();
 
       await fixture.whenStable();
 
-      expect(console.warn).toHaveBeenCalledWith(
-        'Material Symbols Rounded font failed to load:',
-        expect.any(Error)
-      );
+      expect(console.warn).toHaveBeenCalledWith('Material Symbols Rounded font failed to load:', expect.any(Error));
       expect(component.symbolsReady()).toBe(false);
     });
 

@@ -36,9 +36,7 @@ export class StudioTopToolbarComponent implements OnInit {
   items = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
 
-  private readonly hasCharges = computed(
-    () => !!this.plotService.section()?.charges?.length
-  );
+  private readonly hasCharges = computed(() => !!this.plotService.section()?.charges?.length);
 
   tablesDropdown = computed<MenuItem[]>(() => [
     {
@@ -231,9 +229,7 @@ export class StudioTopToolbarComponent implements OnInit {
     }
   ]);
 
-  checkedCount = computed(
-    () => this.toolsItems().filter((item) => item.checked).length
-  );
+  checkedCount = computed(() => this.toolsItems().filter((item) => item.checked).length);
 
   updateCheckedCount(): void {
     this.toolsItems.set([...this.toolsItems()]);

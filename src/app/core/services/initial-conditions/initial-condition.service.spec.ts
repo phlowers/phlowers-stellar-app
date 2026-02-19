@@ -99,10 +99,7 @@ describe('InitialConditionService', () => {
     } as unknown as jest.Mocked<StudiesService>;
 
     TestBed.configureTestingModule({
-      providers: [
-        InitialConditionService,
-        { provide: StudiesService, useValue: mockStudiesService }
-      ]
+      providers: [InitialConditionService, { provide: StudiesService, useValue: mockStudiesService }]
     });
 
     service = TestBed.inject(InitialConditionService);
@@ -159,10 +156,7 @@ describe('InitialConditionService', () => {
           sections: expect.arrayContaining([
             expect.objectContaining({
               uuid: mockSection.uuid,
-              initial_conditions: expect.arrayContaining([
-                mockInitialCondition,
-                newIC
-              ])
+              initial_conditions: expect.arrayContaining([mockInitialCondition, newIC])
             })
           ])
         }),
@@ -173,11 +167,7 @@ describe('InitialConditionService', () => {
 
   describe('deleteInitialCondition', () => {
     it('should delete an initial condition from a section', async () => {
-      await service.deleteInitialCondition(
-        mockStudy,
-        mockSection,
-        mockInitialCondition
-      );
+      await service.deleteInitialCondition(mockStudy, mockSection, mockInitialCondition);
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -197,12 +187,7 @@ describe('InitialConditionService', () => {
     it('should duplicate an initial condition with a new UUID', async () => {
       const newUuid = 'new-ic-uuid';
 
-      const result = await service.duplicateInitialCondition(
-        mockStudy,
-        mockSection,
-        mockInitialCondition,
-        newUuid
-      );
+      const result = await service.duplicateInitialCondition(mockStudy, mockSection, mockInitialCondition, newUuid);
 
       expect(result).toBe(newUuid);
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
@@ -229,11 +214,7 @@ describe('InitialConditionService', () => {
     it('should set the selected initial condition UUID for a section', async () => {
       const newSelectedUuid = 'ic-uuid-new';
 
-      await service.setInitialCondition(
-        mockStudy,
-        mockSection,
-        newSelectedUuid
-      );
+      await service.setInitialCondition(mockStudy, mockSection, newSelectedUuid);
 
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -251,11 +232,7 @@ describe('InitialConditionService', () => {
 
   describe('getInitialCondition', () => {
     it('should retrieve an initial condition by study, section, and IC UUIDs', async () => {
-      const result = await service.getInitialCondition(
-        'study-uuid-1',
-        'section-uuid-1',
-        'ic-uuid-1'
-      );
+      const result = await service.getInitialCondition('study-uuid-1', 'section-uuid-1', 'ic-uuid-1');
 
       expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-uuid-1');
       expect(result).toEqual(mockInitialCondition);

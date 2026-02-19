@@ -4,12 +4,6 @@
  * @param endSupport - The end support number
  * @returns The middle span as an array of two numbers
  */
-export const findMiddleSpan = (
-  startSupport: number,
-  endSupport: number
-): number[] => {
-  return [
-    Math.floor((startSupport + endSupport) / 2),
-    Math.floor((startSupport + endSupport) / 2) + 1
-  ];
+export const findMiddleSpan = (startSupport: number, endSupport: number): number[] => {
+  return [Math.floor((startSupport + endSupport) / 2), Math.floor((startSupport + endSupport) / 2) + 1];
 };

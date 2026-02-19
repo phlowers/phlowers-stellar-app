@@ -68,10 +68,7 @@ describe('filterElements', () => {
       const result = filterElements(testElements, filters);
 
       expect(result).toHaveLength(2);
-      expect(result.map((e) => e.name)).toEqual([
-        'JavaScript Framework',
-        'React Component'
-      ]);
+      expect(result.map((e) => e.name)).toEqual(['JavaScript Framework', 'React Component']);
     });
 
     it('should filter by multiple properties', () => {
@@ -150,8 +147,7 @@ describe('filterElements', () => {
         { id: 2, name: 'Another Test', category: 'Test' }
       ];
 
-      const filters: Partial<{ id: number; name: string; category?: string }> =
-        { category: 'Test' };
+      const filters: Partial<{ id: number; name: string; category?: string }> = { category: 'Test' };
       const result = filterElements(elementsWithMissingProps, filters);
 
       expect(result).toHaveLength(1);

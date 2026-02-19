@@ -1,9 +1,1 @@
-export type TagColor =
-  | 'neutral'
-  | 'success'
-  | 'error'
-  | 'warning'
-  | 'primary'
-  | 'secondary'
-  | 'tertiary'
-  | 'rte';
+export type TagColor = 'neutral' | 'success' | 'error' | 'warning' | 'primary' | 'secondary' | 'tertiary' | 'rte';

@@ -8,11 +8,7 @@ import { PapotoComponent } from './papoto.component';
 import { createTestMeasureData } from './../../../helpers';
 import { LEFT_SUPPORT_OPTIONS_MOCK } from '../../../mock-data';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import {
-  Task,
-  TaskError,
-  GetSectionOutput
-} from '@services/worker_python/tasks/types';
+import { Task, TaskError, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 
 describe('Papoto component', () => {
@@ -131,23 +127,20 @@ describe('Papoto component', () => {
 
     await component.calculatePapoto();
 
-    expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(
-      Task.calculatePapoto,
-      {
-        spanLength: 100,
-        measuredElevationDifference: 5,
-        HL: 10,
-        H1: 20,
-        H2: 30,
-        H3: 40,
-        HR: 50,
-        VL: 15,
-        V1: 25,
-        V2: 35,
-        V3: 45,
-        VR: 55
-      }
-    );
+    expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(Task.calculatePapoto, {
+      spanLength: 100,
+      measuredElevationDifference: 5,
+      HL: 10,
+      H1: 20,
+      H2: 30,
+      H3: 40,
+      HR: 50,
+      VL: 15,
+      V1: 25,
+      V2: 35,
+      V3: 45,
+      VR: 55
+    });
     expect(component.papotoError()).toBe(false);
   });
 

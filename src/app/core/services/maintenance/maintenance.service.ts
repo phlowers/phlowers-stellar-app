@@ -46,8 +46,7 @@ export class MaintenanceService {
     const mapData = (data: MaintenanceCsvDto[]) => {
       return data
         .map((item) => ({
-          maintenance_center_id:
-            item.maintenance_center_id || item.maintenance_id || '',
+          maintenance_center_id: item.maintenance_center_id || item.maintenance_id || '',
           maintenance_center: item.maintenance_center,
           regional_team_id: item.regional_team_id,
           regional_team: item.regional_team,
@@ -62,9 +61,7 @@ export class MaintenanceService {
         Papa.parse(maintenanceTeams, {
           header: true,
           skipEmptyLines: true,
-          complete: (async (
-            jsonResults: Papa.ParseResult<MaintenanceCsvDto>
-          ) => {
+          complete: (async (jsonResults: Papa.ParseResult<MaintenanceCsvDto>) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
@@ -73,9 +70,7 @@ export class MaintenanceService {
             await this.storageService.db?.catMaintenance.clear();
             const maintenanceTable: CatalogMaintenanceEntity[] = mapData(data);
             console.log('adding maintenance data', maintenanceTable.length);
-            await this.storageService.db?.catMaintenance.bulkAdd(
-              maintenanceTable
-            );
+            await this.storageService.db?.catMaintenance.bulkAdd(maintenanceTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<MaintenanceCsvDto>) => void
         });

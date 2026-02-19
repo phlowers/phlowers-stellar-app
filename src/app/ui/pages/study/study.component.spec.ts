@@ -213,9 +213,7 @@ describe('StudyComponent', () => {
 
   describe('ngOnInit', () => {
     it('should navigate to studies if no uuid is provided', () => {
-      (mockActivatedRoute.snapshot.paramMap.get as jest.Mock).mockReturnValue(
-        null
-      );
+      (mockActivatedRoute.snapshot.paramMap.get as jest.Mock).mockReturnValue(null);
 
       component.ngOnInit();
 
@@ -228,9 +226,7 @@ describe('StudyComponent', () => {
 
       await fixture.whenStable();
 
-      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(
-        'test-uuid-1'
-      );
+      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith('test-uuid-1');
       expect(component.study).toEqual(mockStudy);
     });
 
@@ -259,9 +255,7 @@ describe('StudyComponent', () => {
       paramsSubject.next({ uuid: newUuid });
       await fixture.whenStable();
 
-      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(
-        newUuid
-      );
+      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(newUuid);
     });
   });
 
@@ -273,16 +267,12 @@ describe('StudyComponent', () => {
 
       const newUuid = 'new-uuid-123';
       const updatedStudy = { ...mockStudy, uuid: newUuid };
-      mockStudiesService.getStudyAsObservable.mockReturnValue(
-        of(updatedStudy) as any
-      );
+      mockStudiesService.getStudyAsObservable.mockReturnValue(of(updatedStudy) as any);
 
       component.refreshStudy(newUuid);
       await fixture.whenStable();
 
-      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(
-        newUuid
-      );
+      expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(newUuid);
       expect(component.study).toEqual(updatedStudy);
     });
 
@@ -318,13 +308,8 @@ describe('StudyComponent', () => {
 
       await component.duplicateStudy('test-uuid');
 
-      expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith(
-        'test-uuid'
-      );
-      expect(mockRouter.navigate).toHaveBeenCalledWith([
-        '/study',
-        'duplicated-uuid'
-      ]);
+      expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith('test-uuid');
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/study', 'duplicated-uuid']);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -338,9 +323,7 @@ describe('StudyComponent', () => {
 
       await component.duplicateStudy('test-uuid');
 
-      expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith(
-        'test-uuid'
-      );
+      expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith('test-uuid');
       expect(mockRouter.navigate).not.toHaveBeenCalled();
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
@@ -361,10 +344,7 @@ describe('StudyComponent', () => {
 
       await component.createOrUpdateSection(updatedSection);
 
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
-        component.study,
-        updatedSection
-      );
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study, updatedSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -378,10 +358,7 @@ describe('StudyComponent', () => {
 
       await component.createOrUpdateSection(newSection);
 
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
-        component.study,
-        newSection
-      );
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study, newSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -408,10 +385,7 @@ describe('StudyComponent', () => {
     it('should delete section from study', async () => {
       await component.deleteSection(mockSection);
 
-      expect(mockSectionService.deleteSection).toHaveBeenCalledWith(
-        component.study,
-        mockSection
-      );
+      expect(mockSectionService.deleteSection).toHaveBeenCalledWith(component.study, mockSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -438,10 +412,7 @@ describe('StudyComponent', () => {
     it('should duplicate section with new uuid', async () => {
       await component.duplicateSection(mockSection);
 
-      expect(mockSectionService.duplicateSection).toHaveBeenCalledWith(
-        component.study,
-        mockSection
-      );
+      expect(mockSectionService.duplicateSection).toHaveBeenCalledWith(component.study, mockSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -471,9 +442,7 @@ describe('StudyComponent', () => {
         initialCondition: mockInitialCondition
       });
 
-      expect(
-        mockInitialConditionService.addInitialCondition
-      ).toHaveBeenCalledWith(
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalledWith(
         component.study,
         mockSection,
         mockInitialCondition
@@ -502,9 +471,7 @@ describe('StudyComponent', () => {
         initialCondition: newInitialCondition
       });
 
-      expect(
-        mockInitialConditionService.addInitialCondition
-      ).toHaveBeenCalledWith(
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalledWith(
         component.study,
         sectionWithConditions,
         newInitialCondition
@@ -525,9 +492,7 @@ describe('StudyComponent', () => {
         initialCondition: mockInitialCondition
       });
 
-      expect(
-        mockInitialConditionService.addInitialCondition
-      ).not.toHaveBeenCalled();
+      expect(mockInitialConditionService.addInitialCondition).not.toHaveBeenCalled();
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });
   });
@@ -547,9 +512,7 @@ describe('StudyComponent', () => {
         initialCondition: mockInitialCondition
       });
 
-      expect(
-        mockInitialConditionService.deleteInitialCondition
-      ).toHaveBeenCalledWith(
+      expect(mockInitialConditionService.deleteInitialCondition).toHaveBeenCalledWith(
         component.study,
         mockSection,
         mockInitialCondition
@@ -570,9 +533,7 @@ describe('StudyComponent', () => {
         initialCondition: mockInitialCondition
       });
 
-      expect(
-        mockInitialConditionService.deleteInitialCondition
-      ).not.toHaveBeenCalled();
+      expect(mockInitialConditionService.deleteInitialCondition).not.toHaveBeenCalled();
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });
 
@@ -588,9 +549,7 @@ describe('StudyComponent', () => {
         initialCondition: mockInitialCondition
       });
 
-      expect(
-        mockInitialConditionService.deleteInitialCondition
-      ).toHaveBeenCalledWith(
+      expect(mockInitialConditionService.deleteInitialCondition).toHaveBeenCalledWith(
         component.study,
         sectionWithoutConditions,
         mockInitialCondition
@@ -624,9 +583,11 @@ describe('StudyComponent', () => {
         initialCondition: updatedIC
       });
 
-      expect(
-        mockInitialConditionService.updateInitialCondition
-      ).toHaveBeenCalledWith(component.study, mockSection, updatedIC);
+      expect(mockInitialConditionService.updateInitialCondition).toHaveBeenCalledWith(
+        component.study,
+        mockSection,
+        updatedIC
+      );
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -654,9 +615,7 @@ describe('StudyComponent', () => {
         newUuid
       });
 
-      expect(
-        mockInitialConditionService.duplicateInitialCondition
-      ).toHaveBeenCalledWith(
+      expect(mockInitialConditionService.duplicateInitialCondition).toHaveBeenCalledWith(
         component.study,
         mockSection,
         mockInitialCondition,
@@ -686,9 +645,7 @@ describe('StudyComponent', () => {
         initialCondition: mockInitialCondition
       });
 
-      expect(
-        mockInitialConditionService.setInitialCondition
-      ).toHaveBeenCalledWith(
+      expect(mockInitialConditionService.setInitialCondition).toHaveBeenCalledWith(
         component.study,
         mockSection,
         mockInitialCondition.uuid
@@ -712,9 +669,7 @@ describe('StudyComponent', () => {
   describe('Error Handling', () => {
     it('should handle getStudy errors gracefully', async () => {
       // Reset the mock to avoid interference from other tests
-      mockStudiesService.getStudyAsObservable.mockReturnValue(
-        of(mockStudy) as any
-      );
+      mockStudiesService.getStudyAsObservable.mockReturnValue(of(mockStudy) as any);
       readySubject.next(true);
       component.ngOnInit();
 
@@ -734,9 +689,7 @@ describe('StudyComponent', () => {
       // Wait for the promise to resolve/reject
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith(
-        'test-uuid'
-      );
+      expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith('test-uuid');
     });
   });
 
@@ -750,10 +703,7 @@ describe('StudyComponent', () => {
 
       await component.createOrUpdateSection(mockSection);
 
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
-        component.study,
-        mockSection
-      );
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study, mockSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -774,9 +724,7 @@ describe('StudyComponent', () => {
         initialCondition: mockInitialCondition
       });
 
-      expect(
-        mockInitialConditionService.addInitialCondition
-      ).toHaveBeenCalledWith(
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalledWith(
         component.study,
         sectionWithNullConditions,
         mockInitialCondition

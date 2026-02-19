@@ -203,9 +203,7 @@ describe('LoadFormsService', () => {
       service.initTemporaryLoadData();
 
       expect(mockPlotService.temporaryLoadData).toBeDefined();
-      expect(mockPlotService.temporaryLoadData?.climate).toEqual(
-        mockChargeData.climate
-      );
+      expect(mockPlotService.temporaryLoadData?.climate).toEqual(mockChargeData.climate);
     });
   });
 
@@ -320,9 +318,7 @@ describe('LoadFormsService', () => {
       await service.calculateLoad();
 
       expect(mockPlotService.litData.set).toHaveBeenCalledWith(mockCurrentData);
-      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(
-        mockBaseData
-      );
+      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(mockBaseData);
       expect(mockPlotService.error.set).toHaveBeenCalledWith(mockError);
     });
 
@@ -381,11 +377,7 @@ describe('LoadFormsService', () => {
 
       service.deleteLoad();
 
-      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith(
-        'study-uuid',
-        'section-uuid-1',
-        'charge-uuid-1'
-      );
+      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid', 'section-uuid-1', 'charge-uuid-1');
     });
   });
 });

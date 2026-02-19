@@ -1,11 +1,5 @@
 import { Component, computed, effect, signal } from '@angular/core';
-import {
-  trigger,
-  state,
-  style,
-  transition,
-  animate
-} from '@angular/animations';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import { SectionPlotCardComponent } from './card/section-plot-card.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
@@ -35,9 +29,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
           overflow: 'hidden'
         })
       ),
-      transition('collapsed <=> expanded', [
-        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')
-      ])
+      transition('collapsed <=> expanded', [animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')])
     ])
   ]
 })
@@ -57,11 +49,7 @@ export class SectionPlotCardsComponent {
     if (!this.plotService.section()) {
       return [];
     }
-    const array = new Array(
-      this.plotService.plotOptions().endSupport -
-        this.plotService.plotOptions().startSupport +
-        1
-    )
+    const array = new Array(this.plotService.plotOptions().endSupport - this.plotService.plotOptions().startSupport + 1)
       .fill(0)
       .map((_, index) => index + this.plotService.plotOptions().startSupport);
     if (array.length > 3) {

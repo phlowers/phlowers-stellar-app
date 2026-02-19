@@ -60,16 +60,12 @@ export class StudiesComponent implements OnInit {
 
   sortStudies(studies: Study[]) {
     return studies.sort((a, b) => {
-      return (
-        new Date(b.created_at_offline).getTime() -
-        new Date(a.created_at_offline).getTime()
-      );
+      return new Date(b.created_at_offline).getTime() - new Date(a.created_at_offline).getTime();
     });
   }
 
   ngOnInit(): void {
-    this.isNewStudyModalOpen =
-      this.route.snapshot.queryParams['create'] === 'true';
+    this.isNewStudyModalOpen = this.route.snapshot.queryParams['create'] === 'true';
     this.studiesService.ready.subscribe((ready) => {
       if (ready) {
         this.studiesService.getStudies().then((studies) => {

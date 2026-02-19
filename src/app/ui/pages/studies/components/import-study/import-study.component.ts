@@ -1,13 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import {
-  ProtoV4Parameters,
-  ProtoV4Support,
-  Section,
-  Support,
-  Study
-} from '@core/domain';
+import { ProtoV4Parameters, ProtoV4Support, Section, Support, Study } from '@core/domain';
 import Papa from 'papaparse';
 import { StudiesService } from '@services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
@@ -17,10 +11,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { CablesService } from '@services/cables/cables.service';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
 import { createEmptyStudy } from '../new-study-modal/new-study-modal.component';
-import {
-  createEmptySection,
-  createEmptySupport
-} from '@services/sections/helpers';
+import { createEmptySection, createEmptySupport } from '@services/sections/helpers';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -65,10 +56,7 @@ const formatProtoV4Support = (support: Record<string, string>) => {
   };
 };
 
-const formatProtoV4Parameters = (
-  rawParameters: string[],
-  fileName: string
-): ProtoV4Parameters => {
+const formatProtoV4Parameters = (rawParameters: string[], fileName: string): ProtoV4Parameters => {
   return {
     conductor: rawParameters[3],
     cable_amount: convertStringToNumber(rawParameters[5]),
@@ -101,13 +89,7 @@ const importSuccessMessage = {
 
 @Component({
   selector: 'app-import-study',
-  imports: [
-    IconComponent,
-    DividerModule,
-    RouterLink,
-    ButtonComponent,
-    ToastModule
-  ],
+  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent, ToastModule],
   templateUrl: './import-study.component.html',
   styleUrl: './import-study.component.scss'
 })
@@ -125,9 +107,7 @@ export class ImportStudyComponent {
 
   async deleteStudy(uuid: string) {
     await this.studiesService.deleteStudy(uuid);
-    this.newStudies.set(
-      this.newStudies().filter((study) => study.uuid !== uuid)
-    );
+    this.newStudies.set(this.newStudies().filter((study) => study.uuid !== uuid));
   }
 
   private decodeBase64FromText(textContent: string): string {
@@ -155,27 +135,19 @@ export class ImportStudyComponent {
     }));
   }
 
-  private transformSections(
-    sections: unknown[]
-  ): (Section & { supports: Support[] })[] {
+  private transformSections(sections: unknown[]): (Section & { supports: Support[] })[] {
     return sections.map((section: unknown) => {
       const sectionObj = section as Section;
       return {
         ...createEmptySection(),
         ...sectionObj,
-        supports: Array.isArray(sectionObj.supports)
-          ? this.transformSupports(sectionObj.supports)
-          : []
+        supports: Array.isArray(sectionObj.supports) ? this.transformSupports(sectionObj.supports) : []
       };
     });
   }
 
-  private buildStudyFromParsedData(
-    parsedResult: Record<string, unknown>
-  ): Study {
-    const sections = Array.isArray(parsedResult.sections)
-      ? this.transformSections(parsedResult.sections)
-      : [];
+  private buildStudyFromParsedData(parsedResult: Record<string, unknown>): Study {
+    const sections = Array.isArray(parsedResult.sections) ? this.transformSections(parsedResult.sections) : [];
 
     return {
       ...createEmptyStudy(),
@@ -195,10 +167,7 @@ export class ImportStudyComponent {
     }
 
     // Only pass UUID if it's valid, otherwise let createStudy generate a new one
-    const uuid = await this.studiesService.createStudy(
-      study,
-      hasValidUuid ? study.uuid : undefined
-    );
+    const uuid = await this.studiesService.createStudy(study, hasValidUuid ? study.uuid : undefined);
     const createdStudy = await this.studiesService.getStudy(uuid);
 
     if (!createdStudy) {
@@ -209,10 +178,7 @@ export class ImportStudyComponent {
     this.messageService.add(importSuccessMessage);
   }
 
-  private async processAppFileContent(
-    result: string,
-    resolve: () => void
-  ): Promise<void> {
+  private async processAppFileContent(result: string, resolve: () => void): Promise<void> {
     const decodedContent = this.decodeBase64FromText(result);
     const parsedResult = this.parseJsonContent(decodedContent);
     const newStudy = this.buildStudyFromParsedData(parsedResult);
@@ -330,9 +296,7 @@ export class ImportStudyComponent {
       return;
     }
 
-    const supports: ProtoV4Support[] = jsonResults.data
-      .filter((support) => support.num)
-      .map(formatProtoV4Support);
+    const supports: ProtoV4Support[] = jsonResults.data.filter((support) => support.num).map(formatProtoV4Support);
 
     this.studiesService
       .createStudyFromProtoV4(supports, parameters)
@@ -384,12 +348,7 @@ export class ImportStudyComponent {
       reader.onload = async (e) => {
         try {
           const result = e.target?.result as string;
-          await this.processProtoV4FileContent(
-            result,
-            fileName,
-            resolve,
-            reject
-          );
+          await this.processProtoV4FileContent(result, fileName, resolve, reject);
         } catch (error: unknown) {
           if (error instanceof Error && error.message in errors) {
             reject(error);
@@ -433,10 +392,7 @@ export class ImportStudyComponent {
       summary: $localize`Error`,
       detail: errors.fileTypeNotAllowed
     });
-    this.erroredFiles.set([
-      ...this.erroredFiles(),
-      ...invalidFiles.map((file) => file.name)
-    ]);
+    this.erroredFiles.set([...this.erroredFiles(), ...invalidFiles.map((file) => file.name)]);
   }
 
   private getErrorType(error: unknown): keyof typeof errors {

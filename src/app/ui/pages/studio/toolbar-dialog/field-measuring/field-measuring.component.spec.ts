@@ -137,9 +137,7 @@ describe('FieldMeasuringComponent', () => {
 
     it('should inject ToolbarDialogService', () => {
       expect(component['toolbarDialogService']).toBeDefined();
-      expect(component['toolbarDialogService']).toBeInstanceOf(
-        ToolbarDialogService
-      );
+      expect(component['toolbarDialogService']).toBeInstanceOf(ToolbarDialogService);
     });
 
     it('should initialize measureData with createInitialMeasureData result', () => {
@@ -274,10 +272,7 @@ describe('FieldMeasuringComponent', () => {
 
       component.onExport();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Export',
-        component.measureData()
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Export', component.measureData());
     });
   });
 
@@ -287,10 +282,7 @@ describe('FieldMeasuringComponent', () => {
 
       component.onReport();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Report',
-        component.measureData()
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Report', component.measureData());
     });
   });
 
@@ -320,9 +312,7 @@ describe('FieldMeasuringComponent', () => {
       const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
 
       // Set section to null using the signal setter
-      const sectionSignal = plotService.section as ReturnType<
-        typeof signal<Section | null>
-      >;
+      const sectionSignal = plotService.section as ReturnType<typeof signal<Section | null>>;
       sectionSignal.set(null);
 
       await component.onSave();

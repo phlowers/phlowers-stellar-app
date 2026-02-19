@@ -18,11 +18,7 @@ import { PlotService } from '../../services/plot.service';
 import { ChargesService } from '@core/services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '../loadForms.service';
-import {
-  ChargeData,
-  ClimateCharge,
-  SymmetryType
-} from '@core/domain/models/charge.model';
+import { ChargeData, ClimateCharge, SymmetryType } from '@core/domain/models/charge.model';
 import { MessageModule } from 'primeng/message';
 
 function integerValidator(control: AbstractControl): ValidationErrors | null {
@@ -62,8 +58,7 @@ export const getBaseClimate = (
   const selectedInitialCondition = section?.initial_conditions?.find(
     (ic) => ic.uuid === section.selected_initial_condition_uuid
   );
-  const baseTemperature =
-    selectedInitialCondition?.base_temperature ?? DEFAULT_BASE_TEMPERATURE;
+  const baseTemperature = selectedInitialCondition?.base_temperature ?? DEFAULT_BASE_TEMPERATURE;
 
   return {
     ...defaultClimaticCharge,
@@ -127,25 +122,16 @@ export class ClimateComponent {
     symmetryType: [defaultClimaticCharge.symmetryType, Validators.required],
     iceThickness: [
       defaultClimaticCharge.iceThickness,
-      [
-        Validators.min(this.constraints.iceThickness.min),
-        Validators.max(this.constraints.iceThickness.max)
-      ]
+      [Validators.min(this.constraints.iceThickness.min), Validators.max(this.constraints.iceThickness.max)]
     ],
     frontierSupportNumber: [defaultClimaticCharge.frontierSupportNumber],
     iceThicknessBefore: [
       defaultClimaticCharge.iceThicknessBefore,
-      [
-        Validators.min(this.constraints.iceThickness.min),
-        Validators.max(this.constraints.iceThickness.max)
-      ]
+      [Validators.min(this.constraints.iceThickness.min), Validators.max(this.constraints.iceThickness.max)]
     ],
     iceThicknessAfter: [
       defaultClimaticCharge.iceThicknessAfter,
-      [
-        Validators.min(this.constraints.iceThickness.min),
-        Validators.max(this.constraints.iceThickness.max)
-      ]
+      [Validators.min(this.constraints.iceThickness.min), Validators.max(this.constraints.iceThickness.max)]
     ]
   });
   chargeUuid = input.required<string>();
@@ -172,11 +158,7 @@ export class ClimateComponent {
     if (!studyUuid || !sectionUuid) {
       return;
     }
-    const charge = await this.chargesService.getCharge(
-      studyUuid,
-      sectionUuid,
-      this.chargeUuid()
-    );
+    const charge = await this.chargesService.getCharge(studyUuid, sectionUuid, this.chargeUuid());
     if (!charge?.data) {
       return;
     }
@@ -190,17 +172,15 @@ export class ClimateComponent {
     private readonly chargesService: ChargesService,
     private readonly loadFormsService: LoadFormsService
   ) {
-    this.form.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        this.plotService.temporaryLoadData = {
-          ...this.plotService.temporaryLoadData!,
-          climate: {
-            ...this.plotService.temporaryLoadData?.climate,
-            ...value
-          } as ClimateCharge
-        } as ChargeData;
-      });
+    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+      this.plotService.temporaryLoadData = {
+        ...this.plotService.temporaryLoadData!,
+        climate: {
+          ...this.plotService.temporaryLoadData?.climate,
+          ...value
+        } as ClimateCharge
+      } as ChargeData;
+    });
     effect(async () => {
       await this.initForm();
     });
@@ -247,9 +227,7 @@ export class ClimateComponent {
     if (!control?.errors) {
       return null;
     }
-    const ids = errorTypes
-      .filter((type) => control.errors?.[type])
-      .map((type) => `${controlName}-error-${type}`);
+    const ids = errorTypes.filter((type) => control.errors?.[type]).map((type) => `${controlName}-error-${type}`);
     return ids.length > 0 ? ids.join(' ') : null;
   }
 }

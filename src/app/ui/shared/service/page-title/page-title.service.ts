@@ -19,11 +19,7 @@ export class PageTitleService {
     this.router.events
       .pipe(
         startWith({} as NavigationEnd),
-        filter(
-          (event) =>
-            event instanceof NavigationEnd ||
-            Object.keys(event || {}).length === 0
-        ),
+        filter((event) => event instanceof NavigationEnd || Object.keys(event || {}).length === 0),
         map(() => {
           let route = this.activatedRoute;
           while (route.firstChild) {

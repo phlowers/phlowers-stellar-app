@@ -2,14 +2,7 @@
 <section class="study-header">
   <h1 class="study-header__title">{{ study()?.title }}</h1>
 
-  <button
-    (click)="openModifyStudyModal.emit()"
-    app-btn
-    btnSize="s"
-    btnStyle="text"
-    aria-label="modify"
-    i18n-aria-label
-  >
+  <button (click)="openModifyStudyModal.emit()" app-btn btnSize="s" btnStyle="text" aria-label="modify" i18n-aria-label>
     <app-icon icon="edit" />
   </button>
 
@@ -35,10 +28,7 @@
     {{ study()?.author_email }}
   </p>
 
-  <time
-    [attr.datetime]="study()?.created_at_offline"
-    class="study-header__time"
-  >
+  <time [attr.datetime]="study()?.created_at_offline" class="study-header__time">
     <app-icon icon="schedule" />
     {{ study()?.created_at_offline | date: dateFormat }}
   </time>
@@ -49,12 +39,7 @@
 
   <hr class="study-header__separator" />
 
-  <button
-    app-btn
-    btnSize="s"
-    btnStyle="text"
-    (click)="duplicateStudy.emit(study()?.uuid!)"
-  >
+  <button app-btn btnSize="s" btnStyle="text" (click)="duplicateStudy.emit(study()?.uuid!)">
     <app-icon icon="content_copy" />
     <ng-container i18n>Duplicate</ng-container>
   </button>

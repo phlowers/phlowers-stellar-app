@@ -9,9 +9,7 @@ import { SelectWithButtonsComponent } from './select-with-buttons.component';
 
 describe('SelectWithButtonsComponent', () => {
   let component: SelectWithButtonsComponent<Record<string, any>>;
-  let fixture: ComponentFixture<
-    SelectWithButtonsComponent<Record<string, any>>
-  >;
+  let fixture: ComponentFixture<SelectWithButtonsComponent<Record<string, any>>>;
 
   const mockOptions = [
     { id: '1', name: 'Option 1', description: 'First option' },
@@ -38,13 +36,7 @@ describe('SelectWithButtonsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        SelectWithButtonsComponent,
-        FormsModule,
-        SelectModule,
-        DividerModule,
-        NoopAnimationsModule
-      ],
+      imports: [SelectWithButtonsComponent, FormsModule, SelectModule, DividerModule, NoopAnimationsModule],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
@@ -71,9 +63,7 @@ describe('SelectWithButtonsComponent', () => {
   });
 
   afterEach(() => {
-    document
-      .querySelectorAll('.p-overlay, .p-select-overlay')
-      .forEach((e) => e.remove());
+    document.querySelectorAll('.p-overlay, .p-select-overlay').forEach((e) => e.remove());
   });
 
   describe('Initialization', () => {
@@ -138,10 +128,7 @@ describe('SelectWithButtonsComponent', () => {
       expect(component.selectedOptionValue()).toBeUndefined();
       expect(spy).toHaveBeenCalledWith(undefined);
       expect(component.selectComponent.writeValue).toHaveBeenCalledWith(null);
-      expect(component.selectComponent.updateModel).toHaveBeenCalledWith(
-        null,
-        null
-      );
+      expect(component.selectComponent.updateModel).toHaveBeenCalledWith(null, null);
     });
 
     it('should emit selectOption and hide selectComponent onSelectItem', () => {
@@ -157,20 +144,14 @@ describe('SelectWithButtonsComponent', () => {
   });
 
   describe('Outputs', () => {
-    type OutputNames =
-      | 'viewOption'
-      | 'editOption'
-      | 'duplicateOption'
-      | 'deleteOption';
+    type OutputNames = 'viewOption' | 'editOption' | 'duplicateOption' | 'deleteOption';
 
-    it.each<OutputNames>([
-      'viewOption',
-      'editOption',
-      'duplicateOption',
-      'deleteOption'
-    ])('should define %s output emitter', (outputName) => {
-      expect(component[outputName]).toBeDefined();
-    });
+    it.each<OutputNames>(['viewOption', 'editOption', 'duplicateOption', 'deleteOption'])(
+      'should define %s output emitter',
+      (outputName) => {
+        expect(component[outputName]).toBeDefined();
+      }
+    );
   });
 
   describe('Reactive input changes', () => {

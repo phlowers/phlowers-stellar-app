@@ -137,12 +137,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      expect(Plotly.react).toHaveBeenCalledWith(
-        expect.any(String),
-        mockData,
-        expect.any(Object),
-        expect.any(Object)
-      );
+      expect(Plotly.react).toHaveBeenCalledWith(expect.any(String), mockData, expect.any(Object), expect.any(Object));
     });
   });
 

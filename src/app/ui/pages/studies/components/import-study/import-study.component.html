@@ -1,10 +1,7 @@
 <p-toast position="top-center"></p-toast>
 <div class="import-study">
   <div class="my-8">
-    <p i18n class="text-l-600">
-      You can import multiple files, they will be available in the “My studies”
-      tab.
-    </p>
+    <p i18n class="text-l-600">You can import multiple files, they will be available in the “My studies” tab.</p>
   </div>
   <label for="study-file" class="import-study__tool">
     <app-icon icon="upload" class="import-study__tool__icon" />
@@ -36,15 +33,7 @@
           </p>
 
           <div class="import-study__list__btns">
-            <a
-              [routerLink]="'/study/' + study.uuid"
-              app-btn
-              btnStyle="base"
-              btnSize="s"
-              i18n
-            >
-              Open
-            </a>
+            <a [routerLink]="'/study/' + study.uuid" app-btn btnStyle="base" btnSize="s" i18n> Open </a>
           </div>
         </li>
       }

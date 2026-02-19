@@ -45,9 +45,7 @@ describe('SectionsTabComponent', () => {
   });
 
   afterEach(() => {
-    const overlays = document.body.querySelectorAll(
-      '.p-select-overlay, .p-dropdown-panel, .p-overlay'
-    );
+    const overlays = document.body.querySelectorAll('.p-select-overlay, .p-dropdown-panel, .p-overlay');
     overlays.forEach((o) => o.remove());
 
     // Restore console.error
@@ -128,11 +126,7 @@ describe('SectionsTabComponent', () => {
       add: jest.fn()
     } as unknown as MessageService;
     await TestBed.configureTestingModule({
-      imports: [
-        SectionsTabComponent,
-        NoopAnimationsModule,
-        HttpClientTestingModule
-      ],
+      imports: [SectionsTabComponent, NoopAnimationsModule, HttpClientTestingModule],
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },
@@ -161,9 +155,7 @@ describe('SectionsTabComponent', () => {
     fixture.detectChanges();
 
     const noSectionMsg = fixture.debugElement.query(By.css('.no-section-text'));
-    expect(noSectionMsg.nativeElement.textContent).toContain(
-      'No existing section'
-    );
+    expect(noSectionMsg.nativeElement.textContent).toContain('No existing section');
   });
 
   it('should render a section when sections input has data', () => {
@@ -171,9 +163,7 @@ describe('SectionsTabComponent', () => {
     fixture.componentRef.setInput('study', { sections: [sectionWithName] });
     fixture.detectChanges();
 
-    const sectionName = fixture.debugElement.query(
-      By.css('.section__text-name')
-    );
+    const sectionName = fixture.debugElement.query(By.css('.section__text-name'));
     expect(sectionName?.nativeElement?.textContent).toContain('My Section');
   });
 
@@ -208,11 +198,7 @@ describe('SectionsTabComponent', () => {
   });
 
   it('openInitialConditionModal should update state correctly', () => {
-    component.openInitialConditionModal(
-      mockSection,
-      mockInitialCondition,
-      'edit'
-    );
+    component.openInitialConditionModal(mockSection, mockInitialCondition, 'edit');
 
     expect(component.currentSection()).toEqual(mockSection);
     expect(component.currentInitialCondition()).toEqual(mockInitialCondition);
@@ -224,15 +210,12 @@ describe('SectionsTabComponent', () => {
     fixture.componentRef.setInput('study', { sections: [mockSection] });
     fixture.detectChanges();
 
-    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector(
-      '.section__content-action'
-    );
+    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
     expect(triggerBtn).toBeTruthy();
     triggerBtn.click();
     fixture.detectChanges();
 
-    const deleteBtn: HTMLButtonElement =
-      fixture.nativeElement.querySelector('.erase-btn');
+    const deleteBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.erase-btn');
     expect(deleteBtn).toBeTruthy();
     deleteBtn.click();
     fixture.detectChanges();
@@ -244,9 +227,7 @@ describe('SectionsTabComponent', () => {
     fixture.componentRef.setInput('study', { sections: [mockSection] });
     fixture.detectChanges();
 
-    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector(
-      '.section__content-action'
-    );
+    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
     expect(triggerBtn).toBeTruthy();
     triggerBtn.click();
     fixture.detectChanges();

@@ -7,9 +7,7 @@
 
 <p id="complementary-form-field-measuring-init" class="context-paragraph">
   <app-icon icon="info" />
-  <ng-container i18n>
-    Create a new measurment or select an existing one
-  </ng-container>
+  <ng-container i18n> Create a new measurment or select an existing one </ng-container>
 </p>
 
 <div>
@@ -27,17 +25,10 @@
     [formControl]="newMeasureNameControl"
     [class.ng-invalid]="isNameAlreadyTaken()"
     [attr.aria-invalid]="isNameAlreadyTaken()"
-    [attr.aria-errormessage]="
-      isNameAlreadyTaken() ? 'new-measure-name-error-message' : null
-    "
+    [attr.aria-errormessage]="isNameAlreadyTaken() ? 'new-measure-name-error-message' : null"
   />
   @if (isNameAlreadyTaken()) {
-    <p-message
-      id="new-measure-name-error-message"
-      severity="error"
-      size="small"
-      variant="simple"
-      i18n
+    <p-message id="new-measure-name-error-message" severity="error" size="small" variant="simple" i18n
       >Measure name must be unique.</p-message
     >
   }
@@ -79,12 +70,7 @@
   />
 
   <div class="mt-4 text-right">
-    <button
-      app-btn
-      type="button"
-      [disabled]="chooseMeasureControl.invalid"
-      (click)="chooseMeasure()"
-    >
+    <button app-btn type="button" [disabled]="chooseMeasureControl.invalid" (click)="chooseMeasure()">
       <app-icon icon="check" />
       <ng-container i18n>Choose</ng-container>
     </button>

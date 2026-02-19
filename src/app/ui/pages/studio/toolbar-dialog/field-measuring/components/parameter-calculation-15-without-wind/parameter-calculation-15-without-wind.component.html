@@ -3,19 +3,14 @@
   (isOpenChange)="initialConditionModalOpen.set($event)"
   [mode]="'create'"
   [initialConditionInput]="initialConditionInput()"
-  [initialConditions]="
-    sectionService.currentSection()?.initial_conditions ?? []
-  "
+  [initialConditions]="sectionService.currentSection()?.initial_conditions ?? []"
   [section]="sectionService.currentSection()!"
   [study]="studiesService.currentStudy()"
   [isInsideToolsDialog]="true"
   (addInitialCondition)="addInitialCondition($event)"
 />
 
-<p
-  id="mandatory-parameter-15c"
-  class="parameter-calculation-15-without-wind__mandatory-msg"
->
+<p id="mandatory-parameter-15c" class="parameter-calculation-15-without-wind__mandatory-msg">
   <app-icon icon="info" />
   <span i18n>All fields are mandatory for parameter calculation at 15°C</span>
 </p>
@@ -42,16 +37,8 @@
           id="parameterPapoto-input"
           type="number"
           pInputText
-          [ngModel]="
-            measureData().manualParameterCalculation15CWithoutWind
-              ?.parameterPapoto ?? null
-          "
-          (ngModelChange)="
-            updateManualParameterCalculation15CWithoutWind(
-              'parameterPapoto',
-              $event
-            )
-          "
+          [ngModel]="measureData().manualParameterCalculation15CWithoutWind?.parameterPapoto ?? null"
+          (ngModelChange)="updateManualParameterCalculation15CWithoutWind('parameterPapoto', $event)"
           [fluid]="true"
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
@@ -60,9 +47,7 @@
     </div>
 
     <div class="parameterUncertaintyPapoto">
-      <label for="parameterUncertaintyPapoto-input" i18n>
-        Uncertainty parameter
-      </label>
+      <label for="parameterUncertaintyPapoto-input" i18n> Uncertainty parameter </label>
       <p-inputgroup>
         <input
           id="parameterUncertaintyPapoto-input"
@@ -83,16 +68,8 @@
           id="cableTemperature-input"
           type="number"
           pInputText
-          [ngModel]="
-            measureData().manualParameterCalculation15CWithoutWind
-              ?.cableTemperatureCalibration ?? null
-          "
-          (ngModelChange)="
-            updateManualParameterCalculation15CWithoutWind(
-              'cableTemperatureCalibration',
-              $event
-            )
-          "
+          [ngModel]="measureData().manualParameterCalculation15CWithoutWind?.cableTemperatureCalibration ?? null"
+          (ngModelChange)="updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', $event)"
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
         />
@@ -101,23 +78,17 @@
     </div>
 
     <div class="cableTemperatureUncertainty">
-      <label for="cableTemperatureUncertainty-input" i18n>
-        Uncertainty cable temperature
-      </label>
+      <label for="cableTemperatureUncertainty-input" i18n> Uncertainty cable temperature </label>
       <p-inputgroup>
         <input
           id="cableTemperatureUncertainty-input"
           type="number"
           pInputText
           [ngModel]="
-            measureData().manualParameterCalculation15CWithoutWind
-              ?.cableTemperatureCalibrationUncertainty ?? null
+            measureData().manualParameterCalculation15CWithoutWind?.cableTemperatureCalibrationUncertainty ?? null
           "
           (ngModelChange)="
-            updateManualParameterCalculation15CWithoutWind(
-              'cableTemperatureCalibrationUncertainty',
-              $event
-            )
+            updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', $event)
           "
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
@@ -130,9 +101,7 @@
       <div class="parameterPapoto">
         <dt id="parameterPapoto-display" i18n>Parameter (Papoto, etc.)</dt>
         <dd>
-          {{
-            (measureData().outputs.papoto?.parameter | number: '1.0-2') ?? '-'
-          }}
+          {{ (measureData().outputs.papoto?.parameter | number: '1.0-2') ?? '-' }}
           m
         </dd>
       </div>
@@ -149,10 +118,7 @@
       <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
         <dd>
-          {{
-            (measureData().outputs.cableTemperature?.cableTemperature
-              | number: '1.0-2') ?? '-'
-          }}
+          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
           °C
         </dd>
       </div>
@@ -162,13 +128,7 @@
           <del i18n>Uncertainty cable temperature</del>
         </dt>
         <dd>
-          <del
-            >{{
-              measureData().outputs.cableTemperature
-                ?.cableTemperatureUncertainty ?? '-'
-            }}
-            °C</del
-          >
+          <del>{{ measureData().outputs.cableTemperature?.cableTemperatureUncertainty ?? '-' }} °C</del>
         </dd>
       </div>
     </dl>
@@ -184,70 +144,44 @@
 
 @if (measureData().outputs.parameter15C) {
   <div class="parameter-calculation-15-without-wind__results" [@expand]>
-    <h2 class="parameter-calculation-15-without-wind__results__title" i18n>
-      Results :
-    </h2>
+    <h2 class="parameter-calculation-15-without-wind__results__title" i18n>Results :</h2>
 
     <dl class="parameter-calculation-15-without-wind__results__list">
       <div class="parameter15CMinusUncertainty">
         <dt i18n>Parameter at 15°C - uncertainty</dt>
         <dd>
-          {{
-            (measureData().outputs.parameter15C?.parameter15CMinusUncertainty
-              | number: '1.0-3') ?? '-'
-          }}
+          {{ (measureData().outputs.parameter15C?.parameter15CMinusUncertainty | number: '1.0-3') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15C">
         <dt i18n>Parameter at 15°C</dt>
         <dd>
-          {{
-            (measureData().outputs.parameter15C?.parameter15C
-              | number: '1.0-3') ?? '-'
-          }}
+          {{ (measureData().outputs.parameter15C?.parameter15C | number: '1.0-3') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15CPlusUncertainty">
         <dt i18n>Parameter at 15°C + uncertainty</dt>
         <dd>
-          {{
-            (measureData().outputs.parameter15C?.parameter15CPlusUncertainty
-              | number: '1.0-3') ?? '-'
-          }}
+          {{ (measureData().outputs.parameter15C?.parameter15CPlusUncertainty | number: '1.0-3') ?? '-' }}
           m
         </dd>
       </div>
     </dl>
 
     <div class="parameter-calculation-15-without-wind__results__actions">
-      <button
-        app-btn
-        btnStyle="outlined"
-        class="createInitialMinus"
-        (click)="onCreateInitialCondition('minus')"
-      >
+      <button app-btn btnStyle="outlined" class="createInitialMinus" (click)="onCreateInitialCondition('minus')">
         <app-icon icon="add_circle" />
         <ng-container i18n>Create initial condition</ng-container>
       </button>
 
-      <button
-        app-btn
-        btnStyle="outlined"
-        class="createInitialNominal"
-        (click)="onCreateInitialCondition('nominal')"
-      >
+      <button app-btn btnStyle="outlined" class="createInitialNominal" (click)="onCreateInitialCondition('nominal')">
         <app-icon icon="add_circle" />
         <ng-container i18n>Create initial condition</ng-container>
       </button>
 
-      <button
-        app-btn
-        btnStyle="outlined"
-        class="createInitialPlus"
-        (click)="onCreateInitialCondition('plus')"
-      >
+      <button app-btn btnStyle="outlined" class="createInitialPlus" (click)="onCreateInitialCondition('plus')">
         <app-icon icon="add_circle" />
         <ng-container i18n>Create initial condition</ng-container>
       </button>

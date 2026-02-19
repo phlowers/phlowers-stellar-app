@@ -83,8 +83,7 @@ export class ParameterCalculation15WithoutWindComponent {
   isFormValid = computed(() => {
     const isManual = this.measureData().updateMode15C === 'manual';
     if (isManual) {
-      const manualData =
-        this.measureData().manualParameterCalculation15CWithoutWind;
+      const manualData = this.measureData().manualParameterCalculation15CWithoutWind;
       return (
         isNumber(manualData?.cableTemperatureCalibration) &&
         isNumber(manualData?.parameterPapoto) &&
@@ -95,16 +94,11 @@ export class ParameterCalculation15WithoutWindComponent {
       isNumber(this.measureData().outputs.papoto?.parameter) &&
       // data.parameterUncertaintyPapoto !== null && // TODO: Uncomment when parameterUncertaintyPapoto is available
       isNumber(this.measureData().outputs.cableTemperature?.cableTemperature) &&
-      isNumber(
-        this.measureData().outputs.cableTemperature?.cableTemperatureUncertainty
-      )
+      isNumber(this.measureData().outputs.cableTemperature?.cableTemperatureUncertainty)
     );
   });
 
-  updateMeasureData<K extends keyof FieldMeasure>(
-    field: K,
-    value: FieldMeasure[K]
-  ) {
+  updateMeasureData<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     if (field === 'updateMode15C') {
       this.measureData.update((d) => ({
         ...d,
@@ -116,9 +110,10 @@ export class ParameterCalculation15WithoutWindComponent {
     }
   }
 
-  updateManualParameterCalculation15CWithoutWind<
-    K extends keyof ManualParameterCalculation15CWithoutWind
-  >(field: K, value: ManualParameterCalculation15CWithoutWind[K]) {
+  updateManualParameterCalculation15CWithoutWind<K extends keyof ManualParameterCalculation15CWithoutWind>(
+    field: K,
+    value: ManualParameterCalculation15CWithoutWind[K]
+  ) {
     this.measureData.update((d) => ({
       ...d,
       manualParameterCalculation15CWithoutWind: {
@@ -144,27 +139,22 @@ export class ParameterCalculation15WithoutWindComponent {
     const manualData = data.manualParameterCalculation15CWithoutWind;
     const manualDataToSend = {
       parameterPapoto: manualData?.parameterPapoto || null,
-      parameterUncertaintyPapoto:
-        manualData?.parameterUncertaintyPapoto || null,
-      cableTemperatureCalibration:
-        manualData?.cableTemperatureCalibration || null,
-      cableTemperatureCalibrationUncertainty:
-        manualData?.cableTemperatureCalibrationUncertainty || null
+      parameterUncertaintyPapoto: manualData?.parameterUncertaintyPapoto || null,
+      cableTemperatureCalibration: manualData?.cableTemperatureCalibration || null,
+      cableTemperatureCalibrationUncertainty: manualData?.cableTemperatureCalibrationUncertainty || null
     };
     const autoDataToSend = {
       parameterPapoto: data.outputs.papoto?.parameter || null,
       // Uncertainties currently unused
       parameterUncertaintyPapoto: data.parameterUncertaintyPapoto || null,
-      cableTemperatureCalibration:
-        data.outputs.cableTemperature?.cableTemperature || null,
-      cableTemperatureCalibrationUncertainty:
-        data.outputs.cableTemperature?.cableTemperatureUncertainty || null
+      cableTemperatureCalibration: data.outputs.cableTemperature?.cableTemperature || null,
+      cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty || null
     };
     const dataToSend = isManual ? manualDataToSend : autoDataToSend;
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.calculateParameter15CWithoutWind,
-      { ...dataToSend, span_index: data.span?.[0] ?? null }
-    );
+    const { result, error } = await this.workerPythonService.runTask(Task.calculateParameter15CWithoutWind, {
+      ...dataToSend,
+      span_index: data.span?.[0] ?? null
+    });
     if (error) {
       this.parameter15CError.set(true);
       return;
@@ -200,20 +190,15 @@ export class ParameterCalculation15WithoutWindComponent {
     this.initialConditionModalOpen.set(true);
   }
 
-  async addInitialCondition({
-    section,
-    initialCondition,
-    generateState = false
-  }: InitialConditionFunctionsInput) {
+  async addInitialCondition({ section, initialCondition, generateState = false }: InitialConditionFunctionsInput) {
     const newUuid = uuidv4();
     if (!this.studiesService.currentStudy()) {
       return;
     }
-    await this.initialConditionService.addInitialCondition(
-      this.studiesService.currentStudy()!,
-      section,
-      { ...initialCondition, uuid: newUuid }
-    );
+    await this.initialConditionService.addInitialCondition(this.studiesService.currentStudy()!, section, {
+      ...initialCondition,
+      uuid: newUuid
+    });
     const studyUuid = this.studiesService.currentStudy()?.uuid;
     if (!studyUuid) {
       return;
@@ -223,11 +208,7 @@ export class ParameterCalculation15WithoutWindComponent {
       return;
     }
     if (generateState) {
-      await this.initialConditionService.setInitialCondition(
-        study,
-        section,
-        newUuid
-      );
+      await this.initialConditionService.setInitialCondition(study, section, newUuid);
       this.messageService.add({
         severity: 'success',
         summary: $localize`Successful`,

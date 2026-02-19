@@ -5,9 +5,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 // Mock the createDataObject function
 jest.mock('./createPlotDataObject');
-const mockCreateDataObject = createDataObject as jest.MockedFunction<
-  typeof createDataObject
->;
+const mockCreateDataObject = createDataObject as jest.MockedFunction<typeof createDataObject>;
 
 describe('createPlotData', () => {
   let mockParams: GetSectionOutput;

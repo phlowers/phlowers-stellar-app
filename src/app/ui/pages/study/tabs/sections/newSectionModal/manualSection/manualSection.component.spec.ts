@@ -27,12 +27,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ManualSectionComponent } from './manualSection.component';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  Section,
-  Support,
-  CatalogMaintenance,
-  CatalogLine
-} from '@core/domain';
+import { Section, Support, CatalogMaintenance, CatalogLine } from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
@@ -197,8 +192,7 @@ describe('ManualSectionComponent', () => {
     component = fixture.componentInstance;
     // Patch the input() API for test
     (component.section as unknown as () => Section) = () => mockSection;
-    (component.mode as unknown as () => 'create' | 'edit' | 'view') = () =>
-      'create';
+    (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'create';
     component.sectionChange = {
       emit: jest.fn()
     } as unknown as typeof component.sectionChange;
@@ -225,11 +219,7 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should remove supports if amount decreases', () => {
-      mockSection.supports = [
-        createSupportMock(),
-        createSupportMock(),
-        createSupportMock()
-      ];
+      mockSection.supports = [createSupportMock(), createSupportMock(), createSupportMock()];
       const event = { originalEvent: { type: 'mousedown' }, value: 2 };
       component.onSupportsAmountChangeInput(event);
       expect(mockSection.supports.length).toBe(2);
@@ -304,9 +294,7 @@ describe('ManualSectionComponent', () => {
 
   describe('setupFilterTables', () => {
     beforeEach(() => {
-      mockMaintenanceService.getMaintenance.mockResolvedValue(
-        mockMaintenanceData
-      );
+      mockMaintenanceService.getMaintenance.mockResolvedValue(mockMaintenanceData);
       mockLinesService.getLines.mockResolvedValue(mockLinesData);
     });
 
@@ -369,11 +357,7 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should remove supports when decreasing amount', () => {
-      mockSection.supports = [
-        createSupportMock(),
-        createSupportMock(),
-        createSupportMock()
-      ];
+      mockSection.supports = [createSupportMock(), createSupportMock(), createSupportMock()];
 
       component.updateSupportsAmount(1);
       expect(mockSection.supports.length).toBe(2);
@@ -393,9 +377,7 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should reset filters when no value selected', async () => {
-      mockMaintenanceService.getMaintenance.mockResolvedValue(
-        mockMaintenanceData
-      );
+      mockMaintenanceService.getMaintenance.mockResolvedValue(mockMaintenanceData);
       const event = { value: '' };
 
       await component.onMaintenanceSelect(event, 'maintenance_center_id');
@@ -403,13 +385,9 @@ describe('ManualSectionComponent', () => {
       expect(mockSection.maintenance_team_id).toBeUndefined();
       expect(mockSection.maintenance_center_id).toBeUndefined();
       expect(mockSection.regional_team_id).toBeUndefined();
-      expect(component.maintenanceFilterTable()).toEqual(
-        expect.arrayContaining(mockMaintenanceData)
-      );
+      expect(component.maintenanceFilterTable()).toEqual(expect.arrayContaining(mockMaintenanceData));
       expect(component.maintenanceFilterTable()).toHaveLength(2);
-      expect(component.maintenanceFilterTable()[0].maintenance_center_id).toBe(
-        'cm1'
-      );
+      expect(component.maintenanceFilterTable()[0].maintenance_center_id).toBe('cm1');
     });
 
     it('should filter by eel_id and auto-populate related fields', async () => {

@@ -45,10 +45,7 @@ module.exports = tseslint.config(
   {
     files: ['**/*.html'],
     ignores: ['coverage/**', 'dist/**', '.venv/**'],
-    extends: [
-      ...angular.configs.templateRecommended,
-      ...angular.configs.templateAccessibility
-    ],
+    extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
     rules: {
       '@angular-eslint/template/i18n': [
         'warn',

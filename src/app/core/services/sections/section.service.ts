@@ -25,21 +25,14 @@ export class SectionService {
    * @param section The section to create or update
    * @returns Promise that resolves when the operation is complete
    */
-  async createOrUpdateSection(
-    study: StudyEntity,
-    section: Section
-  ): Promise<void> {
-    const existingSection = study.sections.find(
-      (s) => s?.uuid === section?.uuid
-    );
+  async createOrUpdateSection(study: StudyEntity, section: Section): Promise<void> {
+    const existingSection = study.sections.find((s) => s?.uuid === section?.uuid);
     const studyKeep = cloneDeep(study);
 
     const nowDate = new Date().toISOString();
     section.updated_at = nowDate;
     if (existingSection) {
-      study.sections = study.sections.map((s) =>
-        s?.uuid === section?.uuid ? section : s
-      );
+      study.sections = study.sections.map((s) => (s?.uuid === section?.uuid ? section : s));
     } else {
       section.created_at = nowDate;
       study.sections = [...study.sections, section];
@@ -68,10 +61,7 @@ export class SectionService {
    * @param section The section to duplicate
    * @returns Promise that resolves when the operation is complete
    */
-  async duplicateSection(
-    study: StudyEntity,
-    section: Section
-  ): Promise<Section> {
+  async duplicateSection(study: StudyEntity, section: Section): Promise<Section> {
     const newSection = {
       ...section,
       uuid: uuidv4(),
@@ -87,10 +77,7 @@ export class SectionService {
     return newSection;
   }
 
-  getSectionByUuid(
-    studyUuid: string | undefined,
-    sectionUuid: string
-  ): Promise<Section | undefined> {
+  getSectionByUuid(studyUuid: string | undefined, sectionUuid: string): Promise<Section | undefined> {
     if (!studyUuid) {
       return Promise.resolve(undefined);
     }

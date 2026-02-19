@@ -80,9 +80,7 @@ describe('ToolbarDialogComponent', () => {
 
     it('should inject ToolbarDialogService', () => {
       expect(component.toolbarDialogService).toBeDefined();
-      expect(component.toolbarDialogService).toBeInstanceOf(
-        ToolbarDialogService
-      );
+      expect(component.toolbarDialogService).toBeInstanceOf(ToolbarDialogService);
     });
 
     it('should inject Injector', () => {
@@ -151,10 +149,7 @@ describe('ToolbarDialogComponent', () => {
     });
 
     it('should call completePendingTransition when transitioning', () => {
-      const completeSpy = jest.spyOn(
-        toolbarDialogService,
-        'completePendingTransition'
-      );
+      const completeSpy = jest.spyOn(toolbarDialogService, 'completePendingTransition');
       const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();

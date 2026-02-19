@@ -33,10 +33,7 @@ export class CablesService {
   }
 
   async getCable(name: string): Promise<CatalogCableEntity | undefined> {
-    return this.storageService.db?.catCables
-      ?.where('name')
-      .equals(name)
-      .first();
+    return this.storageService.db?.catCables?.where('name').equals(name).first();
   }
 
   async importFromFile() {
@@ -61,12 +58,8 @@ export class CablesService {
           diameter: convertStringToNumber(item.diameter),
           young_modulus: convertStringToNumber(item.young_modulus),
           linear_mass: convertStringToNumber(item.linear_mass),
-          dilatation_coefficient: convertStringToNumber(
-            item.dilatation_coefficient
-          ),
-          temperature_reference: convertStringToNumber(
-            item.temperature_reference
-          ),
+          dilatation_coefficient: convertStringToNumber(item.dilatation_coefficient),
+          temperature_reference: convertStringToNumber(item.temperature_reference),
           stress_strain_a0: convertStringToNumber(item.stress_strain_a0),
           stress_strain_a1: convertStringToNumber(item.stress_strain_a1),
           stress_strain_a2: convertStringToNumber(item.stress_strain_a2),
@@ -77,22 +70,15 @@ export class CablesService {
           stress_strain_b2: convertStringToNumber(item.stress_strain_b2),
           stress_strain_b3: convertStringToNumber(item.stress_strain_b3),
           stress_strain_b4: convertStringToNumber(item.stress_strain_b4),
-          is_polynomial:
-            item.is_polynomial === 'true' || item.is_polynomial === 'True',
+          is_polynomial: item.is_polynomial === 'true' || item.is_polynomial === 'True',
           diameter_heart: convertStringToNumber(item.diameter_heart),
           section_conductor: convertStringToNumber(item.section_conductor),
           section_heart: convertStringToNumber(item.section_heart),
           solar_absorption: convertStringToNumber(item.solar_absorption),
           emissivity: convertStringToNumber(item.emissivity),
-          electric_resistance_20: convertStringToNumber(
-            item.electric_resistance_20
-          ),
-          linear_resistance_temperature_coef: convertStringToNumber(
-            item.linear_resistance_temperature_coef
-          ),
-          radial_thermal_conductivity: convertStringToNumber(
-            item.radial_thermal_conductivity
-          ),
+          electric_resistance_20: convertStringToNumber(item.electric_resistance_20),
+          linear_resistance_temperature_coef: convertStringToNumber(item.linear_resistance_temperature_coef),
+          radial_thermal_conductivity: convertStringToNumber(item.radial_thermal_conductivity),
           has_magnetic_heart: item.has_magnetic_heart === 'true'
         }))
         .filter((item) => item.name);

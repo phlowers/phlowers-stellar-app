@@ -15,10 +15,7 @@ describe('StudyHeader', () => {
     } as unknown as jest.Mocked<MessageService>;
     await TestBed.configureTestingModule({
       imports: [StudyHeaderComponent],
-      providers: [
-        provideNoopAnimations(),
-        { provide: MessageService, useValue: mockMessageService }
-      ]
+      providers: [provideNoopAnimations(), { provide: MessageService, useValue: mockMessageService }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(StudyHeaderComponent);

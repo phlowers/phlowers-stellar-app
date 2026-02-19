@@ -1,13 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  OnInit,
-  output,
-  signal,
-  ViewChild
-} from '@angular/core';
+import { Component, computed, effect, input, OnInit, output, signal, ViewChild } from '@angular/core';
 import { Select, SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { DividerModule } from 'primeng/divider';
@@ -16,19 +7,11 @@ import { ButtonComponent } from '../button/button.component';
 
 @Component({
   selector: 'app-select-with-buttons',
-  imports: [
-    SelectModule,
-    FormsModule,
-    DividerModule,
-    IconComponent,
-    ButtonComponent
-  ],
+  imports: [SelectModule, FormsModule, DividerModule, IconComponent, ButtonComponent],
   templateUrl: './select-with-buttons.component.html',
   styleUrl: './select-with-buttons.component.scss'
 })
-export class SelectWithButtonsComponent<T extends Record<string, any>>
-  implements OnInit
-{
+export class SelectWithButtonsComponent<T extends Record<string, any>> implements OnInit {
   @ViewChild('selectComponent') selectComponent!: Select;
   options = input.required<T[]>();
   selectedOption = input.required<string | undefined | null>();
@@ -56,18 +39,14 @@ export class SelectWithButtonsComponent<T extends Record<string, any>>
 
   selectedOptionLabel = computed(() => {
     return (
-      this.options().find(
-        (option) => option[this.optionValue()] === this.selectedOption()
-      )?.[this.optionLabel()] ?? ''
+      this.options().find((option) => option[this.optionValue()] === this.selectedOption())?.[this.optionLabel()] ?? ''
     );
   });
 
   onSelectionChange(value: string | undefined | null) {
     this.selectedOptionValue.set(value);
     if (value) {
-      const selectedItem = this.options().find(
-        (option) => option[this.optionValue()] === value
-      );
+      const selectedItem = this.options().find((option) => option[this.optionValue()] === value);
       if (selectedItem) {
         this.selectOption.emit(selectedItem);
       }

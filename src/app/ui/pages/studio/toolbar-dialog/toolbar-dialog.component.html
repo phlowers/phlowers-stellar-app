@@ -10,29 +10,17 @@
 >
   @if (toolbarDialogService.templates().header) {
     <ng-template #header>
-      <ng-container
-        *ngTemplateOutlet="toolbarDialogService.templates().header!"
-      />
+      <ng-container *ngTemplateOutlet="toolbarDialogService.templates().header!" />
     </ng-template>
   }
 
   @if (toolbarDialogService.isOpen()) {
-    <ng-container
-      *ngComponentOutlet="
-        toolbarDialogService.getComponent();
-        injector: injector
-      "
-    />
+    <ng-container *ngComponentOutlet="toolbarDialogService.getComponent(); injector: injector" />
   }
 
-  @if (
-    toolbarDialogService.phase() === 'main' &&
-    toolbarDialogService.templates().footer
-  ) {
+  @if (toolbarDialogService.phase() === 'main' && toolbarDialogService.templates().footer) {
     <ng-template #footer>
-      <ng-container
-        *ngTemplateOutlet="toolbarDialogService.templates().footer!"
-      />
+      <ng-container *ngTemplateOutlet="toolbarDialogService.templates().footer!" />
     </ng-template>
   }
 </p-dialog>

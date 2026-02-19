@@ -1,11 +1,5 @@
 import { Component, input, signal, computed } from '@angular/core';
-import {
-  trigger,
-  state,
-  style,
-  transition,
-  animate
-} from '@angular/animations';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
@@ -46,9 +40,7 @@ interface DataSection {
           overflow: 'hidden'
         })
       ),
-      transition('collapsed <=> expanded', [
-        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')
-      ])
+      transition('collapsed <=> expanded', [animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')])
     ])
   ]
 })
@@ -63,13 +55,9 @@ export class SectionPlotCardComponent {
     return this.type() === 'support' ? `N°${idx + 1}` : `${idx + 1}-${idx + 2}`;
   });
 
-  cardColor = computed(() =>
-    this.type() === 'support' ? 'icon-wrapper--support' : 'icon-wrapper--line'
-  );
+  cardColor = computed(() => (this.type() === 'support' ? 'icon-wrapper--support' : 'icon-wrapper--line'));
 
-  private getFormatedNumberIndex = (
-    value: number[] | undefined
-  ): number | string => {
+  private getFormatedNumberIndex = (value: number[] | undefined): number | string => {
     if (value === undefined) {
       return '-';
     }

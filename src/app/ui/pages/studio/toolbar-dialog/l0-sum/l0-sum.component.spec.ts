@@ -48,11 +48,7 @@ describe('L0SumComponent', () => {
     } as unknown as PlotService;
 
     await TestBed.configureTestingModule({
-      providers: [
-        ToolbarDialogService,
-        provideHttpClientTesting(),
-        { provide: PlotService, useValue: mockPlotService }
-      ]
+      providers: [ToolbarDialogService, provideHttpClientTesting(), { provide: PlotService, useValue: mockPlotService }]
     })
       .overrideComponent(L0SumComponent, {
         set: {

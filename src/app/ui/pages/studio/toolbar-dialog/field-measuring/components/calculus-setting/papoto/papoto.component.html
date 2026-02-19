@@ -1,10 +1,5 @@
 <div class="papoto__btns">
-  <button
-    app-btn
-    aria-label="open PAPOTO help"
-    i18n-aria-label
-    (click)="openHelp()"
-  >
+  <button app-btn aria-label="open PAPOTO help" i18n-aria-label (click)="openHelp()">
     <app-icon icon="help" />
   </button>
 
@@ -20,9 +15,7 @@
 
 <div class="papoto__form">
   <div class="papoto__form__line1">
-    <label for="leftSupport" class="leftSupport__label" i18n>
-      Left support
-    </label>
+    <label for="leftSupport" class="leftSupport__label" i18n> Left support </label>
     <p-select
       inputId="leftSupport"
       [options]="retrievedLeftSupportOptions()"
@@ -36,9 +29,7 @@
       class="leftSupport__input"
     />
 
-    <label for="spanLength" i18n class="spanLength__label">
-      Measured span length
-    </label>
+    <label for="spanLength" i18n class="spanLength__label"> Measured span length </label>
     <p-inputgroup class="spanLength__input">
       <input
         id="spanLength"
@@ -61,9 +52,7 @@
       }
     </p>
 
-    <label for="measuredElevationDifference" i18n class="MED__label">
-      Elevation diff. of measured attach.
-    </label>
+    <label for="measuredElevationDifference" i18n class="MED__label"> Elevation diff. of measured attach. </label>
     <p-inputgroup class="MED__input">
       <input
         id="measuredElevationDifference"
@@ -261,9 +250,7 @@
     <dl class="papoto__results__list">
       <div class="param">
         <dt i18n>Parameter</dt>
-        <dd>
-          {{ measureData().outputs.papoto?.parameter | number: '1.0-2' }} m
-        </dd>
+        <dd>{{ measureData().outputs.papoto?.parameter | number: '1.0-2' }} m</dd>
       </div>
 
       <div class="incertainParam">
@@ -273,23 +260,17 @@
 
       <div class="param12">
         <dt i18n>Parameter 1-2</dt>
-        <dd>
-          {{ measureData().outputs.papoto?.parameter_1_2 | number: '1.0-2' }} m
-        </dd>
+        <dd>{{ measureData().outputs.papoto?.parameter_1_2 | number: '1.0-2' }} m</dd>
       </div>
 
       <div class="param23">
         <dt i18n>Parameter 2-3</dt>
-        <dd>
-          {{ measureData().outputs.papoto?.parameter_2_3 | number: '1.0-2' }} m
-        </dd>
+        <dd>{{ measureData().outputs.papoto?.parameter_2_3 | number: '1.0-2' }} m</dd>
       </div>
 
       <div class="param13">
         <dt i18n>Parameter 1-3</dt>
-        <dd>
-          {{ measureData().outputs.papoto?.parameter_1_3 | number: '1.0-2' }} m
-        </dd>
+        <dd>{{ measureData().outputs.papoto?.parameter_1_3 | number: '1.0-2' }} m</dd>
       </div>
 
       <div class="crit">
@@ -314,13 +295,7 @@
   </div>
 }
 
-<p-dialog
-  closeAriaLabel="Close"
-  i18n-closeAriaLabel
-  [(visible)]="papotoHelpDialog"
-  [draggable]="true"
-  appendTo="body"
->
+<p-dialog closeAriaLabel="Close" i18n-closeAriaLabel [(visible)]="papotoHelpDialog" [draggable]="true" appendTo="body">
   <ng-template #header>
     <p class="help-papoto-header">
       <app-icon icon="help" />

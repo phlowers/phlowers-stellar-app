@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  TemplateRef,
-  ViewChild
-} from '@angular/core';
+import { AfterViewInit, Component, computed, effect, inject, signal, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -18,12 +9,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { TableModule } from 'primeng/table';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '../../services/plot.service';
-import {
-  ClimateCharge,
-  LoadType,
-  SpanLoad,
-  SymmetryType
-} from '@core/domain/models/charge.model';
+import { ClimateCharge, LoadType, SpanLoad, SymmetryType } from '@core/domain/models/charge.model';
 
 interface ClimateRow {
   windPressure: number | null;
@@ -107,18 +93,10 @@ export class LoadsTableComponent implements AfterViewInit {
         return load.loadWeight !== 0 || load.loadPosition !== 0;
       })
       .map((load) => {
-        const supportIndex = supports.findIndex(
-          (s) => s.uuid === load.supportUuid
-        );
-        const hasNextSupport =
-          supportIndex >= 0 && supportIndex + 1 < supports.length;
-        const spanLabel = hasNextSupport
-          ? `${supportIndex + 1} - ${supportIndex + 2}`
-          : '-';
-        const referenceSupport =
-          load.referenceSupport === 'LEFT'
-            ? supportIndex + 1
-            : supportIndex + 2;
+        const supportIndex = supports.findIndex((s) => s.uuid === load.supportUuid);
+        const hasNextSupport = supportIndex >= 0 && supportIndex + 1 < supports.length;
+        const spanLabel = hasNextSupport ? `${supportIndex + 1} - ${supportIndex + 2}` : '-';
+        const referenceSupport = load.referenceSupport === 'LEFT' ? supportIndex + 1 : supportIndex + 2;
         return {
           spanLabel,
           referenceSupport,
@@ -208,11 +186,7 @@ export class LoadsTableComponent implements AfterViewInit {
       return;
     }
 
-    const existingCharge = await this.chargesService.getCharge(
-      studyUuid,
-      sectionUuid,
-      uuid
-    );
+    const existingCharge = await this.chargesService.getCharge(studyUuid, sectionUuid, uuid);
     if (!existingCharge) {
       return;
     }
@@ -224,11 +198,7 @@ export class LoadsTableComponent implements AfterViewInit {
       description: this.description()
     };
 
-    await this.chargesService.createOrUpdateCharge(
-      studyUuid,
-      sectionUuid,
-      updatedCharge
-    );
+    await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, updatedCharge);
     this.mode.set('view');
   }
 
@@ -255,12 +225,7 @@ export class LoadsTableComponent implements AfterViewInit {
   isFormValid(): boolean {
     const existingLoadCases = this.plotService.section()?.charges;
     const currentUuid = this.chargeUuid();
-    return (
-      this.nameLength() > 0 &&
-      !existingLoadCases?.some(
-        (c) => c.name === this.name() && c.uuid !== currentUuid
-      )
-    );
+    return this.nameLength() > 0 && !existingLoadCases?.some((c) => c.name === this.name() && c.uuid !== currentUuid);
   }
 
   onVisibleChange(visible: boolean) {

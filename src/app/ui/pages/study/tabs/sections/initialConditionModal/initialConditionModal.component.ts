@@ -1,23 +1,11 @@
-import {
-  Component,
-  effect,
-  input,
-  OnDestroy,
-  output,
-  signal
-} from '@angular/core';
+import { Component, effect, input, OnDestroy, output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
 import { Section, InitialCondition } from '@core/domain';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   InitialConditionFunctionsInput,
   InitialConditionService
@@ -35,14 +23,8 @@ import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 
 const validators = {
   name: ['', [Validators.required, Validators.maxLength(40)]],
-  base_parameters: [
-    null,
-    [Validators.required, Validators.min(20), Validators.max(5000)]
-  ],
-  base_temperature: [
-    15,
-    [Validators.required, Validators.min(-50), Validators.max(250)]
-  ],
+  base_parameters: [null, [Validators.required, Validators.min(20), Validators.max(5000)]],
+  base_temperature: [15, [Validators.required, Validators.min(-50), Validators.max(250)]],
   cable_pretension: [0, [Validators.min(0), Validators.max(100)]],
   min_temperature: [15, [Validators.min(-50), Validators.max(250)]],
   max_wind_pressure: [0, [Validators.min(0), Validators.max(3000)]],
@@ -105,9 +87,7 @@ export class InitialConditionModalComponent implements OnDestroy {
   }
 
   checkNameUniqueness(name: string) {
-    return !this.initialConditions().find(
-      (ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid
-    );
+    return !this.initialConditions().find((ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid);
   }
 
   constructor(
@@ -142,17 +122,10 @@ export class InitialConditionModalComponent implements OnDestroy {
         this.cablesService.getCables().then((cables) => {
           const sectionCableName = this.section().cable_name;
           if (sectionCableName) {
-            const isNarcisse = !!cables?.find(
-              (c) => c.name === sectionCableName
-            )?.is_polynomial;
+            const isNarcisse = !!cables?.find((c) => c.name === sectionCableName)?.is_polynomial;
             this.isCableNarcisse.set(isNarcisse);
 
-            const cableFields = [
-              'cable_pretension',
-              'min_temperature',
-              'max_wind_pressure',
-              'max_frost_width'
-            ];
+            const cableFields = ['cable_pretension', 'min_temperature', 'max_wind_pressure', 'max_frost_width'];
             cableFields.forEach((field) => {
               const control = this.form.get(field);
               if (isNarcisse) {
@@ -164,9 +137,7 @@ export class InitialConditionModalComponent implements OnDestroy {
             });
           }
         });
-        const isNameUnique = this.checkNameUniqueness(
-          this.initialCondition().name
-        );
+        const isNameUnique = this.checkNameUniqueness(this.initialCondition().name);
         this.isNameUnique.set(isNameUnique);
       }
     });
@@ -226,12 +197,11 @@ export class InitialConditionModalComponent implements OnDestroy {
       newUuid
     });
     const studyUuid = this.study()?.uuid ?? '';
-    const initialCondition =
-      await this.initialConditionService.getInitialCondition(
-        studyUuid,
-        this.section().uuid,
-        newUuid
-      );
+    const initialCondition = await this.initialConditionService.getInitialCondition(
+      studyUuid,
+      this.section().uuid,
+      newUuid
+    );
     if (initialCondition) {
       this.initialCondition.set(initialCondition);
       this.form.patchValue({
@@ -247,11 +217,7 @@ export class InitialConditionModalComponent implements OnDestroy {
   }
 
   onDelete() {
-    this.initialConditionService.deleteInitialCondition(
-      this.study()!,
-      this.section(),
-      this.initialCondition()
-    );
+    this.initialConditionService.deleteInitialCondition(this.study()!, this.section(), this.initialCondition());
     this.isOpenChange.emit(false);
   }
 

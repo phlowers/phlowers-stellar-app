@@ -6,7 +6,5 @@ export const convertStringToNumber = <T extends string | undefined>(
   if (value === undefined) {
     return undefined as T extends undefined ? undefined : number;
   }
-  return toNumber(value.replace(',', '.')) as T extends undefined
-    ? undefined
-    : number;
+  return toNumber(value.replace(',', '.')) as T extends undefined ? undefined : number;
 };

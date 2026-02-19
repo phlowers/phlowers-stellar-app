@@ -1,11 +1,4 @@
-import {
-  Component,
-  effect,
-  input,
-  OnInit,
-  output,
-  signal
-} from '@angular/core';
+import { Component, effect, input, OnInit, output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -67,9 +60,7 @@ export class AttachmentSetModalComponent implements OnInit {
 
   async findCoordinates(supportName: string) {
     const attachments = await this.attachmentService.getAttachments();
-    const attachmentSets = attachments.filter(
-      (attachment) => attachment.support_name === supportName
-    );
+    const attachmentSets = attachments.filter((attachment) => attachment.support_name === supportName);
     this.coordinates.set(
       attachmentSets.map((attachment) => [
         attachment.attachment_set_x,
@@ -77,9 +68,7 @@ export class AttachmentSetModalComponent implements OnInit {
         attachment.attachment_set_z
       ])
     );
-    this.attachmentSetNumbers.set(
-      uniq(attachmentSets.map((attachment) => attachment.attachment_set ?? 0))
-    );
+    this.attachmentSetNumbers.set(uniq(attachmentSets.map((attachment) => attachment.attachment_set ?? 0)));
   }
 
   constructor(private readonly attachmentService: AttachmentService) {
@@ -94,9 +83,7 @@ export class AttachmentSetModalComponent implements OnInit {
         if (attachmentSet) {
           this.attachmentSet.set(attachmentSet);
           this.armLength.set(this.support()?.armLength ?? undefined);
-          this.heightBelowConsole.set(
-            this.support()?.heightBelowConsole ?? undefined
-          );
+          this.heightBelowConsole.set(this.support()?.heightBelowConsole ?? undefined);
           this.towerModel.set(this.support()?.towerModel ?? undefined);
         }
       }
@@ -128,9 +115,7 @@ export class AttachmentSetModalComponent implements OnInit {
 
     this.supportsFilterTable.set(attachmentsFilterTable);
     const items = (attachments || [])
-      .filter((item) =>
-        this.supportName() ? item.support_name === this.supportName() : true
-      )
+      .filter((item) => (this.supportName() ? item.support_name === this.supportName() : true))
       .sort((a, b) => (a.attachment_set || 0) - (b.attachment_set || 0));
     this.attachmentsFilterTable.set(items);
   }
@@ -172,9 +157,7 @@ export class AttachmentSetModalComponent implements OnInit {
     if (key === 'attachment_set') {
       const attachments = await this.attachmentService.getAttachments();
       const items = (attachments || []).filter(
-        (item) =>
-          item.attachment_set === event.value &&
-          item.support_name === this.supportName()
+        (item) => item.attachment_set === event.value && item.support_name === this.supportName()
       );
       if (items[0]) {
         this.armLength.set(items[0].cross_arm_length);

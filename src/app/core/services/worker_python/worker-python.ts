@@ -16,22 +16,14 @@ import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [
-  functions,
-  change_state,
-  guying,
-  temperature,
-  parameter_15_without_wind
-];
+const pythonFiles = [functions, change_state, guying, temperature, parameter_15_without_wind];
 
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;
 
 async function loadPyodideAndPackages() {
   try {
-    const allPythonPackages = Object.values(pythonPackages).map(
-      (pkg) => self.name + 'pyodide/' + pkg.file_name
-    );
+    const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
     const start = performance.now();
     pyodide = await loadPyodide({
       indexURL: self.name + 'pyodide/',
@@ -50,24 +42,17 @@ async function loadPyodideAndPackages() {
   }
 }
 
-addEventListener(
-  'message',
-  ({
-    data
-  }: {
-    data: { task: Task; inputs: TaskInputs[Task]; id: string };
-  }) => {
-    if (pyodide) {
-      handleTask(pyodide, data.task, data.inputs).then((result) => {
-        postMessage({
-          ...result,
-          id: data.id
-        });
+addEventListener('message', ({ data }: { data: { task: Task; inputs: TaskInputs[Task]; id: string } }) => {
+  if (pyodide) {
+    handleTask(pyodide, data.task, data.inputs).then((result) => {
+      postMessage({
+        ...result,
+        id: data.id
       });
-    } else {
-      console.error('pyodide is not loaded, cannot handle task ' + data.task);
-    }
+    });
+  } else {
+    console.error('pyodide is not loaded, cannot handle task ' + data.task);
   }
-);
+});
 
 loadPyodideAndPackages();

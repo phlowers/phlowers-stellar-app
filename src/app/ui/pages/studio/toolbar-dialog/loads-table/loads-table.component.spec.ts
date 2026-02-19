@@ -543,15 +543,11 @@ describe('LoadsTableComponent', () => {
 
   describe('getSymmetryLabel', () => {
     it('should return Symmetric for SYMMETRIC type', () => {
-      expect(component.getSymmetryLabel(SymmetryType.SYMMETRIC)).toBe(
-        'Symmetric'
-      );
+      expect(component.getSymmetryLabel(SymmetryType.SYMMETRIC)).toBe('Symmetric');
     });
 
     it('should return Dis Symmetric for DIS_SYMMETRIC type', () => {
-      expect(component.getSymmetryLabel(SymmetryType.DIS_SYMMETRIC)).toBe(
-        'Dis Symmetric'
-      );
+      expect(component.getSymmetryLabel(SymmetryType.DIS_SYMMETRIC)).toBe('Dis Symmetric');
     });
   });
 

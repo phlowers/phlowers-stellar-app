@@ -8,10 +8,7 @@ import { MessageModule } from 'primeng/message';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
-import {
-  PlotService,
-  SelectedDisplayOptions
-} from '@src/app/ui/pages/studio/services/plot.service';
+import { PlotService, SelectedDisplayOptions } from '@src/app/ui/pages/studio/services/plot.service';
 import { SpanLoad } from '@src/app/core';
 import { LoadType } from './helpers/createLoadAnnotations';
 
@@ -26,10 +23,7 @@ export class SectionPlotComponent {
 
   constructor(public readonly plotService: PlotService) {}
 
-  getSpanLoadsToDisplay = (
-    selectedDisplayOptions: SelectedDisplayOptions,
-    plotOptions: PlotOptions
-  ) => {
+  getSpanLoadsToDisplay = (selectedDisplayOptions: SelectedDisplayOptions, plotOptions: PlotOptions) => {
     if (!selectedDisplayOptions.loads) {
       return [];
     }
@@ -42,8 +36,7 @@ export class SectionPlotComponent {
       .map((support) => support.uuid);
     const spanLoads =
       this.plotService.temporaryLoadData?.spanLoads?.filter(
-        (load) =>
-          !!load && (!!load.loadWeight || load.type === LoadType.MARKING)
+        (load) => !!load && (!!load.loadWeight || load.type === LoadType.MARKING)
       ) ?? [];
     const result: (SpanLoad | null)[] = [];
     for (const supportUuid of supportsUuids) {
@@ -68,10 +61,7 @@ export class SectionPlotComponent {
     if (!litData) {
       return;
     }
-    const spanLoads = this.getSpanLoadsToDisplay(
-      selectedDisplayOptions,
-      plotOptions
-    );
+    const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
     let plotData = createPlotData(litData, plotOptions);
 
     // Add shadow traces for base state if enabled

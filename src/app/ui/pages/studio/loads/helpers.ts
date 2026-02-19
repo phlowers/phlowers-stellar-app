@@ -15,15 +15,10 @@ export const emptySpanLoad: SpanLoad = {
  * @param supports The supports to recheck the span loads against
  * @returns The rechecked span loads
  */
-export const recheckSpanLoads = (
-  loads: SpanLoad[],
-  supports: Support[]
-): SpanLoad[] => {
+export const recheckSpanLoads = (loads: SpanLoad[], supports: Support[]): SpanLoad[] => {
   const loadsSupportUuid = loads.map((load) => load.supportUuid);
   const supportUuids = supports.map((support) => support.uuid);
-  const missingSupportUuids = supportUuids.filter(
-    (uuid) => !loadsSupportUuid.includes(uuid)
-  );
+  const missingSupportUuids = supportUuids.filter((uuid) => !loadsSupportUuid.includes(uuid));
   missingSupportUuids.forEach((uuid) => {
     loads.push({
       ...emptySpanLoad,

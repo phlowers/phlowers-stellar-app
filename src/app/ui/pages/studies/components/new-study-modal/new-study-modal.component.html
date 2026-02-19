@@ -41,9 +41,7 @@
           aria-describedby="title-description"
           fluid
         />
-        <small id="title-description" class="text-s-600 ml-1" i18n>
-          Give a name to your study
-        </small>
+        <small id="title-description" class="text-s-600 ml-1" i18n> Give a name to your study </small>
       </div>
       <div>
         <div class="label-container">
@@ -70,23 +68,11 @@
   </ng-template>
 
   <ng-template #footer>
-    <button
-      app-btn
-      type="submit"
-      btnSize="m"
-      btnStyle="text"
-      (click)="isOpenChange.emit(false)"
-    >
+    <button app-btn type="submit" btnSize="m" btnStyle="text" (click)="isOpenChange.emit(false)">
       <app-icon icon="close" />
       <span i18n>Cancel</span>
     </button>
-    <button
-      app-btn
-      type="button"
-      btnSize="m"
-      (click)="onSubmit()"
-      [disabled]="titleLength() === 0"
-    >
+    <button app-btn type="button" btnSize="m" (click)="onSubmit()" [disabled]="titleLength() === 0">
       <app-icon icon="check" />
       <span i18n>Validate</span>
     </button>

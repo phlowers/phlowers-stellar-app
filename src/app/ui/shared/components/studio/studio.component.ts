@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  OnDestroy,
-  signal
-} from '@angular/core';
+import { Component, computed, effect, input, OnDestroy, signal } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { DataError, TaskError } from '@services/worker_python/tasks/types';

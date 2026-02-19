@@ -27,11 +27,7 @@ describe('ImportStudyComponent', () => {
     const mockCablesService = {
       getCables: jest
         .fn()
-        .mockResolvedValue([
-          { name: 'conducteur' },
-          { name: 'ASTER600' },
-          { name: 'câble par faisceau' }
-        ])
+        .mockResolvedValue([{ name: 'conducteur' }, { name: 'ASTER600' }, { name: 'câble par faisceau' }])
     } as unknown as jest.Mocked<CablesService>;
     mockConfirmationService = {
       confirm: jest.fn()
@@ -40,47 +36,45 @@ describe('ImportStudyComponent', () => {
     // Mock Papa.parse
     const mockParse = jest
       .fn()
-      .mockImplementation(
-        (input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
-          if (config?.complete) {
-            // Simulate successful parsing with async behavior
-            setTimeout(async () => {
-              const mockResult: Papa.ParseResult<Record<string, string>> = {
-                data: [
-                  {
-                    num: '1',
-                    nom: '98',
-                    suspension: 'FAUX',
-                    alt_acc: '1075,53',
-                    long_bras: '0',
-                    angle_ligne: '-19,1',
-                    long_ch: '0',
-                    pds_ch: '0',
-                    surf_ch: '0',
-                    ctr_poids: '0',
-                    ch_en_V: 'FAUX',
-                    portée: '473,07'
-                  }
-                ],
-                errors: [],
-                meta: {
-                  delimiter: ';',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0
+      .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
+        if (config?.complete) {
+          // Simulate successful parsing with async behavior
+          setTimeout(async () => {
+            const mockResult: Papa.ParseResult<Record<string, string>> = {
+              data: [
+                {
+                  num: '1',
+                  nom: '98',
+                  suspension: 'FAUX',
+                  alt_acc: '1075,53',
+                  long_bras: '0',
+                  angle_ligne: '-19,1',
+                  long_ch: '0',
+                  pds_ch: '0',
+                  surf_ch: '0',
+                  ctr_poids: '0',
+                  ch_en_V: 'FAUX',
+                  portée: '473,07'
                 }
-              };
-              // Call complete callback and await it since it's async
-              const result = config.complete!(mockResult, undefined) as unknown;
-              if (result && typeof result === 'object' && 'then' in result) {
-                await (result as Promise<void>);
+              ],
+              errors: [],
+              meta: {
+                delimiter: ';',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0
               }
-            }, 0);
-          }
-          return {} as Papa.ParseResult<Record<string, string>>;
+            };
+            // Call complete callback and await it since it's async
+            const result = config.complete!(mockResult, undefined) as unknown;
+            if (result && typeof result === 'object' && 'then' in result) {
+              await (result as Promise<void>);
+            }
+          }, 0);
         }
-      );
+        return {} as Papa.ParseResult<Record<string, string>>;
+      });
 
     (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
@@ -117,9 +111,7 @@ describe('ImportStudyComponent', () => {
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(
-        () => mockFileReader
-      );
+      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.csv', { type: 'text/csv' });
@@ -170,10 +162,9 @@ describe('ImportStudyComponent', () => {
       expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile);
 
       // Simulate FileReader error
-      const mockFileReaderWithError =
-        mockFileReader as typeof mockFileReader & {
-          onerror: ((e: ProgressEvent<FileReader>) => void) | null;
-        };
+      const mockFileReaderWithError = mockFileReader as typeof mockFileReader & {
+        onerror: ((e: ProgressEvent<FileReader>) => void) | null;
+      };
       if (mockFileReaderWithError.onerror) {
         mockFileReaderWithError.onerror({} as ProgressEvent<FileReader>);
       }
@@ -314,9 +305,7 @@ describe('ImportStudyComponent', () => {
             detail: 'Cable not found in database',
             life: 3000
           });
-          expect(
-            studiesServiceMock.createStudyFromProtoV4
-          ).not.toHaveBeenCalled();
+          expect(studiesServiceMock.createStudyFromProtoV4).not.toHaveBeenCalled();
           expect(component.erroredFiles()).toContain(mockFile.name);
           expect(component.loading()).toBe(false);
           done();
@@ -326,9 +315,7 @@ describe('ImportStudyComponent', () => {
 
     it('should handle errors during file import and add to erroredFiles', (done) => {
       // Mock checkIfCableExists to throw an error
-      jest
-        .spyOn(component, 'checkIfCableExists')
-        .mockRejectedValue(new Error('Database connection error'));
+      jest.spyOn(component, 'checkIfCableExists').mockRejectedValue(new Error('Database connection error'));
 
       const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -380,10 +367,7 @@ describe('ImportStudyComponent', () => {
         }
 
         setTimeout(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'Error importing study',
-            expect.any(Error)
-          );
+          expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing study', expect.any(Error));
           expect(mockMessageService.add).toHaveBeenCalledWith({
             severity: 'error',
             summary: expect.any(String),
@@ -391,9 +375,7 @@ describe('ImportStudyComponent', () => {
             life: 3000
           });
           expect(component.erroredFiles()).toContain(mockFile.name);
-          expect(
-            studiesServiceMock.createStudyFromProtoV4
-          ).not.toHaveBeenCalled();
+          expect(studiesServiceMock.createStudyFromProtoV4).not.toHaveBeenCalled();
           consoleErrorSpy.mockRestore();
           done();
         }, 100);
@@ -461,10 +443,7 @@ describe('ImportStudyComponent', () => {
         }
 
         setTimeout(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'Error importing study',
-            expect.any(Error)
-          );
+          expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing study', expect.any(Error));
           expect(mockMessageService.add).toHaveBeenCalledWith({
             severity: 'error',
             summary: expect.any(String),
@@ -493,9 +472,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
         component.loadFiles(mockEvent);
 
@@ -505,10 +482,7 @@ describe('ImportStudyComponent', () => {
           }
 
           setTimeout(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith(
-              'Error reading file',
-              mockFile.name
-            );
+            expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
             expect(mockMessageService.add).toHaveBeenCalledWith({
               severity: 'error',
               summary: expect.any(String),
@@ -536,9 +510,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
         component.loadFiles(mockEvent);
 
@@ -548,10 +520,7 @@ describe('ImportStudyComponent', () => {
           }
 
           setTimeout(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith(
-              'Error reading file',
-              mockFile.name
-            );
+            expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
             expect(mockMessageService.add).toHaveBeenCalledWith({
               severity: 'error',
               summary: expect.any(String),
@@ -579,9 +548,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
         component.loadFiles(mockEvent);
 
@@ -591,10 +558,7 @@ describe('ImportStudyComponent', () => {
           }
 
           setTimeout(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith(
-              'Error reading file',
-              mockFile.name
-            );
+            expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
             expect(mockMessageService.add).toHaveBeenCalledWith({
               severity: 'error',
               summary: expect.any(String),
@@ -652,9 +616,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
         component.loadFiles(mockEvent);
 
@@ -666,21 +628,16 @@ describe('ImportStudyComponent', () => {
           // Wait for Papa.parse to complete
           setTimeout(() => {
             // Verify no decode error was logged
-            const decodeErrorCalls = consoleErrorSpy.mock.calls.filter(
-              (call) => call[0] === 'Error decoding base64'
-            );
+            const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
             expect(decodeErrorCalls.length).toBe(0);
             // Verify the file was not added to erroredFiles due to decode errors
             // (it might be there for other reasons, but not decode errors)
-            const fileDecodeErrors = component
-              .erroredFiles()
-              .filter((name) => name === mockFile.name);
+            const fileDecodeErrors = component.erroredFiles().filter((name) => name === mockFile.name);
             // If file is in erroredFiles, it should not be due to decode error
             if (fileDecodeErrors.length > 0) {
               // Check that the error message is not about decoding
               const mockMessageService = TestBed.inject(MessageService);
-              const errorCalls = (mockMessageService.add as jest.Mock).mock
-                .calls;
+              const errorCalls = (mockMessageService.add as jest.Mock).mock.calls;
               const decodeErrorMessages = errorCalls.filter(
                 (call: unknown[]) =>
                   Array.isArray(call) &&
@@ -748,9 +705,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
         component.loadFiles(mockEvent);
 
@@ -764,9 +719,7 @@ describe('ImportStudyComponent', () => {
             // Verify atob was called (as fallback or primary)
             expect(atobSpy).toHaveBeenCalled();
             // Verify no decode error was logged
-            const decodeErrorCalls = consoleErrorSpy.mock.calls.filter(
-              (call) => call[0] === 'Error decoding base64'
-            );
+            const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
             expect(decodeErrorCalls.length).toBe(0);
             global.atob = originalAtob;
             consoleErrorSpy.mockRestore();
@@ -793,9 +746,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
         component.loadFiles(mockEvent);
 
@@ -805,10 +756,7 @@ describe('ImportStudyComponent', () => {
           }
 
           setTimeout(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith(
-              'Error decoding base64',
-              expect.any(Error)
-            );
+            expect(consoleErrorSpy).toHaveBeenCalledWith('Error decoding base64', expect.any(Error));
             expect(mockMessageService.add).toHaveBeenCalledWith({
               severity: 'error',
               summary: expect.any(String),
@@ -890,65 +838,51 @@ describe('ImportStudyComponent', () => {
         const dataUrl = `data:text/csv;base64,${base64Content}`;
 
         // Mock createStudyFromProtoV4 to throw a known error (cableNotFound is in errors)
-        studiesServiceMock.createStudyFromProtoV4 = jest
-          .fn()
-          .mockRejectedValue(new Error('cableNotFound'));
+        studiesServiceMock.createStudyFromProtoV4 = jest.fn().mockRejectedValue(new Error('cableNotFound'));
 
         const mockParse = jest
           .fn()
-          .mockImplementation(
-            (
-              input: string,
-              config?: Papa.ParseConfig<Record<string, string>>
-            ) => {
-              if (config?.complete) {
-                setTimeout(async () => {
-                  const mockResult: Papa.ParseResult<Record<string, string>> = {
-                    data: [
-                      {
-                        num: '1',
-                        nom: '98',
-                        suspension: 'FAUX',
-                        alt_acc: '1075,53',
-                        long_bras: '0',
-                        angle_ligne: '-19,1',
-                        long_ch: '0',
-                        pds_ch: '0',
-                        surf_ch: '0',
-                        ctr_poids: '0',
-                        ch_en_V: 'FAUX',
-                        portée: '473,07'
-                      }
-                    ],
-                    errors: [],
-                    meta: {
-                      delimiter: ';',
-                      linebreak: '\n',
-                      aborted: false,
-                      truncated: false,
-                      cursor: 0
+          .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
+            if (config?.complete) {
+              setTimeout(async () => {
+                const mockResult: Papa.ParseResult<Record<string, string>> = {
+                  data: [
+                    {
+                      num: '1',
+                      nom: '98',
+                      suspension: 'FAUX',
+                      alt_acc: '1075,53',
+                      long_bras: '0',
+                      angle_ligne: '-19,1',
+                      long_ch: '0',
+                      pds_ch: '0',
+                      surf_ch: '0',
+                      ctr_poids: '0',
+                      ch_en_V: 'FAUX',
+                      portée: '473,07'
                     }
-                  };
-                  try {
-                    const result = config.complete!(
-                      mockResult,
-                      undefined
-                    ) as unknown;
-                    if (
-                      result &&
-                      typeof result === 'object' &&
-                      'then' in result
-                    ) {
-                      await (result as Promise<void>);
-                    }
-                  } catch {
-                    // Errors are expected and handled by the component
+                  ],
+                  errors: [],
+                  meta: {
+                    delimiter: ';',
+                    linebreak: '\n',
+                    aborted: false,
+                    truncated: false,
+                    cursor: 0
                   }
-                }, 0);
-              }
-              return {} as Papa.ParseResult<Record<string, string>>;
+                };
+                try {
+                  const result = config.complete!(mockResult, undefined) as unknown;
+                  if (result && typeof result === 'object' && 'then' in result) {
+                    await (result as Promise<void>);
+                  }
+                } catch {
+                  // Errors are expected and handled by the component
+                }
+              }, 0);
             }
-          );
+            return {} as Papa.ParseResult<Record<string, string>>;
+          });
 
         (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
@@ -1019,65 +953,51 @@ describe('ImportStudyComponent', () => {
         const dataUrl = `data:text/csv;base64,${base64Content}`;
 
         // Mock createStudyFromProtoV4 to throw an unknown error (not in errors)
-        studiesServiceMock.createStudyFromProtoV4 = jest
-          .fn()
-          .mockRejectedValue(new Error('unknownError'));
+        studiesServiceMock.createStudyFromProtoV4 = jest.fn().mockRejectedValue(new Error('unknownError'));
 
         const mockParse = jest
           .fn()
-          .mockImplementation(
-            (
-              input: string,
-              config?: Papa.ParseConfig<Record<string, string>>
-            ) => {
-              if (config?.complete) {
-                setTimeout(async () => {
-                  const mockResult: Papa.ParseResult<Record<string, string>> = {
-                    data: [
-                      {
-                        num: '1',
-                        nom: '98',
-                        suspension: 'FAUX',
-                        alt_acc: '1075,53',
-                        long_bras: '0',
-                        angle_ligne: '-19,1',
-                        long_ch: '0',
-                        pds_ch: '0',
-                        surf_ch: '0',
-                        ctr_poids: '0',
-                        ch_en_V: 'FAUX',
-                        portée: '473,07'
-                      }
-                    ],
-                    errors: [],
-                    meta: {
-                      delimiter: ';',
-                      linebreak: '\n',
-                      aborted: false,
-                      truncated: false,
-                      cursor: 0
+          .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
+            if (config?.complete) {
+              setTimeout(async () => {
+                const mockResult: Papa.ParseResult<Record<string, string>> = {
+                  data: [
+                    {
+                      num: '1',
+                      nom: '98',
+                      suspension: 'FAUX',
+                      alt_acc: '1075,53',
+                      long_bras: '0',
+                      angle_ligne: '-19,1',
+                      long_ch: '0',
+                      pds_ch: '0',
+                      surf_ch: '0',
+                      ctr_poids: '0',
+                      ch_en_V: 'FAUX',
+                      portée: '473,07'
                     }
-                  };
-                  try {
-                    const result = config.complete!(
-                      mockResult,
-                      undefined
-                    ) as unknown;
-                    if (
-                      result &&
-                      typeof result === 'object' &&
-                      'then' in result
-                    ) {
-                      await (result as Promise<void>);
-                    }
-                  } catch {
-                    // Errors are expected and handled by the component
+                  ],
+                  errors: [],
+                  meta: {
+                    delimiter: ';',
+                    linebreak: '\n',
+                    aborted: false,
+                    truncated: false,
+                    cursor: 0
                   }
-                }, 0);
-              }
-              return {} as Papa.ParseResult<Record<string, string>>;
+                };
+                try {
+                  const result = config.complete!(mockResult, undefined) as unknown;
+                  if (result && typeof result === 'object' && 'then' in result) {
+                    await (result as Promise<void>);
+                  }
+                } catch {
+                  // Errors are expected and handled by the component
+                }
+              }, 0);
             }
-          );
+            return {} as Papa.ParseResult<Record<string, string>>;
+          });
 
         (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
@@ -1135,10 +1055,7 @@ describe('ImportStudyComponent', () => {
 
       // Wait for async operations
       setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error in loadFiles',
-          expect.any(Error)
-        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', expect.any(Error));
         expect(component.loading()).toBe(false);
         expect(mockMessageService.add).toHaveBeenCalledWith({
           severity: 'error',
@@ -1166,10 +1083,7 @@ describe('ImportStudyComponent', () => {
 
       // Wait for async operations
       setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error in loadFiles',
-          expect.any(Error)
-        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', expect.any(Error));
         expect(component.loading()).toBe(false);
         expect(mockMessageService.add).toHaveBeenCalledWith({
           severity: 'error',
@@ -1197,10 +1111,7 @@ describe('ImportStudyComponent', () => {
 
       // Wait for async operations
       setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error in loadFiles',
-          'string error'
-        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', 'string error');
         expect(component.loading()).toBe(false);
         expect(mockMessageService.add).toHaveBeenCalledWith({
           severity: 'error',
@@ -1361,10 +1272,7 @@ describe('ImportStudyComponent', () => {
       component.loadFiles(mockEvent);
 
       setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error in loadFiles',
-          null
-        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', null);
         expect(component.loading()).toBe(false);
         expect(mockMessageService.add).toHaveBeenCalledWith({
           severity: 'error',
@@ -1398,9 +1306,7 @@ describe('ImportStudyComponent', () => {
 
       await component.deleteStudy('non-existent-uuid');
 
-      expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(
-        'non-existent-uuid'
-      );
+      expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith('non-existent-uuid');
       expect(component.newStudies()).toEqual([study1]);
     });
 
@@ -1436,9 +1342,7 @@ describe('ImportStudyComponent', () => {
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(
-        () => mockFileReader
-      );
+      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.clst', {
@@ -1479,9 +1383,7 @@ describe('ImportStudyComponent', () => {
       } as Study;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest
-        .fn()
-        .mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
@@ -1522,9 +1424,7 @@ describe('ImportStudyComponent', () => {
       } as Study;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest
-        .fn()
-        .mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
@@ -1605,9 +1505,7 @@ describe('ImportStudyComponent', () => {
         setTimeout(() => {
           expect(studiesServiceMock.createStudy).toHaveBeenCalled();
           expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
-          expect(component.newStudies()).not.toContainEqual(
-            expect.objectContaining({ uuid: 'test-uuid' })
-          );
+          expect(component.newStudies()).not.toContainEqual(expect.objectContaining({ uuid: 'test-uuid' }));
           done();
         }, 10);
       }, 10);
@@ -1648,9 +1546,7 @@ describe('ImportStudyComponent', () => {
       } as Study;
 
       studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest
-        .fn()
-        .mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
@@ -1661,8 +1557,7 @@ describe('ImportStudyComponent', () => {
 
         setTimeout(() => {
           expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          const createStudyCall = studiesServiceMock.createStudy.mock
-            .calls[0][0] as unknown as {
+          const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as unknown as {
             title: string;
             description: string;
             sections: {
@@ -1702,9 +1597,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      studiesServiceMock.createStudy = jest
-        .fn()
-        .mockRejectedValue(new Error('Database error'));
+      studiesServiceMock.createStudy = jest.fn().mockRejectedValue(new Error('Database error'));
 
       component.loadFiles(mockEvent);
 
@@ -1745,9 +1638,7 @@ describe('ImportStudyComponent', () => {
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(
-        () => mockFileReader
-      );
+      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.clst', {
@@ -1868,16 +1759,11 @@ describe('ImportStudyComponent', () => {
       // Mock confirmation service to accept
       mockConfirmationService.confirm = jest
         .fn()
-        .mockImplementation(
-          async (options: {
-            accept?: () => void | Promise<void>;
-            reject?: () => void;
-          }) => {
-            if (options.accept) {
-              await options.accept();
-            }
+        .mockImplementation(async (options: { accept?: () => void | Promise<void>; reject?: () => void }) => {
+          if (options.accept) {
+            await options.accept();
           }
-        );
+        });
 
       const mockProgressEvent = {
         target: {
@@ -1893,12 +1779,8 @@ describe('ImportStudyComponent', () => {
         }
 
         setTimeout(() => {
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(
-            existingUuid
-          );
-          expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(
-            existingUuid
-          );
+          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(existingUuid);
+          expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(existingUuid);
           expect(studiesServiceMock.createStudy).toHaveBeenCalled();
           expect(component.newStudies().length).toBe(1);
           done();
@@ -1925,13 +1807,11 @@ describe('ImportStudyComponent', () => {
       // Mock confirmation service to reject
       mockConfirmationService.confirm = jest
         .fn()
-        .mockImplementation(
-          (options: { accept?: () => void; reject?: () => void }) => {
-            if (options.reject) {
-              options.reject();
-            }
+        .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
+          if (options.reject) {
+            options.reject();
           }
-        );
+        });
 
       const mockProgressEvent = {
         target: {
@@ -1947,9 +1827,7 @@ describe('ImportStudyComponent', () => {
         }
 
         setTimeout(() => {
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(
-            existingUuid
-          );
+          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(existingUuid);
           expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
           expect(component.newStudies().length).toBe(0);
           done();
@@ -2163,8 +2041,7 @@ describe('ImportStudyComponent', () => {
 
         setTimeout(() => {
           expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          const createStudyCall = studiesServiceMock.createStudy.mock
-            .calls[0][0] as any;
+          const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as any;
           expect(createStudyCall.sections).toBeDefined();
           expect(createStudyCall.sections.length).toBe(1);
           expect(createStudyCall.sections[0].supports.length).toBe(2);
@@ -2215,17 +2092,12 @@ describe('ImportStudyComponent', () => {
       // Mock the confirm method to call the accept callback
       mockConfirmationService.confirm = jest
         .fn()
-        .mockImplementation(
-          async (options: {
-            accept?: () => void | Promise<void>;
-            reject?: () => void;
-          }) => {
-            // Simulate user accepting
-            if (options.accept) {
-              await options.accept();
-            }
+        .mockImplementation(async (options: { accept?: () => void | Promise<void>; reject?: () => void }) => {
+          // Simulate user accepting
+          if (options.accept) {
+            await options.accept();
           }
-        );
+        });
 
       const result = await component.promptIfStudyAlreadyExists(testUuid);
 
@@ -2247,14 +2119,12 @@ describe('ImportStudyComponent', () => {
       // Mock the confirm method to call the reject callback
       mockConfirmationService.confirm = jest
         .fn()
-        .mockImplementation(
-          (options: { accept?: () => void; reject?: () => void }) => {
-            // Simulate user rejecting
-            if (options.reject) {
-              options.reject();
-            }
+        .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
+          // Simulate user rejecting
+          if (options.reject) {
+            options.reject();
           }
-        );
+        });
 
       const result = await component.promptIfStudyAlreadyExists(testUuid);
 
@@ -2275,13 +2145,11 @@ describe('ImportStudyComponent', () => {
 
       mockConfirmationService.confirm = jest
         .fn()
-        .mockImplementation(
-          (options: { accept?: () => void; reject?: () => void }) => {
-            if (options.reject) {
-              options.reject();
-            }
+        .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
+          if (options.reject) {
+            options.reject();
           }
-        );
+        });
 
       await component.promptIfStudyAlreadyExists(testUuid);
 

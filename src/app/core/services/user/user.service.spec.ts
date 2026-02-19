@@ -34,18 +34,14 @@ describe('UserService', () => {
 
     it('should throw if a user already exists', async () => {
       usersTableMock.toArray.mockResolvedValue([testUser]);
-      await expect(service.createUser(testUser)).rejects.toThrow(
-        'User already exists'
-      );
+      await expect(service.createUser(testUser)).rejects.toThrow('User already exists');
       expect(usersTableMock.add).not.toHaveBeenCalled();
     });
 
     it('should throw if email is invalid', async () => {
       usersTableMock.toArray.mockResolvedValue([]);
       const invalidUser = { email: 'invalid' };
-      await expect(
-        service.createUser(invalidUser as UserEntity)
-      ).rejects.toThrow('Invalid email');
+      await expect(service.createUser(invalidUser as UserEntity)).rejects.toThrow('Invalid email');
       expect(usersTableMock.add).not.toHaveBeenCalled();
     });
   });

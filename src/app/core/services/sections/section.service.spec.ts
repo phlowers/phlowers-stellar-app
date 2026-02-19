@@ -95,10 +95,7 @@ describe('SectionService', () => {
     } as unknown as jest.Mocked<StudiesService>;
 
     TestBed.configureTestingModule({
-      providers: [
-        SectionService,
-        { provide: StudiesService, useValue: mockStudiesService }
-      ]
+      providers: [SectionService, { provide: StudiesService, useValue: mockStudiesService }]
     });
 
     service = TestBed.inject(SectionService);

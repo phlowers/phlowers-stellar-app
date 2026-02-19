@@ -17,12 +17,7 @@ import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from './components/header/header.component';
 import { FieldMeasure } from './types';
 import { ToolbarDialogService } from '../toolbar-dialog.service';
-import {
-  WIND_DIRECTION_OPTIONS,
-  SKY_COVER_OPTIONS,
-  LEFT_SUPPORT_OPTIONS,
-  SelectOption
-} from './constants';
+import { WIND_DIRECTION_OPTIONS, SKY_COVER_OPTIONS, LEFT_SUPPORT_OPTIONS, SelectOption } from './constants';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
 import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
@@ -79,22 +74,15 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  measureData = signal<FieldMeasure>(
-    createInitialMeasureData(null, '', null, null)
-  );
+  measureData = signal<FieldMeasure>(createInitialMeasureData(null, '', null, null));
 
   selectedSpan = signal<number[]>([]);
 
-  activeTab = signal<
-    | 'terrainData'
-    | 'parameterCalculation'
-    | 'temperatureCalculation'
-    | 'parameterAt15CWithoutWind'
-  >('terrainData');
-
-  readonly windDirectionOptions = signal<SelectOption[]>(
-    WIND_DIRECTION_OPTIONS
+  activeTab = signal<'terrainData' | 'parameterCalculation' | 'temperatureCalculation' | 'parameterAt15CWithoutWind'>(
+    'terrainData'
   );
+
+  readonly windDirectionOptions = signal<SelectOption[]>(WIND_DIRECTION_OPTIONS);
   readonly skyCoverOptions = signal<SelectOption[]>(SKY_COVER_OPTIONS);
   readonly leftSupportOptions = signal<SelectOption[]>(LEFT_SUPPORT_OPTIONS);
   readonly cableOptions = signal<SelectOption[]>([]);
@@ -107,10 +95,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     private readonly messageService: MessageService
   ) {
     effect(() => {
-      if (
-        this.toolbarDialogService.isOpen() &&
-        this.toolbarDialogService.phase() === 'main'
-      ) {
+      if (this.toolbarDialogService.isOpen() && this.toolbarDialogService.phase() === 'main') {
         // Initialize data from PlotService when dialog opens
         this.initializeMeasureData();
         this.cableService.getCables().then((cables) => {
@@ -134,9 +119,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       this.plotService
         .section()
         ?.field_measures?.some(
-          (measure) =>
-            measure.name === this.measureData().name &&
-            measure.uuid !== this.measureData().uuid
+          (measure) => measure.name === this.measureData().name && measure.uuid !== this.measureData().uuid
         ) || false
     );
   });
@@ -185,9 +168,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
 
     // Fetch link_adr from lines service
     const linesTable = await this.linesService.getLines();
-    const linkLine = linesTable?.find(
-      (item) => item.link_idr === section.link_name
-    );
+    const linkLine = linesTable?.find((item) => item.link_idr === section.link_name);
     const linkAdrRead = linkLine?.link_adr || '';
 
     this.measureData.set({
@@ -207,10 +188,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  onFieldChange<K extends keyof FieldMeasure>(
-    field: K,
-    value: FieldMeasure[K]
-  ) {
+  onFieldChange<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     const measureData = this.measureData();
     if (!measureData) {
       return;
@@ -237,9 +215,7 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     if (!section || !measureData) {
       return;
     }
-    const isExistingMeasure = section.field_measures.find(
-      (measure) => measure.uuid === measureData.uuid
-    );
+    const isExistingMeasure = section.field_measures.find((measure) => measure.uuid === measureData.uuid);
     if (isExistingMeasure) {
       await this.plotService.modifySection({
         field_measures: section.field_measures.map((measure) =>

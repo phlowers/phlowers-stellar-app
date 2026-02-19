@@ -1,9 +1,5 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import {
-  ClimateComponent,
-  getBaseClimate,
-  DEFAULT_BASE_TEMPERATURE
-} from './climate.component';
+import { ClimateComponent, getBaseClimate, DEFAULT_BASE_TEMPERATURE } from './climate.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
@@ -117,14 +113,7 @@ describe('ClimateComponent effect edge cases', () => {
     } as unknown as ChargesService;
 
     await TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
-        SelectModule,
-        InputText,
-        ButtonComponent,
-        IconComponent,
-        ClimateComponent
-      ],
+      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: {} },
@@ -156,14 +145,7 @@ describe('ClimateComponent effect edge cases', () => {
     } as unknown as ChargesService;
 
     await TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
-        SelectModule,
-        InputText,
-        ButtonComponent,
-        IconComponent,
-        ClimateComponent
-      ],
+      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: {} },
@@ -247,14 +229,7 @@ describe('ClimateComponent (Jest)', () => {
     } as unknown as LoadFormsService;
 
     await TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
-        SelectModule,
-        InputText,
-        ButtonComponent,
-        IconComponent,
-        ClimateComponent
-      ],
+      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
@@ -313,29 +288,22 @@ describe('ClimateComponent (Jest)', () => {
   describe('button actions', () => {
     it('should call submitForm when submit button is clicked', () => {
       const spy = jest.spyOn(component, 'saveForm');
-      const submitButton = fixture.nativeElement.querySelector(
-        'button[type="submit"]'
-      );
+      const submitButton = fixture.nativeElement.querySelector('button[type="submit"]');
       submitButton.click();
       expect(spy).toHaveBeenCalled();
     });
 
     it('should call calculForm when calculate button is clicked', () => {
       const spy = jest.spyOn(component, 'calculateForm');
-      const buttons = [
-        ...fixture.nativeElement.querySelectorAll('button')
-      ] as HTMLElement[];
-      const calcButton = buttons.find((b) =>
-        b.textContent?.includes('Calculate')
-      );
+      const buttons = [...fixture.nativeElement.querySelectorAll('button')] as HTMLElement[];
+      const calcButton = buttons.find((b) => b.textContent?.includes('Calculate'));
       calcButton?.click();
       expect(spy).toHaveBeenCalled();
     });
 
     it('should call resetForm when erase button is clicked', () => {
       const spy = jest.spyOn(component, 'resetForm');
-      const resetButton =
-        fixture.nativeElement.querySelector('.climate__reset');
+      const resetButton = fixture.nativeElement.querySelector('.climate__reset');
       resetButton.click();
       expect(spy).toHaveBeenCalled();
     });
@@ -345,29 +313,21 @@ describe('ClimateComponent (Jest)', () => {
     it('should call chargesService.deleteCharge with correct parameters', () => {
       const chargesService = TestBed.inject(ChargesService);
       component.deleteCharge();
-      expect(chargesService.deleteCharge).toHaveBeenCalledWith(
-        'study-uuid-1',
-        'section-uuid-1',
-        'test-charge-uuid'
-      );
+      expect(chargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'test-charge-uuid');
     });
 
     it('should throw error when study is not found', () => {
       const plotService = TestBed.inject(PlotService);
       (plotService.study as ReturnType<typeof signal>).set(null);
 
-      expect(() => component.deleteCharge()).toThrow(
-        'Study or section not found'
-      );
+      expect(() => component.deleteCharge()).toThrow('Study or section not found');
     });
 
     it('should throw error when section is not found', () => {
       const plotService = TestBed.inject(PlotService);
       (plotService.section as ReturnType<typeof signal>).set(null);
 
-      expect(() => component.deleteCharge()).toThrow(
-        'Study or section not found'
-      );
+      expect(() => component.deleteCharge()).toThrow('Study or section not found');
     });
   });
 
@@ -382,11 +342,7 @@ describe('ClimateComponent (Jest)', () => {
       component.form.controls.windPressure.markAsTouched();
       component.form.controls.windPressure.updateValueAndValidity();
 
-      const result = component.getErrorIds('windPressure', [
-        'required',
-        'min',
-        'max'
-      ]);
+      const result = component.getErrorIds('windPressure', ['required', 'min', 'max']);
       expect(result).toBe('windPressure-error-required');
     });
 

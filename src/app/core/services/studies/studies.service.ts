@@ -5,20 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable, signal } from '@angular/core';
-import {
-  ProtoV4Parameters,
-  ProtoV4Support,
-  Support,
-  InitialCondition
-} from '@core/domain';
+import { ProtoV4Parameters, ProtoV4Support, Support, InitialCondition } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
-import {
-  createEmptySection,
-  createEmptySupport
-} from '@services/sections/helpers';
+import { createEmptySection, createEmptySupport } from '@services/sections/helpers';
 import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
@@ -52,10 +44,7 @@ export class StudiesService {
    * @param study The study to create
    */
   async createStudy(
-    study: Pick<
-      StudyEntity,
-      'title' | 'description' | 'shareable' | 'sections' | 'author_email'
-    >,
+    study: Pick<StudyEntity, 'title' | 'description' | 'shareable' | 'sections' | 'author_email'>,
     newUuid?: string
   ): Promise<string> {
     const uuid = newUuid || uuidv4();
@@ -99,8 +88,7 @@ export class StudiesService {
     if (!study) {
       return null;
     }
-    const userEmail = (await this.storageService.db?.users.toArray())?.[0]
-      ?.email;
+    const userEmail = (await this.storageService.db?.users.toArray())?.[0]?.email;
     const allStudies = await this.storageService.db?.studies.toArray();
     const allStudyTitles = allStudies?.map((study) => study.title);
     const duplicateTitle = findDuplicateTitle(allStudyTitles, study.title);
@@ -143,21 +131,14 @@ export class StudiesService {
    * @returns The latest studies
    */
   getLatestStudies() {
-    return this.storageService.db?.studies
-      .orderBy('created_at_offline')
-      .reverse()
-      .limit(4)
-      .toArray();
+    return this.storageService.db?.studies.orderBy('created_at_offline').reverse().limit(4).toArray();
   }
 
   /**
    * Update a study
    * @param study The study to update
    */
-  async updateStudy(
-    study: { uuid: string; author_email: string } & Partial<StudyEntity>,
-    overrideAuthorCheck = false
-  ) {
+  async updateStudy(study: { uuid: string; author_email: string } & Partial<StudyEntity>, overrideAuthorCheck = false) {
     const user = await this.storageService.db?.users.toArray();
     if (!overrideAuthorCheck && user?.[0]?.email !== study.author_email) {
       const errorMessage = $localize`You cannot update a study that you did not create, please duplicate it instead.`;
@@ -180,10 +161,7 @@ export class StudiesService {
    * @param parameters The parameters of the proto v4 project
    * @returns The study
    */
-  async createStudyFromProtoV4(
-    protoV4Supports: ProtoV4Support[],
-    parameters: ProtoV4Parameters
-  ): Promise<StudyEntity> {
+  async createStudyFromProtoV4(protoV4Supports: ProtoV4Support[], parameters: ProtoV4Parameters): Promise<StudyEntity> {
     const section = createEmptySection();
     section.name = parameters.section_name;
     section.type = 'phase';

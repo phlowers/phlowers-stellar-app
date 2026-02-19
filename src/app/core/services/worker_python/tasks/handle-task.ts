@@ -81,9 +81,7 @@ export async function handleTask<taskId extends Task>(
     }
     pyodide.globals.set('js_inputs', inputs);
 
-    const functionToRun = pyodide.globals.get(tasks[task].function) as (
-      inputs?: TaskInputs[taskId]
-    ) => PyProxy;
+    const functionToRun = pyodide.globals.get(tasks[task].function) as (inputs?: TaskInputs[taskId]) => PyProxy;
     const result = inputs ? functionToRun(inputs) : functionToRun();
     const resultJs = result.toJs({ dict_converter: Object.fromEntries });
     result.destroy();
@@ -95,10 +93,7 @@ export async function handleTask<taskId extends Task>(
   } catch (error: any) {
     console.error(error);
     let errorType = TaskError.CALCULATION_ERROR;
-    if (
-      error?.message &&
-      error?.message?.toLowerCase().includes('did not converge')
-    ) {
+    if (error?.message && error?.message?.toLowerCase().includes('did not converge')) {
       errorType = TaskError.SOLVER_DID_NOT_CONVERGE;
     }
     return {

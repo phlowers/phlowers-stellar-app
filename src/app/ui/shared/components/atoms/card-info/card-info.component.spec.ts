@@ -111,12 +111,7 @@ describe('CardInfoComponent', () => {
     });
 
     it('should handle all CardState values', () => {
-      const cardStates: CardState[] = [
-        'success',
-        'warning',
-        'error',
-        'unknown'
-      ];
+      const cardStates: CardState[] = ['success', 'warning', 'error', 'unknown'];
 
       cardStates.forEach((state) => {
         fixture.componentRef.setInput('title', 'Test');

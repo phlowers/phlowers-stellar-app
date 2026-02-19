@@ -167,11 +167,7 @@ describe('AttachmentSetModalComponent', () => {
     } as unknown as jest.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
-      imports: [
-        AttachmentSetModalComponent,
-        BrowserAnimationsModule,
-        FormsModule
-      ],
+      imports: [AttachmentSetModalComponent, BrowserAnimationsModule, FormsModule],
       providers: [
         {
           provide: AttachmentService,
@@ -207,9 +203,7 @@ describe('AttachmentSetModalComponent', () => {
 
     expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
     expect(component.attachmentsFilterTable()).toEqual(
-      mockAttachments.sort(
-        (a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0)
-      )
+      mockAttachments.sort((a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0))
     );
   });
 
@@ -333,9 +327,7 @@ describe('AttachmentSetModalComponent', () => {
   });
 
   it('should handle attachment service errors gracefully', async () => {
-    attachmentServiceMock.getAttachments.mockRejectedValue(
-      new Error('Service error')
-    );
+    attachmentServiceMock.getAttachments.mockRejectedValue(new Error('Service error'));
 
     // Should not throw error
     await expect(component.getData()).rejects.toThrow('Service error');

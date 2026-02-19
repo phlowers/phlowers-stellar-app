@@ -18,10 +18,7 @@ import { Study } from '@core/domain';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { StudiesService } from '@services/studies/studies.service';
-import {
-  DEFAULT_TABLE_ROWS_PER_PAGE,
-  TABLE_ROWS_PER_PAGE_OPTIONS
-} from '@ui/shared/constants/tablePagination';
+import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 @Component({
   standalone: true,

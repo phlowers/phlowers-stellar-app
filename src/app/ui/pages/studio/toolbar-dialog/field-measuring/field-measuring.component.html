@@ -5,19 +5,14 @@
   </p>
 </ng-template>
 
-<app-header
-  [measureData]="measureData()"
-  (fieldChange)="onFieldChange($event.field, $event.value)"
-/>
+<app-header [measureData]="measureData()" (fieldChange)="onFieldChange($event.field, $event.value)" />
 
 <p-tabs [(value)]="activeTab">
   <p-tablist>
     <p-tab value="terrainData" i18n>Terrain data</p-tab>
     <p-tab value="parameterCalculation" i18n>Parameter calculation</p-tab>
     <p-tab value="temperatureCalculation" i18n>Temperature calculation</p-tab>
-    <p-tab value="parameterAt15CWithoutWind" i18n
-      >Parameter at 15°C without wind</p-tab
-    >
+    <p-tab value="parameterAt15CWithoutWind" i18n>Parameter at 15°C without wind</p-tab>
   </p-tablist>
 
   <p-tabpanel value="terrainData">
@@ -47,32 +42,15 @@
 
 <ng-template #footer>
   <div class="dialog-footer">
-    <button
-      app-btn
-      type="button"
-      [disabled]="true"
-      btnStyle="outlined"
-      (click)="onReport()"
-    >
+    <button app-btn type="button" [disabled]="true" btnStyle="outlined" (click)="onReport()">
       <app-icon icon="description" />
       <span i18n>Report</span>
     </button>
-    <button
-      app-btn
-      type="button"
-      [disabled]="true"
-      btnStyle="outlined"
-      (click)="onExport()"
-    >
+    <button app-btn type="button" [disabled]="true" btnStyle="outlined" (click)="onExport()">
       <app-icon icon="download" />
       <span i18n>Export</span>
     </button>
-    <button
-      app-btn
-      type="button"
-      [disabled]="!isFormValid()"
-      (click)="onSave()"
-    >
+    <button app-btn type="button" [disabled]="!isFormValid()" (click)="onSave()">
       <app-icon icon="save" />
       <span i18n>Save</span>
     </button>

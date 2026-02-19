@@ -5,12 +5,7 @@ import { L0SumComponent } from './l0-sum/l0-sum.component';
 import { VhlAndGuyingComponent } from './vtl-and-guying/vtl-and-guying.component';
 import { LoadsTableComponent } from './loads-table/loads-table.component';
 
-export type Tool =
-  | 'field-measuring'
-  | 'l0-sum'
-  | 'vtl-and-guying'
-  | 'load-table'
-  | 'other-tool';
+export type Tool = 'field-measuring' | 'l0-sum' | 'vtl-and-guying' | 'load-table' | 'other-tool';
 
 export type DialogPhase = 'init' | 'main';
 
@@ -115,18 +110,14 @@ export class ToolbarDialogService {
     const tool = this.currentTool();
     if (!tool) return null;
     const config = this.toolMap[tool];
-    return this.phase() === 'init'
-      ? config.initComponent || null
-      : config.component;
+    return this.phase() === 'init' ? config.initComponent || null : config.component;
   }
 
   getDialogStyle(): Record<string, string> {
     const tool = this.currentTool();
     if (!tool) return {};
     const config = this.toolMap[tool];
-    return this.phase() === 'init'
-      ? config.initDialogStyle || {}
-      : config.dialogStyle || {};
+    return this.phase() === 'init' ? config.initDialogStyle || {} : config.dialogStyle || {};
   }
 
   setTemplates(templates: ToolTemplates): void {

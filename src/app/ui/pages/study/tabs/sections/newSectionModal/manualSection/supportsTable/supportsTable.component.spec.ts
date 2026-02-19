@@ -141,8 +141,7 @@ describe('SupportsTableComponent', () => {
 
     // Setup component inputs
     (component.supports as unknown as () => Support[]) = () => mockSupports;
-    (component.mode as unknown as () => 'create' | 'edit' | 'view') = () =>
-      'create';
+    (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'create';
     (component.first as unknown as () => number) = () => 0;
     (component.rows as unknown as () => number) = () => 10;
 
@@ -484,11 +483,7 @@ describe('SupportsTableComponent', () => {
     });
 
     it('should only emit chainName when chain is not found', () => {
-      component.onSupportFieldChange(
-        'support1',
-        'chainName',
-        'Non-existent Chain'
-      );
+      component.onSupportFieldChange('support1', 'chainName', 'Non-existent Chain');
 
       expect(component.supportChange.emit).toHaveBeenCalledTimes(1);
       expect(component.supportChange.emit).toHaveBeenCalledWith({

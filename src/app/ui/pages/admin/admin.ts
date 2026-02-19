@@ -52,8 +52,7 @@ export class AdminComponent {
     private readonly confirmationService: ConfirmationService,
     private readonly workerPythonService: WorkerPythonService
   ) {
-    this.activateDebugLogs =
-      localStorage.getItem('activateDebugLogs') === 'true';
+    this.activateDebugLogs = localStorage.getItem('activateDebugLogs') === 'true';
   }
   updateAvailable = false;
   newVersion = '';
@@ -121,9 +120,7 @@ export class AdminComponent {
     localStorage.setItem('activateDebugLogs', activate.toString());
     this.messageService.add({
       severity: 'success',
-      summary: activate
-        ? $localize`Python logs activated`
-        : $localize`Python logs deactivated`,
+      summary: activate ? $localize`Python logs activated` : $localize`Python logs deactivated`,
       detail: activate
         ? $localize`The python logs have been activated`
         : $localize`The python logs have been deactivated`

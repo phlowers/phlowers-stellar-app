@@ -44,11 +44,7 @@ const mockLitData: GetSectionOutput = {
 };
 
 @Component({
-  template: `<app-section-plot-card
-    [type]="cardType"
-    [index]="cardIndex"
-    [litData]="litData"
-  />`,
+  template: `<app-section-plot-card [type]="cardType" [index]="cardIndex" [litData]="litData" />`,
   standalone: true,
   imports: [SectionPlotCardComponent]
 })
@@ -66,13 +62,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        SectionPlotCardComponent,
-        TestHostComponent,
-        CardComponent,
-        IconComponent,
-        NoopAnimationsModule
-      ]
+      imports: [SectionPlotCardComponent, TestHostComponent, CardComponent, IconComponent, NoopAnimationsModule]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SectionPlotCardComponent);
@@ -144,9 +134,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
       hostComponent.cardIndex = 3;
       hostFixture.detectChanges();
 
-      let title = hostFixture.nativeElement.querySelector(
-        '.title'
-      ) as HTMLElement;
+      let title = hostFixture.nativeElement.querySelector('.title') as HTMLElement;
       expect(title.textContent?.trim()).toBe('N°4');
 
       hostComponent.cardType = 'span';
@@ -175,9 +163,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     });
 
     it('should toggle expanded state on button click', () => {
-      const debug = hostFixture.debugElement.query(
-        By.directive(SectionPlotCardComponent)
-      );
+      const debug = hostFixture.debugElement.query(By.directive(SectionPlotCardComponent));
       const instance = debug.componentInstance as SectionPlotCardComponent;
       const button = hostFixture.nativeElement.querySelector('button');
 
@@ -191,9 +177,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     it('should update arrow icon when toggled', () => {
       const button = hostFixture.nativeElement.querySelector('button');
       let arrow = hostFixture.nativeElement.querySelector('.arrow');
-      expect(arrow?.getAttribute('ng-reflect-icon')).toBe(
-        'keyboard_arrow_down'
-      );
+      expect(arrow?.getAttribute('ng-reflect-icon')).toBe('keyboard_arrow_down');
 
       button.click();
       hostFixture.detectChanges();

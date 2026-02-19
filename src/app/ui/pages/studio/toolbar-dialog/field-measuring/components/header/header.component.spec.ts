@@ -88,37 +88,27 @@ describe('HeaderComponent', () => {
 
     it('should display voltage with kV unit', () => {
       const element = fixture.nativeElement;
-      const sections = Array.from(
-        element.querySelectorAll('.header-info')
-      ) as HTMLElement[];
-      const voltageSection = sections.find((el) =>
-        el.textContent?.includes('Voltage')
-      );
+      const sections = Array.from(element.querySelectorAll('.header-info')) as HTMLElement[];
+      const voltageSection = sections.find((el) => el.textContent?.includes('Voltage'));
       expect(voltageSection?.textContent).toContain(mockMeasureData.voltage);
     });
 
     it('should display span type', () => {
       const element = fixture.nativeElement;
       const dlElement = element.querySelector('dl');
-      expect(dlElement.textContent.toLowerCase()).toContain(
-        mockMeasureData.spanType?.toLowerCase()
-      );
+      expect(dlElement.textContent.toLowerCase()).toContain(mockMeasureData.spanType?.toLowerCase());
     });
 
     it('should display phase number', () => {
       const element = fixture.nativeElement;
       const dlElement = element.querySelector('dl');
-      expect(dlElement.textContent).toContain(
-        mockMeasureData.phaseNumber?.toString()
-      );
+      expect(dlElement.textContent).toContain(mockMeasureData.phaseNumber?.toString());
     });
 
     it('should display number of conductors', () => {
       const element = fixture.nativeElement;
       const dlElement = element.querySelector('dl');
-      expect(dlElement.textContent).toContain(
-        mockMeasureData.numberOfConductors?.toString()
-      );
+      expect(dlElement.textContent).toContain(mockMeasureData.numberOfConductors?.toString());
     });
 
     it('should update displayed values when measureData changes', () => {
@@ -318,14 +308,10 @@ describe('HeaderComponent', () => {
           { attachmentHeight: 15 } as Partial<Support>
         ]
       };
-      jest
-        .spyOn(plotService, 'section')
-        .mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
       jest
         .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
-          typeof plotService.plotOptions
-        >);
+        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
 
       newComponent.fieldChange.subscribe(fieldChangeSpy);
 
@@ -376,11 +362,7 @@ describe('HeaderComponent', () => {
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
-        supports: [
-          { attachmentHeight: 10.5 },
-          { attachmentHeight: 12.5 },
-          { attachmentHeight: 15 }
-        ]
+        supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: 12.5 }, { attachmentHeight: 15 }]
       };
 
       jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
@@ -504,11 +486,7 @@ describe('HeaderComponent', () => {
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
-        supports: [
-          { attachmentHeight: 10 },
-          { attachmentHeight: 15 },
-          { attachmentHeight: 20 }
-        ]
+        supports: [{ attachmentHeight: 10 }, { attachmentHeight: 15 }, { attachmentHeight: 20 }]
       };
       jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
 
