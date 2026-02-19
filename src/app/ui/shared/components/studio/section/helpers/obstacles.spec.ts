@@ -1,8 +1,4 @@
-import {
-  LateralDistanceType,
-  Obstacle,
-  ReferenceSupport
-} from '@core/domain/models/obstacle.model';
+import { LateralDistanceType, Obstacle, ReferenceSupport } from '@core/domain/models/obstacle.model';
 import {
   ObstacleAnnotationData,
   getObstacleClickPayload,
@@ -27,10 +23,7 @@ const makeObstacle = (overrides: Partial<Obstacle> = {}): Obstacle => ({
 const makeSupport = (uuid: string) => ({ uuid });
 
 describe('getObstacleClickPayload', () => {
-  const obstacles = [
-    makeObstacle(),
-    makeObstacle({ uuid: 'obs-2', supportUuid: 'sup-2' })
-  ];
+  const obstacles = [makeObstacle(), makeObstacle({ uuid: 'obs-2', supportUuid: 'sup-2' })];
   const supports = [makeSupport('sup-1'), makeSupport('sup-2')];
 
   it('should return null when data is undefined', () => {
@@ -106,16 +99,12 @@ describe('appendExistingObstaclesWithFormObstacle', () => {
   const existing = [makeObstacle(), makeObstacle({ uuid: 'obs-2' })];
 
   it('should return existing obstacles when formObstacle is null', () => {
-    expect(appendExistingObstaclesWithFormObstacle(existing, null)).toBe(
-      existing
-    );
+    expect(appendExistingObstaclesWithFormObstacle(existing, null)).toBe(existing);
   });
 
   it('should return existing obstacles when formObstacle has no uuid', () => {
     const noUuid = { ...makeObstacle(), uuid: '' } as Obstacle;
-    expect(appendExistingObstaclesWithFormObstacle(existing, noUuid)).toBe(
-      existing
-    );
+    expect(appendExistingObstaclesWithFormObstacle(existing, noUuid)).toBe(existing);
   });
 
   it('should replace existing obstacle with matching uuid and append', () => {
@@ -136,12 +125,7 @@ describe('appendExistingObstaclesWithFormObstacle', () => {
 });
 
 describe('createObstaclesAnnotations', () => {
-  const makeSupportDataObject = (
-    uuid: string,
-    x: number,
-    y: number,
-    z: number
-  ): DataObject =>
+  const makeSupportDataObject = (uuid: string, x: number, y: number, z: number): DataObject =>
     ({
       name: 'supports',
       supportUuid: uuid,
@@ -150,9 +134,7 @@ describe('createObstaclesAnnotations', () => {
       z: [z]
     }) as unknown as DataObject;
 
-  const basePlotParams = (
-    overrides: Partial<CreatePlotParams> = {}
-  ): CreatePlotParams => ({
+  const basePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotParams => ({
     plotId: 'plot-1',
     data: [],
     litData: {} as CreatePlotParams['litData'],
@@ -171,10 +153,7 @@ describe('createObstaclesAnnotations', () => {
 
   it('should return empty array when there are no obstacles', () => {
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 0, 0, 0),
-        makeSupportDataObject('sup-2', 10, 0, 0)
-      ]
+      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)]
     });
     expect(createObstaclesAnnotations(params)).toEqual([]);
   });
@@ -182,10 +161,7 @@ describe('createObstaclesAnnotations', () => {
   it('should return empty array when obstacle support is the last support (excluded)', () => {
     const obstacle = makeObstacle({ supportUuid: 'sup-2' });
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 0, 0, 0),
-        makeSupportDataObject('sup-2', 10, 0, 0)
-      ],
+      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)],
       obstacles: [obstacle]
     });
     // sup-2 is the last support and should be sliced off
@@ -198,10 +174,7 @@ describe('createObstaclesAnnotations', () => {
       positions: [{ x: 1, y: 2, z: 3 }]
     });
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 10, 20, 30),
-        makeSupportDataObject('sup-2', 50, 50, 50)
-      ],
+      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 50, 50)],
       obstacles: [obstacle],
       view: '3d'
     });
@@ -226,10 +199,7 @@ describe('createObstaclesAnnotations', () => {
       ]
     });
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 0, 0, 0),
-        makeSupportDataObject('sup-2', 10, 0, 0)
-      ],
+      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)],
       obstacles: [obstacle]
     });
     const annotations = createObstaclesAnnotations(params);
@@ -245,22 +215,15 @@ describe('createObstaclesAnnotations', () => {
       ]
     });
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 0, 0, 0),
-        makeSupportDataObject('sup-2', 10, 0, 0)
-      ],
+      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)],
       obstacles: [obstacle],
       currentObstacleUuid: 'obs-1',
       currentObstaclePointIndex: 1
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    expect((annotations[0] as Record<string, unknown>)['arrowcolor']).toBe(
-      'black'
-    );
-    expect((annotations[1] as Record<string, unknown>)['arrowcolor']).toBe(
-      'red'
-    );
+    expect((annotations[0] as Record<string, unknown>)['arrowcolor']).toBe('black');
+    expect((annotations[1] as Record<string, unknown>)['arrowcolor']).toBe('red');
   });
 
   it('should use z-based y coordinate in 2d face view', () => {
@@ -269,10 +232,7 @@ describe('createObstaclesAnnotations', () => {
       positions: [{ x: 1, y: 2, z: 3 }]
     });
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 10, 20, 30),
-        makeSupportDataObject('sup-2', 50, 50, 50)
-      ],
+      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 50, 50)],
       obstacles: [obstacle],
       view: '2d',
       side: 'face'
@@ -293,16 +253,11 @@ describe('createObstaclesAnnotations', () => {
       positions: [{ x: 1, y: 2, z: 3 }]
     });
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 0, 0, 0),
-        makeSupportDataObject('sup-2', 10, 0, 0)
-      ],
+      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)],
       obstacles: [obstacle]
     });
     const annotations = createObstaclesAnnotations(params);
-    const annotationData = (annotations[0] as Record<string, unknown>)[
-      'data'
-    ] as Record<string, unknown>;
+    const annotationData = (annotations[0] as Record<string, unknown>)['data'] as Record<string, unknown>;
     expect(annotationData).toEqual({
       obstacleUuid: 'obs-1',
       obstaclePositionIndex: 0,

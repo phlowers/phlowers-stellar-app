@@ -138,6 +138,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
             } else {
               this.router.navigate(['/studies']);
             }
+          } else {
+            this.router.navigate(['/studies']);
           }
         });
       }

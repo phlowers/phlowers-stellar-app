@@ -3420,6 +3420,8 @@
       <segment state="initial">
         <source>The initial condition name must be unique.</source>
         <target>Le nom de la condition initiale doit être unique.</target>
+      </segment>
+    </unit>
     <unit id="7009794897351276069">
       <segment state="initial">
         <source>Obstacle type</source>
@@ -3576,9 +3578,9 @@
         <target>Obstacle supprimé</target>
       </segment>
     </unit>
- </file>
-</xliff>
-
+    <unit id="3989668595571335840">
+      <segment state="initial">
+        <source>Obstacle deleted</source>
         <target>Obstacle supprimé</target>
       </segment>
     </unit>

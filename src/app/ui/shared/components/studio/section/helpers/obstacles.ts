@@ -25,9 +25,7 @@ export const getObstacleClickPayload = (
   }
   const obstacle = obstacles.find((o) => o.uuid === data.obstacleUuid);
   if (!obstacle) return null;
-  const supportIndex = supports.findIndex(
-    (s) => s.uuid === obstacle.supportUuid
-  );
+  const supportIndex = supports.findIndex((s) => s.uuid === obstacle.supportUuid);
   if (supportIndex < 0) return null;
   return {
     obstacle,
@@ -81,18 +79,10 @@ const getBaseCoordinates = (supportObject: DataObject): Coordinates => {
 const isValidPosition = (position: Position3D): boolean =>
   position.x !== null && position.y !== null && position.z !== null;
 
-const computeAnnotationCoords = (
-  base: Coordinates,
-  position: Position3D,
-  side: string,
-  is2d: boolean
-): Coordinates => {
+const computeAnnotationCoords = (base: Coordinates, position: Position3D, side: string, is2d: boolean): Coordinates => {
   const x = base.x + (position.x ?? 0);
   const z = base.z + (position.z ?? 0);
-  const y =
-    side === 'face' && is2d
-      ? base.z + (position.z ?? 0)
-      : base.y + (position.y ?? 0);
+  const y = side === 'face' && is2d ? base.z + (position.z ?? 0) : base.y + (position.y ?? 0);
   return { x, y, z };
 };
 
@@ -101,11 +91,7 @@ const getHighlightColor = (
   positionIndex: number,
   currentObstacleUuid: string | null,
   currentObstaclePointIndex: number
-): string =>
-  obstacleUuid === currentObstacleUuid &&
-  positionIndex === currentObstaclePointIndex
-    ? 'red'
-    : 'black';
+): string => (obstacleUuid === currentObstacleUuid && positionIndex === currentObstaclePointIndex ? 'red' : 'black');
 
 const createPositionAnnotation = (
   obstacle: Obstacle,
@@ -130,29 +116,16 @@ const createPositionAnnotation = (
     }
   }) as Partial<Plotly.Annotations>;
 
-export const createObstaclesAnnotations = (
-  plotParams: CreatePlotParams
-): Partial<Plotly.Annotations>[] => {
-  const {
-    obstacles,
-    data: dataObjects,
-    view,
-    side,
-    currentObstacleUuid,
-    currentObstaclePointIndex
-  } = plotParams;
+export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
+  const { obstacles, data: dataObjects, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
   const is2d = view === '2d';
 
   // Exclude the last support — it should not display obstacles
-  const supportObjects = dataObjects
-    .filter((dataObject) => dataObject.name === 'supports')
-    .slice(0, -1);
+  const supportObjects = dataObjects.filter((dataObject) => dataObject.name === 'supports').slice(0, -1);
 
   const supportByUuid = new Map(supportObjects.map((s) => [s.supportUuid, s]));
 
-  const relevantObstacles = obstacles.filter((o) =>
-    supportByUuid.has(o.supportUuid)
-  );
+  const relevantObstacles = obstacles.filter((o) => supportByUuid.has(o.supportUuid));
 
   return relevantObstacles.flatMap((obstacle) => {
     const supportObject = supportByUuid.get(obstacle.supportUuid);
@@ -165,12 +138,7 @@ export const createObstaclesAnnotations = (
       .filter(({ position }) => isValidPosition(position))
       .map(({ position, index }) => {
         const coords = computeAnnotationCoords(base, position, side, is2d);
-        const color = getHighlightColor(
-          obstacle.uuid,
-          index,
-          currentObstacleUuid,
-          currentObstaclePointIndex
-        );
+        const color = getHighlightColor(obstacle.uuid, index, currentObstacleUuid, currentObstaclePointIndex);
         return createPositionAnnotation(obstacle, index, coords, color);
       });
   });

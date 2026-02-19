@@ -309,15 +309,9 @@ describe('createPlotData', () => {
     it('should return flattened array from createDataObject calls', () => {
       // Mock createDataObject to return different arrays for different calls
       mockCreateDataObject
-        .mockReturnValueOnce([
-          { type: 'scatter', x: [1], y: [1], supportUuid: 's0' }
-        ])
-        .mockReturnValueOnce([
-          { type: 'scatter', x: [2], y: [2], supportUuid: 's0' }
-        ])
-        .mockReturnValueOnce([
-          { type: 'scatter', x: [3], y: [3], supportUuid: 's0' }
-        ]);
+        .mockReturnValueOnce([{ type: 'scatter', x: [1], y: [1], supportUuid: 's0' }])
+        .mockReturnValueOnce([{ type: 'scatter', x: [2], y: [2], supportUuid: 's0' }])
+        .mockReturnValueOnce([{ type: 'scatter', x: [3], y: [3], supportUuid: 's0' }]);
 
       const result = createPlotData(mockParams, mockOptions, mockSupports);
 
