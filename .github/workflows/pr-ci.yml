@@ -57,7 +57,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           version: "0.5.24"
-          python-version: "3.12"
+          python-version: "3.13"
       - name: ⚙️ Install JS dependencies
         run: npm install --frozen-lockfile
       - name: 📃 Set up mechaphlowers
