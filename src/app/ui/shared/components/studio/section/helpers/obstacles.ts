@@ -52,13 +52,15 @@ export const appendExistingObstaclesWithFormObstacle = (
   existingObstacles: Obstacle[],
   formObstacle: Obstacle | null
 ): Obstacle[] => {
-  if (!formObstacle) {
+  if (!formObstacle || !formObstacle.uuid) {
     return existingObstacles;
   }
-  return [
-    ...existingObstacles,
-    formObstacle
-  ];
+  const existingIndex = existingObstacles.findIndex((obstacle) => obstacle.uuid === formObstacle.uuid);
+  if (existingIndex === -1) {
+    return [...existingObstacles, formObstacle];
+  }
+  const remaining = existingObstacles.filter((obstacle) => obstacle.uuid !== formObstacle.uuid);
+  return [...remaining, formObstacle];
 };
 
 interface Coordinates {

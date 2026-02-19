@@ -283,10 +283,14 @@ describe('PlotService', () => {
 
       const spans = service.getSpanOptions();
 
-      expect(spans).toHaveLength(1);
+      expect(spans).toHaveLength(2);
       expect(spans[0]).toEqual({
         label: '1 - 2',
         value: 'support-uuid-a'
+      });
+      expect(spans[1]).toEqual({
+        label: '2 - 3',
+        value: 'support-uuid-b'
       });
     });
   });

@@ -186,7 +186,7 @@ export class PlotService {
     if (!plot) {
       return null;
     }
-    return (plot as any)._fullLayout?.scene?.camera;
+    return (plot as HTMLElement & { _fullLayout?: { scene?: { camera?: Camera } } })._fullLayout?.scene?.camera ?? null;
   };
 
   refreshCamera = (): Camera | null => {

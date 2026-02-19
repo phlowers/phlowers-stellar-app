@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { ObstaclesService } from '../obstacles.service';
@@ -8,6 +8,7 @@ import { signal } from '@angular/core';
 import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
 import { Section, Study, Support } from '@core/domain';
 import { ObstacleFormService } from './obstaclesForm.service';
+import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
 
 const mockSupports = [{ uuid: 'sup-1', number: 1 } as any, { uuid: 'sup-2', number: 2 } as any];
 
@@ -221,8 +222,9 @@ describe('ObstacleFormService', () => {
   });
 
   describe('resetFormForNewObstacle', () => {
-    it('should reset form when supportUuid is null', () => {
+    it('should reset form when supportUuid is null', fakeAsync(() => {
       const result = service.resetFormForNewObstacle(null);
+      tick(DEBOUNCED_UPDATE_POINT_DELAY);
       expect(service.form.get('uuid')?.value).toBeTruthy();
       expect(service.form.get('supportUuid')?.value).toBeNull();
       expect(service.positions.length).toBe(0);
@@ -232,7 +234,7 @@ describe('ObstacleFormService', () => {
         horizontale: null
       });
       expect(result).toBeDefined();
-    });
+    }));
     it('should update plot and supportsOptions when supportUuid is valid', () => {
       (mockPlotService.getSupportIndex as jest.Mock).mockReturnValue(0);
       service.resetFormForNewObstacle('sup-1');

@@ -12,7 +12,8 @@ import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
 import { ObstaclesService } from '@ui/pages/studio/obstacles/obstacles.service';
 import { DataObject } from './helpers/createPlotDataObject';
-import { Section } from '@core/domain';
+import { Section, Support, SpanLoad } from '@core/domain';
+import { ChargeData } from '@core/domain/models/charge.model';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@core/domain/models/obstacle.model';
 import { LoadType } from './helpers/createLoadAnnotations';
 
@@ -28,7 +29,50 @@ const mockCreatePlot = createPlot as jest.MockedFunction<typeof createPlot>;
 const mockCreatePlotData = createPlotData as jest.MockedFunction<typeof createPlotData>;
 const mockCreateShadowPlotData = createShadowPlotData as jest.MockedFunction<typeof createShadowPlotData>;
 
-const mockSupports = [{ uuid: 's0', number: 1 } as any, { uuid: 's1', number: 2 } as any];
+const mockSupports: Support[] = [
+  {
+    uuid: 's0',
+    number: '1',
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentSet: null,
+    attachmentHeight: null,
+    heightBelowConsole: null,
+    towerModel: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null
+  },
+  {
+    uuid: 's1',
+    number: '2',
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentSet: null,
+    attachmentHeight: null,
+    heightBelowConsole: null,
+    towerModel: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null
+  }
+];
 
 const mockSection: Section = {
   uuid: 'sec-1',
@@ -162,7 +206,7 @@ describe('SectionPlotComponent', () => {
     section: sectionSignal,
     camera: cameraSignal,
     isFreePositioningMode: isFreePositioningModeSignal,
-    temporaryLoadData: undefined
+    temporaryLoadData: null as ChargeData | null | undefined
   };
 
   const mockSideTabsService = {
@@ -188,7 +232,9 @@ describe('SectionPlotComponent', () => {
       return { value: null, valueChanges: of(null) };
     };
 
-  const mockObstacleFormService: any = {
+  const mockObstacleFormService: {
+    form: { get: (key: string) => Record<string, unknown> | null; value: Partial<Obstacle> | { uuid: null } | null };
+  } = {
     form: {
       get: createFormGet(),
       value: { uuid: null }
@@ -199,7 +245,7 @@ describe('SectionPlotComponent', () => {
     jest.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
     mockCreateShadowPlotData.mockReturnValue(mockShadowPlotData);
-    mockCreatePlot.mockResolvedValue({} as any);
+    mockCreatePlot.mockReturnValue(undefined);
 
     litDataSignal.set(mockLitData);
     baseLitDataSignal.set(null);
@@ -468,11 +514,11 @@ describe('SectionPlotComponent', () => {
         supportUuid: 's0',
         loadWeight: 100,
         type: 'weight'
-      } as any;
+      } as unknown as SpanLoad;
 
       mockPlotService.temporaryLoadData = {
         spanLoads: [spanLoad]
-      } as any;
+      } as unknown as ChargeData;
 
       const displayOptions = { loads: true, baseState: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
@@ -485,10 +531,10 @@ describe('SectionPlotComponent', () => {
     it('should filter loads without weight or non-marking type', () => {
       mockPlotService.temporaryLoadData = {
         spanLoads: [
-          { supportUuid: 's0', loadWeight: 0, type: 'other' },
-          { supportUuid: 's1', loadWeight: 100, type: 'weight' }
+          { supportUuid: 's0', loadWeight: 0, type: 'other' } as unknown as SpanLoad,
+          { supportUuid: 's1', loadWeight: 100, type: 'weight' } as unknown as SpanLoad
         ]
-      } as any;
+      } as unknown as ChargeData;
 
       const displayOptions = { loads: true, baseState: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
@@ -498,10 +544,10 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should include marking loads even without weight', () => {
-      const markingLoad = { supportUuid: 's0', loadWeight: 0, type: LoadType.MARKING } as any;
+      const markingLoad = { supportUuid: 's0', loadWeight: 0, type: LoadType.MARKING } as unknown as SpanLoad;
       mockPlotService.temporaryLoadData = {
         spanLoads: [markingLoad]
-      } as any;
+      } as unknown as ChargeData;
 
       const displayOptions = { loads: true, baseState: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
@@ -558,7 +604,7 @@ describe('SectionPlotComponent', () => {
 
     it('should handle missing section obstacles', () => {
       mockObstacleFormService.form.value = mockObstacle;
-      sectionSignal.set({ ...mockSection, obstacles: undefined } as any);
+      sectionSignal.set({ ...mockSection, obstacles: undefined } as unknown as Section);
 
       const result = component['buildObstacleList']();
 
@@ -581,7 +627,7 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should return empty array when supports is undefined', () => {
-      sectionSignal.set({ ...mockSection, supports: undefined } as any);
+      sectionSignal.set({ ...mockSection, supports: undefined } as unknown as Section);
       const result = component['getSupportsList']();
 
       expect(result).toEqual([]);
