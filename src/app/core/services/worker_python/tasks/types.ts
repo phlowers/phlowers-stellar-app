@@ -19,26 +19,26 @@ import { Dictionary } from 'lodash';
  * @category Worker Types
  */
 export enum Task {
-  /** Run unit tests in Python environment */
-  runTests = 'runTests',
-  /** Calculate line geometry (LIT - Ligne Informatisée de Transport) */
-  getLit = 'getLit',
-  /** Change climate/load state and recalculate */
-  changeState = 'changeState',
-  /** Refresh the projection view */
-  refreshProjection = 'refreshProjection',
-  /** Get coordinates for support display */
-  getSupportCoordinates = 'getSupportCoordinates',
-  /** Calculate PAPOTO (field measurement) parameters */
-  calculatePapoto = 'calculatePapoto',
-  /** Calculate guying forces and angles */
-  calculateGuying = 'calculateGuying',
-  /** Set Python logging level */
-  setLogLevel = 'setLogLevel',
-  /** Calculate cable temperature from ambient conditions */
-  temperatureCalculation = 'temperatureCalculation',
-  /** Calculate parameter at 15°C without wind */
-  calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind'
+    /** Run unit tests in Python environment */
+    runTests = 'runTests',
+    /** Calculate line geometry (LIT - Ligne Informatisée de Transport) */
+    getLit = 'getLit',
+    /** Change climate/load state and recalculate */
+    changeState = 'changeState',
+    /** Refresh the projection view */
+    refreshProjection = 'refreshProjection',
+    /** Get coordinates for support display */
+    getSupportCoordinates = 'getSupportCoordinates',
+    /** Calculate PAPOTO (field measurement) parameters */
+    calculatePapoto = 'calculatePapoto',
+    /** Calculate guying forces and angles */
+    calculateGuying = 'calculateGuying',
+    /** Set Python logging level */
+    setLogLevel = 'setLogLevel',
+    /** Calculate cable temperature from ambient conditions */
+    temperatureCalculation = 'temperatureCalculation',
+    /** Calculate parameter at 15°C without wind */
+    calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind'
 }
 
 /**
@@ -47,8 +47,8 @@ export enum Task {
  * @category Worker Types
  */
 export enum DataError {
-  /** Cable not found in catalog */
-  NO_CABLE_FOUND = 'NO_CABLE_FOUND'
+    /** Cable not found in catalog */
+    NO_CABLE_FOUND = 'NO_CABLE_FOUND'
 }
 
 /**
@@ -57,14 +57,14 @@ export enum DataError {
  * @category Worker Types
  */
 export enum TaskError {
-  /** Failed to load Pyodide runtime */
-  PYODIDE_LOAD_ERROR = 'PYODIDE_LOAD_ERROR',
-  /** Error during calculation execution */
-  CALCULATION_ERROR = 'CALCULATION_ERROR',
-  /** Numerical solver did not converge */
-  SOLVER_DID_NOT_CONVERGE = 'SOLVER_DID_NOT_CONVERGE',
-  /** Unspecified error occurred */
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+    /** Failed to load Pyodide runtime */
+    PYODIDE_LOAD_ERROR = 'PYODIDE_LOAD_ERROR',
+    /** Error during calculation execution */
+    CALCULATION_ERROR = 'CALCULATION_ERROR',
+    /** Numerical solver did not converge */
+    SOLVER_DID_NOT_CONVERGE = 'SOLVER_DID_NOT_CONVERGE',
+    /** Unspecified error occurred */
+    UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
 
 /**
@@ -77,48 +77,48 @@ export enum TaskError {
  * @category Worker Types
  */
 export interface GetSectionOutput {
-  /** 3D coordinates of span catenary curves */
-  spans: number[][][];
-  /** 3D coordinates of insulator chains */
-  insulators: number[][][];
-  /** 3D coordinates of support structures */
-  supports: number[][][];
-  /** L0 parameter values for each span */
-  L0: number[];
-  /** Elevation values at each support */
-  elevation: number[];
-  /** Line angle at each support (degrees) */
-  line_angle: number[];
-  /** VTL under chain for each support */
-  vtl_under_chain: number[][];
-  /** VTL under console for each support */
-  vtl_under_console: number[][];
-  /** Resultant force under chain */
-  r_under_chain: number[];
-  /** Resultant force under console */
-  r_under_console: number[];
-  /** Ground altitude at each support */
-  ground_altitude: number[];
-  /** Load angle at each support */
-  load_angle: number[];
-  /** Cable displacement values */
-  displacement: number[][];
-  /** Span lengths */
-  span_length: number[];
-  /** Coordinates of applied loads by support UUID */
-  loads_coords: Dictionary<number[]>;
-  parameter: number[];
-  tension_sup: number[];
-  tension_inf: number[];
-  horizontal_distance: number[];
-  arc_length: number[];
-  T_h: number[];
+    /** 3D coordinates of span catenary curves */
+    spans: number[][][];
+    /** 3D coordinates of insulator chains */
+    insulators: number[][][];
+    /** 3D coordinates of support structures */
+    supports: number[][][];
+    /** L0 parameter values for each span */
+    L0: number[];
+    /** Elevation values at each support */
+    elevation: number[];
+    /** Line angle at each support (degrees) */
+    line_angle: number[];
+    /** VTL under chain for each support */
+    vtl_under_chain: number[][];
+    /** VTL under console for each support */
+    vtl_under_console: number[][];
+    /** Resultant force under chain */
+    r_under_chain: number[];
+    /** Resultant force under console */
+    r_under_console: number[];
+    /** Ground altitude at each support */
+    ground_altitude: number[];
+    /** Load angle at each support */
+    load_angle: number[];
+    /** Cable displacement values */
+    displacement: number[][];
+    /** Span lengths */
+    span_length: number[];
+    /** Coordinates of applied loads by support UUID */
+    loads_coords: Dictionary<number[]>;
+    parameter: number[];
+    tension_sup: number[];
+    tension_inf: number[];
+    horizontal_distance: number[];
+    arc_length: number[];
+    T_h: number[];
 }
 
 
 export interface GetSectionWithBaseOutput {
-  current: GetSectionOutput;
-  base: GetSectionOutput | null;
+    current: GetSectionOutput;
+    base: GetSectionOutput | null;
 }
 
 
@@ -128,16 +128,16 @@ export interface GetSectionWithBaseOutput {
  * @category Worker Types
  */
 export enum LogLevel {
-  /** Detailed debug information */
-  DEBUG = 10,
-  /** General information messages */
-  INFO = 20,
-  /** Warning messages */
-  WARNING = 30,
-  /** Error messages */
-  ERROR = 40,
-  /** Critical error messages */
-  CRITICAL = 50
+    /** Detailed debug information */
+    DEBUG = 10,
+    /** General information messages */
+    INFO = 20,
+    /** Warning messages */
+    WARNING = 30,
+    /** Error messages */
+    ERROR = 40,
+    /** Critical error messages */
+    CRITICAL = 50
 }
 
 /**
@@ -149,77 +149,77 @@ export enum LogLevel {
  * @category Worker Types
  */
 export interface TaskInputs {
-  /** Inputs for getLit task */
-  [Task.getLit]: { section: Section; cable: CatalogCable };
-  /** Inputs for runTests task */
-  [Task.runTests]: undefined;
-  /** Inputs for changeState task */
-  [Task.changeState]: {
-    climate: ClimateCharge;
-    spanLoads: SpanLoad[];
-  };
-  /** Inputs for refreshProjection task */
-  [Task.refreshProjection]: {
-    startSupport: number;
-    endSupport: number;
-    view: View;
-  };
-  /** Inputs for getSupportCoordinates task */
-  [Task.getSupportCoordinates]: {
-    coordinates: (number | undefined)[][];
-    attachmentSetNumbers: number[];
-  };
-  /** Inputs for calculatePapoto task */
-  [Task.calculatePapoto]: {
-    spanLength: number;
-    measuredElevationDifference: number;
-    HL: number;
-    H1: number;
-    H2: number;
-    H3: number;
-    HR: number;
-    VL: number;
-    V1: number;
-    V2: number;
-    V3: number;
-    VR: number;
-  };
-  /** Inputs for calculateGuying task */
-  [Task.calculateGuying]: {
-    altitude: number;
-    horizontalDistance: number;
-    hasPulley: boolean;
-    selectedSpanIndex: number;
-    selectedSupport: 'LEFT' | 'RIGHT' | null;
-  };
-  /** Inputs for setLogLevel task */
-  [Task.setLogLevel]: {
-    activateDebugLogs: boolean;
-  };
-  /** Inputs for temperatureCalculation task */
-  [Task.temperatureCalculation]: {
-    cableName: string;
-    ambientTemperature: number;
-    longitude: number;
-    latitude: number;
-    altitude: number;
-    azimuth: number;
-    transit: number;
-    date: Date | null;
-    time: Date | null;
-    windSpeed: number;
-    windSpeedUnit: 'kmh' | 'ms';
-    windDirection: string;
-    skyCover: string;
-  };
-  /** Inputs for calculateParameter15CWithoutWind task */
-  [Task.calculateParameter15CWithoutWind]: {
-    parameterPapoto: number | null;
-    parameterUncertaintyPapoto: number | null;
-    cableTemperatureCalibration: number | null;
-    cableTemperatureCalibrationUncertainty: number | null;
-    span_index: number | null;
-  };
+    /** Inputs for getLit task */
+    [Task.getLit]: { section: Section; cable: CatalogCable };
+    /** Inputs for runTests task */
+    [Task.runTests]: undefined;
+    /** Inputs for changeState task */
+    [Task.changeState]: {
+        climate: ClimateCharge;
+        spanLoads: SpanLoad[];
+    };
+    /** Inputs for refreshProjection task */
+    [Task.refreshProjection]: {
+        startSupport: number;
+        endSupport: number;
+        view: View;
+    };
+    /** Inputs for getSupportCoordinates task */
+    [Task.getSupportCoordinates]: {
+        coordinates: (number | undefined)[][];
+        attachmentSetNumbers: number[];
+    };
+    /** Inputs for calculatePapoto task */
+    [Task.calculatePapoto]: {
+        spanLength: number;
+        measuredElevationDifference: number;
+        HL: number;
+        H1: number;
+        H2: number;
+        H3: number;
+        HR: number;
+        VL: number;
+        V1: number;
+        V2: number;
+        V3: number;
+        VR: number;
+    };
+    /** Inputs for calculateGuying task */
+    [Task.calculateGuying]: {
+        altitude: number;
+        horizontalDistance: number;
+        hasPulley: boolean;
+        selectedSpanIndex: number;
+        selectedSupport: 'LEFT' | 'RIGHT' | null;
+    };
+    /** Inputs for setLogLevel task */
+    [Task.setLogLevel]: {
+        activateDebugLogs: boolean;
+    };
+    /** Inputs for temperatureCalculation task */
+    [Task.temperatureCalculation]: {
+        cableName: string;
+        ambientTemperature: number;
+        longitude: number;
+        latitude: number;
+        altitude: number;
+        azimuth: number;
+        transit: number;
+        date: Date | null;
+        time: Date | null;
+        windSpeed: number;
+        windSpeedUnit: 'kmh' | 'ms';
+        windDirection: string;
+        skyCover: string;
+    };
+    /** Inputs for calculateParameter15CWithoutWind task */
+    [Task.calculateParameter15CWithoutWind]: {
+        parameterPapoto: number | null;
+        parameterUncertaintyPapoto: number | null;
+        cableTemperatureCalibration: number | null;
+        cableTemperatureCalibrationUncertainty: number | null;
+        span_index: number | null;
+    };
 }
 
 /**
@@ -231,49 +231,49 @@ export interface TaskInputs {
  * @category Worker Types
  */
 export interface TaskOutputs {
-  /** Output from getLit task */
-  [Task.getLit]: GetSectionWithBaseOutput;
-  /** Output from runTests task */
-  [Task.runTests]: undefined;
-  /** Output from changeState task */
-  [Task.changeState]: GetSectionWithBaseOutput;
-  /** Output from refreshProjection task */
-  [Task.refreshProjection]: GetSectionWithBaseOutput;
-  /** Output from getSupportCoordinates task */
-  [Task.getSupportCoordinates]: {
-    shape_points: number[][];
-    text_display_points: number[][];
-    text_to_display: number[];
-  };
-  /** Output from calculatePapoto task */
-  [Task.calculatePapoto]: {
-    parameter: number;
-    // uncertainty_parameter: number;
-    parameter_1_2: number;
-    parameter_2_3: number;
-    parameter_1_3: number;
-    check_validity: boolean;
-  };
-  /** Output from calculateGuying task */
-  [Task.calculateGuying]: {
-    tensionInGuy: number;
-    guyAngle: number;
-    chargeVUnderConsole: number;
-    chargeHUnderConsole: number;
-    chargeLIfPulley: number;
-  };
-  /** Output from setLogLevel task */
-  [Task.setLogLevel]: undefined;
-  /** Output from temperatureCalculation task */
-  [Task.temperatureCalculation]: {
-    cableSolarFlux: number;
-    cableTemperature: number;
-    cableTemperatureUncertainty: number;
-  };
-  /** Output from calculateParameter15CWithoutWind task */
-  [Task.calculateParameter15CWithoutWind]: {
-    parameter15CMinusUncertainty: number;
-    parameter15C: number;
-    parameter15CPlusUncertainty: number;
-  };
+    /** Output from getLit task */
+    [Task.getLit]: GetSectionWithBaseOutput;
+    /** Output from runTests task */
+    [Task.runTests]: undefined;
+    /** Output from changeState task */
+    [Task.changeState]: GetSectionWithBaseOutput;
+    /** Output from refreshProjection task */
+    [Task.refreshProjection]: GetSectionWithBaseOutput;
+    /** Output from getSupportCoordinates task */
+    [Task.getSupportCoordinates]: {
+        shape_points: number[][];
+        text_display_points: number[][];
+        text_to_display: number[];
+    };
+    /** Output from calculatePapoto task */
+    [Task.calculatePapoto]: {
+        parameter: number;
+        // uncertainty_parameter: number;
+        parameter_1_2: number;
+        parameter_2_3: number;
+        parameter_1_3: number;
+        check_validity: boolean;
+    };
+    /** Output from calculateGuying task */
+    [Task.calculateGuying]: {
+        tensionInGuy: number;
+        guyAngle: number;
+        chargeVUnderConsole: number;
+        chargeHUnderConsole: number;
+        chargeLIfPulley: number;
+    };
+    /** Output from setLogLevel task */
+    [Task.setLogLevel]: undefined;
+    /** Output from temperatureCalculation task */
+    [Task.temperatureCalculation]: {
+        cableSolarFlux: number;
+        cableTemperature: number;
+        cableTemperatureUncertainty: number;
+    };
+    /** Output from calculateParameter15CWithoutWind task */
+    [Task.calculateParameter15CWithoutWind]: {
+        parameter15CMinusUncertainty: number;
+        parameter15C: number;
+        parameter15CPlusUncertainty: number;
+    };
 }
