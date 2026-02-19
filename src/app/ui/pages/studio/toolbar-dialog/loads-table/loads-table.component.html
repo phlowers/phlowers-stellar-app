@@ -42,9 +42,7 @@
     ></textarea>
   }
 
-  <label for="personnelPresence" class="load-person-label" i18n>
-    Personnel presence
-  </label>
+  <label for="personnelPresence" class="load-person-label" i18n> Personnel presence </label>
   <p-toggleswitch
     inputId="personnelPresence"
     name="personnelPresence"
@@ -70,12 +68,8 @@
           }
           @if (climate()?.symmetryType === SymmetryType.DIS_SYMMETRIC) {
             <th id="frontier-support-col" i18n>Frontier support</th>
-            <th id="ice-before-col" i18n>
-              Ice thickness before support frontier
-            </th>
-            <th id="ice-after-col" i18n>
-              Ice thickness after support frontier
-            </th>
+            <th id="ice-before-col" i18n>Ice thickness before support frontier</th>
+            <th id="ice-after-col" i18n>Ice thickness after support frontier</th>
           }
         </tr>
       </ng-template>
@@ -150,12 +144,7 @@
       <ng-container i18n>Cancel</ng-container>
     </button>
 
-    <button
-      app-btn
-      type="button"
-      (click)="saveChanges()"
-      [disabled]="!isFormValid()"
-    >
+    <button app-btn type="button" (click)="saveChanges()" [disabled]="!isFormValid()">
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>

@@ -1,9 +1,4 @@
-import Plotly, {
-  Camera,
-  Data,
-  Layout,
-  ModeBarDefaultButtons
-} from 'plotly.js-dist-min';
+import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
 import { Side, View } from './types';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
@@ -58,9 +53,7 @@ const axis = {
   showbackground: true
 };
 
-const createScene = (
-  plotParams: CreatePlotParams
-): Partial<Layout['scene']> => {
+const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => {
   if (plotParams.camera) {
     const y = Math.abs(plotParams.camera.eye?.y || 0);
     plotParams.camera.eye = {
@@ -115,9 +108,7 @@ const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
   scene: createScene(plotParams)
 });
 
-const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (
-  plotParams
-) => {
+const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams) => {
   return {
     autosize: true,
     showlegend: false,
@@ -152,8 +143,9 @@ export const createPlot = (plotParams: CreatePlotParams) => {
   if (!document.getElementById(plotParams.plotId)) {
     return undefined;
   }
-  const baseLayout =
-    plotParams.view === '3d' ? layout3d(plotParams) : layout2d(plotParams);
+  const baseLayout = plotParams.view === '3d' ? layout3d(plotParams) : layout2d(plotParams);
 
-  return Plotly.newPlot(plotParams.plotId, plotParams.data, baseLayout, config);
+  // Use Plotly.react to update data without resetting camera/zoom
+  // It will create the plot if it doesn't exist, or update it if it does
+  return Plotly.react(plotParams.plotId, plotParams.data, baseLayout, config);
 };

@@ -175,9 +175,7 @@ describe('StudiesComponent', () => {
     it('should handle duplicateStudy promise rejection gracefully', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       const testUuid = 'test-uuid-123';
-      mockStudiesService.duplicateStudy.mockRejectedValue(
-        new Error('Duplicate failed')
-      );
+      mockStudiesService.duplicateStudy.mockRejectedValue(new Error('Duplicate failed'));
 
       component.duplicateStudy(testUuid);
 

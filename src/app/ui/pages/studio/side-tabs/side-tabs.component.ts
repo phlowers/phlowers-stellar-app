@@ -1,11 +1,4 @@
-import {
-  Component,
-  ContentChildren,
-  ElementRef,
-  QueryList,
-  signal,
-  ViewChildren
-} from '@angular/core';
+import { Component, ContentChildren, ElementRef, QueryList, signal, ViewChildren } from '@angular/core';
 import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';

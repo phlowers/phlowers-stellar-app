@@ -12,7 +12,7 @@ import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 
 // Mock Plotly
 jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn()
+  react: jest.fn()
 }));
 
 describe('createPlot', () => {
@@ -35,8 +35,8 @@ describe('createPlot', () => {
       return null;
     });
 
-    // Mock Plotly.newPlot to return a resolved promise
-    (Plotly.newPlot as jest.Mock).mockResolvedValue(undefined);
+    // Mock Plotly.react to return a resolved promise
+    (Plotly.react as jest.Mock).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -80,7 +80,7 @@ describe('createPlot', () => {
   const mockSpanLoads: (SpanLoad | null)[] = [];
 
   describe('basic functionality', () => {
-    it('should call Plotly.newPlot when element exists', () => {
+    it('should call Plotly.react when element exists', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
@@ -96,10 +96,10 @@ describe('createPlot', () => {
       });
 
       expect(document.getElementById).toHaveBeenCalledWith('test-plot-id');
-      expect(Plotly.newPlot).toHaveBeenCalled();
+      expect(Plotly.react).toHaveBeenCalled();
     });
 
-    it('should pass the correct plotId to Plotly.newPlot', () => {
+    it('should pass the correct plotId to Plotly.react', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
@@ -114,7 +114,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      expect(Plotly.newPlot).toHaveBeenCalledWith(
+      expect(Plotly.react).toHaveBeenCalledWith(
         'test-plot-id',
         expect.any(Array),
         expect.any(Object),
@@ -122,7 +122,7 @@ describe('createPlot', () => {
       );
     });
 
-    it('should pass the data to Plotly.newPlot', () => {
+    it('should pass the data to Plotly.react', () => {
       createPlot({
         plotId: 'test-plot-id',
         data: mockData,
@@ -137,12 +137,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      expect(Plotly.newPlot).toHaveBeenCalledWith(
-        expect.any(String),
-        mockData,
-        expect.any(Object),
-        expect.any(Object)
-      );
+      expect(Plotly.react).toHaveBeenCalledWith(expect.any(String), mockData, expect.any(Object), expect.any(Object));
     });
   });
 
@@ -162,7 +157,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.scene.aspectmode).toBe('manual');
     });
 
@@ -181,7 +176,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.scene.aspectratio).toEqual({ x: 3, y: 0.2, z: 0.5 });
     });
   });
@@ -202,7 +197,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.showlegend).toBe(false);
       expect(layoutArg.plot_bgcolor).toBe('gainsboro');
@@ -223,7 +218,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.margin).toEqual({
         l: 50,
         r: 0,
@@ -247,7 +242,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.xaxis.autorange).toBe(true);
     });
 
@@ -266,7 +261,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.xaxis.autorange).toBe(true);
     });
 
@@ -285,7 +280,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.xaxis.backgroundcolor).toBe('gainsboro');
       expect(layoutArg.xaxis.gridcolor).toBe('dimgray');
       expect(layoutArg.xaxis.showbackground).toBe(true);
@@ -309,7 +304,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.scaleratio).toBe(0.2);
       expect(layoutArg.yaxis.scaleanchor).toBe('x');
     });
@@ -329,7 +324,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.scaleratio).toBeUndefined();
       expect(layoutArg.yaxis.scaleanchor).toBeUndefined();
     });
@@ -349,7 +344,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.backgroundcolor).toBe('gainsboro');
       expect(layoutArg.yaxis.gridcolor).toBe('dimgray');
       expect(layoutArg.yaxis.showbackground).toBe(true);
@@ -373,7 +368,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.scene).toBeUndefined();
     });
 
@@ -401,7 +396,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.xaxis.autorange).toBe(true);
       expect(layoutArg.yaxis.scaleratio).toBe(0.2);
@@ -422,7 +417,7 @@ describe('createPlot', () => {
         endSupport: 0
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.xaxis.autorange).toBe('reversed');
     });
@@ -442,7 +437,7 @@ describe('createPlot', () => {
         litData: mockLitData
       });
 
-      const layoutArg = (Plotly.newPlot as jest.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.xaxis.autorange).toBe(true);
     });

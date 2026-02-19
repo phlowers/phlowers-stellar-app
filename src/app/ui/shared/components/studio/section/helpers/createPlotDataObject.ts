@@ -1,4 +1,5 @@
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
+import { SPAN_COLOR } from './plot.constants';
 import { PlotObjectsType, Side, View } from './types';
 
 const getLine = (
@@ -12,7 +13,7 @@ const getLine = (
   switch (type) {
     case 'spans':
       return {
-        color: 'dodgerblue',
+        color: SPAN_COLOR,
         dash: 'solid',
         width: view === '3d' ? 8 : 4
       };
@@ -30,18 +31,10 @@ const getMode = (type: PlotObjectsType): PlotData['mode'] => {
   return 'lines+markers';
 };
 
-const getText = (
-  type: PlotObjectsType,
-  points: number[][],
-  supportIndex: number
-): string[] => {
+const getText = (type: PlotObjectsType, points: number[][], supportIndex: number): string[] => {
   if (type !== 'supports') return [];
-  const highestPointIndex = points.findIndex(
-    (point) => point[2] === Math.max(...points.map((point) => point[2]))
-  );
-  return points.map((point, index) =>
-    index === highestPointIndex ? (supportIndex + 1).toString() : ''
-  );
+  const highestPointIndex = points.findIndex((point) => point[2] === Math.max(...points.map((p) => p[2])));
+  return points.map((_, index) => (index === highestPointIndex ? (supportIndex + 1).toString() : ''));
 };
 
 const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
@@ -65,10 +58,7 @@ export const createDataObject = (
   view: View,
   side: Side
 ): Data[] => {
-  const slidedData = data.slice(
-    startSupport,
-    type === 'spans' ? endSupport : endSupport + 1
-  );
+  const slidedData = data.slice(startSupport, type === 'spans' ? endSupport : endSupport + 1);
   return slidedData.map((points, index) => {
     const x = points.map((point) => point[0]);
     const y = points.map((point) => point[1]);

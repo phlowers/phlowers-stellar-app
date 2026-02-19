@@ -31,9 +31,7 @@ describe('Accordion header', () => {
     fixture = TestBed.createComponent(TestHostComponent);
     fixture.detectChanges();
 
-    const debugElement: DebugElement = fixture.debugElement.query(
-      By.directive(AccordionHeaderComponent)
-    );
+    const debugElement: DebugElement = fixture.debugElement.query(By.directive(AccordionHeaderComponent));
     component = debugElement.componentInstance;
   });
 
@@ -42,9 +40,7 @@ describe('Accordion header', () => {
   });
 
   it('should project content', () => {
-    const projectedContent = fixture.nativeElement.querySelector(
-      '[data-testid="projected-content"]'
-    );
+    const projectedContent = fixture.nativeElement.querySelector('[data-testid="projected-content"]');
     expect(projectedContent).toBeTruthy();
     expect(projectedContent.textContent.trim()).toBe('Test Content');
   });

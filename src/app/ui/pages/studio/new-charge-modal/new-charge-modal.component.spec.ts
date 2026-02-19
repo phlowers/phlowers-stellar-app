@@ -177,9 +177,7 @@ describe('NewChargeModalComponent (Jest)', () => {
     component.updateName('');
     fixture.detectChanges();
 
-    const button = fixture.debugElement.query(
-      By.css('button[app-btn][type="button"]:not([btnStyle="text"])')
-    );
+    const button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="text"])'));
     expect(button.nativeElement.disabled).toBe(true);
   });
 
@@ -187,16 +185,14 @@ describe('NewChargeModalComponent (Jest)', () => {
     component.updateName('Test Name');
     fixture.detectChanges();
 
-    const button = fixture.debugElement.query(
-      By.css('button[app-btn][type="button"]:not([btnStyle="text"])')
-    );
+    const button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="text"])'));
     expect(button.nativeElement.disabled).toBe(false);
   });
 
   it('should reset form when isOpen becomes true', async () => {
     // Set some initial values
     component.updateName('Initial Name');
-    component.updatePersonnelPresence(true);
+    component.updatePersonnelPresence(false);
     component.updateDescription('Initial Description');
 
     fixture.componentRef.setInput('isOpen', false);
@@ -208,7 +204,7 @@ describe('NewChargeModalComponent (Jest)', () => {
 
     // newCharge generates a name based on existing charges count (mockSection has 1 charge, so new one is "CC 2")
     expect(component.name()).toBe('CC 2');
-    expect(component.personnelPresence()).toBe(false);
+    expect(component.personnelPresence()).toBe(true);
     expect(component.description()).toBe('');
   });
 
@@ -245,9 +241,7 @@ describe('NewChargeModalComponent (Jest)', () => {
     plotService.study.set(null);
     component.updateName('Test Charge');
 
-    await expect(component.onSubmit()).rejects.toThrow(
-      'Study or section not found'
-    );
+    await expect(component.onSubmit()).rejects.toThrow('Study or section not found');
   });
 
   it('should have inputs enabled', () => {
@@ -257,9 +251,7 @@ describe('NewChargeModalComponent (Jest)', () => {
 
     const nameInput = fixture.debugElement.query(By.css('#chargeName'));
     const toggleSwitch = fixture.debugElement.query(By.css('p-toggleswitch'));
-    const descriptionTextarea = fixture.debugElement.query(
-      By.css('#description')
-    );
+    const descriptionTextarea = fixture.debugElement.query(By.css('#description'));
 
     expect(nameInput.nativeElement.disabled).toBe(false);
     expect(toggleSwitch.componentInstance.disabled).toBe(false);
@@ -290,5 +282,68 @@ describe('NewChargeModalComponent (Jest)', () => {
   it('should validate form if name is unique', () => {
     component.updateName('Unique Charge Name');
     expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should detect duplicate name via isNameDuplicate', () => {
+    component.updateName('Test Charge');
+    expect(component.isNameDuplicate()).toBe(true);
+
+    component.updateName('Unique Name');
+    expect(component.isNameDuplicate()).toBe(false);
+  });
+
+  it('should show error message when name is duplicate', () => {
+    component.updateName('Test Charge');
+    fixture.detectChanges();
+
+    const errorMessage = fixture.debugElement.query(By.css('#charge-name-error-message'));
+    expect(errorMessage).toBeTruthy();
+    expect(errorMessage.nativeElement.textContent).toContain('The initial condition name must be unique.');
+  });
+
+  it('should not show error message when name is unique', () => {
+    component.updateName('Unique Name');
+    fixture.detectChanges();
+
+    const errorMessage = fixture.debugElement.query(By.css('#charge-name-error-message'));
+    expect(errorMessage).toBeNull();
+  });
+
+  it('should set aria-invalid and aria-errormessage when name is duplicate', () => {
+    component.updateName('Test Charge');
+    fixture.detectChanges();
+
+    const nameInput = fixture.debugElement.query(By.css('#chargeName')).nativeElement;
+    expect(nameInput.getAttribute('aria-invalid')).toBe('true');
+    expect(nameInput.getAttribute('aria-errormessage')).toBe('charge-name-error-message');
+  });
+
+  it('should not set aria-invalid or aria-errormessage when name is unique', () => {
+    component.updateName('Unique Name');
+    fixture.detectChanges();
+
+    const nameInput = fixture.debugElement.query(By.css('#chargeName')).nativeElement;
+    expect(nameInput.getAttribute('aria-invalid')).toBe('false');
+    expect(nameInput.getAttribute('aria-errormessage')).toBeNull();
+  });
+
+  it('should return false for isNameDuplicate when section has no charges', () => {
+    plotService.section.set({ ...mockSection, charges: [] });
+    component.updateName('Any Name');
+    expect(component.isNameDuplicate()).toBe(false);
+  });
+
+  it('should reset form when section has no charges defined', async () => {
+    plotService.section.set({
+      ...mockSection,
+      charges: undefined
+    } as unknown as Section);
+
+    fixture.componentRef.setInput('isOpen', false);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.name()).toBe('CC 1');
   });
 });

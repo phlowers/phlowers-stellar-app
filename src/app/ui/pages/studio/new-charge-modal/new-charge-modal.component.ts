@@ -1,16 +1,10 @@
-import {
-  Component,
-  input,
-  output,
-  computed,
-  signal,
-  effect
-} from '@angular/core';
+import { Component, input, output, computed, signal, effect } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { MessageModule } from 'primeng/message';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Charge } from '@core/domain';
@@ -23,7 +17,7 @@ const newCharge = (currentCharges: Charge[]): Charge => {
   return {
     uuid: uuidv4(),
     name: $localize`CC` + ' ' + (currentCharges.length + 1),
-    personnelPresence: false,
+    personnelPresence: true,
     description: '',
     data: {
       climate: { ...defaultClimaticCharge },
@@ -41,7 +35,8 @@ const newCharge = (currentCharges: Charge[]): Charge => {
     TextareaModule,
     ToggleSwitchModule,
     IconComponent,
-    ButtonComponent
+    ButtonComponent,
+    MessageModule
   ],
   templateUrl: './new-charge-modal.component.html',
   styleUrl: './new-charge-modal.component.scss'
@@ -51,10 +46,15 @@ export class NewChargeModalComponent {
   isOpenChange = output<boolean>();
 
   name = signal<string>('');
-  personnelPresence = signal<boolean>(false);
+  personnelPresence = signal<boolean>(true);
   description = signal<string>('');
 
-  descriptionLength = computed(() => this.description().length ?? 0);
+  descriptionLength = computed(() => this.description().length);
+
+  isNameDuplicate = computed(() => {
+    const existingCharges = this.plotService.section()?.charges;
+    return !!existingCharges?.some((c) => c.name === this.name());
+  });
 
   validate = output<Charge>();
 
@@ -104,11 +104,7 @@ export class NewChargeModalComponent {
       throw new Error('Study or section not found');
     }
 
-    await this.chargesService.createOrUpdateCharge(
-      studyUuid,
-      sectionUuid,
-      charge
-    );
+    await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, charge);
     this.isOpenChange.emit(false);
   }
 
@@ -117,10 +113,6 @@ export class NewChargeModalComponent {
   }
 
   isFormValid(): boolean {
-    const existingLoadCases = this.plotService.section()?.charges;
-    return (
-      this.name().length > 0 &&
-      !existingLoadCases?.some((c) => c.name === this.name())
-    );
+    return this.name().length > 0 && !this.isNameDuplicate();
   }
 }

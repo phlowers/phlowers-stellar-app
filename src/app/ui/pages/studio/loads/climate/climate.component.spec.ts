@@ -1,5 +1,5 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { ClimateComponent } from './climate.component';
+import { ClimateComponent, getBaseClimate, DEFAULT_BASE_TEMPERATURE } from './climate.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
@@ -12,6 +12,73 @@ import { ChargesService } from '@services/charges/charges.service';
 import { LoadFormsService } from '../loadForms.service';
 import { signal } from '@angular/core';
 import { Charge, SymmetryType } from '@core/domain';
+
+describe('getBaseClimate', () => {
+  it('should return base climate with temperature from selected initial condition', () => {
+    const section = {
+      initial_conditions: [
+        { uuid: 'ic-1', base_temperature: 25 },
+        { uuid: 'ic-2', base_temperature: 30 }
+      ],
+      selected_initial_condition_uuid: 'ic-1'
+    };
+
+    const result = getBaseClimate(section);
+
+    expect(result.cableTemperature).toBe(25);
+    expect(result.windPressure).toBe(0);
+    expect(result.iceThickness).toBe(0);
+    expect(result.symmetryType).toBe(SymmetryType.SYMMETRIC);
+  });
+
+  it('should return default temperature when no initial condition is selected', () => {
+    const section = {
+      initial_conditions: [{ uuid: 'ic-1', base_temperature: 25 }],
+      selected_initial_condition_uuid: undefined
+    };
+
+    const result = getBaseClimate(section);
+
+    expect(result.cableTemperature).toBe(DEFAULT_BASE_TEMPERATURE);
+  });
+
+  it('should return default temperature when initial_conditions is empty', () => {
+    const section = {
+      initial_conditions: [],
+      selected_initial_condition_uuid: 'ic-1'
+    };
+
+    const result = getBaseClimate(section);
+
+    expect(result.cableTemperature).toBe(DEFAULT_BASE_TEMPERATURE);
+  });
+
+  it('should return default temperature when section is null', () => {
+    const result = getBaseClimate(null);
+
+    expect(result.cableTemperature).toBe(DEFAULT_BASE_TEMPERATURE);
+  });
+
+  it('should return base climate values that match Python base_engine state', () => {
+    // This test verifies that the base climate values match what the Python
+    // base_engine uses: no wind, no ice, and the base_temperature from initial condition
+    const section = {
+      initial_conditions: [{ uuid: 'ic-1', base_temperature: 20 }],
+      selected_initial_condition_uuid: 'ic-1'
+    };
+
+    const result = getBaseClimate(section);
+
+    // These values should produce the same result as base_engine.solve_change_state()
+    // which is called without parameters (defaults to no wind, no ice, base temperature)
+    expect(result.windPressure).toBe(0);
+    expect(result.iceThickness).toBe(0);
+    expect(result.cableTemperature).toBe(20);
+    expect(result.frontierSupportNumber).toBeNull();
+    expect(result.iceThicknessBefore).toBeNull();
+    expect(result.iceThicknessAfter).toBeNull();
+  });
+});
 
 const mockCharge: Charge = {
   uuid: 'test-charge-uuid',
@@ -46,14 +113,7 @@ describe('ClimateComponent effect edge cases', () => {
     } as unknown as ChargesService;
 
     await TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
-        SelectModule,
-        InputText,
-        ButtonComponent,
-        IconComponent,
-        ClimateComponent
-      ],
+      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: {} },
@@ -85,14 +145,7 @@ describe('ClimateComponent effect edge cases', () => {
     } as unknown as ChargesService;
 
     await TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
-        SelectModule,
-        InputText,
-        ButtonComponent,
-        IconComponent,
-        ClimateComponent
-      ],
+      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: {} },
@@ -176,14 +229,7 @@ describe('ClimateComponent (Jest)', () => {
     } as unknown as LoadFormsService;
 
     await TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
-        SelectModule,
-        InputText,
-        ButtonComponent,
-        IconComponent,
-        ClimateComponent
-      ],
+      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
@@ -242,29 +288,22 @@ describe('ClimateComponent (Jest)', () => {
   describe('button actions', () => {
     it('should call submitForm when submit button is clicked', () => {
       const spy = jest.spyOn(component, 'saveForm');
-      const submitButton = fixture.nativeElement.querySelector(
-        'button[type="submit"]'
-      );
+      const submitButton = fixture.nativeElement.querySelector('button[type="submit"]');
       submitButton.click();
       expect(spy).toHaveBeenCalled();
     });
 
     it('should call calculForm when calculate button is clicked', () => {
       const spy = jest.spyOn(component, 'calculateForm');
-      const buttons = [
-        ...fixture.nativeElement.querySelectorAll('button')
-      ] as HTMLElement[];
-      const calcButton = buttons.find((b) =>
-        b.textContent?.includes('Calculate')
-      );
+      const buttons = [...fixture.nativeElement.querySelectorAll('button')] as HTMLElement[];
+      const calcButton = buttons.find((b) => b.textContent?.includes('Calculate'));
       calcButton?.click();
       expect(spy).toHaveBeenCalled();
     });
 
     it('should call resetForm when erase button is clicked', () => {
       const spy = jest.spyOn(component, 'resetForm');
-      const resetButton =
-        fixture.nativeElement.querySelector('.climate__reset');
+      const resetButton = fixture.nativeElement.querySelector('.climate__reset');
       resetButton.click();
       expect(spy).toHaveBeenCalled();
     });
@@ -274,29 +313,21 @@ describe('ClimateComponent (Jest)', () => {
     it('should call chargesService.deleteCharge with correct parameters', () => {
       const chargesService = TestBed.inject(ChargesService);
       component.deleteCharge();
-      expect(chargesService.deleteCharge).toHaveBeenCalledWith(
-        'study-uuid-1',
-        'section-uuid-1',
-        'test-charge-uuid'
-      );
+      expect(chargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'test-charge-uuid');
     });
 
     it('should throw error when study is not found', () => {
       const plotService = TestBed.inject(PlotService);
       (plotService.study as ReturnType<typeof signal>).set(null);
 
-      expect(() => component.deleteCharge()).toThrow(
-        'Study or section not found'
-      );
+      expect(() => component.deleteCharge()).toThrow('Study or section not found');
     });
 
     it('should throw error when section is not found', () => {
       const plotService = TestBed.inject(PlotService);
       (plotService.section as ReturnType<typeof signal>).set(null);
 
-      expect(() => component.deleteCharge()).toThrow(
-        'Study or section not found'
-      );
+      expect(() => component.deleteCharge()).toThrow('Study or section not found');
     });
   });
 
@@ -311,11 +342,7 @@ describe('ClimateComponent (Jest)', () => {
       component.form.controls.windPressure.markAsTouched();
       component.form.controls.windPressure.updateValueAndValidity();
 
-      const result = component.getErrorIds('windPressure', [
-        'required',
-        'min',
-        'max'
-      ]);
+      const result = component.getErrorIds('windPressure', ['required', 'min', 'max']);
       expect(result).toBe('windPressure-error-required');
     });
 
@@ -379,6 +406,63 @@ describe('ClimateComponent (Jest)', () => {
       component.form.controls.windPressure.setValue(null);
 
       expect(component.isFormValid()).toBe(false);
+    });
+  });
+
+  describe('resetForm with initial condition', () => {
+    it('should reset form to base climate values from initial condition', () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        initial_conditions: [{ uuid: 'ic-1', base_temperature: 25 }],
+        selected_initial_condition_uuid: 'ic-1'
+      });
+
+      // Set some non-default values
+      component.form.patchValue({
+        windPressure: 500,
+        cableTemperature: 40,
+        iceThickness: 10
+      });
+
+      component.resetForm();
+
+      // Should use base_temperature from initial condition
+      expect(component.form.value.cableTemperature).toBe(25);
+      expect(component.form.value.windPressure).toBe(0);
+      expect(component.form.value.iceThickness).toBe(0);
+    });
+
+    it('should reset to default temperature 15 when no initial condition', () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        initial_conditions: [],
+        selected_initial_condition_uuid: undefined
+      });
+
+      component.form.patchValue({
+        cableTemperature: 40
+      });
+
+      component.resetForm();
+
+      expect(component.form.value.cableTemperature).toBe(15);
+    });
+
+    it('should update temporaryLoadData with base climate values', () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        initial_conditions: [{ uuid: 'ic-1', base_temperature: 20 }],
+        selected_initial_condition_uuid: 'ic-1'
+      });
+
+      component.resetForm();
+
+      expect(plotService.temporaryLoadData?.climate.cableTemperature).toBe(20);
+      expect(plotService.temporaryLoadData?.climate.windPressure).toBe(0);
+      expect(plotService.temporaryLoadData?.climate.iceThickness).toBe(0);
     });
   });
 });

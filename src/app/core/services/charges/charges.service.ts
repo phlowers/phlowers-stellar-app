@@ -70,26 +70,14 @@ export class ChargesService {
    * @param charge The charge to create or update
    * @returns Promise that resolves when the operation is complete
    */
-  async createOrUpdateCharge(
-    studyUuid: string,
-    sectionUuid: string,
-    charge: Charge
-  ): Promise<void> {
-    const { study, section } = await this.getStudyAndSection(
-      studyUuid,
-      sectionUuid
-    );
+  async createOrUpdateCharge(studyUuid: string, sectionUuid: string, charge: Charge): Promise<void> {
+    const { study, section } = await this.getStudyAndSection(studyUuid, sectionUuid);
 
-    const existingCharge =
-      section.charges?.find((c) => c?.uuid === charge?.uuid) || null;
+    const existingCharge = section.charges?.find((c) => c?.uuid === charge?.uuid) || null;
 
     if (existingCharge) {
-      section.charges =
-        section.charges?.filter((c) => existingCharge?.uuid !== c?.uuid) ?? [];
-      section.charges = [
-        charge,
-        ...(section.charges?.filter((c) => c?.uuid !== charge?.uuid) ?? [])
-      ];
+      section.charges = section.charges?.filter((c) => existingCharge?.uuid !== c?.uuid) ?? [];
+      section.charges = [charge, ...(section.charges?.filter((c) => c?.uuid !== charge?.uuid) ?? [])];
     } else {
       section.charges = [charge, ...(section.charges || [])];
     }
@@ -99,9 +87,7 @@ export class ChargesService {
     this.messageService.add({
       severity: 'success',
       summary: $localize`Successful`,
-      detail: existingCharge
-        ? $localize`Charge updated`
-        : $localize`Charge created`,
+      detail: existingCharge ? $localize`Charge updated` : $localize`Charge created`,
       life: 500
     });
   }
@@ -113,15 +99,8 @@ export class ChargesService {
    * @param chargeUuid The uuid of the charge to delete
    * @returns Promise that resolves when the operation is complete
    */
-  async deleteCharge(
-    studyUuid: string,
-    sectionUuid: string,
-    chargeUuid: string
-  ): Promise<void> {
-    const { study, section } = await this.getStudyAndSection(
-      studyUuid,
-      sectionUuid
-    );
+  async deleteCharge(studyUuid: string, sectionUuid: string, chargeUuid: string): Promise<void> {
+    const { study, section } = await this.getStudyAndSection(studyUuid, sectionUuid);
 
     section.charges = section.charges.filter((c) => c?.uuid !== chargeUuid);
     if (section.selected_charge_uuid === chargeUuid) {
@@ -143,15 +122,8 @@ export class ChargesService {
    * @param chargeUuid The uuid of the charge to duplicate
    * @returns Promise that resolves with the duplicated charge
    */
-  async duplicateCharge(
-    studyUuid: string,
-    sectionUuid: string,
-    chargeUuid: string
-  ): Promise<Charge> {
-    const { study, section } = await this.getStudyAndSection(
-      studyUuid,
-      sectionUuid
-    );
+  async duplicateCharge(studyUuid: string, sectionUuid: string, chargeUuid: string): Promise<Charge> {
+    const { study, section } = await this.getStudyAndSection(studyUuid, sectionUuid);
 
     const charge = section.charges?.find((c) => c?.uuid === chargeUuid) ?? null;
     if (!charge) {
@@ -181,15 +153,8 @@ export class ChargesService {
    * @param chargeUuid - The UUID of the charge to select
    * @returns Promise that resolves when the operation is complete
    */
-  async setSelectedCharge(
-    studyUuid: string,
-    sectionUuid: string,
-    chargeUuid: string
-  ): Promise<void> {
-    const { study, section } = await this.getStudyAndSection(
-      studyUuid,
-      sectionUuid
-    );
+  async setSelectedCharge(studyUuid: string, sectionUuid: string, chargeUuid: string): Promise<void> {
+    const { study, section } = await this.getStudyAndSection(studyUuid, sectionUuid);
 
     section.selected_charge_uuid = chargeUuid;
     await this.studiesService.updateStudy(study, true);
@@ -202,11 +167,7 @@ export class ChargesService {
    * @param chargeUuid The uuid of the charge to get
    * @returns The charge
    */
-  async getCharge(
-    studyUuid: string,
-    sectionUuid: string,
-    chargeUuid: string
-  ): Promise<Charge | null> {
+  async getCharge(studyUuid: string, sectionUuid: string, chargeUuid: string): Promise<Charge | null> {
     const { section } = await this.getStudyAndSection(studyUuid, sectionUuid);
 
     return section.charges?.find((c) => c?.uuid === chargeUuid) ?? null;
@@ -218,17 +179,11 @@ export class ChargesService {
    * @param sectionUuid The uuid of the section containing the charge
    * @returns The selected charge case
    */
-  async getSelectedChargeCase(
-    studyUuid: string,
-    sectionUuid: string
-  ): Promise<Charge | null> {
+  async getSelectedChargeCase(studyUuid: string, sectionUuid: string): Promise<Charge | null> {
     const { section } = await this.getStudyAndSection(studyUuid, sectionUuid);
     if (!section.selected_charge_uuid) {
       return null;
     }
-    return (
-      section.charges?.find((c) => c?.uuid === section.selected_charge_uuid) ??
-      null
-    );
+    return section.charges?.find((c) => c?.uuid === section.selected_charge_uuid) ?? null;
   }
 }

@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  input,
-  OnInit,
-  output,
-  signal,
-  viewChild
-} from '@angular/core';
+import { Component, computed, input, OnInit, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -16,13 +8,7 @@ import { DividerModule } from 'primeng/divider';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import {
-  Section,
-  Support,
-  CatalogMaintenance,
-  CatalogLine,
-  CatalogCable
-} from '@core/domain';
+import { Section, Support, CatalogMaintenance, CatalogLine, CatalogCable } from '@core/domain';
 import { SupportsTableComponent } from './supportsTable/supportsTable.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@ui/shared/types';
@@ -39,10 +25,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
-import {
-  DEFAULT_TABLE_ROWS_PER_PAGE,
-  TABLE_ROWS_PER_PAGE_OPTIONS
-} from '@ui/shared/constants/tablePagination';
+import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
@@ -61,10 +44,7 @@ const sortLines = (lines: CatalogLine[]) => {
   });
 };
 
-const lineTablePropertiesToSectionProperties: Record<
-  LineTableProperties,
-  keyof Section
-> = {
+const lineTablePropertiesToSectionProperties: Record<LineTableProperties, keyof Section> = {
   voltage_idr: 'voltage_idr',
   link_idr: 'link_name',
   lit_idr: 'lit_code',
@@ -73,11 +53,11 @@ const lineTablePropertiesToSectionProperties: Record<
   branch_adr: 'branch_name'
 };
 
-const orderedMaintenanceTableProperties: (
-  | 'maintenance_center_id'
-  | 'regional_team_id'
-  | 'maintenance_team_id'
-)[] = ['maintenance_center_id', 'regional_team_id', 'maintenance_team_id'];
+const orderedMaintenanceTableProperties: ('maintenance_center_id' | 'regional_team_id' | 'maintenance_team_id')[] = [
+  'maintenance_center_id',
+  'regional_team_id',
+  'maintenance_team_id'
+];
 
 /**
  * Property names from the line catalog table used for filtering.
@@ -171,51 +151,27 @@ export class ManualSectionComponent implements OnInit {
   litAdrRead = signal<string>('');
 
   readonly uniqueMaintenanceCenters = computed(() =>
-    orderBy(
-      uniqBy(this.maintenanceFilterTable(), 'maintenance_center_id'),
-      ['maintenance_center'],
-      ['asc']
-    )
+    orderBy(uniqBy(this.maintenanceFilterTable(), 'maintenance_center_id'), ['maintenance_center'], ['asc'])
   );
 
-  readonly uniqueRegionalTeams = computed(() =>
-    uniqBy(this.maintenanceFilterTable(), 'regional_team_id')
-  );
+  readonly uniqueRegionalTeams = computed(() => uniqBy(this.maintenanceFilterTable(), 'regional_team_id'));
 
-  readonly uniqueMaintenanceTeams = computed(() =>
-    uniqBy(this.maintenanceFilterTable(), 'maintenance_team_id')
-  );
+  readonly uniqueMaintenanceTeams = computed(() => uniqBy(this.maintenanceFilterTable(), 'maintenance_team_id'));
 
-  readonly uniqueCableNames = computed(() =>
-    uniqBy(this.cablesFilterTable(), 'name')
-  );
+  readonly uniqueCableNames = computed(() => uniqBy(this.cablesFilterTable(), 'name'));
 
-  readonly uniqueVoltageIdr = computed(() =>
-    uniqBy(this.linesFilterTable(), 'voltage_idr')
-  );
+  readonly uniqueVoltageIdr = computed(() => uniqBy(this.linesFilterTable(), 'voltage_idr'));
 
-  readonly uniqueLinkIdr = computed(() =>
-    orderBy(uniqBy(this.linesFilterTable(), 'link_idr'), ['link_idr'], ['asc'])
-  );
+  readonly uniqueLinkIdr = computed(() => orderBy(uniqBy(this.linesFilterTable(), 'link_idr'), ['link_idr'], ['asc']));
 
-  readonly uniqueLinkAdr = computed(() =>
-    orderBy(uniqBy(this.linesFilterTable(), 'link_adr'), ['link_adr'], ['asc'])
-  );
+  readonly uniqueLinkAdr = computed(() => orderBy(uniqBy(this.linesFilterTable(), 'link_adr'), ['link_adr'], ['asc']));
 
-  readonly uniqueLitIdr = computed(() =>
-    orderBy(uniqBy(this.linesFilterTable(), 'lit_idr'), ['lit_idr'], ['asc'])
-  );
+  readonly uniqueLitIdr = computed(() => orderBy(uniqBy(this.linesFilterTable(), 'lit_idr'), ['lit_idr'], ['asc']));
 
-  readonly uniqueLitAdr = computed(() =>
-    orderBy(uniqBy(this.linesFilterTable(), 'lit_idr'), ['lit_adr'], ['asc'])
-  );
+  readonly uniqueLitAdr = computed(() => orderBy(uniqBy(this.linesFilterTable(), 'lit_idr'), ['lit_adr'], ['asc']));
 
   readonly uniqueBranchIdr = computed(() =>
-    orderBy(
-      uniqBy(this.linesFilterTable(), 'branch_idr'),
-      ['branch_idr'],
-      ['asc']
-    )
+    orderBy(uniqBy(this.linesFilterTable(), 'branch_idr'), ['branch_idr'], ['asc'])
   );
 
   async setupFilterTables() {
@@ -223,21 +179,14 @@ export class ManualSectionComponent implements OnInit {
     this.maintenanceFilterTable.set(sortBy(table, 'maintenance_team'));
     if (this.mode() === 'view') {
       this.maintenanceTeamRead.set(
-        table.find(
-          (item) =>
-            item.maintenance_team_id === this.section().maintenance_team_id
-        )?.maintenance_team || ''
+        table.find((item) => item.maintenance_team_id === this.section().maintenance_team_id)?.maintenance_team || ''
       );
       this.maintenanceCenterRead.set(
-        table.find(
-          (item) =>
-            item.maintenance_center_id === this.section().maintenance_center_id
-        )?.maintenance_center || ''
+        table.find((item) => item.maintenance_center_id === this.section().maintenance_center_id)?.maintenance_center ||
+          ''
       );
       this.regionalTeamRead.set(
-        table.find(
-          (item) => item.regional_team_id === this.section().regional_team_id
-        )?.regional_team || ''
+        table.find((item) => item.regional_team_id === this.section().regional_team_id)?.regional_team || ''
       );
     }
     let linesTable = await this.linesService.getLines();
@@ -245,19 +194,14 @@ export class ManualSectionComponent implements OnInit {
       linesTable = linesTable.filter(
         (item) =>
           !this.section()[lineTablePropertiesToSectionProperties[id]] ||
-          item[id] ===
-            this.section()[lineTablePropertiesToSectionProperties[id]]
+          item[id] === this.section()[lineTablePropertiesToSectionProperties[id]]
       );
     });
     this.linesFilterTable.set(sortLines(linesTable));
     if (this.mode() === 'view') {
-      const linkLine = linesTable.find(
-        (item) => item.link_idr === this.section().link_name
-      );
+      const linkLine = linesTable.find((item) => item.link_idr === this.section().link_name);
       this.linkAdrRead.set(linkLine?.link_adr || '');
-      const litLine = linesTable.find(
-        (item) => item.lit_idr === this.section().lit_code
-      );
+      const litLine = linesTable.find((item) => item.lit_idr === this.section().lit_code);
       this.litAdrRead.set(litLine?.lit_adr || '');
     }
     const cablesTable = await this.cablesService.getCables();
@@ -291,10 +235,7 @@ export class ManualSectionComponent implements OnInit {
     if (amount > currentSupports.length) {
       this.section().supports = [
         ...currentSupports,
-        ...Array.from(
-          { length: amount - currentSupports.length },
-          createEmptySupport
-        )
+        ...Array.from({ length: amount - currentSupports.length }, createEmptySupport)
       ] as Support[];
     } else {
       const supports = currentSupports.slice(0, amount);
@@ -305,10 +246,7 @@ export class ManualSectionComponent implements OnInit {
     this.onSectionChange();
   }
 
-  onSupportsAmountChangeInput(event: {
-    originalEvent: { type: string };
-    value: string | number | null;
-  }) {
+  onSupportsAmountChangeInput(event: { originalEvent: { type: string }; value: string | number | null }) {
     if (event.originalEvent.type === 'mousedown' && event.value !== null) {
       this.updateSupportsAmount(Number(event.value));
     }
@@ -333,8 +271,7 @@ export class ManualSectionComponent implements OnInit {
     if (this.section().supports?.length <= 2) {
       return;
     }
-    const supports =
-      this.section().supports?.filter((support) => support.uuid !== uuid) || [];
+    const supports = this.section().supports?.filter((support) => support.uuid !== uuid) || [];
     const lastSupport = supports[supports.length - 1];
     lastSupport.spanLength = null;
     this.section().supports = supports;
@@ -342,9 +279,7 @@ export class ManualSectionComponent implements OnInit {
   }
 
   duplicateSupport(uuid: string) {
-    const index = this.section().supports?.findIndex(
-      (support: Support) => support.uuid === uuid
-    );
+    const index = this.section().supports?.findIndex((support: Support) => support.uuid === uuid);
     if (index !== undefined) {
       const support = this.section().supports?.[index];
       if (support) {
@@ -366,9 +301,7 @@ export class ManualSectionComponent implements OnInit {
   }
 
   onSupportChange(change: { uuid: string; support: Partial<Support> }) {
-    const support = this.section().supports?.find(
-      (support: Support) => support.uuid === change.uuid
-    );
+    const support = this.section().supports?.find((support: Support) => support.uuid === change.uuid);
     if (support) {
       Object.assign(support, change.support);
     }
@@ -386,8 +319,7 @@ export class ManualSectionComponent implements OnInit {
           found = true;
         }
         if (found) {
-          (this.section() as unknown as Record<string, unknown>)[id] =
-            undefined;
+          (this.section() as unknown as Record<string, unknown>)[id] = undefined;
         }
       });
     }
@@ -396,21 +328,17 @@ export class ManualSectionComponent implements OnInit {
     orderedMaintenanceTableProperties.forEach((id) => {
       if (id === type) {
         maintenanceTable = maintenanceTable.filter(
-          (item) =>
-            !event.value || item[id as keyof CatalogMaintenance] === event.value
+          (item) => !event.value || item[id as keyof CatalogMaintenance] === event.value
         );
       } else {
         maintenanceTable = maintenanceTable.filter(
           (item) =>
             !this.section()[id as keyof Section] ||
-            item[id as keyof CatalogMaintenance] ===
-              this.section()[id as keyof Section]
+            item[id as keyof CatalogMaintenance] === this.section()[id as keyof Section]
         );
       }
     });
-    this.maintenanceFilterTable.set(
-      sortBy(maintenanceTable, 'maintenance_team')
-    );
+    this.maintenanceFilterTable.set(sortBy(maintenanceTable, 'maintenance_team'));
     if (maintenanceTable.length === 1) {
       orderedMaintenanceTableProperties.forEach((id) => {
         (this.section() as unknown as Record<string, unknown>)[id] =
@@ -427,9 +355,8 @@ export class ManualSectionComponent implements OnInit {
           found = true;
         }
         if (found) {
-          (this.section() as unknown as Record<string, unknown>)[
-            lineTablePropertiesToSectionProperties[id]
-          ] = undefined;
+          (this.section() as unknown as Record<string, unknown>)[lineTablePropertiesToSectionProperties[id]] =
+            undefined;
         }
       });
     }
@@ -437,24 +364,20 @@ export class ManualSectionComponent implements OnInit {
     let linesTable = await this.linesService.getLines();
     orderedLineTableProperties.forEach((id) => {
       if (id === type) {
-        linesTable = linesTable.filter(
-          (item) => !event.value || item[id] === event.value
-        );
+        linesTable = linesTable.filter((item) => !event.value || item[id] === event.value);
       } else {
         linesTable = linesTable.filter(
           (item) =>
             !this.section()[lineTablePropertiesToSectionProperties[id]] ||
-            item[id] ===
-              this.section()[lineTablePropertiesToSectionProperties[id]]
+            item[id] === this.section()[lineTablePropertiesToSectionProperties[id]]
         );
       }
     });
     this.linesFilterTable.set(sortLines(linesTable));
     if (linesTable.length === 1) {
       orderedLineTableProperties.forEach((id) => {
-        (this.section() as unknown as Record<string, unknown>)[
-          lineTablePropertiesToSectionProperties[id]
-        ] = linesTable[0][id];
+        (this.section() as unknown as Record<string, unknown>)[lineTablePropertiesToSectionProperties[id]] =
+          linesTable[0][id];
       });
     }
   }
@@ -468,21 +391,12 @@ export class ManualSectionComponent implements OnInit {
     this.firstSupport.set((event.page ?? 0) * (event.rows ?? 5));
   }
 
-  debounceUpdateSliderOptions = debounce(
-    (key: 'endSupport' | 'startSupport', value: number) => {
-      this.plotService.plotOptionsChange({ [key]: value });
-    },
-    DEBOUNCED_REFRESH_STUDIO_DELAY
-  );
+  debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {
+    this.plotService.plotOptionsChange({ [key]: value });
+  }, DEBOUNCED_REFRESH_STUDIO_DELAY);
 
   //TODO: To put into the plot service
-  updateSliderOptions({
-    value,
-    highValue
-  }: {
-    value?: number | undefined;
-    highValue?: number | undefined;
-  }) {
+  updateSliderOptions({ value, highValue }: { value?: number | undefined; highValue?: number | undefined }) {
     const options = this.plotService.plotOptions();
     [
       { val: value, key: 'startSupport' as const, opt: options.startSupport },

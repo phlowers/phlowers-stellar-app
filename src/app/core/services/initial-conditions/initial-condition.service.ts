@@ -112,20 +112,13 @@ export class InitialConditionService {
    * @param initialCondition The initial condition to add
    * @returns Promise that resolves when the operation is complete
    */
-  async addInitialCondition(
-    study: StudyEntity,
-    section: Section,
-    initialCondition: InitialCondition
-  ): Promise<void> {
+  async addInitialCondition(study: StudyEntity, section: Section, initialCondition: InitialCondition): Promise<void> {
     await this.updateStudyWithModification(study, (studyCopy) => {
       studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
           ? {
               ...s,
-              initial_conditions: [
-                ...(s.initial_conditions || []),
-                initialCondition
-              ]
+              initial_conditions: [...(s.initial_conditions || []), initialCondition]
             }
           : s
       );
@@ -149,9 +142,7 @@ export class InitialConditionService {
         s?.uuid === section?.uuid
           ? {
               ...s,
-              initial_conditions: s.initial_conditions?.filter(
-                (ic) => ic?.uuid !== initialCondition?.uuid
-              ),
+              initial_conditions: s.initial_conditions?.filter((ic) => ic?.uuid !== initialCondition?.uuid),
               selected_initial_condition_uuid:
                 s.selected_initial_condition_uuid === initialCondition?.uuid
                   ? undefined
@@ -206,11 +197,7 @@ export class InitialConditionService {
    * @param initialConditionUuid - The UUID of the initial condition to select
    * @returns Promise that resolves when the operation is complete
    */
-  async setInitialCondition(
-    study: StudyEntity,
-    section: Section,
-    initialConditionUuid: string
-  ): Promise<void> {
+  async setInitialCondition(study: StudyEntity, section: Section, initialConditionUuid: string): Promise<void> {
     const studyToUpdate = await this.studiesService.getStudy(study.uuid);
     if (!studyToUpdate) {
       return;
@@ -219,9 +206,7 @@ export class InitialConditionService {
       studyToUpdate,
       (studyCopy) => {
         studyCopy.sections = studyCopy.sections.map((s) =>
-          s?.uuid === section?.uuid
-            ? { ...s, selected_initial_condition_uuid: initialConditionUuid }
-            : s
+          s?.uuid === section?.uuid ? { ...s, selected_initial_condition_uuid: initialConditionUuid } : s
         );
       },
       true
@@ -235,9 +220,7 @@ export class InitialConditionService {
   ): Promise<InitialCondition | undefined> {
     const study = await this.studiesService.getStudy(studyUuid);
     const section = study?.sections.find((s) => s?.uuid === sectionUuid);
-    const initialCondition = section?.initial_conditions?.find(
-      (ic) => ic?.uuid === initialConditionUuid
-    );
+    const initialCondition = section?.initial_conditions?.find((ic) => ic?.uuid === initialConditionUuid);
     return initialCondition;
   }
 }

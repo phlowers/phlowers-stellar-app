@@ -19,18 +19,13 @@ export class LoadFormsService {
       this.plotService.temporaryLoadData = null;
       return;
     }
-    const charge = this.plotService
-      .section()
-      ?.charges?.find((c) => c.uuid === currentChargeUuid);
+    const charge = this.plotService.section()?.charges?.find((c) => c.uuid === currentChargeUuid);
     if (!charge) {
       this.plotService.temporaryLoadData = null;
       return;
     }
     const newData = cloneDeep(charge.data);
-    newData.spanLoads = recheckSpanLoads(
-      newData.spanLoads || [],
-      this.plotService.section()?.supports ?? []
-    );
+    newData.spanLoads = recheckSpanLoads(newData.spanLoads || [], this.plotService.section()?.supports ?? []);
     this.plotService.temporaryLoadData = newData;
   };
 
@@ -54,19 +49,12 @@ export class LoadFormsService {
     if (!studyUuid || !sectionUuid || !temporaryLoadData) {
       return;
     }
-    const currentCharge = await this.chargesService.getSelectedChargeCase(
-      studyUuid,
-      sectionUuid
-    );
+    const currentCharge = await this.chargesService.getSelectedChargeCase(studyUuid, sectionUuid);
     if (!currentCharge) {
       return;
     }
     currentCharge.data = temporaryLoadData;
-    await this.chargesService.createOrUpdateCharge(
-      studyUuid,
-      sectionUuid,
-      currentCharge
-    );
+    await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, currentCharge);
   };
 
   /**
@@ -79,18 +67,14 @@ export class LoadFormsService {
     }
     this.plotService.refreshCamera();
     this.plotService.loading.set(true);
+
     const currentSection = this.plotService.section();
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.changeState,
-      {
-        climate: temporaryLoadData!.climate,
-        spanLoads: recheckSpanLoads(
-          temporaryLoadData!.spanLoads,
-          currentSection?.supports ?? []
-        )
-      }
-    );
-    this.plotService.litData.set(result);
+    const { result, error } = await this.workerPythonService.runTask(Task.changeState, {
+      climate: temporaryLoadData!.climate,
+      spanLoads: recheckSpanLoads(temporaryLoadData!.spanLoads, currentSection?.supports ?? [])
+    });
+    this.plotService.litData.set(result?.current ?? null);
+    this.plotService.baseLitData.set(result?.base ?? null);
     this.plotService.error.set(error);
     this.plotService.loading.set(false);
   };

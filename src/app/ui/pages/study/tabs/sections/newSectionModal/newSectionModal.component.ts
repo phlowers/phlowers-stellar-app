@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  output,
-  signal
-} from '@angular/core';
+import { Component, computed, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
@@ -29,22 +22,13 @@ const areAllRequiredFieldsFilled = (section: Section) => {
   const typeCondition = !!section.type;
   const cablesAmountCondition = !!section.cables_amount;
   const cableNameCondition = !!section.cable_name;
-  const supportsNumberCondition = !!section.supports.every(
-    (support) => !isNil(support.number)
-  );
+  const supportsNumberCondition = !!section.supports.every((support) => !isNil(support.number));
   const supportsSpanLengthCondition = !!section.supports.every(
-    (support, index) =>
-      !isNil(support.spanLength) || index === section.supports.length - 1
+    (support, index) => !isNil(support.spanLength) || index === section.supports.length - 1
   );
-  const supportsSpanAngleCondition = !!section.supports.every(
-    (support) => !isNil(support.spanAngle)
-  );
-  const supportsChainLengthCondition = !!section.supports.every(
-    (support) => !isNil(support.chainLength)
-  );
-  const supportsAttachmentHeightCondition = !!section.supports.every(
-    (support) => !isNil(support.attachmentHeight)
-  );
+  const supportsSpanAngleCondition = !!section.supports.every((support) => !isNil(support.spanAngle));
+  const supportsChainLengthCondition = !!section.supports.every((support) => !isNil(support.chainLength));
+  const supportsAttachmentHeightCondition = !!section.supports.every((support) => !isNil(support.attachmentHeight));
   return (
     nameCondition &&
     typeCondition &&
@@ -112,9 +96,7 @@ export class NewSectionModalComponent {
   }
 
   checkFields() {
-    this.areAllRequiredFieldsFilled.set(
-      areAllRequiredFieldsFilled(this.section())
-    );
+    this.areAllRequiredFieldsFilled.set(areAllRequiredFieldsFilled(this.section()));
     const isNameUnique = !this.study()?.sections.find(
       (s) => s.name === this.section().name && s.uuid !== this.section().uuid
     );
@@ -138,10 +120,7 @@ export class NewSectionModalComponent {
   }
 
   async onDuplicateSection() {
-    const newSection = await this.sectionService.duplicateSection(
-      this.study()!,
-      this.section()
-    );
+    const newSection = await this.sectionService.duplicateSection(this.study()!, this.section());
     this.setSection.emit(newSection);
   }
 

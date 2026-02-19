@@ -9,9 +9,7 @@
     <dd class="conductor__value">{{ measureData().cableName }}</dd>
 
     <dt i18n class="ambientTemp__label">Ambient temperature (°C)</dt>
-    <dd class="ambientTemp__value">
-      {{ measureData().ambientTemperature }} °C
-    </dd>
+    <dd class="ambientTemp__value">{{ measureData().ambientTemperature }} °C</dd>
   </dl>
 
   <label for="transit" i18n class="transit__label">Transit</label>
@@ -79,28 +77,16 @@
 
   <dl class="contents">
     <dt i18n class="diffusedSolarFlux__label">Diffused solar flux</dt>
-    <dd class="diffusedSolarFlux__value">
-      {{ measureData().diffusedSolarFlux }} W/m²
-    </dd>
+    <dd class="diffusedSolarFlux__value">{{ measureData().diffusedSolarFlux }} W/m²</dd>
 
     <dt i18n class="directSolarFlux__label">Direct solar flux</dt>
-    <dd class="directSolarFlux__value">
-      {{ measureData().directSolarFlux }} W/m²
-    </dd>
+    <dd class="directSolarFlux__value">{{ measureData().directSolarFlux }} W/m²</dd>
 
-    <dt i18n class="diffusedPlusDirectSolarFlux__label">
-      Diffused + direct solar flux
-    </dt>
-    <dd class="diffusedPlusDirectSolarFlux__value">
-      {{ measureData().diffusedPlusDirectSolarFlux }} W/m²
-    </dd>
+    <dt i18n class="diffusedPlusDirectSolarFlux__label">Diffused + direct solar flux</dt>
+    <dd class="diffusedPlusDirectSolarFlux__value">{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
   </dl>
 
-  <label
-    for="measuredDiffusedPlusDirectSolarFlux"
-    i18n
-    class="measuredDiffusedPlusDirectSolarFlux__label"
-  >
+  <label for="measuredDiffusedPlusDirectSolarFlux" i18n class="measuredDiffusedPlusDirectSolarFlux__label">
     Measured diffused + direct solar flux (not required)
   </label>
   <p-inputgroup class="measuredDiffusedPlusDirectSolarFlux__value">
@@ -109,18 +95,14 @@
       type="number"
       pInputText
       [ngModel]="measureData().measuredDiffusedPlusDirectSolarFlux"
-      (ngModelChange)="
-        updateField('measuredDiffusedPlusDirectSolarFlux', $event)
-      "
+      (ngModelChange)="updateField('measuredDiffusedPlusDirectSolarFlux', $event)"
       [min]="0"
       aria-describedby="solar-fluxs-impact"
     />
     <p-inputgroup-addon>W/m²</p-inputgroup-addon>
   </p-inputgroup>
 
-  <p id="solar-fluxs-impact" class="solar-fluxs-impact" i18n>
-    It won't be used in the calculation.
-  </p>
+  <p id="solar-fluxs-impact" class="solar-fluxs-impact" i18n>It won't be used in the calculation.</p>
 </div>
 
 <div class="text-right">
@@ -138,10 +120,7 @@
       <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
         <dd>
-          {{
-            (measureData().outputs.cableTemperature?.cableTemperature
-              | number: '1.0-2') ?? '-'
-          }}
+          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
           °C
         </dd>
       </div>
@@ -151,10 +130,7 @@
         </dt>
         <dd>
           <del>
-            {{
-              (measureData().outputs.cableTemperature
-                ?.cableTemperatureUncertainty | number: '1.0-3') ?? '-'
-            }}
+            {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-3') ?? '-' }}
             °C
           </del>
         </dd>
@@ -162,10 +138,7 @@
       <div class="solarFlux">
         <dt i18n>Solar flux on the cable</dt>
         <dd>
-          {{
-            (measureData().outputs.cableTemperature?.cableSolarFlux
-              | number: '1.0-3') ?? '-'
-          }}
+          {{ (measureData().outputs.cableTemperature?.cableSolarFlux | number: '1.0-3') ?? '-' }}
           W/m²
         </dd>
       </div>

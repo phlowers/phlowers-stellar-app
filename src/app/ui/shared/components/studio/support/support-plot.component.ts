@@ -70,16 +70,8 @@ export class SupportPlotComponent {
       const coords = this.coordinates();
       const attachmentSets = this.attachmentSetNumbers();
 
-      if (
-        coords?.length &&
-        attachmentSets?.length &&
-        this.workerPythonService.ready
-      ) {
-        this.refreshPlot(
-          coords,
-          attachmentSets,
-          this.selectedAttachmentSetNumber()
-        );
+      if (coords?.length && attachmentSets?.length && this.workerPythonService.ready) {
+        this.refreshPlot(coords, attachmentSets, this.selectedAttachmentSetNumber());
       } else {
         this.clearPlot();
       }
@@ -96,13 +88,10 @@ export class SupportPlotComponent {
     selectedAttachmentSetNumber: number | undefined
   ): Promise<void> {
     try {
-      const { result } = await this.workerPythonService.runTask(
-        Task.getSupportCoordinates,
-        {
-          coordinates,
-          attachmentSetNumbers
-        }
-      );
+      const { result } = await this.workerPythonService.runTask(Task.getSupportCoordinates, {
+        coordinates,
+        attachmentSetNumbers
+      });
 
       if (!result) {
         this.clearPlot();
@@ -115,10 +104,7 @@ export class SupportPlotComponent {
         text_display_points,
         selectedAttachmentSetNumber
       );
-      const formattedData = this.reformatTextToDisplay(
-        text_to_display,
-        text_display_points
-      );
+      const formattedData = this.reformatTextToDisplay(text_to_display, text_display_points);
 
       this.createPlot({
         shapePoints: shape_points,
@@ -142,19 +128,12 @@ export class SupportPlotComponent {
       return [];
     }
 
-    const attachmentSetIndex = textToDisplay.findIndex(
-      (number) => number === selectedAttachmentSetNumber
-    );
+    const attachmentSetIndex = textToDisplay.findIndex((number) => number === selectedAttachmentSetNumber);
 
-    return attachmentSetIndex !== -1
-      ? textDisplayPoints[attachmentSetIndex]
-      : [];
+    return attachmentSetIndex !== -1 ? textDisplayPoints[attachmentSetIndex] : [];
   }
 
-  private reformatTextToDisplay(
-    textToDisplay: number[],
-    textDisplayPoints: number[][]
-  ): FormattedTextData {
+  private reformatTextToDisplay(textToDisplay: number[], textDisplayPoints: number[][]): FormattedTextData {
     const groupedText: Record<string, string> = {};
 
     textDisplayPoints.forEach((point, index) => {
@@ -170,35 +149,21 @@ export class SupportPlotComponent {
 
     return {
       textToDisplay: Object.values(groupedText),
-      textDisplayPoints: Object.keys(groupedText).map((key) =>
-        key.split('/').map(Number)
-      )
+      textDisplayPoints: Object.keys(groupedText).map((key) => key.split('/').map(Number))
     };
   }
 
   private createPlot(data: PlotData): void {
     const shapeData = this.createShapeData(data.shapePoints);
-    const textData = this.createTextData(
-      data.textDisplayPoints,
-      data.textToDisplay
-    );
+    const textData = this.createTextData(data.textDisplayPoints, data.textToDisplay);
     const plotData: Data[] = [shapeData, textData];
 
-    if (
-      data.selectedAttachmentSetNumber !== undefined &&
-      data.attachmentSetPoints.length > 0
-    ) {
-      const selectedMarkerData = this.createSelectedMarkerData(
-        data.attachmentSetPoints
-      );
+    if (data.selectedAttachmentSetNumber !== undefined && data.attachmentSetPoints.length > 0) {
+      const selectedMarkerData = this.createSelectedMarkerData(data.attachmentSetPoints);
       plotData.push(selectedMarkerData);
     }
 
-    plotly.newPlot(
-      SupportPlotComponent.PLOT_ELEMENT_ID,
-      plotData,
-      SupportPlotComponent.PLOT_LAYOUT
-    );
+    plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
   }
 
   private createShapeData(shapePoints: number[][]): Data {
@@ -212,10 +177,7 @@ export class SupportPlotComponent {
     };
   }
 
-  private createTextData(
-    textDisplayPoints: number[][],
-    textToDisplay: string[]
-  ): Data {
+  private createTextData(textDisplayPoints: number[][], textToDisplay: string[]): Data {
     return {
       x: textDisplayPoints.map((point) => point[0]),
       y: textDisplayPoints.map((point) => point[1]),

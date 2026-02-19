@@ -1,12 +1,6 @@
 <form [formGroup]="form" class="span__form">
   <div class="span__reset">
-    <button
-      app-btn
-      type="button"
-      btnStyle="outlined"
-      btnSize="s"
-      (click)="resetForm()"
-    >
+    <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()">
       <app-icon icon="refresh" />
       <ng-container i18n>Reset</ng-container>
     </button>
@@ -55,13 +49,7 @@
   <div>
     <label for="loadPosition" i18n>Dist. to ref. support</label>
     <p-inputgroup>
-      <input
-        pInputText
-        type="number"
-        id="loadPosition"
-        fluid
-        formControlName="loadPosition"
-      />
+      <input pInputText type="number" id="loadPosition" fluid formControlName="loadPosition" />
       <p-inputgroup-addon i18n>m</p-inputgroup-addon>
     </p-inputgroup>
   </div>
@@ -69,14 +57,8 @@
     <div>
       <label for="loadWeight" i18n>Load</label>
       <p-inputgroup>
-        <input
-          pInputText
-          type="number"
-          id="loadWeight"
-          fluid
-          formControlName="loadWeight"
-        />
-        <p-inputgroup-addon i18n>N</p-inputgroup-addon>
+        <input pInputText type="number" id="loadWeight" fluid formControlName="loadWeight" />
+        <p-inputgroup-addon>daN</p-inputgroup-addon>
       </p-inputgroup>
     </div>
   }
@@ -93,23 +75,12 @@
       <app-icon icon="delete" />
     </button>
 
-    <button
-      app-btn
-      type="submit"
-      btnStyle="outlined"
-      (click)="saveLoadCase()"
-      [disabled]="isFormInvalid()"
-    >
+    <button app-btn type="submit" btnStyle="outlined" (click)="saveLoadCase()" [disabled]="isFormInvalid()">
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>
 
-    <button
-      app-btn
-      [disabled]="isFormInvalid()"
-      type="button"
-      (click)="calculateLoadCase()"
-    >
+    <button app-btn [disabled]="isFormInvalid()" type="button" (click)="calculateLoadCase()">
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>
     </button>

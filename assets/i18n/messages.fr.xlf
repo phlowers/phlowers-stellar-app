@@ -1646,7 +1646,7 @@
     <unit id="3305078246675075385">
       <segment state="initial">
         <source>Load type</source>
-        <target>Type de charge</target>
+        <target>Type de chargement</target>
       </segment>
     </unit>
     <unit id="4377932527319537276">
@@ -2639,22 +2639,16 @@
         <target>Charge</target>
       </segment>
     </unit>
-    <unit id="2986159287834234807">
-      <segment state="initial">
-        <source>N</source>
-        <target>N</target>
-      </segment>
-    </unit>
     <unit id="7722549882037437502">
       <segment state="initial">
         <source>Marking</source>
         <target>Marquage</target>
       </segment>
     </unit>
-    <unit id="2721513819199429371">
+    <unit id="1583307941081347908">
       <segment state="initial">
-        <source>Load/marking</source>
-        <target>Charge/marquage</target>
+        <source>Load / marking</source>
+        <target>Charge / marquage</target>
       </segment>
     </unit>
     <unit id="6161150769798431069">
@@ -3319,6 +3313,24 @@
       <segment state="initial">
         <source>Parameter:</source>
         <target>Paramètre :</target>
+      </segment>
+    </unit>
+    <unit id="3192753641165405448">
+      <segment state="initial">
+        <source>Base</source>
+        <target>Base</target>
+      </segment>
+    </unit>
+    <unit id="1035708454595696483">
+      <segment state="initial">
+        <source>The initial condition name must be unique.</source>
+        <target>Le nom de la condition initiale doit être unique.</target>
+      </segment>
+    </unit>
+    <unit id="3141736705077915112">
+      <segment state="initial">
+        <source>Punctual charge</source>
+        <target>Charge ponctuelle</target>
       </segment>
     </unit>
   </file>

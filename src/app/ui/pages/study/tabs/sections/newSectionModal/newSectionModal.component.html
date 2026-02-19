@@ -28,12 +28,7 @@
         <h3 class="title-underline" i18n>Choose a creation type</h3>
         <div class="flex flex-wrap gap-6">
           <div class="flex items-center">
-            <p-radiobutton
-              name="source"
-              value="manual"
-              [(ngModel)]="source"
-              inputId="manual"
-            />
+            <p-radiobutton name="source" value="manual" [(ngModel)]="source" inputId="manual" />
             <label for="manual" class="ml-2" i18n>Manual</label>
             <app-icon icon="info" />
           </div>
@@ -45,9 +40,7 @@
               inputId="referencial"
               [disabled]="true"
             />
-            <label for="referencial" class="ml-2" i18n
-              >From local referencial</label
-            >
+            <label for="referencial" class="ml-2" i18n>From local referencial</label>
             <app-icon icon="info" />
           </div>
           <div class="flex items-center">
@@ -58,9 +51,7 @@
               inputId="distantReferencial"
               [disabled]="true"
             />
-            <label for="distantReferencial" class="ml-2" i18n
-              >From distant referencial</label
-            >
+            <label for="distantReferencial" class="ml-2" i18n>From distant referencial</label>
             <app-icon icon="info" />
           </div>
           <div class="flex items-center">
@@ -88,13 +79,7 @@
   </div>
   <ng-template #footer>
     @if (mode() !== 'view') {
-      <button
-        app-btn
-        type="button"
-        btnSize="m"
-        btnStyle="outlined"
-        (click)="onVisibleChange(false)"
-      >
+      <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onVisibleChange(false)">
         <app-icon icon="close" />
         <ng-container i18n>Cancel</ng-container>
       </button>
@@ -114,25 +99,13 @@
       </button>
     } @else {
       <div class="flex gap-2">
-        <button
-          app-btn
-          type="button"
-          btnSize="m"
-          btnStyle="danger"
-          (click)="onDeleteSection()"
-        >
+        <button app-btn type="button" btnSize="m" btnStyle="danger" (click)="onDeleteSection()">
           <app-icon icon="delete" />
           <ng-container i18n>Delete</ng-container>
         </button>
       </div>
 
-      <button
-        app-btn
-        type="button"
-        btnSize="m"
-        btnStyle="outlined"
-        (click)="onDuplicateSection()"
-      >
+      <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onDuplicateSection()">
         <app-icon icon="content_copy" />
         <ng-container i18n>Duplicate</ng-container>
       </button>

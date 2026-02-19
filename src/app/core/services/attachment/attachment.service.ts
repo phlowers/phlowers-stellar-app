@@ -108,9 +108,7 @@ export class AttachmentService {
         Papa.parse(attachments, {
           header: true,
           skipEmptyLines: true,
-          complete: (async (
-            jsonResults: Papa.ParseResult<AttachmentCsvDto>
-          ) => {
+          complete: (async (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => {
             const data = jsonResults.data;
             if (!data || data.length === 0) {
               resolve();
@@ -119,9 +117,7 @@ export class AttachmentService {
             await this.storageService.db?.catAttachments.clear();
             const attachmentsTable: CatalogAttachmentEntity[] = mapData(data);
             console.log('adding attachments data', attachmentsTable.length);
-            await this.storageService.db?.catAttachments.bulkAdd(
-              attachmentsTable
-            );
+            await this.storageService.db?.catAttachments.bulkAdd(attachmentsTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
         });

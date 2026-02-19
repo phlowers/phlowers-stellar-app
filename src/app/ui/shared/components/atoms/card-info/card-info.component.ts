@@ -21,10 +21,7 @@ export class CardInfoComponent {
   additionalClass = input<string>();
 
   computedClass = computed(() => {
-    return [
-      this.statusState() ? 'card-' + this.statusState() : '',
-      this.additionalClass() ?? ''
-    ]
+    return [this.statusState() ? 'card-' + this.statusState() : '', this.additionalClass() ?? '']
       .filter(Boolean)
       .join(' ');
   });

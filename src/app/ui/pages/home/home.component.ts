@@ -73,14 +73,7 @@ type ServerStates = CardState;
 
 @Component({
   selector: 'app-home',
-  imports: [
-    RouterLink,
-    ButtonComponent,
-    IconComponent,
-    CardInfoComponent,
-    CardStudyComponent,
-    CommonModule
-  ],
+  imports: [RouterLink, ButtonComponent, IconComponent, CardInfoComponent, CardStudyComponent, CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
@@ -127,14 +120,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.add(
-      combineLatest([
-        this.onlineService.online$,
-        this.onlineService.serverOnline$
-      ]).subscribe(([isOnline, serverStatus]) => {
-        const finalStatus = this.getConnectivityStatus(isOnline, serverStatus);
-        this.serverStatus.set(finalStatus);
-        this.updateServerText(finalStatus);
-      })
+      combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]).subscribe(
+        ([isOnline, serverStatus]) => {
+          const finalStatus = this.getConnectivityStatus(isOnline, serverStatus);
+          this.serverStatus.set(finalStatus);
+          this.updateServerText(finalStatus);
+        }
+      )
     );
     this.studiesService.ready.subscribe(async (value) => {
       if (value) {
@@ -142,19 +134,14 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.latestStudies.set(
           studies?.map((study) => ({
             ...study,
-            updated_at_offline: timeAgo.format(
-              new Date(study.updated_at_offline)
-            )
+            updated_at_offline: timeAgo.format(new Date(study.updated_at_offline))
           }))
         );
       }
     });
   }
 
-  private getConnectivityStatus(
-    isOnline: boolean,
-    serverStatus: ServerStatus
-  ): ServerStates {
+  private getConnectivityStatus(isOnline: boolean, serverStatus: ServerStatus): ServerStates {
     if (this.isOffline(isOnline)) {
       return 'unknown';
     }
@@ -178,19 +165,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   private updateServerText(status: ServerStates): void {
     switch (status) {
       case 'unknown':
-        this.updateText(
-          'serverText',
-          $localize`Cannot reach data. Please check your internet connectivity.`
-        ); // i18n Impossible d'accéder aux données. Vérifiez votre connexion à internet.
+        this.updateText('serverText', $localize`Cannot reach data. Please check your internet connectivity.`); // i18n Impossible d'accéder aux données. Vérifiez votre connexion à internet.
         break;
       case 'warning':
         this.updateText('serverText', $localize`Trying to reach the servers.`); // i18n Nous essayons de contacter les serveurs.
         break;
       case 'error':
-        this.updateText(
-          'serverText',
-          $localize`An error occured while trying to reach servers.`
-        ); // i18n Une erreur a été rencontré lors de la connexion aux serveurs.
+        this.updateText('serverText', $localize`An error occured while trying to reach servers.`); // i18n Une erreur a été rencontré lors de la connexion aux serveurs.
         break;
       case 'success':
         this.updateText('serverText', $localize`Server connexion success!`); // i18n Connexion aux serveurs réussi !

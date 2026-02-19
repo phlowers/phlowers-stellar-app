@@ -7,10 +7,8 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
-import {
-  PlotService,
-  SelectedDisplayOptions
-} from '@src/app/ui/pages/studio/services/plot.service';
+import { createShadowPlotData } from './helpers/createShadowPlotData';
+import { PlotService, SelectedDisplayOptions } from '@src/app/ui/pages/studio/services/plot.service';
 import { SpanLoad } from '@src/app/core';
 import { LoadType } from './helpers/createLoadAnnotations';
 
@@ -25,10 +23,7 @@ export class SectionPlotComponent {
 
   constructor(public readonly plotService: PlotService) {}
 
-  getSpanLoadsToDisplay = (
-    selectedDisplayOptions: SelectedDisplayOptions,
-    plotOptions: PlotOptions
-  ) => {
+  getSpanLoadsToDisplay = (selectedDisplayOptions: SelectedDisplayOptions, plotOptions: PlotOptions) => {
     if (!selectedDisplayOptions.loads) {
       return [];
     }
@@ -41,8 +36,7 @@ export class SectionPlotComponent {
       .map((support) => support.uuid);
     const spanLoads =
       this.plotService.temporaryLoadData?.spanLoads?.filter(
-        (load) =>
-          !!load && (!!load.loadWeight || load.type === LoadType.MARKING)
+        (load) => !!load && (!!load.loadWeight || load.type === LoadType.MARKING)
       ) ?? [];
     const result: (SpanLoad | null)[] = [];
     for (const supportUuid of supportsUuids) {
@@ -58,19 +52,24 @@ export class SectionPlotComponent {
 
   async refreshPlot(
     litData: GetSectionOutput | null,
+    baseLitData: GetSectionOutput | null,
     plotOptions: PlotOptions,
     isSupportZoom: boolean,
-    _isSidebarOpen: boolean, // eslint-disable-line @typescript-eslint/no-unused-vars
-    selectedDisplayOptions: { loads: boolean }
+    _isSidebarOpen: boolean,
+    selectedDisplayOptions: SelectedDisplayOptions
   ) {
     if (!litData) {
       return;
     }
-    const spanLoads = this.getSpanLoadsToDisplay(
-      selectedDisplayOptions,
-      plotOptions
-    );
-    const plotData = createPlotData(litData, plotOptions);
+    const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
+    let plotData = createPlotData(litData, plotOptions);
+
+    // Add shadow traces for base state if enabled
+    if (selectedDisplayOptions.baseState && baseLitData) {
+      const shadowData = createShadowPlotData(baseLitData, plotOptions);
+      plotData = [...shadowData, ...plotData];
+    }
+
     const camera = this.plotService.camera();
     return createPlot({
       plotId: 'plotly-output',
@@ -90,6 +89,7 @@ export class SectionPlotComponent {
   readonly effect = effect(() => {
     this.refreshPlot(
       this.litData(),
+      this.plotService.baseLitData(),
       this.plotService.plotOptions(),
       this.isSupportZoom(),
       this.plotService.isSidebarOpen(),

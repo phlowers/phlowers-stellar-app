@@ -115,6 +115,13 @@ export interface GetSectionOutput {
   T_h: number[];
 }
 
+
+export interface GetSectionWithBaseOutput {
+  current: GetSectionOutput;
+  base: GetSectionOutput | null;
+}
+
+
 /**
  * Log level values for Python logging.
  *
@@ -225,13 +232,13 @@ export interface TaskInputs {
  */
 export interface TaskOutputs {
   /** Output from getLit task */
-  [Task.getLit]: GetSectionOutput;
+  [Task.getLit]: GetSectionWithBaseOutput;
   /** Output from runTests task */
   [Task.runTests]: undefined;
   /** Output from changeState task */
-  [Task.changeState]: GetSectionOutput;
+  [Task.changeState]: GetSectionWithBaseOutput;
   /** Output from refreshProjection task */
-  [Task.refreshProjection]: GetSectionOutput;
+  [Task.refreshProjection]: GetSectionWithBaseOutput;
   /** Output from getSupportCoordinates task */
   [Task.getSupportCoordinates]: {
     shape_points: number[][];

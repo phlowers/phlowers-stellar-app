@@ -9,11 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { CablesService } from '@services/cables/cables.service';
-import {
-  Task,
-  TaskError,
-  DataError
-} from '@services/worker_python/tasks/types';
+import { Task, TaskError, DataError, GetSectionWithBaseOutput } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study } from '@core/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
@@ -59,6 +55,11 @@ describe('PlotService', () => {
     horizontal_distance: [],
     arc_length: [],
     T_h: []
+  };
+
+  const mockGetSectionWithBaseOutput: GetSectionWithBaseOutput = {
+    current: mockGetSectionOutput,
+    base: mockGetSectionOutput
   };
 
   const mockCable: CatalogCable = {
@@ -302,7 +303,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -345,7 +346,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -358,26 +359,23 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
       await service.refreshSection(mockSection);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.getLit,
-        {
-          section: mockSection,
-          cable: mockCable
-        }
-      );
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.getLit, {
+        section: mockSection,
+        cable: mockCable
+      });
     });
 
     it('should update plotOptions with section supports range', async () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -396,7 +394,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -414,7 +412,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -428,7 +426,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: taskError
       });
 
@@ -443,7 +441,10 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation(() => {
         loadingState = service.loading();
-        return Promise.resolve({ result: mockGetSectionOutput, error: null });
+        return Promise.resolve({
+          result: mockGetSectionWithBaseOutput,
+          error: null
+        });
       });
 
       await service.refreshSection(mockSection);
@@ -455,7 +456,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -469,7 +470,7 @@ describe('PlotService', () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockGetSectionOutput,
+        result: mockGetSectionWithBaseOutput,
         error: null
       });
 
@@ -508,8 +509,20 @@ describe('PlotService', () => {
       expect(service.litData()).toBeNull();
     });
 
+    it('should clear baseLitData', () => {
+      service.baseLitData.set(mockGetSectionOutput);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.purgePlot();
+
+      expect(service.baseLitData()).toBeNull();
+    });
+
     it('should clear all state when plotly-output exists', () => {
       service.litData.set(mockGetSectionOutput);
+      service.baseLitData.set(mockGetSectionOutput);
       service.error.set(TaskError.CALCULATION_ERROR);
       service.loading.set(true);
       (document.getElementById as jest.Mock).mockReturnValue({
@@ -520,6 +533,7 @@ describe('PlotService', () => {
 
       expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
       expect(service.litData()).toBeNull();
+      expect(service.baseLitData()).toBeNull();
       expect(service.error()).toBeNull();
       expect(service.loading()).toBe(false);
     });
@@ -561,6 +575,17 @@ describe('PlotService', () => {
       service.resetAll();
 
       expect(service.litData()).toBeNull();
+    });
+
+    it('should reset baseLitData to null', () => {
+      service.baseLitData.set(mockGetSectionOutput);
+      (document.getElementById as jest.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.resetAll();
+
+      expect(service.baseLitData()).toBeNull();
     });
 
     it('should set loading to false', () => {
@@ -737,16 +762,12 @@ describe('PlotService', () => {
           endSupport: 10
         };
 
-        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, true)).toBe(
-          false
-        );
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, true)).toBe(false);
       });
 
       it('should return false even when all options are identical', () => {
         const options: PlotOptions = { ...baseOptions };
-        expect(checkIfProjectionNeedRefresh(options, options, true)).toBe(
-          false
-        );
+        expect(checkIfProjectionNeedRefresh(options, options, true)).toBe(false);
       });
     });
 
@@ -756,36 +777,28 @@ describe('PlotService', () => {
           const oldOptions: PlotOptions = { ...baseOptions, view: '3d' };
           const newOptions: PlotOptions = { ...baseOptions, view: '2d' };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when view changes from 2d to 3d', () => {
           const oldOptions: PlotOptions = { ...baseOptions, view: '2d' };
           const newOptions: PlotOptions = { ...baseOptions, view: '3d' };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when side changes from profile to face', () => {
           const oldOptions: PlotOptions = { ...baseOptions, side: 'profile' };
           const newOptions: PlotOptions = { ...baseOptions, side: 'face' };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when side changes from face to profile', () => {
           const oldOptions: PlotOptions = { ...baseOptions, side: 'face' };
           const newOptions: PlotOptions = { ...baseOptions, side: 'profile' };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when both view and side change', () => {
@@ -800,9 +813,7 @@ describe('PlotService', () => {
             side: 'face'
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
       });
 
@@ -819,9 +830,7 @@ describe('PlotService', () => {
             startSupport: 5
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when view is 3d and only endSupport changes', () => {
@@ -836,9 +845,7 @@ describe('PlotService', () => {
             endSupport: 10
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when view is 3d and both supports change', () => {
@@ -855,16 +862,12 @@ describe('PlotService', () => {
             endSupport: 10
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when view is 3d and all options are identical', () => {
           const options: PlotOptions = { ...baseOptions, view: '3d' };
-          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(
-            false
-          );
+          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(false);
         });
       });
 
@@ -881,9 +884,7 @@ describe('PlotService', () => {
             startSupport: 5
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when endSupport changes', () => {
@@ -898,9 +899,7 @@ describe('PlotService', () => {
             endSupport: 10
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when both startSupport and endSupport change', () => {
@@ -917,9 +916,7 @@ describe('PlotService', () => {
             endSupport: 10
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return false when supports do not change', () => {
@@ -936,9 +933,7 @@ describe('PlotService', () => {
             endSupport: 1
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when only invert changes', () => {
@@ -953,16 +948,12 @@ describe('PlotService', () => {
             invert: true
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when all options are identical', () => {
           const options: PlotOptions = { ...baseOptions, view: '2d' };
-          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(
-            false
-          );
+          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(false);
         });
       });
     });
@@ -982,9 +973,7 @@ describe('PlotService', () => {
           endSupport: 1
         };
 
-        expect(
-          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-        ).toBe(true);
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
       });
 
       it('should handle large values for supports', () => {
@@ -1001,9 +990,7 @@ describe('PlotService', () => {
           endSupport: 201
         };
 
-        expect(
-          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-        ).toBe(true);
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
       });
 
       it('should handle negative values for supports', () => {
@@ -1020,9 +1007,7 @@ describe('PlotService', () => {
           endSupport: 1
         };
 
-        expect(
-          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-        ).toBe(true);
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
       });
     });
   });

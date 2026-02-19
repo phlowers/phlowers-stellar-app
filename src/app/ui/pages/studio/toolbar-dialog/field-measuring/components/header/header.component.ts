@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  output,
-  signal,
-  untracked
-} from '@angular/core';
+import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -19,14 +11,7 @@ import { isEqual } from 'lodash';
 
 @Component({
   selector: 'app-header',
-  imports: [
-    FormsModule,
-    SelectModule,
-    InputTextModule,
-    InputGroupModule,
-    InputGroupAddonModule,
-    IconComponent
-  ],
+  imports: [FormsModule, SelectModule, InputTextModule, InputGroupModule, InputGroupAddonModule, IconComponent],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
@@ -37,13 +22,8 @@ export class HeaderComponent {
     value: FieldMeasure[keyof FieldMeasure];
   }>();
 
-  readonly spans = computed<
-    { label: string; value: number[]; supports: number[] }[]
-  >(() => {
-    const supportsLength =
-      this.plotService.plotOptions().endSupport -
-      this.plotService.plotOptions().startSupport +
-      1;
+  readonly spans = computed<{ label: string; value: number[]; supports: number[] }[]>(() => {
+    const supportsLength = this.plotService.plotOptions().endSupport - this.plotService.plotOptions().startSupport + 1;
     const spanAmount = Math.max(supportsLength - 1, 0);
     // create an array the length of spanAmount
     const spans = Array.from({ length: spanAmount }, (_, index) => ({
@@ -89,11 +69,7 @@ export class HeaderComponent {
     // Calculate altitude when measureData.span changes
     effect(() => {
       const span = this.measureData().span;
-      if (
-        !Array.isArray(span) ||
-        span.length !== 2 ||
-        isEqual(span, this.previousSpan())
-      ) {
+      if (!Array.isArray(span) || span.length !== 2 || isEqual(span, this.previousSpan())) {
         return;
       }
       this.previousSpan.set(span);
@@ -134,8 +110,7 @@ export class HeaderComponent {
     }
 
     // Calculate mid value
-    const midValue =
-      (leftSupport.attachmentHeight + rightSupport.attachmentHeight) / 2;
+    const midValue = (leftSupport.attachmentHeight + rightSupport.attachmentHeight) / 2;
 
     // Only update if the altitude has actually changed to prevent infinite loops
     const currentAltitude = untracked(() => this.measureData().altitude);
@@ -144,10 +119,7 @@ export class HeaderComponent {
     }
   }
 
-  onFieldChange(
-    field: keyof FieldMeasure,
-    value: FieldMeasure[keyof FieldMeasure]
-  ): void {
+  onFieldChange(field: keyof FieldMeasure, value: FieldMeasure[keyof FieldMeasure]): void {
     this.fieldChange.emit({ field, value });
   }
 }

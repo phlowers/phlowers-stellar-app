@@ -45,9 +45,7 @@
 
       <section class="vtl-guying__vtl-section">
         <header class="vtl-guying__section-header">
-          <h3 class="vtl-guying__section-title underline-text" i18n>
-            VTL without guying
-          </h3>
+          <h3 class="vtl-guying__section-title underline-text" i18n>VTL without guying</h3>
           <button
             app-btn
             btnSize="s"
@@ -64,34 +62,20 @@
         <dl class="vtl-guying__vtl-fields">
           <div class="vtl-guying__vtl-field">
             <dt i18n>Charge V</dt>
-            <dd class="vtl-guying__vtl-value">
-              {{
-                (vtlWithoutGuying()?.chargeV | number: '1.0-3') ?? '-'
-              }}&nbsp;daN
-            </dd>
+            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeV | number: '1.0-3') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
             <dt i18n>Charge T</dt>
-            <dd class="vtl-guying__vtl-value">
-              {{
-                (vtlWithoutGuying()?.chargeH | number: '1.0-3') ?? '-'
-              }}&nbsp;daN
-            </dd>
+            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeH | number: '1.0-3') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
             <dt i18n>Charge L</dt>
-            <dd class="vtl-guying__vtl-value">
-              {{
-                (vtlWithoutGuying()?.chargeL | number: '1.0-3') ?? '-'
-              }}&nbsp;daN
-            </dd>
+            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeL | number: '1.0-3') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
             <dt i18n>Resultant</dt>
             <dd class="vtl-guying__vtl-value">
-              {{
-                (vtlWithoutGuying()?.resultant | number: '1.0-3') ?? '-'
-              }}&nbsp;daN
+              {{ (vtlWithoutGuying()?.resultant | number: '1.0-3') ?? '-' }}&nbsp;daN
             </dd>
           </div>
         </dl>
@@ -107,35 +91,19 @@
           <div class="vtl-guying__form-field">
             <label for="altitude-input" i18n>Altitude</label>
             <p-inputgroup>
-              <input
-                id="altitude-input"
-                type="number"
-                pInputText
-                formControlName="altitude"
-              />
+              <input id="altitude-input" type="number" pInputText formControlName="altitude" />
               <p-inputgroup-addon>m</p-inputgroup-addon>
             </p-inputgroup>
           </div>
           <div class="vtl-guying__form-field">
-            <label for="horizontal-distance-input" i18n
-              >Horizontal distance</label
-            >
+            <label for="horizontal-distance-input" i18n>Horizontal distance</label>
             <p-inputgroup>
-              <input
-                pInputText
-                type="number"
-                id="horizontal-distance-input"
-                formControlName="horizontalDistance"
-              />
+              <input pInputText type="number" id="horizontal-distance-input" formControlName="horizontalDistance" />
               <p-inputgroup-addon>m</p-inputgroup-addon>
             </p-inputgroup>
           </div>
           <div class="vtl-guying__form-field vtl-guying__form-field--checkbox">
-            <p-checkbox
-              [binary]="true"
-              formControlName="hasPulley"
-              inputId="pulley-checkbox"
-            />
+            <p-checkbox [binary]="true" formControlName="hasPulley" inputId="pulley-checkbox" />
             <label for="pulley-checkbox" i18n>With pulley</label>
           </div>
         </div>
@@ -166,39 +134,29 @@
             <div class="vtl-guying__result-field tensionInGuy">
               <dt i18n>Tension in the guy line</dt>
               <dd class="vtl-guying__result-value">
-                {{
-                  (results()?.tensionInGuy | number: '1.0-3') ?? '-'
-                }}&nbsp;daN
+                {{ (results()?.tensionInGuy | number: '1.0-3') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field guyAngle">
               <dt i18n>Angle guy line / Horizon</dt>
-              <dd class="vtl-guying__result-value">
-                {{ (results()?.guyAngle | number: '1.0-3') ?? '-' }}&nbsp;°
-              </dd>
+              <dd class="vtl-guying__result-value">{{ (results()?.guyAngle | number: '1.0-3') ?? '-' }}&nbsp;°</dd>
             </div>
             <div class="vtl-guying__result-field chargeVUnderConsole">
               <dt i18n>Charge V under console</dt>
               <dd class="vtl-guying__result-value">
-                {{
-                  (results()?.chargeVUnderConsole | number: '1.0-3') ?? '-'
-                }}&nbsp;daN
+                {{ (results()?.chargeVUnderConsole | number: '1.0-3') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field chargeHUnderConsole">
               <dt i18n>Charge T under console</dt>
               <dd class="vtl-guying__result-value">
-                {{
-                  (results()?.chargeHUnderConsole | number: '1.0-3') ?? '-'
-                }}&nbsp;daN
+                {{ (results()?.chargeHUnderConsole | number: '1.0-3') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field chargeLIfPulley">
               <dt i18n>Charge L (if pulley)</dt>
               <dd class="vtl-guying__result-value">
-                {{
-                  (results()?.chargeLIfPulley | number: '1.0-3') ?? '-'
-                }}&nbsp;daN
+                {{ (results()?.chargeLIfPulley | number: '1.0-3') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field comment">
@@ -217,11 +175,9 @@
           <div class="vtl-guying__info-text">
             <app-icon icon="info" class="vtl-guying__info-icon" />
             <p i18n>
-              For a stop or a suspension without pulley, the tension in the guy
-              line allows to balance the longitudinal charges at the console
-              level (no L). For a suspension with a pulley, the tension in the
-              guy line is the maximum tension in all the cables of the bundle
-              and a longitudinal charge appears.
+              For a stop or a suspension without pulley, the tension in the guy line allows to balance the longitudinal
+              charges at the console level (no L). For a suspension with a pulley, the tension in the guy line is the
+              maximum tension in all the cables of the bundle and a longitudinal charge appears.
             </p>
           </div>
         </section>
@@ -245,13 +201,7 @@
 }
 <ng-template #footer>
   <div class="vtl-guying__dialog-footer">
-    <button
-      [disabled]="true"
-      app-btn
-      type="button"
-      btnSize="m"
-      (click)="onExport()"
-    >
+    <button [disabled]="true" app-btn type="button" btnSize="m" (click)="onExport()">
       <app-icon icon="download" />
       <span i18n>Export</span>
     </button>
