@@ -6,59 +6,59 @@ const tsParser = require('@typescript-eslint/parser');
 const angularTemplateEslintPlugin = require('@angular-eslint/eslint-plugin-template');
 
 module.exports = tseslint.config(
-    {
-        ignores: ['coverage/**', 'dist/**', '**/.venv/**', '.angular/**', 'docs-sphinx/**']
+  {
+    ignores: ['coverage/**', 'dist/**', '**/.venv/**', '.angular/**', 'docs-sphinx/**']
+  },
+  {
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: './tsconfig.json'
+      }
     },
-    {
-        languageOptions: {
-            parser: tsParser,
-            parserOptions: {
-                project: './tsconfig.json'
-            }
-        },
-        files: ['**/*.ts'],
-        extends: [
-            eslint.configs.recommended,
-            ...tseslint.configs.recommended,
-            ...tseslint.configs.stylistic,
-            ...angular.configs.tsRecommended
-        ],
-        processor: angular.processInlineTemplates,
-        rules: {
-            '@angular-eslint/directive-selector': [
-                'error',
-                {
-                    type: 'attribute',
-                    prefix: 'app',
-                    style: 'camelCase'
-                }
-            ],
-            '@angular-eslint/component-selector': [
-                'error',
-                {
-                    type: ['attribute', 'element'],
-                    prefix: 'app',
-                    style: 'kebab-case'
-                }
-            ],
-            '@typescript-eslint/no-explicit-any': 'warn'
+    files: ['**/*.ts'],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...tseslint.configs.stylistic,
+      ...angular.configs.tsRecommended
+    ],
+    processor: angular.processInlineTemplates,
+    rules: {
+      '@angular-eslint/directive-selector': [
+        'error',
+        {
+          type: 'attribute',
+          prefix: 'app',
+          style: 'camelCase'
         }
-    },
-    {
-        files: ['**/*.html'],
-        extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
-        rules: {
-            '@angular-eslint/template/i18n': [
-                'warn',
-                {
-                    checkText: true,
-                    checkAttributes: false,
-                    checkId: false
-                }
-            ]
-        },
-        plugins: {
-            angularTemplate: angularTemplateEslintPlugin
+      ],
+      '@angular-eslint/component-selector': [
+        'error',
+        {
+          type: ['attribute', 'element'],
+          prefix: 'app',
+          style: 'kebab-case'
         }
+      ],
+      '@typescript-eslint/no-explicit-any': 'warn'
     }
+  },
+  {
+    files: ['**/*.html'],
+    extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
+    rules: {
+      '@angular-eslint/template/i18n': [
+        'warn',
+        {
+          checkText: true,
+          checkAttributes: false,
+          checkId: false
+        }
+      ]
+    },
+    plugins: {
+      angularTemplate: angularTemplateEslintPlugin
+    }
+  }
 );
