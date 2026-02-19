@@ -58,3 +58,4 @@ report-task.txt
 scripts/__pycache__/
 scripts/requirements-resolved.txt
 docs-sphinx/build/
+.venv

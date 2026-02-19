@@ -6,23 +6,23 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Stellar'
-copyright = 'Copyright (c) 2026, RTE (http://www.rte-france.com)'
+project = "Stellar"
+copyright = "Copyright (c) 2026, RTE (http://www.rte-france.com)"
 
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx_js',
-    'myst_parser',  # Support for Markdown files
+    "sphinx_js",
+    "myst_parser",  # Support for Markdown files
 ]
 
 # sphinx-js configuration for TypeScript
-js_language = 'typescript'
-js_source_path = '../../src'
-jsdoc_tsconfig_path = '../tsconfig.typedoc.json'
-primary_domain = 'js'
+js_language = "typescript"
+js_source_path = "../../src"
+jsdoc_tsconfig_path = "../tsconfig.typedoc.json"
+primary_domain = "js"
 
 # MyST-Parser configuration for Markdown support
 myst_enable_extensions = [
@@ -30,49 +30,41 @@ myst_enable_extensions = [
     "deflist",
 ]
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',
+    ".rst": "restructuredtext",
+    ".md": "markdown",
 }
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
 # Language configuration
-language = 'en'
+language = "en"
 
 # Static files (images, style sheets, etc.)
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Custom CSS
-html_css_files = ['custom.css']
+html_css_files = ["custom.css"]
 
 # Logo and favicon
-html_logo = '_static/logo.svg'
-html_favicon = '_static/favicon.png'
+html_logo = "_static/logo.svg"
+html_favicon = "_static/favicon.png"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_material'
+html_theme = "pydata_sphinx_theme"
 
-# Material theme options
+# PyData theme options
 html_theme_options = {
-    "base_url": "https://phlowers.readthedocs.io/projects/Stellar",
-    "repo_url": "https://github.com/phlowers/phlowers-stellar-app",
-    "repo_name": "phlowers-stellar-app",
-    "google_analytics_account": "",
-    "html_minify": False,
-    "css_minify": False,
-    "globaltoc_depth": 3,
-    "globaltoc_collapse": True,
-    "globaltoc_includehidden": True,
-    "color_primary": "indigo",
-    "color_accent": "purple",
-}
-
-# Required for sphinx-material
-html_sidebars = {
-    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
+    "github_url": "https://github.com/phlowers/phlowers-stellar-app",
+    "navbar_align": "content",
+    "show_toc_level": 2,
+    "navigation_with_keys": True,
+    "logo": {
+        "image_light": "_static/logo.svg",
+        "image_dark": "_static/logo.svg",
+    },
 }
 
 html_title = "Stellar Documentation"
