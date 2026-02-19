@@ -157,10 +157,10 @@
         <target>Page non trouvée</target>
       </segment>
     </unit>
-    <unit id="7601213978629574297">
+    <unit id="4020663284410482277">
       <segment state="initial">
-        <source> Go to home page </source>
-        <target> Aller à la page d&apos;accueil </target>
+        <source>Go to home page</source>
+        <target>Aller à la page d&apos;accueil</target>
       </segment>
     </unit>
     <unit id="6713690242020777174">
@@ -175,16 +175,16 @@
         <target>Zone Danger</target>
       </segment>
     </unit>
-    <unit id="1267728769006543252">
+    <unit id="813933074006604830">
       <segment state="initial">
-        <source> Delete all studies </source>
-        <target> Supprimer toutes les études </target>
+        <source>Delete all studies</source>
+        <target>Supprimer toutes les études</target>
       </segment>
     </unit>
-    <unit id="2398619245085086844">
+    <unit id="9126603719123480182">
       <segment state="initial">
-        <source> Reset database </source>
-        <target> Réinitialiser la base de données </target>
+        <source>Reset database</source>
+        <target>Réinitialiser la base de données</target>
       </segment>
     </unit>
     <unit id="4238708305594970843">
@@ -387,13 +387,13 @@
     </unit>
     <unit id="1386766078260547788">
       <segment state="initial">
-        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;"/></source>
         <target> Titre <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
       </segment>
     </unit>
     <unit id="7282804341793038828">
       <segment state="initial">
-        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
         <target> Auteur <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
       </segment>
     </unit>
@@ -405,8 +405,8 @@
     </unit>
     <unit id="1170248653308387010">
       <segment state="initial">
-        <source> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-        <target> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+        <source> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;"/></source>
+        <target> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;"/></target>
       </segment>
     </unit>
     <unit id="3799093232488965923">
@@ -595,16 +595,16 @@
         <target>Nombre de supports</target>
       </segment>
     </unit>
-    <unit id="5027494160802883894">
+    <unit id="5513122358899972896">
       <segment state="initial">
-        <source> Chain name </source>
-        <target> Nom chaîne </target>
+        <source>Chain name</source>
+        <target>Nom chaîne</target>
       </segment>
     </unit>
-    <unit id="5758842248880389182">
+    <unit id="3154787560331051884">
       <segment state="initial">
-        <source> Chain V </source>
-        <target> Chaîne V </target>
+        <source>Chain V</source>
+        <target>Chaîne V</target>
       </segment>
     </unit>
     <unit id="3193976279273491157">
@@ -929,12 +929,6 @@
       <segment state="initial">
         <source>Support name</source>
         <target>Nom de supp.</target>
-      </segment>
-    </unit>
-    <unit id="2901943060312328653">
-      <segment state="initial">
-        <source> Support name </source>
-        <target> Nom de supp. </target>
       </segment>
     </unit>
     <unit id="8455284935734906867">
@@ -1301,10 +1295,10 @@
         <target> P. chaîne </target>
       </segment>
     </unit>
-    <unit id="7929145588930827141">
+    <unit id="6018996754780938049">
       <segment state="initial">
-        <source> Arm l. </source>
-        <target> L. bras </target>
+        <source>Arm l.</source>
+        <target>L. bras</target>
       </segment>
     </unit>
     <unit id="937239552133817956">
@@ -1373,10 +1367,10 @@
         <target>Étude importée avec succès</target>
       </segment>
     </unit>
-    <unit id="848481053719181700">
+    <unit id="6539153962019019862">
       <segment state="initial">
-        <source> Extreme historical conditions incurred by the cable </source>
-        <target> Conditions historiques extrêmes subies par le câble </target>
+        <source>Extreme historical conditions incurred by the cable</source>
+        <target>Conditions historiques extrêmes subies par le câble</target>
       </segment>
     </unit>
     <unit id="5577525641723703663">
@@ -1751,10 +1745,10 @@
         <target>Câble manip. à la portée</target>
       </segment>
     </unit>
-    <unit id="2398928213100250023">
+    <unit id="8033045192563886902">
       <segment state="initial">
-        <source> In order to add charges, you need to create a charge case. </source>
-        <target> Pour ajouter des charges, vous devez créer un cas de charge. </target>
+        <source>In order to add charges, you need to create a charge case.</source>
+        <target>Pour ajouter des charges, vous devez créer un cas de charge.</target>
       </segment>
     </unit>
     <unit id="1339958536387081724">
@@ -1811,10 +1805,10 @@
         <target>Nom du cas de charge</target>
       </segment>
     </unit>
-    <unit id="7726078135791017446">
+    <unit id="8789132061698781587">
       <segment state="initial">
-        <source> Choose the attachment set in the list or on the graph to find the right arm length. </source>
-        <target> Choisissez le set d’accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras. </target>
+        <source>Choose the attachment set in the list or on the graph to find the right arm length.</source>
+        <target>Choisissez le set d’accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras.</target>
       </segment>
     </unit>
     <unit id="2694623513112556993">
@@ -1835,16 +1829,16 @@
         <target>Mise à jour</target>
       </segment>
     </unit>
-    <unit id="7102821621439027980">
+    <unit id="2799248632483463312">
       <segment state="initial">
-        <source> The new version of your application is available! </source>
-        <target> La nouvelle version de votre application est disponible ! </target>
+        <source>The new version of your application is available!</source>
+        <target>La nouvelle version de votre application est disponible !</target>
       </segment>
     </unit>
-    <unit id="5827348953140111224">
+    <unit id="7191321002931803380">
       <segment state="initial">
-        <source> The update of your application is in progress </source>
-        <target> La mise à jour de votre application est en cours </target>
+        <source>The update of your application is in progress</source>
+        <target>La mise à jour de votre application est en cours</target>
       </segment>
     </unit>
     <unit id="9026083618139453880">
@@ -2003,10 +1997,10 @@
         <target>Vous ne pouvez pas mettre à jour une étude que vous n&apos;avez pas créée, veuillez la dupliquer.</target>
       </segment>
     </unit>
-    <unit id="9006227511499022859">
+    <unit id="6674243568758582854">
       <segment state="initial">
-        <source> Reset the app without resetting the database </source>
-        <target> Réinitialiser l&apos;application sans réinitialiser la base de données </target>
+        <source>Reset the app without resetting the database</source>
+        <target>Réinitialiser l&apos;application sans réinitialiser la base de données</target>
       </segment>
     </unit>
     <unit id="8837923071812939954">
@@ -2159,10 +2153,10 @@
         <target>Toutes</target>
       </segment>
     </unit>
-    <unit id="2978133532545567808">
+    <unit id="7927728100096644359">
       <segment state="initial">
-        <source> You can import multiple files, they will be available in the “My studies” tab. </source>
-        <target> Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l&apos;onglet &quot;Mes études&quot;. </target>
+        <source>You can import multiple files, they will be available in the “My studies” tab.</source>
+        <target>Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l&apos;onglet &quot;Mes études&quot;.</target>
       </segment>
     </unit>
     <unit id="292067144793702032">
@@ -2687,10 +2681,10 @@
         <target>Flux solaire direct</target>
       </segment>
     </unit>
-    <unit id="4167437424910371998">
+    <unit id="4412456247511617977">
       <segment state="initial">
-        <source> Diffused + direct solar flux </source>
-        <target> Flux solaire diffus + direct </target>
+        <source>Diffused + direct solar flux</source>
+        <target>Flux solaire diffus + direct</target>
       </segment>
     </unit>
     <unit id="6052330236106770932">
@@ -2699,10 +2693,10 @@
         <target> Flux solaire diffus + direct mesuré (facultatif) </target>
       </segment>
     </unit>
-    <unit id="100914384350148711">
+    <unit id="4153303378370584000">
       <segment state="initial">
-        <source> It won&apos;t be used in the calculation. </source>
-        <target> Celui-ci ne sera pas pris en compte dans le calcul. </target>
+        <source>It won&apos;t be used in the calculation.</source>
+        <target>Celui-ci ne sera pas pris en compte dans le calcul.</target>
       </segment>
     </unit>
     <unit id="1629692616024358810">
@@ -2729,10 +2723,10 @@
         <target>Mise à jour des valeurs</target>
       </segment>
     </unit>
-    <unit id="4659361480509875242">
+    <unit id="3911341609936417398">
       <segment state="initial">
-        <source> Results : </source>
-        <target> Résultats : </target>
+        <source>Results :</source>
+        <target>Résultats :</target>
       </segment>
     </unit>
     <unit id="3044790599387992172">
@@ -2867,10 +2861,10 @@
         <target>Type de support:</target>
       </segment>
     </unit>
-    <unit id="4289686132341098096">
+    <unit id="5725617251868768393">
       <segment state="initial">
-        <source> VTL without guying </source>
-        <target> VHL sans haubanage </target>
+        <source>VTL without guying</source>
+        <target>VHL sans haubanage</target>
       </segment>
     </unit>
     <unit id="8104522487016152357">
@@ -3331,6 +3325,18 @@
       <segment state="initial">
         <source>Punctual charge</source>
         <target>Charge ponctuelle</target>
+      </segment>
+    </unit>
+    <unit id="3876336363073925034">
+      <segment state="initial">
+        <source>Ice thickness before support frontier</source>
+        <target>Ice thickness before support frontier</target>
+      </segment>
+    </unit>
+    <unit id="421318936396804890">
+      <segment state="initial">
+        <source>Ice thickness after support frontier</source>
+        <target>Ice thickness after support frontier</target>
       </segment>
     </unit>
   </file>

@@ -76,9 +76,9 @@
         <source>Update</source>
       </segment>
     </unit>
-    <unit id="7102821621439027980">
+    <unit id="2799248632483463312">
       <segment>
-        <source> The new version of your application is available! </source>
+        <source>The new version of your application is available!</source>
       </segment>
     </unit>
     <unit id="2694240619944418764">
@@ -91,9 +91,9 @@
         <source>Hash :</source>
       </segment>
     </unit>
-    <unit id="5827348953140111224">
+    <unit id="7191321002931803380">
       <segment>
-        <source> The update of your application is in progress </source>
+        <source>The update of your application is in progress</source>
       </segment>
     </unit>
     <unit id="145833412581392848">
@@ -186,9 +186,9 @@
         <source>Page not found</source>
       </segment>
     </unit>
-    <unit id="7601213978629574297">
+    <unit id="4020663284410482277">
       <segment>
-        <source> Go to home page </source>
+        <source>Go to home page</source>
       </segment>
     </unit>
     <unit id="5662040103831344720">
@@ -231,19 +231,19 @@
         <source>Danger zone</source>
       </segment>
     </unit>
-    <unit id="1267728769006543252">
+    <unit id="813933074006604830">
       <segment>
-        <source> Delete all studies </source>
+        <source>Delete all studies</source>
       </segment>
     </unit>
-    <unit id="2398619245085086844">
+    <unit id="9126603719123480182">
       <segment>
-        <source> Reset database </source>
+        <source>Reset database</source>
       </segment>
     </unit>
-    <unit id="9006227511499022859">
+    <unit id="6674243568758582854">
       <segment>
-        <source> Reset the app without resetting the database </source>
+        <source>Reset the app without resetting the database</source>
       </segment>
     </unit>
     <unit id="797001286432919577">
@@ -401,9 +401,9 @@
         <source>Cancel</source>
       </segment>
     </unit>
-    <unit id="2978133532545567808">
+    <unit id="7927728100096644359">
       <segment>
-        <source> You can import multiple files, they will be available in the “My studies” tab. </source>
+        <source>You can import multiple files, they will be available in the “My studies” tab.</source>
       </segment>
     </unit>
     <unit id="292067144793702032">
@@ -468,7 +468,7 @@
     </unit>
     <unit id="1386766078260547788">
       <segment>
-        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;"/></source>
       </segment>
     </unit>
     <unit id="3569799587833040802">
@@ -546,9 +546,9 @@
         <source> Loading </source>
       </segment>
     </unit>
-    <unit id="5758842248880389182">
+    <unit id="3154787560331051884">
       <segment>
-        <source> Chain V </source>
+        <source>Chain V</source>
       </segment>
     </unit>
     <unit id="3193976279273491157">
@@ -603,7 +603,7 @@
     </unit>
     <unit id="1170248653308387010">
       <segment>
-        <source> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <source> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;"/></source>
       </segment>
     </unit>
     <unit id="1079181845691356032">
@@ -673,7 +673,7 @@
     </unit>
     <unit id="7282804341793038828">
       <segment>
-        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
       </segment>
     </unit>
     <unit id="5375905790663497716">
@@ -763,9 +763,9 @@
         <source> Max ice thickness </source>
       </segment>
     </unit>
-    <unit id="848481053719181700">
+    <unit id="6539153962019019862">
       <segment>
-        <source> Extreme historical conditions incurred by the cable </source>
+        <source>Extreme historical conditions incurred by the cable</source>
       </segment>
     </unit>
     <unit id="8798542344025275411">
@@ -993,9 +993,9 @@
         <source>IC</source>
       </segment>
     </unit>
-    <unit id="2398928213100250023">
+    <unit id="8033045192563886902">
       <segment>
-        <source> In order to add charges, you need to create a charge case. </source>
+        <source>In order to add charges, you need to create a charge case.</source>
       </segment>
     </unit>
     <unit id="3059442917741627872">
@@ -1068,9 +1068,9 @@
         <source>Charge case name</source>
       </segment>
     </unit>
-    <unit id="7726078135791017446">
+    <unit id="8789132061698781587">
       <segment>
-        <source> Choose the attachment set in the list or on the graph to find the right arm length. </source>
+        <source>Choose the attachment set in the list or on the graph to find the right arm length.</source>
       </segment>
     </unit>
     <unit id="4893374109940250877">
@@ -1633,9 +1633,9 @@
         <source>Update mode</source>
       </segment>
     </unit>
-    <unit id="4659361480509875242">
+    <unit id="3911341609936417398">
       <segment>
-        <source> Results : </source>
+        <source>Results :</source>
       </segment>
     </unit>
     <unit id="3044790599387992172">
@@ -1708,9 +1708,9 @@
         <source>Direct solar flux</source>
       </segment>
     </unit>
-    <unit id="4167437424910371998">
+    <unit id="4412456247511617977">
       <segment>
-        <source> Diffused + direct solar flux </source>
+        <source>Diffused + direct solar flux</source>
       </segment>
     </unit>
     <unit id="6052330236106770932">
@@ -1718,9 +1718,9 @@
         <source> Measured diffused + direct solar flux (not required) </source>
       </segment>
     </unit>
-    <unit id="100914384350148711">
+    <unit id="4153303378370584000">
       <segment>
-        <source> It won&apos;t be used in the calculation. </source>
+        <source>It won&apos;t be used in the calculation.</source>
       </segment>
     </unit>
     <unit id="1629692616024358810">
@@ -2073,9 +2073,9 @@
         <source>Support name</source>
       </segment>
     </unit>
-    <unit id="5027494160802883894">
+    <unit id="5513122358899972896">
       <segment>
-        <source> Chain name </source>
+        <source>Chain name</source>
       </segment>
     </unit>
     <unit id="8041319185706138234">
@@ -2083,19 +2083,14 @@
         <source> Chain w. </source>
       </segment>
     </unit>
-    <unit id="2901943060312328653">
-      <segment>
-        <source> Support name </source>
-      </segment>
-    </unit>
     <unit id="8455284935734906867">
       <segment>
         <source> Attachment set </source>
       </segment>
     </unit>
-    <unit id="7929145588930827141">
+    <unit id="6018996754780938049">
       <segment>
-        <source> Arm l. </source>
+        <source>Arm l.</source>
       </segment>
     </unit>
     <unit id="5763255287644465636">
@@ -2348,9 +2343,9 @@
         <source>Add a comment for the export.</source>
       </segment>
     </unit>
-    <unit id="4289686132341098096">
+    <unit id="5725617251868768393">
       <segment>
-        <source> VTL without guying </source>
+        <source>VTL without guying</source>
       </segment>
     </unit>
     <unit id="1831958434012261940">
@@ -2763,6 +2758,16 @@
     <unit id="3141736705077915112">
       <segment>
         <source>Punctual charge</source>
+      </segment>
+    </unit>
+    <unit id="3876336363073925034">
+      <segment>
+        <source>Ice thickness before support frontier</source>
+      </segment>
+    </unit>
+    <unit id="421318936396804890">
+      <segment>
+        <source>Ice thickness after support frontier</source>
       </segment>
     </unit>
   </file>
