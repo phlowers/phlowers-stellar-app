@@ -5,7 +5,7 @@ from stellar_engine.validation import GuyingInputs
 
 
 def calculate_guying(inputs: dict, engine: BalanceEngine):
-    guying_inputs = GuyingInputs(**inputs)
+    guying_inputs = GuyingInputs(**inputs.to_py())
     guying = Guying(engine)
     guying_results = guying.compute(
         index=guying_inputs.selectedSpanIndex,
