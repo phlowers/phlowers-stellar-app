@@ -1,11 +1,4 @@
-import {
-  Component,
-  input,
-  output,
-  computed,
-  signal,
-  effect
-} from '@angular/core';
+import { Component, input, output, computed, signal, effect } from '@angular/core';
 import { Study } from '@core/domain';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';

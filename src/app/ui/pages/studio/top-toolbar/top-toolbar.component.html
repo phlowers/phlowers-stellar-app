@@ -73,11 +73,7 @@
 
   <hr class="toolbar__separator" />
 
-  <p-speedDial
-    direction="down"
-    class="toolbar-speed-dial"
-    [model]="tablesDropdown()"
-  >
+  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="tablesDropdown()">
     <ng-template #button let-toggleCallback="toggleCallback">
       <button (click)="toggleCallback($event)">
         <app-icon icon="table_chart" />
@@ -94,11 +90,7 @@
 
   <hr class="toolbar__separator" />
 
-  <p-speedDial
-    direction="down"
-    class="toolbar-speed-dial"
-    [model]="toolsDropdown()"
-  >
+  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="toolsDropdown()">
     <ng-template #button let-toggleCallback="toggleCallback">
       <button (click)="toggleCallback($event)">
         <app-icon icon="build" />
@@ -141,12 +133,7 @@
   </button>
 </div>
 
-<p-dialog
-  [(visible)]="shortcutsModal"
-  [modal]="true"
-  [dismissableMask]="true"
-  [style]="{ width: '27.5rem' }"
->
+<p-dialog [(visible)]="shortcutsModal" [modal]="true" [dismissableMask]="true" [style]="{ width: '27.5rem' }">
   <ng-template #header>
     <p class="modal__header">
       <app-icon icon="build" />

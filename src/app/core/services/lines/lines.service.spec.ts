@@ -5,10 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
@@ -92,10 +89,7 @@ describe('LinesService', () => {
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [
-        LinesService,
-        { provide: StorageService, useValue: storageServiceSpy }
-      ]
+      providers: [LinesService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(LinesService);
@@ -203,27 +197,25 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -231,9 +223,7 @@ describe('LinesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/lines.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -248,27 +238,25 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: [],
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: [],
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -276,9 +264,7 @@ describe('LinesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/lines.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -339,27 +325,25 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001\nLINK002,LIT002,LIT_ADR002,BRANCH002,BRANCH_ADR002,TENSION002,TENSION_ADR002';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -367,9 +351,7 @@ describe('LinesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/lines.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -421,27 +403,25 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -449,9 +429,7 @@ describe('LinesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/lines.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -488,27 +466,25 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -516,18 +492,13 @@ describe('LinesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/lines.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
       await importPromise;
 
-      expect(sortBy as jest.Mock).toHaveBeenCalledWith(
-        expect.any(Array),
-        'voltage_adr'
-      );
+      expect(sortBy as jest.Mock).toHaveBeenCalledWith(expect.any(Array), 'voltage_adr');
     });
 
     it('should handle HTTP error and return empty string', async () => {
@@ -537,27 +508,25 @@ describe('LinesService', () => {
       });
 
       // Mock Papa Parse to return empty data when HTTP error occurs
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: [],
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: [],
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -565,18 +534,13 @@ describe('LinesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request to fail
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/lines.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.error(mockError);
 
       await importPromise;
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error importing lines',
-        expect.any(HttpErrorResponse)
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing lines', expect.any(HttpErrorResponse));
       expect(mockLinesTable.clear).not.toHaveBeenCalled();
       expect(mockLinesTable.bulkAdd).not.toHaveBeenCalled();
 
@@ -611,27 +575,25 @@ describe('LinesService', () => {
 
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,,,BRANCH001,,,';
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<LineCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -639,9 +601,7 @@ describe('LinesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/lines.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 

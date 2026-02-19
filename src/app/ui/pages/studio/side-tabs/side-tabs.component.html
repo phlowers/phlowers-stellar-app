@@ -36,12 +36,7 @@
         [hidden]="!isOpen($index)"
       >
         <header class="side-tab__main__section__header">
-          <button
-            app-btn
-            btnStyle="text"
-            btnSize="s"
-            (click)="toggleTab($index)"
-          >
+          <button app-btn btnStyle="text" btnSize="s" (click)="toggleTab($index)">
             <app-icon icon="keyboard_arrow_right" />
             <ng-container i18n> Fold back </ng-container>
           </button>

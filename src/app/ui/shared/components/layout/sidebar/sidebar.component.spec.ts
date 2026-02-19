@@ -136,9 +136,7 @@ describe('SidebarComponent', () => {
     // Toggle menu (to collapsed)
     component.toggleMenu();
     expect(component.expandedStatus()).toBe(false);
-    expect(mockBodyClassList.remove).toHaveBeenCalledWith(
-      'has-sidebar--expanded'
-    );
+    expect(mockBodyClassList.remove).toHaveBeenCalledWith('has-sidebar--expanded');
 
     // Toggle menu again (back to expanded)
     component.toggleMenu();
@@ -150,9 +148,7 @@ describe('SidebarComponent', () => {
     // Menu is expanded by default in our setup
     hostFixture.detectChanges();
 
-    const img = hostFixture.debugElement.query(
-      By.css('.stelBar-header__link img')
-    );
+    const img = hostFixture.debugElement.query(By.css('.stelBar-header__link img'));
     expect(img.attributes['src']).toBe('in-app-logo/logo-large.svg');
     expect(img.attributes['alt']).toBe('Test App');
   });
@@ -161,9 +157,7 @@ describe('SidebarComponent', () => {
     component.expandedStatus.set(false);
     hostFixture.detectChanges();
 
-    const img = hostFixture.debugElement.query(
-      By.css('.stelBar-header__link img')
-    );
+    const img = hostFixture.debugElement.query(By.css('.stelBar-header__link img'));
     expect(img.attributes['src']).toBe('in-app-logo/logo-small.svg');
     expect(img.attributes['alt']).toBe('Test App');
   });
@@ -172,9 +166,7 @@ describe('SidebarComponent', () => {
     // Default setup: appVersionDisplay=true, expanded=true
     hostFixture.detectChanges();
 
-    const versionEl = hostFixture.debugElement.query(
-      By.css('.stelBar-header__version-display')
-    );
+    const versionEl = hostFixture.debugElement.query(By.css('.stelBar-header__version-display'));
     expect(versionEl).toBeTruthy();
     expect(versionEl.nativeElement.textContent.trim()).toBe('v.1.2.3');
   });
@@ -183,9 +175,7 @@ describe('SidebarComponent', () => {
     hostComponent.appVersionDisplay = false;
     hostFixture.detectChanges();
 
-    const versionEl = hostFixture.debugElement.query(
-      By.css('.stelBar-header__version-display')
-    );
+    const versionEl = hostFixture.debugElement.query(By.css('.stelBar-header__version-display'));
     expect(versionEl).toBeFalsy();
   });
 
@@ -193,17 +183,13 @@ describe('SidebarComponent', () => {
     component.expandedStatus.set(false);
     hostFixture.detectChanges();
 
-    const versionEl = hostFixture.debugElement.query(
-      By.css('.stelBar-header__version-display')
-    );
+    const versionEl = hostFixture.debugElement.query(By.css('.stelBar-header__version-display'));
     expect(versionEl).toBeFalsy();
   });
 
   it('should render main links correctly', () => {
     hostFixture.detectChanges();
-    const mainLinks = hostFixture.debugElement.queryAll(
-      By.css('.stelBar-main li a')
-    );
+    const mainLinks = hostFixture.debugElement.queryAll(By.css('.stelBar-main li a'));
     expect(mainLinks.length).toBe(hostComponent.mainLinks.length);
 
     expect(mainLinks[0].attributes['id']).toBe('dashboard');
@@ -215,9 +201,7 @@ describe('SidebarComponent', () => {
 
   it('should render footer links correctly', () => {
     hostFixture.detectChanges();
-    const footerLinks = hostFixture.debugElement.queryAll(
-      By.css('.stelBar-footer ul li a')
-    );
+    const footerLinks = hostFixture.debugElement.queryAll(By.css('.stelBar-footer ul li a'));
     expect(footerLinks.length).toBe(hostComponent.footerLinks.length);
 
     expect(footerLinks[0].attributes['id']).toBe('settings');
@@ -231,12 +215,8 @@ describe('SidebarComponent', () => {
     // Default setup is expanded
     hostFixture.detectChanges();
 
-    const mainLinkLabels = hostFixture.debugElement.queryAll(
-      By.css('.stelBar-main li a span:not(.app-icon)')
-    );
-    expect(mainLinkLabels[0].nativeElement.textContent.trim()).toBe(
-      'Dashboard'
-    );
+    const mainLinkLabels = hostFixture.debugElement.queryAll(By.css('.stelBar-main li a span:not(.app-icon)'));
+    expect(mainLinkLabels[0].nativeElement.textContent.trim()).toBe('Dashboard');
     expect(mainLinkLabels[1].nativeElement.textContent.trim()).toBe('Reports');
   });
 
@@ -244,9 +224,7 @@ describe('SidebarComponent', () => {
     component.expandedStatus.set(false);
     hostFixture.detectChanges();
 
-    const mainLinkLabels = hostFixture.debugElement.queryAll(
-      By.css('.stelBar-main li a span:not(.app-icon)')
-    );
+    const mainLinkLabels = hostFixture.debugElement.queryAll(By.css('.stelBar-main li a span:not(.app-icon)'));
     expect(mainLinkLabels[0].nativeElement.textContent.trim()).toBe('Dash');
     expect(mainLinkLabels[1].nativeElement.textContent.trim()).toBe('Rep');
   });
@@ -255,9 +233,7 @@ describe('SidebarComponent', () => {
     // Default setup is expanded
     hostFixture.detectChanges();
 
-    const toggleButton = hostFixture.debugElement.query(
-      By.css('button.stellar-sidebar__link span:not(.app-icon)')
-    );
+    const toggleButton = hostFixture.debugElement.query(By.css('button.stellar-sidebar__link span:not(.app-icon)'));
     expect(toggleButton.nativeElement.textContent.trim()).toBe('Shrink menu');
   });
 
@@ -265,17 +241,13 @@ describe('SidebarComponent', () => {
     component.expandedStatus.set(false);
     hostFixture.detectChanges();
 
-    const toggleButton = hostFixture.debugElement.query(
-      By.css('button.stellar-sidebar__link span:not(.app-icon)')
-    );
+    const toggleButton = hostFixture.debugElement.query(By.css('button.stellar-sidebar__link span:not(.app-icon)'));
     expect(toggleButton.nativeElement.textContent.trim()).toBe('Menu');
   });
 
   it('should toggle menu when button is clicked', () => {
     jest.spyOn(component, 'toggleMenu');
-    const toggleButton = hostFixture.debugElement.query(
-      By.css('button.stellar-sidebar__link')
-    );
+    const toggleButton = hostFixture.debugElement.query(By.css('button.stellar-sidebar__link'));
 
     toggleButton.triggerEventHandler('click', null);
     expect(component.toggleMenu).toHaveBeenCalled();
@@ -287,9 +259,7 @@ describe('SidebarComponent', () => {
     hostComponent.logoText = 'New App Name';
     hostFixture.detectChanges();
 
-    const logoSr = hostFixture.debugElement.query(
-      By.css('.stelBar-header__link .sr-only')
-    );
+    const logoSr = hostFixture.debugElement.query(By.css('.stelBar-header__link .sr-only'));
     expect(logoSr.nativeElement.textContent.trim()).toBe('New App Name');
   });
 
@@ -307,9 +277,7 @@ describe('SidebarComponent', () => {
     ];
     hostFixture.detectChanges();
 
-    const mainLinks = hostFixture.debugElement.queryAll(
-      By.css('.stelBar-main li a')
-    );
+    const mainLinks = hostFixture.debugElement.queryAll(By.css('.stelBar-main li a'));
     expect(mainLinks.length).toBe(3);
     expect(mainLinks[2].attributes['id']).toBe('new-link');
   });

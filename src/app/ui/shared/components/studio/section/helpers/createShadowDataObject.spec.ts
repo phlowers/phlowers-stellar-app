@@ -21,14 +21,7 @@ describe('createShadowDataObject', () => {
 
   describe('getShadowLine function', () => {
     it('should return rgba color with opacity for spans type in 2d', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,14 +34,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should return rgba color with opacity for supports type in 2d', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'supports',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,14 +47,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should return rgba color with opacity for insulators type in 2d', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'insulators',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'insulators', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,14 +60,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should return rgba color with opacity for unknown type in 2d', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'unknown' as PlotObjectsType,
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'unknown' as PlotObjectsType, '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,14 +73,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should return dodgerblue color for 3d view (opacity at trace level)', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '3d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,14 +88,7 @@ describe('createShadowDataObject', () => {
 
   describe('getShadowMarker function', () => {
     it('should return marker with rgba color for spans type in 2d', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,14 +101,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should return marker with dodgerblue color for 3d view', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '3d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,14 +114,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should set trace-level opacity for 3d view', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '3d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -179,14 +123,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should not set trace-level opacity for 2d view', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -197,14 +134,7 @@ describe('createShadowDataObject', () => {
 
   describe('data object properties', () => {
     it('should set hoverinfo to skip', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -213,14 +143,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should set showlegend to false', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -229,14 +152,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should set mode to lines+markers', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'supports',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
       // Shadow traces don't include text, just lines+markers
       expect(
@@ -246,14 +162,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should set type to scatter3d for 3d view', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '3d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -262,14 +171,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should set type to scatter for 2d view', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -287,14 +189,7 @@ describe('createShadowDataObject', () => {
     ];
 
     it('should map coordinates correctly for 3d profile view', () => {
-      const result = createShadowDataObject(
-        coordData,
-        0,
-        1,
-        'spans',
-        '3d',
-        'profile'
-      );
+      const result = createShadowDataObject(coordData, 0, 1, 'spans', '3d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -311,14 +206,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should map coordinates correctly for 2d profile view', () => {
-      const result = createShadowDataObject(
-        coordData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(coordData, 0, 1, 'spans', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -335,14 +223,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should map coordinates correctly for 2d face view', () => {
-      const result = createShadowDataObject(
-        coordData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'face'
-      );
+      const result = createShadowDataObject(coordData, 0, 1, 'spans', '2d', 'face');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -356,48 +237,22 @@ describe('createShadowDataObject', () => {
   });
 
   describe('data slicing', () => {
-    const sliceData: number[][][] = [
-      [[1, 1, 1]],
-      [[2, 2, 2]],
-      [[3, 3, 3]],
-      [[4, 4, 4]]
-    ];
+    const sliceData: number[][][] = [[[1, 1, 1]], [[2, 2, 2]], [[3, 3, 3]], [[4, 4, 4]]];
 
     it('should slice data correctly for spans based on start and end support', () => {
-      const result = createShadowDataObject(
-        sliceData,
-        1,
-        3,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(sliceData, 1, 3, 'spans', '2d', 'profile');
 
       expect(result.length).toBe(2); // endSupport - startSupport for spans
     });
 
     it('should slice data correctly for supports (includes endSupport + 1)', () => {
-      const result = createShadowDataObject(
-        sliceData,
-        1,
-        3,
-        'supports',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(sliceData, 1, 3, 'supports', '2d', 'profile');
 
       expect(result.length).toBe(3); // endSupport - startSupport + 1 for supports
     });
 
     it('should slice data correctly for insulators (includes endSupport + 1)', () => {
-      const result = createShadowDataObject(
-        sliceData,
-        1,
-        3,
-        'insulators',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(sliceData, 1, 3, 'insulators', '2d', 'profile');
 
       expect(result.length).toBe(3);
     });
@@ -405,14 +260,7 @@ describe('createShadowDataObject', () => {
 
   describe('width variations by view', () => {
     it('should use width 4 for 2d view (same as normal traces)', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -421,14 +269,7 @@ describe('createShadowDataObject', () => {
     });
 
     it('should use width 8 for 3d view (same as normal traces)', () => {
-      const result = createShadowDataObject(
-        testData,
-        0,
-        1,
-        'spans',
-        '3d',
-        'profile'
-      );
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

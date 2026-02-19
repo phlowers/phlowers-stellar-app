@@ -1,21 +1,6 @@
-import {
-  AfterViewInit,
-  Component,
-  TemplateRef,
-  ViewChild,
-  computed,
-  effect,
-  inject,
-  signal
-} from '@angular/core';
+import { AfterViewInit, Component, TemplateRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -77,9 +62,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
     selectedSpan: FormControl<VtlAndGuying['inputs']['selectedSpan']>;
     selectedSupport: FormControl<VtlAndGuying['inputs']['selectedSupport']>;
     altitude: FormControl<VtlAndGuying['inputs']['altitude']>;
-    horizontalDistance: FormControl<
-      VtlAndGuying['inputs']['horizontalDistance']
-    >;
+    horizontalDistance: FormControl<VtlAndGuying['inputs']['horizontalDistance']>;
     hasPulley: FormControl<VtlAndGuying['inputs']['hasPulley']>;
     comment: FormControl<VtlAndGuying['comment']>;
   }>;
@@ -101,15 +84,11 @@ export class VhlAndGuyingComponent implements AfterViewInit {
     chargeLIfPulley: number | null;
   } | null>(null);
 
-  readonly loading = computed(
-    () => this.plotService.loading() || !this.plotService.litData()
-  );
+  readonly loading = computed(() => this.plotService.loading() || !this.plotService.litData());
 
   constructor() {
     this.form = this.fb.group({
-      selectedSpan: this.fb.control<{ index: number; uuid: string } | null>(
-        null
-      ),
+      selectedSpan: this.fb.control<{ index: number; uuid: string } | null>(null),
       selectedSupport: this.fb.control<'LEFT' | 'RIGHT' | null>(
         {
           value: null,
@@ -117,14 +96,8 @@ export class VhlAndGuyingComponent implements AfterViewInit {
         },
         [Validators.required]
       ),
-      altitude: this.fb.control<number | null>(null, [
-        Validators.required,
-        Validators.min(0)
-      ]),
-      horizontalDistance: this.fb.control<number | null>(null, [
-        Validators.required,
-        Validators.min(0)
-      ]),
+      altitude: this.fb.control<number | null>(null, [Validators.required, Validators.min(0)]),
+      horizontalDistance: this.fb.control<number | null>(null, [Validators.required, Validators.min(0)]),
       hasPulley: this.fb.control<boolean>(false, { nonNullable: true }),
       comment: this.fb.control<string>('', { nonNullable: true })
     });
@@ -186,9 +159,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
       return;
     }
     const supportType =
-      this.plotService.section()?.supports[supportIndex].chainV === true
-        ? $localize`Suspension`
-        : $localize`Anchor`;
+      this.plotService.section()?.supports[supportIndex].chainV === true ? $localize`Suspension` : $localize`Anchor`;
     this.supportType.set(supportType as 'Suspension' | 'Anchor');
   }
 
@@ -250,16 +221,13 @@ export class VhlAndGuyingComponent implements AfterViewInit {
       return;
     }
     const formValue = this.form.value;
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.calculateGuying,
-      {
-        altitude: formValue.altitude!,
-        horizontalDistance: formValue.horizontalDistance!,
-        hasPulley: formValue.hasPulley ?? false,
-        selectedSpanIndex: formValue.selectedSpan?.index || 0,
-        selectedSupport: formValue.selectedSupport || null
-      }
-    );
+    const { result, error } = await this.workerPythonService.runTask(Task.calculateGuying, {
+      altitude: formValue.altitude!,
+      horizontalDistance: formValue.horizontalDistance!,
+      hasPulley: formValue.hasPulley ?? false,
+      selectedSpanIndex: formValue.selectedSpan?.index || 0,
+      selectedSupport: formValue.selectedSupport || null
+    });
     if (error) {
       console.error(error);
       return;

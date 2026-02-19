@@ -52,10 +52,7 @@ export class LinesService {
     const mapData = (data: LineCsvDto[]) => {
       return data
         .map((item) => {
-          const hasNoVoltage =
-            !item.voltage_idr ||
-            !item.voltage_adr ||
-            item.voltage_adr === '0.0';
+          const hasNoVoltage = !item.voltage_idr || !item.voltage_adr || item.voltage_adr === '0.0';
 
           return {
             uuid: uuidv4(),
@@ -66,9 +63,7 @@ export class LinesService {
             branch_id: item.branch_id || '',
             branch_idr: item.branch_idr || '',
             branch_adr: item.branch_adr || '',
-            voltage_idr: hasNoVoltage
-              ? $localize`NO VOLTAGE`
-              : item.voltage_idr,
+            voltage_idr: hasNoVoltage ? $localize`NO VOLTAGE` : item.voltage_idr,
             voltage_adr: hasNoVoltage ? 'NO_VOLTAGE' : item.voltage_adr
           };
         })
@@ -88,17 +83,9 @@ export class LinesService {
             await this.storageService.db?.catLines.clear();
             const table: CatalogLineEntity[] = mapData(data);
             const uniqueTable = uniqBy(table, (element) =>
-              [
-                element.voltage_idr,
-                element.link_idr,
-                element.lit_idr,
-                element.branch_id,
-                element.branch_idr
-              ].join('')
+              [element.voltage_idr, element.link_idr, element.lit_idr, element.branch_id, element.branch_idr].join('')
             );
-            await this.storageService.db?.catLines.bulkAdd(
-              sortBy(uniqueTable, 'voltage_adr')
-            );
+            await this.storageService.db?.catLines.bulkAdd(sortBy(uniqueTable, 'voltage_adr'));
             resolve();
           }) as (jsonResults: Papa.ParseResult<LineCsvDto>) => void
         });

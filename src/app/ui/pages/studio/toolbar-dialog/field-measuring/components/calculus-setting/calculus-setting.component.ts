@@ -8,13 +8,7 @@ import { FieldMeasure } from '../../types';
 
 @Component({
   selector: 'app-calculus-setting',
-  imports: [
-    FormsModule,
-    RadioButton,
-    PapotoComponent,
-    PepComponent,
-    TangentAimingComponent
-  ],
+  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingComponent],
   templateUrl: './calculus-setting.component.html',
   styleUrl: './calculus-setting.component.scss'
 })

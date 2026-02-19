@@ -4,12 +4,7 @@
   <app-new-study-modal [(isOpen)]="isNewStudyModalOpen" />
   <div class="flex justify-between items-start">
     <h2 i18n>Studies</h2>
-    <button
-      app-btn
-      type="submit"
-      btnSize="m"
-      (click)="isNewStudyModalOpen = true"
-    >
+    <button app-btn type="submit" btnSize="m" (click)="isNewStudyModalOpen = true">
       <app-icon icon="add" />
       <span i18n>Create a new study</span>
     </button>

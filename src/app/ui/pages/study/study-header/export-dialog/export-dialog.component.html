@@ -13,22 +13,10 @@
     </div>
   </ng-template>
   <ng-template #content>
-    <form
-      [formGroup]="form"
-      (ngSubmit)="exportStudy()"
-      class="flex flex-col gap-4"
-    >
+    <form [formGroup]="form" (ngSubmit)="exportStudy()" class="flex flex-col gap-4">
       <div>
         <label i18n for="filename">Filename</label>
-        <input
-          type="text"
-          pInputText
-          name="filename"
-          id="filename"
-          formControlName="filename"
-          required
-          fluid
-        />
+        <input type="text" pInputText name="filename" id="filename" formControlName="filename" required fluid />
       </div>
       <div>
         <label i18n for="exportFormat">Export format</label>
@@ -48,12 +36,7 @@
     <button app-btn btnStyle="text" (click)="cancel()">
       <span i18n>Cancel</span>
     </button>
-    <button
-      app-btn
-      type="submit"
-      [disabled]="!form.valid"
-      (click)="exportStudy()"
-    >
+    <button app-btn type="submit" [disabled]="!form.valid" (click)="exportStudy()">
       <app-icon icon="download" />
       <span i18n>Export</span>
     </button>

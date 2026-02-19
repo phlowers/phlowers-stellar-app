@@ -1,11 +1,5 @@
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -70,9 +64,7 @@ export class SpanComponent implements OnDestroy {
     const uuidToFind = this.form.get('spanSelect')?.value?.uuid;
     let load = undefined;
     if (uuidToFind) {
-      load = this.plotService.temporaryLoadData?.spanLoads.find(
-        (spanLoad) => spanLoad.supportUuid === uuidToFind
-      );
+      load = this.plotService.temporaryLoadData?.spanLoads.find((spanLoad) => spanLoad.supportUuid === uuidToFind);
     }
     return load;
   };
@@ -84,56 +76,45 @@ export class SpanComponent implements OnDestroy {
     public readonly workerPythonService: WorkerPythonService
   ) {
     this.subscriptions.add(
-      this.form
-        .get('spanSelect')
-        ?.valueChanges.subscribe((value: { index: number; uuid: string }) => {
-          this.supportsOptions.set([
-            {
-              label: (value.index + 1).toString(),
-              value: 'LEFT'
-            },
-            {
-              label: (value.index + 2).toString(),
-              value: 'RIGHT'
-            }
-          ]);
-          if (value) {
-            this.form.get('referenceSupport')?.enable();
-          } else {
-            this.form.get('referenceSupport')?.disable();
+      this.form.get('spanSelect')?.valueChanges.subscribe((value: { index: number; uuid: string }) => {
+        this.supportsOptions.set([
+          {
+            label: (value.index + 1).toString(),
+            value: 'LEFT'
+          },
+          {
+            label: (value.index + 2).toString(),
+            value: 'RIGHT'
           }
+        ]);
+        if (value) {
+          this.form.get('referenceSupport')?.enable();
+        } else {
+          this.form.get('referenceSupport')?.disable();
+        }
+        const load = this.findSelectedLoad();
+        if (load !== undefined) {
+          this.form.get('referenceSupport')?.setValue(load?.referenceSupport, { emitEvent: false });
+          this.form.get('type')?.setValue(load!.type, { emitEvent: false });
+          this.form.get('loadWeight')?.setValue(load?.loadWeight ?? 0, { emitEvent: false });
+          this.form.get('loadPosition')?.setValue(load?.loadPosition ?? 0, { emitEvent: false });
+        }
+      })
+    );
+    ['loadPosition', 'loadWeight', 'type', 'referenceSupport'].forEach((controlName) => {
+      this.subscriptions.add(
+        this.form.get(controlName)?.valueChanges.subscribe((value) => {
           const load = this.findSelectedLoad();
-          if (load !== undefined) {
-            this.form
-              .get('referenceSupport')
-              ?.setValue(load?.referenceSupport, { emitEvent: false });
-            this.form.get('type')?.setValue(load!.type, { emitEvent: false });
-            this.form
-              .get('loadWeight')
-              ?.setValue(load?.loadWeight ?? 0, { emitEvent: false });
-            this.form
-              .get('loadPosition')
-              ?.setValue(load?.loadPosition ?? 0, { emitEvent: false });
+          if (load) {
+            (load as any)[controlName] = value ?? (emptySpanLoad as any)[controlName];
+            if (controlName === 'type' && value === LoadType.MARKING) {
+              // reset load weight when type is changed
+              this.form.get('loadWeight')?.setValue(0);
+            }
           }
         })
-    );
-    ['loadPosition', 'loadWeight', 'type', 'referenceSupport'].forEach(
-      (controlName) => {
-        this.subscriptions.add(
-          this.form.get(controlName)?.valueChanges.subscribe((value) => {
-            const load = this.findSelectedLoad();
-            if (load) {
-              (load as any)[controlName] =
-                value ?? (emptySpanLoad as any)[controlName];
-              if (controlName === 'type' && value === LoadType.MARKING) {
-                // reset load weight when type is changed
-                this.form.get('loadWeight')?.setValue(0);
-              }
-            }
-          })
-        );
-      }
-    );
+      );
+    });
   }
 
   resetForm() {

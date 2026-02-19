@@ -121,13 +121,7 @@ describe('AppComponent', () => {
     } as unknown as LinesService;
 
     await TestBed.configureTestingModule({
-      imports: [
-        FormsModule,
-        NoopAnimationsModule,
-        RouterTestingModule,
-        HttpClientTestingModule,
-        AppComponent
-      ]
+      imports: [FormsModule, NoopAnimationsModule, RouterTestingModule, HttpClientTestingModule, AppComponent]
     }).compileComponents();
     TestBed.overrideProvider(WorkerPythonService, {
       useValue: mockWorkerService
@@ -169,10 +163,7 @@ describe('AppComponent', () => {
 
       await component.setupWorker();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error creating database',
-        error
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating database', error);
       consoleErrorSpy.mockRestore();
     });
   });

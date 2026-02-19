@@ -262,20 +262,17 @@ describe('StudiesTableComponent', () => {
     });
 
     it('should handle very large study arrays', () => {
-      const largeStudyArray: Study[] = Array.from(
-        { length: 1000 },
-        (_, index) => ({
-          uuid: `study-${index}`,
-          author_email: `user${index}@example.com`,
-          title: `Study ${index}`,
-          description: `Description ${index}`,
-          shareable: index % 2 === 0,
-          created_at_offline: '2025-01-01T00:00:00.000Z',
-          updated_at_offline: '2025-01-01T00:00:00.000Z',
-          saved: true,
-          sections: []
-        })
-      );
+      const largeStudyArray: Study[] = Array.from({ length: 1000 }, (_, index) => ({
+        uuid: `study-${index}`,
+        author_email: `user${index}@example.com`,
+        title: `Study ${index}`,
+        description: `Description ${index}`,
+        shareable: index % 2 === 0,
+        created_at_offline: '2025-01-01T00:00:00.000Z',
+        updated_at_offline: '2025-01-01T00:00:00.000Z',
+        saved: true,
+        sections: []
+      }));
 
       fixture.componentRef.setInput('studies', largeStudyArray);
       fixture.detectChanges();

@@ -12,10 +12,7 @@ import { findMiddleSpan } from '@ui/shared/helpers/findMiddleSpan';
 function isDaylightSavingTime(date: Date = new Date()): boolean {
   const january = new Date(date.getFullYear(), 0, 1);
   const july = new Date(date.getFullYear(), 6, 1);
-  const stdTimezoneOffset = Math.max(
-    january.getTimezoneOffset(),
-    july.getTimezoneOffset()
-  );
+  const stdTimezoneOffset = Math.max(january.getTimezoneOffset(), july.getTimezoneOffset());
   return date.getTimezoneOffset() < stdTimezoneOffset;
 }
 
@@ -100,9 +97,7 @@ export const createInitialMeasureData = (
 };
 
 // Mocked measureData for tests
-export const createTestMeasureData = (
-  overrides?: Partial<FieldMeasure>
-): FieldMeasure => {
+export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldMeasure => {
   const mockSection: Partial<Section> = {
     link_name: 'Line 225kV Rougemontier - Tourbe #1',
     voltage_idr: '123 kV',

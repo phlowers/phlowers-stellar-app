@@ -25,14 +25,7 @@ describe('createPlotDataObject', () => {
     });
 
     it('should return blue color for supports type', () => {
-      const result = createDataObject(
-        testData,
-        0,
-        1,
-        'supports',
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,14 +34,7 @@ describe('createPlotDataObject', () => {
     });
 
     it('should return green color for insulators type', () => {
-      const result = createDataObject(
-        testData,
-        0,
-        1,
-        'insulators',
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(testData, 0, 1, 'insulators', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,14 +47,7 @@ describe('createPlotDataObject', () => {
     });
 
     it('should return black color for unknown type', () => {
-      const result = createDataObject(
-        testData,
-        0,
-        1,
-        'unknown' as PlotObjectsType,
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(testData, 0, 1, 'unknown' as PlotObjectsType, '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,14 +73,7 @@ describe('createPlotDataObject', () => {
     ];
 
     it('should return text+lines mode for supports type', () => {
-      const result = createDataObject(
-        testData,
-        0,
-        1,
-        'supports',
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,14 +91,7 @@ describe('createPlotDataObject', () => {
     });
 
     it('should return lines mode for insulators type', () => {
-      const result = createDataObject(
-        testData,
-        0,
-        1,
-        'insulators',
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(testData, 0, 1, 'insulators', '2d', 'profile');
 
       expect(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -218,14 +183,7 @@ describe('createPlotDataObject', () => {
     });
 
     it('should handle non-spans type with correct slicing', () => {
-      const result = createDataObject(
-        testData,
-        0,
-        2,
-        'supports',
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(testData, 0, 2, 'supports', '2d', 'profile');
 
       // For non-spans, it should slice from startSupport to endSupport + 1 (inclusive)
       expect(result).toHaveLength(3);
@@ -265,28 +223,14 @@ describe('createPlotDataObject', () => {
   describe('edge cases', () => {
     it('should handle empty data array', () => {
       const emptyData: number[][][] = [];
-      const result = createDataObject(
-        emptyData,
-        0,
-        0,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(emptyData, 0, 0, 'spans', '2d', 'profile');
 
       expect(result).toHaveLength(0);
     });
 
     it('should handle single data point', () => {
       const singleData: number[][][] = [[[1, 2, 3]]];
-      const result = createDataObject(
-        singleData,
-        0,
-        1,
-        'spans',
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(singleData, 0, 1, 'spans', '2d', 'profile');
 
       expect(result).toHaveLength(1);
       expect(
@@ -326,14 +270,7 @@ describe('createPlotDataObject', () => {
           [10, 11, 12]
         ]
       ];
-      const result = createDataObject(
-        testData,
-        1,
-        1,
-        'supports',
-        '2d',
-        'profile'
-      );
+      const result = createDataObject(testData, 1, 1, 'supports', '2d', 'profile');
 
       expect(result).toHaveLength(1); // endSupport + 1 - startSupport = 1
     });

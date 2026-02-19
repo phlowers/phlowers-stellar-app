@@ -10,8 +10,4 @@ export type { CatalogAttachment } from './catalog-attachment.model';
 export type { CatalogCable } from './catalog-cable.model';
 export type { CatalogChain } from './catalog-chain.model';
 export type { CatalogLine } from './catalog-line.model';
-export type {
-  CatalogMaintenance,
-  RegionalMaintenanceCenter,
-  MaintenanceTeam
-} from './catalog-maintenance.model';
+export type { CatalogMaintenance, RegionalMaintenanceCenter, MaintenanceTeam } from './catalog-maintenance.model';

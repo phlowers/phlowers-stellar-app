@@ -1,11 +1,4 @@
-import {
-  Component,
-  input,
-  output,
-  computed,
-  signal,
-  effect
-} from '@angular/core';
+import { Component, input, output, computed, signal, effect } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -111,11 +104,7 @@ export class NewChargeModalComponent {
       throw new Error('Study or section not found');
     }
 
-    await this.chargesService.createOrUpdateCharge(
-      studyUuid,
-      sectionUuid,
-      charge
-    );
+    await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, charge);
     this.isOpenChange.emit(false);
   }
 
