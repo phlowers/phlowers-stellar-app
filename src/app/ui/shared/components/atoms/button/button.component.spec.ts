@@ -276,7 +276,7 @@ describe('ButtonComponent', () => {
         @Component({
           standalone: true,
           imports: [ButtonComponent],
-          template: `<button i18n i18n[${selector}] btnSize="s">Test</button>`
+          template: `<button ${selector} btnSize="s">Test</button>`
         })
         class TestSelectorComponent {}
 
