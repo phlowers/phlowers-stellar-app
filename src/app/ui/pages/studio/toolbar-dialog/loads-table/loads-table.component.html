@@ -76,16 +76,16 @@
 
       <ng-template pTemplate="body" let-row>
         <tr>
-          <td>{{ row.windPressure }}&nbsp;Pa</td>
-          <td>{{ row.cableTemperature }}&nbsp;°C</td>
+          <td i18n>{{ row.windPressure }}&nbsp;Pa</td>
+          <td i18n>{{ row.cableTemperature }}&nbsp;°C</td>
           <td>{{ getSymmetryLabel(row.symmetryType) }}</td>
           @if (row.symmetryType === SymmetryType.SYMMETRIC) {
-            <td>{{ row.iceThickness }}&nbsp;cm</td>
+            <td i18n>{{ row.iceThickness }}&nbsp;cm</td>
           }
           @if (row.symmetryType === SymmetryType.DIS_SYMMETRIC) {
             <td>{{ row.frontierSupportNumber }}</td>
-            <td>{{ row.iceThicknessBefore }}&nbsp;cm</td>
-            <td>{{ row.iceThicknessAfter }}&nbsp;cm</td>
+            <td i18n>{{ row.iceThicknessBefore }}&nbsp;cm</td>
+            <td i18n>{{ row.iceThicknessAfter }}&nbsp;cm</td>
           }
         </tr>
       </ng-template>
@@ -115,11 +115,11 @@
           <td>{{ row.spanLabel }}</td>
           <td>{{ row.referenceSupport }}</td>
           <td>{{ getLoadTypeLabel(row.type) }}</td>
-          <td>{{ row.loadPosition }}&nbsp;m</td>
+          <td i18n>{{ row.loadPosition }}&nbsp;m</td>
           @if (row.type === LoadType.MARKING) {
             <td>-</td>
           } @else {
-            <td>{{ row.loadWeight }}&nbsp;N</td>
+            <td i18n>{{ row.loadWeight }}&nbsp;N</td>
           }
         </tr>
       </ng-template>

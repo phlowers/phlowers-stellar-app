@@ -73,17 +73,13 @@ export class UpdateService {
    * Signal containing the currently installed application version.
    * In dev mode, returns a mock version.
    */
-  currentVersion = signal<AppVersion | null>(
-    isDevMode() ? mockCurrentVersion : null
-  );
+  currentVersion = signal<AppVersion | null>(isDevMode() ? mockCurrentVersion : null);
 
   /**
    * Signal containing the latest available application version.
    * In dev mode, returns a mock version.
    */
-  latestVersion = signal<AppVersion | null>(
-    isDevMode() ? mockLatestVersion : null
-  );
+  latestVersion = signal<AppVersion | null>(isDevMode() ? mockLatestVersion : null);
 
   /**
    * Signal indicating whether an update is currently in progress.

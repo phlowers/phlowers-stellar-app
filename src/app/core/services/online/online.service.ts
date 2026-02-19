@@ -57,9 +57,7 @@ export class OnlineService {
    * BehaviorSubject emitting the current server connectivity status.
    * Starts with LOADING and updates based on API health checks.
    */
-  public serverOnline$ = new BehaviorSubject<ServerStatus>(
-    ServerStatus.LOADING
-  );
+  public serverOnline$ = new BehaviorSubject<ServerStatus>(ServerStatus.LOADING);
 
   constructor(private readonly httpClient: HttpClient) {
     this.online$.subscribe((online) => {
@@ -83,10 +81,7 @@ export class OnlineService {
    * Internal observable that merges browser online/offline events.
    * @internal
    */
-  private readonly _online = merge(
-    fromEvent(window, 'online'),
-    fromEvent(window, 'offline')
-  ).pipe(
+  private readonly _online = merge(fromEvent(window, 'online'), fromEvent(window, 'offline')).pipe(
     startWith(undefined),
     map(() => window.navigator.onLine)
   );

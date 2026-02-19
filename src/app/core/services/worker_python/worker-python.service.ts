@@ -60,8 +60,7 @@ export class WorkerPythonService {
   });
 
   /** Map of pending task handlers by ID */
-  handlerMap: Record<string, (result: any, error: TaskError | null) => void> =
-    {};
+  handlerMap: Record<string, (result: any, error: TaskError | null) => void> = {};
 
   /**
    * Observable indicating whether the worker is ready.
