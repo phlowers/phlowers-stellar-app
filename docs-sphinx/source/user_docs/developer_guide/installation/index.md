@@ -1,11 +1,10 @@
 # Installation
 
-This section covers how to set up and configure the Stellar application.
+This section covers general application features and configuration.
 
 ```{toctree}
-:maxdepth: 2
+:titlesonly:
 
 developer_install
-documentation
 setup-mechaphlowers-guide
 ```

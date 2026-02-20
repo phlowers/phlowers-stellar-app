@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Stellar"
-copyright = "Copyright (c) 2026, RTE (http://www.rte-france.com)"
+copyright = "2026, RTE (http://www.rte-france.com)"
 
 
 # -- General configuration ---------------------------------------------------
@@ -16,6 +16,8 @@ copyright = "Copyright (c) 2026, RTE (http://www.rte-france.com)"
 extensions = [
     "sphinx_js",
     "myst_parser",  # Support for Markdown files
+    "sphinx_design",  # Grid, cards, tabs, badges, etc.
+    "sphinx_copybutton",  # Copy button on code blocks
 ]
 
 # sphinx-js configuration for TypeScript
@@ -28,6 +30,7 @@ primary_domain = "js"
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
+    "substitution",
 ]
 source_suffix = {
     ".rst": "restructuredtext",
@@ -65,6 +68,20 @@ html_theme_options = {
         "image_light": "_static/logo.svg",
         "image_dark": "_static/logo.svg",
     },
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/phlowers/phlowers-stellar-app",
+            "icon": "fa-brands fa-github",
+        },
+    ],
+    "footer_start": ["copyright"],
+    "footer_center": ["sphinx-version"],
 }
 
 html_title = "Stellar Documentation"
+
+# Remove secondary sidebar on landing page
+html_sidebars = {
+    "index": [],
+}
