@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { AfterViewInit, Component, effect, ElementRef, input, OnDestroy, viewChild } from '@angular/core';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
@@ -17,11 +17,27 @@ import { LoadType } from './helpers/createLoadAnnotations';
   templateUrl: './section-plot.component.html',
   imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
 })
-export class SectionPlotComponent {
+export class SectionPlotComponent implements AfterViewInit, OnDestroy {
   litData = input<GetSectionOutput | null>(null);
   isSupportZoom = input.required<boolean>();
+  private readonly plotElement = viewChild<ElementRef<HTMLDivElement>>('plotElement');
 
   constructor(public readonly plotService: PlotService) {}
+
+  private setPlotElement(element: HTMLDivElement | null): void {
+    const plotService = this.plotService as PlotService & {
+      setPlotElement?: (plotElement: HTMLElement | null) => void;
+    };
+    plotService.setPlotElement?.(element);
+  }
+
+  ngAfterViewInit(): void {
+    this.setPlotElement(this.plotElement()?.nativeElement ?? null);
+  }
+
+  ngOnDestroy(): void {
+    this.setPlotElement(null);
+  }
 
   getSpanLoadsToDisplay = (selectedDisplayOptions: SelectedDisplayOptions, plotOptions: PlotOptions) => {
     if (!selectedDisplayOptions.loads) {

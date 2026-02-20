@@ -66,6 +66,14 @@ export interface SelectedDisplayOptions {
   baseState: boolean;
 }
 
+interface PlotlyElementWithLayout extends HTMLElement {
+  _fullLayout?: {
+    scene?: {
+      camera?: Camera;
+    };
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -91,6 +99,7 @@ export class PlotService {
     ...defaultSelectedDisplayOptions
   });
   isSidebarOpen = signal(false);
+  private registeredPlotElement: HTMLElement | null = null;
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
@@ -129,7 +138,12 @@ export class PlotService {
     this.isStudioActive.set(false);
     this.section.set(null);
     this.study.set(null);
+    this.registeredPlotElement = null;
   };
+
+  setPlotElement(element: HTMLElement | null): void {
+    this.registeredPlotElement = element;
+  }
 
   private normalizeResolution(value: number): number {
     if (!Number.isFinite(value)) {
@@ -218,11 +232,11 @@ export class PlotService {
   };
 
   getCamera = () => {
-    const plot = document.getElementById(PLOT_ID);
+    const plot = this.registeredPlotElement;
     if (!plot) {
       return null;
     }
-    return (plot as any)._fullLayout?.scene?.camera;
+    return (plot as PlotlyElementWithLayout)._fullLayout?.scene?.camera ?? null;
   };
 
   refreshCamera = (): Camera | null => {
@@ -252,10 +266,10 @@ export class PlotService {
   };
 
   purgePlot = () => {
-    if (!document.getElementById(PLOT_ID)) {
+    if (!this.registeredPlotElement) {
       return;
     }
-    plotly.purge(PLOT_ID);
+    plotly.purge(this.registeredPlotElement);
     this.litData.set(null);
     this.baseLitData.set(null);
     this.error.set(null);

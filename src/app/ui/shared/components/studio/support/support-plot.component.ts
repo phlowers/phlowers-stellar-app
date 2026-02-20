@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, ElementRef, input, OnDestroy, viewChild } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -25,8 +25,7 @@ interface PlotData {
   templateUrl: './support-plot.component.html',
   imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
 })
-export class SupportPlotComponent {
-  private static readonly PLOT_ELEMENT_ID = 'plotly-output-support';
+export class SupportPlotComponent implements OnDestroy {
   private static readonly PLOT_LAYOUT = {
     autosize: true,
     showlegend: false,
@@ -49,6 +48,7 @@ export class SupportPlotComponent {
   coordinates = input<(number | undefined)[][]>();
   attachmentSetNumbers = input<number[]>();
   selectedAttachmentSetNumber = input<number | undefined>(undefined);
+  private readonly plotElement = viewChild<ElementRef<HTMLDivElement>>('plotElement');
 
   constructor(private readonly workerPythonService: WorkerPythonService) {
     effect(() => {
@@ -63,8 +63,16 @@ export class SupportPlotComponent {
     });
   }
 
+  ngOnDestroy(): void {
+    this.clearPlot();
+  }
+
   clearPlot(): void {
-    plotly.purge(SupportPlotComponent.PLOT_ELEMENT_ID);
+    const plotElement = this.plotElement()?.nativeElement;
+    if (!plotElement) {
+      return;
+    }
+    plotly.purge(plotElement);
   }
 
   async refreshPlot(
@@ -148,7 +156,12 @@ export class SupportPlotComponent {
       plotData.push(selectedMarkerData);
     }
 
-    plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
+    const plotElement = this.plotElement()?.nativeElement;
+    if (!plotElement) {
+      return;
+    }
+
+    plotly.newPlot(plotElement, plotData, SupportPlotComponent.PLOT_LAYOUT);
   }
 
   private createShapeData(shapePoints: number[][]): Data {
