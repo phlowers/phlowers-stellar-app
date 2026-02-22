@@ -54,9 +54,7 @@
     <div class="flex gap-6 items-start pl-4">
       <div class="supports-select">
         <button
-          [disabled]="
-            plotService.isFreePositioningMode() || plotService.loading() || plotService.plotOptions().startSupport === 0
-          "
+          [disabled]="isPreviousDisabled()"
           (click)="onSupportButtonClick('left')"
           class="supports-select__buttons supports-select__buttons--left"
         >
@@ -74,11 +72,7 @@
         />
 
         <button
-          [disabled]="
-            plotService.isFreePositioningMode() ||
-            plotService.loading() ||
-            plotService.plotOptions().endSupport === (this.plotService.section()?.supports?.length ?? 0) - 1
-          "
+          [disabled]="isNextDisabled()"
           (click)="onSupportButtonClick('right')"
           class="supports-select__buttons supports-select__buttons--right"
         >
