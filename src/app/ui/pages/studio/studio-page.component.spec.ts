@@ -404,14 +404,6 @@ describe('StudioPageComponent', () => {
     });
   });
 
-  it('onSupportButtonClick should do nothing when supports is all', () => {
-    plotService.spanAmountChoice.set('all');
-
-    component.onSupportButtonClick('right');
-
-    expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
-  });
-
   it('ngOnDestroy should clean up subscription and reset plot service', () => {
     const unsubscribe = jest.fn();
     (component as unknown as { subscription: { unsubscribe: () => void } }).subscription = { unsubscribe };

@@ -193,8 +193,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onSupportButtonClick(direction: 'left' | 'right') {
-    const spanAmountChoice = this.plotService.spanAmountChoice();
-    if (spanAmountChoice === 'all') return;
     const increment = direction === 'left' ? -1 : 1;
     const options = this.plotService.plotOptions();
     this.plotService.plotOptionsChange({
