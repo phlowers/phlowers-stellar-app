@@ -58,7 +58,11 @@ export class SupportsTableComponent implements OnInit {
   supportChange = output<{ uuid: string; support: Partial<Support> }>();
   chainsOptions = signal<CatalogChain[]>([]);
   supplementaryChainsOptions = signal<CatalogChain[]>([]);
-  allChainsOptions = computed(() => [...this.chainsOptions(), ...this.supplementaryChainsOptions()]);
+  allChainsOptions = computed(() =>
+    [...this.chainsOptions(), ...this.supplementaryChainsOptions()].sort((a, b) =>
+      a.chain_name.localeCompare(b.chain_name)
+    )
+  );
   attachmentSetModalOpen = signal<boolean>(false);
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   first = input.required<number>();
