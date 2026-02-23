@@ -31,6 +31,7 @@ interface L0Row {
   templateUrl: './l0-sum.component.html',
   styleUrls: ['./l0-sum.component.scss']
 })
+/** Component displaying the natural cable length (L0) per span and total sum, with sorting and export capabilities. */
 export class L0SumComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;

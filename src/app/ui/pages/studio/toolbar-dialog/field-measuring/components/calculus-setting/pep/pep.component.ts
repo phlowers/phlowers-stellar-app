@@ -6,4 +6,5 @@ import { Component } from '@angular/core';
   templateUrl: './pep.component.html',
   styleUrl: './pep.component.scss'
 })
+/** Placeholder component for the PEP (Point d'Échange Plan) calculation method. */
 export class PepComponent {}

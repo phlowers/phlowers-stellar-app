@@ -93,6 +93,7 @@ const orderedLineTableProperties: LineTableProperties[] = [
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss'
 })
+/** Component for manually defining a section's general info, supports, and graphical preview. */
 export class ManualSectionComponent implements OnInit {
   tabValue = signal<string>('general');
   mode = input.required<CreateEditView>();

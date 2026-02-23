@@ -18,6 +18,7 @@ import { Task, TaskError, TaskInputs } from './tasks/types';
 
 const pythonFiles = [functions, change_state, guying, temperature, parameter_15_without_wind];
 
+/** Type alias for the resolved Pyodide API instance returned by loadPyodide */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;
 

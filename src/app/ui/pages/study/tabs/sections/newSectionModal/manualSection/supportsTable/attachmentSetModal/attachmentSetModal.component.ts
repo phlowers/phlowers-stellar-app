@@ -30,6 +30,7 @@ import { uniq } from 'lodash';
   styleUrls: ['./attachmentSetModal.component.scss'],
   templateUrl: './attachmentSetModal.component.html'
 })
+/** Modal component for selecting and configuring an attachment set for a support. */
 export class AttachmentSetModalComponent implements OnInit {
   isOpen = input<boolean>(false);
   support = input<Support>();

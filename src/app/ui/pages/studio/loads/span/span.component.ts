@@ -30,6 +30,7 @@ import { LoadControlName, SpanFormControls, SupportOption } from './span.interfa
   templateUrl: './span.component.html',
   styleUrl: './span.component.scss'
 })
+/** Component for configuring span-level loads including type, weight, and position relative to supports. */
 export class SpanComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);

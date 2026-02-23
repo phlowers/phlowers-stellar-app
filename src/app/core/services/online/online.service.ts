@@ -53,6 +53,7 @@ export enum ServerStatus {
   providedIn: 'root'
 })
 export class OnlineService {
+  /** BehaviorSubject tracking the server's reachability status (LOADING, ONLINE, or OFFLINE) */
   public serverOnline$ = new BehaviorSubject<ServerStatus>(ServerStatus.LOADING);
 
   constructor(private readonly httpClient: HttpClient) {

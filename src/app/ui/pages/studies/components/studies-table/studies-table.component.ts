@@ -38,18 +38,34 @@ import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/sh
   templateUrl: './studies-table.component.html',
   providers: []
 })
+/**
+ * Reusable table component for displaying, sorting, and paginating a list of studies.
+ * Provides actions for exporting, duplicating, and deleting individual studies.
+ */
 export class StudiesTableComponent {
+  /** Default number of rows displayed per page. */
   defaultRowsPerPage = DEFAULT_TABLE_ROWS_PER_PAGE;
+  /** Available options for rows-per-page selection. */
   rowsPerPageOptions = TABLE_ROWS_PER_PAGE_OPTIONS;
+  /** Required input providing the list of studies to display. */
   studies = input.required<Study[]>();
+  /** Signal holding the current sort field name. */
   sortField = signal<string>('');
+  /** Signal holding the current sort order (1 for ascending, -1 for descending). */
   sortOrder = signal<number>(1);
+  /** Output emitted when a study deletion is requested, carrying the study UUID. */
   deleteStudy = output<string>();
+  /** Output emitted when a study duplication is requested, carrying the study UUID. */
   duplicateStudy = output<string>();
+  /** Localized template string for the paginator's current page report. */
   currentPageReportTemplate = $localize`Study ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
 
   constructor(public readonly studiesService: StudiesService) {}
 
+  /**
+   * Opens the export dialog for the study with the given UUID.
+   * @param uuid - The UUID of the study to export.
+   */
   openExportDialog = (uuid: string) => {
     this.studiesService.exportDialogData.set({
       uuid,
@@ -58,6 +74,10 @@ export class StudiesTableComponent {
     });
   };
 
+  /**
+   * Handles table sort events by updating the sort field and order signals.
+   * @param event - The PrimeNG sort event.
+   */
   onSort(event: SortEvent) {
     this.sortField.set(event.field as string);
     this.sortOrder.set(event.order as number);

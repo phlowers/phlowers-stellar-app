@@ -12,6 +12,7 @@ import { FieldMeasure } from '../../types';
   templateUrl: './calculus-setting.component.html',
   styleUrl: './calculus-setting.component.scss'
 })
+/** Component allowing the user to select and configure a field measurement calculation method (PAPOTO, PEP, or tangent aiming). */
 export class CalculusSettingComponent {
   measureData = model.required<FieldMeasure>();
   selectedCalculusType = 'PAPOTO';

@@ -43,6 +43,7 @@ interface SpanLoadRow {
   templateUrl: './loads-table.component.html',
   styleUrl: './loads-table.component.scss'
 })
+/** Component displaying a charge's climatic and span load data in tabular form, with view and edit modes. */
 export class LoadsTableComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;

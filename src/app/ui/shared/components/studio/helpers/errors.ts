@@ -7,6 +7,13 @@ const ERROR_MESSAGES = {
   [TaskError.PYODIDE_LOAD_ERROR]: $localize`Pyodide load error`
 } as const;
 
+/**
+ * Formats a studio task or data error into a user-facing localized message.
+ * Falls back to a generic "Unknown error" message when the error code is not recognized.
+ * @category Studio
+ * @param error - The error code to format, or `null`.
+ * @returns A localized error message string.
+ */
 export const formatStudioError = (error: TaskError | DataError | null) => {
   return ERROR_MESSAGES[error as keyof typeof ERROR_MESSAGES] ?? $localize`Unknown error`;
 };

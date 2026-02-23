@@ -48,6 +48,7 @@ import { MessageService } from 'primeng/api';
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss']
 })
+/** Component orchestrating the field measuring workflow, including terrain data, calculus settings, and temperature/parameter calculations. */
 export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;

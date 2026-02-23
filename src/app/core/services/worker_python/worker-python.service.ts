@@ -58,6 +58,7 @@ export class WorkerPythonService {
     importTime: 0,
     runTime: 0
   });
+  /** Map of pending task IDs to their resolve callbacks, used to correlate worker responses */
   handlerMap: Record<string, (result: any, error: TaskError | null) => void> = {};
 
   /**

@@ -26,6 +26,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   templateUrl: './init.component.html',
   styleUrl: './init.component.scss'
 })
+/** Initialization component for the field measuring tool, allowing users to create or select a measurement. */
 export class InitComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
 

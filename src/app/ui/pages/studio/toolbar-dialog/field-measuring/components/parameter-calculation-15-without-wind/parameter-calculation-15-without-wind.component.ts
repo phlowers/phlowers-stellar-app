@@ -50,6 +50,7 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
     ])
   ]
 })
+/** Component for computing the cable parameter at 15°C without wind, with auto and manual input modes. */
 export class ParameterCalculation15WithoutWindComponent {
   measureData = model.required<FieldMeasure>();
   initialConditionModalOpen = signal<boolean>(false);

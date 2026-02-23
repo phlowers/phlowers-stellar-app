@@ -5,30 +5,44 @@ import { L0SumComponent } from './l0-sum/l0-sum.component';
 import { VhlAndGuyingComponent } from './vtl-and-guying/vtl-and-guying.component';
 import { LoadsTableComponent } from './loads-table/loads-table.component';
 
+/** Identifier for a toolbar dialog tool. */
 export type Tool = 'field-measuring' | 'l0-sum' | 'vtl-and-guying' | 'load-table' | 'other-tool';
 
+/** Phase of the toolbar dialog lifecycle (init or main content). */
 export type DialogPhase = 'init' | 'main';
 
+/** Configuration for a toolbar dialog tool, including its component and optional init phase. */
 export interface ToolConfig {
+  /** Main component to render for this tool. */
   component: Type<unknown>;
+  /** Optional dialog CSS styles for the main phase. */
   dialogStyle?: Record<string, string>;
+  /** Optional initialization component shown before the main phase. */
   initComponent?: Type<unknown>;
+  /** Optional dialog CSS styles for the init phase. */
   initDialogStyle?: Record<string, string>;
 }
 
+/** Custom header and footer templates injected into the toolbar dialog. */
 export interface ToolTemplates {
+  /** Optional header template reference. */
   header?: TemplateRef<unknown>;
+  /** Optional footer template reference. */
   footer?: TemplateRef<unknown>;
 }
 
+/** Context for opening the loads table tool with a specific charge. */
 export interface LoadTableContext {
+  /** Whether the table opens in view or edit mode. */
   mode: 'view' | 'edit';
+  /** UUID of the charge to display. */
   chargeUuid: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
+/** Service managing the toolbar dialog lifecycle, including opening, closing, and transitioning between tools. */
 export class ToolbarDialogService {
   readonly currentTool = signal<Tool | null>(null);
   readonly isOpen = signal(false);

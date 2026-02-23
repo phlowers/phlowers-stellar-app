@@ -27,6 +27,7 @@ import { MessageModule } from 'primeng/message';
   templateUrl: './field-datas.component.html',
   styleUrls: ['./field-datas.component.scss']
 })
+/** Component for entering and displaying field measurement data such as location, weather, and time. */
 export class FieldDatasComponent {
   isNameAlreadyTaken = input.required<boolean>();
   measureData = input.required<FieldMeasure>();

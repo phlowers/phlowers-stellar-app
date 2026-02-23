@@ -64,6 +64,7 @@ interface SupportOption {
   templateUrl: './vtl-and-guying.component.html',
   styleUrls: ['./vtl-and-guying.component.scss']
 })
+/** Component for computing VTL (vertical/transversal/longitudinal) loads and guying at a selected support. */
 export class VhlAndGuyingComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;

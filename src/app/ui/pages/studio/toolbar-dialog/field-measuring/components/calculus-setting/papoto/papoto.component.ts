@@ -38,6 +38,7 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
     ])
   ]
 })
+/** Component for the PAPOTO calculation method, handling input of measurement distances and parameter computation. */
 export class PapotoComponent {
   leftSupportOption = input.required<{ label: string; value: string }[]>();
   measureData = model.required<FieldMeasure>();

@@ -9,6 +9,7 @@ import { recheckSpanLoads } from './helpers';
 @Injectable({
   providedIn: 'root'
 })
+/** Service coordinating load form state, persisting charge data, and triggering load calculations via the Python worker. */
 export class LoadFormsService {
   /**
    * Initialize the temporary load data by getting the selected charge case and checking the span loads

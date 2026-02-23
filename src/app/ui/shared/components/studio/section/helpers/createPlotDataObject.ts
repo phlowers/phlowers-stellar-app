@@ -51,8 +51,25 @@ const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
   }
 };
 
+/** A Plotly {@link Data} object extended with an optional support UUID for identification.
+ * @category Studio
+ */
 export type DataObject = Data & { supportUuid: string | undefined };
 
+/**
+ * Creates an array of Plotly-compatible data objects from raw 3D coordinate arrays
+ * for a specific section object type (spans, supports, or insulators).
+ * Handles coordinate mapping based on the selected view and side.
+ * @category Studio
+ * @param data - Array of polyline coordinate arrays (`[x, y, z][][]`).
+ * @param startSupport - Zero-based index of the first support to include.
+ * @param endSupport - Zero-based index of the last support to include.
+ * @param type - The section object type being rendered.
+ * @param view - The rendering dimension (`'2d'` or `'3d'`).
+ * @param side - The viewing side (`'profile'` or `'face'`).
+ * @param supports - Optional array of support models to attach UUIDs.
+ * @returns An array of {@link DataObject} entries.
+ */
 export const createDataObject = (
   data: number[][][],
   startSupport: number,

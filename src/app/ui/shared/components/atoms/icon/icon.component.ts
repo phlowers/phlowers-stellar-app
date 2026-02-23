@@ -13,16 +13,25 @@ import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '../../.
     '[class.symbols-loading]': '!symbolsReady()'
   }
 })
+/**
+ * Icon component that renders either a Material Symbols Rounded icon or a custom SVG sprite icon.
+ * Waits for the Material Symbols font to be loaded before displaying the icon.
+ */
 export class IconComponent implements OnInit {
+  /** Name of the icon to display (Material Symbol or custom SVG). */
   icon = input.required<PossibleIconNames | undefined>();
+  /** Whether to render the icon with a filled variant. */
   fill = input<boolean>(false);
 
+  /** Whether the Material Symbols Rounded font is loaded and ready. */
   symbolsReady = signal(false);
 
+  /** Whether the current icon is a custom SVG rather than a Material Symbol. */
   isCustomSvgIcon = computed(() => {
     return CUSTOM_SVG_ICONS.includes(this.icon() as CustomSvgIconNames);
   });
 
+  /** Returns the SVG sprite reference URL for a custom icon. */
   customSvgContent = () => {
     return `/icons/customs.svg#${this.icon()}`;
   };

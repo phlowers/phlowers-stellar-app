@@ -61,6 +61,10 @@ export class AppDatabase extends Dexie {
   /** Table storing maintenance organization catalog data */
   catMaintenance!: Table<CatalogMaintenanceEntity, string>;
 
+  /**
+   * Creates an AppDatabase instance named 'stellar-db' and registers
+   * all table schemas (version 1).
+   */
   constructor() {
     super('stellar-db');
 

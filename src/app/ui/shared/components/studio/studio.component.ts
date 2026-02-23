@@ -10,6 +10,10 @@ import { formatStudioError } from './helpers/errors';
   templateUrl: './studio.component.html',
   imports: [SectionPlotComponent, ProgressSpinnerModule]
 })
+/**
+ * Studio component that orchestrates the section plot visualisation.
+ * Manages plot data refresh, error formatting, and preview mode behaviour.
+ */
 export class StudioComponent {
   // Inputs
   readonly isPreview = input.required<boolean>();

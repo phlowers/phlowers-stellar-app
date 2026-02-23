@@ -41,6 +41,7 @@ const newCharge = (currentCharges: Charge[]): Charge => {
   templateUrl: './new-charge-modal.component.html',
   styleUrl: './new-charge-modal.component.scss'
 })
+/** Modal dialog component for creating a new charge case with name, description, and personnel presence. */
 export class NewChargeModalComponent {
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();

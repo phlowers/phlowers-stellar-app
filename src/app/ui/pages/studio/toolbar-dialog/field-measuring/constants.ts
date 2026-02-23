@@ -1,14 +1,19 @@
+/** Generic select option with a display label and a string value. */
 export interface SelectOption {
+  /** Display label for the option. */
   label: string;
+  /** Value associated with the option. */
   value: string;
 }
 
+/** Available span options for field measuring. */
 export const SPAN_OPTIONS: SelectOption[] = [
   { label: '12-13', value: '12-13' },
   { label: '13-14', value: '13-14' },
   { label: '14-15', value: '14-15' }
 ];
 
+/** Available wind direction options for field measuring. */
 export const WIND_DIRECTION_OPTIONS: SelectOption[] = [
   { label: $localize`North`, value: 'North' },
   { label: $localize`North-East`, value: 'North-East' },
@@ -20,16 +25,19 @@ export const WIND_DIRECTION_OPTIONS: SelectOption[] = [
   { label: $localize`North-West`, value: 'North-West' }
 ];
 
+/** Available time mode options (summer/winter). */
 export const TIME_MODE_OPTIONS: SelectOption[] = [
   { label: $localize`Summer`, value: 'summer' },
   { label: $localize`Winter`, value: 'winter' }
 ];
 
+/** Available wind speed unit options (km/h or m/s). */
 export const WIND_SPEED_UNIT_OPTIONS: SelectOption[] = [
   { label: 'km/h', value: 'kmh' },
   { label: 'm/s', value: 'ms' }
 ];
 
+/** Available sky cover options for field measuring (N0–N8 nebulosity scale). */
 export const SKY_COVER_OPTIONS: SelectOption[] = [
   { label: `N0`, value: 'N0' },
   { label: $localize`N1 - Sunny`, value: 'N1' },
@@ -42,6 +50,7 @@ export const SKY_COVER_OPTIONS: SelectOption[] = [
   { label: $localize`N8 - covered - smoky`, value: 'N8' }
 ];
 
+/** Default left support options for field measuring. */
 export const LEFT_SUPPORT_OPTIONS: SelectOption[] = [
   { label: $localize`Support 1`, value: 'support1' },
   { label: $localize`Support 2`, value: 'support2' },

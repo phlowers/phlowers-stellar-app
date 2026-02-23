@@ -15,6 +15,7 @@ const REFRESH_STUDIO_DELAY = 400;
   templateUrl: './side-tabs.component.html',
   styleUrl: './side-tabs.component.scss'
 })
+/** Component implementing a collapsible side-tab panel system with keyboard navigation support. */
 export class SideTabsComponent {
   @ContentChildren(SideTabComponent) tabs!: QueryList<SideTabComponent>;
   @ViewChildren('panelRef') panels!: QueryList<ElementRef<HTMLElement>>;

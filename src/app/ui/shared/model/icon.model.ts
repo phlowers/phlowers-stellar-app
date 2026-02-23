@@ -1,5 +1,11 @@
+/** Custom SVG icon names registered in the application.
+ * @category Icons
+ */
 export const CUSTOM_SVG_ICONS = ['support', 'span'] as const;
 
+/** Complete list of Material icon names available in the application.
+ * @category Icons
+ */
 export const ALL_ICONS = [
   'search',
   'home',
@@ -3654,6 +3660,17 @@ export const ALL_ICONS = [
   'farsight_digital'
 ] as const;
 
+/** Type representing the names of custom SVG icons.
+ * @category Icons
+ */
 export type CustomSvgIconNames = (typeof CUSTOM_SVG_ICONS)[number];
+
+/** Type representing the names of Material icons.
+ * @category Icons
+ */
 export type MaterialIconNames = (typeof ALL_ICONS)[number];
+
+/** Union type of all possible icon names (Material and custom SVG).
+ * @category Icons
+ */
 export type PossibleIconNames = MaterialIconNames | CustomSvgIconNames;

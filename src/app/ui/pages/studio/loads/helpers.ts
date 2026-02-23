@@ -1,6 +1,7 @@
 import { SpanLoad, Support } from '@core/domain';
 import { LoadType } from '@core/domain/models/charge.model';
 
+/** Default empty span load used as a template when creating new span load entries. */
 export const emptySpanLoad: SpanLoad = {
   supportUuid: '',
   loadPosition: 0,

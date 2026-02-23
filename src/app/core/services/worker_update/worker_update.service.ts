@@ -69,8 +69,11 @@ const mockLatestVersion: AppVersion = {
  */
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
+  /** Signal containing the currently installed application version, or null if unknown */
   currentVersion = signal<AppVersion | null>(isDevMode() ? mockCurrentVersion : null);
+  /** Signal containing the latest available application version, or null if unknown */
   latestVersion = signal<AppVersion | null>(isDevMode() ? mockLatestVersion : null);
+  /** Signal indicating whether an update or install operation is in progress */
   updateLoading = signal(false);
 
   /**

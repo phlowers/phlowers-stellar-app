@@ -8,6 +8,7 @@ import { loadPyodide } from 'pyodide';
 import type { PyProxy } from 'pyodide/ffi';
 import { Task, TaskError, TaskInputs, TaskOutputs } from './types';
 
+/** Type alias for the resolved Pyodide API instance returned by loadPyodide */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 
 const tasks: Record<
@@ -59,6 +60,21 @@ const tasks: Record<
   }
 };
 
+/**
+ * Execute a calculation task in the Pyodide Python runtime.
+ *
+ * @remarks
+ * Loads any required external packages, passes inputs to the corresponding
+ * Python function via Pyodide globals, and converts the result back to
+ * JavaScript. Returns a SOLVER_DID_NOT_CONVERGE error if the solver fails
+ * to converge, or a CALCULATION_ERROR for other exceptions.
+ *
+ * @typeParam taskId - The specific task type from the Task enum
+ * @param pyodide - The initialized Pyodide API instance
+ * @param task - The task identifier to execute
+ * @param inputs - Input parameters matching the task's expected input type
+ * @returns Promise resolving to the task result, execution time, and any error
+ */
 export async function handleTask<taskId extends Task>(
   pyodide: PyodideAPI,
   task: Task,

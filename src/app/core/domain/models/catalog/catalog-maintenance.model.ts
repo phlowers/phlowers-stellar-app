@@ -70,10 +70,16 @@ export interface MaintenanceTeam extends MaintenanceCenter {
  * @category Catalog Models
  */
 export interface CatalogMaintenance {
+  /** Name of the maintenance center */
   maintenance_center: string;
+  /** Name of the regional team */
   regional_team: string;
+  /** Name of the maintenance team */
   maintenance_team: string;
+  /** Internal ID of the maintenance center */
   maintenance_center_id: string;
+  /** Internal ID of the regional team */
   regional_team_id: string;
+  /** Internal ID of the maintenance team */
   maintenance_team_id: string;
 }

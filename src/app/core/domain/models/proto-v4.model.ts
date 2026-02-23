@@ -28,16 +28,27 @@
 export interface ProtoV4Support {
   /** Altitude of attachment point (alt_acc = altitude accrochage) */
   alt_acc: number;
+  /** Line angle at the support (gradients) */
   angle_ligne: number;
+  /** Whether the chain is V-shaped */
   ch_en_V: boolean;
+  /** Counter weight value (kg) */
   ctr_poids: number;
+  /** Arm/crossarm length (meters) */
   long_bras: number;
+  /** Chain length (meters) */
   long_ch: number;
+  /** Support name */
   nom: string;
+  /** Support number */
   num: string;
+  /** Chain weight (kg) */
   pds_ch: number;
+  /** Span length (meters) */
   portée: number;
+  /** Chain surface area (m²) */
   surf_ch: number;
+  /** Whether the support is a suspension type */
   suspension: boolean;
 }
 
@@ -70,13 +81,22 @@ export interface ProtoV4Support {
 export interface ProtoV4Parameters {
   /** Name of the conductor/cable */
   conductor: string;
+  /** Number of cables in the bundle */
   cable_amount: number;
+  /** Reference temperature (°C) */
   temperature_reference: number;
+  /** Sag parameter value (meters) */
   parameter: number;
+  /** CRA (cable pretension) value */
   cra: number;
+  /** Temperature for load condition (°C) */
   temp_load: number;
+  /** Wind pressure for load condition (Pa) */
   wind_load: number;
+  /** Frost/ice thickness for load condition (mm) */
   frost_load: number;
+  /** Name of the section */
   section_name: string;
+  /** Name of the project */
   project_name: string;
 }

@@ -93,9 +93,16 @@ const importSuccessMessage = {
   templateUrl: './import-study.component.html',
   styleUrl: './import-study.component.scss'
 })
+/**
+ * Component for importing studies from external files.
+ * Supports both `.clst` (application JSON) and `.csv` (Proto V4) file formats.
+ */
 export class ImportStudyComponent {
+  /** Signal indicating whether a file import operation is in progress. */
   loading = signal<boolean>(false);
+  /** Signal holding the list of successfully imported studies. */
   newStudies = signal<Study[]>([]);
+  /** Signal holding the names of files that failed to import. */
   erroredFiles = signal<string[]>([]);
 
   constructor(
@@ -105,6 +112,10 @@ export class ImportStudyComponent {
     private readonly confirmationService: ConfirmationService
   ) {}
 
+  /**
+   * Deletes an imported study and removes it from the new studies list.
+   * @param uuid - The UUID of the study to delete.
+   */
   async deleteStudy(uuid: string) {
     await this.studiesService.deleteStudy(uuid);
     this.newStudies.set(this.newStudies().filter((study) => study.uuid !== uuid));
@@ -187,6 +198,11 @@ export class ImportStudyComponent {
     resolve();
   }
 
+  /**
+   * Reads and imports a `.clst` application file containing a base64-encoded JSON study.
+   * @param file - The `.clst` file to import.
+   * @returns A promise that resolves when the import is complete.
+   */
   loadAppFile(file: File): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const reader = new FileReader();
@@ -214,12 +230,23 @@ export class ImportStudyComponent {
     });
   }
 
+  /**
+   * Checks whether a cable with the given conductor name exists in the database.
+   * @param conductor - The conductor/cable name to look up.
+   * @returns A promise resolving to `true` if the cable exists.
+   */
   checkIfCableExists(conductor: string): Promise<boolean> {
     return this.cablesService.getCables().then((cables) => {
       return !!cables?.find((cable) => cable.name === conductor);
     });
   }
 
+  /**
+   * Prompts the user for confirmation if a study with the given UUID already exists.
+   * If confirmed, the existing study is deleted before re-importing.
+   * @param uuid - The UUID to check.
+   * @returns A promise resolving to `true` if import should proceed.
+   */
   async promptIfStudyAlreadyExists(uuid: string): Promise<boolean> {
     const study = await this.studiesService.getStudy(uuid);
     if (!study) {
@@ -340,6 +367,11 @@ export class ImportStudyComponent {
     });
   }
 
+  /**
+   * Reads and imports a Proto V4 CSV file, parsing supports and parameters.
+   * @param file - The CSV file to import.
+   * @returns A promise that resolves when the import is complete.
+   */
   loadProtoV4File(file: File) {
     return new Promise<void>((resolve, reject) => {
       const fileName = file.name;
@@ -434,6 +466,10 @@ export class ImportStudyComponent {
     this.messageService.add(importErrorMessage(errorType));
   }
 
+  /**
+   * Handles the file input change event, validates file types, and processes valid files for import.
+   * @param event - The file input change event.
+   */
   async loadFiles(event: Event) {
     try {
       this.loading.set(true);

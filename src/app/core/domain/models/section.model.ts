@@ -106,7 +106,9 @@ export interface Section {
   supports_comment: string | undefined;
   /** Array of support structures in the section */
   supports: Support[];
+  /** Array of obstacles near the section */
   obstacles: Obstacle[];
+  /** Array of initial conditions for calculations */
   initial_conditions: InitialCondition[];
   /** UUID of the currently selected initial condition */
   selected_initial_condition_uuid: string | undefined;

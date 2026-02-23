@@ -58,6 +58,7 @@ interface DataSection {
     ])
   ]
 })
+/** Component rendering an expandable card showing support or span data from the section plot output. */
 export class SectionPlotCardComponent {
   isExpanded = signal(false);
   litData = input.required<GetSectionOutput | null>();

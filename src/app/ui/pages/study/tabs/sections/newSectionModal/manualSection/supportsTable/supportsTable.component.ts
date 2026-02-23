@@ -49,6 +49,7 @@ import {
   templateUrl: './supportsTable.component.html',
   styleUrls: ['./supportsTable.component.scss']
 })
+/** Table component for displaying and editing the supports of a section. */
 export class SupportsTableComponent implements OnInit {
   supports = input<Support[]>([]);
   mode = input.required<CreateEditView>();

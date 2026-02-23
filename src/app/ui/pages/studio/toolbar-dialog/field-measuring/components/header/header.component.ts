@@ -15,6 +15,7 @@ import { isEqual } from 'lodash';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
+/** Header component for the field measuring dialog, managing span selection and automatic altitude computation. */
 export class HeaderComponent {
   measureData = input.required<FieldMeasure>();
   fieldChange = output<{

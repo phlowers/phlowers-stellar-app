@@ -25,6 +25,12 @@ export interface InitialConditionFunctionsInput {
   generateState?: boolean;
 }
 
+/**
+ * Extended input parameters for duplicating an initial condition.
+ *
+ * @extends InitialConditionFunctionsInput
+ * @category Types
+ */
 export interface DuplicateInitialConditionFunctionsInput extends InitialConditionFunctionsInput {
   newUuid: string;
 }
@@ -205,6 +211,14 @@ export class InitialConditionService {
     );
   }
 
+  /**
+   * Retrieve an initial condition by its UUID from a specific study and section.
+   *
+   * @param studyUuid - The UUID of the study
+   * @param sectionUuid - The UUID of the section
+   * @param initialConditionUuid - The UUID of the initial condition to retrieve
+   * @returns Promise resolving to the initial condition if found, undefined otherwise
+   */
   async getInitialCondition(
     studyUuid: string,
     sectionUuid: string,

@@ -77,10 +77,16 @@ type ServerStates = CardState;
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
+/**
+ * Home page component displaying news, changelog updates, server connectivity status,
+ * and the user's most recently updated studies.
+ */
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
+  /** Signal holding the list of most recently updated studies. */
   public latestStudies = signal<Study[]>([]);
 
+  /** Signal holding the text content displayed in home page cards. */
   public homeText = signal<HomeTexts>(defaultTexts);
 
   private updateText(key: keyof HomeTexts, value: string) {
@@ -90,7 +96,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     }));
   }
 
+  /** Signal representing the current application update availability status. */
   public updateStatus = signal<'unknown' | 'warning'>('unknown');
+  /** Signal representing the current server connectivity status. */
   public serverStatus = signal<ServerStates>('unknown');
   private isOffline(isOnline: boolean): boolean {
     return !isOnline;
@@ -118,6 +126,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Subscribes to online and server status observables and loads the latest studies. */
   ngOnInit(): void {
     this.subscriptions.add(
       combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]).subscribe(
@@ -179,6 +188,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Cleans up all active subscriptions when the component is destroyed. */
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }

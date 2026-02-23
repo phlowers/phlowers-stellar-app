@@ -107,14 +107,29 @@ export interface GetSectionOutput {
   span_length: number[];
   /** Coordinates of applied loads by support UUID */
   loads_coords: Dictionary<number[]>;
+  /** Cable sag parameter (unitless) at each span */
   parameter: number[];
+  /** Superior (upper) tension at each support (daN) */
   tension_sup: number[];
+  /** Inferior (lower) tension at each support (daN) */
   tension_inf: number[];
+  /** Horizontal distance at each span (m) */
   horizontal_distance: number[];
+  /** Arc length of cable in each span (m) */
   arc_length: number[];
+  /** Horizontal component of cable tension at each span (daN) */
   T_h: number[];
 }
 
+/**
+ * Output structure containing both current and base state calculation results.
+ *
+ * @remarks
+ * Used by tasks that compare a modified state against a reference (base) state.
+ * The base output is null when no base state comparison is requested.
+ *
+ * @category Worker Types
+ */
 export interface GetSectionWithBaseOutput {
   current: GetSectionOutput;
   base: GetSectionOutput | null;
@@ -229,10 +244,15 @@ export interface TaskInputs {
  * @category Worker Types
  */
 export interface TaskOutputs {
+  /** Output from getLit task: section geometry with optional base state comparison */
   [Task.getLit]: GetSectionWithBaseOutput;
+  /** Output from runTests task: no output data */
   [Task.runTests]: undefined;
+  /** Output from changeState task: recalculated geometry with optional base state */
   [Task.changeState]: GetSectionWithBaseOutput;
+  /** Output from refreshProjection task: reprojected geometry with optional base state */
   [Task.refreshProjection]: GetSectionWithBaseOutput;
+  /** Output from getSupportCoordinates task: 2D display coordinates for supports */
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
     text_display_points: number[][];

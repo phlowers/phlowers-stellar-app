@@ -39,6 +39,7 @@ import { DecimalPipe } from '@angular/common';
     ])
   ]
 })
+/** Component for computing cable temperature based on environmental conditions and transit data. */
 export class TemperatureCalculationComponent {
   windDirectionOptions = input.required<{ label: string; value: string }[]>();
   skyCoverOptions = input.required<{ label: string; value: string }[]>();

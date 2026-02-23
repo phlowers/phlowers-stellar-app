@@ -16,6 +16,14 @@ function isDaylightSavingTime(date: Date = new Date()): boolean {
   return date.getTimezoneOffset() < stdTimezoneOffset;
 }
 
+/**
+ * Creates the initial field measure data for a new measurement session.
+ * @param section - The current section, used to pre-populate cable/link metadata.
+ * @param name - Name of the field measure.
+ * @param startSupport - Index of the start support, or null.
+ * @param endSupport - Index of the end support, or null.
+ * @returns A new `FieldMeasure` object with default and computed values.
+ */
 export const createInitialMeasureData = (
   section: Section | null,
   name: string,
@@ -96,7 +104,11 @@ export const createInitialMeasureData = (
   };
 };
 
-// Mocked measureData for tests
+/**
+ * Creates a pre-filled field measure for testing purposes.
+ * @param overrides - Optional partial overrides to apply on top of the mock defaults.
+ * @returns A `FieldMeasure` populated with mock data.
+ */
 export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldMeasure => {
   const mockSection: Partial<Section> = {
     link_name: 'Line 225kV Rougemontier - Tourbe #1',
@@ -113,6 +125,7 @@ export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldM
   };
 };
 
+/** Default empty outputs for a new field measure. */
 export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   papoto: null,
   cableTemperature: null,

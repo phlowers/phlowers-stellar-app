@@ -3,11 +3,13 @@ import { CatalogAttachment, Support } from '@core/domain';
 import { isNumber, uniq } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
+/** Represents a partial support update identified by UUID. */
 export interface SupportFieldChange {
   uuid: string;
   support: Partial<Support>;
 }
 
+/** Creates an empty {@link CatalogChain} with optional chain name. */
 export const createEmptyChain = (chainName?: string): CatalogChain => {
   return {
     uuid: uuidv4(),
@@ -20,12 +22,14 @@ export const createEmptyChain = (chainName?: string): CatalogChain => {
   };
 };
 
+/** Returns a sorted, deduplicated list of support names extracted from attachments. */
 export const getUniqueSortedSupportNamesFromAttachments = (attachments: CatalogAttachment[]): string[] => {
   return uniq((attachments || []).map((a) => a.support_name || ''))
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
 };
 
+/** Builds catalog and supplementary support-name filter tables from supports and attachments. */
 export const buildSupportNameFilterTables = (
   supports: Support[],
   attachments: CatalogAttachment[]
@@ -39,6 +43,7 @@ export const buildSupportNameFilterTables = (
   return { catalogSupportNames, supplementarySupportNames };
 };
 
+/** Calculates the numeric suffix and prefix of the first support's number field for auto-increment. */
 export const calculateSupportNumber = (
   firstSupport: Support,
   header: keyof Support
@@ -66,10 +71,12 @@ export const calculateSupportNumber = (
   return { firstNumber, restOfString, isNumberField };
 };
 
+/** Calculates the support foot altitude from the attachment height (minimum 0). */
 export const calculateSupportFootAltitude = (attachmentHeight: number): number => {
   return Math.max(attachmentHeight - 30, 0);
 };
 
+/** Builds field change entries for chain-related properties (length, weight, surface, v-chain). */
 export const buildChainFieldChanges = (
   uuid: string,
   chainLength: number | null,
@@ -81,6 +88,7 @@ export const buildChainFieldChanges = (
   { uuid, support: { chainV: false } }
 ];
 
+/** Builds copy-column field changes that propagate the first support's value to all others. */
 export const buildCopyColumnChanges = (supports: Support[], header: keyof Support): SupportFieldChange[] => {
   const firstSupport = supports[0];
   if (!firstSupport) return [];
@@ -127,6 +135,7 @@ export const buildCopyColumnChanges = (supports: Support[], header: keyof Suppor
   return changes;
 };
 
+/** Builds field change updates for a single support, including derived chain and altitude values. */
 export const buildFieldChangeUpdates = (
   uuid: string,
   field: keyof Support,
@@ -156,14 +165,17 @@ export const buildFieldChangeUpdates = (
   return changes;
 };
 
+/** Returns names that are not present in the catalog names list (case-insensitive). */
 export const findSupplementaryNames = (names: string[], catalogNames: string[]): string[] => {
   const lowerCaseCatalogNames = new Set(catalogNames.map((n) => n.toLowerCase()));
   return uniq(names.filter((name) => name && !lowerCaseCatalogNames.has(name.toLowerCase())));
 };
 
+/** Builds supplementary chain entries for names not found in the catalog. */
 export const buildSupplementaryChains = (names: string[], catalogChainNames: string[]): CatalogChain[] => {
   return findSupplementaryNames(names, catalogChainNames).map((name) => createEmptyChain(name));
 };
 
+/** Extracts an array of string values for the specified field from all supports. */
 export const getSupportFieldValues = (supports: Support[], field: 'chainName' | 'name'): string[] =>
   supports.map((s) => s[field] || '');

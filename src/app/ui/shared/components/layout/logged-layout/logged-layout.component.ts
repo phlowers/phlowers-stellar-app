@@ -22,6 +22,10 @@ interface SidebarNavigation {
   templateUrl: './logged-layout.component.html',
   styleUrl: './logged-layout.component.scss'
 })
+/**
+ * Main layout component for authenticated users.
+ * Provides the top bar, sidebar navigation, and a router outlet for page content.
+ */
 export class LoggedLayoutComponent implements OnInit {
   currentRoute = window.location.pathname;
 

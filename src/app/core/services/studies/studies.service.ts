@@ -48,6 +48,7 @@ export class StudiesService {
 
   /** Observable stream of all studies */
   public readonly studies = new BehaviorSubject<StudyEntity[]>([]);
+  /** Signal holding the export dialog state (study UUID, title, and open/closed status) */
   public readonly exportDialogData = signal<{
     uuid: string;
     title: string;
@@ -211,8 +212,10 @@ export class StudiesService {
   }
 
   /**
-   * Export a study
-   * @param uuid The uuid of the study to export
+   * Download a study as a Base64-encoded .clst file.
+   *
+   * @param uuid - The UUID of the study to download
+   * @param filename - The filename (without extension) for the downloaded file
    */
   async downloadStudy(uuid: string, filename: string) {
     const study = await this.getStudy(uuid);
@@ -233,9 +236,10 @@ export class StudiesService {
   }
 
   /**
-   * Get a study as an observable
-   * @param uuid The uuid of the study to get
-   * @returns
+   * Get a study as a Dexie live-query observable.
+   *
+   * @param uuid - The UUID of the study to observe
+   * @returns An observable that emits the study whenever it changes in IndexedDB
    */
   getStudyAsObservable(uuid: string) {
     return liveQuery(() => this.db?.studies.get(uuid));

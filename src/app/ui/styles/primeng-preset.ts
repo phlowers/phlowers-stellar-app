@@ -9,6 +9,11 @@ import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
 import { getColorPalette } from './theme-helper';
 
+/**
+ * PrimeNG theme preset based on the Aura theme, customized with
+ * application-specific color palettes resolved from CSS custom properties.
+ * @category Styles
+ */
 export const primengPreset = definePreset(Aura, {
   semantic: {
     primary: getColorPalette('primary'),

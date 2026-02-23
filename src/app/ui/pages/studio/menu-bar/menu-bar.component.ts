@@ -29,6 +29,7 @@ import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
     IconComponent
   ]
 })
+/** Component rendering the studio menu bar with charge case selection, initial condition display, and navigation. */
 export class StudioMenuBarComponent {
   section = input.required<Section | null>();
   study = input.required<Study | null>();

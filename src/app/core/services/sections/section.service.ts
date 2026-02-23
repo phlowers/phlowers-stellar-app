@@ -98,6 +98,13 @@ export class SectionService {
     return newSection;
   }
 
+  /**
+   * Retrieve a section by its UUID from a specific study.
+   *
+   * @param studyUuid - The UUID of the study containing the section, or undefined
+   * @param sectionUuid - The UUID of the section to retrieve
+   * @returns Promise resolving to the section if found, undefined otherwise
+   */
   getSectionByUuid(studyUuid: string | undefined, sectionUuid: string): Promise<Section | undefined> {
     if (!studyUuid) {
       return Promise.resolve(undefined);

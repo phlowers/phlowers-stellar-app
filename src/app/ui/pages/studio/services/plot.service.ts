@@ -14,13 +14,24 @@ import { SideTabsService } from '../side-tabs/side-tabs.service';
 import { ObstaclesService } from '../obstacles/obstacles.service';
 import { ObstacleFormService } from '../obstacles/obstaclesForm/obstaclesForm.service';
 
+/** DOM element ID used for the Plotly chart container. */
 export const PLOT_ID = 'plotly-output';
 
+/** Represents an option for selecting a span in the studio plot. */
 export interface SpanOption {
+  /** Display label for the span option. */
   label: string;
+  /** UUID value of the span, or null if not applicable. */
   value: string | null;
 }
 
+/**
+ * Determines whether the plot projection needs to be refreshed based on changed plot options.
+ * @param oldOptions - The previous plot options.
+ * @param newOptions - The updated plot options.
+ * @param loading - Whether the plot is currently loading.
+ * @returns `true` if the projection should be refreshed.
+ */
 export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions: PlotOptions, loading: boolean) => {
   if (loading) {
     return false;
@@ -45,6 +56,7 @@ export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions
   return false;
 };
 
+/** Default plot options used when initializing or resetting the studio view. */
 export const defaultPlotOptions: PlotOptions = {
   view: '3d',
   side: 'profile',
@@ -58,14 +70,18 @@ const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   baseState: false
 };
 
+/** Options controlling which overlays are displayed on the studio plot. */
 export interface SelectedDisplayOptions {
+  /** Whether to display loads on the plot. */
   loads: boolean;
+  /** Whether to display the base state on the plot. */
   baseState: boolean;
 }
 
 @Injectable({
   providedIn: 'root'
 })
+/** Service managing the Plotly-based section visualization, including data fetching, plot options, and camera state. */
 export class PlotService {
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);

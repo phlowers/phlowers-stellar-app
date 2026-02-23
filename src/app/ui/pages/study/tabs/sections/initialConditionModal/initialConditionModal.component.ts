@@ -49,23 +49,36 @@ const validators = {
     KeyFilterModule
   ]
 })
+/** Modal component for creating, editing, viewing, or duplicating an initial condition. */
 export class InitialConditionModalComponent implements OnDestroy {
   private readonly subscriptions = new Subscription();
   private readonly destroyRef = inject(DestroyRef);
+  /** Whether the modal is currently visible. */
   isOpen = input<boolean>(false);
+  /** Emits when the modal open state changes. */
   isOpenChange = output<boolean>();
+  /** The section to which this initial condition belongs. */
   section = input.required<Section>();
+  /** The parent study. */
   study = input.required<Study | null>();
+  /** Current modal mode: view, edit, or create. */
   mode = input.required<'view' | 'edit' | 'create'>();
+  /** Emits when the modal mode changes. */
   changeMode = output<'view' | 'edit' | 'create'>();
+  /** Emits when a new initial condition should be added. */
   addInitialCondition = output<InitialConditionFunctionsInput>();
+  /** Emits when an initial condition should be duplicated. */
   duplicateInitialCondition = output<{
     initialCondition: InitialCondition;
     newUuid: string;
   }>();
+  /** Emits when an initial condition should be updated. */
   updateInitialCondition = output<InitialConditionFunctionsInput>();
+  /** The initial condition received as input. */
   initialConditionInput = input.required<InitialCondition>();
+  /** All initial conditions for the current section. */
   initialConditions = input.required<InitialCondition[]>();
+  /** Local signal holding the working copy of the initial condition. */
   initialCondition = signal<InitialCondition>({
     uuid: '',
     name: '',
@@ -76,17 +89,24 @@ export class InitialConditionModalComponent implements OnDestroy {
     max_wind_pressure: 0,
     max_frost_width: 0
   });
+  /** Whether this modal is rendered inside the tools dialog. */
   isInsideToolsDialog = input<boolean>(false);
+  /** Whether the cable type is Narcisse (polynomial). */
   isCableNarcisse = signal<boolean>(false);
+  /** Whether the initial condition name is unique among siblings. */
   isNameUnique = signal<boolean>(true);
+  /** Regex pattern that accepts only positive integers. */
   public onlyPositiveNumbers = /^[0-9]*$/;
 
+  /** Reactive form group for the initial condition fields. */
   form: FormGroup;
 
+  /** Updates the name uniqueness flag when the name input changes. */
   onNameChange(name: string) {
     this.isNameUnique.set(this.checkNameUniqueness(name));
   }
 
+  /** Checks whether the given name is unique among sibling initial conditions. */
   checkNameUniqueness(name: string) {
     return !this.initialConditions().find((ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid);
   }
@@ -147,12 +167,14 @@ export class InitialConditionModalComponent implements OnDestroy {
     });
   }
 
+  /** Closes the modal when the dialog visibility changes to hidden. */
   onVisibleChange(visible: boolean) {
     if (!visible) {
       this.isOpenChange.emit(false);
     }
   }
 
+  /** Submits the initial condition form, emitting an add or update event based on the mode. */
   onSubmit(generateState: boolean) {
     if (this.form.invalid) return;
 
@@ -180,14 +202,17 @@ export class InitialConditionModalComponent implements OnDestroy {
     }
   }
 
+  /** Checks whether the given value is a number. */
   isNumber(value: number): boolean {
     return isNumber(value);
   }
 
+  /** Switches the modal to edit mode. */
   onModify() {
     this.changeMode.emit('edit');
   }
 
+  /** Duplicates the current initial condition and loads the new copy into the form. */
   async onDuplicate() {
     const newUuid = uuidv4();
     await this.duplicateInitialCondition.emit({
@@ -220,6 +245,7 @@ export class InitialConditionModalComponent implements OnDestroy {
     }
   }
 
+  /** Deletes the current initial condition and closes the modal. */
   onDelete() {
     this.initialConditionService.deleteInitialCondition(this.study()!, this.section(), this.initialCondition());
     this.isOpenChange.emit(false);
@@ -229,6 +255,7 @@ export class InitialConditionModalComponent implements OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  /** Returns whether the form is valid and the name is unique. */
   isFormValid(): boolean {
     return this.form.valid && this.isNameUnique();
   }
