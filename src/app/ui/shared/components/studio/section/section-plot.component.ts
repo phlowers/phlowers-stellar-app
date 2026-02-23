@@ -78,7 +78,9 @@ export class SectionPlotComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
-    let plotData = createPlotData(litData, plotOptions);
+    // Inject axesNorms from PlotService into plotOptions
+    const axesNorms = this.plotService['axesNorms'] || { x: 1, y: 1, z: 1 };
+    let plotData = createPlotData(litData, { ...plotOptions, axesNorms });
 
     // Add shadow traces for base state if enabled
     if (selectedDisplayOptions.baseState && baseLitData) {

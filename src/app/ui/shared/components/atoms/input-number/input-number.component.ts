@@ -1,17 +1,5 @@
-import {
-  Component,
-  computed,
-  effect,
-  forwardRef,
-  input,
-  signal
-} from '@angular/core';
-import {
-  ControlValueAccessor,
-  FormControl,
-  NG_VALUE_ACCESSOR,
-  ReactiveFormsModule
-} from '@angular/forms';
+import { Component, computed, forwardRef, input, signal } from '@angular/core';
+import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 
 let nextId = 0;
 
@@ -45,30 +33,19 @@ export class InputNumberComponent implements ControlValueAccessor {
   readonly inputId = `input-number-${nextId++}`;
   readonly disabled = signal(false);
   readonly pointsCountControl = new FormControl<number | null>(null);
-  readonly pointsCountValue = signal<number | null>(
-    this.pointsCountControl.value
-  );
+  readonly pointsCountValue = signal<number | null>(this.pointsCountControl.value);
 
   /** ID of the assistive element for aria-describedby */
   readonly assistiveId = computed(() =>
-    this.assistiveText() || this.errorMessage()
-      ? `${this.inputId}-assistive`
-      : null
+    this.assistiveText() || this.errorMessage() ? `${this.inputId}-assistive` : null
   );
 
   /** Text displayed below the field (error takes priority over assistive) */
 
-  readonly displayedAssistiveText = computed(() =>
-    this.hasError() ? this.errorMessage() : this.assistiveText()
-  );
+  readonly displayedAssistiveText = computed(() => (this.hasError() ? this.errorMessage() : this.assistiveText()));
 
-  readonly isAtMin = computed(
-    () => (this.pointsCountValue() ?? 0) === this.min()
-  );
-  readonly isAtMax = computed(() => {
-    console.log('isAtMax computed:', this.pointsCountValue());
-    return (this.pointsCountValue() ?? 0) === this.max();
-  });
+  readonly isAtMin = computed(() => (this.pointsCountValue() ?? 0) === this.min());
+  readonly isAtMax = computed(() => (this.pointsCountValue() ?? 0) === this.max());
 
   private onChange: (value: number | null) => void = () => {
     // Callback will be set by registerOnChange

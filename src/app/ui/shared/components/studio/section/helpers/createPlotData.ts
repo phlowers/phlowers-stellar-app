@@ -11,7 +11,8 @@ export const createPlotData = (params: GetSectionOutput, options: PlotOptions): 
       options.endSupport,
       type as PlotObjectsType,
       options.view,
-      options.side
+      options.side,
+      options.axesNorms
     );
   });
 

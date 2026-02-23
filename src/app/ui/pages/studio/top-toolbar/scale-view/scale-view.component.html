@@ -16,19 +16,26 @@
       <legend class="view-config__label text-xs-200" i18n>Sélectionner l'échelle d'affichage.</legend>
 
       <div class="view-config__radio-group" role="radiogroup" aria-label="Échelle d'affichage" i18n-aria-label>
+        <!-- Lorsque le bouton radio "Réduite en x" est sélectionné :
+              La norme de l'axe "Z" est identique à la norme de l'axe "Y",
+              La norme de l'axe "X" est le 1/5ème de la norme de l'axe "Y" -->
         <div class="view-config__radio-item">
           <p-radioButton name="scale" value="plan" formControlName="scale" inputId="plan"></p-radioButton>
-          <label for="plan" i18n>Plan (x/5, y, z)</label>
+          <label for="plan" i18n>Réduite en x (x/5, y, z)</label>
         </div>
 
+        <!-- Lorsque le bouton radio "Uniforme" est sélectionné : Les normes de l'axe "X", de l'axe "Y" et de l'axe "Z" sont identiques -->
         <div class="view-config__radio-item">
           <p-radioButton name="scale" value="geo" formControlName="scale" inputId="geo"></p-radioButton>
-          <label for="geo" i18n>Géographique (x, y, z)</label>
+          <label for="geo" i18n>Uniforme (x, y, z)</label>
         </div>
 
+        <!-- Lorsque le bouton radio "Réduite en z" est sélectionné :
+La norme de l'axe "Y" est identique à la norme de l'axe "X"
+La norme de l'axe "Z" est le 1/2ème de la norme de l'axe "X"-->
         <div class="view-config__radio-item">
           <p-radioButton name="scale" value="celeste" formControlName="scale" inputId="celeste"></p-radioButton>
-          <label for="celeste" i18n>Céleste (x, y, z/2)</label>
+          <label for="celeste" i18n>Réduite en z (x, y, z/2)</label>
         </div>
       </div>
     </fieldset>
@@ -63,6 +70,9 @@
     </fieldset>
 
     <footer class="view-config__footer">
+      <!-- en plus de ce que fait deja ce bouton il faut ajouter : Au clic, la zone graphique du "Studio" est actualisée avec un retraçage de chaque portée selon la norme de chaque axe du repère sélectionnée par l'utilisateur
+
+Le type de vue courante ainsi que les portées sélectionnées ne sont pas modifiées-->
       <p-button i18n-label label="Valider" (onClick)="onValidate()" styleClass="view-config__submit-btn">
         <ng-template #icon>
           <app-icon icon="check_small" />

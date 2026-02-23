@@ -9,4 +9,5 @@ export interface PlotOptions {
   startSupport: number;
   endSupport: number;
   invert: boolean;
+  axesNorms?: { x: number; y: number; z: number };
 }

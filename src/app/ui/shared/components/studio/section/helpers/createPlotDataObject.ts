@@ -56,13 +56,15 @@ export const createDataObject = (
   endSupport: number,
   type: PlotObjectsType,
   view: View,
-  side: Side
+  side: Side,
+  axesNorms?: { x: number; y: number; z: number }
 ): Data[] => {
   const slidedData = data.slice(startSupport, type === 'spans' ? endSupport : endSupport + 1);
   return slidedData.map((points, index) => {
-    const x = points.map((point) => point[0]);
-    const y = points.map((point) => point[1]);
-    const z = points.map((point) => point[2]);
+    // Appliquer la normalisation si axesNorms est fourni
+    const x = points.map((point) => point[0] / (axesNorms?.x || 1));
+    const y = points.map((point) => point[1] / (axesNorms?.y || 1));
+    const z = points.map((point) => point[2] / (axesNorms?.z || 1));
     const dataObject: Data = {
       x: side === 'face' && view === '2d' ? y : x,
       z: view === '3d' ? z : y,

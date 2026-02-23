@@ -78,6 +78,15 @@ interface PlotlyElementWithLayout extends HTMLElement {
   providedIn: 'root'
 })
 export class PlotService {
+  // Stocke la norme des axes courante
+  private axesNorms: { x: number; y: number; z: number } = { x: 1, y: 1, z: 1 };
+
+  /**
+   * Applique la norme des axes selon l'échelle choisie (stocke localement)
+   */
+  public setAxesNorms(norms: { x: number; y: number; z: number }): void {
+    this.axesNorms = norms;
+  }
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
   litData = signal<GetSectionOutput | null>(null);
@@ -254,6 +263,7 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
+    // Ici, on n'envoie pas axesNorms au worker, à adapter si besoin
     const { result, error } = await this.workerPythonService.runTask(Task.refreshProjection, {
       startSupport: this.plotOptions().startSupport,
       endSupport: this.plotOptions().endSupport,

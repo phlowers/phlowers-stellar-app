@@ -42,11 +42,37 @@ export class ScaleViewComponent {
     nonNullable: true
   });
 
+  // Stores the scale choice for each view (2D/3D)
+  private scaleByView: Record<'2d' | '3d', string> = {
+    '2d': 'plan',
+    '3d': 'geo'
+  };
+
   readonly formScaleView = this.fb.group({
-    scale: ['plan', { nonNullable: true }],
+    scale: [this.getInitialScale(), { nonNullable: true }],
     sliderPointsCount: this.sliderControl,
     pointsCount: this.pointsControl
   });
+
+  /**
+   * Returns the default scale according to the current view (2D/3D)
+   * Returns the scale to apply on opening (memorized or default)
+   */
+  private getInitialScale(): string {
+    const view = this.plotService.plotOptions().view as '2d' | '3d';
+    return this.scaleByView[view] ?? (view === '2d' ? 'plan' : 'geo');
+  }
+
+  /**
+   * Watches for view changes and restores the memorized scale
+   */
+  private watchViewChange(): void {
+    effect(() => {
+      const view = this.plotService.plotOptions().view as '2d' | '3d';
+      const memorized = this.scaleByView[view];
+      this.formScaleView.get('scale')?.setValue(memorized ?? (view === '2d' ? 'plan' : 'geo'));
+    });
+  }
 
   private readonly sliderValue = toSignal(this.formScaleView.get('sliderPointsCount')!.valueChanges, {
     initialValue: 30
@@ -59,10 +85,16 @@ export class ScaleViewComponent {
   constructor() {
     this.setupControlsSynchronization();
     this.setupResolutionSync();
+    this.watchViewChange();
+    // Memorizes the user's choice each time the scale changes
+    this.formScaleView.get('scale')?.valueChanges.subscribe((val) => {
+      const view = this.plotService.plotOptions().view as '2d' | '3d';
+      this.scaleByView[view] = typeof val === 'string' ? val : view === '2d' ? 'plan' : 'geo';
+    });
   }
 
   private setupControlsSynchronization(): void {
-    // Synchro Slider -> Input
+    // Sync Slider -> Input
     effect(() => {
       const val = this.sliderValue();
       if (val && val !== this.pointsControl.value) {
@@ -70,7 +102,7 @@ export class ScaleViewComponent {
       }
     });
 
-    // Synchro Input -> Slider
+    // Sync Input -> Slider
     effect(() => {
       const val = this.pointsCountValue();
       if (val && val !== this.sliderControl.value) {
@@ -100,11 +132,37 @@ export class ScaleViewComponent {
     this.popoverRef()?.toggle(event);
   }
 
-  public onValidate(): void {
+  /**
+   * Returns the axis norms according to the selected scale
+   * "plan": x/5, y, z=y
+   * "geo": x, y, z
+   * "celeste": x, y=x, z/2
+   */
+  private getScaleNorms(scale: string) {
+    switch (scale) {
+      case 'plan':
+        return { x: 0.2, y: 1, z: 1 };
+      case 'geo':
+        return { x: 1, y: 1, z: 1 };
+      case 'celeste':
+        return { x: 1, y: 1, z: 0.5 };
+      default:
+        return { x: 1, y: 1, z: 1 };
+    }
+  }
+
+  public async onValidate(): Promise<void> {
     const resolution = this.pointsControl.value;
-    console.log('Validate clicked with resolution:', resolution);
+    const scale = this.formScaleView.get('scale')?.value as string;
+    // Apply the resolution
     this.plotService.setResolution(resolution);
-    this.plotService.applyResolution(resolution);
-    this.plotService.refreshProjection();
+    await this.plotService.applyResolution(resolution);
+
+    // Apply the axis norms according to the scale
+    const norms = this.getScaleNorms(scale);
+    await this.plotService.setAxesNorms(norms);
+
+    // Refresh the graphical projection
+    await this.plotService.refreshProjection();
   }
 }
