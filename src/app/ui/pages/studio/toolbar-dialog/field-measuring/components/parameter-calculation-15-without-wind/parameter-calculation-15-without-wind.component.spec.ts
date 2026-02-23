@@ -7,6 +7,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/sections/section.service';
 import { StudiesService } from '@services/studies/studies.service';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { InitialConditionService } from '@services/initial-conditions/initial-condition.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CablesService } from '@services/cables/cables.service';
@@ -36,7 +37,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
   beforeEach(async () => {
     workerPythonServiceMock = {
-      runTask: jest.fn()
+      runTask: jest.fn(),
+      ready$: new BehaviorSubject<boolean>(true)
     } as unknown as jest.Mocked<WorkerPythonService>;
 
     const mockMessageService = {
@@ -50,7 +52,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     const mockStudiesService = {
       currentStudy: jest.fn().mockReturnValue(null),
       getStudy: jest.fn()
-    } as unknown as StudiesService;
+    } as unknown as StudiesService & { currentStudy: jest.Mock };
 
     const mockInitialConditionService = {
       addInitialCondition: jest.fn(),
@@ -93,8 +95,6 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
     componentRef.setInput('measureData', createTestMeasureData());
-    componentRef.setInput('papotoResult', null);
-    componentRef.setInput('temperatureCalculationResult', null);
     fixture.detectChanges();
   });
 
@@ -268,13 +268,17 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
   describe('Add Initial Condition', () => {
     let mockMessageService: jest.Mocked<MessageService>;
-    let mockStudiesService: jest.Mocked<StudiesService>;
+    let mockStudiesService: jest.Mocked<StudiesService> & {
+      currentStudy: jest.Mock;
+    };
     let mockInitialConditionService: jest.Mocked<InitialConditionService>;
+    let plotService: PlotService;
 
     beforeEach(() => {
       mockMessageService = TestBed.inject(MessageService) as jest.Mocked<MessageService>;
-      mockStudiesService = TestBed.inject(StudiesService) as jest.Mocked<StudiesService>;
+      mockStudiesService = TestBed.inject(StudiesService) as jest.Mocked<StudiesService> & { currentStudy: jest.Mock };
       mockInitialConditionService = TestBed.inject(InitialConditionService) as jest.Mocked<InitialConditionService>;
+      plotService = TestBed.inject(PlotService);
     });
 
     it('should add initial condition without generating state', async () => {
@@ -291,7 +295,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         max_frost_width: 0
       };
 
-      mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
+      plotService.study.set(mockStudy as any);
       mockStudiesService.getStudy.mockResolvedValue(mockStudy as any);
       mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
 
@@ -326,7 +330,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         max_frost_width: 0
       };
 
-      mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
+      plotService.study.set(mockStudy as any);
       mockStudiesService.getStudy.mockResolvedValue(mockStudy as any);
       mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
       mockInitialConditionService.setInitialCondition.mockResolvedValue(undefined);
@@ -361,7 +365,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         max_frost_width: 0
       };
 
-      mockStudiesService.currentStudy.mockReturnValue(null);
+      plotService.study.set(null);
 
       await component.addInitialCondition({
         section: mockSection as any,
@@ -387,7 +391,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         max_frost_width: 0
       };
 
-      mockStudiesService.currentStudy.mockReturnValue(mockStudy as any);
+      plotService.study.set(mockStudy as any);
       mockStudiesService.getStudy.mockResolvedValue(undefined);
       mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
 

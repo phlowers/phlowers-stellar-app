@@ -1,4 +1,4 @@
-import { Component, effect, input, OnDestroy, output, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, input, OnDestroy, output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
@@ -20,6 +20,7 @@ import { Study } from '@core/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { Subscription } from 'rxjs';
 import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 const validators = {
   name: ['', [Validators.required, Validators.maxLength(40)]],
@@ -50,7 +51,7 @@ const validators = {
 })
 export class InitialConditionModalComponent implements OnDestroy {
   private readonly subscriptions = new Subscription();
-
+  private readonly destroyRef = inject(DestroyRef);
   isOpen = input<boolean>(false);
   isOpenChange = output<boolean>();
   section = input.required<Section>();
@@ -98,9 +99,12 @@ export class InitialConditionModalComponent implements OnDestroy {
     this.form = this.fb.group(validators);
 
     this.subscriptions.add(
-      this.form.get('name')?.valueChanges.subscribe((name) => {
-        this.onNameChange(name);
-      })
+      this.form
+        .get('name')
+        ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((name) => {
+          this.onNameChange(name);
+        })
     );
 
     effect(() => {

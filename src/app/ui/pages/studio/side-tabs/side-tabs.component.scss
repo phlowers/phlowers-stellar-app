@@ -8,7 +8,7 @@
   $_btn-px: 2.25rem;
   $_btn-radius: 0.5rem;
   $_default-btn-bgc: var(--primary-100);
-  $_active-btn-bgc: var(--grey-white);
+  $_active-btn-bgc: var(--primary-0);
   $_hover-btn-bgc: var(--primary-200);
   $_panel-transition-timing: 0.3s;
   $_panel-transition-effect: ease-out;
@@ -101,7 +101,6 @@
       }
 
       &.active {
-
         &,
         &::after {
           background-color: $_active-btn-bgc;
@@ -112,7 +111,6 @@
         }
 
         &:hover {
-
           &,
           &::before,
           &::after {
@@ -122,7 +120,6 @@
       }
 
       &:not(.active):hover {
-
         &,
         &::after {
           background-color: $_hover-btn-bgc;
@@ -148,7 +145,6 @@
 
       // "reset" active sibling buttons to let active one go above visually.
       &:has(+ &.active) {
-
         .side-tab__header__btn__bxsh,
         &::after {
           z-index: 0;
@@ -177,7 +173,8 @@
       &.active {
         @apply opacity-100 h-full;
         background: $_active-btn-bgc;
-        transition: opacity $_panel-transition-timing $_panel-transition-timing $_panel-transition-effect;
+        transition: opacity $_panel-transition-timing $_panel-transition-timing
+          $_panel-transition-effect;
 
         @starting-style {
           opacity: 0;

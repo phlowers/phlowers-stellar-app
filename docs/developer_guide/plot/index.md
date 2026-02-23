@@ -22,7 +22,6 @@ Just use the `StudioComponent` in your template:
 ```html
 <app-studio
   [section]="mySection"
-  [isSupportZoom]="true"
 ></app-studio>
 ```
 
@@ -133,7 +132,6 @@ ngOnDestroy() {
   template: `
     <app-studio
       [section]="currentSection()"
-      [isSupportZoom]="true"
     ></app-studio>
     
     <button (click)="toggleView()">Toggle 2D/3D</button>

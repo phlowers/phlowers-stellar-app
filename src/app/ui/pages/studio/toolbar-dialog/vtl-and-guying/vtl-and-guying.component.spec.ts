@@ -418,7 +418,7 @@ describe('VhlAndGuyingComponent', () => {
       writable: true,
       configurable: true
     });
-    Object.defineProperty(mockSectionService, 'currentSection', {
+    Object.defineProperty(mockPlotService, 'section', {
       value: signal(null),
       writable: true,
       configurable: true

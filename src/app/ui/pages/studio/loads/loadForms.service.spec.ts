@@ -79,6 +79,7 @@ describe('LoadFormsService', () => {
         towerModel: 'Tower Model'
       }
     ],
+    obstacles: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],

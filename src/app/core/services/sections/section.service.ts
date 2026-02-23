@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Section } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
@@ -17,7 +17,6 @@ import { cloneDeep } from 'lodash';
 })
 export class SectionService {
   constructor(private readonly studiesService: StudiesService) {}
-  public readonly currentSection = signal<Section | null>(null);
 
   /**
    * Create or update a section in a study
@@ -38,7 +37,7 @@ export class SectionService {
       study.sections = [...study.sections, section];
     }
 
-    await this.studiesService.updateStudy(study).catch((error: any) => {
+    await this.studiesService.updateStudy(study).catch((error: Error) => {
       study.sections = studyKeep.sections;
       throw error;
     });
@@ -84,13 +83,5 @@ export class SectionService {
     return this.studiesService.getStudy(studyUuid).then((study) => {
       return study?.sections.find((s) => s?.uuid === sectionUuid);
     });
-  }
-
-  /**
-   * Set the current section
-   * @param section The section to set as the current section
-   */
-  setCurrentSection(section: Section) {
-    this.currentSection.set(section);
   }
 }

@@ -1,4 +1,14 @@
-import { AfterViewInit, Component, TemplateRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  TemplateRef,
+  ViewChild,
+  computed,
+  effect,
+  inject,
+  signal,
+  DestroyRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -20,6 +30,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { VtlAndGuying } from '@core/domain';
 import { SectionService } from '@services/sections/section.service';
 import { MessageService } from 'primeng/api';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface SupportOption {
   label: number;
@@ -86,6 +97,8 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   readonly loading = computed(() => this.plotService.loading() || !this.plotService.litData());
 
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor() {
     this.form = this.fb.group({
       selectedSpan: this.fb.control<{ index: number; uuid: string } | null>(null),
@@ -103,7 +116,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
     });
 
     // Update computed values when form values change
-    this.form.controls.selectedSpan.valueChanges.subscribe(() => {
+    this.form.controls.selectedSpan.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.form.controls.selectedSupport.setValue(null, { emitEvent: false });
       const selectedSpan = this.form.controls.selectedSpan.value;
 
@@ -114,13 +127,13 @@ export class VhlAndGuyingComponent implements AfterViewInit {
         this.form.controls.selectedSupport.enable({ emitEvent: false });
       }
 
-      this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan));
+      this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan?.uuid ?? null));
       this.supportType.set(null);
       this.vtlWithoutGuying.set(null);
       this.results.set(null);
     });
 
-    this.form.controls.selectedSupport.valueChanges.subscribe(() => {
+    this.form.controls.selectedSupport.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.updateSupportType();
       this.updateVtlWithoutGuying();
       this.results.set(null);
@@ -132,11 +145,11 @@ export class VhlAndGuyingComponent implements AfterViewInit {
       this.updateVtlWithoutGuying();
     });
 
-    this.form.controls.altitude.valueChanges.subscribe(() => {
+    this.form.controls.altitude.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.results.set(null);
     });
 
-    this.form.controls.horizontalDistance.valueChanges.subscribe(() => {
+    this.form.controls.horizontalDistance.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.results.set(null);
     });
 
@@ -146,7 +159,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
   private updateSupportOptions(): void {
     const selectedSpan = this.form.controls.selectedSpan.value;
-    this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan));
+    this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan?.uuid ?? null));
   }
 
   private updateSupportType(): void {
@@ -246,7 +259,7 @@ export class VhlAndGuyingComponent implements AfterViewInit {
   onSave(): void {
     const formValue = this.form.value;
     const study = this.plotService.study();
-    const section = this.sectionService.currentSection();
+    const section = this.plotService.section();
     if (!study || !section) {
       return;
     }

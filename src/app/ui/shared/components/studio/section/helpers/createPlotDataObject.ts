@@ -1,6 +1,7 @@
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
 import { SPAN_COLOR } from './plot.constants';
 import { PlotObjectsType, Side, View } from './types';
+import { Support } from '@core/domain/models/support.model';
 
 const getLine = (
   type: PlotObjectsType,
@@ -50,20 +51,23 @@ const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
   }
 };
 
+export type DataObject = Data & { supportUuid: string | undefined };
+
 export const createDataObject = (
   data: number[][][],
   startSupport: number,
   endSupport: number,
   type: PlotObjectsType,
   view: View,
-  side: Side
-): Data[] => {
+  side: Side,
+  supports: Support[] = []
+): DataObject[] => {
   const slidedData = data.slice(startSupport, type === 'spans' ? endSupport : endSupport + 1);
   return slidedData.map((points, index) => {
     const x = points.map((point) => point[0]);
     const y = points.map((point) => point[1]);
     const z = points.map((point) => point[2]);
-    const dataObject: Data = {
+    const dataObject: DataObject = {
       x: side === 'face' && view === '2d' ? y : x,
       z: view === '3d' ? z : y,
       y: view === '3d' ? y : z,
@@ -72,7 +76,9 @@ export const createDataObject = (
       line: getLine(type, view),
       textposition: 'top center',
       marker: getMarker(type, view),
-      text: getText(type, points, startSupport + index)
+      text: getText(type, points, startSupport + index),
+      name: type,
+      supportUuid: supports[startSupport + index]?.uuid
     };
     return dataObject;
   });

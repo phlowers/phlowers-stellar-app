@@ -13,7 +13,6 @@
     <app-studio
       class="plot-view"
       [isPreview]="false"
-      [isSupportZoom]="false"
       [style.height]="'calc(60vh - 6.5rem)'"
       [style.min-height]="'calc(60vh - 6.5rem)'"
     />
@@ -56,7 +55,11 @@
     <div class="flex gap-6 items-start pl-4">
       <div class="supports-select">
         <button
-          [disabled]="supports() === 'all' || plotService.loading() || plotService.plotOptions().startSupport === 0"
+          [disabled]="
+            plotService.spanAmountChoice() === 'all' ||
+            plotService.loading() ||
+            plotService.plotOptions().startSupport === 0
+          "
           (click)="onSupportButtonClick('left')"
           class="supports-select__buttons supports-select__buttons--left"
         >
@@ -68,14 +71,14 @@
           appendTo="body"
           class="supports-select__p-select"
           [disabled]="plotService.loading()"
-          [options]="supportsOptions()"
-          [ngModel]="supports()"
-          (onChange)="onSelectPlotOptions($event.value)"
+          [options]="spanAmountChoiceOptions()"
+          [ngModel]="plotService.spanAmountChoice()"
+          (onChange)="onSelectSpanAmount($event.value)"
         />
 
         <button
           [disabled]="
-            supports() === 'all' ||
+            plotService.spanAmountChoice() === 'all' ||
             plotService.loading() ||
             plotService.plotOptions().endSupport === (this.plotService.section()?.supports?.length ?? 0) - 1
           "
@@ -87,15 +90,17 @@
       </div>
 
       <div class="slider-plot-cards">
-        <ngx-slider
-          [class.inverted]="plotService.plotOptions().invert"
-          [value]="plotService.plotOptions().startSupport"
-          [highValue]="plotService.plotOptions().endSupport"
-          (userChangeEnd)="updateSliderOptions($event)"
-          [options]="sliderOptions()"
-          class="block"
-        >
-        </ngx-slider>
+        @if (this.plotService.section()) {
+          <ngx-slider
+            [class.inverted]="plotService.plotOptions().invert"
+            [value]="plotService.plotOptions().startSupport"
+            [highValue]="plotService.plotOptions().endSupport"
+            (userChangeEnd)="updateSliderOptions($event)"
+            [options]="sliderOptions()"
+            class="block"
+          >
+          </ngx-slider>
+        }
 
         <app-section-plot-cards />
       </div>
@@ -159,14 +164,8 @@
       </ng-template>
     </app-side-tab>
 
-    <app-side-tab [disabled]="true" label="Obstacles">
-      <ng-template
-        ><div style="width: 300px">
-          coucou contenu onglet "obstacles"
-          <br /><br />
-          <button app-btn>bouton pour tests focus</button>
-        </div></ng-template
-      >
+    <app-side-tab label="Obstacles">
+      <ng-template><app-obstacles-form /></ng-template>
     </app-side-tab>
 
     <app-side-tab [disabled]="true" label="Sol">

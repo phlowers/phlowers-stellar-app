@@ -16,9 +16,8 @@
 
 .plot-view {
   @apply block;
-  min-height: 21.875rem;
-  max-height: 36.875rem;
-  // necessary height in absolute (rem) value is set dynamically via [style.height] binding
+  // height: calc(60vh - 6.5rem);
+  // min-height: calc(60vh - 6.5rem);
 }
 
 .quick-measures {

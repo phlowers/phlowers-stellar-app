@@ -101,6 +101,7 @@ describe('StudyComponent', () => {
     comment: 'random comment',
     supports_comment: 'random supports comment',
     supports: [],
+    obstacles: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],
