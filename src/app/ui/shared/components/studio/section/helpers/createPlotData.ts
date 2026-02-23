@@ -10,7 +10,7 @@ import { Support } from '@core/domain/models/support.model';
  * @param params - The raw section output from the Python computation engine.
  * @param options - Plot rendering options (view, side, support range).
  * @param supports - Optional array of support models used to attach UUIDs to data objects.
- * @returns A flat array of {@link DataObject} entries ready for Plotly rendering.
+ * @returns A flat array of `DataObject` entries ready for Plotly rendering.
  */
 export const createPlotData = (
   params: GetSectionOutput,

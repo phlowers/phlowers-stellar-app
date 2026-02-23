@@ -16,7 +16,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
  * @category Studio
  * @param params - The raw section output from the Python computation engine.
  * @param options - Plot rendering options (view, side, support range).
- * @returns A flat array of Plotly {@link Data} entries for shadow traces.
+ * @returns A flat array of Plotly `Data` entries for shadow traces.
  */
 export const createShadowPlotData = (params: GetSectionOutput, options: PlotOptions): Data[] => {
   const data = (['spans', 'supports', 'insulators'] as (keyof GetSectionOutput)[]).map((type) => {

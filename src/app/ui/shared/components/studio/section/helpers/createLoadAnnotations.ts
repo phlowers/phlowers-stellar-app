@@ -43,7 +43,7 @@ const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
  * Each annotation displays an icon (load or marking) positioned at the load coordinates.
  * @category Studio
  * @param plotParams - The plot parameters including span loads, view, side, and coordinate data.
- * @returns An array of Plotly {@link Plotly.Annotations} for load indicators.
+ * @returns An array of Plotly `Annotations` for load indicators.
  */
 export const createLoadAnnotations = (plotParams: CreatePlotParams): Plotly.Annotations[] => {
   const { side, view } = plotParams;

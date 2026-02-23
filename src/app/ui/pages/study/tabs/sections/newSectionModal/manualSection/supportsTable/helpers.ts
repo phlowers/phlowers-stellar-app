@@ -9,7 +9,7 @@ export interface SupportFieldChange {
   support: Partial<Support>;
 }
 
-/** Creates an empty {@link CatalogChain} with optional chain name. */
+/** Creates an empty `CatalogChain` with optional chain name. */
 export const createEmptyChain = (chainName?: string): CatalogChain => {
   return {
     uuid: uuidv4(),

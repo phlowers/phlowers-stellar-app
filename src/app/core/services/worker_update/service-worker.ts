@@ -176,7 +176,7 @@ export async function handleFetch(event: FetchEvent) {
  *
  * @remarks
  * Supports 'update' and 'install' message types. Delegates to
- * {@link updateApp} or {@link installApp} and posts the result
+ * `updateApp` or `installApp` and posts the result
  * back to the message source.
  *
  * @param event - The ExtendableMessageEvent containing the command

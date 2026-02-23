@@ -68,7 +68,7 @@ const getShadowMarker = (type: PlotObjectsType, view: View): PlotData['marker'] 
  * @param type - The section object type being rendered.
  * @param view - The rendering dimension (`'2d'` or `'3d'`).
  * @param side - The viewing side (`'profile'` or `'face'`).
- * @returns An array of Plotly {@link Data} entries for shadow traces.
+ * @returns An array of Plotly `Data` entries for shadow traces.
  */
 export const createShadowDataObject = (
   data: number[][][],

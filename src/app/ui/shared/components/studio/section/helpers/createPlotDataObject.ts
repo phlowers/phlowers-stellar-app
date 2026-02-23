@@ -51,7 +51,7 @@ const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
   }
 };
 
-/** A Plotly {@link Data} object extended with an optional support UUID for identification.
+/** A Plotly `Data` object extended with an optional support UUID for identification.
  * @category Studio
  */
 export type DataObject = Data & { supportUuid: string | undefined };
@@ -68,7 +68,7 @@ export type DataObject = Data & { supportUuid: string | undefined };
  * @param view - The rendering dimension (`'2d'` or `'3d'`).
  * @param side - The viewing side (`'profile'` or `'face'`).
  * @param supports - Optional array of support models to attach UUIDs.
- * @returns An array of {@link DataObject} entries.
+ * @returns An array of `DataObject` entries.
  */
 export const createDataObject = (
   data: number[][][],

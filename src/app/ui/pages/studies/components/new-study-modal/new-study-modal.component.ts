@@ -15,7 +15,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { Router } from '@angular/router';
 import { FileUploadModule } from 'primeng/fileupload';
 
-/** Creates and returns a new empty {@link Study} object with default values. */
+/** Creates and returns a new empty `Study` object with default values. */
 export const createEmptyStudy = (): Study => {
   return {
     title: '',
