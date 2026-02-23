@@ -1,0 +1,40 @@
+<div class="relative w-full h-full" ;>
+  @if (plotService.loading()) {
+    <div class="h-full flex justify-center items-center">
+      <p-progress-spinner ariaLabel="loading" />
+    </div>
+  } @else if (plotService.error()) {
+    <div class="absolute inset-0 flex justify-center items-center">
+      <p class="text-red-500 text-2xl font-bold">
+        {{ getErrorString() }}
+      </p>
+    </div>
+  } @else {
+    <div class="flex flex-row gap-2 h-full">
+      <div class="grow flex flex-col">
+        <div>
+          <div>
+            x: {{ profileMousePosition()?.x || 'N/A' }}, z:
+            {{ profileMousePosition()?.z || 'N/A' }}
+          </div>
+        </div>
+        <div
+          id="plotly-output-single-span-profile-2"
+          class="border border-gray-300 rounded-md h-full"
+          style="box-sizing: content-box"
+        ></div>
+      </div>
+
+      <div class="w-1/4 flex flex-col">
+        <div>
+          <div>y: {{ faceMousePosition()?.x || 'N/A' }}</div>
+        </div>
+        <div
+          id="plotly-output-single-span-face-2"
+          class="border border-gray-300 rounded-md box-sizing h-full"
+          style="box-sizing: content-box"
+        ></div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,5 @@
+:host::ng-deep {
+    .js-plotly-plot .plotly .cursor-move {
+        cursor: crosshair;
+    }
+}

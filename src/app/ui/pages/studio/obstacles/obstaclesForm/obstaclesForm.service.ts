@@ -9,6 +9,7 @@ import { ObstaclesService } from '../obstacles.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from './constants';
 import { ObstacleFormGroupData } from './interfaces';
 import { debounce } from 'lodash';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root'
@@ -129,12 +130,19 @@ export class ObstacleFormService {
     horizontale: null
   });
 
-  readonly isFormValidSignal = computed(() => this.form.valid);
+  readonly formValue = toSignal(this.form.valueChanges, {
+    initialValue: this.form.getRawValue()
+  });
+
+  readonly isFormValidSignal = computed(() => {
+    this.formValue(); // to recalculate
+    return this.form.valid;
+  });
 
   readonly canCalculateAndSaveSignal = computed(() => {
     const positions = this.positionsSnapshot();
     return (
-      this.form.valid &&
+      this.isFormValidSignal() &&
       positions.length > 0 &&
       positions.every((position: Position3D) => position.x !== null && position.y !== null && position.z !== null)
     );
