@@ -452,9 +452,6 @@ def main() -> None:
         print(f"  {name:30} {v:15} [{tag}]")
         if name in cdn_names:
             cdn_count += 1
-        elif name == "stellar-engine":
-            print(f"  {name:30} {version:15} [LOCAL]")
-            local_count += 1
         else:
             pypi_count += 1
     print("=" * 50)
