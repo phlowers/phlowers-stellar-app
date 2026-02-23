@@ -32,6 +32,7 @@ export interface InitialConditionFunctionsInput {
  * @category Types
  */
 export interface DuplicateInitialConditionFunctionsInput extends InitialConditionFunctionsInput {
+  /** UUID for the duplicated initial condition */
   newUuid: string;
 }
 

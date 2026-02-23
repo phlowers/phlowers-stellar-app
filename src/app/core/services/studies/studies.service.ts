@@ -48,7 +48,11 @@ export class StudiesService {
 
   /** Observable stream of all studies */
   public readonly studies = new BehaviorSubject<StudyEntity[]>([]);
-  /** Signal holding the export dialog state (study UUID, title, and open/closed status) */
+
+  /** Signal containing the currently selected study */
+  public readonly currentStudy = signal<StudyEntity | null>(null);
+
+  /** Signal for export dialog state */
   public readonly exportDialogData = signal<{
     uuid: string;
     title: string;

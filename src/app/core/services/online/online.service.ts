@@ -74,6 +74,10 @@ export class OnlineService {
     });
   }
 
+  /**
+   * Internal observable that merges browser online/offline events.
+   * @internal
+   */
   private readonly _online = merge(fromEvent(window, 'online'), fromEvent(window, 'offline')).pipe(
     startWith(undefined),
     map(() => window.navigator.onLine)

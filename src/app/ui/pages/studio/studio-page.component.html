@@ -164,8 +164,14 @@
       </ng-template>
     </app-side-tab>
 
-    <app-side-tab label="Obstacles">
-      <ng-template><app-obstacles-form /></ng-template>
+    <app-side-tab [disabled]="true" label="Obstacles">
+      <ng-template
+        ><div style="width: 300px">
+          coucou contenu onglet "obstacles"
+          <br /><br />
+          <button i18n app-btn>bouton pour tests focus</button>
+        </div></ng-template
+      >
     </app-side-tab>
 
     <app-side-tab [disabled]="true" label="Sol">
