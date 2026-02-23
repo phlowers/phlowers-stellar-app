@@ -26,11 +26,13 @@ function createSignalMock<T>(initialValue: T): SignalFn<T> {
 // PlotService mock shape used by the component
 class PlotServiceMock {
   isStudioActive: SignalFn<boolean> = createSignalMock<boolean>(false);
+  spanAmountChoice: SignalFn<'single' | 'double' | 'all'> = createSignalMock<'single' | 'double' | 'all'>('all');
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
   section: SignalFn<Section | null> = createSignalMock<Section | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
   plotOptions = jest.fn().mockReturnValue({ invert: false });
   plotOptionsChange = jest.fn();
+  resetAll = jest.fn();
 }
 
 // StudiesService mock
@@ -52,9 +54,7 @@ describe('StudioPageComponent', () => {
   beforeEach(async () => {
     plotService = new PlotServiceMock();
     studiesService = new StudiesServiceMock();
-    sectionService = {
-      setCurrentSection: jest.fn()
-    } as unknown as jest.Mocked<SectionService>;
+    sectionService = {} as unknown as jest.Mocked<SectionService>;
 
     await TestBed.configureTestingModule({
       imports: [StudioPageComponent],
@@ -114,7 +114,7 @@ describe('StudioPageComponent', () => {
 
   it('sliderOptions should reflect initial ceil and invert values', () => {
     // Initial state: no section and invert=false per mock
-    expect(component.sliderOptions().ceil).toBe(99);
+    expect(component.sliderOptions().ceil).toBeUndefined();
     expect(component.sliderOptions().rightToLeft).toBe(false);
   });
 
@@ -152,9 +152,7 @@ describe('StudioPageComponent', () => {
     fixture.detectChanges();
 
     expect(studySetSpy).toHaveBeenCalledWith(study);
-    expect(studiesService.setCurrentStudy).toHaveBeenCalledWith(study);
     expect(sectionSetSpy).toHaveBeenCalledWith(study.sections[1]);
-    expect(sectionService.setCurrentSection).toHaveBeenCalledWith(study.sections[1]);
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 2,
       startSupport: 0
@@ -201,7 +199,7 @@ describe('StudioPageComponent', () => {
     component.debounceUpdateSliderOptions('endSupport', 3);
     jest.advanceTimersByTime(300);
 
-    expect(component.supports()).toBe('single');
+    expect(plotService.spanAmountChoice()).toBe('single');
   });
 
   it('debounceUpdateSliderOptions should set supports to double when diff is 2', () => {
@@ -215,7 +213,7 @@ describe('StudioPageComponent', () => {
     component.debounceUpdateSliderOptions('endSupport', 3);
     jest.advanceTimersByTime(300);
 
-    expect(component.supports()).toBe('double');
+    expect(plotService.spanAmountChoice()).toBe('double');
   });
 
   it('sliderOptions translate callback should return value + 1 as string', () => {
@@ -296,9 +294,9 @@ describe('StudioPageComponent', () => {
       supports: [1, 2, 3, 4, 5, 6]
     } as unknown as Section);
 
-    component.onSelectPlotOptions('single');
+    component.onSelectSpanAmount('single');
 
-    expect(component.supports()).toBe('single');
+    expect(plotService.spanAmountChoice()).toBe('single');
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 2
     });
@@ -314,9 +312,9 @@ describe('StudioPageComponent', () => {
       supports: [1, 2, 3, 4, 5, 6]
     } as unknown as Section);
 
-    component.onSelectPlotOptions('double');
+    component.onSelectSpanAmount('double');
 
-    expect(component.supports()).toBe('double');
+    expect(plotService.spanAmountChoice()).toBe('double');
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 3
     });
@@ -332,9 +330,9 @@ describe('StudioPageComponent', () => {
       supports: [1, 2, 3, 4, 5, 6]
     } as unknown as Section);
 
-    component.onSelectPlotOptions('all');
+    component.onSelectSpanAmount('all');
 
-    expect(component.supports()).toBe('all');
+    expect(plotService.spanAmountChoice()).toBe('all');
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       startSupport: 0,
       endSupport: 5
@@ -351,7 +349,7 @@ describe('StudioPageComponent', () => {
       supports: [1, 2, 3, 4, 5]
     } as unknown as Section);
 
-    component.onSelectPlotOptions('single');
+    component.onSelectSpanAmount('single');
 
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 4
@@ -359,7 +357,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick right should increment supports', () => {
-    component.supports.set('single');
+    plotService.spanAmountChoice.set('single');
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
@@ -375,7 +373,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick left should decrement supports', () => {
-    component.supports.set('double');
+    plotService.spanAmountChoice.set('double');
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 2,
@@ -391,7 +389,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick left should clamp to zero', () => {
-    component.supports.set('single');
+    plotService.spanAmountChoice.set('single');
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 0,
@@ -407,28 +405,20 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick should do nothing when supports is all', () => {
-    component.supports.set('all');
+    plotService.spanAmountChoice.set('all');
 
     component.onSupportButtonClick('right');
 
     expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
   });
 
-  it('ngOnDestroy should clean up subscription, section, and resizeObserver', () => {
+  it('ngOnDestroy should clean up subscription and reset plot service', () => {
     const unsubscribe = jest.fn();
     (component as unknown as { subscription: { unsubscribe: () => void } }).subscription = { unsubscribe };
-    (component as unknown as { resizeObserver: { disconnect: () => void } }).resizeObserver = {
-      disconnect: jest.fn()
-    } as { disconnect: () => void };
-
-    const sectionSetSpy = jest.spyOn(plotService.section, 'set');
 
     component.ngOnDestroy();
 
-    expect(sectionSetSpy).toHaveBeenCalledWith(null);
+    expect(plotService.resetAll).toHaveBeenCalled();
     expect(unsubscribe).toHaveBeenCalled();
-    expect(
-      (component as unknown as { resizeObserver: { disconnect: jest.Mock } }).resizeObserver.disconnect
-    ).toHaveBeenCalled();
   });
 });

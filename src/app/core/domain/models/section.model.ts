@@ -10,6 +10,7 @@ import { Charge } from './charge.model';
 import { InitialCondition } from './initial-condition.model';
 import { Support } from './support.model';
 import { VtlAndGuying } from './vtl-and-guying.model';
+import { Obstacle } from './obstacle.model';
 
 /**
  * Section domain model - represents a power line section
@@ -49,6 +50,7 @@ export interface Section {
   comment: string | undefined;
   supports_comment: string | undefined;
   supports: Support[];
+  obstacles: Obstacle[];
   initial_conditions: InitialCondition[];
   selected_initial_condition_uuid: string | undefined;
   charges: Charge[];

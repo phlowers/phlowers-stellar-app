@@ -79,6 +79,7 @@ describe('NewSectionModalComponent (Jest)', () => {
     comment: undefined,
     supports_comment: undefined,
     supports: [],
+    obstacles: [],
     initial_conditions: [],
     selected_initial_condition_uuid: undefined,
     charges: [],

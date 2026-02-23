@@ -59,6 +59,6 @@ const config = {
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts']
 } satisfies JestConfigWithTsJest;
 
-// console.log("config", JSON.stringify(config, null, 2));
+/// console.log("config", JSON.stringify(config, null, 2));
 
 export default config;
