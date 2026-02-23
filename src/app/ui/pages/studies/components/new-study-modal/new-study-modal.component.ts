@@ -15,7 +15,10 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { Router } from '@angular/router';
 import { FileUploadModule } from 'primeng/fileupload';
 
-/** Creates and returns a new empty `Study` object with default values. */
+/**
+ * Creates a new empty `Study` object with default values.
+ * @returns A blank study with empty fields
+ */
 export const createEmptyStudy = (): Study => {
   return {
     title: '',
@@ -30,6 +33,12 @@ export const createEmptyStudy = (): Study => {
   };
 };
 
+/**
+ * Modal dialog for creating a new study or modifying an existing one.
+ *
+ * In 'new' mode, creates a study and navigates to it.
+ * In 'modify' mode, updates the title and description of an existing study.
+ */
 @Component({
   selector: 'app-new-study-modal',
   imports: [
@@ -48,48 +57,28 @@ export const createEmptyStudy = (): Study => {
   templateUrl: './new-study-modal.component.html',
   styleUrl: './new-study-modal.component.scss'
 })
-/**
- * Modal dialog component for creating a new study or modifying an existing study's title and description.
- * Supports both "new" and "modify" modes.
- */
 export class NewStudyModalComponent {
-  /** Input controlling whether the modal dialog is open. */
+  /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
-  /** Output emitted when the modal open state changes. */
+  /** Emits when the modal open state changes. */
   isOpenChange = output<boolean>();
-  /** Input specifying the modal mode: 'new' for creation, 'modify' for editing. */
+  /** Dialog mode: 'new' to create, 'modify' to edit an existing study. */
   mode = input<'new' | 'modify'>('new');
-  /** Input providing the UUID of the study being modified. */
+  /** UUID of the study being modified (used in 'modify' mode). */
   studyUuid = input<string>('');
-  /** Input providing the initial title when modifying a study. */
   titleInput = input<string>('');
-  /** Input providing the initial description when modifying a study. */
   descriptionInput = input<string>('');
-  /** Signal holding the current title value entered by the user. */
   title = signal<string>('');
-  /** Signal holding the current description value entered by the user. */
   description = signal<string>('');
-  /** Output emitted after a study is updated, carrying the study UUID. */
   refreshStudy = output<string>();
-  /** Computed signal returning the current title length. */
   titleLength = computed(() => this.title().length ?? 0);
-  /** Computed signal returning the current description length. */
   descriptionLength = computed(() => this.description().length ?? 0);
-  /** Signal indicating whether a submission is in progress. */
   loading = signal<boolean>(false);
 
-  /**
-   * Updates the title signal with the given value.
-   * @param title - The new title string.
-   */
   updateTitle(title: string) {
     this.title.set(title);
   }
 
-  /**
-   * Updates the description signal with the given value.
-   * @param description - The new description string.
-   */
   updateDescription(description: string) {
     this.description.set(description);
   }
@@ -107,7 +96,6 @@ export class NewStudyModalComponent {
     });
   }
 
-  /** Submits the form to create a new study or update an existing one, then closes the modal. */
   async onSubmit() {
     if (this.mode() === 'new') {
       const uuid = await this.studiesService.createStudy({

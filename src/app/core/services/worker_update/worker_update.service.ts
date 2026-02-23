@@ -11,23 +11,22 @@ import { BehaviorSubject } from 'rxjs';
  * @category Types
  */
 export interface AppVersion {
-  /** Git commit hash of the build */
+  /** Full git commit hash of the build. */
   git_hash: string;
-  /** UTC timestamp when the build was created */
+  /** UTC datetime string when the build was produced. */
   build_datetime_utc: string;
-  /** Semantic version string */
+  /** Semantic version string. */
   version: string;
 }
 
-/**
- * Represents the list of assets for a specific application version.
+/** Structure of the `assets_list.json` manifest used by the Service Worker.
  *
  * @category Types
  */
 export interface AssetList {
-  /** Version information for the asset bundle */
+  /** The version metadata for this build. */
   app_version: AppVersion;
-  /** List of file paths included in the asset bundle */
+  /** List of asset file paths to cache. */
   files: string[];
 }
 

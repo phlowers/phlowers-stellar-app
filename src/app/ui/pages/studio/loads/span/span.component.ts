@@ -10,18 +10,9 @@ import { PlotService } from '../../services/plot.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LoadFormsService } from '../loadForms.service';
 import { emptySpanLoad } from '../helpers';
-import { LoadType } from '@core/domain/models/charge.model';
-
-/**
- * Option for selecting left or right support in span calculations.
- * @internal
- */
-interface SupportOption {
-  /** Display label for the option */
-  label: string;
-  /** Value indicating which support side */
-  value: 'LEFT' | 'RIGHT';
-}
+import { LoadType, SpanLoad } from '@core/domain/models/charge.model';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { LoadControlName, SpanFormControls, SupportOption } from './span.interfaces';
 
 @Component({
   selector: 'app-span',

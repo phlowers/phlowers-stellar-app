@@ -8,46 +8,27 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-/**
- * Enumeration of possible server connection states.
- *
- * @category Types
- */
+/** Enum representing the status of the remote server. */
 export enum ServerStatus {
-  /** Server status is being determined */
+  /** Server status is being determined. */
   LOADING = 'LOADING',
-  /** Server is reachable and responding */
+  /** Server is reachable. */
   ONLINE = 'ONLINE',
-  /** Server is not reachable */
+  /** Server is unreachable. */
   OFFLINE = 'OFFLINE'
 }
-
-/**
- * Service for fetching application news and announcements.
- *
- * @remarks
- * The NewsService retrieves markdown-formatted news content from the server
- * to display announcements, updates, and important information to users.
- *
- * @example
- * ```typescript
- * this.newsService.getNews().subscribe(markdown => {
- *   this.newsContent = markdown;
- * });
- * ```
- *
- * @category Services
- */
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for fetching application news content from the server.
+ */
 export class NewsService {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Fetch news content from the server.
-   *
-   * @returns Observable emitting the news content as markdown string
+   * Fetches the news markdown file from the application origin.
+   * @returns An observable emitting the raw markdown string.
    */
   getNews(): Observable<string> {
     return this.http.get<string>(`${window.location.origin}/data/news.md`, {

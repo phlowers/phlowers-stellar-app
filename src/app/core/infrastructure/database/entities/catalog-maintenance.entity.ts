@@ -8,12 +8,7 @@
 import { CatalogMaintenance } from '@core/domain';
 
 /**
- * Catalog maintenance entity for Dexie storage.
- *
- * @remarks
- * Uses the domain model directly as no additional persistence fields
- * are needed. Contains maintenance organization hierarchy data.
- *
- * @category Database Entities
+ * Catalog maintenance entity for Dexie storage
+ * Uses the domain model directly as no additional persistence fields are needed
  */
 export type CatalogMaintenanceEntity = CatalogMaintenance;

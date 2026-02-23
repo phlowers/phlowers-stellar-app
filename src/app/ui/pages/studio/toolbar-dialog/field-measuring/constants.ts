@@ -1,12 +1,12 @@
-/** Generic select option with a display label and a string value. */
+/** Option entry for select dropdowns with a string label and value. */
 export interface SelectOption {
   /** Display label for the option. */
   label: string;
-  /** Value associated with the option. */
+  /** Underlying value. */
   value: string;
 }
 
-/** Available span options for field measuring. */
+/** Predefined span options for field measuring. */
 export const SPAN_OPTIONS: SelectOption[] = [
   { label: '12-13', value: '12-13' },
   { label: '13-14', value: '13-14' },
@@ -25,7 +25,7 @@ export const WIND_DIRECTION_OPTIONS: SelectOption[] = [
   { label: $localize`North-West`, value: 'North-West' }
 ];
 
-/** Available time mode options (summer/winter). */
+/** Time mode options (summer / winter). */
 export const TIME_MODE_OPTIONS: SelectOption[] = [
   { label: $localize`Summer`, value: 'summer' },
   { label: $localize`Winter`, value: 'winter' }

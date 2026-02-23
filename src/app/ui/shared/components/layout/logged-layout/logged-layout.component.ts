@@ -5,14 +5,11 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { SidebarItem } from '../sidebar/sidebar.model';
 import { filter } from 'rxjs/operators';
 
-/**
- * Navigation structure for the sidebar component.
- * @internal
- */
+/** Navigation structure grouping main and footer sidebar items. */
 interface SidebarNavigation {
-  /** Main navigation items */
+  /** Primary navigation links. */
   main: SidebarItem[];
-  /** Footer navigation items */
+  /** Footer navigation links. */
   footer: SidebarItem[];
 }
 
@@ -22,10 +19,7 @@ interface SidebarNavigation {
   templateUrl: './logged-layout.component.html',
   styleUrl: './logged-layout.component.scss'
 })
-/**
- * Main layout component for authenticated users.
- * Provides the top bar, sidebar navigation, and a router outlet for page content.
- */
+/** Main layout component for authenticated pages, including the sidebar and topbar. */
 export class LoggedLayoutComponent implements OnInit {
   currentRoute = window.location.pathname;
 

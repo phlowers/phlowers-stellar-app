@@ -32,14 +32,11 @@ import { SectionService } from '@services/sections/section.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-/**
- * Option for selecting support index in VTL and guying calculations.
- * @internal
- */
+/** Option for selecting a reference support direction. */
 interface SupportOption {
-  /** Support number label */
+  /** Numeric label for the support. */
   label: number;
-  /** Side identifier for the support */
+  /** Left or right side of the span. */
   value: 'LEFT' | 'RIGHT';
 }
 
@@ -64,7 +61,7 @@ interface SupportOption {
   templateUrl: './vtl-and-guying.component.html',
   styleUrls: ['./vtl-and-guying.component.scss']
 })
-/** Component for computing VTL (vertical/transversal/longitudinal) loads and guying at a selected support. */
+/** Dialog component for computing VTL (Vertical/Transverse/Longitudinal) forces and guying parameters. */
 export class VhlAndGuyingComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;

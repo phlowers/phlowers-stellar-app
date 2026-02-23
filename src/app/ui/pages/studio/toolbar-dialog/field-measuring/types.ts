@@ -105,7 +105,7 @@ export interface PapotoResult {
   check_validity: boolean;
 }
 
-/** Manual input values for the parameter at 15°C without wind calculation. */
+/** Manual input values for the 15°C without wind parameter calculation. */
 export interface ManualParameterCalculation15CWithoutWind {
   parameterPapoto: number | null;
   parameterUncertaintyPapoto: number | null;

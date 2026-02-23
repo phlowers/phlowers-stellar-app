@@ -26,6 +26,12 @@ import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-di
 import { ToolbarDialogComponent } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 
+/**
+ * Tab component displaying all sections and initial conditions of a study.
+ *
+ * Provides section CRUD, initial condition management, charge case operations,
+ * and integrates with the studio toolbar dialog for load table editing.
+ */
 @Component({
   selector: 'app-sections-tab',
   imports: [
@@ -47,7 +53,6 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss'
 })
-/** Component that renders the sections tab, listing study sections and their initial conditions. */
 export class SectionsTabComponent {
   /** The study whose sections are displayed. */
   study = input<Study | null>(null);
@@ -57,29 +62,22 @@ export class SectionsTabComponent {
   deleteSection = output<Section>();
   /** Emits a section to duplicate. */
   duplicateSection = output<Section>();
-  /** Emits when a new initial condition should be added. */
+  /** Emits an initial condition to add to a section. */
   addInitialCondition = output<InitialConditionFunctionsInput>();
-  /** Emits when an initial condition should be updated. */
+  /** Emits an initial condition to update. */
   updateInitialCondition = output<InitialConditionFunctionsInput>();
-  /** Emits when an initial condition should be deleted. */
+  /** Emits an initial condition to delete. */
   deleteInitialCondition = output<InitialConditionFunctionsInput>();
-  /** Emits when an initial condition should be duplicated. */
+  /** Emits an initial condition to duplicate. */
   duplicateInitialCondition = output<DuplicateInitialConditionFunctionsInput>();
-  /** Emits when an initial condition should be selected as active. */
+  /** Emits an initial condition to set as active. */
   setInitialCondition = output<InitialConditionFunctionsInput>();
-  /** The section currently being created or edited. */
   currentSection = signal<Section>(createEmptySection());
-  /** The initial condition currently being created or edited. */
   currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
-  /** Whether the new/edit section modal is open. */
   isNewSectionModalOpen = signal<boolean>(false);
-  /** Current mode of the section modal (create, edit, or view). */
   newSectionModalMode = signal<CreateEditView>('create');
-  /** Whether the initial condition modal is open. */
   isInitialConditionModalOpen = signal<boolean>(false);
-  /** Current mode of the initial condition modal. */
   initialConditionModalMode = signal<CreateEditView>('create');
-  /** UUID of the currently selected section for charge operations. */
   selectedSection = signal<string>('');
   @ViewChild('popover') popover!: Popover;
   private readonly toolbarDialogService = inject(ToolbarDialogService);
@@ -88,7 +86,6 @@ export class SectionsTabComponent {
 
   constructor(private readonly chargesService: ChargesService) {}
 
-  /** Creates a new default initial condition for the given section. */
   createInitialCondition(section: Section): InitialCondition {
     const currentInitialConditions = section.initial_conditions;
     return {
@@ -103,38 +100,32 @@ export class SectionsTabComponent {
     };
   }
 
-  /** Toggles the selection state of a section. */
   selectSection(section: Section, event: any) {
     this.selectedSection.set(event.checked ? section.uuid : '');
   }
 
-  /** Opens the section modal in edit mode for the given section. */
   editSection(section: Section) {
     this.currentSection.set(cloneDeep(section));
     this.newSectionModalMode.set('edit');
     this.isNewSectionModalOpen.set(true);
   }
 
-  /** Opens the section modal in view-only mode for the given section. */
   viewSection(section: Section) {
     this.currentSection.set(cloneDeep(section));
     this.newSectionModalMode.set('view');
     this.isNewSectionModalOpen.set(true);
   }
 
-  /** Opens the section modal in create mode with a blank section. */
   openNewSectionModalCreate() {
     this.currentSection.set(createEmptySection());
     this.newSectionModalMode.set('create');
     this.isNewSectionModalOpen.set(true);
   }
 
-  /** Handles section modal visibility changes. */
   onModalOpenChange(isOpen: boolean) {
     this.isNewSectionModalOpen.set(isOpen);
   }
 
-  /** Opens the initial condition modal for a given section, condition, and mode. */
   openInitialConditionModal(section: Section, initialCondition: InitialCondition, mode: CreateEditView) {
     this.currentSection.set(section);
     this.currentInitialCondition.set(initialCondition);
@@ -142,7 +133,6 @@ export class SectionsTabComponent {
     this.isInitialConditionModalOpen.set(true);
   }
 
-  /** Duplicates an initial condition from within the modal and switches to edit mode. */
   async duplicateInitialConditionFromModal({
     initialCondition,
     newUuid
@@ -159,17 +149,14 @@ export class SectionsTabComponent {
     this.initialConditionModalMode.set('edit');
   }
 
-  /** Handles initial condition modal visibility changes. */
   onInitialConditionModalOpenChange(isOpen: boolean) {
     this.isInitialConditionModalOpen.set(isOpen);
   }
 
-  /** Handles initial condition modal mode changes. */
   onInitialConditionModalChangeMode(mode: CreateEditView) {
     this.initialConditionModalMode.set(mode);
   }
 
-  /** Computed signal returning the UUID of the selected initial condition for the selected section. */
   getSelectedInitialConditionUuid = computed(() => {
     const section = this.study()?.sections.find((s) => s.uuid === this.selectedSection());
     const selectedInitialConditionUuid = section?.selected_initial_condition_uuid;
@@ -182,7 +169,6 @@ export class SectionsTabComponent {
     return undefined;
   });
 
-  /** Emits a delete event for the given initial condition and section. */
   deleteInitialConditionClick = ({
     initialCondition,
     section
@@ -196,7 +182,6 @@ export class SectionsTabComponent {
     });
   };
 
-  /** Opens the initial condition modal in view mode. */
   viewInitialConditionClick = ({
     initialCondition,
     section
@@ -207,7 +192,6 @@ export class SectionsTabComponent {
     this.openInitialConditionModal(section, initialCondition, 'view');
   };
 
-  /** Opens the initial condition modal in edit mode. */
   editInitialConditionClick = ({
     initialCondition,
     section
@@ -218,7 +202,6 @@ export class SectionsTabComponent {
     this.openInitialConditionModal(section, initialCondition, 'edit');
   };
 
-  /** Emits a duplicate event for the given initial condition and section. */
   duplicateInitialConditionClick = ({
     initialCondition,
     section
@@ -234,7 +217,6 @@ export class SectionsTabComponent {
     });
   };
 
-  /** Emits a set event to select the given initial condition on the section. */
   selectInitialConditionClick = ({
     initialCondition,
     section
@@ -248,12 +230,10 @@ export class SectionsTabComponent {
     });
   };
 
-  /** Returns initial conditions in reverse chronological order. */
   orderedInitialConditions = (initialConditions: InitialCondition[]) => {
     return cloneDeep(initialConditions).reverse();
   };
 
-  /** Builds select options from the section's charge cases. */
   getChargesOptions(section: Section) {
     return (
       section.charges?.map((c) => ({
@@ -263,22 +243,18 @@ export class SectionsTabComponent {
     );
   }
 
-  /** Sets the selected charge case for the given section. */
   selectChargeCase(charge: { label: string; value: string }, section: Section) {
     this.chargesService.setSelectedCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
   }
 
-  /** Deletes a charge case from the given section. */
   deleteChargeCase(charge: { label: string; value: string }, section: Section) {
     this.chargesService.deleteCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
   }
 
-  /** Duplicates a charge case within the given section. */
   duplicateChargeCase(charge: { label: string; value: string }, section: Section) {
     this.chargesService.duplicateCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
   }
 
-  /** Opens the charge case load table in the specified view or edit mode. */
   viewOrEditChargeCase(charge: { label: string; value: string }, mode: 'view' | 'edit', section: Section) {
     if (charge?.value) {
       this.plotService.study.set(this.study());

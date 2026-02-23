@@ -142,7 +142,7 @@
               </p-tabpanel>
 
               <p-tabpanel value="2">
-                <p i18n class="m-0">
+                <p class="m-0">
                   At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
                   deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
                   provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
@@ -152,7 +152,7 @@
               </p-tabpanel>
 
               <p-tabpanel value="3">
-                <p i18n class="m-0">
+                <p class="m-0">
                   Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cumque consequuntur vero, iste ducimus ipsam
                   soluta ab libero maxime, excepturi quia, veniam nostrum. Debitis necessitatibus veritatis mollitia
                   numquam? Optio, minus cum.
@@ -164,21 +164,15 @@
       </ng-template>
     </app-side-tab>
 
-    <app-side-tab [disabled]="true" label="Obstacles">
-      <ng-template
-        ><div style="width: 300px">
-          coucou contenu onglet "obstacles"
-          <br /><br />
-          <button i18n app-btn>bouton pour tests focus</button>
-        </div></ng-template
-      >
+    <app-side-tab label="Obstacles">
+      <ng-template><app-obstacles-form /></ng-template>
     </app-side-tab>
 
     <app-side-tab [disabled]="true" label="Sol">
       <ng-template
         ><div style="width: 400px">
           coucou contenu onglet "sol"<br /><br />
-          <button i18n app-btn>bouton pour tests focus</button>
+          <button app-btn>bouton pour tests focus</button>
         </div></ng-template
       >
     </app-side-tab>
@@ -187,7 +181,7 @@
       <ng-template
         ><div style="width: 500px">
           coucou contenu onglet "estimations"<br /><br />
-          <button i18n app-btn>bouton pour tests focus</button>
+          <button app-btn>bouton pour tests focus</button>
         </div></ng-template
       >
     </app-side-tab>

@@ -8,6 +8,12 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { StudiesService } from '@services/studies/studies.service';
 import { ExportDialogComponent } from './export-dialog/export-dialog.component';
 
+/**
+ * Header component for a study page.
+ *
+ * Displays study metadata, provides actions for duplicating, modifying,
+ * and exporting the study, and includes a toggleable detail panel.
+ */
 @Component({
   selector: 'app-study-header',
   imports: [
@@ -22,24 +28,21 @@ import { ExportDialogComponent } from './export-dialog/export-dialog.component';
   templateUrl: './study-header.component.html',
   styleUrl: './study-header.component.scss'
 })
-/** Header component for the study page, displaying study metadata, actions, and export dialog. */
 export class StudyHeaderComponent {
-  /** Whether the detail accordion panel is currently expanded. */
+  /** Whether the detail accordion panel is expanded. */
   public isDetailOpen = signal<boolean>(false);
 
-  /** Active detail panel identifier for the accordion. */
+  /** Active accordion panel key. */
   public activeDetail = signal<string>('');
-  /** The study to display in the header. */
+  /** The study whose details are displayed. */
   public study = input.required<Study | null>();
-  /** Emits the study UUID when a duplication is requested. */
+  /** Emits the UUID of the study to duplicate. */
   public duplicateStudy = output<string>();
-  /** Emits when the user requests to modify the study. */
+  /** Emits when the user requests to modify the study metadata. */
   public openModifyStudyModal = output<void>();
-  /** Locale-aware date format string used in the template. */
   public dateFormat = $localize`dd/MM:yyyy at HH'h'mm`;
   constructor(private readonly studiesService: StudiesService) {}
 
-  /** Toggles the visibility of the study detail accordion panel. */
   toggleActiveDetail() {
     this.isDetailOpen.set(!this.isDetailOpen());
     if (this.isDetailOpen()) {
@@ -49,7 +52,6 @@ export class StudyHeaderComponent {
     }
   }
 
-  /** Opens the study export dialog populated with the current study data. */
   openExportDialog() {
     this.studiesService.exportDialogData.set({
       uuid: this.study()?.uuid ?? '',

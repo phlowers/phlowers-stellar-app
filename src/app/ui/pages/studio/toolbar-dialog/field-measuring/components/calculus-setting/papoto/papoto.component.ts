@@ -38,9 +38,11 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
     ])
   ]
 })
-/** Component for the PAPOTO calculation method, handling input of measurement distances and parameter computation. */
+/** Component for PAPOTO parameter calculation from field measurement angles and distances. */
 export class PapotoComponent {
+  /** Available support options for the left support selector. */
   leftSupportOption = input.required<{ label: string; value: string }[]>();
+  /** Field measure data model bound two-way. */
   measureData = model.required<FieldMeasure>();
 
   private readonly plotService = inject(PlotService);

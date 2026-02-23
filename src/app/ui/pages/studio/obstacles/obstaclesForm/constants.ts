@@ -1,10 +1,10 @@
 import { LateralDistanceType } from '@src/app/core/domain/models/obstacle.model';
 import { ObstacleFormData } from './interfaces';
 
-/** Delay in milliseconds for debouncing obstacle point updates. */
+/** Delay in ms for debouncing obstacle point coordinate updates. */
 export const DEBOUNCED_UPDATE_POINT_DELAY = 300;
 
-/** Default initial values for the obstacle form. */
+/** Default values for a new obstacle form. */
 export const defaultObstacleForm: ObstacleFormData = {
   uuid: '',
   name: null,

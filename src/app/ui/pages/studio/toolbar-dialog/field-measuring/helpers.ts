@@ -19,10 +19,10 @@ function isDaylightSavingTime(date: Date = new Date()): boolean {
 /**
  * Creates the initial field measure data for a new measurement session.
  * @param section - The current section, used to pre-populate cable/link metadata.
- * @param name - Name of the field measure.
- * @param startSupport - Index of the start support, or null.
- * @param endSupport - Index of the end support, or null.
- * @returns A new `FieldMeasure` object with default and computed values.
+ * @param name - Name of the new measure
+ * @param startSupport - Start support index for span detection
+ * @param endSupport - End support index for span detection
+ * @returns A new `FieldMeasure` with generated UUID and defaults
  */
 export const createInitialMeasureData = (
   section: Section | null,
@@ -105,9 +105,9 @@ export const createInitialMeasureData = (
 };
 
 /**
- * Creates a pre-filled field measure for testing purposes.
- * @param overrides - Optional partial overrides to apply on top of the mock defaults.
- * @returns A `FieldMeasure` populated with mock data.
+ * Creates a test `FieldMeasure` with predefined mock section data.
+ * @param overrides - Optional partial overrides to apply
+ * @returns A `FieldMeasure` suitable for testing
  */
 export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldMeasure => {
   const mockSection: Partial<Section> = {

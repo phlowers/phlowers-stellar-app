@@ -9,13 +9,13 @@ import { isNumber } from 'lodash';
 
 const REFRESH_STUDIO_DELAY = 400;
 
+/** Component hosting a set of collapsible side tabs with panel content. */
 @Component({
   selector: 'app-side-tabs',
   imports: [NgTemplateOutlet, ButtonComponent, IconComponent],
   templateUrl: './side-tabs.component.html',
   styleUrl: './side-tabs.component.scss'
 })
-/** Component implementing a collapsible side-tab panel system with keyboard navigation support. */
 export class SideTabsComponent {
   @ContentChildren(SideTabComponent) tabs!: QueryList<SideTabComponent>;
   @ViewChildren('panelRef') panels!: QueryList<ElementRef<HTMLElement>>;

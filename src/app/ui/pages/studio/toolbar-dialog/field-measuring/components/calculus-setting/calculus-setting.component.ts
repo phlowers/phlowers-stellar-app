@@ -14,6 +14,7 @@ import { FieldMeasure } from '../../types';
 })
 /** Component allowing the user to select and configure a field measurement calculation method (PAPOTO, PEP, or tangent aiming). */
 export class CalculusSettingComponent {
+  /** Field measure data model bound two-way. */
   measureData = model.required<FieldMeasure>();
   selectedCalculusType = 'PAPOTO';
   leftSupportOption = computed(() => {

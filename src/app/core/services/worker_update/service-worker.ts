@@ -1,5 +1,9 @@
 const CACHE_NAME = 'app-assets';
 
+/**
+ * Fetches the latest asset manifest (`assets_list.json`) from the server.
+ * @returns A `Response` promise for the manifest file.
+ */
 function fetchLatestManifest() {
   return fetch('/assets_list.json');
 }
@@ -11,9 +15,9 @@ function log(message: string, ...args: any[]) {
 }
 
 /**
- * Check whether the application has been installed by looking for a cached version entry.
- *
- * @returns Promise resolving to true if the app is installed, false otherwise
+ * Checks whether the application has been installed by looking
+ * for an `app_version` entry in the cache.
+ * @returns `true` if the app is installed.
  */
 export async function checkIfAppInstalled() {
   const cache = await caches.open(CACHE_NAME);
@@ -25,13 +29,10 @@ export async function checkIfAppInstalled() {
 }
 
 /**
- * Install the application by fetching the latest manifest and caching all listed assets.
- *
- * @remarks
- * Downloads every file from the manifest, stores them in the app-assets cache,
- * and notifies all connected clients upon completion.
- *
- * @returns Promise resolving to the installed AppVersion
+ * Performs a full application installation by fetching the asset
+ * manifest, caching all listed files, and storing the build version.
+ * Notifies all controlled clients upon completion.
+ * @returns The installed application version.
  */
 export async function installApp() {
   log('beginning app installation');
@@ -65,13 +66,10 @@ export async function installApp() {
 }
 
 /**
- * Update the application by fetching the latest manifest and refreshing cached assets.
- *
- * @remarks
- * Re-downloads all files except already-cached wheel packages, removes stale
- * entries no longer listed in the manifest, and updates the stored version.
- *
- * @returns Promise resolving to the new AppVersion
+ * Updates the cached application assets to the latest manifest.
+ * Skips re-downloading already-cached wheel files and removes
+ * stale entries no longer present in the manifest.
+ * @returns The updated application version.
  */
 export async function updateApp() {
   log('update requested');

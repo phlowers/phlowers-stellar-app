@@ -32,6 +32,7 @@ import { CablesService } from '@services/cables/cables.service';
 import { isNumber } from 'lodash';
 import { MessageService } from 'primeng/api';
 
+/** Main field measuring tool component with tabs for terrain data, parameter calculation, temperature, and parameter at 15°C. */
 @Component({
   selector: 'app-field-measuring-tool',
   imports: [
@@ -48,7 +49,6 @@ import { MessageService } from 'primeng/api';
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss']
 })
-/** Component orchestrating the field measuring workflow, including terrain data, calculus settings, and temperature/parameter calculations. */
 export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;

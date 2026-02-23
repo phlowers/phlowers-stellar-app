@@ -24,6 +24,12 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from './components/import-study/import-study.component';
 import { ExportDialogComponent } from '../study/study-header/export-dialog/export-dialog.component';
 
+/**
+ * Main studies listing page.
+ *
+ * Displays all studies in a table and provides actions to create, delete,
+ * duplicate, import, and export studies.
+ */
 @Component({
   standalone: true,
   imports: [
@@ -44,14 +50,8 @@ import { ExportDialogComponent } from '../study/study-header/export-dialog/expor
   templateUrl: './studies.component.html',
   providers: [MessageService, ConfirmationService]
 })
-/**
- * Page component for listing, creating, importing, duplicating, and deleting studies.
- * Subscribes to the studies service to keep the displayed list up to date.
- */
 export class StudiesComponent implements OnInit {
-  /** Whether the new-study creation modal is currently open. */
   isNewStudyModalOpen = false;
-  /** The list of studies displayed in the table, sorted by creation date descending. */
   studies: Study[] = [];
 
   constructor(
@@ -64,18 +64,12 @@ export class StudiesComponent implements OnInit {
     });
   }
 
-  /**
-   * Sorts studies by offline creation date in descending order.
-   * @param studies - The studies array to sort.
-   * @returns A new sorted array.
-   */
   sortStudies(studies: Study[]) {
     return studies.sort((a, b) => {
       return new Date(b.created_at_offline).getTime() - new Date(a.created_at_offline).getTime();
     });
   }
 
-  /** Opens the new-study modal if the `create` query parameter is set, and loads studies once the service is ready. */
   ngOnInit(): void {
     this.isNewStudyModalOpen = this.route.snapshot.queryParams['create'] === 'true';
     this.studiesService.ready.subscribe((ready) => {
@@ -87,18 +81,10 @@ export class StudiesComponent implements OnInit {
     });
   }
 
-  /**
-   * Duplicates an existing study.
-   * @param uuid - The UUID of the study to duplicate.
-   */
   duplicateStudy(uuid: string) {
     this.studiesService.duplicateStudy(uuid);
   }
 
-  /**
-   * Prompts the user for confirmation and deletes the specified study.
-   * @param uuid - The UUID of the study to delete.
-   */
   deleteStudy(uuid: string) {
     this.confirmationService.confirm({
       key: 'positionDialog',

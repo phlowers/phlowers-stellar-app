@@ -1,17 +1,10 @@
-/**
- * Option item for section type selection dropdown.
- * @internal
- */
+/** Option item for a dropdown select with display name and code. */
 interface SelectOption {
-  /** Display name for the option */
   name: string;
-  /** Value code for the option */
   code: string;
 }
 
-/**
- * Available section types for manual section creation.
- */
+/** Available section types: guard or phase. */
 export const sectionTypes: SelectOption[] = [
   { name: $localize`Guard`, code: 'guard' },
   { name: $localize`Phase`, code: 'phase' }

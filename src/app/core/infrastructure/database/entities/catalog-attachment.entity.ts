@@ -8,12 +8,7 @@
 import { CatalogAttachment } from '@core/domain';
 
 /**
- * Catalog attachment entity for Dexie storage.
- *
- * @remarks
- * Uses the domain model directly as no additional persistence fields
- * are needed. Contains cable attachment point data.
- *
- * @category Database Entities
+ * Catalog attachment entity for Dexie storage
+ * Uses the domain model directly as no additional persistence fields are needed
  */
 export type CatalogAttachmentEntity = CatalogAttachment;

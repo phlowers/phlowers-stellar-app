@@ -57,7 +57,7 @@
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
         />
-        <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+        <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
     </div>
 
@@ -73,7 +73,7 @@
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
         />
-        <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
+        <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
     </div>
 
@@ -93,7 +93,7 @@
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
         />
-        <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
+        <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
     </div>
   } @else {
@@ -127,8 +127,8 @@
         <dt>
           <del i18n>Uncertainty cable temperature</del>
         </dt>
-        <dd>
-          <del i18n>{{ measureData().outputs.cableTemperature?.cableTemperatureUncertainty ?? '-' }} °C</del>
+        <dd i18n>
+          <del>{{ measureData().outputs.cableTemperature?.cableTemperatureUncertainty ?? '-' }} °C</del>
         </dd>
       </div>
     </dl>

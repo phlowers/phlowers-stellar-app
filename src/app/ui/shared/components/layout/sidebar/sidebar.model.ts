@@ -1,18 +1,15 @@
 import { PossibleIconNames } from '../../../model/icon.model';
 
-/**
- * Describes a navigation item rendered in the application sidebar.
- * @category Models
- */
+/** Represents a single navigation item in the sidebar. */
 export interface SidebarItem {
   /** Unique identifier for the sidebar item. */
   id: string;
-  /** Icon name to display alongside the item. */
+  /** Icon name displayed alongside the label. */
   icon: PossibleIconNames;
-  /** Full label displayed when the sidebar is expanded. */
+  /** Full display label. */
   label: string;
-  /** Optional abbreviated label displayed when the sidebar is collapsed. */
+  /** Abbreviated label used when the sidebar is collapsed. */
   shortLabel?: string;
-  /** Route path to navigate to when the item is selected. */
+  /** Router path the item navigates to. */
   route: string;
 }

@@ -3,8 +3,8 @@ import { Injectable, signal } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
-/** Service tracking which side tab is currently open in the studio. */
+/** Service tracking which side tab is currently open. */
 export class SideTabsService {
-  /** Index of the currently open side tab, or null if all tabs are closed. */
+  /** Index of the currently open tab, or `null` when all tabs are collapsed. */
   public sideTabs = signal<number | null>(null);
 }

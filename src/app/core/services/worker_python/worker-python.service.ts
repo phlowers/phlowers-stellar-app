@@ -38,13 +38,10 @@ import { Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
 })
 export class WorkerPythonService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
-
   /** Observable indicating if Pyodide failed to load */
   readonly pyodideLoadError$ = new BehaviorSubject<boolean>(false);
-
   /** Reference to the web worker instance */
   public worker?: Worker;
-
   /** Signal containing timing information for diagnostics */
   times = signal<{
     /** Time to load Pyodide runtime (ms) */

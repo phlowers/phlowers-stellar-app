@@ -10,12 +10,9 @@ import { UserEntity } from '@core/infrastructure/database';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
- * Validates an email address format.
- *
- * @param email - The email address to validate
- * @returns True if the email format is valid, false otherwise
- *
- * @internal
+ * Validates whether the given string is a well-formed email address.
+ * @param email - The string to validate.
+ * @returns `true` if the string matches the email pattern.
  */
 const validateEmail = (email: string): boolean => {
   const emailRegex =
@@ -24,34 +21,16 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.exec(String(email).toLowerCase()) !== null;
 };
 
-/**
- * Service for managing application users.
- *
- * @remarks
- * This service handles user creation and retrieval from IndexedDB.
- * The application supports a single user per browser instance.
- *
- * @example
- * ```typescript
- * constructor(private userService: UserService) {
- *   // Subscribe to user changes
- *   userService.user$.subscribe(user => {
- *     if (user) {
- *       console.log('Logged in as:', user.email);
- *     }
- *   });
- * }
- * ```
- *
- * @category Services
- */
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for managing the current application user.
+ * Handles user creation, retrieval, and exposes a reactive user observable.
+ */
 export class UserService {
   private readonly userSubject = new BehaviorSubject<UserEntity | null>(null);
-
-  /** Observable stream of the current user */
+  /** Observable emitting the current `UserEntity` or `null` if no user exists. */
   public user$: Observable<UserEntity | null> = this.userSubject.asObservable();
 
   constructor(private readonly storageService: StorageService) {
@@ -67,15 +46,8 @@ export class UserService {
   }
 
   /**
-   * Create a new user in the database.
-   *
-   * @param user - The user entity to create
-   * @throws Error if a user already exists or email is invalid
-   *
-   * @example
-   * ```typescript
-   * await userService.createUser({ email: 'user@example.com' });
-   * ```
+   * Create a new user
+   * @param user The user to create
    */
   async createUser(user: UserEntity) {
     const users = await this.storageService.db?.users.toArray();
@@ -90,14 +62,8 @@ export class UserService {
   }
 
   /**
-   * Get the current user from the database.
-   *
-   * @returns The user entity or null if no user exists
-   *
-   * @example
-   * ```typescript
-   * const user = await userService.getUser();
-   * ```
+   * Get the user from the database
+   * @returns The user
    */
   async getUser() {
     const users = await this.storageService.db?.users.toArray();

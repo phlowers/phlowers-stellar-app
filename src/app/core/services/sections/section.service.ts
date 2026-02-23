@@ -12,31 +12,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
-/**
- * Service for managing sections within studies.
- *
- * @remarks
- * The SectionService provides CRUD operations for sections, which are
- * the primary organizational unit for grouping supports, charges, and
- * initial conditions within a study.
- *
- * @example
- * ```typescript
- * // Injecting and using the service
- * constructor(private sectionService: SectionService) {}
- *
- * // Create a new section
- * await this.sectionService.createOrUpdateSection(study, newSection);
- *
- * // Get current section from signal
- * const section = this.sectionService.currentSection();
- * ```
- *
- * @category Services
- */
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for creating, updating, duplicating, deleting, and retrieving
+ * sections within a study.
+ */
 export class SectionService {
   constructor(private readonly studiesService: StudiesService) {}
 
@@ -99,11 +81,10 @@ export class SectionService {
   }
 
   /**
-   * Retrieve a section by its UUID from a specific study.
-   *
-   * @param studyUuid - The UUID of the study containing the section, or undefined
-   * @param sectionUuid - The UUID of the section to retrieve
-   * @returns Promise resolving to the section if found, undefined otherwise
+   * Retrieves a section by its UUID within a given study.
+   * @param studyUuid - UUID of the study (may be `undefined`).
+   * @param sectionUuid - UUID of the section to find.
+   * @returns The matching `Section` or `undefined`.
    */
   getSectionByUuid(studyUuid: string | undefined, sectionUuid: string): Promise<Section | undefined> {
     if (!studyUuid) {

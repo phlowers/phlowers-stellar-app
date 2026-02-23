@@ -23,6 +23,12 @@ import { NewStudyModalComponent } from '../studies/components/new-study-modal/ne
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'dexie';
 
+/**
+ * Study detail page component.
+ *
+ * Manages the lifecycle of a single study including loading, editing,
+ * section CRUD, and initial condition management.
+ */
 @Component({
   selector: 'app-study',
   imports: [
@@ -42,13 +48,9 @@ import { Subscription } from 'dexie';
   templateUrl: './study.component.html',
   styleUrl: './study.component.scss'
 })
-/** Component that displays and manages a single study, including its sections and initial conditions. */
 export class StudyComponent implements OnInit, OnDestroy {
-  /** The currently loaded study. */
   study: Study | null = null;
-  /** Whether the modify-study modal is open. */
   isNewStudyModalOpen = signal<boolean>(false);
-  /** Subscription to the study observable for cleanup on destroy. */
   subscription: Subscription | null = null;
 
   constructor(
@@ -84,7 +86,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Fetches and subscribes to study updates by UUID, redirecting if not found. */
   refreshStudy(uuid: string) {
     if (uuid && this.studiesService.ready.value) {
       this.subscription = this.studiesService.getStudyAsObservable(uuid).subscribe((study: Study | undefined) => {
@@ -98,12 +99,10 @@ export class StudyComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Opens the modal dialog to modify the current study. */
   openModifyStudyModal() {
     this.isNewStudyModalOpen.set(true);
   }
 
-  /** Duplicates the study and navigates to the newly created copy. */
   duplicateStudy(uuid: string) {
     this.studiesService.duplicateStudy(uuid).then((study) => {
       if (study) {
@@ -118,7 +117,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Creates a new section or updates an existing one in the current study. */
   async createOrUpdateSection(section: Section) {
     if (!this.study) {
       return;
@@ -141,7 +139,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Deletes a section from the current study. */
   async deleteSection(section: Section) {
     if (!this.study) {
       return;
@@ -157,7 +154,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Duplicates a section within the current study. */
   async duplicateSection(section: Section) {
     if (!this.study) {
       return;
@@ -173,7 +169,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Updates an existing initial condition and re-selects it on the section. */
   async updateInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
     if (!this.study) {
       return;
@@ -198,7 +193,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Adds a new initial condition to the given section. */
   async addInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
     if (!this.study) {
       return;
@@ -222,7 +216,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Deletes an initial condition from the given section. */
   async deleteInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
     if (!this.study) {
       return;
@@ -238,7 +231,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Duplicates an initial condition and selects the new copy. */
   async duplicateInitialCondition({ section, initialCondition, newUuid }: DuplicateInitialConditionFunctionsInput) {
     if (!this.study) {
       return;
@@ -255,7 +247,6 @@ export class StudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Sets the active initial condition for the given section. */
   async setInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
     if (!this.study) {
       return;

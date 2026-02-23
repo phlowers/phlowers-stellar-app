@@ -5,44 +5,44 @@ import { L0SumComponent } from './l0-sum/l0-sum.component';
 import { VhlAndGuyingComponent } from './vtl-and-guying/vtl-and-guying.component';
 import { LoadsTableComponent } from './loads-table/loads-table.component';
 
-/** Identifier for a toolbar dialog tool. */
+/** Identifier for a toolbar tool. */
 export type Tool = 'field-measuring' | 'l0-sum' | 'vtl-and-guying' | 'load-table' | 'other-tool';
 
-/** Phase of the toolbar dialog lifecycle (init or main content). */
+/** Phase of the toolbar dialog lifecycle. */
 export type DialogPhase = 'init' | 'main';
 
-/** Configuration for a toolbar dialog tool, including its component and optional init phase. */
+/** Configuration for a toolbar tool, including its component and dialog sizing. */
 export interface ToolConfig {
-  /** Main component to render for this tool. */
+  /** Main component rendered when the tool is active. */
   component: Type<unknown>;
-  /** Optional dialog CSS styles for the main phase. */
+  /** CSS styles applied to the dialog in main phase. */
   dialogStyle?: Record<string, string>;
   /** Optional initialization component shown before the main phase. */
   initComponent?: Type<unknown>;
-  /** Optional dialog CSS styles for the init phase. */
+  /** CSS styles applied to the dialog during the init phase. */
   initDialogStyle?: Record<string, string>;
 }
 
-/** Custom header and footer templates injected into the toolbar dialog. */
+/** Custom header/footer templates injected into the dialog by child components. */
 export interface ToolTemplates {
-  /** Optional header template reference. */
+  /** Header template reference. */
   header?: TemplateRef<unknown>;
-  /** Optional footer template reference. */
+  /** Footer template reference. */
   footer?: TemplateRef<unknown>;
 }
 
-/** Context for opening the loads table tool with a specific charge. */
+/** Context passed when opening the load table tool. */
 export interface LoadTableContext {
   /** Whether the table opens in view or edit mode. */
   mode: 'view' | 'edit';
-  /** UUID of the charge to display. */
+  /** UUID of the charge case to display. */
   chargeUuid: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-/** Service managing the toolbar dialog lifecycle, including opening, closing, and transitioning between tools. */
+/** Service managing the toolbar dialog state, tool registration, phase transitions, and template injection. */
 export class ToolbarDialogService {
   readonly currentTool = signal<Tool | null>(null);
   readonly isOpen = signal(false);

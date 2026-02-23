@@ -28,6 +28,7 @@ import { AttachmentService } from '@services/attachment/attachment.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
 
+/** Regex pattern for validating email addresses. */
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const modules = [
@@ -44,6 +45,12 @@ const modules = [
   ProgressBarModule
 ];
 
+/**
+ * Root application component.
+ *
+ * Handles user registration, service worker setup, database initialization,
+ * online/offline status monitoring, and application update prompts.
+ */
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -51,10 +58,6 @@ const modules = [
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-/**
- * Root application component responsible for bootstrapping services, managing user registration,
- * handling application updates, and initializing reference data.
- */
 export class AppComponent implements OnInit, OnDestroy {
   title = 'phlowers-stellar-app';
   userDialog = false;
@@ -104,7 +107,6 @@ export class AppComponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Imports reference data (maintenance teams, lines, cables, chains, and attachments) from files. */
   async setupData() {
     await this.maintenanceService.importFromFile();
     await this.linesService.importFromFile();
@@ -113,12 +115,10 @@ export class AppComponent implements OnInit, OnDestroy {
     await this.attachmentService.importFromFile();
   }
 
-  /** Cleans up all active subscriptions when the component is destroyed. */
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
-  /** Validates and saves the user email from the registration form. Displays a success or error toast notification. */
   async saveUser() {
     this.submitted = true;
     if (this.form.valid) {
@@ -141,7 +141,6 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Initializes the Python web worker, sets up persistent storage, and creates the IndexedDB database. */
   async setupWorker() {
     try {
       this.workerService.setup();
@@ -152,22 +151,15 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Initializes the worker and storage on component creation. */
   ngOnInit() {
     this.setupWorker();
   }
 
-  /**
-   * Checks whether a form control is in an invalid and touched state.
-   * @param controlName - The name of the form control to validate.
-   * @returns `true` if the control is invalid and has been touched.
-   */
   isInvalid(controlName: string) {
     const control = this.form.get(controlName);
     return control?.invalid && control.touched;
   }
 
-  /** Triggers the application update process. */
   onUpdateClick() {
     this.updateService.update();
   }

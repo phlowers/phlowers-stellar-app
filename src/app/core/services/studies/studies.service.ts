@@ -16,43 +16,20 @@ import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
 import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/new-study-modal.component';
 
-/**
- * Service for managing power line studies.
- *
- * @remarks
- * This service provides CRUD operations for studies stored in IndexedDB.
- * It handles study creation, retrieval, update, deletion, and export.
- *
- * @example
- * ```typescript
- * constructor(private studiesService: StudiesService) {
- *   // Create a new study
- *   const uuid = await studiesService.createStudy({
- *     title: 'My Study',
- *     description: 'Analysis of line ABC',
- *     shareable: false,
- *     sections: [],
- *     author_email: 'user@example.com'
- *   });
- * }
- * ```
- *
- * @category Services
- */
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for managing study entities stored in the local IndexedDB database.
+ * Provides CRUD operations, duplication, import/export, and live-query capabilities.
+ */
 export class StudiesService {
-  /** Observable indicating whether the service is ready */
+  /** Emits `true` when the underlying storage is ready. */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
-  /** Observable stream of all studies */
+  /** Emits the current list of all studies whenever it changes. */
   public readonly studies = new BehaviorSubject<StudyEntity[]>([]);
-
-  /** Signal containing the currently selected study */
-  public readonly currentStudy = signal<StudyEntity | null>(null);
-
-  /** Signal for export dialog state */
+  /** Signal holding the data for the export dialog (UUID, title, open state). */
   public readonly exportDialogData = signal<{
     uuid: string;
     title: string;
@@ -216,10 +193,8 @@ export class StudiesService {
   }
 
   /**
-   * Download a study as a Base64-encoded .clst file.
-   *
-   * @param uuid - The UUID of the study to download
-   * @param filename - The filename (without extension) for the downloaded file
+   * Export a study
+   * @param uuid The uuid of the study to export
    */
   async downloadStudy(uuid: string, filename: string) {
     const study = await this.getStudy(uuid);
@@ -240,10 +215,9 @@ export class StudiesService {
   }
 
   /**
-   * Get a study as a Dexie live-query observable.
-   *
-   * @param uuid - The UUID of the study to observe
-   * @returns An observable that emits the study whenever it changes in IndexedDB
+   * Get a study as an observable
+   * @param uuid The uuid of the study to get
+   * @returns
    */
   getStudyAsObservable(uuid: string) {
     return liveQuery(() => this.db?.studies.get(uuid));

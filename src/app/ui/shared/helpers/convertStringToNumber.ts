@@ -1,11 +1,10 @@
 import { toNumber } from 'lodash';
 
 /**
- * Converts a string value to a number, handling comma as decimal separator.
- * Returns `undefined` if the input is `undefined`.
- * @category Helpers
- * @param value - The string value to convert, or `undefined`.
- * @returns The parsed number, or `undefined` if the input was `undefined`.
+ * Converts a string value to a number, treating commas as decimal separators.
+ * Returns `undefined` when the input is `undefined`.
+ * @param value - The string to convert, or `undefined`.
+ * @returns The numeric value, or `undefined` if input was `undefined`.
  */
 export const convertStringToNumber = <T extends string | undefined>(
   value: T

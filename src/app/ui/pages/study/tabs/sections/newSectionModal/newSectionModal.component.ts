@@ -17,6 +17,11 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { isNil } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
 
+/**
+ * Checks whether all mandatory fields in a section are filled.
+ * @param section - The section to validate
+ * @returns `true` if all required fields have values
+ */
 const areAllRequiredFieldsFilled = (section: Section) => {
   const nameCondition = !!section.name.trim();
   const typeCondition = !!section.type;
@@ -42,6 +47,12 @@ const areAllRequiredFieldsFilled = (section: Section) => {
   );
 };
 
+/**
+ * Modal dialog for creating, editing, or viewing a study section.
+ *
+ * Wraps the `ManualSectionComponent` and validates required fields
+ * and section name uniqueness before allowing submission.
+ */
 @Component({
   selector: 'app-new-section-modal',
   imports: [
@@ -63,35 +74,27 @@ const areAllRequiredFieldsFilled = (section: Section) => {
   templateUrl: './newSectionModal.component.html',
   styleUrl: './newSectionModal.component.scss'
 })
-/** Modal component for creating, editing, or viewing a study section. */
 export class NewSectionModalComponent {
-  /** Whether the modal is currently visible. */
+  /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
   /** Emits when the modal open state changes. */
   isOpenChange = output<boolean>();
-  /** Emits the section after duplication. */
+  /** Emits the validated section on save. */
   setSection = output<Section>();
-  /** Data source type for section creation (e.g. 'manual'). */
   source = 'manual';
   /** The section being created or edited. */
   section = input.required<Section>();
-  /** The parent study of the section. */
+  /** The parent study. */
   study = input.required<Study | null>();
-  /** Emits when the section data changes. */
   sectionChange = output<Section>();
-  /** Emits the section to be saved on validation. */
   outputSection = output<Section>();
-  /** Current modal mode: create, edit, or view. */
+  /** Current dialog mode: create, edit, or view. */
   mode = input.required<'create' | 'edit' | 'view'>();
-  /** Emits when the modal mode changes. */
   setMode = output<'create' | 'edit' | 'view'>();
 
-  /** Whether all required section fields are filled. */
   areAllRequiredFieldsFilled = signal<boolean>(false);
-  /** Whether the section name is unique within the study. */
   isNameUnique = signal<boolean>(false);
 
-  /** Computed header title reflecting the current modal mode. */
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
       return $localize`View a study section`;
@@ -109,7 +112,6 @@ export class NewSectionModalComponent {
     });
   }
 
-  /** Validates that all required fields are filled and the name is unique. */
   checkFields() {
     this.areAllRequiredFieldsFilled.set(areAllRequiredFieldsFilled(this.section()));
     const isNameUnique = !this.study()?.sections.find(
@@ -118,38 +120,32 @@ export class NewSectionModalComponent {
     this.isNameUnique.set(isNameUnique);
   }
 
-  /** Handles dialog visibility changes, closing the modal when hidden. */
   onVisibleChange(visible: boolean) {
     if (!visible) {
       this.isOpenChange.emit(false);
     }
   }
 
-  /** Propagates section changes and re-checks field validity. */
   onSectionChange(event: Section) {
     this.sectionChange.emit(event);
     this.checkFields();
   }
 
-  /** Emits the current section and closes the modal on validation. */
   onValidate() {
     this.outputSection.emit(this.section());
     this.isOpenChange.emit(false);
   }
 
-  /** Duplicates the current section and emits the new copy. */
   async onDuplicateSection() {
     const newSection = await this.sectionService.duplicateSection(this.study()!, this.section());
     this.setSection.emit(newSection);
   }
 
-  /** Switches the modal to edit mode and re-checks fields. */
   onEditSection() {
     this.setMode.emit('edit');
     this.checkFields();
   }
 
-  /** Deletes the current section and closes the modal. */
   onDeleteSection() {
     this.sectionService.deleteSection(this.study()!, this.section());
     this.isOpenChange.emit(false);

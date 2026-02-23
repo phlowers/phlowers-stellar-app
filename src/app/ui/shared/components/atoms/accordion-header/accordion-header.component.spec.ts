@@ -11,7 +11,7 @@ import { AccordionModule } from 'primeng/accordion';
     <p-accordion>
       <p-accordion-panel>
         <app-accordion-header>
-          <span i18n data-testid="projected-content">Test Content</span>
+          <span data-testid="projected-content">Test Content</span>
         </app-accordion-header>
       </p-accordion-panel>
     </p-accordion>

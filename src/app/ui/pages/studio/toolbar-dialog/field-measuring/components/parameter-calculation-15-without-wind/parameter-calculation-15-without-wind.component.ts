@@ -26,6 +26,7 @@ import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 
+/** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({
   selector: 'app-parameter-at-15c-without-wind',
   imports: [
@@ -50,8 +51,8 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
     ])
   ]
 })
-/** Component for computing the cable parameter at 15°C without wind, with auto and manual input modes. */
 export class ParameterCalculation15WithoutWindComponent {
+  /** Field measure data model bound two-way. */
   measureData = model.required<FieldMeasure>();
   initialConditionModalOpen = signal<boolean>(false);
 

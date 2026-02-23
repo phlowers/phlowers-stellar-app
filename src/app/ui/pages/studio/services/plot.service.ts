@@ -17,7 +17,7 @@ import { ObstacleFormService } from '../obstacles/obstaclesForm/obstaclesForm.se
 /** DOM element ID used for the Plotly chart container. */
 export const PLOT_ID = 'plotly-output';
 
-/** Represents an option for selecting a span in the studio plot. */
+/** Option for a span dropdown selector. */
 export interface SpanOption {
   /** Display label for the span option. */
   label: string;
@@ -26,11 +26,11 @@ export interface SpanOption {
 }
 
 /**
- * Determines whether the plot projection needs to be refreshed based on changed plot options.
- * @param oldOptions - The previous plot options.
- * @param newOptions - The updated plot options.
- * @param loading - Whether the plot is currently loading.
- * @returns `true` if the projection should be refreshed.
+ * Checks whether a projection refresh is needed based on changed plot options.
+ * @param oldOptions - Previous plot options
+ * @param newOptions - New plot options
+ * @param loading - Whether a calculation is currently in progress
+ * @returns `true` if the projection should be refreshed
  */
 export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions: PlotOptions, loading: boolean) => {
   if (loading) {
@@ -70,11 +70,11 @@ const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   baseState: false
 };
 
-/** Options controlling which overlays are displayed on the studio plot. */
+/** Options controlling which overlays are visible on the plot. */
 export interface SelectedDisplayOptions {
-  /** Whether to display loads on the plot. */
+  /** Whether load results are displayed. */
   loads: boolean;
-  /** Whether to display the base state on the plot. */
+  /** Whether base state results are displayed. */
   baseState: boolean;
 }
 

@@ -19,19 +19,12 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss'
 })
-/**
- * Top navigation bar component.
- * Displays the current page title, user information, and Python worker readiness status.
- */
+/** Top navigation bar displaying the current page title, user info, and Python worker status. */
 export class TopbarComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
-  /** Title of the current page, updated via the PageTitleService. */
   public currentPageTitle = signal<string>('');
-  /** Whether the Python web worker is ready to execute tasks. */
   public workerReady = signal<boolean>(true);
-  /** Whether an error occurred while loading the Pyodide runtime. */
   public readonly workerError = signal<boolean>(false);
-  /** The currently authenticated user, or `null` if unavailable. */
   public user = signal<User | null>(null);
 
   constructor(

@@ -33,7 +33,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
     ])
   ]
 })
-/** Component displaying a row of support and span data cards below the studio plot. */
+/** Container component that renders `SectionPlotCardComponent` cards for visible supports and spans. */
 export class SectionPlotCardsComponent {
   litData = signal<GetSectionOutput | null>(null);
   constructor(public readonly plotService: PlotService) {

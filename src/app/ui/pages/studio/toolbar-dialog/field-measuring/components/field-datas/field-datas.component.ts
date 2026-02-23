@@ -27,10 +27,13 @@ import { MessageModule } from 'primeng/message';
   templateUrl: './field-datas.component.html',
   styleUrls: ['./field-datas.component.scss']
 })
-/** Component for entering and displaying field measurement data such as location, weather, and time. */
+/** Component for editing field measurement data (date, wind, temperature, sky cover). */
 export class FieldDatasComponent {
+  /** Whether the measure name is already used by another measure. */
   isNameAlreadyTaken = input.required<boolean>();
+  /** Current field measure data. */
   measureData = input.required<FieldMeasure>();
+  /** Emits when a field value changes. */
   fieldChange = output<{
     field: keyof FieldMeasure;
     value: FieldMeasure[keyof FieldMeasure];

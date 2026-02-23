@@ -83,10 +83,6 @@ export interface GetSectionOutput {
   insulators: number[][][];
   /** 3D coordinates of support structures */
   supports: number[][][];
-  /** L0 parameter values for each span */
-  L0: number[];
-  /** Elevation values at each support */
-  elevation: number[];
   /** Line angle at each support (degrees) */
   line_angle: number[];
   /** VTL under chain for each support */
@@ -103,16 +99,20 @@ export interface GetSectionOutput {
   load_angle: number[];
   /** Cable displacement values */
   displacement: number[][];
-  /** Span lengths */
-  span_length: number[];
   /** Coordinates of applied loads by support UUID */
   loads_coords: Dictionary<number[]>;
+  /** Span lengths */
+  span_length: number[];
+  /** Elevation values at each support */
+  elevation: number[];
   /** Cable sag parameter (unitless) at each span */
   parameter: number[];
   /** Superior (upper) tension at each support (daN) */
   tension_sup: number[];
   /** Inferior (lower) tension at each support (daN) */
   tension_inf: number[];
+  /** L0 parameter values for each span */
+  L0: number[];
   /** Horizontal distance at each span (m) */
   horizontal_distance: number[];
   /** Arc length of cable in each span (m) */

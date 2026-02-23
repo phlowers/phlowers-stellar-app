@@ -9,7 +9,7 @@
     <dd class="conductor__value">{{ measureData().cableName }}</dd>
 
     <dt i18n class="ambientTemp__label">Ambient temperature (°C)</dt>
-    <dd i18n class="ambientTemp__value">{{ measureData().ambientTemperature }} °C</dd>
+    <dd class="ambientTemp__value">{{ measureData().ambientTemperature }} °C</dd>
   </dl>
 
   <label for="transit" i18n class="transit__label">Transit</label>
@@ -24,7 +24,7 @@
       aria-describedby="mandatory-temperature"
       required
     />
-    <p-inputgroup-addon i18n>A</p-inputgroup-addon>
+    <p-inputgroup-addon>A</p-inputgroup-addon>
   </p-inputgroup>
 
   <dl class="contents with-mt-labels">
@@ -77,13 +77,13 @@
 
   <dl class="contents">
     <dt i18n class="diffusedSolarFlux__label">Diffused solar flux</dt>
-    <dd i18n class="diffusedSolarFlux__value">{{ measureData().diffusedSolarFlux }} W/m²</dd>
+    <dd class="diffusedSolarFlux__value">{{ measureData().diffusedSolarFlux }} W/m²</dd>
 
     <dt i18n class="directSolarFlux__label">Direct solar flux</dt>
-    <dd i18n class="directSolarFlux__value">{{ measureData().directSolarFlux }} W/m²</dd>
+    <dd class="directSolarFlux__value">{{ measureData().directSolarFlux }} W/m²</dd>
 
     <dt i18n class="diffusedPlusDirectSolarFlux__label">Diffused + direct solar flux</dt>
-    <dd i18n class="diffusedPlusDirectSolarFlux__value">{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
+    <dd class="diffusedPlusDirectSolarFlux__value">{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
   </dl>
 
   <label for="measuredDiffusedPlusDirectSolarFlux" i18n class="measuredDiffusedPlusDirectSolarFlux__label">
@@ -99,7 +99,7 @@
       [min]="0"
       aria-describedby="solar-fluxs-impact"
     />
-    <p-inputgroup-addon i18n>W/m²</p-inputgroup-addon>
+    <p-inputgroup-addon>W/m²</p-inputgroup-addon>
   </p-inputgroup>
 
   <p id="solar-fluxs-impact" class="solar-fluxs-impact" i18n>It won't be used in the calculation.</p>
@@ -119,7 +119,7 @@
     <dl class="temperature-calculation__results__list">
       <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
-        <dd i18n>
+        <dd>
           {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
           °C
         </dd>
@@ -129,7 +129,7 @@
           <del i18n> Uncertainty cable temperature </del>
         </dt>
         <dd>
-          <del i18n>
+          <del>
             {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-3') ?? '-' }}
             °C
           </del>
@@ -137,7 +137,7 @@
       </div>
       <div class="solarFlux">
         <dt i18n>Solar flux on the cable</dt>
-        <dd i18n>
+        <dd>
           {{ (measureData().outputs.cableTemperature?.cableSolarFlux | number: '1.0-3') ?? '-' }}
           W/m²
         </dd>

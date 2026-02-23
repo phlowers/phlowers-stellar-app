@@ -22,8 +22,15 @@ import { LogLevel, Task } from '@services/worker_python/tasks/types';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
+/** Name of the service worker cache used for app assets. */
 const CACHE_NAME = 'app-assets';
 
+/**
+ * Administration page component.
+ *
+ * Provides actions to delete all studies, reset the database, reset the app,
+ * manage updates, and toggle debug logging.
+ */
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -42,10 +49,6 @@ const CACHE_NAME = 'app-assets';
     ToggleSwitch
   ]
 })
-/**
- * Administration page component providing tools for managing application state,
- * including deleting studies, resetting the database, resetting the app, and toggling debug logs.
- */
 export class AdminComponent {
   constructor(
     public updateService: UpdateService,
@@ -58,19 +61,14 @@ export class AdminComponent {
   ) {
     this.activateDebugLogs = localStorage.getItem('activateDebugLogs') === 'true';
   }
-  /** Whether an application update is currently available. */
   updateAvailable = false;
-  /** The version string of the available update. */
   newVersion = '';
-  /** Options for the debug logs toggle switch. */
   activateDebugLogsOptions = [
     { label: $localize`ON`, value: LogLevel.DEBUG },
     { label: $localize`OFF`, value: LogLevel.WARNING }
   ];
-  /** Whether debug-level Python logs are currently activated. */
   activateDebugLogs = false;
 
-  /** Prompts for confirmation and deletes all studies from the database. */
   deleteAllStudies() {
     this.confirmationService.confirm({
       message: $localize`Are you sure you want to delete all studies?`,
@@ -85,7 +83,6 @@ export class AdminComponent {
     });
   }
 
-  /** Prompts for confirmation and resets the IndexedDB database. */
   resetDatabase() {
     this.confirmationService.confirm({
       message: $localize`Are you sure you want to reset the database?`,
@@ -100,7 +97,6 @@ export class AdminComponent {
     });
   }
 
-  /** Prompts for confirmation, unregisters service workers, clears the app cache, and reloads the application. */
   resetApp() {
     this.confirmationService.confirm({
       message: $localize`Are you sure you want to reset the app?`,
@@ -123,10 +119,6 @@ export class AdminComponent {
     });
   }
 
-  /**
-   * Toggles the Python worker log level and persists the setting in local storage.
-   * @param activate - Whether to activate debug-level logs.
-   */
   async onChangeActivateDebugLogs(activate: boolean) {
     await this.workerPythonService.runTask(Task.setLogLevel, {
       activateDebugLogs: activate

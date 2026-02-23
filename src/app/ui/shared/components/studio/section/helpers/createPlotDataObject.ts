@@ -3,6 +3,12 @@ import { SPAN_COLOR } from './plot.constants';
 import { PlotObjectsType, Side, View } from './types';
 import { Support } from '@core/domain/models/support.model';
 
+/**
+ * Returns line styling for a given plot object type and view mode.
+ * @param type - The type of plot object.
+ * @param view - The current view mode.
+ * @returns Line color, dash style, and width configuration.
+ */
 const getLine = (
   type: PlotObjectsType,
   view: View

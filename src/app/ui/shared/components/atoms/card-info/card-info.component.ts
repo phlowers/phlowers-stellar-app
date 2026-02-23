@@ -11,24 +11,23 @@ import { CardState } from '@ui/shared/model/card-info.model';
   templateUrl: './card-info.component.html',
   styleUrl: './card-info.component.scss'
 })
-/** Informational card component that displays a title, descriptive text, an optional status badge, and an optional link. */
+/** Informational card component displaying a title, status, text, and an optional link. */
 export class CardInfoComponent {
-  /** Title displayed at the top of the card. */
+  /** Card title text. */
   title = input.required<string>();
-  /** Visual state applied to the card (e.g. success, warning, error). */
+  /** Visual status state controlling the card's style (success, warning, error, unknown). */
   statusState = input<CardState>();
-  /** Main descriptive text content of the card. */
+  /** Main descriptive text displayed in the card. */
   text = input.required<string>();
-  /** Label for the optional link displayed in the card. */
+  /** Text for the optional action link. */
   linkText = input<string>();
-  /** Accessible label for the optional link. */
+  /** Aria label for the optional action link. */
   linkAriaLabel = input<string>();
-  /** Router path the optional link navigates to. */
+  /** Route path for the optional action link. */
   linkRoute = input<string>();
-  /** Extra CSS class(es) appended to the card element. */
+  /** Additional CSS class appended to the card element. */
   additionalClass = input<string>();
 
-  /** Combined CSS class string derived from the status state and any additional classes. */
   computedClass = computed(() => {
     return [this.statusState() ? 'card-' + this.statusState() : '', this.additionalClass() ?? '']
       .filter(Boolean)

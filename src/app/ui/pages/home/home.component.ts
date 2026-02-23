@@ -44,49 +44,38 @@ const defaultTexts = {
   serverText: $localize`Trying to reach the servers!` // i18n Nous essayons de contacter les serveurs
 };
 
-/**
- * Text content configuration for the home page cards.
- * @internal
- */
+/** Text content displayed on the home page cards and sections. */
 interface HomeTexts {
-  /** Title for the news card */
   newsTitle: string;
-  /** Content text for the news card */
   newsText: string;
-  /** Link text for viewing all news */
   newsLinkText: string;
-  /** Title for the update/changelog card */
   updateTitle: string;
-  /** Content text for the update card */
   updateText: string;
-  /** Link text for the update card */
   updateLinkText: string;
-  /** Explicit link text for accessibility */
   updateLinkExplicitText: string;
-  /** Title for the server status card */
   serverTitle: string;
-  /** Content text for the server status card */
   serverText: string;
 }
 
+/** Possible visual states for the server status card. */
 type ServerStates = CardState;
 
+/**
+ * Home page component.
+ *
+ * Displays news, changelog info, server connectivity status,
+ * and the user's most recently updated studies.
+ */
 @Component({
   selector: 'app-home',
   imports: [RouterLink, ButtonComponent, IconComponent, CardInfoComponent, CardStudyComponent, CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-/**
- * Home page component displaying news, changelog updates, server connectivity status,
- * and the user's most recently updated studies.
- */
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
-  /** Signal holding the list of most recently updated studies. */
   public latestStudies = signal<Study[]>([]);
 
-  /** Signal holding the text content displayed in home page cards. */
   public homeText = signal<HomeTexts>(defaultTexts);
 
   private updateText(key: keyof HomeTexts, value: string) {
@@ -96,9 +85,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }));
   }
 
-  /** Signal representing the current application update availability status. */
   public updateStatus = signal<'unknown' | 'warning'>('unknown');
-  /** Signal representing the current server connectivity status. */
   public serverStatus = signal<ServerStates>('unknown');
   private isOffline(isOnline: boolean): boolean {
     return !isOnline;
@@ -126,7 +113,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Subscribes to online and server status observables and loads the latest studies. */
   ngOnInit(): void {
     this.subscriptions.add(
       combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]).subscribe(
@@ -188,7 +174,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Cleans up all active subscriptions when the component is destroyed. */
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }

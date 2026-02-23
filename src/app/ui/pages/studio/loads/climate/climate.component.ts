@@ -21,6 +21,7 @@ import { LoadFormsService } from '../loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@core/domain/models/charge.model';
 import { MessageModule } from 'primeng/message';
 
+/** Validator that rejects non-integer numeric values. */
 function integerValidator(control: AbstractControl): ValidationErrors | null {
   if (control.value === null || control.value === undefined) {
     return null;
@@ -68,7 +69,7 @@ export const getBaseClimate = (
   };
 };
 
-/** Validation constraints (min/max) for climate form fields. */
+/** Min/max constraints for climate form fields. */
 export const climateConstraints = {
   windPressure: { min: -3000, max: 3000 },
   cableTemperature: { min: -50, max: 250 },
@@ -138,6 +139,7 @@ export class ClimateComponent {
       [Validators.min(this.constraints.iceThickness.min), Validators.max(this.constraints.iceThickness.max)]
     ]
   });
+  /** UUID of the charge case this climate form belongs to. */
   chargeUuid = input.required<string>();
 
   symmetryOptions = [

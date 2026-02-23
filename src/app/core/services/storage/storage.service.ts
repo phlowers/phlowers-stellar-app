@@ -9,56 +9,26 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AppDatabase } from '@core/infrastructure/database';
 
-/**
- * Service for managing IndexedDB storage operations.
- *
- * @remarks
- * This service handles the creation, persistence, and reset of the
- * application's IndexedDB database using Dexie.js.
- *
- * @example
- * ```typescript
- * constructor(private storageService: StorageService) {
- *   this.storageService.ready$.subscribe(ready => {
- *     if (ready) {
- *       console.log('Database is ready');
- *     }
- *   });
- * }
- * ```
- *
- * @category Services
- */
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service that manages the IndexedDB-backed local database (`AppDatabase`).
+ * Provides lifecycle methods for creating, resetting, and configuring persistent storage.
+ */
 export class StorageService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
-
-  /** The Dexie database instance */
+  /** The Dexie `AppDatabase` instance used for all local data access. */
   public db!: AppDatabase;
 
-  /**
-   * Observable indicating whether the database is ready for use.
-   * @returns An observable that emits `true` when the database is initialized
-   */
+  /** Observable that emits `true` once the database is created and ready. */
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
   }
 
   /**
    * Activate the browser persistent storage mode.
-   *
-   * @remarks
-   * This method requests persistent storage from the browser to prevent
-   * automatic data eviction. Only available on HTTPS connections.
-   *
-   * @returns A promise that resolves when the operation completes
-   *
-   * @example
-   * ```typescript
-   * await storageService.setPersistentStorage();
-   * ```
+   * Only available on an https connection
    */
   async setPersistentStorage(): Promise<void> {
     // Request persistent storage for site
@@ -75,14 +45,8 @@ export class StorageService {
   }
 
   /**
-   * Create and initialize the IndexedDB database.
-   *
-   * @throws Error if database creation fails
-   *
-   * @example
-   * ```typescript
-   * await storageService.createDatabase();
-   * ```
+   * Creates and initialises the `AppDatabase` instance.
+   * Emits `true` on the `ready$` observable upon success.
    */
   async createDatabase(): Promise<void> {
     try {
@@ -95,17 +59,9 @@ export class StorageService {
   }
 
   /**
-   * Reset the database by deleting and recreating it.
-   *
-   * @remarks
-   * This will delete all data in the database. Use with caution.
-   *
-   * @example
-   * ```typescript
-   * await storageService.resetDatabase();
-   * ```
+   * Reset the database
    */
-  async resetDatabase(): Promise<void> {
+  async resetDatabase() {
     await this.db?.delete();
     await this.createDatabase();
   }

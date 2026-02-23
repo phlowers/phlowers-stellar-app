@@ -20,6 +20,11 @@ import { RouterLink } from '@angular/router';
 import { StudiesService } from '@services/studies/studies.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
+/**
+ * Sortable, paginated table displaying a list of studies.
+ *
+ * Supports study export, deletion, and duplication through output events.
+ */
 @Component({
   standalone: true,
   selector: 'app-studies-table',
@@ -38,34 +43,23 @@ import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/sh
   templateUrl: './studies-table.component.html',
   providers: []
 })
-/**
- * Reusable table component for displaying, sorting, and paginating a list of studies.
- * Provides actions for exporting, duplicating, and deleting individual studies.
- */
 export class StudiesTableComponent {
   /** Default number of rows displayed per page. */
   defaultRowsPerPage = DEFAULT_TABLE_ROWS_PER_PAGE;
-  /** Available options for rows-per-page selection. */
+  /** Available row-per-page options for the paginator. */
   rowsPerPageOptions = TABLE_ROWS_PER_PAGE_OPTIONS;
-  /** Required input providing the list of studies to display. */
+  /** List of studies to display. */
   studies = input.required<Study[]>();
-  /** Signal holding the current sort field name. */
   sortField = signal<string>('');
-  /** Signal holding the current sort order (1 for ascending, -1 for descending). */
   sortOrder = signal<number>(1);
-  /** Output emitted when a study deletion is requested, carrying the study UUID. */
+  /** Emits the UUID of a study to delete. */
   deleteStudy = output<string>();
-  /** Output emitted when a study duplication is requested, carrying the study UUID. */
+  /** Emits the UUID of a study to duplicate. */
   duplicateStudy = output<string>();
-  /** Localized template string for the paginator's current page report. */
   currentPageReportTemplate = $localize`Study ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
 
   constructor(public readonly studiesService: StudiesService) {}
 
-  /**
-   * Opens the export dialog for the study with the given UUID.
-   * @param uuid - The UUID of the study to export.
-   */
   openExportDialog = (uuid: string) => {
     this.studiesService.exportDialogData.set({
       uuid,
@@ -74,10 +68,6 @@ export class StudiesTableComponent {
     });
   };
 
-  /**
-   * Handles table sort events by updating the sort field and order signals.
-   * @param event - The PrimeNG sort event.
-   */
   onSort(event: SortEvent) {
     this.sortField.set(event.field as string);
     this.sortOrder.set(event.order as number);

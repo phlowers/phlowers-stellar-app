@@ -1,3 +1,8 @@
+/**
+ * Retrieves a CSS custom property value from the document root.
+ * @param variableName - The variable name without the `--` prefix.
+ * @returns The trimmed CSS variable value, or an empty string if unavailable.
+ */
 function getCSSVariable(variableName: string): string {
   if (typeof document !== 'undefined') {
     return getComputedStyle(document.documentElement).getPropertyValue(`--${variableName}`).trim();
@@ -6,12 +11,10 @@ function getCSSVariable(variableName: string): string {
 }
 
 /**
- * Retrieves a color palette by reading CSS custom properties from the document root.
- * Each key in the returned record corresponds to a shade (e.g. `'50'`, `'500'`, `'900'`).
- * @category Styles
- * @param paletteName - The base name of the CSS custom property palette (e.g. `'primary'`).
- * @param keys - The shade keys to read. Defaults to a standard set from 0 to 950.
- * @returns A record mapping shade keys to their resolved CSS color values.
+ * Builds a color palette object by reading CSS custom properties for the given palette name.
+ * @param paletteName - Base name of the CSS variable palette (e.g. 'primary').
+ * @param keys - Shade keys to look up (e.g. 0, 50, 100, ... 950).
+ * @returns Record mapping shade key strings to their resolved CSS color values.
  */
 export function getColorPalette(
   paletteName: string,

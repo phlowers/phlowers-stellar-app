@@ -8,6 +8,11 @@ import { StudiesService } from '@services/studies/studies.service';
 import { CommonModule } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 
+/**
+ * Dialog for exporting a study to a file.
+ *
+ * Allows the user to specify a filename and format before downloading.
+ */
 @Component({
   selector: 'app-export-dialog',
   standalone: true,
@@ -23,12 +28,10 @@ import { SelectModule } from 'primeng/select';
   templateUrl: './export-dialog.component.html',
   styleUrl: './export-dialog.component.scss'
 })
-/** Dialog component for exporting a study to a downloadable file. */
 export class ExportDialogComponent {
   /** Available export format options. */
   exportFormats = input<{ label: string; value: string }[]>([{ label: '.clst', value: 'clst' }]);
 
-  /** Form group controlling filename and export format fields. */
   form: FormGroup<{
     filename: FormControl<string | null>;
     exportFormat: FormControl<string | null>;
@@ -52,7 +55,6 @@ export class ExportDialogComponent {
     });
   }
 
-  /** Validates the form and triggers the study download, then closes the dialog. */
   exportStudy() {
     const filename = this.form.value.filename;
     const uuid = this.studiesService.exportDialogData()?.uuid;
@@ -62,7 +64,6 @@ export class ExportDialogComponent {
     }
   }
 
-  /** Closes the export dialog without exporting. */
   cancel() {
     this.studiesService.exportDialogData.set(null);
   }

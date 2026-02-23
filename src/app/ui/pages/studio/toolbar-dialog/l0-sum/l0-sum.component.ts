@@ -12,16 +12,13 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
-/**
- * Row data for the L0 sum table display.
- * @internal
- */
+/** Row data for the L0 summary table. */
 interface L0Row {
-  /** Span identifier */
+  /** Span label (e.g. "1-2"). */
   span: string;
-  /** L0 value for the span */
+  /** Natural cable length L0 value. */
   l0: number;
-  /** Index position in the section */
+  /** Zero-based span index. */
   index: number;
 }
 
@@ -31,7 +28,7 @@ interface L0Row {
   templateUrl: './l0-sum.component.html',
   styleUrls: ['./l0-sum.component.scss']
 })
-/** Component displaying the natural cable length (L0) per span and total sum, with sorting and export capabilities. */
+/** Dialog component displaying a sortable table of L0 (natural cable length) values per span. */
 export class L0SumComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;

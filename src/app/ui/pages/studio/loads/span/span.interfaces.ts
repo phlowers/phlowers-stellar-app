@@ -3,9 +3,9 @@ import { LoadType } from '@src/app/core/domain/models/charge.model';
 
 /** Option representing a support side selection (LEFT or RIGHT). */
 export interface SupportOption {
-  /** Support number label. */
+  /** Display label (support number). */
   label: number;
-  /** Side identifier for the support. */
+  /** Support side value. */
   value: 'LEFT' | 'RIGHT';
 }
 

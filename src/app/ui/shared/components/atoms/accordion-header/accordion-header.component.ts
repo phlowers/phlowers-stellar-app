@@ -10,5 +10,5 @@ import { IconComponent } from '../icon/icon.component';
     class: 'app-accordion-header'
   }
 })
-/** Reusable header component for PrimeNG accordion panels, providing a consistent look with an icon. */
+/** Reusable accordion header component that wraps PrimeNG accordion with a custom icon. */
 export class AccordionHeaderComponent {}

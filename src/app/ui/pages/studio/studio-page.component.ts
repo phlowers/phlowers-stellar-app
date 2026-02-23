@@ -27,6 +27,7 @@ import { ObstaclesFormComponent } from './obstacles/obstaclesForm/obstaclesForm.
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
+/** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
   selector: 'app-studio-page',
   imports: [
@@ -52,7 +53,6 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
 })
-/** Component for the studio page, handling section visualization and interaction with plot controls. */
 export class StudioPageComponent implements OnInit, OnDestroy {
   sidebarWidth = signal(300);
   sidebarOpen = signal(false);

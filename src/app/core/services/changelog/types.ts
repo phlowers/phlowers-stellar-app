@@ -1,104 +1,87 @@
-/**
- * Represents a single changelog entry from GitHub releases.
- *
- * @remarks
- * This interface maps to the GitHub Releases API response format.
- * It contains metadata about a release including version information,
- * author details, and the release notes body.
- *
- * @category Types
- */
+/** Represents a single changelog / release entry from the repository. */
 export interface ChangelogItem {
-  /** API URL for the release */
+  /** URL of the release API resource. */
   url: string;
-  /** API URL for the release assets */
+  /** URL for the release assets API endpoint. */
   assets_url: string;
-  /** Upload URL template for assets */
+  /** Template URL for uploading release assets. */
   upload_url: string;
-  /** Web URL for the release page */
+  /** HTML page URL of the release. */
   html_url: string;
-  /** Unique identifier for the release */
+  /** Unique numeric identifier of the release. */
   id: number;
-  /** Author who created the release */
+  /** Author who published the release. */
   author: ChangelogAuthor;
-  /** GraphQL node ID */
+  /** GraphQL node identifier. */
   node_id: string;
-  /** Git tag name for the release */
+  /** Git tag associated with the release. */
   tag_name: string;
-  /** Branch or commit the release was created from */
+  /** Branch or commit the tag targets. */
   target_commitish: string;
-  /** Release title */
+  /** Display name of the release. */
   name: string;
-  /** Whether this is a draft release */
+  /** Whether the release is a draft. */
   draft: boolean;
-  /** Whether this release is immutable */
+  /** Whether the release is immutable. */
   immutable: boolean;
-  /** Whether this is a pre-release */
+  /** Whether the release is marked as a pre-release. */
   prerelease: boolean;
-  /** ISO timestamp when the release was created */
+  /** ISO-8601 creation timestamp. */
   created_at: string;
-  /** ISO timestamp when the release was last updated */
+  /** ISO-8601 last-update timestamp. */
   updated_at: string;
-  /** ISO timestamp when the release was published */
+  /** ISO-8601 publication timestamp. */
   published_at: string;
-  /** Array of release assets (downloads) */
+  /** Downloadable assets attached to the release. */
   assets: any[];
-  /** URL to download source as tarball */
+  /** URL to download the source tarball. */
   tarball_url: string;
-  /** URL to download source as zip */
+  /** URL to download the source zipball. */
   zipball_url: string;
-  /** Release notes in markdown format */
+  /** Markdown body / release notes. */
   body: string;
-  /** Number of mentions in the release notes */
+  /** Number of `@mentions` in the release body. */
   mentions_count: number;
 }
 
-/**
- * Represents the author of a GitHub release.
- *
- * @remarks
- * This interface maps to the GitHub User API response format,
- * containing profile information and API URLs for the user.
- *
- * @category Types
- */
+/** Represents the author of a changelog / release entry. */
 export interface ChangelogAuthor {
-  /** GitHub username */
+  /** Author login / username. */
   login: string;
-  /** Unique user identifier */
+  /** Unique numeric identifier. */
   id: number;
-  /** GraphQL node ID */
+  /** GraphQL node identifier. */
   node_id: string;
-  /** URL to user's avatar image */
+  /** URL of the author's avatar image. */
   avatar_url: string;
-  /** Gravatar ID if linked */
+  /** Gravatar identifier (may be empty). */
   gravatar_id: string;
-  /** API URL for user */
+  /** API URL for the author. */
   url: string;
-  /** Web URL for user profile */
+  /** HTML profile page URL. */
   html_url: string;
-  /** API URL for user's followers */
+  /** API URL for the author's followers. */
   followers_url: string;
-  /** API URL template for users they follow */
+  /** API URL template for users the author follows. */
   following_url: string;
-  /** API URL template for user's gists */
+  /** API URL template for the author's gists. */
   gists_url: string;
-  /** API URL template for starred repos */
+  /** API URL template for repositories the author starred. */
   starred_url: string;
-  /** API URL for subscriptions */
+  /** API URL for the author's subscriptions. */
   subscriptions_url: string;
-  /** API URL for organizations */
+  /** API URL for the author's organizations. */
   organizations_url: string;
-  /** API URL for user's repositories */
+  /** API URL for the author's repositories. */
   repos_url: string;
-  /** API URL template for user events */
+  /** API URL template for the author's events. */
   events_url: string;
-  /** API URL for received events */
+  /** API URL for events received by the author. */
   received_events_url: string;
-  /** Account type (User, Organization, etc.) */
+  /** User type (e.g. "User"). */
   type: string;
-  /** How the user views the account */
+  /** View type of the user. */
   user_view_type: string;
-  /** Whether user is a GitHub admin */
+  /** Whether the author is a site administrator. */
   site_admin: boolean;
 }

@@ -13,35 +13,28 @@ const version = environment.version;
   styleUrl: './sidebar.component.scss',
   encapsulation: ViewEncapsulation.None
 })
-/**
- * Collapsible sidebar navigation component.
- * Renders main and footer navigation links and persists its expanded/collapsed state in local storage.
- */
+/** Collapsible navigation sidebar with expandable/shrank states persisted in local storage. */
 export class SidebarComponent implements OnInit {
-  /** Path to the logo icon displayed when the sidebar is expanded. */
+  /** Logo image path shown when the sidebar is expanded. */
   logoIconExpanded = input<string>();
-  /** Path to the logo icon displayed when the sidebar is collapsed. */
+  /** Logo image path shown when the sidebar is collapsed. */
   logoIconShrank = input.required<string>();
   /** Application name displayed next to the logo. */
   logoText = input.required<string>();
-  /** Whether to display the application version in the sidebar. */
+  /** Whether to display the version number in the sidebar. */
   appVersionDisplay = input<boolean>(true);
-  /** Navigation items rendered in the main section of the sidebar. */
+  /** Main navigation links rendered in the sidebar body. */
   mainLinks = input<SidebarItem[]>();
-  /** Navigation items rendered in the footer section of the sidebar. */
+  /** Navigation links rendered in the sidebar footer. */
   footerLinks = input<SidebarItem[]>();
   /** Initial expanded state of the sidebar. */
   expanded = input<boolean>(true);
 
   private readonly bodyTag = signal<HTMLBodyElement | null>(null);
-  /** Current expanded or collapsed state of the sidebar. */
   public expandedStatus = signal<boolean>(this.getInitialExpandedStatus());
-  /** Application version string displayed in the sidebar. */
   public appVersion = signal<string>('');
-  /** Root path for logo image assets. */
   public appLogoRoot = signal<string>('in-app-logo/');
 
-  /** CSS class list applied to the sidebar element based on its expanded state. */
   sidebarClass = computed(() => {
     return this.expandedStatus() ? 'stellar-sidebar stellar-sidebar--expanded' : 'stellar-sidebar';
   });
@@ -70,7 +63,6 @@ export class SidebarComponent implements OnInit {
     localStorage.setItem('expandedStatus', JSON.stringify(this.expandedStatus()));
   }
 
-  /** Toggles the sidebar between expanded and collapsed states and persists the choice. */
   toggleMenu(): void {
     this.expandedStatus.set(!this.expandedStatus());
 
