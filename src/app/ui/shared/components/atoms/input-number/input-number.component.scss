@@ -102,7 +102,6 @@
     transition: color var(--transition-duration);
     &--disabled {
       color: var(--star-dust-300);
-      background-color: var(--star-dust-300);
       cursor: not-allowed;
     }
 

@@ -1,7 +1,7 @@
 .view-config {
   padding: 1.5rem;
-  background: #fdfdfd;
-  color: #4b5563;
+  background: var(--surface-card, #fdfdfd);
+  color: var(--text-color, #4b5563);
   font-family: sans-serif;
   max-width: 37.5rem;
 
@@ -12,7 +12,7 @@
   &__label {
     font-size: 0.9rem;
     margin-bottom: 1rem;
-    color: #666;
+    color: var(--text-color-secondary, #666);
   }
 
   &__radio-group {
@@ -34,7 +34,7 @@
 
   &__divider {
     border: 0;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--surface-border, #eee);
     margin: 1.5rem 0;
   }
 
@@ -58,7 +58,7 @@
 
   &__limit {
     font-size: 0.85rem;
-    color: #333;
+    color: var(--text-color, #333);
   }
 
   &__footer {
@@ -69,8 +69,37 @@
 
   // Surcharge PrimeNG pour correspondre à votre image
   &__submit-btn {
-    // background-color: #7b5da3 !important; // Le violet de l'image
+    background-color: var(--main-primary, #7b5da3) !important;
+    color: #fff !important;
     border: none !important;
     padding: 0.5rem 1.5rem !important;
+    transition: background 0.2s;
+    &.active,
+    &:active,
+    &:focus,
+    &:hover {
+      background-color: var(--main-secondary, #5d7ba3) !important;
+      color: #fff !important;
+    }
+  }
+
+  // Style pour le bouton principal "Vue" (p-button)
+  .view-button {
+    background: var(--surface-card, #fff) !important;
+    color: var(--main-primary, #7b5da3) !important;
+    border-radius: var(--content-border-radius, 0.5rem) !important;
+    border: 1px solid var(--surface-border, #eee) !important;
+    transition:
+      background 0.2s,
+      color 0.2s;
+    &--active,
+    &.active,
+    &:active,
+    &:focus,
+    &:hover {
+      background: var(--main-primary, #7b5da3) !important;
+      color: #fff !important;
+      border-color: var(--main-primary, #7b5da3) !important;
+    }
   }
 }

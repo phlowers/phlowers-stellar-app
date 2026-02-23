@@ -48,19 +48,13 @@ export class ScaleViewComponent {
     pointsCount: this.pointsControl
   });
 
-  private readonly sliderValue = toSignal(
-    this.formScaleView.get('sliderPointsCount')!.valueChanges,
-    {
-      initialValue: 30
-    }
-  );
+  private readonly sliderValue = toSignal(this.formScaleView.get('sliderPointsCount')!.valueChanges, {
+    initialValue: 30
+  });
 
-  readonly pointsCountValue = toSignal(
-    this.formScaleView.get('pointsCount')!.valueChanges,
-    {
-      initialValue: 30
-    }
-  );
+  readonly pointsCountValue = toSignal(this.formScaleView.get('pointsCount')!.valueChanges, {
+    initialValue: 30
+  });
 
   constructor() {
     this.setupControlsSynchronization();
@@ -107,6 +101,10 @@ export class ScaleViewComponent {
   }
 
   public onValidate(): void {
-    this.plotService.setResolution(this.pointsControl.value);
+    const resolution = this.pointsControl.value;
+    console.log('Validate clicked with resolution:', resolution);
+    this.plotService.setResolution(resolution);
+    this.plotService.applyResolution(resolution);
+    this.plotService.refreshProjection();
   }
 }
