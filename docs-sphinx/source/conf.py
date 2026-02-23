@@ -37,6 +37,12 @@ source_suffix = {
 templates_path = ['_templates']
 exclude_patterns = []
 
+# Include the docs folder in the source path
+import os
+import sys
+# Create symlink or copy docs content - we'll reference them directly
+docs_path = os.path.abspath('../../docs')
+
 # Language configuration
 language = 'en'
 
@@ -53,26 +59,21 @@ html_favicon = '_static/favicon.png'
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_material'
+html_theme = 'sphinx_book_theme'
+html_static_path = ['_static']
 
-# Material theme options
+# Wiki-like theme options
 html_theme_options = {
-    "base_url": "https://phlowers.readthedocs.io/projects/Stellar",
-    "repo_url": "https://github.com/phlowers/phlowers-stellar-app",
-    "repo_name": "phlowers-stellar-app",
-    "google_analytics_account": "",
-    "html_minify": False,
-    "css_minify": False,
-    "globaltoc_depth": 3,
-    "globaltoc_collapse": True,
-    "globaltoc_includehidden": True,
-    "color_primary": "indigo",
-    "color_accent": "purple",
+    "repository_url": "https://github.com/your-org/phlowers-stellar-app",
+    "use_repository_button": True,
+    "use_edit_page_button": True,
+    "use_source_button": True,
+    "use_issues_button": True,
+    "use_download_button": True,
+    "show_toc_level": 2,
+    "navigation_with_keys": True,
+    "show_navbar_depth": 2,
+    "home_page_in_toc": True,
 }
 
-# Required for sphinx-material
-html_sidebars = {
-    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
-}
-
-html_title = "Stellar Documentation"
+html_title = "Stellar Wiki"
