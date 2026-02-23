@@ -95,7 +95,7 @@ export const calculateSupportNumber = (
  * @returns Foot altitude (at least 0)
  */
 export const calculateSupportFootAltitude = (attachmentHeight: number): number => {
-  return Math.max(attachmentHeight - 30, 0);
+  return Math.max(attachmentHeight - 30, -150);
 };
 
 /**
@@ -239,3 +239,10 @@ export const buildSupplementaryChains = (names: string[], catalogChainNames: str
  */
 export const getSupportFieldValues = (supports: Support[], field: 'chainName' | 'name'): string[] =>
   supports.map((s) => s[field] || '');
+
+export const SUPPORT_FIELD_LIMITS = {
+  attachmentHeight: { min: -100, max: 9000 },
+  spanAngle: { min: -200, max: 200 },
+  armLength: { min: -50, max: 50 },
+  supportFootAltitude: { min: -150, max: 9000 }
+} as const;

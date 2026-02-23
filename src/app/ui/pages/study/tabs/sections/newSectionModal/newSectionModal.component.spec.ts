@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
-import { Section, Study } from '@core/domain';
+import { Section, Study, Support } from '@core/domain';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
@@ -192,5 +192,102 @@ describe('NewSectionModalComponent (Jest)', () => {
 
     const button = fixture.debugElement.nativeElement.querySelector('button.app-btn-base span');
     expect(button.textContent.toLowerCase()).toContain('create section');
+  });
+
+  describe('supportsBoundsErrors', () => {
+    const validSupport: Support = {
+      uuid: 'sup1',
+      number: '1',
+      name: null,
+      spanLength: 50,
+      spanAngle: 0,
+      attachmentHeight: 100,
+      cableType: null,
+      attachmentSet: null,
+      heightBelowConsole: null,
+      armLength: 0,
+      chainName: null,
+      chainLength: null,
+      chainWeight: null,
+      chainV: null,
+      counterWeight: null,
+      supportFootAltitude: 0,
+      chainSurface: null,
+      attachmentPosition: null,
+      towerModel: null
+    };
+
+    it('should be false when all supports are within bounds', () => {
+      fixture.componentRef.setInput('section', { ...mockSection, supports: [validSupport] });
+      fixture.detectChanges();
+      component.checkFields();
+      expect(component.supportsBoundsErrors()).toBe(false);
+    });
+
+    it('should be false when supports array is empty', () => {
+      component.checkFields();
+      expect(component.supportsBoundsErrors()).toBe(false);
+    });
+
+    it('should be true when attachmentHeight is below min', () => {
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [{ ...validSupport, attachmentHeight: -200 }]
+      });
+      fixture.detectChanges();
+      component.checkFields();
+      expect(component.supportsBoundsErrors()).toBe(true);
+    });
+
+    it('should be true when attachmentHeight is above max', () => {
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [{ ...validSupport, attachmentHeight: 10000 }]
+      });
+      fixture.detectChanges();
+      component.checkFields();
+      expect(component.supportsBoundsErrors()).toBe(true);
+    });
+
+    it('should be true when spanAngle is out of bounds', () => {
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [{ ...validSupport, spanAngle: 300 }]
+      });
+      fixture.detectChanges();
+      component.checkFields();
+      expect(component.supportsBoundsErrors()).toBe(true);
+    });
+
+    it('should be true when armLength is out of bounds', () => {
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [{ ...validSupport, armLength: -100 }]
+      });
+      fixture.detectChanges();
+      component.checkFields();
+      expect(component.supportsBoundsErrors()).toBe(true);
+    });
+
+    it('should be true when supportFootAltitude is out of bounds', () => {
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [{ ...validSupport, supportFootAltitude: -200 }]
+      });
+      fixture.detectChanges();
+      component.checkFields();
+      expect(component.supportsBoundsErrors()).toBe(true);
+    });
+
+    it('should disable the save button when bounds errors are present', () => {
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [{ ...validSupport, attachmentHeight: -200 }]
+      });
+      fixture.detectChanges();
+
+      const button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="outlined"])'));
+      expect(button.nativeElement.disabled).toBe(true);
+    });
   });
 });

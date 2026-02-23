@@ -229,7 +229,7 @@ describe('SupportsTableComponent', () => {
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        support: { supportFootAltitude: 0 }
+        support: { supportFootAltitude: -18 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
@@ -237,7 +237,7 @@ describe('SupportsTableComponent', () => {
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        support: { supportFootAltitude: 0 }
+        support: { supportFootAltitude: -18 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
@@ -245,7 +245,7 @@ describe('SupportsTableComponent', () => {
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        support: { supportFootAltitude: 0 }
+        support: { supportFootAltitude: -18 }
       });
     });
 
@@ -431,6 +431,41 @@ describe('SupportsTableComponent', () => {
         uuid: 'support1',
         support: { chainV: false }
       });
+    });
+  });
+
+  describe('truncateDecimals', () => {
+    const makeEvent = (value: string) =>
+      ({ target: { value } as HTMLInputElement }) as unknown as Event;
+
+    it('should do nothing when value has no decimal separator', () => {
+      const event = makeEvent('123');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('123');
+    });
+
+    it('should do nothing when value has exactly 2 decimal places', () => {
+      const event = makeEvent('1.23');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('1.23');
+    });
+
+    it('should do nothing when value has fewer than 2 decimal places', () => {
+      const event = makeEvent('1.2');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('1.2');
+    });
+
+    it('should truncate to 2 decimal places when value has more', () => {
+      const event = makeEvent('1.234');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('1.23');
+    });
+
+    it('should truncate negative numbers with more than 2 decimal places', () => {
+      const event = makeEvent('-1.234');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('-1.23');
     });
   });
 

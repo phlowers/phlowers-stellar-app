@@ -16,6 +16,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { isNil } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
+import { SUPPORT_FIELD_LIMITS } from './manualSection/supportsTable/helpers';
 
 /**
  * Checks whether all mandatory fields in a section are filled.
@@ -45,6 +46,33 @@ const areAllRequiredFieldsFilled = (section: Section) => {
     supportsChainLengthCondition &&
     supportsAttachmentHeightCondition
   );
+};
+
+const hasSupportsBoundsErrors = (section: Section): boolean => {
+  const { attachmentHeight, spanAngle, armLength, supportFootAltitude } = SUPPORT_FIELD_LIMITS;
+  return section.supports.some((support) => {
+    if (
+      typeof support.attachmentHeight === 'number' &&
+      (support.attachmentHeight < attachmentHeight.min || support.attachmentHeight > attachmentHeight.max)
+    )
+      return true;
+    if (
+      typeof support.spanAngle === 'number' &&
+      (support.spanAngle < spanAngle.min || support.spanAngle > spanAngle.max)
+    )
+      return true;
+    if (
+      typeof support.armLength === 'number' &&
+      (support.armLength < armLength.min || support.armLength > armLength.max)
+    )
+      return true;
+    if (
+      typeof support.supportFootAltitude === 'number' &&
+      (support.supportFootAltitude < supportFootAltitude.min || support.supportFootAltitude > supportFootAltitude.max)
+    )
+      return true;
+    return false;
+  });
 };
 
 /**
@@ -94,6 +122,7 @@ export class NewSectionModalComponent {
 
   areAllRequiredFieldsFilled = signal<boolean>(false);
   isNameUnique = signal<boolean>(false);
+  supportsBoundsErrors = signal<boolean>(false);
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
@@ -114,6 +143,7 @@ export class NewSectionModalComponent {
 
   checkFields() {
     this.areAllRequiredFieldsFilled.set(areAllRequiredFieldsFilled(this.section()));
+    this.supportsBoundsErrors.set(hasSupportsBoundsErrors(this.section()));
     const isNameUnique = !this.study()?.sections.find(
       (s) => s.name === this.section().name && s.uuid !== this.section().uuid
     );

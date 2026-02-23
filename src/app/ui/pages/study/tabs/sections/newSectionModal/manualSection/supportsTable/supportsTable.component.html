@@ -106,6 +106,7 @@
               pInputText
               type="number"
               step="0.01"
+              min="0"
               aria-label="span length"
               i18n-aria-label
               [pKeyFilter]="onlyPositiveNumbersWithDecimal"
@@ -113,6 +114,11 @@
               [disabled]="rowIndex === supports().length - 1"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
               [id]="'spanLength' + rowIndex + 1"
+              [attr.aria-invalid]="spanLengthInput.dirty && spanLengthInput.invalid"
+              [attr.aria-errormessage]="
+                spanLengthInput.dirty && spanLengthInput.invalid ? 'spanLengthError' + rowIndex : null
+              "
+              #spanLengthInput="ngModel"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
@@ -132,15 +138,31 @@
               pInputText
               type="number"
               step="0.01"
+              [min]="limits.attachmentHeight.min"
+              [max]="limits.attachmentHeight.max"
               aria-label="attachment height"
               i18n-aria-label
-              [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
               [ngModel]="support.attachmentHeight"
+              (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
               [id]="'attachmentHeight' + rowIndex + 1"
+              [attr.aria-invalid]="attachmentHeightInput.dirty && attachmentHeightInput.invalid"
+              [attr.aria-errormessage]="
+                attachmentHeightInput.dirty && attachmentHeightInput.invalid ? 'attachmentHeightError' + rowIndex : null
+              "
+              #attachmentHeightInput="ngModel"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
+          @if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['min']) {
+            <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.attachmentHeight.min }}
+            </p-message>
+          } @else if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['max']) {
+            <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.attachmentHeight.max }}
+            </p-message>
+          }
         } @else {
           <p class="read-only_info">
             {{ support.attachmentHeight }}
@@ -156,17 +178,32 @@
             <input
               pInputText
               type="number"
-              min="-400"
-              max="400"
+              step="0.01"
+              [min]="limits.spanAngle.min"
+              [max]="limits.spanAngle.max"
               aria-label="span angle"
-              [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
               i18n-aria-label
               [ngModel]="support.spanAngle"
+              (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
               [id]="'spanAngle' + rowIndex + 1"
+              [attr.aria-invalid]="spanAngleInput.dirty && spanAngleInput.invalid"
+              [attr.aria-errormessage]="
+                spanAngleInput.dirty && spanAngleInput.invalid ? 'spanAngleError' + rowIndex : null
+              "
+              #spanAngleInput="ngModel"
             />
             <p-inputgroup-addon>Gr</p-inputgroup-addon>
           </p-inputgroup>
+          @if (spanAngleInput.dirty && spanAngleInput.errors?.['min']) {
+            <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.spanAngle.min }}
+            </p-message>
+          } @else if (spanAngleInput.dirty && spanAngleInput.errors?.['max']) {
+            <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.spanAngle.max }}
+            </p-message>
+          }
         } @else {
           <p class="read-only_info">
             {{ support.spanAngle }}
@@ -311,15 +348,32 @@
             <input
               pInputText
               type="number"
+              step="0.01"
+              [min]="limits.armLength.min"
+              [max]="limits.armLength.max"
               aria-label="arm length"
               i18n-aria-label
-              [pKeyFilter]="positiveAndNegativeNumbersWithDecimal"
               [ngModel]="support.armLength"
+              (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
               [id]="'armLength' + rowIndex + 1"
+              [attr.aria-invalid]="armLengthInput.dirty && armLengthInput.invalid"
+              [attr.aria-errormessage]="
+                armLengthInput.dirty && armLengthInput.invalid ? 'armLengthError' + rowIndex : null
+              "
+              #armLengthInput="ngModel"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
+          @if (armLengthInput.dirty && armLengthInput.errors?.['min']) {
+            <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.armLength.min }}
+            </p-message>
+          } @else if (armLengthInput.dirty && armLengthInput.errors?.['max']) {
+            <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.armLength.max }}
+            </p-message>
+          }
         } @else {
           <p class="read-only_info">
             {{ support.armLength }}
@@ -382,15 +436,33 @@
               pInputText
               type="number"
               step="0.01"
+              [min]="limits.supportFootAltitude.min"
+              [max]="limits.supportFootAltitude.max"
               aria-label="support foot altitude"
               i18n-aria-label
-              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.supportFootAltitude"
+              (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
               [id]="'supportFootAltitude' + rowIndex + 1"
+              [attr.aria-invalid]="supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid"
+              [attr.aria-errormessage]="
+                supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid
+                  ? 'supportFootAltitudeError' + rowIndex
+                  : null
+              "
+              #supportFootAltitudeInput="ngModel"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
+          @if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['min']) {
+            <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.supportFootAltitude.min }}
+            </p-message>
+          } @else if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['max']) {
+            <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.supportFootAltitude.max }}
+            </p-message>
+          }
         } @else {
           <p class="read-only_info">
             {{ support.supportFootAltitude }}
