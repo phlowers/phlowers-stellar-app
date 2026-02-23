@@ -95,7 +95,7 @@
     "source": "local"
   },
   "tenacity": {
-    "file_name": "tenacity-9.1.2-cp313-none-any.whl",
+    "file_name": "tenacity-9.1.4-cp313-none-any.whl",
     "name": "tenacity",
     "source": "local"
   },
@@ -105,7 +105,7 @@
     "source": "local"
   },
   "typeguard": {
-    "file_name": "typeguard-4.4.4-cp313-none-any.whl",
+    "file_name": "typeguard-4.5.1-cp313-none-any.whl",
     "name": "typeguard",
     "source": "local"
   },

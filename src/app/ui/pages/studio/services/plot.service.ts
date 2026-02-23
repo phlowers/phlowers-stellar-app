@@ -159,7 +159,7 @@ export class PlotService {
     this.litData.set(null);
     this.baseLitData.set(null);
     this.section.set(section);
-    if (!this.workerPythonService.ready || !section || !section.cable_name) {
+    if (!this.workerPythonService.ready || !section?.cable_name) {
       console.error('refreshSection error');
       this.error.set(DataError.NO_CABLE_FOUND);
       this.loading.set(false);
@@ -173,7 +173,6 @@ export class PlotService {
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
     }
-
     const { result, error } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
     this.litData.set(result?.current ?? null);
     this.baseLitData.set(result?.base ?? null);

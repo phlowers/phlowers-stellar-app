@@ -93,7 +93,7 @@ export class SpanComponent {
   });
 
   loadTypeOptions = [
-    { label: $localize`Punctual`, value: 'punctual' },
+    { label: $localize`Punctual charge`, value: 'punctual' },
     { label: $localize`Marking`, value: 'marking' }
   ];
 
