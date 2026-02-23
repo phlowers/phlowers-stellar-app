@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  ElementRef,
-  input,
-  OnDestroy,
-  OnInit,
-  ViewEncapsulation
-} from '@angular/core';
+import { Component, computed, ElementRef, input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { IconComponent } from '../icon/icon.component';
 
 @Component({
@@ -23,9 +15,7 @@ import { IconComponent } from '../icon/icon.component';
 export class ButtonComponent implements OnInit, OnDestroy {
   private clickListener?: (e: Event) => void;
 
-  constructor(
-    private readonly elementRef: ElementRef<HTMLButtonElement | HTMLLinkElement>
-  ) {}
+  constructor(private readonly elementRef: ElementRef<HTMLButtonElement | HTMLLinkElement>) {}
 
   btnSize = input<'s' | 'm' | 'l'>('m');
   btnStyle = input<'base' | 'outlined' | 'text' | 'danger'>('base');
@@ -52,20 +42,12 @@ export class ButtonComponent implements OnInit, OnDestroy {
       }
     };
 
-    this.elementRef.nativeElement.addEventListener(
-      'click',
-      this.clickListener,
-      true
-    );
+    this.elementRef.nativeElement.addEventListener('click', this.clickListener, true);
   }
 
   ngOnDestroy(): void {
     if (this.clickListener) {
-      this.elementRef.nativeElement.removeEventListener(
-        'click',
-        this.clickListener,
-        true
-      );
+      this.elementRef.nativeElement.removeEventListener('click', this.clickListener, true);
     }
   }
 }

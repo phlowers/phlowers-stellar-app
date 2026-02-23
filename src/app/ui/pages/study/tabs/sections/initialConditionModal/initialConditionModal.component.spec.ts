@@ -101,10 +101,7 @@ describe('InitialConditionModalComponent', () => {
     component = fixture.componentInstance;
     fixture.componentRef.setInput('section', mockSection);
     fixture.componentRef.setInput('mode', 'create');
-    fixture.componentRef.setInput(
-      'initialConditionInput',
-      mockInitialCondition
-    );
+    fixture.componentRef.setInput('initialConditionInput', mockInitialCondition);
     fixture.componentRef.setInput('initialConditions', []);
     fixture.componentRef.setInput('study', null);
     fixture.detectChanges();
@@ -300,19 +297,12 @@ describe('InitialConditionModalComponent', () => {
       fixture.componentRef.setInput('study', mockStudy);
       fixture.detectChanges();
 
-      const deleteServiceSpy = jest.spyOn(
-        component['initialConditionService'],
-        'deleteInitialCondition'
-      );
+      const deleteServiceSpy = jest.spyOn(component['initialConditionService'], 'deleteInitialCondition');
       const closeModalSpy = jest.spyOn(component.isOpenChange, 'emit');
 
       component.onDelete();
 
-      expect(deleteServiceSpy).toHaveBeenCalledWith(
-        mockStudy,
-        mockSection,
-        mockInitialCondition
-      );
+      expect(deleteServiceSpy).toHaveBeenCalledWith(mockStudy, mockSection, mockInitialCondition);
       expect(closeModalSpy).toHaveBeenCalledWith(false);
     });
   });

@@ -48,14 +48,7 @@ describe('CardComponent', () => {
     });
 
     it('should return null for non-interactive roles', () => {
-      const nonInteractiveRoles = [
-        'dialog',
-        'generic',
-        'presentation',
-        'custom-role',
-        'main',
-        'article'
-      ];
+      const nonInteractiveRoles = ['dialog', 'generic', 'presentation', 'custom-role', 'main', 'article'];
 
       nonInteractiveRoles.forEach((role) => {
         fixture.componentRef.setInput('role', role);

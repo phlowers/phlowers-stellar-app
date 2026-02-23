@@ -17,7 +17,6 @@
     "test": "jest",
     "coverage": "jest --coverage --collectCoverageFrom 'src/**/*.ts'",
     "set-up-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers_v2.py",
-    "set-up-mechaphlowers:skip-compression": "uv run ./scripts/set_up_mechaphlowers_v2.py --skip-compression",
     "set-up-mechaphlowers:local-cdn": "uv run ./scripts/set_up_mechaphlowers_v2.py --local-cdn-dir",
     "set-up-mechaphlowers:local-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers_v2.py --local-mechaphlowers",
     "set-env-variables": "uv run ./scripts/set-env-variables.py",

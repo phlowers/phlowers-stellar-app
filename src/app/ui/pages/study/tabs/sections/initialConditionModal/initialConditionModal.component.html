@@ -58,13 +58,7 @@
               formControlName="name"
             />
             @if (!isNameUnique()) {
-              <p-message
-                id="initial-condition-name-error-message"
-                severity="error"
-                size="small"
-                variant="simple"
-                i18n
-              >
+              <p-message id="initial-condition-name-error-message" severity="error" size="small" variant="simple" i18n>
                 Initial condition name must be unique.
               </p-message>
             }
@@ -104,9 +98,7 @@
           </div>
           @if (isCableNarcisse()) {
             <div>
-              <label for="initial-condition-cable-pretension" i18n>
-                Cable pretension
-              </label>
+              <label for="initial-condition-cable-pretension" i18n> Cable pretension </label>
               <p-inputgroup>
                 <input
                   name="initial-condition-cable-pretension"
@@ -119,14 +111,10 @@
               </p-inputgroup>
             </div>
             <div>
-              <p class="font-bold mb-0" i18n>
-                Extreme historical conditions incurred by the cable
-              </p>
+              <p class="font-bold mb-0" i18n>Extreme historical conditions incurred by the cable</p>
             </div>
             <div>
-              <label for="initial-condition-min-temperature" i18n>
-                Min temperature
-              </label>
+              <label for="initial-condition-min-temperature" i18n> Min temperature </label>
               <p-inputgroup>
                 <input
                   name="initial-condition-min-temperature"
@@ -139,9 +127,7 @@
               </p-inputgroup>
             </div>
             <div>
-              <label for="initial-condition-max-wind-pressure" i18n>
-                Max wind pressure
-              </label>
+              <label for="initial-condition-max-wind-pressure" i18n> Max wind pressure </label>
               <p-inputgroup>
                 <input
                   name="initial-condition-max-wind-pressure"
@@ -154,9 +140,7 @@
               </p-inputgroup>
             </div>
             <div>
-              <label for="initial-condition-max-frost-width" i18n>
-                Max ice thickness
-              </label>
+              <label for="initial-condition-max-frost-width" i18n> Max ice thickness </label>
               <p-inputgroup>
                 <input
                   name="initial-condition-max-frost-width"
@@ -204,9 +188,7 @@
               </dd>
             </div>
             <div>
-              <dt class="extreme-historical-conditions" i18n>
-                Extreme historical conditions incurred by the cable
-              </dt>
+              <dt class="extreme-historical-conditions" i18n>Extreme historical conditions incurred by the cable</dt>
             </div>
             <div>
               <dt i18n>Min temperature</dt>
@@ -243,55 +225,25 @@
 
   <ng-template #footer>
     @if (mode() === 'view') {
-      <button
-        app-btn
-        type="button"
-        btnSize="m"
-        btnStyle="danger"
-        (click)="onDelete()"
-      >
+      <button app-btn type="button" btnSize="m" btnStyle="danger" (click)="onDelete()">
         <app-icon icon="delete" />
         <span i18n>Delete</span>
       </button>
-      <button
-        app-btn
-        type="button"
-        btnSize="m"
-        btnStyle="outlined"
-        (click)="onDuplicate()"
-      >
+      <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onDuplicate()">
         <app-icon icon="content_copy" />
         <span i18n>Duplicate</span>
       </button>
-      <button
-        app-btn
-        type="button"
-        btnSize="m"
-        btnStyle="outlined"
-        (click)="onModify()"
-      >
+      <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onModify()">
         <app-icon icon="edit" />
         <span i18n>Edit</span>
       </button>
     } @else {
-      <button
-        app-btn
-        type="submit"
-        btnSize="m"
-        btnStyle="outlined"
-        (click)="isOpenChange.emit(false)"
-      >
+      <button app-btn type="submit" btnSize="m" btnStyle="outlined" (click)="isOpenChange.emit(false)">
         <app-icon icon="close" />
         <span i18n>Cancel</span>
       </button>
       @if (!isInsideToolsDialog()) {
-        <button
-          app-btn
-          type="button"
-          [disabled]="!isFormValid()"
-          btnSize="m"
-          (click)="onSubmit(false)"
-        >
+        <button app-btn type="button" [disabled]="!isFormValid()" btnSize="m" (click)="onSubmit(false)">
           <app-icon icon="check" />
           <span i18n>Validate</span>
         </button>

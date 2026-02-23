@@ -120,10 +120,7 @@ describe('HomeComponent', () => {
   describe('ngOnInit', () => {
     it('should subscribe to online and server status changes', () => {
       const onlineSpy = jest.spyOn(onlineServiceMock.online$, 'subscribe');
-      const serverSpy = jest.spyOn(
-        onlineServiceMock.serverOnline$,
-        'subscribe'
-      );
+      const serverSpy = jest.spyOn(onlineServiceMock.serverOnline$, 'subscribe');
 
       component.ngOnInit();
 
@@ -153,27 +150,21 @@ describe('HomeComponent', () => {
 
     it('should set server status to success when online and server is online', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.ONLINE
-      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
 
       expect(component.serverStatus()).toBe('success');
     });
 
     it('should set server status to warning when online and server is loading', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.LOADING
-      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
 
       expect(component.serverStatus()).toBe('warning');
     });
 
     it('should set server status to error when online and server is offline', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.OFFLINE
-      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
 
       expect(component.serverStatus()).toBe('error');
     });
@@ -192,33 +183,23 @@ describe('HomeComponent', () => {
 
     it('should update server text for warning status', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.LOADING
-      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
 
-      expect(component.homeText().serverText).toContain(
-        'Trying to reach the servers'
-      );
+      expect(component.homeText().serverText).toContain('Trying to reach the servers');
     });
 
     it('should update server text for error status', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.OFFLINE
-      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
 
       expect(component.homeText().serverText).toContain('An error occured');
     });
 
     it('should update server text for success status', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.ONLINE
-      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
 
-      expect(component.homeText().serverText).toContain(
-        'Server connexion success'
-      );
+      expect(component.homeText().serverText).toContain('Server connexion success');
     });
   });
 
@@ -275,10 +256,7 @@ describe('HomeComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should unsubscribe from all subscriptions', () => {
-      const unsubscribeSpy = jest.spyOn(
-        component['subscriptions'],
-        'unsubscribe'
-      );
+      const unsubscribeSpy = jest.spyOn(component['subscriptions'], 'unsubscribe');
 
       component.ngOnDestroy();
 
@@ -291,8 +269,7 @@ describe('HomeComponent', () => {
       component.latestStudies.set(mockStudies);
       fixture.detectChanges();
 
-      const studyElements =
-        fixture.nativeElement.querySelectorAll('app-card-study');
+      const studyElements = fixture.nativeElement.querySelectorAll('app-card-study');
       expect(studyElements.length).toBe(mockStudies.length);
     });
 
@@ -300,8 +277,7 @@ describe('HomeComponent', () => {
       component.serverStatus.set('success');
       fixture.detectChanges();
 
-      const cardInfoElement =
-        fixture.nativeElement.querySelector('app-card-info');
+      const cardInfoElement = fixture.nativeElement.querySelector('app-card-info');
       expect(cardInfoElement).toBeTruthy();
     });
 
@@ -309,8 +285,7 @@ describe('HomeComponent', () => {
       component.updateStatus.set('warning');
       fixture.detectChanges();
 
-      const updateElements =
-        fixture.nativeElement.querySelectorAll('app-card-info');
+      const updateElements = fixture.nativeElement.querySelectorAll('app-card-info');
       expect(updateElements.length).toBeGreaterThan(0);
     });
   });
@@ -320,15 +295,9 @@ describe('HomeComponent', () => {
       component.ngOnInit();
 
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.ONLINE
-      );
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.OFFLINE
-      );
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(
-        ServerStatus.LOADING
-      );
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
+      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
 
       expect(component.serverStatus()).toBe('warning');
     });

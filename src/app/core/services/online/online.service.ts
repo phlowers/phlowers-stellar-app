@@ -6,15 +6,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {
-  BehaviorSubject,
-  Observable,
-  distinctUntilChanged,
-  fromEvent,
-  map,
-  merge,
-  startWith
-} from 'rxjs';
+import { BehaviorSubject, Observable, distinctUntilChanged, fromEvent, map, merge, startWith } from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { environment } from '@src/environments/environment';
 
@@ -27,9 +19,7 @@ export enum ServerStatus {
   providedIn: 'root'
 })
 export class OnlineService {
-  public serverOnline$ = new BehaviorSubject<ServerStatus>(
-    ServerStatus.LOADING
-  );
+  public serverOnline$ = new BehaviorSubject<ServerStatus>(ServerStatus.LOADING);
 
   constructor(private readonly httpClient: HttpClient) {
     this.online$.subscribe((online) => {
@@ -49,10 +39,7 @@ export class OnlineService {
     });
   }
 
-  private readonly _online = merge(
-    fromEvent(window, 'online'),
-    fromEvent(window, 'offline')
-  ).pipe(
+  private readonly _online = merge(fromEvent(window, 'online'), fromEvent(window, 'offline')).pipe(
     startWith(undefined),
     map(() => window.navigator.onLine)
   );

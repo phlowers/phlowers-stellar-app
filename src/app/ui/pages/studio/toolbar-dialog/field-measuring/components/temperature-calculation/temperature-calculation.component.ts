@@ -57,16 +57,12 @@ export class TemperatureCalculationComponent {
 
   isFormValid = computed(() => {
     const data = this.measureData();
-    return (
-      data.cableName !== null && data.transit !== null && data.skyCover !== null
-    );
+    return data.cableName !== null && data.transit !== null && data.skyCover !== null;
   });
 
   localizedWindDirection = computed(() => {
     const windDirection = this.measureData().windDirection;
-    const option = this.windDirectionOptions().find(
-      (opt) => opt.value === windDirection
-    );
+    const option = this.windDirectionOptions().find((opt) => opt.value === windDirection);
     return option?.label ?? windDirection;
   });
 
@@ -81,24 +77,21 @@ export class TemperatureCalculationComponent {
       ...d,
       outputs: { ...d.outputs, cableTemperature: null }
     }));
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.temperatureCalculation,
-      {
-        cableName: data.cableName!,
-        ambientTemperature: data.ambientTemperature || 0,
-        longitude: data.longitude || 0,
-        latitude: data.latitude || 0,
-        altitude: data.altitude ?? 0,
-        azimuth: data.azimuth ?? 0,
-        transit: data.transit!,
-        date: data.date ?? null,
-        time: data.time ?? null,
-        windSpeed: data.windSpeed ?? 0,
-        windSpeedUnit: data.windSpeedUnit ?? 'kmh',
-        windDirection: data.windDirection ?? 'North',
-        skyCover: data.skyCover ?? ''
-      }
-    );
+    const { result, error } = await this.workerPythonService.runTask(Task.temperatureCalculation, {
+      cableName: data.cableName!,
+      ambientTemperature: data.ambientTemperature || 0,
+      longitude: data.longitude || 0,
+      latitude: data.latitude || 0,
+      altitude: data.altitude ?? 0,
+      azimuth: data.azimuth ?? 0,
+      transit: data.transit!,
+      date: data.date ?? null,
+      time: data.time ?? null,
+      windSpeed: data.windSpeed ?? 0,
+      windSpeedUnit: data.windSpeedUnit ?? 'kmh',
+      windDirection: data.windDirection ?? 'North',
+      skyCover: data.skyCover ?? ''
+    });
     if (error) {
       this.temperatureCalculationError.set(true);
       return;

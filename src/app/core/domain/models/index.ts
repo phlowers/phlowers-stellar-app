@@ -15,11 +15,7 @@ export type { Support } from './support.model';
 export type { Charge, ClimateCharge, SpanLoad } from './charge.model';
 export { SymmetryType } from './charge.model';
 export type { InitialCondition } from './initial-condition.model';
-export type {
-  VtlAndGuying,
-  VtlAndGuyingInputs,
-  VtlAndGuyingOutputs
-} from './vtl-and-guying.model';
+export type { VtlAndGuying, VtlAndGuyingInputs, VtlAndGuyingOutputs } from './vtl-and-guying.model';
 export type { ProtoV4Support, ProtoV4Parameters } from './proto-v4.model';
 
 // Catalog models

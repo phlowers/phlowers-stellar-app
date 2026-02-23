@@ -20,12 +20,7 @@
 
   <ng-template let-item let-index="index" #item>
     <div class="select-dropdown">
-      <button
-        app-btn
-        btnStyle="text"
-        class="select-dropdown__select"
-        (click)="onSelectItem(item)"
-      >
+      <button app-btn btnStyle="text" class="select-dropdown__select" (click)="onSelectItem(item)">
         {{ item[optionLabel()] }}
       </button>
 
@@ -37,11 +32,7 @@
         btnStyle="text"
         ariaLabel="view"
         i18n-ariaLabel
-        (click)="
-          $event.stopPropagation();
-          $event.stopImmediatePropagation();
-          viewOption.emit(item)
-        "
+        (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); viewOption.emit(item)"
       >
         <app-icon icon="visibility" />
       </button>
@@ -54,11 +45,7 @@
         btnStyle="text"
         ariaLabel="edit"
         i18n-ariaLabel
-        (click)="
-          $event.stopPropagation();
-          $event.stopImmediatePropagation();
-          editOption.emit(item)
-        "
+        (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); editOption.emit(item)"
       >
         <app-icon icon="edit" />
       </button>
@@ -71,11 +58,7 @@
         btnStyle="text"
         ariaLabel="duplicate"
         i18n-ariaLabel
-        (click)="
-          $event.stopPropagation();
-          $event.stopImmediatePropagation();
-          duplicateOption.emit(item)
-        "
+        (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); duplicateOption.emit(item)"
       >
         <app-icon icon="content_copy" />
       </button>
@@ -89,11 +72,7 @@
         class="erase-btn"
         ariaLabel="delete"
         i18n-ariaLabel
-        (click)="
-          $event.stopPropagation();
-          $event.stopImmediatePropagation();
-          deleteOption.emit(item)
-        "
+        (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); deleteOption.emit(item)"
       >
         <app-icon icon="delete" />
       </button>

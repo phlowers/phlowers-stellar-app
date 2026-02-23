@@ -52,10 +52,7 @@ describe('Task handlers', () => {
       const result = await handleTask(mockPyodide, Task.runTests, undefined);
 
       // Verify
-      expect(mockPyodide.globals.set).toHaveBeenCalledWith(
-        'js_inputs',
-        undefined
-      );
+      expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', undefined);
       expect(mockPyodide.loadPackage).toHaveBeenCalledWith(['pytest']);
       expect(mockPyodide.globals.get).toHaveBeenCalledWith('run_tests');
       expect(mockToJs).toHaveBeenCalledWith({
@@ -89,10 +86,7 @@ describe('Task handlers', () => {
       const result = await handleTask(mockPyodide, Task.getLit, undefined);
 
       // Verify
-      expect(mockPyodide.globals.set).toHaveBeenCalledWith(
-        'js_inputs',
-        undefined
-      );
+      expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', undefined);
       // script is loaded at worker boot time; here we only call the exposed function
       expect(mockPyodide.globals.get).toHaveBeenCalledWith('init_section');
       expect(mockToJs).toHaveBeenCalledWith({

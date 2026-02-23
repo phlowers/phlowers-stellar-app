@@ -35,10 +35,7 @@ const getShadowLine = (
  * Uses same size as normal traces but with reduced opacity.
  * All shadow traces use the same color as spans (dodgerblue) for consistency.
  */
-const getShadowMarker = (
-  type: PlotObjectsType,
-  view: View
-): PlotData['marker'] => {
+const getShadowMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
   let size: number;
   switch (type) {
     case 'spans':
@@ -68,10 +65,7 @@ export const createShadowDataObject = (
   view: View,
   side: Side
 ): Data[] => {
-  const slidedData = data.slice(
-    startSupport,
-    type === 'spans' ? endSupport : endSupport + 1
-  );
+  const slidedData = data.slice(startSupport, type === 'spans' ? endSupport : endSupport + 1);
   return slidedData.map((points) => {
     const x = points.map((point) => point[0]);
     const y = points.map((point) => point[1]);

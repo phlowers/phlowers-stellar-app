@@ -9,12 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { CablesService } from '@services/cables/cables.service';
-import {
-  Task,
-  TaskError,
-  DataError,
-  GetSectionWithBaseOutput
-} from '@services/worker_python/tasks/types';
+import { Task, TaskError, DataError, GetSectionWithBaseOutput } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study } from '@core/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
@@ -370,13 +365,10 @@ describe('PlotService', () => {
 
       await service.refreshSection(mockSection);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.getLit,
-        {
-          section: mockSection,
-          cable: mockCable
-        }
-      );
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.getLit, {
+        section: mockSection,
+        cable: mockCable
+      });
     });
 
     it('should update plotOptions with section supports range', async () => {
@@ -770,16 +762,12 @@ describe('PlotService', () => {
           endSupport: 10
         };
 
-        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, true)).toBe(
-          false
-        );
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, true)).toBe(false);
       });
 
       it('should return false even when all options are identical', () => {
         const options: PlotOptions = { ...baseOptions };
-        expect(checkIfProjectionNeedRefresh(options, options, true)).toBe(
-          false
-        );
+        expect(checkIfProjectionNeedRefresh(options, options, true)).toBe(false);
       });
     });
 
@@ -789,36 +777,28 @@ describe('PlotService', () => {
           const oldOptions: PlotOptions = { ...baseOptions, view: '3d' };
           const newOptions: PlotOptions = { ...baseOptions, view: '2d' };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when view changes from 2d to 3d', () => {
           const oldOptions: PlotOptions = { ...baseOptions, view: '2d' };
           const newOptions: PlotOptions = { ...baseOptions, view: '3d' };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when side changes from profile to face', () => {
           const oldOptions: PlotOptions = { ...baseOptions, side: 'profile' };
           const newOptions: PlotOptions = { ...baseOptions, side: 'face' };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when side changes from face to profile', () => {
           const oldOptions: PlotOptions = { ...baseOptions, side: 'face' };
           const newOptions: PlotOptions = { ...baseOptions, side: 'profile' };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when both view and side change', () => {
@@ -833,9 +813,7 @@ describe('PlotService', () => {
             side: 'face'
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
       });
 
@@ -852,9 +830,7 @@ describe('PlotService', () => {
             startSupport: 5
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when view is 3d and only endSupport changes', () => {
@@ -869,9 +845,7 @@ describe('PlotService', () => {
             endSupport: 10
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when view is 3d and both supports change', () => {
@@ -888,16 +862,12 @@ describe('PlotService', () => {
             endSupport: 10
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when view is 3d and all options are identical', () => {
           const options: PlotOptions = { ...baseOptions, view: '3d' };
-          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(
-            false
-          );
+          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(false);
         });
       });
 
@@ -914,9 +884,7 @@ describe('PlotService', () => {
             startSupport: 5
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when endSupport changes', () => {
@@ -931,9 +899,7 @@ describe('PlotService', () => {
             endSupport: 10
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return true when both startSupport and endSupport change', () => {
@@ -950,9 +916,7 @@ describe('PlotService', () => {
             endSupport: 10
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(true);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
         });
 
         it('should return false when supports do not change', () => {
@@ -969,9 +933,7 @@ describe('PlotService', () => {
             endSupport: 1
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when only invert changes', () => {
@@ -986,16 +948,12 @@ describe('PlotService', () => {
             invert: true
           };
 
-          expect(
-            checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-          ).toBe(false);
+          expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(false);
         });
 
         it('should return false when all options are identical', () => {
           const options: PlotOptions = { ...baseOptions, view: '2d' };
-          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(
-            false
-          );
+          expect(checkIfProjectionNeedRefresh(options, options, false)).toBe(false);
         });
       });
     });
@@ -1015,9 +973,7 @@ describe('PlotService', () => {
           endSupport: 1
         };
 
-        expect(
-          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-        ).toBe(true);
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
       });
 
       it('should handle large values for supports', () => {
@@ -1034,9 +990,7 @@ describe('PlotService', () => {
           endSupport: 201
         };
 
-        expect(
-          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-        ).toBe(true);
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
       });
 
       it('should handle negative values for supports', () => {
@@ -1053,9 +1007,7 @@ describe('PlotService', () => {
           endSupport: 1
         };
 
-        expect(
-          checkIfProjectionNeedRefresh(oldOptions, newOptions, false)
-        ).toBe(true);
+        expect(checkIfProjectionNeedRefresh(oldOptions, newOptions, false)).toBe(true);
       });
     });
   });

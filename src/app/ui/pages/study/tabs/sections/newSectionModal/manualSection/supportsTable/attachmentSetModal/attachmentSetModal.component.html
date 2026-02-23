@@ -18,10 +18,7 @@
   <ng-template #content>
     <div class="flex flex-row gap-4 h-full">
       <div class="flex flex-col gap-2">
-        <p i18n class="mb-0">
-          Choose the attachment set in the list or on the graph to find the
-          right arm length.
-        </p>
+        <p i18n class="mb-0">Choose the attachment set in the list or on the graph to find the right arm length.</p>
         <div class="flex flex-col gap-1">
           <label for="supportName" i18n>Support name</label>
           <p-select
@@ -55,25 +52,18 @@
         <div class="flex flex-row gap-8">
           <div>
             <p class="label mb-0" i18n>Arm length</p>
-            <span class="ml-2"
-              >{{ armLength() ?? '-' }}
-              <ng-container i18n>m</ng-container></span
-            >
+            <span class="ml-2">{{ armLength() ?? '-' }} <ng-container i18n>m</ng-container></span>
           </div>
           <div>
             <p class="label mb-0" i18n>Height below console</p>
-            <span class="ml-2"
-              >{{ heightBelowConsole() || '-' }}
-              <ng-container i18n>m</ng-container></span
-            >
+            <span class="ml-2">{{ heightBelowConsole() || '-' }} <ng-container i18n>m</ng-container></span>
           </div>
         </div>
         <div>
           <p class="text-sm flex items-start gap-1 text-black mt-2">
             <app-icon icon="info" />
             <ng-container i18n>
-              The attachment set and the arm length (m) will be automatically
-              filled in the table.
+              The attachment set and the arm length (m) will be automatically filled in the table.
             </ng-container>
           </p>
         </div>
@@ -91,13 +81,7 @@
   </ng-template>
 
   <ng-template #footer>
-    <button
-      app-btn
-      type="button"
-      btnSize="m"
-      btnStyle="outlined"
-      (click)="onVisibleChange()"
-    >
+    <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onVisibleChange()">
       <app-icon icon="close" />
       <ng-container i18n>Close</ng-container>
     </button>

@@ -83,10 +83,7 @@ describe('TopbarComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should unsubscribe from subscriptions', () => {
-      const unsubscribeSpy = jest.spyOn(
-        component['subscriptions'],
-        'unsubscribe'
-      );
+      const unsubscribeSpy = jest.spyOn(component['subscriptions'], 'unsubscribe');
 
       component.ngOnDestroy();
 

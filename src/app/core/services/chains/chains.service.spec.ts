@@ -5,10 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { ChainsService } from './chains.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -65,10 +62,7 @@ describe('ChainsService', () => {
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [
-        ChainsService,
-        { provide: StorageService, useValue: storageServiceSpy }
-      ]
+      providers: [ChainsService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(ChainsService);
@@ -160,31 +154,28 @@ describe('ChainsService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'name,length,weight\nChain 1,100,5,2,3\nChain 2,150,0,3,1';
+      const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3\nChain 2,150,0,3,1';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -192,9 +183,7 @@ describe('ChainsService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/chains.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/chains.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -227,27 +216,25 @@ describe('ChainsService', () => {
       const mockCsvContent = 'name,length,weight\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: [],
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: [],
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -255,9 +242,7 @@ describe('ChainsService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/chains.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/chains.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -289,30 +274,27 @@ describe('ChainsService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'name,length,weight\n,100,5,2,3\nChain 2,150,0,3,1';
+      const mockCsvContent = 'name,length,weight\n,100,5,2,3\nChain 2,150,0,3,1';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -320,9 +302,7 @@ describe('ChainsService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/chains.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/chains.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -359,27 +339,25 @@ describe('ChainsService', () => {
 
       const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -387,9 +365,7 @@ describe('ChainsService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/chains.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/chains.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -431,27 +407,25 @@ describe('ChainsService', () => {
       const mockCsvContent =
         'name,length,weight,surface,v\nChain 1,100,5,2,3,false\n,150,0,3,1,true\nChain 3,200,0,4,2,false';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -459,9 +433,7 @@ describe('ChainsService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/chains.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/chains.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -505,27 +477,25 @@ describe('ChainsService', () => {
 
       const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3';
 
-      (Papa.parse as jest.Mock).mockImplementation(
-        (data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
-          if (options.complete) {
-            options.complete(
-              {
-                data: mockCsvData,
-                errors: [],
-                meta: {
-                  delimiter: ',',
-                  linebreak: '\n',
-                  aborted: false,
-                  truncated: false,
-                  cursor: 0,
-                  fields: []
-                }
-              },
-              undefined
-            );
-          }
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ',',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
         }
-      );
+      });
 
       const importPromise = service.importFromFile();
 
@@ -533,9 +503,7 @@ describe('ChainsService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(
-        `${window.location.origin}/data/chains.csv`
-      );
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/chains.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 

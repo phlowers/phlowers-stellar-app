@@ -51,10 +51,7 @@ describe('UpdateService', () => {
     window.fetch = mockFetch;
 
     TestBed.configureTestingModule({
-      providers: [
-        UpdateService,
-        { provide: MessageService, useValue: mockMessageService }
-      ]
+      providers: [UpdateService, { provide: MessageService, useValue: mockMessageService }]
     });
     service = TestBed.inject(UpdateService);
     service.latestVersion.set(null);
@@ -79,10 +76,7 @@ describe('UpdateService', () => {
   });
 
   it('should register service worker event listener on initialization', () => {
-    expect(mockServiceWorker.addEventListener).toHaveBeenCalledWith(
-      'message',
-      expect.any(Function)
-    );
+    expect(mockServiceWorker.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
   });
 
   describe('getAppVersion', () => {

@@ -30,12 +30,8 @@ const mockLatestVersion: AppVersion = {
 
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
-  currentVersion = signal<AppVersion | null>(
-    isDevMode() ? mockCurrentVersion : null
-  );
-  latestVersion = signal<AppVersion | null>(
-    isDevMode() ? mockLatestVersion : null
-  );
+  currentVersion = signal<AppVersion | null>(isDevMode() ? mockCurrentVersion : null);
+  latestVersion = signal<AppVersion | null>(isDevMode() ? mockLatestVersion : null);
   updateLoading = signal(false);
   needUpdate$ = new BehaviorSubject<boolean>(false);
 

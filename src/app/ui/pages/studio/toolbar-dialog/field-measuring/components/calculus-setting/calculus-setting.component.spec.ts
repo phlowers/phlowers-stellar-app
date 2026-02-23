@@ -35,9 +35,7 @@ describe('CalculusSetting component', () => {
   });
 
   it('should render three radio buttons with correct labels', () => {
-    const labels = fixture.debugElement.queryAll(
-      By.css('.cac-set-select label')
-    );
+    const labels = fixture.debugElement.queryAll(By.css('.cac-set-select label'));
     expect(labels[0].nativeElement.textContent.trim()).toBe('PAPOTO');
     expect(labels[1].nativeElement.textContent.trim()).toBe('Tangent aiming');
     expect(labels[2].nativeElement.textContent.trim()).toBe('PEP');
@@ -45,9 +43,7 @@ describe('CalculusSetting component', () => {
 
   it('should display papoto component by default', () => {
     const papotoComponent = fixture.debugElement.query(By.css('app-papoto'));
-    const tangentAimingComponent = fixture.debugElement.query(
-      By.css('app-tangent-aiming')
-    );
+    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming'));
     const pepComponent = fixture.debugElement.query(By.css('app-pep'));
 
     expect(papotoComponent).toBeTruthy();
@@ -60,9 +56,7 @@ describe('CalculusSetting component', () => {
     fixture.detectChanges();
 
     const papotoComponent = fixture.debugElement.query(By.css('app-papoto'));
-    const tangentAimingComponent = fixture.debugElement.query(
-      By.css('app-tangent-aiming')
-    );
+    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming'));
     const pepComponent = fixture.debugElement.query(By.css('app-pep'));
 
     expect(papotoComponent).toBeFalsy();
@@ -75,9 +69,7 @@ describe('CalculusSetting component', () => {
     fixture.detectChanges();
 
     const papotoComponent = fixture.debugElement.query(By.css('app-papoto'));
-    const tangentAimingComponent = fixture.debugElement.query(
-      By.css('app-tangent-aiming')
-    );
+    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming'));
     const pepComponent = fixture.debugElement.query(By.css('app-pep'));
 
     expect(papotoComponent).toBeFalsy();
@@ -93,17 +85,13 @@ describe('CalculusSetting component', () => {
     // Change to TANGENT_AIMING
     component.selectedCalculusType = 'TANGENT_AIMING';
     fixture.detectChanges();
-    expect(
-      fixture.debugElement.query(By.css('app-tangent-aiming'))
-    ).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('app-tangent-aiming'))).toBeTruthy();
     expect(fixture.debugElement.query(By.css('app-papoto'))).toBeFalsy();
 
     // Change to PEP
     component.selectedCalculusType = 'PEP';
     fixture.detectChanges();
     expect(fixture.debugElement.query(By.css('app-pep'))).toBeTruthy();
-    expect(
-      fixture.debugElement.query(By.css('app-tangent-aiming'))
-    ).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('app-tangent-aiming'))).toBeFalsy();
   });
 });

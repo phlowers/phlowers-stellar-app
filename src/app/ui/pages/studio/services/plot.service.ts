@@ -1,11 +1,6 @@
 import { computed, effect, Injectable, signal, untracked } from '@angular/core';
 import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
-import {
-  DataError,
-  GetSectionOutput,
-  Task,
-  TaskError
-} from '@services/worker_python/tasks/types';
+import { DataError, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
 import { Section, Study } from '@core/domain';
 import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
@@ -26,11 +21,7 @@ export interface SpanOption {
   };
 }
 
-export const checkIfProjectionNeedRefresh = (
-  oldOptions: PlotOptions,
-  newOptions: PlotOptions,
-  loading: boolean
-) => {
+export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions: PlotOptions, loading: boolean) => {
   if (loading) {
     return false;
   }
@@ -159,7 +150,7 @@ export class PlotService {
     this.litData.set(null);
     this.baseLitData.set(null);
     this.section.set(section);
-    if (!this.workerPythonService.ready || !section || !section.cable_name) {
+    if (!this.workerPythonService.ready || !section?.cable_name) {
       console.error('refreshSection error');
       this.error.set(DataError.NO_CABLE_FOUND);
       this.loading.set(false);
@@ -173,10 +164,7 @@ export class PlotService {
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
     }
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.getLit,
-      { section, cable }
-    );
+    const { result, error } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
     this.litData.set(result?.current ?? null);
     this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
@@ -206,14 +194,11 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
-    const { result, error } = await this.workerPythonService.runTask(
-      Task.refreshProjection,
-      {
-        startSupport: this.plotOptions().startSupport,
-        endSupport: this.plotOptions().endSupport,
-        view: this.plotOptions().view
-      }
-    );
+    const { result, error } = await this.workerPythonService.runTask(Task.refreshProjection, {
+      startSupport: this.plotOptions().startSupport,
+      endSupport: this.plotOptions().endSupport,
+      view: this.plotOptions().view
+    });
     this.litData.set(result?.current ?? null);
     this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
@@ -251,9 +236,7 @@ export class PlotService {
     return spans;
   });
 
-  getSupportOptions = (
-    selectedSpan: SpanOption['value'] | null
-  ): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
+  getSupportOptions = (selectedSpan: SpanOption['value'] | null): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
     if (selectedSpan === null) {
       return [];
     }

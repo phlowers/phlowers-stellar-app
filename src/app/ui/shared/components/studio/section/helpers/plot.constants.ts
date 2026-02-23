@@ -18,7 +18,5 @@ export const SHADOW_OPACITY = 0.3;
  * For 3D: base color (opacity is applied at trace level for scatter3d).
  */
 export const getShadowColor = (view: '2d' | '3d'): string => {
-  return view === '3d'
-    ? SPAN_COLOR
-    : `rgba(${SPAN_COLOR_RGB},${SHADOW_OPACITY})`;
+  return view === '3d' ? SPAN_COLOR : `rgba(${SPAN_COLOR_RGB},${SHADOW_OPACITY})`;
 };
