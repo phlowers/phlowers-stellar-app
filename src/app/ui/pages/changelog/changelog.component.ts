@@ -7,6 +7,7 @@ import { DatePipe } from '@angular/common';
 import { PanelModule } from 'primeng/panel';
 import { OnlineService } from '@services/online/online.service';
 
+/** Displays the application changelog entries fetched from the server. */
 @Component({
   selector: 'app-changelog',
   imports: [ProgressSpinnerModule, MarkdownModule, DatePipe, PanelModule],

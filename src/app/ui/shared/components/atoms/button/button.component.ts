@@ -12,13 +12,20 @@ import { IconComponent } from '../icon/icon.component';
     '[class]': 'classesList()'
   }
 })
+/**
+ * Custom button component supporting multiple sizes, styles, and a loading state.
+ * Applied as an attribute directive on `<button>` or `<a>` elements.
+ */
 export class ButtonComponent implements OnInit, OnDestroy {
   private clickListener?: (e: Event) => void;
 
   constructor(private readonly elementRef: ElementRef<HTMLButtonElement | HTMLLinkElement>) {}
 
+  /** Button size: 's' (small), 'm' (medium), or 'l' (large). */
   btnSize = input<'s' | 'm' | 'l'>('m');
+  /** Visual style variant of the button. */
   btnStyle = input<'base' | 'outlined' | 'text' | 'danger'>('base');
+  /** Whether the button is in a loading state, disabling click events. */
   btnLoading = input<boolean>(false);
 
   classesList = computed(() => {

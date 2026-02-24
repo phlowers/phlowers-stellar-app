@@ -28,6 +28,7 @@ import { AttachmentService } from '@services/attachment/attachment.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
 
+/** Regex pattern for validating email addresses. */
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const modules = [
@@ -44,6 +45,12 @@ const modules = [
   ProgressBarModule
 ];
 
+/**
+ * Root application component.
+ *
+ * Handles user registration, service worker setup, database initialization,
+ * online/offline status monitoring, and application update prompts.
+ */
 @Component({
   selector: 'app-root',
   standalone: true,

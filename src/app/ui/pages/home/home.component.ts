@@ -44,6 +44,7 @@ const defaultTexts = {
   serverText: $localize`Trying to reach the servers!` // i18n Nous essayons de contacter les serveurs
 };
 
+/** Text content displayed on the home page cards and sections. */
 interface HomeTexts {
   newsTitle: string;
   newsText: string;
@@ -56,8 +57,15 @@ interface HomeTexts {
   serverText: string;
 }
 
+/** Possible visual states for the server status card. */
 type ServerStates = CardState;
 
+/**
+ * Home page component.
+ *
+ * Displays news, changelog info, server connectivity status,
+ * and the user's most recently updated studies.
+ */
 @Component({
   selector: 'app-home',
   imports: [RouterLink, ButtonComponent, IconComponent, CardInfoComponent, CardStudyComponent, CommonModule],

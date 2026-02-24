@@ -1,3 +1,4 @@
+/** Complete data model for a field measurement session, including inputs, settings, and computed outputs. */
 export interface FieldMeasure {
   uuid: string;
   name: string;
@@ -71,24 +72,31 @@ export interface FieldMeasure {
   outputs: FieldMeasureOutputs;
 }
 
+/** Aggregated output results of a field measurement calculation. */
 export interface FieldMeasureOutputs {
+  /** PAPOTO calculation result, if computed. */
   papoto: PapotoResult | null;
+  /** Cable temperature calculation result, if computed. */
   cableTemperature: TemperatureCalculationResult | null;
+  /** Parameter at 15°C calculation result, if computed. */
   parameter15C: Parameter15CResult | null;
 }
 
+/** Result of the parameter at 15°C without wind calculation including uncertainty bounds. */
 export interface Parameter15CResult {
   parameter15CMinusUncertainty: number;
   parameter15C: number;
   parameter15CPlusUncertainty: number;
 }
 
+/** Result of the cable temperature calculation from environmental conditions. */
 export interface TemperatureCalculationResult {
   cableSolarFlux: number;
   cableTemperature: number;
   cableTemperatureUncertainty: number;
 }
 
+/** Result of the PAPOTO parameter calculation with validity check. */
 export interface PapotoResult {
   parameter: number;
   parameter_1_2: number;
@@ -97,6 +105,7 @@ export interface PapotoResult {
   check_validity: boolean;
 }
 
+/** Manual input values for the 15°C without wind parameter calculation. */
 export interface ManualParameterCalculation15CWithoutWind {
   parameterPapoto: number | null;
   parameterUncertaintyPapoto: number | null;

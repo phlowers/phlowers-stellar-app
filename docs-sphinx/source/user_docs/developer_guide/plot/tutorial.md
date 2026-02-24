@@ -2,6 +2,7 @@
 
 A quick guide to using the plot system to visualize section data in 2D or 3D.
 
+
 ## The Basics
 
 The plot system has three main pieces:
@@ -19,9 +20,10 @@ When you give `StudioComponent` a section, it automatically:
 
 Just use the `StudioComponent` in your template:
 
-```html
+```text
 <app-studio
   [section]="mySection"
+  [isSupportZoom]="true"
 ></app-studio>
 ```
 
@@ -132,6 +134,7 @@ ngOnDestroy() {
   template: `
     <app-studio
       [section]="currentSection()"
+      [isSupportZoom]="true"
     ></app-studio>
     
     <button (click)="toggleView()">Toggle 2D/3D</button>

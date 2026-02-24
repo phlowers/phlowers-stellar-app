@@ -26,8 +26,13 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
   templateUrl: './section-plot.component.html',
   imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
 })
+/**
+ * Renders an interactive Plotly section plot for a transmission-line study.
+ * Listens to display options, obstacle positions, and span loads to keep the plot in sync.
+ */
 export class SectionPlotComponent {
   // Input
+  /** Lit data output used to draw the section plot. `null` when no data is available. */
   litData = input<GetSectionOutput | null>(null);
 
   // Services
@@ -118,6 +123,7 @@ export class SectionPlotComponent {
     return this.obstacleFormService.form.get('uuid')?.value ?? null;
   }
 
+  /** Rebuilds and redraws the section plot with the latest data, options, and obstacles. */
   async refreshPlot(): Promise<void> {
     const litData = this.plotService.litData();
     if (!litData) return;

@@ -6,4 +6,5 @@ import { Component } from '@angular/core';
   templateUrl: './tangent-aiming.component.html',
   styleUrl: './tangent-aiming.component.scss'
 })
+/** Placeholder component for tangent aiming parameter calculation. */
 export class TangentAimingComponent {}

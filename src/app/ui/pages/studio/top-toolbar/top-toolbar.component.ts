@@ -30,6 +30,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
     ButtonComponent
   ]
 })
+/** Top toolbar component providing view controls, display options, and tool/table menus. */
 export class StudioTopToolbarComponent implements OnInit {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
 

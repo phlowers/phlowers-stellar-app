@@ -1,6 +1,7 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { LateralDistanceType, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
 
+/** Plain data representation of an obstacle form. */
 export interface ObstacleFormData {
   uuid: string;
   name: string | null;
@@ -12,6 +13,7 @@ export interface ObstacleFormData {
   positions: Position3D[];
 }
 
+/** Typed reactive form controls for the obstacle form. */
 export interface ObstacleFormGroupData {
   uuid: FormControl<string | null>;
   name: FormControl<string | null>;

@@ -57,6 +57,19 @@ const getShadowMarker = (type: PlotObjectsType, view: View): PlotData['marker'] 
   };
 };
 
+/**
+ * Creates an array of shadow Plotly data objects from raw 3D coordinate arrays
+ * for a specific section object type. Shadow objects use a uniform color with
+ * reduced opacity to serve as background reference traces.
+ * @category Studio
+ * @param data - Array of polyline coordinate arrays (`[x, y, z][][]`).
+ * @param startSupport - Zero-based index of the first support to include.
+ * @param endSupport - Zero-based index of the last support to include.
+ * @param type - The section object type being rendered.
+ * @param view - The rendering dimension (`'2d'` or `'3d'`).
+ * @param side - The viewing side (`'profile'` or `'face'`).
+ * @returns An array of Plotly `Data` entries for shadow traces.
+ */
 export const createShadowDataObject = (
   data: number[][][],
   startSupport: number,

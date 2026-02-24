@@ -22,8 +22,15 @@ import { LogLevel, Task } from '@services/worker_python/tasks/types';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
+/** Name of the service worker cache used for app assets. */
 const CACHE_NAME = 'app-assets';
 
+/**
+ * Administration page component.
+ *
+ * Provides actions to delete all studies, reset the database, reset the app,
+ * manage updates, and toggle debug logging.
+ */
 @Component({
   selector: 'app-admin',
   standalone: true,

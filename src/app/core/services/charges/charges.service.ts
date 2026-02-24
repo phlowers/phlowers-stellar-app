@@ -12,6 +12,25 @@ import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
 import { MessageService } from 'primeng/api';
 
+/**
+ * Service for managing charge cases within sections.
+ *
+ * @remarks
+ * The ChargesService provides CRUD operations for charge cases, which
+ * represent different loading scenarios for mechanical calculations.
+ * Each section can have multiple charges with one selected as active.
+ *
+ * @example
+ * ```typescript
+ * // Create a new charge
+ * await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, charge);
+ *
+ * // Get the selected charge
+ * const selectedCharge = await this.chargesService.getSelectedChargeCase(studyUuid, sectionUuid);
+ * ```
+ *
+ * @category Services
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -127,9 +146,12 @@ export class ChargesService {
   }
 
   /**
-   * Get a charge by uuid
-   * @param uuid The uuid of the charge to get
-   * @returns The charge
+   * Set the selected charge for a section.
+   *
+   * @param studyUuid - The UUID of the study containing the section
+   * @param sectionUuid - The UUID of the section
+   * @param chargeUuid - The UUID of the charge to select
+   * @returns Promise that resolves when the operation is complete
    */
   async setSelectedCharge(studyUuid: string, sectionUuid: string, chargeUuid: string): Promise<void> {
     const { study, section } = await this.getStudyAndSection(studyUuid, sectionUuid);

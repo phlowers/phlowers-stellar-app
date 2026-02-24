@@ -7,16 +7,31 @@ import plotly, { Data } from 'plotly.js-dist-min';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 
+/**
+ * Formatted text data for plot annotations.
+ * @internal
+ */
 interface FormattedTextData {
+  /** Array of text strings to display */
   textToDisplay: string[];
+  /** 2D array of coordinates for text placement */
   textDisplayPoints: number[][];
 }
 
+/**
+ * Data structure for rendering support plots.
+ * @internal
+ */
 interface PlotData {
+  /** 2D array of shape coordinates */
   shapePoints: number[][];
+  /** 2D array of text display coordinates */
   textDisplayPoints: number[][];
+  /** Array of text strings to display */
   textToDisplay: string[];
+  /** Currently selected attachment set number */
   selectedAttachmentSetNumber: number | undefined;
+  /** Coordinates of the attachment set point */
   attachmentSetPoints: number[];
 }
 
@@ -25,6 +40,10 @@ interface PlotData {
   templateUrl: './support-plot.component.html',
   imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
 })
+/**
+ * Renders an interactive 3D Plotly visualisation of a transmission-line support structure.
+ * Reacts to coordinate and attachment-set input changes to refresh the plot.
+ */
 export class SupportPlotComponent {
   private static readonly PLOT_ELEMENT_ID = 'plotly-output-support';
   private static readonly PLOT_LAYOUT = {
@@ -46,8 +65,11 @@ export class SupportPlotComponent {
     size: 15
   } as const;
 
+  /** 2D array of coordinate tuples describing the support geometry. */
   coordinates = input<(number | undefined)[][]>();
+  /** Available attachment-set numbers for the support. */
   attachmentSetNumbers = input<number[]>();
+  /** Currently selected attachment-set number to highlight on the plot. */
   selectedAttachmentSetNumber = input<number | undefined>(undefined);
 
   constructor(private readonly workerPythonService: WorkerPythonService) {
@@ -63,10 +85,17 @@ export class SupportPlotComponent {
     });
   }
 
+  /** Removes the current Plotly chart from the DOM element. */
   clearPlot(): void {
     plotly.purge(SupportPlotComponent.PLOT_ELEMENT_ID);
   }
 
+  /**
+   * Recomputes support coordinates via the Python worker and redraws the 3D plot.
+   * @param coordinates - Raw support geometry coordinates.
+   * @param attachmentSetNumbers - List of attachment-set identifiers.
+   * @param selectedAttachmentSetNumber - The attachment-set to highlight, if any.
+   */
   async refreshPlot(
     coordinates: (number | undefined)[][],
     attachmentSetNumbers: number[],

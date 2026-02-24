@@ -9,6 +9,11 @@ import { StorageService } from '@services/storage/storage.service';
 import { UserEntity } from '@core/infrastructure/database';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+/**
+ * Validates whether the given string is a well-formed email address.
+ * @param email - The string to validate.
+ * @returns `true` if the string matches the email pattern.
+ */
 const validateEmail = (email: string): boolean => {
   const emailRegex =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //NOSONAR
@@ -19,8 +24,13 @@ const validateEmail = (email: string): boolean => {
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for managing the current application user.
+ * Handles user creation, retrieval, and exposes a reactive user observable.
+ */
 export class UserService {
   private readonly userSubject = new BehaviorSubject<UserEntity | null>(null);
+  /** Observable emitting the current `UserEntity` or `null` if no user exists. */
   public user$: Observable<UserEntity | null> = this.userSubject.asObservable();
 
   constructor(private readonly storageService: StorageService) {

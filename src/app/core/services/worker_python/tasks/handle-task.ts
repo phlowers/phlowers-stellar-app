@@ -8,6 +8,7 @@ import { loadPyodide } from 'pyodide';
 import type { PyProxy } from 'pyodide/ffi';
 import { Task, TaskError, TaskInputs, TaskOutputs } from './types';
 
+/** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 
 const tasks: Record<
@@ -59,6 +60,17 @@ const tasks: Record<
   }
 };
 
+/**
+ * Executes a Python task inside the Pyodide runtime.
+ *
+ * Loads any required external packages, passes `inputs` to the corresponding
+ * Python function, and converts the result back to a JavaScript object.
+ *
+ * @param pyodide - The initialised Pyodide API.
+ * @param task - The task identifier to execute.
+ * @param inputs - Input data forwarded to the Python function.
+ * @returns An object containing the `result`, `runTime` in ms, and any `error`.
+ */
 export async function handleTask<taskId extends Task>(
   pyodide: PyodideAPI,
   task: Task,

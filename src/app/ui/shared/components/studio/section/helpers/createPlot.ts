@@ -7,19 +7,36 @@ import { Obstacle } from '@core/domain/models/obstacle.model';
 import { DataObject } from './createPlotDataObject';
 import { createObstaclesAnnotations } from './obstacles';
 
+/**
+ * Parameters required to create or update a Plotly section plot.
+ * @category Studio
+ */
 export interface CreatePlotParams {
+  /** The DOM element ID of the plot container. */
   plotId: string;
+  /** Array of data objects to render in the plot. */
   data: DataObject[];
+  /** Raw section output data from the Python computation engine. */
   litData: GetSectionOutput;
+  /** Whether to invert the plot axis direction. */
   invert: boolean;
+  /** The rendering dimension of the plot. */
   view: View;
+  /** The current camera position, or `null` to use the default. */
   camera: Camera | null;
+  /** The viewing side of the plot. */
   side: Side;
+  /** Array of span loads; `null` entries indicate spans with no load. */
   spanLoads: (SpanLoad | null)[];
+  /** Zero-based index of the first support to display. */
   startSupport: number;
+  /** Zero-based index of the last support to display. */
   endSupport: number;
+  /** List of obstacles to annotate on the plot. */
   obstacles: Obstacle[];
+  /** UUID of the currently selected obstacle, or `null`. */
   currentObstacleUuid: string | null;
+  /** Index of the currently selected obstacle position point. */
   currentObstaclePointIndex: number;
 }
 
@@ -127,6 +144,14 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams)
   };
 };
 
+/**
+ * Creates or updates a Plotly plot in the DOM element identified by `plotParams.plotId`.
+ * Selects the appropriate 2D or 3D layout and uses `Plotly.react` for efficient updates
+ * without resetting the camera or zoom.
+ * @category Studio
+ * @param plotParams - The full set of parameters describing the plot data, layout, and options.
+ * @returns The Plotly promise returned by `Plotly.react`, or `undefined` if the target element is not found.
+ */
 export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
   if (!document.getElementById(plotParams.plotId)) {

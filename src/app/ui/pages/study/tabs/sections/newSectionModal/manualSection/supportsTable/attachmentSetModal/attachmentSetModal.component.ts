@@ -13,6 +13,12 @@ import { InputIconModule } from 'primeng/inputicon';
 import { SupportPlotComponent } from '@ui/shared/components/studio/support/support-plot.component';
 import { uniq } from 'lodash';
 
+/**
+ * Modal dialog for selecting and configuring an attachment set for a support.
+ *
+ * Allows choosing a support name and attachment set from the catalog,
+ * auto-populating arm length, height below console, and tower model.
+ */
 @Component({
   selector: 'app-attachment-set-modal',
   imports: [
@@ -31,9 +37,13 @@ import { uniq } from 'lodash';
   templateUrl: './attachmentSetModal.component.html'
 })
 export class AttachmentSetModalComponent implements OnInit {
+  /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
+  /** The support being configured. */
   support = input<Support>();
+  /** Emits when the modal open state changes. */
   isOpenChange = output<boolean>();
+  /** The parent section for context. */
   section = input.required<Section | null>();
   attachmentSet = signal<number | undefined>(undefined);
   supportName = signal<string | undefined>(undefined);

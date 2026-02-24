@@ -27,6 +27,7 @@ import { ObstaclesFormComponent } from './obstacles/obstaclesForm/obstaclesForm.
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
+/** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
   selector: 'app-studio-page',
   imports: [

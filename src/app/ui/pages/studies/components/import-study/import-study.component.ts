@@ -28,6 +28,7 @@ function parseISO88591Base64(str: string) {
   );
 }
 
+/** Localized error messages for file import failures. */
 const errors = {
   cableNotFound: $localize`Cable not found in database`,
   fileTypeNotAllowed: $localize`File type not allowed`,
@@ -38,6 +39,11 @@ const errors = {
   fileReadError: $localize`Error reading file`
 };
 
+/**
+ * Formats a raw Proto V4 support record into a typed `ProtoV4Support` object.
+ * @param support - Raw CSV record with string values
+ * @returns Formatted support with numeric and boolean fields converted
+ */
 const formatProtoV4Support = (support: Record<string, string>) => {
   return {
     ...support,
@@ -56,6 +62,12 @@ const formatProtoV4Support = (support: Record<string, string>) => {
   };
 };
 
+/**
+ * Formats raw Proto V4 parameter strings into a typed `ProtoV4Parameters` object.
+ * @param rawParameters - Array of raw parameter values extracted from CSV
+ * @param fileName - Original file name used to derive the project name
+ * @returns Typed Proto V4 parameters
+ */
 const formatProtoV4Parameters = (rawParameters: string[], fileName: string): ProtoV4Parameters => {
   return {
     conductor: rawParameters[3],
@@ -71,6 +83,11 @@ const formatProtoV4Parameters = (rawParameters: string[], fileName: string): Pro
   };
 };
 
+/**
+ * Builds a PrimeNG toast message for a given import error type.
+ * @param type - Key identifying the error in the `errors` map
+ * @returns Toast message configuration object
+ */
 const importErrorMessage = (type: keyof typeof errors) => {
   return {
     severity: 'error',
@@ -80,6 +97,7 @@ const importErrorMessage = (type: keyof typeof errors) => {
   };
 };
 
+/** Toast message shown on successful study import. */
 const importSuccessMessage = {
   severity: 'success',
   summary: $localize`Success`,
@@ -87,6 +105,11 @@ const importSuccessMessage = {
   life: 3000
 };
 
+/**
+ * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
+ *
+ * Handles file reading, decoding, parsing, validation, and study creation.
+ */
 @Component({
   selector: 'app-import-study',
   imports: [IconComponent, DividerModule, RouterLink, ButtonComponent, ToastModule],

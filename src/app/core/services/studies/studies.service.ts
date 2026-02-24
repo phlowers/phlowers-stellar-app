@@ -19,10 +19,17 @@ import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/n
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for managing study entities stored in the local IndexedDB database.
+ * Provides CRUD operations, duplication, import/export, and live-query capabilities.
+ */
 export class StudiesService {
+  /** Emits `true` when the underlying storage is ready. */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
+  /** Emits the current list of all studies whenever it changes. */
   public readonly studies = new BehaviorSubject<StudyEntity[]>([]);
+  /** Signal holding the data for the export dialog (UUID, title, open state). */
   public readonly exportDialogData = signal<{
     uuid: string;
     title: string;

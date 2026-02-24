@@ -26,6 +26,12 @@ import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-di
 import { ToolbarDialogComponent } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 
+/**
+ * Tab component displaying all sections and initial conditions of a study.
+ *
+ * Provides section CRUD, initial condition management, charge case operations,
+ * and integrates with the studio toolbar dialog for load table editing.
+ */
 @Component({
   selector: 'app-sections-tab',
   imports: [
@@ -48,14 +54,23 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
   styleUrl: './sectionsTab.component.scss'
 })
 export class SectionsTabComponent {
+  /** The study whose sections are displayed. */
   study = input<Study | null>(null);
+  /** Emits a section to create or update. */
   createOrUpdateSection = output<Section>();
+  /** Emits a section to delete. */
   deleteSection = output<Section>();
+  /** Emits a section to duplicate. */
   duplicateSection = output<Section>();
+  /** Emits an initial condition to add to a section. */
   addInitialCondition = output<InitialConditionFunctionsInput>();
+  /** Emits an initial condition to update. */
   updateInitialCondition = output<InitialConditionFunctionsInput>();
+  /** Emits an initial condition to delete. */
   deleteInitialCondition = output<InitialConditionFunctionsInput>();
+  /** Emits an initial condition to duplicate. */
   duplicateInitialCondition = output<DuplicateInitialConditionFunctionsInput>();
+  /** Emits an initial condition to set as active. */
   setInitialCondition = output<InitialConditionFunctionsInput>();
   currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
