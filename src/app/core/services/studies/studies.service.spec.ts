@@ -6,43 +6,58 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { StudiesService } from './studies.service';
-import { StorageService } from '@services/storage/storage.service';
-import { ProtoV4Support, ProtoV4Parameters } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
 import { BehaviorSubject } from 'rxjs';
 import { MessageService } from 'primeng/api';
+import { StudiesService } from './studies.service';
+import { StorageService } from '@services/storage/storage.service';
+import { ProtoV4Parameters, ProtoV4Support, Support } from '@core/domain';
+import { StudyEntity } from '@core/infrastructure/database';
+import { liveQuery } from 'dexie';
 
-// Mock uuid
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid-123')
 }));
 
+jest.mock('dexie', () => {
+  class Dexie {
+    version() {
+      return {
+        stores: jest.fn()
+      };
+    }
+  }
+
+  return {
+    __esModule: true,
+    default: Dexie,
+    liveQuery: jest.fn()
+  };
+});
+
+interface MockDb {
+  users: {
+    toArray: jest.Mock<Promise<{ email: string }[]>, []>;
+  };
+  studies: {
+    add: jest.Mock<Promise<void>, [StudyEntity]>;
+    toArray: jest.Mock<Promise<StudyEntity[]>, []>;
+    get: jest.Mock<Promise<StudyEntity | undefined>, [string]>;
+    delete: jest.Mock<Promise<void>, [string]>;
+    clear: jest.Mock<Promise<void>, []>;
+    update: jest.Mock<Promise<number>, [string, Partial<StudyEntity>]>;
+    orderBy: jest.Mock;
+  };
+}
+
 describe('StudiesService', () => {
   let service: StudiesService;
   let mockStorageService: jest.Mocked<StorageService>;
-  const mockMessageService = {
-    add: jest.fn()
-  } as any;
-  let mockDb: {
-    users: {
-      toArray: jest.Mock;
-    };
-    studies: {
-      add: jest.Mock;
-      toArray: jest.Mock;
-      get: jest.Mock;
-      delete: jest.Mock;
-      orderBy: jest.Mock;
-      reverse: jest.Mock;
-      limit: jest.Mock;
-    };
-  };
+  let mockDb: MockDb;
   let readySubject: BehaviorSubject<boolean>;
+  let messageService: MessageService;
 
   const mockUser = {
-    email: 'test@example.com',
-    uuid: 'user-uuid-123'
+    email: 'test@example.com'
   };
 
   const mockStudy: Pick<StudyEntity, 'title' | 'description' | 'shareable' | 'sections' | 'author_email'> = {
@@ -56,7 +71,6 @@ describe('StudiesService', () => {
   const mockStudyFromDb: StudyEntity = {
     ...mockStudy,
     uuid: 'existing-uuid-123',
-    author_email: 'test@example.com',
     created_at_offline: '2025-01-01T00:00:00.000Z',
     updated_at_offline: '2025-01-01T00:00:00.000Z',
     saved: true
@@ -74,9 +88,15 @@ describe('StudiesService', () => {
         toArray: jest.fn().mockResolvedValue([]),
         get: jest.fn().mockResolvedValue(mockStudyFromDb),
         delete: jest.fn().mockResolvedValue(undefined),
-        orderBy: jest.fn().mockReturnThis(),
-        reverse: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis()
+        clear: jest.fn().mockResolvedValue(undefined),
+        update: jest.fn().mockResolvedValue(1),
+        orderBy: jest.fn().mockReturnValue({
+          reverse: jest.fn().mockReturnValue({
+            limit: jest.fn().mockReturnValue({
+              toArray: jest.fn().mockResolvedValue([mockStudyFromDb])
+            })
+          })
+        })
       }
     };
 
@@ -89,219 +109,218 @@ describe('StudiesService', () => {
       providers: [
         StudiesService,
         { provide: StorageService, useValue: mockStorageService },
-        { provide: MessageService, useValue: mockMessageService }
+        { provide: MessageService, useValue: { add: jest.fn() } }
       ]
     });
 
     service = TestBed.inject(StudiesService);
+    messageService = TestBed.inject(MessageService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  it('initializes ready and studies', () => {
+    expect(service.ready.value).toBe(false);
+    expect(service.studies.value).toEqual([]);
+
+    readySubject.next(true);
+    expect(service.ready.value).toBe(true);
   });
 
-  describe('initialization', () => {
-    it('should initialize with ready as false', () => {
-      expect(service.ready.value).toBeFalsy();
-    });
+  it('creates a study and refreshes list', async () => {
+    mockDb.studies.toArray.mockResolvedValue([mockStudyFromDb]);
 
-    it('should initialize with empty studies array', () => {
-      expect(service.studies.value).toEqual([]);
-    });
+    const uuid = await service.createStudy(mockStudy);
 
-    it('should subscribe to storage service ready$ and update ready subject', () => {
-      readySubject.next(true);
-      expect(service.ready.value).toBeTruthy();
+    expect(uuid).toBe('mock-uuid-123');
+    expect(mockDb.studies.add).toHaveBeenCalledWith({
+      ...mockStudy,
+      author_email: 'test@example.com',
+      uuid: 'mock-uuid-123',
+      created_at_offline: expect.any(String),
+      updated_at_offline: expect.any(String),
+      saved: false
     });
+    expect(service.studies.value).toEqual([mockStudyFromDb]);
   });
 
-  describe('createStudy', () => {
-    it('should create a new study successfully', async () => {
-      const studiesSpy = jest.spyOn(service.studies, 'next');
-      mockDb.studies.toArray.mockResolvedValue([mockStudyFromDb]);
+  it('uses user email when study author is missing', async () => {
+    mockDb.studies.toArray.mockResolvedValue([]);
 
-      await service.createStudy(mockStudy);
-
-      expect(mockDb.users.toArray).toHaveBeenCalled();
-      expect(mockDb.studies.add).toHaveBeenCalledWith({
-        uuid: 'mock-uuid-123',
-        ...mockStudy,
-        created_at_offline: expect.any(String),
-        updated_at_offline: expect.any(String),
-        saved: false
-      });
-      expect(mockDb.studies.toArray).toHaveBeenCalled();
-      expect(studiesSpy).toHaveBeenCalledWith([mockStudyFromDb]);
+    await service.createStudy({
+      title: 'No Author',
+      description: '',
+      shareable: false,
+      sections: [],
+      author_email: ''
     });
 
-    it('should handle database errors gracefully', async () => {
-      const error = new Error('Database error');
-      mockDb.studies.add.mockRejectedValue(error);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      await expect(service.createStudy(mockStudy)).rejects.toThrow('Database error');
-
-      consoleErrorSpy.mockRestore();
-    });
-  });
-
-  describe('getStudies', () => {
-    it('should return all studies from database', async () => {
-      const mockStudies = [mockStudyFromDb];
-      mockDb.studies.toArray.mockResolvedValue(mockStudies);
-
-      const result = await service.getStudies();
-
-      expect(mockDb.studies.toArray).toHaveBeenCalled();
-      expect(result).toEqual(mockStudies);
-    });
-
-    it('should return undefined when database is not available', async () => {
-      (mockStorageService as unknown as { db: undefined }).db = undefined;
-
-      const result = await service.getStudies();
-
-      expect(result).toBeUndefined();
+    expect(mockDb.studies.add).toHaveBeenCalledWith({
+      title: 'No Author',
+      description: '',
+      shareable: false,
+      sections: [],
+      author_email: 'test@example.com',
+      uuid: 'mock-uuid-123',
+      created_at_offline: expect.any(String),
+      updated_at_offline: expect.any(String),
+      saved: false
     });
   });
 
-  describe('duplicateStudy', () => {
-    it('should duplicate a study successfully', async () => {
-      const studiesSpy = jest.spyOn(service.studies, 'next');
-      const mockDuplicatedStudies = [mockStudyFromDb, { ...mockStudyFromDb, uuid: 'new-uuid' }];
-      mockDb.studies.toArray.mockResolvedValue(mockDuplicatedStudies);
+  it('gets studies and latest studies', async () => {
+    await service.getStudies();
 
-      await service.duplicateStudy('existing-uuid-123');
+    expect(mockDb.studies.toArray).toHaveBeenCalled();
 
-      expect(mockDb.studies.get).toHaveBeenCalledWith('existing-uuid-123');
-      expect(mockDb.studies.add).toHaveBeenCalledWith({
-        ...mockStudyFromDb,
-        uuid: 'mock-uuid-123',
-        created_at_offline: expect.any(String),
-        updated_at_offline: expect.any(String),
-        saved: false,
-        title: 'Test Study (Copy 1)'
-      });
-      expect(mockDb.studies.toArray).toHaveBeenCalled();
-      expect(studiesSpy).toHaveBeenCalledWith(mockDuplicatedStudies);
+    const latest = await service.getLatestStudies();
+    expect(mockDb.studies.orderBy).toHaveBeenCalledWith('created_at_offline');
+    expect(latest).toEqual([mockStudyFromDb]);
+  });
+
+  it('returns undefined when db is missing', async () => {
+    (mockStorageService as unknown as { db: undefined }).db = undefined;
+
+    const studies = await service.getStudies();
+    const latest = await service.getLatestStudies();
+
+    expect(studies).toBeUndefined();
+    expect(latest).toBeUndefined();
+  });
+
+  it('refreshes studies to empty list when db is missing', async () => {
+    (mockStorageService as unknown as { db: undefined }).db = undefined;
+
+    const result = await (service as unknown as { refreshStudies: () => Promise<StudyEntity[]> }).refreshStudies();
+
+    expect(result).toEqual([]);
+    expect(service.studies.value).toEqual([]);
+  });
+
+  it('duplicates a study and refreshes list', async () => {
+    mockDb.studies.toArray.mockResolvedValue([mockStudyFromDb]);
+
+    const result = await service.duplicateStudy('existing-uuid-123');
+
+    expect(result?.title).toContain('Test Study');
+    expect(mockDb.studies.add).toHaveBeenCalledWith({
+      ...mockStudyFromDb,
+      title: 'Test Study (Copy 1)',
+      author_email: 'test@example.com',
+      uuid: 'mock-uuid-123',
+      created_at_offline: expect.any(String),
+      updated_at_offline: expect.any(String),
+      saved: false
     });
+    expect(service.studies.value).toEqual([mockStudyFromDb]);
+  });
 
-    it('should handle case when study does not exist', async () => {
-      mockDb.studies.get.mockResolvedValue(undefined);
-      const studiesSpy = jest.spyOn(service.studies, 'next');
+  it('uses empty list when duplicate study list is undefined', async () => {
+    mockDb.studies.toArray.mockResolvedValue(undefined as unknown as StudyEntity[]);
 
-      await service.duplicateStudy('non-existent-uuid');
+    await service.duplicateStudy('existing-uuid-123');
 
-      expect(mockDb.studies.get).toHaveBeenCalledWith('non-existent-uuid');
-      expect(mockDb.studies.add).not.toHaveBeenCalled();
-      expect(studiesSpy).not.toHaveBeenCalled();
-    });
+    expect(mockDb.studies.add).toHaveBeenCalled();
+  });
 
-    it('should handle database errors gracefully', async () => {
-      const error = new Error('Database error');
-      mockDb.studies.get.mockRejectedValue(error);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+  it('uses study author email when user email is missing on duplicate', async () => {
+    mockDb.users.toArray.mockResolvedValue([]);
+    mockDb.studies.toArray.mockResolvedValue([mockStudyFromDb]);
 
-      await expect(service.duplicateStudy('existing-uuid-123')).rejects.toThrow('Database error');
+    const result = await service.duplicateStudy('existing-uuid-123');
 
-      consoleErrorSpy.mockRestore();
+    expect(result?.author_email).toBe(mockStudyFromDb.author_email);
+    expect(mockDb.studies.add).toHaveBeenCalledWith({
+      ...mockStudyFromDb,
+      title: 'Test Study (Copy 1)',
+      author_email: mockStudyFromDb.author_email,
+      uuid: 'mock-uuid-123',
+      created_at_offline: expect.any(String),
+      updated_at_offline: expect.any(String),
+      saved: false
     });
   });
 
-  describe('deleteStudy', () => {
-    it('should delete a study successfully', async () => {
-      const studiesSpy = jest.spyOn(service.studies, 'next');
-      const remainingStudies: StudyEntity[] = [];
-      mockDb.studies.toArray.mockResolvedValue(remainingStudies);
+  it('returns null when duplicating missing study', async () => {
+    mockDb.studies.get.mockResolvedValue(undefined);
 
-      await service.deleteStudy('existing-uuid-123');
+    const result = await service.duplicateStudy('missing-uuid');
 
-      expect(mockDb.studies.delete).toHaveBeenCalledWith('existing-uuid-123');
-      expect(mockDb.studies.toArray).toHaveBeenCalled();
-      expect(studiesSpy).toHaveBeenCalledWith(remainingStudies);
+    expect(result).toBeNull();
+    expect(mockDb.studies.add).not.toHaveBeenCalled();
+  });
+
+  it('deletes a study and refreshes list', async () => {
+    mockDb.studies.toArray.mockResolvedValue([]);
+
+    await service.deleteStudy('existing-uuid-123');
+
+    expect(mockDb.studies.delete).toHaveBeenCalledWith('existing-uuid-123');
+    expect(service.studies.value).toEqual([]);
+  });
+
+  it('deletes all studies and refreshes list', async () => {
+    mockDb.studies.toArray.mockResolvedValue([]);
+
+    await service.deleteAllStudies();
+
+    expect(mockDb.studies.clear).toHaveBeenCalled();
+    expect(service.studies.value).toEqual([]);
+  });
+
+  it('updates study when author matches', async () => {
+    await service.updateStudy({
+      uuid: 'existing-uuid-123',
+      author_email: 'test@example.com',
+      title: 'Updated'
     });
 
-    it('should handle database errors gracefully', async () => {
-      const error = new Error('Database error');
-      mockDb.studies.delete.mockRejectedValue(error);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      await expect(service.deleteStudy('existing-uuid-123')).rejects.toThrow('Database error');
-
-      consoleErrorSpy.mockRestore();
+    expect(mockDb.studies.update).toHaveBeenCalledWith('existing-uuid-123', {
+      uuid: 'existing-uuid-123',
+      author_email: 'test@example.com',
+      title: 'Updated',
+      updated_at_offline: expect.any(String)
     });
   });
 
-  describe('getLatestStudies', () => {
-    it('should return latest 4 studies ordered by creation date', async () => {
-      const mockLatestStudies = [mockStudyFromDb];
-      mockDb.studies.orderBy.mockReturnValue({
-        reverse: jest.fn().mockReturnValue({
-          limit: jest.fn().mockReturnValue({
-            toArray: jest.fn().mockResolvedValue(mockLatestStudies)
-          })
-        })
-      });
+  it('allows update when overrideAuthorCheck is true', async () => {
+    mockDb.users.toArray.mockResolvedValue([{ email: 'other@example.com' }]);
 
-      const result = await service.getLatestStudies();
+    await service.updateStudy(
+      {
+        uuid: 'existing-uuid-123',
+        author_email: 'test@example.com',
+        title: 'Updated'
+      },
+      true
+    );
 
-      expect(mockDb.studies.orderBy).toHaveBeenCalledWith('created_at_offline');
-      expect(result).toEqual(mockLatestStudies);
-    });
+    expect(mockDb.studies.update).toHaveBeenCalled();
+  });
 
-    it('should return undefined when database is not available', async () => {
-      (mockStorageService as unknown as { db: undefined }).db = undefined;
+  it('rejects update when author mismatches', async () => {
+    mockDb.users.toArray.mockResolvedValue([{ email: 'other@example.com' }]);
+    const addSpy = jest.spyOn(messageService, 'add');
 
-      const result = await service.getLatestStudies();
+    await expect(
+      service.updateStudy({
+        uuid: 'existing-uuid-123',
+        author_email: 'test@example.com',
+        title: 'Updated'
+      })
+    ).rejects.toThrow('You cannot update a study that you did not create, please duplicate it instead.');
 
-      expect(result).toBeUndefined();
+    expect(addSpy).toHaveBeenCalledWith({
+      severity: 'error',
+      summary: 'Unauthorized',
+      detail: 'You cannot update a study that you did not create, please duplicate it instead.'
     });
   });
 
-  describe('BehaviorSubject emissions', () => {
-    it('should emit updated studies after createStudy', async () => {
-      const mockStudies: StudyEntity[] = [mockStudyFromDb];
-      mockDb.studies.toArray.mockResolvedValue(mockStudies);
-
-      const studiesEmissionSpy = jest.fn();
-      service.studies.subscribe(studiesEmissionSpy);
-
-      await service.createStudy(mockStudy);
-
-      expect(studiesEmissionSpy).toHaveBeenCalledWith(mockStudies);
-    });
-
-    it('should emit updated studies after duplicateStudy', async () => {
-      const mockStudies: StudyEntity[] = [mockStudyFromDb];
-      mockDb.studies.toArray.mockResolvedValue(mockStudies);
-
-      const studiesEmissionSpy = jest.fn();
-      service.studies.subscribe(studiesEmissionSpy);
-
-      await service.duplicateStudy('existing-uuid-123');
-
-      expect(studiesEmissionSpy).toHaveBeenCalledWith(mockStudies);
-    });
-
-    it('should emit updated studies after deleteStudy', async () => {
-      const mockStudies: StudyEntity[] = [];
-      mockDb.studies.toArray.mockResolvedValue(mockStudies);
-
-      const studiesEmissionSpy = jest.fn();
-      service.studies.subscribe(studiesEmissionSpy);
-
-      await service.deleteStudy('existing-uuid-123');
-
-      expect(studiesEmissionSpy).toHaveBeenCalledWith(mockStudies);
-    });
-  });
-
-  describe('createStudyFromProtoV4', () => {
-    const mockProtoV4Parameters: ProtoV4Parameters = {
+  it('creates a study from proto v4 parameters', async () => {
+    const parameters: ProtoV4Parameters = {
       conductor: 'ACSR-240',
       cable_amount: 3,
       temperature_reference: 20,
@@ -314,7 +333,7 @@ describe('StudiesService', () => {
       section_name: 'Test Section'
     };
 
-    const mockProtoV4Support: ProtoV4Support = {
+    const support: ProtoV4Support = {
       alt_acc: 12.5,
       angle_ligne: 45,
       ch_en_V: true,
@@ -329,29 +348,142 @@ describe('StudiesService', () => {
       suspension: true
     };
 
-    it('should create a study from proto v4 with valid inputs', async () => {
-      const result = await service.createStudyFromProtoV4([mockProtoV4Support], mockProtoV4Parameters);
+    const createStudySpy = jest.spyOn(service, 'createStudy').mockResolvedValue('mock-uuid-123');
+    const getStudySpy = jest.spyOn(service, 'getStudy').mockResolvedValue(mockStudyFromDb);
 
-      expect(result).toEqual({
-        author_email: 'test@example.com',
-        created_at_offline: '2025-01-01T00:00:00.000Z',
-        description: 'Test Description',
-        saved: true,
-        sections: [],
-        shareable: true,
-        title: 'Test Study',
-        updated_at_offline: '2025-01-01T00:00:00.000Z',
-        uuid: 'existing-uuid-123'
+    const result = await service.createStudyFromProtoV4([support], parameters);
+
+    expect(createStudySpy).toHaveBeenCalled();
+    const payload = createStudySpy.mock.calls[0][0];
+    expect(payload.sections).toHaveLength(1);
+    expect(payload.sections[0].supports).toHaveLength(1);
+    expect(payload.sections[0].initial_conditions).toHaveLength(1);
+    expect(payload.sections[0].selected_initial_condition_uuid).toBe(payload.sections[0].initial_conditions[0].uuid);
+    expect(getStudySpy).toHaveBeenCalledWith('mock-uuid-123');
+    expect(result).toEqual(mockStudyFromDb);
+  });
+
+  it('creates supports with non-negative foot altitude', async () => {
+    const parameters: ProtoV4Parameters = {
+      conductor: 'ACSR-240',
+      cable_amount: 3,
+      temperature_reference: 20,
+      parameter: 1.2,
+      cra: 0.5,
+      temp_load: 15,
+      wind_load: 10,
+      frost_load: 5,
+      project_name: 'Test Project',
+      section_name: 'Test Section'
+    };
+
+    const support: ProtoV4Support = {
+      alt_acc: 10,
+      angle_ligne: 45,
+      ch_en_V: true,
+      ctr_poids: 2.5,
+      long_bras: 3.0,
+      long_ch: 1.5,
+      nom: 'Support 1',
+      num: '1',
+      pds_ch: 1.2,
+      portée: 200,
+      surf_ch: 0.8,
+      suspension: true
+    };
+
+    const createStudySpy = jest.spyOn(service, 'createStudy').mockResolvedValue('mock-uuid-123');
+    jest.spyOn(service, 'getStudy').mockResolvedValue(mockStudyFromDb);
+
+    await service.createStudyFromProtoV4([support], parameters);
+
+    const payload = createStudySpy.mock.calls[0][0];
+    expect(payload.sections[0].supports[0].supportFootAltitude).toBe(0);
+  });
+
+  it('builds supports with positive foot altitude when height allows', () => {
+    const supports = (
+      service as unknown as {
+        buildSupportsFromProtoV4: (items: ProtoV4Support[], conductor: string) => Support[];
+      }
+    ).buildSupportsFromProtoV4(
+      [
+        {
+          alt_acc: 40,
+          angle_ligne: 0,
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 1',
+          num: '1',
+          pds_ch: 0,
+          portée: 0,
+          surf_ch: 0,
+          suspension: false
+        }
+      ],
+      'ACSR-240'
+    );
+
+    expect(supports[0].supportFootAltitude).toBe(10);
+  });
+
+  it('downloads a study when present', async () => {
+    const createObjectUrlSpy = jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    if (!URL.revokeObjectURL) {
+      Object.defineProperty(URL, 'revokeObjectURL', {
+        value: jest.fn(),
+        writable: true
       });
+    }
+    const revokeObjectUrlSpy = jest.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    const clickSpy = jest.fn();
+    const originalCreateElement = document.createElement.bind(document);
+
+    const createElementSpy = jest.spyOn(document, 'createElement').mockImplementation((tagName) => {
+      const element = originalCreateElement(tagName);
+      if (tagName === 'a') {
+        element.click = clickSpy;
+      }
+      return element;
     });
 
-    it('should return correct structure with sections and shareable properties', async () => {
-      const result = await service.createStudyFromProtoV4([mockProtoV4Support], mockProtoV4Parameters);
+    await service.downloadStudy('existing-uuid-123', 'file-name');
 
-      expect(result).toHaveProperty('sections');
-      expect(result).toHaveProperty('shareable');
-      expect(Array.isArray(result.sections)).toBe(true);
-      expect(result.shareable).toBe(true);
+    expect(createObjectUrlSpy).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
+    expect(revokeObjectUrlSpy).toHaveBeenCalled();
+
+    createObjectUrlSpy.mockRestore();
+    revokeObjectUrlSpy.mockRestore();
+    createElementSpy.mockRestore();
+  });
+
+  it('returns early when downloading missing study', async () => {
+    mockDb.studies.get.mockResolvedValue(undefined);
+    const createObjectUrlSpy = jest.spyOn(URL, 'createObjectURL');
+
+    await service.downloadStudy('missing-uuid', 'file-name');
+
+    expect(createObjectUrlSpy).not.toHaveBeenCalled();
+
+    createObjectUrlSpy.mockRestore();
+  });
+
+  it('returns live query observable for getStudyAsObservable', () => {
+    const liveQueryMock = liveQuery as jest.MockedFunction<typeof liveQuery>;
+    const fakeObservable = { subscribe: jest.fn() } as unknown as ReturnType<typeof liveQuery>;
+
+    liveQueryMock.mockImplementation((query) => {
+      query();
+      return fakeObservable;
     });
+
+    const result = service.getStudyAsObservable('existing-uuid-123');
+
+    expect(liveQueryMock).toHaveBeenCalled();
+    expect(mockDb.studies.get).toHaveBeenCalledWith('existing-uuid-123');
+    expect(result).toBe(fakeObservable);
   });
 });

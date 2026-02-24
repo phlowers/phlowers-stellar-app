@@ -42,7 +42,7 @@
     placeholder="Display"
     [filter]="false"
     [showToggleAll]="false"
-    [options]="displayOptions()"
+    [options]="selectedDisplayOptions()"
     [ngModel]="selectedDisplayValues()"
     (ngModelChange)="setSelectedDisplayOptions($event)"
     optionLabel="label"

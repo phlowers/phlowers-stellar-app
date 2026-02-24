@@ -1,12 +1,15 @@
-import { Component, ContentChildren, ElementRef, QueryList, signal, ViewChildren } from '@angular/core';
+import { Component, ContentChildren, effect, ElementRef, inject, QueryList, signal, ViewChildren } from '@angular/core';
 import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { PlotService } from '../services/plot.service';
+import { SideTabsService } from './side-tabs.service';
+import { isNumber } from 'lodash';
 
 const REFRESH_STUDIO_DELAY = 400;
 
+/** Component hosting a set of collapsible side tabs with panel content. */
 @Component({
   selector: 'app-side-tabs',
   imports: [NgTemplateOutlet, ButtonComponent, IconComponent],
@@ -18,14 +21,28 @@ export class SideTabsComponent {
   @ViewChildren('panelRef') panels!: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren('btnRef') btns!: QueryList<ElementRef<HTMLButtonElement>>;
 
-  public sideTabs = signal<number | string>('');
   public panelWidth = signal<string>('0px');
 
-  constructor(private readonly plotService: PlotService) {}
+  private readonly plotService = inject(PlotService);
+  private readonly sideTabsService = inject(SideTabsService);
+
+  constructor() {
+    effect(() => {
+      const toggle = this.sideTabsService.sideTabs();
+      this.updateWidth();
+
+      if (toggle !== null && isNumber(toggle)) {
+        this.focusPanel(toggle);
+      }
+      setTimeout(() => {
+        this.plotService.refreshCamera();
+      }, REFRESH_STUDIO_DELAY);
+    });
+  }
 
   private updateWidth() {
-    const idx = this.sideTabs();
-    if (idx === '') {
+    const idx = this.sideTabsService.sideTabs();
+    if (idx === null) {
       this.panelWidth.set('0px');
       return;
     }
@@ -51,20 +68,12 @@ export class SideTabsComponent {
   }
 
   toggleTab(i: number) {
-    const toggle = this.sideTabs() === i ? '' : i;
-    this.sideTabs.set(toggle);
-    this.updateWidth();
-
-    if (toggle !== '') {
-      this.focusPanel(toggle);
-    }
-    setTimeout(() => {
-      this.plotService.setSidebarOpen();
-    }, REFRESH_STUDIO_DELAY);
+    const toggle = this.sideTabsService.sideTabs() === i ? null : i;
+    this.sideTabsService.sideTabs.set(toggle);
   }
 
   isOpen(i: number): boolean {
-    return this.sideTabs() === i;
+    return this.sideTabsService.sideTabs() === i;
   }
 
   getButtonId(i: number) {
@@ -91,8 +100,8 @@ export class SideTabsComponent {
         this.focusButton(newIndex);
         break;
       case 'Escape':
-        if (this.sideTabs() !== '') {
-          this.sideTabs.set('');
+        if (this.sideTabsService.sideTabs() !== null) {
+          this.sideTabsService.sideTabs.set(null);
           this.panelWidth.set('0px');
           this.focusButton(i);
         }

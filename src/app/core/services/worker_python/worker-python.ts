@@ -18,9 +18,15 @@ import { Task, TaskError, TaskInputs } from './tasks/types';
 
 const pythonFiles = [functions, change_state, guying, temperature, parameter_15_without_wind];
 
+/** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
 let pyodide: PyodideAPI;
 
+/**
+ * Loads the Pyodide runtime and all required Python packages,
+ * then executes the bundled Python source files.
+ * Posts `loadTime` and `importTime` messages back to the main thread.
+ */
 async function loadPyodideAndPackages() {
   try {
     const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);

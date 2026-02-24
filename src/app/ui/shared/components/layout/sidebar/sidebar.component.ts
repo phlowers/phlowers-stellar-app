@@ -13,13 +13,21 @@ const version = environment.version;
   styleUrl: './sidebar.component.scss',
   encapsulation: ViewEncapsulation.None
 })
+/** Collapsible navigation sidebar with expandable/shrank states persisted in local storage. */
 export class SidebarComponent implements OnInit {
+  /** Logo image path shown when the sidebar is expanded. */
   logoIconExpanded = input<string>();
+  /** Logo image path shown when the sidebar is collapsed. */
   logoIconShrank = input.required<string>();
+  /** Application name displayed next to the logo. */
   logoText = input.required<string>();
+  /** Whether to display the version number in the sidebar. */
   appVersionDisplay = input<boolean>(true);
+  /** Main navigation links rendered in the sidebar body. */
   mainLinks = input<SidebarItem[]>();
+  /** Navigation links rendered in the sidebar footer. */
   footerLinks = input<SidebarItem[]>();
+  /** Initial expanded state of the sidebar. */
   expanded = input<boolean>(true);
 
   private readonly bodyTag = signal<HTMLBodyElement | null>(null);

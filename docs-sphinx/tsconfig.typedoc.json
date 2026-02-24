@@ -1,0 +1,24 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/typedoc",
+    "types": ["node", "@angular/localize"],
+    "baseUrl": "..",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@app/*": ["./src/app/*"],
+      "@core/*": ["./src/app/core/*"],
+      "@services/*": ["./src/app/core/services/*"],
+      "@ui/*": ["./src/app/ui/*"],
+      "@plugins/*": ["./src/app/plugins/*"],
+      "@adapters/*": ["./src/app/adapters/*"]
+    }
+  },
+  "include": [
+    "../src/**/*.ts"
+  ],
+  "exclude": [
+    "../src/**/*.spec.ts",
+    "../src/test-setup.ts"
+  ]
+}

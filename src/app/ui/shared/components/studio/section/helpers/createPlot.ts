@@ -1,21 +1,43 @@
-import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
+import Plotly, { Camera, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
 import { Side, View } from './types';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { SpanLoad } from '@core/domain';
+import { Obstacle } from '@core/domain/models/obstacle.model';
+import { DataObject } from './createPlotDataObject';
+import { createObstaclesAnnotations } from './obstacles';
 
+/**
+ * Parameters required to create or update a Plotly section plot.
+ * @category Studio
+ */
 export interface CreatePlotParams {
+  /** The DOM element ID of the plot container. */
   plotId: string;
-  data: Data[];
+  /** Array of data objects to render in the plot. */
+  data: DataObject[];
+  /** Raw section output data from the Python computation engine. */
   litData: GetSectionOutput;
-  isSupportZoom: boolean;
+  /** Whether to invert the plot axis direction. */
   invert: boolean;
+  /** The rendering dimension of the plot. */
   view: View;
+  /** The current camera position, or `null` to use the default. */
   camera: Camera | null;
+  /** The viewing side of the plot. */
   side: Side;
+  /** Array of span loads; `null` entries indicate spans with no load. */
   spanLoads: (SpanLoad | null)[];
+  /** Zero-based index of the first support to display. */
   startSupport: number;
+  /** Zero-based index of the last support to display. */
   endSupport: number;
+  /** List of obstacles to annotate on the plot. */
+  obstacles: Obstacle[];
+  /** UUID of the currently selected obstacle, or `null`. */
+  currentObstacleUuid: string | null;
+  /** Index of the currently selected obstacle position point. */
+  currentObstaclePointIndex: number;
 }
 
 const normalCamera = () => ({
@@ -30,22 +52,6 @@ const normalCamera = () => ({
     z: 0.2
   }
 });
-
-const supportCamera = {
-  up: { x: 0, y: 0, z: 1 },
-  // TODO: replace magic numbers
-  center: {
-    x: -0.97,
-    y: -0.73,
-    z: 0.07
-  },
-  eye: {
-    x: 0.9,
-    y: 0.1,
-    z: -0.1
-  },
-  projection: { type: 'perspective' }
-};
 
 const axis = {
   backgroundcolor: 'gainsboro',
@@ -71,11 +77,11 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
       y: 0.2,
       z: 0.5
     },
-    annotations: createLoadAnnotations(plotParams),
+    annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)],
     camera: plotParams.camera
       ? plotParams.camera
       : {
-          ...(plotParams.isSupportZoom ? supportCamera : normalCamera())
+          ...normalCamera()
         }
   };
 };
@@ -134,14 +140,23 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams)
       scaleratio: plotParams.side === 'face' ? 0.2 : undefined,
       scaleanchor: plotParams.side === 'face' ? 'x' : undefined
     },
-    annotations: createLoadAnnotations(plotParams)
+    annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)]
   };
 };
 
+/**
+ * Creates or updates a Plotly plot in the DOM element identified by `plotParams.plotId`.
+ * Selects the appropriate 2D or 3D layout and uses `Plotly.react` for efficient updates
+ * without resetting the camera or zoom.
+ * @category Studio
+ * @param plotParams - The full set of parameters describing the plot data, layout, and options.
+ * @returns The Plotly promise returned by `Plotly.react`, or `undefined` if the target element is not found.
+ */
 export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
   if (!document.getElementById(plotParams.plotId)) {
-    return undefined;
+    console.warn(`Plot element not found: ${plotParams.plotId}`);
+    return;
   }
   const baseLayout = plotParams.view === '3d' ? layout3d(plotParams) : layout2d(plotParams);
 

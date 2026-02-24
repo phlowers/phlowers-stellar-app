@@ -11,29 +11,24 @@ import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { OnlineService } from '@services/online/online.service';
 import { StorageService } from '@services/storage/storage.service';
 import { IconComponent } from './shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from './shared/components/atoms/button/button.component';
 import { UserService } from '@services/user/user.service';
-import { StudiesService } from '@services/studies/studies.service';
-import { SectionService } from '@services/sections/section.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { InitialConditionService } from '@services/initial-conditions/initial-condition.service';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { Subscription } from 'rxjs';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
 import { ChainsService } from '@services/chains/chains.service';
-import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { AttachmentService } from '@services/attachment/attachment.service';
-import { ChargesService } from '@services/charges/charges.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { LoadFormsService } from './pages/studio/loads/loadForms.service';
 
+/** Regex pattern for validating email addresses. */
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const modules = [
@@ -50,30 +45,16 @@ const modules = [
   ProgressBarModule
 ];
 
+/**
+ * Root application component.
+ *
+ * Handles user registration, service worker setup, database initialization,
+ * online/offline status monitoring, and application update prompts.
+ */
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: modules,
-  providers: [
-    MessageService,
-    StorageService,
-    WorkerPythonService,
-    OnlineService,
-    UserService,
-    MaintenanceService,
-    LinesService,
-    ChainsService,
-    StudiesService,
-    SectionService,
-    InitialConditionService,
-    ConfirmationService,
-    UpdateService,
-    CablesService,
-    PlotService,
-    AttachmentService,
-    ChargesService,
-    LoadFormsService
-  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

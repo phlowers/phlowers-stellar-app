@@ -6,14 +6,10 @@
   } @else if (plotService.error()) {
     <div class="absolute inset-0 flex justify-center items-center">
       <p class="text-red-500 text-2xl font-bold">
-        {{ getErrorString() }}
+        {{ errorString() }}
       </p>
     </div>
   } @else {
-    <app-section-plot
-      class="h-full"
-      [litData]="plotService.litData()"
-      [isSupportZoom]="isSupportZoom()"
-    ></app-section-plot>
+    <app-section-plot class="h-full" [litData]="plotService.litData()"></app-section-plot>
   }
 </div>

@@ -19,11 +19,17 @@ import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/n
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for managing study entities stored in the local IndexedDB database.
+ * Provides CRUD operations, duplication, import/export, and live-query capabilities.
+ */
 export class StudiesService {
+  /** Emits `true` when the underlying storage is ready. */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
+  /** Emits the current list of all studies whenever it changes. */
   public readonly studies = new BehaviorSubject<StudyEntity[]>([]);
-  public readonly currentStudy = signal<StudyEntity | null>(null);
+  /** Signal holding the data for the export dialog (UUID, title, open state). */
   public readonly exportDialogData = signal<{
     uuid: string;
     title: string;
@@ -39,6 +45,21 @@ export class StudiesService {
     });
   }
 
+  private get db() {
+    return this.storageService.db;
+  }
+
+  private async refreshStudies(): Promise<StudyEntity[]> {
+    const studies = (await this.getStudies()) ?? [];
+    this.studies.next(studies);
+    return studies;
+  }
+
+  private async getUserEmail(): Promise<string> {
+    const user = (await this.db?.users.toArray())?.[0];
+    return user?.email ?? '';
+  }
+
   /**
    * Create a new study
    * @param study The study to create
@@ -48,17 +69,16 @@ export class StudiesService {
     newUuid?: string
   ): Promise<string> {
     const uuid = newUuid || uuidv4();
-    const user = (await this.storageService.db?.users.toArray())?.[0];
-    await this.storageService.db?.studies.add({
+    const userEmail = await this.getUserEmail();
+    await this.db?.studies.add({
       ...study,
-      author_email: study.author_email || user.email,
+      author_email: study.author_email || userEmail,
       uuid,
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
       saved: false
     });
-    const studies = await this.getStudies();
-    this.studies.next(studies);
+    await this.refreshStudies();
     return uuid;
   }
 
@@ -67,7 +87,7 @@ export class StudiesService {
    * @returns The studies
    */
   getStudies() {
-    return this.storageService.db?.studies.toArray();
+    return this.db?.studies.toArray();
   }
 
   /**
@@ -76,7 +96,7 @@ export class StudiesService {
    * @returns The study
    */
   getStudy(uuid: string) {
-    return this.storageService.db?.studies.get(uuid);
+    return this.db?.studies.get(uuid);
   }
 
   /**
@@ -84,26 +104,25 @@ export class StudiesService {
    * @param uuid The uuid of the study to duplicate
    */
   async duplicateStudy(uuid: string): Promise<StudyEntity | null> {
-    const study = await this.storageService.db?.studies.get(uuid);
+    const study = await this.db?.studies.get(uuid);
     if (!study) {
       return null;
     }
-    const userEmail = (await this.storageService.db?.users.toArray())?.[0]?.email;
-    const allStudies = await this.storageService.db?.studies.toArray();
-    const allStudyTitles = allStudies?.map((study) => study.title);
+    const userEmail = await this.getUserEmail();
+    const allStudies = (await this.db?.studies.toArray()) ?? [];
+    const allStudyTitles = allStudies.map((studyItem) => studyItem.title);
     const duplicateTitle = findDuplicateTitle(allStudyTitles, study.title);
     const newStudy = {
       ...study,
       title: duplicateTitle,
-      author_email: userEmail,
+      author_email: userEmail || study.author_email,
       uuid: uuidv4(),
       created_at_offline: new Date().toISOString(),
       updated_at_offline: new Date().toISOString(),
       saved: false
     };
-    await this.storageService.db?.studies.add(newStudy);
-    const studies = await this.getStudies();
-    this.studies.next(studies);
+    await this.db?.studies.add(newStudy);
+    await this.refreshStudies();
     return newStudy;
   }
 
@@ -112,18 +131,16 @@ export class StudiesService {
    * @param uuid The uuid of the study to delete
    */
   async deleteStudy(uuid: string) {
-    await this.storageService.db?.studies.delete(uuid);
-    const studies = await this.getStudies();
-    this.studies.next(studies);
+    await this.db?.studies.delete(uuid);
+    await this.refreshStudies();
   }
 
   /**
    * Delete all studies
    */
   async deleteAllStudies() {
-    await this.storageService.db?.studies.clear();
-    const studies = await this.getStudies();
-    this.studies.next(studies);
+    await this.db?.studies.clear();
+    await this.refreshStudies();
   }
 
   /**
@@ -131,7 +148,7 @@ export class StudiesService {
    * @returns The latest studies
    */
   getLatestStudies() {
-    return this.storageService.db?.studies.orderBy('created_at_offline').reverse().limit(4).toArray();
+    return this.db?.studies.orderBy('created_at_offline').reverse().limit(4).toArray();
   }
 
   /**
@@ -139,8 +156,8 @@ export class StudiesService {
    * @param study The study to update
    */
   async updateStudy(study: { uuid: string; author_email: string } & Partial<StudyEntity>, overrideAuthorCheck = false) {
-    const user = await this.storageService.db?.users.toArray();
-    if (!overrideAuthorCheck && user?.[0]?.email !== study.author_email) {
+    const userEmail = await this.getUserEmail();
+    if (!overrideAuthorCheck && userEmail !== study.author_email) {
       const errorMessage = $localize`You cannot update a study that you did not create, please duplicate it instead.`;
       this.messageService.add({
         severity: 'error',
@@ -149,7 +166,7 @@ export class StudiesService {
       });
       throw new Error(errorMessage);
     }
-    await this.storageService.db?.studies.update(study.uuid, {
+    await this.db?.studies.update(study.uuid, {
       ...study,
       updated_at_offline: new Date().toISOString()
     });
@@ -162,42 +179,7 @@ export class StudiesService {
    * @returns The study
    */
   async createStudyFromProtoV4(protoV4Supports: ProtoV4Support[], parameters: ProtoV4Parameters): Promise<StudyEntity> {
-    const section = createEmptySection();
-    section.name = parameters.section_name;
-    section.type = 'phase';
-    section.cables_amount = parameters.cable_amount;
-    section.cable_name = parameters.conductor;
-    const supports: Support[] = protoV4Supports.map((support) => {
-      return {
-        ...createEmptySupport(),
-        uuid: uuidv4(),
-        number: support.nom,
-        spanLength: support.portée,
-        spanAngle: support.angle_ligne,
-        attachmentHeight: support.alt_acc,
-        cableType: parameters.conductor,
-        armLength: support.long_bras,
-        chainLength: support.long_ch,
-        chainWeight: support.pds_ch,
-        counterWeight: support.ctr_poids,
-        chainV: support.ch_en_V,
-        chainSurface: support.surf_ch,
-        supportFootAltitude: support.alt_acc - 30 > 0 ? support.alt_acc - 30 : 0
-      };
-    });
-    const initialCondition: InitialCondition = {
-      uuid: uuidv4(),
-      name: $localize`IC 1`,
-      base_parameters: parameters.parameter,
-      base_temperature: parameters.temperature_reference,
-      cable_pretension: parameters.cra,
-      min_temperature: parameters.temp_load,
-      max_wind_pressure: parameters.wind_load,
-      max_frost_width: parameters.frost_load
-    };
-    section.supports = supports;
-    section.initial_conditions = [initialCondition];
-    section.selected_initial_condition_uuid = initialCondition.uuid;
+    const section = this.buildSectionFromProtoV4(parameters, protoV4Supports);
     const uuid = await this.createStudy({
       ...createEmptyStudy(),
       author_email: '',
@@ -238,14 +220,51 @@ export class StudiesService {
    * @returns
    */
   getStudyAsObservable(uuid: string) {
-    return liveQuery(() => this.storageService.db?.studies.get(uuid));
+    return liveQuery(() => this.db?.studies.get(uuid));
   }
 
-  /**
-   * Set the current study
-   * @param study The study to set as the current study
-   */
-  setCurrentStudy(study: StudyEntity) {
-    this.currentStudy.set(study);
+  private buildSectionFromProtoV4(parameters: ProtoV4Parameters, protoV4Supports: ProtoV4Support[]) {
+    const section = createEmptySection();
+    section.name = parameters.section_name;
+    section.type = 'phase';
+    section.cables_amount = parameters.cable_amount;
+    section.cable_name = parameters.conductor;
+    section.supports = this.buildSupportsFromProtoV4(protoV4Supports, parameters.conductor);
+    const initialCondition = this.buildInitialCondition(parameters);
+    section.initial_conditions = [initialCondition];
+    section.selected_initial_condition_uuid = initialCondition.uuid;
+    return section;
+  }
+
+  private buildSupportsFromProtoV4(protoV4Supports: ProtoV4Support[], conductor: string): Support[] {
+    return protoV4Supports.map((support) => ({
+      ...createEmptySupport(),
+      uuid: uuidv4(),
+      number: support.nom,
+      spanLength: support.portée,
+      spanAngle: support.angle_ligne,
+      attachmentHeight: support.alt_acc,
+      cableType: conductor,
+      armLength: support.long_bras,
+      chainLength: support.long_ch,
+      chainWeight: support.pds_ch,
+      counterWeight: support.ctr_poids,
+      chainV: support.ch_en_V,
+      chainSurface: support.surf_ch,
+      supportFootAltitude: support.alt_acc - 30 > 0 ? support.alt_acc - 30 : 0
+    }));
+  }
+
+  private buildInitialCondition(parameters: ProtoV4Parameters): InitialCondition {
+    return {
+      uuid: uuidv4(),
+      name: $localize`IC 1`,
+      base_parameters: parameters.parameter,
+      base_temperature: parameters.temperature_reference,
+      cable_pretension: parameters.cra,
+      min_temperature: parameters.temp_load,
+      max_wind_pressure: parameters.wind_load,
+      max_frost_width: parameters.frost_load
+    };
   }
 }

@@ -15,6 +15,10 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { Router } from '@angular/router';
 import { FileUploadModule } from 'primeng/fileupload';
 
+/**
+ * Creates a new empty `Study` object with default values.
+ * @returns A blank study with empty fields
+ */
 export const createEmptyStudy = (): Study => {
   return {
     title: '',
@@ -29,6 +33,12 @@ export const createEmptyStudy = (): Study => {
   };
 };
 
+/**
+ * Modal dialog for creating a new study or modifying an existing one.
+ *
+ * In 'new' mode, creates a study and navigates to it.
+ * In 'modify' mode, updates the title and description of an existing study.
+ */
 @Component({
   selector: 'app-new-study-modal',
   imports: [
@@ -48,9 +58,13 @@ export const createEmptyStudy = (): Study => {
   styleUrl: './new-study-modal.component.scss'
 })
 export class NewStudyModalComponent {
+  /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
+  /** Emits when the modal open state changes. */
   isOpenChange = output<boolean>();
+  /** Dialog mode: 'new' to create, 'modify' to edit an existing study. */
   mode = input<'new' | 'modify'>('new');
+  /** UUID of the study being modified (used in 'modify' mode). */
   studyUuid = input<string>('');
   titleInput = input<string>('');
   descriptionInput = input<string>('');

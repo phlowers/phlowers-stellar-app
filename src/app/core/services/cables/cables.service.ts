@@ -13,10 +13,30 @@ import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
 
+/**
+ * Service for managing electrical cable catalog data.
+ *
+ * @remarks
+ * The CablesService handles loading, storing, and querying cable catalog
+ * data from CSV files into the IndexedDB database. Cables contain
+ * technical specifications for conductors used in transmission lines.
+ *
+ * @example
+ * ```typescript
+ * // Get a specific cable by name
+ * const cable = await this.cablesService.getCable('ASTER_570');
+ * ```
+ *
+ * @category Services
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class CablesService {
+  /**
+   * BehaviorSubject indicating whether the service is ready to use.
+   * Becomes true when the storage service is initialized.
+   */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   constructor(
@@ -28,14 +48,39 @@ export class CablesService {
     });
   }
 
+  /**
+   * Retrieve all cables from the catalog.
+   *
+   * @returns Promise resolving to an array of all cable entities
+   */
   async getCables() {
     return this.storageService.db?.catCables?.toArray();
   }
 
+  /**
+   * Retrieve a specific cable by its name.
+   *
+   * @param name - The unique name identifier of the cable
+   * @returns Promise resolving to the cable entity if found, undefined otherwise
+   */
   async getCable(name: string): Promise<CatalogCableEntity | undefined> {
     return this.storageService.db?.catCables?.where('name').equals(name).first();
   }
 
+  /**
+   * Import cable catalog data from a CSV file.
+   *
+   * @remarks
+   * This method fetches the cables.csv file from the server, parses it,
+   * transforms the data into the appropriate entity format, and stores
+   * the results in the IndexedDB database.
+   *
+   * The CSV should contain columns for all cable properties including
+   * mechanical and electrical characteristics like section, diameter,
+   * young_modulus, linear_mass, stress-strain coefficients, etc.
+   *
+   * @returns Promise that resolves when import is complete
+   */
   async importFromFile() {
     const cables = this.http
       .get(`${window.location.origin}/data/cables.csv`, {

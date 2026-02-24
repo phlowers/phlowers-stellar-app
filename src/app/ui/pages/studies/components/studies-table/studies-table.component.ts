@@ -20,6 +20,11 @@ import { RouterLink } from '@angular/router';
 import { StudiesService } from '@services/studies/studies.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
+/**
+ * Sortable, paginated table displaying a list of studies.
+ *
+ * Supports study export, deletion, and duplication through output events.
+ */
 @Component({
   standalone: true,
   selector: 'app-studies-table',
@@ -39,12 +44,17 @@ import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/sh
   providers: []
 })
 export class StudiesTableComponent {
+  /** Default number of rows displayed per page. */
   defaultRowsPerPage = DEFAULT_TABLE_ROWS_PER_PAGE;
+  /** Available row-per-page options for the paginator. */
   rowsPerPageOptions = TABLE_ROWS_PER_PAGE_OPTIONS;
+  /** List of studies to display. */
   studies = input.required<Study[]>();
   sortField = signal<string>('');
   sortOrder = signal<number>(1);
+  /** Emits the UUID of a study to delete. */
   deleteStudy = output<string>();
+  /** Emits the UUID of a study to duplicate. */
   duplicateStudy = output<string>();
   currentPageReportTemplate = $localize`Study ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
 

@@ -7,6 +7,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
+/** Service that tracks the current page title based on Angular router events and updates the browser tab title. */
 export class PageTitleService {
   private readonly pageTitleSubject = new BehaviorSubject<string>('');
   public pageTitle$: Observable<string> = this.pageTitleSubject.asObservable();
@@ -39,6 +40,9 @@ export class PageTitleService {
       });
   }
 
+  /**
+   * Returns the current page title synchronously.
+   */
   getCurrentTitle(): string {
     return this.pageTitleSubject.value;
   }

@@ -19,6 +19,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss'
 })
+/** Top navigation bar displaying the current page title, user info, and Python worker status. */
 export class TopbarComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
   public currentPageTitle = signal<string>('');

@@ -1,4 +1,4 @@
-import { Component, effect, input, OnDestroy, output, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, input, OnDestroy, output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
@@ -20,7 +20,9 @@ import { Study } from '@core/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { Subscription } from 'rxjs';
 import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+/** Form validation rules for initial condition fields. */
 const validators = {
   name: ['', [Validators.required, Validators.maxLength(40)]],
   base_parameters: [null, [Validators.required, Validators.min(20), Validators.max(5000)]],
@@ -31,6 +33,12 @@ const validators = {
   max_frost_width: [0, [Validators.min(0), Validators.max(20)]]
 };
 
+/**
+ * Modal dialog for creating, editing, or viewing an initial condition of a section.
+ *
+ * Validates cable-specific constraints and ensures name uniqueness
+ * across the section's initial conditions.
+ */
 @Component({
   selector: 'app-initial-condition-modal',
   templateUrl: './initialConditionModal.component.html',
@@ -50,11 +58,16 @@ const validators = {
 })
 export class InitialConditionModalComponent implements OnDestroy {
   private readonly subscriptions = new Subscription();
-
+  private readonly destroyRef = inject(DestroyRef);
+  /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
+  /** Emits when the modal open state changes. */
   isOpenChange = output<boolean>();
+  /** The section this initial condition belongs to. */
   section = input.required<Section>();
+  /** The parent study. */
   study = input.required<Study | null>();
+  /** Current modal mode: view, edit, or create. */
   mode = input.required<'view' | 'edit' | 'create'>();
   changeMode = output<'view' | 'edit' | 'create'>();
   addInitialCondition = output<InitialConditionFunctionsInput>();
@@ -98,9 +111,12 @@ export class InitialConditionModalComponent implements OnDestroy {
     this.form = this.fb.group(validators);
 
     this.subscriptions.add(
-      this.form.get('name')?.valueChanges.subscribe((name) => {
-        this.onNameChange(name);
-      })
+      this.form
+        .get('name')
+        ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((name) => {
+          this.onNameChange(name);
+        })
     );
 
     effect(() => {

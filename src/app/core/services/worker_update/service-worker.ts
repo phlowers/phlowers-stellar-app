@@ -1,5 +1,9 @@
 const CACHE_NAME = 'app-assets';
 
+/**
+ * Fetches the latest asset manifest (`assets_list.json`) from the server.
+ * @returns A `Response` promise for the manifest file.
+ */
 function fetchLatestManifest() {
   return fetch('/assets_list.json');
 }
@@ -10,6 +14,11 @@ function log(message: string, ...args: any[]) {
   console.log(serviceWorkerLogPrefix + message, ...args);
 }
 
+/**
+ * Checks whether the application has been installed by looking
+ * for an `app_version` entry in the cache.
+ * @returns `true` if the app is installed.
+ */
 export async function checkIfAppInstalled() {
   const cache = await caches.open(CACHE_NAME);
   const appVersion = await cache.match('app_version');
@@ -19,6 +28,12 @@ export async function checkIfAppInstalled() {
   return false;
 }
 
+/**
+ * Performs a full application installation by fetching the asset
+ * manifest, caching all listed files, and storing the build version.
+ * Notifies all controlled clients upon completion.
+ * @returns The installed application version.
+ */
 export async function installApp() {
   log('beginning app installation');
   const latestManifest = await fetchLatestManifest();
@@ -50,6 +65,12 @@ export async function installApp() {
   return buildVersion;
 }
 
+/**
+ * Updates the cached application assets to the latest manifest.
+ * Skips re-downloading already-cached wheel files and removes
+ * stale entries no longer present in the manifest.
+ * @returns The updated application version.
+ */
 export async function updateApp() {
   log('update requested');
   const manifest = await fetchLatestManifest().then((manifest) => manifest.json());
@@ -98,6 +119,16 @@ const noCacheHeaders = () => {
   };
 };
 
+/**
+ * Handle fetch events from the Service Worker.
+ *
+ * @remarks
+ * Serves cached responses when available. Routes home page requests to
+ * the cached index.html, proxies backend requests directly, and falls
+ * back to network for uncached assets.
+ *
+ * @param event - The FetchEvent from the Service Worker
+ */
 export async function handleFetch(event: FetchEvent) {
   const url = event.request.url;
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
@@ -138,6 +169,16 @@ export async function handleFetch(event: FetchEvent) {
   log('installing service worker');
 });
 
+/**
+ * Handle messages sent to the Service Worker.
+ *
+ * @remarks
+ * Supports 'update' and 'install' message types. Delegates to
+ * `updateApp` or `installApp` and posts the result
+ * back to the message source.
+ *
+ * @param event - The ExtendableMessageEvent containing the command
+ */
 export async function handleMessage(event: ExtendableMessageEvent) {
   log('message in service worker', event);
   const type = event.data.type;

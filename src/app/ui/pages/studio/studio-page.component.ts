@@ -22,10 +22,12 @@ import { NewChargeModalComponent } from './new-charge-modal/new-charge-modal.com
 import { ToolbarDialogComponent } from './toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from './services/plot.service';
 import { SectionService } from '@services/sections/section.service';
+import { ObstaclesFormComponent } from './obstacles/obstaclesForm/obstaclesForm.component';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
+/** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
   selector: 'app-studio-page',
   imports: [
@@ -45,7 +47,8 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
     ClimateComponent,
     SpanComponent,
     NewChargeModalComponent,
-    ToolbarDialogComponent
+    ToolbarDialogComponent,
+    ObstaclesFormComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
@@ -53,8 +56,7 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 export class StudioPageComponent implements OnInit, OnDestroy {
   sidebarWidth = signal(300);
   sidebarOpen = signal(false);
-  supports = signal<string>('all');
-  supportsOptions = signal<
+  spanAmountChoiceOptions = signal<
     {
       label: string;
       value: string;
@@ -65,14 +67,12 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     { label: $localize`All`, value: 'all' }
   ]);
   subscription: Subscription | null = null;
-  plotStudioHeight = signal<string>('21.875rem');
   isNewChargeModalOpen = signal(false);
-  private resizeObserver?: ResizeObserver;
 
   sliderOptions = computed<Options>(() => {
     return {
       floor: 0,
-      ceil: (this.plotService.section()?.supports?.length ?? 100) - 1,
+      ceil: this.plotService.section()?.supports?.length ? this.plotService.section()!.supports.length - 1 : undefined,
       step: 1,
       showTicks: true,
       showTicksValues: true,
@@ -126,11 +126,9 @@ export class StudioPageComponent implements OnInit, OnDestroy {
         this.subscription = this.studiesService.getStudyAsObservable(studyUuid).subscribe((study) => {
           if (study) {
             this.plotService.study.set(study);
-            this.studiesService.setCurrentStudy(study);
             const section = study.sections.find((s) => s.uuid === sectionUuid);
             if (section) {
               this.plotService.section.set(section);
-              this.sectionService.setCurrentSection(section);
               if (this.previousSectionUuid() !== section.uuid) {
                 this.plotService.plotOptionsChange({
                   endSupport: section.supports.length - 1,
@@ -151,20 +149,15 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.plotService.isStudioActive.set(false);
-    this.plotService.section.set(null);
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
+    this.plotService.resetAll();
+    this.subscription?.unsubscribe();
   }
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {
     this.plotService.plotOptionsChange({ [key]: value });
     const options = this.plotService.plotOptions();
     const diff = Math.abs(options.endSupport - options.startSupport);
-    this.supports.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
+    this.plotService.spanAmountChoice.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
 
   updateSliderOptions({ value, highValue }: { value?: number | undefined; highValue?: number | undefined }) {
@@ -183,8 +176,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.isNewChargeModalOpen.set(true);
   }
 
-  onSelectPlotOptions(value: string) {
-    this.supports.set(value);
+  onSelectSpanAmount(value: string) {
+    this.plotService.spanAmountChoice.set(value as 'single' | 'double' | 'all');
     const startSupport = this.plotService.plotOptions().startSupport;
     const maxSupport = (this.plotService.section()?.supports.length ?? 0) - 1;
     const offset = value === 'single' ? 1 : value === 'double' ? 2 : null;
@@ -201,8 +194,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onSupportButtonClick(direction: 'left' | 'right') {
-    const supportButton = this.supports();
-    if (supportButton === 'all') return;
+    const spanAmountChoice = this.plotService.spanAmountChoice();
+    if (spanAmountChoice === 'all') return;
     const increment = direction === 'left' ? -1 : 1;
     const options = this.plotService.plotOptions();
     this.plotService.plotOptionsChange({

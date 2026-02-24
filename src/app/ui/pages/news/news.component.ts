@@ -4,6 +4,7 @@ import { OnlineService } from '@services/online/online.service';
 import { MarkdownModule } from 'ngx-markdown';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
+/** Displays news content fetched as markdown from the server. */
 @Component({
   selector: 'app-news',
   imports: [MarkdownModule, ProgressSpinnerModule],

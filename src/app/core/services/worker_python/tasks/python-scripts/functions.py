@@ -15,11 +15,13 @@ import sys
 RESOLUTION = 100
 # init a logger to print to stdout
 logger = logging.getLogger("mechaphlowers")
-logger.setLevel(logging.WARNING)  # Set logger level to INFO so info messages are shown
+# Set logger level to INFO so info messages are shown
+logger.setLevel(logging.WARNING)
 
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -30,9 +32,10 @@ def init_config():
     mph.options.graphics.resolution = RESOLUTION
     mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
 
+
 def convert_jsnull(obj):
     """Recursively convert JavaScript null (jsnull) to Python None.
-    
+
     Pyodide's to_py() converts JS null to a special 'jsnull' object instead of None.
     This function traverses nested structures and replaces all jsnull with None.
     """
@@ -43,7 +46,7 @@ def convert_jsnull(obj):
         return {k: convert_jsnull(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [convert_jsnull(item) for item in obj]
-    
+
     return obj
 
 
@@ -184,6 +187,7 @@ base_plt_line = None
 def get_section_middle_span(start_support: int, end_support: int):
     return (start_support + end_support) // 2
 
+
 def get_coordinates(
     plt_line: PlotEngine,
     project: bool = False,
@@ -198,7 +202,8 @@ def get_coordinates(
     vtl_under_console = list(engine.balance_model.vhl_under_console().vhl)
     # vtl = vtl_under_chain.vtl)
 
-    loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span)
+    loads_coords = plt_line.get_loads_coords(
+        project=project, frame_index=middle_span)
     line_angle_rad = engine.section_array.data.line_angle.to_numpy()
     result = {
         "spans": span.coords,
@@ -212,7 +217,8 @@ def get_coordinates(
         "ground_altitude": engine.section_array.data.ground_altitude.tolist(),
         "displacement": engine.get_displacement().tolist(),
         "load_angle": engine.cable_loads.load_angle.tolist(),
-        "loads_coords" : loads_coords
+        "span_length": engine.section_array.data.span_length.tolist(),
+        "loads_coords": loads_coords,
     }
     result_spans = engine.get_data_spans()
     result.update(result_spans)
@@ -222,7 +228,6 @@ def get_coordinates(
 def init_section(js_inputs: dict):
     global engine, plt_line, base_engine, base_plt_line
     python_inputs = js_to_python(js_inputs)
-    print("python_inputs: ", python_inputs)
     input_section = python_inputs["section"]
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
@@ -235,7 +240,8 @@ def init_section(js_inputs: dict):
             if condition["uuid"] == input_section["selected_initial_condition_uuid"]
         )
     )
-    input_charges = input_section["charges"] if "charges" in input_section else []
+    input_charges = input_section["charges"] if "charges" in input_section else [
+    ]
     input_charge = (
         None
         if not input_charges
@@ -246,7 +252,8 @@ def init_section(js_inputs: dict):
         )
     )
     initial_condition = (
-        InitialCondition(**input_initial_condition) if input_initial_condition else None
+        InitialCondition(
+            **input_initial_condition) if input_initial_condition else None
     )
     cable = Cable(**input_cable)
 
@@ -424,5 +431,6 @@ def calculate_papoto(js_inputs: dict):
         "parameter_1_3": papoto.parameter_1_3[0],
         "check_validity": bool(papoto.check_validity()[0]),
     }
+
 
 init_config()

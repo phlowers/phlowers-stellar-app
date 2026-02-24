@@ -1,4 +1,4 @@
-import { computed, effect, Injectable, signal, untracked } from '@angular/core';
+import { computed, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
 import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
 import { DataError, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
 import { Section, Study } from '@core/domain';
@@ -9,18 +9,29 @@ import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
-import { ChargeData } from '@src/app/core/domain/models/charge.model';
+import { ChargeData } from '@core/domain/models/charge.model';
+import { SideTabsService } from '../side-tabs/side-tabs.service';
+import { ObstaclesService } from '../obstacles/obstacles.service';
+import { ObstacleFormService } from '../obstacles/obstaclesForm/obstaclesForm.service';
 
+/** DOM element ID used for the Plotly chart container. */
 export const PLOT_ID = 'plotly-output';
 
+/** Option for a span dropdown selector. */
 export interface SpanOption {
+  /** Display label for the span option. */
   label: string;
-  value: {
-    index: number;
-    uuid: string;
-  };
+  /** UUID value of the span, or null if not applicable. */
+  value: string | null;
 }
 
+/**
+ * Checks whether a projection refresh is needed based on changed plot options.
+ * @param oldOptions - Previous plot options
+ * @param newOptions - New plot options
+ * @param loading - Whether a calculation is currently in progress
+ * @returns `true` if the projection should be refreshed
+ */
 export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions: PlotOptions, loading: boolean) => {
   if (loading) {
     return false;
@@ -45,6 +56,7 @@ export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions
   return false;
 };
 
+/** Default plot options used when initializing or resetting the studio view. */
 export const defaultPlotOptions: PlotOptions = {
   view: '3d',
   side: 'profile',
@@ -58,14 +70,18 @@ const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   baseState: false
 };
 
+/** Options controlling which overlays are visible on the plot. */
 export interface SelectedDisplayOptions {
+  /** Whether load results are displayed. */
   loads: boolean;
+  /** Whether base state results are displayed. */
   baseState: boolean;
 }
 
 @Injectable({
   providedIn: 'root'
 })
+/** Service managing the Plotly-based section visualization, including data fetching, plot options, and camera state. */
 export class PlotService {
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
@@ -79,18 +95,23 @@ export class PlotService {
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
+  spanAmountChoice = signal<'single' | 'double' | 'all'>('all');
+
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions
   });
   selectedDisplayOptions = signal<SelectedDisplayOptions>({
     ...defaultSelectedDisplayOptions
   });
-  isSidebarOpen = signal(false);
+
+  private readonly injector = inject(Injector);
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
     private readonly cableService: CablesService,
-    private readonly sectionService: SectionService
+    private readonly sectionService: SectionService,
+    private readonly sideTabsService: SideTabsService,
+    private readonly obstaclesService: ObstaclesService
   ) {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
@@ -115,6 +136,10 @@ export class PlotService {
     this.isStudioActive.set(false);
     this.section.set(null);
     this.study.set(null);
+    this.spanAmountChoice.set('all');
+    this.injector.get(ObstacleFormService).clearPositions();
+    this.obstaclesService.resetCurrentPointIndex();
+    this.sideTabsService.sideTabs.set(null);
   };
 
   modifySection = (sectionData: Partial<Section>) => {
@@ -150,7 +175,7 @@ export class PlotService {
     this.litData.set(null);
     this.baseLitData.set(null);
     this.section.set(section);
-    if (!this.workerPythonService.ready || !section?.cable_name) {
+    if (!this.workerPythonService.ready || !section || !section.cable_name) {
       console.error('refreshSection error');
       this.error.set(DataError.NO_CABLE_FOUND);
       this.loading.set(false);
@@ -164,6 +189,7 @@ export class PlotService {
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
     }
+
     const { result, error } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
     this.litData.set(result?.current ?? null);
     this.baseLitData.set(result?.base ?? null);
@@ -176,7 +202,7 @@ export class PlotService {
     if (!plot) {
       return null;
     }
-    return (plot as any)._fullLayout?.scene?.camera;
+    return (plot as HTMLElement & { _fullLayout?: { scene?: { camera?: Camera } } })._fullLayout?.scene?.camera ?? null;
   };
 
   refreshCamera = (): Camera | null => {
@@ -216,40 +242,40 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  setSidebarOpen = () => {
-    this.refreshCamera();
-    this.isSidebarOpen.set(!this.isSidebarOpen());
-  };
-
   getSpanOptions = computed<SpanOption[]>(() => {
     const supports = this.section()?.supports ?? [];
-    const supportsAmount = supports.length ?? 0;
+    const supportRealNumberLength = supports.length + 1;
+    const supportsAmount = supportRealNumberLength ?? 0;
     const spanAmount = Math.max(supportsAmount - 1, 0);
-    // create an array the length of spanAmount
     const spans = Array.from({ length: spanAmount }, (_, index) => ({
       label: `${index + 1} - ${index + 2}`,
-      value: {
-        index: index,
-        uuid: supports[index]?.uuid ?? ''
-      }
+      value: supports[index]?.uuid ?? null
     }));
+    spans.pop();
     return spans;
   });
 
-  getSupportOptions = (selectedSpan: SpanOption['value'] | null): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
-    if (selectedSpan === null) {
+  getSupportIndex = (supportUuid: string): number => {
+    return this.section()?.supports?.findIndex((s) => s.uuid === supportUuid) ?? -1;
+  };
+
+  getSupportOptions = (supportUuid: string | null): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
+    if (supportUuid === null) {
       return [];
     }
-    const spanIndex = selectedSpan.index;
-    return [
-      {
-        label: spanIndex + 1,
-        value: 'LEFT'
-      },
-      {
-        label: spanIndex + 2,
-        value: 'RIGHT'
-      }
-    ];
+    const spanIndex = this.section()?.supports?.findIndex((s) => s.uuid === supportUuid);
+    if (spanIndex !== undefined && spanIndex >= 0) {
+      return [
+        {
+          label: spanIndex + 1,
+          value: 'LEFT'
+        },
+        {
+          label: spanIndex + 2,
+          value: 'RIGHT'
+        }
+      ];
+    }
+    return [];
   };
 }

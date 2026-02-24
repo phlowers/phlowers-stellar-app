@@ -14,7 +14,6 @@ import {
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { InitialConditionModalComponent } from '@ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@core/domain';
-import { SectionService } from '@services/sections/section.service';
 import { StudiesService } from '@services/studies/studies.service';
 import {
   InitialConditionFunctionsInput,
@@ -25,7 +24,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
+import { PlotService } from '@ui/pages/studio/services/plot.service';
 
+/** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({
   selector: 'app-parameter-at-15c-without-wind',
   imports: [
@@ -51,6 +52,7 @@ import { isNumber } from 'lodash';
   ]
 })
 export class ParameterCalculation15WithoutWindComponent {
+  /** Field measure data model bound two-way. */
   measureData = model.required<FieldMeasure>();
   initialConditionModalOpen = signal<boolean>(false);
 
@@ -74,7 +76,7 @@ export class ParameterCalculation15WithoutWindComponent {
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
-    public readonly sectionService: SectionService,
+    public readonly plotService: PlotService,
     public readonly studiesService: StudiesService,
     private readonly initialConditionService: InitialConditionService,
     private readonly messageService: MessageService
@@ -192,14 +194,14 @@ export class ParameterCalculation15WithoutWindComponent {
 
   async addInitialCondition({ section, initialCondition, generateState = false }: InitialConditionFunctionsInput) {
     const newUuid = uuidv4();
-    if (!this.studiesService.currentStudy()) {
+    if (!this.plotService.study()) {
       return;
     }
-    await this.initialConditionService.addInitialCondition(this.studiesService.currentStudy()!, section, {
+    await this.initialConditionService.addInitialCondition(this.plotService.study()!, section, {
       ...initialCondition,
       uuid: newUuid
     });
-    const studyUuid = this.studiesService.currentStudy()?.uuid;
+    const studyUuid = this.plotService.study()?.uuid;
     if (!studyUuid) {
       return;
     }
