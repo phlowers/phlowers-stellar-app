@@ -5,19 +5,21 @@
     </div>
   } @else if (plotService.error()) {
     <div class="absolute inset-0 flex justify-center items-center">
-      <p class="text-red-500 text-2xl font-bold">
+      <p class="free-positioning-error">
         {{ getErrorString() }}
       </p>
     </div>
   } @else {
     <div class="flex flex-row gap-2 h-full">
       <div class="grow flex flex-col">
-        <div>
-          <div>
-            x: {{ profileMousePosition()?.x || 'N/A' }}, z:
-            {{ profileMousePosition()?.z || 'N/A' }}
-          </div>
-        </div>
+        <dl>
+          <dt>x:</dt>
+          <dd>{{ profileMousePosition()?.x || 'N/A' }}</dd>
+
+          <dt>z:</dt>
+          <dd>{{ profileMousePosition()?.z || 'N/A' }}</dd>
+        </dl>
+
         <div
           id="plotly-output-single-span-profile-2"
           class="border border-gray-300 rounded-md h-full"
@@ -26,9 +28,10 @@
       </div>
 
       <div class="w-1/4 flex flex-col">
-        <div>
-          <div>y: {{ faceMousePosition()?.x || 'N/A' }}</div>
-        </div>
+        <dl>
+          <dt>y:</dt>
+          <dd>{{ faceMousePosition()?.x || 'N/A' }}</dd>
+        </dl>
         <div
           id="plotly-output-single-span-face-2"
           class="border border-gray-300 rounded-md box-sizing h-full"
