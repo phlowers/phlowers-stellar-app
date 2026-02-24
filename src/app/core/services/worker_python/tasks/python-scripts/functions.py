@@ -323,7 +323,7 @@ def init_section(js_inputs: dict):
                 [span["loadPosition"] for span in loads_list])
             load_weight_daN = np.array(
                 [span["loadWeight"] if span['type'] == 'punctual' else 0.01 for span in loads_list])
-            load_mass_kg = units(load_weight_daN, 'daN').to('kg').m
+            load_mass_kg = units(load_weight_daN, 'daN').to('kg').magnitude
             engine.add_loads(load_position_meters, load_mass_kg)
         
     plt_line = PlotEngine.builder_from_balance_engine(engine)
