@@ -13,8 +13,11 @@ import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '../../.
     '[class.symbols-loading]': '!symbolsReady()'
   }
 })
+/** Icon component that renders Material Symbols or custom SVG icons by name. */
 export class IconComponent implements OnInit {
+  /** Name of the icon to display (Material Symbol or custom SVG). */
   icon = input.required<PossibleIconNames | undefined>();
+  /** Whether to render the icon in its filled variant. */
   fill = input<boolean>(false);
 
   symbolsReady = signal(false);

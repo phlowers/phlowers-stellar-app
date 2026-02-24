@@ -8,6 +8,7 @@ import { ToolbarDialogService } from './toolbar-dialog.service';
   imports: [DialogModule, NgComponentOutlet, NgTemplateOutlet],
   templateUrl: './toolbar-dialog.component.html'
 })
+/** Wrapper dialog component that dynamically renders the active toolbar tool. */
 export class ToolbarDialogComponent {
   readonly toolbarDialogService = inject(ToolbarDialogService);
   readonly injector = inject(Injector);

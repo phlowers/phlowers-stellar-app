@@ -9,6 +9,7 @@ import { isNumber } from 'lodash';
 
 const REFRESH_STUDIO_DELAY = 400;
 
+/** Component hosting a set of collapsible side tabs with panel content. */
 @Component({
   selector: 'app-side-tabs',
   imports: [NgTemplateOutlet, ButtonComponent, IconComponent],

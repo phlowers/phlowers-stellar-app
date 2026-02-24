@@ -2,15 +2,29 @@ import { Obstacle, Position3D } from '@core/domain/models/obstacle.model';
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
 
+/**
+ * Data payload attached to a Plotly obstacle annotation for click event handling.
+ * @category Studio
+ */
 export interface ObstacleAnnotationData {
+  /** Discriminator indicating this annotation represents an obstacle. */
   type: 'obstacle';
+  /** UUID of the associated obstacle. */
   obstacleUuid: string;
+  /** Index of the obstacle position point this annotation represents. */
   obstaclePositionIndex: number;
 }
 
+/**
+ * Payload returned when a user clicks on an obstacle annotation in the plot.
+ * @category Studio
+ */
 export interface ObstacleClickPayload {
+  /** The full obstacle model that was clicked. */
   obstacle: Obstacle;
+  /** Zero-based index of the support the obstacle is attached to. */
   supportIndex: number;
+  /** Index of the specific obstacle position point that was clicked. */
   obstaclePositionIndex: number;
 }
 
@@ -46,6 +60,15 @@ const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
   captureevents: true
 };
 
+/**
+ * Merges a form-edited obstacle into the existing obstacles array.
+ * If the obstacle already exists (by UUID), it is replaced; otherwise it is appended.
+ * Returns the original array unchanged if `formObstacle` is `null` or has no UUID.
+ * @category Studio
+ * @param existingObstacles - The current list of obstacles.
+ * @param formObstacle - The obstacle from the form to merge, or `null`.
+ * @returns A new array with the form obstacle merged in.
+ */
 export const appendExistingObstaclesWithFormObstacle = (
   existingObstacles: Obstacle[],
   formObstacle: Obstacle | null
@@ -116,6 +139,14 @@ const createPositionAnnotation = (
     }
   }) as Partial<Plotly.Annotations>;
 
+/**
+ * Creates Plotly annotation objects for all valid obstacle positions in the current plot view.
+ * Each annotation is positioned relative to its parent support and color-highlighted
+ * when it matches the currently selected obstacle point.
+ * @category Studio
+ * @param plotParams - The plot parameters including obstacles, data objects, view, and selection state.
+ * @returns An array of partial Plotly annotation objects representing obstacles.
+ */
 export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
   const { obstacles, data: dataObjects, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
   const is2d = view === '2d';

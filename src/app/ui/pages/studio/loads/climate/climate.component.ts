@@ -21,6 +21,7 @@ import { LoadFormsService } from '../loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@core/domain/models/charge.model';
 import { MessageModule } from 'primeng/message';
 
+/** Validator that rejects non-integer numeric values. */
 function integerValidator(control: AbstractControl): ValidationErrors | null {
   if (control.value === null || control.value === undefined) {
     return null;
@@ -32,8 +33,10 @@ function integerValidator(control: AbstractControl): ValidationErrors | null {
   return null;
 }
 
+/** Default base temperature in degrees Celsius used for climatic charge calculations. */
 export const DEFAULT_BASE_TEMPERATURE = 15;
 
+/** Default climatic charge values used when creating a new charge case. */
 export const defaultClimaticCharge: ClimateCharge = {
   windPressure: 0,
   cableTemperature: DEFAULT_BASE_TEMPERATURE,
@@ -66,6 +69,7 @@ export const getBaseClimate = (
   };
 };
 
+/** Min/max constraints for climate form fields. */
 export const climateConstraints = {
   windPressure: { min: -3000, max: 3000 },
   cableTemperature: { min: -50, max: 250 },
@@ -87,6 +91,7 @@ export const climateConstraints = {
   templateUrl: './climate.component.html',
   styleUrl: './climate.component.scss'
 })
+/** Component for editing climatic charge parameters (wind pressure, temperature, ice) for a charge case. */
 export class ClimateComponent {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
@@ -134,6 +139,7 @@ export class ClimateComponent {
       [Validators.min(this.constraints.iceThickness.min), Validators.max(this.constraints.iceThickness.max)]
     ]
   });
+  /** UUID of the charge case this climate form belongs to. */
   chargeUuid = input.required<string>();
 
   symmetryOptions = [

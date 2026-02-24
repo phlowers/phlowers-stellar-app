@@ -28,6 +28,12 @@ import {
   getSupportFieldValues
 } from './helpers';
 
+/**
+ * Editable table of supports within a section.
+ *
+ * Displays support properties in a paginated table with inline editing,
+ * column copy, chain and attachment set selection, and support CRUD actions.
+ */
 @Component({
   selector: 'app-supports-table',
   imports: [
@@ -50,11 +56,17 @@ import {
   styleUrls: ['./supportsTable.component.scss']
 })
 export class SupportsTableComponent implements OnInit {
+  /** List of supports to display in the table. */
   supports = input<Support[]>([]);
+  /** Current mode: create, edit, or view. */
   mode = input.required<CreateEditView>();
+  /** Emits when a support should be added at a given index and position. */
   addSupport = output<{ index: number; position: 'before' | 'after' }>();
+  /** Emits the UUID of a support to delete. */
   deleteSupport = output<string>();
+  /** Emits the UUID of a support to duplicate. */
   duplicateSupport = output<string>();
+  /** Emits a partial support update keyed by UUID. */
   supportChange = output<{ uuid: string; support: Partial<Support> }>();
   chainsOptions = signal<CatalogChain[]>([]);
   supplementaryChainsOptions = signal<CatalogChain[]>([]);

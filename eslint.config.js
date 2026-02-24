@@ -7,6 +7,9 @@ const angularTemplateEslintPlugin = require('@angular-eslint/eslint-plugin-templ
 
 module.exports = tseslint.config(
   {
+    ignores: ['coverage/**', 'dist/**', '**/.venv/**', '.angular/**', 'docs-sphinx/**']
+  },
+  {
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -14,7 +17,6 @@ module.exports = tseslint.config(
       }
     },
     files: ['**/*.ts'],
-    ignores: ['coverage/**', 'dist/**', '.venv/**'],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -44,7 +46,6 @@ module.exports = tseslint.config(
   },
   {
     files: ['**/*.html'],
-    ignores: ['coverage/**', 'dist/**', '.venv/**'],
     extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
     rules: {
       '@angular-eslint/template/i18n': [

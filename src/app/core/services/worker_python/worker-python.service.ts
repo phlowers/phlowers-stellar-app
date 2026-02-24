@@ -10,32 +10,82 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
 
+/**
+ * Service for managing the Python (Pyodide) web worker.
+ *
+ * @remarks
+ * This service initializes and communicates with a web worker running
+ * Pyodide (Python in WebAssembly). It handles task execution for
+ * mechanical calculations using the mechaphlowers library.
+ *
+ * @example
+ * ```typescript
+ * constructor(private workerService: WorkerPythonService) {
+ *   // Wait for worker to be ready
+ *   workerService.ready$.subscribe(ready => {
+ *     if (ready) {
+ *       // Run a calculation task
+ *       workerService.runTask(Task.getLit, { section, cable });
+ *     }
+ *   });
+ * }
+ * ```
+ *
+ * @category Services
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class WorkerPythonService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
+  /** Observable indicating if Pyodide failed to load */
   readonly pyodideLoadError$ = new BehaviorSubject<boolean>(false);
+  /** Reference to the web worker instance */
   public worker?: Worker;
+  /** Signal containing timing information for diagnostics */
   times = signal<{
+    /** Time to load Pyodide runtime (ms) */
     loadTime: number;
+    /** Time to import Python packages (ms) */
     importTime: number;
+    /** Time to run the last task (ms) */
     runTime: number;
   }>({
     loadTime: 0,
     importTime: 0,
     runTime: 0
   });
+  /** Map of pending task IDs to their resolve callbacks, used to correlate worker responses */
   handlerMap: Record<string, (result: any, error: TaskError | null) => void> = {};
 
+  /**
+   * Observable indicating whether the worker is ready.
+   * @returns Observable that emits true when Pyodide is loaded and ready
+   */
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
   }
 
+  /**
+   * Current ready state of the worker.
+   * @returns True if the worker is ready to execute tasks
+   */
   get ready() {
     return this._ready.value;
   }
 
+  /**
+   * Initialize the web worker and load Pyodide.
+   *
+   * @remarks
+   * This method creates the web worker and sets up message handlers.
+   * It should be called once during application initialization.
+   *
+   * @example
+   * ```typescript
+   * workerService.setup();
+   * ```
+   */
   setup() {
     this.worker = new Worker(new URL('./worker-python', import.meta.url));
     this.worker.onmessage = ({ data }) => {
@@ -54,6 +104,25 @@ export class WorkerPythonService {
     };
   }
 
+  /**
+   * Run a calculation task in the Python worker.
+   *
+   * @typeParam taskId - The task type from the Task enum
+   * @param task - The task to execute
+   * @param inputs - Input parameters for the task
+   * @returns Promise resolving to the task result and any error
+   *
+   * @example
+   * ```typescript
+   * const { result, error } = await workerService.runTask(
+   *   Task.getLit,
+   *   { section: mySection, cable: myCable }
+   * );
+   * if (!error) {
+   *   console.log('Calculation result:', result);
+   * }
+   * ```
+   */
   runTask<taskId extends Task>(
     task: taskId,
     inputs: TaskInputs[taskId]

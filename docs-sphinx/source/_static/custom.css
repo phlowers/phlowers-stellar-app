@@ -1,0 +1,73 @@
+/* Custom CSS for Stellar documentation - PyData Sphinx Theme */
+/* Indigo color scheme */
+
+/* ---- Light mode ---- */
+html[data-theme="light"],
+body:not([data-theme="dark"]) {
+    --pst-color-primary: #4f46e5;
+    --pst-color-primary-bg: #eef2ff;
+    --pst-color-primary-text: #3730a3;
+    --pst-color-link: #4f46e5;
+    --pst-color-link-hover: #3730a3;
+    --pst-color-accent: #6366f1;
+    --pst-color-navbar-link-hover: #4f46e5;
+    --pst-color-headerlink-hover: #4f46e5;
+}
+
+/* ---- Dark mode ---- */
+html[data-theme="dark"] {
+    --pst-color-primary: #818cf8;
+    --pst-color-primary-bg: #1e1b4b;
+    --pst-color-primary-text: #a5b4fc;
+    --pst-color-link: #818cf8;
+    --pst-color-link-hover: #a5b4fc;
+    --pst-color-accent: #6366f1;
+    --pst-color-navbar-link-hover: #818cf8;
+    --pst-color-headerlink-hover: #818cf8;
+}
+
+/* Landing page grid cards styling */
+.sd-card {
+    transition: box-shadow 0.2s ease-in-out;
+    border-top: 3px solid var(--pst-color-primary);
+}
+
+.sd-card:hover {
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+/* Sidebar active link */
+.bd-sidebar .nav-link.active,
+.bd-sidebar .nav-link:hover {
+    color: var(--pst-color-primary);
+}
+
+/* Header navbar — indigo background */
+.bd-header {
+    background-color: #4f46e5 !important;
+    border-bottom: 2px solid #3730a3;
+}
+
+.bd-header .navbar-nav .nav-link,
+.bd-header .navbar-item a,
+.bd-header .bd-header__inner a,
+.bd-header i {
+    color: #fff !important;
+}
+
+.bd-header .navbar-nav .nav-link:hover,
+.bd-header .navbar-nav .nav-link:focus {
+    color: #c7d2fe !important;
+}
+
+/* Title / logo text in header */
+.navbar-brand,
+.navbar-brand p,
+.bd-header .navbar-header-items a {
+    color: #fff !important;
+}
+
+html[data-theme="dark"] .bd-header {
+    background-color: #3730a3 !important;
+    border-bottom: 2px solid #1e1b4b;
+}

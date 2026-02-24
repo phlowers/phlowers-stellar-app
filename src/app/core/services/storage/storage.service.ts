@@ -12,10 +12,16 @@ import { AppDatabase } from '@core/infrastructure/database';
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service that manages the IndexedDB-backed local database (`AppDatabase`).
+ * Provides lifecycle methods for creating, resetting, and configuring persistent storage.
+ */
 export class StorageService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
+  /** The Dexie `AppDatabase` instance used for all local data access. */
   public db!: AppDatabase;
 
+  /** Observable that emits `true` once the database is created and ready. */
   get ready$(): Observable<boolean> {
     return this._ready.asObservable();
   }
@@ -38,6 +44,10 @@ export class StorageService {
     }
   }
 
+  /**
+   * Creates and initialises the `AppDatabase` instance.
+   * Emits `true` on the `ready$` observable upon success.
+   */
   async createDatabase(): Promise<void> {
     try {
       this.db = new AppDatabase();

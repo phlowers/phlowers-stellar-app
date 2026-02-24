@@ -17,6 +17,11 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { isNil } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
 
+/**
+ * Checks whether all mandatory fields in a section are filled.
+ * @param section - The section to validate
+ * @returns `true` if all required fields have values
+ */
 const areAllRequiredFieldsFilled = (section: Section) => {
   const nameCondition = !!section.name.trim();
   const typeCondition = !!section.type;
@@ -42,6 +47,12 @@ const areAllRequiredFieldsFilled = (section: Section) => {
   );
 };
 
+/**
+ * Modal dialog for creating, editing, or viewing a study section.
+ *
+ * Wraps the `ManualSectionComponent` and validates required fields
+ * and section name uniqueness before allowing submission.
+ */
 @Component({
   selector: 'app-new-section-modal',
   imports: [
@@ -64,14 +75,20 @@ const areAllRequiredFieldsFilled = (section: Section) => {
   styleUrl: './newSectionModal.component.scss'
 })
 export class NewSectionModalComponent {
+  /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
+  /** Emits when the modal open state changes. */
   isOpenChange = output<boolean>();
+  /** Emits the validated section on save. */
   setSection = output<Section>();
   source = 'manual';
+  /** The section being created or edited. */
   section = input.required<Section>();
+  /** The parent study. */
   study = input.required<Study | null>();
   sectionChange = output<Section>();
   outputSection = output<Section>();
+  /** Current dialog mode: create, edit, or view. */
   mode = input.required<'create' | 'edit' | 'view'>();
   setMode = output<'create' | 'edit' | 'view'>();
 

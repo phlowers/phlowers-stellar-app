@@ -28,8 +28,14 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 // debounce to make it more fluid when dragging the slider
+/** Debounce delay in ms for refreshing studio plot when dragging the slider. */
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
+/**
+ * Sorts catalog lines by voltage, placing 'NO_VOLTAGE' entries first.
+ * @param lines - Array of catalog lines to sort
+ * @returns Sorted array of catalog lines
+ */
 const sortLines = (lines: CatalogLine[]) => {
   return lines.sort((a, b) => {
     const aHasNoVoltage = a.voltage_adr === 'NO_VOLTAGE';
@@ -44,6 +50,7 @@ const sortLines = (lines: CatalogLine[]) => {
   });
 };
 
+/** Mapping from line table property keys to their corresponding `Section` property keys. */
 const lineTablePropertiesToSectionProperties: Record<LineTableProperties, keyof Section> = {
   voltage_idr: 'voltage_idr',
   link_idr: 'link_name',
@@ -53,14 +60,17 @@ const lineTablePropertiesToSectionProperties: Record<LineTableProperties, keyof 
   branch_adr: 'branch_name'
 };
 
+/** Ordered maintenance hierarchy for cascading filter: center -> regional team -> maintenance team. */
 const orderedMaintenanceTableProperties: ('maintenance_center_id' | 'regional_team_id' | 'maintenance_team_id')[] = [
   'maintenance_center_id',
   'regional_team_id',
   'maintenance_team_id'
 ];
 
+/** Property keys from the lines catalog table used for cascading filters. */
 type LineTableProperties = 'voltage_idr' | 'link_idr' | 'lit_idr' | 'lit_adr' | 'branch_idr' | 'branch_adr';
 
+/** Ordered line table properties for cascading filter logic. */
 const orderedLineTableProperties: LineTableProperties[] = [
   'voltage_idr',
   'link_idr',
@@ -70,6 +80,13 @@ const orderedLineTableProperties: LineTableProperties[] = [
   'branch_adr'
 ];
 
+/**
+ * Manual section editor component.
+ *
+ * Provides a tabbed form for editing section general information, supports,
+ * and a graphical studio view. Includes cascading filters for maintenance
+ * teams, lines, and cables catalogs.
+ */
 @Component({
   selector: 'app-manual-section',
   imports: [

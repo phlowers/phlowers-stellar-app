@@ -11,6 +11,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '../../services/plot.service';
 import { ClimateCharge, LoadType, SpanLoad, SymmetryType } from '@core/domain/models/charge.model';
 
+/** Row data representing climate parameters in the loads table. */
 interface ClimateRow {
   windPressure: number | null;
   cableTemperature: number | null;
@@ -21,6 +22,7 @@ interface ClimateRow {
   iceThicknessAfter: number | null;
 }
 
+/** Row data representing a span load in the loads table. */
 interface SpanLoadRow {
   spanLabel: string;
   referenceSupport: number;
@@ -43,6 +45,7 @@ interface SpanLoadRow {
   templateUrl: './loads-table.component.html',
   styleUrl: './loads-table.component.scss'
 })
+/** Dialog component for viewing and editing charge case details and associated loads. */
 export class LoadsTableComponent implements AfterViewInit {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
   @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;

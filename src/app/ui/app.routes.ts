@@ -15,6 +15,7 @@ import { NotFoundComponent } from './pages/404/404.component';
 import { ChangelogComponent } from './pages/changelog/changelog.component';
 import { StudioPageComponent } from './pages/studio/studio-page.component';
 
+/** Application route definitions mapping URL paths to page components. */
 export const appRoutes: Routes = [
   {
     path: '',

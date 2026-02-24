@@ -7,7 +7,10 @@ import { TagColor } from '@ui/shared/model/tags.model';
   templateUrl: './tag.component.html',
   styleUrl: './tag.component.scss'
 })
+/** Small label component used to display colored tags with text. */
 export class TagComponent {
+  /** Text displayed inside the tag. */
   text = input.required<string>();
+  /** Color variant of the tag. */
   type = input<TagColor>('neutral');
 }

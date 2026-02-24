@@ -11,20 +11,36 @@ import { ButtonComponent } from '../button/button.component';
   templateUrl: './select-with-buttons.component.html',
   styleUrl: './select-with-buttons.component.scss'
 })
+/**
+ * Generic select dropdown with action buttons (view, edit, duplicate, delete) for each option.
+ * @typeParam T - The option object type.
+ */
 export class SelectWithButtonsComponent<T extends Record<string, any>> implements OnInit {
   @ViewChild('selectComponent') selectComponent!: Select;
+  /** List of selectable options. */
   options = input.required<T[]>();
+  /** Currently selected option value. */
   selectedOption = input.required<string | undefined | null>();
+  /** Property name used as the display label for each option. */
   optionLabel = input.required<string>();
+  /** Property name used as the unique value for each option. */
   optionValue = input.required<string>();
+  /** Accessible label for the select element. */
   ariaLabel = input.required<string>();
+  /** Placeholder text when no option is selected. */
   placeholder = input<string>('');
+  /** Whether to show a clear button to deselect. */
   showClear = input<boolean>(false);
 
+  /** Emitted when an option is selected. */
   selectOption = output<T>();
+  /** Emitted when the view action is triggered for an option. */
   viewOption = output<T>();
+  /** Emitted when the edit action is triggered for an option. */
   editOption = output<T>();
+  /** Emitted when the duplicate action is triggered for an option. */
   duplicateOption = output<T>();
+  /** Emitted when the delete action is triggered for an option. */
   deleteOption = output<T>();
 
   selectedOptionValue = signal<string | undefined | null>(null);

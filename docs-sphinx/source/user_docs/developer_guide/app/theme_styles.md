@@ -7,7 +7,7 @@ Custom properties are dynamicly generated from SASS for each color collection (p
 ### SASS use
 SASS colors variables are exposed through abstracts.extracts.scss file *src/app/styles/abstracts/_abstract.extracts.scss* and requires sass:map built in module.  
 ex:  
-``` SCSS
+```text
 @use 'sass:map';
 @use '/*path to styles folder*/abstracts/abstracts.extracts.scss' as app;
 
@@ -114,7 +114,7 @@ In compliance with RTE design system, we use "Nunito" font-family and the differ
 ### SASS use
 SASS texts styles variables and placeholder are exposed through abstracts.extracts.scss file *src/app/styles/abstracts/_abstract.extracts.scss* and requires sass:map built in module for variables.  
 ex:  
-``` SCSS
+```text
 // sass map use
 @use 'sass:map';
 @use '/*path to styles folder*/abstracts/abstracts.extracts.scss' as app;
@@ -124,7 +124,7 @@ ex:
 }
 ```
 
-``` SCSS
+```text
 @use 'sass:map';
 @use '/*path to styles folder*/abstracts/abstracts.extracts.scss' as app;
 

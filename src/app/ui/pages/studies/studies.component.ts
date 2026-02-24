@@ -24,6 +24,12 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from './components/import-study/import-study.component';
 import { ExportDialogComponent } from '../study/study-header/export-dialog/export-dialog.component';
 
+/**
+ * Main studies listing page.
+ *
+ * Displays all studies in a table and provides actions to create, delete,
+ * duplicate, import, and export studies.
+ */
 @Component({
   standalone: true,
   imports: [

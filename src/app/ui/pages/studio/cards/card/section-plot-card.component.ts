@@ -5,13 +5,16 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { round } from 'lodash';
 
+/** Represents a single data field with label, value, and unit. */
 interface DataField {
   label: string;
   value: string | number;
   unit: string;
 }
 
+/** Represents a group of data fields, optionally titled and indented. */
 interface DataSection {
+  /** Optional heading for this section. */
   title?: string;
   fields: DataField[];
   indent?: boolean;
@@ -44,10 +47,15 @@ interface DataSection {
     ])
   ]
 })
+/** Card component displaying computed section plot data for a support or span. */
 export class SectionPlotCardComponent {
+  /** Whether the card details are expanded. */
   isExpanded = signal(false);
+  /** Computed section output data to display. */
   litData = input.required<GetSectionOutput | null>();
+  /** Type of section element: span or support. */
   type = input<'span' | 'support'>('support');
+  /** Zero-based index of the support or span. */
   index = input.required<number>();
 
   cardTitle = computed(() => {

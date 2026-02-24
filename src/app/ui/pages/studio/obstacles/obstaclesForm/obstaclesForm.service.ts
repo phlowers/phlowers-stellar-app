@@ -13,6 +13,7 @@ import { debounce } from 'lodash';
 @Injectable({
   providedIn: 'root'
 })
+/** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 export class ObstacleFormService {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);

@@ -23,6 +23,12 @@ import { NewStudyModalComponent } from '../studies/components/new-study-modal/ne
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'dexie';
 
+/**
+ * Study detail page component.
+ *
+ * Manages the lifecycle of a single study including loading, editing,
+ * section CRUD, and initial condition management.
+ */
 @Component({
   selector: 'app-study',
   imports: [

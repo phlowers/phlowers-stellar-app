@@ -11,13 +11,21 @@ import { CardState } from '@ui/shared/model/card-info.model';
   templateUrl: './card-info.component.html',
   styleUrl: './card-info.component.scss'
 })
+/** Informational card component displaying a title, status, text, and an optional link. */
 export class CardInfoComponent {
+  /** Card title text. */
   title = input.required<string>();
+  /** Visual status state controlling the card's style (success, warning, error, unknown). */
   statusState = input<CardState>();
+  /** Main descriptive text displayed in the card. */
   text = input.required<string>();
+  /** Text for the optional action link. */
   linkText = input<string>();
+  /** Aria label for the optional action link. */
   linkAriaLabel = input<string>();
+  /** Route path for the optional action link. */
   linkRoute = input<string>();
+  /** Additional CSS class appended to the card element. */
   additionalClass = input<string>();
 
   computedClass = computed(() => {

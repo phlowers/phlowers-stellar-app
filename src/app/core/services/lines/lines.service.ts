@@ -14,10 +14,34 @@ import { LineCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { sortBy, uniqBy } from 'lodash';
 
+/**
+ * Service for managing electrical transmission line catalog data.
+ *
+ * @remarks
+ * The LinesService handles loading, storing, and querying line catalog data
+ * from CSV files into the IndexedDB database. Lines represent electrical
+ * transmission circuits with their identification codes.
+ *
+ * @example
+ * ```typescript
+ * // Wait for service to be ready
+ * this.linesService.ready.subscribe(ready => {
+ *   if (ready) {
+ *     const lines = await this.linesService.getLines();
+ *   }
+ * });
+ * ```
+ *
+ * @category Services
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class LinesService {
+  /**
+   * BehaviorSubject indicating whether the service is ready to use.
+   * Becomes true when the storage service is initialized.
+   */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   constructor(
@@ -29,14 +53,37 @@ export class LinesService {
     });
   }
 
+  /**
+   * Get the total count of lines in the catalog.
+   *
+   * @returns Promise resolving to the number of lines in the database
+   */
   async getLinesCount() {
     return this.storageService.db?.catLines.count();
   }
 
+  /**
+   * Retrieve all lines from the catalog.
+   *
+   * @returns Promise resolving to an array of all line entities
+   */
   async getLines() {
     return this.storageService.db?.catLines.toArray();
   }
 
+  /**
+   * Import line catalog data from a CSV file.
+   *
+   * @remarks
+   * This method fetches the lines.csv file from the server, parses it,
+   * transforms the data into the appropriate entity format, removes
+   * duplicates, and stores the results in the IndexedDB database.
+   *
+   * The CSV should contain columns: link_idr, link_adr, lit_idr, lit_adr,
+   * branch_id, branch_idr, branch_adr, voltage_idr, voltage_adr.
+   *
+   * @returns Promise that resolves when import is complete
+   */
   async importFromFile() {
     const linesFile = this.http
       .get(`${window.location.origin}/data/lines.csv`, {

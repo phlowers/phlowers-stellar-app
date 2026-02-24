@@ -14,6 +14,7 @@ import { appRoutes } from './app.routes';
 import { primengPreset } from './styles/primeng-preset';
 import { provideMarkdown } from 'ngx-markdown';
 
+/** Root Angular application configuration with routing, HTTP, animations, PrimeNG theme, and markdown support. */
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(

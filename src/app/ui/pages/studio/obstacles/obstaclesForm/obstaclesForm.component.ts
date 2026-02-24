@@ -33,6 +33,7 @@ import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
   templateUrl: './obstaclesForm.component.html',
   styleUrl: './obstaclesForm.component.scss'
 })
+/** Component providing the obstacle creation and editing form in the studio sidebar. */
 export class ObstaclesFormComponent {
   private readonly plotService = inject(PlotService);
   public readonly obstaclesService = inject(ObstaclesService);

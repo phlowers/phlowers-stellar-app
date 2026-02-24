@@ -13,6 +13,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '../services/plot.service';
 import { defaultClimaticCharge } from '../loads/climate/climate.component';
 
+/** Creates a new charge with default climate values and an auto-generated name. */
 const newCharge = (currentCharges: Charge[]): Charge => {
   return {
     uuid: uuidv4(),
@@ -41,8 +42,11 @@ const newCharge = (currentCharges: Charge[]): Charge => {
   templateUrl: './new-charge-modal.component.html',
   styleUrl: './new-charge-modal.component.scss'
 })
+/** Modal dialog component for creating a new charge case. */
 export class NewChargeModalComponent {
+  /** Whether the modal is open. */
   isOpen = input<boolean>(false);
+  /** Emits the new open/close state of the modal. */
   isOpenChange = output<boolean>();
 
   name = signal<string>('');
@@ -56,6 +60,7 @@ export class NewChargeModalComponent {
     return !!existingCharges?.some((c) => c.name === this.name());
   });
 
+  /** Emits the validated charge on submit. */
   validate = output<Charge>();
 
   constructor(

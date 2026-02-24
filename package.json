@@ -25,7 +25,10 @@
     "create-assets-list-for-service-worker:fr": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language fr",
     "create-assets-list-for-service-worker:en": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language en",
     "extract-i18n": "ng extract-i18n --output-path assets/i18n --format=xlf2",
-    "cyclonedx": "npx @cyclonedx/cyclonedx-npm --output-file bom.xml  --output-format XML"
+    "cyclonedx": "npx @cyclonedx/cyclonedx-npm --output-file bom.xml  --output-format XML",
+    "docs": "cd docs-sphinx && uv run sphinx-build -M clean source build && uv run sphinx-build -M html source build",
+    "autodocs": "cd docs-sphinx && uv run sphinx-autobuild --host localhost --port 8000 source build",
+    "docs:open": "npm run docs && xdg-open docs-sphinx/build/html/index.html"
   },
   "browser": {
     "child_process": false,
@@ -116,7 +119,7 @@
     "prettier": "3.5.3",
     "random-words-commonjs": "^2.0.1",
     "tailwindcss": "^3.4.17",
-    "typedoc": "^0.28.3",
+    "typedoc": "^0.28.16",
     "typescript": "~5.6.2",
     "typescript-eslint": "8.27.0"
   }

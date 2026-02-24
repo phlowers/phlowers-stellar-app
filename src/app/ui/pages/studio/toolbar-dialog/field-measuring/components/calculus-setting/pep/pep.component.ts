@@ -6,4 +6,5 @@ import { Component } from '@angular/core';
   templateUrl: './pep.component.html',
   styleUrl: './pep.component.scss'
 })
+/** Placeholder component for PEP (Points d'Egalisation des Paramètre) calculation. */
 export class PepComponent {}

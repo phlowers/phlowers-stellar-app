@@ -14,13 +14,24 @@ import { SideTabsService } from '../side-tabs/side-tabs.service';
 import { ObstaclesService } from '../obstacles/obstacles.service';
 import { ObstacleFormService } from '../obstacles/obstaclesForm/obstaclesForm.service';
 
+/** DOM element ID used for the Plotly chart container. */
 export const PLOT_ID = 'plotly-output';
 
+/** Option for a span dropdown selector. */
 export interface SpanOption {
+  /** Display label for the span option. */
   label: string;
+  /** UUID value of the span, or null if not applicable. */
   value: string | null;
 }
 
+/**
+ * Checks whether a projection refresh is needed based on changed plot options.
+ * @param oldOptions - Previous plot options
+ * @param newOptions - New plot options
+ * @param loading - Whether a calculation is currently in progress
+ * @returns `true` if the projection should be refreshed
+ */
 export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions: PlotOptions, loading: boolean) => {
   if (loading) {
     return false;
@@ -45,6 +56,7 @@ export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions
   return false;
 };
 
+/** Default plot options used when initializing or resetting the studio view. */
 export const defaultPlotOptions: PlotOptions = {
   view: '3d',
   side: 'profile',
@@ -58,14 +70,18 @@ const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   baseState: false
 };
 
+/** Options controlling which overlays are visible on the plot. */
 export interface SelectedDisplayOptions {
+  /** Whether load results are displayed. */
   loads: boolean;
+  /** Whether base state results are displayed. */
   baseState: boolean;
 }
 
 @Injectable({
   providedIn: 'root'
 })
+/** Service managing the Plotly-based section visualization, including data fetching, plot options, and camera state. */
 export class PlotService {
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);

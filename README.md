@@ -29,3 +29,14 @@ Run `npm run build` to build the project. The build artifacts will be stored in 
 
 #### Running unit tests  
 Run `npm run test` to execute the unit tests.
+
+#### Running local documentation
+
+Go to `docs-sphinx` folder and run 
+```shell
+uv venv --python 3.13 # to create a venv 
+source .venv/bin/activate # to activate it.
+uv pip install -r requirements.txt # to install the dependencies. 
+```
+
+You can now run `npm run docs` to build or directly `npm run autodocs` to build and serve the documentation on `http://localhost:8000/` with live reload on changes.

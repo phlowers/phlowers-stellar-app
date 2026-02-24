@@ -6,8 +6,14 @@ const LOAD_COLOR = '#4A355A';
 const LOAD_ICON = '&#xf5cd;';
 const MARKING_ICON = '&#xf08d;';
 
+/**
+ * Enumeration of load types used in plot annotations.
+ * @category Studio
+ */
 export enum LoadType {
+  /** A punctual (point) load applied at a specific location. */
   PUNCTUAL = 'punctual',
+  /** A marking load used for reference positioning. */
   MARKING = 'marking'
 }
 
@@ -32,6 +38,13 @@ const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
   arrowwidth: 1
 };
 
+/**
+ * Creates Plotly annotation objects representing span loads on the section plot.
+ * Each annotation displays an icon (load or marking) positioned at the load coordinates.
+ * @category Studio
+ * @param plotParams - The plot parameters including span loads, view, side, and coordinate data.
+ * @returns An array of Plotly `Annotations` for load indicators.
+ */
 export const createLoadAnnotations = (plotParams: CreatePlotParams): Plotly.Annotations[] => {
   const { side, view } = plotParams;
   const annotations: Plotly.Annotations[] = [];

@@ -29,9 +29,13 @@ import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
     IconComponent
   ]
 })
+/** Menu bar component for the studio page, handling charge case selection and actions. */
 export class StudioMenuBarComponent {
+  /** Current section data. */
   section = input.required<Section | null>();
+  /** Current study data. */
   study = input.required<Study | null>();
+  /** Emits when the user requests to open the new charge modal. */
   openNewChargeModal = output<void>();
   charges = computed(
     () =>

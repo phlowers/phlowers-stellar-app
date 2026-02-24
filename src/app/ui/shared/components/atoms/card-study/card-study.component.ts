@@ -10,11 +10,17 @@ import { Router } from '@angular/router';
   templateUrl: './card-study.component.html',
   styleUrl: './card-study.component.scss'
 })
+/** Card component representing a study item, displaying metadata and navigating to the study on click. */
 export class CardStudyComponent {
+  /** Study title. */
   title = input.required<string>();
+  /** Email address of the study author. */
   authorMail = input.required<string>();
+  /** Last modification date of the study. */
   modificationDate = input.required<string>();
+  /** Optional list of tags to display on the card. */
   tagList = input<TagList[]>();
+  /** Unique identifier used for navigation to the study detail page. */
   uuid = input.required<string>();
 
   constructor(private readonly router: Router) {}

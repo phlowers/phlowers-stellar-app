@@ -15,6 +15,10 @@ import { cloneDeep } from 'lodash';
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for creating, updating, duplicating, deleting, and retrieving
+ * sections within a study.
+ */
 export class SectionService {
   constructor(private readonly studiesService: StudiesService) {}
 
@@ -76,6 +80,12 @@ export class SectionService {
     return newSection;
   }
 
+  /**
+   * Retrieves a section by its UUID within a given study.
+   * @param studyUuid - UUID of the study (may be `undefined`).
+   * @param sectionUuid - UUID of the section to find.
+   * @returns The matching `Section` or `undefined`.
+   */
   getSectionByUuid(studyUuid: string | undefined, sectionUuid: string): Promise<Section | undefined> {
     if (!studyUuid) {
       return Promise.resolve(undefined);
