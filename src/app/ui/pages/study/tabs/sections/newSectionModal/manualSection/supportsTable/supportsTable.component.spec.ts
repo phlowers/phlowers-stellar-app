@@ -435,8 +435,7 @@ describe('SupportsTableComponent', () => {
   });
 
   describe('truncateDecimals', () => {
-    const makeEvent = (value: string) =>
-      ({ target: { value } as HTMLInputElement }) as unknown as Event;
+    const makeEvent = (value: string) => ({ target: { value } as HTMLInputElement }) as unknown as Event;
 
     it('should do nothing when value has no decimal separator', () => {
       const event = makeEvent('123');

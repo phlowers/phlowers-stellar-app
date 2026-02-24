@@ -73,7 +73,12 @@ describe('helpers', () => {
 
   describe('getUniqueSortedSupportNamesFromAttachments', () => {
     it('should return unique, sorted names', () => {
-      const attachments = [makeAttachment('Bravo'), makeAttachment('Alpha'), makeAttachment('Bravo'), makeAttachment('Charlie')];
+      const attachments = [
+        makeAttachment('Bravo'),
+        makeAttachment('Alpha'),
+        makeAttachment('Bravo'),
+        makeAttachment('Charlie')
+      ];
       expect(getUniqueSortedSupportNamesFromAttachments(attachments)).toEqual(['Alpha', 'Bravo', 'Charlie']);
     });
 
@@ -245,8 +250,24 @@ describe('helpers', () => {
 
   describe('buildFieldChangeUpdates', () => {
     const mockChains = [
-      { chain_name: 'Chain A', mean_length: 10, mean_mass: 2, v_chain: false, chain_type: '', chain_surface: 0, uuid: 'c1' },
-      { chain_name: 'Chain B', mean_length: 20, mean_mass: 4, v_chain: true, chain_type: '', chain_surface: 5, uuid: 'c2' }
+      {
+        chain_name: 'Chain A',
+        mean_length: 10,
+        mean_mass: 2,
+        v_chain: false,
+        chain_type: '',
+        chain_surface: 0,
+        uuid: 'c1'
+      },
+      {
+        chain_name: 'Chain B',
+        mean_length: 20,
+        mean_mass: 4,
+        v_chain: true,
+        chain_type: '',
+        chain_surface: 5,
+        uuid: 'c2'
+      }
     ];
 
     it('should return only the changed field for non-special fields', () => {
