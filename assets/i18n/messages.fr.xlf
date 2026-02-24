@@ -1409,24 +1409,6 @@
         <target>Température de base</target>
       </segment>
     </unit>
-    <unit id="2936057948596507296">
-      <segment state="initial">
-        <source>°C</source>
-        <target>°C</target>
-      </segment>
-    </unit>
-    <unit id="902828700910058336">
-      <segment state="initial">
-        <source>Pa</source>
-        <target>Pa</target>
-      </segment>
-    </unit>
-    <unit id="2340664682417154043">
-      <segment state="initial">
-        <source>cm</source>
-        <target>cm</target>
-      </segment>
-    </unit>
     <unit id="2205679024859102357">
       <segment state="initial">
         <source>Parameter (m)</source>
@@ -1797,12 +1779,6 @@
       <segment state="initial">
         <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
         <target> Le Set d’accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau. </target>
-      </segment>
-    </unit>
-    <unit id="4893374109940250877">
-      <segment state="initial">
-        <source>%CRA</source>
-        <target>%CRA</target>
       </segment>
     </unit>
     <unit id="4021752662928002901">
@@ -3306,13 +3282,13 @@
     <unit id="3876336363073925034">
       <segment state="initial">
         <source>Ice thickness before support frontier</source>
-        <target>Ice thickness before support frontier</target>
+        <target>Épaisseur du givre avant le support frontière</target>
       </segment>
     </unit>
     <unit id="421318936396804890">
       <segment state="initial">
         <source>Ice thickness after support frontier</source>
-        <target>Ice thickness after support frontier</target>
+        <target>Épaisseur du givre après le support frontière</target>
       </segment>
     </unit>
     <unit id="1131253797808406443">
@@ -3517,6 +3493,12 @@
       <segment state="initial">
         <source>Punctual charge</source>
         <target>Charge ponctuelle</target>
+      </segment>
+    </unit>
+    <unit id="3112674295214073901">
+      <segment state="initial">
+        <source>Study&apos;s section graph view</source>
+        <target>Vu graphique du canton d&apos;étude</target>
       </segment>
     </unit>
   </file>
