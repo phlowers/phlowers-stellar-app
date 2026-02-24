@@ -1,6 +1,6 @@
 ARG DEFAULT_LANGUAGE=fr
 
-FROM node:alpine as build
+FROM node:22-alpine as build
 
 ARG DEFAULT_LANGUAGE
 
@@ -14,7 +14,7 @@ COPY . /usr/src/app
 
 RUN npm install
 
-RUN uv python install 3.12
+RUN uv python install 3.13
 
 RUN npm run set-up-mechaphlowers
 
