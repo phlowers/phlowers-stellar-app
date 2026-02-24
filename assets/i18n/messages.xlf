@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
   <file id="ngi18n" original="ng.template">
     <unit id="3521084103654700903">
@@ -21,6 +21,11 @@
         <source>Charge deleted</source>
       </segment>
     </unit>
+    <unit id="509620284258406390">
+      <segment>
+        <source>NO VOLTAGE</source>
+      </segment>
+    </unit>
     <unit id="4124418045778511362">
       <segment>
         <source>You cannot update a study that you did not create, please duplicate it instead.</source>
@@ -31,14 +36,14 @@
         <source>Unauthorized</source>
       </segment>
     </unit>
-    <unit id="858950043240201803">
-      <segment>
-        <source>IC 1</source>
-      </segment>
-    </unit>
     <unit id="2622453688077092594">
       <segment>
         <source>Study imported from protoV4</source>
+      </segment>
+    </unit>
+    <unit id="858950043240201803">
+      <segment>
+        <source>IC 1</source>
       </segment>
     </unit>
     <unit id="4238708305594970843">
@@ -166,11 +171,6 @@
         <source>Studio</source>
       </segment>
     </unit>
-    <unit id="2471229163174544608">
-      <segment>
-        <source>Sections</source>
-      </segment>
-    </unit>
     <unit id="841934696444961534">
       <segment>
         <source>News</source>
@@ -226,6 +226,11 @@
         <source> Update to latest version </source>
       </segment>
     </unit>
+    <unit id="2936879176471643383">
+      <segment>
+        <source>Activate Python logs</source>
+      </segment>
+    </unit>
     <unit id="2547571169649786686">
       <segment>
         <source>Danger zone</source>
@@ -244,6 +249,16 @@
     <unit id="6674243568758582854">
       <segment>
         <source>Reset the app without resetting the database</source>
+      </segment>
+    </unit>
+    <unit id="9213587357522873966">
+      <segment>
+        <source>ON</source>
+      </segment>
+    </unit>
+    <unit id="3129001544428431323">
+      <segment>
+        <source>OFF</source>
       </segment>
     </unit>
     <unit id="797001286432919577">
@@ -291,6 +306,26 @@
         <source>The app has been reset</source>
       </segment>
     </unit>
+    <unit id="7565332931594484808">
+      <segment>
+        <source>Python logs activated</source>
+      </segment>
+    </unit>
+    <unit id="5093495639955235689">
+      <segment>
+        <source>Python logs deactivated</source>
+      </segment>
+    </unit>
+    <unit id="2401579609429794582">
+      <segment>
+        <source>The python logs have been activated</source>
+      </segment>
+    </unit>
+    <unit id="1839839226703008167">
+      <segment>
+        <source>The python logs have been deactivated</source>
+      </segment>
+    </unit>
     <unit id="4768592761478998496">
       <segment>
         <source>You are offline</source>
@@ -303,9 +338,7 @@
     </unit>
     <unit id="8283592065951885988">
       <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;" /> Create a new study </source>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a new study </source>
       </segment>
     </unit>
     <unit id="983324339375029355">
@@ -320,16 +353,12 @@
     </unit>
     <unit id="6016428309492185040">
       <segment>
-        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON"
-            equivEnd="CLOSE_TAG_APP_ICON" type="other"
-            dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" /></source>
+        <source> Go to my studies <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_right&quot; iconRight /&gt;"/></source>
       </segment>
     </unit>
     <unit id="2640561782983672481">
       <segment>
-        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please
-          contact us to share your ideas and feedbacks to help us upgrade this application!</source>
+        <source>Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!</source>
       </segment>
     </unit>
     <unit id="1444333919089743258">
@@ -402,11 +431,6 @@
         <source>No news found</source>
       </segment>
     </unit>
-    <unit id="2159130950882492111">
-      <segment>
-        <source>Cancel</source>
-      </segment>
-    </unit>
     <unit id="7927728100096644359">
       <segment>
         <source>You can import multiple files, they will be available in the “My studies” tab.</source>
@@ -420,158 +444,6 @@
     <unit id="4888540688990075177">
       <segment>
         <source> File formats: .csv, .clst </source>
-      </segment>
-    </unit>
-    <unit id="7022070615528435141">
-      <segment>
-        <source>Delete</source>
-      </segment>
-    </unit>
-    <unit id="6621329748219109148">
-      <segment>
-        <source>Duplicate</source>
-      </segment>
-    </unit>
-    <unit id="7585826646011739428">
-      <segment>
-        <source>Edit</source>
-      </segment>
-    </unit>
-    <unit id="6536020395223120161">
-      <segment>
-        <source> Error </source>
-      </segment>
-    </unit>
-    <unit id="6202213245388240559">
-      <segment>
-        <source>Study updated</source>
-      </segment>
-    </unit>
-    <unit id="8337097439903063887">
-      <segment>
-        <source>Study created</source>
-      </segment>
-    </unit>
-    <unit id="1170667643695316061">
-      <segment>
-        <source>Create a study section</source>
-      </segment>
-    </unit>
-    <unit id="928951684182090210">
-      <segment>
-        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
-      </segment>
-    </unit>
-    <unit id="1289308098980826210">
-      <segment>
-        <source>Section type</source>
-      </segment>
-    </unit>
-    <unit id="128932358295516526">
-      <segment>
-        <source>Section Deleted</source>
-      </segment>
-    </unit>
-    <unit id="1386766078260547788">
-      <segment>
-        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
-      </segment>
-    </unit>
-    <unit id="3569799587833040802">
-      <segment>
-        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
-      </segment>
-    </unit>
-    <unit id="1599802675385906175">
-      <segment>
-        <source>Add support after</source>
-      </segment>
-    </unit>
-    <unit id="1614612576043079687">
-      <segment>
-        <source>Shrink menu</source>
-      </segment>
-    </unit>
-    <unit id="1653305415865364716">
-      <segment>
-        <source>Study updated successfully</source>
-      </segment>
-    </unit>
-    <unit id="1949800506879332767">
-      <segment>
-        <source>Section Name</source>
-      </segment>
-    </unit>
-    <unit id="2102825898069375693">
-      <segment>
-        <source>Menu</source>
-      </segment>
-    </unit>
-    <unit id="2233560223291461480">
-      <segment>
-        <source>Manual</source>
-      </segment>
-    </unit>
-    <unit id="479690504462006012">
-      <segment>
-        <source>Initial condition</source>
-      </segment>
-    </unit>
-    <unit id="2509141182388535183">
-      <segment>
-        <source>View</source>
-      </segment>
-    </unit>
-    <unit id="2593007815199532062">
-      <segment>
-        <source>Section</source>
-      </segment>
-    </unit>
-    <unit id="2638469548137871317">
-      <segment>
-        <source>Initial condition name</source>
-      </segment>
-    </unit>
-    <unit id="2925129304308690882">
-      <segment>
-        <source>Last modified</source>
-      </segment>
-    </unit>
-    <unit id="2981219928115418649">
-      <segment>
-        <source>Link</source>
-      </segment>
-    </unit>
-    <unit id="3049551355280538164">
-      <segment>
-        <source>Initial Condition Added</source>
-      </segment>
-    </unit>
-    <unit id="3102779920122732727">
-      <segment>
-        <source> Loading </source>
-      </segment>
-    </unit>
-    <unit id="3154787560331051884">
-      <segment>
-        <source>Chain V</source>
-      </segment>
-    </unit>
-    <unit id="3193976279273491157">
-      <segment>
-        <source>Actions</source>
-      </segment>
-    </unit>
-    <unit id="3533138925800017240">
-      <segment>
-        <source>Study Duplicated</source>
       </segment>
     </unit>
     <unit id="3799093232488965923">
@@ -614,12 +486,9 @@
         <source>Error reading file</source>
       </segment>
     </unit>
-    <unit id="1170248653308387010">
+    <unit id="4648900870671159218">
       <segment>
-        <source> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
+        <source>Success</source>
       </segment>
     </unit>
     <unit id="1079181845691356032">
@@ -629,8 +498,7 @@
     </unit>
     <unit id="6738867123972990167">
       <segment>
-        <source>Study <ph id="0" equiv="PH" disp="study.title" /> already exists. Do you want to
-          replace it?</source>
+        <source>Study <ph id="0" equiv="PH" disp="study.title"/> already exists. Do you want to replace it?</source>
       </segment>
     </unit>
     <unit id="2807800733729323332">
@@ -655,9 +523,7 @@
     </unit>
     <unit id="5231861831935768001">
       <segment>
-        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
+        <source> Study name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
     <unit id="927660422911816633">
@@ -680,9 +546,19 @@
         <source>Enter description</source>
       </segment>
     </unit>
+    <unit id="2159130950882492111">
+      <segment>
+        <source>Cancel</source>
+      </segment>
+    </unit>
     <unit id="6057281094654962766">
       <segment>
         <source>Validate</source>
+      </segment>
+    </unit>
+    <unit id="8337097439903063887">
+      <segment>
+        <source>Study created</source>
       </segment>
     </unit>
     <unit id="5519001504653726625">
@@ -690,25 +566,64 @@
         <source>Study created successfully</source>
       </segment>
     </unit>
+    <unit id="6202213245388240559">
+      <segment>
+        <source>Study updated</source>
+      </segment>
+    </unit>
+    <unit id="1653305415865364716">
+      <segment>
+        <source>Study updated successfully</source>
+      </segment>
+    </unit>
+    <unit id="1386766078260547788">
+      <segment>
+        <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
     <unit id="7282804341793038828">
       <segment>
-        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
+        <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
       </segment>
     </unit>
     <unit id="5375905790663497716">
       <segment>
-        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON"
-            equivEnd="CLOSE_TAG_APP_ICON" type="other"
-            dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"
-            dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" /></source>
+        <source> Modification date <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;updated_at_offline&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="1170248653308387010">
+      <segment>
+        <source> LIT <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;lit_code&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="2050780142571489753">
+      <segment>
+        <source>Description/comment</source>
+      </segment>
+    </unit>
+    <unit id="3193976279273491157">
+      <segment>
+        <source>Actions</source>
+      </segment>
+    </unit>
+    <unit id="6621329748219109148">
+      <segment>
+        <source>Duplicate</source>
       </segment>
     </unit>
     <unit id="7462301153729425254">
       <segment>
         <source>Export</source>
+      </segment>
+    </unit>
+    <unit id="7022070615528435141">
+      <segment>
+        <source>Delete</source>
+      </segment>
+    </unit>
+    <unit id="744159181527045596">
+      <segment>
+        <source>Study <ph id="0" equiv="PH" disp="&apos;{&apos;"/>first} to <ph id="1" equiv="PH_1" disp="&apos;{&apos;"/>last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;"/>totalRecords}</source>
       </segment>
     </unit>
     <unit id="3922504333199040096">
@@ -729,7 +644,7 @@
     <unit id="187187500641108332">
       <segment>
         <source>
-          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}" />
+          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
         </source>
       </segment>
     </unit>
@@ -738,14 +653,19 @@
         <source>Expand details</source>
       </segment>
     </unit>
-    <unit id="8384742917026482252">
+    <unit id="3980974174191771572">
       <segment>
-        <source>Phase</source>
+        <source>VTL (under chain)</source>
       </segment>
     </unit>
     <unit id="4740697952012289999">
       <segment>
         <source>V:</source>
+      </segment>
+    </unit>
+    <unit id="1580807911042419380">
+      <segment>
+        <source>T:</source>
       </segment>
     </unit>
     <unit id="2705138319949054840">
@@ -756,452 +676,6 @@
     <unit id="5979575883644533575">
       <segment>
         <source>Resultant:</source>
-      </segment>
-    </unit>
-    <unit id="2153962924756003345">
-      <segment>
-        <source>Max wind pressure</source>
-      </segment>
-    </unit>
-    <unit id="6888404140532857244">
-      <segment>
-        <source>Max ice thickness</source>
-      </segment>
-    </unit>
-    <unit id="3948064756684098346">
-      <segment>
-        <source> Max wind pressure </source>
-      </segment>
-    </unit>
-    <unit id="5455255610792577574">
-      <segment>
-        <source> Min temperature </source>
-      </segment>
-    </unit>
-    <unit id="5577525641723703663">
-      <segment>
-        <source> Cable pretension </source>
-      </segment>
-    </unit>
-    <unit id="7696118233074431582">
-      <segment>
-        <source> Max ice thickness </source>
-      </segment>
-    </unit>
-    <unit id="6539153962019019862">
-      <segment>
-        <source>Extreme historical conditions incurred by the cable</source>
-      </segment>
-    </unit>
-    <unit id="8798542344025275411">
-      <segment>
-        <source>Min temperature</source>
-      </segment>
-    </unit>
-    <unit id="9095132887560670905">
-      <segment>
-        <source>Cable pretension</source>
-      </segment>
-    </unit>
-    <unit id="2340664682417154043">
-      <segment>
-        <source>cm</source>
-      </segment>
-    </unit>
-    <unit id="2936057948596507296">
-      <segment>
-        <source>°C</source>
-      </segment>
-    </unit>
-    <unit id="8662695338423847831">
-      <segment>
-        <source>Base temperature</source>
-      </segment>
-    </unit>
-    <unit id="902828700910058336">
-      <segment>
-        <source>Pa</source>
-      </segment>
-    </unit>
-    <unit id="2143129387317692084">
-      <segment>
-        <source>Horizontal (m)</source>
-      </segment>
-    </unit>
-    <unit id="2205679024859102357">
-      <segment>
-        <source>Parameter (m)</source>
-      </segment>
-    </unit>
-    <unit id="3494570942698291859">
-      <segment>
-        <source>Oblique (m)</source>
-      </segment>
-    </unit>
-    <unit id="5909128736797701112">
-      <segment>
-        <source>Work load %</source>
-      </segment>
-    </unit>
-    <unit id="6560642783363072934">
-      <segment>
-        <source>Vertical (m)</source>
-      </segment>
-    </unit>
-    <unit id="3854993654974680287">
-      <segment>
-        <source>Support {first} to {last} of {totalRecords}</source>
-      </segment>
-    </unit>
-    <unit id="3885497195825665706">
-      <segment>
-        <source>Next</source>
-      </segment>
-    </unit>
-    <unit id="4321296572437361289">
-      <segment>
-        <source>Generate a state</source>
-      </segment>
-    </unit>
-    <unit id="4452427314943113135">
-      <segment>
-        <source>Previous</source>
-      </segment>
-    </unit>
-    <unit id="7386852230658433938">
-      <segment>
-        <source>Comment about the supports</source>
-      </segment>
-    </unit>
-    <unit id="131564779447274448">
-      <segment>
-        <source>Attachment alt. (NGF)</source>
-      </segment>
-    </unit>
-    <unit id="2759009850634919490">
-      <segment>
-        <source>Span l.</source>
-      </segment>
-    </unit>
-    <unit id="4363811923368535546">
-      <segment>
-        <source>Chain l.</source>
-      </segment>
-    </unit>
-    <unit id="8240240329115149718">
-      <segment>
-        <source>Angle</source>
-      </segment>
-    </unit>
-    <unit id="8502839014739399542">
-      <segment>
-        <source>Double click on a column to copy the value to all supports</source>
-      </segment>
-    </unit>
-    <unit id="1927414643473979733">
-      <segment>
-        <source>Choose a creation type</source>
-      </segment>
-    </unit>
-    <unit id="8792569904201285826">
-      <segment>
-        <source>List of saved states</source>
-      </segment>
-    </unit>
-    <unit id="9093347743965817292">
-      <segment>
-        <source>Line team</source>
-      </segment>
-    </unit>
-    <unit id="8446665382086922955">
-      <segment>
-        <source>dd/MM:yyyy at HH&apos;h&apos;mm</source>
-      </segment>
-    </unit>
-    <unit id="7430416142942514215">
-      <segment>
-        <source>Publish</source>
-      </segment>
-    </unit>
-    <unit id="3449156368391431679">
-      <segment>
-        <source>N° supp.</source>
-      </segment>
-    </unit>
-    <unit id="3852148482682745847">
-      <segment>
-        <source>From local referencial</source>
-      </segment>
-    </unit>
-    <unit id="4266658892163682187">
-      <segment>
-        <source>Face</source>
-      </segment>
-    </unit>
-    <unit id="4915431133669985304">
-      <segment>
-        <source>Profile</source>
-      </segment>
-    </unit>
-    <unit id="5778821001923660039">
-      <segment>
-        <source>From a file</source>
-      </segment>
-    </unit>
-    <unit id="5946937164148510682">
-      <segment>
-        <source>supports comment</source>
-      </segment>
-    </unit>
-    <unit id="7819314041543176992">
-      <segment>
-        <source>Close</source>
-      </segment>
-    </unit>
-    <unit id="2657043015926552641">
-      <segment>
-        <source>Unknown error</source>
-      </segment>
-    </unit>
-    <unit id="3305078246675075385">
-      <segment>
-        <source>Load type</source>
-      </segment>
-    </unit>
-    <unit id="4377932527319537276">
-      <segment>
-        <source>Punctual</source>
-      </segment>
-    </unit>
-    <unit id="5080875188035619513">
-      <segment>
-        <source>Pyodide load error</source>
-      </segment>
-    </unit>
-    <unit id="520772936343037608">
-      <segment>
-        <source>Dis Symmetric</source>
-      </segment>
-    </unit>
-    <unit id="7215028324689336548">
-      <segment>
-        <source>Calculation error</source>
-      </segment>
-    </unit>
-    <unit id="8083736833442025529">
-      <segment>
-        <source>No cable found</source>
-      </segment>
-    </unit>
-    <unit id="8293684133671200243">
-      <segment>
-        <source>Symmetric</source>
-      </segment>
-    </unit>
-    <unit id="8990805719441989570">
-      <segment>
-        <source>Span</source>
-      </segment>
-    </unit>
-    <unit id="1339958536387081724">
-      <segment>
-        <source>Add a charge case</source>
-      </segment>
-    </unit>
-    <unit id="1964106600703167330">
-      <segment>
-        <source>Cable manip. at span</source>
-      </segment>
-    </unit>
-    <unit id="2087858758183650212">
-      <segment>
-        <source>IC</source>
-      </segment>
-    </unit>
-    <unit id="8033045192563886902">
-      <segment>
-        <source>In order to add charges, you need to create a charge case.</source>
-      </segment>
-    </unit>
-    <unit id="3059442917741627872">
-      <segment>
-        <source>Arm length</source>
-      </segment>
-    </unit>
-    <unit id="8198965325876404733">
-      <segment>
-        <source>LIT - ID</source>
-      </segment>
-    </unit>
-    <unit id="4142858945350399408">
-      <segment>
-        <source>Height below console</source>
-      </segment>
-    </unit>
-    <unit id="5004217118094368051">
-      <segment>
-        <source>Ver.MAJ</source>
-      </segment>
-    </unit>
-    <unit id="581758079292144535">
-      <segment>
-        <source>Add a description to your charge case</source>
-      </segment>
-    </unit>
-    <unit id="5884678477650117685">
-      <segment>
-        <source>Cable manip. at support</source>
-      </segment>
-    </unit>
-    <unit id="472586784721739380">
-      <segment>
-        <source>Link - ID</source>
-      </segment>
-    </unit>
-    <unit id="7607770781665288883">
-      <segment>
-        <source>Create a charge case</source>
-      </segment>
-    </unit>
-    <unit id="8179510261091625036">
-      <segment>
-        <source>Climate condition</source>
-      </segment>
-    </unit>
-    <unit id="8365437498463676833">
-      <segment>
-        <source> Personnel presence </source>
-      </segment>
-    </unit>
-    <unit id="8736414220975972324">
-      <segment>
-        <source>Generalities</source>
-      </segment>
-    </unit>
-    <unit id="9064235119713814924">
-      <segment>
-        <source>Version / MAJ</source>
-      </segment>
-    </unit>
-    <unit id="2694623513112556993">
-      <segment>
-        <source> The attachment set and the arm length (m) will be automatically filled in the
-          table. </source>
-      </segment>
-    </unit>
-    <unit id="4262495966859034995">
-      <segment>
-        <source>Charge case name</source>
-      </segment>
-    </unit>
-    <unit id="8789132061698781587">
-      <segment>
-        <source>Choose the attachment set in the list or on the graph to find the right arm length.</source>
-      </segment>
-    </unit>
-    <unit id="4893374109940250877">
-      <segment>
-        <source>%CRA</source>
-      </segment>
-    </unit>
-    <unit id="1271914484753735123">
-      <segment>
-        <source>Cable adjustment</source>
-      </segment>
-    </unit>
-    <unit id="1684734235599362204">
-      <segment>
-        <source>Tools</source>
-      </segment>
-    </unit>
-    <unit id="2938335127110015653">
-      <segment>
-        <source>Field measurements</source>
-      </segment>
-    </unit>
-    <unit id="3135010041684944812">
-      <segment>
-        <source>Height &amp; lateral distance</source>
-      </segment>
-    </unit>
-    <unit id="3219524493839487316">
-      <segment>
-        <source>Inset</source>
-      </segment>
-    </unit>
-    <unit id="3493980964958188572">
-      <segment>
-        <source>Obstacles table</source>
-      </segment>
-    </unit>
-    <unit id="3627508489639881021">
-      <segment>
-        <source>Grounds table</source>
-      </segment>
-    </unit>
-    <unit id="4114020677798356875">
-      <segment>
-        <source>Tables</source>
-      </segment>
-    </unit>
-    <unit id="4819033235564776951">
-      <segment>
-        <source>Edit your selected tools shortcuts</source>
-      </segment>
-    </unit>
-    <unit id="568104999805025008">
-      <segment>
-        <source>Strand RRTS</source>
-      </segment>
-    </unit>
-    <unit id="6812930637022637485">
-      <segment>
-        <source>Display</source>
-      </segment>
-    </unit>
-    <unit id="6843015305937593038">
-      <segment>
-        <source>Loads table</source>
-      </segment>
-    </unit>
-    <unit id="7353266591752987691">
-      <segment>
-        <source>Forest trenches</source>
-      </segment>
-    </unit>
-    <unit id="7536890634485426754">
-      <segment>
-        <source>Select which elements to display on the studio.</source>
-      </segment>
-    </unit>
-    <unit id="7801621976146528131">
-      <segment>
-        <source>Loads</source>
-      </segment>
-    </unit>
-    <unit id="810011115797190863">
-      <segment>
-        <source>Cable marking</source>
-      </segment>
-    </unit>
-    <unit id="8365500949716833241">
-      <segment>
-        <source>VTL &amp; Guying</source>
-      </segment>
-    </unit>
-    <unit id="8772586645735221164">
-      <segment>
-        <source>Pose table</source>
-      </segment>
-    </unit>
-    <unit id="8826026204967028707">
-      <segment>
-        <source>Select and organise the tools with quick access (maximum 5).</source>
-      </segment>
-    </unit>
-    <unit id="2639795872572346193">
-      <segment>
-        <source>Arc length LA:</source>
       </segment>
     </unit>
     <unit id="8349857961550718385">
@@ -1254,6 +728,16 @@
         <source>Span length:</source>
       </segment>
     </unit>
+    <unit id="7345748523571536840">
+      <segment>
+        <source>Elevation:</source>
+      </segment>
+    </unit>
+    <unit id="7518486444185721115">
+      <segment>
+        <source>Parameter:</source>
+      </segment>
+    </unit>
     <unit id="6126902002679300027">
       <segment>
         <source>Supp tension (Max):</source>
@@ -1279,6 +763,11 @@
         <source>Horizontal dist. acc.:</source>
       </segment>
     </unit>
+    <unit id="2639795872572346193">
+      <segment>
+        <source>Arc length LA:</source>
+      </segment>
+    </unit>
     <unit id="9108177438626507742">
       <segment>
         <source>Th - T0:</source>
@@ -1289,9 +778,29 @@
         <source>Inf tension acc.:</source>
       </segment>
     </unit>
+    <unit id="7808756054397155068">
+      <segment>
+        <source>Reset</source>
+      </segment>
+    </unit>
     <unit id="6613300769068333223">
       <segment>
         <source>Wind Pressure</source>
+      </segment>
+    </unit>
+    <unit id="136732925281726551">
+      <segment>
+        <source>Minimum value:</source>
+      </segment>
+    </unit>
+    <unit id="9120411489526633764">
+      <segment>
+        <source>Maximum value:</source>
+      </segment>
+    </unit>
+    <unit id="5549776374941114664">
+      <segment>
+        <source> Whole number required </source>
       </segment>
     </unit>
     <unit id="4865483609520535639">
@@ -1299,9 +808,29 @@
         <source>Cable Temperature</source>
       </segment>
     </unit>
+    <unit id="399524330429754869">
+      <segment>
+        <source>Ice indicator</source>
+      </segment>
+    </unit>
     <unit id="5423101655447195400">
       <segment>
         <source>Ice thickness</source>
+      </segment>
+    </unit>
+    <unit id="914576298220560599">
+      <segment>
+        <source>Frontier support</source>
+      </segment>
+    </unit>
+    <unit id="7478743037636719773">
+      <segment>
+        <source> Ice thickness before support frontier </source>
+      </segment>
+    </unit>
+    <unit id="8939108734321665925">
+      <segment>
+        <source> Ice thickness after support frontier </source>
       </segment>
     </unit>
     <unit id="5204909450862821423">
@@ -1314,9 +843,29 @@
         <source>Calculate</source>
       </segment>
     </unit>
+    <unit id="8293684133671200243">
+      <segment>
+        <source>Symmetric</source>
+      </segment>
+    </unit>
+    <unit id="520772936343037608">
+      <segment>
+        <source>Dis Symmetric</source>
+      </segment>
+    </unit>
+    <unit id="8990805719441989570">
+      <segment>
+        <source>Span</source>
+      </segment>
+    </unit>
     <unit id="867538041196492933">
       <segment>
         <source>Reference support</source>
+      </segment>
+    </unit>
+    <unit id="3305078246675075385">
+      <segment>
+        <source>Load type</source>
       </segment>
     </unit>
     <unit id="6494353762632546017">
@@ -1337,6 +886,11 @@
     <unit id="9131913350495870905">
       <segment>
         <source>Load</source>
+      </segment>
+    </unit>
+    <unit id="4377932527319537276">
+      <segment>
+        <source>Punctual</source>
       </segment>
     </unit>
     <unit id="7722549882037437502">
@@ -1374,6 +928,11 @@
         <source>add charge case</source>
       </segment>
     </unit>
+    <unit id="8690924341268563915">
+      <segment>
+        <source>Add a load case</source>
+      </segment>
+    </unit>
     <unit id="5638154401039870638">
       <segment>
         <source>Staff is present</source>
@@ -1384,14 +943,269 @@
         <source>Staff is absent</source>
       </segment>
     </unit>
+    <unit id="3244879037311223621">
+      <segment>
+        <source>Save state</source>
+      </segment>
+    </unit>
+    <unit id="7607770781665288883">
+      <segment>
+        <source>Create a charge case</source>
+      </segment>
+    </unit>
+    <unit id="8736414220975972324">
+      <segment>
+        <source>Generalities</source>
+      </segment>
+    </unit>
+    <unit id="4262495966859034995">
+      <segment>
+        <source>Charge case name</source>
+      </segment>
+    </unit>
+    <unit id="1035708454595696483">
+      <segment>
+        <source>The initial condition name must be unique.</source>
+      </segment>
+    </unit>
+    <unit id="8365437498463676833">
+      <segment>
+        <source> Personnel presence </source>
+      </segment>
+    </unit>
+    <unit id="581758079292144535">
+      <segment>
+        <source>Add a description to your charge case</source>
+      </segment>
+    </unit>
+    <unit id="7819314041543176992">
+      <segment>
+        <source>Close</source>
+      </segment>
+    </unit>
+    <unit id="2587240527868724590">
+      <segment>
+        <source>CC</source>
+      </segment>
+    </unit>
+    <unit id="3490467566453662140">
+      <segment>
+        <source>Return to span</source>
+      </segment>
+    </unit>
+    <unit id="8897211906922465937">
+      <segment>
+        <source>Create new obstacle</source>
+      </segment>
+    </unit>
+    <unit id="7009794897351276069">
+      <segment>
+        <source>Obstacle type</source>
+      </segment>
+    </unit>
+    <unit id="1131253797808406443">
+      <segment>
+        <source>Obstacle name</source>
+      </segment>
+    </unit>
+    <unit id="5268710126531471758">
+      <segment>
+        <source>Obstacle altitude type</source>
+      </segment>
+    </unit>
+    <unit id="557727381317439046">
+      <segment>
+        <source>Lateral distance type</source>
+      </segment>
+    </unit>
+    <unit id="9072710812131117366">
+      <segment>
+        <source>Free positioning</source>
+      </segment>
+    </unit>
+    <unit id="381912160634740127">
+      <segment>
+        <source>Add point</source>
+      </segment>
+    </unit>
+    <unit id="2005931237680290696">
+      <segment>
+        <source>Select point</source>
+      </segment>
+    </unit>
+    <unit id="3563524107874537314">
+      <segment>
+        <source>delete point</source>
+      </segment>
+    </unit>
+    <unit id="8394386160100993545">
+      <segment>
+        <source> Alt. point </source>
+      </segment>
+    </unit>
+    <unit id="4761670130264103669">
+      <segment>
+        <source> Ref. supp. dist. </source>
+      </segment>
+    </unit>
+    <unit id="1173626964516754828">
+      <segment>
+        <source> Line axe dist. </source>
+      </segment>
+    </unit>
+    <unit id="1498958297880085534">
+      <segment>
+        <source>delete obstacle</source>
+      </segment>
+    </unit>
+    <unit id="8244905429888828226">
+      <segment>
+        <source>AT-CCGLA</source>
+      </segment>
+    </unit>
+    <unit id="5469472899799340456">
+      <segment>
+        <source>Calculate and save</source>
+      </segment>
+    </unit>
+    <unit id="8699047463831885417">
+      <segment>
+        <source>Results:</source>
+      </segment>
+    </unit>
+    <unit id="6954812763575269213">
+      <segment>
+        <source>Oblique</source>
+      </segment>
+    </unit>
+    <unit id="160958144287367985">
+      <segment>
+        <source>Vertical</source>
+      </segment>
+    </unit>
+    <unit id="8382375758916799432">
+      <segment>
+        <source>Horizontal</source>
+      </segment>
+    </unit>
+    <unit id="1125666118611359006">
+      <segment>
+        <source>House</source>
+      </segment>
+    </unit>
+    <unit id="5782981899482871069">
+      <segment>
+        <source>Building</source>
+      </segment>
+    </unit>
+    <unit id="5139118152626940877">
+      <segment>
+        <source>Tree</source>
+      </segment>
+    </unit>
+    <unit id="8693603235657020323">
+      <segment>
+        <source>Other</source>
+      </segment>
+    </unit>
+    <unit id="6474791459744892295">
+      <segment>
+        <source>Absolute (NGF)</source>
+      </segment>
+    </unit>
+    <unit id="3757513599773924778">
+      <segment>
+        <source>Relative to support</source>
+      </segment>
+    </unit>
+    <unit id="4305399083978919436">
+      <segment>
+        <source>Span axis</source>
+      </segment>
+    </unit>
+    <unit id="4441055613955460887">
+      <segment>
+        <source>Line axis</source>
+      </segment>
+    </unit>
+    <unit id="3989668595571335837">
+      <segment>
+        <source>Obstacle deleted</source>
+      </segment>
+    </unit>
+    <unit id="5037464174861244391">
+      <segment>
+        <source>Obstacle saved</source>
+      </segment>
+    </unit>
     <unit id="3899641059154911141">
       <segment>
         <source> Fold back </source>
       </segment>
     </unit>
+    <unit id="2205679024859102357">
+      <segment>
+        <source>Parameter (m)</source>
+      </segment>
+    </unit>
+    <unit id="5909128736797701112">
+      <segment>
+        <source>Work load %</source>
+      </segment>
+    </unit>
+    <unit id="3494570942698291859">
+      <segment>
+        <source>Oblique (m)</source>
+      </segment>
+    </unit>
+    <unit id="6560642783363072934">
+      <segment>
+        <source>Vertical (m)</source>
+      </segment>
+    </unit>
+    <unit id="2143129387317692084">
+      <segment>
+        <source>Horizontal (m)</source>
+      </segment>
+    </unit>
+    <unit id="8179510261091625036">
+      <segment>
+        <source>Climate condition</source>
+      </segment>
+    </unit>
     <unit id="1583307941081347908">
       <segment>
         <source>Load / marking</source>
+      </segment>
+    </unit>
+    <unit id="5884678477650117685">
+      <segment>
+        <source>Cable manip. at support</source>
+      </segment>
+    </unit>
+    <unit id="1964106600703167330">
+      <segment>
+        <source>Cable manip. at span</source>
+      </segment>
+    </unit>
+    <unit id="8033045192563886902">
+      <segment>
+        <source>In order to add charges, you need to create a charge case.</source>
+      </segment>
+    </unit>
+    <unit id="1339958536387081724">
+      <segment>
+        <source>Add a charge case</source>
+      </segment>
+    </unit>
+    <unit id="6028011477486800998">
+      <segment>
+        <source>One span</source>
+      </segment>
+    </unit>
+    <unit id="2981359641232309364">
+      <segment>
+        <source>Two spans</source>
       </segment>
     </unit>
     <unit id="1616102757855967475">
@@ -1499,14 +1313,16 @@
         <source>VR</source>
       </segment>
     </unit>
-    <unit id="8699047463831885417">
-      <segment>
-        <source>Results:</source>
-      </segment>
-    </unit>
     <unit id="1183601349925746054">
       <segment>
         <source>Parameter</source>
+      </segment>
+    </unit>
+    <unit id="80889600222732792">
+      <segment>
+        <source>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
+        </source>
       </segment>
     </unit>
     <unit id="981945747118080282">
@@ -1549,6 +1365,11 @@
         <source>Measure name</source>
       </segment>
     </unit>
+    <unit id="2900727946848099689">
+      <segment>
+        <source>Measure name must be unique.</source>
+      </segment>
+    </unit>
     <unit id="3973931101896534797">
       <segment>
         <source>Date</source>
@@ -1579,6 +1400,11 @@
         <source>Sky cover</source>
       </segment>
     </unit>
+    <unit id="2981219928115418649">
+      <segment>
+        <source>Link</source>
+      </segment>
+    </unit>
     <unit id="5198396305972397137">
       <segment>
         <source>Voltage</source>
@@ -1587,6 +1413,16 @@
     <unit id="57361994969699356">
       <segment>
         <source>Span type</source>
+      </segment>
+    </unit>
+    <unit id="8384742917026482252">
+      <segment>
+        <source>Phase</source>
+      </segment>
+    </unit>
+    <unit id="8721528059163811685">
+      <segment>
+        <source>Guard</source>
       </segment>
     </unit>
     <unit id="3968142117594394855">
@@ -1644,9 +1480,29 @@
         <source>Create a new measurement</source>
       </segment>
     </unit>
+    <unit id="7141835298693653605">
+      <segment>
+        <source>Choose an existing measure</source>
+      </segment>
+    </unit>
+    <unit id="8878227880393471056">
+      <segment>
+        <source>No measures found</source>
+      </segment>
+    </unit>
+    <unit id="4396866374643971390">
+      <segment>
+        <source>No measures</source>
+      </segment>
+    </unit>
     <unit id="5698046514233867599">
       <segment>
         <source>Choose</source>
+      </segment>
+    </unit>
+    <unit id="5503038325545336483">
+      <segment>
+        <source>TM </source>
       </segment>
     </unit>
     <unit id="4417879210680246482">
@@ -1657,6 +1513,62 @@
     <unit id="3177280644106670130">
       <segment>
         <source>Update mode</source>
+      </segment>
+    </unit>
+    <unit id="875667397146608317">
+      <segment>
+        <source>Parameter (Papoto, etc.)</source>
+      </segment>
+    </unit>
+    <unit id="7070151077841866543">
+      <segment>
+        <source> Uncertainty parameter </source>
+      </segment>
+    </unit>
+    <unit id="1629692616024358810">
+      <segment>
+        <source>Cable temperature</source>
+      </segment>
+    </unit>
+    <unit id="1974465944242849442">
+      <segment>
+        <source> Uncertainty cable temperature </source>
+      </segment>
+    </unit>
+    <unit id="7188780438285561792">
+      <segment>
+        <source> <ph id="0" equiv="INTERPOLATION" disp="{{ (measureData().outputs.papoto?.parameter | number: &apos;1.0-2&apos;) ?? &apos;-&apos; }}"/> m </source>
+      </segment>
+    </unit>
+    <unit id="2702723106685015008">
+      <segment>
+        <source>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">
+            <ph id="1" equiv="INTERPOLATION" disp="{{ &apos;-&apos; }}"/>
+          </pc>
+        </source>
+      </segment>
+    </unit>
+    <unit id="2808375176954788016">
+      <segment>
+        <source> <ph id="0" equiv="INTERPOLATION" disp="{{ (measureData().outputs.cableTemperature?.cableTemperature | number: &apos;1.0-2&apos;) ?? &apos;-&apos; }}"/> °C </source>
+      </segment>
+    </unit>
+    <unit id="7384950308158654962">
+      <segment>
+        <source>Uncertainty cable temperature</source>
+      </segment>
+    </unit>
+    <unit id="5665555819415968939">
+      <segment>
+        <source>
+          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ measureData().outputs.cableTemperature?.cableTemperatureUncertainty ?? &apos;-&apos; }}"/> °C</pc>
+        </source>
+      </segment>
+    </unit>
+    <unit id="2271602410584964197">
+      <segment>
+        <source>Calculate setting parameter at 15°C</source>
       </segment>
     </unit>
     <unit id="3911341609936417398">
@@ -1689,6 +1601,11 @@
         <source>Auto</source>
       </segment>
     </unit>
+    <unit id="2233560223291461480">
+      <segment>
+        <source>Manual</source>
+      </segment>
+    </unit>
     <unit id="7288576464171916715">
       <segment>
         <source>Initial Condition added and state generated</source>
@@ -1697,6 +1614,11 @@
     <unit id="6231230520120019174">
       <segment>
         <source>Initial Condition added</source>
+      </segment>
+    </unit>
+    <unit id="6408021470602185042">
+      <segment>
+        <source>All fields are mandatory for temperature calculation.</source>
       </segment>
     </unit>
     <unit id="4408679057911996366">
@@ -1749,14 +1671,14 @@
         <source>It won&apos;t be used in the calculation.</source>
       </segment>
     </unit>
-    <unit id="1629692616024358810">
-      <segment>
-        <source>Cable temperature</source>
-      </segment>
-    </unit>
     <unit id="5327011370475378063">
       <segment>
         <source>Solar flux on the cable</source>
+      </segment>
+    </unit>
+    <unit id="5939025002547986929">
+      <segment>
+        <source>An error occurred while calculating the temperature</source>
       </segment>
     </unit>
     <unit id="1252103849589771616">
@@ -1879,9 +1801,314 @@
         <source>Report</source>
       </segment>
     </unit>
+    <unit id="2185228394767497497">
+      <segment>
+        <source>Data saved successfully</source>
+      </segment>
+    </unit>
+    <unit id="1831958434012261940">
+      <segment>
+        <source>Natural lengths L0</source>
+      </segment>
+    </unit>
+    <unit id="8065031423203926640">
+      <segment>
+        <source>L0 table</source>
+      </segment>
+    </unit>
+    <unit id="971569449266353120">
+      <segment>
+        <source>L0</source>
+      </segment>
+    </unit>
+    <unit id="4436770741152429750">
+      <segment>
+        <source>Sum L0</source>
+      </segment>
+    </unit>
+    <unit id="8198413691907314778">
+      <segment>
+        <source>Loading L0 data…</source>
+      </segment>
+    </unit>
+    <unit id="6843015305937593038">
+      <segment>
+        <source>Loads table</source>
+      </segment>
+    </unit>
+    <unit id="6509563701224725941">
+      <segment>
+        <source>Load case name</source>
+      </segment>
+    </unit>
+    <unit id="7450321450712565157">
+      <segment>
+        <source> Description <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span&gt;" dispEnd="&lt;/span&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ descriptionLength() }}"/>/240</pc></source>
+      </segment>
+    </unit>
+    <unit id="8632108336747094747">
+      <segment>
+        <source>Wind pressure</source>
+      </segment>
+    </unit>
+    <unit id="1592892612383369831">
+      <segment>
+        <source>Cable temp.</source>
+      </segment>
+    </unit>
+    <unit id="3876336363073925034">
+      <segment>
+        <source>Ice thickness before support frontier</source>
+      </segment>
+    </unit>
+    <unit id="421318936396804890">
+      <segment>
+        <source>Ice thickness after support frontier</source>
+      </segment>
+    </unit>
+    <unit id="3759359101166219663">
+      <segment>
+        <source>load / marking</source>
+      </segment>
+    </unit>
+    <unit id="5667839260849056594">
+      <segment>
+        <source>N°</source>
+      </segment>
+    </unit>
+    <unit id="8484530075062955140">
+      <segment>
+        <source>Ref. support</source>
+      </segment>
+    </unit>
+    <unit id="1386303765424324449">
+      <segment>
+        <source>Distance to ref. support</source>
+      </segment>
+    </unit>
+    <unit id="3251759404563225821">
+      <segment>
+        <source>Modify</source>
+      </segment>
+    </unit>
+    <unit id="8365500949716833241">
+      <segment>
+        <source>VTL &amp; Guying</source>
+      </segment>
+    </unit>
+    <unit id="922943791833170370">
+      <segment>
+        <source>Guying span</source>
+      </segment>
+    </unit>
+    <unit id="2763143653229759651">
+      <segment>
+        <source>Support type:</source>
+      </segment>
+    </unit>
+    <unit id="5725617251868768393">
+      <segment>
+        <source>VTL without guying</source>
+      </segment>
+    </unit>
+    <unit id="8104522487016152357">
+      <segment>
+        <source>Charge V</source>
+      </segment>
+    </unit>
+    <unit id="2592173227911935397">
+      <segment>
+        <source>Charge T</source>
+      </segment>
+    </unit>
+    <unit id="2203215067045218337">
+      <segment>
+        <source>Charge L</source>
+      </segment>
+    </unit>
+    <unit id="5819878164896182593">
+      <segment>
+        <source>Resultant</source>
+      </segment>
+    </unit>
+    <unit id="3001880415806038829">
+      <segment>
+        <source>Guying</source>
+      </segment>
+    </unit>
+    <unit id="4337200314263685406">
+      <segment>
+        <source>Horizontal distance</source>
+      </segment>
+    </unit>
+    <unit id="5175853471479908941">
+      <segment>
+        <source>With pulley</source>
+      </segment>
+    </unit>
+    <unit id="5521065577754808188">
+      <segment>
+        <source>Tension in the guy line</source>
+      </segment>
+    </unit>
+    <unit id="3482664162570542899">
+      <segment>
+        <source>Angle guy line / Horizon</source>
+      </segment>
+    </unit>
+    <unit id="6175534130375947992">
+      <segment>
+        <source>Charge V under console</source>
+      </segment>
+    </unit>
+    <unit id="1682829464476951720">
+      <segment>
+        <source>Charge T under console</source>
+      </segment>
+    </unit>
+    <unit id="2837109850472064180">
+      <segment>
+        <source>Charge L (if pulley)</source>
+      </segment>
+    </unit>
+    <unit id="2662644497259948010">
+      <segment>
+        <source>Comment</source>
+      </segment>
+    </unit>
+    <unit id="1258725719065801469">
+      <segment>
+        <source>Add a comment for the export.</source>
+      </segment>
+    </unit>
+    <unit id="5667174251183495987">
+      <segment>
+        <source> For a stop or a suspension without pulley, the tension in the guy line allows to balance the longitudinal charges at the console level (no L). For a suspension with a pulley, the tension in the guy line is the maximum tension in all the cables of the bundle and a longitudinal charge appears. </source>
+      </segment>
+    </unit>
+    <unit id="8828649339346559125">
+      <segment>
+        <source>Loading data…</source>
+      </segment>
+    </unit>
+    <unit id="7695209021302072052">
+      <segment>
+        <source>Suspension</source>
+      </segment>
+    </unit>
+    <unit id="1971546395781227984">
+      <segment>
+        <source>Anchor</source>
+      </segment>
+    </unit>
+    <unit id="5640313464913831943">
+      <segment>
+        <source>VTL and guying saved</source>
+      </segment>
+    </unit>
     <unit id="3652243134148906527">
       <segment>
         <source>Invert:</source>
+      </segment>
+    </unit>
+    <unit id="6812930637022637485">
+      <segment>
+        <source>Display</source>
+      </segment>
+    </unit>
+    <unit id="7536890634485426754">
+      <segment>
+        <source>Select which elements to display on the studio.</source>
+      </segment>
+    </unit>
+    <unit id="4114020677798356875">
+      <segment>
+        <source>Tables</source>
+      </segment>
+    </unit>
+    <unit id="1684734235599362204">
+      <segment>
+        <source>Tools</source>
+      </segment>
+    </unit>
+    <unit id="4819033235564776951">
+      <segment>
+        <source>Edit your selected tools shortcuts</source>
+      </segment>
+    </unit>
+    <unit id="3219524493839487316">
+      <segment>
+        <source>Inset</source>
+      </segment>
+    </unit>
+    <unit id="8826026204967028707">
+      <segment>
+        <source>Select and organise the tools with quick access (maximum 5).</source>
+      </segment>
+    </unit>
+    <unit id="8772586645735221164">
+      <segment>
+        <source>Pose table</source>
+      </segment>
+    </unit>
+    <unit id="3493980964958188572">
+      <segment>
+        <source>Obstacles table</source>
+      </segment>
+    </unit>
+    <unit id="3627508489639881021">
+      <segment>
+        <source>Grounds table</source>
+      </segment>
+    </unit>
+    <unit id="4915431133669985304">
+      <segment>
+        <source>Profile</source>
+      </segment>
+    </unit>
+    <unit id="4266658892163682187">
+      <segment>
+        <source>Face</source>
+      </segment>
+    </unit>
+    <unit id="7801621976146528131">
+      <segment>
+        <source>Loads</source>
+      </segment>
+    </unit>
+    <unit id="3192753641165405448">
+      <segment>
+        <source>Base</source>
+      </segment>
+    </unit>
+    <unit id="2938335127110015653">
+      <segment>
+        <source>Field measurements</source>
+      </segment>
+    </unit>
+    <unit id="810011115797190863">
+      <segment>
+        <source>Cable marking</source>
+      </segment>
+    </unit>
+    <unit id="568104999805025008">
+      <segment>
+        <source>Strand RRTS</source>
+      </segment>
+    </unit>
+    <unit id="7353266591752987691">
+      <segment>
+        <source>Forest trenches</source>
+      </segment>
+    </unit>
+    <unit id="3135010041684944812">
+      <segment>
+        <source>Height &amp; lateral distance</source>
+      </segment>
+    </unit>
+    <unit id="1271914484753735123">
+      <segment>
+        <source>Cable adjustment</source>
       </segment>
     </unit>
     <unit id="7003790776240394114">
@@ -1901,15 +2128,32 @@
     </unit>
     <unit id="794617384648959179">
       <segment>
-        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other"
-            dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" /></source>
+        <source> Details <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;" dispEnd="&lt;app-icon icon=&quot;keyboard_arrow_down&quot; iconRight /&gt;"/></source>
+      </segment>
+    </unit>
+    <unit id="7430416142942514215">
+      <segment>
+        <source>Publish</source>
       </segment>
     </unit>
     <unit id="1724907302012419507">
       <segment>
         <source>There is no study description</source>
+      </segment>
+    </unit>
+    <unit id="8446665382086922955">
+      <segment>
+        <source>dd/MM:yyyy at HH&apos;h&apos;mm</source>
+      </segment>
+    </unit>
+    <unit id="2471229163174544608">
+      <segment>
+        <source>Sections</source>
+      </segment>
+    </unit>
+    <unit id="8792569904201285826">
+      <segment>
+        <source>List of saved states</source>
       </segment>
     </unit>
     <unit id="5361585538695040272">
@@ -1922,6 +2166,11 @@
         <source>Ground &amp; obstacles</source>
       </segment>
     </unit>
+    <unit id="3533138925800017240">
+      <segment>
+        <source>Study Duplicated</source>
+      </segment>
+    </unit>
     <unit id="6600961151364207736">
       <segment>
         <source>Section Updated</source>
@@ -1932,6 +2181,11 @@
         <source>Section Created</source>
       </segment>
     </unit>
+    <unit id="128932358295516526">
+      <segment>
+        <source>Section Deleted</source>
+      </segment>
+    </unit>
     <unit id="7697593277738514956">
       <segment>
         <source>Section Duplicated</source>
@@ -1940,6 +2194,11 @@
     <unit id="8157568719212294147">
       <segment>
         <source>Initial Condition Updated</source>
+      </segment>
+    </unit>
+    <unit id="3049551355280538164">
+      <segment>
+        <source>Initial Condition Added</source>
       </segment>
     </unit>
     <unit id="5722345326918734257">
@@ -1982,9 +2241,89 @@
         <source>Base parameter</source>
       </segment>
     </unit>
+    <unit id="8662695338423847831">
+      <segment>
+        <source>Base temperature</source>
+      </segment>
+    </unit>
+    <unit id="2936057948596507296">
+      <segment>
+        <source>°C</source>
+      </segment>
+    </unit>
+    <unit id="5577525641723703663">
+      <segment>
+        <source> Cable pretension </source>
+      </segment>
+    </unit>
+    <unit id="4893374109940250877">
+      <segment>
+        <source>%CRA</source>
+      </segment>
+    </unit>
+    <unit id="6539153962019019862">
+      <segment>
+        <source>Extreme historical conditions incurred by the cable</source>
+      </segment>
+    </unit>
+    <unit id="5455255610792577574">
+      <segment>
+        <source> Min temperature </source>
+      </segment>
+    </unit>
+    <unit id="3948064756684098346">
+      <segment>
+        <source> Max wind pressure </source>
+      </segment>
+    </unit>
+    <unit id="902828700910058336">
+      <segment>
+        <source>Pa</source>
+      </segment>
+    </unit>
+    <unit id="7696118233074431582">
+      <segment>
+        <source> Max ice thickness </source>
+      </segment>
+    </unit>
+    <unit id="2340664682417154043">
+      <segment>
+        <source>cm</source>
+      </segment>
+    </unit>
+    <unit id="2638469548137871317">
+      <segment>
+        <source>Initial condition name</source>
+      </segment>
+    </unit>
     <unit id="5280610039017327422">
       <segment>
         <source>Base temperature (°C)</source>
+      </segment>
+    </unit>
+    <unit id="9095132887560670905">
+      <segment>
+        <source>Cable pretension</source>
+      </segment>
+    </unit>
+    <unit id="8798542344025275411">
+      <segment>
+        <source>Min temperature</source>
+      </segment>
+    </unit>
+    <unit id="2153962924756003345">
+      <segment>
+        <source>Max wind pressure</source>
+      </segment>
+    </unit>
+    <unit id="6888404140532857244">
+      <segment>
+        <source>Max ice thickness</source>
+      </segment>
+    </unit>
+    <unit id="7585826646011739428">
+      <segment>
+        <source>Edit</source>
       </segment>
     </unit>
     <unit id="9010681967368917708">
@@ -2012,6 +2351,16 @@
         <source> Graphical view </source>
       </segment>
     </unit>
+    <unit id="2593007815199532062">
+      <segment>
+        <source>Section</source>
+      </segment>
+    </unit>
+    <unit id="3569799587833040802">
+      <segment>
+        <source> Section name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+      </segment>
+    </unit>
     <unit id="2037406622728640058">
       <segment>
         <source>Section name must be unique.</source>
@@ -2019,9 +2368,7 @@
     </unit>
     <unit id="6414866325880172359">
       <segment>
-        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
+        <source> Section type <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
       </segment>
     </unit>
     <unit id="5532577047370657996">
@@ -2029,11 +2376,24 @@
         <source>Electric phase number</source>
       </segment>
     </unit>
+    <unit id="928951684182090210">
+      <segment>
+        <source> Cable name <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+      </segment>
+    </unit>
     <unit id="2715728438895385250">
       <segment>
-        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT"
-            type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">
-          *</pc></source>
+        <source> Cable amount <pc id="0" equivStart="START_SUPERSCRIPT" equivEnd="CLOSE_SUPERSCRIPT" type="other" dispStart="&lt;sup class=&quot;mandatory&quot;&gt;" dispEnd="&lt;/sup&gt;">*</pc></source>
+      </segment>
+    </unit>
+    <unit id="1289308098980826210">
+      <segment>
+        <source>Section type</source>
+      </segment>
+    </unit>
+    <unit id="9093347743965817292">
+      <segment>
+        <source>Line team</source>
       </segment>
     </unit>
     <unit id="2820133611314033915">
@@ -2056,9 +2416,19 @@
         <source>Electric tension level</source>
       </segment>
     </unit>
+    <unit id="472586784721739380">
+      <segment>
+        <source>Link - ID</source>
+      </segment>
+    </unit>
     <unit id="7952517032522600259">
       <segment>
         <source>Link - Name</source>
+      </segment>
+    </unit>
+    <unit id="8198965325876404733">
+      <segment>
+        <source>LIT - ID</source>
       </segment>
     </unit>
     <unit id="7554418821130915590">
@@ -2066,19 +2436,19 @@
         <source>LIT - Name</source>
       </segment>
     </unit>
-    <unit id="8569561572681353162">
+    <unit id="8387651464002742246">
       <segment>
-        <source>LIT</source>
-      </segment>
-    </unit>
-    <unit id="2662644497259948010">
-      <segment>
-        <source>Comment</source>
+        <source>Branch</source>
       </segment>
     </unit>
     <unit id="8718048249801659622">
       <segment>
         <source>comment</source>
+      </segment>
+    </unit>
+    <unit id="3885497195825665706">
+      <segment>
+        <source>Next</source>
       </segment>
     </unit>
     <unit id="5798603970967359521">
@@ -2091,9 +2461,34 @@
         <source>supports amount</source>
       </segment>
     </unit>
-    <unit id="8721528059163811685">
+    <unit id="8502839014739399542">
       <segment>
-        <source>Guard</source>
+        <source>Double click on a column to copy the value to all supports</source>
+      </segment>
+    </unit>
+    <unit id="3854993654974680287">
+      <segment>
+        <source>Support {first} to {last} of {totalRecords}</source>
+      </segment>
+    </unit>
+    <unit id="5946937164148510682">
+      <segment>
+        <source>supports comment</source>
+      </segment>
+    </unit>
+    <unit id="7386852230658433938">
+      <segment>
+        <source>Comment about the supports</source>
+      </segment>
+    </unit>
+    <unit id="4452427314943113135">
+      <segment>
+        <source>Previous</source>
+      </segment>
+    </unit>
+    <unit id="668947737201625404">
+      <segment>
+        <source>Support <ph id="0" equiv="PH" disp="&apos;{&apos;"/>first} to <ph id="1" equiv="PH_1" disp="&apos;{&apos;"/>last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;"/>totalRecords}</source>
       </segment>
     </unit>
     <unit id="7584732332123203553">
@@ -2101,14 +2496,59 @@
         <source>Attachment set</source>
       </segment>
     </unit>
+    <unit id="8789132061698781587">
+      <segment>
+        <source>Choose the attachment set in the list or on the graph to find the right arm length.</source>
+      </segment>
+    </unit>
     <unit id="419149014255896698">
       <segment>
         <source>Support name</source>
       </segment>
     </unit>
+    <unit id="3059442917741627872">
+      <segment>
+        <source>Arm length</source>
+      </segment>
+    </unit>
+    <unit id="4142858945350399408">
+      <segment>
+        <source>Height below console</source>
+      </segment>
+    </unit>
+    <unit id="2694623513112556993">
+      <segment>
+        <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
+      </segment>
+    </unit>
+    <unit id="3449156368391431679">
+      <segment>
+        <source>N° supp.</source>
+      </segment>
+    </unit>
+    <unit id="2759009850634919490">
+      <segment>
+        <source>Span l.</source>
+      </segment>
+    </unit>
+    <unit id="131564779447274448">
+      <segment>
+        <source>Attachment alt. (NGF)</source>
+      </segment>
+    </unit>
+    <unit id="8240240329115149718">
+      <segment>
+        <source>Angle</source>
+      </segment>
+    </unit>
     <unit id="5513122358899972896">
       <segment>
         <source>Chain name</source>
+      </segment>
+    </unit>
+    <unit id="4363811923368535546">
+      <segment>
+        <source>Chain l.</source>
       </segment>
     </unit>
     <unit id="8041319185706138234">
@@ -2124,6 +2564,11 @@
     <unit id="6018996754780938049">
       <segment>
         <source>Arm l.</source>
+      </segment>
+    </unit>
+    <unit id="3154787560331051884">
+      <segment>
+        <source>Chain V</source>
       </segment>
     </unit>
     <unit id="5763255287644465636">
@@ -2144,6 +2589,11 @@
     <unit id="6645271274546920288">
       <segment>
         <source> Chain surface </source>
+      </segment>
+    </unit>
+    <unit id="5463714848868355880">
+      <segment>
+        <source>Tower</source>
       </segment>
     </unit>
     <unit id="349300253783483450">
@@ -2241,6 +2691,11 @@
         <source>Add support before</source>
       </segment>
     </unit>
+    <unit id="1599802675385906175">
+      <segment>
+        <source>Add support after</source>
+      </segment>
+    </unit>
     <unit id="7434521647283704814">
       <segment>
         <source>Delete support</source>
@@ -2251,9 +2706,24 @@
         <source>Create a section</source>
       </segment>
     </unit>
+    <unit id="1927414643473979733">
+      <segment>
+        <source>Choose a creation type</source>
+      </segment>
+    </unit>
+    <unit id="3852148482682745847">
+      <segment>
+        <source>From local referencial</source>
+      </segment>
+    </unit>
     <unit id="513031718637117901">
       <segment>
         <source>From distant referencial</source>
+      </segment>
+    </unit>
+    <unit id="5778821001923660039">
+      <segment>
+        <source>From a file</source>
       </segment>
     </unit>
     <unit id="5145287154773357101">
@@ -2276,6 +2746,11 @@
         <source>Modify a study section</source>
       </segment>
     </unit>
+    <unit id="1170667643695316061">
+      <segment>
+        <source>Create a study section</source>
+      </segment>
+    </unit>
     <unit id="8833276229402617730">
       <segment>
         <source>No existing section</source>
@@ -2283,14 +2758,32 @@
     </unit>
     <unit id="1363022291205513969">
       <segment>
-        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON"
-            type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;"
-            dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;" /> Create a section </source>
+        <source><pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon icon=&quot;add&quot; /&gt;" dispEnd="&lt;app-icon icon=&quot;add&quot; /&gt;"/> Create a section </source>
       </segment>
     </unit>
     <unit id="3501835423208116051">
       <segment>
         <source>select this study&apos;s section</source>
+      </segment>
+    </unit>
+    <unit id="1949800506879332767">
+      <segment>
+        <source>Section Name</source>
+      </segment>
+    </unit>
+    <unit id="8569561572681353162">
+      <segment>
+        <source>LIT</source>
+      </segment>
+    </unit>
+    <unit id="2925129304308690882">
+      <segment>
+        <source>Last modified</source>
+      </segment>
+    </unit>
+    <unit id="479690504462006012">
+      <segment>
+        <source>Initial condition</source>
       </segment>
     </unit>
     <unit id="8214037487031019515">
@@ -2308,9 +2801,29 @@
         <source>View initial conditions</source>
       </segment>
     </unit>
+    <unit id="5132528819937680289">
+      <segment>
+        <source>Charge cases</source>
+      </segment>
+    </unit>
+    <unit id="2509141182388535183">
+      <segment>
+        <source>View</source>
+      </segment>
+    </unit>
     <unit id="6598075623864682368">
       <segment>
         <source>Add an initial condition</source>
+      </segment>
+    </unit>
+    <unit id="4321296572437361289">
+      <segment>
+        <source>Generate a state</source>
+      </segment>
+    </unit>
+    <unit id="2087858758183650212">
+      <segment>
+        <source>IC</source>
       </segment>
     </unit>
     <unit id="3411835502741534903">
@@ -2358,9 +2871,49 @@
         <source>clear selection</source>
       </segment>
     </unit>
+    <unit id="9064235119713814924">
+      <segment>
+        <source>Version / MAJ</source>
+      </segment>
+    </unit>
+    <unit id="5004217118094368051">
+      <segment>
+        <source>Ver.MAJ</source>
+      </segment>
+    </unit>
+    <unit id="1614612576043079687">
+      <segment>
+        <source>Shrink menu</source>
+      </segment>
+    </unit>
+    <unit id="2102825898069375693">
+      <segment>
+        <source>Menu</source>
+      </segment>
+    </unit>
+    <unit id="3102779920122732727">
+      <segment>
+        <source> Loading </source>
+      </segment>
+    </unit>
     <unit id="7215759904460573154">
       <segment>
         <source> Ready </source>
+      </segment>
+    </unit>
+    <unit id="6536020395223120161">
+      <segment>
+        <source> Error </source>
+      </segment>
+    </unit>
+    <unit id="8083736833442025529">
+      <segment>
+        <source>No cable found</source>
+      </segment>
+    </unit>
+    <unit id="7215028324689336548">
+      <segment>
+        <source>Calculation error</source>
       </segment>
     </unit>
     <unit id="1630268381780426388">
@@ -2368,593 +2921,19 @@
         <source>Calculation error: &apos;Solver did not converge&apos;</source>
       </segment>
     </unit>
+    <unit id="5080875188035619513">
+      <segment>
+        <source>Pyodide load error</source>
+      </segment>
+    </unit>
+    <unit id="2657043015926552641">
+      <segment>
+        <source>Unknown error</source>
+      </segment>
+    </unit>
     <unit id="4323470180912194028">
       <segment>
         <source>Copy</source>
-      </segment>
-    </unit>
-    <unit id="1258725719065801469">
-      <segment>
-        <source>Add a comment for the export.</source>
-      </segment>
-    </unit>
-    <unit id="5725617251868768393">
-      <segment>
-        <source>VTL without guying</source>
-      </segment>
-    </unit>
-    <unit id="1831958434012261940">
-      <segment>
-        <source>Natural lengths L0</source>
-      </segment>
-    </unit>
-    <unit id="2203215067045218337">
-      <segment>
-        <source>Charge L</source>
-      </segment>
-    </unit>
-    <unit id="2763143653229759651">
-      <segment>
-        <source>Support type:</source>
-      </segment>
-    </unit>
-    <unit id="2837109850472064180">
-      <segment>
-        <source>Charge L (if pulley)</source>
-      </segment>
-    </unit>
-    <unit id="3001880415806038829">
-      <segment>
-        <source>Guying</source>
-      </segment>
-    </unit>
-    <unit id="1682829464476951720">
-      <segment>
-        <source>Charge T under console</source>
-      </segment>
-    </unit>
-    <unit id="3482664162570542899">
-      <segment>
-        <source>Angle guy line / Horizon</source>
-      </segment>
-    </unit>
-    <unit id="4436770741152429750">
-      <segment>
-        <source>Sum L0</source>
-      </segment>
-    </unit>
-    <unit id="5521065577754808188">
-      <segment>
-        <source>Tension in the guy line</source>
-      </segment>
-    </unit>
-    <unit id="5667174251183495987">
-      <segment>
-        <source> For a stop or a suspension without pulley, the tension in the guy line allows to
-          balance the longitudinal charges at the console level (no L). For a suspension with a
-          pulley, the tension in the guy line is the maximum tension in all the cables of the bundle
-          and a longitudinal charge appears. </source>
-      </segment>
-    </unit>
-    <unit id="5819878164896182593">
-      <segment>
-        <source>Resultant</source>
-      </segment>
-    </unit>
-    <unit id="6175534130375947992">
-      <segment>
-        <source>Charge V under console</source>
-      </segment>
-    </unit>
-    <unit id="8065031423203926640">
-      <segment>
-        <source>L0 table</source>
-      </segment>
-    </unit>
-    <unit id="8104522487016152357">
-      <segment>
-        <source>Charge V</source>
-      </segment>
-    </unit>
-    <unit id="8198413691907314778">
-      <segment>
-        <source>Loading L0 data…</source>
-      </segment>
-    </unit>
-    <unit id="2592173227911935397">
-      <segment>
-        <source>Charge T</source>
-      </segment>
-    </unit>
-    <unit id="8828649339346559125">
-      <segment>
-        <source>Loading data…</source>
-      </segment>
-    </unit>
-    <unit id="971569449266353120">
-      <segment>
-        <source>L0</source>
-      </segment>
-    </unit>
-    <unit id="1580807911042419380">
-      <segment>
-        <source>T:</source>
-      </segment>
-    </unit>
-    <unit id="1839839226703008167">
-      <segment>
-        <source>The python logs have been deactivated</source>
-      </segment>
-    </unit>
-    <unit id="2401579609429794582">
-      <segment>
-        <source>The python logs have been activated</source>
-      </segment>
-    </unit>
-    <unit id="2587240527868724590">
-      <segment>
-        <source>CC</source>
-      </segment>
-    </unit>
-    <unit id="2936879176471643383">
-      <segment>
-        <source>Activate Python logs</source>
-      </segment>
-    </unit>
-    <unit id="3129001544428431323">
-      <segment>
-        <source>OFF</source>
-      </segment>
-    </unit>
-    <unit id="5093495639955235689">
-      <segment>
-        <source>Python logs deactivated</source>
-      </segment>
-    </unit>
-    <unit id="5463714848868355880">
-      <segment>
-        <source>Tower</source>
-      </segment>
-    </unit>
-    <unit id="7565332931594484808">
-      <segment>
-        <source>Python logs activated</source>
-      </segment>
-    </unit>
-    <unit id="8690924341268563915">
-      <segment>
-        <source>Add a load case</source>
-      </segment>
-    </unit>
-    <unit id="4648900870671159218">
-      <segment>
-        <source>Success</source>
-      </segment>
-    </unit>
-    <unit id="2981359641232309364">
-      <segment>
-        <source>Two spans</source>
-      </segment>
-    </unit>
-    <unit id="6028011477486800998">
-      <segment>
-        <source>One span</source>
-      </segment>
-    </unit>
-    <unit id="9213587357522873966">
-      <segment>
-        <source>ON</source>
-      </segment>
-    </unit>
-    <unit id="2050780142571489753">
-      <segment>
-        <source>Description/comment</source>
-      </segment>
-    </unit>
-    <unit id="1974465944242849442">
-      <segment>
-        <source> Uncertainty cable temperature </source>
-      </segment>
-    </unit>
-    <unit id="2900727946848099689">
-      <segment>
-        <source>Measure name must be unique.</source>
-      </segment>
-    </unit>
-    <unit id="3980974174191771572">
-      <segment>
-        <source>VTL (under chain)</source>
-      </segment>
-    </unit>
-    <unit id="5939025002547986929">
-      <segment>
-        <source>An error occurred while calculating the temperature</source>
-      </segment>
-    </unit>
-    <unit id="80889600222732792">
-      <segment>
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other"
-            dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
-        </source>
-      </segment>
-    </unit>
-    <unit id="5503038325545336483">
-      <segment>
-        <source>TM </source>
-      </segment>
-    </unit>
-    <unit id="8387651464002742246">
-      <segment>
-        <source>Branch</source>
-      </segment>
-    </unit>
-    <unit id="3244879037311223621">
-      <segment>
-        <source>Save state</source>
-      </segment>
-    </unit>
-    <unit id="5132528819937680289">
-      <segment>
-        <source>Charge cases</source>
-      </segment>
-    </unit>
-    <unit id="509620284258406390">
-      <segment>
-        <source>NO VOLTAGE</source>
-      </segment>
-    </unit>
-    <unit id="4337200314263685406">
-      <segment>
-        <source>Horizontal distance</source>
-      </segment>
-    </unit>
-    <unit id="5175853471479908941">
-      <segment>
-        <source>With pulley</source>
-      </segment>
-    </unit>
-    <unit id="5640313464913831943">
-      <segment>
-        <source>VTL and guying saved</source>
-      </segment>
-    </unit>
-    <unit id="922943791833170370">
-      <segment>
-        <source>Guying span</source>
-      </segment>
-    </unit>
-    <unit id="2271602410584964197">
-      <segment>
-        <source>Calculate setting parameter at 15°C</source>
-      </segment>
-    </unit>
-    <unit id="7384950308158654962">
-      <segment>
-        <source>Uncertainty cable temperature</source>
-      </segment>
-    </unit>
-    <unit id="7070151077841866543">
-      <segment>
-        <source> Uncertainty parameter </source>
-      </segment>
-    </unit>
-    <unit id="875667397146608317">
-      <segment>
-        <source>Parameter (Papoto, etc.)</source>
-      </segment>
-    </unit>
-    <unit id="6408021470602185042">
-      <segment>
-        <source>All fields are mandatory for temperature calculation.</source>
-      </segment>
-    </unit>
-    <unit id="4396866374643971390">
-      <segment>
-        <source>No measures</source>
-      </segment>
-    </unit>
-    <unit id="7141835298693653605">
-      <segment>
-        <source>Choose an existing measure</source>
-      </segment>
-    </unit>
-    <unit id="8878227880393471056">
-      <segment>
-        <source>No measures found</source>
-      </segment>
-    </unit>
-    <unit id="399524330429754869">
-      <segment>
-        <source>Ice indicator</source>
-      </segment>
-    </unit>
-    <unit id="7478743037636719773">
-      <segment>
-        <source> Ice thickness before support frontier </source>
-      </segment>
-    </unit>
-    <unit id="8939108734321665925">
-      <segment>
-        <source> Ice thickness after support frontier </source>
-      </segment>
-    </unit>
-    <unit id="914576298220560599">
-      <segment>
-        <source>Frontier support</source>
-      </segment>
-    </unit>
-    <unit id="7808756054397155068">
-      <segment>
-        <source>Reset</source>
-      </segment>
-    </unit>
-    <unit id="668947737201625404">
-      <segment>
-        <source>Support <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} to <ph id="1"
-            equiv="PH_1" disp="&apos;{&apos;" />last} of <ph id="2" equiv="PH_2"
-            disp="&apos;{&apos;" />totalRecords}</source>
-      </segment>
-    </unit>
-    <unit id="744159181527045596">
-      <segment>
-        <source>Study <ph id="0" equiv="PH" disp="&apos;{&apos;" />first} to <ph id="1" equiv="PH_1"
-            disp="&apos;{&apos;" />last} of <ph id="2" equiv="PH_2" disp="&apos;{&apos;" />
-          totalRecords}</source>
-      </segment>
-    </unit>
-    <unit id="1971546395781227984">
-      <segment>
-        <source>Anchor</source>
-      </segment>
-    </unit>
-    <unit id="7695209021302072052">
-      <segment>
-        <source>Suspension</source>
-      </segment>
-    </unit>
-    <unit id="136732925281726551">
-      <segment>
-        <source>Minimum value:</source>
-      </segment>
-    </unit>
-    <unit id="5549776374941114664">
-      <segment>
-        <source> Whole number required </source>
-      </segment>
-    </unit>
-    <unit id="9120411489526633764">
-      <segment>
-        <source>Maximum value:</source>
-      </segment>
-    </unit>
-    <unit id="2185228394767497497">
-      <segment>
-        <source>Data saved successfully</source>
-      </segment>
-    </unit>
-    <unit id="5667839260849056594">
-      <segment>
-        <source>N°</source>
-      </segment>
-    </unit>
-    <unit id="6509563701224725941">
-      <segment>
-        <source>Load case name</source>
-      </segment>
-    </unit>
-    <unit id="7450321450712565157">
-      <segment>
-        <source> Description <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN"
-            type="other" dispStart="&lt;span&gt;" dispEnd="&lt;/span&gt;"><ph id="1"
-              equiv="INTERPOLATION" disp="{{ descriptionLength() }}" />/240</pc></source>
-      </segment>
-    </unit>
-    <unit id="8484530075062955140">
-      <segment>
-        <source>Ref. support</source>
-      </segment>
-    </unit>
-    <unit id="8632108336747094747">
-      <segment>
-        <source>Wind pressure</source>
-      </segment>
-    </unit>
-    <unit id="1386303765424324449">
-      <segment>
-        <source>Distance to ref. support</source>
-      </segment>
-    </unit>
-    <unit id="1592892612383369831">
-      <segment>
-        <source>Cable temp.</source>
-      </segment>
-    </unit>
-    <unit id="3759359101166219663">
-      <segment>
-        <source>load / marking</source>
-      </segment>
-    </unit>
-    <unit id="3251759404563225821">
-      <segment>
-        <source>Modify</source>
-      </segment>
-    </unit>
-    <unit id="7345748523571536840">
-      <segment>
-        <source>Elevation:</source>
-      </segment>
-    </unit>
-    <unit id="7518486444185721115">
-      <segment>
-        <source>Parameter:</source>
-      </segment>
-    </unit>
-    <unit id="1125666118611359006">
-      <segment>
-        <source>House</source>
-      </segment>
-    </unit>
-    <unit id="1131253797808406443">
-      <segment>
-        <source>Obstacle name</source>
-      </segment>
-    </unit>
-    <unit id="160958144287367985">
-      <segment>
-        <source>Vertical</source>
-      </segment>
-    </unit>
-    <unit id="3757513599773924778">
-      <segment>
-        <source>Relative to support</source>
-      </segment>
-    </unit>
-    <unit id="4305399083978919436">
-      <segment>
-        <source>Span axis</source>
-      </segment>
-    </unit>
-    <unit id="4441055613955460887">
-      <segment>
-        <source>Line axis</source>
-      </segment>
-    </unit>
-    <unit id="5139118152626940877">
-      <segment>
-        <source>Tree</source>
-      </segment>
-    </unit>
-    <unit id="5268710126531471758">
-      <segment>
-        <source>Obstacle altitude type</source>
-      </segment>
-    </unit>
-    <unit id="5469472899799340456">
-      <segment>
-        <source>Calculate and save</source>
-      </segment>
-    </unit>
-    <unit id="557727381317439046">
-      <segment>
-        <source>Lateral distance type</source>
-      </segment>
-    </unit>
-    <unit id="5782981899482871069">
-      <segment>
-        <source>Building</source>
-      </segment>
-    </unit>
-    <unit id="6474791459744892295">
-      <segment>
-        <source>Absolute (NGF)</source>
-      </segment>
-    </unit>
-    <unit id="6954812763575269213">
-      <segment>
-        <source>Oblique</source>
-      </segment>
-    </unit>
-    <unit id="7009794897351276069">
-      <segment>
-        <source>Obstacle type</source>
-      </segment>
-    </unit>
-    <unit id="8244905429888828226">
-      <segment>
-        <source>AT-CCGLA</source>
-      </segment>
-    </unit>
-    <unit id="8382375758916799432">
-      <segment>
-        <source>Horizontal</source>
-      </segment>
-    </unit>
-    <unit id="8693603235657020323">
-      <segment>
-        <source>Other</source>
-      </segment>
-    </unit>
-    <unit id="9072710812131117366">
-      <segment>
-        <source>Free positioning</source>
-      </segment>
-    </unit>
-    <unit id="3563524107874537314">
-      <segment>
-        <source>delete point</source>
-      </segment>
-    </unit>
-    <unit id="381912160634740127">
-      <segment>
-        <source>Add point</source>
-      </segment>
-    </unit>
-    <unit id="5037464174861244391">
-      <segment>
-        <source>Obstacle saved</source>
-      </segment>
-    </unit>
-    <unit id="1498958297880085534">
-      <segment>
-        <source>delete obstacle</source>
-      </segment>
-    </unit>
-    <unit id="3490467566453662140">
-      <segment>
-        <source>Return to span</source>
-      </segment>
-    </unit>
-    <unit id="3989668595571335837">
-      <segment>
-        <source>Obstacle deleted</source>
-      </segment>
-    </unit>
-    <unit id="8897211906922465937">
-      <segment>
-        <source>Create new obstacle</source>
-      </segment>
-    </unit>
-
-    <unit id="1035708454595696483">
-      <segment>
-        <source>The initial condition name must be unique.</source>
-      </segment>
-    </unit>
-    <unit id="3141736705077915112">
-      <segment>
-        <source>Punctual charge</source>
-      </segment>
-    </unit>
-    <unit id="3876336363073925034">
-      <segment>
-        <source>Ice thickness before support frontier</source>
-      </segment>
-    </unit>
-    <unit id="421318936396804890">
-      <segment>
-        <source>Ice thickness after support frontier</source>
-    <unit id="3192753641165405448">
-      <segment>
-        <source>Base</source>
-    <unit id="1173626964516754828">
-      <segment>
-        <source> Line axe dist. </source>
-      </segment>
-    </unit>
-    <unit id="2005931237680290696">
-      <segment>
-        <source>Select point</source>
-      </segment>
-    </unit>
-    <unit id="4761670130264103669">
-      <segment>
-        <source> Ref. supp. dist. </source>
-      </segment>
-    </unit>
-    <unit id="8394386160100993545">
-      <segment>
-        <source> Alt. point </source>
       </segment>
     </unit>
   </file>
