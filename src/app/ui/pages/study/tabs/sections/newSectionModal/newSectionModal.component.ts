@@ -49,30 +49,14 @@ const areAllRequiredFieldsFilled = (section: Section) => {
 };
 
 const hasSupportsBoundsErrors = (section: Section): boolean => {
-  const { attachmentHeight, spanAngle, armLength, supportFootAltitude } = SUPPORT_FIELD_LIMITS;
-  return section.supports.some((support) => {
-    if (
-      typeof support.attachmentHeight === 'number' &&
-      (support.attachmentHeight < attachmentHeight.min || support.attachmentHeight > attachmentHeight.max)
-    )
-      return true;
-    if (
-      typeof support.spanAngle === 'number' &&
-      (support.spanAngle < spanAngle.min || support.spanAngle > spanAngle.max)
-    )
-      return true;
-    if (
-      typeof support.armLength === 'number' &&
-      (support.armLength < armLength.min || support.armLength > armLength.max)
-    )
-      return true;
-    if (
-      typeof support.supportFootAltitude === 'number' &&
-      (support.supportFootAltitude < supportFootAltitude.min || support.supportFootAltitude > supportFootAltitude.max)
-    )
-      return true;
-    return false;
-  });
+  const fields = Object.keys(SUPPORT_FIELD_LIMITS) as (keyof typeof SUPPORT_FIELD_LIMITS)[];
+  return section.supports.some((support) =>
+    fields.some((field) => {
+      const value = (support as unknown as Record<string, unknown>)[field];
+      const { min, max } = SUPPORT_FIELD_LIMITS[field];
+      return typeof value === 'number' && (value < min || value > max);
+    })
+  );
 };
 
 /**

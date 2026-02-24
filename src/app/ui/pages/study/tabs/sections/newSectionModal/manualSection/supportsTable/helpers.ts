@@ -241,8 +241,14 @@ export const getSupportFieldValues = (supports: Support[], field: 'chainName' | 
   supports.map((s) => s[field] || '');
 
 export const SUPPORT_FIELD_LIMITS = {
+  spanLength: { min: 5, max: 5000 },
   attachmentHeight: { min: -100, max: 9000 },
   spanAngle: { min: -200, max: 200 },
+  chainLength: { min: 0, max: 15 },
+  chainWeight: { min: 0, max: 5000 },
+  attachmentSet: { min: 1, max: 60 },
   armLength: { min: -50, max: 50 },
-  supportFootAltitude: { min: -150, max: 9000 }
+  counterWeight: { min: 0, max: 5000 },
+  supportFootAltitude: { min: -150, max: 9000 },
+  chainSurface: { min: 0, max: 9.99 }
 } as const;
