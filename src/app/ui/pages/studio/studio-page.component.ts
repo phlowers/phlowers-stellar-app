@@ -81,8 +81,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       showTicksValues: true,
       animate: false,
       animateOnMove: false,
-      disabled:
-        this.plotService.loading() || this.plotService.isFreePositioningMode(),
+      disabled: this.plotService.loading() || this.plotService.isFreePositioningMode(),
       translate: (value: number) => {
         return (value + 1).toString();
       },

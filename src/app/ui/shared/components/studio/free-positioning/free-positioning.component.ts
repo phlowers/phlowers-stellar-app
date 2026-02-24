@@ -125,10 +125,9 @@ export class FreePositioningComponent implements OnDestroy {
     public readonly obstacleFormService: ObstacleFormService,
     public readonly obstaclesService: ObstaclesService
   ) {
-    this.positionsValue = toSignal(
-      this.obstacleFormService.form.get('positions')?.valueChanges ?? of([]),
-      { initialValue: this.obstacleFormService.form.get('positions')?.value ?? [] }
-    );
+    this.positionsValue = toSignal(this.obstacleFormService.form.get('positions')?.valueChanges ?? of([]), {
+      initialValue: this.obstacleFormService.form.get('positions')?.value ?? []
+    });
 
     effect(() => {
       const plotOptions = this.plotService.plotOptions();

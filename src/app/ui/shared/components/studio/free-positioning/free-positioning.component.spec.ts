@@ -18,9 +18,7 @@ jest.mock('plotly.js-dist-min', () => ({
   update: jest.fn().mockResolvedValue(undefined)
 }));
 
-const mockCreatePlotData = createPlotData as jest.MockedFunction<
-  typeof createPlotData
->;
+const mockCreatePlotData = createPlotData as jest.MockedFunction<typeof createPlotData>;
 
 describe('FreePositioningComponent', () => {
   let component: FreePositioningComponent;
@@ -98,10 +96,7 @@ describe('FreePositioningComponent', () => {
 
   const buildMockObstacleFormService = () => {
     fb = new FormBuilder();
-    positionsFormArray = fb.array([
-      fb.group({ x: 1, y: 2, z: 3 }),
-      fb.group({ x: 4, y: 5, z: 6 })
-    ]);
+    positionsFormArray = fb.array([fb.group({ x: 1, y: 2, z: 3 }), fb.group({ x: 4, y: 5, z: 6 })]);
 
     const form = fb.group({
       uuid: [null as string | null],
@@ -260,9 +255,7 @@ describe('FreePositioningComponent', () => {
 
       await component.createPlot(mockLitData, 0, 'profile', []);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Plot element not found')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Plot element not found'));
     });
 
     it('should call createPlotData and Plotly.newPlot when element exists', async () => {
@@ -311,10 +304,7 @@ describe('FreePositioningComponent', () => {
 
       await component.createPlot(mockLitData, 0, 'face', []);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error creating plot'),
-        expect.any(Error)
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Error creating plot'), expect.any(Error));
     });
   });
 
