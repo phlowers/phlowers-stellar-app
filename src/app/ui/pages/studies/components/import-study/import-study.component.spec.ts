@@ -245,8 +245,7 @@ describe('ImportStudyComponent', () => {
     }, 10000);
 
     it('should show error message and return early when cable does not exist in database', (done) => {
-      // Mock checkIfCableExists to return false (cable doesn't exist)
-      jest.spyOn(component, 'checkIfCableExists').mockResolvedValue(false);
+      jest.spyOn(component, 'findCableInDatabase').mockResolvedValue(null);
 
       // Create CSV with a conductor that doesn't exist in the database
       // The conductor is extracted from rawParameters[3], which corresponds to the 5th data line
@@ -314,8 +313,7 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should handle errors during file import and add to erroredFiles', (done) => {
-      // Mock checkIfCableExists to throw an error
-      jest.spyOn(component, 'checkIfCableExists').mockRejectedValue(new Error('Database connection error'));
+      jest.spyOn(component, 'findCableInDatabase').mockRejectedValue(new Error('Database connection error'));
 
       const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -383,8 +381,7 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should handle errors during Papa.parse and add to erroredFiles', (done) => {
-      // Mock checkIfCableExists to return true (cable exists)
-      jest.spyOn(component, 'checkIfCableExists').mockResolvedValue(true);
+      jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
       // Mock Papa.parse to throw an error
       const mockParse = jest.fn().mockImplementation(() => {
@@ -573,8 +570,7 @@ describe('ImportStudyComponent', () => {
       });
 
       it('should successfully decode using parseISO88591Base64', (done) => {
-        // Mock checkIfCableExists to return true to avoid cableNotFound errors
-        jest.spyOn(component, 'checkIfCableExists').mockResolvedValue(true);
+        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -655,8 +651,7 @@ describe('ImportStudyComponent', () => {
       }, 10000);
 
       it('should fallback to atob when parseISO88591Base64 fails', (done) => {
-        // Mock checkIfCableExists to return true to avoid cableNotFound errors
-        jest.spyOn(component, 'checkIfCableExists').mockResolvedValue(true);
+        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         // Create a base64 string that will cause parseISO88591Base64 to fail
         // but atob will succeed
@@ -808,7 +803,7 @@ describe('ImportStudyComponent', () => {
 
     describe('Papa.parse error handling (lines 267-273)', () => {
       it('should execute reject path when parseError message is in errors', (done) => {
-        jest.spyOn(component, 'checkIfCableExists').mockResolvedValue(true);
+        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -923,7 +918,7 @@ describe('ImportStudyComponent', () => {
       }, 10000);
 
       it('should throw fileParseError when parseError is not a known error', (done) => {
-        jest.spyOn(component, 'checkIfCableExists').mockResolvedValue(true);
+        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('ASTER600');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -1283,6 +1278,23 @@ describe('ImportStudyComponent', () => {
         consoleErrorSpy.mockRestore();
         done();
       }, 100);
+    });
+  });
+
+  describe('findCableInDatabase', () => {
+    it('should return the cable name on exact match', async () => {
+      const result = await component.findCableInDatabase('ASTER600');
+      expect(result).toBe('ASTER600');
+    });
+
+    it('should return the cable name when input matches with first space removed', async () => {
+      const result = await component.findCableInDatabase('câblepar faisceau');
+      expect(result).toBe('câble par faisceau');
+    });
+
+    it('should return null when no cable matches', async () => {
+      const result = await component.findCableInDatabase('NONEXISTENT_CABLE');
+      expect(result).toBeNull();
     });
   });
 
