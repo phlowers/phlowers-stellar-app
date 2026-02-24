@@ -1,7 +1,7 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # Compiled output
-/dist
+dist/
 /tmp
 /out-tsc
 /bazel-out
@@ -57,5 +57,24 @@ public/data/attachments.csv
 report-task.txt
 scripts/__pycache__/
 scripts/requirements-resolved.txt
+
+# python
+dist
+.coverage
+.pytest_cache
+.ruff_cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.pdm-build/
+coverage.xml
+htmlcov/
+
+# vscode
+.vscode
 docs-sphinx/build/
 .venv
+stellar-engine/input/*.whl

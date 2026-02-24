@@ -1,0 +1,70 @@
+name: 🐍 Python dev CI
+
+on:
+  pull_request:
+    paths:
+      - 'stellar-engine/**'
+  push:
+    paths:
+      - 'stellar-engine/**'
+    branches:
+      - main
+      - dev
+    
+
+jobs:
+  manylinux_build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+
+    steps:
+      - name: 📃 Checkout sources
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Disable shallow clones to improve sonarcloud analysis
+
+      - name: ⚙️ Install uv and Set up Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          # Install a specific version of uv.
+          working-directory: stellar-engine
+          version: "0.5.24"
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: ⚙️ Check uv version
+        run: |
+          uv --version
+    
+      - name: ⚙️ Install dependencies
+        working-directory: stellar-engine
+        run: |
+          uv sync --group all
+
+      - name: ✔️ Check code style
+        working-directory: stellar-engine
+        run: |
+          uv run ruff format --check
+
+      - name: ✔️ Lint code
+        working-directory: stellar-engine
+        run: |
+          uv run ruff check
+
+    #   - name: ✔️ Check typing
+    #     working-directory: stellar-engine
+    #     run: |
+    #       uv run mypy .
+
+      - name: ✔️ Run tests and generate coverage report
+        working-directory: stellar-engine
+        run: |
+          uv run pytest --cov-report xml --cov=stellar_engine
+
+      - name: 🛠️ Build wheel
+        working-directory: stellar-engine
+        run: |
+          uv build
