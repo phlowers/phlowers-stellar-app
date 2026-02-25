@@ -30,6 +30,7 @@ class PlotServiceMock {
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
   section: SignalFn<Section | null> = createSignalMock<Section | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
+  isFreePositioningMode: SignalFn<boolean> = createSignalMock<boolean>(false);
   plotOptions = jest.fn().mockReturnValue({ invert: false });
   plotOptionsChange = jest.fn();
   resetAll = jest.fn();
@@ -202,7 +203,7 @@ describe('StudioPageComponent', () => {
     expect(plotService.spanAmountChoice()).toBe('single');
   });
 
-  it('debounceUpdateSliderOptions should set supports to double when diff is 2', () => {
+  it('debounceUpdateSliderOptions should set spanAmountChoice to double when diff is 2', () => {
     jest.useFakeTimers();
     plotService.plotOptions.mockReturnValue({
       invert: false,
@@ -284,7 +285,7 @@ describe('StudioPageComponent', () => {
     expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
   });
 
-  it('onSelectPlotOptions should set single span offset', () => {
+  it('onSelectSpanAmount should set single span offset', () => {
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
@@ -302,7 +303,7 @@ describe('StudioPageComponent', () => {
     });
   });
 
-  it('onSelectPlotOptions should set double span offset', () => {
+  it('onSelectSpanAmount should set double span offset', () => {
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
@@ -320,7 +321,7 @@ describe('StudioPageComponent', () => {
     });
   });
 
-  it('onSelectPlotOptions should reset to all supports', () => {
+  it('onSelectSpanAmount should reset to all supports', () => {
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
@@ -339,7 +340,7 @@ describe('StudioPageComponent', () => {
     });
   });
 
-  it('onSelectPlotOptions single should clamp to maxSupport', () => {
+  it('onSelectSpanAmount single should clamp to maxSupport', () => {
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 4,

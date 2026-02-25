@@ -23,6 +23,7 @@ import { ToolbarDialogComponent } from './toolbar-dialog/toolbar-dialog.componen
 import { PlotService } from './services/plot.service';
 import { SectionService } from '@services/sections/section.service';
 import { ObstaclesFormComponent } from './obstacles/obstaclesForm/obstaclesForm.component';
+import { FreePositioningComponent } from '../../shared/components/studio/free-positioning/free-positioning.component';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
@@ -48,7 +49,8 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
     SpanComponent,
     NewChargeModalComponent,
     ToolbarDialogComponent,
-    ObstaclesFormComponent
+    ObstaclesFormComponent,
+    FreePositioningComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss'
@@ -68,6 +70,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   ]);
   subscription: Subscription | null = null;
   isNewChargeModalOpen = signal(false);
+  isFreePositioningToolOpen = signal(false);
 
   sliderOptions = computed<Options>(() => {
     return {
@@ -78,7 +81,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       showTicksValues: true,
       animate: false,
       animateOnMove: false,
-      disabled: this.plotService.loading(),
+      disabled: this.plotService.loading() || this.plotService.isFreePositioningMode(),
       translate: (value: number) => {
         return (value + 1).toString();
       },

@@ -83,6 +83,7 @@ export interface SelectedDisplayOptions {
 })
 /** Service managing the Plotly-based section visualization, including data fetching, plot options, and camera state. */
 export class PlotService {
+  isFreePositioningMode = signal<boolean>(false);
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
   litData = signal<GetSectionOutput | null>(null);

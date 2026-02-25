@@ -104,7 +104,10 @@
 
   <div class="obstacles-form__field">
     <div class="obstacles-form__field__toggle">
-      <p-toggleswitch [disabled]="true" data-testid="free-positioning" />
+      <p-toggleswitch
+        [disabled]="!obstacleFormService.form.get('supportUuid')?.value"
+        (onChange)="freePositioningChange($event)"
+      />
       <label for="freePositioning" i18n>Free positioning</label>
     </div>
 

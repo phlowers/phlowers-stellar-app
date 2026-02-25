@@ -15,9 +15,11 @@
 }
 
 .plot-view {
+  $_plot-view-height: calc(60vh - 6.5rem);
+
   @apply block;
-  // height: calc(60vh - 6.5rem);
-  // min-height: calc(60vh - 6.5rem);
+  height: $_plot-view-height;
+  min-height: $_plot-view-height;
 }
 
 .quick-measures {

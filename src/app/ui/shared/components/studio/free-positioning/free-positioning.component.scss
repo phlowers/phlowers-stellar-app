@@ -1,0 +1,20 @@
+@use 'abstract.extracts' as app;
+
+:host::ng-deep {
+  .js-plotly-plot .plotly .cursor-move {
+    cursor: crosshair;
+  }
+}
+
+.free-positioning-error {
+  @extend %heading-l;
+  color: var(--main-error);
+}
+
+dl {
+  @apply flex gap-1;
+}
+
+dd {
+  @apply pr-2;
+}

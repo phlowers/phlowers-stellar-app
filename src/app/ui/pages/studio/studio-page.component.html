@@ -10,12 +10,11 @@
 
 <div class="graph-tools">
   <div class="graph-tools__left">
-    <app-studio
-      class="plot-view"
-      [isPreview]="false"
-      [style.height]="'calc(60vh - 6.5rem)'"
-      [style.min-height]="'calc(60vh - 6.5rem)'"
-    />
+    @if (plotService.isFreePositioningMode()) {
+      <app-free-positioning class="plot-view" />
+    } @else {
+      <app-studio class="plot-view" [isPreview]="false" />
+    }
 
     <div class="quick-measures">
       <div class="quick-measures__card">
@@ -55,7 +54,9 @@
     <div class="flex gap-6 items-start pl-4">
       <div class="supports-select">
         <button
-          [disabled]="plotService.loading() || plotService.plotOptions().startSupport === 0"
+          [disabled]="
+            plotService.isFreePositioningMode() || plotService.loading() || plotService.plotOptions().startSupport === 0
+          "
           (click)="onSupportButtonClick('left')"
           class="supports-select__buttons supports-select__buttons--left"
         >
@@ -66,7 +67,7 @@
           inputId="supports"
           appendTo="body"
           class="supports-select__p-select"
-          [disabled]="plotService.loading()"
+          [disabled]="plotService.loading() || plotService.isFreePositioningMode()"
           [options]="spanAmountChoiceOptions()"
           [ngModel]="plotService.spanAmountChoice()"
           (onChange)="onSelectSpanAmount($event.value)"
@@ -74,6 +75,7 @@
 
         <button
           [disabled]="
+            plotService.isFreePositioningMode() ||
             plotService.loading() ||
             plotService.plotOptions().endSupport === (this.plotService.section()?.supports?.length ?? 0) - 1
           "

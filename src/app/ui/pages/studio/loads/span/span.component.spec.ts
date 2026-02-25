@@ -1,36 +1,66 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { SpanComponent } from './span.component';
-import { PlotService } from '../../services/plot.service';
+import { PlotService, SpanOption } from '../../services/plot.service';
 import { LoadFormsService } from '../loadForms.service';
 import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@core/domain/models/charge.model';
+
+const mockSpanOptions: SpanOption[] = [
+  { label: '1 - 2', value: 'support-1' },
+  { label: '2 - 3', value: 'support-2' }
+];
+
+const mockSupportOptions = [
+  { label: 1, value: 'LEFT' as const },
+  { label: 2, value: 'RIGHT' as const }
+];
+
+const createTemporaryLoadData = (overrides: Partial<SpanLoad> = {}): ChargeData => ({
+  climate: {
+    windPressure: null,
+    cableTemperature: null,
+    symmetryType: SymmetryType.SYMMETRIC,
+    iceThickness: null,
+    frontierSupportNumber: null,
+    iceThicknessBefore: null,
+    iceThicknessAfter: null
+  },
+  spanLoads: [
+    {
+      supportUuid: 'support-1',
+      referenceSupport: 'LEFT',
+      type: LoadType.PUNCTUAL,
+      loadWeight: 10,
+      loadPosition: 2,
+      ...overrides
+    }
+  ]
+});
 
 describe('SpanComponent', () => {
   let component: SpanComponent;
   let fixture: ComponentFixture<SpanComponent>;
-  let mockPlotService: jest.Mocked<PlotService>;
-  let mockLoadFormsService: jest.Mocked<LoadFormsService>;
+  let mockPlotService: Record<string, unknown>;
+  let mockLoadFormsService: Record<string, unknown>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   beforeEach(async () => {
     mockPlotService = {
-      getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
+      getSpanOptions: signal<SpanOption[]>(mockSpanOptions),
       getSupportIndex: jest.fn().mockReturnValue(0),
-      getSupportOptions: jest.fn().mockReturnValue([
-        { label: 1, value: 'LEFT' },
-        { label: 2, value: 'RIGHT' }
-      ]),
+      getSupportOptions: jest.fn().mockReturnValue(mockSupportOptions),
       plotOptionsChange: jest.fn(),
       temporaryLoadData: null
-    } as unknown as jest.Mocked<PlotService>;
+    };
 
     mockLoadFormsService = {
       initTemporaryLoadData: jest.fn(),
       deleteLoad: jest.fn(),
       saveTemporaryLoadDataInSection: jest.fn().mockResolvedValue(undefined),
       calculateLoad: jest.fn().mockResolvedValue(undefined)
-    } as unknown as jest.Mocked<LoadFormsService>;
+    };
 
     await TestBed.configureTestingModule({
       imports: [SpanComponent],
@@ -58,191 +88,170 @@ describe('SpanComponent', () => {
     expect(component.form.controls.loadWeight.value).toBe(0);
   });
 
-  it('updates supports options and plot options when span is selected', () => {
-    component.form.controls.spanSelect.setValue('support-1');
-    fixture.detectChanges();
+  it('computes span options from plot service', () => {
+    const spans = component.spansOptions();
+    expect(spans).toEqual(mockSpanOptions);
+  });
 
-    expect(mockPlotService.getSupportOptions).toHaveBeenCalledWith('support-1');
-    expect(component.supportsOptions()).toEqual([
-      { label: 1, value: 'LEFT' },
-      { label: 2, value: 'RIGHT' }
-    ]);
-    expect(component.form.controls.referenceSupport.enabled).toBe(true);
-    expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({
-      startSupport: 0,
-      endSupport: 1
+  describe('Span selection', () => {
+    it('updates supports options and plot options when span is selected', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+
+      expect(mockPlotService['getSupportOptions']).toHaveBeenCalledWith('support-1');
+      expect(component.supportsOptions()).toEqual(mockSupportOptions);
+      expect(component.form.controls.referenceSupport.enabled).toBe(true);
+      expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledWith({
+        startSupport: 0,
+        endSupport: 1
+      });
+    });
+
+    it('resets supports and disables referenceSupport when span is cleared', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+
+      component.form.controls.spanSelect.setValue(null);
+      fixture.detectChanges();
+
+      expect(component.supportsOptions()).toEqual([]);
+      expect(component.form.controls.referenceSupport.disabled).toBe(true);
+    });
+
+    it('applies existing load values when span is selected', () => {
+      mockPlotService['temporaryLoadData'] = createTemporaryLoadData({
+        referenceSupport: 'RIGHT',
+        type: LoadType.MARKING,
+        loadWeight: 12,
+        loadPosition: 5
+      });
+
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+
+      expect(component.form.controls.referenceSupport.value).toBe('RIGHT');
+      expect(component.form.controls.type.value).toBe(LoadType.MARKING);
+      expect(component.form.controls.loadWeight.value).toBe(12);
+      expect(component.form.controls.loadPosition.value).toBe(5);
     });
   });
 
-  it('clears supports options when span is cleared', () => {
-    component.form.controls.spanSelect.setValue('support-1');
-    fixture.detectChanges();
+  describe('resetForm', () => {
+    it('resets form values and disables referenceSupport', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+      component.form.controls.referenceSupport.setValue('LEFT');
 
-    component.form.controls.spanSelect.setValue(null);
-    fixture.detectChanges();
+      component.resetForm();
+      fixture.detectChanges();
 
-    expect(component.supportsOptions()).toEqual([]);
-    expect(component.form.controls.referenceSupport.disabled).toBe(true);
+      expect(component.form.get('spanSelect')?.value).toBeNull();
+      expect(component.form.get('referenceSupport')?.disabled).toBe(true);
+      expect(mockLoadFormsService['initTemporaryLoadData']).toHaveBeenCalled();
+    });
   });
 
-  it('applies selected load values when existing load is found', () => {
-    const temporaryLoadData: ChargeData = {
-      climate: {
-        windPressure: null,
-        cableTemperature: null,
-        symmetryType: SymmetryType.SYMMETRIC,
-        iceThickness: null,
-        frontierSupportNumber: null,
-        iceThicknessBefore: null,
-        iceThicknessAfter: null
-      },
-      spanLoads: [
-        {
-          supportUuid: 'support-1',
-          referenceSupport: 'RIGHT',
-          type: LoadType.MARKING,
-          loadWeight: 12,
-          loadPosition: 5
-        }
-      ]
-    };
-    mockPlotService.temporaryLoadData = temporaryLoadData;
+  describe('deleteCharge', () => {
+    it('resets form and calls deleteLoad', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
 
-    component.form.controls.spanSelect.setValue('support-1');
-    fixture.detectChanges();
+      component.deleteCharge();
+      fixture.detectChanges();
 
-    expect(component.form.controls.referenceSupport.value).toBe('RIGHT');
-    expect(component.form.controls.type.value).toBe(LoadType.MARKING);
-    expect(component.form.controls.loadWeight.value).toBe(12);
-    expect(component.form.controls.loadPosition.value).toBe(5);
+      expect(mockLoadFormsService['deleteLoad']).toHaveBeenCalled();
+      expect(component.form.controls.spanSelect.value).toBeNull();
+    });
   });
 
-  it('defaults missing load values to 0', () => {
-    mockPlotService.temporaryLoadData = {
-      climate: {
-        windPressure: null,
-        cableTemperature: null,
-        symmetryType: SymmetryType.SYMMETRIC,
-        iceThickness: null,
-        frontierSupportNumber: null,
-        iceThicknessBefore: null,
-        iceThicknessAfter: null
-      },
-      spanLoads: [
-        {
-          supportUuid: 'support-1',
-          referenceSupport: 'LEFT',
-          type: LoadType.MARKING
-        } as unknown as SpanLoad
-      ]
-    };
+  describe('saveLoadCase', () => {
+    it('does not save when form is invalid', () => {
+      component.saveLoadCase();
 
-    component.form.controls.spanSelect.setValue('support-1');
-    fixture.detectChanges();
+      expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).not.toHaveBeenCalled();
+    });
 
-    expect(component.form.controls.loadWeight.value).toBe(0);
-    expect(component.form.controls.loadPosition.value).toBe(0);
+    it('saves when form is valid', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      component.form.controls.referenceSupport.enable();
+      component.form.controls.referenceSupport.setValue('LEFT');
+      fixture.detectChanges();
+
+      component.saveLoadCase();
+
+      expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).toHaveBeenCalled();
+    });
   });
 
-  it('updates load data when control values change', () => {
-    const temporaryLoadData: ChargeData = {
-      climate: {
-        windPressure: null,
-        cableTemperature: null,
-        symmetryType: SymmetryType.SYMMETRIC,
-        iceThickness: null,
-        frontierSupportNumber: null,
-        iceThicknessBefore: null,
-        iceThicknessAfter: null
-      },
-      spanLoads: [
-        {
-          supportUuid: 'support-1',
-          referenceSupport: 'LEFT',
-          type: LoadType.PUNCTUAL,
-          loadWeight: 10,
-          loadPosition: 2
-        }
-      ]
-    };
-    mockPlotService.temporaryLoadData = temporaryLoadData;
+  describe('calculateLoadCase', () => {
+    it('does not calculate when form is invalid', () => {
+      component.calculateLoadCase();
 
-    component.form.controls.spanSelect.setValue('support-1');
-    fixture.detectChanges();
+      expect(mockLoadFormsService['calculateLoad']).not.toHaveBeenCalled();
+    });
 
-    component.form.controls.loadPosition.setValue(8);
-    component.form.controls.type.setValue(LoadType.MARKING);
-    fixture.detectChanges();
+    it('calculates when form is valid', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      component.form.controls.referenceSupport.enable();
+      component.form.controls.referenceSupport.setValue('LEFT');
+      fixture.detectChanges();
 
-    expect(temporaryLoadData.spanLoads[0].loadPosition).toBe(8);
-    expect(temporaryLoadData.spanLoads[0].type).toBe(LoadType.MARKING);
-    expect(temporaryLoadData.spanLoads[0].loadWeight).toBe(0);
-    expect(component.form.controls.loadWeight.value).toBe(0);
+      component.calculateLoadCase();
+
+      expect(mockLoadFormsService['calculateLoad']).toHaveBeenCalled();
+    });
   });
 
-  it('resets form and reloads temporary data', () => {
-    component.form.controls.spanSelect.setValue('support-1');
-    component.form.controls.referenceSupport.setValue('LEFT');
+  describe('Load control changes', () => {
+    it('updates temporary load data when loadWeight changes', () => {
+      const temporaryLoadData = createTemporaryLoadData();
+      mockPlotService['temporaryLoadData'] = temporaryLoadData;
 
-    component.resetForm();
-    fixture.detectChanges();
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
 
-    expect(component.form.controls.spanSelect.value).toBeNull();
-    expect(component.form.controls.referenceSupport.disabled).toBe(true);
-    expect(mockLoadFormsService.initTemporaryLoadData).toHaveBeenCalled();
+      component.form.controls.loadWeight.setValue(50);
+      fixture.detectChanges();
+
+      expect(temporaryLoadData.spanLoads[0].loadWeight).toBe(50);
+    });
+
+    it('resets loadWeight to 0 when type changes to marking', () => {
+      const temporaryLoadData = createTemporaryLoadData();
+      mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+
+      component.form.controls.type.setValue(LoadType.MARKING);
+      fixture.detectChanges();
+
+      expect(temporaryLoadData.spanLoads[0].loadWeight).toBe(0);
+      expect(component.form.controls.loadWeight.value).toBe(0);
+    });
   });
 
-  it('deletes load case and resets form', () => {
-    component.form.controls.spanSelect.setValue('support-1');
+  describe('UI state', () => {
+    it('disables save and calculate buttons when form is invalid', () => {
+      const saveButton = getByTestId('save-load') as HTMLButtonElement;
+      const calculateButton = getByTestId('calculate-load') as HTMLButtonElement;
 
-    component.deleteCharge();
-    fixture.detectChanges();
+      expect(saveButton.disabled).toBe(true);
+      expect(calculateButton.disabled).toBe(true);
+    });
 
-    expect(mockLoadFormsService.deleteLoad).toHaveBeenCalled();
-    expect(component.form.controls.spanSelect.value).toBeNull();
-  });
+    it('shows load weight input for punctual type', () => {
+      component.form.controls.type.setValue(LoadType.PUNCTUAL);
+      fixture.detectChanges();
 
-  it('saves and calculates only when form is valid', () => {
-    component.saveLoadCase();
-    component.calculateLoadCase();
+      expect(getByTestId('load-weight')).toBeTruthy();
+    });
 
-    expect(mockLoadFormsService.saveTemporaryLoadDataInSection).not.toHaveBeenCalled();
-    expect(mockLoadFormsService.calculateLoad).not.toHaveBeenCalled();
+    it('hides load weight input for marking type', () => {
+      component.form.controls.type.setValue(LoadType.MARKING);
+      fixture.detectChanges();
 
-    component.form.controls.spanSelect.setValue('support-1');
-    component.form.controls.referenceSupport.setValue('LEFT');
-    fixture.detectChanges();
-
-    component.saveLoadCase();
-    component.calculateLoadCase();
-
-    expect(mockLoadFormsService.saveTemporaryLoadDataInSection).toHaveBeenCalled();
-    expect(mockLoadFormsService.calculateLoad).toHaveBeenCalled();
-  });
-
-  it('toggles load weight field based on load type', () => {
-    const loadWeightInput = () => getByTestId('load-weight');
-
-    expect(loadWeightInput()).toBeTruthy();
-
-    component.form.controls.type.setValue(LoadType.MARKING);
-    fixture.detectChanges();
-
-    expect(loadWeightInput()).toBeNull();
-  });
-
-  it('disables save and calculate buttons when form is invalid', () => {
-    const saveButton = getByTestId('save-load') as HTMLButtonElement;
-    const calculateButton = getByTestId('calculate-load') as HTMLButtonElement;
-
-    expect(saveButton.disabled).toBe(true);
-    expect(calculateButton.disabled).toBe(true);
-
-    component.form.controls.spanSelect.setValue('support-1');
-    component.form.controls.referenceSupport.setValue('LEFT');
-    fixture.detectChanges();
-
-    expect(saveButton.disabled).toBe(false);
-    expect(calculateButton.disabled).toBe(false);
+      expect(getByTestId('load-weight')).toBeNull();
+    });
   });
 });
