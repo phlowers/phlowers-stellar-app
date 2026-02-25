@@ -47,7 +47,8 @@ const CACHE_NAME = 'app-assets';
     ProgressSpinnerModule,
     DatePipe,
     ToggleSwitch
-  ]
+  ],
+  providers: [ConfirmationService]
 })
 export class AdminComponent {
   constructor(
