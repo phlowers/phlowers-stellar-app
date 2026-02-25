@@ -16,7 +16,11 @@ import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
 import { Obstacle } from '@src/app/core/domain/models/obstacle.model';
-import { appendExistingObstaclesWithFormObstacle } from './helpers/obstacles';
+import {
+  appendExistingObstaclesWithFormObstacle,
+  getObstacleClickPayload,
+  ObstacleAnnotationData
+} from './helpers/obstacles';
 import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
@@ -146,7 +150,7 @@ export class SectionPlotComponent {
       const currentObstacleUuid = this.getCurrentObstacleUuid();
       const currentObstaclePointIndex = this.obstaclesService.currentPointIndex();
 
-      await createPlot({
+      const plot = await createPlot({
         plotId: PLOT_ID,
         data: plotData,
         invert: plotOptions.invert,
@@ -161,10 +165,40 @@ export class SectionPlotComponent {
         currentObstaclePointIndex,
         obstacles
       });
+      if (plot) {
+        this.addEventListenersToPlot(plot);
+      }
     } catch (error) {
       console.error('Error refreshing plot:', error);
     } finally {
       this.isPlotRefreshing.set(false);
     }
   }
+
+  addEventListenersToPlot = (plot: Plotly.PlotlyHTMLElement) => {
+    interface ClickAnnotationEvent {
+      annotation?: { data?: ObstacleAnnotationData };
+    }
+    (
+      plot as Plotly.PlotlyHTMLElement & {
+        on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
+      }
+    ).on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
+      if (event?.annotation?.data?.type === 'obstacle') {
+        const section = this.plotService.section();
+        const payload = getObstacleClickPayload(
+          event?.annotation?.data,
+          section?.obstacles ?? [],
+          section?.supports ?? []
+        );
+        if (!payload) return;
+        this.sideTabsService.sideTabs.set(1);
+        this.plotService.plotOptionsChange({
+          startSupport: payload.supportIndex,
+          endSupport: payload.supportIndex + 1
+        });
+        this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
+      }
+    });
+  };
 }
