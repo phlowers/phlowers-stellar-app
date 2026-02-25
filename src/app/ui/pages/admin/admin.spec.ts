@@ -97,7 +97,13 @@ describe('AdminComponent', () => {
         { provide: ConfirmationService, useValue: confirmationServiceMock },
         { provide: OnlineService, useValue: onlineServiceMock }
       ]
-    }).compileComponents();
+    })
+      .overrideComponent(AdminComponent, {
+        set: {
+          providers: [{ provide: ConfirmationService, useValue: confirmationServiceMock }]
+        }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(AdminComponent);
     component = fixture.componentInstance;
