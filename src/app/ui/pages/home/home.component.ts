@@ -137,12 +137,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private getConnectivityStatus(isOnline: boolean, serverStatus: ServerStatus): ServerStates {
-    // if (this.isOffline(isOnline)) {
-    //   return 'unknown';
-    // }
+    if (this.isOffline(isOnline)) {
+      return 'offline';
+    }
 
-    // return this.getOnlineStatus(serverStatus);
-    return 'offline';
+    return this.getOnlineStatus(serverStatus);
   }
 
   private getOnlineStatus(serverStatus: ServerStatus): ServerStates {
@@ -150,7 +149,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case ServerStatus.LOADING:
         return 'warning';
       case ServerStatus.OFFLINE:
-        return 'error';
+        return 'offline';
       case ServerStatus.ONLINE:
         return 'success';
       default:
