@@ -3543,5 +3543,17 @@
         </target>
       </segment>
     </unit>
+    <unit id="7422930352691546141">
+      <segment state="initial">
+        <source>Application in offline mode.</source>
+        <target>Application en mode déconnecté.</target>
+      </segment>
+    </unit>
+    <unit id="3141736705077915112">
+      <segment state="initial">
+        <source>Punctual charge</source>
+        <target>Punctual charge</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

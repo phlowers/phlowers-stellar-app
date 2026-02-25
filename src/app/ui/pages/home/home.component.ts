@@ -137,11 +137,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private getConnectivityStatus(isOnline: boolean, serverStatus: ServerStatus): ServerStates {
-    if (this.isOffline(isOnline)) {
-      return 'unknown';
-    }
+    // if (this.isOffline(isOnline)) {
+    //   return 'unknown';
+    // }
 
-    return this.getOnlineStatus(serverStatus);
+    // return this.getOnlineStatus(serverStatus);
+    return 'offline';
   }
 
   private getOnlineStatus(serverStatus: ServerStatus): ServerStates {
@@ -159,6 +160,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private updateServerText(status: ServerStates): void {
     switch (status) {
+      case 'offline':
+        this.updateText('serverText', $localize`Application in offline mode.`); // i18n Application en mode offline.
+        break;
       case 'unknown':
         this.updateText('serverText', $localize`Cannot reach data. Please check your internet connectivity.`); // i18n Impossible d'accéder aux données. Vérifiez votre connexion à internet.
         break;
