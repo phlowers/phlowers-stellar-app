@@ -29,6 +29,7 @@ describe('StudioTopToolbarComponent', () => {
         invert: false
       }),
       loading: signal(false),
+      isFreePositioningMode: signal(false),
       plotOptionsChange: jest.fn(),
       selectedDisplayOptions: signal({ loads: false }),
       section: signal(null)

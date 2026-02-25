@@ -9,11 +9,12 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '../../services/plot.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
 import { debounce } from 'lodash';
 import { ObstaclesService } from '../obstacles.service';
 import { ObstacleFormService } from './obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
+import { distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-obstacles-form',
@@ -61,9 +62,12 @@ export class ObstaclesFormComponent {
     return this.plotService.getSpanOptions();
   });
 
-  readonly supportUuidValue = toSignal(this.obstacleFormService.form.get('supportUuid')!.valueChanges, {
-    initialValue: this.obstacleFormService.form.get('supportUuid')?.value ?? null
-  });
+  readonly supportUuidValue = toSignal(
+    this.obstacleFormService.form.get('supportUuid')!.valueChanges.pipe(distinctUntilChanged()),
+    {
+      initialValue: this.obstacleFormService.form.get('supportUuid')?.value ?? null
+    }
+  );
 
   private readonly debouncedUpdatePoint = debounce((key: 'x' | 'y' | 'z', value: number) => {
     const currentIndex = this.obstaclesService.currentPointIndex();
@@ -85,5 +89,9 @@ export class ObstaclesFormComponent {
 
   setCurrentObstaclePoint(index: number) {
     this.obstaclesService.setCurrentPointIndex(index);
+  }
+
+  freePositioningChange(event: ToggleSwitchChangeEvent) {
+    this.plotService.isFreePositioningMode.set(event.checked);
   }
 }
