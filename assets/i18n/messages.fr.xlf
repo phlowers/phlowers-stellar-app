@@ -2639,10 +2639,10 @@
         <target>Marquage</target>
       </segment>
     </unit>
-    <unit id="1583307941081347908">
+    <unit id="1472301698922549629">
       <segment state="initial">
-        <source>Load / marking</source>
-        <target>Charge / marquage</target>
+        <source>Load / Marking</source>
+        <target>Charge / Marquage</target>
       </segment>
     </unit>
     <unit id="6161150769798431069">
@@ -3243,9 +3243,9 @@
         <target>Temp. câble</target>
       </segment>
     </unit>
-    <unit id="3759359101166219663">
+    <unit id="4284810495983931717">
       <segment state="initial">
-        <source>load / marking</source>
+        <source>load / Marking</source>
         <target>Charge / Marquage</target>
       </segment>
     </unit>
@@ -3552,7 +3552,7 @@
     <unit id="3141736705077915112">
       <segment state="initial">
         <source>Punctual charge</source>
-        <target>Punctual charge</target>
+        <target>Charge ponctuelle</target>
       </segment>
     </unit>
   </file>
