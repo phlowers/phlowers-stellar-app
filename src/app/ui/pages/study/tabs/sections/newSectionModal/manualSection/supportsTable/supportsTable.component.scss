@@ -39,11 +39,15 @@ input {
 }
 
 td {
-  >*:not(button) {
+  > *:not(button) {
     width: 100%;
   }
 
   .p-inputicon {
     top: 40%;
   }
+}
+
+.one-line-text {
+  @apply mb-0 whitespace-nowrap;
 }
