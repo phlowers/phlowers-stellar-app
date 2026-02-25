@@ -37,6 +37,12 @@ La norme de l'axe "Z" est le 1/2ème de la norme de l'axe "X"-->
           <p-radioButton name="scale" value="celeste" formControlName="scale" inputId="celeste"></p-radioButton>
           <label for="celeste" i18n>Réduite en z (x, y, z/2)</label>
         </div>
+
+        <!-- Lorsque le bouton radio "Auto" est sélectionné : Plotly détermine automatiquement le mode d'aspect (aspectmode: 'data') -->
+        <div class="view-config__radio-item">
+          <p-radioButton name="scale" value="auto" formControlName="scale" inputId="auto"></p-radioButton>
+          <label for="auto" i18n>Auto</label>
+        </div>
       </div>
     </fieldset>
 

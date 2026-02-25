@@ -79,7 +79,7 @@ export class SectionPlotComponent implements AfterViewInit, OnDestroy {
     }
     const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
     // Inject axesNorms from PlotService into plotOptions
-    const axesNorms = this.plotService['axesNorms'] || { x: 1, y: 1, z: 1 };
+    const axesNorms = this.plotService['axesNorms'] || { x: 1, y: 1, z: 1, aspectMode: 'auto' };
     let plotData = createPlotData(litData, { ...plotOptions, axesNorms });
 
     // Add shadow traces for base state if enabled
@@ -100,7 +100,8 @@ export class SectionPlotComponent implements AfterViewInit, OnDestroy {
       spanLoads,
       litData,
       startSupport: plotOptions.startSupport,
-      endSupport: plotOptions.endSupport
+      endSupport: plotOptions.endSupport,
+      axesNorms
     });
   }
 

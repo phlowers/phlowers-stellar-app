@@ -67,7 +67,6 @@
     margin-top: 2rem;
   }
 
-  // Surcharge PrimeNG pour correspondre à votre image
   &__submit-btn {
     background-color: var(--main-primary, #7b5da3) !important;
     color: #fff !important;
@@ -83,7 +82,6 @@
     }
   }
 
-  // Style pour le bouton principal "Vue" (p-button)
   .view-button {
     background: var(--surface-card, #fff) !important;
     color: var(--main-primary, #7b5da3) !important;

@@ -16,6 +16,7 @@ export interface CreatePlotParams {
   spanLoads: (SpanLoad | null)[];
   startSupport: number;
   endSupport: number;
+  axesNorms?: { x: number; y: number; z: number; aspectMode: string };
 }
 
 const normalCamera = () => ({
@@ -62,14 +63,16 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
     };
   }
   return {
-    aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+    aspectmode: (['auto', 'data', 'cube', 'manual'] as const).includes(plotParams.axesNorms?.aspectMode as any)
+      ? (plotParams.axesNorms?.aspectMode as 'auto' | 'data' | 'cube' | 'manual')
+      : 'data',
     xaxis: axis,
     yaxis: axis,
     zaxis: axis,
     aspectratio: {
-      x: 3,
-      y: 0.2,
-      z: 0.5
+      x: plotParams.axesNorms?.x ?? 3,
+      y: plotParams.axesNorms?.y ?? 0.2,
+      z: plotParams.axesNorms?.z ?? 0.5
     },
     annotations: createLoadAnnotations(plotParams),
     camera: plotParams.camera
@@ -124,14 +127,15 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams)
       autorange: plotParams.invert ? 'reversed' : true,
       showticklabels: true,
       showgrid: true,
-      showline: true
+      showline: true,
+      dtick: plotParams.side === 'face' ? 100 : undefined
     },
     yaxis: {
       ...axis,
       showticklabels: true,
       showgrid: true,
       showline: true,
-      scaleratio: plotParams.side === 'face' ? 0.2 : undefined,
+      scaleratio: plotParams.side === 'face' ? 1 : undefined,
       scaleanchor: plotParams.side === 'face' ? 'x' : undefined
     },
     annotations: createLoadAnnotations(plotParams)

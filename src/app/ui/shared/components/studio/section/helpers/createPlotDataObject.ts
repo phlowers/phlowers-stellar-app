@@ -50,6 +50,24 @@ const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
   }
 };
 
+const getNorms = (
+  axesNorms: { x: number; y: number; z: number } | undefined,
+  view: View,
+  side: Side
+): { x: number; y: number; z: number } | undefined => {
+  if (!axesNorms) return undefined;
+
+  if (view === '2d' && side === 'face') {
+    return {
+      x: axesNorms.y,
+      y: axesNorms.z,
+      z: axesNorms.x
+    };
+  }
+
+  return axesNorms;
+};
+
 export const createDataObject = (
   data: number[][][],
   startSupport: number,
@@ -62,9 +80,14 @@ export const createDataObject = (
   const slidedData = data.slice(startSupport, type === 'spans' ? endSupport : endSupport + 1);
   return slidedData.map((points, index) => {
     // Appliquer la normalisation si axesNorms est fourni
-    const x = points.map((point) => point[0] / (axesNorms?.x || 1));
-    const y = points.map((point) => point[1] / (axesNorms?.y || 1));
-    const z = points.map((point) => point[2] / (axesNorms?.z || 1));
+    const norms = getNorms(axesNorms, view, side);
+
+    const x = points.map((point) => (norms ? point[0] / norms.x : point[0]));
+    const y = points.map((point) => (norms ? point[1] / norms.y : point[1]));
+    const z = points.map((point) => (norms ? point[2] / norms.z : point[2]));
+    console.log('Normalized x:', x);
+    console.log('Normalized y:', y);
+    console.log('Normalized z:', z);
     const dataObject: Data = {
       x: side === 'face' && view === '2d' ? y : x,
       z: view === '3d' ? z : y,

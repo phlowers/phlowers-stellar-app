@@ -42,37 +42,11 @@ export class ScaleViewComponent {
     nonNullable: true
   });
 
-  // Stores the scale choice for each view (2D/3D)
-  private scaleByView: Record<'2d' | '3d', string> = {
-    '2d': 'plan',
-    '3d': 'geo'
-  };
-
   readonly formScaleView = this.fb.group({
-    scale: [this.getInitialScale(), { nonNullable: true }],
+    scale: ['geo', { nonNullable: true }],
     sliderPointsCount: this.sliderControl,
     pointsCount: this.pointsControl
   });
-
-  /**
-   * Returns the default scale according to the current view (2D/3D)
-   * Returns the scale to apply on opening (memorized or default)
-   */
-  private getInitialScale(): string {
-    const view = this.plotService.plotOptions().view as '2d' | '3d';
-    return this.scaleByView[view] ?? (view === '2d' ? 'plan' : 'geo');
-  }
-
-  /**
-   * Watches for view changes and restores the memorized scale
-   */
-  private watchViewChange(): void {
-    effect(() => {
-      const view = this.plotService.plotOptions().view as '2d' | '3d';
-      const memorized = this.scaleByView[view];
-      this.formScaleView.get('scale')?.setValue(memorized ?? (view === '2d' ? 'plan' : 'geo'));
-    });
-  }
 
   private readonly sliderValue = toSignal(this.formScaleView.get('sliderPointsCount')!.valueChanges, {
     initialValue: 30
@@ -85,12 +59,6 @@ export class ScaleViewComponent {
   constructor() {
     this.setupControlsSynchronization();
     this.setupResolutionSync();
-    this.watchViewChange();
-    // Memorizes the user's choice each time the scale changes
-    this.formScaleView.get('scale')?.valueChanges.subscribe((val) => {
-      const view = this.plotService.plotOptions().view as '2d' | '3d';
-      this.scaleByView[view] = typeof val === 'string' ? val : view === '2d' ? 'plan' : 'geo';
-    });
   }
 
   private setupControlsSynchronization(): void {
@@ -138,16 +106,18 @@ export class ScaleViewComponent {
    * "geo": x, y, z
    * "celeste": x, y=x, z/2
    */
-  private getScaleNorms(scale: string) {
+  private getScaleNorms(scale: string): { x: number; y: number; z: number; aspectMode: string } {
     switch (scale) {
       case 'plan':
-        return { x: 0.2, y: 1, z: 1 };
+        return { x: 0.2, y: 1, z: 1, aspectMode: 'manual' };
       case 'geo':
-        return { x: 1, y: 1, z: 1 };
+        return { x: 1, y: 1, z: 1, aspectMode: 'manual' };
       case 'celeste':
-        return { x: 1, y: 1, z: 0.5 };
+        return { x: 1, y: 1, z: 0.5, aspectMode: 'manual' };
+      case 'auto':
+        return { x: 1, y: 1, z: 1, aspectMode: 'auto' };
       default:
-        return { x: 1, y: 1, z: 1 };
+        return { x: 3, y: 0.2, z: 0.5, aspectMode: 'manual' };
     }
   }
 
