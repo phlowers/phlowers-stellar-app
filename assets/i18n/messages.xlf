@@ -2936,5 +2936,15 @@
         <source>Copy</source>
       </segment>
     </unit>
+    <unit id="3141736705077915112">
+      <segment>
+        <source>Punctual charge</source>
+      </segment>
+    </unit>
+    <unit id="7422930352691546141">
+      <segment>
+        <source>Application in offline mode.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
