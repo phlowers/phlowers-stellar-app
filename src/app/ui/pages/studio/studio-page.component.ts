@@ -84,18 +84,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     return this.plotService.loading() || (invert ? startSupport === 0 : endSupport === this.maxSupportIndex());
   });
 
-  private readonly maxSupportIndex = computed(() => (this.plotService.section()?.supports?.length ?? 0) - 1);
-
-  isPreviousDisabled = computed(() => {
-    const { invert, startSupport, endSupport } = this.plotService.plotOptions();
-    return this.plotService.loading() || (invert ? endSupport === this.maxSupportIndex() : startSupport === 0);
-  });
-
-  isNextDisabled = computed(() => {
-    const { invert, startSupport, endSupport } = this.plotService.plotOptions();
-    return this.plotService.loading() || (invert ? startSupport === 0 : endSupport === this.maxSupportIndex());
-  });
-
   sliderOptions = computed<Options>(() => {
     return {
       floor: 0,
