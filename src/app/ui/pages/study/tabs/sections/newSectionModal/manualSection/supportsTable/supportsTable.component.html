@@ -264,7 +264,7 @@
             (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
           />
         } @else {
-          <p class="read-only_info">{{ support.name }}</p>
+          <p class="read-only_info one-line-text">{{ support.name }}</p>
         }
       </td>
       <td class="integer-column">
@@ -432,7 +432,7 @@
       </td>
       @if (mode() === 'view') {
         <td>
-          {{ support.towerModel }}
+          <p class="one-line-text">{{ support.towerModel }}</p>
         </td>
       }
       @if (mode() === 'edit' || mode() === 'create') {
