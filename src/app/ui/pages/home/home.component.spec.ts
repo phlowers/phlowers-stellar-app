@@ -142,10 +142,10 @@ describe('HomeComponent', () => {
       component.ngOnInit();
     });
 
-    it('should set server status to unknown when offline', () => {
+    it('should set server status to offline when offline', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
 
-      expect(component.serverStatus()).toBe('unknown');
+      expect(component.serverStatus()).toBe('offline');
     });
 
     it('should set server status to success when online and server is online', () => {
@@ -162,11 +162,11 @@ describe('HomeComponent', () => {
       expect(component.serverStatus()).toBe('warning');
     });
 
-    it('should set server status to error when online and server is offline', () => {
+    it('should set server status to offline when online and server is offline', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
 
-      expect(component.serverStatus()).toBe('error');
+      expect(component.serverStatus()).toBe('offline');
     });
   });
 
@@ -175,10 +175,10 @@ describe('HomeComponent', () => {
       component.ngOnInit();
     });
 
-    it('should update server text for unknown status', () => {
+    it('should update server text for offline status', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
 
-      expect(component.homeText().serverText).toContain('Cannot reach data');
+      expect(component.homeText().serverText).toContain('Application in offline mode');
     });
 
     it('should update server text for warning status', () => {
@@ -188,11 +188,11 @@ describe('HomeComponent', () => {
       expect(component.homeText().serverText).toContain('Trying to reach the servers');
     });
 
-    it('should update server text for error status', () => {
+    it('should update server text for offline status when server is offline', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
 
-      expect(component.homeText().serverText).toContain('An error occured');
+      expect(component.homeText().serverText).toContain('Application in offline mode');
     });
 
     it('should update server text for success status', () => {
