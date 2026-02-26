@@ -190,6 +190,8 @@ describe('SectionPlotComponent', () => {
     } as Data
   ];
 
+  const mockPlotElement = { on: jest.fn() };
+
   const litDataSignal = signal<GetSectionOutput | null>(null);
   const baseLitDataSignal = signal<GetSectionOutput | null>(null);
   const plotOptionsSignal = signal<PlotOptions>(mockPlotOptions);
@@ -244,8 +246,7 @@ describe('SectionPlotComponent', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
-    mockCreateShadowPlotData.mockReturnValue(mockShadowPlotData);
-    mockCreatePlot.mockReturnValue(undefined);
+    mockCreatePlot.mockResolvedValue(mockPlotElement as any);
 
     litDataSignal.set(mockLitData);
     baseLitDataSignal.set(null);
@@ -440,7 +441,8 @@ describe('SectionPlotComponent', () => {
         baseState: true
       };
 
-      baseLitDataSignal.set(mockLitData); // Using same data as baseLitData for test
+      mockCreateShadowPlotData.mockReturnValue(mockShadowPlotData);
+      baseLitDataSignal.set(mockLitData);
       selectedDisplayOptionsSignal.set(displayOptionsWithBase);
       litDataSignal.set(mockLitData);
       await component.refreshPlot();
