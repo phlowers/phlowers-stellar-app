@@ -3243,12 +3243,6 @@
         <target>Temp. câble</target>
       </segment>
     </unit>
-    <unit id="4284810495983931717">
-      <segment state="initial">
-        <source>load / Marking</source>
-        <target>Charge / Marquage</target>
-      </segment>
-    </unit>
     <unit id="1386303765424324449">
       <segment state="initial">
         <source>Distance to ref. support</source>
