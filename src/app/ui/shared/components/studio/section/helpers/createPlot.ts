@@ -54,6 +54,12 @@ const axis = {
   showbackground: true
 };
 
+/**
+ * Creates or updates a Plotly plot based on the provided parameters.
+ * The layout is configured based on whether it's a 2D or 3D view, and the axis norms are applied if provided.
+ * @param plotParams
+ * @returns
+ */
 const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => {
   if (plotParams.camera) {
     const y = Math.abs(plotParams.camera.eye?.y || 0);
@@ -70,9 +76,9 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
     yaxis: axis,
     zaxis: axis,
     aspectratio: {
-      x: plotParams.axesNorms?.x ?? 3,
-      y: plotParams.axesNorms?.y ?? 0.2,
-      z: plotParams.axesNorms?.z ?? 0.5
+      x: plotParams.axesNorms?.x,
+      y: plotParams.axesNorms?.y,
+      z: plotParams.axesNorms?.z
     },
     annotations: createLoadAnnotations(plotParams),
     camera: plotParams.camera
@@ -83,6 +89,11 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
   };
 };
 
+/**
+ * Creates or updates a Plotly plot based on the provided parameters.
+ * The layout is configured based on whether it's a 2D or 3D view, and the axis norms are applied if provided.
+ * @param plotParams
+ */
 const config = {
   displayModeBar: true,
   displaylogo: false,
@@ -99,6 +110,12 @@ const config = {
   ] as ModeBarDefaultButtons[]
 };
 
+/**
+ * Creates or updates a Plotly plot based on the provided parameters.
+ *
+ * @param plotParams
+ * @returns
+ */
 const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
   autosize: true,
   showlegend: false,
@@ -108,9 +125,22 @@ const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
     t: 0,
     b: 0
   },
+  xaxis: {
+    range: [-600, 200]
+  },
+  yaxis: {
+    range: [-100, 600]
+  },
   scene: createScene(plotParams)
 });
 
+/**
+ * Creates or updates a 2D Plotly plot based on the provided parameters.
+ * The x and y axes are configured based on the 'side' and 'invert' parameters.
+ * Annotations for loads are also created using the createLoadAnnotations function.
+ * @param plotParams
+ * @returns
+ */
 const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams) => {
   return {
     autosize: true,
@@ -128,14 +158,13 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams)
       showticklabels: true,
       showgrid: true,
       showline: true,
-      dtick: plotParams.side === 'face' ? 100 : undefined
+      scaleratio: plotParams.side === 'face' ? 0.2 : undefined
     },
     yaxis: {
       ...axis,
       showticklabels: true,
       showgrid: true,
       showline: true,
-      scaleratio: plotParams.side === 'face' ? 1 : undefined,
       scaleanchor: plotParams.side === 'face' ? 'x' : undefined
     },
     annotations: createLoadAnnotations(plotParams)

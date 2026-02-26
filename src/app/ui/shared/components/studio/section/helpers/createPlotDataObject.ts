@@ -59,9 +59,9 @@ const getNorms = (
 
   if (view === '2d' && side === 'face') {
     return {
-      x: axesNorms.y,
+      x: axesNorms.x,
       y: axesNorms.z,
-      z: axesNorms.x
+      z: axesNorms.y
     };
   }
 
@@ -79,15 +79,11 @@ export const createDataObject = (
 ): Data[] => {
   const slidedData = data.slice(startSupport, type === 'spans' ? endSupport : endSupport + 1);
   return slidedData.map((points, index) => {
-    // Appliquer la normalisation si axesNorms est fourni
     const norms = getNorms(axesNorms, view, side);
-
     const x = points.map((point) => (norms ? point[0] / norms.x : point[0]));
     const y = points.map((point) => (norms ? point[1] / norms.y : point[1]));
     const z = points.map((point) => (norms ? point[2] / norms.z : point[2]));
-    console.log('Normalized x:', x);
-    console.log('Normalized y:', y);
-    console.log('Normalized z:', z);
+
     const dataObject: Data = {
       x: side === 'face' && view === '2d' ? y : x,
       z: view === '3d' ? z : y,

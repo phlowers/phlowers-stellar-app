@@ -78,12 +78,12 @@ interface PlotlyElementWithLayout extends HTMLElement {
   providedIn: 'root'
 })
 export class PlotService {
-  // Stocke la norme des axes courante
+  // default values for axesNorms, can be updated via setAxesNorms
   private axesNorms: { x: number; y: number; z: number; aspectMode: string } = {
-    x: 3,
-    y: 0.2,
-    z: 0.5,
-    aspectMode: 'manual'
+    x: 1,
+    y: 1,
+    z: 1,
+    aspectMode: 'data'
   };
 
   /**

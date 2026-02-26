@@ -1,5 +1,5 @@
 import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Component, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, effect, inject, signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { Popover, PopoverModule } from 'primeng/popover';
@@ -28,10 +28,10 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
   styleUrls: ['./scale-view.component.scss']
 })
 export class ScaleViewComponent {
+  @ViewChild('popover') popover!: Popover;
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   readonly popoverOpen = signal(false);
-  readonly popoverRef = viewChild<Popover>('popover');
   readonly scaleMax = 250;
   readonly scaleMin = 25;
 
@@ -43,7 +43,7 @@ export class ScaleViewComponent {
   });
 
   readonly formScaleView = this.fb.group({
-    scale: ['geo', { nonNullable: true }],
+    scale: ['auto', { nonNullable: true }],
     sliderPointsCount: this.sliderControl,
     pointsCount: this.pointsControl
   });
@@ -56,10 +56,9 @@ export class ScaleViewComponent {
     initialValue: 30
   });
 
-  constructor() {
-    this.setupControlsSynchronization();
-    this.setupResolutionSync();
-  }
+  // Initialisation of effects to synchronize controls and resolution
+  private readonly _syncControls = this.setupControlsSynchronization();
+  private readonly _syncResolution = this.setupResolutionSync();
 
   private setupControlsSynchronization(): void {
     // Sync Slider -> Input
@@ -79,11 +78,12 @@ export class ScaleViewComponent {
     });
   }
 
+  // Effect to synchronize the resolution from the PlotService to the controls
   private setupResolutionSync(): void {
     const initialResolution = this.plotService.resolution();
     this.sliderControl.setValue(initialResolution, { emitEvent: false });
     this.pointsControl.setValue(initialResolution, { emitEvent: false });
-
+    // Sync PlotService resolution -> Controls
     effect(() => {
       const resolution = this.plotService.resolution();
       if (resolution !== this.sliderControl.value) {
@@ -95,9 +95,10 @@ export class ScaleViewComponent {
     });
   }
 
+  // Method to toggle the popover visibility
   public togglePopover(event: Event): void {
     this.popoverOpen.update((open) => !open);
-    this.popoverRef()?.toggle(event);
+    this.popover?.toggle(event);
   }
 
   /**
@@ -105,23 +106,23 @@ export class ScaleViewComponent {
    * "plan": x/5, y, z=y
    * "geo": x, y, z
    * "celeste": x, y=x, z/2
+   * "auto": x, y, z with aspect mode set to 'data' (equal scaling based on data range)
    */
+  private readonly scaleNormsMap: Record<string, { x: number; y: number; z: number; aspectMode: string }> = {
+    plan: { x: 0.2, y: 1, z: 1, aspectMode: 'manual' },
+    geo: { x: 1, y: 1, z: 1, aspectMode: 'manual' },
+    celeste: { x: 1, y: 1, z: 0.5, aspectMode: 'manual' },
+    auto: { x: 1, y: 1, z: 1, aspectMode: 'data' }
+  };
+
+  // Method to get the axis norms based on the selected scale
   private getScaleNorms(scale: string): { x: number; y: number; z: number; aspectMode: string } {
-    switch (scale) {
-      case 'plan':
-        return { x: 0.2, y: 1, z: 1, aspectMode: 'manual' };
-      case 'geo':
-        return { x: 1, y: 1, z: 1, aspectMode: 'manual' };
-      case 'celeste':
-        return { x: 1, y: 1, z: 0.5, aspectMode: 'manual' };
-      case 'auto':
-        return { x: 1, y: 1, z: 1, aspectMode: 'auto' };
-      default:
-        return { x: 3, y: 0.2, z: 0.5, aspectMode: 'manual' };
-    }
+    return this.scaleNormsMap[scale] ?? { x: 1, y: 1, z: 1, aspectMode: 'data' };
   }
 
   public async onValidate(): Promise<void> {
+    this.togglePopover(new Event('click')); // Close the popover after validation
+
     const resolution = this.pointsControl.value;
     const scale = this.formScaleView.get('scale')?.value as string;
     // Apply the resolution
