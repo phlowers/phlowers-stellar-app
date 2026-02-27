@@ -26,15 +26,16 @@ export class HeaderComponent {
   }>();
 
   readonly spans = computed<{ label: string; value: number[]; supports: number[] }[]>(() => {
-    const supportsLength = this.plotService.plotOptions().endSupport - this.plotService.plotOptions().startSupport + 1;
-    const spanAmount = Math.max(supportsLength - 1, 0);
-    // create an array the length of spanAmount
-    const spans = Array.from({ length: spanAmount }, (_, index) => ({
-      label: `${index + 1} - ${index + 2}`,
-      value: [index, index + 1],
-      supports: [index, index + 1]
-    }));
-    return spans;
+    const { startSupport, endSupport } = this.plotService.plotOptions();
+    const spanAmount = Math.max(endSupport - startSupport, 0);
+    return Array.from({ length: spanAmount }, (_, index) => {
+      const actualIndex = index + startSupport;
+      return {
+        label: `${actualIndex + 1} - ${actualIndex + 2}`,
+        value: [actualIndex, actualIndex + 1],
+        supports: [actualIndex, actualIndex + 1]
+      };
+    });
   });
 
   selectedSpan = signal<number[] | null>(null);
