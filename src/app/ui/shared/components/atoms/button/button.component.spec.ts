@@ -43,7 +43,6 @@ describe('ButtonComponent', () => {
 
     fixture = TestBed.createComponent(ButtonComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   describe('Component Creation', () => {
@@ -101,7 +100,6 @@ describe('ButtonComponent', () => {
         styles.forEach((style) => {
           fixture.componentRef.setInput('btnSize', size);
           fixture.componentRef.setInput('btnStyle', style);
-          fixture.detectChanges();
           const classes = component.classesList();
           expect(classes).toBe(`app-btn-${size} app-btn-${style}`);
         });
@@ -110,7 +108,6 @@ describe('ButtonComponent', () => {
 
     it('should add loading classes when btnLoading is true', () => {
       fixture.componentRef.setInput('btnLoading', true);
-      fixture.detectChanges();
       const classes = component.classesList();
       expect(classes).toContain('disabled app-btn-loading');
     });
@@ -311,24 +308,20 @@ describe('ButtonComponent', () => {
 
       // Change size
       fixture.componentRef.setInput('btnSize', 's');
-      fixture.detectChanges();
       expect(component.classesList()).toBe('app-btn-s app-btn-base');
 
       // Change style
       fixture.componentRef.setInput('btnStyle', 'outlined');
-      fixture.detectChanges();
       expect(component.classesList()).toBe('app-btn-s app-btn-outlined');
 
       // Add loading
       fixture.componentRef.setInput('btnLoading', true);
-      fixture.detectChanges();
       expect(component.classesList()).toBe('app-btn-s app-btn-outlined disabled app-btn-loading');
 
       // Change all
       fixture.componentRef.setInput('btnSize', 'l');
       fixture.componentRef.setInput('btnStyle', 'danger');
       fixture.componentRef.setInput('btnLoading', false);
-      fixture.detectChanges();
       expect(component.classesList()).toBe('app-btn-l app-btn-danger');
     });
 

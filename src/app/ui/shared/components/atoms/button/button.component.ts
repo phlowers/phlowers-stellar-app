@@ -1,14 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  ElementRef,
-  input,
-  OnDestroy,
-  OnInit,
-  signal,
-  ViewEncapsulation
-} from '@angular/core';
+import { Component, computed, ElementRef, input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { IconComponent } from '../icon/icon.component';
 
 @Component({

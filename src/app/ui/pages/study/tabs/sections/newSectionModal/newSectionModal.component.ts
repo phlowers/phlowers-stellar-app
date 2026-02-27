@@ -16,7 +16,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { isNil } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
-import { SUPPORT_FIELD_LIMITS } from './manualSection/supportsTable/helpers';
+import { hasSupportsBoundsErrors } from './newSectionModal.constants';
 
 /**
  * Checks whether all mandatory fields in a section are filled.
@@ -45,17 +45,6 @@ const areAllRequiredFieldsFilled = (section: Section) => {
     supportsSpanAngleCondition &&
     supportsChainLengthCondition &&
     supportsAttachmentHeightCondition
-  );
-};
-
-const hasSupportsBoundsErrors = (section: Section): boolean => {
-  const fields = Object.keys(SUPPORT_FIELD_LIMITS) as (keyof typeof SUPPORT_FIELD_LIMITS)[];
-  return section.supports.some((support) =>
-    fields.some((field) => {
-      const value = (support as unknown as Record<string, unknown>)[field];
-      const { min, max } = SUPPORT_FIELD_LIMITS[field];
-      return typeof value === 'number' && (value < min || value > max);
-    })
   );
 };
 

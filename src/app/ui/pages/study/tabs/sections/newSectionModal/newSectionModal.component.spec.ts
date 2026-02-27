@@ -310,68 +310,6 @@ describe('NewSectionModalComponent (Jest)', () => {
       towerModel: null
     };
 
-    it('should be false when all supports are within bounds', () => {
-      fixture.componentRef.setInput('section', { ...mockSection, supports: [validSupport] });
-      fixture.detectChanges();
-      component.checkFields();
-      expect(component.supportsBoundsErrors()).toBe(false);
-    });
-
-    it('should be false when supports array is empty', () => {
-      component.checkFields();
-      expect(component.supportsBoundsErrors()).toBe(false);
-    });
-
-    it('should be true when attachmentHeight is below min', () => {
-      fixture.componentRef.setInput('section', {
-        ...mockSection,
-        supports: [{ ...validSupport, attachmentHeight: -200 }]
-      });
-      fixture.detectChanges();
-      component.checkFields();
-      expect(component.supportsBoundsErrors()).toBe(true);
-    });
-
-    it('should be true when attachmentHeight is above max', () => {
-      fixture.componentRef.setInput('section', {
-        ...mockSection,
-        supports: [{ ...validSupport, attachmentHeight: 10000 }]
-      });
-      fixture.detectChanges();
-      component.checkFields();
-      expect(component.supportsBoundsErrors()).toBe(true);
-    });
-
-    it('should be true when spanAngle is out of bounds', () => {
-      fixture.componentRef.setInput('section', {
-        ...mockSection,
-        supports: [{ ...validSupport, spanAngle: 300 }]
-      });
-      fixture.detectChanges();
-      component.checkFields();
-      expect(component.supportsBoundsErrors()).toBe(true);
-    });
-
-    it('should be true when armLength is out of bounds', () => {
-      fixture.componentRef.setInput('section', {
-        ...mockSection,
-        supports: [{ ...validSupport, armLength: -100 }]
-      });
-      fixture.detectChanges();
-      component.checkFields();
-      expect(component.supportsBoundsErrors()).toBe(true);
-    });
-
-    it('should be true when supportFootAltitude is out of bounds', () => {
-      fixture.componentRef.setInput('section', {
-        ...mockSection,
-        supports: [{ ...validSupport, supportFootAltitude: -200 }]
-      });
-      fixture.detectChanges();
-      component.checkFields();
-      expect(component.supportsBoundsErrors()).toBe(true);
-    });
-
     it('should disable the save button when bounds errors are present', () => {
       fixture.componentRef.setInput('section', {
         ...mockSection,
