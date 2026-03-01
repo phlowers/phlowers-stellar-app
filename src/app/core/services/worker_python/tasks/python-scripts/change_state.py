@@ -31,7 +31,7 @@ class ChangeStateInput:
 
 
 def change_state(js_inputs: dict):
-    global engine, plt_line, base_plt_line, base_engine, js_to_python, apply_span_loads
+    global engine, plt_line, base_plt_line, base_engine, js_to_python, apply_span_loads, get_coordinates
 
     # logger.debug("python_inputs: ", str(js_inputs))
     change_state_inputs = js_to_python(js_inputs)  # type: ignore

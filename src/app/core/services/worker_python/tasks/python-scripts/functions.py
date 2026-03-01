@@ -186,21 +186,41 @@ base_plt_line = None
 
 def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
     """Convert raw span load dicts into position and weight arrays."""
+    global engine
     load_position_list = []
     load_weight_list = []
+    span_lengths = engine.section_array.data["span_length"].to_numpy()
     for index, span in enumerate(span_loads):
-        if span['referenceSupport'] == 'LEFT':
-            load_position_list.append(span["loadPosition"])
-        elif span['referenceSupport'] == 'RIGHT':
-            span_length = engine.section_array.data["span_length"].to_numpy()[
-                index]
-            load_position_list.append(span_length - span["loadPosition"])
-        else:
-            load_position_list.append(0)
+        try:
+            if span['referenceSupport'] == 'LEFT':
+                load_position_list.append(span["loadPosition"])
+            elif span['referenceSupport'] == 'RIGHT':
+                if 0 <= index < len(span_lengths):
+                    span_length = span_lengths[index]
+                    load_position_list.append(span_length - span["loadPosition"])
+                else:
+                    logging.warning(
+                        "Span load index %s is out of bounds for span_length array (size %s). "
+                        "Defaulting load position to 0.",
+                        index,
+                        len(span_lengths),
+                    )
+                    load_position_list.append(0)
+            else:
+                load_position_list.append(0)
 
-        if span['type'] == 'punctual':
-            load_weight_list.append(span["loadWeight"])
-        else:
+            if span['type'] == 'punctual':
+                load_weight_list.append(span["loadWeight"])
+            else:
+                load_weight_list.append(0.01)
+        except KeyError as e:
+            logging.warning(
+                "Span load at index %s is missing required key %s. "
+                "Skipping with defaults (position=0, weight=0.01).",
+                index,
+                e,
+            )
+            load_position_list.append(0)
             load_weight_list.append(0.01)
 
     return np.array(load_position_list), np.array(load_weight_list)
@@ -208,7 +228,7 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
 
 def apply_span_loads(span_loads: list):
     """Parse span loads and add them to the engine if any are non-zero."""
-    global plt_line
+    global plt_line, engine
     load_position_meters, load_weight = parse_span_loads(span_loads)
     if (load_position_meters != 0).any() and (load_weight != 0).any():
         engine.add_loads(load_position_meters, load_weight)
@@ -369,17 +389,24 @@ def init_section(js_inputs: dict):
     if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
         climate = input_charge["data"]["climate"]
 
-    if input_charge and "data" in input_charge and "spanLoads" in input_charge["data"]:
+    has_span_loads = (
+        input_charge
+        and "data" in input_charge
+        and "spanLoads" in input_charge["data"]
+    )
+
+    if has_span_loads:
         apply_span_loads(input_charge["data"]["spanLoads"])
         engine.solve_adjustment()
-        if climate:
-            engine.solve_change_state(
-                ice_thickness=climate["iceThickness"],
-                new_temperature=climate["cableTemperature"],
-                wind_pressure=climate["windPressure"],
-            )
-        else:
-            engine.solve_change_state()
+
+    if climate:
+        engine.solve_change_state(
+            ice_thickness=climate["iceThickness"],
+            new_temperature=climate["cableTemperature"],
+            wind_pressure=climate["windPressure"],
+        )
+    elif has_span_loads:
+        engine.solve_change_state()
 
     section_length = len(engine.section_array.data)
     base_section_length = len(base_engine.section_array.data)
