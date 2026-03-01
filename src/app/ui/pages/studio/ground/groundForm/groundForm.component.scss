@@ -1,0 +1,216 @@
+@use 'abstract.extracts' as app;
+
+%_align-top {
+  align-self: start;
+}
+
+%_align-center {
+  align-self: center;
+}
+
+%_align-end {
+  align-self: end;
+}
+
+%_error-layout {
+  @apply flex flex-col gap-1 pt-1;
+}
+
+:host {
+  @apply flex flex-col px-4 h-full;
+  width: 25rem;
+}
+
+.ground-form {
+  @apply flex flex-col gap-3 items-stretch flex-1 min-h-0 max-h-full;
+
+  &__buttons {
+    @apply flex flex-row justify-between items-center;
+  }
+
+  &__grid-2-cols {
+    @apply grid grid-cols-2;
+    grid-template-areas:
+      'leftLabel rightLabel'
+      'leftInput rightInput'
+      'leftError rightError';
+    column-gap: 0.625rem;
+  }
+
+  &__field {
+    @apply flex flex-row items-stretch justify-end;
+  }
+
+  &__points {
+    @apply flex flex-col gap-3 min-h-0 overflow-y-auto overflow-x-hidden;
+
+    &__point {
+      %_content-hover-select {
+        @apply relative;
+        z-index: 1;
+      }
+
+      @apply relative p-2;
+      border: 0.0625rem solid rgb(255 255 255 / 0);
+      border-radius: 0.25rem;
+      transition:
+        border-color 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+
+      &--active {
+        border-color: var(--main-primary);
+      }
+
+      &:hover {
+        background-color: var(--primary-100);
+      }
+
+      &__select {
+        @apply overflow-hidden;
+
+        &,
+        &::after {
+          @apply absolute inset-0;
+        }
+        &::after {
+          content: '';
+        }
+
+        &:focus-visible::after {
+          @extend %focus-state;
+        }
+      }
+
+      &__header {
+        @apply flex flex-row justify-between items-center mb-1;
+
+        &__label {
+          @extend %text-xl-400;
+          margin: 0;
+        }
+
+        &__btn {
+          @extend %_content-hover-select;
+        }
+      }
+
+      &__form {
+        @apply grid grid-cols-2;
+        grid-template-areas:
+          'altPointLabel distRefLabel'
+          'altPointInput distRefInput'
+          'altPointError distRefError';
+        column-gap: 0.625rem;
+
+        &__label,
+        &__input {
+          @extend %_content-hover-select;
+        }
+      }
+    }
+  }
+
+  &__sticky {
+    @apply flex flex-col gap-3;
+    flex-shrink: 0;
+    height: 12.5rem;
+
+    &__btns {
+      @apply flex justify-end items-center;
+      gap: 0.625rem;
+    }
+
+    &__divider {
+      margin: 0;
+      border: none;
+      border-top: 0.0625rem solid var(--star-dust-300);
+    }
+
+    &__results {
+      margin-top: 0;
+      padding: 0;
+      border-radius: 0.25rem;
+
+      &__title {
+        @extend %heading-xs;
+        margin-bottom: 0.5rem;
+      }
+
+      &__grid {
+        @apply grid grid-cols-3;
+        column-gap: 1rem;
+
+        &__item {
+          @apply flex flex-col;
+
+          &__term {
+            color: var(--star-dust-900);
+            padding: 0.125rem 0.25rem;
+          }
+
+          &__def {
+            @extend %text-m-400;
+            color: var(--star-dust-950);
+            padding: 0.375rem 0.5rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+input {
+  @apply w-full;
+}
+
+.span-label,
+.alt-label {
+  grid-area: leftLabel;
+  @extend %_align-end;
+}
+
+.span-input,
+.alt-input {
+  grid-area: leftInput;
+  @extend %_align-center;
+}
+
+.ref-label {
+  grid-area: rightLabel;
+  @extend %_align-end;
+}
+
+.ref-input {
+  grid-area: rightInput;
+  @extend %_align-center;
+}
+
+.alt-point-label {
+  grid-area: altPointLabel;
+  @extend %_align-end;
+}
+
+.alt-point-input {
+  grid-area: altPointInput;
+  @extend %_align-center;
+}
+
+.alt-point-error {
+  grid-area: altPointError;
+  @extend %_align-top, %_error-layout;
+}
+
+.dist-ref-label {
+  grid-area: distRefLabel;
+  @extend %_align-end;
+}
+
+.dist-ref-input {
+  grid-area: distRefInput;
+  @extend %_align-center;
+}
+
+.dist-ref-error {
+  grid-area: distRefError;
+  @extend %_align-top, %_error-layout;
+}

@@ -4,8 +4,10 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { SpanLoad } from '@core/domain';
 import { Obstacle } from '@core/domain/models/obstacle.model';
+import { Ground } from '@core/domain/models/ground.model';
 import { DataObject } from './createPlotDataObject';
 import { createObstaclesAnnotations } from './obstacles';
+import { createGroundAnnotations } from './grounds';
 
 /**
  * Parameters required to create or update a Plotly section plot.
@@ -38,6 +40,12 @@ export interface CreatePlotParams {
   currentObstacleUuid: string | null;
   /** Index of the currently selected obstacle position point. */
   currentObstaclePointIndex: number;
+  /** List of ground profiles to annotate on the plot. */
+  grounds: Ground[];
+  /** UUID of the currently selected ground profile, or `null`. */
+  currentGroundUuid: string | null;
+  /** Index of the currently selected ground position point. */
+  currentGroundPointIndex: number;
 }
 
 const normalCamera = () => ({
@@ -77,7 +85,7 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
       y: 0.2,
       z: 0.5
     },
-    annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)],
+    annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams), ...createGroundAnnotations(plotParams)],
     camera: plotParams.camera
       ? plotParams.camera
       : {
@@ -140,7 +148,7 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams)
       scaleratio: plotParams.side === 'face' ? 0.2 : undefined,
       scaleanchor: plotParams.side === 'face' ? 'x' : undefined
     },
-    annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)]
+    annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams), ...createGroundAnnotations(plotParams)]
   };
 };
 

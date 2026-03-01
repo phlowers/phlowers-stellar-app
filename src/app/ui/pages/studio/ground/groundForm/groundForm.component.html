@@ -1,0 +1,245 @@
+<form [formGroup]="groundFormService.form" class="ground-form" data-testid="ground-form">
+  <div class="ground-form__buttons">
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      [disabled]="!supportUuidValue()"
+      (click)="groundFormService.returnToSpan()"
+      btnSize="s"
+      data-testid="return-to-span"
+    >
+      <ng-container i18n>Return to span</ng-container>
+    </button>
+
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="groundFormService.resetFormForNewGround()"
+      data-testid="reset-ground"
+    >
+      <app-icon icon="refresh" />
+      <ng-container i18n>Reset</ng-container>
+    </button>
+  </div>
+
+  <div class="ground-form__grid-2-cols">
+    <label for="span" class="span-label" i18n>Span</label>
+
+    <p-select
+      inputId="span"
+      [options]="spansOptions()"
+      formControlName="supportUuid"
+      optionLabel="label"
+      optionValue="value"
+      class="span-input"
+      data-testid="span-select"
+    />
+
+    <label for="referenceSupport" class="ref-label" i18n>Reference support</label>
+    <p-select
+      inputId="referenceSupport"
+      [options]="groundFormService.supportsOptions()"
+      formControlName="referenceSupport"
+      optionLabel="label"
+      optionValue="value"
+      class="ref-input"
+      data-testid="reference-support"
+    />
+  </div>
+
+  <div class="ground-form__grid-2-cols">
+    <label for="altitudeType" class="alt-label" i18n>Altitude type</label>
+
+    <p-select
+      inputId="altitudeType"
+      [options]="altitudeTypeOptions"
+      formControlName="altitudeType"
+      optionLabel="label"
+      optionValue="value"
+      class="alt-input"
+      data-testid="altitude-type"
+    />
+  </div>
+
+  <div class="ground-form__field">
+    <button
+      [disabled]="groundFormService.form.get('supportUuid')?.value === null"
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      (click)="groundFormService.addPosition()"
+      data-testid="add-point"
+    >
+      <app-icon icon="add_circle" />
+      <ng-container i18n>Add point</ng-container>
+    </button>
+  </div>
+
+  <ul class="ground-form__points" data-testid="points-list">
+    @for (ground of groundFormService.positions.controls; track $index) {
+      <li
+        [class.ground-form__points__point--active]="groundsService.currentPointIndex() === $index"
+        [attr.aria-selected]="groundsService.currentPointIndex() === $index ? 'true' : 'false'"
+        class="ground-form__points__point"
+        data-testid="point-item"
+      >
+        <button
+          type="button"
+          class="ground-form__points__point__select"
+          (click)="setCurrentGroundPoint($index)"
+          data-testid="select-point"
+        >
+          <span class="sr-only"><ng-container i18n>Select point</ng-container>&nbsp;{{ $index + 1 }}</span>
+        </button>
+
+        <div class="ground-form__points__point__header">
+          <p class="ground-form__points__point__header__label">Point {{ $index + 1 }}</p>
+          <button
+            app-btn
+            btnStyle="danger"
+            btnSize="s"
+            type="button"
+            class="ground-form__points__point__header__btn"
+            (click)="groundFormService.deletePoint($index); $event.stopPropagation()"
+            aria-label="delete point"
+            i18n-aria-label
+            data-testid="delete-point"
+          >
+            <app-icon icon="delete" />
+          </button>
+        </div>
+
+        <div class="ground-form__points__point__form">
+          <label
+            [for]="'altitudePoint' + $index"
+            class="ground-form__points__point__form__label alt-point-label"
+            i18n
+          >
+            Alt. point
+          </label>
+
+          <p-inputgroup class="ground-form__points__point__form__input">
+            <input
+              (input)="onPositionInput($event, 'z')"
+              pInputText
+              [disabled]="!groundFormService.form.get('supportUuid')?.value"
+              type="number"
+              [id]="'altitudePoint' + $index"
+              [value]="ground.value.z"
+              class="alt-point-input"
+              step="0.01"
+              (focus)="setCurrentGroundPoint($index)"
+              data-testid="point-altitude"
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
+
+          <label
+            [for]="'distanceToRefSupport' + $index"
+            class="ground-form__points__point__form__label dist-ref-label"
+            i18n
+          >
+            Ref. supp. dist.
+          </label>
+
+          <p-inputgroup class="ground-form__points__point__form__input">
+            <input
+              pInputText
+              (input)="onPositionInput($event, 'x')"
+              [disabled]="!groundFormService.form.get('supportUuid')?.value"
+              type="number"
+              [id]="'distanceToRefSupport' + $index"
+              [value]="ground.value.x"
+              class="dist-ref-input"
+              step="0.01"
+              (focus)="setCurrentGroundPoint($index)"
+              data-testid="point-ref-distance"
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
+        </div>
+      </li>
+    }
+  </ul>
+
+  <div class="ground-form__sticky">
+    <div class="ground-form__sticky__btns">
+      <button
+        app-btn
+        btnStyle="danger"
+        type="button"
+        [disabled]="!groundFormService.form.get('uuid')?.value"
+        (click)="groundFormService.deleteGround()"
+        aria-label="delete ground"
+        i18n-aria-label
+        data-testid="delete-ground"
+      >
+        <app-icon icon="delete" />
+      </button>
+
+      <button
+        app-btn
+        btnStyle="outlined"
+        type="button"
+        class="p-0"
+        (click)="groundFormService.saveGround()"
+        [disabled]="true"
+        data-testid="save-ground"
+      >
+        <ng-container i18n>AT-CCGLA</ng-container>
+      </button>
+
+      <button
+        app-btn
+        type="button"
+        (click)="groundFormService.calculateAndSave()"
+        [disabled]="!groundFormService.canCalculateAndSave()"
+        data-testid="calculate-save"
+      >
+        <app-icon icon="rocket_launch" />
+        <ng-container i18n>Calculate and save</ng-container>
+      </button>
+    </div>
+
+    <hr class="ground-form__sticky__divider" />
+
+    <div class="ground-form__sticky__results" data-testid="results">
+      <h2 class="ground-form__sticky__results__title" i18n>Results:</h2>
+
+      <dl class="ground-form__sticky__results__grid">
+        <div class="ground-form__sticky__results__grid__item">
+          <dt class="ground-form__sticky__results__grid__item__term" i18n>Oblique</dt>
+          <dd class="ground-form__sticky__results__grid__item__def">
+            <span data-testid="result-oblique">
+              {{ groundFormService.results().oblique ?? 'N/A' }}
+            </span>
+            <ng-container i18n>m</ng-container>
+          </dd>
+        </div>
+
+        <div class="ground-form__sticky__results__grid__item">
+          <dt class="ground-form__sticky__results__grid__item__term" i18n>Vertical</dt>
+          <dd class="ground-form__sticky__results__grid__item__def">
+            <span data-testid="result-vertical">
+              {{ groundFormService.results().verticale ?? 'N/A' }}
+            </span>
+            <ng-container i18n>m</ng-container>
+          </dd>
+        </div>
+
+        <div class="ground-form__sticky__results__grid__item">
+          <dt class="ground-form__sticky__results__grid__item__term" i18n>Horizontal</dt>
+          <dd class="ground-form__sticky__results__grid__item__def">
+            <span data-testid="result-horizontal">
+              {{ groundFormService.results().horizontale ?? 'N/A' }}
+            </span>
+            <ng-container i18n>m</ng-container>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</form>

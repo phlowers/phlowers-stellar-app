@@ -23,6 +23,7 @@ import { ToolbarDialogComponent } from './toolbar-dialog/toolbar-dialog.componen
 import { PlotService } from './services/plot.service';
 import { SectionService } from '@services/sections/section.service';
 import { ObstaclesFormComponent } from './obstacles/obstaclesForm/obstaclesForm.component';
+import { GroundFormComponent } from './ground/groundForm/groundForm.component';
 import { FreePositioningComponent } from '../../shared/components/studio/free-positioning/free-positioning.component';
 
 // debounce to make it more fluid when dragging the slider
@@ -50,6 +51,7 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
     NewChargeModalComponent,
     ToolbarDialogComponent,
     ObstaclesFormComponent,
+    GroundFormComponent,
     FreePositioningComponent
   ],
   templateUrl: './studio-page.component.html',

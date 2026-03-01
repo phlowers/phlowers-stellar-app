@@ -94,7 +94,10 @@ describe('createPlot', () => {
     endSupport: 0,
     obstacles: [],
     currentObstacleUuid: null,
-    currentObstaclePointIndex: 0
+    currentObstaclePointIndex: 0,
+    grounds: [],
+    currentGroundUuid: null,
+    currentGroundPointIndex: 0
   };
 
   describe('basic functionality', () => {

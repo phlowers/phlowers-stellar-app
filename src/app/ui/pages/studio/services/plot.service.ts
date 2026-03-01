@@ -13,6 +13,8 @@ import { ChargeData } from '@core/domain/models/charge.model';
 import { SideTabsService } from '../side-tabs/side-tabs.service';
 import { ObstaclesService } from '../obstacles/obstacles.service';
 import { ObstacleFormService } from '../obstacles/obstaclesForm/obstaclesForm.service';
+import { GroundsService } from '../ground/grounds.service';
+import { GroundFormService } from '../ground/groundForm/groundForm.service';
 
 /** DOM element ID used for the Plotly chart container. */
 export const PLOT_ID = 'plotly-output';
@@ -112,7 +114,8 @@ export class PlotService {
     private readonly cableService: CablesService,
     private readonly sectionService: SectionService,
     private readonly sideTabsService: SideTabsService,
-    private readonly obstaclesService: ObstaclesService
+    private readonly obstaclesService: ObstaclesService,
+    private readonly groundsService: GroundsService
   ) {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
@@ -140,6 +143,8 @@ export class PlotService {
     this.spanAmountChoice.set('all');
     this.injector.get(ObstacleFormService).clearPositions();
     this.obstaclesService.resetCurrentPointIndex();
+    this.injector.get(GroundFormService).clearPositions();
+    this.groundsService.resetCurrentPointIndex();
     this.sideTabsService.sideTabs.set(null);
   };
 

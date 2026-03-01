@@ -16,12 +16,21 @@ import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
 import { Obstacle } from '@src/app/core/domain/models/obstacle.model';
+import { Ground } from '@src/app/core/domain/models/ground.model';
 import {
   appendExistingObstaclesWithFormObstacle,
   getObstacleClickPayload,
   ObstacleAnnotationData
 } from './helpers/obstacles';
+import {
+  appendExistingGroundsWithFormGround,
+  createGroundTraces,
+  getGroundClickPayload,
+  GroundAnnotationData
+} from './helpers/grounds';
 import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
+import { GroundFormService } from '@src/app/ui/pages/studio/ground/groundForm/groundForm.service';
+import { GroundsService } from '@src/app/ui/pages/studio/ground/grounds.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -44,6 +53,8 @@ export class SectionPlotComponent {
   private readonly sideTabsService = inject(SideTabsService);
   private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly obstaclesService = inject(ObstaclesService);
+  private readonly groundFormService = inject(GroundFormService);
+  private readonly groundsService = inject(GroundsService);
 
   // Signals
   private readonly isPlotRefreshing = signal(false);
@@ -57,6 +68,10 @@ export class SectionPlotComponent {
     initialValue: ''
   });
 
+  private readonly currentGroundPositions = toSignal(this.groundFormService.form.get('positions')!.valueChanges, {
+    initialValue: []
+  });
+
   // Computed state
   private readonly plotState = computed(() => ({
     litData: this.litData(),
@@ -64,9 +79,11 @@ export class SectionPlotComponent {
     plotOptions: this.plotService.plotOptions(),
     displayOptions: this.plotService.selectedDisplayOptions(),
     pointIndex: this.obstaclesService.currentPointIndex(),
+    groundPointIndex: this.groundsService.currentPointIndex(),
     sideTabs: this.sideTabsService.sideTabs(),
     positions: this.currentObstaclePositions(),
-    name: this.currentObstacleName()
+    name: this.currentObstacleName(),
+    groundPositions: this.currentGroundPositions()
   }));
 
   // Debounced plot refresh with signal
@@ -119,12 +136,22 @@ export class SectionPlotComponent {
     return appendExistingObstaclesWithFormObstacle(existingObstacles, currentObstacle);
   }
 
+  private buildGroundList(): Ground[] {
+    const currentGround = this.groundFormService.form.value as Ground;
+    const existingGrounds = this.plotService.section()?.grounds ?? [];
+    return appendExistingGroundsWithFormGround(existingGrounds, currentGround);
+  }
+
   private getSupportsList() {
     return this.plotService.section()?.supports ?? [];
   }
 
   private getCurrentObstacleUuid(): string | null {
     return this.obstacleFormService.form.get('uuid')?.value ?? null;
+  }
+
+  private getCurrentGroundUuid(): string | null {
+    return this.groundFormService.form.get('uuid')?.value ?? null;
   }
 
   /** Rebuilds and redraws the section plot with the latest data, options, and obstacles. */
@@ -138,6 +165,7 @@ export class SectionPlotComponent {
       const selectedDisplayOptions = this.plotService.selectedDisplayOptions();
       const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
       const obstacles = this.buildObstacleList();
+      const grounds = this.buildGroundList();
       const supports = this.getSupportsList();
       let plotData = createPlotData(litData, plotOptions, supports);
 
@@ -149,8 +177,10 @@ export class SectionPlotComponent {
       const camera = this.plotService.camera();
       const currentObstacleUuid = this.getCurrentObstacleUuid();
       const currentObstaclePointIndex = this.obstaclesService.currentPointIndex();
+      const currentGroundUuid = this.getCurrentGroundUuid();
+      const currentGroundPointIndex = this.groundsService.currentPointIndex();
 
-      const plot = await createPlot({
+      const plotParams = {
         plotId: PLOT_ID,
         data: plotData,
         invert: plotOptions.invert,
@@ -163,8 +193,16 @@ export class SectionPlotComponent {
         endSupport: plotOptions.endSupport,
         currentObstacleUuid,
         currentObstaclePointIndex,
-        obstacles
-      });
+        obstacles,
+        grounds,
+        currentGroundUuid,
+        currentGroundPointIndex
+      };
+
+      const groundTraces = createGroundTraces(plotParams);
+      plotParams.data = [...plotData, ...groundTraces];
+
+      const plot = await createPlot(plotParams);
       if (plot) {
         this.addEventListenersToPlot(plot);
       }
@@ -177,17 +215,18 @@ export class SectionPlotComponent {
 
   addEventListenersToPlot = (plot: Plotly.PlotlyHTMLElement) => {
     interface ClickAnnotationEvent {
-      annotation?: { data?: ObstacleAnnotationData };
+      annotation?: { data?: ObstacleAnnotationData | GroundAnnotationData };
     }
     (
       plot as Plotly.PlotlyHTMLElement & {
         on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
       }
     ).on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
-      if (event?.annotation?.data?.type === 'obstacle') {
+      const annotationData = event?.annotation?.data;
+      if (annotationData?.type === 'obstacle') {
         const section = this.plotService.section();
         const payload = getObstacleClickPayload(
-          event?.annotation?.data,
+          annotationData as ObstacleAnnotationData,
           section?.obstacles ?? [],
           section?.supports ?? []
         );
@@ -198,6 +237,20 @@ export class SectionPlotComponent {
           endSupport: payload.supportIndex + 1
         });
         this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
+      } else if (annotationData?.type === 'ground') {
+        const section = this.plotService.section();
+        const payload = getGroundClickPayload(
+          annotationData as GroundAnnotationData,
+          section?.grounds ?? [],
+          section?.supports ?? []
+        );
+        if (!payload) return;
+        this.sideTabsService.sideTabs.set(2);
+        this.plotService.plotOptionsChange({
+          startSupport: payload.supportIndex,
+          endSupport: payload.supportIndex + 1
+        });
+        this.groundFormService.setExistingGround(payload.ground, payload.groundPositionIndex);
       }
     });
   };

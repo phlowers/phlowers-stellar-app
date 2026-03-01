@@ -10,6 +10,7 @@ import { Charge } from './charge.model';
 import { InitialCondition } from './initial-condition.model';
 import { Support } from './support.model';
 import { VtlAndGuying } from './vtl-and-guying.model';
+import { Ground } from './ground.model';
 import { Obstacle } from './obstacle.model';
 
 /**
@@ -108,6 +109,8 @@ export interface Section {
   supports: Support[];
   /** Array of obstacles near the section */
   obstacles: Obstacle[];
+  /** Array of ground profile definitions for the section */
+  grounds?: Ground[];
   /** Array of initial conditions for calculations */
   initial_conditions: InitialCondition[];
   /** UUID of the currently selected initial condition */
