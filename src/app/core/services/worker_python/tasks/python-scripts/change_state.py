@@ -2,8 +2,6 @@ from dataclasses import dataclass
 
 import logging
 
-import numpy as np
-
 logger = logging.getLogger("mechaphlowers")
 # Set logger level to WARNING so info messages are shown
 logger.setLevel(logging.WARNING)
@@ -31,8 +29,9 @@ class ChangeStateInput:
     climate: ClimateCharge
     spanLoads: list[SpanLoad]
 
+
 def change_state(js_inputs: dict):
-    global engine, plt_line, base_plt_line, base_engine, js_to_python
+    global engine, plt_line, base_plt_line, base_engine, js_to_python, apply_span_loads
 
     # logger.debug("python_inputs: ", str(js_inputs))
     change_state_inputs = js_to_python(js_inputs)  # type: ignore
@@ -44,32 +43,7 @@ def change_state(js_inputs: dict):
     cable_temperature = climate.cableTemperature
     ice_thickness = climate.iceThickness / 100  # in meters in the engine
 
-    punctual_load = change_state_inputs["spanLoads"]
-    load_position_list = []
-    load_weight_list = []
-    for index, span in enumerate(punctual_load):
-        if span["referenceSupport"] == "LEFT":
-            load_position_list.append(span["loadPosition"])
-        elif span["referenceSupport"] == "RIGHT":
-            span_length = engine.section_array.data["span_length"].to_numpy()[
-                index]
-            load_position_list.append(span_length - span["loadPosition"])
-        else:
-            load_position_list.append(0)
-
-        if span["type"] == "punctual":
-            load_weight_list.append(span["loadWeight"])
-        else:
-            # Temporary work around to factor in marking
-            load_weight_list.append(0.01)
-
-    load_position_meters = np.array(load_position_list)
-    load_weight = np.array(load_weight_list)
-
-    # Small optimization if no loads
-    if (load_position_meters != 0).any() and (load_position_meters != 0).any():
-        engine.add_loads(load_position_meters, load_weight)
-        plt_line = plt_line.generate_reset()
+    apply_span_loads(change_state_inputs["spanLoads"])
 
     engine.solve_adjustment()
     engine.solve_change_state(
@@ -78,7 +52,8 @@ def change_state(js_inputs: dict):
         wind_pressure=wind_pressure,
     )
     section_length = len(engine.section_array.data)
-    base_section_length = len(base_engine.section_array.data) if base_engine else section_length
+    base_section_length = len(
+        base_engine.section_array.data) if base_engine else section_length
     return {
         "current": get_coordinates(plt_line, False, 0, section_length - 1),
         "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1) if base_plt_line else None
