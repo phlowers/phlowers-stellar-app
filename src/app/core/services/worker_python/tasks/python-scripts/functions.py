@@ -393,6 +393,7 @@ def init_section(js_inputs: dict):
         input_charge
         and "data" in input_charge
         and "spanLoads" in input_charge["data"]
+        and len(input_charge["data"]["spanLoads"]) > 0
     )
 
     if has_span_loads:
