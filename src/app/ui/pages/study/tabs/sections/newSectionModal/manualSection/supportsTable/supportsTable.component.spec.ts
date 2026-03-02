@@ -229,7 +229,7 @@ describe('SupportsTableComponent', () => {
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
-        support: { supportFootAltitude: 0 }
+        support: { supportFootAltitude: -18 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
@@ -237,7 +237,7 @@ describe('SupportsTableComponent', () => {
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
-        support: { supportFootAltitude: 0 }
+        support: { supportFootAltitude: -18 }
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
@@ -245,7 +245,7 @@ describe('SupportsTableComponent', () => {
       });
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support3',
-        support: { supportFootAltitude: 0 }
+        support: { supportFootAltitude: -18 }
       });
     });
 
@@ -434,6 +434,40 @@ describe('SupportsTableComponent', () => {
     });
   });
 
+  describe('truncateDecimals', () => {
+    const makeEvent = (value: string) => ({ target: { value } as HTMLInputElement }) as unknown as Event;
+
+    it('should do nothing when value has no decimal separator', () => {
+      const event = makeEvent('123');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('123');
+    });
+
+    it('should do nothing when value has exactly 2 decimal places', () => {
+      const event = makeEvent('1.23');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('1.23');
+    });
+
+    it('should do nothing when value has fewer than 2 decimal places', () => {
+      const event = makeEvent('1.2');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('1.2');
+    });
+
+    it('should truncate to 2 decimal places when value has more', () => {
+      const event = makeEvent('1.234');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('1.23');
+    });
+
+    it('should truncate negative numbers with more than 2 decimal places', () => {
+      const event = makeEvent('-1.234');
+      component.truncateDecimals(event);
+      expect((event.target as HTMLInputElement).value).toBe('-1.23');
+    });
+  });
+
   describe('ngOnInit', () => {
     it('should call getData on init', async () => {
       const getDataSpy = jest.spyOn(component, 'getData');
@@ -520,6 +554,106 @@ describe('SupportsTableComponent', () => {
       expect(support?.attachmentSet).toBe(1);
       expect(support?.armLength).toBe(3.0);
       expect(support?.heightBelowConsole).toBe(2.0);
+    });
+  });
+
+  describe('onSupportNumberDoubleClick in view mode', () => {
+    it('should not copy when mode is view', () => {
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
+
+      component.onSupportNumberDoubleClick('spanLength');
+
+      expect(component.supportChange.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onChainNameFilter', () => {
+    beforeEach(() => {
+      component.chainsOptions.set(mockChains);
+      component.supplementaryChainsOptions.set([]);
+    });
+
+    it('should add a supplementary chain option when the filter value is not in the catalog', () => {
+      component.onChainNameFilter({ filter: 'My Custom Chain' });
+
+      expect(component.supplementaryChainsOptions().some((c) => c.chain_name === 'My Custom Chain')).toBe(true);
+    });
+
+    it('should not update supplementary options when the filter value is already in the catalog', () => {
+      component.onChainNameFilter({ filter: 'Chain 1' });
+
+      expect(component.supplementaryChainsOptions()).toEqual([]);
+    });
+  });
+
+  describe('onSupportNameFilter', () => {
+    beforeEach(() => {
+      // Use isolated support names to avoid mutations from onValidateFormAttachmentSetModal
+      const freshSupports: Support[] = [
+        { ...mockSupports[0], name: 'TypeA' },
+        { ...mockSupports[1], name: 'TypeB' }
+      ];
+      (component.supports as unknown as () => Support[]) = () => freshSupports;
+      component.supportFilterTable.set(['TypeA', 'TypeB']);
+      component.supplementarySupportFilterTable.set([]);
+    });
+
+    it('should add a supplementary support name when the filter value is not in the catalog', () => {
+      component.onSupportNameFilter({ filter: 'Custom Support' });
+
+      expect(component.supplementarySupportFilterTable()).toContain('Custom Support');
+    });
+
+    it('should not update supplementary names when the filter value is already in the catalog', () => {
+      component.onSupportNameFilter({ filter: 'TypeA' });
+
+      expect(component.supplementarySupportFilterTable()).toEqual([]);
+    });
+  });
+
+  describe('isNumber', () => {
+    it('should return true for numeric values', () => {
+      expect(component.isNumber(0)).toBe(true);
+      expect(component.isNumber(42)).toBe(true);
+      expect(component.isNumber(-1)).toBe(true);
+      expect(component.isNumber(3.14)).toBe(true);
+    });
+
+    it('should return false for non-numeric values', () => {
+      expect(component.isNumber(null)).toBe(false);
+      expect(component.isNumber(undefined)).toBe(false);
+      expect(component.isNumber('')).toBe(false);
+      expect(component.isNumber('42')).toBe(false);
+    });
+  });
+
+  describe('getData with attachments', () => {
+    it('should populate supportFilterTable and supplementarySupportFilterTable', async () => {
+      mockAttachmentService.getAttachments.mockResolvedValue([
+        { uuid: 'a1', updated_at: '', created_at: '', support_tower: '', support_name: 'CatalogType' }
+      ]);
+      (component.supports as unknown as () => Support[]) = () => [{ ...mockSupports[0], name: 'CustomType' }];
+
+      await component.getData();
+
+      expect(component.supportFilterTable()).toContain('CatalogType');
+      expect(component.supplementarySupportFilterTable()).toContain('CustomType');
+    });
+  });
+
+  describe('onSupportFieldChange with attachmentHeight', () => {
+    it('should emit attachmentHeight and the computed supportFootAltitude', () => {
+      component.onSupportFieldChange('support1', 'attachmentHeight', 50);
+
+      expect(component.supportChange.emit).toHaveBeenCalledTimes(2);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { supportFootAltitude: 20 } // 50 - 30
+      });
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { attachmentHeight: 50 }
+      });
     });
   });
 });

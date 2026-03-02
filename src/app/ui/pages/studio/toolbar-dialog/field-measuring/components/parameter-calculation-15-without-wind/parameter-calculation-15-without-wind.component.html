@@ -100,7 +100,7 @@
     <dl class="contents">
       <div class="parameterPapoto">
         <dt id="parameterPapoto-display" i18n>Parameter (Papoto, etc.)</dt>
-        <dd i18n>
+        <dd>
           {{ (measureData().outputs.papoto?.parameter | number: '1.0-2') ?? '-' }}
           m
         </dd>
@@ -110,14 +110,14 @@
         <dt id="parameterUncertaintyPapoto-display">
           <del i18n> Uncertainty parameter </del>
         </dt>
-        <dd i18n>
+        <dd>
           <del>{{ '-' }}</del>
         </dd>
       </div>
 
       <div class="cableTemperature">
         <dt i18n>Cable temperature</dt>
-        <dd i18n>
+        <dd>
           {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
           °C
         </dd>
@@ -127,7 +127,7 @@
         <dt>
           <del i18n>Uncertainty cable temperature</del>
         </dt>
-        <dd i18n>
+        <dd>
           <del>{{ measureData().outputs.cableTemperature?.cableTemperatureUncertainty ?? '-' }} °C</del>
         </dd>
       </div>
@@ -149,21 +149,21 @@
     <dl class="parameter-calculation-15-without-wind__results__list">
       <div class="parameter15CMinusUncertainty">
         <dt i18n>Parameter at 15°C - uncertainty</dt>
-        <dd i18n>
+        <dd>
           {{ (measureData().outputs.parameter15C?.parameter15CMinusUncertainty | number: '1.0-3') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15C">
         <dt i18n>Parameter at 15°C</dt>
-        <dd i18n>
+        <dd>
           {{ (measureData().outputs.parameter15C?.parameter15C | number: '1.0-3') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15CPlusUncertainty">
         <dt i18n>Parameter at 15°C + uncertainty</dt>
-        <dd i18n>
+        <dd>
           {{ (measureData().outputs.parameter15C?.parameter15CPlusUncertainty | number: '1.0-3') ?? '-' }}
           m
         </dd>

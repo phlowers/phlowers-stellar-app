@@ -92,10 +92,10 @@ export const calculateSupportNumber = (
 /**
  * Calculates a support foot altitude from the attachment height with a 30m offset.
  * @param attachmentHeight - Height of the attachment in meters
- * @returns Foot altitude (at least 0)
+ * @returns Foot altitude (at least -150)
  */
 export const calculateSupportFootAltitude = (attachmentHeight: number): number => {
-  return Math.max(attachmentHeight - 30, 0);
+  return Math.max(attachmentHeight - 30, -150);
 };
 
 /**
@@ -239,3 +239,16 @@ export const buildSupplementaryChains = (names: string[], catalogChainNames: str
  */
 export const getSupportFieldValues = (supports: Support[], field: 'chainName' | 'name'): string[] =>
   supports.map((s) => s[field] || '');
+
+export const SUPPORT_FIELD_LIMITS = {
+  spanLength: { min: 5, max: 5000 },
+  attachmentHeight: { min: -100, max: 9000 },
+  spanAngle: { min: -200, max: 200 },
+  chainLength: { min: 0, max: 15 },
+  chainWeight: { min: 0, max: 5000 },
+  attachmentSet: { min: 1, max: 60 },
+  armLength: { min: -50, max: 50 },
+  counterWeight: { min: 0, max: 5000 },
+  supportFootAltitude: { min: -150, max: 9000 },
+  chainSurface: { min: 0, max: 9.99 }
+} as const;

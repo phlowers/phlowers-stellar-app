@@ -16,6 +16,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { isNil } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
+import { hasSupportsBoundsErrors } from './newSectionModal.constants';
 
 /**
  * Checks whether all mandatory fields in a section are filled.
@@ -94,6 +95,7 @@ export class NewSectionModalComponent {
 
   areAllRequiredFieldsFilled = signal<boolean>(false);
   isNameUnique = signal<boolean>(false);
+  supportsBoundsErrors = signal<boolean>(false);
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
@@ -114,6 +116,7 @@ export class NewSectionModalComponent {
 
   checkFields() {
     this.areAllRequiredFieldsFilled.set(areAllRequiredFieldsFilled(this.section()));
+    this.supportsBoundsErrors.set(hasSupportsBoundsErrors(this.section()));
     const isNameUnique = !this.study()?.sections.find(
       (s) => s.name === this.section().name && s.uuid !== this.section().uuid
     );

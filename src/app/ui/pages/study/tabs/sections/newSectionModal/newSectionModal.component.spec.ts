@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
-import { Section, Study } from '@core/domain';
+import { Section, Study, Support } from '@core/domain';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
@@ -192,5 +192,140 @@ describe('NewSectionModalComponent (Jest)', () => {
 
     const button = fixture.debugElement.nativeElement.querySelector('button.app-btn-base span');
     expect(button.textContent.toLowerCase()).toContain('create section');
+  });
+
+  describe('headerTitle', () => {
+    it('should return the create text when mode is create', () => {
+      expect(component.headerTitle()).toBe('Create a study section');
+    });
+
+    it('should return the edit text when mode is edit', () => {
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.detectChanges();
+      expect(component.headerTitle()).toBe('Modify a study section');
+    });
+
+    it('should return the view text when mode is view', () => {
+      fixture.componentRef.setInput('mode', 'view');
+      fixture.detectChanges();
+      expect(component.headerTitle()).toBe('View a study section');
+    });
+  });
+
+  describe('onDuplicateSection', () => {
+    it('should call duplicateSection and emit setSection with the new section', async () => {
+      const sectionService = TestBed.inject(SectionService) as unknown as MockSectionService;
+      const newSection = { ...mockSection, uuid: 'new-uuid' };
+      sectionService.duplicateSection.mockResolvedValue(newSection);
+      const spy = jest.spyOn(component.setSection, 'emit');
+
+      await component.onDuplicateSection();
+
+      expect(sectionService.duplicateSection).toHaveBeenCalledWith(mockStudy, mockSection);
+      expect(spy).toHaveBeenCalledWith(newSection);
+    });
+  });
+
+  describe('onEditSection', () => {
+    it('should emit setMode(edit) and call checkFields', () => {
+      fixture.componentRef.setInput('mode', 'view');
+      fixture.detectChanges();
+
+      const spySetMode = jest.spyOn(component.setMode, 'emit');
+      const spyCheckFields = jest.spyOn(component, 'checkFields');
+
+      component.onEditSection();
+
+      expect(spySetMode).toHaveBeenCalledWith('edit');
+      expect(spyCheckFields).toHaveBeenCalled();
+    });
+  });
+
+  describe('onDeleteSection', () => {
+    it('should call deleteSection and emit isOpenChange(false)', () => {
+      fixture.componentRef.setInput('mode', 'view');
+      fixture.detectChanges();
+
+      const sectionService = TestBed.inject(SectionService) as unknown as MockSectionService;
+      const spy = jest.spyOn(component.isOpenChange, 'emit');
+
+      component.onDeleteSection();
+
+      expect(sectionService.deleteSection).toHaveBeenCalledWith(mockStudy, mockSection);
+      expect(spy).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('checkFields name uniqueness', () => {
+    it('should set isNameUnique to false when another section has the same name', () => {
+      const duplicateSection = { ...mockSection, uuid: 'other-uuid' };
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [duplicateSection] });
+      fixture.detectChanges();
+
+      component.checkFields();
+
+      expect(component.isNameUnique()).toBe(false);
+    });
+
+    it('should set isNameUnique to true when no other section shares the same name', () => {
+      const otherSection = { ...mockSection, uuid: 'other-uuid', name: 'Different Section' };
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [otherSection] });
+      fixture.detectChanges();
+
+      component.checkFields();
+
+      expect(component.isNameUnique()).toBe(true);
+    });
+
+    it('should set isNameUnique to true when the only matching name belongs to the same section (same uuid)', () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [mockSection] });
+      fixture.detectChanges();
+
+      component.checkFields();
+
+      expect(component.isNameUnique()).toBe(true);
+    });
+  });
+
+  describe('supportsBoundsErrors', () => {
+    const validSupport = {
+      uuid: 'sup1',
+      number: '1',
+      name: 'Support 1',
+      spanLength: 50,
+      spanAngle: 0,
+      attachmentHeight: 100,
+      cableType: 'cable-type-1',
+      attachmentSet: 'attachment-set-1',
+      heightBelowConsole: 10,
+      armLength: 0,
+      chainName: 'Chain 1',
+      chainLength: 10,
+      chainWeight: 1,
+      chainV: 1,
+      counterWeight: 1,
+      supportFootAltitude: 0,
+      chainSurface: 1,
+      attachmentPosition: 5,
+      towerModel: 'Tower model 1'
+    } as unknown as Support;
+    it('should disable the save button when bounds errors are present', () => {
+      // First, with all required fields filled and no bounds errors, the save button should be enabled.
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [validSupport]
+      });
+      fixture.detectChanges();
+      let button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="outlined"])'));
+      expect(button.nativeElement.disabled).toBe(false);
+      // When an out-of-bounds value is introduced, the save button should become disabled.
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [{ ...validSupport, attachmentHeight: -200 }]
+      });
+      fixture.detectChanges();
+      button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="outlined"])'));
+      expect(button.nativeElement.disabled).toBe(true);
+    });
   });
 });

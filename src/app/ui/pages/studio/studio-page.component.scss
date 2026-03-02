@@ -22,23 +22,27 @@
   min-height: $_plot-view-height;
 }
 
+.graph-tools-cards {
+  @apply flex items-start justify-center;
+}
+
 .quick-measures {
-  @apply flex justify-center py-2;
+  @apply inline-flex items-start gap-2 p-2 h-12 max-h-12 rounded-sm;
+  box-shadow: var(--elevation-neutral-2);
 
-  &__card {
-    @apply inline-flex items-start gap-2 p-2 h-12 max-h-12 rounded-sm;
-    box-shadow: var(--elevation-neutral-2);
-  }
+  &__list {
+    @apply contents;
 
-  &__title {
-    @apply block;
-    color: var(--star-dust-900);
-    @extend %text-s-400;
-  }
+    &__title {
+      @apply block;
+      color: var(--star-dust-900);
+      @extend %text-s-400;
+    }
 
-  &__value {
-    color: var(--star-dust-950);
-    @extend %text-m-400;
+    &__value {
+      color: var(--star-dust-950);
+      @extend %text-m-400;
+    }
   }
 
   &__separator {
