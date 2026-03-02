@@ -12,25 +12,20 @@ import { Support } from '@core/domain/models/support.model';
  * @param supports - Optional array of support models used to attach UUIDs to data objects.
  * @returns A flat array of `DataObject` entries ready for Plotly rendering.
  */
-export const createPlotData = (
-  params: GetSectionOutput,
-  options: PlotOptions,
-  supports: Support[] = []
-): DataObject[] => {
+export const createPlotData = (params: GetSectionOutput, options: PlotOptions, supports?: Support[]): DataObject[] => {
   const dataObjects: DataObject[] = [];
-  (['spans', 'supports', 'insulators'] as (keyof GetSectionOutput)[]).forEach((type) => {
+  (['spans', 'supports', 'insulators'] as const).forEach((type: PlotObjectsType) => {
     dataObjects.push(
-      ...(createDataObject(
+      ...createDataObject(
         params[type as keyof GetSectionOutput] as number[][][],
         options.startSupport,
         options.endSupport,
-        type as PlotObjectsType,
+        type,
         options.view,
         options.side,
         supports
-      ) as DataObject[])
+      )
     );
   });
-
   return dataObjects.flat();
 };

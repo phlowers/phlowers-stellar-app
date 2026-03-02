@@ -31,4 +31,5 @@ export interface PlotOptions {
   endSupport: number;
   /** Whether to invert the plot axis direction. */
   invert: boolean;
+  axesNorms?: { x: number; y: number; z: number };
 }

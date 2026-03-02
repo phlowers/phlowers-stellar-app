@@ -94,19 +94,20 @@ describe('createPlot', () => {
     endSupport: 0,
     obstacles: [],
     currentObstacleUuid: null,
-    currentObstaclePointIndex: 0
+    currentObstaclePointIndex: 0,
+    isSupportZoom: false
   };
 
   describe('basic functionality', () => {
     it('should call Plotly.react when element exists', () => {
-      createPlot({ ...defaultParams });
+      createPlot({ ...defaultParams, isSupportZoom: false });
 
       expect(document.getElementById).toHaveBeenCalledWith('test-plot-id');
       expect(Plotly.react).toHaveBeenCalled();
     });
 
     it('should pass the correct plotId to Plotly.react', () => {
-      createPlot({ ...defaultParams });
+      createPlot({ ...defaultParams, isSupportZoom: false });
 
       expect(Plotly.react).toHaveBeenCalledWith(
         'test-plot-id',
@@ -117,7 +118,7 @@ describe('createPlot', () => {
     });
 
     it('should pass the data to Plotly.react', () => {
-      createPlot({ ...defaultParams });
+      createPlot({ ...defaultParams, isSupportZoom: false });
 
       expect(Plotly.react).toHaveBeenCalledWith(expect.any(String), mockData, expect.any(Object), expect.any(Object));
     });
@@ -237,7 +238,8 @@ describe('createPlot', () => {
         ...defaultParams,
         data: differentData,
         view: '2d',
-        side: 'face'
+        side: 'face',
+        isSupportZoom: false
       });
 
       const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
@@ -247,7 +249,7 @@ describe('createPlot', () => {
     });
 
     it('should work with invert parameter set to true', () => {
-      createPlot({ ...defaultParams, view: '2d', invert: true });
+      createPlot({ ...defaultParams, view: '2d', invert: true, isSupportZoom: false });
 
       const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
@@ -255,7 +257,7 @@ describe('createPlot', () => {
     });
 
     it('should work with invert parameter set to false', () => {
-      createPlot({ ...defaultParams, view: '2d', side: 'face' });
+      createPlot({ ...defaultParams, view: '2d', side: 'face', isSupportZoom: false });
 
       const layoutArg = (Plotly.react as jest.Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);

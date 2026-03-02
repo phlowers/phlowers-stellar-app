@@ -1,0 +1,95 @@
+<p-button
+  data-testid="scale-view-trigger"
+  i18n-label
+  label="Vue"
+  [styleClass]="'view-button' + (popoverOpen() ? ' view-button--active' : '')"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="popoverOpen()"
+  (onClick)="togglePopover($event)"
+>
+  <ng-template #icon>
+    <app-icon icon="image_aspect_ratio" />
+  </ng-template>
+</p-button>
+
+<p-popover appendTo="body" styleClass="scale-view-popover" #popover (onHide)="popoverOpen.set(false)">
+  <form
+    data-testid="scale-view-form"
+    class="view-config"
+    [formGroup]="formScaleView"
+    aria-label="Configuration de la vue"
+    i18n-aria-label
+  >
+    <fieldset data-testid="scale-fieldset" class="view-config__section">
+      <legend class="view-config__label text-xs-200" i18n>Sélectionner l'échelle d'affichage.</legend>
+
+      <div class="view-config__radio-group">
+        <div data-testid="scale-radio-plan" class="view-config__radio-item">
+          <p-radioButton name="scale" value="plan" formControlName="scale" inputId="plan"></p-radioButton>
+          <label for="plan" i18n>Réduite en x (x/5, y, z)</label>
+        </div>
+
+        <div data-testid="scale-radio-geo" class="view-config__radio-item">
+          <p-radioButton name="scale" value="geo" formControlName="scale" inputId="geo"></p-radioButton>
+          <label for="geo" i18n>Uniforme (x, y, z)</label>
+        </div>
+
+        <div data-testid="scale-radio-celeste" class="view-config__radio-item">
+          <p-radioButton name="scale" value="celeste" formControlName="scale" inputId="celeste"></p-radioButton>
+          <label for="celeste" i18n>Réduite en z (x, y, z/2)</label>
+        </div>
+
+        <div data-testid="scale-radio-auto" class="view-config__radio-item">
+          <p-radioButton name="scale" value="auto" formControlName="scale" inputId="auto"></p-radioButton>
+          <label for="auto" i18n>Auto</label>
+        </div>
+      </div>
+    </fieldset>
+
+    <hr class="view-config__divider" aria-hidden="true" />
+
+    <fieldset data-testid="points-fieldset" class="view-config__section">
+      <legend class="view-config__label text-sm-200" i18n>Choisir le nombre de points à afficher par portée.</legend>
+
+      <div class="view-config__controls flex flex-between items-center gap-8">
+        <div class="view-config__slider-wrapper w-[70%]">
+          <span class="view-config__limit" aria-hidden="true">{{ scaleMin }}</span>
+          <p-slider
+            data-testid="scale-slider"
+            formControlName="sliderPointsCount"
+            [min]="scaleMin"
+            [max]="scaleMax"
+            class="view-config__slider"
+            aria-label="Nombre de points par portée"
+            i18n-aria-label
+          ></p-slider>
+          <span class="view-config__limit" aria-hidden="true">{{ scaleMax }}</span>
+        </div>
+
+        <app-input-number
+          data-testid="scale-input-number"
+          formControlName="pointsCount"
+          [min]="scaleMin"
+          [max]="scaleMax"
+          aria-label="Nombre de points par portée"
+          i18n-aria-label
+        ></app-input-number>
+      </div>
+    </fieldset>
+
+    <footer class="view-config__footer">
+      <p-button
+        data-testid="scale-validate-btn"
+        i18n-label
+        label="Valider"
+        type="submit"
+        (onClick)="onValidate()"
+        styleClass="view-config__submit-btn"
+      >
+        <ng-template #icon>
+          <app-icon icon="check_small" />
+        </ng-template>
+      </p-button>
+    </footer>
+  </form>
+</p-popover>

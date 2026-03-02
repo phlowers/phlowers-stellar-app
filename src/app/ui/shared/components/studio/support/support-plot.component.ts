@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, ElementRef, input, OnDestroy, viewChild } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -44,7 +44,7 @@ interface PlotData {
  * Renders an interactive 3D Plotly visualisation of a transmission-line support structure.
  * Reacts to coordinate and attachment-set input changes to refresh the plot.
  */
-export class SupportPlotComponent {
+export class SupportPlotComponent implements OnDestroy {
   private static readonly PLOT_ELEMENT_ID = 'plotly-output-support';
   private static readonly PLOT_LAYOUT = {
     autosize: true,
@@ -71,6 +71,7 @@ export class SupportPlotComponent {
   attachmentSetNumbers = input<number[]>();
   /** Currently selected attachment-set number to highlight on the plot. */
   selectedAttachmentSetNumber = input<number | undefined>(undefined);
+  private readonly plotElement = viewChild<ElementRef<HTMLDivElement>>('plotElement');
 
   constructor(private readonly workerPythonService: WorkerPythonService) {
     effect(() => {
@@ -85,9 +86,16 @@ export class SupportPlotComponent {
     });
   }
 
-  /** Removes the current Plotly chart from the DOM element. */
+  /** Removes the current Plotly chart from le DOM element. */
+  ngOnDestroy(): void {
+    this.clearPlot();
+  }
   clearPlot(): void {
-    plotly.purge(SupportPlotComponent.PLOT_ELEMENT_ID);
+    const plotElement = this.plotElement()?.nativeElement;
+    if (!plotElement) {
+      return;
+    }
+    plotly.purge(plotElement);
   }
 
   /**
@@ -177,7 +185,12 @@ export class SupportPlotComponent {
       plotData.push(selectedMarkerData);
     }
 
-    plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
+    const plotElement = this.plotElement()?.nativeElement;
+    if (!plotElement) {
+      return;
+    }
+
+    plotly.newPlot(plotElement, plotData, SupportPlotComponent.PLOT_LAYOUT);
   }
 
   private createShapeData(shapePoints: number[][]): Data {

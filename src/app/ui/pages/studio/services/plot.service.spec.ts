@@ -483,26 +483,18 @@ describe('PlotService', () => {
   });
 
   describe('purgePlot', () => {
-    beforeEach(() => {
-      // Mock document.getElementById
-      document.getElementById = jest.fn();
-    });
-
     it('should call plotly.purge when plotly-output element exists', () => {
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      const plotElement = document.createElement('div');
+      service.setPlotElement(plotElement);
 
       service.purgePlot();
 
-      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(plotly.purge).toHaveBeenCalledWith(plotElement);
     });
 
     it('should clear litData', () => {
       service.litData.set(mockGetSectionOutput);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.purgePlot();
 
@@ -511,9 +503,7 @@ describe('PlotService', () => {
 
     it('should clear baseLitData', () => {
       service.baseLitData.set(mockGetSectionOutput);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.purgePlot();
 
@@ -525,13 +515,12 @@ describe('PlotService', () => {
       service.baseLitData.set(mockGetSectionOutput);
       service.error.set(TaskError.CALCULATION_ERROR);
       service.loading.set(true);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      const plotElement = document.createElement('div');
+      service.setPlotElement(plotElement);
 
       service.purgePlot();
 
-      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(plotly.purge).toHaveBeenCalledWith(plotElement);
       expect(service.litData()).toBeNull();
       expect(service.baseLitData()).toBeNull();
       expect(service.error()).toBeNull();
@@ -540,26 +529,18 @@ describe('PlotService', () => {
   });
 
   describe('resetAll', () => {
-    beforeEach(() => {
-      // Mock document.getElementById
-      document.getElementById = jest.fn();
-    });
-
     it('should call purgePlot', () => {
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      const plotElement = document.createElement('div');
+      service.setPlotElement(plotElement);
 
       service.resetAll();
 
-      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(plotly.purge).toHaveBeenCalledWith(plotElement);
     });
 
     it('should reset error to null', () => {
       service.error.set(TaskError.CALCULATION_ERROR);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.resetAll();
 
@@ -568,9 +549,7 @@ describe('PlotService', () => {
 
     it('should reset litData to null', () => {
       service.litData.set(mockGetSectionOutput);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.resetAll();
 
@@ -579,9 +558,7 @@ describe('PlotService', () => {
 
     it('should reset baseLitData to null', () => {
       service.baseLitData.set(mockGetSectionOutput);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.resetAll();
 
@@ -590,9 +567,7 @@ describe('PlotService', () => {
 
     it('should set loading to false', () => {
       service.loading.set(true);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.resetAll();
 
@@ -607,9 +582,7 @@ describe('PlotService', () => {
         endSupport: 10,
         invert: true
       });
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.resetAll();
 
@@ -628,9 +601,7 @@ describe('PlotService', () => {
         up: { x: 0, y: 0, z: 1 }
       };
       service.camera.set(mockCamera);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.resetAll();
 
@@ -639,9 +610,7 @@ describe('PlotService', () => {
 
     it('should reset section to null', () => {
       service.section.set(mockSection);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.resetAll();
 
@@ -661,9 +630,7 @@ describe('PlotService', () => {
         sections: [mockSection]
       };
       service.study.set(mockStudy);
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      service.setPlotElement(document.createElement('div'));
 
       service.resetAll();
 
@@ -702,15 +669,13 @@ describe('PlotService', () => {
       service.camera.set(mockCamera);
       service.section.set(mockSection);
       service.study.set(mockStudy);
-
-      (document.getElementById as jest.Mock).mockReturnValue({
-        id: 'plotly-output'
-      });
+      const plotElement = document.createElement('div');
+      service.setPlotElement(plotElement);
 
       service.resetAll();
 
       // Verify all state is reset
-      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(plotly.purge).toHaveBeenCalledWith(plotElement);
       expect(service.error()).toBeNull();
       expect(service.litData()).toBeNull();
       expect(service.loading()).toBe(false);
@@ -727,8 +692,6 @@ describe('PlotService', () => {
     });
 
     it('should handle reset when plotly-output element does not exist', () => {
-      (document.getElementById as jest.Mock).mockReturnValue(null);
-
       service.error.set(TaskError.CALCULATION_ERROR);
       service.litData.set(mockGetSectionOutput);
       service.loading.set(true);

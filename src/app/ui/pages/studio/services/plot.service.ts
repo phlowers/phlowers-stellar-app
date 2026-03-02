@@ -65,6 +65,9 @@ export const defaultPlotOptions: PlotOptions = {
   invert: false
 };
 
+const DEFAULT_RESOLUTION = 100;
+const RESOLUTION_STORAGE_KEY = 'plotResolution';
+
 const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   loads: true,
   baseState: false
@@ -78,12 +81,34 @@ export interface SelectedDisplayOptions {
   baseState: boolean;
 }
 
+interface PlotlyElementWithLayout extends HTMLElement {
+  _fullLayout?: {
+    scene?: {
+      camera?: Camera;
+    };
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
 /** Service managing the Plotly-based section visualization, including data fetching, plot options, and camera state. */
 export class PlotService {
   isFreePositioningMode = signal<boolean>(false);
+  // default values for axesNorms, can be updated via setAxesNorms
+  readonly axesNorms = signal<{ x: number; y: number; z: number; aspectMode: string }>({
+    x: 1,
+    y: 1,
+    z: 1,
+    aspectMode: 'data'
+  });
+
+  /**
+   * Applies the axis norms based on the selected scale (stored locally).
+   */
+  public setAxesNorms(norms: { x: number; y: number; z: number; aspectMode: string }): void {
+    this.axesNorms.set(norms);
+  }
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
   litData = signal<GetSectionOutput | null>(null);
@@ -101,11 +126,15 @@ export class PlotService {
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions
   });
+  resolution = signal<number>(DEFAULT_RESOLUTION);
+  appliedResolution = signal<number | null>(null);
   selectedDisplayOptions = signal<SelectedDisplayOptions>({
     ...defaultSelectedDisplayOptions
   });
 
   private readonly injector = inject(Injector);
+  isSidebarOpen = signal(false);
+  private registeredPlotElement: HTMLElement | null = null;
 
   constructor(
     private readonly workerPythonService: WorkerPythonService,
@@ -114,12 +143,21 @@ export class PlotService {
     private readonly sideTabsService: SideTabsService,
     private readonly obstaclesService: ObstaclesService
   ) {
+    const storedResolution = Number(localStorage.getItem(RESOLUTION_STORAGE_KEY));
+    if (Number.isFinite(storedResolution) && storedResolution > 0) {
+      this.resolution.set(storedResolution);
+    }
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
     });
     effect(() => {
       if (this.isStudioActive() && this.workerReady() && this.section()) {
         this.refreshSection(this.section()!);
+      }
+    });
+    effect(() => {
+      if (this.workerReady()) {
+        this.applyResolution(this.resolution());
       }
     });
   }
@@ -141,7 +179,45 @@ export class PlotService {
     this.injector.get(ObstacleFormService).clearPositions();
     this.obstaclesService.resetCurrentPointIndex();
     this.sideTabsService.sideTabs.set(null);
+    this.axesNorms.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    this.registeredPlotElement = null;
   };
+
+  setPlotElement(element: HTMLElement | null): void {
+    this.registeredPlotElement = element;
+  }
+
+  private normalizeResolution(value: number): number {
+    if (!Number.isFinite(value)) {
+      return DEFAULT_RESOLUTION;
+    }
+    return Math.max(1, Math.round(value));
+  }
+
+  async applyResolution(value: number): Promise<void> {
+    if (!this.workerPythonService.ready) {
+      return;
+    }
+    const normalizedResolution = this.normalizeResolution(value);
+    if (this.appliedResolution() === normalizedResolution) {
+      return;
+    }
+    const { error } = await this.workerPythonService.runTask(Task.setResolution, {
+      resolution: normalizedResolution
+    });
+    if (!error) {
+      this.appliedResolution.set(normalizedResolution);
+    }
+  }
+
+  setResolution(value: number): void {
+    const normalizedResolution = this.normalizeResolution(value);
+    if (normalizedResolution === this.resolution()) {
+      return;
+    }
+    this.resolution.set(normalizedResolution);
+    localStorage.setItem(RESOLUTION_STORAGE_KEY, normalizedResolution.toString());
+  }
 
   modifySection = (sectionData: Partial<Section>) => {
     const study = this.study();
@@ -198,11 +274,11 @@ export class PlotService {
   };
 
   getCamera = () => {
-    const plot = document.getElementById(PLOT_ID);
+    const plot = this.registeredPlotElement;
     if (!plot) {
       return null;
     }
-    return (plot as HTMLElement & { _fullLayout?: { scene?: { camera?: Camera } } })._fullLayout?.scene?.camera ?? null;
+    return (plot as PlotlyElementWithLayout)._fullLayout?.scene?.camera ?? null;
   };
 
   refreshCamera = (): Camera | null => {
@@ -220,6 +296,7 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
+    // axesNorms is not sent to the worker here; adjust if needed
     const { result, error } = await this.workerPythonService.runTask(Task.refreshProjection, {
       startSupport: this.plotOptions().startSupport,
       endSupport: this.plotOptions().endSupport,
@@ -232,10 +309,10 @@ export class PlotService {
   };
 
   purgePlot = () => {
-    if (!document.getElementById(PLOT_ID)) {
+    if (!this.registeredPlotElement) {
       return;
     }
-    plotly.purge(PLOT_ID);
+    plotly.purge(this.registeredPlotElement);
     this.litData.set(null);
     this.baseLitData.set(null);
     this.error.set(null);

@@ -35,6 +35,8 @@ export enum Task {
   calculateGuying = 'calculateGuying',
   /** Set Python logging level */
   setLogLevel = 'setLogLevel',
+  /** Set the resolution for graphical outputs */
+  setResolution = 'setResolution',
   /** Calculate cable temperature from ambient conditions */
   temperatureCalculation = 'temperatureCalculation',
   /** Calculate parameter at 15°C without wind */
@@ -209,6 +211,10 @@ export interface TaskInputs {
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
   };
+  /** Inputs for setResolution task */
+  [Task.setResolution]: {
+    resolution: number;
+  };
   /** Inputs for temperatureCalculation task */
   [Task.temperatureCalculation]: {
     cableName: string;
@@ -277,6 +283,11 @@ export interface TaskOutputs {
   };
   /** Output from setLogLevel task */
   [Task.setLogLevel]: undefined;
+  /** Output from setResolution task */
+  [Task.setResolution]: {
+    success: boolean;
+    resolution: number;
+  };
   /** Output from temperatureCalculation task */
   [Task.temperatureCalculation]: {
     cableSolarFlux: number;

@@ -388,13 +388,13 @@
     <unit id="1386766078260547788">
       <segment state="initial">
         <source> Title <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any(sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos;) &quot; /&gt;"/></source>
-        <target> Titre <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+        <target> Titre <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;title&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
       </segment>
     </unit>
     <unit id="7282804341793038828">
       <segment state="initial">
         <source> Author <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"/></source>
-        <target> Auteur <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? (sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos;) : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
+        <target> Auteur <pc id="0" equivStart="START_TAG_APP_ICON" equivEnd="CLOSE_TAG_APP_ICON" type="other" dispStart="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;" dispEnd="&lt;app-icon [icon]=&quot; $any( sortField() === &apos;author_email&apos; ? sortOrder() === 1 ? &apos;arrow_upward&apos; : &apos;arrow_downward&apos; : &apos;swap_vert&apos; ) &quot; /&gt;"/></target>
       </segment>
     </unit>
     <unit id="5375905790663497716">
@@ -3547,6 +3547,84 @@
       <segment state="initial">
         <source>Punctual charge</source>
         <target>Charge ponctuelle</target>
+      </segment>
+    </unit>
+    <unit id="3876336363073925034">
+      <segment state="initial">
+        <source>Ice thickness before support frontier</source>
+        <target>Ice thickness before support frontier</target>
+      </segment>
+    </unit>
+    <unit id="421318936396804890">
+      <segment state="initial">
+        <source>Ice thickness after support frontier</source>
+        <target>Ice thickness after support frontier</target>
+      </segment>
+    </unit>
+    <unit id="1298133550706786507">
+      <segment state="initial">
+        <source>View</source>
+        <target>Vue</target>
+      </segment>
+    </unit>
+    <unit id="3399773872569525966">
+      <segment state="initial">
+        <source>View configuration</source>
+        <target>Configuration de la vue</target>
+      </segment>
+    </unit>
+    <unit id="3964119826933477251">
+      <segment state="initial">
+        <source>Select display scale.</source>
+        <target>Sélectionner l&apos;échelle d&apos;affichage.</target>
+      </segment>
+    </unit>
+    <unit id="5411276704897649002">
+      <segment state="initial">
+        <source>Display scale</source>
+        <target>Échelle d&apos;affichage</target>
+      </segment>
+    </unit>
+    <unit id="5492230637275735147">
+      <segment state="initial">
+        <source>Reduced in x (x/5, y, z)</source>
+        <target>Réduite en x (x/5, y, z)</target>
+      </segment>
+    </unit>
+    <unit id="3091203419193911797">
+      <segment state="initial">
+        <source>Uniform (x, y, z)</source>
+        <target>Uniforme (x, y, z)</target>
+      </segment>
+    </unit>
+    <unit id="5092969083309731429">
+      <segment state="initial">
+        <source>Reduced in z (x, y, z/2)</source>
+        <target>Réduite en z (x, y, z/2)</target>
+      </segment>
+    </unit>
+    <unit id="8411307827924811071">
+      <segment state="initial">
+        <source>Choose the number of points to display per span.</source>
+        <target>Choisir le nombre de points à afficher par portée.</target>
+      </segment>
+    </unit>
+    <unit id="3165893340803817948">
+      <segment state="initial">
+        <source>Number of points per span</source>
+        <target>Nombre de points par portée</target>
+      </segment>
+    </unit>
+    <unit id="2984462610411894300">
+      <segment state="initial">
+        <source>Number of points</source>
+        <target>Nombre de points</target>
+      </segment>
+    </unit>
+    <unit id="4003387801369922138">
+      <segment state="initial">
+        <source>Validate</source>
+        <target>Valider</target>
       </segment>
     </unit>
   </file>

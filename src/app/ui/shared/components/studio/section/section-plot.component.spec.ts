@@ -199,6 +199,7 @@ describe('SectionPlotComponent', () => {
   const sectionSignal = signal<Section | null>(mockSection);
   const cameraSignal = signal<unknown>(null);
   const isFreePositioningModeSignal = signal(false);
+  const axesNormsSignal = signal({ x: 1, y: 1, z: 1, aspectMode: 'data' });
 
   const mockPlotService = {
     litData: litDataSignal,
@@ -208,6 +209,7 @@ describe('SectionPlotComponent', () => {
     section: sectionSignal,
     camera: cameraSignal,
     isFreePositioningMode: isFreePositioningModeSignal,
+    axesNorms: axesNormsSignal,
     temporaryLoadData: null as ChargeData | null | undefined
   };
 

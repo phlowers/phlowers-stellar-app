@@ -36,8 +36,12 @@ export interface CreatePlotParams {
   obstacles: Obstacle[];
   /** UUID of the currently selected obstacle, or `null`. */
   currentObstacleUuid: string | null;
+  /** Whether support zoom is enabled, affecting annotation visibility. */
+  isSupportZoom: boolean;
   /** Index of the currently selected obstacle position point. */
   currentObstaclePointIndex: number;
+  /** Normalization factors for the axes and aspect mode. */
+  axesNorms?: { x: number; y: number; z: number; aspectMode: string };
 }
 
 const normalCamera = () => ({
@@ -59,6 +63,12 @@ const axis = {
   showbackground: true
 };
 
+/**
+ * Creates or updates a Plotly plot based on the provided parameters.
+ * The layout is configured based on whether it's a 2D or 3D view, and the axis norms are applied if provided.
+ * @param plotParams
+ * @returns
+ */
 const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => {
   if (plotParams.camera) {
     const y = Math.abs(plotParams.camera.eye?.y || 0);
@@ -68,14 +78,20 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
     };
   }
   return {
-    aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+    aspectmode:
+      plotParams.axesNorms?.aspectMode &&
+      (['auto', 'data', 'cube', 'manual'] as const).includes(
+        plotParams.axesNorms.aspectMode as 'auto' | 'data' | 'cube' | 'manual'
+      )
+        ? (plotParams.axesNorms.aspectMode as 'auto' | 'data' | 'cube' | 'manual')
+        : 'manual',
     xaxis: axis,
     yaxis: axis,
     zaxis: axis,
     aspectratio: {
-      x: 3,
-      y: 0.2,
-      z: 0.5
+      x: plotParams.axesNorms?.x ?? 3,
+      y: plotParams.axesNorms?.y ?? 0.2,
+      z: plotParams.axesNorms?.z ?? 0.5
     },
     annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)],
     camera: plotParams.camera
@@ -86,6 +102,11 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
   };
 };
 
+/**
+ * Creates or updates a Plotly plot based on the provided parameters.
+ * The layout is configured based on whether it's a 2D or 3D view, and the axis norms are applied if provided.
+ * @param plotParams
+ */
 const config = {
   displayModeBar: true,
   displaylogo: false,
@@ -102,6 +123,12 @@ const config = {
   ] as ModeBarDefaultButtons[]
 };
 
+/**
+ * Creates or updates a Plotly plot based on the provided parameters.
+ *
+ * @param plotParams
+ * @returns
+ */
 const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
   autosize: true,
   showlegend: false,
@@ -111,9 +138,22 @@ const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
     t: 0,
     b: 0
   },
+  xaxis: {
+    range: [-600, 200]
+  },
+  yaxis: {
+    range: [-100, 600]
+  },
   scene: createScene(plotParams)
 });
 
+/**
+ * Creates or updates a 2D Plotly plot based on the provided parameters.
+ * The x and y axes are configured based on the 'side' and 'invert' parameters.
+ * Annotations for loads are also created using the createLoadAnnotations function.
+ * @param plotParams
+ * @returns
+ */
 const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams) => {
   return {
     autosize: true,

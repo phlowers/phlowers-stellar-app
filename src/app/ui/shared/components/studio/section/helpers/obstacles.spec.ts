@@ -148,6 +148,7 @@ describe('createObstaclesAnnotations', () => {
     obstacles: [],
     currentObstacleUuid: null,
     currentObstaclePointIndex: 0,
+    isSupportZoom: false,
     ...overrides
   });
 

@@ -12,13 +12,16 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { ScaleViewComponent } from './scale-view/scale-view.component';
 
 @Component({
   selector: 'app-studio-top-toolbar',
+  standalone: true,
   templateUrl: './top-toolbar.component.html',
   styleUrl: './top-toolbar.component.scss',
   imports: [
     SelectButtonModule,
+    ScaleViewComponent,
     FormsModule,
     DividerModule,
     ToggleSwitchModule,
