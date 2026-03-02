@@ -347,6 +347,101 @@ describe('HeaderComponent', () => {
     });
   });
 
+  describe('Spans Computed Property', () => {
+    it('should return spans starting at index 0 when startSupport is 0', () => {
+      const plotService = TestBed.inject(PlotService);
+      jest
+        .spyOn(plotService, 'plotOptions')
+        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
+
+      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [0, 1] });
+      fixture.detectChanges();
+
+      expect(component.spans()).toEqual([
+        { label: '1 - 2', value: [0, 1], supports: [0, 1] },
+        { label: '2 - 3', value: [1, 2], supports: [1, 2] }
+      ]);
+    });
+
+    it('should offset span indices by startSupport when startSupport is non-zero', () => {
+      // Scenario: section has spans 1-2, 2-3, 3-4 (supports 0,1,2,3)
+      // User selects spans 2-3 and 3-4 with the slider → startSupport=1, endSupport=3
+      const plotService = TestBed.inject(PlotService);
+      jest
+        .spyOn(plotService, 'plotOptions')
+        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+
+      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2] });
+      fixture.detectChanges();
+
+      expect(component.spans()).toEqual([
+        { label: '2 - 3', value: [1, 2], supports: [1, 2] },
+        { label: '3 - 4', value: [2, 3], supports: [2, 3] }
+      ]);
+    });
+
+    it('should NOT include out-of-range spans when startSupport is non-zero', () => {
+      // Regression: before the fix, selecting spans 2-3 and 3-4 showed 1-2 and 2-3 instead
+      const plotService = TestBed.inject(PlotService);
+      jest
+        .spyOn(plotService, 'plotOptions')
+        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+
+      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2] });
+      fixture.detectChanges();
+
+      const labels = component.spans().map((s) => s.label);
+      expect(labels).not.toContain('1 - 2');
+      expect(labels).toContain('2 - 3');
+      expect(labels).toContain('3 - 4');
+    });
+
+    it('should auto-initialize to the first selected span (not the first section span) when no span is set', () => {
+      // Regression: before the fix, the auto-selected default was [0,1] even when startSupport=1
+      const plotService = TestBed.inject(PlotService);
+      const mockSection = {
+        supports: [
+          { attachmentHeight: 10 },
+          { attachmentHeight: 12 },
+          { attachmentHeight: 15 },
+          { attachmentHeight: 18 }
+        ]
+      };
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
+      jest
+        .spyOn(plotService, 'plotOptions')
+        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+
+      const fieldChangeSpy = jest.fn();
+      const newFixture = TestBed.createComponent(HeaderComponent);
+      newFixture.componentInstance.fieldChange.subscribe(fieldChangeSpy);
+      newFixture.componentRef.setInput('measureData', { ...mockMeasureData, span: null });
+      newFixture.detectChanges();
+
+      // The auto-initialized span should be [1, 2] (first span in selection), not [0, 1]
+      expect(fieldChangeSpy).toHaveBeenCalledWith({
+        field: 'span',
+        value: [1, 2]
+      });
+      expect(fieldChangeSpy).not.toHaveBeenCalledWith({
+        field: 'span',
+        value: [0, 1]
+      });
+    });
+
+    it('should return empty array when startSupport equals endSupport', () => {
+      const plotService = TestBed.inject(PlotService);
+      jest
+        .spyOn(plotService, 'plotOptions')
+        .mockReturnValue({ startSupport: 2, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
+
+      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: null });
+      fixture.detectChanges();
+
+      expect(component.spans()).toEqual([]);
+    });
+  });
+
   describe('Altitude Calculation from Attachment Heights', () => {
     let plotService: any;
 
