@@ -72,6 +72,18 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   isNewChargeModalOpen = signal(false);
   isFreePositioningToolOpen = signal(false);
 
+  private readonly maxSupportIndex = computed(() => (this.plotService.section()?.supports?.length ?? 0) - 1);
+
+  isPreviousDisabled = computed(() => {
+    const { invert, startSupport, endSupport } = this.plotService.plotOptions();
+    return this.plotService.loading() || (invert ? endSupport === this.maxSupportIndex() : startSupport === 0);
+  });
+
+  isNextDisabled = computed(() => {
+    const { invert, startSupport, endSupport } = this.plotService.plotOptions();
+    return this.plotService.loading() || (invert ? startSupport === 0 : endSupport === this.maxSupportIndex());
+  });
+
   sliderOptions = computed<Options>(() => {
     return {
       floor: 0,
@@ -197,7 +209,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onSupportButtonClick(direction: 'left' | 'right') {
-    const increment = direction === 'left' ? -1 : 1;
+    let increment = direction === 'left' ? -1 : 1;
+    increment = this.plotService.plotOptions().invert ? -increment : increment;
     const options = this.plotService.plotOptions();
     this.plotService.plotOptionsChange({
       startSupport: Math.max(options.startSupport + increment, 0),

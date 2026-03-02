@@ -56,6 +56,6 @@ export class SectionPlotCardsComponent {
     if (array.length > 3) {
       return [];
     }
-    return array;
+    return this.plotService.plotOptions().invert ? [...array].reverse() : array;
   });
 }

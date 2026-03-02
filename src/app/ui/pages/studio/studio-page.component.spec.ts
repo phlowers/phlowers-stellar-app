@@ -405,6 +405,51 @@ describe('StudioPageComponent', () => {
     });
   });
 
+  it('onSupportButtonClick right with invert should decrement supports', () => {
+    plotService.plotOptions.mockReturnValue({
+      invert: true,
+      startSupport: 2,
+      endSupport: 4
+    });
+
+    component.onSupportButtonClick('right');
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 1,
+      endSupport: 3
+    });
+  });
+
+  it('onSupportButtonClick left with invert should increment supports', () => {
+    plotService.plotOptions.mockReturnValue({
+      invert: true,
+      startSupport: 1,
+      endSupport: 2
+    });
+
+    component.onSupportButtonClick('left');
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 2,
+      endSupport: 3
+    });
+  });
+
+  it('onSupportButtonClick right with invert should clamp to zero', () => {
+    plotService.plotOptions.mockReturnValue({
+      invert: true,
+      startSupport: 0,
+      endSupport: 1
+    });
+
+    component.onSupportButtonClick('right');
+
+    expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 0,
+      endSupport: 0
+    });
+  });
+
   it('ngOnDestroy should clean up subscription and reset plot service', () => {
     const unsubscribe = jest.fn();
     (component as unknown as { subscription: { unsubscribe: () => void } }).subscription = { unsubscribe };
