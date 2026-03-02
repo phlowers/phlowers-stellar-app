@@ -1319,28 +1319,10 @@
         <target>m</target>
       </segment>
     </unit>
-    <unit id="8669671325133819004">
-      <segment state="initial">
-        <source>Gr</source>
-        <target>Gr</target>
-      </segment>
-    </unit>
-    <unit id="4141745434313993573">
-      <segment state="initial">
-        <source>kg</source>
-        <target>kg</target>
-      </segment>
-    </unit>
     <unit id="1146214339732730560">
       <segment state="initial">
         <source>attachment position</source>
         <target>position accroche</target>
-      </segment>
-    </unit>
-    <unit id="884256968362108043">
-      <segment state="initial">
-        <source>m²</source>
-        <target>m²</target>
       </segment>
     </unit>
     <unit id="1519954996184640001">
@@ -1425,24 +1407,6 @@
       <segment state="initial">
         <source>Base temperature</source>
         <target>Température de base</target>
-      </segment>
-    </unit>
-    <unit id="2936057948596507296">
-      <segment state="initial">
-        <source>°C</source>
-        <target>°C</target>
-      </segment>
-    </unit>
-    <unit id="902828700910058336">
-      <segment state="initial">
-        <source>Pa</source>
-        <target>Pa</target>
-      </segment>
-    </unit>
-    <unit id="2340664682417154043">
-      <segment state="initial">
-        <source>cm</source>
-        <target>cm</target>
       </segment>
     </unit>
     <unit id="2205679024859102357">
@@ -1815,12 +1779,6 @@
       <segment state="initial">
         <source> The attachment set and the arm length (m) will be automatically filled in the table. </source>
         <target> Le Set d’accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau. </target>
-      </segment>
-    </unit>
-    <unit id="4893374109940250877">
-      <segment state="initial">
-        <source>%CRA</source>
-        <target>%CRA</target>
       </segment>
     </unit>
     <unit id="4021752662928002901">
@@ -3324,13 +3282,13 @@
     <unit id="3876336363073925034">
       <segment state="initial">
         <source>Ice thickness before support frontier</source>
-        <target>Ice thickness before support frontier</target>
+        <target>Épaisseur du givre avant le support frontière</target>
       </segment>
     </unit>
     <unit id="421318936396804890">
       <segment state="initial">
         <source>Ice thickness after support frontier</source>
-        <target>Ice thickness after support frontier</target>
+        <target>Épaisseur du givre après le support frontière</target>
       </segment>
     </unit>
     <unit id="1131253797808406443">
@@ -3501,40 +3459,28 @@
         <target> Dist. axe ligne </target>
       </segment>
     </unit>
-    <unit id="7188780438285561792">
+    <unit id="3876336363073925034">
       <segment state="initial">
-        <source> <ph id="0" equiv="INTERPOLATION" disp="{{ (measureData().outputs.papoto?.parameter | number: &apos;1.0-2&apos;) ?? &apos;-&apos; }}"/> m </source>
-        <target> <ph id="0" equiv="INTERPOLATION" disp="{{ (measureData().outputs.papoto?.parameter | number: &apos;1.0-2&apos;) ?? &apos;-&apos; }}"/> m </target>
+        <source>Ice thickness before support frontier</source>
+        <target>Épaisseur du givre avant le support frontière</target>
       </segment>
     </unit>
-    <unit id="2702723106685015008">
+    <unit id="421318936396804890">
       <segment state="initial">
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">
-            <ph id="1" equiv="INTERPOLATION" disp="{{ &apos;-&apos; }}"/>
-          </pc>
-        </source>
-        <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">
-            <ph id="1" equiv="INTERPOLATION" disp="{{ &apos;-&apos; }}"/>
-          </pc>
-        </target>
+        <source>Ice thickness after support frontier</source>
+        <target>Épaisseur du givre après le support frontière</target>
       </segment>
     </unit>
-    <unit id="2808375176954788016">
+    <unit id="6930809859018263642">
       <segment state="initial">
-        <source> <ph id="0" equiv="INTERPOLATION" disp="{{ (measureData().outputs.cableTemperature?.cableTemperature | number: &apos;1.0-2&apos;) ?? &apos;-&apos; }}"/> °C </source>
-        <target> <ph id="0" equiv="INTERPOLATION" disp="{{ (measureData().outputs.cableTemperature?.cableTemperature | number: &apos;1.0-2&apos;) ?? &apos;-&apos; }}"/> °C </target>
+        <source>Min. value:</source>
+        <target>Valeur min. :</target>
       </segment>
     </unit>
-    <unit id="5665555819415968939">
+    <unit id="855857180386145942">
       <segment state="initial">
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ measureData().outputs.cableTemperature?.cableTemperatureUncertainty ?? &apos;-&apos; }}"/> °C</pc>
-        </source>
-        <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ measureData().outputs.cableTemperature?.cableTemperatureUncertainty ?? &apos;-&apos; }}"/> °C</pc>
-        </target>
+        <source>Max. value:</source>
+        <target>Valeur max. :</target>
       </segment>
     </unit>
     <unit id="7422930352691546141">
@@ -3547,6 +3493,12 @@
       <segment state="initial">
         <source>Punctual charge</source>
         <target>Charge ponctuelle</target>
+      </segment>
+    </unit>
+    <unit id="3112674295214073901">
+      <segment state="initial">
+        <source>Study&apos;s section graph view</source>
+        <target>Vue graphique du canton d&apos;étude</target>
       </segment>
     </unit>
   </file>

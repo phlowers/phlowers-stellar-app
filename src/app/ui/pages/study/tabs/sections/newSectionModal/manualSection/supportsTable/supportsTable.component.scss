@@ -39,6 +39,8 @@ input {
 }
 
 td {
+  vertical-align: top;
+
   > *:not(button) {
     width: 100%;
   }

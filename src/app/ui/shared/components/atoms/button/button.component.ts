@@ -29,10 +29,8 @@ export class ButtonComponent implements OnInit, OnDestroy {
   btnLoading = input<boolean>(false);
 
   classesList = computed(() => {
-    const classes: string[] = [];
+    const classes: string[] = [`app-btn-${this.btnSize()}`, `app-btn-${this.btnStyle()}`];
 
-    classes.push(`app-btn-${this.btnSize()}`);
-    classes.push(`app-btn-${this.btnStyle()}`);
     if (this.btnLoading()) {
       classes.push('disabled app-btn-loading');
     }

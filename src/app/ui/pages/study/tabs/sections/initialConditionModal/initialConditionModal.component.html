@@ -93,7 +93,7 @@
                 pInputText
                 formControlName="base_temperature"
               />
-              <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
+              <p-inputgroup-addon>°C</p-inputgroup-addon>
             </p-inputgroup>
           </div>
           @if (isCableNarcisse()) {
@@ -107,7 +107,7 @@
                   pInputText
                   formControlName="cable_pretension"
                 />
-                <p-inputgroup-addon i18n>%CRA</p-inputgroup-addon>
+                <p-inputgroup-addon>%CRA</p-inputgroup-addon>
               </p-inputgroup>
             </div>
             <div>
@@ -123,7 +123,7 @@
                   pInputText
                   formControlName="min_temperature"
                 />
-                <p-inputgroup-addon i18n>°C</p-inputgroup-addon>
+                <p-inputgroup-addon>°C</p-inputgroup-addon>
               </p-inputgroup>
             </div>
             <div>
@@ -136,7 +136,7 @@
                   pInputText
                   formControlName="max_wind_pressure"
                 />
-                <p-inputgroup-addon i18n>Pa</p-inputgroup-addon>
+                <p-inputgroup-addon>Pa</p-inputgroup-addon>
               </p-inputgroup>
             </div>
             <div>
@@ -149,7 +149,7 @@
                   pInputText
                   formControlName="max_frost_width"
                 />
-                <p-inputgroup-addon i18n>cm</p-inputgroup-addon>
+                <p-inputgroup-addon>cm</p-inputgroup-addon>
               </p-inputgroup>
             </div>
           }
@@ -173,7 +173,7 @@
             <dd class="read-only-info test">
               {{ initialCondition().base_temperature }}
               @if (isNumber(initialCondition().base_temperature)) {
-                <ng-container i18n>°C</ng-container>
+                <ng-container>°C</ng-container>
               }
             </dd>
           </div>
@@ -183,7 +183,7 @@
               <dd class="read-only-info test">
                 {{ initialCondition().cable_pretension }}
                 @if (isNumber(initialCondition().cable_pretension)) {
-                  <ng-container i18n>%CRA</ng-container>
+                  <ng-container>%CRA</ng-container>
                 }
               </dd>
             </div>
@@ -195,7 +195,7 @@
               <dd class="read-only-info test">
                 {{ initialCondition().min_temperature }}
                 @if (isNumber(initialCondition().min_temperature)) {
-                  <ng-container i18n>°C</ng-container>
+                  <ng-container>°C</ng-container>
                 }
               </dd>
             </div>
@@ -204,7 +204,7 @@
               <dd class="read-only-info test">
                 {{ initialCondition().max_wind_pressure }}
                 @if (isNumber(initialCondition().max_wind_pressure)) {
-                  <ng-container i18n>Pa</ng-container>
+                  <ng-container>Pa</ng-container>
                 }
               </dd>
             </div>
@@ -213,7 +213,7 @@
               <dd class="read-only-info test">
                 {{ initialCondition().max_frost_width }}
                 @if (isNumber(initialCondition().max_frost_width)) {
-                  <ng-container i18n>cm</ng-container>
+                  <ng-container>cm</ng-container>
                 }
               </dd>
             </div>

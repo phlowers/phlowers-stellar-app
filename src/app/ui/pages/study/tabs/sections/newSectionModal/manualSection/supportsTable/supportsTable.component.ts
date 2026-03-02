@@ -15,6 +15,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { KeyFilterModule } from 'primeng/keyfilter';
+import { MessageModule } from 'primeng/message';
 import { isNumber } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
 import { AttachmentService } from '@services/attachment/attachment.service';
@@ -25,7 +26,8 @@ import {
   buildSupportNameFilterTables,
   buildSupplementaryChains,
   findSupplementaryNames,
-  getSupportFieldValues
+  getSupportFieldValues,
+  SUPPORT_FIELD_LIMITS
 } from './helpers';
 
 /**
@@ -50,6 +52,7 @@ import {
     InputGroupModule,
     InputGroupAddonModule,
     KeyFilterModule,
+    MessageModule,
     PaginatorModule
   ],
   templateUrl: './supportsTable.component.html',
@@ -91,9 +94,10 @@ export class SupportsTableComponent implements OnInit {
     label: String(index + 1),
     value: index + 1
   }));
-  public onlyPositiveNumbers = /^[0-9]*$/;
-  public onlyPositiveNumbersWithDecimal = /^[0-9]*[,.]?[0-9]{0,20}$/;
-  public positiveAndNegativeNumbersWithDecimal = /^-?[0-9]*[,.]?[0-9]{0,20}$/;
+  readonly limits = SUPPORT_FIELD_LIMITS;
+
+  public onlyPositiveNumbers = /^\d*$/;
+  public onlyPositiveNumbersWithDecimal = /^\d*[,.]?\d{0,2}$/;
 
   optionsChainV = [
     { label: $localize`Yes`, value: true },
@@ -184,5 +188,13 @@ export class SupportsTableComponent implements OnInit {
 
   isNumber(value: unknown) {
     return isNumber(value);
+  }
+
+  truncateDecimals(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const sepIndex = input.value.indexOf('.');
+    if (sepIndex !== -1 && input.value.substring(sepIndex + 1).length > 2) {
+      input.value = input.value.substring(0, sepIndex + 3);
+    }
   }
 }

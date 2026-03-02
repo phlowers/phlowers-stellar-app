@@ -88,7 +88,7 @@
         type="button"
         btnSize="m"
         (click)="onValidate()"
-        [disabled]="!areAllRequiredFieldsFilled() || !isNameUnique()"
+        [disabled]="!areAllRequiredFieldsFilled() || !isNameUnique() || supportsBoundsErrors()"
       >
         <app-icon icon="save" />
         @if (mode() === 'create') {
