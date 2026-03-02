@@ -288,36 +288,43 @@ describe('NewSectionModalComponent (Jest)', () => {
   });
 
   describe('supportsBoundsErrors', () => {
-    const validSupport: Support = {
+    const validSupport = {
       uuid: 'sup1',
       number: '1',
-      name: null,
+      name: 'Support 1',
       spanLength: 50,
       spanAngle: 0,
       attachmentHeight: 100,
-      cableType: null,
-      attachmentSet: null,
-      heightBelowConsole: null,
+      cableType: 'cable-type-1',
+      attachmentSet: 'attachment-set-1',
+      heightBelowConsole: 10,
       armLength: 0,
-      chainName: null,
-      chainLength: null,
-      chainWeight: null,
-      chainV: null,
-      counterWeight: null,
+      chainName: 'Chain 1',
+      chainLength: 10,
+      chainWeight: 1,
+      chainV: 1,
+      counterWeight: 1,
       supportFootAltitude: 0,
-      chainSurface: null,
-      attachmentPosition: null,
-      towerModel: null
-    };
-
+      chainSurface: 1,
+      attachmentPosition: 5,
+      towerModel: 'Tower model 1'
+    } as unknown as Support;
     it('should disable the save button when bounds errors are present', () => {
+      // First, with all required fields filled and no bounds errors, the save button should be enabled.
+      fixture.componentRef.setInput('section', {
+        ...mockSection,
+        supports: [validSupport]
+      });
+      fixture.detectChanges();
+      let button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="outlined"])'));
+      expect(button.nativeElement.disabled).toBe(false);
+      // When an out-of-bounds value is introduced, the save button should become disabled.
       fixture.componentRef.setInput('section', {
         ...mockSection,
         supports: [{ ...validSupport, attachmentHeight: -200 }]
       });
       fixture.detectChanges();
-
-      const button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="outlined"])'));
+      button = fixture.debugElement.query(By.css('button[app-btn][type="button"]:not([btnStyle="outlined"])'));
       expect(button.nativeElement.disabled).toBe(true);
     });
   });

@@ -92,7 +92,7 @@ export const calculateSupportNumber = (
 /**
  * Calculates a support foot altitude from the attachment height with a 30m offset.
  * @param attachmentHeight - Height of the attachment in meters
- * @returns Foot altitude (at least 0)
+ * @returns Foot altitude (at least -150)
  */
 export const calculateSupportFootAltitude = (attachmentHeight: number): number => {
   return Math.max(attachmentHeight - 30, -150);
