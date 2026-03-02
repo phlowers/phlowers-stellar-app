@@ -11,7 +11,7 @@ from functools import wraps
 import logging
 from importlib.metadata import version
 import sys
-
+import json
 RESOLUTION = 100
 # init a logger to print to stdout
 logger = logging.getLogger("mechaphlowers")
@@ -184,6 +184,57 @@ base_engine = None
 base_plt_line = None
 
 
+def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
+    """Convert raw span load dicts into position and weight arrays."""
+    global engine
+    load_position_list = []
+    load_weight_list = []
+    span_lengths = engine.section_array.data["span_length"].to_numpy()
+    for index, span in enumerate(span_loads):
+        try:
+            if span['referenceSupport'] == 'LEFT':
+                load_position_list.append(span["loadPosition"])
+            elif span['referenceSupport'] == 'RIGHT':
+                if 0 <= index < len(span_lengths):
+                    span_length = span_lengths[index]
+                    load_position_list.append(span_length - span["loadPosition"])
+                else:
+                    logging.warning(
+                        "Span load index %s is out of bounds for span_length array (size %s). "
+                        "Defaulting load position to 0.",
+                        index,
+                        len(span_lengths),
+                    )
+                    load_position_list.append(0)
+            else:
+                load_position_list.append(0)
+
+            if span['type'] == 'punctual':
+                load_weight_list.append(span["loadWeight"])
+            else:
+                load_weight_list.append(0.01)
+        except KeyError as e:
+            logging.warning(
+                "Span load at index %s is missing required key %s. "
+                "Skipping with defaults (position=0, weight=0.01).",
+                index,
+                e,
+            )
+            load_position_list.append(0)
+            load_weight_list.append(0.01)
+
+    return np.array(load_position_list), np.array(load_weight_list)
+
+
+def apply_span_loads(span_loads: list):
+    """Parse span loads and add them to the engine if any are non-zero."""
+    global plt_line, engine
+    load_position_meters, load_weight = parse_span_loads(span_loads)
+    if (load_position_meters != 0).any() and (load_weight != 0).any():
+        engine.add_loads(load_position_meters, load_weight)
+        plt_line = plt_line.generate_reset()
+
+
 def get_section_middle_span(start_support: int, end_support: int):
     return (start_support + end_support) // 2
 
@@ -316,20 +367,10 @@ def init_section(js_inputs: dict):
     )
 
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
-    if input_charge and "data" in input_charge and "spanLoads" in input_charge["data"]:
-        loads_list = input_charge["data"]["spanLoads"]
-        if len(loads_list) != 0:
-            load_position_meters = np.array(
-                [span["loadPosition"] for span in loads_list])
-            load_weight_daN = np.array(
-                [span["loadWeight"] if span['type'] == 'punctual' else 0.01 for span in loads_list])
-            load_mass_kg = units(load_weight_daN, 'daN').to('kg').magnitude
-            engine.add_loads(load_position_meters, load_mass_kg)
-        
     plt_line = PlotEngine.builder_from_balance_engine(engine)
     engine.solve_adjustment()
     engine.solve_change_state()
-    
+
     # Create base engine state (before any climate changes)
     # by creating a separate BalanceEngine with same initial params
     base_section = SectionArray(df.copy())
@@ -338,20 +379,36 @@ def init_section(js_inputs: dict):
     base_section.sagging_temperature = (
         initial_condition.base_temperature if initial_condition else 15
     )
-    base_engine = BalanceEngine(cable_array=cable_array, section_array=base_section)
+    base_engine = BalanceEngine(
+        cable_array=cable_array, section_array=base_section)
     base_plt_line = PlotEngine.builder_from_balance_engine(base_engine)
     base_engine.solve_adjustment()
     base_engine.solve_change_state()
-    
-    print(f"{input_charge=}")
 
+    climate = None
     if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
         climate = input_charge["data"]["climate"]
+
+    has_span_loads = (
+        input_charge
+        and "data" in input_charge
+        and "spanLoads" in input_charge["data"]
+        and len(input_charge["data"]["spanLoads"]) > 0
+    )
+
+    if has_span_loads:
+        apply_span_loads(input_charge["data"]["spanLoads"])
+        engine.solve_adjustment()
+
+    if climate:
         engine.solve_change_state(
             ice_thickness=climate["iceThickness"],
             new_temperature=climate["cableTemperature"],
             wind_pressure=climate["windPressure"],
         )
+    elif has_span_loads:
+        engine.solve_change_state()
+
     section_length = len(engine.section_array.data)
     base_section_length = len(base_engine.section_array.data)
     return {
@@ -367,10 +424,12 @@ def refresh_projection(js_inputs: dict):
     end_support = python_inputs["endSupport"]
     view = python_inputs["view"]
     project = view == "2d"
-    
-    current_coords = get_coordinates(plt_line, project, start_support, end_support)
-    base_coords = get_coordinates(base_plt_line, project, start_support, end_support) if base_plt_line else None
-    
+
+    current_coords = get_coordinates(
+        plt_line, project, start_support, end_support)
+    base_coords = get_coordinates(
+        base_plt_line, project, start_support, end_support) if base_plt_line else None
+
     return {
         "current": current_coords,
         "base": base_coords
