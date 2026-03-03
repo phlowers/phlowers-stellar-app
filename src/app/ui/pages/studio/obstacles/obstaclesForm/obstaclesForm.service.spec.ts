@@ -215,6 +215,12 @@ describe('ObstacleFormService', () => {
       service.setExistingObstacle(obstacle, 0);
       expect(service.form.get('uuid')?.value).toBe('obs-1');
       expect(service.form.get('name')?.value).toBe('Obstacle 1');
+      expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 1 });
+      expect(mockPlotService.spanAmountChoice()).toBe('single');
+      expect(service.supportsOptions()).toEqual([
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
+      ]);
       expect(service.positions.length).toBe(1);
       expect(service.positions.at(0).get('x')?.value).toBe(1);
       expect(mockObstaclesService.setCurrentPointIndex).toHaveBeenCalledWith(0);

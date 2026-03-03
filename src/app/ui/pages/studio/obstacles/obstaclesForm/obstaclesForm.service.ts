@@ -102,6 +102,10 @@ export class ObstacleFormService {
   }
 
   setExistingObstacle(obstacle: Obstacle, index: number): void {
+    // When selecting an existing obstacle (e.g. by clicking it on the plot),
+    // ensure the reference support options are refreshed for the obstacle span.
+    // This also keeps the plot focused on the correct support.
+    this.focusPlotOnSupport(obstacle.supportUuid);
     this.form.patchValue(
       {
         uuid: obstacle.uuid,
