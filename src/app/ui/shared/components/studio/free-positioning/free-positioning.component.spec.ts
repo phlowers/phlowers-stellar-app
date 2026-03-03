@@ -173,6 +173,60 @@ describe('FreePositioningComponent', () => {
     });
   });
 
+  describe('Escape key', () => {
+    it('should exit free positioning mode on Escape', () => {
+      mockPlotService.isFreePositioningMode.set(true);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      expect(mockPlotService.isFreePositioningMode()).toBe(false);
+    });
+  });
+
+  describe('Click to position (profile)', () => {
+    const makeFakePlotElement = (xValue: number, yValue: number) =>
+      ({
+        _fullLayout: {
+          margin: { l: 0, r: 0, t: 0, b: 0 },
+          xaxis: { p2c: () => xValue },
+          yaxis: { p2c: () => yValue }
+        }
+      }) as any;
+
+    const makeClickEvent = () =>
+      ({
+        layerX: 10,
+        layerY: 10,
+        target: { tagName: 'CANVAS' }
+      }) as any;
+
+    it('should store absolute altitude in absolute mode', () => {
+      // absolute by default
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 0, y: 0, z: 0 }));
+      mockObstaclesService.currentPointIndex.set(0);
+
+      const plotElement = makeFakePlotElement(100, 50);
+      (component as any).handleClick(makeClickEvent(), 'profile', plotElement);
+
+      expect(positionsFormArray.at(0).get('x')?.value).toBe(100);
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(50);
+    });
+
+    it('should store delta altitude in relative mode', () => {
+      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+      component.referenceSupportAltitudeNgf.set(30);
+
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 0, y: 0, z: 0 }));
+      mockObstaclesService.currentPointIndex.set(0);
+
+      const plotElement = makeFakePlotElement(100, 50);
+      (component as any).handleClick(makeClickEvent(), 'profile', plotElement);
+
+      // 50 (absolute) - 30 (support) = 20
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(20);
+    });
+  });
+
   describe('getErrorString', () => {
     it('should return unknown error string when error is null', () => {
       errorSignal.set(null);
@@ -416,6 +470,47 @@ describe('FreePositioningComponent', () => {
       const annotations = updateCall[2].annotations;
       expect(annotations[0].font.color).toBe('black');
       expect(annotations[1].font.color).toBe('red');
+    });
+
+    it('should use raw NGF altitude in absolute mode', () => {
+      // altitudeType is absolute by default in the mock form
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 1, y: 2, z: 3 }));
+
+      const fakePlot = {
+        _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
+      } as any;
+      component.plotProfile.set(fakePlot);
+
+      component.debounceUpdateSelectedPositionMarkers();
+      jest.advanceTimersByTime(200);
+
+      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
+      const annotations = updateCall[2].annotations;
+      expect(annotations[0].y).toBe(3);
+    });
+
+    it('should add reference support altitude in relative mode', () => {
+      // Switch to relative altitude mode
+      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+
+      // Simulate support altitude NGF = 30
+      component.referenceSupportAltitudeNgf.set(30);
+
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 1, y: 2, z: 3 }));
+
+      const fakePlot = {
+        _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
+      } as any;
+      component.plotProfile.set(fakePlot);
+
+      component.debounceUpdateSelectedPositionMarkers();
+      jest.advanceTimersByTime(200);
+
+      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
+      const annotations = updateCall[2].annotations;
+      expect(annotations[0].y).toBe(33);
     });
   });
 });

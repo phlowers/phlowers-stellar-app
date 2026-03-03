@@ -56,7 +56,7 @@ class MockObstacleFormService {
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
-  let mockPlotService: { getSpanOptions: jest.Mock };
+  let mockPlotService: { getSpanOptions: jest.Mock; isFreePositioningMode: ReturnType<typeof signal> };
   let mockObstacleFormService: MockObstacleFormService;
   let obstaclesService: ObstaclesService;
 
@@ -65,7 +65,8 @@ describe('ObstaclesFormComponent', () => {
 
   beforeEach(async () => {
     mockPlotService = {
-      getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }])
+      getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
+      isFreePositioningMode: signal(false)
     };
     mockObstacleFormService = new MockObstacleFormService();
     obstaclesService = new ObstaclesService();

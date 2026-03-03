@@ -179,13 +179,28 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    expect(annotations).toHaveLength(1);
-    expect(annotations[0]).toMatchObject({
-      x: 11,
-      y: 22,
-      z: 33,
-      text: 'Obstacle 1'
+    expect(annotations).toHaveLength(2);
+    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const label = annotations.find((a) => (a as any).text === 'Obstacle 1') as any;
+    expect(marker).toMatchObject({ x: 11, y: 22, z: 3 });
+    expect(label).toMatchObject({ x: 11, y: 22, z: 3, text: 'Obstacle 1' });
+  });
+
+  it('should add support altitude to z when altitudeType is relative', () => {
+    const obstacle = makeObstacle({
+      altitudeType: 'relative',
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 3 }]
     });
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 50, 50)],
+      obstacles: [obstacle],
+      view: '3d'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    expect(annotations).toHaveLength(2);
+    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    expect(marker).toMatchObject({ x: 11, y: 22, z: 33 });
   });
 
   it('should skip positions where x, y or z is null', () => {
@@ -203,7 +218,7 @@ describe('createObstaclesAnnotations', () => {
       obstacles: [obstacle]
     });
     const annotations = createObstaclesAnnotations(params);
-    expect(annotations).toHaveLength(1);
+    expect(annotations).toHaveLength(2);
   });
 
   it('should highlight current obstacle position in red', () => {
@@ -221,9 +236,12 @@ describe('createObstaclesAnnotations', () => {
       currentObstaclePointIndex: 1
     });
     const annotations = createObstaclesAnnotations(params);
-    expect(annotations).toHaveLength(2);
-    expect((annotations[0] as Record<string, unknown>)['arrowcolor']).toBe('black');
-    expect((annotations[1] as Record<string, unknown>)['arrowcolor']).toBe('red');
+    // 2 points => 4 annotations (marker + label for each)
+    expect(annotations).toHaveLength(4);
+    const marker0 = annotations.find((a: any) => a.text === '●' && a.data?.obstaclePositionIndex === 0) as any;
+    const marker1 = annotations.find((a: any) => a.text === '●' && a.data?.obstaclePositionIndex === 1) as any;
+    expect(marker0.font.color).toBe('black');
+    expect(marker1.font.color).toBe('red');
   });
 
   it('should use z-based y coordinate in 2d face view', () => {
@@ -232,19 +250,36 @@ describe('createObstaclesAnnotations', () => {
       positions: [{ x: 1, y: 2, z: 3 }]
     });
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 50, 50)],
+      // In 2D plots, support altitude (NGF) is stored in the DataObject's y coordinate
+      data: [makeSupportDataObject('sup-1', 10, 30, 0), makeSupportDataObject('sup-2', 50, 50, 0)],
       obstacles: [obstacle],
       view: '2d',
       side: 'face'
     });
     const annotations = createObstaclesAnnotations(params);
-    expect(annotations).toHaveLength(1);
-    // In 2d face view, y should be base.z + position.z = 30 + 3 = 33
-    expect(annotations[0]).toMatchObject({
-      x: 11,
-      y: 33,
-      z: 33
+    expect(annotations).toHaveLength(2);
+    // In 2d face view, y is the vertical axis (altitude). In absolute mode, it's the raw NGF altitude.
+    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    expect(marker).toMatchObject({ x: 12, y: 3, z: 3 });
+  });
+
+  it('should add support altitude in 2d when altitudeType is relative', () => {
+    const obstacle = makeObstacle({
+      altitudeType: 'relative',
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 3 }]
     });
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 10, 30, 0), makeSupportDataObject('sup-2', 50, 50, 0)],
+      obstacles: [obstacle],
+      view: '2d',
+      side: 'face'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    expect(annotations).toHaveLength(2);
+    // In 2D, support altitude is carried by base.y (not base.z)
+    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    expect(marker).toMatchObject({ x: 12, y: 33, z: 33 });
   });
 
   it('should include annotation data for event handling', () => {
@@ -257,11 +292,32 @@ describe('createObstaclesAnnotations', () => {
       obstacles: [obstacle]
     });
     const annotations = createObstaclesAnnotations(params);
-    const annotationData = (annotations[0] as Record<string, unknown>)['data'] as Record<string, unknown>;
-    expect(annotationData).toEqual({
-      obstacleUuid: 'obs-1',
-      obstaclePositionIndex: 0,
-      type: 'obstacle'
+    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const label = annotations.find((a) => (a as any).text === 'Obstacle 1') as any;
+    expect(marker.data).toEqual({ obstacleUuid: 'obs-1', obstaclePositionIndex: 0, type: 'obstacle' });
+    expect(label.data).toEqual({ obstacleUuid: 'obs-1', obstaclePositionIndex: 0, type: 'obstacle' });
+  });
+
+  it('should show tooltip only on marker (not on label)', () => {
+    const obstacle = makeObstacle({
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 3 }]
     });
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 50, 50)],
+      obstacles: [obstacle],
+      view: '3d'
+    });
+
+    const annotations = createObstaclesAnnotations(params) as any[];
+    const marker = annotations.find((a) => a.text === '●');
+    const label = annotations.find((a) => a.text === 'Obstacle 1');
+
+    expect(marker.captureevents).toBe(true);
+    expect(typeof marker.hovertext).toBe('string');
+
+    expect(label.captureevents).toBe(false);
+    expect(label.hovertext).toBeUndefined();
+    expect(label.yshift).toBe(12);
   });
 });

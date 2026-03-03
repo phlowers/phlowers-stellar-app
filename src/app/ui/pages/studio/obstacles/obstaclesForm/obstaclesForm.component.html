@@ -105,8 +105,12 @@
   <div class="obstacles-form__field">
     <div class="obstacles-form__field__toggle">
       <p-toggleswitch
+        inputId="freePositioning"
+        name="freePositioning"
         [disabled]="!obstacleFormService.form.get('supportUuid')?.value"
-        (onChange)="freePositioningChange($event)"
+        [ngModel]="plotService.isFreePositioningMode()"
+        [ngModelOptions]="{ standalone: true }"
+        (onChange)="plotService.isFreePositioningMode.set($event.checked)"
       />
       <label for="freePositioning" i18n>Free positioning</label>
     </div>

@@ -36,7 +36,7 @@ import { distinctUntilChanged } from 'rxjs';
 })
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 export class ObstaclesFormComponent {
-  private readonly plotService = inject(PlotService);
+  public readonly plotService = inject(PlotService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
   private readonly cdr = inject(ChangeDetectorRef);

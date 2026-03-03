@@ -49,10 +49,7 @@ export const getObstacleClickPayload = (
 };
 
 const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
-  showarrow: true,
-  arrowhead: 6,
-  arrowwidth: 0,
-  standoff: 20,
+  showarrow: false,
   font: {
     color: 'black',
     size: 10
@@ -102,10 +99,30 @@ const getBaseCoordinates = (supportObject: DataObject): Coordinates => {
 const isValidPosition = (position: Position3D): boolean =>
   position.x !== null && position.y !== null && position.z !== null;
 
-const computeAnnotationCoords = (base: Coordinates, position: Position3D, side: string, is2d: boolean): Coordinates => {
-  const x = base.x + (position.x ?? 0);
-  const z = base.z + (position.z ?? 0);
-  const y = side === 'face' && is2d ? base.z + (position.z ?? 0) : base.y + (position.y ?? 0);
+const computeAnnotationCoords = (
+  base: Coordinates,
+  obstacle: Obstacle,
+  position: Position3D,
+  side: string,
+  is2d: boolean
+): Coordinates => {
+  // Z meaning depends on altitudeType:
+  // - 'relative': position.z is a delta from the reference support altitude
+  // - 'absolute': position.z is an NGF altitude (referenced to 0)
+  const isAbsoluteAltitude = obstacle.altitudeType === 'absolute';
+
+  // In 2D plots, Plotly's vertical axis is `y` and represents altitude (NGF).
+  // The support altitude in plot-coordinates is stored in `base.y`.
+  // In 3D plots, altitude is `z` and stored in `base.z`.
+  const supportAltitudeNgf = is2d ? base.y : base.z;
+  const altitudeNgf = (position.z ?? 0) + (isAbsoluteAltitude ? 0 : supportAltitudeNgf);
+
+  // Axis mapping depends on 2D side:
+  // - 2D profile: x-axis is distance to reference support (position.x)
+  // - 2D face:    x-axis is distance to line axis (position.y)
+  const x = is2d && side === 'face' ? base.x + (position.y ?? 0) : base.x + (position.x ?? 0);
+  const y = is2d ? altitudeNgf : base.y + (position.y ?? 0);
+  const z = altitudeNgf;
   return { x, y, z };
 };
 
@@ -116,28 +133,49 @@ const getHighlightColor = (
   currentObstaclePointIndex: number
 ): string => (obstacleUuid === currentObstacleUuid && positionIndex === currentObstaclePointIndex ? 'red' : 'black');
 
-const createPositionAnnotation = (
+const createPositionAnnotations = (
   obstacle: Obstacle,
   positionIndex: number,
+  position: Position3D,
   coords: Coordinates,
   color: string
-): Partial<Plotly.Annotations> =>
-  // z and data are non-standard Plotly annotation properties used for 3D rendering and event handling
-  ({
+): Partial<Plotly.Annotations>[] => {
+  const hovertext = `dist. supp. réf: ${(position.x ?? 0).toFixed(2)}m<br />dist. axe. ligne: ${(position.y ?? 0).toFixed(2)}m<br />alt. point: ${coords.z.toFixed(2)}m`;
+  const data = {
+    obstacleUuid: obstacle.uuid,
+    obstaclePositionIndex: positionIndex,
+    type: 'obstacle' as const
+  };
+
+  // Dot marker at the exact coordinates
+  const marker =
+    // z and data are non-standard Plotly annotation properties used for 3D rendering and event handling
+    {
+      ...BASE_ANNOTATION,
+      x: coords.x,
+      y: coords.y,
+      z: coords.z,
+      text: '●',
+      font: { ...BASE_ANNOTATION.font, color, size: 14 },
+      hovertext,
+      data
+    } as Partial<Plotly.Annotations>;
+
+  // Label just above the point (no arrow)
+  const label = {
     ...BASE_ANNOTATION,
     x: coords.x,
     y: coords.y,
     z: coords.z,
     text: obstacle.name,
+    yshift: 12,
     font: { ...BASE_ANNOTATION.font, color },
-    arrowcolor: color,
-    hovertext: `dist. supp. réf: ${coords.x.toFixed(2)}m<br />dist. axe. ligne: ${coords.y.toFixed(2)}m<br />alt. point: ${coords.z.toFixed(2)}m`,
-    data: {
-      obstacleUuid: obstacle.uuid,
-      obstaclePositionIndex: positionIndex,
-      type: 'obstacle' as const
-    }
-  }) as Partial<Plotly.Annotations>;
+    captureevents: false,
+    data
+  } as Partial<Plotly.Annotations>;
+
+  return [marker, label];
+};
 
 /**
  * Creates Plotly annotation objects for all valid obstacle positions in the current plot view.
@@ -168,9 +206,10 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
       .map((position, index) => ({ position, index }))
       .filter(({ position }) => isValidPosition(position))
       .map(({ position, index }) => {
-        const coords = computeAnnotationCoords(base, position, side, is2d);
+        const coords = computeAnnotationCoords(base, obstacle, position, side, is2d);
         const color = getHighlightColor(obstacle.uuid, index, currentObstacleUuid, currentObstaclePointIndex);
-        return createPositionAnnotation(obstacle, index, coords, color);
-      });
+        return createPositionAnnotations(obstacle, index, position, coords, color);
+      })
+      .flat();
   });
 };

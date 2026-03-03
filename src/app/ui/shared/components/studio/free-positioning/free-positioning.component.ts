@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, computed, effect, OnDestroy, signal, Signal, untracked } from '@angular/core';
+import { Component, computed, effect, HostListener, OnDestroy, signal, Signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -104,6 +104,8 @@ interface PlotElement extends HTMLElement {
 export class FreePositioningComponent implements OnDestroy {
   isLoading = signal<boolean>(true);
 
+  readonly referenceSupportAltitudeNgf = signal<number>(0);
+
   // State
   options = signal<Options>({});
   plotFace = signal<PlotlyHTMLElement | null>(null);
@@ -166,11 +168,25 @@ export class FreePositioningComponent implements OnDestroy {
       endSupport: startSupport + 1,
       view: '2d'
     });
+
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, startSupport));
+
     const supports = this.plotService.section()?.supports ?? [];
     await this.createPlot(litData.result.current, startSupport, 'face', supports);
     await this.createPlot(litData.result.current, startSupport, 'profile', supports);
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
+
+  private getSupportAltitudeNgf(litData: GetSectionOutput, supportIndex: number): number {
+    const supportPoints = litData?.supports?.[supportIndex];
+    const firstPoint = supportPoints?.[0];
+    const altitude = Array.isArray(firstPoint) ? firstPoint[2] : undefined;
+    return typeof altitude === 'number' && !Number.isNaN(altitude) ? altitude : 0;
+  }
+
+  private isAbsoluteAltitudeMode(): boolean {
+    return this.obstacleFormService.form.get('altitudeType')?.value === 'absolute';
+  }
 
   debounceUpdateSelectedPositionMarkers = debounce(() => {
     this.updateSelectedPositionMarkers();
@@ -302,13 +318,19 @@ export class FreePositioningComponent implements OnDestroy {
     const positions = this.obstacleFormService.positions.value as Position3D[];
     const previousSelectedObstacle = positions.find((o, index) => index === previousSelected);
     if (!previousSelectedObstacle) return;
+
+    const clickedAbsoluteAltitude = parseFloat(layout.yaxis.p2c(y).toFixed(2));
+    const zValue = this.isAbsoluteAltitudeMode()
+      ? clickedAbsoluteAltitude
+      : parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
+
     const newObstacle: Position3D =
       type === 'profile'
         ? {
             // First plot (profile): update x and z, keep y
             x: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
             y: previousSelectedObstacle.y ?? null,
-            z: parseFloat(layout.yaxis.p2c(y).toFixed(2))
+            z: zValue
           }
         : {
             // Second plot (face): update y, keep x and z
@@ -344,7 +366,7 @@ export class FreePositioningComponent implements OnDestroy {
         return;
       }
       const xCoord = side === 'profile' ? position.x : position.y!;
-      const yCoord = position.z;
+      const yCoord = this.isAbsoluteAltitudeMode() ? position.z : position.z + this.referenceSupportAltitudeNgf();
       annotations.push({
         x: xCoord,
         y: yCoord,
@@ -464,6 +486,15 @@ export class FreePositioningComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Safety net: always leave the mode when this component is destroyed
+    this.plotService.isFreePositioningMode.set(false);
     this.destroyAllPlots();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscape(event: KeyboardEvent): void {
+    if (!this.plotService.isFreePositioningMode()) return;
+    event.preventDefault();
+    this.plotService.isFreePositioningMode.set(false);
   }
 }
