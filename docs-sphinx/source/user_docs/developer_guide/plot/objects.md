@@ -88,8 +88,8 @@ Marker sizes vary by object type and view mode:
   - All others: `'lines+markers'` (no text labels)
   
 - **Text Labels** (Supports only):
-  - Display: Support number (1-indexed) on the highest point (maximum z-coordinate)
+  - Display: Support `number` field from the `Support` model on the highest point (maximum z-coordinate)
   - Position: `'top center'` (applied to all data objects)
-  - Logic: Only the point with the highest z-value in each support gets labeled; all other points have empty strings
+  - Logic: Only the point with the highest z-value in each support gets labeled; all other points have empty strings. Falls back to an empty string if the support or its `number` is not available.
 
 - **Text Position**: `'top center'` (applied globally to all data objects)
