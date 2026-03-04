@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, computed, effect, HostListener, OnDestroy, signal, Signal, untracked } from '@angular/core';
+import { Component, computed, effect, OnDestroy, signal, Signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -313,7 +313,7 @@ export class FreePositioningComponent implements OnDestroy {
     const previousSelected = this.obstaclesService.currentPointIndex();
     if (!isNumber(previousSelected)) return;
     const positions = this.obstacleFormService.positions.value as Position3D[];
-    const previousSelectedObstacle = positions.find((o, index) => index === previousSelected);
+    const previousSelectedObstacle = positions.find((_o, index) => index === previousSelected);
     if (!previousSelectedObstacle) return;
 
     const clickedAbsoluteAltitude = parseFloat(layout.yaxis.p2c(y).toFixed(2));
