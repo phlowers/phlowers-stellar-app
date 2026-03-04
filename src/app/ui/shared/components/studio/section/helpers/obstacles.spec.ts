@@ -426,12 +426,6 @@ describe('createObstaclesAnnotations', () => {
   });
 
   it('should fall back to left support when only one support data object exists', () => {
-    const obstacle = makeObstacle({
-      altitudeType: 'relative',
-      referenceSupport: ReferenceSupport.RIGHT,
-      supportUuid: 'sup-1',
-      positions: [{ x: 1, y: 2, z: 3 }]
-    });
     // Two supports but sup-1 is at index 0 and no next support exists beyond it.
     // We need at least 2 supports for sup-1 to not be sliced off.
     // With only one non-terminal support, the right support cannot be resolved
@@ -446,7 +440,15 @@ describe('createObstaclesAnnotations', () => {
       ],
       // sup-2 is the left support of the last span (sup-2 → sup-3)
       // sup-3 is the right support of that span — it IS in allSupportObjects
-      obstacles: [makeObstacle({ uuid: 'obs-edge', supportUuid: 'sup-2', referenceSupport: ReferenceSupport.RIGHT, altitudeType: 'relative', positions: [{ x: 5, y: 3, z: 10 }] })],
+      obstacles: [
+        makeObstacle({
+          uuid: 'obs-edge',
+          supportUuid: 'sup-2',
+          referenceSupport: ReferenceSupport.RIGHT,
+          altitudeType: 'relative',
+          positions: [{ x: 5, y: 3, z: 10 }]
+        })
+      ],
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);

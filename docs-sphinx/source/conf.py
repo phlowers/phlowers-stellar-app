@@ -15,6 +15,7 @@ copyright = "2026, RTE (http://www.rte-france.com)"
 
 extensions = [
     "sphinx_js",
+    "sphinx.ext.mathjax",  # Math rendering for dollarmath equations
     "myst_parser",  # Support for Markdown files
     "sphinx_design",  # Grid, cards, tabs, badges, etc.
     "sphinx_copybutton",  # Copy button on code blocks

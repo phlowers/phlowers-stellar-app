@@ -29,9 +29,7 @@ $$\text{altitudeNGF} = \text{altitudeSupportNGF} + z$$
 
 The **Free positioning** mode allows placing a point by clicking on the chart.
 
-- Exiting the mode:
-  - by disabling the **Free positioning** toggle, or
-  - by pressing **Escape**
+- Exiting the mode by disabling the **Free positioning** toggle
 
 ### Interaction with altitude
 

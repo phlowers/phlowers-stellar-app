@@ -512,10 +512,7 @@ describe('FreePositioningComponent', () => {
     //   support 0 (left)  → altitude 100  (first point [x, y, z=100])
     //   support 1 (right) → altitude 250  (first point [x, y, z=250])
     const litDataWithTwoSupports = {
-      supports: [
-        [[10, 20, 100]],
-        [[30, 40, 250]]
-      ],
+      supports: [[[10, 20, 100]], [[30, 40, 250]]],
       insulators: [[[0, 0, 0]]],
       spans: [[[0, 0, 0]]],
       L0: [],
