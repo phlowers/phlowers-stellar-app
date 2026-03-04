@@ -7,6 +7,7 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
 import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
+import { ReferenceSupport } from '@src/app/core/domain/models/obstacle.model';
 import { createPlotData } from '../section/helpers/createPlotData';
 import { GetSectionOutput, TaskError, DataError } from '@core/services/worker_python/tasks/types';
 import { Section } from '@core/domain';
@@ -109,7 +110,7 @@ describe('FreePositioningComponent', () => {
       name: ['test'],
       type: ['tree'],
       supportUuid: ['s0'],
-      referenceSupport: [null as number | null],
+      referenceSupport: [null as string | null],
       altitudeType: ['absolute'],
       lateralDistanceType: ['left'],
       positions: positionsFormArray
@@ -176,6 +177,52 @@ describe('FreePositioningComponent', () => {
     it('should have null initial mouse positions', () => {
       expect(component.profileMousePosition()).toBeNull();
       expect(component.faceMousePosition()).toBeNull();
+    });
+  });
+
+  describe('Click to position (profile)', () => {
+    const makeFakePlotElement = (xValue: number, yValue: number) =>
+      ({
+        _fullLayout: {
+          margin: { l: 0, r: 0, t: 0, b: 0 },
+          xaxis: { p2c: () => xValue },
+          yaxis: { p2c: () => yValue }
+        }
+      }) as any;
+
+    const makeClickEvent = () =>
+      ({
+        layerX: 10,
+        layerY: 10,
+        target: { tagName: 'CANVAS' }
+      }) as any;
+
+    it('should store absolute altitude in absolute mode', () => {
+      // absolute by default
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 0, y: 0, z: 0 }));
+      mockObstaclesService.currentPointIndex.set(0);
+
+      const plotElement = makeFakePlotElement(100, 50);
+      (component as any).handleClick(makeClickEvent(), 'profile', plotElement);
+
+      expect(positionsFormArray.at(0).get('x')?.value).toBe(100);
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(50);
+    });
+
+    it('should store delta altitude in relative mode', () => {
+      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+      component.referenceSupportAltitudeNgf.set(30);
+
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 0, y: 0, z: 0 }));
+      mockObstaclesService.currentPointIndex.set(0);
+
+      const plotElement = makeFakePlotElement(100, 50);
+      (component as any).handleClick(makeClickEvent(), 'profile', plotElement);
+
+      // 50 (absolute) - 30 (support) = 20
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(20);
     });
   });
 
@@ -422,6 +469,148 @@ describe('FreePositioningComponent', () => {
       const annotations = updateCall[2].annotations;
       expect(annotations[0].font.color).toBe('black');
       expect(annotations[1].font.color).toBe('red');
+    });
+
+    it('should use raw NGF altitude in absolute mode', () => {
+      // altitudeType is absolute by default in the mock form
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 1, y: 2, z: 3 }));
+
+      const fakePlot = {
+        _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
+      } as any;
+      component.plotProfile.set(fakePlot);
+
+      component.debounceUpdateSelectedPositionMarkers();
+      jest.advanceTimersByTime(200);
+
+      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
+      const annotations = updateCall[2].annotations;
+      expect(annotations[0].y).toBe(3);
+    });
+
+    it('should add reference support altitude in relative mode', () => {
+      // Switch to relative altitude mode
+      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+
+      // Simulate support altitude NGF = 30
+      component.referenceSupportAltitudeNgf.set(30);
+
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 1, y: 2, z: 3 }));
+
+      const fakePlot = {
+        _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
+      } as any;
+      component.plotProfile.set(fakePlot);
+
+      component.debounceUpdateSelectedPositionMarkers();
+      jest.advanceTimersByTime(200);
+
+      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
+      const annotations = updateCall[2].annotations;
+      expect(annotations[0].y).toBe(33);
+    });
+  });
+
+  describe('recreatePlots – referenceSupportAltitudeNgf uses selected reference support', () => {
+    // Two supports with different altitudes:
+    //   support 0 (left)  → altitude 100  (first point [x, y, z=100])
+    //   support 1 (right) → altitude 250  (first point [x, y, z=250])
+    const litDataWithTwoSupports = {
+      supports: [[[10, 20, 100]], [[30, 40, 250]]],
+      insulators: [[[0, 0, 0]]],
+      spans: [[[0, 0, 0]]],
+      L0: [],
+      elevation: [],
+      line_angle: [],
+      vtl_under_chain: [],
+      vtl_under_console: [],
+      r_under_chain: [],
+      r_under_console: [],
+      ground_altitude: [],
+      load_angle: [],
+      displacement: [],
+      span_length: [],
+      loads_coords: {},
+      parameter: [],
+      tension_sup: [],
+      tension_inf: [],
+      horizontal_distance: [],
+      arc_length: [],
+      T_h: []
+    };
+
+    const flushDebounceAndMicrotasks = async () => {
+      // Advance past the debounce delay
+      jest.advanceTimersByTime(500);
+      // Flush the resolved promise from runTask
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      // Flush any remaining microtasks
+      jest.advanceTimersByTime(0);
+      await Promise.resolve();
+      await Promise.resolve();
+    };
+
+    beforeEach(() => {
+      // Mock DOM elements so createPlot doesn't warn about missing elements
+      jest.spyOn(document, 'getElementById').mockReturnValue(document.createElement('div'));
+      jest.spyOn(console, 'warn').mockImplementation();
+    });
+
+    it('should use left support altitude when referenceSupport is null', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: { current: litDataWithTwoSupports }
+      });
+      mockObstacleFormService.form.get('referenceSupport')?.setValue(null);
+
+      component.recreatePlots();
+      await flushDebounceAndMicrotasks();
+
+      expect(component.referenceSupportAltitudeNgf()).toBe(100);
+    });
+
+    it('should use left support altitude when referenceSupport is LEFT', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: { current: litDataWithTwoSupports }
+      });
+      (mockObstacleFormService.form.get('referenceSupport') as any).setValue(ReferenceSupport.LEFT);
+
+      component.recreatePlots();
+      await flushDebounceAndMicrotasks();
+
+      expect(component.referenceSupportAltitudeNgf()).toBe(100);
+    });
+
+    it('should use right support altitude when referenceSupport is RIGHT', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: { current: litDataWithTwoSupports }
+      });
+      (mockObstacleFormService.form.get('referenceSupport') as any).setValue(ReferenceSupport.RIGHT);
+
+      component.recreatePlots();
+      await flushDebounceAndMicrotasks();
+
+      expect(component.referenceSupportAltitudeNgf()).toBe(250);
+    });
+
+    it('should fall back to 0 when right support data is missing', async () => {
+      const litDataOnlyOneSupport = {
+        ...litDataWithTwoSupports,
+        supports: [[[10, 20, 100]]]
+      };
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: { current: litDataOnlyOneSupport }
+      });
+      (mockObstacleFormService.form.get('referenceSupport') as any).setValue(ReferenceSupport.RIGHT);
+
+      component.recreatePlots();
+      await flushDebounceAndMicrotasks();
+
+      // Support index 1 doesn't exist → getSupportAltitudeNgf returns 0
+      expect(component.referenceSupportAltitudeNgf()).toBe(0);
     });
   });
 });

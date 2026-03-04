@@ -1,9 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 
+/** Service tracking the currently selected obstacle point index. */
 @Injectable({
   providedIn: 'root'
 })
-/** Service tracking the currently selected obstacle point index. */
 export class ObstaclesService {
   /** Index of the currently selected obstacle point. */
   currentPointIndex = signal<number>(0);

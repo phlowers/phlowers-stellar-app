@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -9,13 +9,14 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '../../services/plot.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
-import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { debounce } from 'lodash';
 import { ObstaclesService } from '../obstacles.service';
 import { ObstacleFormService } from './obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
 import { distinctUntilChanged } from 'rxjs';
 
+/** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
   selector: 'app-obstacles-form',
   standalone: true,
@@ -34,12 +35,10 @@ import { distinctUntilChanged } from 'rxjs';
   templateUrl: './obstaclesForm.component.html',
   styleUrl: './obstaclesForm.component.scss'
 })
-/** Component providing the obstacle creation and editing form in the studio sidebar. */
 export class ObstaclesFormComponent {
-  private readonly plotService = inject(PlotService);
+  public readonly plotService = inject(PlotService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
-  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly obstacleTypeOptions = [
     { label: $localize`House`, value: 'House' },
@@ -78,7 +77,11 @@ export class ObstaclesFormComponent {
   }, DEBOUNCED_UPDATE_POINT_DELAY);
 
   private readonly supportUuidEffect = effect(() => {
-    this.obstacleFormService.resetFormForNewObstacle(this.supportUuidValue());
+    const supportUuid = this.supportUuidValue();
+    if (!supportUuid) {
+      this.plotService.isFreePositioningMode.set(false);
+    }
+    this.obstacleFormService.resetFormForNewObstacle(supportUuid);
   });
 
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {
@@ -89,9 +92,5 @@ export class ObstaclesFormComponent {
 
   setCurrentObstaclePoint(index: number) {
     this.obstaclesService.setCurrentPointIndex(index);
-  }
-
-  freePositioningChange(event: ToggleSwitchChangeEvent) {
-    this.plotService.isFreePositioningMode.set(event.checked);
   }
 }

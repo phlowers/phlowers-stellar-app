@@ -56,16 +56,20 @@ class MockObstacleFormService {
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
-  let mockPlotService: { getSpanOptions: jest.Mock };
+  let mockPlotService: { getSpanOptions: jest.Mock; isFreePositioningMode: ReturnType<typeof signal> };
   let mockObstacleFormService: MockObstacleFormService;
   let obstaclesService: ObstaclesService;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
+  const getAllByTestId = (testId: string): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
+
   beforeEach(async () => {
     mockPlotService = {
-      getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }])
+      getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
+      isFreePositioningMode: signal(false)
     };
     mockObstacleFormService = new MockObstacleFormService();
     obstaclesService = new ObstaclesService();
@@ -88,130 +92,398 @@ describe('ObstaclesFormComponent', () => {
     jest.clearAllMocks();
   });
 
-  it('initializes and resets form based on support uuid', () => {
-    expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+  describe('form initialization', () => {
+    it('should render the obstacles form', () => {
+      expect(getByTestId('obstacles-form')).toBeTruthy();
+    });
 
-    mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
-    fixture.detectChanges();
+    it('should reset form based on initial null support uuid', () => {
+      expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+    });
 
-    expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith('support-1');
+    it('should reset form when support uuid changes', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+
+      expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith('support-1');
+    });
+
+    it('should not re-trigger reset when support uuid emits the same value', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+
+      const callCount = mockObstacleFormService.resetFormForNewObstacle.mock.calls.length;
+
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+
+      expect(mockObstacleFormService.resetFormForNewObstacle.mock.calls.length).toBe(callCount);
+    });
   });
 
-  it('toggles return to span button based on support selection', () => {
-    const button = getByTestId('return-to-span') as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
+  describe('return to span button', () => {
+    it('should be disabled when no support is selected', () => {
+      const button = getByTestId('return-to-span') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
+    });
 
-    mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
-    fixture.detectChanges();
+    it('should be enabled when a support is selected', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
 
-    expect(button.disabled).toBe(false);
+      const button = getByTestId('return-to-span') as HTMLButtonElement;
+      expect(button.disabled).toBe(false);
+    });
+
+    it('should call returnToSpan on click', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+
+      (getByTestId('return-to-span') as HTMLButtonElement).click();
+
+      expect(mockObstacleFormService.returnToSpan).toHaveBeenCalled();
+    });
   });
 
-  it('calls reset for new obstacle from button', () => {
-    const button = getByTestId('create-new-obstacle') as HTMLButtonElement;
-    button.click();
+  describe('create new obstacle button', () => {
+    it('should call resetFormForNewObstacle with null on click', () => {
+      (getByTestId('create-new-obstacle') as HTMLButtonElement).click();
 
-    expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+      expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+    });
   });
 
-  it('calls returnToSpan from button', () => {
-    const button = getByTestId('return-to-span') as HTMLButtonElement;
-    mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
-    fixture.detectChanges();
+  describe('free positioning toggle', () => {
+    it('should be disabled when no support is selected', () => {
+      const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
+      expect(toggle.getAttribute('ng-reflect-disabled')).toBe('true');
+    });
 
-    button.click();
+    it('should be enabled when a support is selected', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
 
-    expect(mockObstacleFormService.returnToSpan).toHaveBeenCalled();
+      const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
+      expect(toggle.getAttribute('ng-reflect-disabled')).toBe('false');
+    });
+
+    it('should reflect isFreePositioningMode value', () => {
+      const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
+      expect(toggle.getAttribute('ng-reflect-model')).toBe('false');
+
+      mockPlotService.isFreePositioningMode.set(true);
+      fixture.detectChanges();
+
+      expect(toggle.getAttribute('ng-reflect-model')).toBe('true');
+    });
   });
 
-  it('enables add point button when support and name are set', () => {
-    const addButton = getByTestId('add-point') as HTMLButtonElement;
-    expect(addButton.disabled).toBe(true);
+  describe('add point button', () => {
+    it('should be disabled when support uuid is null', () => {
+      const addButton = getByTestId('add-point') as HTMLButtonElement;
+      expect(addButton.disabled).toBe(true);
+    });
 
-    mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
-    mockObstacleFormService.form.controls.name.setValue('Obstacle');
-    fixture.detectChanges();
+    it('should be disabled when name is empty but support is set', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
 
-    expect(addButton.disabled).toBe(false);
+      const addButton = getByTestId('add-point') as HTMLButtonElement;
+      expect(addButton.disabled).toBe(true);
+    });
 
-    addButton.click();
-    expect(mockObstacleFormService.addPosition).toHaveBeenCalled();
+    it('should be enabled when both support and name are set', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      mockObstacleFormService.form.controls.name.setValue('Obstacle');
+      fixture.detectChanges();
+
+      const addButton = getByTestId('add-point') as HTMLButtonElement;
+      expect(addButton.disabled).toBe(false);
+    });
+
+    it('should call addPosition on click', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      mockObstacleFormService.form.controls.name.setValue('Obstacle');
+      fixture.detectChanges();
+
+      (getByTestId('add-point') as HTMLButtonElement).click();
+
+      expect(mockObstacleFormService.addPosition).toHaveBeenCalled();
+    });
   });
 
-  it('updates positions on input', () => {
-    const input = getByTestId('point-altitude') as HTMLInputElement;
-    input.value = '12.5';
+  describe('obstacle name input', () => {
+    it('should set aria-invalid when name control is invalid', () => {
+      mockObstacleFormService.form.controls.name.setErrors({ required: true });
+      fixture.detectChanges();
 
-    component.onPositionInput({ target: input } as unknown as Event, 'z');
+      const input = getByTestId('obstacle-name') as HTMLInputElement;
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+    });
 
-    const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-    expect(positionGroup.get('z')?.value).toBe(12.5);
+    it('should not set aria-invalid when name control is valid', () => {
+      mockObstacleFormService.form.controls.name.setValue('Valid Name');
+      mockObstacleFormService.form.controls.name.setErrors(null);
+      fixture.detectChanges();
+
+      const input = getByTestId('obstacle-name') as HTMLInputElement;
+      expect(input.getAttribute('aria-invalid')).toBeNull();
+    });
   });
 
-  it('defaults position input to 0 when value is not numeric', () => {
-    const input = getByTestId('point-altitude') as HTMLInputElement;
-    input.value = 'not-a-number';
+  describe('points list', () => {
+    it('should render one point item per position', () => {
+      const points = getAllByTestId('point-item');
+      expect(points).toHaveLength(1);
+    });
 
-    component.onPositionInput({ target: input } as unknown as Event, 'z');
+    it('should render multiple point items when positions are added', () => {
+      const fb = new FormBuilder();
+      mockObstacleFormService.positions.push(
+        fb.group({
+          x: new FormControl<number | null>(1),
+          y: new FormControl<number | null>(2),
+          z: new FormControl<number | null>(3)
+        })
+      );
+      fixture.detectChanges();
 
-    const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-    expect(positionGroup.get('z')?.value).toBe(0);
+      const points = getAllByTestId('point-item');
+      expect(points).toHaveLength(2);
+    });
+
+    it('should mark the active point with aria-selected', () => {
+      obstaclesService.setCurrentPointIndex(0);
+      fixture.detectChanges();
+
+      const point = getByTestId('point-item') as HTMLElement;
+      expect(point.getAttribute('aria-selected')).toBe('true');
+    });
+
+    it('should not mark non-active points with aria-selected', () => {
+      const fb = new FormBuilder();
+      mockObstacleFormService.positions.push(
+        fb.group({
+          x: new FormControl<number | null>(1),
+          y: new FormControl<number | null>(2),
+          z: new FormControl<number | null>(3)
+        })
+      );
+      obstaclesService.setCurrentPointIndex(0);
+      fixture.detectChanges();
+
+      const points = getAllByTestId('point-item');
+      expect(points[0].getAttribute('aria-selected')).toBe('true');
+      expect(points[1].getAttribute('aria-selected')).toBe('false');
+    });
   });
 
-  it('sets current obstacle point on select click', () => {
-    const spy = jest.spyOn(obstaclesService, 'setCurrentPointIndex');
-    const button = getByTestId('select-point') as HTMLButtonElement;
+  describe('point selection', () => {
+    it('should set current obstacle point on select click', () => {
+      const spy = jest.spyOn(obstaclesService, 'setCurrentPointIndex');
+      (getByTestId('select-point') as HTMLButtonElement).click();
 
-    button.click();
+      expect(spy).toHaveBeenCalledWith(0);
+    });
 
-    expect(spy).toHaveBeenCalledWith(0);
+    it('should set current obstacle point on input focus', () => {
+      const spy = jest.spyOn(obstaclesService, 'setCurrentPointIndex');
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+
+      input.dispatchEvent(new Event('focus'));
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(0);
+    });
   });
 
-  it('deletes point using delete button', () => {
-    const deleteButton = getByTestId('delete-point') as HTMLButtonElement;
+  describe('point inputs', () => {
+    it('should disable point inputs when name is empty', () => {
+      mockObstacleFormService.form.controls.name.setValue(null);
+      fixture.detectChanges();
 
-    deleteButton.click();
+      const altInput = getByTestId('point-altitude') as HTMLInputElement;
+      const refInput = getByTestId('point-ref-distance') as HTMLInputElement;
+      const axisInput = getByTestId('point-axis-distance') as HTMLInputElement;
 
-    expect(mockObstacleFormService.deletePoint).toHaveBeenCalledWith(0);
+      expect(altInput.disabled).toBe(true);
+      expect(refInput.disabled).toBe(true);
+      expect(axisInput.disabled).toBe(true);
+    });
+
+    it('should enable point inputs when name is set', () => {
+      mockObstacleFormService.form.controls.name.setValue('Obstacle');
+      fixture.detectChanges();
+
+      const altInput = getByTestId('point-altitude') as HTMLInputElement;
+      const refInput = getByTestId('point-ref-distance') as HTMLInputElement;
+      const axisInput = getByTestId('point-axis-distance') as HTMLInputElement;
+
+      expect(altInput.disabled).toBe(false);
+      expect(refInput.disabled).toBe(false);
+      expect(axisInput.disabled).toBe(false);
+    });
+
+    it('should update z position on altitude input', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      input.value = '12.5';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+    });
+
+    it('should update x position on ref distance input', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      input.value = '5.3';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'x');
+
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      expect(positionGroup.get('x')?.value).toBe(5.3);
+    });
+
+    it('should update y position on axis distance input', () => {
+      const input = getByTestId('point-axis-distance') as HTMLInputElement;
+      input.value = '7.8';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'y');
+
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      expect(positionGroup.get('y')?.value).toBe(7.8);
+    });
+
+    it('should default to 0 when input value is not numeric', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      input.value = 'not-a-number';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      expect(positionGroup.get('z')?.value).toBe(0);
+    });
   });
 
-  it('toggles delete obstacle button based on uuid', () => {
-    const deleteButton = getByTestId('delete-obstacle') as HTMLButtonElement;
-    expect(deleteButton.disabled).toBe(true);
+  describe('delete point button', () => {
+    it('should call deletePoint with the correct index', () => {
+      (getByTestId('delete-point') as HTMLButtonElement).click();
 
-    mockObstacleFormService.form.controls.uuid.setValue('obstacle-1');
-    fixture.detectChanges();
-
-    expect(deleteButton.disabled).toBe(false);
-
-    deleteButton.click();
-    expect(mockObstacleFormService.deleteObstacle).toHaveBeenCalled();
+      expect(mockObstacleFormService.deletePoint).toHaveBeenCalledWith(0);
+    });
   });
 
-  it('calls calculate and save when enabled', () => {
-    const button = getByTestId('calculate-save') as HTMLButtonElement;
+  describe('delete obstacle button', () => {
+    it('should be disabled when no uuid is set', () => {
+      const deleteButton = getByTestId('delete-obstacle') as HTMLButtonElement;
+      expect(deleteButton.disabled).toBe(true);
+    });
 
-    button.click();
+    it('should be enabled when uuid is set', () => {
+      mockObstacleFormService.form.controls.uuid.setValue('obstacle-1');
+      fixture.detectChanges();
 
-    expect(mockObstacleFormService.calculateAndSave).toHaveBeenCalled();
+      const deleteButton = getByTestId('delete-obstacle') as HTMLButtonElement;
+      expect(deleteButton.disabled).toBe(false);
+    });
+
+    it('should call deleteObstacle on click', () => {
+      mockObstacleFormService.form.controls.uuid.setValue('obstacle-1');
+      fixture.detectChanges();
+
+      (getByTestId('delete-obstacle') as HTMLButtonElement).click();
+
+      expect(mockObstacleFormService.deleteObstacle).toHaveBeenCalled();
+    });
   });
 
-  it('disables calculate and save when not allowed', () => {
-    mockObstacleFormService.canCalculateAndSave = jest.fn(() => false);
-    fixture.detectChanges();
+  describe('save obstacle button (AT-CCGLA)', () => {
+    it('should always be disabled', () => {
+      const saveButton = getByTestId('save-obstacle') as HTMLButtonElement;
+      expect(saveButton.disabled).toBe(true);
+    });
 
-    const button = getByTestId('calculate-save') as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
+    it('should call saveObstacle on click', () => {
+      const saveButton = getByTestId('save-obstacle') as HTMLButtonElement;
+      saveButton.disabled = false;
+      saveButton.click();
+
+      expect(mockObstacleFormService.saveObstacle).toHaveBeenCalled();
+    });
   });
 
-  it('renders results values', () => {
-    expect(getByTestId('result-oblique')?.textContent).toContain('N/A');
+  describe('calculate and save button', () => {
+    it('should be enabled when canCalculateAndSave returns true', () => {
+      const button = getByTestId('calculate-save') as HTMLButtonElement;
+      expect(button.disabled).toBe(false);
+    });
 
-    mockObstacleFormService.results.set({ oblique: 1, verticale: 2, horizontale: 3 });
-    fixture.detectChanges();
+    it('should be disabled when canCalculateAndSave returns false', () => {
+      mockObstacleFormService.canCalculateAndSave = jest.fn(() => false);
+      fixture.detectChanges();
 
-    expect(getByTestId('result-oblique')?.textContent).toContain('1');
-    expect(getByTestId('result-vertical')?.textContent).toContain('2');
-    expect(getByTestId('result-horizontal')?.textContent).toContain('3');
+      const button = getByTestId('calculate-save') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
+    });
+
+    it('should call calculateAndSave on click', () => {
+      (getByTestId('calculate-save') as HTMLButtonElement).click();
+
+      expect(mockObstacleFormService.calculateAndSave).toHaveBeenCalled();
+    });
+  });
+
+  describe('support uuid effect', () => {
+    it('should reset isFreePositioningMode when supportUuid is cleared', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+
+      mockPlotService.isFreePositioningMode.set(true);
+
+      mockObstacleFormService.form.controls.supportUuid.setValue(null);
+      fixture.detectChanges();
+
+      expect(mockPlotService.isFreePositioningMode()).toBe(false);
+    });
+  });
+
+  describe('results display', () => {
+    it('should show N/A for all results when values are null', () => {
+      expect(getByTestId('result-oblique')?.textContent).toContain('N/A');
+      expect(getByTestId('result-vertical')?.textContent).toContain('N/A');
+      expect(getByTestId('result-horizontal')?.textContent).toContain('N/A');
+    });
+
+    it('should display oblique result when set', () => {
+      mockObstacleFormService.results.set({ oblique: 42.5, verticale: null, horizontale: null });
+      fixture.detectChanges();
+
+      expect(getByTestId('result-oblique')?.textContent).toContain('42.5');
+      expect(getByTestId('result-vertical')?.textContent).toContain('N/A');
+      expect(getByTestId('result-horizontal')?.textContent).toContain('N/A');
+    });
+
+    it('should display vertical result when set', () => {
+      mockObstacleFormService.results.set({ oblique: null, verticale: 18.3, horizontale: null });
+      fixture.detectChanges();
+
+      expect(getByTestId('result-vertical')?.textContent).toContain('18.3');
+    });
+
+    it('should display horizontal result when set', () => {
+      mockObstacleFormService.results.set({ oblique: null, verticale: null, horizontale: 9.7 });
+      fixture.detectChanges();
+
+      expect(getByTestId('result-horizontal')?.textContent).toContain('9.7');
+    });
+
+    it('should display all results when all values are set', () => {
+      mockObstacleFormService.results.set({ oblique: 1, verticale: 2, horizontale: 3 });
+      fixture.detectChanges();
+
+      expect(getByTestId('result-oblique')?.textContent).toContain('1');
+      expect(getByTestId('result-vertical')?.textContent).toContain('2');
+      expect(getByTestId('result-horizontal')?.textContent).toContain('3');
+    });
   });
 });
