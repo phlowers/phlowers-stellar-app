@@ -174,14 +174,6 @@ describe('FreePositioningComponent', () => {
     });
   });
 
-  describe('Escape key', () => {
-    it('should exit free positioning mode on Escape', () => {
-      mockPlotService.isFreePositioningMode.set(true);
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-      expect(mockPlotService.isFreePositioningMode()).toBe(false);
-    });
-  });
-
   describe('Click to position (profile)', () => {
     const makeFakePlotElement = (xValue: number, yValue: number) =>
       ({

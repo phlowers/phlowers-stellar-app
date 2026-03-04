@@ -164,7 +164,9 @@ export class FreePositioningComponent implements OnDestroy {
       view: '2d'
     });
 
-    const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as ReferenceSupport | undefined;
+    const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
+      | ReferenceSupport
+      | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
     this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
 
@@ -482,12 +484,5 @@ export class FreePositioningComponent implements OnDestroy {
     // Safety net: always leave the mode when this component is destroyed
     this.plotService.isFreePositioningMode.set(false);
     this.destroyAllPlots();
-  }
-
-  @HostListener('document:keydown.escape', ['$event'])
-  onEscape(event: KeyboardEvent): void {
-    if (!this.plotService.isFreePositioningMode()) return;
-    event.preventDefault();
-    this.plotService.isFreePositioningMode.set(false);
   }
 }
