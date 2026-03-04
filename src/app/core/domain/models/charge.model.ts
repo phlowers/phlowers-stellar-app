@@ -115,7 +115,7 @@ export enum LoadType {
 export interface SpanLoad {
   /** Position along the span (0-100%) */
   loadPosition: number;
-  /** Weight of the load in N (Newtons) */
+  /** Weight of the load in daN (decaNewtons) */
   loadWeight: number;
   /** Type of load (punctual or marking) */
   type: LoadType;
