@@ -185,10 +185,10 @@ base_plt_line = None
 
 
 def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
-    """Convert raw span load dicts into position and weight arrays."""
+    """Convert raw span load dicts into position and mass arrays."""
     global engine
     load_position_list = []
-    load_weight_list = []
+    load_weight_list_daN = []
     span_lengths = engine.section_array.data["span_length"].to_numpy()
     for index, span in enumerate(span_loads):
         try:
@@ -210,9 +210,9 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
                 load_position_list.append(0)
 
             if span['type'] == 'punctual':
-                load_weight_list.append(span["loadWeight"])
+                load_weight_list_daN.append(span["loadWeight"])
             else:
-                load_weight_list.append(0.01)
+                load_weight_list_daN.append(0.01)
         except KeyError as e:
             logging.warning(
                 "Span load at index %s is missing required key %s. "
@@ -221,17 +221,17 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
                 e,
             )
             load_position_list.append(0)
-            load_weight_list.append(0.01)
-
-    return np.array(load_position_list), np.array(load_weight_list)
+            load_weight_list_daN.append(0.01)
+    load_mass_kg = units(load_weight_list_daN, 'daN').to('kg').magnitude
+    return np.array(load_position_list), np.array(load_mass_kg)
 
 
 def apply_span_loads(span_loads: list):
     """Parse span loads and add them to the engine if any are non-zero."""
     global plt_line, engine
-    load_position_meters, load_weight = parse_span_loads(span_loads)
-    if (load_position_meters != 0).any() and (load_weight != 0).any():
-        engine.add_loads(load_position_meters, load_weight)
+    load_position_meters, load_mass = parse_span_loads(span_loads)
+    if (load_position_meters != 0).any() and (load_mass != 0).any():
+        engine.add_loads(load_position_meters, load_mass)
         plt_line = plt_line.generate_reset()
 
 
