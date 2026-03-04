@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
-import Plotly, { ModeBarButtonAny, PlotlyHTMLElement, Shape } from 'plotly.js-dist-min';
+import Plotly, { ModeBarButtonAny, PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { Options } from '@angular-slider/ngx-slider';
 import { createPlotData } from '../section/helpers/createPlotData';
 import { Side } from '../section/helpers/types';
@@ -25,7 +25,7 @@ import { debounce, isNumber } from 'lodash';
 import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
 import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
-import { Position3D } from '@src/app/core/domain/models/obstacle.model';
+import { Position3D, ReferenceSupport } from '@src/app/core/domain/models/obstacle.model';
 
 // Constants
 const PLOT_CONFIG = {
@@ -72,22 +72,17 @@ interface PlotLayout {
   };
 }
 
-export interface PlotAnnotation {
+interface PlotAnnotation {
   x: number;
   y: number;
   text: string;
   showarrow: boolean;
-  arrowhead: number;
-  standoff: number;
+  arrowhead?: number;
+  standoff?: number;
   font?: {
     color?: string;
     size?: number;
   };
-}
-
-interface PlotLayoutWithExtras extends PlotLayout {
-  shapes?: Partial<Shape>[];
-  annotations?: PlotAnnotation[];
 }
 
 interface PlotElement extends HTMLElement {
@@ -169,7 +164,9 @@ export class FreePositioningComponent implements OnDestroy {
       view: '2d'
     });
 
-    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, startSupport));
+    const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as ReferenceSupport | undefined;
+    const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
 
     const supports = this.plotService.section()?.supports ?? [];
     await this.createPlot(litData.result.current, startSupport, 'face', supports);
@@ -228,8 +225,6 @@ export class FreePositioningComponent implements OnDestroy {
     const isFaceView = side === 'face';
 
     return {
-      // autosize: true,
-      // height: PLOT_CONFIG.HEIGHT,
       autosize: true,
       showlegend: false,
       dragmode: 'pan',
@@ -390,8 +385,6 @@ export class FreePositioningComponent implements OnDestroy {
     const annotations = this.getAnnotations(obstaclesPoints, side);
 
     if (!plot) return;
-    const layoutWithExtras = (plot as PlotElement)._fullLayout as PlotLayoutWithExtras;
-    if (!layoutWithExtras) return;
 
     const pLayout = this.getPlotLayout(side);
     void Plotly.update(

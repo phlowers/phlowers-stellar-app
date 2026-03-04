@@ -40,7 +40,7 @@ This does the actual work of transforming coordinates into Plotly objects.
 **Helper functions:**
 - `getLine()` - Returns color (blue/indigo/red), dash style, and width (thicker in 3D)
 - `getMode()` - Returns `'text+lines+markers'` for supports, `'lines+markers'` for others
-- `getText()` - Labels supports with their number (1-indexed) on the highest point
+- `getText()` - Labels supports with their `number` field from the `Support` model on the highest point
 - `getMarker()` - Sets marker sizes (varies by type and view)
 
 ## Quick Reference
@@ -55,7 +55,7 @@ This does the actual work of transforming coordinates into Plotly objects.
 - Supports: indigo, width 8 (3D) or 4 (2D), shows numbered labels
 - Insulators: red, width 8 (3D) or 4 (2D)
 
-**Note:** Support indices are 0-based internally but displayed as 1-based in labels.
+**Note:** Support labels display the `number` field from the `Support` model, not a derived index.
 
 ## Style Configuration Summary
 

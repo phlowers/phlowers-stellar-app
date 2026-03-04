@@ -30,6 +30,7 @@ primary_domain = "js"
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
+    "dollarmath",
     "substitution",
 ]
 source_suffix = {

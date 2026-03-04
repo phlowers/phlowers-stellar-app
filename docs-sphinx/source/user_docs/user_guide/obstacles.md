@@ -2,42 +2,42 @@
 
 ## Altitude: Absolute (NGF) vs Relative
 
-Chaque point d’obstacle a une coordonnée `z` dont l’interprétation dépend du champ **Altitude type**.
+Each obstacle point has a `z` coordinate whose interpretation depends on the **Altitude type** field.
 
 - **Absolute (NGF)**
-  - `z` est une altitude NGF absolue.
-  - Sur les graphes (2D/3D), le point est placé à l’altitude NGF saisie.
-  - Exemple : si `z = 50`, le point est à **50 NGF**, indépendamment du support.
+  - `z` is an absolute NGF altitude.
+  - On charts (2D/3D), the point is placed at the entered NGF altitude.
+  - Example: if `z = 50`, the point is at **50 NGF**, regardless of the support.
 
 - **Relative (to support)**
-  - `z` est un delta par rapport à l’altitude NGF du support de référence.
-  - L’altitude NGF affichée/placée sur les graphes est :
+  - `z` is a delta relative to the NGF altitude of the reference support.
+  - The NGF altitude displayed/placed on charts is:
 
 $$\text{altitudeNGF} = \text{altitudeSupportNGF} + z$$
 
-  - Exemple : si le support est à **30 NGF** et `z = 20`, alors le point est à **50 NGF**.
+  - Example: if the support is at **30 NGF** and `z = 20`, then the point is at **50 NGF**.
 
-## Affichage sur les graphes
+## Chart display
 
-- Chaque point est rendu avec :
-  - un **marqueur** ("●") au niveau exact du point
-  - un **label** (nom de l’obstacle) juste au-dessus du marqueur
-- Il n’y a **pas** de ligne/flèche entre le point et le label.
-- L’**infobulle** (hover) est attachée **uniquement au marqueur**, pas au label.
+- Each point is rendered with:
+  - a **marker** ("●") at the exact point level
+  - a **label** (obstacle name) just above the marker
+- There is **no** line/arrow between the point and the label.
+- The **tooltip** (hover) is attached **only to the marker**, not to the label.
 
 ## Free positioning
 
-Le mode **Free positioning** permet de positionner un point en cliquant sur le graphe.
+The **Free positioning** mode allows placing a point by clicking on the chart.
 
-- Sortie du mode :
-  - en désactivant le toggle **Free positioning**, ou
-  - en appuyant sur **Escape**
+- Exiting the mode:
+  - by disabling the **Free positioning** toggle, or
+  - by pressing **Escape**
 
-### Interaction avec l’altitude
+### Interaction with altitude
 
-- En **Absolute (NGF)** : un clic positionne directement `z` à l’altitude NGF cliquée.
-- En **Relative (to support)** : un clic enregistre `z` comme un delta :
+- In **Absolute (NGF)** mode: a click directly sets `z` to the clicked NGF altitude.
+- In **Relative (to support)** mode: a click records `z` as a delta:
 
-$$z = \text{altitudeCliqueeNGF} - \text{altitudeSupportNGF}$$
+$$z = \text{clickedAltitudeNGF} - \text{altitudeSupportNGF}$$
 
-Le point reste affiché au bon niveau NGF (altitude du support + delta).
+The point remains displayed at the correct NGF level (support altitude + delta).

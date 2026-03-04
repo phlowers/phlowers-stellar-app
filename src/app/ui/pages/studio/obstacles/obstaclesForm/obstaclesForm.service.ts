@@ -11,10 +11,10 @@ import { ObstacleFormGroupData } from './interfaces';
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 
+/** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
   providedIn: 'root'
 })
-/** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 export class ObstacleFormService {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
@@ -42,29 +42,19 @@ export class ObstacleFormService {
   private readonly positionsSnapshot = signal<Position3D[]>([]);
 
   constructor() {
-    // Subscribe aux changements du FormArray
+    // Subscribe to FormArray changes to keep the snapshot updated
     this.positions.valueChanges.subscribe((positions) => {
       this.positionsSnapshot.set(positions as Position3D[]);
     });
 
-    // Initialise le snapshot
+    // Initialize the snapshot with the current positions value
     this.positionsSnapshot.set(this.positions.value as Position3D[]);
   }
 
-  private buildPositionControls(positions: Position3D[]): FormGroup<{
-    x: FormControl<number | null>;
-    y: FormControl<number | null>;
-    z: FormControl<number | null>;
-  }>[] {
-    const controls: FormGroup<{
-      x: FormControl<number | null>;
-      y: FormControl<number | null>;
-      z: FormControl<number | null>;
-    }>[] = [];
-    for (const position of positions) {
-      controls.push(this.createPositionGroup(position));
-    }
-    return controls;
+  private buildPositionControls(
+    positions: Position3D[]
+  ): FormGroup<{ x: FormControl<number | null>; y: FormControl<number | null>; z: FormControl<number | null> }>[] {
+    return positions.map((position) => this.createPositionGroup(position));
   }
 
   get positions(): FormArray {
@@ -152,12 +142,14 @@ export class ObstacleFormService {
     );
   });
 
+  private readonly debouncedResetForm = debounce((supportUuid: string | null) => {
+    this.resetForm(supportUuid);
+    this.resetResults();
+  }, DEBOUNCED_UPDATE_POINT_DELAY);
+
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
     this.focusPlotOnSupport(supportUuid);
-    debounce(() => {
-      this.resetForm(supportUuid);
-      this.resetResults();
-    }, DEBOUNCED_UPDATE_POINT_DELAY)();
+    this.debouncedResetForm(supportUuid);
     return this.form.value as Obstacle;
   }
 
