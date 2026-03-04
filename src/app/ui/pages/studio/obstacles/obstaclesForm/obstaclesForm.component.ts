@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -9,7 +9,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '../../services/plot.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
 import { debounce } from 'lodash';
 import { ObstaclesService } from '../obstacles.service';
 import { ObstacleFormService } from './obstaclesForm.service';
@@ -40,12 +40,7 @@ export class ObstaclesFormComponent {
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
 
-  readonly obstacleTypeOptions = [
-    { label: $localize`House`, value: 'House' },
-    { label: $localize`Building`, value: 'Building' },
-    { label: $localize`Tree`, value: 'Tree' },
-    { label: $localize`Other`, value: 'Other' }
-  ];
+  readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);
 
   readonly altitudeTypeOptions = [
     { label: $localize`Absolute (NGF)`, value: 'absolute' },
@@ -92,5 +87,9 @@ export class ObstaclesFormComponent {
 
   setCurrentObstaclePoint(index: number) {
     this.obstaclesService.setCurrentPointIndex(index);
+  }
+
+  freePositioningChange(event: ToggleSwitchChangeEvent) {
+    this.plotService.isFreePositioningMode.set(event.checked);
   }
 }

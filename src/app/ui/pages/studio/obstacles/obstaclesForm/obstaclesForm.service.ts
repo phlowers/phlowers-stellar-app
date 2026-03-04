@@ -264,7 +264,10 @@ export class ObstacleFormService {
     if (this.form.invalid) {
       return;
     }
-    // TODO: Implement save logic
+    //TODO: Implement save logic
+    // const obstacle = this.buildObstacleFromForm();
+    // this.upsertObstacleInSection(obstacle);
+    // await this.saveSection();
   }
 
   async calculateAndSave(): Promise<void> {
@@ -276,10 +279,31 @@ export class ObstacleFormService {
     await this.saveSection();
     // TODO: Implement calculation logic
     // For now, set mock results
+    let minOblique = Number.POSITIVE_INFINITY;
+    let minVerticale = Number.POSITIVE_INFINITY;
+    let minHorizontale = Number.POSITIVE_INFINITY;
+    for (const position of obstacle.positions) {
+      const { x, y, z } = position;
+      if (x === null || y === null || z === null) {
+        continue;
+      }
+      const absZ = Math.abs(z);
+      const horizontal = Math.hypot(x, y);
+      const oblique = Math.hypot(horizontal, z);
+      if (oblique < minOblique) {
+        minOblique = oblique;
+      }
+      if (absZ < minVerticale) {
+        minVerticale = absZ;
+      }
+      if (horizontal < minHorizontale) {
+        minHorizontale = horizontal;
+      }
+    }
     this.results.set({
-      oblique: 123,
-      verticale: 123,
-      horizontale: 123
+      oblique: Number.isFinite(minOblique) ? minOblique : null,
+      verticale: Number.isFinite(minVerticale) ? minVerticale : null,
+      horizontale: Number.isFinite(minHorizontale) ? minHorizontale : null
     });
   }
 
@@ -298,12 +322,18 @@ export class ObstacleFormService {
   }
 
   private upsertObstacleInSection(obstacle: Obstacle): void {
-    const obstacles = this.plotService.section()?.obstacles ?? [];
-    const existingObstacle = obstacles.find((o) => o.uuid === obstacle.uuid);
-    if (existingObstacle) {
-      Object.assign(existingObstacle, obstacle);
+    const section = this.plotService.section();
+    if (!section) {
+      return;
+    }
+    if (!section.obstacles) {
+      section.obstacles = [];
+    }
+    const existingIndex = section.obstacles.findIndex((o) => o.uuid === obstacle.uuid);
+    if (existingIndex !== -1) {
+      section.obstacles[existingIndex] = obstacle;
     } else {
-      obstacles.push(obstacle);
+      section.obstacles.push(obstacle);
     }
   }
 

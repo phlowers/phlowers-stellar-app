@@ -13,3 +13,4 @@ export { CATALOG_CABLE_SCHEMA } from './catalog-cable.schema';
 export { CATALOG_CHAIN_SCHEMA } from './catalog-chain.schema';
 export { CATALOG_LINE_SCHEMA } from './catalog-line.schema';
 export { CATALOG_MAINTENANCE_SCHEMA } from './catalog-maintenance.schema';
+export { CATALOG_OBSTACLE_TYPE_SCHEMA } from './catalog-obstacle-type.schema';

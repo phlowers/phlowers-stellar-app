@@ -5,6 +5,8 @@ import { ObstaclesFormComponent } from './obstaclesForm.component';
 import { PlotService } from '../../services/plot.service';
 import { ObstaclesService } from '../obstacles.service';
 import { ObstacleFormService } from './obstaclesForm.service';
+import { ObstacleTypesService } from '@services/obstacle-types/obstacle.services';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('lodash', () => ({
   debounce: (fn: (...args: unknown[]) => void) => fn
@@ -79,7 +81,17 @@ describe('ObstaclesFormComponent', () => {
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: ObstaclesService, useValue: obstaclesService },
-        { provide: ObstacleFormService, useValue: mockObstacleFormService }
+        { provide: ObstacleFormService, useValue: mockObstacleFormService },
+        {
+          provide: ObstacleTypesService,
+          useValue: {
+            ready: new BehaviorSubject<boolean>(true),
+            getObstacleTypes: jest.fn().mockResolvedValue([
+              { obstacle_type: 'ordinary_ground', obstacle_type_name: 'Terrain ordinaire', details: '' },
+              { obstacle_type: 'vegetation', obstacle_type_name: 'Végétation', details: '' }
+            ])
+          }
+        }
       ]
     }).compileComponents();
 

@@ -1,0 +1,10 @@
+obstacle_type;obstacle_type_name;details
+ordinary_ground;Terrain ordinaire;Terrain ordinaire (non cultivé, présence de personnes exceptionnelles)
+agricultural_land;Terrain agricole;Terrain agricole et terrain occupé ou utilisé de façons diverses (voie privée, voie dans site industriel, camping)
+high_clearance_equipment_area;Aire engin gde hauteur;Aire évolution engins agricoles ou industriels de grande hauteur H (>5m)
+traffic_lane;Voie de circulation;Voie de circulation (y compris chemin rural débouchant sur voie de circulation)
+high_clearance_vehicle_route;Itinéraire véhicules gde hauteur;Itinéraire pour véhicule de grande hauteur H (>5m)
+silo_proximity;Proximité silo;Proximité silo (H = hauteur de la partie supérieure de l'ouverture de remplissage)
+accessible_building;Bâtiment accessible;Bâtiment accessible aux personnes et parties saillantes (par extension, passerelle, balcon, terrasse, installation d'équipement sportif, cheminée sur un toit…)
+non_accessible_structure;Construction non accessible;Construction au sol et parties saillantes des bâtiments non normalement accessibles aux personnes (ex. antenne sur un toit)
+vegetation;Végétation;Végétation (il faut en plus intégrer la pousse des arbres)

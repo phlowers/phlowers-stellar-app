@@ -11,3 +11,4 @@ export type { CableCsvDto } from './cable-csv.dto';
 export type { ChainCsvDto } from './chain-csv.dto';
 export type { LineCsvDto } from './line-csv.dto';
 export type { MaintenanceCsvDto } from './maintenance-csv.dto';
+export type { ObstacleTypeCsvDto } from './obstacle-type-csv.dto';

@@ -476,7 +476,7 @@ describe('ObstacleFormService', () => {
       await service.calculateAndSave();
 
       expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
-      expect(service.results().oblique).toBe(123);
+      expect(service.results().oblique).toBeCloseTo(Math.sqrt(14), 5);
     });
     it('should create new obstacle and save when no existing obstacle for support', async () => {
       service.form.patchValue({
@@ -506,7 +506,7 @@ describe('ObstacleFormService', () => {
       expect(section.obstacles[0].uuid).toBe('new-uuid');
       expect(section.obstacles[0].positions).toHaveLength(1);
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
-      expect(service.results().oblique).toBe(123);
+      expect(service.results().oblique).toBeCloseTo(Math.sqrt(14), 5);
       expect(mockMessageService.add).toHaveBeenCalled();
     });
     it('should update existing obstacle and save when obstacle exists for support', async () => {
@@ -534,9 +534,10 @@ describe('ObstacleFormService', () => {
       });
       service.addPosition({ x: 5, y: 5, z: 5 });
       await service.calculateAndSave();
-      expect(existing.name).toBe('Updated Name');
-      expect(existing.type).toBe('Tree');
-      expect(existing.positions.length).toBe(1);
+      const updated = section.obstacles.find((o) => o.uuid === 'obs-1')!;
+      expect(updated.name).toBe('Updated Name');
+      expect(updated.type).toBe('Tree');
+      expect(updated.positions.length).toBe(1);
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
     });
   });
