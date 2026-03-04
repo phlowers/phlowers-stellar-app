@@ -131,7 +131,7 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{js,mjs,mts,d.ts}": [
+    "*.{js,mjs,mts}": [
       "prettier --write"
     ]
   }
