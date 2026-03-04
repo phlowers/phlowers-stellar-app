@@ -52,7 +52,7 @@ export async function installApp() {
     })
   );
   log('app installed');
-  for (const client of await (self as unknown as ServiceWorkerGlobalScope).clients.matchAll({
+  for (const client of await (globalThis as unknown as ServiceWorkerGlobalScope).clients.matchAll({
     includeUncontrolled: true,
     type: 'window'
   })) {
@@ -91,7 +91,7 @@ export async function updateApp() {
       await cache.add(file);
     }
   }
-  const cacheKeys = (await cache.keys()).map((key) => key.url.replace(self.location.origin, ''));
+  const cacheKeys = (await cache.keys()).map((key) => key.url.replace(globalThis.location.origin, ''));
   const keysToDelete = cacheKeys.filter((key) => key !== '/app_version' && !files.includes(key));
   for (const key of keysToDelete) {
     log('deleting file', key);
@@ -131,7 +131,7 @@ const noCacheHeaders = () => {
  */
 export async function handleFetch(event: FetchEvent) {
   const url = event.request.url;
-  const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
+  const scope = (globalThis as unknown as ServiceWorkerGlobalScope).registration?.scope;
   if (url === scope) {
     // case for home page
     const newUrl = scope + 'index.html';
@@ -163,9 +163,9 @@ export async function handleFetch(event: FetchEvent) {
   }
 }
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener('fetch', handleFetch);
+(globalThis as unknown as ServiceWorkerGlobalScope).addEventListener('fetch', handleFetch);
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener('install', async () => {
+(globalThis as unknown as ServiceWorkerGlobalScope).addEventListener('install', async () => {
   log('installing service worker');
 });
 
@@ -207,7 +207,7 @@ export async function handleMessage(event: ExtendableMessageEvent) {
   }
 }
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener('activate', async () => {
+(globalThis as unknown as ServiceWorkerGlobalScope).addEventListener('activate', async () => {
   log('activating service worker');
   const installed = await checkIfAppInstalled();
   if (installed) {
@@ -218,4 +218,4 @@ export async function handleMessage(event: ExtendableMessageEvent) {
   }
 });
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener('message', handleMessage);
+(globalThis as unknown as ServiceWorkerGlobalScope).addEventListener('message', handleMessage);

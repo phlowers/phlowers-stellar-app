@@ -9,8 +9,8 @@ import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
 import { TestBed } from '@angular/core/testing';
 import { MessageService } from 'primeng/api';
 
-window.ResizeObserver =
-  window.ResizeObserver ||
+globalThis.ResizeObserver =
+  globalThis.ResizeObserver ||
   jest.fn().mockImplementation(() => ({
     disconnect: jest.fn(),
     observe: jest.fn(),
@@ -28,7 +28,7 @@ Object.defineProperty(document, 'fonts', {
 setupZoneTestEnv();
 
 // Mock URL.createObjectURL
-Object.defineProperty(window.URL, 'createObjectURL', {
+Object.defineProperty(globalThis.URL, 'createObjectURL', {
   value: jest.fn().mockReturnValue('mock-url')
 });
 

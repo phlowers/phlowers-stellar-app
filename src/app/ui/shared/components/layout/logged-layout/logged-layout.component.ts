@@ -21,7 +21,7 @@ interface SidebarNavigation {
 })
 /** Main layout component for authenticated pages, including the sidebar and topbar. */
 export class LoggedLayoutComponent implements OnInit {
-  currentRoute = window.location.pathname;
+  currentRoute = globalThis.location.pathname;
 
   constructor(private readonly router: Router) {}
 

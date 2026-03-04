@@ -19,7 +19,7 @@ describe('SelectWithButtonsComponent', () => {
 
   beforeAll(() => {
     // PrimeNG overlay rendering needs matchMedia
-    Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(globalThis, 'matchMedia', {
       writable: true,
       value: jest.fn().mockImplementation((query) => ({
         matches: false,

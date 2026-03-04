@@ -31,7 +31,7 @@ export class NewsService {
    * @returns An observable emitting the raw markdown string.
    */
   getNews(): Observable<string> {
-    return this.http.get(`${window.location.origin}/data/news.md`, {
+    return this.http.get(`${globalThis.location.origin}/data/news.md`, {
       responseType: 'text' as const
     });
   }

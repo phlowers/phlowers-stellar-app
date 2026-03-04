@@ -83,7 +83,7 @@ export class ObstaclesFormComponent {
 
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {
     const targetValue = (event.target as HTMLInputElement).value;
-    const numericValue = parseFloat(targetValue);
+    const numericValue = Number.parseFloat(targetValue);
     this.debouncedUpdatePoint(key, isNaN(numericValue) ? 0 : numericValue);
   }
 

@@ -295,10 +295,7 @@ export class FreePositioningComponent implements OnDestroy {
     const x = evt.layerX - layout.margin.l;
     const y = evt.layerY - layout.margin.t;
     // TODO: try to find another way to detect if the click not on the background
-    if (
-      !(evt.target as SVGElement)?.className?.baseVal?.includes('drag') &&
-      (evt.target as Element).tagName !== 'CANVAS'
-    ) {
+    if (!(evt.target as Element)?.classList?.contains('drag') && (evt.target as Element).tagName !== 'CANVAS') {
       return;
     }
 
@@ -311,14 +308,14 @@ export class FreePositioningComponent implements OnDestroy {
       type === 'profile'
         ? {
             // First plot (profile): update x and z, keep y
-            x: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+            x: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
             y: previousSelectedObstacle.y ?? null,
-            z: parseFloat(layout.yaxis.p2c(y).toFixed(2))
+            z: Number.parseFloat(layout.yaxis.p2c(y).toFixed(2))
           }
         : {
             // Second plot (face): update y, keep x and z
             x: previousSelectedObstacle.x ?? null,
-            y: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+            y: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
             z: previousSelectedObstacle.z ?? null
           };
 
@@ -445,7 +442,6 @@ export class FreePositioningComponent implements OnDestroy {
         side
       );
 
-      // const width = plotElement.clientWidth;
       const layout = this.getPlotLayout(side);
       const config = this.getPlotConfig();
 

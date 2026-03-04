@@ -5,7 +5,6 @@ import { BehaviorSubject, of } from 'rxjs';
 import { PageTitleService } from './page-title.service';
 
 describe('PageTitleService', () => {
-  //   let service: PageTitleService;
   let mockRouter: Partial<Router>;
   let mockActivatedRoute: Partial<ActivatedRoute>;
   let mockTitleService: Partial<Title>;

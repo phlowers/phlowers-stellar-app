@@ -7,7 +7,6 @@
 
 import { loadPyodide } from 'pyodide';
 import { handleTask } from './tasks/handle-task';
-// import importScript from './python-functions/imports.py';
 import pythonPackages from './python-packages.json';
 
 // Mock dependencies
@@ -27,12 +26,8 @@ const mockPerformance = {
 };
 
 // Setup global objects to simulate web worker environment
-Object.defineProperty(global, 'self', {
-  value: {
-    name: 'test/',
-    postMessage: mockPostMessage,
-    addEventListener: mockAddEventListener
-  },
+Object.defineProperty(global, 'name', {
+  value: 'test/',
   writable: true
 });
 
@@ -80,9 +75,9 @@ describe('Worker', () => {
       await import('./worker-python');
 
       // Verify loadPyodide was called with correct parameters
-      const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
+      const allPythonPackages = Object.values(pythonPackages).map((pkg) => 'test/pyodide/' + pkg.file_name);
       expect(loadPyodide).toHaveBeenCalledWith({
-        indexURL: self.name + 'pyodide/',
+        indexURL: 'test/pyodide/',
         packages: expect.arrayContaining(allPythonPackages)
       });
 
@@ -92,57 +87,5 @@ describe('Worker', () => {
       const callArgs = (loadPyodide as jest.Mock).mock.calls[0][0];
       expect(callArgs.packages).toEqual(expect.arrayContaining(allPackages));
     });
-
-    // it('should post load time message after Pyodide loads', async () => {
-    //   await import('./worker');
-    //   await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    //   // First postMessage should be the load time
-    //   expect(mockPostMessage).toHaveBeenCalledWith({ loadTime: expect.any(Number) });
-    // });
-
-    // it('should run Python import script', async () => {
-    //   await import('./worker');
-
-    //   // Verify runPython was called with the import script
-    //   expect(mockPyodide.runPython).toHaveBeenCalledWith(importScript);
-    // });
-
-    // it('should post import time message after imports complete', async () => {
-    //   await import('./worker');
-
-    //   // Second postMessage should be the import time
-    //   expect(mockPostMessage).toHaveBeenCalledWith({ importTime: expect.any(Number) });
-    // });
   });
-
-  // describe('message event listener', () => {
-  //   it('should register a message event listener', async () => {
-  //     await import('./worker');
-
-  //     expect(addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
-  //   });
-
-  //   it('should handle incoming messages and process tasks', async () => {
-  //     await import('./worker');
-
-  //     // Get the message handler function
-  //     const messageHandler = mockAddEventListener.mock.calls[0][1];
-
-  //     // Create a mock message event
-  //     const mockData = {
-  //       task: 'testTask',
-  //       data: { param1: 'value1' }
-  //     };
-
-  //     // Call the message handler
-  //     await messageHandler({ data: mockData });
-
-  //     // Verify handleTask was called with correct parameters
-  //     expect(handleTask).toHaveBeenCalledWith(mockPyodide, 'testTask', { param1: 'value1' });
-
-  //     // Verify result was posted back
-  //     expect(mockPostMessage).toHaveBeenCalledWith({ result: 'success' });
-  //   });
-  // });
 });

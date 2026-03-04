@@ -39,16 +39,16 @@ describe('UpdateService', () => {
     mockCaches = {
       open: jest.fn().mockResolvedValue(mockCache)
     };
-    originalCaches = window.caches;
-    Object.defineProperty(window, 'caches', {
+    originalCaches = globalThis.caches;
+    Object.defineProperty(globalThis, 'caches', {
       value: mockCaches,
       writable: true
     });
 
     // Mock fetch
     mockFetch = jest.fn();
-    originalFetch = window.fetch;
-    window.fetch = mockFetch;
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = mockFetch;
 
     TestBed.configureTestingModule({
       providers: [UpdateService, { provide: MessageService, useValue: mockMessageService }]
@@ -64,11 +64,11 @@ describe('UpdateService', () => {
       value: originalServiceWorker,
       writable: true
     });
-    Object.defineProperty(window, 'caches', {
+    Object.defineProperty(globalThis, 'caches', {
       value: originalCaches,
       writable: true
     });
-    window.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   it('should be created', () => {

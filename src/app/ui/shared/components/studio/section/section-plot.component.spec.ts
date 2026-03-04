@@ -300,8 +300,8 @@ describe('SectionPlotComponent', () => {
 
     it('should have correct container classes', () => {
       const container = fixture.nativeElement.querySelector('[data-testid="section-plot-container"]');
-      expect(container.className).toContain('w-full');
-      expect(container.className).toContain('h-full');
+      expect(container.classList).toContain('w-full');
+      expect(container.classList).toContain('h-full');
     });
   });
 

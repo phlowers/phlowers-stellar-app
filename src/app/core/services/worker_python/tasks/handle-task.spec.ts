@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { handleTask, PyodideAPI } from './handle-task';
-// import functions from './python-scripts/functions.py';
 import { Task } from './types';
 
 // Mock the pyodide module

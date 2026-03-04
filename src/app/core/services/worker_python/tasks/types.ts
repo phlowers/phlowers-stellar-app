@@ -261,7 +261,6 @@ export interface TaskOutputs {
   /** Output from calculatePapoto task */
   [Task.calculatePapoto]: {
     parameter: number;
-    // uncertainty_parameter: number;
     parameter_1_2: number;
     parameter_2_3: number;
     parameter_1_3: number;

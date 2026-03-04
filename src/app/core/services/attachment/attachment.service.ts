@@ -94,11 +94,11 @@ export class AttachmentService {
           created_at: new Date().toISOString(),
           support_name: item.support_adr,
           attachment_set: toNumber(item.position),
-          attachment_altitude: parseFloat(item.Z),
-          cross_arm_length: parseFloat(item.L),
-          attachment_set_x: parseFloat(item.X),
-          attachment_set_y: parseFloat(item.Y),
-          attachment_set_z: parseFloat(item.Z),
+          attachment_altitude: Number.parseFloat(item.Z),
+          cross_arm_length: Number.parseFloat(item.L),
+          attachment_set_x: Number.parseFloat(item.X),
+          attachment_set_y: Number.parseFloat(item.Y),
+          attachment_set_z: Number.parseFloat(item.Z),
           support_tower: item.support_tower
         }));
     };

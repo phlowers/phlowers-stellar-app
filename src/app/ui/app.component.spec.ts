@@ -69,7 +69,7 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     // @ts-expect-error worker
-    window.Worker = Worker;
+    globalThis.Worker = Worker;
     readySubject = new BehaviorSubject<boolean>(true);
     workerReadySubject = new BehaviorSubject<boolean>(true);
 

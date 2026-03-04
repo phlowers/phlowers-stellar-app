@@ -211,15 +211,15 @@ describe('AdminComponent', () => {
   describe('resetApp', () => {
     beforeEach(() => {
       // Mock the caches API
-      Object.defineProperty(window, 'caches', {
+      Object.defineProperty(globalThis, 'caches', {
         value: {
           delete: jest.fn().mockResolvedValue(undefined)
         },
         writable: true
       });
 
-      // Mock window.location
-      Object.defineProperty(window, 'location', {
+      // Mock globalThis.location
+      Object.defineProperty(globalThis, 'location', {
         value: {
           href: ''
         },
@@ -258,7 +258,7 @@ describe('AdminComponent', () => {
       // Execute the accept callback
       await acceptCallback();
 
-      expect(window.caches.delete).toHaveBeenCalledWith('app-assets');
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('app-assets');
       expect(messageServiceMock.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -268,7 +268,7 @@ describe('AdminComponent', () => {
       // Wait for the setTimeout to execute
       await new Promise((resolve) => setTimeout(resolve, 2100));
 
-      expect(window.location.href).toBe('/');
+      expect(globalThis.location.href).toBe('/');
     });
 
     it('should not delete cache when confirmation is cancelled', () => {
@@ -276,9 +276,9 @@ describe('AdminComponent', () => {
 
       // Don't call the accept callback
 
-      expect(window.caches.delete).not.toHaveBeenCalled();
+      expect(globalThis.caches.delete).not.toHaveBeenCalled();
       expect(messageServiceMock.add).not.toHaveBeenCalled();
-      expect(window.location.href).toBe('');
+      expect(globalThis.location.href).toBe('');
     });
   });
 });

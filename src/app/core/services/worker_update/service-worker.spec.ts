@@ -22,12 +22,6 @@ const mockClients = {
   matchAll: jest.fn()
 };
 
-const mockSelf = {
-  location: { origin: 'https://example.com' },
-  clients: mockClients,
-  registration: { scope: 'https://example.com/' }
-};
-
 // Mock global objects
 global.caches = {
   ...mockCaches,
@@ -54,10 +48,18 @@ global.console = {
 };
 
 // Mock service worker global scope
-Object.defineProperty(global, 'self', {
-  value: mockSelf,
+Object.defineProperty(global, 'clients', {
+  value: mockClients,
   writable: true
 });
+Object.defineProperty(global, 'registration', {
+  value: { scope: 'https://example.com/' },
+  writable: true
+});
+
+// @ts-expect-error mock location
+delete global.location;
+global.location = { origin: 'https://example.com' } as Location;
 
 describe('Service Worker Functions', () => {
   beforeEach(() => {

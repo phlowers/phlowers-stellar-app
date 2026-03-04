@@ -96,7 +96,7 @@ export class UpdateService {
               summary: $localize`Update successful`,
               detail: $localize`The application has been updated to the latest version`
             });
-            window.location.href = '/';
+            globalThis.location.href = '/';
             break;
           case 'install_complete':
             await this.checkAppVersion();

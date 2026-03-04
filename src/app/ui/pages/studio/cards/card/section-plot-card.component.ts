@@ -75,7 +75,6 @@ export class SectionPlotCardComponent {
   // Data structure for support type
   supportData = computed((): DataSection[] => {
     const vtl_under_chain = this.litData()?.vtl_under_chain;
-    // const vtl_under_console = this.litData()?.vtl_under_console;
     const r_under_chain = this.litData()?.r_under_chain;
     const lineAngle = this.litData()?.line_angle;
 

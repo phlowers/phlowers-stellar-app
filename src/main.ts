@@ -8,12 +8,12 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/ui/app.component';
 import { appConfig } from './app/ui/app.config';
 import { isDevMode } from '@angular/core';
-(window as unknown as Record<string, unknown>).global = window;
+(globalThis as unknown as Record<string, unknown>).global = globalThis;
 
 bootstrapApplication(AppComponent, appConfig)
   .then(() => {
     if ('serviceWorker' in navigator && !isDevMode()) {
-      window.addEventListener('load', () => {
+      globalThis.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')?.catch((error) => {
           console.error('Service Worker registration failed:', error);
         });

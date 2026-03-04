@@ -29,10 +29,11 @@ let pyodide: PyodideAPI;
  */
 async function loadPyodideAndPackages() {
   try {
-    const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
+    const workerName = (globalThis as unknown as DedicatedWorkerGlobalScope).name;
+    const allPythonPackages = Object.values(pythonPackages).map((pkg) => workerName + 'pyodide/' + pkg.file_name);
     const start = performance.now();
     pyodide = await loadPyodide({
-      indexURL: self.name + 'pyodide/',
+      indexURL: workerName + 'pyodide/',
       packages: allPythonPackages
     });
     const loadEnd = performance.now();
