@@ -1,0 +1,5 @@
+set -e
+
+npm run extract-i18n
+npm run test
+npm run build:fr
