@@ -1,5 +1,29 @@
 import { createDataObject } from './createPlotDataObject';
 import { PlotObjectsType } from './types';
+import { Support } from '@core/domain/models/support.model';
+
+const createMockSupport = (overrides: Partial<Support> = {}): Support => ({
+  uuid: 'test-uuid',
+  number: null,
+  name: null,
+  spanLength: null,
+  spanAngle: null,
+  attachmentSet: null,
+  attachmentHeight: null,
+  heightBelowConsole: null,
+  towerModel: null,
+  cableType: null,
+  armLength: null,
+  chainName: null,
+  chainLength: null,
+  chainWeight: null,
+  chainV: null,
+  counterWeight: null,
+  supportFootAltitude: null,
+  attachmentPosition: null,
+  chainSurface: null,
+  ...overrides
+});
 
 describe('createPlotDataObject', () => {
   describe('getColor function', () => {
@@ -97,6 +121,61 @@ describe('createPlotDataObject', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result[0] as any).mode
       ).toBe('lines+markers');
+    });
+  });
+
+  describe('getText function', () => {
+    const testData: number[][][] = [
+      [
+        [1, 2, 3],
+        [4, 5, 6]
+      ],
+      [
+        [7, 8, 9],
+        [10, 11, 12]
+      ]
+    ];
+
+    it('should display support number on the highest point for supports type', () => {
+      const supports = [
+        createMockSupport({ uuid: 'uuid-1', number: '42' }),
+        createMockSupport({ uuid: 'uuid-2', number: '43' })
+      ];
+      const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile', supports);
+
+      // Point [4,5,6] has the highest z (6), so index 1 gets the label
+      expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (result[0] as any).text
+      ).toEqual(['', '42']);
+    });
+
+    it('should return empty strings when no support is provided', () => {
+      const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
+
+      expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (result[0] as any).text
+      ).toEqual(['', '']);
+    });
+
+    it('should return empty strings when support number is null', () => {
+      const supports = [createMockSupport({ uuid: 'uuid-1', number: null })];
+      const result = createDataObject(testData, 0, 0, 'supports', '2d', 'profile', supports);
+
+      expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (result[0] as any).text
+      ).toEqual(['', '']);
+    });
+
+    it('should return empty array for non-supports type', () => {
+      const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
+
+      expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (result[0] as any).text
+      ).toEqual([]);
     });
   });
 

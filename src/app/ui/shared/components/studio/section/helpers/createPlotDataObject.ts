@@ -38,10 +38,11 @@ const getMode = (type: PlotObjectsType): PlotData['mode'] => {
   return 'lines+markers';
 };
 
-const getText = (type: PlotObjectsType, points: number[][], supportIndex: number): string[] => {
+const getText = (type: PlotObjectsType, points: number[][], support: Support | undefined): string[] => {
   if (type !== 'supports') return [];
   const highestPointIndex = points.findIndex((point) => point[2] === Math.max(...points.map((p) => p[2])));
-  return points.map((_, index) => (index === highestPointIndex ? (supportIndex + 1).toString() : ''));
+  const label = support?.number ?? '';
+  return points.map((_, index) => (index === highestPointIndex ? label : ''));
 };
 
 const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
@@ -99,7 +100,7 @@ export const createDataObject = (
       line: getLine(type, view),
       textposition: 'top center',
       marker: getMarker(type, view),
-      text: getText(type, points, startSupport + index),
+      text: getText(type, points, supports[startSupport + index]),
       name: type,
       supportUuid: supports[startSupport + index]?.uuid
     };

@@ -23,4 +23,5 @@ Introduction to the Stellar application and its main features.
 :hidden:
 
 welcome
+obstacles
 ```
