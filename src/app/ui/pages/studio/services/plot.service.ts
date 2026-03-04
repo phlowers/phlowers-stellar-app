@@ -130,6 +130,7 @@ export class PlotService {
     this.litData.set(null);
     this.baseLitData.set(null);
     this.loading.set(false);
+    this.isFreePositioningMode.set(false);
     this.plotOptions.set({
       ...defaultPlotOptions
     });

@@ -1,4 +1,4 @@
-import { Obstacle, Position3D } from '@core/domain/models/obstacle.model';
+import { Obstacle, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
 
@@ -49,10 +49,7 @@ export const getObstacleClickPayload = (
 };
 
 const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
-  showarrow: true,
-  arrowhead: 6,
-  arrowwidth: 0,
-  standoff: 20,
+  showarrow: false,
   font: {
     color: 'black',
     size: 10
@@ -102,10 +99,46 @@ const getBaseCoordinates = (supportObject: DataObject): Coordinates => {
 const isValidPosition = (position: Position3D): boolean =>
   position.x !== null && position.y !== null && position.z !== null;
 
-const computeAnnotationCoords = (base: Coordinates, position: Position3D, side: string, is2d: boolean): Coordinates => {
-  const x = base.x + (position.x ?? 0);
-  const z = base.z + (position.z ?? 0);
-  const y = side === 'face' && is2d ? base.z + (position.z ?? 0) : base.y + (position.y ?? 0);
+const computeAnnotationCoords = (
+  base: Coordinates,
+  obstacle: Obstacle,
+  position: Position3D,
+  side: string,
+  is2d: boolean,
+  rightBase?: Coordinates
+): Coordinates => {
+  // Z meaning depends on altitudeType:
+  // - 'relative': position.z is a delta from the reference support altitude
+  // - 'absolute': position.z is an NGF altitude (referenced to 0)
+  const isAbsoluteAltitude = obstacle.altitudeType === 'absolute';
+  const isRightReference = obstacle.referenceSupport === ReferenceSupport.RIGHT;
+
+  // Choose which support base to use for altitude and lateral positioning.
+  // When the obstacle references the RIGHT support and its coordinates are
+  // available, use the right support; otherwise fall back to the left (base).
+  const refBase = isRightReference && rightBase ? rightBase : base;
+
+  // In 2D plots, Plotly's vertical axis is `y` and represents altitude (NGF).
+  // The support altitude in plot-coordinates is stored in `refBase.y`.
+  // In 3D plots, altitude is `z` and stored in `refBase.z`.
+  const supportAltitudeNgf = is2d ? refBase.y : refBase.z;
+  const altitudeNgf = (position.z ?? 0) + (isAbsoluteAltitude ? 0 : supportAltitudeNgf);
+
+  // Compute X coordinate based on view/side and reference support direction.
+  // In profile view, position.x = distance along span from the reference support.
+  // In face view, position.y = lateral distance from the line axis.
+  let x: number;
+  if (is2d && side === 'face') {
+    x = refBase.x + (position.y ?? 0);
+  } else if (isRightReference && rightBase) {
+    // Distance is measured from the right support; subtract to get plot position.
+    x = rightBase.x - (position.x ?? 0);
+  } else {
+    x = base.x + (position.x ?? 0);
+  }
+
+  const y = is2d ? altitudeNgf : refBase.y + (position.y ?? 0);
+  const z = altitudeNgf;
   return { x, y, z };
 };
 
@@ -116,28 +149,49 @@ const getHighlightColor = (
   currentObstaclePointIndex: number
 ): string => (obstacleUuid === currentObstacleUuid && positionIndex === currentObstaclePointIndex ? 'red' : 'black');
 
-const createPositionAnnotation = (
+const createPositionAnnotations = (
   obstacle: Obstacle,
   positionIndex: number,
+  position: Position3D,
   coords: Coordinates,
   color: string
-): Partial<Plotly.Annotations> =>
-  // z and data are non-standard Plotly annotation properties used for 3D rendering and event handling
-  ({
+): Partial<Plotly.Annotations>[] => {
+  const hovertext = `ref. support dist.: ${(position.x ?? 0).toFixed(2)}m<br />line axis dist.: ${(position.y ?? 0).toFixed(2)}m<br />point alt.: ${coords.z.toFixed(2)}m`;
+  const data = {
+    obstacleUuid: obstacle.uuid,
+    obstaclePositionIndex: positionIndex,
+    type: 'obstacle' as const
+  };
+
+  // Dot marker at the exact coordinates
+  const marker =
+    // z and data are non-standard Plotly annotation properties used for 3D rendering and event handling
+    {
+      ...BASE_ANNOTATION,
+      x: coords.x,
+      y: coords.y,
+      z: coords.z,
+      text: '●',
+      font: { ...BASE_ANNOTATION.font, color, size: 14 },
+      hovertext,
+      data
+    } as Partial<Plotly.Annotations>;
+
+  // Label just above the point (no arrow)
+  const label = {
     ...BASE_ANNOTATION,
     x: coords.x,
     y: coords.y,
     z: coords.z,
     text: obstacle.name,
+    yshift: 12,
     font: { ...BASE_ANNOTATION.font, color },
-    arrowcolor: color,
-    hovertext: `dist. supp. réf: ${coords.x.toFixed(2)}m<br />dist. axe. ligne: ${coords.y.toFixed(2)}m<br />alt. point: ${coords.z.toFixed(2)}m`,
-    data: {
-      obstacleUuid: obstacle.uuid,
-      obstaclePositionIndex: positionIndex,
-      type: 'obstacle' as const
-    }
-  }) as Partial<Plotly.Annotations>;
+    captureevents: false,
+    data
+  } as Partial<Plotly.Annotations>;
+
+  return [marker, label];
+};
 
 /**
  * Creates Plotly annotation objects for all valid obstacle positions in the current plot view.
@@ -151,10 +205,12 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
   const { obstacles, data: dataObjects, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
   const is2d = view === '2d';
 
-  // Exclude the last support — it should not display obstacles
-  const supportObjects = dataObjects.filter((dataObject) => dataObject.name === 'supports').slice(0, -1);
+  // Get all support objects (including the last one, needed as right-side reference)
+  const allSupportObjects = dataObjects.filter((dataObject) => dataObject.name === 'supports');
+  // Exclude the last support — it should not own obstacles (left-support list)
+  const leftSupportObjects = allSupportObjects.slice(0, -1);
 
-  const supportByUuid = new Map(supportObjects.map((s) => [s.supportUuid, s]));
+  const supportByUuid = new Map(leftSupportObjects.map((s) => [s.supportUuid, s]));
 
   const relevantObstacles = obstacles.filter((o) => supportByUuid.has(o.supportUuid));
 
@@ -164,13 +220,18 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
 
     const base = getBaseCoordinates(supportObject);
 
-    return obstacle.positions
-      .map((position, index) => ({ position, index }))
-      .filter(({ position }) => isValidPosition(position))
-      .map(({ position, index }) => {
-        const coords = computeAnnotationCoords(base, position, side, is2d);
-        const color = getHighlightColor(obstacle.uuid, index, currentObstacleUuid, currentObstaclePointIndex);
-        return createPositionAnnotation(obstacle, index, coords, color);
-      });
+    // Resolve the right (next) support of this span so RIGHT-referenced
+    // obstacles can use its altitude and position as the reference point.
+    const leftIndex = allSupportObjects.indexOf(supportObject);
+    const rightSupportObject =
+      leftIndex >= 0 && leftIndex + 1 < allSupportObjects.length ? allSupportObjects[leftIndex + 1] : undefined;
+    const rightBase = rightSupportObject ? getBaseCoordinates(rightSupportObject) : undefined;
+
+    return obstacle.positions.flatMap((position, index) => {
+      if (!isValidPosition(position)) return [];
+      const coords = computeAnnotationCoords(base, obstacle, position, side, is2d, rightBase);
+      const color = getHighlightColor(obstacle.uuid, index, currentObstacleUuid, currentObstaclePointIndex);
+      return createPositionAnnotations(obstacle, index, position, coords, color);
+    });
   });
 };
