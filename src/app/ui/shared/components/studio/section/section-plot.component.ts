@@ -14,14 +14,14 @@ import { LoadType } from './helpers/createLoadAnnotations';
 import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
-import { Obstacle } from '@src/app/core/domain/models/obstacle.model';
+import { ObstacleFormService } from '@ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
+import { Obstacle } from '@core/domain/models/obstacle.model';
 import {
   appendExistingObstaclesWithFormObstacle,
   getObstacleClickPayload,
   ObstacleAnnotationData
 } from './helpers/obstacles';
-import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
+import { ObstaclesService } from '@src/app/core/services/obstacles/obstacles.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 

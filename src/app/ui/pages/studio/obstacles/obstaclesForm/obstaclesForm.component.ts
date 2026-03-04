@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -7,14 +7,14 @@ import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '../../services/plot.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
 import { debounce } from 'lodash';
-import { ObstaclesService } from '../obstacles.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { ObstacleFormService } from './obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
-import { distinctUntilChanged } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -39,8 +39,28 @@ export class ObstaclesFormComponent {
   public readonly plotService = inject(PlotService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);
+
+  constructor() {
+    this.obstaclesService.ready
+      .pipe(
+        filter((ready) => ready),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(async () => {
+        const obstacleTypes = await this.obstaclesService.getObstacleTypes();
+        if (obstacleTypes) {
+          this.obstacleTypeOptions.set(
+            obstacleTypes.map((type) => ({
+              label: type.obstacle_type_name,
+              value: type.obstacle_type
+            }))
+          );
+        }
+      });
+  }
 
   readonly altitudeTypeOptions = [
     { label: $localize`Absolute (NGF)`, value: 'absolute' },

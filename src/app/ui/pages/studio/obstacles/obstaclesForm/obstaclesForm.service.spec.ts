@@ -1,7 +1,7 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
-import { ObstaclesService } from '../obstacles.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { SectionService } from '@core/services/sections/section.service';
 import { MessageService } from 'primeng/api';
 import { signal } from '@angular/core';
@@ -10,7 +10,50 @@ import { Section, Study, Support } from '@core/domain';
 import { ObstacleFormService } from './obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
 
-const mockSupports = [{ uuid: 'sup-1', number: 1 } as any, { uuid: 'sup-2', number: 2 } as any];
+const mockSupports: Support[] = [
+  {
+    uuid: 'sup-1',
+    number: '1',
+    name: 'Support 1',
+    spanLength: 0,
+    spanAngle: 0,
+    attachmentSet: 0,
+    attachmentHeight: 0,
+    heightBelowConsole: 0,
+    towerModel: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null
+  },
+  {
+    uuid: 'sup-2',
+    number: '2',
+    name: 'Support 2',
+    spanLength: 0,
+    spanAngle: 0,
+    attachmentSet: 0,
+    attachmentHeight: 0,
+    heightBelowConsole: 0,
+    towerModel: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null
+  }
+];
 
 const mockSection: Section = {
   uuid: 'sec-1',
@@ -47,7 +90,7 @@ const mockSection: Section = {
   comment: undefined,
   supports_comment: undefined,
   supports: mockSupports,
-  obstacles: [] as any[],
+  obstacles: [],
   initial_conditions: [],
   selected_initial_condition_uuid: undefined,
   charges: [],
@@ -94,8 +137,8 @@ describe('ObstacleFormService', () => {
     mockPlotService = {
       getSupportIndex: jest.fn().mockReturnValue(0),
       getSupportOptions: jest.fn().mockReturnValue([
-        { label: 1, value: 'LEFT' as any },
-        { label: 2, value: 'RIGHT' as any }
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
       ]),
       getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]),
       plotOptionsChange: jest.fn(),
@@ -236,8 +279,8 @@ describe('ObstacleFormService', () => {
       expect(service.positions.length).toBe(0);
       expect(service.results()).toEqual({
         oblique: null,
-        verticale: null,
-        horizontale: null
+        vertical: null,
+        horizontal: null
       });
       expect(result).toBeDefined();
     }));
@@ -497,8 +540,8 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
       mockPlotService.getSupportIndex.mockReturnValue(0);
       mockPlotService.getSupportOptions.mockReturnValue([
-        { label: 1, value: 'LEFT' as any },
-        { label: 2, value: 'RIGHT' as any }
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
       ]);
       await service.calculateAndSave();
       expect(section.obstacles.length).toBe(1);
@@ -551,9 +594,9 @@ describe('ObstacleFormService', () => {
         altitudeType: 'absolute',
         lateralDistanceType: LateralDistanceType.SPAN_AXIS
       });
-      // Point 1: x=3, y=4, z=5 => horizontal=5, oblique=sqrt(50), verticale=5
+      // Point 1: x=3, y=4, z=5 => horizontal=5, oblique=sqrt(50), vertical=5
       service.addPosition({ x: 3, y: 4, z: 5 });
-      // Point 2: x=1, y=1, z=1 => horizontal=sqrt(2), oblique=sqrt(3), verticale=1
+      // Point 2: x=1, y=1, z=1 => horizontal=sqrt(2), oblique=sqrt(3), vertical=1
       service.addPosition({ x: 1, y: 1, z: 1 });
 
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
@@ -564,10 +607,10 @@ describe('ObstacleFormService', () => {
 
       // Min oblique = sqrt(3) ≈ 1.732
       expect(service.results().oblique).toBeCloseTo(Math.sqrt(3), 5);
-      // Min verticale = |1| = 1
-      expect(service.results().verticale).toBeCloseTo(1, 5);
-      // Min horizontale = sqrt(2) ≈ 1.414
-      expect(service.results().horizontale).toBeCloseTo(Math.sqrt(2), 5);
+      // Min vertical = |1| = 1
+      expect(service.results().vertical).toBeCloseTo(1, 5);
+      // Min horizontal = sqrt(2) ≈ 1.414
+      expect(service.results().horizontal).toBeCloseTo(Math.sqrt(2), 5);
     });
 
     it('should skip positions with null coordinates in distance calculations', async () => {
@@ -593,8 +636,8 @@ describe('ObstacleFormService', () => {
       const horizontal = Math.hypot(10, 10);
       const oblique = Math.hypot(horizontal, 10);
       expect(service.results().oblique).toBeCloseTo(oblique, 5);
-      expect(service.results().verticale).toBeCloseTo(10, 5);
-      expect(service.results().horizontale).toBeCloseTo(horizontal, 5);
+      expect(service.results().vertical).toBeCloseTo(10, 5);
+      expect(service.results().horizontal).toBeCloseTo(horizontal, 5);
     });
 
     it('should return null results when all positions have null coordinates', async () => {
@@ -616,8 +659,8 @@ describe('ObstacleFormService', () => {
       await service.calculateAndSave();
 
       expect(service.results().oblique).toBeNull();
-      expect(service.results().verticale).toBeNull();
-      expect(service.results().horizontale).toBeNull();
+      expect(service.results().vertical).toBeNull();
+      expect(service.results().horizontal).toBeNull();
     });
 
     it('should handle negative coordinates correctly in distance calculations', async () => {
@@ -640,8 +683,8 @@ describe('ObstacleFormService', () => {
       await service.calculateAndSave();
 
       expect(service.results().oblique).toBeCloseTo(Math.sqrt(74), 5);
-      expect(service.results().verticale).toBeCloseTo(7, 5);
-      expect(service.results().horizontale).toBeCloseTo(5, 5);
+      expect(service.results().vertical).toBeCloseTo(7, 5);
+      expect(service.results().horizontal).toBeCloseTo(5, 5);
     });
 
     it('should compute zero distances for a point at the origin', async () => {
@@ -663,8 +706,8 @@ describe('ObstacleFormService', () => {
       await service.calculateAndSave();
 
       expect(service.results().oblique).toBe(0);
-      expect(service.results().verticale).toBe(0);
-      expect(service.results().horizontale).toBe(0);
+      expect(service.results().vertical).toBe(0);
+      expect(service.results().horizontal).toBe(0);
     });
   });
 

@@ -13,6 +13,7 @@
     "format": "prettier --write \"**/*.{js,mjs,ts,mts,d.ts,html}\" --cache",
     "prettier-check": "prettier --check \"**/*.{js,mjs,ts,mts,d.ts,html}\"",
     "lint-check": "eslint .",
+    "lint-check-blocked": "eslint . --quiet",
     "type-check": "tsc --noEmit",
     "test": "jest",
     "coverage": "jest --coverage --collectCoverageFrom 'src/**/*.ts'",

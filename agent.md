@@ -20,6 +20,26 @@ Development guide for the AI assistant on the **Stellar** project: an Angular 19
 | Jest | Unit tests |
 | Clean Architecture + DDD | Overall architecture |
 
+
+### TypeScript import aliases — Required
+
+**All TypeScript imports must use the configured path aliases (e.g. `@core/`, `@ui/`, `@services/`, etc.) instead of relative paths.**
+
+- Use aliases as defined in `tsconfig.json` and `tsconfig.app.json` for all internal imports.
+- Never use long relative paths like `../../../../core/services/foo.service` — always prefer `@core/services/foo.service`.
+- This applies to all TypeScript files, including tests, services, components, and feature modules.
+
+```typescript
+// ✅ ALWAYS — use alias
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
+
+// ❌ NEVER — use long relative path
+import { ObstaclesService } from '../../../../core/services/obstacles/obstacles.service';
+```
+
+> **Rationale:** Aliases improve code readability, maintainability, and reduce errors during refactoring.
+
+---
 ### Language policy — English only
 
 **All code, comments, documentation, commit messages, PR descriptions, variable names, class names, function names, TSDoc/JSDoc, and inline comments must be written in English.** This applies to:
@@ -875,7 +895,27 @@ export class FeatureComponent {
 
 ## 12. Unit tests (Jest)
 
+
 ### Mandatory test coverage
+
+#### Deprecated Angular testing modules — Forbidden
+
+**It is strictly forbidden to use deprecated Angular testing modules such as `HttpClientTestingModule` in any test.**
+
+- Always use the latest Angular testing utilities and best practices for mocking HTTP and other dependencies.
+- Update all legacy tests to remove deprecated modules.
+- Refer to the official Angular documentation for up-to-date testing patterns.
+
+```typescript
+// ❌ NEVER — deprecated
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+
+// ✅ ALWAYS — use modern Angular testing utilities
+// e.g., provideHttpClient(), provideMockStore(), etc.
+import { provideHttpClient } from '@angular/common/http';
+```
+
+> **Rationale:** Deprecated modules may be removed in future Angular versions and can cause maintenance and compatibility issues. Always prefer the official, modern testing APIs.
 
 - **Every new feature, service, or component must have corresponding unit tests before merging.**
 - **When modifying existing code, the related tests must be updated or extended** to cover the new/changed behavior.

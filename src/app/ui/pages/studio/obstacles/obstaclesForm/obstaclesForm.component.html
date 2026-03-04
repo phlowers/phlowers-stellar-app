@@ -148,7 +148,9 @@
         </button>
 
         <div class="obstacles-form__points__point__header">
-          <p class="obstacles-form__points__point__header__label">Point {{ $index + 1 }}</p>
+          <p class="obstacles-form__points__point__header__label">
+            <ng-container i18n>Point</ng-container> {{ $index + 1 }}
+          </p>
           <button
             app-btn
             btnStyle="danger"
@@ -300,7 +302,7 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Vertical</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-vertical">
-              {{ obstacleFormService.results().verticale ?? 'N/A' }}
+              {{ obstacleFormService.results().vertical ?? 'N/A' }}
             </span>
             <ng-container i18n>m</ng-container>
           </dd>
@@ -310,7 +312,7 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Horizontal</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-horizontal">
-              {{ obstacleFormService.results().horizontale ?? 'N/A' }}
+              {{ obstacleFormService.results().horizontal ?? 'N/A' }}
             </span>
             <ng-container i18n>m</ng-container>
           </dd>

@@ -25,7 +25,7 @@ import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
 import { ChainsService } from '@services/chains/chains.service';
 import { AttachmentService } from '@services/attachment/attachment.service';
-import { ObstacleTypesService } from '@services/obstacle-types/obstacle.services';
+import { ObstaclesService } from '@src/app/core/services/obstacles/obstacles.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
 
@@ -81,7 +81,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly cablesService: CablesService,
     private readonly chainsService: ChainsService,
     private readonly attachmentService: AttachmentService,
-    private readonly obstacleTypesService: ObstacleTypesService
+    private readonly obstacleTypesService: ObstaclesService
   ) {
     this.form = new FormGroup({
       email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])

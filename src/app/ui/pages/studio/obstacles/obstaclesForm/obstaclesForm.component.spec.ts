@@ -3,9 +3,8 @@ import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { signal } from '@angular/core';
 import { ObstaclesFormComponent } from './obstaclesForm.component';
 import { PlotService } from '../../services/plot.service';
-import { ObstaclesService } from '../obstacles.service';
+import { ObstaclesService } from '@src/app/core/services/obstacles/obstacles.service';
 import { ObstacleFormService } from './obstaclesForm.service';
-import { ObstacleTypesService } from '@services/obstacle-types/obstacle.services';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('lodash', () => ({
@@ -20,8 +19,8 @@ class MockObstacleFormService {
   supportsOptions = signal([{ label: 1, value: 1 }]);
   results = signal({
     oblique: null as number | null,
-    verticale: null as number | null,
-    horizontale: null as number | null
+    vertical: null as number | null,
+    horizontal: null as number | null
   });
 
   returnToSpan = jest.fn();
@@ -60,7 +59,11 @@ describe('ObstaclesFormComponent', () => {
   let fixture: ComponentFixture<ObstaclesFormComponent>;
   let mockPlotService: { getSpanOptions: jest.Mock; isFreePositioningMode: ReturnType<typeof signal> };
   let mockObstacleFormService: MockObstacleFormService;
-  let obstaclesService: ObstaclesService;
+  let obstaclesService: {
+    currentPointIndex: ReturnType<typeof signal<number>>;
+    setCurrentPointIndex: jest.Mock;
+    resetCurrentPointIndex: jest.Mock;
+  };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -74,21 +77,26 @@ describe('ObstaclesFormComponent', () => {
       isFreePositioningMode: signal(false)
     };
     mockObstacleFormService = new MockObstacleFormService();
-    obstaclesService = new ObstaclesService();
+    const indexSignal = signal(0);
+    obstaclesService = {
+      currentPointIndex: indexSignal,
+      setCurrentPointIndex: jest.fn((i: number) => indexSignal.set(i)),
+      resetCurrentPointIndex: jest.fn()
+    };
 
     await TestBed.configureTestingModule({
       imports: [ObstaclesFormComponent],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
-        { provide: ObstaclesService, useValue: obstaclesService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
         {
-          provide: ObstacleTypesService,
+          provide: ObstaclesService,
           useValue: {
+            ...obstaclesService,
             ready: new BehaviorSubject<boolean>(true),
             getObstacleTypes: jest.fn().mockResolvedValue([
-              { obstacle_type: 'ordinary_ground', obstacle_type_name: 'Terrain ordinaire', details: '' },
-              { obstacle_type: 'vegetation', obstacle_type_name: 'Végétation', details: '' }
+              { obstacle_type: 'ordinary_ground', obstacle_type_name: 'Ordinary ground', details: '' },
+              { obstacle_type: 'vegetation', obstacle_type_name: 'Vegetation', details: '' }
             ])
           }
         }
@@ -275,7 +283,7 @@ describe('ObstaclesFormComponent', () => {
     });
 
     it('should display computed results after calculation', () => {
-      mockObstacleFormService.results.set({ oblique: 10.5, verticale: 5.2, horizontale: 8.7 });
+      mockObstacleFormService.results.set({ oblique: 10.5, vertical: 5.2, horizontal: 8.7 });
       fixture.detectChanges();
 
       expect(getByTestId('result-oblique')?.textContent).toContain('10.5');
@@ -284,7 +292,7 @@ describe('ObstaclesFormComponent', () => {
     });
 
     it('should display partial results when some are null', () => {
-      mockObstacleFormService.results.set({ oblique: 7.3, verticale: null, horizontale: 4.1 });
+      mockObstacleFormService.results.set({ oblique: 7.3, vertical: null, horizontal: 4.1 });
       fixture.detectChanges();
 
       expect(getByTestId('result-oblique')?.textContent).toContain('7.3');
@@ -324,32 +332,47 @@ describe('ObstaclesFormComponent', () => {
 
       expect(component.obstacleTypeOptions().length).toBe(2);
       expect(component.obstacleTypeOptions()).toEqual([
-        { label: 'Terrain ordinaire', value: 'ordinary_ground' },
-        { label: 'Végétation', value: 'vegetation' }
+        { label: 'Ordinary ground', value: 'ordinary_ground' },
+        { label: 'Vegetation', value: 'vegetation' }
       ]);
     });
 
     it('should not populate options when service is not ready', async () => {
-      // Verify the loadObstacleTypes subscription filters on ready=true
-      // In the main beforeEach, ready is true and types are loaded.
-      // Here we test the filtering logic by checking the subscription behavior.
-      const mockService = TestBed.inject(ObstacleTypesService) as unknown as {
-        ready: BehaviorSubject<boolean>;
-        getObstacleTypes: jest.Mock;
-      };
-      // Reset options
-      component.obstacleTypeOptions.set([]);
+      // Create a service with ready initially set to false
+      const ready$ = new BehaviorSubject<boolean>(false);
+      const getObstacleTypes = jest.fn();
+      await TestBed.resetTestingModule()
+        .configureTestingModule({
+          imports: [ObstaclesFormComponent],
+          providers: [
+            { provide: PlotService, useValue: mockPlotService },
+            { provide: ObstacleFormService, useValue: mockObstacleFormService },
+            {
+              provide: ObstaclesService,
+              useValue: {
+                ...obstaclesService,
+                ready: ready$,
+                getObstacleTypes
+              }
+            }
+          ]
+        })
+        .compileComponents();
 
-      // Emit false - should NOT trigger getObstacleTypes
-      mockService.getObstacleTypes.mockClear();
-      mockService.ready.next(false);
-      await fixture.whenStable();
-
-      expect(component.obstacleTypeOptions().length).toBe(0);
+      const localFixture = TestBed.createComponent(ObstaclesFormComponent);
+      const localComponent = localFixture.componentInstance;
+      localFixture.detectChanges();
+      // Check that no call is made as long as ready remains false
+      expect(getObstacleTypes).not.toHaveBeenCalled();
+      // Emit false again
+      ready$.next(false);
+      await localFixture.whenStable();
+      expect(getObstacleTypes).not.toHaveBeenCalled();
+      expect(localComponent.obstacleTypeOptions().length).toBe(0);
     });
 
     it('should handle null response from getObstacleTypes gracefully', async () => {
-      const mockService = TestBed.inject(ObstacleTypesService) as unknown as {
+      const mockService = TestBed.inject(ObstaclesService) as unknown as {
         ready: BehaviorSubject<boolean>;
         getObstacleTypes: jest.Mock;
       };
@@ -759,7 +782,7 @@ describe('ObstaclesFormComponent', () => {
     });
 
     it('should display oblique result when set', () => {
-      mockObstacleFormService.results.set({ oblique: 42.5, verticale: null, horizontale: null });
+      mockObstacleFormService.results.set({ oblique: 42.5, vertical: null, horizontal: null });
       fixture.detectChanges();
 
       expect(getByTestId('result-oblique')?.textContent).toContain('42.5');
@@ -768,21 +791,21 @@ describe('ObstaclesFormComponent', () => {
     });
 
     it('should display vertical result when set', () => {
-      mockObstacleFormService.results.set({ oblique: null, verticale: 18.3, horizontale: null });
+      mockObstacleFormService.results.set({ oblique: null, vertical: 18.3, horizontal: null });
       fixture.detectChanges();
 
       expect(getByTestId('result-vertical')?.textContent).toContain('18.3');
     });
 
     it('should display horizontal result when set', () => {
-      mockObstacleFormService.results.set({ oblique: null, verticale: null, horizontale: 9.7 });
+      mockObstacleFormService.results.set({ oblique: null, vertical: null, horizontal: 9.7 });
       fixture.detectChanges();
 
       expect(getByTestId('result-horizontal')?.textContent).toContain('9.7');
     });
 
     it('should display all results when all values are set', () => {
-      mockObstacleFormService.results.set({ oblique: 1, verticale: 2, horizontale: 3 });
+      mockObstacleFormService.results.set({ oblique: 1, vertical: 2, horizontal: 3 });
       fixture.detectChanges();
 
       expect(getByTestId('result-oblique')?.textContent).toContain('1');

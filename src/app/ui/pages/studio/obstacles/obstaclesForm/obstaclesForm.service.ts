@@ -5,7 +5,7 @@ import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@co
 import { SectionService } from '@core/services/sections/section.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
-import { ObstaclesService } from '../obstacles.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from './constants';
 import { ObstacleFormGroupData } from './interfaces';
 import { debounce } from 'lodash';
@@ -116,12 +116,12 @@ export class ObstacleFormService {
 
   readonly results = signal<{
     oblique: number | null;
-    verticale: number | null;
-    horizontale: number | null;
+    vertical: number | null;
+    horizontal: number | null;
   }>({
     oblique: null,
-    verticale: null,
-    horizontale: null
+    vertical: null,
+    horizontal: null
   });
 
   readonly formValue = toSignal(this.form.valueChanges, {
@@ -187,7 +187,7 @@ export class ObstacleFormService {
   }
 
   private resetResults() {
-    this.results.set({ oblique: null, verticale: null, horizontale: null });
+    this.results.set({ oblique: null, vertical: null, horizontal: null });
   }
 
   loadObstacle(uuid: string): void {
@@ -265,9 +265,9 @@ export class ObstacleFormService {
       return;
     }
     //TODO: Implement save logic
-    // const obstacle = this.buildObstacleFromForm();
-    // this.upsertObstacleInSection(obstacle);
-    // await this.saveSection();
+    const obstacle = this.buildObstacleFromForm();
+    this.upsertObstacleInSection(obstacle);
+    await this.saveSection();
   }
 
   async calculateAndSave(): Promise<void> {
@@ -280,8 +280,8 @@ export class ObstacleFormService {
     // TODO: Implement calculation logic
     // For now, set mock results
     let minOblique = Number.POSITIVE_INFINITY;
-    let minVerticale = Number.POSITIVE_INFINITY;
-    let minHorizontale = Number.POSITIVE_INFINITY;
+    let minVertical = Number.POSITIVE_INFINITY;
+    let minHorizontal = Number.POSITIVE_INFINITY;
     for (const position of obstacle.positions) {
       const { x, y, z } = position;
       if (x === null || y === null || z === null) {
@@ -293,17 +293,17 @@ export class ObstacleFormService {
       if (oblique < minOblique) {
         minOblique = oblique;
       }
-      if (absZ < minVerticale) {
-        minVerticale = absZ;
+      if (absZ < minVertical) {
+        minVertical = absZ;
       }
-      if (horizontal < minHorizontale) {
-        minHorizontale = horizontal;
+      if (horizontal < minHorizontal) {
+        minHorizontal = horizontal;
       }
     }
     this.results.set({
       oblique: Number.isFinite(minOblique) ? minOblique : null,
-      verticale: Number.isFinite(minVerticale) ? minVerticale : null,
-      horizontale: Number.isFinite(minHorizontale) ? minHorizontale : null
+      vertical: Number.isFinite(minVertical) ? minVertical : null,
+      horizontal: Number.isFinite(minHorizontal) ? minHorizontal : null
     });
   }
 

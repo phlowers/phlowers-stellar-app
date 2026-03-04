@@ -5,9 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
-import { ObstacleTypesService } from './obstacle.services';
+import { ObstaclesService } from './obstacles.service';
 import { StorageService } from '@services/storage/storage.service';
 import { CatalogObstacleTypeEntity } from '@core/infrastructure/database';
 import { ObstacleTypeCsvDto } from '@core/infrastructure/dto';
@@ -30,8 +29,8 @@ interface MockDb {
   catObstacleTypes: MockTable;
 }
 
-describe('ObstacleTypesService', () => {
-  let service: ObstacleTypesService;
+describe('ObstaclesService', () => {
+  let service: ObstaclesService;
   let storageService: StorageService;
   let mockDb: MockDb;
   let mockObstacleTypesTable: MockTable;
@@ -61,11 +60,10 @@ describe('ObstacleTypesService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [ObstacleTypesService, { provide: StorageService, useValue: storageServiceSpy }]
+      providers: [ObstaclesService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
-    service = TestBed.inject(ObstacleTypesService);
+    service = TestBed.inject(ObstaclesService);
     storageService = TestBed.inject(StorageService);
   });
 
@@ -90,13 +88,13 @@ describe('ObstacleTypesService', () => {
       const mockObstacleTypes: CatalogObstacleTypeEntity[] = [
         {
           obstacle_type: 'ordinary_ground',
-          obstacle_type_name: 'Terrain ordinaire',
-          details: 'Terrain ordinaire (non cultivé, présence de personnes exceptionnelles)'
+          obstacle_type_name: 'Ordinary ground',
+          details: 'Ordinary ground (uncultivated, occasional presence of people)'
         },
         {
           obstacle_type: 'vegetation',
-          obstacle_type_name: 'Végétation',
-          details: 'Végétation (il faut en plus intégrer la pousse des arbres)'
+          obstacle_type_name: 'Vegetation',
+          details: 'Vegetation (must also account for tree growth)'
         }
       ];
       mockObstacleTypesTable.toArray.mockResolvedValue(mockObstacleTypes);
@@ -117,8 +115,8 @@ describe('ObstacleTypesService', () => {
     it('should return a specific obstacle type by key', async () => {
       const mockObstacleType: CatalogObstacleTypeEntity = {
         obstacle_type: 'vegetation',
-        obstacle_type_name: 'Végétation',
-        details: 'Végétation (il faut en plus intégrer la pousse des arbres)'
+        obstacle_type_name: 'Vegetation',
+        details: 'Vegetation (must also account for tree growth)'
       };
 
       mockObstacleTypesTable.where = jest.fn().mockReturnValue({
@@ -134,32 +132,24 @@ describe('ObstacleTypesService', () => {
   });
 
   describe('importFromFile', () => {
-    let httpTestingController: HttpTestingController;
-
-    beforeEach(() => {
-      httpTestingController = TestBed.inject(HttpTestingController);
-    });
-
-    afterEach(() => {
-      httpTestingController.verify();
-    });
+    // Modern HTTP mocking: use jest.fn() and spy on fetch or HttpClient if needed
 
     it('should import obstacle types from CSV file successfully', async () => {
       const mockCsvData: ObstacleTypeCsvDto[] = [
         {
           obstacle_type: 'ordinary_ground',
-          obstacle_type_name: 'Terrain ordinaire',
-          details: 'Terrain ordinaire (non cultivé, présence de personnes exceptionnelles)'
+          obstacle_type_name: 'Ordinary ground',
+          details: 'Ordinary ground (uncultivated, occasional presence of people)'
         },
         {
           obstacle_type: 'vegetation',
-          obstacle_type_name: 'Végétation',
-          details: 'Végétation (il faut en plus intégrer la pousse des arbres)'
+          obstacle_type_name: 'Vegetation',
+          details: 'Vegetation (must also account for tree growth)'
         }
       ];
 
       const mockCsvContent =
-        'obstacle_type;obstacle_type_name;details\nordinary_ground;Terrain ordinaire;Terrain ordinaire (non cultivé, présence de personnes exceptionnelles)\nvegetation;Végétation;Végétation (il faut en plus intégrer la pousse des arbres)';
+        'obstacle_type;obstacle_type_name;details\nordinary_ground;Ordinary ground;Ordinary ground (uncultivated, occasional presence of people)\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
       // Mock Papa Parse to call complete callback
       (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
@@ -182,29 +172,28 @@ describe('ObstacleTypesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
+      // Mock fetch for CSV file
+      const originalFetch = global.fetch;
+      global.fetch = jest.fn().mockResolvedValue({
+        text: () => Promise.resolve(mockCsvContent),
+        ok: true
+      }) as any;
 
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await service.importFromFile();
 
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      global.fetch = originalFetch;
 
       expect(mockObstacleTypesTable.clear).toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith([
         {
           obstacle_type: 'ordinary_ground',
-          obstacle_type_name: 'Terrain ordinaire',
-          details: 'Terrain ordinaire (non cultivé, présence de personnes exceptionnelles)'
+          obstacle_type_name: 'Ordinary ground',
+          details: 'Ordinary ground (uncultivated, occasional presence of people)'
         },
         {
           obstacle_type: 'vegetation',
-          obstacle_type_name: 'Végétation',
-          details: 'Végétation (il faut en plus intégrer la pousse des arbres)'
+          obstacle_type_name: 'Vegetation',
+          details: 'Vegetation (must also account for tree growth)'
         }
       ]);
     });
@@ -233,17 +222,15 @@ describe('ObstacleTypesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
+      const originalFetch = global.fetch;
+      global.fetch = jest.fn().mockResolvedValue({
+        text: () => Promise.resolve(mockCsvContent),
+        ok: true
+      }) as any;
 
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await service.importFromFile();
 
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      global.fetch = originalFetch;
 
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
@@ -258,13 +245,13 @@ describe('ObstacleTypesService', () => {
         },
         {
           obstacle_type: 'vegetation',
-          obstacle_type_name: 'Végétation',
-          details: 'Végétation (il faut en plus intégrer la pousse des arbres)'
+          obstacle_type_name: 'Vegetation',
+          details: 'Vegetation (must also account for tree growth)'
         }
       ];
 
       const mockCsvContent =
-        'obstacle_type;obstacle_type_name;details\n;Invalid;Should be filtered out\nvegetation;Végétation;Végétation (il faut en plus intégrer la pousse des arbres)';
+        'obstacle_type;obstacle_type_name;details\n;Invalid;Should be filtered out\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
       (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
@@ -286,24 +273,22 @@ describe('ObstacleTypesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
+      const originalFetch = global.fetch;
+      global.fetch = jest.fn().mockResolvedValue({
+        text: () => Promise.resolve(mockCsvContent),
+        ok: true
+      }) as any;
 
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await service.importFromFile();
 
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      global.fetch = originalFetch;
 
       // Should only add the entry with valid obstacle_type
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith([
         {
           obstacle_type: 'vegetation',
-          obstacle_type_name: 'Végétation',
-          details: 'Végétation (il faut en plus intégrer la pousse des arbres)'
+          obstacle_type_name: 'Vegetation',
+          details: 'Vegetation (must also account for tree growth)'
         }
       ]);
     });
@@ -330,16 +315,15 @@ describe('ObstacleTypesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
+      const originalFetch = global.fetch;
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        text: () => Promise.resolve('')
+      }) as any;
 
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await service.importFromFile();
 
-      // Simulate HTTP error
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
-      req.error(new ProgressEvent('error'));
-
-      await importPromise;
+      global.fetch = originalFetch;
 
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
@@ -347,31 +331,31 @@ describe('ObstacleTypesService', () => {
 
     it('should import all 9 obstacle types from full CSV data', async () => {
       const fullCsvData: ObstacleTypeCsvDto[] = [
-        { obstacle_type: 'ordinary_ground', obstacle_type_name: 'Terrain ordinaire', details: 'Terrain ordinaire' },
-        { obstacle_type: 'agricultural_land', obstacle_type_name: 'Terrain agricole', details: 'Terrain agricole' },
+        { obstacle_type: 'ordinary_ground', obstacle_type_name: 'Ordinary ground', details: 'Ordinary ground' },
+        { obstacle_type: 'agricultural_land', obstacle_type_name: 'Agricultural land', details: 'Agricultural land' },
         {
           obstacle_type: 'high_clearance_equipment_area',
-          obstacle_type_name: 'Aire engin gde hauteur',
-          details: 'Aire évolution'
+          obstacle_type_name: 'High clearance equipment area',
+          details: 'Area for operation of agricultural or industrial equipment of large height H (>5m)'
         },
-        { obstacle_type: 'traffic_lane', obstacle_type_name: 'Voie de circulation', details: 'Voie de circulation' },
+        { obstacle_type: 'traffic_lane', obstacle_type_name: 'Traffic lane', details: 'Traffic lane' },
         {
           obstacle_type: 'high_clearance_vehicle_route',
-          obstacle_type_name: 'Itinéraire véhicules gde hauteur',
-          details: 'Itinéraire'
+          obstacle_type_name: 'High clearance vehicle route',
+          details: 'Route for vehicles of large height H (>5m)'
         },
-        { obstacle_type: 'silo_proximity', obstacle_type_name: 'Proximité silo', details: 'Proximité silo' },
+        { obstacle_type: 'silo_proximity', obstacle_type_name: 'Silo proximity', details: 'Proximity to silo' },
         {
           obstacle_type: 'accessible_building',
-          obstacle_type_name: 'Bâtiment accessible',
-          details: 'Bâtiment accessible'
+          obstacle_type_name: 'Accessible building',
+          details: 'Building accessible to people and protruding parts'
         },
         {
           obstacle_type: 'non_accessible_structure',
-          obstacle_type_name: 'Construction non accessible',
-          details: 'Construction au sol'
+          obstacle_type_name: 'Non-accessible structure',
+          details: 'Ground structures and protruding parts of buildings not normally accessible to people'
         },
-        { obstacle_type: 'vegetation', obstacle_type_name: 'Végétation', details: 'Végétation' }
+        { obstacle_type: 'vegetation', obstacle_type_name: 'Vegetation', details: 'Vegetation' }
       ];
 
       (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
@@ -394,13 +378,15 @@ describe('ObstacleTypesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      const originalFetch = global.fetch;
+      global.fetch = jest.fn().mockResolvedValue({
+        text: () => Promise.resolve('csv-content'),
+        ok: true
+      }) as any;
 
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
-      req.flush('csv-content');
+      await service.importFromFile();
 
-      await importPromise;
+      global.fetch = originalFetch;
 
       expect(mockObstacleTypesTable.clear).toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith(
@@ -416,7 +402,7 @@ describe('ObstacleTypesService', () => {
 
     it('should correctly parse CSV with semicolon delimiter', async () => {
       const csvContent =
-        'obstacle_type;obstacle_type_name;details\nvegetation;Végétation;Végétation (il faut en plus intégrer la pousse des arbres)';
+        'obstacle_type;obstacle_type_name;details\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
       (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         expect(options.delimiter).toBe(';');
@@ -428,8 +414,8 @@ describe('ObstacleTypesService', () => {
               data: [
                 {
                   obstacle_type: 'vegetation',
-                  obstacle_type_name: 'Végétation',
-                  details: 'Végétation (il faut en plus intégrer la pousse des arbres)'
+                  obstacle_type_name: 'Vegetation',
+                  details: 'Vegetation (must also account for tree growth)'
                 }
               ],
               errors: [],
@@ -447,13 +433,15 @@ describe('ObstacleTypesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      const originalFetch = global.fetch;
+      global.fetch = jest.fn().mockResolvedValue({
+        text: () => Promise.resolve(csvContent),
+        ok: true
+      }) as any;
 
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
-      req.flush(csvContent);
+      await service.importFromFile();
 
-      await importPromise;
+      global.fetch = originalFetch;
 
       expect(Papa.parse).toHaveBeenCalledWith(
         csvContent,
@@ -471,8 +459,8 @@ describe('ObstacleTypesService', () => {
       const mockCsvData: ObstacleTypeCsvDto[] = [
         {
           obstacle_type: 'vegetation',
-          obstacle_type_name: 'Végétation',
-          details: 'Végétation'
+          obstacle_type_name: 'Vegetation',
+          details: 'Vegetation'
         }
       ];
 
@@ -496,14 +484,16 @@ describe('ObstacleTypesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
-      req.flush('csv-content');
+      const originalFetch = global.fetch;
+      global.fetch = jest.fn().mockResolvedValue({
+        text: () => Promise.resolve('csv-content'),
+        ok: true
+      }) as any;
 
       // The service uses optional chaining (db?.catObstacleTypes), so it resolves without throwing
-      await importPromise;
+      await service.importFromFile();
+
+      global.fetch = originalFetch;
 
       // bulkAdd should NOT have been called since db is undefined
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();

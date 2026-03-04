@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, firstValueFrom, of } from 'rxjs';
 import { CatalogObstacleTypeEntity } from '@core/infrastructure/database';
@@ -32,12 +32,15 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
-export class ObstacleTypesService {
+export class ObstaclesService {
   /**
    * BehaviorSubject indicating whether the service is ready to use.
    * Becomes true when the storage service is initialized.
    */
   public readonly ready = new BehaviorSubject<boolean>(false);
+
+  /** Index of the currently selected obstacle point. */
+  currentPointIndex = signal<number>(0);
 
   private readonly storageService = inject(StorageService);
   private readonly http = inject(HttpClient);
@@ -46,6 +49,24 @@ export class ObstacleTypesService {
     this.storageService.ready$.subscribe((value) => {
       this.ready.next(value);
     });
+  }
+
+  /** Sets the current obstacle point index. */
+  setCurrentPointIndex(index: number): void {
+    this.currentPointIndex.set(index);
+  }
+
+  /** Resets the current obstacle point index to zero. */
+  resetCurrentPointIndex(): void {
+    this.currentPointIndex.set(0);
+  }
+
+  /** Retrieve all obstacle types from the database.
+   *
+   * @returns Promise resolving to an array of obstacle type entities, or undefined if not available
+   */
+  async getObstacleTypes(): Promise<CatalogObstacleTypeEntity[] | undefined> {
+    return this.storageService.db?.catObstacleTypes?.toArray();
   }
 
   /**
@@ -146,7 +167,6 @@ export class ObstacleTypesService {
    */
   private async storeInDatabase(entities: CatalogObstacleTypeEntity[]): Promise<void> {
     await this.storageService.db?.catObstacleTypes.clear();
-    console.log('adding obstacle types data', entities.length);
     await this.storageService.db?.catObstacleTypes.bulkAdd(entities);
   }
 }
