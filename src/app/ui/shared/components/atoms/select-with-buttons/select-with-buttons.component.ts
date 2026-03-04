@@ -32,8 +32,8 @@ export class SelectWithButtonsComponent<T extends object = Record<string, unknow
   /** Whether to show a clear button to deselect. */
   showClear = input<boolean>(false);
 
-  /** Emitted when an option is selected. */
-  selectOption = output<T>();
+  /** Emitted when an option is selected, or undefined when cleared. */
+  selectOption = output<T | undefined>();
   /** Emitted when the view action is triggered for an option. */
   viewOption = output<T>();
   /** Emitted when the edit action is triggered for an option. */
@@ -74,7 +74,7 @@ export class SelectWithButtonsComponent<T extends object = Record<string, unknow
 
   clearSelectedOptionValue() {
     this.selectedOptionValue.set(undefined);
-    this.selectOption.emit(undefined as unknown as T);
+    this.selectOption.emit(undefined);
     if (this.selectComponent) {
       this.selectComponent.writeValue(null);
       this.selectComponent.updateModel(null, null);

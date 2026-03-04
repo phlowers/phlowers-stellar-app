@@ -221,9 +221,12 @@ export class SectionsTabComponent {
     initialCondition,
     section
   }: {
-    initialCondition: InitialCondition;
+    initialCondition: InitialCondition | undefined;
     section: Section;
   }) => {
+    if (!initialCondition) {
+      return;
+    }
     this.setInitialCondition.emit({
       section: section,
       initialCondition: initialCondition
@@ -243,8 +246,11 @@ export class SectionsTabComponent {
     );
   }
 
-  selectChargeCase(charge: { label: string; value: string }, section: Section) {
-    this.chargesService.setSelectedCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
+  selectChargeCase(charge: { label: string; value: string } | undefined, section: Section) {
+    if (!charge) {
+      return;
+    }
+    this.chargesService.setSelectedCharge(this.study()?.uuid ?? '', section.uuid, charge.value ?? '');
   }
 
   deleteChargeCase(charge: { label: string; value: string }, section: Section) {
