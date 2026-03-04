@@ -6,11 +6,11 @@
  */
 export const filterElements = <Element extends Record<string, unknown>>(
   elements: Element[],
-  filters: Element
+  filters: Partial<Element>
 ): Element[] => {
   const filteredElements = elements.filter((element) => {
     let found = true;
-    Object.entries(filters).forEach(([key]) => {
+    Object.entries(filters as Record<string, unknown>).forEach(([key]) => {
       const checkedStudyValue = element[key] ?? '';
       const enteredValue = filters[key];
       if (typeof enteredValue === 'boolean') {

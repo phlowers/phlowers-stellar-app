@@ -3,6 +3,7 @@ import { filterElements } from './autocomplete-filters.service';
 describe('filterElements', () => {
   // Test data types
   interface TestElement {
+    [key: string]: unknown;
     id: number;
     name: string;
     category: string;
@@ -225,6 +226,7 @@ describe('filterElements', () => {
   describe('type safety', () => {
     it('should work with different element types', () => {
       interface User {
+        [key: string]: unknown;
         id: string;
         email: string;
         role: string;

@@ -167,8 +167,10 @@ export class FreePositioningComponent implements OnDestroy {
       view: '2d'
     });
     const supports = this.plotService.section()?.supports ?? [];
-    await this.createPlot(litData.result.current, startSupport, 'face', supports);
-    await this.createPlot(litData.result.current, startSupport, 'profile', supports);
+    if (litData.result) {
+      await this.createPlot(litData.result.current, startSupport, 'face', supports);
+      await this.createPlot(litData.result.current, startSupport, 'profile', supports);
+    }
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
 
