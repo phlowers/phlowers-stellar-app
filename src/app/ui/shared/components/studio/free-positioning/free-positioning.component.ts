@@ -293,7 +293,10 @@ export class FreePositioningComponent implements OnDestroy {
     const x = evt.layerX - layout.margin.l;
     const y = evt.layerY - layout.margin.t;
     // TODO: try to find another way to detect if the click not on the background
-    if (!(evt.target as any)?.className?.baseVal?.includes('drag') && (evt.target as any).tagName !== 'CANVAS') {
+    if (
+      !(evt.target as SVGElement)?.className?.baseVal?.includes('drag') &&
+      (evt.target as Element).tagName !== 'CANVAS'
+    ) {
       return;
     }
 

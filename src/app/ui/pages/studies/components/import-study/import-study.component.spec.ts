@@ -1658,8 +1658,8 @@ describe('ImportStudyComponent', () => {
       });
     });
 
-    const createMockStudyData = (uuid?: string): any => {
-      const studyData: any = {
+    const createMockStudyData = (uuid?: string): Partial<Study> => {
+      const studyData: Record<string, unknown> = {
         title: 'Test Study',
         description: 'Test Description',
         author_email: 'test@example.com',
@@ -1684,7 +1684,7 @@ describe('ImportStudyComponent', () => {
       return studyData;
     };
 
-    const encodeStudyToBase64 = (studyData: any): string => {
+    const encodeStudyToBase64 = (studyData: Partial<Study>): string => {
       const jsonString = JSON.stringify(studyData);
       return btoa(jsonString);
     };
@@ -2023,7 +2023,7 @@ describe('ImportStudyComponent', () => {
           }
         ]
       };
-      const base64Content = encodeStudyToBase64(studyData);
+      const base64Content = encodeStudyToBase64(studyData as unknown as Partial<Study>);
       const newUuid = 'new-study-uuid';
       const createdStudy = {
         ...studyData,
@@ -2053,7 +2053,9 @@ describe('ImportStudyComponent', () => {
 
         setTimeout(() => {
           expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as any;
+          const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as unknown as {
+            sections: { supports: unknown[] }[];
+          };
           expect(createStudyCall.sections).toBeDefined();
           expect(createStudyCall.sections.length).toBe(1);
           expect(createStudyCall.sections[0].supports.length).toBe(2);

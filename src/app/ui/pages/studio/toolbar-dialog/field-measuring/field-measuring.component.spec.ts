@@ -13,6 +13,7 @@ import { StudiesService } from '@services/studies/studies.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { BehaviorSubject } from 'rxjs';
 import { Section } from '@core/domain';
+import { FieldMeasure } from './types';
 import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
 
@@ -465,7 +466,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('onFieldChange edge cases', () => {
     it('should return early when measureData is falsy', () => {
-      component.measureData.set(null as any);
+      component.measureData.set(null as unknown as FieldMeasure);
 
       component.onFieldChange('name', 'New Name');
 
@@ -490,7 +491,7 @@ describe('FieldMeasuringComponent', () => {
         selected_field_measure_uuid: 'new-uuid'
       };
 
-      plotService.section = signal(mockSection as any);
+      plotService.section = signal(mockSection as unknown as Section);
       component.measureData.set(newMeasure);
 
       const modifySpy = jest.spyOn(plotService, 'modifySection');
@@ -508,8 +509,8 @@ describe('FieldMeasuringComponent', () => {
         field_measures: []
       };
 
-      plotService.section = signal(mockSection as any);
-      component.measureData.set(null as any);
+      plotService.section = signal(mockSection as unknown as Section);
+      component.measureData.set(null as unknown as FieldMeasure);
 
       const modifySpy = jest.spyOn(plotService, 'modifySection');
 

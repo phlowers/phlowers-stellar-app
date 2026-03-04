@@ -100,7 +100,7 @@ export class SectionsTabComponent {
     };
   }
 
-  selectSection(section: Section, event: any) {
+  selectSection(section: Section, event: { checked?: boolean }) {
     this.selectedSection.set(event.checked ? section.uuid : '');
   }
 

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioTopToolbarComponent } from './top-toolbar.component';
 import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
-import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { PlotService, SelectedDisplayOptions } from '@ui/pages/studio/services/plot.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -12,6 +12,7 @@ import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { Section } from '@core/domain';
 import { signal } from '@angular/core';
 
 describe('StudioTopToolbarComponent', () => {
@@ -33,12 +34,12 @@ describe('StudioTopToolbarComponent', () => {
       plotOptionsChange: jest.fn(),
       selectedDisplayOptions: signal({ loads: false }),
       section: signal(null)
-    } as any;
+    } as unknown as jest.Mocked<PlotService>;
 
     // Mock ToolbarDialogService
     mockToolbarDialogService = {
       openTool: jest.fn()
-    } as any;
+    } as unknown as jest.Mocked<ToolbarDialogService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -110,7 +111,7 @@ describe('StudioTopToolbarComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call loadToolsItemsState on init', () => {
-      const loadSpy = jest.spyOn(component as any, 'loadToolsItemsState');
+      const loadSpy = jest.spyOn(component as unknown as { loadToolsItemsState: () => void }, 'loadToolsItemsState');
       component.ngOnInit();
       expect(loadSpy).toHaveBeenCalled();
     });
@@ -129,7 +130,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should disable Loads table when section has empty charges', () => {
-      mockPlotService.section.set({ charges: [] } as any);
+      mockPlotService.section.set({ charges: [] } as unknown as Section);
       const tables = component.tablesDropdown();
       expect(tables[0].disabled).toBe(true);
     });
@@ -137,7 +138,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should enable Loads table when section has charges', () => {
       mockPlotService.section.set({
         charges: [{ uuid: '1', name: 'Charge 1' }]
-      } as any);
+      } as unknown as Section);
       const tables = component.tablesDropdown();
       expect(tables[0].disabled).toBe(false);
     });
@@ -250,7 +251,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should call saveToolsItemsState', () => {
-      const saveSpy = jest.spyOn(component as any, 'saveToolsItemsState');
+      const saveSpy = jest.spyOn(component as unknown as { saveToolsItemsState: () => void }, 'saveToolsItemsState');
       component.updateCheckedCount();
       expect(saveSpy).toHaveBeenCalled();
     });
@@ -510,7 +511,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should handle empty display options', () => {
-      mockPlotService.selectedDisplayOptions.set({} as any);
+      mockPlotService.selectedDisplayOptions.set({} as SelectedDisplayOptions);
 
       const options = component.selectedDisplayOptions();
 
@@ -545,7 +546,7 @@ describe('StudioTopToolbarComponent', () => {
       mockPlotService.selectedDisplayOptions.set({
         loads: true,
         mesh: false
-      } as any);
+      } as unknown as SelectedDisplayOptions);
 
       const values = component.selectedDisplayValues();
 
@@ -633,7 +634,7 @@ describe('StudioTopToolbarComponent', () => {
 
       const saved = localStorage.getItem('toolsItemsState');
       const parsed = JSON.parse(saved!);
-      const checkedItems = parsed.filter((item: any) => item.checked);
+      const checkedItems = parsed.filter((item: { checked: boolean }) => item.checked);
 
       expect(checkedItems).toHaveLength(5);
     });

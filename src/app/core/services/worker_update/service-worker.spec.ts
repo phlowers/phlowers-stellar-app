@@ -32,21 +32,21 @@ const mockSelf = {
 global.caches = {
   ...mockCaches,
   match: jest.fn()
-} as any;
-global.fetch = mockFetch as any;
+} as unknown as CacheStorage;
+global.fetch = mockFetch as unknown as typeof fetch;
 global.Response = class Response {
-  constructor(body?: any, init?: any) {
+  constructor(body?: string, init?: Record<string, unknown>) {
     const response = {
       json: jest.fn().mockResolvedValue(body),
       text: jest.fn().mockResolvedValue(body),
       ...init
     };
-    return response as any;
+    return response as unknown as Response;
   }
   static error() {
     return new Response('Error', { status: 500 });
   }
-} as any;
+} as unknown as typeof Response;
 global.console = {
   ...console,
   log: jest.fn(),
@@ -63,7 +63,7 @@ describe('Service Worker Functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCaches.open.mockResolvedValue(mockCache);
-    (global.caches as any).match.mockResolvedValue(null);
+    (global.caches as unknown as typeof mockCaches).match.mockResolvedValue(null);
   });
 
   describe('checkIfAppInstalled', () => {
@@ -218,7 +218,10 @@ describe('Service Worker Functions', () => {
   });
 
   describe('handleFetch', () => {
-    let mockEvent: any;
+    let mockEvent: {
+      request: { url: string; clone: jest.Mock };
+      respondWith: jest.Mock;
+    };
 
     beforeEach(() => {
       mockEvent = {
@@ -233,18 +236,20 @@ describe('Service Worker Functions', () => {
     it('should handle home page requests', async () => {
       mockEvent.request.url = 'https://example.com/';
       const mockResponse = new Response('<html>Home</html>');
-      (global.caches as any).match.mockResolvedValue(mockResponse);
+      (global.caches as unknown as typeof mockCaches).match.mockResolvedValue(mockResponse);
 
-      await handleFetch(mockEvent);
+      await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect((global.caches as any).match).toHaveBeenCalledWith('https://example.com/index.html');
+      expect((global.caches as unknown as typeof mockCaches).match).toHaveBeenCalledWith(
+        'https://example.com/index.html'
+      );
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 
     it('should handle backend requests', async () => {
       mockEvent.request.url = 'https://example.com/celesteback/api/data';
 
-      await handleFetch(mockEvent);
+      await handleFetch(mockEvent as unknown as FetchEvent);
 
       expect(mockEvent.respondWith).toHaveBeenCalledWith(expect.any(Promise));
     });
@@ -252,22 +257,22 @@ describe('Service Worker Functions', () => {
     it('should handle other requests with cache hit', async () => {
       mockEvent.request.url = 'https://example.com/app.js';
       const mockResponse = new Response('console.log("test");');
-      (global.caches as any).match.mockResolvedValue(mockResponse);
+      (global.caches as unknown as typeof mockCaches).match.mockResolvedValue(mockResponse);
 
-      await handleFetch(mockEvent);
+      await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect((global.caches as any).match).toHaveBeenCalledWith(mockEvent.request);
+      expect((global.caches as unknown as typeof mockCaches).match).toHaveBeenCalledWith(mockEvent.request);
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 
     it('should handle other requests with cache miss', async () => {
       mockEvent.request.url = 'https://example.com/app.js';
-      (global.caches as any).match.mockResolvedValue(null);
+      (global.caches as unknown as typeof mockCaches).match.mockResolvedValue(null);
       mockFetch.mockResolvedValue(new Response('console.log("test");'));
       const clonedRequest = { url: 'https://example.com/app.js' };
       mockEvent.request.clone.mockReturnValue(clonedRequest);
 
-      await handleFetch(mockEvent);
+      await handleFetch(mockEvent as unknown as FetchEvent);
 
       expect(mockFetch).toHaveBeenCalledWith(
         clonedRequest,
@@ -281,17 +286,20 @@ describe('Service Worker Functions', () => {
 
     it('should handle fetch errors gracefully', async () => {
       mockEvent.request.url = 'https://example.com/app.js';
-      (global.caches as any).match.mockResolvedValue(null);
+      (global.caches as unknown as typeof mockCaches).match.mockResolvedValue(null);
       mockFetch.mockRejectedValue(new Error('Network error'));
 
-      await handleFetch(mockEvent);
+      await handleFetch(mockEvent as unknown as FetchEvent);
 
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
   });
 
   describe('handleMessage', () => {
-    let mockEvent: any;
+    let mockEvent: {
+      data: { type: string };
+      source: { postMessage: jest.Mock } | null;
+    };
 
     beforeEach(() => {
       mockEvent = {
@@ -307,9 +315,9 @@ describe('Service Worker Functions', () => {
       });
       mockCache.keys.mockResolvedValue([]);
 
-      await handleMessage(mockEvent);
+      await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
-      expect(mockEvent.source.postMessage).toHaveBeenCalledWith({
+      expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
         message: 'update_complete',
         latest_version: '1.1.0'
       });
@@ -324,9 +332,9 @@ describe('Service Worker Functions', () => {
       mockClients.matchAll.mockResolvedValue([]);
       mockCache.addAll.mockResolvedValue(undefined);
 
-      await handleMessage(mockEvent);
+      await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
-      expect(mockEvent.source.postMessage).toHaveBeenCalledWith({
+      expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
         message: 'install_complete',
         latest_version: '1.0.0'
       });
@@ -335,18 +343,18 @@ describe('Service Worker Functions', () => {
     it('should handle unknown message type', async () => {
       mockEvent.data.type = 'unknown';
 
-      await handleMessage(mockEvent);
+      await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
-      expect(mockEvent.source.postMessage).not.toHaveBeenCalled();
+      expect(mockEvent.source!.postMessage).not.toHaveBeenCalled();
     });
 
     it('should handle errors and send error message', async () => {
       mockEvent.data.type = 'update';
       mockFetch.mockRejectedValue(new Error('Update failed'));
 
-      await handleMessage(mockEvent);
+      await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
-      expect(mockEvent.source.postMessage).toHaveBeenCalledWith({
+      expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
         message: 'error',
         error: 'Update failed'
       });
@@ -361,7 +369,7 @@ describe('Service Worker Functions', () => {
       });
       mockCache.keys.mockResolvedValue([]);
 
-      await handleMessage(mockEvent);
+      await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
       // Should not throw and should not call postMessage when source is null
       expect(mockEvent.source).toBeNull();

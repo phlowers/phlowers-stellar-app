@@ -20,7 +20,7 @@ jest.mock('@core/infrastructure/database', () => {
 
 describe('StorageService', () => {
   let service: StorageService;
-  let originalNavigator: any;
+  let originalNavigator: Navigator;
 
   beforeEach(() => {
     // Save original navigator
@@ -50,7 +50,7 @@ describe('StorageService', () => {
   });
 
   it('should create database and set ready to true', async () => {
-    const readySpy = jest.spyOn<any, any>(service['_ready'], 'next');
+    const readySpy = jest.spyOn(service['_ready'], 'next');
 
     await service.createDatabase();
 
@@ -114,7 +114,7 @@ describe('StorageService', () => {
     // Mock navigator without storage
     global.navigator = {
       ...originalNavigator,
-      storage: null
+      storage: null as unknown as StorageManager
     };
 
     // This should not throw an error

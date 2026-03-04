@@ -17,7 +17,7 @@ class MockAttachmentSetModalComponent {
   @Input() isOpen = false;
   @Input() support: Support | undefined = undefined;
   @Output() isOpenChange = new EventEmitter<boolean>();
-  @Output() validateForm = new EventEmitter<any>();
+  @Output() validateForm = new EventEmitter<Support>();
 }
 
 // Mock services

@@ -236,7 +236,10 @@ describe('HomeComponent', () => {
       const originalText = component.homeText().newsTitle;
 
       // Access private method through component instance
-      (component as any).updateText('newsTitle', 'Updated Title');
+      (component as unknown as { updateText: (key: string, value: string) => void }).updateText(
+        'newsTitle',
+        'Updated Title'
+      );
 
       expect(component.homeText().newsTitle).toBe('Updated Title');
       expect(component.homeText().newsTitle).not.toBe(originalText);
@@ -246,7 +249,10 @@ describe('HomeComponent', () => {
       const originalNewsText = component.homeText().newsText;
       const originalUpdateTitle = component.homeText().updateTitle;
 
-      (component as any).updateText('serverTitle', 'New Server Title');
+      (component as unknown as { updateText: (key: string, value: string) => void }).updateText(
+        'serverTitle',
+        'New Server Title'
+      );
 
       expect(component.homeText().newsText).toBe(originalNewsText);
       expect(component.homeText().updateTitle).toBe(originalUpdateTitle);

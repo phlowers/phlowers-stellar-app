@@ -56,7 +56,7 @@ export class WorkerPythonService {
     runTime: 0
   });
   /** Map of pending task IDs to their resolve callbacks, used to correlate worker responses */
-  handlerMap: Record<string, (result: any, error: TaskError | null) => void> = {};
+  handlerMap: Record<string, (result: TaskOutputs[Task], error: TaskError | null) => void> = {};
 
   /**
    * Observable indicating whether the worker is ready.
@@ -130,9 +130,9 @@ export class WorkerPythonService {
     const id = uuidv4();
     return new Promise((resolve) => {
       this.worker?.postMessage({ task, inputs, id });
-      this.handlerMap[id] = (result: TaskOutputs[taskId], error: TaskError | null) => {
+      this.handlerMap[id] = (result, error) => {
         delete this.handlerMap[id];
-        resolve({ result, error });
+        resolve({ result: result as TaskOutputs[taskId], error });
       };
     });
   }

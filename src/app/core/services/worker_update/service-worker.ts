@@ -10,7 +10,7 @@ function fetchLatestManifest() {
 
 const serviceWorkerLogPrefix = 'SERVICE WORKER: ';
 
-function log(message: string, ...args: any[]) {
+function log(message: string, ...args: unknown[]) {
   console.log(serviceWorkerLogPrefix + message, ...args);
 }
 
@@ -202,8 +202,8 @@ export async function handleMessage(event: ExtendableMessageEvent) {
       default:
         log('unknown message type', type);
     }
-  } catch (e: any) {
-    event.source?.postMessage({ message: 'error', error: e.message });
+  } catch (e: unknown) {
+    event.source?.postMessage({ message: 'error', error: e instanceof Error ? e.message : String(e) });
   }
 }
 

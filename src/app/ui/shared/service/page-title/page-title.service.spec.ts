@@ -9,13 +9,13 @@ describe('PageTitleService', () => {
   let mockRouter: Partial<Router>;
   let mockActivatedRoute: Partial<ActivatedRoute>;
   let mockTitleService: Partial<Title>;
-  let routerEventsSubject: BehaviorSubject<any>;
+  let routerEventsSubject: BehaviorSubject<unknown>;
 
   const createService = (): PageTitleService => {
-    routerEventsSubject = new BehaviorSubject<any>(null);
+    routerEventsSubject = new BehaviorSubject<unknown>(null);
 
     mockRouter = {
-      events: routerEventsSubject.asObservable()
+      events: routerEventsSubject.asObservable() as Router['events']
     };
 
     mockActivatedRoute = {
@@ -105,7 +105,7 @@ describe('PageTitleService', () => {
     it('should not update title when route title is null', () => {
       const testRoute = {
         ...mockActivatedRoute,
-        title: of(null as any)
+        title: of(null as unknown as string)
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });

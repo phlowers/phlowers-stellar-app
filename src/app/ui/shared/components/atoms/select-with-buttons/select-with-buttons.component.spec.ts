@@ -8,8 +8,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { SelectWithButtonsComponent } from './select-with-buttons.component';
 
 describe('SelectWithButtonsComponent', () => {
-  let component: SelectWithButtonsComponent<Record<string, any>>;
-  let fixture: ComponentFixture<SelectWithButtonsComponent<Record<string, any>>>;
+  let component: SelectWithButtonsComponent<Record<string, unknown>>;
+  let fixture: ComponentFixture<SelectWithButtonsComponent<Record<string, unknown>>>;
 
   const mockOptions = [
     { id: '1', name: 'Option 1', description: 'First option' },
@@ -40,7 +40,9 @@ describe('SelectWithButtonsComponent', () => {
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SelectWithButtonsComponent);
+    fixture = TestBed.createComponent(SelectWithButtonsComponent) as ComponentFixture<
+      SelectWithButtonsComponent<Record<string, unknown>>
+    >;
     component = fixture.componentInstance;
 
     fixture.componentRef.setInput('options', mockOptions);
@@ -59,7 +61,7 @@ describe('SelectWithButtonsComponent', () => {
       writeValue: jest.fn(),
       updateModel: jest.fn(),
       hide: jest.fn()
-    } as any;
+    } as unknown as typeof component.selectComponent;
   });
 
   afterEach(() => {

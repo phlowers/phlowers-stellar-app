@@ -8,11 +8,17 @@ import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
 import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
 import { createPlotData } from '../section/helpers/createPlotData';
-import Plotly from 'plotly.js-dist-min';
+import { GetSectionOutput, TaskError, DataError } from '@core/services/worker_python/tasks/types';
+import { Section } from '@core/domain';
+import Plotly, { PlotlyHTMLElement } from 'plotly.js-dist-min';
+
+interface PlotElement extends PlotlyHTMLElement {
+  _fullLayout?: { margin: { l: number; r: number; t: number; b: number } };
+}
 
 jest.mock('../section/helpers/createPlotData');
 jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn().mockResolvedValue({} as any),
+  newPlot: jest.fn().mockResolvedValue({} as unknown as PlotElement),
   relayout: jest.fn(),
   purge: jest.fn(),
   update: jest.fn().mockResolvedValue(undefined)
@@ -33,15 +39,15 @@ describe('FreePositioningComponent', () => {
     invert: false
   });
   const workerReadySignal = signal(false);
-  const litDataSignal = signal<any>(null);
-  const sectionSignal = signal<any>({
+  const litDataSignal = signal<GetSectionOutput | null>(null);
+  const sectionSignal = signal<Section | null>({
     supports: [
       { uuid: 's0', number: '0' },
       { uuid: 's1', number: '1' }
     ],
     obstacles: []
-  });
-  const errorSignal = signal<any>(null);
+  } as unknown as Section);
+  const errorSignal = signal<TaskError | DataError | null>(null);
   const loadingSignal = signal(false);
 
   const mockPlotService = {
@@ -192,7 +198,7 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should call Plotly.relayout on face plot when it exists', () => {
-      const fakePlot = {} as any;
+      const fakePlot = {} as unknown as PlotElement;
       component.plotFace.set(fakePlot);
       component.plotProfile.set(null);
 
@@ -206,8 +212,8 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should call Plotly.relayout on both plots when both exist', () => {
-      const fakeFace = { id: 'face' } as any;
-      const fakeProfile = { id: 'profile' } as any;
+      const fakeFace = { id: 'face' } as unknown as PlotElement;
+      const fakeProfile = { id: 'profile' } as unknown as PlotElement;
       component.plotFace.set(fakeFace);
       component.plotProfile.set(fakeProfile);
 
@@ -243,7 +249,7 @@ describe('FreePositioningComponent', () => {
     };
 
     it('should return early when litData is null', async () => {
-      await component.createPlot(null as any, 0, 'face', []);
+      await component.createPlot(null as unknown as GetSectionOutput, 0, 'face', []);
 
       expect(mockCreatePlotData).not.toHaveBeenCalled();
       expect(Plotly.newPlot).not.toHaveBeenCalled();
@@ -275,7 +281,7 @@ describe('FreePositioningComponent', () => {
     it('should set plotFace when side is face', async () => {
       const fakeElement = document.createElement('div');
       jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
-      (Plotly.newPlot as jest.Mock).mockResolvedValue({ _face: true } as any);
+      (Plotly.newPlot as jest.Mock).mockResolvedValue({ _face: true } as unknown as PlotElement);
 
       await component.createPlot(mockLitData, 0, 'face', []);
 
@@ -287,7 +293,7 @@ describe('FreePositioningComponent', () => {
       jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
       (Plotly.newPlot as jest.Mock).mockResolvedValue({
         _profile: true
-      } as any);
+      } as unknown as PlotElement);
 
       await component.createPlot(mockLitData, 0, 'profile', []);
 
@@ -310,8 +316,8 @@ describe('FreePositioningComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should purge existing plots on destroy', () => {
-      const fakeFace = { id: 'face' } as any;
-      const fakeProfile = { id: 'profile' } as any;
+      const fakeFace = { id: 'face' } as unknown as PlotElement;
+      const fakeProfile = { id: 'profile' } as unknown as PlotElement;
       component.plotFace.set(fakeFace);
       component.plotProfile.set(fakeProfile);
 
@@ -338,7 +344,7 @@ describe('FreePositioningComponent', () => {
     it('should invoke Plotly.update with annotations when plots exist', () => {
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as PlotElement;
       component.plotFace.set(fakePlot);
       component.plotProfile.set(fakePlot);
 
@@ -366,7 +372,7 @@ describe('FreePositioningComponent', () => {
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as PlotElement;
       component.plotProfile.set(fakePlot);
 
       component.debounceUpdateSelectedPositionMarkers();
@@ -384,7 +390,7 @@ describe('FreePositioningComponent', () => {
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as PlotElement;
       component.plotFace.set(fakePlot);
       component.plotProfile.set(null);
 
@@ -405,7 +411,7 @@ describe('FreePositioningComponent', () => {
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as PlotElement;
       component.plotProfile.set(fakePlot);
       component.plotFace.set(null);
 

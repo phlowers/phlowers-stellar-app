@@ -8,6 +8,7 @@ import { FieldMeasure } from '../../types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { createTestMeasureData } from '../../helpers';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { Section } from '@core/domain';
 import { Support } from '@core/domain';
 
 @Component({
@@ -443,7 +444,7 @@ describe('HeaderComponent', () => {
   });
 
   describe('Altitude Calculation from Attachment Heights', () => {
-    let plotService: any;
+    let plotService: PlotService;
 
     beforeEach(() => {
       plotService = TestBed.inject(PlotService);
@@ -460,7 +461,7 @@ describe('HeaderComponent', () => {
         supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: 12.5 }, { attachmentHeight: 15 }]
       };
 
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Change span to [0, 1]
       component.onSpanChange([0, 1]);
@@ -493,7 +494,7 @@ describe('HeaderComponent', () => {
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = { supports: null };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -511,7 +512,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [null, { attachmentHeight: 12.5 }]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -529,7 +530,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [{ attachmentHeight: 10.5 }, null]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -547,7 +548,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [{ attachmentHeight: null }, { attachmentHeight: 12.5 }]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -565,7 +566,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: null }]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -583,7 +584,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [{ attachmentHeight: 10 }, { attachmentHeight: 15 }, { attachmentHeight: 20 }]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection);
+      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       component.onSpanChange([1, 2]);
       fixture.detectChanges();

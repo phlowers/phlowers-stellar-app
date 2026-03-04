@@ -13,6 +13,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CablesService } from '@services/cables/cables.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
+import { Section, Study } from '@core/domain';
 
 interface SignalFn<T> {
   (): T;
@@ -295,12 +296,12 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         max_frost_width: 0
       };
 
-      plotService.study.set(mockStudy as any);
-      mockStudiesService.getStudy.mockResolvedValue(mockStudy as any);
+      plotService.study.set(mockStudy as unknown as Study);
+      mockStudiesService.getStudy.mockResolvedValue(mockStudy as unknown as Study);
       mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
 
       await component.addInitialCondition({
-        section: mockSection as any,
+        section: mockSection as unknown as Section,
         initialCondition: mockInitialCondition,
         generateState: false
       });
@@ -330,13 +331,13 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         max_frost_width: 0
       };
 
-      plotService.study.set(mockStudy as any);
-      mockStudiesService.getStudy.mockResolvedValue(mockStudy as any);
+      plotService.study.set(mockStudy as unknown as Study);
+      mockStudiesService.getStudy.mockResolvedValue(mockStudy as unknown as Study);
       mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
       mockInitialConditionService.setInitialCondition.mockResolvedValue(undefined);
 
       await component.addInitialCondition({
-        section: mockSection as any,
+        section: mockSection as unknown as Section,
         initialCondition: mockInitialCondition,
         generateState: true
       });
@@ -368,7 +369,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       plotService.study.set(null);
 
       await component.addInitialCondition({
-        section: mockSection as any,
+        section: mockSection as unknown as Section,
         initialCondition: mockInitialCondition,
         generateState: false
       });
@@ -391,12 +392,12 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         max_frost_width: 0
       };
 
-      plotService.study.set(mockStudy as any);
+      plotService.study.set(mockStudy as unknown as Study);
       mockStudiesService.getStudy.mockResolvedValue(undefined);
       mockInitialConditionService.addInitialCondition.mockResolvedValue(undefined);
 
       await component.addInitialCondition({
-        section: mockSection as any,
+        section: mockSection as unknown as Section,
         initialCondition: mockInitialCondition,
         generateState: false
       });

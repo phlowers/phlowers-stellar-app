@@ -102,10 +102,10 @@ export async function handleTask<taskId extends Task>(
       runTime: performance.now() - start,
       error: null
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(error);
     let errorType = TaskError.CALCULATION_ERROR;
-    if (error?.message && error?.message?.toLowerCase().includes('did not converge')) {
+    if (error instanceof Error && error.message?.toLowerCase().includes('did not converge')) {
       errorType = TaskError.SOLVER_DID_NOT_CONVERGE;
     }
     return {

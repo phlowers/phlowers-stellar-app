@@ -3,13 +3,13 @@ import { LoadFormsService } from './loadForms.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { Task } from '@src/app/core/services/worker_python/tasks/types';
-import { Section, Charge, SymmetryType } from '@core/domain';
+import { Task, TaskError, TaskOutputs } from '@src/app/core/services/worker_python/tasks/types';
+import { Section, Charge, Study, SymmetryType } from '@core/domain';
 import { ChargeData, LoadType } from '@core/domain/models/charge.model';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
-  const fn = jest.fn(() => value) as any;
+  const fn = jest.fn(() => value) as jest.Mock & { set: jest.Mock };
   fn.set = jest.fn((v: T) => {
     value = v;
   });
@@ -229,7 +229,7 @@ describe('LoadFormsService', () => {
 
     it('should return early when sectionUuid is missing', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as any);
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as unknown as Study);
       mockPlotService.section.mockReturnValue(null);
 
       await service.saveTemporaryLoadDataInSection();
@@ -239,7 +239,7 @@ describe('LoadFormsService', () => {
 
     it('should return early when currentCharge is null', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as any);
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as unknown as Study);
       mockPlotService.section.mockReturnValue(mockSection);
       mockChargesService.getSelectedChargeCase.mockResolvedValue(null);
 
@@ -250,7 +250,7 @@ describe('LoadFormsService', () => {
 
     it('should save temporaryLoadData to charge', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as any);
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as unknown as Study);
       mockPlotService.section.mockReturnValue(mockSection);
       mockChargesService.getSelectedChargeCase.mockResolvedValue(mockCharge);
       mockChargesService.createOrUpdateCharge.mockResolvedValue(undefined);
@@ -275,7 +275,7 @@ describe('LoadFormsService', () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.section.mockReturnValue(mockSection);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: {} as any,
+        result: {} as unknown as TaskOutputs[Task.changeState],
         error: null
       });
 
@@ -295,7 +295,7 @@ describe('LoadFormsService', () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.section.mockReturnValue(mockSection);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: {} as any,
+        result: {} as unknown as TaskOutputs[Task.changeState],
         error: null
       });
 
@@ -306,9 +306,9 @@ describe('LoadFormsService', () => {
     });
 
     it('should set litData and baseLitData from task result', async () => {
-      const mockCurrentData = { spans: [[]] } as any;
-      const mockBaseData = { spans: [[]] } as any;
-      const mockError = 'test-error' as any;
+      const mockCurrentData = { spans: [[]] } as unknown as TaskOutputs[Task.changeState]['current'];
+      const mockBaseData = { spans: [[]] } as unknown as TaskOutputs[Task.changeState]['base'];
+      const mockError = 'test-error' as unknown as TaskError;
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.section.mockReturnValue(mockSection);
       mockWorkerPythonService.runTask.mockResolvedValue({
@@ -327,7 +327,7 @@ describe('LoadFormsService', () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.section.mockReturnValue(mockSection);
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: null as any,
+        result: null as unknown as TaskOutputs[Task.changeState],
         error: null
       });
 
@@ -349,7 +349,7 @@ describe('LoadFormsService', () => {
     });
 
     it('should return early when sectionUuid is missing', () => {
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as any);
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as unknown as Study);
       mockPlotService.section.mockReturnValue(null);
 
       service.deleteLoad();
@@ -358,7 +358,7 @@ describe('LoadFormsService', () => {
     });
 
     it('should return early when chargeUuid is missing', () => {
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as any);
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as unknown as Study);
       mockPlotService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: null
@@ -370,7 +370,7 @@ describe('LoadFormsService', () => {
     });
 
     it('should call deleteCharge with correct parameters', () => {
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as any);
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as unknown as Study);
       mockPlotService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1'

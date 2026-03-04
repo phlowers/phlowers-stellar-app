@@ -311,7 +311,7 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should not save if study uuid is missing', async () => {
-      (mockPlotService.study as any).set(null);
+      mockPlotService.study!.set(null);
       component.chargeUuid.set('charge-uuid-1');
 
       await component.saveChanges();
@@ -320,7 +320,7 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should not save if section uuid is missing', async () => {
-      (mockPlotService.section as any).set(null);
+      mockPlotService.section!.set(null);
       component.chargeUuid.set('charge-uuid-1');
 
       await component.saveChanges();
@@ -348,9 +348,9 @@ describe('LoadsTableComponent', () => {
 
   describe('climate and span loads data loading', () => {
     it('should populate climate signal after loading charge data', async () => {
-      (mockToolbarDialogService.isOpen as any).set(true);
-      (mockToolbarDialogService.currentTool as any).set('load-table');
-      (mockToolbarDialogService.loadTableContext as any).set({
+      mockToolbarDialogService.isOpen!.set(true);
+      mockToolbarDialogService.currentTool!.set('load-table');
+      mockToolbarDialogService.loadTableContext!.set({
         mode: 'view',
         chargeUuid: 'charge-uuid-1'
       });
@@ -362,9 +362,9 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should populate spanLoads signal after loading charge data', async () => {
-      (mockToolbarDialogService.isOpen as any).set(true);
-      (mockToolbarDialogService.currentTool as any).set('load-table');
-      (mockToolbarDialogService.loadTableContext as any).set({
+      mockToolbarDialogService.isOpen!.set(true);
+      mockToolbarDialogService.currentTool!.set('load-table');
+      mockToolbarDialogService.loadTableContext!.set({
         mode: 'view',
         chargeUuid: 'charge-uuid-1'
       });
@@ -381,9 +381,9 @@ describe('LoadsTableComponent', () => {
         data: undefined
       });
 
-      (mockToolbarDialogService.isOpen as any).set(true);
-      (mockToolbarDialogService.currentTool as any).set('load-table');
-      (mockToolbarDialogService.loadTableContext as any).set({
+      mockToolbarDialogService.isOpen!.set(true);
+      mockToolbarDialogService.currentTool!.set('load-table');
+      mockToolbarDialogService.loadTableContext!.set({
         mode: 'view',
         chargeUuid: 'charge-uuid-1'
       });
@@ -604,9 +604,9 @@ describe('LoadsTableComponent', () => {
 
   describe('effect - load charge data', () => {
     it('should load charge data when tool opens with context', async () => {
-      (mockToolbarDialogService.isOpen as any).set(true);
-      (mockToolbarDialogService.currentTool as any).set('load-table');
-      (mockToolbarDialogService.loadTableContext as any).set({
+      mockToolbarDialogService.isOpen!.set(true);
+      mockToolbarDialogService.currentTool!.set('load-table');
+      mockToolbarDialogService.loadTableContext!.set({
         mode: 'edit',
         chargeUuid: 'charge-uuid-1'
       });
@@ -619,9 +619,9 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should load selected charge when tool opens without context', async () => {
-      (mockToolbarDialogService.isOpen as any).set(true);
-      (mockToolbarDialogService.currentTool as any).set('load-table');
-      (mockToolbarDialogService.loadTableContext as any).set(null);
+      mockToolbarDialogService.isOpen!.set(true);
+      mockToolbarDialogService.currentTool!.set('load-table');
+      mockToolbarDialogService.loadTableContext!.set(null);
 
       fixture.detectChanges();
       await fixture.whenStable();

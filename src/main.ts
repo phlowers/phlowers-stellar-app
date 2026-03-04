@@ -8,7 +8,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/ui/app.component';
 import { appConfig } from './app/ui/app.config';
 import { isDevMode } from '@angular/core';
-(window as any).global = window;
+(window as unknown as Record<string, unknown>).global = window;
 
 bootstrapApplication(AppComponent, appConfig)
   .then(() => {

@@ -10,7 +10,10 @@ import { Section, Study, Support } from '@core/domain';
 import { ObstacleFormService } from './obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
 
-const mockSupports = [{ uuid: 'sup-1', number: 1 } as any, { uuid: 'sup-2', number: 2 } as any];
+const mockSupports = [
+  { uuid: 'sup-1', number: 1 } as unknown as Support,
+  { uuid: 'sup-2', number: 2 } as unknown as Support
+];
 
 const mockSection: Section = {
   uuid: 'sec-1',
@@ -47,7 +50,7 @@ const mockSection: Section = {
   comment: undefined,
   supports_comment: undefined,
   supports: mockSupports,
-  obstacles: [] as any[],
+  obstacles: [] as Obstacle[],
   initial_conditions: [],
   selected_initial_condition_uuid: undefined,
   charges: [],
@@ -94,8 +97,8 @@ describe('ObstacleFormService', () => {
     mockPlotService = {
       getSupportIndex: jest.fn().mockReturnValue(0),
       getSupportOptions: jest.fn().mockReturnValue([
-        { label: 1, value: 'LEFT' as any },
-        { label: 2, value: 'RIGHT' as any }
+        { label: 1, value: ReferenceSupport.LEFT },
+        { label: 2, value: ReferenceSupport.RIGHT }
       ]),
       getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]),
       plotOptionsChange: jest.fn(),
@@ -491,8 +494,8 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
       mockPlotService.getSupportIndex.mockReturnValue(0);
       mockPlotService.getSupportOptions.mockReturnValue([
-        { label: 1, value: 'LEFT' as any },
-        { label: 2, value: 'RIGHT' as any }
+        { label: 1, value: ReferenceSupport.LEFT },
+        { label: 2, value: ReferenceSupport.RIGHT }
       ]);
       await service.calculateAndSave();
       expect(section.obstacles.length).toBe(1);

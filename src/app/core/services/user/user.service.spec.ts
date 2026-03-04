@@ -1,11 +1,15 @@
 import { UserService } from './user.service';
 import { UserEntity } from '@core/infrastructure/database';
+import { StorageService } from '@core/services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 
 describe('UserService', () => {
   let service: UserService;
-  let storageServiceMock: any;
-  let usersTableMock: any;
+  let storageServiceMock: {
+    db: { users: typeof usersTableMock };
+    ready$: ReturnType<typeof readySubject.asObservable>;
+  };
+  let usersTableMock: { toArray: jest.Mock; add: jest.Mock; clear: jest.Mock };
   let readySubject: BehaviorSubject<boolean>;
 
   const testUser: UserEntity = { email: 'test@example.com' };
@@ -21,7 +25,7 @@ describe('UserService', () => {
       db: { users: usersTableMock },
       ready$: readySubject.asObservable()
     };
-    service = new UserService(storageServiceMock);
+    service = new UserService(storageServiceMock as unknown as StorageService);
   });
 
   describe('createUser', () => {

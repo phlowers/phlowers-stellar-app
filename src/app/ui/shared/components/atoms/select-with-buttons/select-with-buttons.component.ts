@@ -15,7 +15,7 @@ import { ButtonComponent } from '../button/button.component';
  * Generic select dropdown with action buttons (view, edit, duplicate, delete) for each option.
  * @typeParam T - The option object type.
  */
-export class SelectWithButtonsComponent<T extends Record<string, any>> implements OnInit {
+export class SelectWithButtonsComponent<T extends object = Record<string, unknown>> implements OnInit {
   @ViewChild('selectComponent') selectComponent!: Select;
   /** List of selectable options. */
   options = input.required<T[]>();
@@ -54,15 +54,18 @@ export class SelectWithButtonsComponent<T extends Record<string, any>> implement
   }
 
   selectedOptionLabel = computed(() => {
-    return (
-      this.options().find((option) => option[this.optionValue()] === this.selectedOption())?.[this.optionLabel()] ?? ''
+    const found = this.options().find(
+      (option) => (option as Record<string, unknown>)[this.optionValue()] === this.selectedOption()
     );
+    return found ? (((found as Record<string, unknown>)[this.optionLabel()] as string) ?? '') : '';
   });
 
   onSelectionChange(value: string | undefined | null) {
     this.selectedOptionValue.set(value);
     if (value) {
-      const selectedItem = this.options().find((option) => option[this.optionValue()] === value);
+      const selectedItem = this.options().find(
+        (option) => (option as Record<string, unknown>)[this.optionValue()] === value
+      );
       if (selectedItem) {
         this.selectOption.emit(selectedItem);
       }
@@ -71,7 +74,7 @@ export class SelectWithButtonsComponent<T extends Record<string, any>> implement
 
   clearSelectedOptionValue() {
     this.selectedOptionValue.set(undefined);
-    this.selectOption.emit(undefined as any);
+    this.selectOption.emit(undefined as unknown as T);
     if (this.selectComponent) {
       this.selectComponent.writeValue(null);
       this.selectComponent.updateModel(null, null);
@@ -79,7 +82,7 @@ export class SelectWithButtonsComponent<T extends Record<string, any>> implement
   }
 
   onSelectItem(item: T) {
-    this.selectedOptionValue.set(item[this.optionValue()]);
+    this.selectedOptionValue.set((item as Record<string, unknown>)[this.optionValue()] as string);
     this.selectOption.emit(item);
     this.selectComponent.hide();
   }

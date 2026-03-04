@@ -9,7 +9,7 @@ import { SpeedDialModule } from 'primeng/speeddial';
 import { MenuItem } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
-import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { PlotService, SelectedDisplayOptions } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 
@@ -138,9 +138,10 @@ export class StudioTopToolbarComponent implements OnInit {
   );
 
   selectedDisplayValues = computed(() => {
-    const values = [];
-    for (const key in this.plotService.selectedDisplayOptions()) {
-      if ((this.plotService.selectedDisplayOptions() as any)[key]) {
+    const values: string[] = [];
+    const options = this.plotService.selectedDisplayOptions();
+    for (const key of Object.keys(options)) {
+      if (options[key as keyof SelectedDisplayOptions]) {
         values.push(key);
       }
     }

@@ -150,7 +150,7 @@ export class AttachmentSetModalComponent implements OnInit {
     this.getData();
   }
 
-  async onAttachmentSelect(event: any, key: keyof CatalogAttachment) {
+  async onAttachmentSelect(event: { value: string | number | null | undefined }, key: keyof CatalogAttachment) {
     if (event.value === null || event.value === undefined) {
       this.resetValues(key === 'support_name');
       return;

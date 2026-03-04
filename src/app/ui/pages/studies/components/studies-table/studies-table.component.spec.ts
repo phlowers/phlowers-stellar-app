@@ -84,7 +84,7 @@ describe('StudiesTableComponent', () => {
     });
 
     it('should handle undefined studies input', () => {
-      fixture.componentRef.setInput('studies', undefined as any);
+      fixture.componentRef.setInput('studies', undefined as unknown as Study[]);
       expect(component.studies()).toBeUndefined();
     });
   });
@@ -226,12 +226,12 @@ describe('StudiesTableComponent', () => {
     it('should handle null or undefined study properties gracefully', () => {
       const nullStudy: Study = {
         uuid: 'null-uuid',
-        author_email: null as any,
-        title: null as any,
-        description: null as any,
+        author_email: null as unknown as string,
+        title: null as unknown as string,
+        description: null as unknown as string,
         shareable: false,
-        created_at_offline: null as any,
-        updated_at_offline: null as any,
+        created_at_offline: null as unknown as string,
+        updated_at_offline: null as unknown as string,
         saved: false,
         sections: []
       };

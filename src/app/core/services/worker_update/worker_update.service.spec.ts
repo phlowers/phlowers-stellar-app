@@ -4,13 +4,13 @@ import { MessageService } from 'primeng/api';
 
 describe('UpdateService', () => {
   let service: UpdateService;
-  let mockServiceWorker: any;
-  let mockCaches: any;
-  let mockCache: any;
-  let mockFetch: any;
-  let originalServiceWorker: any;
-  let originalCaches: any;
-  let originalFetch: any;
+  let mockServiceWorker: { addEventListener: jest.Mock; getRegistration: jest.Mock };
+  let mockCaches: { open: jest.Mock };
+  let mockCache: { match: jest.Mock };
+  let mockFetch: jest.Mock;
+  let originalServiceWorker: ServiceWorkerContainer;
+  let originalCaches: CacheStorage;
+  let originalFetch: typeof fetch;
   let mockMessageService: MessageService;
 
   beforeEach(() => {
@@ -179,7 +179,7 @@ describe('UpdateService', () => {
   });
 
   describe('service worker message handling', () => {
-    let messageHandler: (event: any) => void;
+    let messageHandler: (event: MessageEvent) => void;
 
     beforeEach(() => {
       // Extract the message handler function
@@ -210,7 +210,7 @@ describe('UpdateService', () => {
           message: 'update_complete',
           current_version: mockCurrentVersion
         }
-      });
+      } as unknown as MessageEvent);
 
       expect(service.updateLoading()).toBe(false);
       expect(service.currentVersion()).toEqual(mockCurrentVersion);
@@ -240,7 +240,7 @@ describe('UpdateService', () => {
           message: 'install_complete',
           latest_version: mockVersion
         }
-      });
+      } as unknown as MessageEvent);
 
       expect(service.updateLoading()).toBe(false);
       expect(service.currentVersion()).toEqual(mockVersion);

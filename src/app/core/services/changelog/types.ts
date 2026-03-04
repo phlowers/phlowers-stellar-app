@@ -33,7 +33,7 @@ export interface ChangelogItem {
   /** ISO-8601 publication timestamp. */
   published_at: string;
   /** Downloadable assets attached to the release. */
-  assets: any[];
+  assets: unknown[];
   /** URL to download the source tarball. */
   tarball_url: string;
   /** URL to download the source zipball. */
