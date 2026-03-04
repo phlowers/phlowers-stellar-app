@@ -20,6 +20,36 @@ Development guide for the AI assistant on the **Stellar** project: an Angular 19
 | Jest | Unit tests |
 | Clean Architecture + DDD | Overall architecture |
 
+### Language policy — English only
+
+**All code, comments, documentation, commit messages, PR descriptions, variable names, class names, function names, TSDoc/JSDoc, and inline comments must be written in English.** This applies to:
+
+- Source code (TypeScript, SCSS, HTML templates)
+- Code comments and documentation (`/** ... */`, `// ...`)
+- Commit messages and PR descriptions
+- README, CLAUDE.md, agent.md, and any markdown documentation
+- Test descriptions (`describe`, `it` blocks)
+- Console logs and error messages
+- CSV headers and data model field names
+
+```typescript
+// ✅ ALWAYS — English everywhere
+/** Service for managing obstacle type catalog data. */
+export class ObstacleTypesService {
+  /** Retrieve all obstacle types from the catalog. */
+  async getObstacleTypes() { ... }
+}
+
+// ❌ NEVER — French or other languages in code
+/** Service de gestion des types d'obstacles. */
+export class ObstacleTypesService {
+  /** Récupère tous les types d'obstacles. */
+  async getObstacleTypes() { ... }
+}
+```
+
+> **Exception**: User-facing text in templates uses Angular i18n (`i18n` attribute or `$localize`) — the source language in templates may be English or French as long as translations are provided.
+
 ---
 
 ## 2. DDD & Clean Architecture
@@ -845,6 +875,15 @@ export class FeatureComponent {
 
 ## 12. Unit tests (Jest)
 
+### Mandatory test coverage
+
+- **Every new feature, service, or component must have corresponding unit tests before merging.**
+- **When modifying existing code, the related tests must be updated or extended** to cover the new/changed behavior.
+- Tests must be kept in sync with the implementation at all times — no orphaned tests, no untested features.
+- A PR that adds or changes functionality **without updating tests will be rejected**.
+
+### Testing components with signals
+
 ```typescript
 // ✅ Testing a component with signals
 describe('NetworkDiagramComponent', () => {
@@ -881,11 +920,124 @@ describe('NetworkDiagramComponent', () => {
 });
 ```
 
+### HTML rendering tests with `data-testid`
+
+All interactive or meaningful HTML elements **must** have a `data-testid` attribute, and every `data-testid` **must** have a corresponding rendering test.
+
+#### Adding `data-testid` in templates
+
+```html
+<!-- ✅ ALWAYS — data-testid on interactive/meaningful elements -->
+<form [formGroup]="form" data-testid="my-form">
+  <input pInputText formControlName="name" data-testid="name-input" />
+  <p-select formControlName="type" data-testid="type-select" />
+  <button app-btn type="submit" data-testid="submit-btn">Save</button>
+  <ul data-testid="items-list">
+    @for (item of items; track $index) {
+      <li data-testid="item-row">{{ item.name }}</li>
+    }
+  </ul>
+  <span data-testid="result-value">{{ result() ?? 'N/A' }}</span>
+</form>
+```
+
+#### Writing rendering tests
+
+Use a `getByTestId` helper to query elements by `data-testid`:
+
+```typescript
+// ✅ Helper function — define once per describe block
+const getByTestId = (testId: string): HTMLElement | null =>
+  fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+// ✅ Test form structure rendering
+describe('HTML rendering - form structure', () => {
+  it('should render the form', () => {
+    const form = getByTestId('my-form');
+    expect(form).toBeTruthy();
+    expect(form?.tagName).toBe('FORM');
+  });
+
+  it('should render the name input', () => {
+    const input = getByTestId('name-input');
+    expect(input).toBeTruthy();
+    expect(input?.tagName).toBe('INPUT');
+  });
+
+  it('should render the submit button', () => {
+    const btn = getByTestId('submit-btn') as HTMLButtonElement;
+    expect(btn).toBeTruthy();
+    expect(btn.tagName).toBe('BUTTON');
+  });
+});
+
+// ✅ Test dynamic rendering (lists, conditionals)
+describe('HTML rendering - dynamic content', () => {
+  it('should render list items for each entry', () => {
+    const items = fixture.nativeElement.querySelectorAll('[data-testid="item-row"]');
+    expect(items.length).toBe(expectedCount);
+  });
+
+  it('should display N/A when result is null', () => {
+    expect(getByTestId('result-value')?.textContent).toContain('N/A');
+  });
+
+  it('should display computed value after calculation', () => {
+    mockService.results.set({ value: 42 });
+    fixture.detectChanges();
+    expect(getByTestId('result-value')?.textContent).toContain('42');
+  });
+});
+
+// ✅ Test button states (disabled/enabled)
+describe('HTML rendering - button states', () => {
+  it('should disable submit when form is invalid', () => {
+    const btn = getByTestId('submit-btn') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+  });
+
+  it('should enable submit when form is valid', () => {
+    mockForm.patchValue({ name: 'Valid' });
+    fixture.detectChanges();
+    const btn = getByTestId('submit-btn') as HTMLButtonElement;
+    expect(btn.disabled).toBe(false);
+  });
+});
+
+// ✅ Test accessibility attributes
+describe('HTML rendering - accessibility', () => {
+  it('should set aria-invalid on invalid input', () => {
+    control.setErrors({ required: true });
+    fixture.detectChanges();
+    const input = getByTestId('name-input');
+    expect(input?.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('should set aria-selected on active item', () => {
+    const item = getByTestId('item-row');
+    expect(item?.getAttribute('aria-selected')).toBe('true');
+  });
+});
+```
+
+#### `data-testid` rules
+
+- **Every** `<button>`, `<input>`, `<select>`, `<form>`, `<ul>/<ol>`, and result display `<span>`/`<p>` must have a `data-testid`.
+- Use **kebab-case** for `data-testid` values: `submit-btn`, `obstacle-name`, `result-oblique`.
+- For repeated elements (e.g. list items), use a shared `data-testid` and query with `querySelectorAll`.
+- Group rendering tests in dedicated `describe('HTML rendering - ...')` blocks.
+- Test **existence** (element is rendered), **tag type**, **disabled/enabled state**, **text content**, and **ARIA attributes**.
+- `data-testid` attributes are for **testing only** — they carry no semantic or styling meaning.
+
 ---
 
 ## 13. Code review checklist
 
 Before each PR, check:
+
+**Language**
+- [ ] All code, comments, docs, commit messages, and PR descriptions are in **English**
+- [ ] No French or other non-English text in code, comments, or documentation (except i18n translation source text)
 
 **Angular & Signals**
 - [ ] `ChangeDetectionStrategy.OnPush` on all components
@@ -910,6 +1062,14 @@ Before each PR, check:
 - [ ] `aria-*` present on complex interactive elements
 - [ ] Alt text on images and icons
 - [ ] Keyboard navigation works
+- [ ] `data-testid` on all interactive and meaningful elements
+
+**Testing**
+- [ ] Every new feature/service/component has unit tests
+- [ ] Modified code has updated or extended tests
+- [ ] HTML rendering tests exist for every `data-testid` element (structure, states, content)
+- [ ] `getByTestId` helper used for DOM assertions
+- [ ] Tests cover: existence, tag type, disabled/enabled, text content, ARIA attributes
 
 **i18n**
 - [ ] No hardcoded French/English text in templates

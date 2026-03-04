@@ -540,6 +540,132 @@ describe('ObstacleFormService', () => {
       expect(updated.positions.length).toBe(1);
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
     });
+
+    it('should compute min distances correctly with multiple points', async () => {
+      service.form.patchValue({
+        uuid: 'obs-multi',
+        name: 'Multi-point',
+        type: 'House',
+        supportUuid: 'sup-1',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      // Point 1: x=3, y=4, z=5 => horizontal=5, oblique=sqrt(50), verticale=5
+      service.addPosition({ x: 3, y: 4, z: 5 });
+      // Point 2: x=1, y=1, z=1 => horizontal=sqrt(2), oblique=sqrt(3), verticale=1
+      service.addPosition({ x: 1, y: 1, z: 1 });
+
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      await service.calculateAndSave();
+
+      // Min oblique = sqrt(3) ≈ 1.732
+      expect(service.results().oblique).toBeCloseTo(Math.sqrt(3), 5);
+      // Min verticale = |1| = 1
+      expect(service.results().verticale).toBeCloseTo(1, 5);
+      // Min horizontale = sqrt(2) ≈ 1.414
+      expect(service.results().horizontale).toBeCloseTo(Math.sqrt(2), 5);
+    });
+
+    it('should skip positions with null coordinates in distance calculations', async () => {
+      service.form.patchValue({
+        uuid: 'obs-null',
+        name: 'Null points',
+        type: 'House',
+        supportUuid: 'sup-1',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      service.addPosition({ x: null, y: 2, z: 3 });
+      service.addPosition({ x: 10, y: 10, z: 10 });
+
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      await service.calculateAndSave();
+
+      // Only the second point should be used
+      const horizontal = Math.hypot(10, 10);
+      const oblique = Math.hypot(horizontal, 10);
+      expect(service.results().oblique).toBeCloseTo(oblique, 5);
+      expect(service.results().verticale).toBeCloseTo(10, 5);
+      expect(service.results().horizontale).toBeCloseTo(horizontal, 5);
+    });
+
+    it('should return null results when all positions have null coordinates', async () => {
+      service.form.patchValue({
+        uuid: 'obs-allnull',
+        name: 'All null',
+        type: 'House',
+        supportUuid: 'sup-1',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      service.addPosition({ x: null, y: null, z: null });
+
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      await service.calculateAndSave();
+
+      expect(service.results().oblique).toBeNull();
+      expect(service.results().verticale).toBeNull();
+      expect(service.results().horizontale).toBeNull();
+    });
+
+    it('should handle negative coordinates correctly in distance calculations', async () => {
+      service.form.patchValue({
+        uuid: 'obs-neg',
+        name: 'Negative',
+        type: 'House',
+        supportUuid: 'sup-1',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      // z=-7 => absZ=7, horizontal=hypot(-3,-4)=5, oblique=hypot(5,-7)=sqrt(74)
+      service.addPosition({ x: -3, y: -4, z: -7 });
+
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      await service.calculateAndSave();
+
+      expect(service.results().oblique).toBeCloseTo(Math.sqrt(74), 5);
+      expect(service.results().verticale).toBeCloseTo(7, 5);
+      expect(service.results().horizontale).toBeCloseTo(5, 5);
+    });
+
+    it('should compute zero distances for a point at the origin', async () => {
+      service.form.patchValue({
+        uuid: 'obs-zero',
+        name: 'Zero',
+        type: 'House',
+        supportUuid: 'sup-1',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      service.addPosition({ x: 0, y: 0, z: 0 });
+
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      await service.calculateAndSave();
+
+      expect(service.results().oblique).toBe(0);
+      expect(service.results().verticale).toBe(0);
+      expect(service.results().horizontale).toBe(0);
+    });
   });
 
   describe('isFormValid', () => {
@@ -646,6 +772,10 @@ describe('ObstacleFormService', () => {
   });
 
   describe('upsertObstacleInSection', () => {
+    const invokeUpsert = (obstacle: Obstacle) => {
+      (service as unknown as { upsertObstacleInSection: (o: Obstacle) => void }).upsertObstacleInSection(obstacle);
+    };
+
     it('should handle missing section safely', () => {
       mockPlotService.section.set(null);
       const obstacle: Obstacle = {
@@ -659,9 +789,96 @@ describe('ObstacleFormService', () => {
         positions: []
       };
 
-      (service as unknown as { upsertObstacleInSection: (o: Obstacle) => void }).upsertObstacleInSection(obstacle);
+      invokeUpsert(obstacle);
 
       expect(mockPlotService.section()).toBeNull();
+    });
+
+    it('should create obstacles array when section.obstacles is undefined', () => {
+      const section = { ...mockSection, obstacles: undefined } as unknown as Section;
+      mockPlotService.section.set(section);
+
+      const obstacle: Obstacle = {
+        uuid: 'obs-new',
+        supportUuid: 'sup-1',
+        name: 'New Obstacle',
+        type: 'House',
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+        referenceSupport: ReferenceSupport.LEFT,
+        positions: [{ x: 1, y: 2, z: 3 }]
+      };
+
+      invokeUpsert(obstacle);
+
+      expect(section.obstacles).toBeDefined();
+      expect(section.obstacles!.length).toBe(1);
+      expect(section.obstacles![0].uuid).toBe('obs-new');
+    });
+
+    it('should replace existing obstacle at the correct index', () => {
+      const existing: Obstacle = {
+        uuid: 'obs-1',
+        supportUuid: 'sup-1',
+        name: 'Old Name',
+        type: 'House',
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+        referenceSupport: ReferenceSupport.LEFT,
+        positions: []
+      };
+      const section = { ...mockSection, obstacles: [existing] } as Section;
+      mockPlotService.section.set(section);
+
+      const updated: Obstacle = {
+        uuid: 'obs-1',
+        supportUuid: 'sup-1',
+        name: 'Updated Name',
+        type: 'Tree',
+        altitudeType: 'relative',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+        referenceSupport: ReferenceSupport.RIGHT,
+        positions: [{ x: 10, y: 20, z: 30 }]
+      };
+
+      invokeUpsert(updated);
+
+      expect(section.obstacles.length).toBe(1);
+      expect(section.obstacles[0].name).toBe('Updated Name');
+      expect(section.obstacles[0].type).toBe('Tree');
+      expect(section.obstacles[0].positions).toHaveLength(1);
+    });
+
+    it('should append obstacle when uuid does not match existing ones', () => {
+      const existing: Obstacle = {
+        uuid: 'obs-1',
+        supportUuid: 'sup-1',
+        name: 'Existing',
+        type: 'House',
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+        referenceSupport: ReferenceSupport.LEFT,
+        positions: []
+      };
+      const section = { ...mockSection, obstacles: [existing] } as Section;
+      mockPlotService.section.set(section);
+
+      const newObstacle: Obstacle = {
+        uuid: 'obs-2',
+        supportUuid: 'sup-1',
+        name: 'New One',
+        type: 'Tree',
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+        referenceSupport: ReferenceSupport.LEFT,
+        positions: []
+      };
+
+      invokeUpsert(newObstacle);
+
+      expect(section.obstacles.length).toBe(2);
+      expect(section.obstacles[0].uuid).toBe('obs-1');
+      expect(section.obstacles[1].uuid).toBe('obs-2');
     });
   });
 

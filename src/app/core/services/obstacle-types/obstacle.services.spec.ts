@@ -344,5 +344,206 @@ describe('ObstacleTypesService', () => {
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
     });
+
+    it('should import all 9 obstacle types from full CSV data', async () => {
+      const fullCsvData: ObstacleTypeCsvDto[] = [
+        { obstacle_type: 'ordinary_ground', obstacle_type_name: 'Terrain ordinaire', details: 'Terrain ordinaire' },
+        { obstacle_type: 'agricultural_land', obstacle_type_name: 'Terrain agricole', details: 'Terrain agricole' },
+        {
+          obstacle_type: 'high_clearance_equipment_area',
+          obstacle_type_name: 'Aire engin gde hauteur',
+          details: 'Aire évolution'
+        },
+        { obstacle_type: 'traffic_lane', obstacle_type_name: 'Voie de circulation', details: 'Voie de circulation' },
+        {
+          obstacle_type: 'high_clearance_vehicle_route',
+          obstacle_type_name: 'Itinéraire véhicules gde hauteur',
+          details: 'Itinéraire'
+        },
+        { obstacle_type: 'silo_proximity', obstacle_type_name: 'Proximité silo', details: 'Proximité silo' },
+        {
+          obstacle_type: 'accessible_building',
+          obstacle_type_name: 'Bâtiment accessible',
+          details: 'Bâtiment accessible'
+        },
+        {
+          obstacle_type: 'non_accessible_structure',
+          obstacle_type_name: 'Construction non accessible',
+          details: 'Construction au sol'
+        },
+        { obstacle_type: 'vegetation', obstacle_type_name: 'Végétation', details: 'Végétation' }
+      ];
+
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: fullCsvData,
+              errors: [],
+              meta: {
+                delimiter: ';',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
+        }
+      });
+
+      const importPromise = service.importFromFile();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
+      req.flush('csv-content');
+
+      await importPromise;
+
+      expect(mockObstacleTypesTable.clear).toHaveBeenCalled();
+      expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ obstacle_type: 'ordinary_ground' }),
+          expect.objectContaining({ obstacle_type: 'vegetation' }),
+          expect.objectContaining({ obstacle_type: 'accessible_building' })
+        ])
+      );
+      const addedEntities = mockObstacleTypesTable.bulkAdd.mock.calls[0][0];
+      expect(addedEntities).toHaveLength(9);
+    });
+
+    it('should correctly parse CSV with semicolon delimiter', async () => {
+      const csvContent =
+        'obstacle_type;obstacle_type_name;details\nvegetation;Végétation;Végétation (il faut en plus intégrer la pousse des arbres)';
+
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+        expect(options.delimiter).toBe(';');
+        expect(options.header).toBe(true);
+        expect(options.skipEmptyLines).toBe(true);
+        if (options.complete) {
+          options.complete(
+            {
+              data: [
+                {
+                  obstacle_type: 'vegetation',
+                  obstacle_type_name: 'Végétation',
+                  details: 'Végétation (il faut en plus intégrer la pousse des arbres)'
+                }
+              ],
+              errors: [],
+              meta: {
+                delimiter: ';',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
+        }
+      });
+
+      const importPromise = service.importFromFile();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
+      req.flush(csvContent);
+
+      await importPromise;
+
+      expect(Papa.parse).toHaveBeenCalledWith(
+        csvContent,
+        expect.objectContaining({
+          header: true,
+          delimiter: ';',
+          skipEmptyLines: true
+        })
+      );
+    });
+
+    it('should not store data when database is not available during import', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+
+      const mockCsvData: ObstacleTypeCsvDto[] = [
+        {
+          obstacle_type: 'vegetation',
+          obstacle_type_name: 'Végétation',
+          details: 'Végétation'
+        }
+      ];
+
+      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+        if (options.complete) {
+          options.complete(
+            {
+              data: mockCsvData,
+              errors: [],
+              meta: {
+                delimiter: ';',
+                linebreak: '\n',
+                aborted: false,
+                truncated: false,
+                cursor: 0,
+                fields: []
+              }
+            },
+            undefined
+          );
+        }
+      });
+
+      const importPromise = service.importFromFile();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const req = httpTestingController.expectOne(`${window.location.origin}/data/obstacle_type_rte.csv`);
+      req.flush('csv-content');
+
+      // The service uses optional chaining (db?.catObstacleTypes), so it resolves without throwing
+      await importPromise;
+
+      // bulkAdd should NOT have been called since db is undefined
+      expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
+      expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getObstacleType - edge cases', () => {
+    it('should return undefined when obstacle type is not found', async () => {
+      mockObstacleTypesTable.where = jest.fn().mockReturnValue({
+        equals: jest.fn().mockReturnValue({
+          first: jest.fn().mockResolvedValue(undefined)
+        })
+      });
+
+      const result = await service.getObstacleType('nonexistent_type');
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when database is not available', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+      const result = await service.getObstacleType('vegetation');
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('ready state', () => {
+    it('should follow storage service ready state transitions', () => {
+      const readySubject = storageService.ready$ as BehaviorSubject<boolean>;
+
+      expect(service.ready.value).toBe(false);
+
+      readySubject.next(true);
+      expect(service.ready.value).toBe(true);
+
+      readySubject.next(false);
+      expect(service.ready.value).toBe(false);
+
+      readySubject.next(true);
+      expect(service.ready.value).toBe(true);
+    });
   });
 });
