@@ -27,7 +27,8 @@
     "cyclonedx": "npx @cyclonedx/cyclonedx-npm --output-file bom.xml  --output-format XML",
     "docs": "cd docs-sphinx && uv run sphinx-build -M clean source build && uv run sphinx-build -M html source build",
     "autodocs": "cd docs-sphinx && uv run sphinx-autobuild --host localhost --port 8000 source build",
-    "docs:open": "npm run docs && xdg-open docs-sphinx/build/html/index.html"
+    "docs:open": "npm run docs && xdg-open docs-sphinx/build/html/index.html",
+    "prepare": "husky"
   },
   "browser": {
     "child_process": false,
@@ -110,10 +111,12 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^9.1.7",
     "jasmine-core": "~5.4.0",
     "jest-raw-loader": "^1.0.1",
     "jest-sonar": "^0.2.16",
     "jsdom": "^26.0.0",
+    "lint-staged": "^16.3.2",
     "ng-extract-i18n-merge": "^2.14.3",
     "postcss": "^8.4.49",
     "prettier": "3.5.3",
@@ -122,5 +125,14 @@
     "typedoc": "^0.28.16",
     "typescript": "~5.6.2",
     "typescript-eslint": "8.27.0"
+  },
+  "lint-staged": {
+    "*.{ts,html}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,mjs,mts,d.ts}": [
+      "prettier --write"
+    ]
   }
 }
