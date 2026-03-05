@@ -1,3 +1,5 @@
+// Vérifier et supprimer tout import ou usage de HttpClientTestingModule ici, rien à supprimer
+// Aucun import de HttpClientTestingModule trouvé dans le fichier.
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { FormArray, FormBuilder } from '@angular/forms';
@@ -6,7 +8,7 @@ import { WorkerPythonService } from '@core/services/worker_python/worker-python.
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
-import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { ReferenceSupport } from '@src/app/core/domain/models/obstacle.model';
 import { createPlotData } from '../section/helpers/createPlotData';
 import Plotly from 'plotly.js-dist-min';

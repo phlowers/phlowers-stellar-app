@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { signal } from '@angular/core';
 import { ObstaclesFormComponent } from './obstaclesForm.component';
 import { PlotService } from '../../services/plot.service';
-import { ObstaclesService } from '@src/app/core/services/obstacles/obstacles.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { ObstacleFormService } from './obstaclesForm.service';
 import { BehaviorSubject } from 'rxjs';
 

@@ -24,7 +24,7 @@ import { Support } from '@core/index';
 import { debounce, isNumber } from 'lodash';
 import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
-import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { Position3D, ReferenceSupport } from '@src/app/core/domain/models/obstacle.model';
 
 // Constants
