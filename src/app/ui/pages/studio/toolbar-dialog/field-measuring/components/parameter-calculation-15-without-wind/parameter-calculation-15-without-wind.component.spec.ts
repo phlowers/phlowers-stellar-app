@@ -9,7 +9,7 @@ import { SectionService } from '@services/sections/section.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { InitialConditionService } from '@services/initial-conditions/initial-condition.service';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting, HttpClientTestingModule } from '@angular/common/http/testing';
 import { CablesService } from '@services/cables/cables.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
@@ -75,7 +75,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     } as unknown as StorageService;
 
     await TestBed.configureTestingModule({
-      imports: [ParameterCalculation15WithoutWindComponent],
+      imports: [ParameterCalculation15WithoutWindComponent, HttpClientTestingModule],
       providers: [
         provideHttpClientTesting(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },

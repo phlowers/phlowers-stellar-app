@@ -11,3 +11,4 @@ export type { CatalogCable } from './catalog-cable.model';
 export type { CatalogChain } from './catalog-chain.model';
 export type { CatalogLine } from './catalog-line.model';
 export type { CatalogMaintenance, RegionalMaintenanceCenter, MaintenanceTeam } from './catalog-maintenance.model';
+export type { CatalogObstacleType } from './catalog-obstacle-type.model';

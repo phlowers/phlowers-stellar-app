@@ -14,7 +14,8 @@ import {
   CatalogCableEntity,
   CatalogChainEntity,
   CatalogLineEntity,
-  CatalogMaintenanceEntity
+  CatalogMaintenanceEntity,
+  CatalogObstacleTypeEntity
 } from './entities';
 
 import {
@@ -24,7 +25,8 @@ import {
   CATALOG_CABLE_SCHEMA,
   CATALOG_CHAIN_SCHEMA,
   CATALOG_LINE_SCHEMA,
-  CATALOG_MAINTENANCE_SCHEMA
+  CATALOG_MAINTENANCE_SCHEMA,
+  CATALOG_OBSTACLE_TYPE_SCHEMA
 } from './schemas';
 
 /**
@@ -60,6 +62,8 @@ export class AppDatabase extends Dexie {
   catLines!: Table<CatalogLineEntity, string>;
   /** Table storing maintenance organization catalog data */
   catMaintenance!: Table<CatalogMaintenanceEntity, string>;
+  /** Table storing obstacle type catalog data */
+  catObstacleTypes!: Table<CatalogObstacleTypeEntity, string>;
 
   /**
    * Creates an AppDatabase instance named 'stellar-db' and registers
@@ -75,7 +79,8 @@ export class AppDatabase extends Dexie {
       ...CATALOG_CABLE_SCHEMA,
       ...CATALOG_CHAIN_SCHEMA,
       ...CATALOG_LINE_SCHEMA,
-      ...CATALOG_MAINTENANCE_SCHEMA
+      ...CATALOG_MAINTENANCE_SCHEMA,
+      ...CATALOG_OBSTACLE_TYPE_SCHEMA
     });
   }
 }

@@ -1,3 +1,5 @@
+// Vérifier et supprimer tout import ou usage de HttpClientTestingModule ici, rien à supprimer
+// Aucun import de HttpClientTestingModule trouvé dans le fichier.
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { FormArray, FormBuilder } from '@angular/forms';
@@ -6,14 +8,14 @@ import { WorkerPythonService } from '@core/services/worker_python/worker-python.
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@src/app/ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
-import { ObstaclesService } from '@src/app/ui/pages/studio/obstacles/obstacles.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { ReferenceSupport } from '@src/app/core/domain/models/obstacle.model';
 import { createPlotData } from '../section/helpers/createPlotData';
 import Plotly from 'plotly.js-dist-min';
 
 jest.mock('../section/helpers/createPlotData');
 jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn().mockResolvedValue({} as any),
+  newPlot: jest.fn().mockResolvedValue({} as unknown),
   relayout: jest.fn(),
   purge: jest.fn(),
   update: jest.fn().mockResolvedValue(undefined)
@@ -34,15 +36,15 @@ describe('FreePositioningComponent', () => {
     invert: false
   });
   const workerReadySignal = signal(false);
-  const litDataSignal = signal<any>(null);
-  const sectionSignal = signal<any>({
+  const litDataSignal = signal<unknown>(null);
+  const sectionSignal = signal<unknown>({
     supports: [
       { uuid: 's0', number: '0' },
       { uuid: 's1', number: '1' }
     ],
     obstacles: []
   });
-  const errorSignal = signal<any>(null);
+  const errorSignal = signal<unknown>(null);
   const loadingSignal = signal(false);
 
   const mockPlotService = {
@@ -182,14 +184,20 @@ describe('FreePositioningComponent', () => {
           xaxis: { p2c: () => xValue },
           yaxis: { p2c: () => yValue }
         }
-      }) as any;
+      }) as unknown as {
+        _fullLayout: {
+          margin: { l: number; r: number; t: number; b: number };
+          xaxis: { p2c: () => number };
+          yaxis: { p2c: () => number };
+        };
+      };
 
     const makeClickEvent = () =>
       ({
         layerX: 10,
         layerY: 10,
         target: { tagName: 'CANVAS' }
-      }) as any;
+      }) as unknown as { layerX: number; layerY: number; target: { tagName: string } };
 
     it('should store absolute altitude in absolute mode', () => {
       // absolute by default
@@ -198,14 +206,18 @@ describe('FreePositioningComponent', () => {
       mockObstaclesService.currentPointIndex.set(0);
 
       const plotElement = makeFakePlotElement(100, 50);
-      (component as any).handleClick(makeClickEvent(), 'profile', plotElement);
+      (component as unknown as { handleClick: (evt: unknown, type: string, plotElement: unknown) => void }).handleClick(
+        makeClickEvent(),
+        'profile',
+        plotElement
+      );
 
       expect(positionsFormArray.at(0).get('x')?.value).toBe(100);
       expect(positionsFormArray.at(0).get('z')?.value).toBe(50);
     });
 
     it('should store delta altitude in relative mode', () => {
-      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+      (mockObstacleFormService.form.get('altitudeType') as { setValue: (v: string) => void }).setValue('relative');
       component.referenceSupportAltitudeNgf.set(30);
 
       positionsFormArray.clear();
@@ -213,7 +225,11 @@ describe('FreePositioningComponent', () => {
       mockObstaclesService.currentPointIndex.set(0);
 
       const plotElement = makeFakePlotElement(100, 50);
-      (component as any).handleClick(makeClickEvent(), 'profile', plotElement);
+      (component as unknown as { handleClick: (evt: unknown, type: string, plotElement: unknown) => void }).handleClick(
+        makeClickEvent(),
+        'profile',
+        plotElement
+      );
 
       // 50 (absolute) - 30 (support) = 20
       expect(positionsFormArray.at(0).get('z')?.value).toBe(20);
@@ -239,7 +255,7 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should call Plotly.relayout on face plot when it exists', () => {
-      const fakePlot = {} as any;
+      const fakePlot = {} as unknown as Plotly.PlotlyHTMLElement;
       component.plotFace.set(fakePlot);
       component.plotProfile.set(null);
 
@@ -253,8 +269,8 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should call Plotly.relayout on both plots when both exist', () => {
-      const fakeFace = { id: 'face' } as any;
-      const fakeProfile = { id: 'profile' } as any;
+      const fakeFace = { id: 'face' } as unknown as Plotly.PlotlyHTMLElement;
+      const fakeProfile = { id: 'profile' } as unknown as Plotly.PlotlyHTMLElement;
       component.plotFace.set(fakeFace);
       component.plotProfile.set(fakeProfile);
 
@@ -290,7 +306,12 @@ describe('FreePositioningComponent', () => {
     };
 
     it('should return early when litData is null', async () => {
-      await component.createPlot(null as any, 0, 'face', []);
+      await component.createPlot(
+        null as unknown as import('@core/services/worker_python/tasks/types').GetSectionOutput,
+        0,
+        'face',
+        []
+      );
 
       expect(mockCreatePlotData).not.toHaveBeenCalled();
       expect(Plotly.newPlot).not.toHaveBeenCalled();
@@ -322,7 +343,7 @@ describe('FreePositioningComponent', () => {
     it('should set plotFace when side is face', async () => {
       const fakeElement = document.createElement('div');
       jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
-      (Plotly.newPlot as jest.Mock).mockResolvedValue({ _face: true } as any);
+      (Plotly.newPlot as jest.Mock).mockResolvedValue({ _face: true } as unknown as Plotly.PlotlyHTMLElement);
 
       await component.createPlot(mockLitData, 0, 'face', []);
 
@@ -334,7 +355,7 @@ describe('FreePositioningComponent', () => {
       jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
       (Plotly.newPlot as jest.Mock).mockResolvedValue({
         _profile: true
-      } as any);
+      } as unknown as Plotly.PlotlyHTMLElement);
 
       await component.createPlot(mockLitData, 0, 'profile', []);
 
@@ -357,8 +378,8 @@ describe('FreePositioningComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should purge existing plots on destroy', () => {
-      const fakeFace = { id: 'face' } as any;
-      const fakeProfile = { id: 'profile' } as any;
+      const fakeFace = { id: 'face' } as unknown as Plotly.PlotlyHTMLElement;
+      const fakeProfile = { id: 'profile' } as unknown as Plotly.PlotlyHTMLElement;
       component.plotFace.set(fakeFace);
       component.plotProfile.set(fakeProfile);
 
@@ -385,7 +406,7 @@ describe('FreePositioningComponent', () => {
     it('should invoke Plotly.update with annotations when plots exist', () => {
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as Plotly.PlotlyHTMLElement;
       component.plotFace.set(fakePlot);
       component.plotProfile.set(fakePlot);
 
@@ -413,7 +434,7 @@ describe('FreePositioningComponent', () => {
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as Plotly.PlotlyHTMLElement;
       component.plotProfile.set(fakePlot);
 
       component.debounceUpdateSelectedPositionMarkers();
@@ -431,7 +452,7 @@ describe('FreePositioningComponent', () => {
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as Plotly.PlotlyHTMLElement;
       component.plotFace.set(fakePlot);
       component.plotProfile.set(null);
 
@@ -452,7 +473,7 @@ describe('FreePositioningComponent', () => {
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as Plotly.PlotlyHTMLElement;
       component.plotProfile.set(fakePlot);
       component.plotFace.set(null);
 
@@ -472,7 +493,7 @@ describe('FreePositioningComponent', () => {
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as Plotly.PlotlyHTMLElement;
       component.plotProfile.set(fakePlot);
 
       component.debounceUpdateSelectedPositionMarkers();
@@ -485,7 +506,7 @@ describe('FreePositioningComponent', () => {
 
     it('should add reference support altitude in relative mode', () => {
       // Switch to relative altitude mode
-      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+      (mockObstacleFormService.form.get('altitudeType') as { setValue: (v: string) => void }).setValue('relative');
 
       // Simulate support altitude NGF = 30
       component.referenceSupportAltitudeNgf.set(30);
@@ -495,7 +516,7 @@ describe('FreePositioningComponent', () => {
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
-      } as any;
+      } as unknown as Plotly.PlotlyHTMLElement;
       component.plotProfile.set(fakePlot);
 
       component.debounceUpdateSelectedPositionMarkers();
@@ -570,7 +591,9 @@ describe('FreePositioningComponent', () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
         result: { current: litDataWithTwoSupports }
       });
-      (mockObstacleFormService.form.get('referenceSupport') as any).setValue(ReferenceSupport.LEFT);
+      (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
+        ReferenceSupport.LEFT
+      );
 
       component.recreatePlots();
       await flushDebounceAndMicrotasks();
@@ -582,7 +605,9 @@ describe('FreePositioningComponent', () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
         result: { current: litDataWithTwoSupports }
       });
-      (mockObstacleFormService.form.get('referenceSupport') as any).setValue(ReferenceSupport.RIGHT);
+      (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
+        ReferenceSupport.RIGHT
+      );
 
       component.recreatePlots();
       await flushDebounceAndMicrotasks();
@@ -598,7 +623,9 @@ describe('FreePositioningComponent', () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
         result: { current: litDataOnlyOneSupport }
       });
-      (mockObstacleFormService.form.get('referenceSupport') as any).setValue(ReferenceSupport.RIGHT);
+      (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
+        ReferenceSupport.RIGHT
+      );
 
       component.recreatePlots();
       await flushDebounceAndMicrotasks();

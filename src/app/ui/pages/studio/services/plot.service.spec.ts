@@ -6,6 +6,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { CablesService } from '@services/cables/cables.service';
@@ -203,6 +204,7 @@ describe('PlotService', () => {
     } as unknown as jest.Mocked<CablesService>;
 
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       providers: [
         PlotService,
         {

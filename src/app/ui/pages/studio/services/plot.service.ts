@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 import { SectionService } from '@services/sections/section.service';
 import { ChargeData } from '@core/domain/models/charge.model';
 import { SideTabsService } from '../side-tabs/side-tabs.service';
-import { ObstaclesService } from '../obstacles/obstacles.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { ObstacleFormService } from '../obstacles/obstaclesForm/obstaclesForm.service';
 
 /** DOM element ID used for the Plotly chart container. */
