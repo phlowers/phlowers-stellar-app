@@ -983,11 +983,6 @@
         <source>Load type</source>
       </segment>
     </unit>
-    <unit id="4377932527319537276">
-      <segment>
-        <source>Punctual</source>
-      </segment>
-    </unit>
     <unit id="5080875188035619513">
       <segment>
         <source>Pyodide load error</source>
@@ -2888,6 +2883,11 @@
     <unit id="8316615093085902594">
       <segment>
         <source>Minimum transit value:</source>
+      </segment>
+    </unit>
+    <unit id="50322401921445433">
+      <segment>
+        <source>Punctual load</source>
       </segment>
     </unit>
   </file>
