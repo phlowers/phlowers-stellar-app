@@ -38,6 +38,8 @@ export interface CreatePlotParams {
   currentObstacleUuid: string | null;
   /** Index of the currently selected obstacle position point. */
   currentObstaclePointIndex: number;
+  /** Normalization factors for the axes and Plotly aspect mode. */
+  axesNorms?: { x: number; y: number; z: number; aspectMode: string };
 }
 
 const normalCamera = () => ({
@@ -68,14 +70,20 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
     };
   }
   return {
-    aspectmode: 'manual' as 'manual' | 'auto' | 'cube' | 'data' | undefined,
+    aspectmode:
+      plotParams.axesNorms?.aspectMode &&
+      (['auto', 'data', 'cube', 'manual'] as const).includes(
+        plotParams.axesNorms.aspectMode as 'auto' | 'data' | 'cube' | 'manual'
+      )
+        ? (plotParams.axesNorms.aspectMode as 'auto' | 'data' | 'cube' | 'manual')
+        : 'manual',
     xaxis: axis,
     yaxis: axis,
     zaxis: axis,
     aspectratio: {
-      x: 3,
-      y: 0.2,
-      z: 0.5
+      x: plotParams.axesNorms?.x ?? 3,
+      y: plotParams.axesNorms?.y ?? 0.2,
+      z: plotParams.axesNorms?.z ?? 0.5
     },
     annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)],
     camera: plotParams.camera
