@@ -299,7 +299,7 @@ describe('NewChargeModalComponent (Jest)', () => {
 
     const errorMessage = fixture.debugElement.query(By.css('#charge-name-error-message'));
     expect(errorMessage).toBeTruthy();
-    expect(errorMessage.nativeElement.textContent).toContain('The initial condition name must be unique.');
+    expect(errorMessage.nativeElement.textContent).toContain(' The charge case name must be unique. ');
   });
 
   it('should not show error message when name is unique', () => {
