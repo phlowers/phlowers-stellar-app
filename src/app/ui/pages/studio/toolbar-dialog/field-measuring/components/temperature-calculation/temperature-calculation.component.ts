@@ -13,7 +13,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { FieldMeasure } from '@ui/pages/studio/toolbar-dialog/field-measuring/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_MIN, TRANSIT_MAX } from '../../constants';
+import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 @Component({
@@ -54,8 +54,7 @@ export class TemperatureCalculationComponent {
 
   temperatureCalculationError = signal<boolean>(false);
 
-  readonly transitMin = TRANSIT_MIN;
-  readonly transitMax = TRANSIT_MAX;
+  readonly transitBounds = TRANSIT_BOUNDS;
 
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
@@ -68,7 +67,7 @@ export class TemperatureCalculationComponent {
 
   isTransitOutOfBounds = computed(() => {
     const transit = this.measureData().transit;
-    return transit !== null && (transit < this.transitMin || transit > this.transitMax);
+    return transit !== null && (transit < this.transitBounds.min || transit > this.transitBounds.max);
   });
 
   isFormValid = computed(() => {

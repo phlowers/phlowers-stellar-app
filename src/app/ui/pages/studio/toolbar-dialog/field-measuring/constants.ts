@@ -51,8 +51,7 @@ export const SKY_COVER_OPTIONS: SelectOption[] = [
 ];
 
 /** Min/max bounds for the transit input (in Amperes). */
-export const TRANSIT_MIN = 0;
-export const TRANSIT_MAX = 4000;
+export const TRANSIT_BOUNDS = { min: 0, max: 4000 };
 
 /** Default left support options for field measuring. */
 export const LEFT_SUPPORT_OPTIONS: SelectOption[] = [

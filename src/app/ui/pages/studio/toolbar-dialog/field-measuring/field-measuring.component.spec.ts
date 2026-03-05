@@ -15,7 +15,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Section } from '@core/domain';
 import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
-import { TRANSIT_MIN, TRANSIT_MAX } from './constants';
+import { TRANSIT_BOUNDS } from './constants';
 
 @Component({
   selector: 'app-button',
@@ -362,22 +362,22 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should return true when transit is at minimum boundary', () => {
-      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_MIN }));
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.min }));
       expect(component.isFormValid()).toBeTruthy();
     });
 
     it('should return true when transit is at maximum boundary', () => {
-      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_MAX }));
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.max }));
       expect(component.isFormValid()).toBeTruthy();
     });
 
     it('should return false when transit is below minimum', () => {
-      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_MIN - 1 }));
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.min - 1 }));
       expect(component.isFormValid()).toBeFalsy();
     });
 
     it('should return false when transit is above maximum', () => {
-      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_MAX + 1 }));
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.max + 1 }));
       expect(component.isFormValid()).toBeFalsy();
     });
   });

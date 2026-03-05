@@ -1563,26 +1563,6 @@
         <source>Horizontal</source>
       </segment>
     </unit>
-    <unit id="1125666118611359006">
-      <segment>
-        <source>House</source>
-      </segment>
-    </unit>
-    <unit id="5782981899482871069">
-      <segment>
-        <source>Building</source>
-      </segment>
-    </unit>
-    <unit id="5139118152626940877">
-      <segment>
-        <source>Tree</source>
-      </segment>
-    </unit>
-    <unit id="8693603235657020323">
-      <segment>
-        <source>Other</source>
-      </segment>
-    </unit>
     <unit id="6474791459744892295">
       <segment>
         <source>Absolute (NGF)</source>
@@ -2893,6 +2873,21 @@
     <unit id="3112674295214073901">
       <segment>
         <source>Study&apos;s section graph view</source>
+      </segment>
+    </unit>
+    <unit id="1353298487927664176">
+      <segment>
+        <source>Point</source>
+      </segment>
+    </unit>
+    <unit id="7454710209876834992">
+      <segment>
+        <source>Maximum transit value:</source>
+      </segment>
+    </unit>
+    <unit id="8316615093085902594">
+      <segment>
+        <source>Minimum transit value:</source>
       </segment>
     </unit>
   </file>

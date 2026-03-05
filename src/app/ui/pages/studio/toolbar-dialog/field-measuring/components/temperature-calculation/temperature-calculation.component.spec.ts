@@ -7,8 +7,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
-  TRANSIT_MIN,
-  TRANSIT_MAX
+  TRANSIT_BOUNDS
 } from '@ui/pages/studio/toolbar-dialog/field-measuring/constants';
 
 describe('TemperatureCalculationComponent', () => {
@@ -65,12 +64,12 @@ describe('TemperatureCalculationComponent', () => {
     });
 
     it('should return false when transit is at minimum boundary', () => {
-      component.updateField('transit', TRANSIT_MIN);
+      component.updateField('transit', TRANSIT_BOUNDS.min);
       expect(component.isTransitOutOfBounds()).toBe(false);
     });
 
     it('should return false when transit is at maximum boundary', () => {
-      component.updateField('transit', TRANSIT_MAX);
+      component.updateField('transit', TRANSIT_BOUNDS.max);
       expect(component.isTransitOutOfBounds()).toBe(false);
     });
 
@@ -80,12 +79,12 @@ describe('TemperatureCalculationComponent', () => {
     });
 
     it('should return true when transit is below minimum', () => {
-      component.updateField('transit', TRANSIT_MIN - 1);
+      component.updateField('transit', TRANSIT_BOUNDS.min - 1);
       expect(component.isTransitOutOfBounds()).toBe(true);
     });
 
     it('should return true when transit is above maximum', () => {
-      component.updateField('transit', TRANSIT_MAX + 1);
+      component.updateField('transit', TRANSIT_BOUNDS.max + 1);
       expect(component.isTransitOutOfBounds()).toBe(true);
     });
   });
@@ -107,12 +106,12 @@ describe('TemperatureCalculationComponent', () => {
     });
 
     it('should return false when transit is below minimum', () => {
-      component.updateField('transit', TRANSIT_MIN - 1);
+      component.updateField('transit', TRANSIT_BOUNDS.min - 1);
       expect(component.isFormValid()).toBe(false);
     });
 
     it('should return false when transit is above maximum', () => {
-      component.updateField('transit', TRANSIT_MAX + 1);
+      component.updateField('transit', TRANSIT_BOUNDS.max + 1);
       expect(component.isFormValid()).toBe(false);
     });
 

@@ -22,8 +22,7 @@ import {
   SKY_COVER_OPTIONS,
   LEFT_SUPPORT_OPTIONS,
   SelectOption,
-  TRANSIT_MIN,
-  TRANSIT_MAX
+  TRANSIT_BOUNDS
 } from './constants';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
 import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
@@ -157,7 +156,8 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
       measureData.ambientTemperature <= 99 &&
       measureData.windDirection &&
       measureData.skyCover &&
-      (!isNumber(measureData.transit) || (measureData.transit >= TRANSIT_MIN && measureData.transit <= TRANSIT_MAX));
+      (!isNumber(measureData.transit) ||
+        (measureData.transit >= TRANSIT_BOUNDS.min && measureData.transit <= TRANSIT_BOUNDS.max));
     return isValid && !this.isNameAlreadyTaken();
   });
 
