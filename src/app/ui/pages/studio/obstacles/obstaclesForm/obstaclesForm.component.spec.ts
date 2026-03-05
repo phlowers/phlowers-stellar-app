@@ -421,8 +421,10 @@ describe('ObstaclesFormComponent', () => {
     });
   });
 
-  it('initializes and resets form based on support uuid', () => {
-    expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+  describe('initializes and resets form based on support uuid', () => {
+    it('should call resetFormForNewObstacle with null on init', () => {
+      expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+    });
 
     it('should reset form based on initial null support uuid', () => {
       expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
@@ -431,7 +433,6 @@ describe('ObstaclesFormComponent', () => {
     it('should reset form when support uuid changes', () => {
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       fixture.detectChanges();
-
       expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith('support-1');
     });
 

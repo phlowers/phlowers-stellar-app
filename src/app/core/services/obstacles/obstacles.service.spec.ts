@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { ObstaclesService } from './obstacles.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -34,6 +35,7 @@ describe('ObstaclesService', () => {
   let storageService: StorageService;
   let mockDb: MockDb;
   let mockObstacleTypesTable: MockTable;
+  let httpTestingController: import('@angular/common/http/testing').HttpTestingController;
 
   beforeEach(() => {
     // Create mock database tables
@@ -60,11 +62,13 @@ describe('ObstaclesService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       providers: [ObstaclesService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(ObstaclesService);
     storageService = TestBed.inject(StorageService);
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {
@@ -172,16 +176,12 @@ describe('ObstaclesService', () => {
         }
       });
 
-      // Mock fetch for CSV file
-      const originalFetch = global.fetch;
-      global.fetch = jest.fn().mockResolvedValue({
-        text: () => Promise.resolve(mockCsvContent),
-        ok: true
-      }) as any;
-
-      await service.importFromFile();
-
-      global.fetch = originalFetch;
+      // Lancer l'import et intercepter la requête HTTP
+      const importPromise = service.importFromFile();
+      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+      await importPromise;
 
       expect(mockObstacleTypesTable.clear).toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith([
@@ -222,15 +222,11 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const originalFetch = global.fetch;
-      global.fetch = jest.fn().mockResolvedValue({
-        text: () => Promise.resolve(mockCsvContent),
-        ok: true
-      }) as any;
-
-      await service.importFromFile();
-
-      global.fetch = originalFetch;
+      const importPromise = service.importFromFile();
+      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+      await importPromise;
 
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
@@ -273,15 +269,11 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const originalFetch = global.fetch;
-      global.fetch = jest.fn().mockResolvedValue({
-        text: () => Promise.resolve(mockCsvContent),
-        ok: true
-      }) as any;
-
-      await service.importFromFile();
-
-      global.fetch = originalFetch;
+      const importPromise = service.importFromFile();
+      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCsvContent);
+      await importPromise;
 
       // Should only add the entry with valid obstacle_type
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith([
@@ -315,15 +307,11 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const originalFetch = global.fetch;
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: false,
-        text: () => Promise.resolve('')
-      }) as any;
-
-      await service.importFromFile();
-
-      global.fetch = originalFetch;
+      const importPromise = service.importFromFile();
+      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
+      expect(req.request.method).toBe('GET');
+      req.flush('', { status: 404, statusText: 'Not Found' });
+      await importPromise;
 
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
@@ -378,15 +366,11 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const originalFetch = global.fetch;
-      global.fetch = jest.fn().mockResolvedValue({
-        text: () => Promise.resolve('csv-content'),
-        ok: true
-      }) as any;
-
-      await service.importFromFile();
-
-      global.fetch = originalFetch;
+      const importPromise = service.importFromFile();
+      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
+      expect(req.request.method).toBe('GET');
+      req.flush('csv-content');
+      await importPromise;
 
       expect(mockObstacleTypesTable.clear).toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith(
@@ -433,15 +417,11 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const originalFetch = global.fetch;
-      global.fetch = jest.fn().mockResolvedValue({
-        text: () => Promise.resolve(csvContent),
-        ok: true
-      }) as any;
-
-      await service.importFromFile();
-
-      global.fetch = originalFetch;
+      const importPromise = service.importFromFile();
+      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
+      expect(req.request.method).toBe('GET');
+      req.flush(csvContent);
+      await importPromise;
 
       expect(Papa.parse).toHaveBeenCalledWith(
         csvContent,
@@ -484,16 +464,11 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const originalFetch = global.fetch;
-      global.fetch = jest.fn().mockResolvedValue({
-        text: () => Promise.resolve('csv-content'),
-        ok: true
-      }) as any;
-
-      // The service uses optional chaining (db?.catObstacleTypes), so it resolves without throwing
-      await service.importFromFile();
-
-      global.fetch = originalFetch;
+      const importPromise = service.importFromFile();
+      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
+      expect(req.request.method).toBe('GET');
+      req.flush('csv-content');
+      await importPromise;
 
       // bulkAdd should NOT have been called since db is undefined
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();

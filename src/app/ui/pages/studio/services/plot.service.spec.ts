@@ -204,6 +204,7 @@ describe('PlotService', () => {
     } as unknown as jest.Mocked<CablesService>;
 
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       providers: [
         PlotService,
         {
