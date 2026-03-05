@@ -9,4 +9,5 @@ custom_components
 engine_worker
 offline_database
 theme_styles
+angular_signals_pitfalls
 ```
