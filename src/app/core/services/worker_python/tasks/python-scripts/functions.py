@@ -266,7 +266,7 @@ def get_coordinates(
         "r_under_chain": engine.balance_model.vhl_under_chain().R.value().tolist(),
         "r_under_console": engine.balance_model.vhl_under_console().R.value().tolist(),
         "ground_altitude": engine.section_array.data.ground_altitude.tolist(),
-        "displacement": engine.get_displacement().tolist(),
+        "displacement": engine.get_displacement().T.tolist(),
         "load_angle": engine.cable_loads.load_angle.tolist(),
         "span_length": engine.section_array.data.span_length.tolist(),
         "loads_coords": loads_coords,
