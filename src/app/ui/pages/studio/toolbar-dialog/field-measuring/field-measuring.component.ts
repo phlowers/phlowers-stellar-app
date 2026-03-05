@@ -17,7 +17,14 @@ import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from './components/header/header.component';
 import { FieldMeasure } from './types';
 import { ToolbarDialogService } from '../toolbar-dialog.service';
-import { WIND_DIRECTION_OPTIONS, SKY_COVER_OPTIONS, LEFT_SUPPORT_OPTIONS, SelectOption, TRANSIT_MIN, TRANSIT_MAX } from './constants';
+import {
+  WIND_DIRECTION_OPTIONS,
+  SKY_COVER_OPTIONS,
+  LEFT_SUPPORT_OPTIONS,
+  SelectOption,
+  TRANSIT_MIN,
+  TRANSIT_MAX
+} from './constants';
 import { FieldDatasComponent } from './components/field-datas/field-datas.component';
 import { CalculusSettingComponent } from './components/calculus-setting/calculus-setting.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';

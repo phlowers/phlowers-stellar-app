@@ -60,7 +60,7 @@ export class TemperatureCalculationComponent {
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
   readonly windIncidenceModeOptions = [
-    { label: $localize`Auto`, value: 'auto' },
+    { label: $localize`Auto`, value: 'auto', disabled: true },
     { label: $localize`Perpendicular`, value: 'perpendicular' }
   ];
 
