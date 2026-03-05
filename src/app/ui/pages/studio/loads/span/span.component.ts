@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, Signal, signal } from '@angular/core';
+import { Component, computed, effect, inject, Signal, signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -84,13 +84,24 @@ export class SpanComponent {
     this.onSpanSelectChange(value ?? null);
   });
 
-  private readonly loadControlsEffect = effect(() => {
-    (Object.keys(this.loadControlSignals) as LoadControlName[]).forEach((controlName) => {
-      const value = this.loadControlSignals[controlName]();
-      if (value !== undefined) {
-        this.onLoadControlChange(controlName, value);
-      }
-    });
+  private readonly loadPositionEffect = effect(() => {
+    const value = this.loadControlSignals.loadPosition();
+    if (value !== undefined) this.onLoadControlChange('loadPosition', value);
+  });
+
+  private readonly loadWeightEffect = effect(() => {
+    const value = this.loadControlSignals.loadWeight();
+    if (value !== undefined) this.onLoadControlChange('loadWeight', value);
+  });
+
+  private readonly typeEffect = effect(() => {
+    const value = this.loadControlSignals.type();
+    if (value !== undefined) this.onLoadControlChange('type', value);
+  });
+
+  private readonly referenceSupportEffect = effect(() => {
+    const value = this.loadControlSignals.referenceSupport();
+    if (value !== undefined) this.onLoadControlChange('referenceSupport', value);
   });
 
   loadTypeOptions = [
@@ -139,13 +150,13 @@ export class SpanComponent {
       return;
     }
 
-    const index = this.plotService.getSupportIndex(supportUuid);
+    const index = untracked(() => this.plotService.getSupportIndex(supportUuid));
     if (index < 0) {
       return;
     }
 
-    this.supportsOptions.set(this.plotService.getSupportOptions(supportUuid));
-    this.form.controls.referenceSupport.enable();
+    this.supportsOptions.set(untracked(() => this.plotService.getSupportOptions(supportUuid)));
+    this.form.controls.referenceSupport.enable({ emitEvent: false });
     this.plotService.plotOptionsChange({
       startSupport: index,
       endSupport: index + 1

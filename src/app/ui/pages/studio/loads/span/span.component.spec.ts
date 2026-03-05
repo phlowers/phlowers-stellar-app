@@ -231,6 +231,170 @@ describe('SpanComponent', () => {
     });
   });
 
+  describe('Regression: Bug #447 — App freeze when switching span', () => {
+    /**
+     * Helper creating two distinct span loads used across regression tests.
+     * - support-1: referenceSupport LEFT, type PUNCTUAL, loadWeight 10, loadPosition 2
+     * - support-2: referenceSupport LEFT, type PUNCTUAL, loadWeight 20, loadPosition 5
+     */
+    const createTemporaryLoadDataTwoSpans = (): ChargeData => ({
+      climate: {
+        windPressure: null,
+        cableTemperature: null,
+        symmetryType: SymmetryType.SYMMETRIC,
+        iceThickness: null,
+        frontierSupportNumber: null,
+        iceThicknessBefore: null,
+        iceThicknessAfter: null
+      },
+      spanLoads: [
+        {
+          supportUuid: 'support-1',
+          referenceSupport: 'LEFT' as const,
+          type: LoadType.PUNCTUAL,
+          loadWeight: 10,
+          loadPosition: 2
+        },
+        {
+          supportUuid: 'support-2',
+          referenceSupport: 'LEFT' as const,
+          type: LoadType.PUNCTUAL,
+          loadWeight: 20,
+          loadPosition: 5
+        }
+      ]
+    });
+
+    beforeEach(() => {
+      (mockPlotService['getSupportIndex'] as jest.Mock).mockImplementation((uuid: string) =>
+        uuid === 'support-1' ? 0 : uuid === 'support-2' ? 1 : -1
+      );
+    });
+
+    describe('Bug 1 — spanSelectEffect must not track section() as a reactive dependency', () => {
+      it('should not call plotOptionsChange again when a signal read inside getSupportIndex changes', () => {
+        // Simulate the real PlotService.getSupportIndex which reads section() internally.
+        // Without untracked(), that read would register section() as a dependency of
+        // spanSelectEffect, causing the effect to re-run on every Dexie emission.
+        const internalSignal = signal(0);
+        (mockPlotService['getSupportIndex'] as jest.Mock).mockImplementation(() => {
+          internalSignal(); // reads a signal — simulates reading section()
+          return 0;
+        });
+
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+
+        expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledTimes(1);
+
+        // Simulate a section() change (e.g. a new Dexie emission with a fresh object reference)
+        internalSignal.set(1);
+        fixture.detectChanges();
+
+        // spanSelectEffect must NOT have re-run because getSupportIndex is wrapped in untracked()
+        expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('Bug 2 — enable() must use { emitEvent: false } to avoid corrupting load data', () => {
+      it('should preserve span A load data when switching back to span A after visiting span B', () => {
+        // Scenario:
+        // 1. Select span A, user sets referenceSupport to 'RIGHT' → signal = 'RIGHT'
+        // 2. Switch to span B → applySelectedLoadValues sets form to 'LEFT' (emitEvent:false)
+        //    signal stays 'RIGHT', but the form control value is now 'LEFT'
+        // 3. Switch back to span A → enable() (already enabled) re-emits 'LEFT' (the current form value)
+        //    Without emitEvent:false: signal 'RIGHT'→'LEFT' → referenceSupportEffect fires
+        //    → onLoadControlChange('referenceSupport', 'LEFT') → span A data corrupted to 'LEFT'
+        const temporaryLoadData = createTemporaryLoadDataTwoSpans();
+        mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+        // Step 1 — select span A and simulate the user choosing 'RIGHT'
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+        component.form.controls.referenceSupport.setValue('RIGHT');
+        fixture.detectChanges();
+        expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('RIGHT');
+
+        // Step 2 — switch to span B: form becomes 'LEFT' (span B data), signal stays 'RIGHT'
+        component.form.controls.spanSelect.setValue('support-2');
+        fixture.detectChanges();
+
+        // Step 3 — switch back to span A: enable() would emit 'LEFT' (current form value)
+        // if emitEvent:true, triggering the effect with a stale value
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+
+        // Span A's referenceSupport must remain 'RIGHT', not be overwritten by span B's form value
+        expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('RIGHT');
+      });
+    });
+
+    describe('Bug 3 — individual effects must not overwrite fields of other controls with stale signal values', () => {
+      it('should not overwrite type or loadWeight of span B when only loadPosition changes', () => {
+        // Scenario:
+        // 1. Select span A, set type to MARKING → type signal = 'marking'
+        // 2. Switch to span B (PUNCTUAL, loadWeight 20) → applySelectedLoadValues sets form.type
+        //    to 'punctual' with emitEvent:false → type signal stays 'marking'
+        // 3. User changes loadPosition on span B
+        //    Old bug (combined effect): type signal 'marking' → onLoadControlChange('type','marking')
+        //    → span B type overwritten to 'marking' AND loadWeight reset to 0
+        //    Fix (separate effects): only loadPositionEffect fires → only loadPosition updated
+        const temporaryLoadData = createTemporaryLoadDataTwoSpans();
+        mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+        // Step 1 — select span A and set type to MARKING
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+        component.form.controls.type.setValue(LoadType.MARKING);
+        fixture.detectChanges();
+        // type signal is now 'marking'
+
+        // Step 2 — switch to span B: form.type → 'punctual' (emitEvent:false), signal stays 'marking'
+        component.form.controls.spanSelect.setValue('support-2');
+        fixture.detectChanges();
+
+        // Step 3 — user changes only loadPosition on span B
+        component.form.controls.loadPosition.setValue(99);
+        fixture.detectChanges();
+
+        expect(temporaryLoadData.spanLoads[1].type).toBe(LoadType.PUNCTUAL);
+        expect(temporaryLoadData.spanLoads[1].loadWeight).toBe(20);
+        expect(temporaryLoadData.spanLoads[1].loadPosition).toBe(99);
+      });
+
+      it('should not overwrite loadWeight of span B when only referenceSupport changes', () => {
+        // Scenario:
+        // 1. Select span A, user sets loadWeight to 999 → loadWeight signal = 999
+        // 2. Switch to span B (loadWeight 20) → applySelectedLoadValues sets form.loadWeight
+        //    to 20 with emitEvent:false → loadWeight signal stays 999
+        // 3. User changes referenceSupport on span B
+        //    Old bug (combined effect): loadWeight signal 999 → onLoadControlChange('loadWeight',999)
+        //    → span B loadWeight overwritten to 999
+        //    Fix (separate effects): only referenceSupportEffect fires → only referenceSupport updated
+        const temporaryLoadData = createTemporaryLoadDataTwoSpans();
+        mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+        // Step 1 — select span A and set loadWeight to 999
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+        component.form.controls.loadWeight.setValue(999);
+        fixture.detectChanges();
+        // loadWeight signal is now 999
+
+        // Step 2 — switch to span B: form.loadWeight → 20 (emitEvent:false), signal stays 999
+        component.form.controls.spanSelect.setValue('support-2');
+        fixture.detectChanges();
+
+        // Step 3 — user changes only referenceSupport on span B
+        component.form.controls.referenceSupport.setValue('RIGHT');
+        fixture.detectChanges();
+
+        expect(temporaryLoadData.spanLoads[1].loadWeight).toBe(20);
+        expect(temporaryLoadData.spanLoads[1].referenceSupport).toBe('RIGHT');
+      });
+    });
+  });
+
   describe('UI state', () => {
     it('disables save and calculate buttons when form is invalid', () => {
       const saveButton = getByTestId('save-load') as HTMLButtonElement;
