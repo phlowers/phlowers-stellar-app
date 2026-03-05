@@ -10,7 +10,7 @@ import { SectionService } from '@services/sections/section.service';
 import { InitialConditionService } from '@services/initial-conditions/initial-condition.service';
 import { CablesService } from '@services/cables/cables.service';
 import { Section, InitialCondition, Study } from '@core/domain';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting, HttpClientTestingModule } from '@angular/common/http/testing';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -176,7 +176,7 @@ describe('StudyComponent', () => {
     } as unknown as jest.Mocked<CablesService>;
 
     await TestBed.configureTestingModule({
-      imports: [StudyComponent],
+      imports: [StudyComponent, HttpClientTestingModule],
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: StudiesService, useValue: mockStudiesService },

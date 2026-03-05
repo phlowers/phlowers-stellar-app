@@ -25,6 +25,7 @@ import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
 import { ChainsService } from '@services/chains/chains.service';
 import { AttachmentService } from '@services/attachment/attachment.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
 
@@ -79,7 +80,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly linesService: LinesService,
     private readonly cablesService: CablesService,
     private readonly chainsService: ChainsService,
-    private readonly attachmentService: AttachmentService
+    private readonly attachmentService: AttachmentService,
+    private readonly obstacleTypesService: ObstaclesService
   ) {
     this.form = new FormGroup({
       email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])
@@ -113,6 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
     await this.cablesService.importFromFile();
     await this.chainsService.importFromFile();
     await this.attachmentService.importFromFile();
+    await this.obstacleTypesService.importFromFile();
   }
 
   ngOnDestroy(): void {
