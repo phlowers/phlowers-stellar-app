@@ -13,19 +13,36 @@
   </dl>
 
   <label for="transit" i18n class="transit__label">Transit</label>
-  <p-inputgroup class="transit__value">
-    <input
-      id="transit"
-      type="number"
-      pInputText
-      [ngModel]="measureData().transit"
-      (ngModelChange)="updateField('transit', $event)"
-      [fluid]="true"
-      aria-describedby="mandatory-temperature"
-      required
-    />
-    <p-inputgroup-addon>A</p-inputgroup-addon>
-  </p-inputgroup>
+  <div class="transit__value">
+    <p-inputgroup>
+      <input
+        id="transit"
+        type="number"
+        [min]="transitMin"
+        [max]="transitMax"
+        pInputText
+        [ngModel]="measureData().transit"
+        (ngModelChange)="updateField('transit', $event)"
+        [fluid]="true"
+        aria-describedby="mandatory-temperature"
+        [ngClass]="isTransitOutOfBounds() ? 'ng-invalid ng-dirty' : ''"
+        [attr.aria-invalid]="isTransitOutOfBounds() || null"
+        [attr.aria-errormessage]="measureData().transit! < transitMin ? 'transit-error-min-message' : null"
+        [attr.aria-errormessage]="measureData().transit! > transitMax ? 'transit-error-max-message' : null"
+        required
+      />
+      <p-inputgroup-addon>A</p-inputgroup-addon>
+    </p-inputgroup>
+    @if (measureData().transit! < transitMin) {
+      <p-message id="transit-error-min-message" severity="error" size="small" variant="simple">
+        <ng-container i18n>Minimum transit value:</ng-container> {{ transitMin }} A.
+      </p-message>
+    } @else if (measureData().transit! > transitMax) {
+      <p-message id="transit-error-max-message" severity="error" size="small" variant="simple">
+        <ng-container i18n>Maximum transit value:</ng-container> {{ transitMax }} A.
+      </p-message>
+    }
+  </div>
 
   <dl class="contents with-mt-labels">
     <dt for="windSpeed" i18n class="windSpeed__label">Wind speed</dt>
