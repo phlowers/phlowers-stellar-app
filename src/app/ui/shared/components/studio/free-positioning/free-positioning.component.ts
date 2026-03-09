@@ -100,6 +100,7 @@ export class FreePositioningComponent implements OnDestroy {
   isLoading = signal<boolean>(true);
 
   readonly referenceSupportAltitudeNgf = signal<number>(0);
+  readonly sharedYRange = signal<[number, number] | null>(null);
 
   // State
   options = signal<Options>({});
@@ -171,8 +172,10 @@ export class FreePositioningComponent implements OnDestroy {
     this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
 
     const supports = this.plotService.section()?.supports ?? [];
+    this.sharedYRange.set(null);
     await this.createPlot(litData.result.current, startSupport, 'face', supports);
     await this.createPlot(litData.result.current, startSupport, 'profile', supports);
+    this.synchronizeYAxisRanges();
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
 
@@ -195,10 +198,10 @@ export class FreePositioningComponent implements OnDestroy {
     const facePlot = this.plotFace();
     const profilePlot = this.plotProfile();
     if (facePlot) {
-      Plotly.relayout(facePlot, this.getPlotLayout('face'));
+      Plotly.relayout(facePlot, this.getPlotLayout());
     }
     if (profilePlot) {
-      Plotly.relayout(profilePlot, this.getPlotLayout('profile'));
+      Plotly.relayout(profilePlot, this.getPlotLayout());
     }
   }
 
@@ -221,10 +224,66 @@ export class FreePositioningComponent implements OnDestroy {
   }
 
   /**
+   * Extracts all finite Y values from a plot's traces.
+   */
+  private extractYValues(plot: PlotlyHTMLElement): number[] {
+    return plot.data
+      .flatMap((trace) => {
+        const y = (trace as Plotly.ScatterData).y;
+        if (y == null) return [];
+        return Array.from(y as ArrayLike<number>);
+      })
+      .filter((v) => typeof v === 'number' && isFinite(v));
+  }
+
+  /**
+   * Computes a padded [min, max] range from an array of Y values.
+   * Returns null if the array is empty.
+   */
+  private computePaddedYRange(yValues: number[]): [number, number] | null {
+    if (yValues.length === 0) return null;
+
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const v of yValues) {
+      if (v < minY) minY = v;
+      if (v > maxY) maxY = v;
+    }
+    const padding = Math.max((maxY - minY) * 0.05, 1);
+    return [minY - padding, maxY + padding];
+  }
+
+  /**
+   * Applies a shared Y axis range to the given plots.
+   */
+  private applySharedYRange(plots: PlotlyHTMLElement[], range: [number, number]): void {
+    for (const plot of plots) {
+      void Plotly.relayout(plot, { 'yaxis.range': range, 'yaxis.autorange': false });
+    }
+  }
+
+  /**
+   * Synchronizes the Y axis range between face and profile plots
+   * so that both charts share the exact same vertical scale.
+   */
+  private synchronizeYAxisRanges(): void {
+    const facePlot = this.plotFace();
+    const profilePlot = this.plotProfile();
+    if (!facePlot || !profilePlot) return;
+
+    const allYValues = [...this.extractYValues(facePlot), ...this.extractYValues(profilePlot)];
+    const sharedRange = this.computePaddedYRange(allYValues);
+    if (!sharedRange) return;
+
+    this.sharedYRange.set(sharedRange);
+    this.applySharedYRange([facePlot, profilePlot], sharedRange);
+  }
+
+  /**
    * Creates plot layout configuration
    */
-  private getPlotLayout(side: Side): Partial<Plotly.Layout> {
-    const isFaceView = side === 'face';
+  private getPlotLayout(): Partial<Plotly.Layout> {
+    const sharedRange = this.sharedYRange();
 
     return {
       autosize: true,
@@ -238,11 +297,10 @@ export class FreePositioningComponent implements OnDestroy {
       },
       yaxis: {
         ...AXIS_CONFIG,
-        scaleratio: isFaceView ? 0.2 : undefined,
-        scaleanchor: isFaceView ? 'x' : undefined,
         showticklabels: true,
         showgrid: true,
-        showline: true
+        showline: true,
+        ...(sharedRange ? { range: [...sharedRange], autorange: false } : {})
       },
       xaxis: {
         ...AXIS_CONFIG,
@@ -331,10 +389,10 @@ export class FreePositioningComponent implements OnDestroy {
             z: zValue
           }
         : {
-            // Second plot (face): update y, keep x and z
+            // Second plot (face): update y and z, keep x
             x: previousSelectedObstacle.x ?? null,
             y: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
-            z: previousSelectedObstacle.z ?? null
+            z: zValue
           };
 
     // Update local selected position immediately for instant UI feedback
@@ -389,7 +447,7 @@ export class FreePositioningComponent implements OnDestroy {
 
     if (!plot) return;
 
-    const pLayout = this.getPlotLayout(side);
+    const pLayout = this.getPlotLayout();
     void Plotly.update(
       plot,
       {},
@@ -459,7 +517,7 @@ export class FreePositioningComponent implements OnDestroy {
       );
 
       // const width = plotElement.clientWidth;
-      const layout = this.getPlotLayout(side);
+      const layout = this.getPlotLayout();
       const config = this.getPlotConfig();
 
       const plot = await Plotly.newPlot(plotId, plotData, { ...layout, annotations }, config);
