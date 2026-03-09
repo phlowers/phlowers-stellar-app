@@ -38,7 +38,11 @@ export enum Task {
   /** Calculate cable temperature from ambient conditions */
   temperatureCalculation = 'temperatureCalculation',
   /** Calculate parameter at 15°C without wind */
-  calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind'
+  calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind',
+  /** Set the number of calculation points per span */
+  setResolution = 'setResolution',
+  /** Get Python-side configuration constants */
+  getConfig = 'getConfig'
 }
 
 /**
@@ -233,6 +237,12 @@ export interface TaskInputs {
     cableTemperatureCalibrationUncertainty: number | null;
     span_index: number | null;
   };
+  /** Inputs for setResolution task */
+  [Task.setResolution]: {
+    resolution: number;
+  };
+  /** Inputs for getConfig task: no inputs */
+  [Task.getConfig]: undefined;
 }
 
 /**
@@ -288,5 +298,14 @@ export interface TaskOutputs {
     parameter15CMinusUncertainty: number;
     parameter15C: number;
     parameter15CPlusUncertainty: number;
+  };
+  /** Output from setResolution task */
+  [Task.setResolution]: {
+    success: boolean;
+    resolution: number;
+  };
+  /** Output from getConfig task */
+  [Task.getConfig]: {
+    resolution: number;
   };
 }

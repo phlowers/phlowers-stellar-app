@@ -12,6 +12,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { ScaleViewComponent } from './scale-view/scale-view.component';
 
 @Component({
   selector: 'app-studio-top-toolbar',
@@ -27,7 +28,8 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
     SpeedDialModule,
     DialogModule,
     CheckboxModule,
-    ButtonComponent
+    ButtonComponent,
+    ScaleViewComponent
   ]
 })
 /** Top toolbar component providing view controls, display options, and tool/table menus. */

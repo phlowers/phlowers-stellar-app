@@ -208,6 +208,7 @@ describe('SectionPlotComponent', () => {
     section: sectionSignal,
     camera: cameraSignal,
     isFreePositioningMode: isFreePositioningModeSignal,
+    axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
     temporaryLoadData: null as ChargeData | null | undefined
   };
 

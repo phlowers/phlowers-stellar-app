@@ -3471,6 +3471,72 @@
         <target> Le nom du cas de charge doit être unique. </target>
       </segment>
     </unit>
+    <unit id="scaleView.button.label">
+      <segment state="initial">
+        <source>View</source>
+        <target>Vue</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.form.ariaLabel">
+      <segment state="translated">
+        <source>View configuration</source>
+        <target>Configuration de la vue</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.legend">
+      <segment state="initial">
+        <source>Select the display scale.</source>
+        <target>Sélectionner l&apos;échelle d&apos;affichage.</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.plan">
+      <segment state="initial">
+        <source>Reduced in x (x/5, y, z)</source>
+        <target>Réduite en x (x/5, y, z)</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.geo">
+      <segment state="initial">
+        <source>Uniform (x, y, z)</source>
+        <target>Uniforme (x, y, z)</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.celeste">
+      <segment state="initial">
+        <source>Reduced in z (x, y, z/2)</source>
+        <target>Réduite en z (x, y, z/2)</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.auto">
+      <segment state="translated">
+        <source>Auto</source>
+        <target>Auto</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.points.legend">
+      <segment state="initial">
+        <source> Choose the number of points to display per range. </source>
+        <target>Choisir le nombre de points à afficher par portée.</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.slider.ariaLabel">
+      <segment state="initial">
+        <source>Number of points per range</source>
+        <target>Nombre de points par portée</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.input.ariaLabel">
+      <segment state="initial">
+        <source>Number of points per range</source>
+        <target>Nombre de points par portée</target>
+      </segment>
+    </unit>
+    <unit id="scaleView.validate.label">
+      <segment state="initial">
+        <source>Validate</source>
+        <target>Valider</target>
+      </segment>
+    </unit>
     <unit id="1353298487927664176">
       <segment state="initial">
         <source>Point</source>

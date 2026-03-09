@@ -17,6 +17,9 @@ import { ObstacleFormService } from '../obstacles/obstaclesForm/obstaclesForm.se
 /** DOM element ID used for the Plotly chart container. */
 export const PLOT_ID = 'plotly-output';
 
+const MIN_RESOLUTION = 25;
+const RESOLUTION_STORAGE_KEY = 'plotResolution';
+
 /** Option for a span dropdown selector. */
 export interface SpanOption {
   /** Display label for the span option. */
@@ -86,6 +89,18 @@ export class PlotService {
   isFreePositioningMode = signal<boolean>(false);
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
+
+  readonly axesNorms = signal<{ x: number; y: number; z: number; aspectMode: string }>({
+    x: 1,
+    y: 1,
+    z: 1,
+    aspectMode: 'data'
+  });
+
+  resolution = signal<number>(100);
+  appliedResolution = signal<number | null>(null);
+  /** Default resolution value loaded from Python engine configuration. Also used as maximum for the UI slider. */
+  defaultResolution = signal<number>(100);
   litData = signal<GetSectionOutput | null>(null);
   baseLitData = signal<GetSectionOutput | null>(null);
   loading = signal<boolean>(true);
@@ -114,8 +129,29 @@ export class PlotService {
     private readonly sideTabsService: SideTabsService,
     private readonly obstaclesService: ObstaclesService
   ) {
+    const storedResolution = Number(localStorage.getItem(RESOLUTION_STORAGE_KEY));
+    if (Number.isFinite(storedResolution) && storedResolution >= MIN_RESOLUTION) {
+      // Clamp to minimum; will be re-clamped to max once worker loads config
+      this.resolution.set(storedResolution);
+    }
+
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
+    });
+    effect(() => {
+      if (this.workerReady()) {
+        this.workerPythonService.runTask(Task.getConfig, undefined).then(({ result }) => {
+          if (result && result.resolution) {
+            // Update default resolution from Python config
+            this.defaultResolution.set(result.resolution);
+            // Re-clamp current resolution if it exceeds the loaded value
+            const currentResolution = this.resolution();
+            if (currentResolution > result.resolution) {
+              this.setResolution(result.resolution);
+            }
+          }
+        });
+      }
     });
     effect(() => {
       if (this.isStudioActive() && this.workerReady() && this.section()) {
@@ -139,6 +175,7 @@ export class PlotService {
     this.section.set(null);
     this.study.set(null);
     this.spanAmountChoice.set('all');
+    this.axesNorms.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     this.injector.get(ObstacleFormService).clearPositions();
     this.obstaclesService.resetCurrentPointIndex();
     this.sideTabsService.sideTabs.set(null);
@@ -242,6 +279,44 @@ export class PlotService {
     this.error.set(null);
     this.loading.set(false);
   };
+
+  public setAxesNorms(norms: { x: number; y: number; z: number; aspectMode: string }): void {
+    this.axesNorms.set(norms);
+  }
+
+  private normalizeResolution(value: number): number {
+    if (!Number.isFinite(value)) {
+      return this.defaultResolution();
+    }
+    const rounded = Math.round(value);
+    const max = this.defaultResolution();
+    return Math.max(MIN_RESOLUTION, Math.min(max, rounded));
+  }
+
+  setResolution(value: number): void {
+    const normalizedResolution = this.normalizeResolution(value);
+    if (normalizedResolution === this.resolution()) {
+      return;
+    }
+    this.resolution.set(normalizedResolution);
+    localStorage.setItem(RESOLUTION_STORAGE_KEY, normalizedResolution.toString());
+  }
+
+  async applyResolution(value: number): Promise<void> {
+    if (!this.workerPythonService.ready) {
+      return;
+    }
+    const normalizedResolution = this.normalizeResolution(value);
+    if (this.appliedResolution() === normalizedResolution) {
+      return;
+    }
+    const { error } = await this.workerPythonService.runTask(Task.setResolution, {
+      resolution: normalizedResolution
+    });
+    if (!error) {
+      this.appliedResolution.set(normalizedResolution);
+    }
+  }
 
   getSpanOptions = computed<SpanOption[]>(() => {
     const supports = this.section()?.supports ?? [];

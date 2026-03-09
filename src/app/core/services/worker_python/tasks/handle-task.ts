@@ -57,6 +57,14 @@ const tasks: Record<
   [Task.calculateParameter15CWithoutWind]: {
     function: 'parameter_15_without_wind',
     externalPackages: []
+  },
+  [Task.setResolution]: {
+    function: 'set_resolution',
+    externalPackages: []
+  },
+  [Task.getConfig]: {
+    function: 'get_config',
+    externalPackages: []
   }
 };
 
