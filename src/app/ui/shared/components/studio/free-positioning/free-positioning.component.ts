@@ -224,6 +224,45 @@ export class FreePositioningComponent implements OnDestroy {
   }
 
   /**
+   * Extracts all finite Y values from a plot's traces.
+   */
+  private extractYValues(plot: PlotlyHTMLElement): number[] {
+    return plot.data
+      .flatMap((trace) => {
+        const y = (trace as Plotly.ScatterData).y;
+        if (y == null) return [];
+        return Array.from(y as ArrayLike<number>);
+      })
+      .filter((v) => typeof v === 'number' && isFinite(v));
+  }
+
+  /**
+   * Computes a padded [min, max] range from an array of Y values.
+   * Returns null if the array is empty.
+   */
+  private computePaddedYRange(yValues: number[]): [number, number] | null {
+    if (yValues.length === 0) return null;
+
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const v of yValues) {
+      if (v < minY) minY = v;
+      if (v > maxY) maxY = v;
+    }
+    const padding = Math.max((maxY - minY) * 0.05, 1);
+    return [minY - padding, maxY + padding];
+  }
+
+  /**
+   * Applies a shared Y axis range to the given plots.
+   */
+  private applySharedYRange(plots: PlotlyHTMLElement[], range: [number, number]): void {
+    for (const plot of plots) {
+      void Plotly.relayout(plot, { 'yaxis.range': range, 'yaxis.autorange': false });
+    }
+  }
+
+  /**
    * Synchronizes the Y axis range between face and profile plots
    * so that both charts share the exact same vertical scale.
    */
@@ -232,31 +271,12 @@ export class FreePositioningComponent implements OnDestroy {
     const profilePlot = this.plotProfile();
     if (!facePlot || !profilePlot) return;
 
-    const extractY = (plot: PlotlyHTMLElement): number[] =>
-      plot.data
-        .flatMap((trace) => {
-          const y = (trace as Plotly.ScatterData).y;
-          if (y == null) return [];
-          return Array.from(y as ArrayLike<number>);
-        })
-        .filter((v) => typeof v === 'number' && isFinite(v));
-
-    const allYValues = [...extractY(facePlot), ...extractY(profilePlot)];
-    if (allYValues.length === 0) return;
-
-    let minY = Infinity;
-    let maxY = -Infinity;
-    for (const v of allYValues) {
-      if (v < minY) minY = v;
-      if (v > maxY) maxY = v;
-    }
-    const padding = Math.max((maxY - minY) * 0.05, 1);
-    const sharedRange: [number, number] = [minY - padding, maxY + padding];
+    const allYValues = [...this.extractYValues(facePlot), ...this.extractYValues(profilePlot)];
+    const sharedRange = this.computePaddedYRange(allYValues);
+    if (!sharedRange) return;
 
     this.sharedYRange.set(sharedRange);
-
-    void Plotly.relayout(facePlot, { 'yaxis.range': sharedRange, 'yaxis.autorange': false });
-    void Plotly.relayout(profilePlot, { 'yaxis.range': sharedRange, 'yaxis.autorange': false });
+    this.applySharedYRange([facePlot, profilePlot], sharedRange);
   }
 
   /**
