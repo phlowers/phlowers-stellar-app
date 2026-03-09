@@ -198,10 +198,10 @@ export class FreePositioningComponent implements OnDestroy {
     const facePlot = this.plotFace();
     const profilePlot = this.plotProfile();
     if (facePlot) {
-      Plotly.relayout(facePlot, this.getPlotLayout('face'));
+      Plotly.relayout(facePlot, this.getPlotLayout());
     }
     if (profilePlot) {
-      Plotly.relayout(profilePlot, this.getPlotLayout('profile'));
+      Plotly.relayout(profilePlot, this.getPlotLayout());
     }
   }
 
@@ -262,7 +262,7 @@ export class FreePositioningComponent implements OnDestroy {
   /**
    * Creates plot layout configuration
    */
-  private getPlotLayout(_side: Side): Partial<Plotly.Layout> {
+  private getPlotLayout(): Partial<Plotly.Layout> {
     const sharedRange = this.sharedYRange();
 
     return {
@@ -427,7 +427,7 @@ export class FreePositioningComponent implements OnDestroy {
 
     if (!plot) return;
 
-    const pLayout = this.getPlotLayout(side);
+    const pLayout = this.getPlotLayout();
     void Plotly.update(
       plot,
       {},
@@ -497,7 +497,7 @@ export class FreePositioningComponent implements OnDestroy {
       );
 
       // const width = plotElement.clientWidth;
-      const layout = this.getPlotLayout(side);
+      const layout = this.getPlotLayout();
       const config = this.getPlotConfig();
 
       const plot = await Plotly.newPlot(plotId, plotData, { ...layout, annotations }, config);
