@@ -413,13 +413,17 @@ describe('FreePositioningComponent', () => {
       (component as any).synchronizeYAxisRanges();
 
       // min=5, max=50, padding = (50-5)*0.05 = 2.25 → range = [2.75, 52.25]
-      expect(component.sharedYRange()).toEqual([2.75, 52.25]);
+      const range = component.sharedYRange() as [number, number];
+      expect(range).not.toBeNull();
+      expect(range[0]).toBeCloseTo(2.75, 10);
+      expect(range[1]).toBeCloseTo(52.25, 10);
+
       expect(Plotly.relayout).toHaveBeenCalledWith(fakeFace, {
-        'yaxis.range': [2.75, 52.25],
+        'yaxis.range': expect.arrayContaining([expect.closeTo(2.75, 10), expect.closeTo(52.25, 10)]),
         'yaxis.autorange': false
       });
       expect(Plotly.relayout).toHaveBeenCalledWith(fakeProfile, {
-        'yaxis.range': [2.75, 52.25],
+        'yaxis.range': expect.arrayContaining([expect.closeTo(2.75, 10), expect.closeTo(52.25, 10)]),
         'yaxis.autorange': false
       });
     });

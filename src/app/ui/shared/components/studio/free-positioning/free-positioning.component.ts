@@ -234,15 +234,23 @@ export class FreePositioningComponent implements OnDestroy {
 
     const extractY = (plot: PlotlyHTMLElement): number[] =>
       plot.data
-        .flatMap((trace) => ((trace as Plotly.ScatterData).y as number[]) || [])
+        .flatMap((trace) => {
+          const y = (trace as Plotly.ScatterData).y;
+          if (y == null) return [];
+          return Array.from(y as ArrayLike<number>);
+        })
         .filter((v) => typeof v === 'number' && isFinite(v));
 
     const allYValues = [...extractY(facePlot), ...extractY(profilePlot)];
     if (allYValues.length === 0) return;
 
-    const minY = Math.min(...allYValues);
-    const maxY = Math.max(...allYValues);
-    const padding = (maxY - minY) * 0.05;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const v of allYValues) {
+      if (v < minY) minY = v;
+      if (v > maxY) maxY = v;
+    }
+    const padding = Math.max((maxY - minY) * 0.05, 1);
     const sharedRange: [number, number] = [minY - padding, maxY + padding];
 
     this.sharedYRange.set(sharedRange);
@@ -254,7 +262,7 @@ export class FreePositioningComponent implements OnDestroy {
   /**
    * Creates plot layout configuration
    */
-  private getPlotLayout(side: Side): Partial<Plotly.Layout> {
+  private getPlotLayout(_side: Side): Partial<Plotly.Layout> {
     const sharedRange = this.sharedYRange();
 
     return {
