@@ -1607,12 +1607,6 @@
         <target>Type de chargement</target>
       </segment>
     </unit>
-    <unit id="4377932527319537276">
-      <segment state="initial">
-        <source>Punctual</source>
-        <target>Ponctuel</target>
-      </segment>
-    </unit>
     <unit id="8083736833442025529">
       <segment state="initial">
         <source>No cable found</source>
@@ -3493,6 +3487,12 @@
       <segment state="initial">
         <source>Maximum transit value:</source>
         <target>Valeur de transit maximum :</target>
+      </segment>
+    </unit>
+    <unit id="50322401921445433">
+      <segment state="initial">
+        <source>Punctual load</source>
+        <target>Charge ponctuelle</target>
       </segment>
     </unit>
   </file>
