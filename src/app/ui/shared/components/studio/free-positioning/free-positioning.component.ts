@@ -389,10 +389,10 @@ export class FreePositioningComponent implements OnDestroy {
             z: zValue
           }
         : {
-            // Second plot (face): update y and z, keep x
+            // Second plot (face): update y only, keep x and z
             x: previousSelectedObstacle.x ?? null,
             y: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
-            z: zValue
+            z: previousSelectedObstacle.z ?? null
           };
 
     // Update local selected position immediately for instant UI feedback
@@ -447,15 +447,7 @@ export class FreePositioningComponent implements OnDestroy {
 
     if (!plot) return;
 
-    const pLayout = this.getPlotLayout();
-    void Plotly.update(
-      plot,
-      {},
-      {
-        ...pLayout,
-        annotations
-      }
-    );
+    void Plotly.relayout(plot, { annotations });
   }
 
   /**

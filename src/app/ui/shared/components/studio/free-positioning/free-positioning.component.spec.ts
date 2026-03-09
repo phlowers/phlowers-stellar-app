@@ -253,7 +253,7 @@ describe('FreePositioningComponent', () => {
         target: { tagName: 'CANVAS' }
       }) as any;
 
-    it('should update y and z on face click in absolute mode', () => {
+    it('should update y only on face click in absolute mode, keeping z unchanged', () => {
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
       mockObstaclesService.currentPointIndex.set(0);
@@ -263,15 +263,15 @@ describe('FreePositioningComponent', () => {
 
       expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
       expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
-      expect(positionsFormArray.at(0).get('z')?.value).toBe(25); // z updated from yaxis
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(0); // z kept unchanged
     });
 
-    it('should update y and z on face click in relative mode', () => {
+    it('should update y only on face click in relative mode, keeping z unchanged', () => {
       (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
       component.referenceSupportAltitudeNgf.set(30);
 
       positionsFormArray.clear();
-      positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
+      positionsFormArray.push(fb.group({ x: 10, y: 0, z: 7 }));
       mockObstaclesService.currentPointIndex.set(0);
 
       const plotElement = makeFakePlotElement(5, 50);
@@ -279,8 +279,7 @@ describe('FreePositioningComponent', () => {
 
       expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
       expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
-      // 50 (absolute) - 30 (support) = 20
-      expect(positionsFormArray.at(0).get('z')?.value).toBe(20); // z updated with relative altitude
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(7); // z kept unchanged
     });
   });
 
@@ -301,7 +300,7 @@ describe('FreePositioningComponent', () => {
         target: { tagName: 'CANVAS' }
       }) as any;
 
-    it('should update y and z on face click in absolute mode', () => {
+    it('should update y only on face click in absolute mode, keeping z unchanged', () => {
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
       mockObstaclesService.currentPointIndex.set(0);
@@ -311,15 +310,15 @@ describe('FreePositioningComponent', () => {
 
       expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
       expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
-      expect(positionsFormArray.at(0).get('z')?.value).toBe(25); // z updated from yaxis
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(0); // z kept unchanged
     });
 
-    it('should update y and z on face click in relative mode', () => {
+    it('should update y only on face click in relative mode, keeping z unchanged', () => {
       (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
       component.referenceSupportAltitudeNgf.set(30);
 
       positionsFormArray.clear();
-      positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
+      positionsFormArray.push(fb.group({ x: 10, y: 0, z: 7 }));
       mockObstaclesService.currentPointIndex.set(0);
 
       const plotElement = makeFakePlotElement(5, 50);
@@ -327,8 +326,7 @@ describe('FreePositioningComponent', () => {
 
       expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
       expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
-      // 50 (absolute) - 30 (support) = 20
-      expect(positionsFormArray.at(0).get('z')?.value).toBe(20); // z updated with relative altitude
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(7); // z kept unchanged
     });
   });
 
@@ -572,7 +570,7 @@ describe('FreePositioningComponent', () => {
   });
 
   describe('getAnnotations (via updateSelectedPositionMarkers)', () => {
-    it('should invoke Plotly.update with annotations when plots exist', () => {
+    it('should invoke Plotly.relayout with annotations when plots exist', () => {
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
       } as unknown as Plotly.PlotlyHTMLElement;
@@ -583,17 +581,17 @@ describe('FreePositioningComponent', () => {
       component.debounceUpdateSelectedPositionMarkers();
       jest.advanceTimersByTime(200);
 
-      expect(Plotly.update).toHaveBeenCalled();
+      expect(Plotly.relayout).toHaveBeenCalled();
     });
 
-    it('should not call Plotly.update when plots are null', () => {
+    it('should not call Plotly.relayout when plots are null', () => {
       component.plotFace.set(null);
       component.plotProfile.set(null);
 
       component.debounceUpdateSelectedPositionMarkers();
       jest.advanceTimersByTime(200);
 
-      expect(Plotly.update).not.toHaveBeenCalled();
+      expect(Plotly.relayout).not.toHaveBeenCalled();
     });
 
     it('should skip positions with null x or z', () => {
@@ -609,9 +607,9 @@ describe('FreePositioningComponent', () => {
       component.debounceUpdateSelectedPositionMarkers();
       jest.advanceTimersByTime(200);
 
-      // The annotations array in the update call should be empty
-      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
-      const layout = updateCall[2];
+      // The annotations array in the relayout call should be empty
+      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const layout = relayoutCall[1];
       expect(layout.annotations).toEqual([]);
     });
 
@@ -629,8 +627,8 @@ describe('FreePositioningComponent', () => {
       jest.advanceTimersByTime(200);
 
       // Face view requires y — annotation should be skipped for face, but profile would have it
-      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
-      const layout = updateCall[2];
+      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const layout = relayoutCall[1];
       expect(layout.annotations).toEqual([]);
     });
 
@@ -649,8 +647,8 @@ describe('FreePositioningComponent', () => {
       component.debounceUpdateSelectedPositionMarkers();
       jest.advanceTimersByTime(200);
 
-      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
-      const annotations = updateCall[2].annotations;
+      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const annotations = relayoutCall[1].annotations;
       expect(annotations[0].font.color).toBe('black');
       expect(annotations[1].font.color).toBe('red');
     });
@@ -668,8 +666,8 @@ describe('FreePositioningComponent', () => {
       component.debounceUpdateSelectedPositionMarkers();
       jest.advanceTimersByTime(200);
 
-      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
-      const annotations = updateCall[2].annotations;
+      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const annotations = relayoutCall[1].annotations;
       expect(annotations[0].y).toBe(3);
     });
 
@@ -691,8 +689,8 @@ describe('FreePositioningComponent', () => {
       component.debounceUpdateSelectedPositionMarkers();
       jest.advanceTimersByTime(200);
 
-      const updateCall = (Plotly.update as jest.Mock).mock.calls[0];
-      const annotations = updateCall[2].annotations;
+      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const annotations = relayoutCall[1].annotations;
       expect(annotations[0].y).toBe(33);
     });
   });
