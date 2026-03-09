@@ -63,6 +63,7 @@ export class SectionPlotComponent {
     baseLitData: this.plotService.baseLitData(),
     plotOptions: this.plotService.plotOptions(),
     displayOptions: this.plotService.selectedDisplayOptions(),
+    axesNorms: this.plotService.axesNorms(),
     pointIndex: this.obstaclesService.currentPointIndex(),
     sideTabs: this.sideTabsService.sideTabs(),
     positions: this.currentObstaclePositions(),
@@ -149,6 +150,7 @@ export class SectionPlotComponent {
       const camera = this.plotService.camera();
       const currentObstacleUuid = this.getCurrentObstacleUuid();
       const currentObstaclePointIndex = this.obstaclesService.currentPointIndex();
+      const axesNorms = this.plotService.axesNorms();
 
       const plot = await createPlot({
         plotId: PLOT_ID,
@@ -163,7 +165,8 @@ export class SectionPlotComponent {
         endSupport: plotOptions.endSupport,
         currentObstacleUuid,
         currentObstaclePointIndex,
-        obstacles
+        obstacles,
+        axesNorms
       });
       if (plot) {
         this.addEventListenersToPlot(plot);

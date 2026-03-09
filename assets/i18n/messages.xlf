@@ -2865,6 +2865,61 @@
         <source>Study&apos;s section graph view</source>
       </segment>
     </unit>
+    <unit id="scaleView.button.label">
+      <segment>
+        <source>View</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.form.ariaLabel">
+      <segment>
+        <source>View configuration</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.legend">
+      <segment>
+        <source>Select the display scale.</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.plan">
+      <segment>
+        <source>Reduced in x (x/5, y, z)</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.geo">
+      <segment>
+        <source>Uniform (x, y, z)</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.celeste">
+      <segment>
+        <source>Reduced in z (x, y, z/2)</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.scale.auto">
+      <segment>
+        <source>Auto</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.points.legend">
+      <segment>
+        <source> Choose the number of points to display per range. </source>
+      </segment>
+    </unit>
+    <unit id="scaleView.slider.ariaLabel">
+      <segment>
+        <source>Number of points per range</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.input.ariaLabel">
+      <segment>
+        <source>Number of points per range</source>
+      </segment>
+    </unit>
+    <unit id="scaleView.validate.label">
+      <segment>
+        <source>Validate</source>
+      </segment>
+    </unit>
     <unit id="1353298487927664176">
       <segment>
         <source>Point</source>

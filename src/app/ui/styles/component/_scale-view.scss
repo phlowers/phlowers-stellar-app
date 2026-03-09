@@ -1,0 +1,28 @@
+@use 'abstract.extracts' as app;
+
+// popover margin override for scale view component
+.scale-view-popover {
+  margin-top: 8px !important;
+  position: absolute;
+  z-index: 1000;
+  min-width: 37.5rem;
+}
+
+.view-button {
+  @apply text-m-600;
+  background-color: #fff !important;
+  color: var(--p-button-primary-background) !important;
+  padding-block: inherit !important;
+  border-radius: inherit !important;
+  &--active {
+    background-color: var(--p-button-primary-background) !important;
+    color: #fff !important;
+  }
+  &:hover {
+    background-color: var(--p-button-primary-hover-background) !important;
+    color: #fff !important;
+  }
+  &:focus-visible {
+    @extend %focus-state;
+  }
+}

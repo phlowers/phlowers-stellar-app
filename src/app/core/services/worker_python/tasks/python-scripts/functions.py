@@ -64,6 +64,17 @@ def set_log_level(js_inputs: dict):
     return {"success": True}
 
 
+def set_resolution(js_inputs: dict):
+    python_inputs = js_to_python(js_inputs)
+    resolution = python_inputs["resolution"]
+    mph.options.graphics.resolution = resolution
+    return {"success": True, "resolution": resolution}
+
+
+def get_config():
+    return {"resolution": RESOLUTION}
+
+
 @dataclass
 class Support:
     uuid: str

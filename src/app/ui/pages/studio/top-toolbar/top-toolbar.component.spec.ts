@@ -32,7 +32,13 @@ describe('StudioTopToolbarComponent', () => {
       isFreePositioningMode: signal(false),
       plotOptionsChange: jest.fn(),
       selectedDisplayOptions: signal({ loads: false }),
-      section: signal(null)
+      section: signal(null),
+      resolution: signal(100),
+      defaultResolution: signal(100),
+      setResolution: jest.fn(),
+      applyResolution: jest.fn().mockResolvedValue(undefined),
+      setAxesNorms: jest.fn(),
+      refreshProjection: jest.fn().mockResolvedValue(undefined)
     } as any;
 
     // Mock ToolbarDialogService
