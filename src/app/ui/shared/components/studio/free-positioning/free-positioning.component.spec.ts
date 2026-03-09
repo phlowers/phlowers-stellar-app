@@ -15,7 +15,7 @@ import Plotly from 'plotly.js-dist-min';
 
 jest.mock('../section/helpers/createPlotData');
 jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn().mockResolvedValue({} as unknown),
+  newPlot: jest.fn().mockResolvedValue({ data: [] } as unknown as Plotly.PlotlyHTMLElement),
   relayout: jest.fn(),
   purge: jest.fn(),
   update: jest.fn().mockResolvedValue(undefined)
@@ -236,6 +236,54 @@ describe('FreePositioningComponent', () => {
     });
   });
 
+  describe('Click to position (face)', () => {
+    const makeFakePlotElement = (xValue: number, yValue: number) =>
+      ({
+        _fullLayout: {
+          margin: { l: 0, r: 0, t: 0, b: 0 },
+          xaxis: { p2c: () => xValue },
+          yaxis: { p2c: () => yValue }
+        }
+      }) as any;
+
+    const makeClickEvent = () =>
+      ({
+        layerX: 10,
+        layerY: 10,
+        target: { tagName: 'CANVAS' }
+      }) as any;
+
+    it('should update y and z on face click in absolute mode', () => {
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
+      mockObstaclesService.currentPointIndex.set(0);
+
+      const plotElement = makeFakePlotElement(5, 25);
+      (component as any).handleClick(makeClickEvent(), 'face', plotElement);
+
+      expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
+      expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(25); // z updated from yaxis
+    });
+
+    it('should update y and z on face click in relative mode', () => {
+      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+      component.referenceSupportAltitudeNgf.set(30);
+
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
+      mockObstaclesService.currentPointIndex.set(0);
+
+      const plotElement = makeFakePlotElement(5, 50);
+      (component as any).handleClick(makeClickEvent(), 'face', plotElement);
+
+      expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
+      expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
+      // 50 (absolute) - 30 (support) = 20
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(20); // z updated with relative altitude
+    });
+  });
+
   describe('getErrorString', () => {
     it('should return unknown error string when error is null', () => {
       errorSignal.set(null);
@@ -277,6 +325,74 @@ describe('FreePositioningComponent', () => {
       component.relayoutPlots();
 
       expect(Plotly.relayout).toHaveBeenCalledTimes(2);
+    });
+
+    it('should include shared Y range in layout when set', () => {
+      const fakeFace = { id: 'face' } as any;
+      const fakeProfile = { id: 'profile' } as any;
+      component.plotFace.set(fakeFace);
+      component.plotProfile.set(fakeProfile);
+      (component as any).sharedYRange.set([0, 100]);
+
+      component.relayoutPlots();
+
+      expect(Plotly.relayout).toHaveBeenCalledWith(
+        fakeFace,
+        expect.objectContaining({
+          yaxis: expect.objectContaining({ range: [0, 100], autorange: false })
+        })
+      );
+      expect(Plotly.relayout).toHaveBeenCalledWith(
+        fakeProfile,
+        expect.objectContaining({
+          yaxis: expect.objectContaining({ range: [0, 100], autorange: false })
+        })
+      );
+    });
+  });
+
+  describe('synchronizeYAxisRanges', () => {
+    it('should compute shared Y range from both plots data', () => {
+      const fakeFace = {
+        data: [{ y: [10, 20, 30] }]
+      } as any;
+      const fakeProfile = {
+        data: [{ y: [5, 15, 50] }]
+      } as any;
+      component.plotFace.set(fakeFace);
+      component.plotProfile.set(fakeProfile);
+
+      (component as any).synchronizeYAxisRanges();
+
+      // min=5, max=50, padding = (50-5)*0.05 = 2.25 → range = [2.75, 52.25]
+      expect(component.sharedYRange()).toEqual([2.75, 52.25]);
+      expect(Plotly.relayout).toHaveBeenCalledWith(fakeFace, {
+        'yaxis.range': [2.75, 52.25],
+        'yaxis.autorange': false
+      });
+      expect(Plotly.relayout).toHaveBeenCalledWith(fakeProfile, {
+        'yaxis.range': [2.75, 52.25],
+        'yaxis.autorange': false
+      });
+    });
+
+    it('should not synchronize when a plot is null', () => {
+      component.plotFace.set(null);
+      component.plotProfile.set({ data: [{ y: [1] }] } as any);
+
+      (component as any).synchronizeYAxisRanges();
+
+      expect(component.sharedYRange()).toBeNull();
+      expect(Plotly.relayout).not.toHaveBeenCalled();
+    });
+
+    it('should not synchronize when both plots have no y data', () => {
+      component.plotFace.set({ data: [] } as any);
+      component.plotProfile.set({ data: [] } as any);
+
+      (component as any).synchronizeYAxisRanges();
+
+      expect(component.sharedYRange()).toBeNull();
     });
   });
 
@@ -343,23 +459,24 @@ describe('FreePositioningComponent', () => {
     it('should set plotFace when side is face', async () => {
       const fakeElement = document.createElement('div');
       jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
-      (Plotly.newPlot as jest.Mock).mockResolvedValue({ _face: true } as unknown as Plotly.PlotlyHTMLElement);
+      (Plotly.newPlot as jest.Mock).mockResolvedValue({ _face: true, data: [] } as unknown as Plotly.PlotlyHTMLElement);
 
       await component.createPlot(mockLitData, 0, 'face', []);
 
-      expect(component.plotFace()).toEqual({ _face: true });
+      expect(component.plotFace()).toEqual(expect.objectContaining({ _face: true }));
     });
 
     it('should set plotProfile when side is profile', async () => {
       const fakeElement = document.createElement('div');
       jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
       (Plotly.newPlot as jest.Mock).mockResolvedValue({
-        _profile: true
+        _profile: true,
+        data: []
       } as unknown as Plotly.PlotlyHTMLElement);
 
       await component.createPlot(mockLitData, 0, 'profile', []);
 
-      expect(component.plotProfile()).toEqual({ _profile: true });
+      expect(component.plotProfile()).toEqual(expect.objectContaining({ _profile: true }));
     });
 
     it('should handle errors gracefully', async () => {
