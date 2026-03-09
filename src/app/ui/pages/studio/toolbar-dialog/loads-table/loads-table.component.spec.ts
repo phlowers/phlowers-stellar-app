@@ -554,7 +554,7 @@ describe('LoadsTableComponent', () => {
 
   describe('getLoadTypeLabel', () => {
     it('should return Punctual for PUNCTUAL type', () => {
-      expect(component.getLoadTypeLabel(LoadType.PUNCTUAL)).toBe('Punctual');
+      expect(component.getLoadTypeLabel(LoadType.PUNCTUAL)).toBe('Punctual load');
     });
 
     it('should return Marking for MARKING type', () => {

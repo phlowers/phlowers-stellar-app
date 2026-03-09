@@ -217,7 +217,7 @@ export class LoadsTableComponent implements AfterViewInit {
   getLoadTypeLabel(type: string): string {
     switch (type) {
       case LoadType.PUNCTUAL:
-        return $localize`Punctual`;
+        return $localize`Punctual load`;
       case LoadType.MARKING:
         return $localize`Marking`;
       default:

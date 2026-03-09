@@ -34,11 +34,14 @@
   }
   .load-person-label {
     grid-area: loadPersonLabel;
-    @extend %_align-end;
+    @extend %_align-end, %text-m-400;
+    @apply m-0;
+    color: var(--star-dust-950);
   }
   .load-person-value {
     grid-area: loadPersonValue;
     @extend %_align-start;
+    @apply mt-2;
   }
 
   dt {
