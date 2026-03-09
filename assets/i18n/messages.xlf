@@ -1053,9 +1053,9 @@
         <source>Ver.MAJ</source>
       </segment>
     </unit>
-    <unit id="581758079292144535">
+    <unit id="2033387769986799452">
       <segment>
-        <source>Add a description to your charge case</source>
+        <source>Add a description to the charge case</source>
       </segment>
     </unit>
     <unit id="5884678477650117685">
@@ -1446,11 +1446,6 @@
     <unit id="3244879037311223621">
       <segment>
         <source>Save state</source>
-      </segment>
-    </unit>
-    <unit id="1035708454595696483">
-      <segment>
-        <source>The initial condition name must be unique.</source>
       </segment>
     </unit>
     <unit id="2587240527868724590">
@@ -2888,6 +2883,11 @@
     <unit id="50322401921445433">
       <segment>
         <source>Punctual load</source>
+      </segment>
+    </unit>
+    <unit id="4751647451297518735">
+      <segment>
+        <source> The charge case name must be unique. </source>
       </segment>
     </unit>
   </file>
