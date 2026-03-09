@@ -44,7 +44,7 @@
   },
   "private": true,
   "config": {
-    "mechaphlowers": "0.5.3",
+    "mechaphlowers": "0.6.0rc1",
     "thermohl": "1.4.0"
   },
   "dependencies": {
