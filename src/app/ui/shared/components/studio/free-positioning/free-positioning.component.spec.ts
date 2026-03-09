@@ -284,6 +284,54 @@ describe('FreePositioningComponent', () => {
     });
   });
 
+  describe('Click to position (face)', () => {
+    const makeFakePlotElement = (xValue: number, yValue: number) =>
+      ({
+        _fullLayout: {
+          margin: { l: 0, r: 0, t: 0, b: 0 },
+          xaxis: { p2c: () => xValue },
+          yaxis: { p2c: () => yValue }
+        }
+      }) as any;
+
+    const makeClickEvent = () =>
+      ({
+        layerX: 10,
+        layerY: 10,
+        target: { tagName: 'CANVAS' }
+      }) as any;
+
+    it('should update y and z on face click in absolute mode', () => {
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
+      mockObstaclesService.currentPointIndex.set(0);
+
+      const plotElement = makeFakePlotElement(5, 25);
+      (component as any).handleClick(makeClickEvent(), 'face', plotElement);
+
+      expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
+      expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(25); // z updated from yaxis
+    });
+
+    it('should update y and z on face click in relative mode', () => {
+      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+      component.referenceSupportAltitudeNgf.set(30);
+
+      positionsFormArray.clear();
+      positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
+      mockObstaclesService.currentPointIndex.set(0);
+
+      const plotElement = makeFakePlotElement(5, 50);
+      (component as any).handleClick(makeClickEvent(), 'face', plotElement);
+
+      expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
+      expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
+      // 50 (absolute) - 30 (support) = 20
+      expect(positionsFormArray.at(0).get('z')?.value).toBe(20); // z updated with relative altitude
+    });
+  });
+
   describe('getErrorString', () => {
     it('should return unknown error string when error is null', () => {
       errorSignal.set(null);
