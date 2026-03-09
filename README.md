@@ -27,8 +27,35 @@ ex:
 #### Build  
 Run `npm run build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-#### Running unit tests  
+#### Running unit tests
 Run `npm run test` to execute the unit tests.
+
+#### Running E2E tests
+
+E2E tests use [Playwright](https://playwright.dev/) and require the dev server to be running first.
+
+```shell
+# Terminal 1 — start the dev server
+npm run start
+
+# Terminal 2 — run E2E tests
+npm run test:e2e
+```
+
+Available commands:
+
+| Command | Description |
+| --- | --- |
+| `npm run test:e2e` | Run all E2E tests in headless mode |
+| `npm run test:e2e:ui` | Open Playwright UI mode (interactive, with time-travel debugging) |
+| `npm run test:e2e:debug` | Run tests in debug mode (step by step) |
+
+Test files are located in the `e2e/` directory:
+
+- `e2e/home.spec.ts` — navigation tests (user registration dialog, home page, sidebar)
+- `e2e/studies.spec.ts` — studies CRUD flow (page structure, create study, redirect)
+
+> The dev server must be started manually before running E2E tests because `ng serve` sets the `Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy` headers required by Pyodide.
 
 #### Running local documentation
 

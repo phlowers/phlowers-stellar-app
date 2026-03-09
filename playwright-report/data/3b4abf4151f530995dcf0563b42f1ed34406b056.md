@@ -1,0 +1,76 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e5]:
+    - paragraph [ref=e6]: Home
+    - paragraph [ref=e7]:
+      - generic [ref=e8]:
+        - img "calculate" [ref=e9]
+        - img "progress_activity" [ref=e10]
+      - generic [ref=e11]: Loading
+    - paragraph [ref=e12]: test@e2e.local
+  - navigation [ref=e13]:
+    - generic [ref=e14]:
+      - link "Stellar Stellar" [ref=e15] [cursor=pointer]:
+        - /url: /
+        - img "Stellar" [ref=e16]
+        - generic [ref=e17]: Stellar
+      - generic [ref=e18]: v.0.0.0
+    - main [ref=e19]:
+      - list [ref=e20]:
+        - listitem [ref=e21]:
+          - link "home Home" [ref=e22] [cursor=pointer]:
+            - /url: /
+            - img "home" [ref=e23]
+            - generic [ref=e24]: Home
+        - listitem [ref=e25]:
+          - link "folder Studies" [ref=e26] [cursor=pointer]:
+            - /url: /studies
+            - img "folder" [ref=e27]
+            - generic [ref=e28]: Studies
+    - separator [ref=e29]
+    - generic [ref=e30]:
+      - list [ref=e31]:
+        - listitem [ref=e32]:
+          - link "account_circle Version / MAJ" [ref=e33] [cursor=pointer]:
+            - /url: /admin
+            - img "account_circle" [ref=e34]
+            - generic [ref=e35]: Version / MAJ
+      - separator [ref=e36]
+      - button "keyboard_double_arrow_right Shrink menu" [ref=e37] [cursor=pointer]:
+        - img "keyboard_double_arrow_right" [ref=e38]
+        - generic [ref=e39]: Shrink menu
+  - main [ref=e40]:
+    - generic [ref=e41]:
+      - link "add Create a new study" [ref=e43] [cursor=pointer]:
+        - /url: /studies?create=true
+        - img "add" [ref=e44]
+        - generic [ref=e45]: Create a new study
+      - article [ref=e46]:
+        - article [ref=e48]:
+          - heading "News" [level=2] [ref=e50]
+          - main [ref=e51]:
+            - paragraph [ref=e52]: Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!
+        - article [ref=e54]:
+          - heading "Changelogs" [level=2] [ref=e56]
+          - main [ref=e57]:
+            - paragraph [ref=e58]: View latest updates.
+          - link "Learn more about latest updates" [ref=e60] [cursor=pointer]:
+            - /url: /changelog
+            - generic [ref=e61]: Learn more
+            - img "keyboard_arrow_right" [ref=e62]
+        - article [ref=e64]:
+          - heading "Server state" [level=2] [ref=e66]
+          - main [ref=e67]:
+            - paragraph [ref=e68]: Application in offline mode.
+          - img [ref=e69]
+      - article [ref=e73]:
+        - heading "My last studies" [level=2] [ref=e75]
+        - main [ref=e76]:
+          - paragraph [ref=e77]: No recent studies
+        - link "Go to my studies keyboard_arrow_right" [ref=e79] [cursor=pointer]:
+          - /url: /studies
+          - generic [ref=e80]: Go to my studies
+          - img "keyboard_arrow_right" [ref=e81]
+```
