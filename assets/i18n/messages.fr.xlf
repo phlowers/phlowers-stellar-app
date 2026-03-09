@@ -1679,10 +1679,10 @@
         <target> Présence du personnel </target>
       </segment>
     </unit>
-    <unit id="581758079292144535">
+    <unit id="2033387769986799452">
       <segment state="initial">
-        <source>Add a description to your charge case</source>
-        <target>Ajouter une description à votre cas de charge</target>
+        <source>Add a description to the charge case</source>
+        <target>Ajouter une description au cas de charge</target>
       </segment>
     </unit>
     <unit id="8179510261091625036">
@@ -3261,12 +3261,6 @@
         <target>Base</target>
       </segment>
     </unit>
-    <unit id="1035708454595696483">
-      <segment state="initial">
-        <source>The initial condition name must be unique.</source>
-        <target>Le nom de la condition initiale doit être unique.</target>
-      </segment>
-    </unit>
     <unit id="7009794897351276069">
       <segment state="initial">
         <source>Obstacle type</source>
@@ -3469,6 +3463,12 @@
       <segment state="initial">
         <source>Study&apos;s section graph view</source>
         <target>Vue graphique du canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="4751647451297518735">
+      <segment state="initial">
+        <source> The charge case name must be unique. </source>
+        <target> Le nom du cas de charge doit être unique. </target>
       </segment>
     </unit>
     <unit id="1353298487927664176">

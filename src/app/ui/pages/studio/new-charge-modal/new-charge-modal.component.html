@@ -37,9 +37,9 @@
           fluid
         />
         @if (isNameDuplicate()) {
-          <p-message id="charge-name-error-message" severity="error" size="small" variant="simple" i18n
-            >The initial condition name must be unique.</p-message
-          >
+          <p-message id="charge-name-error-message" severity="error" size="small" variant="simple" i18n>
+            The charge case name must be unique.
+          </p-message>
         }
       </div>
 
@@ -62,7 +62,7 @@
           id="description"
           name="description"
           i18n-placeholder
-          placeholder="Add a description to your charge case"
+          placeholder="Add a description to the charge case"
           class="block"
           pTextarea
           [ngModel]="description()"
