@@ -3396,19 +3396,19 @@
     <unit id="381912160634740127">
       <segment state="initial">
         <source>Add point</source>
-        <target>Add point</target>
+        <target>Ajouter un point</target>
       </segment>
     </unit>
     <unit id="3563524107874537314">
       <segment state="initial">
         <source>delete point</source>
-        <target>delete point</target>
+        <target>Supprimer un point</target>
       </segment>
     </unit>
     <unit id="5037464174861244391">
       <segment state="initial">
         <source>Obstacle saved</source>
-        <target>Obstacle saved</target>
+        <target>Obstacle enregistré</target>
       </segment>
     </unit>
     <unit id="3490467566453662140">
