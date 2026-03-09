@@ -13,19 +13,36 @@
   </dl>
 
   <label for="transit" i18n class="transit__label">Transit</label>
-  <p-inputgroup class="transit__value">
-    <input
-      id="transit"
-      type="number"
-      pInputText
-      [ngModel]="measureData().transit"
-      (ngModelChange)="updateField('transit', $event)"
-      [fluid]="true"
-      aria-describedby="mandatory-temperature"
-      required
-    />
-    <p-inputgroup-addon>A</p-inputgroup-addon>
-  </p-inputgroup>
+  <div class="transit__value">
+    <p-inputgroup>
+      <input
+        id="transit"
+        type="number"
+        [min]="transitBounds.min"
+        [max]="transitBounds.max"
+        pInputText
+        [ngModel]="measureData().transit"
+        (ngModelChange)="updateField('transit', $event)"
+        [fluid]="true"
+        aria-describedby="mandatory-temperature"
+        [ngClass]="{ 'ng-invalid ng-dirty': isTransitOutOfBounds() }"
+        [attr.aria-invalid]="isTransitOutOfBounds() || null"
+        [attr.aria-errormessage]="measureData().transit! < transitBounds.min ? 'transit-error-min-message' : null"
+        [attr.aria-errormessage]="measureData().transit! > transitBounds.max ? 'transit-error-max-message' : null"
+        required
+      />
+      <p-inputgroup-addon>A</p-inputgroup-addon>
+    </p-inputgroup>
+    @if (measureData().transit! < transitBounds.min) {
+      <p-message id="transit-error-min-message" severity="error" size="small" variant="simple">
+        <ng-container i18n>Minimum transit value:</ng-container> {{ transitBounds.min }} A.
+      </p-message>
+    } @else if (measureData().transit! > transitBounds.max) {
+      <p-message id="transit-error-max-message" severity="error" size="small" variant="simple">
+        <ng-container i18n>Maximum transit value:</ng-container> {{ transitBounds.max }} A.
+      </p-message>
+    }
+  </div>
 
   <dl class="contents with-mt-labels">
     <dt for="windSpeed" i18n class="windSpeed__label">Wind speed</dt>
@@ -45,6 +62,7 @@
         (onChange)="updateField('windIncidenceMode', $event.value)"
         optionLabel="label"
         optionValue="value"
+        optionDisabled="disabled"
         allowEmpty="false"
         ariaLabelledBy="windIncidenceLabel"
       />

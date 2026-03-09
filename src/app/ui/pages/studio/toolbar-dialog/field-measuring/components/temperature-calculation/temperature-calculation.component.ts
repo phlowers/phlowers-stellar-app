@@ -1,4 +1,5 @@
 import { Component, input, model, signal, computed } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -7,16 +8,18 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { MessageModule } from 'primeng/message';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { FieldMeasure } from '@ui/pages/studio/toolbar-dialog/field-measuring/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { WIND_SPEED_UNIT_OPTIONS } from '../../constants';
+import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
+    NgClass,
     FormsModule,
     SelectModule,
     InputTextModule,
@@ -24,6 +27,7 @@ import { DecimalPipe } from '@angular/common';
     InputGroupAddonModule,
     SelectButtonModule,
     RadioButtonModule,
+    MessageModule,
     IconComponent,
     ButtonComponent,
     DecimalPipe
@@ -50,18 +54,25 @@ export class TemperatureCalculationComponent {
 
   temperatureCalculationError = signal<boolean>(false);
 
+  readonly transitBounds = TRANSIT_BOUNDS;
+
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
   readonly windIncidenceModeOptions = [
-    { label: $localize`Auto`, value: 'auto' },
+    { label: $localize`Auto`, value: 'auto', disabled: true },
     { label: $localize`Perpendicular`, value: 'perpendicular' }
   ];
 
   constructor(private readonly workerPythonService: WorkerPythonService) {}
 
+  isTransitOutOfBounds = computed(() => {
+    const transit = this.measureData().transit;
+    return transit !== null && (transit < this.transitBounds.min || transit > this.transitBounds.max);
+  });
+
   isFormValid = computed(() => {
     const data = this.measureData();
-    return data.cableName !== null && data.transit !== null && data.skyCover !== null;
+    return data.cableName !== null && data.transit !== null && data.skyCover !== null && !this.isTransitOutOfBounds();
   });
 
   localizedWindDirection = computed(() => {

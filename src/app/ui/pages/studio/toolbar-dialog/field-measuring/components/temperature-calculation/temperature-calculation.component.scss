@@ -40,7 +40,7 @@ dd {
     }
 
     [class*='__value'] {
-      @apply self-center;
+      align-self: start;
     }
 
     .conductor__label {
