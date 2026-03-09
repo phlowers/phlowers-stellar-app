@@ -3345,30 +3345,6 @@
         <target>Horizontale</target>
       </segment>
     </unit>
-    <unit id="1125666118611359006">
-      <segment state="initial">
-        <source>House</source>
-        <target>Maison</target>
-      </segment>
-    </unit>
-    <unit id="5782981899482871069">
-      <segment state="initial">
-        <source>Building</source>
-        <target>Bâtiment</target>
-      </segment>
-    </unit>
-    <unit id="5139118152626940877">
-      <segment state="initial">
-        <source>Tree</source>
-        <target>Arbre</target>
-      </segment>
-    </unit>
-    <unit id="8693603235657020323">
-      <segment state="initial">
-        <source>Other</source>
-        <target>Autre</target>
-      </segment>
-    </unit>
     <unit id="6474791459744892295">
       <segment state="initial">
         <source>Absolute (NGF)</source>
@@ -3499,6 +3475,24 @@
       <segment state="initial">
         <source>Study&apos;s section graph view</source>
         <target>Vue graphique du canton d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="1353298487927664176">
+      <segment state="initial">
+        <source>Point</source>
+        <target>Point</target>
+      </segment>
+    </unit>
+    <unit id="8316615093085902594">
+      <segment state="initial">
+        <source>Minimum transit value:</source>
+        <target>Valeur de transit minimum :</target>
+      </segment>
+    </unit>
+    <unit id="7454710209876834992">
+      <segment state="initial">
+        <source>Maximum transit value:</source>
+        <target>Valeur de transit maximum :</target>
       </segment>
     </unit>
   </file>

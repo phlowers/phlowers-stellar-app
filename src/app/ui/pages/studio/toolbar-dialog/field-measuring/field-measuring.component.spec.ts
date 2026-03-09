@@ -15,6 +15,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Section } from '@core/domain';
 import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
+import { TRANSIT_BOUNDS } from './constants';
 
 @Component({
   selector: 'app-button',
@@ -333,6 +334,51 @@ describe('FieldMeasuringComponent', () => {
 
       // onSave no longer closes the tool - it shows a success message instead
       expect(closeToolSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isFormValid - transit bounds', () => {
+    const validBase = {
+      name: 'Test',
+      span: [1, 2],
+      longitude: 2,
+      latitude: 48,
+      altitude: 100,
+      azimuth: 90,
+      windSpeed: 10,
+      ambientTemperature: 20,
+      windDirection: 'North',
+      skyCover: 'N5'
+    };
+
+    it('should return true when transit is null (progressive save allowed)', () => {
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: null }));
+      expect(component.isFormValid()).toBeTruthy();
+    });
+
+    it('should return true when transit is within bounds', () => {
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: 2000 }));
+      expect(component.isFormValid()).toBeTruthy();
+    });
+
+    it('should return true when transit is at minimum boundary', () => {
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.min }));
+      expect(component.isFormValid()).toBeTruthy();
+    });
+
+    it('should return true when transit is at maximum boundary', () => {
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.max }));
+      expect(component.isFormValid()).toBeTruthy();
+    });
+
+    it('should return false when transit is below minimum', () => {
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.min - 1 }));
+      expect(component.isFormValid()).toBeFalsy();
+    });
+
+    it('should return false when transit is above maximum', () => {
+      component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.max + 1 }));
+      expect(component.isFormValid()).toBeFalsy();
     });
   });
 
