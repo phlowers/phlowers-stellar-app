@@ -45,7 +45,7 @@ The Pyodide version is read from `package.json`:
     "pyodide": "^0.28.3"
   },
   "config": {
-    "mechaphlowers": "0.5.3"
+    "mechaphlowers": "0.6.0rc1"
   }
 }
 ```
@@ -54,7 +54,7 @@ stellar-engine's `pyproject.toml` declares a single direct dependency:
 
 ```toml
 dependencies = [
-    "mechaphlowers>=0.5.3",
+    "mechaphlowers>=0.6.0rc1",
 ]
 ```
 
