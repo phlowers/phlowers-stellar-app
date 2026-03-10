@@ -329,6 +329,7 @@ def init_section(js_inputs: dict):
     df = generate_section_array(supports_data)
 
     section = SectionArray(df)
+    section.angles_sense = "clockwise"
     # set sagging parameter and temperatur
     if initial_condition:
         section.sagging_parameter = initial_condition.base_parameters
@@ -390,6 +391,7 @@ def init_section(js_inputs: dict):
     base_section.sagging_temperature = (
         initial_condition.base_temperature if initial_condition else 15
     )
+    base_section.angles_sense = "clockwise"
     base_engine = BalanceEngine(
         cable_array=cable_array, section_array=base_section)
     base_plt_line = PlotEngine.builder_from_balance_engine(base_engine)
@@ -413,9 +415,11 @@ def init_section(js_inputs: dict):
 
     if climate:
         engine.solve_change_state(
-            ice_thickness=climate["iceThickness"],
+            # convert cm into m
+            ice_thickness=climate["iceThickness"] / 100,
             new_temperature=climate["cableTemperature"],
             wind_pressure=climate["windPressure"],
+            wind_sense="clockwise",
         )
     elif has_span_loads:
         engine.solve_change_state()
