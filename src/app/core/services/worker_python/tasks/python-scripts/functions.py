@@ -404,7 +404,8 @@ def init_section(js_inputs: dict):
 
     if climate:
         engine.solve_change_state(
-            ice_thickness=climate["iceThickness"],
+            # convert cm into m
+            ice_thickness=climate["iceThickness"] / 100,
             new_temperature=climate["cableTemperature"],
             wind_pressure=climate["windPressure"],
             wind_sense="clockwise",
