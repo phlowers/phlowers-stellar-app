@@ -18,12 +18,6 @@ function fetchLatestManifest() {
   });
 }
 
-const serviceWorkerLogPrefix = 'SERVICE WORKER: ';
-
-function log(message: string, ...args: any[]) {
-  console.log(serviceWorkerLogPrefix + message, ...args);
-}
-
 function areVersionsEqual(first: AppVersion | null, second: AppVersion | null): boolean {
   if (!first || !second) {
     return false;
