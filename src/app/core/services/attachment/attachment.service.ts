@@ -13,6 +13,7 @@ import { CatalogAttachmentEntity } from '@core/infrastructure/database';
 import { AttachmentCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { toNumber } from 'lodash';
+import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
  * Service for managing attachment point catalog data.
@@ -114,10 +115,9 @@ export class AttachmentService {
               resolve();
               return;
             }
-            await this.storageService.db?.catAttachments.clear();
             const attachmentsTable: CatalogAttachmentEntity[] = mapData(data);
             console.log('adding attachments data', attachmentsTable.length);
-            await this.storageService.db?.catAttachments.bulkAdd(attachmentsTable);
+            await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
         });

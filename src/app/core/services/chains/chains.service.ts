@@ -11,6 +11,7 @@ import { CatalogChainEntity } from '@core/infrastructure/database';
 import { ChainCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
+import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
  * Service for managing insulator chain catalog data.
@@ -105,10 +106,9 @@ export class ChainsService {
               resolve();
               return;
             }
-            await this.storageService.db?.catChains.clear();
             const chainsTable: CatalogChainEntity[] = mapData(data);
             console.log('adding chains data', chainsTable.length);
-            await this.storageService.db?.catChains.bulkAdd(chainsTable);
+            await replaceTableData(this.storageService.db?.catChains, chainsTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<ChainCsvDto>) => void
         });

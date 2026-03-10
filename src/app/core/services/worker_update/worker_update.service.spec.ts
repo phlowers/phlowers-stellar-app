@@ -103,7 +103,16 @@ describe('UpdateService', () => {
 
       await service.checkAppVersion();
 
-      expect(mockFetch).toHaveBeenCalledWith('/assets_list.json');
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/assets_list.json',
+        expect.objectContaining({
+          cache: 'no-store',
+          headers: expect.objectContaining({
+            'cache-control': 'no-cache',
+            pragma: 'no-cache'
+          })
+        })
+      );
       expect(service.currentVersion()).toBeNull();
     });
 

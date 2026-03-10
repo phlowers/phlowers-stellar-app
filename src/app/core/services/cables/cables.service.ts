@@ -12,6 +12,7 @@ import { CableCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
+import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
  * Service for managing electrical cable catalog data.
@@ -140,10 +141,9 @@ export class CablesService {
               resolve();
               return;
             }
-            await this.storageService.db?.catCables.clear();
             const cablesTable: CatalogCableEntity[] = mapData(data);
             console.log('adding cables data', cablesTable.length);
-            await this.storageService.db?.catCables.bulkAdd(cablesTable);
+            await replaceTableData(this.storageService.db?.catCables, cablesTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<CableCsvDto>) => void
         });

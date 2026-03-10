@@ -11,6 +11,7 @@ import { CatalogMaintenanceEntity } from '@core/infrastructure/database';
 import { MaintenanceCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
+import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
  * Service for managing maintenance team catalog data.
@@ -106,10 +107,9 @@ export class MaintenanceService {
               resolve();
               return;
             }
-            await this.storageService.db?.catMaintenance.clear();
             const maintenanceTable: CatalogMaintenanceEntity[] = mapData(data);
             console.log('adding maintenance data', maintenanceTable.length);
-            await this.storageService.db?.catMaintenance.bulkAdd(maintenanceTable);
+            await replaceTableData(this.storageService.db?.catMaintenance, maintenanceTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<MaintenanceCsvDto>) => void
         });

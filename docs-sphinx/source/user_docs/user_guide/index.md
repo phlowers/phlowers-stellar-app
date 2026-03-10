@@ -16,6 +16,13 @@ Step-by-step guides for using the Stellar application.
 Introduction to the Stellar application and its main features.
 :::
 
+:::{grid-item-card} {fas}`arrows-rotate;pst-color-primary` Application Update
+:link: application_update
+:link-type: doc
+
+Understand how app files and catalog data are updated safely.
+:::
+
 ::::
 
 ```{toctree}
@@ -24,4 +31,5 @@ Introduction to the Stellar application and its main features.
 
 welcome
 obstacles
+application_update
 ```

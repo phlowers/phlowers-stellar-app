@@ -13,6 +13,7 @@ import { CatalogLineEntity } from '@core/infrastructure/database';
 import { LineCsvDto } from '@core/infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { sortBy, uniqBy } from 'lodash';
+import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
  * Service for managing electrical transmission line catalog data.
@@ -127,12 +128,11 @@ export class LinesService {
               resolve();
               return;
             }
-            await this.storageService.db?.catLines.clear();
             const table: CatalogLineEntity[] = mapData(data);
             const uniqueTable = uniqBy(table, (element) =>
               [element.voltage_idr, element.link_idr, element.lit_idr, element.branch_id, element.branch_idr].join('')
             );
-            await this.storageService.db?.catLines.bulkAdd(sortBy(uniqueTable, 'voltage_adr'));
+            await replaceTableData(this.storageService.db?.catLines, sortBy(uniqueTable, 'voltage_adr'));
             resolve();
           }) as (jsonResults: Papa.ParseResult<LineCsvDto>) => void
         });
