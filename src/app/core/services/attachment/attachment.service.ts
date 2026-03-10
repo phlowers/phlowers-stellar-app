@@ -116,7 +116,6 @@ export class AttachmentService {
             }
             await this.storageService.db?.catAttachments.clear();
             const attachmentsTable: CatalogAttachmentEntity[] = mapData(data);
-            console.log('adding attachments data', attachmentsTable.length);
             await this.storageService.db?.catAttachments.bulkAdd(attachmentsTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void

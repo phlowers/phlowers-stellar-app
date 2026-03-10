@@ -142,7 +142,6 @@ export class CablesService {
             }
             await this.storageService.db?.catCables.clear();
             const cablesTable: CatalogCableEntity[] = mapData(data);
-            console.log('adding cables data', cablesTable.length);
             await this.storageService.db?.catCables.bulkAdd(cablesTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<CableCsvDto>) => void
