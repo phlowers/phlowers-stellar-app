@@ -94,6 +94,7 @@ describe('UpdateService', () => {
       mockCache.match.mockResolvedValue(null);
       mockFetch.mockReset();
       mockFetch.mockResolvedValueOnce({
+        ok: true,
         json: jest.fn().mockResolvedValueOnce(mockAssetList)
       });
 
@@ -127,6 +128,7 @@ describe('UpdateService', () => {
       };
 
       mockFetch.mockResolvedValueOnce({
+        ok: true,
         json: jest.fn().mockResolvedValueOnce({
           app_version: mockLatestVersion,
           files: ['file1.js', 'file2.css']
@@ -150,7 +152,10 @@ describe('UpdateService', () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
       mockCache.match.mockResolvedValueOnce(null);
 
-      await expect(service.checkAppVersion()).rejects.toThrow('Network error');
+      await expect(service.checkAppVersion()).resolves.toBeUndefined();
+      expect(service.currentVersion()).toBeNull();
+      expect(service.latestVersion()).toBeNull();
+      expect(service.needUpdate$.value).toBe(false);
     });
   });
 
@@ -202,6 +207,7 @@ describe('UpdateService', () => {
       };
 
       mockFetch.mockResolvedValueOnce({
+        ok: true,
         json: jest.fn().mockResolvedValueOnce({
           app_version: mockCurrentVersion,
           files: ['file1.js', 'file2.css']
@@ -232,6 +238,7 @@ describe('UpdateService', () => {
       };
 
       mockFetch.mockResolvedValueOnce({
+        ok: true,
         json: jest.fn().mockResolvedValueOnce({
           app_version: mockVersion,
           files: ['file1.js', 'file2.css']

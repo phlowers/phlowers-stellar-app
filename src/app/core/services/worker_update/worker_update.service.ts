@@ -139,7 +139,6 @@ export class UpdateService {
     if (!data) {
       return null;
     }
-    console.log('latest version is', data.app_version);
     return data.app_version;
   }
 
@@ -147,17 +146,24 @@ export class UpdateService {
    * Fetch the latest asset manifest from the server with no-cache semantics.
    */
   async getLatestAssetList(): Promise<AssetList | null> {
-    const response = await fetch('/assets_list.json', {
-      cache: 'no-store',
-      headers: {
-        'cache-control': 'no-cache',
-        pragma: 'no-cache'
+    try {
+      const response = await fetch('/assets_list.json', {
+        cache: 'no-store',
+        headers: {
+          'cache-control': 'no-cache',
+          pragma: 'no-cache'
+        }
+      });
+
+      if (!response.ok) {
+        return null;
       }
-    });
-    if (!response) {
+
+      const data = (await response.json()) as AssetList;
+      return data;
+    } catch {
       return null;
     }
-    return response.json();
   }
 
   /**

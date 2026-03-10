@@ -152,7 +152,11 @@ const server = http.createServer((request, response) => {
   }
 
   const requestedPath = pathname === '/' ? '/index.html' : pathname;
-  const normalized = path.normalize(requestedPath).replace(/^\.+/, '');
+  // Ensure the path stays relative to DIST_DIR on POSIX and Windows.
+  const normalized = path
+    .normalize(requestedPath)
+    .replace(/^\.+/, '')
+    .replace(/^[/\\]+/, '');
   const filePath = path.join(DIST_DIR, normalized);
 
   if (filePath.startsWith(DIST_DIR) && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {

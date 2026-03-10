@@ -297,6 +297,52 @@ describe('Service Worker Functions', () => {
 
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
+
+    it('should use network-first and cache successful js responses', async () => {
+      mockEvent.request.url = 'https://example.com/app.js';
+      const clonedRequest = { url: 'https://example.com/app.js' };
+      const networkResponse = {
+        ok: true,
+        clone: jest.fn().mockReturnValue({ ok: true, body: 'bundled-js' })
+      };
+      mockEvent.request.clone.mockReturnValue(clonedRequest);
+      mockFetch.mockResolvedValue(networkResponse as any);
+
+      await handleFetch(mockEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+
+      expect(response).toBe(networkResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        clonedRequest,
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.any(Object)
+        })
+      );
+      expect(mockCache.put).toHaveBeenCalledWith(mockEvent.request, expect.any(Object));
+      expect(networkResponse.clone).toHaveBeenCalled();
+    });
+
+    it('should use network-first and fall back to cache on network failure', async () => {
+      mockEvent.request.url = 'https://example.com/styles.css';
+      const clonedRequest = { url: 'https://example.com/styles.css' };
+      const cachedResponse = { from: 'cache' };
+      mockEvent.request.clone.mockReturnValue(clonedRequest);
+      mockFetch.mockRejectedValue(new Error('Network down'));
+      mockCache.match.mockResolvedValue(cachedResponse as any);
+
+      await handleFetch(mockEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+
+      expect(response).toBe(cachedResponse);
+      expect(mockCache.match).toHaveBeenCalledWith(mockEvent.request);
+    });
   });
 
   describe('handleMessage', () => {
