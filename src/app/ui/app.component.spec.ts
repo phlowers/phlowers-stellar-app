@@ -64,6 +64,10 @@ describe('AppComponent', () => {
       count: jest.fn(),
       toArray: jest.fn(),
       bulkAdd: jest.fn()
+    },
+    metadata: {
+      get: jest.fn().mockResolvedValue(null),
+      put: jest.fn().mockResolvedValue(undefined)
     }
   };
 
@@ -104,6 +108,7 @@ describe('AppComponent', () => {
 
     mockUpdateService = {
       checkAppVersion: jest.fn(),
+      getLatestAssetList: jest.fn().mockResolvedValue(null),
       needUpdate$: new BehaviorSubject<boolean>(false)
     } as unknown as UpdateService;
 

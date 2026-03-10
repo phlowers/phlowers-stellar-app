@@ -18,7 +18,7 @@ import { IconComponent } from './shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from './shared/components/atoms/button/button.component';
 import { UserService } from '@services/user/user.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { UpdateService } from '@services/worker_update/worker_update.service';
+import { AssetList, UpdateService } from '@services/worker_update/worker_update.service';
 import { Subscription } from 'rxjs';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { LinesService } from '@services/lines/lines.service';
@@ -69,6 +69,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   submitted = false;
   private readonly subscriptions = new Subscription();
+  private readonly csvImporters: Record<string, () => Promise<void>>;
   constructor(
     private readonly messageService: MessageService,
     private readonly storageService: StorageService,
@@ -83,6 +84,15 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly attachmentService: AttachmentService,
     private readonly obstacleTypesService: ObstaclesService
   ) {
+    this.csvImporters = {
+      'maintenance-teams.csv': () => this.maintenanceService.importFromFile(),
+      'lines.csv': () => this.linesService.importFromFile(),
+      'cables.csv': () => this.cablesService.importFromFile(),
+      'chains.csv': () => this.chainsService.importFromFile(),
+      'attachments.csv': () => this.attachmentService.importFromFile(),
+      'obstacle_type_rte.csv': () => this.obstacleTypesService.importFromFile()
+    };
+
     this.form = new FormGroup({
       email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])
     });
@@ -110,12 +120,50 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   async setupData() {
-    await this.maintenanceService.importFromFile();
-    await this.linesService.importFromFile();
-    await this.cablesService.importFromFile();
-    await this.chainsService.importFromFile();
-    await this.attachmentService.importFromFile();
-    await this.obstacleTypesService.importFromFile();
+    const manifest = await this.fetchLatestManifestSafe();
+    const dataHashes = manifest?.data_hashes || {};
+    const hashEntries = Object.entries(dataHashes);
+
+    // Fallback for legacy builds without per-CSV hashes.
+    if (hashEntries.length === 0) {
+      await this.importAllCatalogs();
+      return;
+    }
+
+    for (const [csvFileName, importFn] of Object.entries(this.csvImporters)) {
+      const latestHash = dataHashes[csvFileName];
+      if (!latestHash) {
+        continue;
+      }
+
+      const metadataKey = `catalog_hash:${csvFileName}`;
+      const storedHash = await this.storageService.db?.metadata.get(metadataKey);
+      if (storedHash?.value === latestHash) {
+        continue;
+      }
+
+      await importFn();
+      await this.storageService.db?.metadata.put({
+        key: metadataKey,
+        value: latestHash,
+        updated_at: new Date().toISOString()
+      });
+    }
+  }
+
+  private async fetchLatestManifestSafe(): Promise<AssetList | null> {
+    try {
+      return await this.updateService.getLatestAssetList();
+    } catch (error) {
+      console.warn('Unable to fetch latest asset manifest, using full catalog import fallback', error);
+      return null;
+    }
+  }
+
+  private async importAllCatalogs(): Promise<void> {
+    for (const importFn of Object.values(this.csvImporters)) {
+      await importFn();
+    }
   }
 
   ngOnDestroy(): void {

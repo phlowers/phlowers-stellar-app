@@ -26,6 +26,8 @@ export interface AppVersion {
 export interface AssetList {
   /** The version metadata for this build. */
   app_version: AppVersion;
+  /** Per-CSV hashes used to detect catalog updates. */
+  data_hashes?: Record<string, string>;
   /** List of asset file paths to cache. */
   files: string[];
 }
@@ -133,13 +135,29 @@ export class UpdateService {
    * @returns Promise resolving to the latest version or null if unavailable
    */
   async getLatestVersion() {
-    const response = await fetch('/assets_list.json');
-    if (response) {
-      const data: AssetList = await response.json();
-      return data.app_version;
-    } else {
+    const data = await this.getLatestAssetList();
+    if (!data) {
       return null;
     }
+    console.log('latest version is', data.app_version);
+    return data.app_version;
+  }
+
+  /**
+   * Fetch the latest asset manifest from the server with no-cache semantics.
+   */
+  async getLatestAssetList(): Promise<AssetList | null> {
+    const response = await fetch('/assets_list.json', {
+      cache: 'no-store',
+      headers: {
+        'cache-control': 'no-cache',
+        pragma: 'no-cache'
+      }
+    });
+    if (!response) {
+      return null;
+    }
+    return response.json();
   }
 
   /**
