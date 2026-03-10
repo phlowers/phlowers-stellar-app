@@ -375,25 +375,26 @@ export class FreePositioningComponent implements OnDestroy {
     const previousSelectedObstacle = positions.find((_o, index) => index === previousSelected);
     if (!previousSelectedObstacle) return;
 
-    const clickedAbsoluteAltitude = parseFloat(layout.yaxis.p2c(y).toFixed(2));
-    const zValue = this.isAbsoluteAltitudeMode()
-      ? clickedAbsoluteAltitude
-      : parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
-
-    const newObstacle: Position3D =
-      type === 'profile'
-        ? {
-            // First plot (profile): update x and z, keep y
-            x: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
-            y: previousSelectedObstacle.y ?? null,
-            z: zValue
-          }
-        : {
-            // Second plot (face): update y and z, keep x
-            x: previousSelectedObstacle.x ?? null,
-            y: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
-            z: zValue
-          };
+    let newObstacle: Position3D;
+    if (type === 'profile') {
+      // Profile plot: update x and z, keep y
+      const clickedAbsoluteAltitude = parseFloat(layout.yaxis.p2c(y).toFixed(2));
+      const zValue = this.isAbsoluteAltitudeMode()
+        ? clickedAbsoluteAltitude
+        : parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
+      newObstacle = {
+        x: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        y: previousSelectedObstacle.y ?? null,
+        z: zValue
+      };
+    } else {
+      // Face plot: update y only, keep x and z
+      newObstacle = {
+        x: previousSelectedObstacle.x ?? null,
+        y: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        z: previousSelectedObstacle.z ?? null
+      };
+    }
 
     // Update local selected position immediately for instant UI feedback
     const positionGroup = this.obstacleFormService.positions.at(previousSelected);
@@ -447,15 +448,7 @@ export class FreePositioningComponent implements OnDestroy {
 
     if (!plot) return;
 
-    const pLayout = this.getPlotLayout();
-    void Plotly.update(
-      plot,
-      {},
-      {
-        ...pLayout,
-        annotations
-      }
-    );
+    void Plotly.relayout(plot, { annotations });
   }
 
   /**
