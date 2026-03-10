@@ -26,7 +26,7 @@ class Worker {
   constructor(stringUrl: string) {
     this.url = stringUrl;
     this.onmessage = () => {
-      console.log('onmessage');
+      // Mock worker message handler - no-op for tests
     };
   }
 

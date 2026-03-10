@@ -141,8 +141,9 @@ export class StudioTopToolbarComponent implements OnInit {
 
   selectedDisplayValues = computed(() => {
     const values = [];
-    for (const key in this.plotService.selectedDisplayOptions()) {
-      if ((this.plotService.selectedDisplayOptions() as any)[key]) {
+    const options = this.plotService.selectedDisplayOptions();
+    for (const key in options) {
+      if (options[key as keyof typeof options]) {
         values.push(key);
       }
     }

@@ -169,8 +169,6 @@ export class ParameterCalculation15WithoutWindComponent {
 
   onCreateInitialCondition(type: 'minus' | 'nominal' | 'plus') {
     // TODO: Implement create initial condition functionality
-    console.log('Create initial condition:', type);
-
     const result = this.measureData().outputs.parameter15C;
     let baseParameter: number | undefined;
 

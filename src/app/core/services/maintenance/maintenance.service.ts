@@ -108,7 +108,6 @@ export class MaintenanceService {
             }
             await this.storageService.db?.catMaintenance.clear();
             const maintenanceTable: CatalogMaintenanceEntity[] = mapData(data);
-            console.log('adding maintenance data', maintenanceTable.length);
             await this.storageService.db?.catMaintenance.bulkAdd(maintenanceTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<MaintenanceCsvDto>) => void
