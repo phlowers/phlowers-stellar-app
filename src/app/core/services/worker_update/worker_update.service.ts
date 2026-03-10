@@ -82,7 +82,6 @@ export class UpdateService {
 
   constructor(private readonly messageService: MessageService) {
     navigator.serviceWorker.addEventListener('message', async (event) => {
-      console.log(`Message from service worker:`, event.data);
       if (event.data.message) {
         switch (event.data.message) {
           case 'worker_ready':
@@ -122,7 +121,6 @@ export class UpdateService {
     const cachedResponse = await cache.match('/app_version');
     if (cachedResponse) {
       const version = await cachedResponse.json();
-      console.log('current version is', version);
       return version;
     } else {
       return null;
@@ -138,7 +136,6 @@ export class UpdateService {
     const response = await fetch('/assets_list.json');
     if (response) {
       const data: AssetList = await response.json();
-      console.log('latest version is', data.app_version);
       return data.app_version;
     } else {
       return null;

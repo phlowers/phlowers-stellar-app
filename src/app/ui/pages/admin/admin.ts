@@ -104,7 +104,6 @@ export class AdminComponent {
       accept: async () => {
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (const registration of registrations) {
-          console.log('registration is', registration);
           await registration.unregister();
         }
         await caches.delete(CACHE_NAME);

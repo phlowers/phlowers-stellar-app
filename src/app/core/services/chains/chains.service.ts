@@ -107,7 +107,6 @@ export class ChainsService {
             }
             await this.storageService.db?.catChains.clear();
             const chainsTable: CatalogChainEntity[] = mapData(data);
-            console.log('adding chains data', chainsTable.length);
             await this.storageService.db?.catChains.bulkAdd(chainsTable);
             resolve();
           }) as (jsonResults: Papa.ParseResult<ChainCsvDto>) => void

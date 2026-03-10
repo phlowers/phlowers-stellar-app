@@ -27,7 +27,6 @@ export class NewsComponent implements OnInit {
       if (online) {
         this.newsService.getNews().subscribe(
           (news) => {
-            console.log(news);
             this.news.set(news);
             this.isLoading.set(false);
           },

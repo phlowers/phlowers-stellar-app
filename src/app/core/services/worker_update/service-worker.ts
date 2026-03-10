@@ -8,12 +8,6 @@ function fetchLatestManifest() {
   return fetch('/assets_list.json');
 }
 
-const serviceWorkerLogPrefix = 'SERVICE WORKER: ';
-
-function log(message: string, ...args: any[]) {
-  console.log(serviceWorkerLogPrefix + message, ...args);
-}
-
 /**
  * Checks whether the application has been installed by looking
  * for an `app_version` entry in the cache.
@@ -35,10 +29,9 @@ export async function checkIfAppInstalled() {
  * @returns The installed application version.
  */
 export async function installApp() {
-  log('beginning app installation');
+  console.log('SERVICE WORKER: Beginning app installation');
   const latestManifest = await fetchLatestManifest();
   const manifest = await latestManifest.json();
-  log('installing service worker with manifest', manifest);
   const filesToInstall = manifest.files || [];
   const buildVersion = manifest.app_version;
   const cache = await caches.open(CACHE_NAME);
@@ -51,7 +44,7 @@ export async function installApp() {
       }
     })
   );
-  log('app installed');
+  console.log(`SERVICE WORKER: App installed (version ${buildVersion}, ${filesToInstall.length} files)`);
   for (const client of await (self as unknown as ServiceWorkerGlobalScope).clients.matchAll({
     includeUncontrolled: true,
     type: 'window'
@@ -72,29 +65,26 @@ export async function installApp() {
  * @returns The updated application version.
  */
 export async function updateApp() {
-  log('update requested');
+  console.log('SERVICE WORKER: Update requested');
   const manifest = await fetchLatestManifest().then((manifest) => manifest.json());
-  log('updating service worker with manifest', manifest);
   const files = manifest.files || [];
   const cache = await caches.open(CACHE_NAME);
+  let addedCount = 0;
   for (const file of files) {
     // do not redownload wheels if already in cache
     if (file.startsWith('/pyodide') && file.endsWith('.whl')) {
-      if (await cache.match(file)) {
-        log('file already in cache, skipping', file);
-      } else {
-        log('file not in cache, adding', file);
+      if (!(await cache.match(file))) {
         await cache.add(file);
+        addedCount++;
       }
     } else {
-      log('adding file', file);
       await cache.add(file);
+      addedCount++;
     }
   }
   const cacheKeys = (await cache.keys()).map((key) => key.url.replace(self.location.origin, ''));
   const keysToDelete = cacheKeys.filter((key) => key !== '/app_version' && !files.includes(key));
   for (const key of keysToDelete) {
-    log('deleting file', key);
     await cache.delete(key);
   }
   const appVersion = manifest.app_version;
@@ -105,6 +95,9 @@ export async function updateApp() {
         'content-type': 'application/json'
       }
     })
+  );
+  console.log(
+    `SERVICE WORKER: Update complete (version ${appVersion}, ${addedCount} added, ${keysToDelete.length} deleted)`
   );
   return appVersion;
 }
@@ -166,7 +159,7 @@ export async function handleFetch(event: FetchEvent) {
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('fetch', handleFetch);
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('install', async () => {
-  log('installing service worker');
+  console.log('SERVICE WORKER: Installing service worker');
 });
 
 /**
@@ -180,7 +173,6 @@ export async function handleFetch(event: FetchEvent) {
  * @param event - The ExtendableMessageEvent containing the command
  */
 export async function handleMessage(event: ExtendableMessageEvent) {
-  log('message in service worker', event);
   const type = event.data.type;
   let appVersion = null;
   try {
@@ -200,7 +192,7 @@ export async function handleMessage(event: ExtendableMessageEvent) {
         });
         break;
       default:
-        log('unknown message type', type);
+        console.warn(`SERVICE WORKER: Unknown message type: ${type}`);
     }
   } catch (e: any) {
     event.source?.postMessage({ message: 'error', error: e.message });
@@ -208,12 +200,10 @@ export async function handleMessage(event: ExtendableMessageEvent) {
 }
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('activate', async () => {
-  log('activating service worker');
+  console.log('SERVICE WORKER: Activating service worker');
   const installed = await checkIfAppInstalled();
-  if (installed) {
-    log('app is installed');
-  } else {
-    log('app is not installed');
+  if (!installed) {
+    console.log('SERVICE WORKER: App not installed, installing now');
     await installApp();
   }
 });

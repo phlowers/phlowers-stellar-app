@@ -36,7 +36,6 @@ export enum ServerStatus {
  * ```typescript
  * // Subscribe to online status
  * this.onlineService.online$.subscribe(isOnline => {
- *   console.log('Browser online:', isOnline);
  * });
  *
  * // Subscribe to server status

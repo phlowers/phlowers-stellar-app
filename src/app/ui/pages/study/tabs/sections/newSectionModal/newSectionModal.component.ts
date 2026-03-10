@@ -114,14 +114,14 @@ export class NewSectionModalComponent {
     });
   }
 
-  checkFields() {
+  checkFields = () => {
     this.areAllRequiredFieldsFilled.set(areAllRequiredFieldsFilled(this.section()));
     this.supportsBoundsErrors.set(hasSupportsBoundsErrors(this.section()));
     const isNameUnique = !this.study()?.sections.find(
       (s) => s.name === this.section().name && s.uuid !== this.section().uuid
     );
     this.isNameUnique.set(isNameUnique);
-  }
+  };
 
   onVisibleChange(visible: boolean) {
     if (!visible) {

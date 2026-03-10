@@ -16,6 +16,21 @@ import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
 import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/new-study-modal.component';
 
+/**
+ * Field validation limits for support data imported from CSV.
+ * Used to clamp out-of-bounds values during import.
+ */
+const SUPPORT_FIELD_LIMITS: Record<string, { min: number; max: number }> = {
+  spanAngle: { min: -200, max: 200 },
+  attachmentHeight: { min: -100, max: 9000 },
+  armLength: { min: -50, max: 50 },
+  chainLength: { min: 0, max: 15 },
+  chainWeight: { min: 0, max: 5000 },
+  counterWeight: { min: 0, max: 5000 },
+  chainSurface: { min: 0, max: 9.99 },
+  supportFootAltitude: { min: -150, max: 9000 }
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -236,23 +251,89 @@ export class StudiesService {
     return section;
   }
 
+  /**
+   * Validates a support field value against known limits and logs errors
+   * @param fieldName - Name of the field being validated
+   * @param value - Value to validate
+   * @param supportIndex - Index of the support (for error reporting)
+   * @param supportNumber - Number/name of the support (for error reporting)
+   * @returns The validated value (clamped if out of bounds) or null if invalid
+   */
+  private validateSupportField(
+    fieldName: string,
+    value: number | null | undefined,
+    supportIndex: number,
+    supportNumber: string
+  ): number | null {
+    if (value == null) return null;
+
+    // Check for NaN/Infinity
+    if (!Number.isFinite(value)) {
+      console.warn(
+        `CSV Import Warning: Support ${supportIndex + 1} (${supportNumber || 'N/A'}) - ` +
+          `${fieldName} = ${value} is not a finite number (NaN or Infinity). Converted to null.`
+      );
+      return null;
+    }
+
+    const limit = SUPPORT_FIELD_LIMITS[fieldName];
+    if (limit && (value < limit.min || value > limit.max)) {
+      console.warn(
+        `CSV Import Warning: Support ${supportIndex + 1} (${supportNumber || 'N/A'}) - ` +
+          `${fieldName} = ${value} is out of bounds [${limit.min}, ${limit.max}]. Value will be clamped.`
+      );
+      return Math.min(limit.max, Math.max(limit.min, value));
+    }
+
+    return value;
+  }
+
   private buildSupportsFromProtoV4(protoV4Supports: ProtoV4Support[], conductor: string): Support[] {
-    return protoV4Supports.map((support) => ({
-      ...createEmptySupport(),
-      uuid: uuidv4(),
-      number: support.nom,
-      spanLength: support.portée,
-      spanAngle: support.angle_ligne,
-      attachmentHeight: support.alt_acc,
-      cableType: conductor,
-      armLength: support.long_bras,
-      chainLength: support.long_ch,
-      chainWeight: support.pds_ch,
-      counterWeight: support.ctr_poids,
-      chainV: support.ch_en_V,
-      chainSurface: support.surf_ch,
-      supportFootAltitude: support.alt_acc - 30 > 0 ? support.alt_acc - 30 : 0
-    }));
+    return protoV4Supports.map((support, index) => {
+      const isLastSupport = index === protoV4Supports.length - 1;
+      const hasInvalidSpanLength = !support.portée || support.portée === 0;
+      const supportId = support.nom || 'N/A';
+
+      // Validate spanLength
+      let spanLength: number | null = null;
+      if (!isLastSupport) {
+        if (hasInvalidSpanLength) {
+          console.warn(
+            `CSV Import Warning: Support ${index + 1} (${supportId}) has invalid spanLength: ${support.portée}. ` +
+              `Expected value between 5-5000m. Converted to null.`
+          );
+        } else if (support.portée < 5 || support.portée > 5000) {
+          console.warn(
+            `CSV Import Warning: Support ${index + 1} (${supportId}) - ` +
+              `spanLength = ${support.portée} is out of bounds [5, 5000]. Value will be clamped.`
+          );
+          spanLength = Math.min(5000, Math.max(5, support.portée));
+        } else {
+          spanLength = support.portée;
+        }
+      }
+
+      // First validate attachmentHeight, then derive supportFootAltitude from it
+      const attachmentHeight = this.validateSupportField('attachmentHeight', support.alt_acc, index, supportId);
+      const supportFootAltitude = attachmentHeight != null && attachmentHeight - 30 > 0 ? attachmentHeight - 30 : 0;
+
+      return {
+        ...createEmptySupport(),
+        uuid: uuidv4(),
+        number: support.nom,
+        spanLength,
+        spanAngle: this.validateSupportField('spanAngle', support.angle_ligne, index, supportId),
+        attachmentHeight,
+        cableType: conductor,
+        armLength: this.validateSupportField('armLength', support.long_bras, index, supportId),
+        chainLength: this.validateSupportField('chainLength', support.long_ch, index, supportId),
+        chainWeight: this.validateSupportField('chainWeight', support.pds_ch, index, supportId),
+        counterWeight: this.validateSupportField('counterWeight', support.ctr_poids, index, supportId),
+        chainV: support.ch_en_V,
+        chainSurface: this.validateSupportField('chainSurface', support.surf_ch, index, supportId),
+        supportFootAltitude
+      };
+    });
   }
 
   private buildInitialCondition(parameters: ProtoV4Parameters): InitialCondition {

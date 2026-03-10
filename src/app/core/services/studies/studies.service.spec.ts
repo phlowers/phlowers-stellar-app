@@ -429,6 +429,244 @@ describe('StudiesService', () => {
     expect(supports[0].supportFootAltitude).toBe(10);
   });
 
+  it('derives supportFootAltitude from validated attachmentHeight', () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+    const supports = (
+      service as unknown as {
+        buildSupportsFromProtoV4: (items: ProtoV4Support[], conductor: string) => Support[];
+      }
+    ).buildSupportsFromProtoV4(
+      [
+        {
+          alt_acc: 10000, // Out of bounds, will be clamped to 9000
+          angle_ligne: 0,
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 1',
+          num: '1',
+          pds_ch: 0,
+          portée: 100,
+          surf_ch: 0,
+          suspension: false
+        },
+        {
+          alt_acc: 100,
+          angle_ligne: 0,
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 2',
+          num: '2',
+          pds_ch: 0,
+          portée: 0,
+          surf_ch: 0,
+          suspension: false
+        }
+      ],
+      'ACSR-240'
+    );
+
+    // attachmentHeight clamped to 9000 → supportFootAltitude = 9000 - 30 = 8970
+    expect(supports[0].attachmentHeight).toBe(9000);
+    expect(supports[0].supportFootAltitude).toBe(8970);
+
+    consoleWarnSpy.mockRestore();
+  });
+
+  it('clamps out of bounds values and logs warnings', () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+    const supports = (
+      service as unknown as {
+        buildSupportsFromProtoV4: (items: ProtoV4Support[], conductor: string) => Support[];
+      }
+    ).buildSupportsFromProtoV4(
+      [
+        {
+          alt_acc: 10000, // Out of bounds [−100, 9000]
+          angle_ligne: 300, // Out of bounds [−200, 200]
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 100, // Out of bounds [−50, 50]
+          long_ch: 20, // Out of bounds [0, 15]
+          nom: 'Support 1',
+          num: '1',
+          pds_ch: 0,
+          portée: 100,
+          surf_ch: 15, // Out of bounds [0, 9.99]
+          suspension: false
+        },
+        {
+          alt_acc: 100,
+          angle_ligne: 0,
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 2',
+          num: '2',
+          pds_ch: 0,
+          portée: 0, // Last support
+          surf_ch: 0,
+          suspension: false
+        }
+      ],
+      'ACSR-240'
+    );
+
+    // Verify values are clamped
+    expect(supports[0].attachmentHeight).toBe(9000); // Clamped from 10000
+    expect(supports[0].spanAngle).toBe(200); // Clamped from 300
+    expect(supports[0].armLength).toBe(50); // Clamped from 100
+    expect(supports[0].chainLength).toBe(15); // Clamped from 20
+    expect(supports[0].chainSurface).toBe(9.99); // Clamped from 15
+
+    // Verify console.warn was called
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('CSV Import Warning: Support 1'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('attachmentHeight'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('spanAngle'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('armLength'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('chainLength'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('chainSurface'));
+
+    consoleWarnSpy.mockRestore();
+  });
+
+  it('handles invalid spanLength for non-last supports', () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+    const supports = (
+      service as unknown as {
+        buildSupportsFromProtoV4: (items: ProtoV4Support[], conductor: string) => Support[];
+      }
+    ).buildSupportsFromProtoV4(
+      [
+        {
+          alt_acc: 100,
+          angle_ligne: 0,
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 1',
+          num: '1',
+          pds_ch: 0,
+          portée: 0, // Invalid for non-last support
+          surf_ch: 0,
+          suspension: false
+        },
+        {
+          alt_acc: 100,
+          angle_ligne: 0,
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 2',
+          num: '2',
+          pds_ch: 0,
+          portée: 3, // Below minimum of 5
+          surf_ch: 0,
+          suspension: false
+        },
+        {
+          alt_acc: 100,
+          angle_ligne: 0,
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 3',
+          num: '3',
+          pds_ch: 0,
+          portée: 0, // Last support
+          surf_ch: 0,
+          suspension: false
+        }
+      ],
+      'ACSR-240'
+    );
+
+    // Verify spanLength handling
+    expect(supports[0].spanLength).toBeNull(); // Invalid value for non-last support
+    expect(supports[1].spanLength).toBe(5); // Clamped from 3 to minimum of 5
+    expect(supports[2].spanLength).toBeNull(); // Last support
+
+    // Verify console.warn was called for invalid spanLength
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Support 1 (Support 1) has invalid spanLength')
+    );
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Support 2 (Support 2)'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('spanLength = 3'));
+
+    // Should not log warning for last support
+    expect(consoleWarnSpy).not.toHaveBeenCalledWith(expect.stringContaining('Support 3'));
+
+    consoleWarnSpy.mockRestore();
+  });
+
+  it('rejects NaN and Infinity values', () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+    const supports = (
+      service as unknown as {
+        buildSupportsFromProtoV4: (items: ProtoV4Support[], conductor: string) => Support[];
+      }
+    ).buildSupportsFromProtoV4(
+      [
+        {
+          alt_acc: NaN, // Not a finite number
+          angle_ligne: Infinity, // Not a finite number
+          ch_en_V: false,
+          ctr_poids: -Infinity, // Not a finite number
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 1',
+          num: '1',
+          pds_ch: 0,
+          portée: 100,
+          surf_ch: 0,
+          suspension: false
+        },
+        {
+          alt_acc: 100,
+          angle_ligne: 0,
+          ch_en_V: false,
+          ctr_poids: 0,
+          long_bras: 0,
+          long_ch: 0,
+          nom: 'Support 2',
+          num: '2',
+          pds_ch: 0,
+          portée: 0,
+          surf_ch: 0,
+          suspension: false
+        }
+      ],
+      'ACSR-240'
+    );
+
+    // Verify NaN/Infinity values are converted to null
+    expect(supports[0].attachmentHeight).toBeNull();
+    expect(supports[0].spanAngle).toBeNull();
+    expect(supports[0].counterWeight).toBeNull();
+
+    // Verify console.warn was called for non-finite values
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('not a finite number (NaN or Infinity)'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('attachmentHeight'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('spanAngle'));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('counterWeight'));
+
+    // Verify supportFootAltitude defaults to 0 when attachmentHeight is null
+    expect(supports[0].supportFootAltitude).toBe(0);
+
+    consoleWarnSpy.mockRestore();
+  });
+
   it('downloads a study when present', async () => {
     const createObjectUrlSpy = jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
     if (!URL.revokeObjectURL) {
