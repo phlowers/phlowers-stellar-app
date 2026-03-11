@@ -1,4 +1,14 @@
-import { AfterViewInit, Component, computed, effect, inject, signal, TemplateRef, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarDialogService } from '../toolbar-dialog.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -43,7 +53,8 @@ interface SpanLoadRow {
     TableModule
   ],
   templateUrl: './loads-table.component.html',
-  styleUrl: './loads-table.component.scss'
+  styleUrl: './loads-table.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Dialog component for viewing and editing charge case details and associated loads. */
 export class LoadsTableComponent implements AfterViewInit {

@@ -1,4 +1,4 @@
-import { Component, Injector, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, inject } from '@angular/core';
 import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ToolbarDialogService } from './toolbar-dialog.service';
@@ -6,7 +6,8 @@ import { ToolbarDialogService } from './toolbar-dialog.service';
 @Component({
   selector: 'app-toolbar-dialog',
   imports: [DialogModule, NgComponentOutlet, NgTemplateOutlet],
-  templateUrl: './toolbar-dialog.component.html'
+  templateUrl: './toolbar-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Wrapper dialog component that dynamically renders the active toolbar tool. */
 export class ToolbarDialogComponent {

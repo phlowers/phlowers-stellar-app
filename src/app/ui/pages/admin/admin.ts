@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { TableModule } from 'primeng/table';
 import { UpdateService } from '@services/worker_update/worker_update.service';
@@ -48,19 +48,20 @@ const CACHE_NAME = 'app-assets';
     DatePipe,
     ToggleSwitch
   ],
-  providers: [ConfirmationService]
+  providers: [ConfirmationService],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminComponent {
-  constructor(
-    public updateService: UpdateService,
-    public onlineService: OnlineService,
-    private readonly messageService: MessageService,
-    private readonly studyService: StudiesService,
-    private readonly storageService: StorageService,
-    private readonly confirmationService: ConfirmationService,
-    private readonly workerPythonService: WorkerPythonService
-  ) {
-    this.activateDebugLogs = localStorage.getItem('activateDebugLogs') === 'true';
+  readonly updateService = inject(UpdateService);
+  readonly onlineService = inject(OnlineService);
+  private readonly messageService = inject(MessageService);
+  private readonly studyService = inject(StudiesService);
+  private readonly storageService = inject(StorageService);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly workerPythonService = inject(WorkerPythonService);
+
+  constructor() {
+    this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
   }
   updateAvailable = false;
   newVersion = '';
@@ -68,7 +69,7 @@ export class AdminComponent {
     { label: $localize`ON`, value: LogLevel.DEBUG },
     { label: $localize`OFF`, value: LogLevel.WARNING }
   ];
-  activateDebugLogs = false;
+  readonly activateDebugLogs = signal(false);
 
   deleteAllStudies() {
     this.confirmationService.confirm({

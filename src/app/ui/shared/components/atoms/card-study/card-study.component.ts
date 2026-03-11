@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { TagComponent } from '@ui/shared/components/atoms/tag/tag.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TagList } from '@ui/shared/model/card-study.model';
@@ -8,7 +8,8 @@ import { Router } from '@angular/router';
   selector: 'app-card-study',
   imports: [TagComponent, IconComponent],
   templateUrl: './card-study.component.html',
-  styleUrl: './card-study.component.scss'
+  styleUrl: './card-study.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Card component representing a study item, displaying metadata and navigating to the study on click. */
 export class CardStudyComponent {
@@ -23,7 +24,7 @@ export class CardStudyComponent {
   /** Unique identifier used for navigation to the study detail page. */
   uuid = input.required<string>();
 
-  constructor(private readonly router: Router) {}
+  private readonly router = inject(Router);
 
   onCardClick() {
     this.router.navigate(['/study', this.uuid()]);

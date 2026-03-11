@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -33,7 +33,8 @@ import { distinctUntilChanged, filter } from 'rxjs';
     FormsModule
   ],
   templateUrl: './obstaclesForm.component.html',
-  styleUrl: './obstaclesForm.component.scss'
+  styleUrl: './obstaclesForm.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ObstaclesFormComponent {
   public readonly plotService = inject(PlotService);

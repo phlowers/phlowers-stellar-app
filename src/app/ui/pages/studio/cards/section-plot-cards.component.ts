@@ -1,4 +1,4 @@
-import { Component, computed, effect, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { SectionPlotCardComponent } from './card/section-plot-card.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
@@ -31,12 +31,14 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
       ),
       transition('collapsed <=> expanded', [animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')])
     ])
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Container component that renders `SectionPlotCardComponent` cards for visible supports and spans. */
 export class SectionPlotCardsComponent {
   litData = signal<GetSectionOutput | null>(null);
-  constructor(public readonly plotService: PlotService) {
+  readonly plotService = inject(PlotService);
+  constructor() {
     effect(() => {
       const litData = this.plotService.litData();
       if (!litData) {

@@ -1,4 +1,14 @@
-import { AfterViewInit, Component, TemplateRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  TemplateRef,
+  ViewChild,
+  computed,
+  effect,
+  inject,
+  signal
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
@@ -26,7 +36,8 @@ interface L0Row {
   selector: 'app-l0-sum-tool',
   imports: [CommonModule, DialogModule, TableModule, ProgressSpinnerModule, ButtonComponent, IconComponent],
   templateUrl: './l0-sum.component.html',
-  styleUrls: ['./l0-sum.component.scss']
+  styleUrls: ['./l0-sum.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Dialog component displaying a sortable table of L0 (natural cable length) values per span. */
 export class L0SumComponent implements AfterViewInit {

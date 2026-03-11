@@ -1,5 +1,5 @@
 import { PlotService } from '@ui/pages/studio/services/plot.service';
-import { effect, Injectable } from '@angular/core';
+import { effect, inject, Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@src/app/core/services/charges/charges.service';
 import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
@@ -30,11 +30,11 @@ export class LoadFormsService {
     this.plotService.temporaryLoadData = newData;
   };
 
-  constructor(
-    private readonly plotService: PlotService,
-    private readonly chargesService: ChargesService,
-    private readonly workerPythonService: WorkerPythonService
-  ) {
+  private readonly plotService = inject(PlotService);
+  private readonly chargesService = inject(ChargesService);
+  private readonly workerPythonService = inject(WorkerPythonService);
+
+  constructor() {
     effect(() => {
       this.initTemporaryLoadData();
     });

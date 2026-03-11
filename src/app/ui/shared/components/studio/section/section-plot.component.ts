@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
@@ -28,7 +28,8 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 @Component({
   selector: 'app-section-plot',
   templateUrl: './section-plot.component.html',
-  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
+  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
  * Renders an interactive Plotly section plot for a transmission-line study.

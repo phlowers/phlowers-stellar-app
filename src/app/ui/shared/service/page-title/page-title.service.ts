@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, map, mergeMap, startWith } from 'rxjs/operators';
@@ -12,11 +12,11 @@ export class PageTitleService {
   private readonly pageTitleSubject = new BehaviorSubject<string>('');
   public pageTitle$: Observable<string> = this.pageTitleSubject.asObservable();
 
-  constructor(
-    private readonly router: Router,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly titleService: Title
-  ) {
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly titleService = inject(Title);
+
+  constructor() {
     this.router.events
       .pipe(
         startWith({} as NavigationEnd),

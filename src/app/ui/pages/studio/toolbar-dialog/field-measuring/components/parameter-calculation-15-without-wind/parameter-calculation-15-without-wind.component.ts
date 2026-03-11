@@ -1,4 +1,4 @@
-import { Component, model, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, model, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -42,6 +42,7 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
   ],
   templateUrl: './parameter-calculation-15-without-wind.component.html',
   styleUrl: './parameter-calculation-15-without-wind.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('expand', [
       transition(':enter', [
@@ -74,13 +75,11 @@ export class ParameterCalculation15WithoutWindComponent {
     { label: $localize`Manual`, value: 'manual' }
   ];
 
-  constructor(
-    private readonly workerPythonService: WorkerPythonService,
-    public readonly plotService: PlotService,
-    public readonly studiesService: StudiesService,
-    private readonly initialConditionService: InitialConditionService,
-    private readonly messageService: MessageService
-  ) {}
+  private readonly workerPythonService = inject(WorkerPythonService);
+  readonly plotService = inject(PlotService);
+  readonly studiesService = inject(StudiesService);
+  private readonly initialConditionService = inject(InitialConditionService);
+  private readonly messageService = inject(MessageService);
 
   isFormValid = computed(() => {
     const isManual = this.measureData().updateMode15C === 'manual';

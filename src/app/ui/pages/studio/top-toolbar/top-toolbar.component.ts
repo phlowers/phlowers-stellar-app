@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -30,7 +30,8 @@ import { ScaleViewComponent } from './scale-view/scale-view.component';
     CheckboxModule,
     ButtonComponent,
     ScaleViewComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Top toolbar component providing view controls, display options, and tool/table menus. */
 export class StudioTopToolbarComponent implements OnInit {
@@ -81,8 +82,7 @@ export class StudioTopToolbarComponent implements OnInit {
 
   shortcutsModal = signal<boolean>(false);
   shortcutsCount = signal<number>(0);
-
-  constructor(public readonly plotService: PlotService) {}
+  readonly plotService = inject(PlotService);
 
   ngOnInit(): void {
     this.loadToolsItemsState();

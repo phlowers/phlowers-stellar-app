@@ -1,4 +1,4 @@
-import { Injectable, isDevMode, signal } from '@angular/core';
+import { inject, Injectable, isDevMode, signal } from '@angular/core';
 
 import { environment } from '@src/environments/environment';
 import { isEqual } from 'lodash';
@@ -82,7 +82,9 @@ export class UpdateService {
    */
   needUpdate$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private readonly messageService: MessageService) {
+  private readonly messageService = inject(MessageService);
+
+  constructor() {
     navigator.serviceWorker.addEventListener('message', async (event) => {
       if (event.data.message) {
         switch (event.data.message) {

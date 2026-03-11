@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 /** Enum representing the status of the remote server. */
@@ -24,7 +24,7 @@ export enum ServerStatus {
  * Service for fetching application news content from the server.
  */
 export class NewsService {
-  constructor(private readonly http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   /**
    * Fetches the news markdown file from the application origin.

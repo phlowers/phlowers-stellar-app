@@ -52,8 +52,9 @@
       <label for="activateDebugLogs" i18n>Activate Python logs</label>
       <p-toggleSwitch
         inputId="activateDebugLogs"
-        [(ngModel)]="activateDebugLogs"
-        (onChange)="onChangeActivateDebugLogs(activateDebugLogs)"
+        [ngModel]="activateDebugLogs()"
+        (ngModelChange)="activateDebugLogs.set($event)"
+        (onChange)="onChangeActivateDebugLogs(activateDebugLogs())"
       />
     </div>
   </p-card>

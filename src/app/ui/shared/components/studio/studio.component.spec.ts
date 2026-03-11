@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, Input, signal, WritableSignal } from '@angular/core';
+import { Component, input, signal, WritableSignal } from '@angular/core';
 import { StudioComponent } from './studio.component';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
@@ -14,7 +14,7 @@ import { formatStudioError } from './helpers/errors';
   standalone: true
 })
 class SectionPlotStubComponent {
-  @Input() litData: any;
+  litData = input<any>();
 }
 
 const mockSection: Section = {

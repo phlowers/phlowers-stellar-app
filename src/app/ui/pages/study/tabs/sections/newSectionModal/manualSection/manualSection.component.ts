@@ -1,4 +1,14 @@
-import { Component, computed, input, OnInit, output, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+  viewChild
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -108,7 +118,8 @@ const orderedLineTableProperties: LineTableProperties[] = [
     NgxSliderModule
   ],
   templateUrl: './manualSection.component.html',
-  styleUrl: './manualSection.component.scss'
+  styleUrl: './manualSection.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManualSectionComponent implements OnInit {
   tabValue = signal<string>('general');
@@ -120,13 +131,10 @@ export class ManualSectionComponent implements OnInit {
   public sectionTypes = sectionTypes;
   isNameUnique = input<boolean>();
   currentPageReportTemplate = $localize`Support ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
-
-  constructor(
-    private readonly maintenanceService: MaintenanceService,
-    private readonly linesService: LinesService,
-    private readonly cablesService: CablesService,
-    public readonly plotService: PlotService
-  ) {}
+  private readonly maintenanceService = inject(MaintenanceService);
+  private readonly linesService = inject(LinesService);
+  private readonly cablesService = inject(CablesService);
+  readonly plotService = inject(PlotService);
 
   //TODO: To put into the plot service
   sliderOptions = computed<Options>(() => {

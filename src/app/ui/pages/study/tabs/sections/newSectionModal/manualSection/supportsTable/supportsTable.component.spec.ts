@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SupportsTableComponent } from './supportsTable.component';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Support, CatalogChain } from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -14,10 +14,10 @@ import { AttachmentService } from '@services/attachment/attachment.service';
   template: ''
 })
 class MockAttachmentSetModalComponent {
-  @Input() isOpen = false;
-  @Input() support: Support | undefined = undefined;
-  @Output() isOpenChange = new EventEmitter<boolean>();
-  @Output() validateForm = new EventEmitter<any>();
+  isOpen = input(false);
+  support = input<Support | undefined>(undefined);
+  isOpenChange = output<boolean>();
+  validateForm = output<any>();
 }
 
 // Mock services

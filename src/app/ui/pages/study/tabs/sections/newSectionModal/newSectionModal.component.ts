@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
@@ -73,7 +73,8 @@ const areAllRequiredFieldsFilled = (section: Section) => {
     ButtonComponent
   ],
   templateUrl: './newSectionModal.component.html',
-  styleUrl: './newSectionModal.component.scss'
+  styleUrl: './newSectionModal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewSectionModalComponent {
   /** Whether the modal dialog is open. */
@@ -82,7 +83,7 @@ export class NewSectionModalComponent {
   isOpenChange = output<boolean>();
   /** Emits the validated section on save. */
   setSection = output<Section>();
-  source = 'manual';
+  source = signal('manual');
   /** The section being created or edited. */
   section = input.required<Section>();
   /** The parent study. */
@@ -97,6 +98,8 @@ export class NewSectionModalComponent {
   isNameUnique = signal<boolean>(false);
   supportsBoundsErrors = signal<boolean>(false);
 
+  private readonly sectionService = inject(SectionService);
+
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
       return $localize`View a study section`;
@@ -106,7 +109,7 @@ export class NewSectionModalComponent {
     return $localize`Create a study section`;
   });
 
-  constructor(private readonly sectionService: SectionService) {
+  constructor() {
     effect(() => {
       if (this.isOpen()) {
         this.checkFields();

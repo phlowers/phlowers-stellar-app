@@ -1,5 +1,7 @@
+import { TestBed } from '@angular/core/testing';
 import { UserService } from './user.service';
 import { UserEntity } from '@core/infrastructure/database';
+import { StorageService } from '@core/services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 
 describe('UserService', () => {
@@ -21,7 +23,10 @@ describe('UserService', () => {
       db: { users: usersTableMock },
       ready$: readySubject.asObservable()
     };
-    service = new UserService(storageServiceMock);
+    TestBed.configureTestingModule({
+      providers: [UserService, { provide: StorageService, useValue: storageServiceMock }]
+    });
+    service = TestBed.inject(UserService);
   });
 
   describe('createUser', () => {

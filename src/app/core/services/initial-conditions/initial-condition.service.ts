@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Section, InitialCondition } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
@@ -60,7 +60,7 @@ export interface DuplicateInitialConditionFunctionsInput extends InitialConditio
   providedIn: 'root'
 })
 export class InitialConditionService {
-  constructor(private readonly studiesService: StudiesService) {}
+  private readonly studiesService = inject(StudiesService);
 
   /**
    * Helper method to clone a study, apply modifications, and update it

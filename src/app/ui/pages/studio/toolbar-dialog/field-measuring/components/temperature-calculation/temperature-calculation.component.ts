@@ -1,4 +1,4 @@
-import { Component, input, model, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, model, signal, computed } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -34,6 +34,7 @@ import { DecimalPipe } from '@angular/common';
   ],
   templateUrl: './temperature-calculation.component.html',
   styleUrl: './temperature-calculation.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('expand', [
       transition(':enter', [
@@ -63,7 +64,7 @@ export class TemperatureCalculationComponent {
     { label: $localize`Perpendicular`, value: 'perpendicular' }
   ];
 
-  constructor(private readonly workerPythonService: WorkerPythonService) {}
+  private readonly workerPythonService = inject(WorkerPythonService);
 
   isTransitOutOfBounds = computed(() => {
     const transit = this.measureData().transit;

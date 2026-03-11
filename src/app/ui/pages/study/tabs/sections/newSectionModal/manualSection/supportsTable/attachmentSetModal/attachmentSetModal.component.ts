@@ -1,4 +1,4 @@
-import { Component, effect, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -34,7 +34,8 @@ import { uniq } from 'lodash';
     SupportPlotComponent
   ],
   styleUrls: ['./attachmentSetModal.component.scss'],
-  templateUrl: './attachmentSetModal.component.html'
+  templateUrl: './attachmentSetModal.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AttachmentSetModalComponent implements OnInit {
   /** Whether the modal dialog is open. */
@@ -63,6 +64,7 @@ export class AttachmentSetModalComponent implements OnInit {
 
   supportsFilterTable = signal<CatalogAttachment[]>([]);
   attachmentsFilterTable = signal<CatalogAttachment[]>([]);
+  private readonly attachmentService = inject(AttachmentService);
 
   onVisibleChange() {
     this.isOpenChange.emit(false);
@@ -81,7 +83,7 @@ export class AttachmentSetModalComponent implements OnInit {
     this.attachmentSetNumbers.set(uniq(attachmentSets.map((attachment) => attachment.attachment_set ?? 0)));
   }
 
-  constructor(private readonly attachmentService: AttachmentService) {
+  constructor() {
     effect(() => {
       if (this.isOpen()) {
         this.resetValues(true);

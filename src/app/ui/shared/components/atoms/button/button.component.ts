@@ -1,4 +1,14 @@
-import { Component, computed, ElementRef, input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input,
+  OnDestroy,
+  OnInit,
+  ViewEncapsulation
+} from '@angular/core';
 import { IconComponent } from '../icon/icon.component';
 
 @Component({
@@ -10,7 +20,8 @@ import { IconComponent } from '../icon/icon.component';
   host: {
     class: 'app-btn',
     '[class]': 'classesList()'
-  }
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
  * Custom button component supporting multiple sizes, styles, and a loading state.
@@ -18,8 +29,7 @@ import { IconComponent } from '../icon/icon.component';
  */
 export class ButtonComponent implements OnInit, OnDestroy {
   private clickListener?: (e: Event) => void;
-
-  constructor(private readonly elementRef: ElementRef<HTMLButtonElement | HTMLLinkElement>) {}
+  private readonly elementRef = inject(ElementRef<HTMLButtonElement | HTMLLinkElement>);
 
   /** Button size: 's' (small), 'm' (medium), or 'l' (large). */
   btnSize = input<'s' | 'm' | 'l'>('m');

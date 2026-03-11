@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -38,7 +38,8 @@ interface PlotData {
 @Component({
   selector: 'app-support-plot',
   templateUrl: './support-plot.component.html',
-  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule]
+  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
  * Renders an interactive 3D Plotly visualisation of a transmission-line support structure.
@@ -72,7 +73,9 @@ export class SupportPlotComponent {
   /** Currently selected attachment-set number to highlight on the plot. */
   selectedAttachmentSetNumber = input<number | undefined>(undefined);
 
-  constructor(private readonly workerPythonService: WorkerPythonService) {
+  private readonly workerPythonService = inject(WorkerPythonService);
+
+  constructor() {
     effect(() => {
       const coords = this.coordinates();
       const attachmentSets = this.attachmentSetNumbers();

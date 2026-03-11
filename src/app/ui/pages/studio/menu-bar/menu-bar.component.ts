@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ChargesService } from '@services/charges/charges.service';
@@ -27,7 +27,8 @@ import { ToolbarDialogService } from '../toolbar-dialog/toolbar-dialog.service';
     SelectWithButtonsComponent,
     ButtonComponent,
     IconComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Menu bar component for the studio page, handling charge case selection and actions. */
 export class StudioMenuBarComponent {
@@ -60,11 +61,8 @@ export class StudioMenuBarComponent {
     return charge?.personnelPresence;
   });
   private readonly toolbarDialogService = inject(ToolbarDialogService);
-
-  constructor(
-    public readonly plotService: PlotService,
-    private readonly chargesService: ChargesService
-  ) {}
+  readonly plotService = inject(PlotService);
+  private readonly chargesService = inject(ChargesService);
 
   launchChargeFunction(
     functionToLaunch: (studyUuid: string, sectionUuid: string, value: string) => void,

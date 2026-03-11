@@ -1,4 +1,4 @@
-import { Component, model, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, model, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
@@ -10,13 +10,14 @@ import { FieldMeasure } from '../../types';
   selector: 'app-calculus-setting',
   imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingComponent],
   templateUrl: './calculus-setting.component.html',
-  styleUrl: './calculus-setting.component.scss'
+  styleUrl: './calculus-setting.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Component allowing the user to select and configure a field measurement calculation method (PAPOTO, PEP, or tangent aiming). */
 export class CalculusSettingComponent {
   /** Field measure data model bound two-way. */
   measureData = model.required<FieldMeasure>();
-  selectedCalculusType = 'PAPOTO';
+  readonly selectedCalculusType = signal('PAPOTO');
   leftSupportOption = computed(() => {
     const span = this.measureData().span;
     if (!span) {

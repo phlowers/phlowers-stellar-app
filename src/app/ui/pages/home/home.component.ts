@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -70,10 +70,14 @@ type ServerStates = CardState;
   selector: 'app-home',
   imports: [RouterLink, ButtonComponent, IconComponent, CardInfoComponent, CardStudyComponent, CommonModule],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  styleUrl: './home.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
+  private readonly updateService = inject(UpdateService);
+  private readonly onlineService = inject(OnlineService);
+  private readonly studiesService = inject(StudiesService);
   public latestStudies = signal<Study[]>([]);
 
   public homeText = signal<HomeTexts>(defaultTexts);
@@ -91,11 +95,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     return !isOnline;
   }
 
-  constructor(
-    private readonly updateService: UpdateService,
-    private readonly onlineService: OnlineService,
-    private readonly studiesService: StudiesService
-  ) {
+  constructor() {
     this.updateService.needUpdate$.subscribe((needUpdate) => {
       // prettier-ignore
       if (needUpdate) { //NOSONAR

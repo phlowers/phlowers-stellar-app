@@ -1,4 +1,14 @@
-import { Component, ContentChildren, effect, ElementRef, inject, QueryList, signal, ViewChildren } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ContentChildren,
+  effect,
+  ElementRef,
+  inject,
+  QueryList,
+  signal,
+  ViewChildren
+} from '@angular/core';
 import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -14,7 +24,8 @@ const REFRESH_STUDIO_DELAY = 400;
   selector: 'app-side-tabs',
   imports: [NgTemplateOutlet, ButtonComponent, IconComponent],
   templateUrl: './side-tabs.component.html',
-  styleUrl: './side-tabs.component.scss'
+  styleUrl: './side-tabs.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideTabsComponent {
   @ContentChildren(SideTabComponent) tabs!: QueryList<SideTabComponent>;

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
 import { Section, InitialCondition, Study } from '@core/domain';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -51,7 +51,8 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
     ToolbarDialogComponent
   ],
   templateUrl: './sectionsTab.component.html',
-  styleUrl: './sectionsTab.component.scss'
+  styleUrl: './sectionsTab.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SectionsTabComponent {
   /** The study whose sections are displayed. */
@@ -83,8 +84,7 @@ export class SectionsTabComponent {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
 
   private readonly plotService = inject(PlotService);
-
-  constructor(private readonly chargesService: ChargesService) {}
+  private readonly chargesService = inject(ChargesService);
 
   createInitialCondition(section: Section): InitialCondition {
     const currentInitialConditions = section.initial_conditions;

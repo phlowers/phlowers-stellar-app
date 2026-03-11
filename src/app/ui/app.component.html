@@ -1,7 +1,7 @@
 <router-outlet></router-outlet>
 <p-toast position="top-center"></p-toast>
 <p-dialog
-  [(visible)]="isUpdateDialogOpen"
+  [visible]="isUpdateDialogOpen()"
   [style]="{ width: '43.75rem' }"
   closable="false"
   modal="true"
@@ -44,7 +44,7 @@
   </ng-template>
   @if (!updateService.updateLoading()) {
     <ng-template #footer>
-      <button app-btn type="button" btnStyle="text" (click)="isUpdateDialogOpen = false">
+      <button app-btn type="button" btnStyle="text" (click)="isUpdateDialogOpen.set(false)">
         <app-icon icon="close" />
         <span i18n>Later</span>
       </button>
@@ -57,7 +57,7 @@
 </p-dialog>
 
 <p-dialog
-  [(visible)]="userDialog"
+  [visible]="userDialog()"
   [style]="{ width: '496px' }"
   closable="false"
   modal="true"

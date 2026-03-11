@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   signal,
   effect,
@@ -53,7 +54,8 @@ import { MessageService } from 'primeng/api';
     ParameterCalculation15WithoutWindComponent
   ],
   templateUrl: './field-measuring.component.html',
-  styleUrls: ['./field-measuring.component.scss']
+  styleUrls: ['./field-measuring.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
@@ -94,13 +96,13 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   readonly leftSupportOptions = signal<SelectOption[]>(LEFT_SUPPORT_OPTIONS);
   readonly cableOptions = signal<SelectOption[]>([]);
 
-  constructor(
-    public readonly sectionService: SectionService,
-    public readonly studiesService: StudiesService,
-    private readonly linesService: LinesService,
-    public readonly cableService: CablesService,
-    private readonly messageService: MessageService
-  ) {
+  readonly sectionService = inject(SectionService);
+  readonly studiesService = inject(StudiesService);
+  private readonly linesService = inject(LinesService);
+  readonly cableService = inject(CablesService);
+  private readonly messageService = inject(MessageService);
+
+  constructor() {
     effect(() => {
       if (this.toolbarDialogService.isOpen() && this.toolbarDialogService.phase() === 'main') {
         // Initialize data from PlotService when dialog opens

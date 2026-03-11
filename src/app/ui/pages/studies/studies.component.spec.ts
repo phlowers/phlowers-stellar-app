@@ -94,8 +94,8 @@ describe('StudiesComponent', () => {
     });
 
     it('should initialize with default values', () => {
-      expect(component.isNewStudyModalOpen).toBeFalsy();
-      expect(component.studies).toEqual([]);
+      expect(component.isNewStudyModalOpen()).toBeFalsy();
+      expect(component.studies()).toEqual([]);
     });
   });
 
@@ -104,7 +104,7 @@ describe('StudiesComponent', () => {
       const testStudies = [mockStudy, mockStudy2];
       mockStudiesService.studies.next(testStudies);
 
-      expect(component.studies).toEqual(testStudies);
+      expect(component.studies()).toEqual([mockStudy2, mockStudy]);
     });
 
     it('should update studies when studies service emits new values', () => {
@@ -112,10 +112,10 @@ describe('StudiesComponent', () => {
       const updatedStudies = [mockStudy, mockStudy2];
 
       mockStudiesService.studies.next(initialStudies);
-      expect(component.studies).toEqual(initialStudies);
+      expect(component.studies()).toEqual(initialStudies);
 
       mockStudiesService.studies.next(updatedStudies);
-      expect(component.studies).toEqual(updatedStudies);
+      expect(component.studies()).toEqual([mockStudy2, mockStudy]);
     });
   });
 
@@ -125,7 +125,7 @@ describe('StudiesComponent', () => {
 
       component.ngOnInit();
 
-      expect(component.isNewStudyModalOpen).toBeTruthy();
+      expect(component.isNewStudyModalOpen()).toBeTruthy();
     });
 
     it('should set isNewStudyModalOpen to false when create query param is not true', () => {
@@ -133,7 +133,7 @@ describe('StudiesComponent', () => {
 
       component.ngOnInit();
 
-      expect(component.isNewStudyModalOpen).toBeFalsy();
+      expect(component.isNewStudyModalOpen()).toBeFalsy();
     });
 
     it('should call getStudies when service is ready', async () => {
@@ -158,7 +158,7 @@ describe('StudiesComponent', () => {
       // Wait for the async operation to complete
       await fixture.whenStable();
 
-      expect(component.studies).toEqual(testStudies);
+      expect(component.studies()).toEqual([mockStudy2, mockStudy]);
     });
   });
 

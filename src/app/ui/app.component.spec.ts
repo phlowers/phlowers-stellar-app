@@ -263,7 +263,7 @@ describe('AppComponent', () => {
       readySubject.next(true);
       await fixture.whenStable();
 
-      expect(component.userDialog).toBe(true);
+      expect(component.userDialog()).toBe(true);
     });
 
     it('should not show user dialog if a user exists', async () => {
@@ -274,7 +274,7 @@ describe('AppComponent', () => {
       readySubject.next(true);
       await fixture.whenStable();
 
-      expect(component.userDialog).toBe(false);
+      expect(component.userDialog()).toBe(false);
     });
 
     it('should save valid user and close dialog', async () => {
@@ -284,11 +284,11 @@ describe('AppComponent', () => {
 
       await component.saveUser();
 
-      expect(component.submitted).toBe(true);
+      expect(component.submitted()).toBe(true);
       expect(mockUserService.createUser).toHaveBeenCalledWith({
         email: 'test@example.com'
       });
-      expect(component.userDialog).toBe(false);
+      expect(component.userDialog()).toBe(false);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Successful',
@@ -302,7 +302,7 @@ describe('AppComponent', () => {
 
       await component.saveUser();
 
-      expect(component.submitted).toBe(true);
+      expect(component.submitted()).toBe(true);
       expect(mockDb.users.add).not.toHaveBeenCalled();
     });
   });

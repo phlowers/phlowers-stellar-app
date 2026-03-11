@@ -25,7 +25,7 @@ jest.mock('plotly.js-dist-min', () => ({
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ManualSectionComponent } from './manualSection.component';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Section, Support, CatalogMaintenance, CatalogLine } from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -40,13 +40,13 @@ import { MessageService } from 'primeng/api';
   template: ''
 })
 class MockSupportsTableComponent {
-  @Input() supports: Support[] = [];
-  @Output() addSupport = new EventEmitter<{
+  supports = input<Support[]>([]);
+  addSupport = output<{
     index: number;
     position: 'before' | 'after';
   }>();
-  @Output() deleteSupport = new EventEmitter<string>();
-  @Output() supportChange = new EventEmitter<{
+  deleteSupport = output<string>();
+  supportChange = output<{
     uuid: string;
     field: keyof Support;
     value: Support;

@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 @Component({
   selector: 'app-card',
@@ -8,7 +8,8 @@ import { Component, computed, input } from '@angular/core';
   host: {
     '[role]': 'role()',
     '[attr.tabindex]': 'tabIndexValue()'
-  }
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Generic card wrapper component with configurable ARIA role and keyboard accessibility. */
 export class CardComponent {

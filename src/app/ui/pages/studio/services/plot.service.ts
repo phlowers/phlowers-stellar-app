@@ -122,13 +122,13 @@ export class PlotService {
 
   private readonly injector = inject(Injector);
 
-  constructor(
-    private readonly workerPythonService: WorkerPythonService,
-    private readonly cableService: CablesService,
-    private readonly sectionService: SectionService,
-    private readonly sideTabsService: SideTabsService,
-    private readonly obstaclesService: ObstaclesService
-  ) {
+  private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly cableService = inject(CablesService);
+  private readonly sectionService = inject(SectionService);
+  private readonly sideTabsService = inject(SideTabsService);
+  private readonly obstaclesService = inject(ObstaclesService);
+
+  constructor() {
     const storedResolution = Number(localStorage.getItem(RESOLUTION_STORAGE_KEY));
     if (Number.isFinite(storedResolution) && storedResolution >= MIN_RESOLUTION) {
       // Clamp to minimum; will be re-clamped to max once worker loads config

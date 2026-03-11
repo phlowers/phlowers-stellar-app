@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import { CatalogChainEntity } from '@core/infrastructure/database';
@@ -39,10 +39,10 @@ export class ChainsService {
    */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
-  constructor(
-    private readonly storageService: StorageService,
-    private readonly http: HttpClient
-  ) {
+  private readonly storageService = inject(StorageService);
+  private readonly http = inject(HttpClient);
+
+  constructor() {
     this.storageService.ready$.subscribe((value) => {
       this.ready.next(value);
     });

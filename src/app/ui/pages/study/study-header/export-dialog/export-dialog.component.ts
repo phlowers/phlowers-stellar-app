@@ -1,4 +1,4 @@
-import { Component, input, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -26,7 +26,8 @@ import { SelectModule } from 'primeng/select';
     SelectModule
   ],
   templateUrl: './export-dialog.component.html',
-  styleUrl: './export-dialog.component.scss'
+  styleUrl: './export-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExportDialogComponent {
   /** Available export format options. */
@@ -37,7 +38,9 @@ export class ExportDialogComponent {
     exportFormat: FormControl<string | null>;
   }>;
 
-  constructor(public readonly studiesService: StudiesService) {
+  readonly studiesService = inject(StudiesService);
+
+  constructor() {
     this.form = new FormGroup({
       filename: new FormControl<string>('', [Validators.required]),
       exportFormat: new FormControl<string>(this.exportFormats()[0]?.value || '', [Validators.required])

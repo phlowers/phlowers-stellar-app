@@ -28,7 +28,13 @@
         <h3 class="title-underline" i18n>Choose a creation type</h3>
         <div class="flex flex-wrap gap-6">
           <div class="flex items-center">
-            <p-radiobutton name="source" value="manual" [(ngModel)]="source" inputId="manual" />
+            <p-radiobutton
+              name="source"
+              value="manual"
+              [ngModel]="source()"
+              (ngModelChange)="source.set($event)"
+              inputId="manual"
+            />
             <label for="manual" class="ml-2" i18n>Manual</label>
             <app-icon icon="info" />
           </div>
@@ -36,7 +42,8 @@
             <p-radiobutton
               name="source"
               value="referencial"
-              [(ngModel)]="source"
+              [ngModel]="source()"
+              (ngModelChange)="source.set($event)"
               inputId="referencial"
               [disabled]="true"
             />
@@ -47,7 +54,8 @@
             <p-radiobutton
               name="source"
               value="distantReferencial"
-              [(ngModel)]="source"
+              [ngModel]="source()"
+              (ngModelChange)="source.set($event)"
               inputId="distantReferencial"
               [disabled]="true"
             />
@@ -58,7 +66,8 @@
             <p-radiobutton
               name="source"
               value="extraction"
-              [(ngModel)]="source"
+              [ngModel]="source()"
+              (ngModelChange)="source.set($event)"
               inputId="extraction"
               [disabled]="true"
             />
@@ -68,7 +77,7 @@
         </div>
       </div>
     }
-    @if (source === 'manual' && isOpen()) {
+    @if (source() === 'manual' && isOpen()) {
       <app-manual-section
         [isNameUnique]="isNameUnique()"
         [mode]="mode()"

@@ -4,7 +4,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, computed, effect, OnDestroy, signal, Signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  OnDestroy,
+  signal,
+  Signal,
+  untracked
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -94,7 +104,8 @@ interface PlotElement extends HTMLElement {
   standalone: true,
   imports: [CommonModule, FormsModule, DialogModule, InputNumberModule, ProgressSpinnerModule],
   templateUrl: './free-positioning.component.html',
-  styleUrl: './free-positioning.component.scss'
+  styleUrl: './free-positioning.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FreePositioningComponent implements OnDestroy {
   isLoading = signal<boolean>(true);
@@ -114,15 +125,14 @@ export class FreePositioningComponent implements OnDestroy {
   });
 
   // Dependencies
+  private readonly workerPythonService = inject(WorkerPythonService);
+  readonly plotService = inject(PlotService);
+  readonly sideTabsService = inject(SideTabsService);
+  readonly obstacleFormService = inject(ObstacleFormService);
+  readonly obstaclesService = inject(ObstaclesService);
   private readonly positionsValue: Signal<unknown>;
 
-  constructor(
-    private readonly workerPythonService: WorkerPythonService,
-    public readonly plotService: PlotService,
-    public readonly sideTabsService: SideTabsService,
-    public readonly obstacleFormService: ObstacleFormService,
-    public readonly obstaclesService: ObstaclesService
-  ) {
+  constructor() {
     this.positionsValue = toSignal(this.obstacleFormService.form.get('positions')?.valueChanges ?? of([]), {
       initialValue: this.obstacleFormService.form.get('positions')?.value ?? []
     });

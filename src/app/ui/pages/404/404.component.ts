@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 
@@ -6,10 +6,11 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 @Component({
   selector: 'app-404',
   imports: [ButtonComponent],
-  templateUrl: './404.component.html'
+  templateUrl: './404.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotFoundComponent {
-  constructor(private readonly router: Router) {}
+  private readonly router = inject(Router);
 
   goToHome() {
     this.router.navigate(['/']);

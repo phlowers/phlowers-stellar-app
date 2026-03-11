@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -57,33 +57,33 @@ const modules = [
   standalone: true,
   imports: modules,
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'phlowers-stellar-app';
-  userDialog = false;
-  isUpdateDialogOpen = false;
+  readonly userDialog = signal(false);
+  readonly isUpdateDialogOpen = signal(false);
   form: FormGroup<{
     email: FormControl<string | null>;
   }>;
 
-  submitted = false;
+  readonly submitted = signal(false);
   private readonly subscriptions = new Subscription();
+  private readonly messageService = inject(MessageService);
+  private readonly storageService = inject(StorageService);
+  private readonly workerService = inject(WorkerPythonService);
+  private readonly userService = inject(UserService);
+  private readonly onlineService = inject(OnlineService);
+  readonly updateService = inject(UpdateService);
+  private readonly maintenanceService = inject(MaintenanceService);
+  private readonly linesService = inject(LinesService);
+  private readonly cablesService = inject(CablesService);
+  private readonly chainsService = inject(ChainsService);
+  private readonly attachmentService = inject(AttachmentService);
+  private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
-  constructor(
-    private readonly messageService: MessageService,
-    private readonly storageService: StorageService,
-    private readonly workerService: WorkerPythonService,
-    private readonly userService: UserService,
-    private readonly onlineService: OnlineService,
-    public readonly updateService: UpdateService,
-    private readonly maintenanceService: MaintenanceService,
-    private readonly linesService: LinesService,
-    private readonly cablesService: CablesService,
-    private readonly chainsService: ChainsService,
-    private readonly attachmentService: AttachmentService,
-    private readonly obstacleTypesService: ObstaclesService
-  ) {
+  constructor() {
     this.csvImporters = {
       'maintenance-teams.csv': () => this.maintenanceService.importFromFile(),
       'lines.csv': () => this.linesService.importFromFile(),
@@ -104,17 +104,17 @@ export class AppComponent implements OnInit, OnDestroy {
       })
     );
     this.subscriptions.add(
-      storageService.ready$.subscribe(async (ready) => {
+      this.storageService.ready$.subscribe(async (ready) => {
         if (ready) {
           const user = await this.userService.getUser();
-          this.userDialog = !user;
+          this.userDialog.set(!user);
           this.setupData();
         }
       })
     );
     this.subscriptions.add(
       this.updateService.needUpdate$.subscribe((needUpdate) => {
-        this.isUpdateDialogOpen = needUpdate;
+        this.isUpdateDialogOpen.set(needUpdate);
       })
     );
   }
@@ -171,7 +171,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   async saveUser() {
-    this.submitted = true;
+    this.submitted.set(true);
     if (this.form.valid) {
       await this.userService.createUser({ email: this.form.value.email! }).catch((err) => {
         console.error('Error creating user', err);
@@ -188,7 +188,7 @@ export class AppComponent implements OnInit, OnDestroy {
         detail: $localize`User info set`,
         life: 3000
       });
-      this.userDialog = false;
+      this.userDialog.set(false);
     }
   }
 

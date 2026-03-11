@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -25,7 +25,8 @@ import { MessageModule } from 'primeng/message';
     MessageModule
   ],
   templateUrl: './field-datas.component.html',
-  styleUrls: ['./field-datas.component.scss']
+  styleUrls: ['./field-datas.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Component for editing field measurement data (date, wind, temperature, sky cover). */
 export class FieldDatasComponent {

@@ -1,4 +1,4 @@
-import { Component, input, output, computed, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, computed, signal, effect } from '@angular/core';
 import { Study } from '@core/domain';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
@@ -55,7 +55,8 @@ export const createEmptyStudy = (): Study => {
     FileUploadModule
   ],
   templateUrl: './new-study-modal.component.html',
-  styleUrl: './new-study-modal.component.scss'
+  styleUrl: './new-study-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewStudyModalComponent {
   /** Whether the modal dialog is open. */
@@ -75,6 +76,10 @@ export class NewStudyModalComponent {
   descriptionLength = computed(() => this.description().length ?? 0);
   loading = signal<boolean>(false);
 
+  private readonly messageService = inject(MessageService);
+  private readonly studiesService = inject(StudiesService);
+  private readonly router = inject(Router);
+
   updateTitle(title: string) {
     this.title.set(title);
   }
@@ -83,11 +88,7 @@ export class NewStudyModalComponent {
     this.description.set(description);
   }
 
-  constructor(
-    private readonly messageService: MessageService,
-    private readonly studiesService: StudiesService,
-    private readonly router: Router
-  ) {
+  constructor() {
     effect(() => {
       if (this.isOpen() && this.mode() === 'modify') {
         this.title.set(this.titleInput());

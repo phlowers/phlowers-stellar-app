@@ -1127,6 +1127,10 @@ Before each PR, check:
 - [ ] Execution only in a Web Worker
 - [ ] Loading indicator present during init/execution
 
+**Dead code**
+- [ ] No dead code deleted without entry in `deadcode.md` and user validation
+- [ ] Any suspected dead code found during this PR is logged in `deadcode.md`
+
 ---
 
 ## 14. Useful commands
@@ -1153,6 +1157,45 @@ npm run lint
 # Format
 npm run format
 ```
+
+---
+
+## 15. Dead code detection & tracking
+
+### Mandatory workflow
+
+When you detect potentially dead code during any task (refactoring, code review, feature implementation, debugging), you **must** immediately log it in `./deadcode.md` — **never delete it silently**.
+
+### What qualifies as suspected dead code
+
+- Functions, methods, or classes with **zero references** in the codebase
+- Components or services **not imported or routed** anywhere
+- Interfaces or types **not used** by any implementation
+- Imports that are **unused** after a refactoring
+- Files that are **orphaned** (no other file references them)
+- Variables or constants that are **never read**
+- CSS classes **not referenced** in any template
+- Translation keys **not used** in any template or TypeScript file
+
+### How to log dead code
+
+Add an entry to `./deadcode.md` under the **"Pending review"** section using the template defined in that file:
+
+```markdown
+### `symbolName` — `path/to/file.ts`
+- **Type**: function | class | component | service | variable | import | interface | method | file
+- **Reason**: description of why this code appears dead
+- **Detected on**: YYYY-MM-DD
+- **Status**: ⏳ PENDING REVIEW
+```
+
+### Rules
+
+- **NEVER delete suspected dead code directly** — only log it in `deadcode.md`.
+- **Only the user can authorize deletion** after reviewing the entry.
+- When the user validates deletion, remove the code AND update the entry status in `deadcode.md`.
+- If the code is actually used (false positive), update the entry as kept with a justification.
+- The dedicated review task is in `plan.md` — **Phase 7**.
 
 ---
 

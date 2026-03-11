@@ -1,4 +1,4 @@
-import { Component, input, model, signal, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -29,6 +29,7 @@ import { PlotService } from '@ui/pages/studio/services/plot.service';
   ],
   templateUrl: './papoto.component.html',
   styleUrl: './papoto.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('expand', [
       transition(':enter', [

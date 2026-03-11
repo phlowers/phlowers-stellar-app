@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { NewsService } from '@services/news/news.service';
 import { OnlineService } from '@services/online/online.service';
 import { MarkdownModule } from 'ngx-markdown';
@@ -9,16 +9,15 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
   selector: 'app-news',
   imports: [MarkdownModule, ProgressSpinnerModule],
   templateUrl: './news.component.html',
-  styleUrl: './news.component.scss'
+  styleUrl: './news.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewsComponent implements OnInit {
   isOnline = signal<boolean>(false);
   news = signal<string>('');
   isLoading = signal<boolean>(false);
-  constructor(
-    private readonly onlineService: OnlineService,
-    private readonly newsService: NewsService
-  ) {}
+  private readonly onlineService = inject(OnlineService);
+  private readonly newsService = inject(NewsService);
 
   ngOnInit() {
     this.isLoading.set(true);

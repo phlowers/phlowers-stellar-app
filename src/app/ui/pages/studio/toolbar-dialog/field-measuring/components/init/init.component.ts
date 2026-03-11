@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   inject,
   signal,
@@ -24,7 +25,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   selector: 'app-field-measuring-init',
   imports: [IconComponent, InputText, Select, ReactiveFormsModule, ButtonComponent, MessageModule],
   templateUrl: './init.component.html',
-  styleUrl: './init.component.scss'
+  styleUrl: './init.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Initialization component for field measuring: lets the user create or select a measure. */
 export class InitComponent implements AfterViewInit, OnDestroy, OnInit {

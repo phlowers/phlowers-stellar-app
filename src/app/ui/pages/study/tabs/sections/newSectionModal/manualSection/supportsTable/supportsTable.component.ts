@@ -1,4 +1,4 @@
-import { Component, computed, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -56,7 +56,8 @@ import {
     PaginatorModule
   ],
   templateUrl: './supportsTable.component.html',
-  styleUrls: ['./supportsTable.component.scss']
+  styleUrls: ['./supportsTable.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SupportsTableComponent implements OnInit {
   /** List of supports to display in the table. */
@@ -86,10 +87,8 @@ export class SupportsTableComponent implements OnInit {
   supportFilterTable = signal<string[]>([]);
   supplementarySupportFilterTable = signal<string[]>([]);
   allSupportFilterTable = computed(() => [...this.supportFilterTable(), ...this.supplementarySupportFilterTable()]);
-  constructor(
-    private readonly chainsService: ChainsService,
-    private readonly attachmentService: AttachmentService
-  ) {}
+  private readonly chainsService = inject(ChainsService);
+  private readonly attachmentService = inject(AttachmentService);
   optionsAttachmentPosition = new Array(20).fill(0).map((_, index) => ({
     label: String(index + 1),
     value: index + 1

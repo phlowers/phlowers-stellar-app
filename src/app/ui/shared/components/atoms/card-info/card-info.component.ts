@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -9,7 +9,8 @@ import { CardState } from '@ui/shared/model/card-info.model';
   selector: 'app-card-info',
   imports: [CommonModule, RouterLink, IconComponent, ButtonComponent],
   templateUrl: './card-info.component.html',
-  styleUrl: './card-info.component.scss'
+  styleUrl: './card-info.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Informational card component displaying a title, status, text, and an optional link. */
 export class CardInfoComponent {

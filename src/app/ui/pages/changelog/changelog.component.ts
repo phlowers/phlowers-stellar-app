@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ChangelogService } from '@services/changelog/changelog.service';
 import { ChangelogItem } from '@services/changelog/types';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -11,16 +11,15 @@ import { OnlineService } from '@services/online/online.service';
 @Component({
   selector: 'app-changelog',
   imports: [ProgressSpinnerModule, MarkdownModule, DatePipe, PanelModule],
-  templateUrl: './changelog.component.html'
+  templateUrl: './changelog.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangelogComponent implements OnInit {
-  changelogs: ChangelogItem[] = [];
+  readonly changelogs = signal<ChangelogItem[]>([]);
   isLoading = signal<boolean>(false);
   isOnline = signal<boolean>(false);
-  constructor(
-    private readonly changelogService: ChangelogService,
-    private readonly onlineService: OnlineService
-  ) {}
+  private readonly changelogService = inject(ChangelogService);
+  private readonly onlineService = inject(OnlineService);
 
   ngOnInit() {
     this.isLoading.set(true);
@@ -28,7 +27,7 @@ export class ChangelogComponent implements OnInit {
       this.isOnline.set(online);
       if (online) {
         this.changelogService.getChangelogs().subscribe((changelog) => {
-          this.changelogs = changelog;
+          this.changelogs.set(changelog);
           this.isLoading.set(false);
         });
       } else {

@@ -1,4 +1,4 @@
-import { Component, input, OnInit, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, OnInit, signal, computed } from '@angular/core';
 import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '@ui/shared/model/icon.model';
 
 @Component({
@@ -11,7 +11,8 @@ import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '@ui/sha
     '[class.filled]': 'fill()',
     '[attr.aria-label]': 'icon()',
     '[class.symbols-loading]': '!symbolsReady()'
-  }
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Icon component that renders Material Symbols or custom SVG icons by name. */
 export class IconComponent implements OnInit {

@@ -1,15 +1,15 @@
 <app-study-header
-  [study]="study"
+  [study]="study()"
   (duplicateStudy)="duplicateStudy($event)"
   (openModifyStudyModal)="openModifyStudyModal()"
 />
-@if (study) {
+@if (study()) {
   <app-new-study-modal
     [(isOpen)]="isNewStudyModalOpen"
     mode="modify"
-    [studyUuid]="study!.uuid"
-    [titleInput]="study!.title"
-    [descriptionInput]="study!.description ?? ''"
+    [studyUuid]="study()!.uuid"
+    [titleInput]="study()!.title"
+    [descriptionInput]="study()!.description ?? ''"
     (refreshStudy)="refreshStudy($event)"
   />
 }
@@ -24,7 +24,7 @@
     <p-tabpanels class="px-0">
       <p-tabpanel value="sections">
         <app-sections-tab
-          [study]="study"
+          [study]="study()"
           (createOrUpdateSection)="createOrUpdateSection($event)"
           (deleteSection)="deleteSection($event)"
           (duplicateSection)="duplicateSection($event)"

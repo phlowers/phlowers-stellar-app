@@ -1,4 +1,4 @@
-import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
@@ -53,7 +53,8 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
     FreePositioningComponent
   ],
   templateUrl: './studio-page.component.html',
-  styleUrl: './studio-page.component.scss'
+  styleUrl: './studio-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StudioPageComponent implements OnInit, OnDestroy {
   sidebarWidth = signal(300);
@@ -119,13 +120,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.sidebarWidth.set(this.sidebarOpen() ? 300 : 0);
   }
 
-  constructor(
-    public readonly plotService: PlotService,
-    private readonly route: ActivatedRoute,
-    private readonly router: Router,
-    private readonly studiesService: StudiesService,
-    private readonly sectionService: SectionService
-  ) {}
+  readonly plotService = inject(PlotService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly studiesService = inject(StudiesService);
+  private readonly sectionService = inject(SectionService);
 
   previousSectionUuid = signal<string | null>(null);
 

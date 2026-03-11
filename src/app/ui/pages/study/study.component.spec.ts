@@ -207,7 +207,7 @@ describe('StudyComponent', () => {
     });
 
     it('should initialize with default values', () => {
-      expect(component.study).toBeNull();
+      expect(component.study()).toBeNull();
       expect(component.isNewStudyModalOpen()).toBeFalsy();
     });
   });
@@ -228,7 +228,7 @@ describe('StudyComponent', () => {
       await fixture.whenStable();
 
       expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith('test-uuid-1');
-      expect(component.study).toEqual(mockStudy);
+      expect(component.study()).toEqual(mockStudy);
     });
 
     it('should not load study when service is not ready', () => {
@@ -274,7 +274,7 @@ describe('StudyComponent', () => {
       await fixture.whenStable();
 
       expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalledWith(newUuid);
-      expect(component.study).toEqual(updatedStudy);
+      expect(component.study()).toEqual(updatedStudy);
     });
 
     it('should not refresh study when service is not ready', () => {
@@ -337,7 +337,7 @@ describe('StudyComponent', () => {
 
   describe('createOrUpdateSection', () => {
     beforeEach(() => {
-      component.study = { ...mockStudy, sections: [mockSection] };
+      component.study.set({ ...mockStudy, sections: [mockSection] });
     });
 
     it('should update existing section', async () => {
@@ -345,7 +345,7 @@ describe('StudyComponent', () => {
 
       await component.createOrUpdateSection(updatedSection);
 
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study, updatedSection);
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study(), updatedSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -359,7 +359,7 @@ describe('StudyComponent', () => {
 
       await component.createOrUpdateSection(newSection);
 
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study, newSection);
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study(), newSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -369,7 +369,7 @@ describe('StudyComponent', () => {
     });
 
     it('should not update when study is null', async () => {
-      component.study = null;
+      component.study.set(null);
 
       await component.createOrUpdateSection(mockSection);
 
@@ -380,13 +380,13 @@ describe('StudyComponent', () => {
 
   describe('deleteSection', () => {
     beforeEach(() => {
-      component.study = { ...mockStudy, sections: [mockSection] };
+      component.study.set({ ...mockStudy, sections: [mockSection] });
     });
 
     it('should delete section from study', async () => {
       await component.deleteSection(mockSection);
 
-      expect(mockSectionService.deleteSection).toHaveBeenCalledWith(component.study, mockSection);
+      expect(mockSectionService.deleteSection).toHaveBeenCalledWith(component.study(), mockSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -396,7 +396,7 @@ describe('StudyComponent', () => {
     });
 
     it('should not delete when study is null', async () => {
-      component.study = null;
+      component.study.set(null);
 
       await component.deleteSection(mockSection);
 
@@ -407,13 +407,13 @@ describe('StudyComponent', () => {
 
   describe('duplicateSection', () => {
     beforeEach(() => {
-      component.study = { ...mockStudy, sections: [mockSection] };
+      component.study.set({ ...mockStudy, sections: [mockSection] });
     });
 
     it('should duplicate section with new uuid', async () => {
       await component.duplicateSection(mockSection);
 
-      expect(mockSectionService.duplicateSection).toHaveBeenCalledWith(component.study, mockSection);
+      expect(mockSectionService.duplicateSection).toHaveBeenCalledWith(component.study(), mockSection);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -423,7 +423,7 @@ describe('StudyComponent', () => {
     });
 
     it('should not duplicate when study is null', async () => {
-      component.study = null;
+      component.study.set(null);
 
       await component.duplicateSection(mockSection);
 
@@ -434,7 +434,7 @@ describe('StudyComponent', () => {
 
   describe('addInitialCondition', () => {
     beforeEach(() => {
-      component.study = { ...mockStudy, sections: [mockSection] };
+      component.study.set({ ...mockStudy, sections: [mockSection] });
     });
 
     it('should add initial condition to section', async () => {
@@ -444,7 +444,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalledWith(
-        component.study,
+        component.study(),
         mockSection,
         mockInitialCondition
       );
@@ -461,7 +461,7 @@ describe('StudyComponent', () => {
         ...mockSection,
         initial_conditions: [mockInitialCondition]
       };
-      component.study = { ...mockStudy, sections: [sectionWithConditions] };
+      component.study.set({ ...mockStudy, sections: [sectionWithConditions] });
 
       const newInitialCondition = {
         ...mockInitialCondition,
@@ -473,7 +473,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalledWith(
-        component.study,
+        component.study(),
         sectionWithConditions,
         newInitialCondition
       );
@@ -486,7 +486,7 @@ describe('StudyComponent', () => {
     });
 
     it('should not add when study is null', async () => {
-      component.study = null;
+      component.study.set(null);
 
       await component.addInitialCondition({
         section: mockSection,
@@ -504,7 +504,7 @@ describe('StudyComponent', () => {
         ...mockSection,
         initial_conditions: [mockInitialCondition]
       };
-      component.study = { ...mockStudy, sections: [sectionWithConditions] };
+      component.study.set({ ...mockStudy, sections: [sectionWithConditions] });
     });
 
     it('should delete initial condition from section', async () => {
@@ -514,7 +514,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.deleteInitialCondition).toHaveBeenCalledWith(
-        component.study,
+        component.study(),
         mockSection,
         mockInitialCondition
       );
@@ -527,7 +527,7 @@ describe('StudyComponent', () => {
     });
 
     it('should not delete when study is null', async () => {
-      component.study = null;
+      component.study.set(null);
 
       await component.deleteInitialCondition({
         section: mockSection,
@@ -543,7 +543,7 @@ describe('StudyComponent', () => {
         ...mockSection,
         initial_conditions: []
       };
-      component.study = { ...mockStudy, sections: [sectionWithoutConditions] };
+      component.study.set({ ...mockStudy, sections: [sectionWithoutConditions] });
 
       await component.deleteInitialCondition({
         section: sectionWithoutConditions,
@@ -551,7 +551,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.deleteInitialCondition).toHaveBeenCalledWith(
-        component.study,
+        component.study(),
         sectionWithoutConditions,
         mockInitialCondition
       );
@@ -570,7 +570,7 @@ describe('StudyComponent', () => {
         ...mockSection,
         initial_conditions: [mockInitialCondition]
       };
-      component.study = { ...mockStudy, sections: [sectionWithConditions] };
+      component.study.set({ ...mockStudy, sections: [sectionWithConditions] });
     });
 
     it('should update initial condition in section', async () => {
@@ -585,7 +585,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.updateInitialCondition).toHaveBeenCalledWith(
-        component.study,
+        component.study(),
         mockSection,
         updatedIC
       );
@@ -604,7 +604,7 @@ describe('StudyComponent', () => {
         ...mockSection,
         initial_conditions: [mockInitialCondition]
       };
-      component.study = { ...mockStudy, sections: [sectionWithConditions] };
+      component.study.set({ ...mockStudy, sections: [sectionWithConditions] });
     });
 
     it('should duplicate initial condition with new UUID', async () => {
@@ -617,7 +617,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.duplicateInitialCondition).toHaveBeenCalledWith(
-        component.study,
+        component.study(),
         mockSection,
         mockInitialCondition,
         newUuid
@@ -637,7 +637,7 @@ describe('StudyComponent', () => {
         ...mockSection,
         initial_conditions: [mockInitialCondition]
       };
-      component.study = { ...mockStudy, sections: [sectionWithConditions] };
+      component.study.set({ ...mockStudy, sections: [sectionWithConditions] });
     });
 
     it('should set the selected initial condition', async () => {
@@ -647,7 +647,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.setInitialCondition).toHaveBeenCalledWith(
-        component.study,
+        component.study(),
         mockSection,
         mockInitialCondition.uuid
       );
@@ -677,7 +677,7 @@ describe('StudyComponent', () => {
       await fixture.whenStable();
 
       expect(mockStudiesService.getStudyAsObservable).toHaveBeenCalled();
-      expect(component.study).toBeDefined();
+      expect(component.study()).toBeDefined();
     });
 
     it('should handle duplicateStudy errors gracefully', async () => {
@@ -700,11 +700,14 @@ describe('StudyComponent', () => {
         ...mockStudy,
         sections: null as unknown as Section[]
       };
-      component.study = studyWithNullSections;
+      component.study.set(studyWithNullSections);
 
       await component.createOrUpdateSection(mockSection);
 
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study, mockSection);
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
+        { ...studyWithNullSections, sections: [] },
+        mockSection
+      );
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -718,7 +721,7 @@ describe('StudyComponent', () => {
         ...mockSection,
         initial_conditions: null as unknown as InitialCondition[]
       };
-      component.study = { ...mockStudy, sections: [sectionWithNullConditions] };
+      component.study.set({ ...mockStudy, sections: [sectionWithNullConditions] });
 
       await component.addInitialCondition({
         section: sectionWithNullConditions,
@@ -726,7 +729,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalledWith(
-        component.study,
+        component.study(),
         sectionWithNullConditions,
         mockInitialCondition
       );
@@ -739,7 +742,7 @@ describe('StudyComponent', () => {
     });
 
     it('should handle multiple rapid updates', async () => {
-      component.study = { ...mockStudy, sections: [mockSection] };
+      component.study.set({ ...mockStudy, sections: [mockSection] });
 
       // Simulate rapid updates
       await component.createOrUpdateSection({

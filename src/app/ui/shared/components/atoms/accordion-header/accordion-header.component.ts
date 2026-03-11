@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AccordionModule } from 'primeng/accordion';
 import { IconComponent } from '../icon/icon.component';
 
@@ -8,7 +8,8 @@ import { IconComponent } from '../icon/icon.component';
   templateUrl: './accordion-header.component.html',
   host: {
     class: 'app-accordion-header'
-  }
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Reusable accordion header component that wraps PrimeNG accordion with a custom icon. */
 export class AccordionHeaderComponent {}

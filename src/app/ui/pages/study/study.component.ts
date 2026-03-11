@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudyHeaderComponent } from '@ui/pages/study/study-header/study-header.component';
 import { StudiesService } from '@services/studies/studies.service';
@@ -46,21 +46,19 @@ import { Subscription } from 'dexie';
     NewStudyModalComponent
   ],
   templateUrl: './study.component.html',
-  styleUrl: './study.component.scss'
+  styleUrl: './study.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StudyComponent implements OnInit, OnDestroy {
-  study: Study | null = null;
+  readonly study = signal<Study | null>(null);
   isNewStudyModalOpen = signal<boolean>(false);
   subscription: Subscription | null = null;
-
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly studiesService: StudiesService,
-    private readonly sectionService: SectionService,
-    private readonly initialConditionService: InitialConditionService,
-    private readonly router: Router,
-    private readonly messageService: MessageService
-  ) {}
+  private readonly route = inject(ActivatedRoute);
+  private readonly studiesService = inject(StudiesService);
+  private readonly sectionService = inject(SectionService);
+  private readonly initialConditionService = inject(InitialConditionService);
+  private readonly router = inject(Router);
+  private readonly messageService = inject(MessageService);
 
   ngOnInit(): void {
     const uuid = this.route.snapshot.paramMap.get('uuid');
@@ -90,8 +88,10 @@ export class StudyComponent implements OnInit, OnDestroy {
     if (uuid && this.studiesService.ready.value) {
       this.subscription = this.studiesService.getStudyAsObservable(uuid).subscribe((study: Study | undefined) => {
         if (study) {
-          study.sections = study.sections.sort((a, b) => -a.created_at.localeCompare(b.created_at));
-          this.study = study;
+          this.study.set({
+            ...study,
+            sections: study.sections.sort((a, b) => -a.created_at.localeCompare(b.created_at))
+          });
         } else {
           this.router.navigate(['/studies']);
         }
@@ -118,18 +118,17 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   async createOrUpdateSection(section: Section) {
-    if (!this.study) {
+    const study = this.study();
+    if (!study) {
       return;
     }
 
     // Initialize sections array if it's null
-    if (!this.study.sections) {
-      this.study.sections = [];
-    }
+    const studyWithSections = study.sections ? study : { ...study, sections: [] };
 
-    const existingSection = this.study.sections.find((s) => s?.uuid === section?.uuid);
+    const existingSection = studyWithSections.sections.find((s) => s?.uuid === section?.uuid);
 
-    await this.sectionService.createOrUpdateSection(this.study, section);
+    await this.sectionService.createOrUpdateSection(studyWithSections, section);
 
     this.messageService.add({
       severity: 'success',
@@ -140,11 +139,12 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   async deleteSection(section: Section) {
-    if (!this.study) {
+    const study = this.study();
+    if (!study) {
       return;
     }
 
-    await this.sectionService.deleteSection(this.study, section);
+    await this.sectionService.deleteSection(study, section);
 
     this.messageService.add({
       severity: 'success',
@@ -155,11 +155,12 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   async duplicateSection(section: Section) {
-    if (!this.study) {
+    const study = this.study();
+    if (!study) {
       return;
     }
 
-    await this.sectionService.duplicateSection(this.study, section);
+    await this.sectionService.duplicateSection(study, section);
 
     this.messageService.add({
       severity: 'success',
@@ -170,12 +171,13 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   async updateInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
-    if (!this.study) {
+    const currentStudy = this.study();
+    if (!currentStudy) {
       return;
     }
 
-    await this.initialConditionService.updateInitialCondition(this.study, section, initialCondition);
-    const study = await this.studiesService.getStudy(this.study?.uuid);
+    await this.initialConditionService.updateInitialCondition(currentStudy, section, initialCondition);
+    const study = await this.studiesService.getStudy(currentStudy.uuid);
     if (!study) {
       return;
     }
@@ -194,11 +196,12 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   async addInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
-    if (!this.study) {
+    const currentStudy = this.study();
+    if (!currentStudy) {
       return;
     }
-    await this.initialConditionService.addInitialCondition(this.study, section, initialCondition);
-    const study = await this.studiesService.getStudy(this.study?.uuid);
+    await this.initialConditionService.addInitialCondition(currentStudy, section, initialCondition);
+    const study = await this.studiesService.getStudy(currentStudy.uuid);
     if (!study) {
       return;
     }
@@ -217,11 +220,12 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   async deleteInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
-    if (!this.study) {
+    const study = this.study();
+    if (!study) {
       return;
     }
 
-    await this.initialConditionService.deleteInitialCondition(this.study, section, initialCondition);
+    await this.initialConditionService.deleteInitialCondition(study, section, initialCondition);
 
     this.messageService.add({
       severity: 'success',
@@ -232,12 +236,13 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   async duplicateInitialCondition({ section, initialCondition, newUuid }: DuplicateInitialConditionFunctionsInput) {
-    if (!this.study) {
+    const study = this.study();
+    if (!study) {
       return;
     }
 
-    await this.initialConditionService.duplicateInitialCondition(this.study, section, initialCondition, newUuid);
-    await this.initialConditionService.setInitialCondition(this.study, section, newUuid);
+    await this.initialConditionService.duplicateInitialCondition(study, section, initialCondition, newUuid);
+    await this.initialConditionService.setInitialCondition(study, section, newUuid);
 
     this.messageService.add({
       severity: 'success',
@@ -248,9 +253,10 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   async setInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
-    if (!this.study) {
+    const study = this.study();
+    if (!study) {
       return;
     }
-    await this.initialConditionService.setInitialCondition(this.study, section, initialCondition.uuid);
+    await this.initialConditionService.setInitialCondition(study, section, initialCondition.uuid);
   }
 }

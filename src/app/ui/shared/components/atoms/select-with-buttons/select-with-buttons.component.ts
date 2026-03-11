@@ -1,4 +1,14 @@
-import { Component, computed, effect, input, OnInit, output, signal, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  OnInit,
+  output,
+  signal,
+  ViewChild
+} from '@angular/core';
 import { Select, SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { DividerModule } from 'primeng/divider';
@@ -9,7 +19,8 @@ import { ButtonComponent } from '../button/button.component';
   selector: 'app-select-with-buttons',
   imports: [SelectModule, FormsModule, DividerModule, IconComponent, ButtonComponent],
   templateUrl: './select-with-buttons.component.html',
-  styleUrl: './select-with-buttons.component.scss'
+  styleUrl: './select-with-buttons.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
  * Generic select dropdown with action buttons (view, edit, duplicate, delete) for each option.

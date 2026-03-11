@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { PageTitleService } from '@ui/shared/service/page-title/page-title.service';
@@ -17,21 +17,19 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
   selector: 'app-topbar',
   imports: [CommonModule, IconComponent],
   templateUrl: './topbar.component.html',
-  styleUrl: './topbar.component.scss'
+  styleUrl: './topbar.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Top navigation bar displaying the current page title, user info, and Python worker status. */
 export class TopbarComponent implements OnInit, OnDestroy {
   private readonly subscriptions = new Subscription();
+  private readonly pageTitleService = inject(PageTitleService);
+  private readonly userService = inject(UserService);
+  private readonly workerPythonService = inject(WorkerPythonService);
   public currentPageTitle = signal<string>('');
   public workerReady = signal<boolean>(true);
   public readonly workerError = signal<boolean>(false);
   public user = signal<User | null>(null);
-
-  constructor(
-    private readonly pageTitleService: PageTitleService,
-    private readonly userService: UserService,
-    private readonly workerPythonService: WorkerPythonService
-  ) {}
 
   ngOnInit() {
     this.subscriptions.add(

@@ -31,7 +31,7 @@ describe('CalculusSetting component', () => {
   });
 
   it('should have PAPOTO selected by default', () => {
-    expect(component.selectedCalculusType).toBe('PAPOTO');
+    expect(component.selectedCalculusType()).toBe('PAPOTO');
   });
 
   it('should render three radio buttons with correct labels', () => {
@@ -52,7 +52,8 @@ describe('CalculusSetting component', () => {
   });
 
   it('should display tangent aiming component when selected', () => {
-    component.selectedCalculusType = 'TANGENT_AIMING';
+    component.selectedCalculusType.set('TANGENT_AIMING');
+    componentRef.changeDetectorRef.markForCheck();
     fixture.detectChanges();
 
     const papotoComponent = fixture.debugElement.query(By.css('app-papoto'));
@@ -65,7 +66,8 @@ describe('CalculusSetting component', () => {
   });
 
   it('should display pep component when selected', () => {
-    component.selectedCalculusType = 'PEP';
+    component.selectedCalculusType.set('PEP');
+    componentRef.changeDetectorRef.markForCheck();
     fixture.detectChanges();
 
     const papotoComponent = fixture.debugElement.query(By.css('app-papoto'));
@@ -77,20 +79,24 @@ describe('CalculusSetting component', () => {
     expect(pepComponent).toBeTruthy();
   });
 
-  it('should switch components when radio button selection changes', () => {
+  it('should switch components when radio button selection changes', async () => {
     // Start with PAPOTO
-    expect(component.selectedCalculusType).toBe('PAPOTO');
+    expect(component.selectedCalculusType()).toBe('PAPOTO');
     expect(fixture.debugElement.query(By.css('app-papoto'))).toBeTruthy();
 
     // Change to TANGENT_AIMING
-    component.selectedCalculusType = 'TANGENT_AIMING';
+    component.selectedCalculusType.set('TANGENT_AIMING');
+    componentRef.changeDetectorRef.markForCheck();
     fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.debugElement.query(By.css('app-tangent-aiming'))).toBeTruthy();
     expect(fixture.debugElement.query(By.css('app-papoto'))).toBeFalsy();
 
     // Change to PEP
-    component.selectedCalculusType = 'PEP';
+    component.selectedCalculusType.set('PEP');
+    componentRef.changeDetectorRef.markForCheck();
     fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.debugElement.query(By.css('app-pep'))).toBeTruthy();
     expect(fixture.debugElement.query(By.css('app-tangent-aiming'))).toBeFalsy();
   });

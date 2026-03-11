@@ -1,4 +1,14 @@
-import { Component, DestroyRef, effect, inject, input, OnDestroy, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  OnDestroy,
+  output,
+  signal
+} from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
@@ -54,7 +64,8 @@ const validators = {
     InputGroup,
     InputGroupAddon,
     KeyFilterModule
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InitialConditionModalComponent implements OnDestroy {
   private readonly subscriptions = new Subscription();
@@ -92,6 +103,9 @@ export class InitialConditionModalComponent implements OnDestroy {
   isCableNarcisse = signal<boolean>(false);
   isNameUnique = signal<boolean>(true);
   public onlyPositiveNumbers = /^[0-9]*$/;
+  private readonly fb = inject(FormBuilder);
+  private readonly cablesService = inject(CablesService);
+  private readonly initialConditionService = inject(InitialConditionService);
 
   form: FormGroup;
 
@@ -103,11 +117,7 @@ export class InitialConditionModalComponent implements OnDestroy {
     return !this.initialConditions().find((ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid);
   }
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly cablesService: CablesService,
-    private readonly initialConditionService: InitialConditionService
-  ) {
+  constructor() {
     this.form = this.fb.group(validators);
 
     this.subscriptions.add(

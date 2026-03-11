@@ -76,19 +76,124 @@ Toutes importées directement dans un seul fichier `app.routes.ts`.
 
 ## Plan d'action
 
-### Phase 0 — Préparation (non-bloquante)
-1. **Créer la branche de refactoring** et s'assurer que les tests existants passent (baseline)
-2. **Ajouter les alias tsconfig manquants** : `@features/*`, `@shared/*`, `@infrastructure/*`
-3. **Fixer les 4 imports relatifs profonds** (sidebar.model, icon.component, papoto)
-4. **Supprimer les alias fantômes** `@plugins/*` et `@adapters/*` dans tsconfig
+### Phase 0 — Préparation (non-bloquante) ✅ TERMINÉE
+1. ~~**Créer la branche de refactoring**~~ → branche `601-stellar-code-refacto`
+2. ~~**Ajouter les alias tsconfig manquants**~~ → `@features/*`, `@shared/*`, `@infrastructure/*` ajoutés dans tsconfig.json, tsconfig.app.json, tsconfig.spec.json
+3. ~~**Fixer les 2 imports relatifs profonds**~~ → sidebar.model.ts + icon.component.ts → `@ui/shared/model/icon.model`
+4. ~~**Supprimer les alias fantômes**~~ → `@plugins/*` et `@adapters/*` supprimés des 3 tsconfig
+> **Baseline** : build OK, 88 suites / 1696 tests pass, lint 0 erreurs (309 warnings)
 
-### Phase 1 — OnPush & inject() (zero-breaking, high-impact)
-*Peut être parallélisé sur les fichiers*
+### Phase 1 — Signals-first, OnPush & inject() (zero-breaking, high-impact) ✅ TERMINÉE
 
-5. **Ajouter `ChangeDetectionStrategy.OnPush`** à tous les ~54 composants qui ne l'ont pas
-6. **Migrer les 22 fichiers constructor injection → `inject()`** (15 composants + 7 services)
-7. **Mettre à jour les 3 mocks spec** qui utilisent encore `@Input()`/`@Output()`
-8. **Vérification OnPush** : `npm run test` + `npm run build` + `npm run lint-check` — zéro régression. **IMPORTANT** : pour chaque composant migré vers OnPush, vérifier manuellement dans l'app que toutes les données se mettent correctement à jour dans l'IHM (bindings, listes, formulaires, résultats de calcul). OnPush ne déclenche le change detection que sur input reference change, signal update, ou async pipe — tout état muté par référence sans signal ni `markForCheck()` cessera de se rafraîchir silencieusement. Tester particulièrement : les tableaux/listes dynamiques, les résultats de calculs Pyodide, les formulaires réactifs, et les mises à jour après navigation.
+#### Philosophie Angular 21 — Signals d'abord, OnPush ensuite
+
+Angular 21 pousse vers le **zoneless change detection** où les **signals sont la primitive réactive principale**. L'ordre correct est :
+1. **D'abord** : migrer TOUT l'état des composants vers `signal()`
+2. **Ensuite** : appliquer `ChangeDetectionStrategy.OnPush`
+3. **Enfin** : vérifier que tout fonctionne ensemble
+
+> **Règle fondamentale** : Sous OnPush, seuls les **signal updates**, **input reference changes** et **DOM events** déclenchent le change detection. Toute propriété plain mutée dans un callback async (.subscribe, .then, await, effect) est **invisible** pour OnPush et provoque des régressions silencieuses.
+
+> **`[(ngModel)]` sur propriété plain** : Fonctionne sous OnPush car le DOM event déclenche le CD. Mais pour la compatibilité zoneless Angular 21, ces propriétés doivent aussi être des signals.
+
+> **Propriétés statiques/constantes** (options de select qui ne changent jamais à l'exécution) : Restent en `readonly` — les signaux n'apportent pas de valeur pour des données immuables.
+
+#### État actuel
+
+| Étape | Statut | Détail |
+|-------|--------|--------|
+| OnPush sur ~60 composants | ✅ Fait | 100% des composants ont OnPush |
+| inject() (22 fichiers) | ✅ Fait | Aucune constructor injection restante |
+| Mocks spec @Input/@Output | ✅ Fait | Tous migrés vers input()/output() |
+| Migration signal() | ✅ Fait | 7 composants migrés (voir tableau ci-dessous) |
+
+#### Étapes
+5. ~~**Ajouter `ChangeDetectionStrategy.OnPush`**~~ ✅ à tous les ~60 composants
+6. ~~**Migrer les 22 fichiers constructor injection → `inject()`**~~ ✅ (15 composants + 7 services)
+7. ~~**Mettre à jour les 3 mocks spec**~~ ✅ qui utilisaient `@Input()`/`@Output()`
+
+#### Étape 8 — Migration systématique signal() (CRITIQUE)
+
+**Principe** : Pour chaque composant, convertir TOUTES les propriétés plain qui sont :
+- Lues dans le template ET mutées dans des callbacks async → **🔴 CRITIQUE** (OnPush cassé maintenant)
+- Liées via `[(ngModel)]` → **🟡 IMPORTANT** (fonctionne sous OnPush mais requis pour zoneless Angular 21)
+
+##### 8a — Propriétés cassées sous OnPush (async mutations → plain) — PRIORITÉ ABSOLUE
+
+| # | Composant | Fichiers | Propriété(s) | Mutation | Fix |
+|---|-----------|----------|-------------|----------|-----|
+| ✅ | StudiesComponent | .ts + .html + .spec.ts | `studies`, `isNewStudyModalOpen` | `.subscribe()` | ✅ Migré vers signal() |
+| ✅ | **AppComponent** | .ts + .html + .spec.ts | `userDialog`, `isUpdateDialogOpen`, `submitted` | `.subscribe()`, `saveUser()` | ✅ Migré vers signal() |
+| ✅ | **StudyComponent** | .ts + .html + .spec.ts | `study` | `.subscribe()` | ✅ Migré vers signal() |
+| ✅ | **ChangelogComponent** | .ts + .html | `changelogs` | `.subscribe()` | ✅ Migré vers signal() |
+| ✅ | **ClimateComponent** | .ts + .html | `frontierSupportOptions` | mutation dans `initForm()` appelé par `effect()` | ✅ Migré vers signal() |
+
+##### 8b — Propriétés plain avec `[(ngModel)]` — compatibilité zoneless Angular 21
+
+> **Note `[(ngModel)]` + signal** : Angular 19 ne supporte pas nativement `[(ngModel)]="mySignal()"` en two-way. Le pattern est :
+> `[ngModel]="mySignal()" (ngModelChange)="mySignal.set($event)"` (split binding)
+
+| # | Composant | Fichier | Propriété | Usage template | Fix |
+|---|-----------|---------|-----------|---------------|-----|
+| ✅ | **CalculusSettingComponent** | .ts + .html + .spec.ts | `selectedCalculusType` | `[(ngModel)]`, `@if (=== 'PAPOTO')` | ✅ Migré vers signal(), split binding |
+| ✅ | **NewSectionModalComponent** | .ts + .html | `source` | `[(ngModel)]` sur p-radiobutton | ✅ Migré vers signal(), split binding |
+| ✅ | **AdminComponent** | .ts + .html | `activateDebugLogs` | `[(ngModel)]` + async mutation | ✅ Migré vers signal(), split binding |
+
+##### 8c — Code mort identifié → `deadcode.md`
+
+Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode.md) pour validation avant suppression (voir Phase 7).
+
+| Composant | Code mort | Action |
+|-----------|-----------|--------|
+| LoggedLayoutComponent | `currentRoute` + `ngOnInit()` + imports inutilisés | → `deadcode.md` |
+| StudioPageComponent | `spanData`, `supportData` (mock arrays non référencés) | → `deadcode.md` |
+
+#### Étape 9 — Vérification signal() + OnPush
+
+**Automatisée :**
+- ✅ `npm run build` — 0 erreurs
+- ✅ `npm run test` — 88 suites, 1696 tests pass
+- ✅ `npm run lint-check` — 0 erreurs (warnings ≤309)
+
+**Vérification heuristique :**
+- ✅ `grep -r "ChangeDetectionStrategy.OnPush" src/ --include="*.ts" | wc -l` = 61
+- ✅ `grep -rn "constructor(" src/ --include="*.component.ts" --include="*.service.ts"` — aucun avec paramètres DI
+- ✅ Aucun `[(visible)]="plainProp"` restant (doit être `[visible]="signal()"` ou `[(visible)]` sur un `model()`)
+
+**Vérification manuelle IHM (Humain) :**
+- [x] **(Humain)** Navigation complète : Home → Studies → Study detail → Studio (2D/3D) → Obstacles → Loads → Field Measuring → Admin → News → Changelog
+- [x] **(Humain)** Vérification IHM critique :
+  - Boîte de dialogue utilisateur (AppComponent) : apparaît au premier lancement, se ferme après soumission
+  - Boîte de dialogue mise à jour (AppComponent) : apparaît quand une mise à jour est disponible
+  - Création / import d'étude (StudiesComponent) : modal s'ouvre, étude apparaît dans la table
+  - Détail d'étude (StudyComponent) : sections se chargent, CRUD fonctionne
+  - Changelog : liste des versions s'affiche
+  - Climate : sélectionner le type de givre affiche les supports frontière
+  - Calculus setting : radio buttons changent le panneau affiché
+  - Admin : toggle debug logs fonctionne
+  - New section modal : radio buttons source changent le contenu
+
+#### Definition of Done — Phase 1
+
+**Par composant :**
+- [x] `changeDetection: ChangeDetectionStrategy.OnPush` présent
+- [x] Aucun `constructor(` avec paramètres DI — services injectés via `inject()` en `private readonly`
+- [x] `ChangeDetectionStrategy` importé depuis `@angular/core`
+- [x] **Aucune propriété plain d'état lue dans le template** — tout est `signal()`, `computed()`, `input()`, `output()`, `model()`, ou `readonly` (constantes)
+- [x] Aucune mutation d'objet/array par référence — utiliser `signal().set()` / `.update()` avec spread
+- [x] `.spec.ts` associé compile et passe — assertions sur signal via `component.prop()` et mutations via `.set()`
+
+**Mocks spec :**
+- [x] Aucun `@Input()` ni `@Output()` dans les `.spec.ts`
+- [x] Mocks utilisent `input()` / `output()` signal API
+
+**Globale :**
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1696 tests pass
+- [x] `npm run lint-check` — 0 erreurs (warnings ≤309)
+- [x] `grep -r "ChangeDetectionStrategy.OnPush" src/ --include="*.ts" | wc -l` = 61
+- [x] `grep -rn "constructor(" src/ --include="*.component.ts" --include="*.service.ts"` — aucun avec paramètres DI
+- [x] **(Humain)** Vérification IHM complète (voir étape 9)
 
 ### Phase 2 — Lazy Loading des routes
 *Dépend de Phase 0 (aliases)*
@@ -323,6 +428,19 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 
 31. **Vérification** : `npm run e2e` — les 5 + l'existant (update-flow) passent
 
+### Phase 7 — Nettoyage du code mort
+*Dépend de validation humaine. Peut être exécutée à tout moment après Phase 1.*
+
+> Tout code mort identifié au fil des phases est centralisé dans [`deadcode.md`](deadcode.md). La suppression est effectuée **uniquement après validation** du développeur sur chaque entrée.
+
+32. **Revoir `deadcode.md`** avec le développeur — valider ou invalider chaque entrée
+33. **Supprimer le code mort validé** :
+    - LoggedLayoutComponent : `currentRoute`, `ngOnInit()`, imports `NavigationEnd`, `filter`, `OnInit`
+    - StudioPageComponent : `spanData`, `supportData` (mock arrays)
+    - Tout autre code mort identifié au fil des phases (le fichier `deadcode.md` sera enrichi progressivement)
+34. **Vérification** : `npm run test` + `npm run build` + `npm run lint-check` — zéro régression
+35. **Mettre à jour `deadcode.md`** — marquer les entrées comme supprimées avec date
+
 ---
 
 ## Fichiers clés à modifier
@@ -354,12 +472,21 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 - `core/services/user/*` — reste dans core
 - `core/services/news/*` — reste dans core (ou features/news/)
 
-### 22 fichiers constructor injection → inject()
-- 15 composants listés dans l'audit
-- 7 services listés dans l'audit
+### ~~22 fichiers constructor injection → inject()~~ ✅
+- ~~15 composants listés dans l'audit~~ ✅
+- ~~7 services listés dans l'audit~~ ✅
 
-### ~54 composants → ajouter OnPush
-- Tous les .component.ts sauf scale-view.component.ts
+### ~~~54 composants → ajouter OnPush~~ ✅
+- ~~Tous les .component.ts~~ ✅ — 60 composants avec OnPush
+
+### 7 composants → migration signal() (Phase 1, étape 8)
+- `src/app/ui/app.component.ts` — `userDialog`, `isUpdateDialogOpen`, `submitted`
+- `src/app/ui/pages/study/study.component.ts` — `study`
+- `src/app/ui/pages/changelog/changelog.component.ts` — `changelogs`
+- `src/app/ui/pages/studio/loads/climate/climate.component.ts` — `frontierSupportOptions`
+- `src/app/ui/pages/studio/toolbar-dialog/field-measuring/components/calculus-setting/calculus-setting.component.ts` — `selectedCalculusType`
+- `src/app/ui/pages/study/tabs/sections/newSectionModal/newSectionModal.component.ts` — `source`
+- `src/app/ui/pages/admin/admin.ts` — `activateDebugLogs`
 
 ---
 
@@ -376,3 +503,8 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 - **Studio** : **sous-features** (obstacles, loads, field-measuring, toolbar) + un `studio/core/` pour les composants shell et le plot.service partagé
 - **Catalog** : **feature "catalog" dédié** (`features/catalog/`) avec son propre domain/infrastructure pour cables, chains, lines, attachment, maintenance, obstacle-types
 - **Dexie DB** : **centralisé** dans `infrastructure/database/` au top-level, singleton injecté via `InjectionToken`, accédé uniquement par les repositories des features
+- **Signals-first** : Migrer signal() AVANT d'appliquer OnPush — l'inverse provoque des régressions silencieuses
+- **Propriétés statiques** (altitudeTypeOptions, symmetryOptions, etc.) : restent `readonly`, signals inutiles pour données immuables
+- **Code mort** : inventorié dans `deadcode.md`, Phase 7 dédiée avec validation humaine avant toute suppression
+- **`[(ngModel)]` + signal** : split binding `[ngModel]="sig()" (ngModelChange)="sig.set($event)"` (Angular 19 ne supporte pas `[(ngModel)]` sur signal nativement)
+- **StudyComponent.study** : pattern immutable avec spread (pas de mutation locale d'objet/array)

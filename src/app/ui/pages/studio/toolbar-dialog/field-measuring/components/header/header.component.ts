@@ -1,4 +1,14 @@
-import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -13,7 +23,8 @@ import { isEqual } from 'lodash';
   selector: 'app-header',
   imports: [FormsModule, SelectModule, InputTextModule, InputGroupModule, InputGroupAddonModule, IconComponent],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+  styleUrls: ['./header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Header component for field measuring, handling span selection and altitude computation. */
 export class HeaderComponent {
@@ -43,7 +54,9 @@ export class HeaderComponent {
   private hasCalculatedInitialAltitude = false;
   private previousSpan = signal<number[] | null>(null);
 
-  constructor(private readonly plotService: PlotService) {
+  private readonly plotService = inject(PlotService);
+
+  constructor() {
     // Initialize span to first available span if measureData has no span set,
     // and calculate altitude if span exists but altitude is null
     effect(() => {

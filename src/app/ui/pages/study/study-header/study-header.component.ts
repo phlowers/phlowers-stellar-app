@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TagComponent } from '@ui/shared/components/atoms/tag/tag.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
@@ -26,7 +26,8 @@ import { ExportDialogComponent } from './export-dialog/export-dialog.component';
     ExportDialogComponent
   ],
   templateUrl: './study-header.component.html',
-  styleUrl: './study-header.component.scss'
+  styleUrl: './study-header.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StudyHeaderComponent {
   /** Whether the detail accordion panel is expanded. */
@@ -41,7 +42,7 @@ export class StudyHeaderComponent {
   /** Emits when the user requests to modify the study metadata. */
   public openModifyStudyModal = output<void>();
   public dateFormat = $localize`dd/MM:yyyy at HH'h'mm`;
-  constructor(private readonly studiesService: StudiesService) {}
+  private readonly studiesService = inject(StudiesService);
 
   toggleActiveDetail() {
     this.isDetailOpen.set(!this.isDetailOpen());

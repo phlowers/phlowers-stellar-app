@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Section } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
@@ -20,7 +20,7 @@ import { cloneDeep } from 'lodash';
  * sections within a study.
  */
 export class SectionService {
-  constructor(private readonly studiesService: StudiesService) {}
+  private readonly studiesService = inject(StudiesService);
 
   /**
    * Create or update a section in a study

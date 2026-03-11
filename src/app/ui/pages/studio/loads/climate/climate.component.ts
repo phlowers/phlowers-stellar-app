@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -89,7 +89,8 @@ export const climateConstraints = {
     IconComponent
   ],
   templateUrl: './climate.component.html',
-  styleUrl: './climate.component.scss'
+  styleUrl: './climate.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Component for editing climatic charge parameters (wind pressure, temperature, ice) for a charge case. */
 export class ClimateComponent {
@@ -147,7 +148,11 @@ export class ClimateComponent {
     { label: $localize`Dis Symmetric`, value: SymmetryType.DIS_SYMMETRIC }
   ];
 
-  frontierSupportOptions: { label: string; value: number }[] = [];
+  readonly frontierSupportOptions = signal<{ label: string; value: number }[]>([]);
+
+  private readonly plotService = inject(PlotService);
+  private readonly chargesService = inject(ChargesService);
+  private readonly loadFormsService = inject(LoadFormsService);
 
   async initForm() {
     const supports = this.plotService.section()?.supports;
@@ -158,7 +163,7 @@ export class ClimateComponent {
       })) ?? [];
     frontierSupportOptions.shift();
     frontierSupportOptions.pop();
-    this.frontierSupportOptions = frontierSupportOptions;
+    this.frontierSupportOptions.set(frontierSupportOptions);
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.plotService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
@@ -173,11 +178,7 @@ export class ClimateComponent {
     this.form.updateValueAndValidity();
   }
 
-  constructor(
-    private readonly plotService: PlotService,
-    private readonly chargesService: ChargesService,
-    private readonly loadFormsService: LoadFormsService
-  ) {
+  constructor() {
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
       this.plotService.temporaryLoadData = {
         ...this.plotService.temporaryLoadData!,

@@ -1,10 +1,10 @@
 <app-export-dialog></app-export-dialog>
 <p-confirmdialog key="positionDialog" [position]="'center'" />
 <section>
-  <app-new-study-modal [(isOpen)]="isNewStudyModalOpen" />
+  <app-new-study-modal [isOpen]="isNewStudyModalOpen()" (isOpenChange)="isNewStudyModalOpen.set($event)" />
   <div class="flex justify-between items-start">
     <h2 i18n>Studies</h2>
-    <button app-btn type="submit" btnSize="m" (click)="isNewStudyModalOpen = true">
+    <button app-btn type="submit" btnSize="m" (click)="isNewStudyModalOpen.set(true)">
       <app-icon icon="add" />
       <span i18n>Create a new study</span>
     </button>
@@ -19,7 +19,7 @@
   <p-tabpanels>
     <p-tabpanel value="myStudies"
       ><app-studies-table
-        [studies]="studies"
+        [studies]="studies()"
         (deleteStudy)="deleteStudy($event)"
         (duplicateStudy)="duplicateStudy($event)"
       />

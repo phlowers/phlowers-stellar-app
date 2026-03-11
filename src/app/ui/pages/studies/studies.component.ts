@@ -6,7 +6,7 @@
  */
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { OnInit, Component } from '@angular/core';
+import { ChangeDetectionStrategy, OnInit, Component, inject, signal } from '@angular/core';
 import { NewStudyModalComponent } from './components/new-study-modal/new-study-modal.component';
 import { ButtonModule } from 'primeng/button';
 import { ButtonComponent } from 'src/app/ui/shared/components/atoms/button/button.component';
@@ -48,34 +48,34 @@ import { ExportDialogComponent } from '../study/study-header/export-dialog/expor
     ExportDialogComponent
   ],
   templateUrl: './studies.component.html',
-  providers: [MessageService, ConfirmationService]
+  providers: [MessageService, ConfirmationService],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StudiesComponent implements OnInit {
-  isNewStudyModalOpen = false;
-  studies: Study[] = [];
+  readonly isNewStudyModalOpen = signal(false);
+  readonly studies = signal<Study[]>([]);
+  private readonly route = inject(ActivatedRoute);
+  private readonly studiesService = inject(StudiesService);
+  private readonly confirmationService = inject(ConfirmationService);
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly studiesService: StudiesService,
-    private readonly confirmationService: ConfirmationService
-  ) {
+  constructor() {
     this.studiesService.studies.subscribe((studies) => {
-      this.studies = this.sortStudies(studies);
+      this.studies.set(this.sortStudies(studies));
     });
   }
 
   sortStudies(studies: Study[]) {
-    return studies.sort((a, b) => {
+    return [...studies].sort((a, b) => {
       return new Date(b.created_at_offline).getTime() - new Date(a.created_at_offline).getTime();
     });
   }
 
   ngOnInit(): void {
-    this.isNewStudyModalOpen = this.route.snapshot.queryParams['create'] === 'true';
+    this.isNewStudyModalOpen.set(this.route.snapshot.queryParams['create'] === 'true');
     this.studiesService.ready.subscribe((ready) => {
       if (ready) {
         this.studiesService.getStudies().then((studies) => {
-          this.studies = this.sortStudies(studies);
+          this.studies.set(this.sortStudies(studies));
         });
       }
     });

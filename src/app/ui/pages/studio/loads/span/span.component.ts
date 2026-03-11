@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, Signal, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, Signal, signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -28,7 +28,8 @@ import { LoadControlName, SpanFormControls, SupportOption } from './span.interfa
     FormsModule
   ],
   templateUrl: './span.component.html',
-  styleUrl: './span.component.scss'
+  styleUrl: './span.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Component for configuring span-level loads including type, weight, and position relative to supports. */
 export class SpanComponent {

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ProtoV4Parameters, ProtoV4Support, Section, Support, Study } from '@core/domain';
@@ -114,19 +114,17 @@ const importSuccessMessage = {
   selector: 'app-import-study',
   imports: [IconComponent, DividerModule, RouterLink, ButtonComponent, ToastModule],
   templateUrl: './import-study.component.html',
-  styleUrl: './import-study.component.scss'
+  styleUrl: './import-study.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportStudyComponent {
   loading = signal<boolean>(false);
   newStudies = signal<Study[]>([]);
   erroredFiles = signal<string[]>([]);
-
-  constructor(
-    private readonly studiesService: StudiesService,
-    private readonly messageService: MessageService,
-    private readonly cablesService: CablesService,
-    private readonly confirmationService: ConfirmationService
-  ) {}
+  private readonly studiesService = inject(StudiesService);
+  private readonly messageService = inject(MessageService);
+  private readonly cablesService = inject(CablesService);
+  private readonly confirmationService = inject(ConfirmationService);
 
   async deleteStudy(uuid: string) {
     await this.studiesService.deleteStudy(uuid);

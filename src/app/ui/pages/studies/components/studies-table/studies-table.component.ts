@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Component, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { SortEvent } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ButtonComponent } from 'src/app/ui/shared/components/atoms/button/button.component';
@@ -41,7 +41,8 @@ import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/sh
     RouterLink
   ],
   templateUrl: './studies-table.component.html',
-  providers: []
+  providers: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StudiesTableComponent {
   /** Default number of rows displayed per page. */
@@ -58,7 +59,7 @@ export class StudiesTableComponent {
   duplicateStudy = output<string>();
   currentPageReportTemplate = $localize`Study ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
 
-  constructor(public readonly studiesService: StudiesService) {}
+  readonly studiesService = inject(StudiesService);
 
   openExportDialog = (uuid: string) => {
     this.studiesService.exportDialogData.set({

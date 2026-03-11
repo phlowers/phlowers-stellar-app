@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
@@ -8,7 +8,8 @@ import { formatStudioError } from './helpers/errors';
 @Component({
   selector: 'app-studio',
   templateUrl: './studio.component.html',
-  imports: [SectionPlotComponent, ProgressSpinnerModule]
+  imports: [SectionPlotComponent, ProgressSpinnerModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
  * Top-level studio component that orchestrates section plot rendering,

@@ -1,11 +1,12 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TagColor } from '@ui/shared/model/tags.model';
 
 @Component({
   selector: 'app-tag',
   imports: [],
   templateUrl: './tag.component.html',
-  styleUrl: './tag.component.scss'
+  styleUrl: './tag.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Small label component used to display colored tags with text. */
 export class TagComponent {

@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Charge, Section } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
@@ -35,10 +35,8 @@ import { MessageService } from 'primeng/api';
   providedIn: 'root'
 })
 export class ChargesService {
-  constructor(
-    private readonly studiesService: StudiesService,
-    private readonly messageService: MessageService
-  ) {}
+  private readonly studiesService = inject(StudiesService);
+  private readonly messageService = inject(MessageService);
 
   /**
    * Helper method to get study and section, throwing errors if not found

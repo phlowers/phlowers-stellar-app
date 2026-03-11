@@ -1,4 +1,4 @@
-import { Component, input, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, computed } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
@@ -45,7 +45,8 @@ interface DataSection {
       ),
       transition('collapsed <=> expanded', [animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')])
     ])
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Card component displaying computed section plot data for a support or span. */
 export class SectionPlotCardComponent {

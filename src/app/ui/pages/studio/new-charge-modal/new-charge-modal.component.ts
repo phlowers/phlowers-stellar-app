@@ -1,4 +1,4 @@
-import { Component, input, output, computed, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, computed, signal, effect } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -40,7 +40,8 @@ const newCharge = (currentCharges: Charge[]): Charge => {
     MessageModule
   ],
   templateUrl: './new-charge-modal.component.html',
-  styleUrl: './new-charge-modal.component.scss'
+  styleUrl: './new-charge-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Modal dialog component for creating a new charge case. */
 export class NewChargeModalComponent {
@@ -62,11 +63,10 @@ export class NewChargeModalComponent {
 
   /** Emits the validated charge on submit. */
   validate = output<Charge>();
+  private readonly chargesService = inject(ChargesService);
+  private readonly plotService = inject(PlotService);
 
-  constructor(
-    private readonly chargesService: ChargesService,
-    private readonly plotService: PlotService
-  ) {
+  constructor() {
     effect(() => {
       if (this.isOpen()) {
         const emptyCase = newCharge(this.plotService.section()?.charges ?? []);

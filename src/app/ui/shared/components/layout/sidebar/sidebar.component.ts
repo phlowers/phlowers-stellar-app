@@ -1,4 +1,4 @@
-import { Component, computed, input, OnInit, signal, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { SidebarItem } from './sidebar.model';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { environment } from '@src/environments/environment';
@@ -11,7 +11,8 @@ const version = environment.version;
   imports: [RouterLink, RouterLinkActive, IconComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Collapsible navigation sidebar with expandable/shrank states persisted in local storage. */
 export class SidebarComponent implements OnInit {

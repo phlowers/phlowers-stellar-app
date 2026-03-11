@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '@src/environments/environment';
 import { ChangelogItem } from './types';
@@ -45,7 +45,7 @@ export enum ServerStatus {
   providedIn: 'root'
 })
 export class ChangelogService {
-  constructor(private readonly http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   /**
    * Fetch the application changelog from the server.

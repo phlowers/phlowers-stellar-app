@@ -1,9 +1,10 @@
-import { Component, ContentChild, input, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, input, TemplateRef } from '@angular/core';
 
 @Component({
   selector: 'app-side-tab',
   imports: [],
-  template: ``
+  template: ``,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Represents a single side tab, providing a label and content template. */
 export class SideTabComponent {

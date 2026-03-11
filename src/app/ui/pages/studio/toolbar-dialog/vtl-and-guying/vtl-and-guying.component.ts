@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   AfterViewInit,
   Component,
   TemplateRef,
@@ -59,7 +60,8 @@ interface SupportOption {
     CardComponent
   ],
   templateUrl: './vtl-and-guying.component.html',
-  styleUrls: ['./vtl-and-guying.component.scss']
+  styleUrls: ['./vtl-and-guying.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Dialog component for computing VTL (Vertical/Transverse/Longitudinal) forces and guying parameters. */
 export class VhlAndGuyingComponent implements AfterViewInit {
