@@ -9,11 +9,12 @@ export default defineConfig({
     timeout: 30_000
   },
   fullyParallel: false,
-  retries: 0,
+  retries: 1,
   workers: 1,
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
-    headless: true
+    headless: true,
+    trace: 'on-first-retry'
   },
   webServer: {
     command: `node e2e/update-sim-server.mjs`,

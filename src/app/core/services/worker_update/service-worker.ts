@@ -329,13 +329,17 @@ async function activateWhenAppInstalled() {
 }
 
 async function activateWhenAppNotInstalled() {
-  console.log('SERVICE WORKER: App not installed, installing now');
-  const manifest = await installApp();
-  await postMessageToAllClients('worker_ready', {
-    latest_version: manifest.app_version,
-    current_version: manifest.app_version,
-    data_hashes: manifest.data_hashes || {}
-  });
+  try {
+    console.log('SERVICE WORKER: App not installed, installing now');
+    const manifest = await installApp();
+    await postMessageToAllClients('worker_ready', {
+      latest_version: manifest.app_version,
+      current_version: manifest.app_version,
+      data_hashes: manifest.data_hashes || {}
+    });
+  } catch (err) {
+    console.error('SERVICE WORKER: Installation failed', err);
+  }
 }
 
 async function handleActivate() {

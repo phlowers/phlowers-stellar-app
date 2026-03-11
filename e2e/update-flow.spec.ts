@@ -16,7 +16,7 @@ async function readSnapshot(page: import('@playwright/test').Page): Promise<Snap
       dbRequest.onerror = () => reject(dbRequest.error);
     });
 
-    const readStoreValue = (storeName: string, key: string): Promise<any> => {
+    const readStoreValue = (storeName: string, key: string): Promise<Record<string, unknown> | null> => {
       return new Promise((resolve, reject) => {
         if (!db.objectStoreNames.contains(storeName)) {
           resolve(null);
@@ -30,7 +30,7 @@ async function readSnapshot(page: import('@playwright/test').Page): Promise<Snap
       });
     };
 
-    const firstCable = await new Promise<any>((resolve, reject) => {
+    const firstCable = await new Promise<Record<string, unknown> | null>((resolve, reject) => {
       if (!db.objectStoreNames.contains('catCables')) {
         resolve(null);
         return;
@@ -50,8 +50,8 @@ async function readSnapshot(page: import('@playwright/test').Page): Promise<Snap
       appVersion,
       hasAssetV1: cacheKeys.includes('/e2e-app-v1.js'),
       hasAssetV2: cacheKeys.includes('/e2e-app-v2.js'),
-      cableHash: cableHashMetadata?.value ?? null,
-      cableName: firstCable?.name ?? null
+      cableHash: (cableHashMetadata?.['value'] as string) ?? null,
+      cableName: (firstCable?.['name'] as string) ?? null
     };
   });
 }
