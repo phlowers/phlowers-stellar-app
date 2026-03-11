@@ -56,7 +56,8 @@ const config = {
       }
     ]
   },
-  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts']
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  testPathIgnorePatterns: ['<rootDir>/e2e/']
 } satisfies JestConfigWithTsJest;
 
 export default config;

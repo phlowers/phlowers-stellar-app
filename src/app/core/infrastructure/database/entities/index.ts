@@ -14,3 +14,4 @@ export type { CatalogChainEntity } from './catalog-chain.entity';
 export type { CatalogLineEntity } from './catalog-line.entity';
 export type { CatalogMaintenanceEntity } from './catalog-maintenance.entity';
 export type { CatalogObstacleTypeEntity } from './catalog-obstacle-type.entity';
+export type { MetadataEntity } from './metadata.entity';

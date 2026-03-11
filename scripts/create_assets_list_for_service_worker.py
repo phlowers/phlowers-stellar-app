@@ -8,6 +8,7 @@ import subprocess
 import os
 import sys
 import json
+import hashlib
 from datetime import datetime, tzinfo, timedelta
 from pathlib import Path
 
@@ -70,6 +71,27 @@ def list_files_recursively(directory):
     return file_list
 
 
+def compute_sha256(filepath):
+    """Compute SHA-256 for a file and return it as hex string."""
+    digest = hashlib.sha256()
+    with open(filepath, "rb") as file_handle:
+        for block in iter(lambda: file_handle.read(65536), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def collect_csv_hashes(directory):
+    """Return a mapping of CSV basename to SHA-256 hash."""
+    hashes = {}
+    data_dir = Path(directory) / "data"
+    if not data_dir.exists() or not data_dir.is_dir():
+        return hashes
+
+    for csv_path in sorted(data_dir.glob("*.csv")):
+        hashes[csv_path.name] = compute_sha256(csv_path)
+    return hashes
+
+
 def main(language):
     target_dir = f"dist/{language}"
 
@@ -96,6 +118,7 @@ def main(language):
     with open(package_json_file, "r") as f:
         package_json = json.load(f)
     version = package_json["version"]
+    csv_hashes = collect_csv_hashes(target_dir)
     res = {
         "app_version": {
             "git_hash": get_git_revision_hash(),
@@ -104,6 +127,7 @@ def main(language):
             .isoformat(),
             "version": version,
         },
+        "data_hashes": csv_hashes,
         "files": [file for file in files if os.path.basename(file) not in blacklist],
     }
     with open(output_file, "w") as f:

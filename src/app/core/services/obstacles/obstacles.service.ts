@@ -11,6 +11,7 @@ import { CatalogObstacleTypeEntity } from '@core/infrastructure/database';
 import { ObstacleTypeCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
+import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
  * Service for managing obstacle type catalog data.
@@ -166,7 +167,6 @@ export class ObstaclesService {
    * @param entities - Array of obstacle type entities to store
    */
   private async storeInDatabase(entities: CatalogObstacleTypeEntity[]): Promise<void> {
-    await this.storageService.db?.catObstacleTypes.clear();
-    await this.storageService.db?.catObstacleTypes.bulkAdd(entities);
+    await replaceTableData(this.storageService.db?.catObstacleTypes, entities);
   }
 }
