@@ -1,11 +1,82 @@
+import type { AppVersion, AssetManifest } from './service-worker.interfaces';
+
 const CACHE_NAME = 'app-assets';
+const APP_VERSION_CACHE_KEY = '/app_version';
+const LEGACY_APP_VERSION_CACHE_KEY = 'app_version';
 
 /**
  * Fetches the latest asset manifest (`assets_list.json`) from the server.
  * @returns A `Response` promise for the manifest file.
  */
 function fetchLatestManifest() {
-  return fetch('/assets_list.json');
+  return fetch('/assets_list.json', {
+    cache: 'no-store',
+    headers: {
+      'cache-control': 'no-cache',
+      pragma: 'no-cache'
+    }
+  });
+}
+
+function areVersionsEqual(first: AppVersion | null, second: AppVersion | null): boolean {
+  if (!first || !second) {
+    return false;
+  }
+  return (
+    first.git_hash === second.git_hash &&
+    first.build_datetime_utc === second.build_datetime_utc &&
+    first.version === second.version
+  );
+}
+
+async function getCachedAppVersion(): Promise<AppVersion | null> {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedVersionResponse = await getOrMigrateAppVersionCacheEntry(cache);
+  if (!cachedVersionResponse) {
+    return null;
+  }
+  try {
+    return await cachedVersionResponse.json();
+  } catch (error) {
+    console.warn('SERVICE WORKER: cached app version is invalid JSON', error);
+    return null;
+  }
+}
+
+async function getOrMigrateAppVersionCacheEntry(cache: Cache): Promise<Response | null> {
+  const currentVersionResponse = await cache.match(APP_VERSION_CACHE_KEY);
+  if (currentVersionResponse) {
+    return currentVersionResponse;
+  }
+
+  const legacyVersionResponse = await cache.match(LEGACY_APP_VERSION_CACHE_KEY);
+  if (!legacyVersionResponse) {
+    return null;
+  }
+
+  // Migrate old key to the current key so future reads are consistent.
+  await cache.put(APP_VERSION_CACHE_KEY, legacyVersionResponse.clone());
+  await cache.delete(LEGACY_APP_VERSION_CACHE_KEY);
+  return legacyVersionResponse;
+}
+
+async function postMessageToAllClients(message: string, payload: Record<string, unknown> = {}) {
+  const clients = await (self as unknown as ServiceWorkerGlobalScope).clients.matchAll({
+    includeUncontrolled: true,
+    type: 'window'
+  });
+  for (const client of clients) {
+    client.postMessage({ message, ...payload });
+  }
+}
+
+function shouldUseNetworkFirst(request: Request): boolean {
+  if (request.mode === 'navigate') {
+    return true;
+  }
+  const url = new URL(request.url);
+  const path = url.pathname;
+  return path === '/assets_list.json' || path.endsWith('.html') || path.endsWith('.js') || path.endsWith('.css');
 }
 
 /**
@@ -15,7 +86,7 @@ function fetchLatestManifest() {
  */
 export async function checkIfAppInstalled() {
   const cache = await caches.open(CACHE_NAME);
-  const appVersion = await cache.match('app_version');
+  const appVersion = await getOrMigrateAppVersionCacheEntry(cache);
   if (appVersion) {
     return true;
   }
@@ -26,18 +97,18 @@ export async function checkIfAppInstalled() {
  * Performs a full application installation by fetching the asset
  * manifest, caching all listed files, and storing the build version.
  * Notifies all controlled clients upon completion.
- * @returns The installed application version.
+ * @returns The installed asset manifest.
  */
 export async function installApp() {
   console.log('SERVICE WORKER: Beginning app installation');
   const latestManifest = await fetchLatestManifest();
-  const manifest = await latestManifest.json();
+  const manifest: AssetManifest = await latestManifest.json();
   const filesToInstall = manifest.files || [];
   const buildVersion = manifest.app_version;
   const cache = await caches.open(CACHE_NAME);
   await cache.addAll(filesToInstall);
-  cache.put(
-    'app_version',
+  await cache.put(
+    APP_VERSION_CACHE_KEY,
     new Response(JSON.stringify(buildVersion), {
       headers: {
         'content-type': 'application/json'
@@ -52,21 +123,22 @@ export async function installApp() {
     client.postMessage({
       message: 'install_complete',
       latest_version: buildVersion,
-      current_version: buildVersion
+      current_version: buildVersion,
+      data_hashes: manifest.data_hashes || {}
     });
   }
-  return buildVersion;
+  return manifest;
 }
 
 /**
  * Updates the cached application assets to the latest manifest.
  * Skips re-downloading already-cached wheel files and removes
  * stale entries no longer present in the manifest.
- * @returns The updated application version.
+ * @returns The updated asset manifest.
  */
 export async function updateApp() {
   console.log('SERVICE WORKER: Update requested');
-  const manifest = await fetchLatestManifest().then((manifest) => manifest.json());
+  const manifest: AssetManifest = await fetchLatestManifest().then((manifest) => manifest.json());
   const files = manifest.files || [];
   const cache = await caches.open(CACHE_NAME);
   let addedCount = 0;
@@ -83,13 +155,15 @@ export async function updateApp() {
     }
   }
   const cacheKeys = (await cache.keys()).map((key) => key.url.replace(self.location.origin, ''));
-  const keysToDelete = cacheKeys.filter((key) => key !== '/app_version' && !files.includes(key));
+  const keysToDelete = cacheKeys.filter(
+    (key) => key !== APP_VERSION_CACHE_KEY && key !== LEGACY_APP_VERSION_CACHE_KEY && !files.includes(key)
+  );
   for (const key of keysToDelete) {
     await cache.delete(key);
   }
   const appVersion = manifest.app_version;
   await cache.put(
-    'app_version',
+    APP_VERSION_CACHE_KEY,
     new Response(JSON.stringify(appVersion), {
       headers: {
         'content-type': 'application/json'
@@ -99,7 +173,7 @@ export async function updateApp() {
   console.log(
     `SERVICE WORKER: Update complete (version ${appVersion}, ${addedCount} added, ${keysToDelete.length} deleted)`
   );
-  return appVersion;
+  return manifest;
 }
 
 const noCacheHeaders = () => {
@@ -141,6 +215,29 @@ export async function handleFetch(event: FetchEvent) {
     event.respondWith(fetch(event.request.clone()));
   } else {
     // all other requests
+    if (shouldUseNetworkFirst(event.request)) {
+      event.respondWith(
+        (async () => {
+          const cache = await caches.open(CACHE_NAME);
+          try {
+            const networkResponse = await fetch(event.request.clone(), noCacheHeaders());
+            if (networkResponse && networkResponse.ok) {
+              await cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          } catch (error) {
+            console.error('Network-first fetch failed, trying cache:', error);
+            const cachedResponse = await cache.match(event.request);
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            return Response.error();
+          }
+        })()
+      );
+      return;
+    }
+
     event.respondWith(
       caches.match(event.request).then((response) => {
         if (response) {
@@ -158,8 +255,9 @@ export async function handleFetch(event: FetchEvent) {
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('fetch', handleFetch);
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener('install', async () => {
+(self as unknown as ServiceWorkerGlobalScope).addEventListener('install', () => {
   console.log('SERVICE WORKER: Installing service worker');
+  (self as unknown as ServiceWorkerGlobalScope).skipWaiting();
 });
 
 /**
@@ -174,21 +272,23 @@ export async function handleFetch(event: FetchEvent) {
  */
 export async function handleMessage(event: ExtendableMessageEvent) {
   const type = event.data.type;
-  let appVersion = null;
+  let manifest: AssetManifest | null = null;
   try {
     switch (type) {
       case 'update':
-        appVersion = await updateApp();
+        manifest = await updateApp();
         event.source?.postMessage({
           message: 'update_complete',
-          latest_version: appVersion
+          latest_version: manifest.app_version,
+          data_hashes: manifest.data_hashes || {}
         });
         break;
       case 'install':
-        appVersion = await installApp();
+        manifest = await installApp();
         event.source?.postMessage({
           message: 'install_complete',
-          latest_version: appVersion
+          latest_version: manifest.app_version,
+          data_hashes: manifest.data_hashes || {}
         });
         break;
       default:
@@ -199,13 +299,74 @@ export async function handleMessage(event: ExtendableMessageEvent) {
   }
 }
 
-(self as unknown as ServiceWorkerGlobalScope).addEventListener('activate', async () => {
-  console.log('SERVICE WORKER: Activating service worker');
-  const installed = await checkIfAppInstalled();
-  if (!installed) {
-    console.log('SERVICE WORKER: App not installed, installing now');
-    await installApp();
+async function fetchLatestManifestOrThrow(): Promise<AssetManifest> {
+  const latestManifestResponse = await fetchLatestManifest();
+  if (!latestManifestResponse.ok) {
+    throw new Error(`Manifest fetch failed with status ${latestManifestResponse.status}`);
   }
+  return latestManifestResponse.json();
+}
+
+async function activateWhenAppInstalled() {
+  const cachedVersion = await getCachedAppVersion();
+  const latestManifest = await fetchLatestManifestOrThrow();
+
+  if (!areVersionsEqual(cachedVersion, latestManifest.app_version)) {
+    console.log('SERVICE WORKER: new App version detected during activate, updating cached assets');
+    const updatedManifest = await updateApp();
+    await postMessageToAllClients('update_complete', {
+      latest_version: updatedManifest.app_version,
+      data_hashes: updatedManifest.data_hashes || {}
+    });
+    return;
+  }
+
+  await postMessageToAllClients('worker_ready', {
+    latest_version: latestManifest.app_version,
+    current_version: cachedVersion,
+    data_hashes: latestManifest.data_hashes || {}
+  });
+}
+
+async function activateWhenAppNotInstalled() {
+  try {
+    console.log('SERVICE WORKER: App not installed, installing now');
+    const manifest = await installApp();
+    await postMessageToAllClients('worker_ready', {
+      latest_version: manifest.app_version,
+      current_version: manifest.app_version,
+      data_hashes: manifest.data_hashes || {}
+    });
+  } catch (err) {
+    console.error('SERVICE WORKER: Installation failed', err);
+  }
+}
+
+async function handleActivate() {
+  console.log('SERVICE WORKER: Activating service worker');
+  await (self as unknown as ServiceWorkerGlobalScope).clients.claim();
+
+  try {
+    const installed = await checkIfAppInstalled();
+    if (installed) {
+      await activateWhenAppInstalled();
+      return;
+    }
+
+    await activateWhenAppNotInstalled();
+  } catch (error) {
+    console.warn('SERVICE WORKER: activate flow failed, using cached state when available', error);
+    const cachedVersion = await getCachedAppVersion();
+    await postMessageToAllClients('worker_ready', {
+      latest_version: cachedVersion,
+      current_version: cachedVersion,
+      data_hashes: {}
+    });
+  }
+}
+
+(self as unknown as ServiceWorkerGlobalScope).addEventListener('activate', (event) => {
+  event.waitUntil(handleActivate());
 });
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('message', handleMessage);

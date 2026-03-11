@@ -74,7 +74,7 @@ describe('Service Worker Functions', () => {
       const result = await checkIfAppInstalled();
 
       expect(result).toBe(true);
-      expect(mockCache.match).toHaveBeenCalledWith('app_version');
+      expect(mockCache.match).toHaveBeenCalledWith('/app_version');
     });
 
     it('should return false when app version does not exist in cache', async () => {
@@ -83,7 +83,7 @@ describe('Service Worker Functions', () => {
       const result = await checkIfAppInstalled();
 
       expect(result).toBe(false);
-      expect(mockCache.match).toHaveBeenCalledWith('app_version');
+      expect(mockCache.match).toHaveBeenCalledWith('/app_version');
     });
 
     it('should handle cache open errors', async () => {
@@ -109,10 +109,19 @@ describe('Service Worker Functions', () => {
     it('should install app successfully', async () => {
       await installApp();
 
-      expect(mockFetch).toHaveBeenCalledWith('/assets_list.json');
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/assets_list.json',
+        expect.objectContaining({
+          cache: 'no-store',
+          headers: expect.objectContaining({
+            'cache-control': 'no-cache',
+            pragma: 'no-cache'
+          })
+        })
+      );
       expect(mockCache.addAll).toHaveBeenCalledWith(mockManifest.files);
       expect(mockCache.put).toHaveBeenCalledWith(
-        'app_version',
+        '/app_version',
         expect.objectContaining({
           headers: { 'content-type': 'application/json' }
         })
@@ -169,12 +178,12 @@ describe('Service Worker Functions', () => {
 
       const result = await updateApp();
 
-      expect(result).toBe('1.1.0');
+      expect(result).toEqual(mockManifest);
       expect(mockCache.add).toHaveBeenCalledWith('/index.html');
       expect(mockCache.add).toHaveBeenCalledWith('/app.js');
       expect(mockCache.add).toHaveBeenCalledWith('/pyodide/file1.py');
       expect(mockCache.put).toHaveBeenCalledWith(
-        'app_version',
+        '/app_version',
         expect.objectContaining({
           headers: { 'content-type': 'application/json' }
         })
@@ -206,7 +215,7 @@ describe('Service Worker Functions', () => {
 
       const result = await updateApp();
 
-      expect(result).toBe('1.1.0');
+      expect(result).toEqual(emptyManifest);
       expect(mockCache.add).not.toHaveBeenCalled();
     });
 
@@ -250,7 +259,7 @@ describe('Service Worker Functions', () => {
     });
 
     it('should handle other requests with cache hit', async () => {
-      mockEvent.request.url = 'https://example.com/app.js';
+      mockEvent.request.url = 'https://example.com/image.png';
       const mockResponse = new Response('console.log("test");');
       (global.caches as any).match.mockResolvedValue(mockResponse);
 
@@ -261,10 +270,10 @@ describe('Service Worker Functions', () => {
     });
 
     it('should handle other requests with cache miss', async () => {
-      mockEvent.request.url = 'https://example.com/app.js';
+      mockEvent.request.url = 'https://example.com/image.png';
       (global.caches as any).match.mockResolvedValue(null);
       mockFetch.mockResolvedValue(new Response('console.log("test");'));
-      const clonedRequest = { url: 'https://example.com/app.js' };
+      const clonedRequest = { url: 'https://example.com/image.png' };
       mockEvent.request.clone.mockReturnValue(clonedRequest);
 
       await handleFetch(mockEvent);
@@ -280,13 +289,59 @@ describe('Service Worker Functions', () => {
     });
 
     it('should handle fetch errors gracefully', async () => {
-      mockEvent.request.url = 'https://example.com/app.js';
+      mockEvent.request.url = 'https://example.com/image.png';
       (global.caches as any).match.mockResolvedValue(null);
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       await handleFetch(mockEvent);
 
       expect(mockEvent.respondWith).toHaveBeenCalled();
+    });
+
+    it('should use network-first and cache successful js responses', async () => {
+      mockEvent.request.url = 'https://example.com/app.js';
+      const clonedRequest = { url: 'https://example.com/app.js' };
+      const networkResponse = {
+        ok: true,
+        clone: jest.fn().mockReturnValue({ ok: true, body: 'bundled-js' })
+      };
+      mockEvent.request.clone.mockReturnValue(clonedRequest);
+      mockFetch.mockResolvedValue(networkResponse as any);
+
+      await handleFetch(mockEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+
+      expect(response).toBe(networkResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        clonedRequest,
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.any(Object)
+        })
+      );
+      expect(mockCache.put).toHaveBeenCalledWith(mockEvent.request, expect.any(Object));
+      expect(networkResponse.clone).toHaveBeenCalled();
+    });
+
+    it('should use network-first and fall back to cache on network failure', async () => {
+      mockEvent.request.url = 'https://example.com/styles.css';
+      const clonedRequest = { url: 'https://example.com/styles.css' };
+      const cachedResponse = { from: 'cache' };
+      mockEvent.request.clone.mockReturnValue(clonedRequest);
+      mockFetch.mockRejectedValue(new Error('Network down'));
+      mockCache.match.mockResolvedValue(cachedResponse as any);
+
+      await handleFetch(mockEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+
+      expect(response).toBe(cachedResponse);
+      expect(mockCache.match).toHaveBeenCalledWith(mockEvent.request);
     });
   });
 
@@ -311,7 +366,8 @@ describe('Service Worker Functions', () => {
 
       expect(mockEvent.source.postMessage).toHaveBeenCalledWith({
         message: 'update_complete',
-        latest_version: '1.1.0'
+        latest_version: '1.1.0',
+        data_hashes: {}
       });
     });
 
@@ -328,7 +384,8 @@ describe('Service Worker Functions', () => {
 
       expect(mockEvent.source.postMessage).toHaveBeenCalledWith({
         message: 'install_complete',
-        latest_version: '1.0.0'
+        latest_version: '1.0.0',
+        data_hashes: {}
       });
     });
 

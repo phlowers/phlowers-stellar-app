@@ -19,6 +19,10 @@ import { UpdateService } from '@services/worker_update/worker_update.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { LinesService } from '@services/lines/lines.service';
+import { CablesService } from '@services/cables/cables.service';
+import { ChainsService } from '@services/chains/chains.service';
+import { AttachmentService } from '@services/attachment/attachment.service';
+import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
 
 class Worker {
   url: string;
@@ -46,6 +50,10 @@ describe('AppComponent', () => {
   let mockUpdateService: UpdateService;
   let mockMaintenanceService: MaintenanceService;
   let mockLinesService: LinesService;
+  let mockCablesService: CablesService;
+  let mockChainsService: ChainsService;
+  let mockAttachmentService: AttachmentService;
+  let mockObstaclesService: ObstaclesService;
   let readySubject: BehaviorSubject<boolean>;
   let workerReadySubject: BehaviorSubject<boolean>;
 
@@ -64,13 +72,18 @@ describe('AppComponent', () => {
       count: jest.fn(),
       toArray: jest.fn(),
       bulkAdd: jest.fn()
+    },
+    metadata: {
+      get: jest.fn().mockResolvedValue(null),
+      put: jest.fn().mockResolvedValue(undefined)
     }
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     // @ts-expect-error worker
     window.Worker = Worker;
-    readySubject = new BehaviorSubject<boolean>(true);
+    readySubject = new BehaviorSubject<boolean>(false);
     workerReadySubject = new BehaviorSubject<boolean>(true);
 
     mockMessageService = {
@@ -104,6 +117,7 @@ describe('AppComponent', () => {
 
     mockUpdateService = {
       checkAppVersion: jest.fn(),
+      getLatestAssetList: jest.fn().mockResolvedValue(null),
       needUpdate$: new BehaviorSubject<boolean>(false)
     } as unknown as UpdateService;
 
@@ -120,6 +134,22 @@ describe('AppComponent', () => {
       ready: new BehaviorSubject<boolean>(true)
     } as unknown as LinesService;
 
+    mockCablesService = {
+      importFromFile: jest.fn().mockResolvedValue(undefined)
+    } as unknown as CablesService;
+
+    mockChainsService = {
+      importFromFile: jest.fn().mockResolvedValue(undefined)
+    } as unknown as ChainsService;
+
+    mockAttachmentService = {
+      importFromFile: jest.fn().mockResolvedValue(undefined)
+    } as unknown as AttachmentService;
+
+    mockObstaclesService = {
+      importFromFile: jest.fn().mockResolvedValue(undefined)
+    } as unknown as ObstaclesService;
+
     await TestBed.configureTestingModule({
       imports: [FormsModule, NoopAnimationsModule, RouterTestingModule, HttpClientTestingModule, AppComponent]
     }).compileComponents();
@@ -135,6 +165,10 @@ describe('AppComponent', () => {
       useValue: mockMaintenanceService
     });
     TestBed.overrideProvider(LinesService, { useValue: mockLinesService });
+    TestBed.overrideProvider(CablesService, { useValue: mockCablesService });
+    TestBed.overrideProvider(ChainsService, { useValue: mockChainsService });
+    TestBed.overrideProvider(AttachmentService, { useValue: mockAttachmentService });
+    TestBed.overrideProvider(ObstaclesService, { useValue: mockObstaclesService });
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
   });
@@ -165,6 +199,58 @@ describe('AppComponent', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating database', error);
       consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe('setupData', () => {
+    it('should skip import when stored hash matches latest hash', async () => {
+      // @ts-expect-error jest mock on service method
+      mockUpdateService.getLatestAssetList.mockResolvedValue({
+        data_hashes: {
+          'lines.csv': 'hash-1'
+        }
+      });
+      mockDb.metadata.get.mockResolvedValue({ value: 'hash-1' });
+
+      await component.setupData();
+
+      expect(mockDb.metadata.get).toHaveBeenCalledWith('catalog_hash:lines.csv');
+      expect(mockLinesService.importFromFile).not.toHaveBeenCalled();
+      expect(mockDb.metadata.put).not.toHaveBeenCalled();
+    });
+
+    it('should import and update metadata when hash changes', async () => {
+      // @ts-expect-error jest mock on service method
+      mockUpdateService.getLatestAssetList.mockResolvedValue({
+        data_hashes: {
+          'lines.csv': 'new-hash'
+        }
+      });
+      mockDb.metadata.get.mockResolvedValue({ value: 'old-hash' });
+
+      await component.setupData();
+
+      expect(mockLinesService.importFromFile).toHaveBeenCalledTimes(1);
+      expect(mockDb.metadata.put).toHaveBeenCalledWith({
+        key: 'catalog_hash:lines.csv',
+        value: 'new-hash',
+        updated_at: expect.any(String)
+      });
+    });
+
+    it('should import all catalogs when manifest has no data_hashes', async () => {
+      // @ts-expect-error jest mock on service method
+      mockUpdateService.getLatestAssetList.mockResolvedValue({});
+
+      await component.setupData();
+
+      expect(mockMaintenanceService.importFromFile).toHaveBeenCalledTimes(1);
+      expect(mockLinesService.importFromFile).toHaveBeenCalledTimes(1);
+      expect(mockCablesService.importFromFile).toHaveBeenCalledTimes(1);
+      expect(mockChainsService.importFromFile).toHaveBeenCalledTimes(1);
+      expect(mockAttachmentService.importFromFile).toHaveBeenCalledTimes(1);
+      expect(mockObstaclesService.importFromFile).toHaveBeenCalledTimes(1);
+      expect(mockDb.metadata.put).not.toHaveBeenCalled();
     });
   });
 
