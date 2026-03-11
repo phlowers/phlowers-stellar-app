@@ -32,11 +32,14 @@
       "@ui/*": [
         "./src/app/ui/*"
       ],
-      "@plugins/*": [
-        "./src/app/plugins/*"
+      "@features/*": [
+        "./src/app/features/*"
       ],
-      "@adapters/*": [
-        "./src/app/adapters/*"
+      "@shared/*": [
+        "./src/app/shared/*"
+      ],
+      "@infrastructure/*": [
+        "./src/app/infrastructure/*"
       ]
     },
   },

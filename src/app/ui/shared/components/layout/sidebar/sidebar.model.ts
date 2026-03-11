@@ -1,4 +1,4 @@
-import { PossibleIconNames } from '../../../model/icon.model';
+import { PossibleIconNames } from '@ui/shared/model/icon.model';
 
 /** Represents a single navigation item in the sidebar. */
 export interface SidebarItem {

@@ -1,5 +1,5 @@
 import { Component, input, OnInit, signal, computed } from '@angular/core';
-import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '../../../model/icon.model';
+import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '@ui/shared/model/icon.model';
 
 @Component({
   selector: 'app-icon',
