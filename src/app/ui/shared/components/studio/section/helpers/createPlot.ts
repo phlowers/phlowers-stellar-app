@@ -123,6 +123,17 @@ const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
 });
 
 const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams) => {
+  let scaleratio: number | undefined;
+  if (plotParams.axesNorms) {
+    if (plotParams.side === 'face') {
+      scaleratio = plotParams.axesNorms.z / plotParams.axesNorms.y;
+    } else if (plotParams.side === 'profile') {
+      scaleratio = plotParams.axesNorms.z / plotParams.axesNorms.x;
+    }
+  } else {
+    scaleratio = plotParams.side === 'face' ? 0.2 : undefined;
+  }
+
   return {
     autosize: true,
     showlegend: false,
@@ -145,8 +156,8 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams)
       showticklabels: true,
       showgrid: true,
       showline: true,
-      scaleratio: plotParams.side === 'face' ? 0.2 : undefined,
-      scaleanchor: plotParams.side === 'face' ? 'x' : undefined
+      scaleratio,
+      scaleanchor: scaleratio !== undefined ? 'x' : undefined
     },
     annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)]
   };
