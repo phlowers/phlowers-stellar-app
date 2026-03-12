@@ -8,13 +8,13 @@ import { MessageModule } from 'primeng/message';
 import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
-import { PLOT_ID, PlotService, SelectedDisplayOptions } from '@src/app/ui/pages/studio/services/plot.service';
+import { PLOT_ID, PlotService, SelectedDisplayOptions } from '@features/studio/core/services/plot.service';
 import { SpanLoad } from '@src/app/core';
 import { LoadType } from './helpers/createLoadAnnotations';
-import { SideTabsService } from '@ui/pages/studio/side-tabs/side-tabs.service';
+import { SideTabsService } from '@features/studio/core/services/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { ObstacleFormService } from '@ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service';
+import { ObstacleFormService } from '@features/studio/obstacles/presentation/services/obstaclesForm.service';
 import { Obstacle } from '@core/domain/models/obstacle.model';
 import {
   appendExistingObstaclesWithFormObstacle,

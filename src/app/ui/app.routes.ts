@@ -47,7 +47,10 @@ export const appRoutes: Routes = [
       {
         path: 'studio',
         title: $localize`Studio`,
-        loadComponent: () => import('./pages/studio/studio-page.component').then((m) => m.StudioPageComponent)
+        loadComponent: () =>
+          import('@features/studio/core/presentation/pages/studio-page/studio-page.component').then(
+            (m) => m.StudioPageComponent
+          )
       }
     ]
   },

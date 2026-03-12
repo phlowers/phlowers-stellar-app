@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring.component';
-import { ToolbarDialogService } from '../toolbar-dialog.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { createTestMeasureData } from './helpers';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/sections/section.service';

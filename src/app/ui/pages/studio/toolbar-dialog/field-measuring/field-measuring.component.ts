@@ -17,7 +17,7 @@ import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from './components/header/header.component';
 import { FieldMeasure } from './types';
-import { ToolbarDialogService } from '../toolbar-dialog.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,

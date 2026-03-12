@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3C terminées.**
+**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3D terminées.**
 
 ---
 
@@ -529,7 +529,7 @@ src/app/features/study/
 - **Domain helpers (`createEmptySection`, `createEmptySupport`) dans `features/study/domain/helpers/`** — fonctions factory pour les objets domaine du contexte study
 - **Noms de fichiers préservés** (ex. `sectionsTab.component.ts` non renommé) — renommage hors scope
 - **Dossier `tabs/sections/` aplati en `sections-tab/`** — le niveau `tabs/` était du bruit organisationnel
-- **Services catalogue (`@services/cables/`, `@services/chains/`, `@services/lines/`, `@services/attachment/`, `@services/maintenance/`) NON déplacés** — appartiennent au futur feature `catalog` (Phase 3E)
+- **Services catalogue (`@services/cables/`, `@services/chains/`, `@services/lines/`, `@services/attachment/`, `@services/maintenance/`) NON déplacés** — appartiennent au futur `shared/catalog/` (Phase 3E)
 - **Dépendances cross-feature vers studio (`PlotService`, `ToolbarDialogService/Component`)** — conservées en `@ui/pages/studio/`, seront résolues lors de la migration studio (Phase 3D)
 - **`isolatedModules` et re-export de types** — les interfaces (`InitialConditionFunctionsInput`, `DuplicateInitialConditionFunctionsInput`) nécessitent `export type` dans le bridge
 
@@ -554,30 +554,193 @@ src/app/features/study/
 - [x] `npm run build` — 0 erreurs
 - [x] `npm run test` — 88 suites, 1702 tests pass
 - [x] `npm run lint-check` — 0 erreurs (309 warnings)
-- [ ] **(Humain)** Navigation : Studies → Create study → Open study → Study header → Sections tab → Create section → Add supports → Add IC → Generate state → Studio
+- [x] **(Humain)** Navigation : Studies → Create study → Open study → Study header → Sections tab → Create section → Add supports → Add IC → Generate state → Studio
 
-### Phase 3D — DDD : Feature `studio` (sous-features)
-*Dépend de Phase 3C. Feature la plus complexe — découpée en sous-features.*
+### Phase 3D — DDD : Feature `studio` (sous-features) ✅ TERMINÉE
+*Dépend de Phase 3C. Feature la plus complexe — découpée en sous-features (~117 fichiers déplacés).*
 
-21. **Feature `studio`** — découpé en **sous-features** :
-    - **`features/studio/core/`** : composants shell (studio-page, top-toolbar, menu-bar, side-tabs, cards) + plot.service (partagé entre sous-features)
-    - **`features/studio/obstacles/`** : domain/ (obstacle entity, repository interface) + application/ (create-obstacle, delete-obstacle, update-position use-cases) + infrastructure/ (obstacles.service impl) + presentation/ (obstaclesForm)
-    - **`features/studio/loads/`** : domain/ (charge, climate entities) + application/ (save-load, calculate-load, delete-charge use-cases) + infrastructure/ (charges.service, loadForms.service impl) + presentation/ (span, climate, new-charge-modal)
-    - **`features/studio/field-measuring/`** : domain/ (measure-data entity) + application/ (save-measurement, compute-parameter use-cases) + infrastructure/ (Pyodide adapter) + presentation/ (field-measuring, header, init, field-datas, calculus-setting, papoto, pep, tangent-aiming, temperature-calculation, parameter-calculation-15)
-    - **`features/studio/toolbar/`** : presentation/ (toolbar-dialog, l0-sum, loads-table, vtl-and-guying) + toolbar-dialog.service
-    - Chaque sous-feature a sa propre structure DDD et son propre fichier routes si nécessaire
-    - `plot.service` reste dans `studio/core/` car partagé entre obstacles, loads et les vues
-22. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
+#### État actuel
 
-### Phase 3E — DDD : Feature `catalog`
-*Dépend de Phase 3D (les catalogues sont consommés par studio).*
+| Étape | Statut | Détail |
+|-------|--------|--------|
+| Structure DDD (28+ répertoires) | ✅ Fait | `features/studio/{core,obstacles,loads,field-measuring,toolbar}/{domain,infrastructure,presentation}/{components,services,pages}/` |
+| PlotService + SideTabsService → `studio/core/services/` | ✅ Fait | 2 re-export bridges créés |
+| ObstaclesService → `studio/obstacles/infrastructure/services/` | ✅ Fait | 1 re-export bridge créé |
+| Composants shell → `studio/core/presentation/` | ✅ Fait | studio-page, top-toolbar, scale-view, menu-bar, side-tabs, side-tab, cards (7 composants) |
+| Obstacles sub-feature → `studio/obstacles/presentation/` | ✅ Fait | obstaclesForm composant + service + interfaces + constants (1 re-export bridge) |
+| Loads sub-feature → `studio/loads/presentation/` | ✅ Fait | climate, span, new-charge-modal + loadForms.service + helpers |
+| Toolbar sub-feature → `studio/toolbar/presentation/` | ✅ Fait | toolbar-dialog service/composant, l0-sum, loads-table, vtl-and-guying |
+| Field-measuring sub-feature → `studio/field-measuring/` | ✅ Fait | domain/types.ts + presentation/ (14 composants : field-measuring, header, init, field-datas, calculus-setting, papoto, pep, tangent-aiming, temperature-calculation, parameter-calculation-15 + helpers, constants, mock-data) |
+| Lazy loading study.routes.ts | ✅ Fait | `loadComponent` lazy vers StudioPageComponent |
+| Cross-feature imports (study → studio) | ✅ Fait | PlotService, ToolbarDialogService/Component, FieldMeasure type |
+| Imports ui/shared → @features/studio/ | ✅ Fait | section-plot, free-positioning, studio shared components |
+| Tests dépréciés corrigés | ✅ Fait | `HttpClientTestingModule` → `provideHttpClient()` + `provideHttpClientTesting()` (4 specs) |
+| Nettoyage répertoires vides | ✅ Fait | Anciens dossiers vides supprimés |
+| Vérification build | ✅ Fait | 0 erreurs |
+| Vérification tests | ✅ Fait | 88 suites, 1702 tests pass |
 
-23. **Feature `catalog`** (bounded context dédié) :
-    - `features/catalog/domain/entities/` : CatalogCable, CatalogChain, CatalogLine, CatalogAttachment, CatalogMaintenance, CatalogObstacleType
-    - `features/catalog/domain/repositories/` : interfaces pour chaque catalogue
-    - `features/catalog/infrastructure/repositories/` : implémentations (cables.service, chains.service, lines.service, attachment.service, maintenance.service, obstacles-types)
-    - `features/catalog/infrastructure/dto/` : CSV DTOs existants (cable-csv.dto, chain-csv.dto, etc.)
-    - Pas de presentation/ (les catalogues sont consommés par d'autres features via injection)
+#### Ce qui a été fait
+
+21. ~~**Structure DDD**~~ ✅ — 28+ répertoires créés sous `features/studio/` avec 5 sous-features
+
+22. ~~**PlotService + SideTabsService**~~ ✅ — déplacés de `ui/pages/studio/services/` vers `features/studio/core/services/`
+    - PlotService : service central (~15 consommateurs), exporte `PLOT_ID`, `SelectedDisplayOptions`, `SpanOption`, `checkIfProjectionNeedRefresh`, `defaultPlotOptions`
+    - SideTabsService : service simple avec signal `sideTabs`
+    - 2 re-export bridges créés dans les anciens emplacements
+
+23. ~~**ObstaclesService**~~ ✅ — déplacé de `core/services/obstacles/` vers `features/studio/obstacles/infrastructure/services/`
+    - CSV catalog + `currentPointIndex` signal
+    - 1 re-export bridge créé dans `core/services/obstacles/`
+
+24. ~~**Composants shell**~~ ✅ — 7 composants déplacés vers `features/studio/core/presentation/`
+    - studio-page (page principale), top-toolbar, scale-view, menu-bar, side-tabs, side-tab, cards
+    - Routes mises à jour dans `app.routes.ts` et `study.routes.ts`
+
+25. ~~**Obstacles sub-feature**~~ ✅ — obstaclesForm composant + service + interfaces + constants → `features/studio/obstacles/presentation/`
+    - 1 re-export bridge créé pour `obstaclesForm.service`
+    - Import PlotService mis à jour vers nouveau chemin
+
+26. ~~**Loads sub-feature**~~ ✅ — climate, span, new-charge-modal + loadForms.service + helpers → `features/studio/loads/presentation/`
+    - Tous les imports internes corrigés
+
+27. ~~**Toolbar sub-feature**~~ ✅ — toolbar-dialog service/composant, l0-sum, loads-table, vtl-and-guying → `features/studio/toolbar/presentation/`
+    - Cross-feature imports depuis study (sectionsTab) corrigés immédiatement
+
+28. ~~**Field-measuring sub-feature**~~ ✅ — la plus complexe (~30 fichiers)
+    - `types.ts` déplacé vers `domain/types.ts` (entités FieldMeasure, FieldMeasureOutputs, etc.)
+    - Composant principal + 10 sous-composants → `presentation/components/`
+    - helpers, constants, mock-data → `presentation/`
+    - ~40 imports corrigés (relatifs + alias `@ui/` → `@features/studio/`)
+    - 1 re-export bridge créé pour `types.ts`
+
+29. ~~**Lazy loading**~~ ✅ — `study.routes.ts` converti de static import vers `loadComponent()` lazy pour StudioPageComponent
+
+30. ~~**Cross-feature imports**~~ ✅ — tous les imports `@ui/pages/studio/` et `@src/app/ui/pages/studio/` mis à jour :
+    - `study/sectionsTab.component.ts` → PlotService, ToolbarDialogService/Component
+    - `study/manualSection.component.ts` → PlotService
+    - `core/domain/models/section.model.ts` → FieldMeasure type
+    - `ui/shared/components/studio/` (section-plot, free-positioning, studio) → PlotService, SideTabsService, ObstacleFormService
+
+31. ~~**Tests dépréciés**~~ ✅ — `HttpClientTestingModule` remplacé par `provideHttpClient()` + `provideHttpClientTesting()` dans 4 specs :
+    - `plot.service.spec.ts`
+    - `obstacles.service.spec.ts`
+    - `new-charge-modal.component.spec.ts`
+    - `parameter-calculation-15-without-wind.component.spec.ts`
+
+32. ~~**Nettoyage**~~ ✅ — répertoires vides supprimés, 5 re-export bridges conservés
+
+#### Architecture résultante
+
+```
+src/app/features/studio/
+├── core/
+│   ├── services/
+│   │   ├── plot.service.ts + spec          ← service central Plotly
+│   │   └── side-tabs.service.ts + spec     ← gestion onglets latéraux
+│   └── presentation/
+│       ├── pages/
+│       │   └── studio-page/                ← page principale studio
+│       └── components/
+│           ├── top-toolbar/                ← barre d'outils supérieure
+│           │   └── scale-view/             ← vue échelle
+│           ├── menu-bar/                   ← barre de menu
+│           ├── side-tabs/                  ← onglets latéraux
+│           │   └── side-tab/               ← onglet individuel
+│           └── cards/                      ← cartes d'information
+├── obstacles/
+│   ├── infrastructure/
+│   │   └── services/
+│   │       └── obstacles.service.ts + spec ← catalogue obstacles CSV
+│   └── presentation/
+│       ├── components/
+│       │   └── obstaclesForm/              ← formulaire obstacles (composant + service + interfaces + constants)
+│       └── services/
+│           └── obstaclesForm.service.ts    ← service formulaire obstacles
+├── loads/
+│   └── presentation/
+│       ├── components/
+│       │   ├── climate/                    ← formulaire climat
+│       │   ├── span/                       ← formulaire portée
+│       │   └── new-charge-modal/           ← modal nouveau cas de charge
+│       ├── services/
+│       │   └── loadForms.service.ts        ← service formulaires charges
+│       └── helpers/                        ← helpers charges
+├── toolbar/
+│   └── presentation/
+│       ├── components/
+│       │   ├── toolbar-dialog/             ← dialog barre d'outils
+│       │   ├── l0-sum/                     ← somme L0
+│       │   ├── loads-table/                ← tableau charges
+│       │   └── vtl-and-guying/             ← VTL et haubanage
+│       └── services/
+│           └── toolbar-dialog.service.ts + spec
+└── field-measuring/
+    ├── domain/
+    │   └── types.ts                        ← FieldMeasure, FieldMeasureOutputs, etc.
+    └── presentation/
+        ├── components/
+        │   ├── field-measuring/             ← composant principal
+        │   ├── header/                     ← en-tête
+        │   ├── init/                       ← initialisation
+        │   ├── field-datas/                ← données terrain
+        │   ├── calculus-setting/            ← paramètres calcul
+        │   │   ├── papoto/                 ← calcul PAPOTO
+        │   │   ├── pep/                    ← calcul PEP
+        │   │   └── tangent-aiming/         ← visée tangente
+        │   ├── temperature-calculation/     ← calcul température
+        │   └── parameter-calculation-15-without-wind/ ← paramètre 15°C sans vent
+        ├── helpers.ts                      ← helpers mesures terrain
+        ├── constants.ts                    ← constantes
+        └── mock-data.ts                    ← données mock pour tests
+```
+
+#### Re-export bridges (5 au total)
+
+| Bridge (ancien chemin) | Redirige vers | Consommateurs |
+|------------------------|--------------|---------------|
+| `ui/pages/studio/services/plot.service.ts` | `@features/studio/core/services/plot.service` | ~~15+ → tous migrés~~ 0 restants |
+| `ui/pages/studio/side-tabs/side-tabs.service.ts` | `@features/studio/core/services/side-tabs.service` | 0 restants |
+| `core/services/obstacles/obstacles.service.ts` | `@features/studio/obstacles/infrastructure/services/obstacles.service` | consommateurs via `@services/obstacles/` |
+| `ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service.ts` | `@features/studio/obstacles/presentation/services/obstaclesForm.service` | 0 restants |
+| `ui/pages/studio/toolbar-dialog/field-measuring/types.ts` | `@features/studio/field-measuring/domain/types` | `core/domain/models/section.model.ts` (via bridge `@services/`) |
+
+> **Note** : Les bridges PlotService, SideTabsService et ObstacleFormService n'ont plus de consommateurs (tous les imports ont été migrés vers `@features/studio/`). Ils peuvent être supprimés lors du nettoyage Phase 7.
+
+#### Fichiers modifiés (hors déplacements)
+
+| Fichier | Modification |
+|---------|-------------|
+| `features/study/presentation/study.routes.ts` | Import statique StudioPageComponent → `loadComponent` lazy |
+| `features/study/.../sectionsTab.component.ts` | Imports PlotService, ToolbarDialogService/Component → `@features/studio/` |
+| `features/study/.../manualSection.component.ts` | Import PlotService → `@features/studio/` |
+| `core/domain/models/section.model.ts` | Import FieldMeasure → `@features/studio/field-measuring/domain/types` |
+| `ui/shared/components/studio/section/section-plot.component.ts + spec` | Imports PlotService, SideTabsService, ObstacleFormService → `@features/studio/` |
+| `ui/shared/components/studio/free-positioning/free-positioning.component.ts + spec` | Imports PlotService, SideTabsService, ObstacleFormService → `@features/studio/` |
+| `ui/shared/components/studio/studio.component.ts + spec` | Import PlotService → `@features/studio/` |
+
+#### Definition of Done — Phase 3D
+
+- [x] `src/app/features/studio/` existe avec 5 sous-features : `core`, `obstacles`, `loads`, `toolbar`, `field-measuring`
+- [x] ~117 fichiers déplacés depuis `ui/pages/studio/` et `core/services/obstacles/`
+- [x] 5 re-export bridges créés (plot.service, side-tabs.service, obstacles.service, obstaclesForm.service, types.ts)
+- [x] `study.routes.ts` utilise `loadComponent` lazy pour StudioPageComponent
+- [x] Tous les imports `@ui/pages/studio/` et `@src/app/ui/pages/studio/` migrés vers `@features/studio/`
+- [x] `HttpClientTestingModule` supprimé de 4 specs studio
+- [x] Répertoires vides nettoyés
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1702 tests pass
+- [x] 0 erreurs TypeScript
+- [x] **(Humain)** Navigation Studio complète : Studio page → 2D/3D → Obstacles → Loads → Climate → Field Measuring → Toolbar dialogs
+
+### Phase 3E — Shared : `catalog` (données de référence partagées)
+*Dépend de Phase 3D (les catalogues sont consommés par studio, study, etc.).*
+
+Les catalogues ne sont **pas un bounded context** — ce sont des données de référence partagées (CSV → IndexedDB → lookup) consommées par plusieurs features. Ils vont dans `shared/catalog/` (Shared Kernel).
+
+23. **`shared/catalog/`** (ressources partagées) :
+    - `shared/catalog/services/` : cables.service, chains.service, lines.service, attachment.service, maintenance.service, obstacle-types.service
+    - `shared/catalog/dto/` : CSV DTOs existants (cable-csv.dto, chain-csv.dto, etc.)
+    - Pas de domain/entities ni de presentation/ — ce sont des services d'accès aux données de référence
 24. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
 
 ### Phase 3F — DDD : Infrastructure, core et shared
@@ -797,15 +960,15 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 
 ### Services à déplacer (core → features)
 - ~~`core/services/studies/studies.service.ts` → `features/studies/infrastructure/`~~ ✅ (Phase 3B — re-export bridge en place)
-- `core/services/sections/section.service.ts` → `features/study/infrastructure/`
-- `core/services/charges/charges.service.ts` → `features/studio/loads/infrastructure/`
-- `core/services/obstacles/obstacles.service.ts` → `features/studio/obstacles/infrastructure/`
-- `core/services/initial-conditions/initial-condition.service.ts` → `features/study/infrastructure/`
-- `core/services/attachment/attachment.service.ts` → `features/catalog/infrastructure/`
-- `core/services/cables/cables.service.ts` → `features/catalog/infrastructure/`
-- `core/services/chains/chains.service.ts` → `features/catalog/infrastructure/`
-- `core/services/lines/lines.service.ts` → `features/catalog/infrastructure/`
-- `core/services/maintenance/maintenance.service.ts` → `features/catalog/infrastructure/`
+- ~~`core/services/sections/section.service.ts` → `features/study/infrastructure/`~~ ✅ (Phase 3C — re-export bridge en place)
+- ~~`core/services/charges/charges.service.ts` → `features/study/infrastructure/`~~ ✅ (Phase 3C — re-export bridge en place)
+- ~~`core/services/obstacles/obstacles.service.ts` → `features/studio/obstacles/infrastructure/`~~ ✅ (Phase 3D — re-export bridge en place)
+- ~~`core/services/initial-conditions/initial-condition.service.ts` → `features/study/infrastructure/`~~ ✅ (Phase 3C — re-export bridge en place)
+- `core/services/attachment/attachment.service.ts` → `shared/catalog/services/`
+- `core/services/cables/cables.service.ts` → `shared/catalog/services/`
+- `core/services/chains/chains.service.ts` → `shared/catalog/services/`
+- `core/services/lines/lines.service.ts` → `shared/catalog/services/`
+- `core/services/maintenance/maintenance.service.ts` → `shared/catalog/services/`
 
 ### Dexie DB (centralisé)
 - `core/infrastructure/database/*` → `infrastructure/database/` (top-level, injecté via InjectionToken)
@@ -847,7 +1010,7 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 ## Décisions validées
 
 - **Studio** : **sous-features** (obstacles, loads, field-measuring, toolbar) + un `studio/core/` pour les composants shell et le plot.service partagé
-- **Catalog** : **feature "catalog" dédié** (`features/catalog/`) avec son propre domain/infrastructure pour cables, chains, lines, attachment, maintenance, obstacle-types
+- **Catalog** : **ressources partagées** dans `shared/catalog/` (pas un bounded context — données de référence consommées par plusieurs features via injection)
 - **Dexie DB** : **centralisé** dans `infrastructure/database/` au top-level, singleton injecté via `InjectionToken`, accédé uniquement par les repositories des features
 - **Signals-first** : Migrer signal() AVANT d'appliquer OnPush — l'inverse provoque des régressions silencieuses
 - **Propriétés statiques** (altitudeTypeOptions, symmetryOptions, etc.) : restent `readonly`, signals inutiles pour données immuables

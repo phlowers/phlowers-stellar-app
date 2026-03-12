@@ -22,9 +22,9 @@ import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@features/study/infrastructure/services/charges.service';
-import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.service';
-import { ToolbarDialogComponent } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.component';
-import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
+import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
+import { PlotService } from '@features/studio/core/services/plot.service';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.

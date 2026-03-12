@@ -14,7 +14,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { createInitialMeasureData } from '../../helpers';

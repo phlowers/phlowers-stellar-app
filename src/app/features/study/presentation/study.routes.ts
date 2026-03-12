@@ -6,10 +6,16 @@
  */
 import { Routes } from '@angular/router';
 import { StudyComponent } from './pages/study/study.component';
-import { StudioPageComponent } from '@ui/pages/studio/studio-page.component';
 
 /** Child routes for the study/:uuid context. */
 export const studyRoutes: Routes = [
   { path: '', pathMatch: 'full', component: StudyComponent },
-  { path: 'studio', title: $localize`Studio`, component: StudioPageComponent }
+  {
+    path: 'studio',
+    title: $localize`Studio`,
+    loadComponent: () =>
+      import('@features/studio/core/presentation/pages/studio-page/studio-page.component').then(
+        (m) => m.StudioPageComponent
+      )
+  }
 ];

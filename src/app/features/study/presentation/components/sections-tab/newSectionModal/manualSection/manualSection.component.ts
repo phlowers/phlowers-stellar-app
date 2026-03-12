@@ -34,7 +34,7 @@ import { ButtonComponent } from '@ui/shared/components/atoms/button/button.compo
 import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { PlotService } from '@features/studio/core/services/plot.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 // debounce to make it more fluid when dragging the slider

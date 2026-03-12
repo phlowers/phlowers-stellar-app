@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { InitComponent } from './init.component';
-import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { PlotService } from '@ui/pages/studio/services/plot.service';
 import { Section } from '@core/domain';
 
