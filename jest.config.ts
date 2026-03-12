@@ -10,6 +10,7 @@ const config = {
     '^@services/(.*)$': '<rootDir>/src/app/core/services/$1',
     '^@core/(.*)$': '<rootDir>/src/app/core/$1',
     '^@ui/(.*)$': '<rootDir>/src/app/ui/$1',
+    '^@features/(.*)$': '<rootDir>/src/app/features/$1',
     '^@plugins/(.*)$': '<rootDir>/src/app/plugins/$1',
     '^@adapters/(.*)$': '<rootDir>/src/app/adapters/$1',
     '^@src/(.*)$': '<rootDir>/src/$1'

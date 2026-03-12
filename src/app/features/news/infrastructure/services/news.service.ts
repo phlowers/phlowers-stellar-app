@@ -8,15 +8,6 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-/** Enum representing the status of the remote server. */
-export enum ServerStatus {
-  /** Server status is being determined. */
-  LOADING = 'LOADING',
-  /** Server is reachable. */
-  ONLINE = 'ONLINE',
-  /** Server is unreachable. */
-  OFFLINE = 'OFFLINE'
-}
 @Injectable({
   providedIn: 'root'
 })

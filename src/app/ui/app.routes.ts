@@ -17,7 +17,7 @@ export const appRoutes: Routes = [
       {
         path: '',
         title: $localize`Home`,
-        loadComponent: () => import('./pages/home/home.component').then((m) => m.HomeComponent)
+        loadChildren: () => import('@features/home/presentation/home.routes').then((m) => m.homeRoutes)
       },
       {
         path: 'studies',
@@ -27,7 +27,7 @@ export const appRoutes: Routes = [
       {
         path: 'admin',
         title: $localize`Admin`,
-        loadComponent: () => import('./pages/admin/admin').then((m) => m.AdminComponent)
+        loadChildren: () => import('@features/admin/presentation/admin.routes').then((m) => m.adminRoutes)
       },
       {
         path: 'study/:uuid',
@@ -37,12 +37,12 @@ export const appRoutes: Routes = [
       {
         path: 'news',
         title: $localize`News`,
-        loadComponent: () => import('./pages/news/news.component').then((m) => m.NewsComponent)
+        loadChildren: () => import('@features/news/presentation/news.routes').then((m) => m.newsRoutes)
       },
       {
         path: 'changelog',
         title: $localize`Changelog`,
-        loadComponent: () => import('./pages/changelog/changelog.component').then((m) => m.ChangelogComponent)
+        loadChildren: () => import('@features/changelog/presentation/changelog.routes').then((m) => m.changelogRoutes)
       },
       {
         path: 'studio',

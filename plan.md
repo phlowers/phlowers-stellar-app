@@ -234,25 +234,116 @@ Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode
 - [x] 30 chunks lazy générés dans `dist/fr/` (> 7 minimum attendus)
 - [x] `app.routes.ts` ne contient plus d'imports statiques de pages (seulement `LoggedLayoutComponent` et `NotFoundComponent`)
 - [x] `study.routes.ts` existe et exporte `studyRoutes: Routes`
-- [ ] **(Humain)** Navigation complète sur toutes les routes (Home → Studies → Study → Studio → News → Changelog → Admin → 404)
+- [x] **(Humain)** Navigation complète sur toutes les routes (Home → Studies → Study → Studio → News → Changelog → Admin → 404)
 
-### Phase 3 — Restructuration DDD (feature par feature)
-*Dépend de Phase 2. Traiter un feature à la fois pour limiter le risque.*
+### Phase 3A — DDD : Features simples (home, news, changelog, admin) ✅ TERMINÉE
+*Dépend de Phase 2. Features les plus simples, risque minimal — sert de rodage pour le pattern DDD.*
 
-**Ordre de migration** (du plus simple au plus complexe) :
-12. **Feature `home`** (1 composant simple) : créer structure `features/home/presentation/`
-13. **Feature `news`** (1 composant + 1 service) : domaine simple
-14. **Feature `changelog`** (1 composant + 1 service) : domaine simple
-15. **Feature `admin`** (1 composant) : domaine simple
-16. **Feature `studies`** (3 composants + 1 service) :
+#### État actuel
+
+| Étape | Statut | Détail |
+|-------|--------|--------|
+| Feature `home` | ✅ Fait | 4 fichiers déplacés → `features/home/presentation/pages/home/` + route créée |
+| Feature `news` | ✅ Fait | 4 fichiers composant + 1 service déplacés → `features/news/` + route créée |
+| Feature `changelog` | ✅ Fait | 3 fichiers composant + 2 fichiers service déplacés → `features/changelog/` + route créée |
+| Feature `admin` | ✅ Fait | 4 fichiers déplacés → `features/admin/presentation/pages/admin/` + route créée |
+| Routes feature | ✅ Fait | 4 fichiers `*.routes.ts` créés avec licence RTE |
+| app.routes.ts | ✅ Fait | 4 routes migrées vers `loadChildren` + `@features/` |
+| Imports corrigés | ✅ Fait | news → `@features/`, changelog → `@features/`, admin → `@ui/` alias |
+| Tests corrigés | ✅ Fait | `HttpClientTestingModule` supprimé (news, changelog), `RouterTestingModule` supprimé (home) |
+| Dead code supprimé | ✅ Fait | `ServerStatus` enum supprimé de news.service.ts et changelog.service.ts |
+| Jest config | ✅ Fait | Alias `@features/` ajouté dans `jest.config.ts` |
+| Vérification build | ✅ Fait | 0 erreurs |
+| Vérification tests | ✅ Fait | 88 suites, 1702 tests pass (+6 nouveaux tests news/changelog) |
+| Vérification lint | ✅ Fait | 0 erreurs, 309 warnings (inchangé) |
+
+#### Ce qui a été fait
+
+12. ~~**Feature `home`**~~ ✅ — 4 fichiers déplacés de `ui/pages/home/` vers `features/home/presentation/pages/home/`
+    - Imports existants (`@services/*`, `@core/*`, `@ui/shared/*`) conservés tels quels (migrés en phases suivantes)
+    - `home.component.spec.ts` : `RouterTestingModule` remplacé par `provideRouter([])`
+
+13. ~~**Feature `news`**~~ ✅ — 4 fichiers composant + 1 service
+    - `news.service.ts` déplacé vers `features/news/infrastructure/services/`
+    - `ServerStatus` enum dead code supprimé de `news.service.ts` (duplicate de `online.service.ts`, jamais importé) → noté dans `deadcode.md`
+    - Import `news.component.ts` mis à jour : `@services/news/` → `@features/news/infrastructure/services/`
+    - `news.component.spec.ts` : `HttpClientTestingModule` supprimé, remplacé par mocks de `NewsService` + `OnlineService` + `provideMarkdown()` + `provideHttpClient()`, 3 tests ajoutés
+
+14. ~~**Feature `changelog`**~~ ✅ — 3 fichiers composant + 2 fichiers service
+    - `changelog.service.ts` et `types.ts` déplacés vers `features/changelog/infrastructure/services/`
+    - `ServerStatus` enum dead code supprimé de `changelog.service.ts` → noté dans `deadcode.md`
+    - Imports `changelog.component.ts` mis à jour : `@services/changelog/` → `@features/changelog/infrastructure/services/`
+    - `changelog.component.spec.ts` : `HttpClientTestingModule` supprimé, remplacé par mocks + `provideMarkdown()` + `provideHttpClient()` + `provideNoopAnimations()` (requis pour `p-panel`), 3 tests ajoutés
+
+15. ~~**Feature `admin`**~~ ✅ — 4 fichiers déplacés
+    - Import relatif `ButtonComponent` corrigé dans `admin.ts` et `admin.spec.ts` : `../../shared/` → `@ui/shared/components/atoms/button/button.component`
+
+16. ~~**Vérification**~~ ✅ :
+    - `npm run build` — 0 erreurs
+    - `npm run test` — 88 suites, 1702 tests pass
+    - `npm run lint-check` — 0 erreurs (309 warnings)
+    - Aucun import vers les anciens chemins (`ui/pages/home`, `ui/pages/news`, etc.)
+    - 6 anciens dossiers supprimés (ui/pages/home, news, changelog, admin + core/services/news, changelog)
+
+#### Fichiers créés
+
+| Fichier | Rôle |
+|---------|------|
+| `features/home/presentation/home.routes.ts` | Route lazy home → HomeComponent |
+| `features/news/presentation/news.routes.ts` | Route lazy news → NewsComponent |
+| `features/changelog/presentation/changelog.routes.ts` | Route lazy changelog → ChangelogComponent |
+| `features/admin/presentation/admin.routes.ts` | Route lazy admin → AdminComponent |
+
+#### Fichiers modifiés (hors déplacements)
+
+| Fichier | Modification |
+|---------|-------------|
+| `ui/app.routes.ts` | 4 routes → `loadChildren` + `@features/` |
+| `jest.config.ts` | Ajout alias `@features/` dans `moduleNameMapper` |
+| `deadcode.md` | 2 entrées `ServerStatus` ajoutées (supprimées Phase 3A) |
+
+#### Definition of Done — Phase 3A
+
+- [x] `src/app/features/home/` existe avec `presentation/pages/home/` (4 fichiers)
+- [x] `src/app/features/news/` existe avec `infrastructure/services/` (1 fichier) + `presentation/pages/news/` (4 fichiers)
+- [x] `src/app/features/changelog/` existe avec `infrastructure/services/` (2 fichiers) + `presentation/pages/changelog/` (3 fichiers)
+- [x] `src/app/features/admin/` existe avec `presentation/pages/admin/` (4 fichiers)
+- [x] 4 fichiers `*.routes.ts` créés avec licence RTE
+- [x] `app.routes.ts` utilise `loadChildren` + `@features/` pour ces 4 routes
+- [x] Aucun import relatif profond dans les fichiers déplacés
+- [x] `HttpClientTestingModule` supprimé de news.spec et changelog.spec
+- [x] `RouterTestingModule` supprimé de home.spec
+- [x] `ServerStatus` dead code supprimé de news.service et changelog.service → noté dans `deadcode.md`
+- [x] Import relatif de `ButtonComponent` corrigé dans admin.ts et admin.spec.ts
+- [x] Anciens dossiers supprimés (6 dossiers)
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1702 tests pass
+- [x] `npm run lint-check` — 0 erreurs (309 warnings)
+- [x] Aucun grep ne trouve d'import vers les anciens chemins
+- [x] **(Humain)** Navigation Home, News, Changelog, Admin fonctionne
+
+### Phase 3B — DDD : Feature `studies`
+*Dépend de Phase 3A.*
+
+17. **Feature `studies`** (3 composants + 1 service) :
     - Créer `domain/entities/study.entity.ts`, `domain/repositories/study.repository.ts` (interface)
     - Créer `application/use-cases/` (create-study, list-studies, import-study, delete-study)
     - Déplacer `studies.service.ts` → `infrastructure/repositories/study.repository.impl.ts`
     - Déplacer composants → `presentation/`
-17. **Feature `study`** (composants study-header, export-dialog, sectionsTab, initialConditionModal, newSectionModal, manualSection, supportsTable, attachmentSetModal) :
+18. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
+
+### Phase 3C — DDD : Feature `study`
+*Dépend de Phase 3B.*
+
+19. **Feature `study`** (composants study-header, export-dialog, sectionsTab, initialConditionModal, newSectionModal, manualSection, supportsTable, attachmentSetModal) :
     - Créer domain/application/infrastructure/presentation
     - Séparer services sections, initial-conditions, charges en use-cases
-18. **Feature `studio`** — découpé en **sous-features** :
+20. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
+
+### Phase 3D — DDD : Feature `studio` (sous-features)
+*Dépend de Phase 3C. Feature la plus complexe — découpée en sous-features.*
+
+21. **Feature `studio`** — découpé en **sous-features** :
     - **`features/studio/core/`** : composants shell (studio-page, top-toolbar, menu-bar, side-tabs, cards) + plot.service (partagé entre sous-features)
     - **`features/studio/obstacles/`** : domain/ (obstacle entity, repository interface) + application/ (create-obstacle, delete-obstacle, update-position use-cases) + infrastructure/ (obstacles.service impl) + presentation/ (obstaclesForm)
     - **`features/studio/loads/`** : domain/ (charge, climate entities) + application/ (save-load, calculate-load, delete-charge use-cases) + infrastructure/ (charges.service, loadForms.service impl) + presentation/ (span, climate, new-charge-modal)
@@ -260,34 +351,44 @@ Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode
     - **`features/studio/toolbar/`** : presentation/ (toolbar-dialog, l0-sum, loads-table, vtl-and-guying) + toolbar-dialog.service
     - Chaque sous-feature a sa propre structure DDD et son propre fichier routes si nécessaire
     - `plot.service` reste dans `studio/core/` car partagé entre obstacles, loads et les vues
-18b. **Feature `catalog`** (bounded context dédié) :
+22. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
+
+### Phase 3E — DDD : Feature `catalog`
+*Dépend de Phase 3D (les catalogues sont consommés par studio).*
+
+23. **Feature `catalog`** (bounded context dédié) :
     - `features/catalog/domain/entities/` : CatalogCable, CatalogChain, CatalogLine, CatalogAttachment, CatalogMaintenance, CatalogObstacleType
     - `features/catalog/domain/repositories/` : interfaces pour chaque catalogue
     - `features/catalog/infrastructure/repositories/` : implémentations (cables.service, chains.service, lines.service, attachment.service, maintenance.service, obstacles-types)
     - `features/catalog/infrastructure/dto/` : CSV DTOs existants (cable-csv.dto, chain-csv.dto, etc.)
     - Pas de presentation/ (les catalogues sont consommés par d'autres features via injection)
-19. **Migrer `core/services/`** : les services transverses restent dans core (worker_python, worker_update, storage, online, user), les services métier vont en features
-19b. **`infrastructure/` top-level** : Dexie DB centralisé
+24. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
+
+### Phase 3F — DDD : Infrastructure, core et shared
+*Dépend de Phase 3E. Finalise la restructuration en déplaçant les couches transverses.*
+
+25. **Migrer `core/services/`** : les services transverses restent dans core (worker_python, worker_update, storage, online, user), les services métier vont en features
+26. **`infrastructure/` top-level** : Dexie DB centralisé
     - `infrastructure/database/app-database.ts` (singleton Dexie)
     - `infrastructure/database/entities/` (toutes les entities DB)
     - `infrastructure/database/schemas/` (tous les schemas)
     - Injecté via `InjectionToken` partout, accédé uniquement par les repositories dans les features
-20. **Migrer `core/domain/models/`** dans les features correspondantes
-21. **Migrer `ui/shared/`** → `shared/` au top-level avec atoms, layout, studio (composants réutilisables)
-22. **Vérification par feature** : `npm run test` + `npm run build` après chaque déplacement
+27. **Migrer `core/domain/models/`** dans les features correspondantes
+28. **Migrer `ui/shared/`** → `shared/` au top-level avec atoms, layout, studio (composants réutilisables)
+29. **Vérification finale Phase 3** : `npm run test` + `npm run build` + `npm run e2e` — zéro régression
 
 ### Phase 4 — BEM SCSS strict
-*Parallèle avec Phase 3*
+*Parallèle avec Phase 3.*
 
-23. **Auditer et corriger les SCSS non-BEM** :
+30. **Auditer et corriger les SCSS non-BEM** :
     - `topbar.component.scss` — convertir classes plates en BEM `.topbar__*`
     - `obstaclesForm.component.scss` — fixer la profondeur `__field__toggle` → `__field-toggle`
     - Vérifier tous les SCSS pour magic numbers → CSS variables
-24. **Vérifier la profondeur de nesting** (max 3 niveaux)
-25. **Vérification** : inspection visuelle + `npm run build` (pas de broken styles)
+31. **Vérifier la profondeur de nesting** (max 3 niveaux)
+32. **Vérification** : inspection visuelle + `npm run build` (pas de broken styles)
 
 ### Phase 5 — data-testid & tests orientés use cases utilisateur
-*Dépend de Phase 3 (files relocated)*
+*Dépend de Phase 3F (files relocated).*
 
 **Principes** :
 - Les tests sont structurés par **use case utilisateur** (ce que l'utilisateur FAIT), pas par méthode technique
@@ -302,7 +403,7 @@ Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode
 - `span.component.spec.ts` a un début de tests UI (section UI state)
 - Les tests existants appellent directement `component.ngOnInit()` ou `component.loadData()` au lieu de simuler l'interaction utilisateur
 
-#### Étape 26 — Ajouter `data-testid` stratégiquement (pas systématiquement)
+#### Étape 33 — Ajouter `data-testid` stratégiquement (pas systématiquement)
 
 Ajouter `data-testid` **uniquement sur les éléments impliqués dans un use case** (pas de data-testid sur des éléments décoratifs/structurels). Prioriser par feature :
 
@@ -325,7 +426,7 @@ Ajouter `data-testid` **uniquement sur les éléments impliqués dans un use cas
 
 **Total estimé : ~90 data-testids** (vs ~57 templates × N éléments si systématique → on réduit le bruit)
 
-#### Étape 27 — Tests unitaires orientés use cases
+#### Étape 34 — Tests unitaires orientés use cases
 
 Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` correspondant aux scénarios utilisateur réels. **Un test par use case** plutôt qu'un test par élément DOM.
 
@@ -415,7 +516,7 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 
 **TOTAL : ~60 tests unitaires orientés use cases** (vs > 200 si test atomique par data-testid)
 
-#### Étape 28 — Refactorer les tests existants
+#### Étape 35 — Refactorer les tests existants
 
 - **Conserver** les tests de `obstaclesForm.component.spec.ts` (déjà conformes)
 - **Conserver** les tests de logique métier pure (ex: `getBaseClimate`, `integerValidator`, helpers)
@@ -427,7 +528,7 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
   const getAllByTestId = (id: string) => fixture.nativeElement.querySelectorAll(`[data-testid="${id}"]`);
   ```
 
-#### Étape 29 — Vérification
+#### Étape 36 — Vérification
 - `npm run test` — tous les tests passent
 - `npm run coverage` — vérifier que la couverture de branches est >= avant refacto
 - Vérifier que chaque composant a au minimum 1 test UC
@@ -437,7 +538,7 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 
 **Principe** : Les E2E testent des **parcours complets multi-pages**, pas des interactions unitaires (déjà couvertes en phase 5). Chaque test E2E traverse plusieurs pages et vérifie le résultat final.
 
-30. **Créer 5 scénarios E2E** (fichiers dans `e2e/`) :
+37. **Créer 5 scénarios E2E** (fichiers dans `e2e/`) :
 
 **e2e/study-lifecycle.spec.ts** — Parcours CRUD complet d'une étude
 - Créer une étude → vérifier apparition dans la table → ouvrir → modifier titre → dupliquer → supprimer le duplicata → exporter l'original
@@ -454,20 +555,20 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 **e2e/import-export.spec.ts** — Import/export
 - Importer un fichier .csv → vérifier apparition → ouvrir l'étude importée → exporter en .clst → vérifier le téléchargement
 
-31. **Vérification** : `npm run e2e` — les 5 + l'existant (update-flow) passent
+38. **Vérification** : `npm run e2e` — les 5 + l'existant (update-flow) passent
 
 ### Phase 7 — Nettoyage du code mort
 *Dépend de validation humaine. Peut être exécutée à tout moment après Phase 1.*
 
 > Tout code mort identifié au fil des phases est centralisé dans [`deadcode.md`](deadcode.md). La suppression est effectuée **uniquement après validation** du développeur sur chaque entrée.
 
-32. **Revoir `deadcode.md`** avec le développeur — valider ou invalider chaque entrée
-33. **Supprimer le code mort validé** :
+39. **Revoir `deadcode.md`** avec le développeur — valider ou invalider chaque entrée
+40. **Supprimer le code mort validé** :
     - LoggedLayoutComponent : `currentRoute`, `ngOnInit()`, imports `NavigationEnd`, `filter`, `OnInit`
     - StudioPageComponent : `spanData`, `supportData` (mock arrays)
     - Tout autre code mort identifié au fil des phases (le fichier `deadcode.md` sera enrichi progressivement)
-34. **Vérification** : `npm run test` + `npm run build` + `npm run lint-check` — zéro régression
-35. **Mettre à jour `deadcode.md`** — marquer les entrées comme supprimées avec date
+41. **Vérification** : `npm run test` + `npm run build` + `npm run lint-check` — zéro régression
+42. **Mettre à jour `deadcode.md`** — marquer les entrées comme supprimées avec date
 
 ---
 
@@ -522,7 +623,7 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 ## Vérifications globales
 
 1. **Après chaque phase** : `npm run test` + `npm run build` + `npm run lint-check`
-2. **Après Phase 3** : `npm run e2e` (update-flow existant)
+2. **Après Phase 3F** : `npm run e2e` (update-flow existant)
 3. **Fin** : `npm run coverage` pour mesurer la progression
 4. **Vérification manuelle** : navigation complète dans l'app (toutes les routes)
 5. **Bundle size** : comparer avant/après lazy loading

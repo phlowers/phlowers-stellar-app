@@ -9,7 +9,7 @@ import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-
 import { CardInfoComponent } from '@ui/shared/components/atoms/card-info/card-info.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -57,15 +57,9 @@ describe('HomeComponent', () => {
     } as unknown as jest.Mocked<StudiesService>;
 
     await TestBed.configureTestingModule({
-      imports: [
-        HomeComponent,
-        CardStudyComponent,
-        CardInfoComponent,
-        ButtonComponent,
-        IconComponent,
-        RouterTestingModule
-      ],
+      imports: [HomeComponent, CardStudyComponent, CardInfoComponent, ButtonComponent, IconComponent],
       providers: [
+        provideRouter([]),
         { provide: UpdateService, useValue: updateServiceMock },
         { provide: OnlineService, useValue: onlineServiceMock },
         { provide: StudiesService, useValue: studiesServiceMock }

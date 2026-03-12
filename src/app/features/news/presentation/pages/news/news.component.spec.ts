@@ -1,0 +1,68 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { NewsComponent } from './news.component';
+import { NewsService } from '@features/news/infrastructure/services/news.service';
+import { OnlineService } from '@services/online/online.service';
+import { BehaviorSubject, of } from 'rxjs';
+import { provideMarkdown } from 'ngx-markdown';
+import { provideHttpClient } from '@angular/common/http';
+
+describe('News component', () => {
+  let component: NewsComponent;
+  let fixture: ComponentFixture<NewsComponent>;
+  let newsServiceMock: jest.Mocked<NewsService>;
+  let onlineServiceMock: jest.Mocked<OnlineService>;
+
+  beforeEach(async () => {
+    newsServiceMock = {
+      getNews: jest.fn().mockReturnValue(of('# Test News'))
+    } as unknown as jest.Mocked<NewsService>;
+
+    onlineServiceMock = {
+      online$: new BehaviorSubject<boolean>(true)
+    } as unknown as jest.Mocked<OnlineService>;
+
+    await TestBed.configureTestingModule({
+      imports: [NewsComponent],
+      providers: [
+        provideHttpClient(),
+        provideMarkdown(),
+        { provide: NewsService, useValue: newsServiceMock },
+        { provide: OnlineService, useValue: onlineServiceMock }
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(NewsComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should load news when online', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(newsServiceMock.getNews).toHaveBeenCalled();
+    expect(component.news()).toBe('# Test News');
+    expect(component.isLoading()).toBe(false);
+  });
+
+  it('should not load news when offline', () => {
+    (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
+
+    fixture = TestBed.createComponent(NewsComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(newsServiceMock.getNews).not.toHaveBeenCalled();
+    expect(component.isOnline()).toBe(false);
+    expect(component.isLoading()).toBe(false);
+  });
+
+  it('should set isOnline signal based on online status', () => {
+    fixture.detectChanges();
+    expect(component.isOnline()).toBe(true);
+  });
+});

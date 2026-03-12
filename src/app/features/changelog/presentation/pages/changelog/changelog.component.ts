@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { ChangelogService } from '@services/changelog/changelog.service';
-import { ChangelogItem } from '@services/changelog/types';
+import { ChangelogService } from '@features/changelog/infrastructure/services/changelog.service';
+import { ChangelogItem } from '@features/changelog/infrastructure/services/types';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MarkdownModule } from 'ngx-markdown';
 import { DatePipe } from '@angular/common';

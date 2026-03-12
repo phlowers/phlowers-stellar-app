@@ -47,4 +47,30 @@
 
 ---
 
-*Dernière mise à jour : 11/03/2026 — Audit Phase 1*
+*Dernière mise à jour : 12/03/2026 — Audit Phase 3A*
+
+---
+
+## 4. `ServerStatus` — `core/services/news/news.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/news/news.service.ts` |
+| Code | `export enum ServerStatus { LOADING, ONLINE, OFFLINE }` |
+| 🔍 Preuve | Duplicate of `ServerStatus` in `online.service.ts`, never imported by any file |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Enum removed during DDD migration |
+| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 3A) |
+
+---
+
+## 5. `ServerStatus` — `core/services/changelog/changelog.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/changelog/changelog.service.ts` |
+| Code | `export enum ServerStatus { LOADING, ONLINE, OFFLINE }` |
+| 🔍 Preuve | Duplicate of `ServerStatus` in `online.service.ts`, never imported by any file |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Enum removed during DDD migration |
+| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 3A) |
