@@ -5,8 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -88,8 +88,7 @@ describe('LinesService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [LinesService, { provide: StorageService, useValue: storageServiceSpy }]
+      providers: [provideHttpClient(), provideHttpClientTesting(), LinesService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(LinesService);

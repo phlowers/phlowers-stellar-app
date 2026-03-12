@@ -2,9 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
-import { InitComponent } from './init.component';
+import { InitComponent } from '@features/studio/field-measuring/presentation/components/init/init.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
-import { PlotService } from '@ui/pages/studio/services/plot.service';
+import { PlotService } from '@features/studio/core/services/plot.service';
 import { Section } from '@core/domain';
 
 describe('Init component', () => {

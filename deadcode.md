@@ -74,3 +74,27 @@
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Enum removed during DDD migration |
 | ✅ Validé | 🗑️ SUPPRIMÉ (Phase 3A) |
+
+---
+
+## 6. Stale UI component files after DDD migration
+
+### `FieldMeasuringComponent` — `ui/pages/studio/toolbar-dialog/field-measuring/field-measuring.component.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/ui/pages/studio/toolbar-dialog/field-measuring/field-measuring.component.ts` |
+| 🔍 Preuve | Stale copy after migration to `features/studio/field-measuring/presentation/components/field-measuring/`. Missing `.html` and `.scss` template files. Not imported by any file. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Delete file — the real component lives in `features/` |
+| Status | ⏳ PENDING REVIEW |
+
+### `InitComponent` — `ui/pages/studio/toolbar-dialog/field-measuring/components/init/init.component.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/ui/pages/studio/toolbar-dialog/field-measuring/components/init/init.component.ts` |
+| 🔍 Preuve | Stale copy after migration to `features/studio/field-measuring/presentation/components/init/`. Missing `.html` and `.scss` template files. Not imported by any file. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Delete file — the real component lives in `features/` |
+| Status | ⏳ PENDING REVIEW |

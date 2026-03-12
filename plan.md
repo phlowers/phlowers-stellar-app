@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3D terminées.**
+**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (313 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3E terminées.**
 
 ---
 
@@ -732,16 +732,76 @@ src/app/features/studio/
 - [x] 0 erreurs TypeScript
 - [x] **(Humain)** Navigation Studio complète : Studio page → 2D/3D → Obstacles → Loads → Climate → Field Measuring → Toolbar dialogs
 
-### Phase 3E — Shared : `catalog` (données de référence partagées)
+### Phase 3E — Shared : `catalog` (données de référence partagées) ✅ TERMINÉE
 *Dépend de Phase 3D (les catalogues sont consommés par studio, study, etc.).*
 
 Les catalogues ne sont **pas un bounded context** — ce sont des données de référence partagées (CSV → IndexedDB → lookup) consommées par plusieurs features. Ils vont dans `shared/catalog/` (Shared Kernel).
 
-23. **`shared/catalog/`** (ressources partagées) :
-    - `shared/catalog/services/` : cables.service, chains.service, lines.service, attachment.service, maintenance.service, obstacle-types.service
-    - `shared/catalog/dto/` : CSV DTOs existants (cable-csv.dto, chain-csv.dto, etc.)
-    - Pas de domain/entities ni de presentation/ — ce sont des services d'accès aux données de référence
-24. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
+23. ~~**`shared/catalog/services/`** (ressources partagées)~~ :
+    - ~~cables.service, chains.service, lines.service, attachment.service, maintenance.service~~ — déplacés
+    - DTOs et models restent dans `@core/infrastructure/dto/` et `@core/domain/models/catalog/` (Phase 3F)
+24. ~~**Vérification**~~ : build + test après chaque déplacement ✅
+
+#### Config modifiée
+
+| Fichier | Modification |
+|---------|-------------|
+| `jest.config.ts` | Ajout alias `'^@shared/(.*)$': '<rootDir>/src/app/shared/$1'` dans `moduleNameMapper` |
+
+> **Note** : `@shared/*` était déjà dans `tsconfig.json` et `tsconfig.spec.json` (Phase 0).
+
+#### Structure créée
+
+```
+src/app/shared/                              ← NOUVEAU répertoire
+└── catalog/
+    └── services/
+        ├── cables.service.ts + spec
+        ├── chains.service.ts + spec
+        ├── lines.service.ts + spec
+        ├── attachment.service.ts + spec
+        └── maintenance.service.ts + spec
+```
+
+#### Fichiers déplacés (10 fichiers)
+
+| Source | Destination |
+|--------|------------|
+| `core/services/cables/cables.service.ts` + `.spec.ts` | `shared/catalog/services/cables.service.ts` + `.spec.ts` |
+| `core/services/chains/chains.service.ts` + `.spec.ts` | `shared/catalog/services/chains.service.ts` + `.spec.ts` |
+| `core/services/lines/lines.service.ts` + `.spec.ts` | `shared/catalog/services/lines.service.ts` + `.spec.ts` |
+| `core/services/attachment/attachment.service.ts` + `.spec.ts` | `shared/catalog/services/attachment.service.ts` + `.spec.ts` |
+| `core/services/maintenance/maintenance.service.ts` + `.spec.ts` | `shared/catalog/services/maintenance.service.ts` + `.spec.ts` |
+
+#### Re-export bridges (5 au total)
+
+| Bridge (ancien chemin) | Redirige vers | Symbole |
+|------------------------|--------------|--------|
+| `core/services/cables/cables.service.ts` | `@shared/catalog/services/cables.service` | `CablesService` |
+| `core/services/chains/chains.service.ts` | `@shared/catalog/services/chains.service` | `ChainsService` |
+| `core/services/lines/lines.service.ts` | `@shared/catalog/services/lines.service` | `LinesService` |
+| `core/services/attachment/attachment.service.ts` | `@shared/catalog/services/attachment.service` | `AttachmentService` |
+| `core/services/maintenance/maintenance.service.ts` | `@shared/catalog/services/maintenance.service` | `MaintenanceService` |
+
+> **60+ consommateurs** via `@services/cables/`, `@services/chains/`, etc. continuent à fonctionner sans modification grâce aux bridges.
+
+#### Modernisation des specs catalogue
+
+- `HttpClientTestingModule` (déprécié) remplacé par `provideHttpClient()` + `provideHttpClientTesting()` dans les 5 specs catalogue
+
+#### Definition of Done — Phase 3E
+
+- [x] `src/app/shared/catalog/services/` existe avec 5 services + 5 specs (10 fichiers)
+- [x] 5 re-export bridges créés dans `core/services/{cables,chains,lines,attachment,maintenance}/`
+- [x] `@shared/` alias ajouté dans `jest.config.ts` (`moduleNameMapper`)
+- [x] `tsconfig.spec.json` a l'alias `@shared/*` (hérité de tsconfig.json)
+- [x] Aucun import modifié dans les 60+ consommateurs (tous passent par les bridges)
+- [x] Anciens specs supprimés des dossiers `core/services/xxx/` (seul le bridge y reste)
+- [x] `HttpClientTestingModule` supprimé des 5 specs catalogue
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1702 tests pass
+- [x] `npm run lint-check` — 0 erreurs (313 warnings)
+- [x] **(Humain)** L'app démarre, les catalogues se chargent (CSV → IndexedDB), Studio et Study fonctionnent
 
 ### Phase 3F — DDD : Infrastructure, core et shared
 *Dépend de Phase 3E. Finalise la restructuration en déplaçant les couches transverses.*
