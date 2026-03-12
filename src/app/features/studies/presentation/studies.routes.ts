@@ -4,9 +4,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+import { Routes } from '@angular/router';
 
-/**
- * Re-export for backward compatibility during DDD migration.
- * Consumers should progressively migrate to @features/studies/infrastructure/services/studies.service
- */
-export { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+export const studiesRoutes: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./pages/studies/studies.component').then((m) => m.StudiesComponent)
+  }
+];

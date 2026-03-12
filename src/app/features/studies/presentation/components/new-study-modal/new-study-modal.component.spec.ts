@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NewStudyModalComponent } from './new-study-modal.component';
 import { MessageService } from 'primeng/api';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 
 describe('NewStudyModalComponent', () => {
   let component: NewStudyModalComponent;

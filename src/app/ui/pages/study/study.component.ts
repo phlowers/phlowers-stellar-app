@@ -19,7 +19,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SectionsTabComponent } from './tabs/sections/sectionsTab.component';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { NewStudyModalComponent } from '../studies/components/new-study-modal/new-study-modal.component';
+import { NewStudyModalComponent } from '@features/studies/presentation/components/new-study-modal/new-study-modal.component';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'dexie';
 

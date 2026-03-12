@@ -22,7 +22,7 @@ export const appRoutes: Routes = [
       {
         path: 'studies',
         title: $localize`Studies`,
-        loadComponent: () => import('./pages/studies/studies.component').then((m) => m.StudiesComponent)
+        loadChildren: () => import('@features/studies/presentation/studies.routes').then((m) => m.studiesRoutes)
       },
       {
         path: 'admin',

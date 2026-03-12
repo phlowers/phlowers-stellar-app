@@ -7,8 +7,8 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { SortEvent } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { ButtonComponent } from 'src/app/ui/shared/components/atoms/button/button.component';
-import { IconComponent } from 'src/app/ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TableModule } from 'primeng/table';
 
 import { TabsModule } from 'primeng/tabs';
@@ -17,7 +17,7 @@ import { PopoverModule } from 'primeng/popover';
 import { Study } from '@core/domain';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
 
 /**

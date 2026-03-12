@@ -7,22 +7,22 @@
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ChangeDetectionStrategy, OnInit, Component, inject, signal } from '@angular/core';
-import { NewStudyModalComponent } from './components/new-study-modal/new-study-modal.component';
+import { NewStudyModalComponent } from '@features/studies/presentation/components/new-study-modal/new-study-modal.component';
 import { ButtonModule } from 'primeng/button';
-import { ButtonComponent } from 'src/app/ui/shared/components/atoms/button/button.component';
-import { IconComponent } from 'src/app/ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { TableModule } from 'primeng/table';
 
 import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
 import { Study } from '@core/domain';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { CommonModule } from '@angular/common';
-import { StudiesTableComponent } from './components/studies-table/studies-table.component';
+import { StudiesTableComponent } from '@features/studies/presentation/components/studies-table/studies-table.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ImportStudyComponent } from './components/import-study/import-study.component';
-import { ExportDialogComponent } from '../study/study-header/export-dialog/export-dialog.component';
+import { ImportStudyComponent } from '@features/studies/presentation/components/import-study/import-study.component';
+import { ExportDialogComponent } from '@ui/pages/study/study-header/export-dialog/export-dialog.component';
 
 /**
  * Main studies listing page.

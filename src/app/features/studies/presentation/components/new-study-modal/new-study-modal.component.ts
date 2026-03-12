@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, computed, signal, effect } from '@angular/core';
-import { Study } from '@core/domain';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -9,29 +8,12 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { Router } from '@angular/router';
 import { FileUploadModule } from 'primeng/fileupload';
-
-/**
- * Creates a new empty `Study` object with default values.
- * @returns A blank study with empty fields
- */
-export const createEmptyStudy = (): Study => {
-  return {
-    title: '',
-    description: '',
-    shareable: false,
-    uuid: '',
-    author_email: '',
-    created_at_offline: '',
-    updated_at_offline: '',
-    saved: false,
-    sections: []
-  };
-};
+import { createEmptyStudy } from '@features/studies/domain/helpers/study.helpers';
 
 /**
  * Modal dialog for creating a new study or modifying an existing one.

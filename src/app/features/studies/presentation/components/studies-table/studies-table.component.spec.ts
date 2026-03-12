@@ -6,7 +6,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 import { SortEvent } from 'primeng/api';
 import { StudiesTableComponent } from './studies-table.component';
 import { Study } from '@core/domain';
@@ -49,8 +49,8 @@ describe('StudiesTableComponent', () => {
     } as unknown as jest.Mocked<MessageService>;
 
     await TestBed.configureTestingModule({
-      imports: [StudiesTableComponent, RouterTestingModule],
-      providers: [{ provide: MessageService, useValue: mockMessageService }]
+      imports: [StudiesTableComponent],
+      providers: [{ provide: MessageService, useValue: mockMessageService }, provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(StudiesTableComponent);

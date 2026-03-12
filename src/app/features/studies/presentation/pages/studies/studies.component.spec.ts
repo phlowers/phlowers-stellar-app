@@ -10,9 +10,9 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { BehaviorSubject } from 'rxjs';
 import { StudiesComponent } from './studies.component';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { Study } from '@core/domain';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { CablesService } from '@services/cables/cables.service';
 
 describe('StudiesComponent', () => {
   let component: StudiesComponent;
@@ -71,12 +71,13 @@ describe('StudiesComponent', () => {
     } as unknown as jest.Mocked<MessageService>;
 
     await TestBed.configureTestingModule({
-      imports: [StudiesComponent, HttpClientTestingModule],
+      imports: [StudiesComponent],
       providers: [
         { provide: StudiesService, useValue: mockStudiesService },
         { provide: ConfirmationService, useValue: mockConfirmationService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: MessageService, useValue: mockMessageService }
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: CablesService, useValue: { getCables: jest.fn().mockResolvedValue([]) } }
       ]
     }).compileComponents();
 

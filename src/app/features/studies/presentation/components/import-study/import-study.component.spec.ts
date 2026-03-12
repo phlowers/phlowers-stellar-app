@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ImportStudyComponent } from './import-study.component';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import Papa from 'papaparse';
 import { Study } from '@core/domain';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { CablesService } from '@services/cables/cables.service';
 
 describe('ImportStudyComponent', () => {
@@ -79,7 +78,7 @@ describe('ImportStudyComponent', () => {
     (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
     await TestBed.configureTestingModule({
-      imports: [ImportStudyComponent, HttpClientTestingModule],
+      imports: [ImportStudyComponent],
       providers: [
         { provide: StudiesService, useValue: studiesServiceMock },
         { provide: MessageService, useValue: mockMessageService },

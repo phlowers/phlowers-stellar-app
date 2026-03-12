@@ -3,14 +3,14 @@ import { RouterLink } from '@angular/router';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ProtoV4Parameters, ProtoV4Support, Section, Support, Study } from '@core/domain';
 import Papa from 'papaparse';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CablesService } from '@services/cables/cables.service';
 import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
-import { createEmptyStudy } from '../new-study-modal/new-study-modal.component';
+import { createEmptyStudy } from '@features/studies/domain/helpers/study.helpers';
 import { createEmptySection, createEmptySupport } from '@services/sections/helpers';
 
 /**

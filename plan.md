@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-Refactoring majeur d'un projet Angular 19 PWA (~55 composants, ~230 fichiers) vers une architecture DDD stricte avec adoption complète des patterns Angular modernes (signals, OnPush, lazy loading), BEM SCSS, data-testid + tests. Le projet est déjà bien avancé sur certains axes (standalone, input()/output(), signal()) mais critique sur d'autres (OnPush: 1/55, data-testid: 4/61, DDD: inexistant, lazy loading: 0%).
+**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3B terminées.**
 
 ---
 
@@ -322,15 +322,139 @@ Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode
 - [x] Aucun grep ne trouve d'import vers les anciens chemins
 - [x] **(Humain)** Navigation Home, News, Changelog, Admin fonctionne
 
-### Phase 3B — DDD : Feature `studies`
+### Phase 3B — DDD : Feature `studies` ✅ TERMINÉE
 *Dépend de Phase 3A.*
 
-17. **Feature `studies`** (3 composants + 1 service) :
-    - Créer `domain/entities/study.entity.ts`, `domain/repositories/study.repository.ts` (interface)
-    - Créer `application/use-cases/` (create-study, list-studies, import-study, delete-study)
-    - Déplacer `studies.service.ts` → `infrastructure/repositories/study.repository.impl.ts`
-    - Déplacer composants → `presentation/`
-18. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
+#### État actuel
+
+| Étape | Statut | Détail |
+|-------|--------|--------|
+| Extraire `createEmptyStudy` | ✅ Fait | `features/studies/domain/helpers/study.helpers.ts` — casse la dépendance circulaire service → composant |
+| Déplacer `studies.service` | ✅ Fait | `features/studies/infrastructure/services/studies.service.ts` + `.spec.ts` |
+| Re-export bridge | ✅ Fait | `core/services/studies/studies.service.ts` → re-export pour les 27+ consommateurs |
+| Déplacer composants (14 fichiers) | ✅ Fait | 4 composants → `features/studies/presentation/` |
+| Créer `studies.routes.ts` | ✅ Fait | Licence RTE, `loadComponent` lazy |
+| Mettre à jour `app.routes.ts` | ✅ Fait | `loadChildren` → `@features/studies/presentation/studies.routes` |
+| Mettre à jour cross-feature imports | ✅ Fait | `study.component.ts` → `@features/studies/` pour `NewStudyModalComponent` |
+| Corriger tests dépréciés | ✅ Fait | `HttpClientTestingModule` supprimé (2 specs), `RouterTestingModule` → `provideRouter([])` (1 spec) |
+| Vérification build | ✅ Fait | 0 erreurs |
+| Vérification tests | ✅ Fait | 88 suites, 1702 tests pass |
+| Vérification lint | ✅ Fait | 0 erreurs, 309 warnings (inchangé) |
+
+#### Ce qui a été fait
+
+17. ~~**Extraire `createEmptyStudy`**~~ ✅ — fonction extraite de `new-study-modal.component.ts` vers `features/studies/domain/helpers/study.helpers.ts`
+    - Casse la dépendance circulaire `studies.service.ts` → composant
+    - Import `Study` supprimé de `new-study-modal.component.ts` (devenu unused après extraction)
+    - 3 fichiers mis à jour (`studies.service.ts`, `new-study-modal.component.ts`, `import-study.component.ts`)
+
+18. ~~**Déplacer `studies.service`**~~ ✅ — `core/services/studies/` → `features/studies/infrastructure/services/`
+    - `studies.service.ts` + `studies.service.spec.ts` déplacés
+    - Re-export bridge créé dans `core/services/studies/studies.service.ts` pour compatibilité des 27+ consommateurs via `@services/studies/`
+    - Ancien spec supprimé
+
+19. ~~**Déplacer les composants**~~ ✅ — 14 fichiers déplacés :
+    - `studies.component.ts` + `.html` + `.spec.ts` → `features/studies/presentation/pages/studies/`
+    - `studies-table/` (3 fichiers) → `features/studies/presentation/components/studies-table/`
+    - `new-study-modal/` (4 fichiers) → `features/studies/presentation/components/new-study-modal/`
+    - `import-study/` (4 fichiers) → `features/studies/presentation/components/import-study/`
+    - Tous les imports internes mis à jour (`@features/studies/`, `@ui/shared/`)
+    - Imports `from 'src/app/ui/shared/...'` remplacés par `@ui/shared/components/atoms/...`
+
+20. ~~**Corriger les tests**~~ ✅ :
+    - `studies.component.spec.ts` : `HttpClientTestingModule` supprimé, mock `CablesService` ajouté
+    - `studies-table.component.spec.ts` : `RouterTestingModule` → `provideRouter([])`
+    - `import-study.component.spec.ts` : `HttpClientTestingModule` supprimé
+    - `new-study-modal.component.spec.ts` : import `StudiesService` mis à jour vers `@features/`
+
+21. ~~**Cross-feature**~~ ✅ :
+    - `study.component.ts` : import `NewStudyModalComponent` → `@features/studies/presentation/components/new-study-modal/`
+    - `ExportDialogComponent` : NON déplacé (appartient à feature `study`, sera migré en Phase 3C), importé via `@ui/pages/study/study-header/export-dialog/`
+
+22. ~~**Vérification**~~ ✅ :
+    - `npm run build` — 0 erreurs
+    - `npm run test` — 88 suites, 1702 tests pass
+    - `npm run lint-check` — 0 erreurs (309 warnings)
+    - Aucun import vers `ui/pages/studies/` restant
+    - `createEmptyStudy` défini uniquement dans `study.helpers.ts`, importé via `@features/studies/domain/helpers/study.helpers`
+    - Ancien dossier `ui/pages/studies/` supprimé
+
+#### Architecture résultante
+
+```
+src/app/features/studies/
+├── domain/
+│   └── helpers/
+│       └── study.helpers.ts                    ← createEmptyStudy extraite
+├── infrastructure/
+│   └── services/
+│       ├── studies.service.ts                  ← déplacé depuis core/services/studies/
+│       └── studies.service.spec.ts
+└── presentation/
+    ├── pages/
+    │   └── studies/
+    │       ├── studies.component.ts
+    │       ├── studies.component.html
+    │       └── studies.component.spec.ts
+    ├── components/
+    │   ├── studies-table/
+    │   │   ├── studies-table.component.ts
+    │   │   ├── studies-table.component.html
+    │   │   └── studies-table.component.spec.ts
+    │   ├── new-study-modal/
+    │   │   ├── new-study-modal.component.ts
+    │   │   ├── new-study-modal.component.html
+    │   │   ├── new-study-modal.component.scss
+    │   │   └── new-study-modal.component.spec.ts
+    │   └── import-study/
+    │       ├── import-study.component.ts
+    │       ├── import-study.component.html
+    │       ├── import-study.component.scss
+    │       └── import-study.component.spec.ts
+    └── studies.routes.ts
+```
+
+#### Fichiers créés
+
+| Fichier | Rôle |
+|---------|------|
+| `features/studies/domain/helpers/study.helpers.ts` | `createEmptyStudy()` extraite du composant |
+| `features/studies/presentation/studies.routes.ts` | Route lazy studies → StudiesComponent |
+
+#### Fichiers modifiés (hors déplacements)
+
+| Fichier | Modification |
+|---------|-------------|
+| `core/services/studies/studies.service.ts` | Remplacé par re-export bridge vers `@features/studies/` |
+| `ui/app.routes.ts` | Route `studies` → `loadChildren` + `@features/studies/presentation/studies.routes` |
+| `ui/pages/study/study.component.ts` | Import `NewStudyModalComponent` → `@features/studies/` |
+
+#### Décisions architecturales appliquées
+
+- **Pas de `domain/entities/` ni `domain/repositories/`** — le refactoring DDD complet (interfaces, use-cases) est hors scope de cette phase qui se concentre sur la restructuration de fichiers
+- **Re-export bridge** dans `core/services/studies/` — permet aux 27+ consommateurs de continuer sans modification, sera nettoyé progressivement
+- **`ExportDialogComponent` NON déplacé** — appartient à feature `study` (Phase 3C)
+- **`@services/sections/helpers` et `@services/cables/cables.service`** — NON déplacés, seront migrés en Phase 3C et 3E respectivement
+
+#### Definition of Done — Phase 3B
+
+- [x] `src/app/features/studies/` existe avec `domain/`, `infrastructure/` et `presentation/`
+- [x] `createEmptyStudy` extraite dans `domain/helpers/study.helpers.ts` — plus exportée depuis le composant
+- [x] `studies.service.ts` + `.spec.ts` dans `features/studies/infrastructure/services/`
+- [x] Re-export bridge dans `core/services/studies/studies.service.ts`
+- [x] 14 fichiers composant déplacés dans `features/studies/presentation/`
+- [x] `studies.routes.ts` créé avec licence RTE
+- [x] `app.routes.ts` utilise `loadChildren` + `@features/studies/`
+- [x] `study.component.ts` import de `NewStudyModalComponent` mis à jour vers `@features/studies/`
+- [x] Aucun import `from 'src/app/ui/shared/...'` — tous remplacés par `@ui/shared/`
+- [x] `HttpClientTestingModule` supprimé de `studies.component.spec.ts` et `import-study.component.spec.ts`
+- [x] `RouterTestingModule` supprimé de `studies-table.component.spec.ts`
+- [x] Ancien dossier `ui/pages/studies/` supprimé
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1702 tests pass
+- [x] `npm run lint-check` — 0 erreurs (309 warnings)
+- [x] Aucun grep vers anciens chemins (sauf `ExportDialogComponent` attendu, migré en Phase 3C)
+- [x] **(Humain)** Navigation Studies → Create → Import → Table fonctionne
 
 ### Phase 3C — DDD : Feature `study`
 *Dépend de Phase 3B.*
@@ -580,7 +704,7 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 - `tsconfig.json` / `tsconfig.app.json` — ajout aliases @features, @shared, @infrastructure
 
 ### Services à déplacer (core → features)
-- `core/services/studies/studies.service.ts` → `features/studies/infrastructure/`
+- ~~`core/services/studies/studies.service.ts` → `features/studies/infrastructure/`~~ ✅ (Phase 3B — re-export bridge en place)
 - `core/services/sections/section.service.ts` → `features/study/infrastructure/`
 - `core/services/charges/charges.service.ts` → `features/studio/loads/infrastructure/`
 - `core/services/obstacles/obstacles.service.ts` → `features/studio/obstacles/infrastructure/`
