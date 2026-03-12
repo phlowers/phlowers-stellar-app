@@ -23,7 +23,7 @@ import { SupportsTableComponent } from './supportsTable/supportsTable.component'
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@ui/shared/types';
 import { StudioComponent } from '@ui/shared/components/studio/studio.component';
-import { createEmptySupport } from '@services/sections/helpers';
+import { createEmptySupport } from '@features/study/domain/helpers/sections.helpers';
 import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { debounce, sortBy, orderBy, uniqBy } from 'lodash';

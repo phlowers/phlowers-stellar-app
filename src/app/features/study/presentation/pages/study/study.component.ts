@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { StudyHeaderComponent } from '@ui/pages/study/study-header/study-header.component';
+import { StudyHeaderComponent } from '@features/study/presentation/components/study-header/study-header.component';
 import { StudiesService } from '@services/studies/studies.service';
-import { SectionService } from '@services/sections/section.service';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
 import {
   DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput,
   InitialConditionService
-} from '@services/initial-conditions/initial-condition.service';
+} from '@features/study/infrastructure/services/initial-condition.service';
 import { Section, Study } from '@core/domain';
 import { TabsModule } from 'primeng/tabs';
 import { AccordionModule } from 'primeng/accordion';
@@ -16,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { StepperModule } from 'primeng/stepper';
 import { InputTextModule } from 'primeng/inputtext';
-import { SectionsTabComponent } from './tabs/sections/sectionsTab.component';
+import { SectionsTabComponent } from '@features/study/presentation/components/sections-tab/sectionsTab.component';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { NewStudyModalComponent } from '@features/studies/presentation/components/new-study-modal/new-study-modal.component';

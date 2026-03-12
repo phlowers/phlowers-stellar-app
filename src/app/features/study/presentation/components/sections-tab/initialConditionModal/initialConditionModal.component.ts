@@ -19,7 +19,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import {
   InitialConditionFunctionsInput,
   InitialConditionService
-} from '@services/initial-conditions/initial-condition.service';
+} from '@features/study/infrastructure/services/initial-condition.service';
 import { MessageModule } from 'primeng/message';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';

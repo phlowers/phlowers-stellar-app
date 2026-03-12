@@ -29,8 +29,9 @@ import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Section, Support, CatalogMaintenance, CatalogLine } from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LinesService } from '@services/lines/lines.service';
 import { MessageService } from 'primeng/api';
 
@@ -179,13 +180,14 @@ describe('ManualSectionComponent', () => {
         ManualSectionComponent,
         MockSupportsTableComponent,
         MockStudioComponent,
-        NoopAnimationsModule,
-        HttpClientTestingModule
+        NoopAnimationsModule
       ],
       providers: [
         { provide: MaintenanceService, useValue: mockMaintenanceService },
         { provide: LinesService, useValue: mockLinesService },
-        { provide: MessageService, useValue: mockMessageService }
+        { provide: MessageService, useValue: mockMessageService },
+        provideHttpClient(),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

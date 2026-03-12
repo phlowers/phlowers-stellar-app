@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3B terminées.**
+**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3C terminées.**
 
 ---
 
@@ -369,7 +369,7 @@ Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode
 
 21. ~~**Cross-feature**~~ ✅ :
     - `study.component.ts` : import `NewStudyModalComponent` → `@features/studies/presentation/components/new-study-modal/`
-    - `ExportDialogComponent` : NON déplacé (appartient à feature `study`, sera migré en Phase 3C), importé via `@ui/pages/study/study-header/export-dialog/`
+    - `ExportDialogComponent` : déplacé en Phase 3C ✅ dans `features/study/presentation/components/study-header/export-dialog/`
 
 22. ~~**Vérification**~~ ✅ :
     - `npm run build` — 0 erreurs
@@ -433,8 +433,8 @@ src/app/features/studies/
 
 - **Pas de `domain/entities/` ni `domain/repositories/`** — le refactoring DDD complet (interfaces, use-cases) est hors scope de cette phase qui se concentre sur la restructuration de fichiers
 - **Re-export bridge** dans `core/services/studies/` — permet aux 27+ consommateurs de continuer sans modification, sera nettoyé progressivement
-- **`ExportDialogComponent` NON déplacé** — appartient à feature `study` (Phase 3C)
-- **`@services/sections/helpers` et `@services/cables/cables.service`** — NON déplacés, seront migrés en Phase 3C et 3E respectivement
+- **`ExportDialogComponent` NON déplacé** — appartient à feature `study` (migré en Phase 3C ✅)
+- **`@services/sections/helpers` et `@services/cables/cables.service`** — `helpers` migré en Phase 3C ✅, `cables.service` sera migré en Phase 3E
 
 #### Definition of Done — Phase 3B
 
@@ -453,16 +453,108 @@ src/app/features/studies/
 - [x] `npm run build` — 0 erreurs
 - [x] `npm run test` — 88 suites, 1702 tests pass
 - [x] `npm run lint-check` — 0 erreurs (309 warnings)
-- [x] Aucun grep vers anciens chemins (sauf `ExportDialogComponent` attendu, migré en Phase 3C)
+- [x] Aucun grep vers anciens chemins
 - [x] **(Humain)** Navigation Studies → Create → Import → Table fonctionne
 
-### Phase 3C — DDD : Feature `study`
+### Phase 3C — DDD : Feature `study` ✅ TERMINÉE
 *Dépend de Phase 3B.*
 
-19. **Feature `study`** (composants study-header, export-dialog, sectionsTab, initialConditionModal, newSectionModal, manualSection, supportsTable, attachmentSetModal) :
-    - Créer domain/application/infrastructure/presentation
-    - Séparer services sections, initial-conditions, charges en use-cases
-20. **Vérification** : `npm run test` + `npm run build` après chaque déplacement
+19. ~~**Feature `study`** (composants study-header, export-dialog, sectionsTab, initialConditionModal, newSectionModal, manualSection, supportsTable, attachmentSetModal) :~~
+    - ~~Créer domain/application/infrastructure/presentation~~
+    - ~~Séparer services sections, initial-conditions, charges en use-cases~~
+20. ~~**Vérification** : `npm run test` + `npm run build` après chaque déplacement~~
+
+#### Scope Phase 3C
+
+- **48 fichiers déplacés** : 41 fichiers composant/route depuis `ui/pages/study/` + 7 fichiers service depuis `core/services/{sections,initial-conditions,charges}/`
+- **4 re-export bridges** créés pour 17+ consommateurs externes dans `studio/`
+- **6 specs corrigées** : suppression de `HttpClientTestingModule` (5), `provideHttpClientTesting` (1), `NO_ERRORS_SCHEMA`/`CUSTOM_ELEMENTS_SCHEMA` (1) — remplacés par `provideHttpClient()` + `provideHttpClientTesting()` (pattern moderne)
+- **2 cross-feature refs mises à jour** : `ExportDialogComponent` (studies), `InitialConditionModalComponent` (studio)
+- **1 route lazy load** mise à jour dans `app.routes.ts`
+- Ancien dossier `ui/pages/study/` supprimé
+
+#### Architecture résultante
+
+```
+src/app/features/study/
+├── domain/
+│   └── helpers/
+│       └── sections.helpers.ts              ← createEmptySupport, createEmptySection
+├── infrastructure/
+│   └── services/
+│       ├── section.service.ts + spec
+│       ├── initial-condition.service.ts + spec
+│       └── charges.service.ts + spec
+└── presentation/
+    ├── pages/
+    │   └── study/
+    │       ├── study.component.ts + html + scss + spec
+    ├── components/
+    │   ├── study-header/
+    │   │   ├── study-header.component.ts + html + scss + spec
+    │   │   └── export-dialog/
+    │   │       ├── export-dialog.component.ts + html + scss
+    │   └── sections-tab/
+    │       ├── sectionsTab.component.ts + html + scss + spec
+    │       ├── initialConditionModal/   (4 files)
+    │       └── newSectionModal/         (6 files)
+    │           └── manualSection/       (5 files)
+    │               └── supportsTable/   (6 files)
+    │                   └── attachmentSetModal/ (4 files)
+    └── study.routes.ts
+```
+
+#### Fichiers créés
+
+| Fichier | Rôle |
+|---------|------|
+| `features/study/domain/helpers/sections.helpers.ts` | Factories `createEmptySupport()`, `createEmptySection()` (+ `createFirstAndLastSupport` privée) |
+| `features/study/presentation/study.routes.ts` | Route lazy study → StudyComponent + studio |
+
+#### Fichiers modifiés (hors déplacements)
+
+| Fichier | Modification |
+|---------|-------------|
+| `core/services/sections/helpers.ts` | Remplacé par re-export bridge → `@features/study/domain/helpers/sections.helpers` |
+| `core/services/sections/section.service.ts` | Remplacé par re-export bridge → `@features/study/infrastructure/services/section.service` |
+| `core/services/initial-conditions/initial-condition.service.ts` | Remplacé par re-export bridge → `@features/study/infrastructure/services/initial-condition.service` (avec `export type` pour interfaces) |
+| `core/services/charges/charges.service.ts` | Remplacé par re-export bridge → `@features/study/infrastructure/services/charges.service` |
+| `ui/app.routes.ts` | Route `study/:uuid` → `loadChildren` + `@features/study/presentation/study.routes` |
+| `features/studies/.../studies.component.ts` | Import `ExportDialogComponent` → `@features/study/` |
+| `ui/pages/studio/.../parameter-calculation-15-without-wind.component.ts` | Import `InitialConditionModalComponent` → `@features/study/` |
+
+#### Décisions architecturales appliquées
+
+- **Services `SectionService`, `InitialConditionService`, `ChargesService` dans `study` bounded context** — gèrent sections/IC/charges au sein des études, studio les consomme en lecture seule via bridges
+- **Domain helpers (`createEmptySection`, `createEmptySupport`) dans `features/study/domain/helpers/`** — fonctions factory pour les objets domaine du contexte study
+- **Noms de fichiers préservés** (ex. `sectionsTab.component.ts` non renommé) — renommage hors scope
+- **Dossier `tabs/sections/` aplati en `sections-tab/`** — le niveau `tabs/` était du bruit organisationnel
+- **Services catalogue (`@services/cables/`, `@services/chains/`, `@services/lines/`, `@services/attachment/`, `@services/maintenance/`) NON déplacés** — appartiennent au futur feature `catalog` (Phase 3E)
+- **Dépendances cross-feature vers studio (`PlotService`, `ToolbarDialogService/Component`)** — conservées en `@ui/pages/studio/`, seront résolues lors de la migration studio (Phase 3D)
+- **`isolatedModules` et re-export de types** — les interfaces (`InitialConditionFunctionsInput`, `DuplicateInitialConditionFunctionsInput`) nécessitent `export type` dans le bridge
+
+#### Definition of Done — Phase 3C
+
+- [x] `src/app/features/study/` existe avec `domain/`, `infrastructure/` et `presentation/`
+- [x] `sections.helpers.ts` dans `domain/helpers/` — `createEmptySupport`, `createEmptySection` extraites
+- [x] 3 services + 3 specs dans `features/study/infrastructure/services/`
+- [x] 4 re-export bridges dans `core/services/` (sections/helpers, sections/section.service, initial-conditions, charges)
+- [x] 41 fichiers composant/route déplacés dans `features/study/presentation/`
+- [x] `study.routes.ts` créé avec imports mis à jour (`./pages/study/`, `@ui/pages/studio/`)
+- [x] `app.routes.ts` utilise `loadChildren` + `@features/study/presentation/study.routes`
+- [x] `studies.component.ts` import de `ExportDialogComponent` mis à jour vers `@features/study/`
+- [x] `parameter-calculation-15-without-wind.component.ts` import de `InitialConditionModalComponent` mis à jour vers `@features/study/`
+- [x] `HttpClientTestingModule` supprimé de 5 specs (study, sectionsTab, newSectionModal, manualSection, supportsTable)
+- [x] `provideHttpClientTesting()` supprimé de initialConditionModal spec (inutile car services mockés)
+- [x] `NO_ERRORS_SCHEMA` / `CUSTOM_ELEMENTS_SCHEMA` supprimés de sectionsTab spec
+- [x] 4 specs migrées vers `provideHttpClient()` + `provideHttpClientTesting()` (pattern moderne)
+- [x] Ancien dossier `ui/pages/study/` supprimé
+- [x] `grep -r "@ui/pages/study" src/ --include="*.ts"` — 0 résultats
+- [x] `grep -r "ui/pages/study" src/ --include="*.ts"` — 0 résultats
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1702 tests pass
+- [x] `npm run lint-check` — 0 erreurs (309 warnings)
+- [ ] **(Humain)** Navigation : Studies → Create study → Open study → Study header → Sections tab → Create section → Add supports → Add IC → Generate state → Studio
 
 ### Phase 3D — DDD : Feature `studio` (sous-features)
 *Dépend de Phase 3C. Feature la plus complexe — découpée en sous-features.*

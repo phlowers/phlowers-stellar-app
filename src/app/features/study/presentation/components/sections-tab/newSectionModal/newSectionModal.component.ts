@@ -15,7 +15,7 @@ import { Section, Study } from '@core/domain';
 import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
 import { isNil } from 'lodash';
-import { SectionService } from '@services/sections/section.service';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
 import { hasSupportsBoundsErrors } from './newSectionModal.constants';
 
 /**

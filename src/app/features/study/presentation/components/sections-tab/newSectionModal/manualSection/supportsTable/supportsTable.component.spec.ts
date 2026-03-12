@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { Support, CatalogChain } from '@core/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ChainsService } from '@services/chains/chains.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AttachmentService } from '@services/attachment/attachment.service';
 
 // Mock child component
@@ -123,13 +122,7 @@ describe('SupportsTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        FormsModule,
-        SupportsTableComponent,
-        MockAttachmentSetModalComponent,
-        NoopAnimationsModule,
-        HttpClientTestingModule
-      ],
+      imports: [FormsModule, SupportsTableComponent, MockAttachmentSetModalComponent, NoopAnimationsModule],
       providers: [
         { provide: ChainsService, useValue: mockChainsService },
         { provide: AttachmentService, useValue: mockAttachmentService }

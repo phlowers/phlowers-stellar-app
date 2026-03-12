@@ -12,7 +12,7 @@ import {
   ManualParameterCalculation15CWithoutWind
 } from '@ui/pages/studio/toolbar-dialog/field-measuring/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { InitialConditionModalComponent } from '@ui/pages/study/tabs/sections/initialConditionModal/initialConditionModal.component';
+import { InitialConditionModalComponent } from '@features/study/presentation/components/sections-tab/initialConditionModal/initialConditionModal.component';
 import { InitialCondition } from '@core/domain';
 import { StudiesService } from '@services/studies/studies.service';
 import {

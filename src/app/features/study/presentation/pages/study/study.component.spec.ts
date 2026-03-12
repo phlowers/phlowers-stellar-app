@@ -3,14 +3,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject, Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { StudyComponent } from './study.component';
 import { StudiesService } from '@services/studies/studies.service';
-import { SectionService } from '@services/sections/section.service';
-import { InitialConditionService } from '@services/initial-conditions/initial-condition.service';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { InitialConditionService } from '@features/study/infrastructure/services/initial-condition.service';
 import { CablesService } from '@services/cables/cables.service';
 import { Section, InitialCondition, Study } from '@core/domain';
-import { provideHttpClientTesting, HttpClientTestingModule } from '@angular/common/http/testing';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -176,7 +177,7 @@ describe('StudyComponent', () => {
     } as unknown as jest.Mocked<CablesService>;
 
     await TestBed.configureTestingModule({
-      imports: [StudyComponent, HttpClientTestingModule],
+      imports: [StudyComponent],
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: StudiesService, useValue: mockStudiesService },
@@ -189,6 +190,7 @@ describe('StudyComponent', () => {
         { provide: Router, useValue: mockRouter },
         { provide: MessageService, useValue: mockMessageService },
         provideNoopAnimations(),
+        provideHttpClient(),
         provideHttpClientTesting()
       ]
     }).compileComponents();

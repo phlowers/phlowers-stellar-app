@@ -5,10 +5,10 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { InitialCondition, Section } from '@core/domain';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { LinesService } from '@services/lines/lines.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
-import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MessageService } from 'primeng/api';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -127,14 +127,15 @@ describe('SectionsTabComponent', () => {
       add: jest.fn()
     } as unknown as MessageService;
     await TestBed.configureTestingModule({
-      imports: [SectionsTabComponent, NoopAnimationsModule, HttpClientTestingModule],
+      imports: [SectionsTabComponent, NoopAnimationsModule],
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },
         { provide: MessageService, useValue: mockMessageService },
-        { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } }
-      ],
-      schemas: [NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA]
+        { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SectionsTabComponent);

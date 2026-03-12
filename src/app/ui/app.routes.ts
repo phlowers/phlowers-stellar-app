@@ -32,7 +32,7 @@ export const appRoutes: Routes = [
       {
         path: 'study/:uuid',
         title: $localize`Study`,
-        loadChildren: () => import('./pages/study/study.routes').then((m) => m.studyRoutes)
+        loadChildren: () => import('@features/study/presentation/study.routes').then((m) => m.studyRoutes)
       },
       {
         path: 'news',

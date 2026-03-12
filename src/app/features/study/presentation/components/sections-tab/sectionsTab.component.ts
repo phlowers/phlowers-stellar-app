@@ -14,14 +14,14 @@ import { DividerModule } from 'primeng/divider';
 import {
   DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput
-} from '@services/initial-conditions/initial-condition.service';
+} from '@features/study/infrastructure/services/initial-condition.service';
 import { CreateEditView } from '@ui/shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
-import { createEmptySection } from '@services/sections/helpers';
+import { createEmptySection } from '@features/study/domain/helpers/sections.helpers';
 import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
-import { ChargesService } from '@services/charges/charges.service';
+import { ChargesService } from '@features/study/infrastructure/services/charges.service';
 import { ToolbarDialogService } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.service';
 import { ToolbarDialogComponent } from '@ui/pages/studio/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@ui/pages/studio/services/plot.service';

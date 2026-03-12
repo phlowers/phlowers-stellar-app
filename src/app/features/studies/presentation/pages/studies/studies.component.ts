@@ -22,7 +22,7 @@ import { CommonModule } from '@angular/common';
 import { StudiesTableComponent } from '@features/studies/presentation/components/studies-table/studies-table.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from '@features/studies/presentation/components/import-study/import-study.component';
-import { ExportDialogComponent } from '@ui/pages/study/study-header/export-dialog/export-dialog.component';
+import { ExportDialogComponent } from '@features/study/presentation/components/study-header/export-dialog/export-dialog.component';
 
 /**
  * Main studies listing page.

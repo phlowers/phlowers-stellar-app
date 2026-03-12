@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InitialConditionModalComponent } from './initialConditionModal.component';
 import { Section, InitialCondition } from '@core/domain';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CablesService } from '@services/cables/cables.service';
 import { StorageService } from '@services/storage/storage.service';
 import { StudiesService } from '@services/studies/studies.service';
@@ -91,7 +90,6 @@ describe('InitialConditionModalComponent', () => {
     await TestBed.configureTestingModule({
       imports: [InitialConditionModalComponent],
       providers: [
-        provideHttpClientTesting(),
         { provide: StorageService, useValue: mockStorageService },
         { provide: CablesService, useValue: mockCablesService },
         { provide: StudiesService, useValue: mockStudiesService }

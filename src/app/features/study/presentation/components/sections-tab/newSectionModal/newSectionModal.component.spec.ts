@@ -5,10 +5,11 @@ import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
 import { LinesService } from '@services/lines/lines.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ChainsService } from '@services/chains/chains.service';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AttachmentService } from '@services/attachment/attachment.service';
-import { SectionService } from '@services/sections/section.service';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -103,14 +104,16 @@ describe('NewSectionModalComponent (Jest)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NewSectionModalComponent, HttpClientTestingModule],
+      imports: [NewSectionModalComponent],
       providers: [
         provideNoopAnimations(),
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },
         { provide: ChainsService, useClass: MockChainsService },
         { provide: AttachmentService, useClass: MockAttachmentService },
-        { provide: SectionService, useClass: MockSectionService }
+        { provide: SectionService, useClass: MockSectionService },
+        provideHttpClient(),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

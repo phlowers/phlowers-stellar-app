@@ -5,8 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Routes } from '@angular/router';
-import { StudyComponent } from './study.component';
-import { StudioPageComponent } from '../studio/studio-page.component';
+import { StudyComponent } from './pages/study/study.component';
+import { StudioPageComponent } from '@ui/pages/studio/studio-page.component';
 
 /** Child routes for the study/:uuid context. */
 export const studyRoutes: Routes = [
