@@ -21,7 +21,7 @@ Refactoring majeur d'un projet Angular 19 PWA (~55 composants, ~230 fichiers) ve
 |---------|-------|--------|
 | `ChangeDetectionStrategy.OnPush` | 🔴 1/~55 | Seul `scale-view.component.ts` l'a |
 | `data-testid` coverage | 🔴 4/61 templates | 93% sans data-testid |
-| Lazy loading routes | 🔴 0% | 100% eager, toutes dans 1 seul fichier routes |
+| Lazy loading routes | � 100% | 7 routes lazy via `loadComponent`/`loadChildren`, 30 chunks |
 | Architecture DDD | 🔴 Inexistante | Pas de features/, pas d'use-cases, pas de repository interfaces |
 | Constructor injection | 🟡 22 fichiers | ~30% encore en constructor DI |
 | BEM SCSS | 🟡 Mixte | Majorité OK, quelques fichiers non-BEM (topbar, etc.) |
@@ -51,18 +51,18 @@ src/app/
 └── app.routes.ts   # Lazy loading vers feature routes
 ```
 
-### Routes actuelles (100% eager)
-- `/` → HomeComponent
-- `/studies` → StudiesComponent  
-- `/admin` → AdminComponent
-- `/study/:uuid` → StudyComponent
-- `/study/:uuid/studio` → StudioPageComponent
-- `/news` → NewsComponent
-- `/changelog` → ChangelogComponent
-- `/studio` → StudioPageComponent
-- `/**` → NotFoundComponent
+### Routes actuelles (100% lazy loaded)
+- `/` → HomeComponent (lazy `loadComponent`)
+- `/studies` → StudiesComponent (lazy `loadComponent`)
+- `/admin` → AdminComponent (lazy `loadComponent`)
+- `/study/:uuid` → StudyComponent (lazy `loadChildren` → `study.routes.ts`)
+- `/study/:uuid/studio` → StudioPageComponent (lazy via `study.routes.ts`)
+- `/news` → NewsComponent (lazy `loadComponent`)
+- `/changelog` → ChangelogComponent (lazy `loadComponent`)
+- `/studio` → StudioPageComponent (lazy `loadComponent`)
+- `/**` → NotFoundComponent (eager — wildcard)
 
-Toutes importées directement dans un seul fichier `app.routes.ts`.
+Shell `LoggedLayoutComponent` eagerly loaded (layout obligatoire).
 
 ### Compatibilité Angular 21
 - `signal()`, `input()`, `output()`, `computed()`, `effect()` → stables et renforcés en ng21
@@ -195,18 +195,46 @@ Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode
 - [x] `grep -rn "constructor(" src/ --include="*.component.ts" --include="*.service.ts"` — aucun avec paramètres DI
 - [x] **(Humain)** Vérification IHM complète (voir étape 9)
 
-### Phase 2 — Lazy Loading des routes
+### Phase 2 — Lazy Loading des routes ✅ TERMINÉE
 *Dépend de Phase 0 (aliases)*
 
-9. **Créer un fichier routes par feature** :
-   - `features/home/home.routes.ts`
-   - `features/studies/studies.routes.ts`
-   - `features/study/study.routes.ts` (inclut studio comme child)
-   - `features/admin/admin.routes.ts`
-   - `features/news/news.routes.ts`
-   - `features/changelog/changelog.routes.ts`
-10. **Refactorer `app.routes.ts`** pour utiliser `loadChildren` / `loadComponent` avec imports dynamiques
-11. **Vérification** : navigation manuelle sur toutes les routes, e2e existant (update-flow), `npm run build` analyze bundle size
+#### État actuel
+
+| Étape | Statut | Détail |
+|-------|--------|--------|
+| Créer `study.routes.ts` | ✅ Fait | `src/app/ui/pages/study/study.routes.ts` — child routes `study/:uuid` |
+| Refactorer `app.routes.ts` | ✅ Fait | 7 imports statiques supprimés, `loadComponent`/`loadChildren` partout |
+| Vérification build | ✅ Fait | 0 erreurs, 30 lazy chunks générés dans `dist/fr/` |
+| Vérification tests | ✅ Fait | 88 suites, 1696 tests pass |
+| Vérification lint | ✅ Fait | 0 erreurs, 309 warnings (inchangé) |
+
+#### Ce qui a été fait
+
+9. ~~**Créer un fichier routes pour `study/:uuid`**~~ ✅ — `src/app/ui/pages/study/study.routes.ts` avec :
+   - `''` → `StudyComponent` (pathMatch: full)
+   - `'studio'` → `StudioPageComponent`
+   - En-tête licence RTE inclus
+10. ~~**Refactorer `app.routes.ts`**~~ ✅ — conversion complète :
+    - **Eagerly loaded** (conservés) : `LoggedLayoutComponent` (shell layout), `NotFoundComponent` (wildcard `**`)
+    - **Lazy loaded** via `loadComponent` : Home, Studies, Admin, News, Changelog, Studio (top-level)
+    - **Lazy loaded** via `loadChildren` : `study/:uuid` → `study.routes.ts`
+    - Commentaire mort (`// path: 'study'`) supprimé
+11. ~~**Vérification**~~ ✅ :
+    - `npm run build` — 0 erreurs, 30 chunks lazy dans `dist/fr/`
+    - `npm run test` — 88 suites, 1696 tests pass
+    - `npm run lint-check` — 0 erreurs (309 warnings)
+
+> **Note** : Les fichiers routes par feature (`features/home/home.routes.ts`, etc.) prévus initialement n'ont pas été créés — la Phase 3 (DDD) déplacera les routes dans les features. Pour l'instant, `app.routes.ts` utilise `loadComponent` avec des imports dynamiques vers les chemins actuels (`./pages/...`).
+
+#### Definition of Done — Phase 2
+
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1696 tests pass
+- [x] `npm run lint-check` — 0 erreurs (309 warnings)
+- [x] 30 chunks lazy générés dans `dist/fr/` (> 7 minimum attendus)
+- [x] `app.routes.ts` ne contient plus d'imports statiques de pages (seulement `LoggedLayoutComponent` et `NotFoundComponent`)
+- [x] `study.routes.ts` existe et exporte `studyRoutes: Routes`
+- [ ] **(Humain)** Navigation complète sur toutes les routes (Home → Studies → Study → Studio → News → Changelog → Admin → 404)
 
 ### Phase 3 — Restructuration DDD (feature par feature)
 *Dépend de Phase 2. Traiter un feature à la fois pour limiter le risque.*
@@ -446,7 +474,8 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 ## Fichiers clés à modifier
 
 ### Routing & config
-- `src/app/ui/app.routes.ts` — refonte complète lazy loading
+- ~~`src/app/ui/app.routes.ts` — refonte complète lazy loading~~ ✅
+- `src/app/ui/pages/study/study.routes.ts` — ✅ créé (child routes study/:uuid)
 - `tsconfig.json` / `tsconfig.app.json` — ajout aliases @features, @shared, @infrastructure
 
 ### Services à déplacer (core → features)

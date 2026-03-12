@@ -5,15 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Routes } from '@angular/router';
-import { StudiesComponent } from './pages/studies/studies.component';
-import { AdminComponent } from './pages/admin/admin';
-import { StudyComponent } from './pages/study/study.component';
 import { LoggedLayoutComponent } from './shared/components/layout/logged-layout/logged-layout.component';
-import { HomeComponent } from './pages/home/home.component';
-import { NewsComponent } from './pages/news/news.component';
 import { NotFoundComponent } from './pages/404/404.component';
-import { ChangelogComponent } from './pages/changelog/changelog.component';
-import { StudioPageComponent } from './pages/studio/studio-page.component';
 
 /** Application route definitions mapping URL paths to page components. */
 export const appRoutes: Routes = [
@@ -21,47 +14,40 @@ export const appRoutes: Routes = [
     path: '',
     component: LoggedLayoutComponent,
     children: [
-      { path: '', title: $localize`Home`, component: HomeComponent },
+      {
+        path: '',
+        title: $localize`Home`,
+        loadComponent: () => import('./pages/home/home.component').then((m) => m.HomeComponent)
+      },
       {
         path: 'studies',
         title: $localize`Studies`,
-        component: StudiesComponent
+        loadComponent: () => import('./pages/studies/studies.component').then((m) => m.StudiesComponent)
       },
-      { path: 'admin', title: $localize`Admin`, component: AdminComponent },
-      // {
-      //   path: 'study',
-      //   component: NotFoundComponent
-      // },
+      {
+        path: 'admin',
+        title: $localize`Admin`,
+        loadComponent: () => import('./pages/admin/admin').then((m) => m.AdminComponent)
+      },
       {
         path: 'study/:uuid',
         title: $localize`Study`,
-        children: [
-          {
-            path: '',
-            pathMatch: 'full',
-            component: StudyComponent
-          },
-          {
-            path: 'studio',
-            title: $localize`Studio`,
-            component: StudioPageComponent
-          }
-        ]
+        loadChildren: () => import('./pages/study/study.routes').then((m) => m.studyRoutes)
       },
       {
         path: 'news',
         title: $localize`News`,
-        component: NewsComponent
+        loadComponent: () => import('./pages/news/news.component').then((m) => m.NewsComponent)
       },
       {
         path: 'changelog',
         title: $localize`Changelog`,
-        component: ChangelogComponent
+        loadComponent: () => import('./pages/changelog/changelog.component').then((m) => m.ChangelogComponent)
       },
       {
         path: 'studio',
         title: $localize`Studio`,
-        component: StudioPageComponent
+        loadComponent: () => import('./pages/studio/studio-page.component').then((m) => m.StudioPageComponent)
       }
     ]
   },
