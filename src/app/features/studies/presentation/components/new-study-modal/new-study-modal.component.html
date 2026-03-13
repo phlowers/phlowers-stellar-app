@@ -71,11 +71,25 @@
   </ng-template>
 
   <ng-template #footer>
-    <button app-btn type="submit" btnSize="m" btnStyle="text" (click)="isOpenChange.emit(false)" data-testid="cancel-btn">
+    <button
+      app-btn
+      type="submit"
+      btnSize="m"
+      btnStyle="text"
+      (click)="isOpenChange.emit(false)"
+      data-testid="cancel-btn"
+    >
       <app-icon icon="close" />
       <span i18n>Cancel</span>
     </button>
-    <button app-btn type="button" btnSize="m" (click)="onSubmit()" [disabled]="titleLength() === 0" data-testid="validate-btn">
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      (click)="onSubmit()"
+      [disabled]="titleLength() === 0"
+      data-testid="validate-btn"
+    >
       <app-icon icon="check" />
       <span i18n>Validate</span>
     </button>

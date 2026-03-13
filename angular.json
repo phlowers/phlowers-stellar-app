@@ -64,11 +64,11 @@
               }
             ],
             "styles": [
-              "src/app/ui/styles/styles.scss"
+              "src/styles/styles.scss"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
-                "src/app/ui/styles/abstracts"
+                "src/styles/abstracts"
               ]
             },
             "scripts": [

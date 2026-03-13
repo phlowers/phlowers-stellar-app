@@ -6,7 +6,7 @@ This document describes the `ScaleViewComponent` located in the Studio top-toolb
 
 ## Component location
 
-`src/app/ui/pages/studio/top-toolbar/scale-view/scale-view.component.ts`
+`src/app/features/studio/core/presentation/components/top-toolbar/scale-view/scale-view.component.ts`
 
 ## Purpose
 
@@ -93,7 +93,7 @@ When controls are out of sync or the plot does not update after changes, follow 
 
 ## Where to look in code
 
-- Component: `src/app/ui/pages/studio/top-toolbar/scale-view/scale-view.component.ts`
+- Component: `src/app/features/studio/core/presentation/components/top-toolbar/scale-view/scale-view.component.ts`
 - Plot service: search for `class PlotService` under `src/app` to find its implementation and tests/mocks.
 
 ## Notes for reviewers

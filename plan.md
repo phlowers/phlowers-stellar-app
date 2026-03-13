@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (311 warnings), 30 lazy chunks. **Phases 0-3F et 4 terminées.**
+**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (311 warnings), 30 lazy chunks. **Phases 0-3F, 4 et 7 terminées.**
 
 ---
 
@@ -1093,14 +1093,65 @@ src/app/
 38. **Vérification** : `npm run test` + `npm run build` + `npm run lint-check` — zéro régression
 39. **Mettre à jour `deadcode.md`** — marquer les entrées comme supprimées avec date
 
+### Phase 7 — Démantèlement du répertoire `src/app/ui/` ✅ TERMINÉE
+*Dépendait de Phase 3 (toutes les pages et composants migrés vers `features/` et `shared/`).*
+
+> Le répertoire `src/app/ui/` n'existait pas dans l'architecture cible DDD. Toutes les pages et composants avaient déjà été migrés. Il ne restait que le **shell applicatif** (`app.component`, `app.config`, `app.routes`) et les **styles globaux** (~45 fichiers SCSS + 2 helpers TS).
+
+#### Étape A — Remonter le shell applicatif à `src/app/` ✅
+
+40. ~~**Déplacer les fichiers app.\***~~ ✅ :
+    - `src/app/ui/app.component.ts/html/scss/spec.ts` → `src/app/app.component.ts/html/scss/spec.ts`
+    - `src/app/ui/app.config.ts` → `src/app/app.config.ts`
+    - `src/app/ui/app.routes.ts` → `src/app/app.routes.ts`
+41. ~~**Mettre à jour `src/main.ts`**~~ ✅ — `./app/ui/app.component` → `./app/app.component`, `./app/ui/app.config` → `./app/app.config`
+42. ~~**Mettre à jour `app.config.ts`**~~ ✅ — import `primeng-preset` → `../styles/primeng-preset`
+
+#### Étape B — Déplacer les styles globaux vers `src/styles/` ✅
+
+43. ~~**Déplacer tout `src/app/ui/styles/`**~~ → `src/styles/` ✅
+44. ~~**Mettre à jour `angular.json`**~~ ✅ :
+    - `"styles"` : `"src/styles/styles.scss"`
+    - `"stylePreprocessorOptions.includePaths"` : `["src/styles/abstracts"]`
+45. ~~**Corriger chemin relatif SCSS**~~ ✅ — `_home-info-cards.scss` : url image `public/img/` ajustée pour le nouveau répertoire
+
+#### Étape C — Supprimer l'alias `@ui/*` ✅
+
+46. ~~**Supprimer `"@ui/*"`**~~ ✅ dans `tsconfig.json`, `tsconfig.app.json`, `jest.config.ts`, `docs-sphinx/tsconfig.typedoc.json`
+47. ~~**Vérification**~~ ✅ — `grep -r "@ui/" src/ --include="*.ts"` → 0 résultat
+
+#### Étape D — Nettoyage final ✅
+
+48. ~~**Supprimer `src/app/ui/typedoc.json`**~~ ✅ — orphelin après migration
+49. ~~**Supprimer le répertoire `src/app/ui/`**~~ ✅ — vide, supprimé
+50. ~~**Mettre à jour la documentation**~~ ✅ :
+    - `CLAUDE.md` + `.github/copilot-instructions.md` : `@ui/` retiré des exemples d'alias → remplacé par `@features/`
+    - `docs-sphinx/developer_install.md` : ligne `@ui/*` supprimée, ajouté `@features/*`, `@shared/*`, `@infrastructure/*`, exemple import corrigé
+    - `deadcode.md` : 5 chemins `src/app/ui/` → nouveaux emplacements `features/` et `shared/`
+    - `docs-sphinx/scale_view.md` : 2 chemins composant mis à jour
+    - `docs-sphinx/angular_signals_pitfalls.md` : chemin composant mis à jour
+51. ~~**Vérification finale**~~ ✅ :
+    - `npm run build` — ✅ build sans erreur
+    - `grep -r "@ui/" src/ --include="*.ts"` — 0 résultat ✅
+    - `grep -r "app/ui/" src/ --include="*.ts"` — 0 résultat ✅
+    - `ls src/app/ui/` — répertoire n'existe plus ✅
+    - Tests et lint : **à confirmer** (`npm run test` + `npm run lint-check`)
+
+#### Décisions Phase 7
+
+- **Styles globaux → `src/styles/`** (pas `src/app/shared/styles/`) : assets globaux SCSS, pas des composants Angular
+- `primeng-preset.ts` et `theme-helper.ts` restent avec les styles (consommés uniquement par `app.config`)
+- **Pas de nouvel alias `@styles/*`** : seul `app.config.ts` importe `primeng-preset`, import relatif suffisant
+- L'alias `@ui/*` supprimé — 0 consommateur dans le code source
+
 ---
 
 ## Fichiers clés à modifier
 
 ### Routing & config
-- ~~`src/app/ui/app.routes.ts` — refonte complète lazy loading~~ ✅
-- `src/app/ui/pages/study/study.routes.ts` — ✅ créé (child routes study/:uuid)
-- `tsconfig.json` / `tsconfig.app.json` — ajout aliases @features, @shared, @infrastructure
+- ~~`src/app/ui/app.routes.ts` — refonte complète lazy loading~~ ✅ → désormais `src/app/app.routes.ts` (Phase 7)
+- ~~`src/app/ui/pages/study/study.routes.ts`~~ — ✅ créé (child routes study/:uuid) → désormais `src/app/features/study/presentation/study.routes.ts`
+- ~~`tsconfig.json` / `tsconfig.app.json` — ajout aliases @features, @shared, @infrastructure~~ ✅ + suppression alias @ui/* (Phase 7)
 
 ### Services à déplacer (core → features)
 - ~~`core/services/studies/studies.service.ts` → `features/studies/infrastructure/`~~ ✅ (Phase 3B — re-export bridge en place)
@@ -1164,3 +1215,4 @@ src/app/
 - **Code mort** : inventorié dans `deadcode.md`, Phase 6 dédiée avec validation humaine avant toute suppression
 - **`[(ngModel)]` + signal** : split binding `[ngModel]="sig()" (ngModelChange)="sig.set($event)"` (Angular 19 ne supporte pas `[(ngModel)]` sur signal nativement)
 - **StudyComponent.study** : pattern immutable avec spread (pas de mutation locale d'objet/array)
+- **Démantèlement `ui/`** : shell applicatif → `src/app/`, styles globaux → `src/styles/`, alias `@ui/*` supprimé (Phase 7)

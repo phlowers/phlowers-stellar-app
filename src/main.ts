@@ -5,8 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/ui/app.component';
-import { appConfig } from './app/ui/app.config';
+import { AppComponent } from './app/app.component';
+import { appConfig } from './app/app.config';
 import { isDevMode } from '@angular/core';
 (window as any).global = window;
 

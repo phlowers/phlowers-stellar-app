@@ -14,7 +14,6 @@
       "@app/*": ["./src/app/*"],
       "@core/*": ["./src/app/core/*"],
       "@services/*": ["./src/app/core/services/*"],
-      "@ui/*": ["./src/app/ui/*"],
       "@features/*": ["./src/app/features/*"],
       "@shared/*": ["./src/app/shared/*"],
       "@infrastructure/*": ["./src/app/infrastructure/*"]

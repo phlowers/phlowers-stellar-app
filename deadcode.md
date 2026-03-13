@@ -13,7 +13,7 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/ui/shared/components/layout/logged-layout/logged-layout.component.ts` lignes 25, 28-32 |
+| 📍 Source | `src/app/shared/components/layout/logged-layout/logged-layout.component.ts` lignes 25, 28-32 |
 | Code | `currentRoute = window.location.pathname;` + `ngOnInit()` avec `router.events.subscribe()` qui met à jour `this.currentRoute = event.url` |
 | 🔍 Preuve | `currentRoute` n'est référencé nulle part dans le template (`logged-layout.component.html`). Aucune autre référence dans le codebase hors de ce fichier. |
 | ⚠️ Confiance | **HIGH** |
@@ -26,7 +26,7 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/ui/pages/studio/studio-page.component.ts` lignes 106-116 |
+| 📍 Source | `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` lignes 106-116 |
 | Code | `spanData = [{ label: 'Span 1-2', ... }, ...]` et `supportData = [{ label: 'Support 1', ... }, ...]` |
 | 🔍 Preuve | Aucune référence dans `studio-page.component.html`. Données mock jamais consommées. |
 | ⚠️ Confiance | **HIGH** |
@@ -39,7 +39,7 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/ui/pages/studio/studio-page.component.ts` ligne 75 |
+| 📍 Source | `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` ligne 75 |
 | Code | `subscription: Subscription | null = null;` — utilisée dans `ngOnInit()` et `ngOnDestroy()` pour gérer le cycle de vie d'un abonnement Dexie |
 | 🔍 Preuve | N'est PAS du code mort — c'est du code interne de gestion de cycle de vie. Non référencé dans le template mais nécessaire. |
 | ⚠️ Confiance | **NOT DEAD** — à ne pas supprimer |
@@ -83,7 +83,7 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/ui/pages/studio/toolbar-dialog/field-measuring/field-measuring.component.ts` |
+| 📍 Source | `src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.ts` (stale copy — already migrated) |
 | 🔍 Preuve | Stale copy after migration to `features/studio/field-measuring/presentation/components/field-measuring/`. Missing `.html` and `.scss` template files. Not imported by any file. |
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Delete file — the real component lives in `features/` |
@@ -93,7 +93,7 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/ui/pages/studio/toolbar-dialog/field-measuring/components/init/init.component.ts` |
+| 📍 Source | `src/app/features/studio/field-measuring/presentation/components/init/init.component.ts` (stale copy — already migrated) |
 | 🔍 Preuve | Stale copy after migration to `features/studio/field-measuring/presentation/components/init/`. Missing `.html` and `.scss` template files. Not imported by any file. |
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Delete file — the real component lives in `features/` |

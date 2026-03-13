@@ -23,7 +23,7 @@ Development guide for the AI assistant on the **Stellar** project: an Angular 19
 
 ### TypeScript import aliases — Required
 
-**All TypeScript imports must use the configured path aliases (e.g. `@core/`, `@ui/`, `@services/`, etc.) instead of relative paths.**
+**All TypeScript imports must use the configured path aliases (e.g. `@core/`, `@features/`, `@services/`, etc.) instead of relative paths.**
 
 - Use aliases as defined in `tsconfig.json` and `tsconfig.app.json` for all internal imports.
 - Never use long relative paths like `../../../../core/services/foo.service` — always prefer `@core/services/foo.service`.

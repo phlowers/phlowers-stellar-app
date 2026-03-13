@@ -1,7 +1,4 @@
-<p-dialog
-  data-testid="ic-modal"
-  dismissableMask="true"
->
+<p-dialog data-testid="ic-modal" dismissableMask="true">
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
       @if (mode() === 'create') {
@@ -239,12 +236,26 @@
         <span i18n>Edit</span>
       </button>
     } @else {
-      <button app-btn type="submit" btnSize="m" btnStyle="outlined" (click)="isOpenChange.emit(false)" data-testid="cancel-btn">
+      <button
+        app-btn
+        type="submit"
+        btnSize="m"
+        btnStyle="outlined"
+        (click)="isOpenChange.emit(false)"
+        data-testid="cancel-btn"
+      >
         <app-icon icon="close" />
         <span i18n>Cancel</span>
       </button>
       @if (!isInsideToolsDialog()) {
-      <button app-btn type="button" [disabled]="!isFormValid()" btnSize="m" (click)="onSubmit(false)" data-testid="validate-btn">
+        <button
+          app-btn
+          type="button"
+          [disabled]="!isFormValid()"
+          btnSize="m"
+          (click)="onSubmit(false)"
+          data-testid="validate-btn"
+        >
           <app-icon icon="check" />
           <span i18n>Validate</span>
         </button>

@@ -38,7 +38,14 @@
           data-testid="charge-name-input"
         />
         @if (isNameDuplicate()) {
-          <p-message id="charge-name-error-message" severity="error" size="small" variant="simple" i18n data-testid="name-error">
+          <p-message
+            id="charge-name-error-message"
+            severity="error"
+            size="small"
+            variant="simple"
+            i18n
+            data-testid="name-error"
+          >
             The charge case name must be unique.
           </p-message>
         }
@@ -85,7 +92,14 @@
       <ng-container i18n>Close</ng-container>
     </button>
 
-    <button app-btn type="button" btnSize="m" (click)="onSubmit()" [disabled]="!isFormValid()" data-testid="validate-btn">
+    <button
+      app-btn
+      type="button"
+      btnSize="m"
+      (click)="onSubmit()"
+      [disabled]="!isFormValid()"
+      data-testid="validate-btn"
+    >
       <app-icon icon="check" />
       <ng-container i18n>Validate</ng-container>
     </button>

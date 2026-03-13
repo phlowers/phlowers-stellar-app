@@ -1,6 +1,6 @@
 app-home {
   .card-update {
-    background-image: url('../../../../../public/img/home-update-card-bgi.png');
+    background-image: url('../../../public/img/home-update-card-bgi.png');
     background-repeat: no-repeat;
     background-position: bottom left;
     transition: background-color 0.3s ease-in-out;
@@ -219,9 +219,7 @@ app-home {
 
 @keyframes unknown-foreground {
   to {
-    d: path(
-      'M204.6892579,92H.0000026v7.9999924h224.0000005v-7.9999924h-19.3107452Z'
-    );
+    d: path('M204.6892579,92H.0000026v7.9999924h224.0000005v-7.9999924h-19.3107452Z');
   }
 }
 @keyframes unknown-middleground {

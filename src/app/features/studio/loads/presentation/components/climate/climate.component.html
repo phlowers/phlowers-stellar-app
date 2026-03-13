@@ -1,5 +1,13 @@
 <form [formGroup]="form" class="climate" data-testid="climate-form">
-  <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" class="climate__reset" data-testid="reset-btn">
+  <button
+    app-btn
+    type="button"
+    btnStyle="outlined"
+    btnSize="s"
+    (click)="resetForm()"
+    class="climate__reset"
+    data-testid="reset-btn"
+  >
     <app-icon icon="refresh" />
     <ng-container i18n>Reset</ng-container>
   </button>
@@ -226,7 +234,14 @@
       <app-icon icon="delete" />
     </button>
 
-    <button app-btn type="submit" btnStyle="outlined" (click)="saveForm()" [disabled]="!isFormValid()" data-testid="save-btn">
+    <button
+      app-btn
+      type="submit"
+      btnStyle="outlined"
+      (click)="saveForm()"
+      [disabled]="!isFormValid()"
+      data-testid="save-btn"
+    >
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>
