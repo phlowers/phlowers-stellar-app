@@ -18,7 +18,7 @@
 | 🔍 Preuve | `currentRoute` n'est référencé nulle part dans le template (`logged-layout.component.html`). Aucune autre référence dans le codebase hors de ce fichier. |
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Supprimer la propriété, la méthode `ngOnInit`, l'interface `OnInit`, et les imports `NavigationEnd`, `filter` devenus inutiles |
-| ✅ Validé | ☐ |
+| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |
 
 ---
 
@@ -31,7 +31,7 @@
 | 🔍 Preuve | Aucune référence dans `studio-page.component.html`. Données mock jamais consommées. |
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Supprimer les 2 propriétés (11 lignes) |
-| ✅ Validé | ☐ |
+| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |
 
 ---
 
@@ -87,7 +87,7 @@
 | 🔍 Preuve | Stale copy after migration to `features/studio/field-measuring/presentation/components/field-measuring/`. Missing `.html` and `.scss` template files. Not imported by any file. |
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Delete file — the real component lives in `features/` |
-| Status | ⏳ PENDING REVIEW |
+| Status | 🗑️ SUPPRIMÉ (Phase 3D) — fichier n'existe plus |
 
 ### `InitComponent` — `ui/pages/studio/toolbar-dialog/field-measuring/components/init/init.component.ts`
 
@@ -97,4 +97,28 @@
 | 🔍 Preuve | Stale copy after migration to `features/studio/field-measuring/presentation/components/init/`. Missing `.html` and `.scss` template files. Not imported by any file. |
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Delete file — the real component lives in `features/` |
-| Status | ⏳ PENDING REVIEW |
+| Status | 🗑️ SUPPRIMÉ (Phase 3D) — fichier n'existe plus |
+
+---
+
+## 8. Re-export bridge `obstacles.service.ts` — `core/services/obstacles/`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/obstacles/obstacles.service.ts` |
+| Code | Re-export bridge vers `@features/studio/obstacles/infrastructure/services/obstacles.service` |
+| 🔍 Preuve | 0 consommateurs — tous les imports migrent directement vers `@features/studio/obstacles/` |
+| ⚠️ Confiance | **HIGH** |
+| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |
+
+---
+
+## 9. Re-export bridge `index.ts` — `core/infrastructure/`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/infrastructure/index.ts` |
+| Code | Re-export bridge vers `@infrastructure/` |
+| 🔍 Preuve | 0 consommateurs production — seul `plan.md` le mentionne |
+| ⚠️ Confiance | **HIGH** |
+| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |

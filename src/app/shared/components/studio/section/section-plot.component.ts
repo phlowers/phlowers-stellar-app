@@ -21,7 +21,7 @@ import {
   getObstacleClickPayload,
   ObstacleAnnotationData
 } from './helpers/obstacles';
-import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
+import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 

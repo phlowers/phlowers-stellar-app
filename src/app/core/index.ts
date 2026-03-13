@@ -7,4 +7,3 @@
 
 // Core module barrel exports
 export * from './domain';
-export * from './infrastructure';

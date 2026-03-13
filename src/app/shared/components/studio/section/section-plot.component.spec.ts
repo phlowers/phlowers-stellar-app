@@ -10,7 +10,7 @@ import { PlotOptions } from './helpers/types';
 import { PlotService, SelectedDisplayOptions } from '@features/studio/core/services/plot.service';
 import { SideTabsService } from '@features/studio/core/services/side-tabs.service';
 import { ObstacleFormService } from '@features/studio/obstacles/presentation/services/obstaclesForm.service';
-import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
+import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
 import { DataObject } from './helpers/createPlotDataObject';
 import { Section, Support, SpanLoad } from '@core/domain';
 import { ChargeData } from '@core/domain/models/charge.model';

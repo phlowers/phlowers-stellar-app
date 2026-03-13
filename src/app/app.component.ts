@@ -25,7 +25,7 @@ import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
 import { ChainsService } from '@services/chains/chains.service';
 import { AttachmentService } from '@services/attachment/attachment.service';
-import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
+import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
 

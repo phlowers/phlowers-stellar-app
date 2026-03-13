@@ -8,7 +8,7 @@ import { WorkerPythonService } from '@core/services/worker_python/worker-python.
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { SideTabsService } from '@features/studio/core/services/side-tabs.service';
 import { ObstacleFormService } from '@features/studio/obstacles/presentation/services/obstaclesForm.service';
-import { ObstaclesService } from '@core/services/obstacles/obstacles.service';
+import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
 import { ReferenceSupport } from '@src/app/core/domain/models/obstacle.model';
 import { createPlotData } from '../section/helpers/createPlotData';
 import Plotly from 'plotly.js-dist-min';

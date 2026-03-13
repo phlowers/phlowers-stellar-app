@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (311 warnings), 30 lazy chunks. **Phases 0-3F, 4 et 7 terminées.**
+**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (311 warnings), 30 lazy chunks. **Phases 0-3F, 4 et 7 terminées.** Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-13) — ~150 violations identifiées, plan de remédiation en 7 étapes (A-G). Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal() — reste 9 composants avec `subscribe()` manuel et 8 avec `@ViewChild`.
 
 ---
 
@@ -1080,18 +1080,36 @@ src/app/
 
 35. **Vérification** : `npm run e2e` — les 5 + l'existant (update-flow) passent
 
-### Phase 6 — Nettoyage du code mort
+### Phase 6 — Nettoyage du code mort ✅ TERMINÉE
 *Dépend de validation humaine. Peut être exécutée à tout moment après Phase 1.*
 
 > Tout code mort identifié au fil des phases est centralisé dans [`deadcode.md`](deadcode.md). La suppression est effectuée **uniquement après validation** du développeur sur chaque entrée.
 
-36. **Revoir `deadcode.md`** avec le développeur — valider ou invalider chaque entrée
-37. **Supprimer le code mort validé** :
-    - LoggedLayoutComponent : `currentRoute`, `ngOnInit()`, imports `NavigationEnd`, `filter`, `OnInit`
-    - StudioPageComponent : `spanData`, `supportData` (mock arrays)
-    - Tout autre code mort identifié au fil des phases (le fichier `deadcode.md` sera enrichi progressivement)
-38. **Vérification** : `npm run test` + `npm run build` + `npm run lint-check` — zéro régression
-39. **Mettre à jour `deadcode.md`** — marquer les entrées comme supprimées avec date
+36. ~~**Revoir `deadcode.md`**~~ ✅ — toutes les entrées validées ou marquées comme faux positif
+37. ~~**Supprimer le code mort validé**~~ ✅ :
+    - **LoggedLayoutComponent** : supprimé `currentRoute`, `ngOnInit()`, `router`, imports `OnInit`, `inject`, `NavigationEnd`, `Router`, `filter`
+    - **StudioPageComponent** : supprimé `spanData`, `supportData` (12 lignes de mock data)
+    - **Bridge `obstacles.service.ts`** (`core/services/obstacles/`) : fichier + dossier supprimés, 5 consommateurs migrés vers `@features/studio/obstacles/infrastructure/services/obstacles.service`
+    - **Bridge `@core/infrastructure/index.ts`** : fichier supprimé, re-export retiré de `core/index.ts`
+    - **Entrées 6-7** (`FieldMeasuringComponent`, `InitComponent` stale copies) : marquées SUPPRIMÉ Phase 3D (fichiers n'existaient déjà plus)
+38. ~~**Vérification**~~ ✅ :
+    - `npm run build` — 0 erreurs ✅
+    - `npm run test` — 88 suites, 1726 tests passent ✅
+    - `npm run lint-check` — 0 erreurs, 309 warnings (inchangé) ✅
+39. ~~**Mettre à jour `deadcode.md`**~~ ✅ :
+    - Entry 1 (LoggedLayoutComponent) → 🗑️ SUPPRIMÉ (Phase 6)
+    - Entry 2 (StudioPageComponent) → 🗑️ SUPPRIMÉ (Phase 6)
+    - Entry 3 (subscription) → N/A — NOT DEAD (confirmé faux positif)
+    - Entry 6 (FieldMeasuringComponent) → 🗑️ SUPPRIMÉ (Phase 3D)
+    - Entry 7 (InitComponent) → 🗑️ SUPPRIMÉ (Phase 3D)
+    - Entry 8 (bridge obstacles) → ajoutée + 🗑️ SUPPRIMÉ (Phase 6)
+    - Entry 9 (bridge @core/infrastructure) → ajoutée + 🗑️ SUPPRIMÉ (Phase 6)
+
+#### Décisions Phase 6
+
+- **Bridges actifs conservés** : 13 re-export bridges avec consommateurs actifs (studies, sections, cables, etc.) — migration hors scope
+- **Migration obstacles** : le bridge avait en réalité 5 consommateurs non détectés initialement (`app.component`, `section-plot.component`, `free-positioning.component` + specs) — tous migrés vers import direct `@features/`
+- **`core/index.ts`** : la ligne `export * from './infrastructure'` qui référençait le fichier supprimé a été retirée
 
 ### Phase 7 — Démantèlement du répertoire `src/app/ui/` ✅ TERMINÉE
 *Dépendait de Phase 3 (toutes les pages et composants migrés vers `features/` et `shared/`).*
@@ -1143,6 +1161,146 @@ src/app/
 - `primeng-preset.ts` et `theme-helper.ts` restent avec les styles (consommés uniquement par `app.config`)
 - **Pas de nouvel alias `@styles/*`** : seul `app.config.ts` importe `primeng-preset`, import relatif suffisant
 - L'alias `@ui/*` supprimé — 0 consommateur dans le code source
+
+### Phase 8 — Audit de conformité CLAUDE.md & remédiation (audit rafraîchi 2026-03-13)
+
+*Audit complet du code existant par rapport aux règles définies dans CLAUDE.md. ~150 violations identifiées, plan de remédiation priorisé en 6 étapes (A–F).*
+
+> **Contexte** : Angular 19.2.4. Phases 0–3F, 4 et 7 terminées. L'audit précédent a été rafraîchi pour refléter l'état réel post-Phase 7.
+
+#### État de conformité actuel (60 composants)
+
+| Critère | Résultat | Taux |
+|---------|----------|------|
+| `standalone: true` | 60/60 | ✅ 100% |
+| `ChangeDetectionStrategy.OnPush` | 60/60 | ✅ 100% |
+| `inject()` (pas de constructor DI) | 60/60 | ✅ 100% |
+| `input()` / `output()` signal API | 60/60 | ✅ 100% |
+| `signal()` / `computed()` pour l'état | 60/60 | ✅ 100% |
+| RxJS → `toSignal()` (pas de `subscribe()` manuel) | 51/60 | ⚠️ 85% |
+| `viewChild()` signal vs `@ViewChild` | 49/60 | ⚠️ 82% |
+
+#### Résumé des violations restantes
+
+| Catégorie | Violations | Sévérité |
+|-----------|-----------|----------|
+| Import `Subscription` depuis `dexie` en couche présentation | 2 fichiers | 🔴 CRITIQUE |
+| `HttpClientTestingModule` (interdit) | 1 fichier | 🔴 CRITIQUE |
+| Texte français hardcodé / commentaires FR | 5 instances | 🟠 HAUTE |
+| Imports relatifs profonds (alias manquants) | 9 fichiers | 🟠 HAUTE |
+| Subscriptions RxJS manuelles (`subscribe()`) au lieu de `toSignal()` | 9 composants | 🟠 HAUTE |
+| Imports cross-features (DDD bounded contexts) | 5 imports dans 4 fichiers | 🟠 HAUTE |
+| `@ViewChild`/`@ContentChildren` à migrer vers `viewChild()`/`contentChildren()` | 11 décorateurs dans 8 composants | 🟡 MOYENNE |
+| `data-testid` manquants sur éléments interactifs | ~60-80 éléments | 🟠 HAUTE |
+| `aria-label` / `aria-*` manquants | ~20 éléments | 🟡 MOYENNE |
+| Sélecteurs globaux SCSS dans composants | ~22 instances | 🟡 MOYENNE |
+| Noms de classes non-BEM | ~6 fichiers | 🟡 MOYENNE |
+| Imbrication SCSS profonde (4+) | ~5 fichiers | 🔵 BASSE |
+
+#### Étape A — Corrections critiques (quick fixes)
+
+52. **Corriger `import { Subscription } from 'dexie'` → `from 'rxjs'`** dans 2 fichiers :
+    - `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` (ligne 7)
+    - `src/app/features/study/presentation/pages/study/study.component.ts` (ligne 24)
+53. **Remplacer `HttpClientTestingModule`** par `provideHttpClient()` dans `src/app/app.component.spec.ts` (ligne 19, 154)
+54. **Supprimer le texte français hardcodé** dans `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.html` (lignes 170-180) — "bouton pour tests focus", "coucou contenu onglet…"
+55. **Supprimer le commentaire français** dans `src/app/shared/components/studio/free-positioning/free-positioning.component.spec.ts` (ligne 1) — "Vérifier et supprimer…"
+
+#### Étape B — Import aliases (9 fichiers dans `field-measuring`)
+
+56. **Convertir les 9 imports relatifs profonds** vers alias `@features/` :
+    - `calculus-setting.component.ts` : `'../../../domain/types'` → `'@features/studio/field-measuring/domain/types'`
+    - `papoto.component.ts` : `'../../../../domain/types'` → `'@features/studio/field-measuring/domain/types'`
+    - `papoto.component.spec.ts` : `'./../../../helpers'` + `'../../../mock-data'`
+    - `field-datas.component.ts` + `.spec.ts` : `'../../../domain/types'`
+    - `header.component.ts` + `.spec.ts` : `'../../../domain/types'`
+    - `field-measuring.component.ts` : `'../../../domain/types'`
+
+#### Étape C — Migration `toSignal()` (9 composants avec Subscriptions RxJS manuelles)
+
+57. **Convertir les Subscriptions manuelles en `toSignal()` + `effect()`** :
+    - `src/app/app.component.ts` — `subscriptions: Subscription` + `.subscribe()` + ngOnInit/ngOnDestroy
+    - `src/app/shared/components/layout/topbar/topbar.component.ts` — `subscriptions: Subscription` + multiple `.subscribe()`
+    - `src/app/features/home/presentation/pages/home/home.component.ts` — `subscriptions: Subscription` + `.subscribe()` dans constructor
+    - `src/app/features/changelog/presentation/pages/changelog/changelog.component.ts` — `.subscribe()` imbriqués dans ngOnInit
+    - `src/app/features/news/presentation/pages/news/news.component.ts` — `.subscribe()` imbriqués dans ngOnInit
+    - `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` — `subscription: Subscription` + `.subscribe()`
+    - `src/app/features/study/presentation/pages/study/study.component.ts` — `subscription: Subscription` + `.subscribe()`
+    - `src/app/features/studies/presentation/pages/studies/studies.component.ts` — `.subscribe()` dans constructor et ngOnInit
+    - `src/app/features/study/presentation/components/sections-tab/initialConditionModal/initialConditionModal.component.ts` — `subscriptions: Subscription` redondant avec `takeUntilDestroyed`
+
+#### Étape D — Migration `viewChild()` signal-based (11 décorateurs dans 8 composants)
+
+58. **Remplacer `@ViewChild`/`@ContentChild`/`@ContentChildren`/`@ViewChildren`** par les alternatives signal-based :
+    - `select-with-buttons.component.ts` — `@ViewChild('selectComponent')` → `viewChild('selectComponent')`
+    - `vtl-and-guying.component.ts` — 2× `@ViewChild` (header, footer)
+    - `loads-table.component.ts` — 2× `@ViewChild` (header, footer)
+    - `l0-sum.component.ts` — 2× `@ViewChild` (header, footer)
+    - `scale-view.component.ts` — `@ViewChild('popover')`
+    - `sectionsTab.component.ts` — `@ViewChild('popover')`
+    - `init.component.ts` — `@ViewChild('header')`
+    - `field-measuring.component.ts` — 2× `@ViewChild` (header, footer)
+    - `side-tab.component.ts` — `@ContentChild(TemplateRef)` → `contentChild(TemplateRef)`
+    - `side-tabs.component.ts` — `@ContentChildren` + 2× `@ViewChildren` → `contentChildren()` + `viewChildren()`
+
+#### Étape E — Architecture DDD (imports cross-features)
+
+59. **Résoudre les imports cross-features (5 imports dans 4 fichiers)** — extraire les composants/services partagés vers `@shared/` ou `@core/` :
+    - **studio → study** : `parameter-calculation-15-without-wind.component.ts` importe `InitialConditionModalComponent` depuis `@features/study/`
+    - **study → studio** (3 imports) : `sectionsTab.component.ts` importe `ToolbarDialogService`, `ToolbarDialogComponent` depuis `@features/studio/toolbar/` et `PlotService` depuis `@features/studio/core/`
+    - **study → studio** : `manualSection.component.ts` importe `PlotService` depuis `@features/studio/core/`
+    - **studies → study** : `studies.component.ts` importe `ExportDialogComponent` depuis `@features/study/`
+    - **study → studies** : `study.component.ts` importe `NewStudyModalComponent` depuis `@features/studies/`
+
+#### Étape F — Accessibilité & `data-testid`
+
+60. **Ajouter `data-testid`** sur ~60-80 éléments interactifs manquants dans ~20 templates :
+    - `app.component.html` — form, input email, submit, close dialog, update button
+    - `card-study.component.html` — button "Go to study"
+    - `select-with-buttons.component.html` — 6 boutons dropdown
+    - `input-number.component.html` — boutons incr/décr
+    - `vtl-and-guying.component.html` — inputs altitude, horizontal-distance, boutons export/save
+    - `loads-table.component.html` — input search, 4 boutons action
+    - `papoto.component.html` — bouton help, inputs, bouton calculate
+    - `sectionsTab.component.html` — ~10 boutons action dans menus
+    - `initialConditionModal.component.html` — champs read-only
+    - `studio-page.component.html` — selects, boutons
+    - `field-datas.component.html` — input search
+    - `init.component.html` — 4+ inputs/boutons form
+    - `studies-table.component.html` — selects, contenu lignes
+61. **Ajouter `aria-label`** sur ~20 éléments :
+    - Boutons icon-only dans `studies-table.component.html` (duplicate, export, delete)
+    - Selects sans label dans `vtl-and-guying.component.html`
+    - Inputs sans aria dans `vtl-and-guying.component.html` (altitude, distance)
+    - Input email dans `app.component.html`
+
+#### Étape G — SCSS / BEM
+
+62. **Remplacer les sélecteurs globaux HTML** par des classes BEM dans ~22 fichiers SCSS composants :
+    - `card-info.component.scss` (`h2`), `tag.component.scss` (`p`), `card-study.component.scss` (`h3`, `ul`, `button`)
+    - `vtl-and-guying.component.scss` (`label`, `p`), `loads-table.component.scss` (`span`)
+    - `field-datas.component.scss` (`label`), `header.component.scss` (`label`), `field-measuring.component.scss` (`button`)
+    - `span.component.scss` (`label`), `climate.component.scss` (`input`), `obstaclesForm.component.scss` (`label`, `input`)
+    - `top-toolbar.component.scss` (`label`), `scale-view.component.scss` (`label`)
+    - `supportsTable.component.scss` (`input`), `initialConditionModal.component.scss` (`input`)
+    - `study-header.component.scss` (`p`), `study.component.scss` (`h3`)
+    - `parameter-calculation-15-without-wind.component.scss` (`p`)
+63. **Corriger les noms de classes non-BEM** :
+    - `papoto.component` : `spanLength__input`, `MED__input` → convention BEM `.papoto__span-length-input`, `.papoto__med-input`
+    - `pep.component` : `PEP__*` → minuscules BEM
+    - `parameter-calculation-15-without-wind.component` : `createInitialMinus`, `createInitialNominal`, `createInitialPlus` → BEM
+    - `initialConditionModal.component` : `read-only-info test` → classe sémantique
+64. **Réduire l'imbrication excessive** à max 3 niveaux :
+    - `obstaclesForm.component.scss` : jusqu'à 6 niveaux (`.obstacles-form__points__point__form__input`)
+    - `top-toolbar.component.scss` : 4 niveaux
+
+#### Décisions Phase 8
+
+- **`@ViewChild` vs `viewChild()`** : `@ViewChild` n'est pas officiellement deprecated en Angular 19 mais `viewChild()` est le pattern recommandé. Migration priorité moyenne (Étape D).
+- **`PlotService` cross-feature** : service utilisé par study ET studio — candidat #1 pour déplacement vers `@core/services/` ou `@shared/services/`
+- **Overrides SCSS vendor** (PrimeNG dans `src/styles/vendor-extension/`) : magic numbers acceptables en tant qu'overrides de thème tiers, hors scope de cette phase
+- **Imports intra-studio** (toolbar → core, field-measuring → core) : acceptables — sous-features d'un même bounded context `studio`
+- **Vérification** après chaque étape : `npm run test` + `npm run build` + `npm run lint-check`
 
 ---
 

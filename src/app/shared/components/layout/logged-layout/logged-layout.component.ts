@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { SidebarItem } from '../sidebar/sidebar.model';
-import { filter } from 'rxjs/operators';
 
 /** Navigation structure grouping main and footer sidebar items. */
 interface SidebarNavigation {
@@ -21,15 +20,7 @@ interface SidebarNavigation {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Main layout component for authenticated pages, including the sidebar and topbar. */
-export class LoggedLayoutComponent implements OnInit {
-  currentRoute = window.location.pathname;
-  private readonly router = inject(Router);
-
-  ngOnInit(): void {
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event: NavigationEnd) => {
-      this.currentRoute = event.url;
-    });
-  }
+export class LoggedLayoutComponent {
   public readonly sideBarNav = signal<SidebarNavigation>({
     main: [
       {
