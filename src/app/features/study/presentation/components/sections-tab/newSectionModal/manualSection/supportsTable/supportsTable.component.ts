@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { CreateEditView } from '@ui/shared/types';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { CreateEditView } from '@shared/types';
 import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
@@ -19,7 +19,7 @@ import { MessageModule } from 'primeng/message';
 import { isNumber } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
 import { AttachmentService } from '@services/attachment/attachment.service';
-import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
+import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import {
   buildCopyColumnChanges,
   buildFieldChangeUpdates,

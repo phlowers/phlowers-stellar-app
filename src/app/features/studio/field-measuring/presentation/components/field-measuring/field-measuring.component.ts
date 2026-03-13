@@ -12,8 +12,8 @@ import {
   untracked
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from '../header/header.component';
 import { FieldMeasure } from '../../../domain/types';

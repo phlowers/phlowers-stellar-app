@@ -14,13 +14,13 @@ import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SortEvent } from 'primeng/api';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { PossibleIconNames } from '@ui/shared/model/icon.model';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { PossibleIconNames } from '@shared/model/icon.model';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
+import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 
 /** Row data for the L0 summary table. */
 interface L0Row {

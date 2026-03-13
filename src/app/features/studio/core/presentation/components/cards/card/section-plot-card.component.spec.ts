@@ -3,8 +3,8 @@ import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SectionPlotCardComponent } from './section-plot-card.component';
-import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { CardComponent } from '@shared/components/atoms/card/card.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 const mockLitData: GetSectionOutput = {

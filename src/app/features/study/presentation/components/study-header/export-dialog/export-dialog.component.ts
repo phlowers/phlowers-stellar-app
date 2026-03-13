@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angu
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StudiesService } from '@services/studies/studies.service';
 import { CommonModule } from '@angular/common';
 import { SelectModule } from 'primeng/select';

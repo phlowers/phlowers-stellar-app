@@ -20,9 +20,9 @@ import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { Section, Support, CatalogMaintenance, CatalogLine, CatalogCable } from '@core/domain';
 import { SupportsTableComponent } from './supportsTable/supportsTable.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { CreateEditView } from '@ui/shared/types';
-import { StudioComponent } from '@ui/shared/components/studio/studio.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { CreateEditView } from '@shared/types';
+import { StudioComponent } from '@shared/components/studio/studio.component';
 import { createEmptySupport } from '@features/study/domain/helpers/sections.helpers';
 import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@services/maintenance/maintenance.service';
@@ -30,12 +30,12 @@ import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
 import { LinesService } from '@services/lines/lines.service';
 import { CablesService } from '@services/cables/cables.service';
 import { MessageModule } from 'primeng/message';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { PlotService } from '@features/studio/core/services/plot.service';
-import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@ui/shared/constants/tablePagination';
+import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 
 // debounce to make it more fluid when dragging the slider
 /** Debounce delay in ms for refreshing studio plot when dragging the slider. */

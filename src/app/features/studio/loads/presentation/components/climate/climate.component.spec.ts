@@ -3,8 +3,8 @@ import { ClimateComponent, getBaseClimate, DEFAULT_BASE_TEMPERATURE } from './cl
 import { ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';

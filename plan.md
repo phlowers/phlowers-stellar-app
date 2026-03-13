@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (313 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3E terminées.**
+**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3F terminées.**
 
 ---
 
@@ -803,18 +803,225 @@ src/app/shared/                              ← NOUVEAU répertoire
 - [x] `npm run lint-check` — 0 erreurs (313 warnings)
 - [x] **(Humain)** L'app démarre, les catalogues se chargent (CSV → IndexedDB), Studio et Study fonctionnent
 
-### Phase 3F — DDD : Infrastructure, core et shared
+### Phase 3F — DDD : Infrastructure, core et shared ✅ TERMINÉE
 *Dépend de Phase 3E. Finalise la restructuration en déplaçant les couches transverses.*
 
-25. **Migrer `core/services/`** : les services transverses restent dans core (worker_python, worker_update, storage, online, user), les services métier vont en features
-26. **`infrastructure/` top-level** : Dexie DB centralisé
-    - `infrastructure/database/app-database.ts` (singleton Dexie)
-    - `infrastructure/database/entities/` (toutes les entities DB)
-    - `infrastructure/database/schemas/` (tous les schemas)
-    - Injecté via `InjectionToken` partout, accédé uniquement par les repositories dans les features
-27. **Migrer `core/domain/models/`** dans les features correspondantes
-28. **Migrer `ui/shared/`** → `shared/` au top-level avec atoms, layout, studio (composants réutilisables)
-29. **Vérification finale Phase 3** : `npm run test` + `npm run build` + `npm run e2e` — zéro régression
+#### État actuel
+
+| Étape | Statut | Détail |
+|-------|--------|--------|
+| Suppression fichiers morts Phase 3D | ✅ Fait | 4 fichiers doublons supprimés de ui/pages/studio/ |
+| Migration ui/shared/ → shared/ | ✅ Fait | 89 fichiers déplacés, ~160 imports mis à jour (bulk sed) |
+| NotFoundComponent → shared/ | ✅ Fait | 2 fichiers déplacés et renommés (404.* → not-found.*) |
+| Migration core/infrastructure/ → infrastructure/ | ✅ Fait | 30 fichiers déplacés, 2 re-export bridges créés |
+| Migration core/domain/ → shared/domain/ | ✅ Fait | 18 fichiers déplacés, 7 re-export bridges créés |
+| FieldMeasure types → shared/domain/ | ✅ Fait | types.ts copié vers shared/domain/models/field-measure.model.ts |
+| Suppression bridges ui/pages/studio/ | ✅ Fait | 6 bridges (0 consommateurs) supprimés, ui/pages/ entièrement supprimé |
+| Jest config | ✅ Fait | Alias `@infrastructure/` ajouté dans jest.config.ts |
+| Vérification build | ✅ Fait | 0 erreurs |
+| Vérification tests | ✅ Fait | 88 suites, 1702 tests pass |
+| Vérification lint | ✅ Fait | 0 erreurs, 309 warnings |
+
+#### Ce qui a été fait
+
+25. ~~**Suppression fichiers morts Phase 3D**~~ ✅ — 4 fichiers originaux non supprimés (doublons des fichiers migrés dans `features/studio/`) :
+    - `ui/pages/studio/toolbar-dialog/field-measuring/field-measuring.component.ts` + `.spec.ts`
+    - `ui/pages/studio/toolbar-dialog/field-measuring/components/init/init.component.ts` + `.spec.ts`
+
+26. ~~**Migration ui/shared/ → shared/**~~ ✅ — 89 fichiers déplacés :
+    - `ui/shared/components/` → `shared/components/` (atoms, layout, studio)
+    - `ui/shared/helpers/` → `shared/helpers/`
+    - `ui/shared/model/` → `shared/model/`
+    - `ui/shared/service/` → `shared/service/` (autocomplete, page-title)
+    - `ui/shared/constants/` → `shared/constants/`
+    - `ui/shared/types/` → `shared/types/`
+    - ~160 imports `@ui/shared/` → `@shared/` mis à jour en bulk (sed + corrections manuelles)
+    - 3 jest.mock() string literals mis à jour (`@ui/shared/helpers/duplicate`)
+    - 1 import `@src/app/ui/shared/` mis à jour (scale-view.component.ts)
+    - Imports relatifs dans `app.component.ts` (Icon, Button) et `app.routes.ts` (LoggedLayout) → `@shared/`
+    - `shared/catalog/` (Phase 3E) conservé intact
+    - Ancien dossier `ui/shared/` supprimé
+
+27. ~~**NotFoundComponent déplacé et renommé**~~ ✅ :
+    - `ui/pages/404/404.component.ts` → `shared/components/layout/not-found/not-found.component.ts`
+    - `ui/pages/404/404.component.html` → `shared/components/layout/not-found/not-found.component.html`
+    - `templateUrl` mis à jour dans le composant
+    - Import dans `app.routes.ts` → `@shared/components/layout/not-found/not-found.component`
+    - Ancien dossier `ui/pages/404/` supprimé
+
+28. ~~**Migration core/infrastructure/ → infrastructure/ top-level**~~ ✅ — 30 fichiers déplacés :
+    - `core/infrastructure/database/` → `infrastructure/database/` (app-database, entities, schemas)
+    - `core/infrastructure/dto/` → `infrastructure/dto/` (6 CSV DTOs)
+    - `core/infrastructure/index.ts` → `infrastructure/index.ts`
+    - Re-export bridge `core/infrastructure/database/index.ts` créé (exporte `AppDatabase`, `AppDB`, entities, schemas)
+    - Re-export bridge `core/infrastructure/dto/index.ts` créé (exporte les 6 types DTO)
+    - Alias `@infrastructure/` ajouté dans `jest.config.ts` (déjà dans les 3 tsconfig depuis Phase 0)
+
+29. ~~**Migration core/domain/ → shared/domain/**~~ ✅ — 18 fichiers déplacés :
+    - `core/domain/models/` → `shared/domain/models/` (study, section, support, charge, initial-condition, obstacle, user, vtl-and-guying, proto-v4)
+    - `core/domain/models/catalog/` → `shared/domain/models/catalog/` (6 modèles catalogue + index)
+    - `core/domain/index.ts` → `shared/domain/index.ts`
+    - **FieldMeasure types** déplacés de `features/studio/field-measuring/domain/types.ts` vers `shared/domain/models/field-measure.model.ts` — élimine la dépendance `shared → features` (interdit en DDD)
+    - `section.model.ts` import `FieldMeasure` mis à jour : `@features/studio/...` → `./field-measure.model`
+    - `features/studio/field-measuring/domain/types.ts` converti en re-export bridge vers `@shared/domain/models/field-measure.model`
+    - Barrel `shared/domain/models/index.ts` enrichi avec les 6 types FieldMeasure
+    - 7 re-export bridges créés dans `core/domain/` (index.ts, models/index.ts, charge.model.ts, obstacle.model.ts, support.model.ts, catalog/catalog-chain.model.ts)
+
+30. ~~**Suppression bridges obsolètes ui/pages/studio/**~~ ✅ — 6 bridges avec 0 consommateurs supprimés :
+    - `plot.service.ts`, `side-tabs.service.ts`, `obstaclesForm.service.ts` (bridges Phase 3D)
+    - `types.ts`, `constants.ts`, `helpers.ts` (bridges field-measuring Phase 3D)
+    - Répertoire `ui/pages/` entièrement supprimé
+
+31. ~~**Vérification core/services/ bridges**~~ ✅ — 169 consommateurs via `@services/` :
+    - Bridges maintenues : cables, chains, lines, attachment, maintenance → `@shared/catalog/`
+    - Bridges maintenues : studies → `@features/studies/`, sections/charges/initial-conditions → `@features/study/`, obstacles → `@features/studio/`
+    - Services réels : storage, user, online, worker_python, worker_update
+
+32. ~~**Vérification finale**~~ ✅ :
+    - `npm run build` — 0 erreurs
+    - `npm run test` — 88 suites, 1702 tests pass
+    - `npm run lint-check` — 0 erreurs (309 warnings)
+    - `npm run format` — aucun changement
+
+#### Architecture résultante (fin Phase 3 complète)
+
+```
+src/app/
+├── core/                                    ← Services transverses + bridges
+│   ├── domain/                              ← Bridges → @shared/domain/
+│   │   ├── index.ts
+│   │   └── models/
+│   │       ├── index.ts
+│   │       ├── charge.model.ts
+│   │       ├── obstacle.model.ts
+│   │       ├── support.model.ts
+│   │       └── catalog/
+│   │           └── catalog-chain.model.ts
+│   ├── infrastructure/                      ← Bridges → @infrastructure/
+│   │   ├── database/
+│   │   │   └── index.ts
+│   │   └── dto/
+│   │       └── index.ts
+│   └── services/
+│       ├── storage/                         ← StorageService (REAL)
+│       ├── user/                            ← UserService (REAL)
+│       ├── online/                          ← OnlineService (REAL)
+│       ├── worker_python/                   ← WorkerPythonService (REAL)
+│       ├── worker_update/                   ← UpdateService (REAL)
+│       ├── cables/                          ← Bridge → @shared/catalog/
+│       ├── chains/                          ← Bridge → @shared/catalog/
+│       ├── lines/                           ← Bridge → @shared/catalog/
+│       ├── attachment/                      ← Bridge → @shared/catalog/
+│       ├── maintenance/                     ← Bridge → @shared/catalog/
+│       ├── studies/                         ← Bridge → @features/studies/
+│       ├── sections/                        ← Bridge → @features/study/
+│       ├── charges/                         ← Bridge → @features/study/
+│       ├── initial-conditions/              ← Bridge → @features/study/
+│       └── obstacles/                       ← Bridge → @features/studio/
+├── shared/                                  ← Tout le code partagé cross-feature (120 fichiers)
+│   ├── components/
+│   │   ├── atoms/                           ← 9 composants UI (button, icon, card, etc.)
+│   │   ├── layout/                          ← logged-layout, sidebar, topbar, not-found
+│   │   └── studio/                          ← Composants visualisation Plotly
+│   ├── catalog/
+│   │   └── services/                        ← 5 services catalogue (Phase 3E)
+│   ├── domain/
+│   │   └── models/                          ← Modèles partagés (Study, Section, etc.)
+│   │       ├── field-measure.model.ts       ← FieldMeasure types (déplacés depuis studio)
+│   │       └── catalog/                     ← Modèles catalogue
+│   ├── helpers/                             ← Utilitaires (convertStringToNumber, etc.)
+│   ├── model/                               ← Modèles UI (card-info, icon, tags)
+│   ├── service/                             ← Services partagés (autocomplete, page-title)
+│   ├── constants/                           ← Constantes partagées (tablePagination)
+│   └── types/                               ← Types partagés
+├── infrastructure/                          ← Couche technique persistence (30 fichiers)
+│   ├── database/
+│   │   ├── app-database.ts                  ← Singleton Dexie
+│   │   ├── entities/                        ← Entities DB (9 types)
+│   │   └── schemas/                         ← Schemas Dexie (9)
+│   ├── dto/                                 ← CSV DTOs (6 types)
+│   └── index.ts
+├── features/                                ← Bounded contexts
+│   ├── home/
+│   ├── news/
+│   ├── changelog/
+│   ├── admin/
+│   ├── studies/
+│   ├── study/
+│   └── studio/
+│       └── field-measuring/domain/types.ts  ← Bridge → @shared/domain/models/field-measure.model
+└── ui/                                      ← Shell application uniquement
+    ├── app.component.ts + html + scss + spec
+    ├── app.config.ts
+    ├── app.routes.ts
+    ├── typedoc.json
+    └── styles/                              ← Styles globaux (SCSS, PrimeNG preset)
+```
+
+#### Fichiers modifiés (hors déplacements)
+
+| Fichier | Modification |
+|---------|-------------|
+| `ui/app.component.ts` | Imports Icon, Button → `@shared/` (plus de relatif `./shared/`) |
+| `ui/app.routes.ts` | Import LoggedLayout → `@shared/`, NotFound → `@shared/`, plus de `./shared/` ni `./pages/` |
+| `jest.config.ts` | Ajout alias `@infrastructure/` dans `moduleNameMapper` |
+| `features/studio/field-measuring/domain/types.ts` | Converti en re-export bridge → `@shared/domain/models/field-measure.model` |
+| `shared/domain/models/section.model.ts` | Import FieldMeasure → `./field-measure.model` (plus `@features/`) |
+| `shared/domain/models/index.ts` | Ajout exports FieldMeasure, FieldMeasureOutputs, PapotoResult, etc. |
+
+#### Config modifiée
+
+| Fichier | Modification |
+|---------|-------------|
+| `jest.config.ts` | `'^@infrastructure/(.*)$': '<rootDir>/src/app/infrastructure/$1'` ajouté |
+
+#### Re-export bridges créés (Phase 3F)
+
+| Bridge (ancien chemin) | Redirige vers | Rôle |
+|------------------------|--------------|------|
+| `core/infrastructure/database/index.ts` | `@infrastructure/database/...` | AppDatabase, entities, schemas |
+| `core/infrastructure/dto/index.ts` | `@infrastructure/dto/...` | 6 CSV DTOs |
+| `core/domain/index.ts` | `@shared/domain/index` | Barrel domain |
+| `core/domain/models/index.ts` | `@shared/domain/models/index` | Barrel models |
+| `core/domain/models/charge.model.ts` | `@shared/domain/models/charge.model` | Charge, ClimateCharge, etc. |
+| `core/domain/models/obstacle.model.ts` | `@shared/domain/models/obstacle.model` | Obstacle, Position3D, etc. |
+| `core/domain/models/support.model.ts` | `@shared/domain/models/support.model` | Support |
+| `core/domain/models/catalog/catalog-chain.model.ts` | `@shared/domain/models/catalog/catalog-chain.model` | CatalogChain |
+| `features/studio/field-measuring/domain/types.ts` | `@shared/domain/models/field-measure.model` | FieldMeasure types |
+
+#### Décisions architecturales appliquées
+
+- **`core/domain/models/` → `shared/domain/models/`** — les modèles Study, Section, Support, Charge sont utilisés par 4+ features. Ce sont des types du Shared Kernel, pas d'un bounded context spécifique
+- **`FieldMeasure` types → `shared/domain/models/field-measure.model.ts`** — déplacés depuis `features/studio/field-measuring/domain/types.ts` pour éliminer la dépendance `shared → features` (interdit en DDD)
+- **Pas de re-export bridges pour `@ui/shared/`** — les ~160 imports mis à jour en bulk car tous les consommateurs sont sous notre contrôle
+- **Re-export bridges pour `@core/domain` et `@core/infrastructure/`** — 50+ consommateurs via `@core/`, bridges permettent migration progressive
+- **`ui/styles/` reste dans `ui/`** — styles globaux liés au point d'entrée de l'app
+- **Bridges `core/services/` conservés** — 169 consommateurs, suppression progressive hors scope
+- **`NotFoundComponent` renommé** — `404.component.ts` → `not-found.component.ts` (convention standard)
+- **`ui/pages/` entièrement supprimé** — tous les bridges y avaient 0 consommateurs
+
+#### Definition of Done — Phase 3F
+
+- [x] `ui/shared/` n'existe plus (supprimé)
+- [x] `ui/pages/` n'existe plus (supprimé entièrement)
+- [x] `shared/` contient ~120 fichiers (composants, helpers, models, services, catalog, domain)
+- [x] `src/app/infrastructure/` contient ~30 fichiers (database, dto)
+- [x] `@infrastructure/` alias ajouté dans `jest.config.ts`
+- [x] Re-export bridges dans `core/domain/` (7 fichiers) et `core/infrastructure/` (2 fichiers)
+- [x] ~160 imports `@ui/shared/` → `@shared/` mis à jour
+- [x] `FieldMeasure` types déplacés vers `shared/domain/models/field-measure.model.ts`
+- [x] `features/studio/field-measuring/domain/types.ts` converti en re-export bridge
+- [x] 4 fichiers morts supprimés de `ui/pages/studio/`
+- [x] 6 bridges sans consommateurs supprimés de `ui/pages/studio/`
+- [x] `NotFoundComponent` déplacé et renommé → `shared/components/layout/not-found/`
+- [x] `app.routes.ts` imports mis à jour (`@shared/` pour LoggedLayout et NotFound)
+- [x] `app.component.ts` imports mis à jour (`@shared/` pour Icon et Button)
+- [x] `worker_python/tasks/types.ts` import mis à jour (`@shared/` pour View — via bulk sed)
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1702 tests pass
+- [x] `npm run lint-check` — 0 erreurs (309 warnings)
+- [x] `npm run format` — aucun changement
+- [ ] **(Humain)** Navigation complète : Home → Studies → Study → Studio → News → Changelog → Admin → 404
 
 ### Phase 4 — BEM SCSS strict
 *Parallèle avec Phase 3.*
@@ -1024,22 +1231,22 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 - ~~`core/services/charges/charges.service.ts` → `features/study/infrastructure/`~~ ✅ (Phase 3C — re-export bridge en place)
 - ~~`core/services/obstacles/obstacles.service.ts` → `features/studio/obstacles/infrastructure/`~~ ✅ (Phase 3D — re-export bridge en place)
 - ~~`core/services/initial-conditions/initial-condition.service.ts` → `features/study/infrastructure/`~~ ✅ (Phase 3C — re-export bridge en place)
-- `core/services/attachment/attachment.service.ts` → `shared/catalog/services/`
-- `core/services/cables/cables.service.ts` → `shared/catalog/services/`
-- `core/services/chains/chains.service.ts` → `shared/catalog/services/`
-- `core/services/lines/lines.service.ts` → `shared/catalog/services/`
-- `core/services/maintenance/maintenance.service.ts` → `shared/catalog/services/`
+- ~~`core/services/attachment/attachment.service.ts` → `shared/catalog/services/`~~ ✅ (Phase 3E — re-export bridge en place)
+- ~~`core/services/cables/cables.service.ts` → `shared/catalog/services/`~~ ✅ (Phase 3E — re-export bridge en place)
+- ~~`core/services/chains/chains.service.ts` → `shared/catalog/services/`~~ ✅ (Phase 3E — re-export bridge en place)
+- ~~`core/services/lines/lines.service.ts` → `shared/catalog/services/`~~ ✅ (Phase 3E — re-export bridge en place)
+- ~~`core/services/maintenance/maintenance.service.ts` → `shared/catalog/services/`~~ ✅ (Phase 3E — re-export bridge en place)
 
 ### Dexie DB (centralisé)
-- `core/infrastructure/database/*` → `infrastructure/database/` (top-level, injecté via InjectionToken)
+- ~~`core/infrastructure/database/*` → `infrastructure/database/`~~ ✅ (Phase 3F — re-export bridge en place)
 
-### Services transverses (restent dans core)
-- `core/services/worker_python/*` — reste dans core
-- `core/services/worker_update/*` — reste dans core
-- `core/services/storage/*` — reste dans core
-- `core/services/online/*` — reste dans core
-- `core/services/user/*` — reste dans core
-- `core/services/news/*` — reste dans core (ou features/news/)
+### Services transverses (restent dans core) ✅
+- `core/services/worker_python/*` — reste dans core ✅
+- `core/services/worker_update/*` — reste dans core ✅
+- `core/services/storage/*` — reste dans core ✅
+- `core/services/online/*` — reste dans core ✅
+- `core/services/user/*` — reste dans core ✅
+- `core/services/news/*` — reste dans features/news/ ✅ (Phase 3A)
 
 ### ~~22 fichiers constructor injection → inject()~~ ✅
 - ~~15 composants listés dans l'audit~~ ✅
@@ -1071,7 +1278,10 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 
 - **Studio** : **sous-features** (obstacles, loads, field-measuring, toolbar) + un `studio/core/` pour les composants shell et le plot.service partagé
 - **Catalog** : **ressources partagées** dans `shared/catalog/` (pas un bounded context — données de référence consommées par plusieurs features via injection)
-- **Dexie DB** : **centralisé** dans `infrastructure/database/` au top-level, singleton injecté via `InjectionToken`, accédé uniquement par les repositories des features
+- **Dexie DB** : **centralisé** dans `infrastructure/database/` au top-level, singleton injecté via `InjectionToken`, accédé uniquement par les repositories des features ✅ (Phase 3F)
+- **Domain models** : **partagés** dans `shared/domain/models/` — Study, Section, Support, Charge sont des types Shared Kernel cross-feature
+- **FieldMeasure** : déplacé de `features/studio/` vers `shared/domain/models/` pour éliminer la dépendance `shared → features` (interdit en DDD)
+- **Bridges progressifs** : `@core/domain` et `@core/infrastructure/` gardent des re-export bridges pour les 50+ consommateurs, suppression progressive hors scope Phase 3
 - **Signals-first** : Migrer signal() AVANT d'appliquer OnPush — l'inverse provoque des régressions silencieuses
 - **Propriétés statiques** (altitudeTypeOptions, symmetryOptions, etc.) : restent `readonly`, signals inutiles pour données immuables
 - **Code mort** : inventorié dans `deadcode.md`, Phase 7 dédiée avec validation humaine avant toute suppression

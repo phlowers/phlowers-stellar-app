@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HeaderComponent } from './header.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '../../../domain/types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { createTestMeasureData } from '../../helpers';

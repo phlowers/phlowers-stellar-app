@@ -8,9 +8,9 @@ import { Subscription } from 'dexie';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
-import { StudioComponent } from '@ui/shared/components/studio/studio.component';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { StudioComponent } from '@shared/components/studio/studio.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { StudioTopToolbarComponent } from '../../components/top-toolbar/top-toolbar.component';
 import { StudioMenuBarComponent } from '../../components/menu-bar/menu-bar.component';
 import { SectionPlotCardsComponent } from '../../components/cards/section-plot-cards.component';
@@ -23,7 +23,7 @@ import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/co
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { SectionService } from '@services/sections/section.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
-import { FreePositioningComponent } from '@ui/shared/components/studio/free-positioning/free-positioning.component';
+import { FreePositioningComponent } from '@shared/components/studio/free-positioning/free-positioning.component';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;

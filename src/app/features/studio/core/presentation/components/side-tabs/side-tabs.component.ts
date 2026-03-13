@@ -11,8 +11,8 @@ import {
 } from '@angular/core';
 import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { SideTabsService } from '@features/studio/core/services/side-tabs.service';
 import { isNumber } from 'lodash';

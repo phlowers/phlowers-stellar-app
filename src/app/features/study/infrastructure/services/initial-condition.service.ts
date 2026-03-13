@@ -8,7 +8,7 @@ import { inject, Injectable } from '@angular/core';
 import { Section, InitialCondition } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
-import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
+import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
 /**

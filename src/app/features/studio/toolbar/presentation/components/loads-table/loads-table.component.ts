@@ -11,8 +11,8 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';

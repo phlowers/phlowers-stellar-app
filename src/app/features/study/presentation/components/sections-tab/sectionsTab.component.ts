@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
 import { Section, InitialCondition, Study } from '@core/domain';
 import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { NewSectionModalComponent } from './newSectionModal/newSectionModal.component';
-import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
+import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { Popover, PopoverModule } from 'primeng/popover';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectModule } from 'primeng/select';
@@ -15,11 +15,11 @@ import {
   DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput
 } from '@features/study/infrastructure/services/initial-condition.service';
-import { CreateEditView } from '@ui/shared/types';
+import { CreateEditView } from '@shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
 import { createEmptySection } from '@features/study/domain/helpers/sections.helpers';
 import { RouterLink } from '@angular/router';
-import { SelectWithButtonsComponent } from '@ui/shared/components/atoms/select-with-buttons/select-with-buttons.component';
+import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@features/study/infrastructure/services/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';

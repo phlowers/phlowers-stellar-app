@@ -5,6 +5,5 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-// Infrastructure layer barrel export
-export * from './database';
-export * from './dto';
+// Re-export bridge — will be removed when all consumers are updated to @infrastructure/
+export * from '@infrastructure/index';

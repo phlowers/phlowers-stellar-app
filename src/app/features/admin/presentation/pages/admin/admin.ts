@@ -15,7 +15,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { StudiesService } from '@services/studies/studies.service';
 import { StorageService } from '@services/storage/storage.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { OnlineService } from '@services/online/online.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LogLevel, Task } from '@services/worker_python/tasks/types';

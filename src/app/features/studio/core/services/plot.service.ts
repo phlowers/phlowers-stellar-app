@@ -1,5 +1,5 @@
 import { computed, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
-import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
+import { PlotOptions } from '@shared/components/studio/section/helpers/types';
 import { DataError, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
 import { Section, Study } from '@core/domain';
 import { Subscription } from 'rxjs';

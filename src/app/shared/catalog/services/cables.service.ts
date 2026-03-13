@@ -11,7 +11,7 @@ import { CatalogCableEntity } from '@core/infrastructure/database';
 import { CableCsvDto } from '@core/infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
-import { convertStringToNumber } from '@ui/shared/helpers/convertStringToNumber';
+import { convertStringToNumber } from '@shared/helpers/convertStringToNumber';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**

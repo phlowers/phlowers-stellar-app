@@ -7,9 +7,9 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { CardComponent } from '@ui/shared/components/atoms/card/card.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { SectionService } from '@services/sections/section.service';
 import { MessageService } from 'primeng/api';
 

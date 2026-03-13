@@ -11,11 +11,11 @@ import {
   DestroyRef
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { createInitialMeasureData } from '../../helpers';
 import { MessageModule } from 'primeng/message';

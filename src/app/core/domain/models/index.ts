@@ -5,18 +5,5 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-// Domain models barrel export
-
-// Core domain models
-export type { User } from './user.model';
-export type { Study } from './study.model';
-export type { Section } from './section.model';
-export type { Support } from './support.model';
-export type { Charge, ClimateCharge, SpanLoad } from './charge.model';
-export { SymmetryType } from './charge.model';
-export type { InitialCondition } from './initial-condition.model';
-export type { VtlAndGuying, VtlAndGuyingInputs, VtlAndGuyingOutputs } from './vtl-and-guying.model';
-export type { ProtoV4Support, ProtoV4Parameters } from './proto-v4.model';
-
-// Catalog models
-export * from './catalog';
+// Re-export bridge — will be removed when all consumers are updated to @shared/domain/
+export * from '@shared/domain/models/index';

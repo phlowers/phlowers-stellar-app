@@ -15,7 +15,7 @@ import { Task, TaskError, DataError, GetSectionWithBaseOutput } from '@services/
 import { CatalogCable, Section, Study } from '@core/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
-import { PlotOptions } from '@ui/shared/components/studio/section/helpers/types';
+import { PlotOptions } from '@shared/components/studio/section/helpers/types';
 import { Camera } from 'plotly.js-dist-min';
 import { BehaviorSubject } from 'rxjs';
 

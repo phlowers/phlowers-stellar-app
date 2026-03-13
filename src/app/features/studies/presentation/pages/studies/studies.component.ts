@@ -9,8 +9,8 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ChangeDetectionStrategy, OnInit, Component, inject, signal } from '@angular/core';
 import { NewStudyModalComponent } from '@features/studies/presentation/components/new-study-modal/new-study-modal.component';
 import { ButtonModule } from 'primeng/button';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TableModule } from 'primeng/table';
 
 import { TabsModule } from 'primeng/tabs';

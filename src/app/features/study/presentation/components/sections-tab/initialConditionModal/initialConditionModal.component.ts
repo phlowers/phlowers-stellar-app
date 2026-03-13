@@ -13,8 +13,8 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
 import { Section, InitialCondition } from '@core/domain';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   InitialConditionFunctionsInput,
@@ -29,7 +29,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Study } from '@core/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { Subscription } from 'rxjs';
-import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
+import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 /** Form validation rules for initial condition fields. */

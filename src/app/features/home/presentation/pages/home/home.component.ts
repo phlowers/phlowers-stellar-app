@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { CardInfoComponent } from '@ui/shared/components/atoms/card-info/card-info.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { CardInfoComponent } from '@shared/components/atoms/card-info/card-info.component';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { OnlineService, ServerStatus } from '@services/online/online.service';
 import { Subscription, combineLatest } from 'rxjs';
-import { CardState } from '@ui/shared/model/card-info.model';
-import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
+import { CardState } from '@shared/model/card-info.model';
+import { CardStudyComponent } from '@shared/components/atoms/card-study/card-study.component';
 import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@core/domain';
 import TimeAgo from 'javascript-time-ago';

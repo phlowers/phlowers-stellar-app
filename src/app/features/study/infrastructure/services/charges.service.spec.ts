@@ -18,7 +18,7 @@ jest.mock('uuid', () => ({
 }));
 
 // Mock findDuplicateTitle
-jest.mock('@ui/shared/helpers/duplicate', () => ({
+jest.mock('@shared/helpers/duplicate', () => ({
   findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
 }));
 

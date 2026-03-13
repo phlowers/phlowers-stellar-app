@@ -62,7 +62,12 @@ describe('ChainsService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), ChainsService, { provide: StorageService, useValue: storageServiceSpy }]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ChainsService,
+        { provide: StorageService, useValue: storageServiceSpy }
+      ]
     });
 
     service = TestBed.inject(ChainsService);

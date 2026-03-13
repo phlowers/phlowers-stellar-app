@@ -62,7 +62,12 @@ describe('MaintenanceService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), MaintenanceService, { provide: StorageService, useValue: storageServiceSpy }]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        MaintenanceService,
+        { provide: StorageService, useValue: storageServiceSpy }
+      ]
     });
 
     service = TestBed.inject(MaintenanceService);

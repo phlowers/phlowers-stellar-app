@@ -1,16 +1,16 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { Select } from 'primeng/select';
 import { CatalogAttachment, Section, Support } from '@core/domain';
 import { DividerModule } from 'primeng/divider';
 import { AttachmentService } from '@services/attachment/attachment.service';
 import { FormsModule } from '@angular/forms';
-import { UniquePipe } from '@ui/shared/service/autocomplete/unique.pipe';
+import { UniquePipe } from '@shared/service/autocomplete/unique.pipe';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { SupportPlotComponent } from '@ui/shared/components/studio/support/support-plot.component';
+import { SupportPlotComponent } from '@shared/components/studio/support/support-plot.component';
 import { uniq } from 'lodash';
 
 /**

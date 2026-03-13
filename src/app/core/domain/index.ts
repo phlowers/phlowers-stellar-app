@@ -5,5 +5,5 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-// Domain layer barrel export
-export * from './models';
+// Re-export bridge — will be removed when all consumers are updated to @shared/domain/
+export * from '@shared/domain/index';

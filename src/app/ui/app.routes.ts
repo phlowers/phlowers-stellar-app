@@ -5,8 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Routes } from '@angular/router';
-import { LoggedLayoutComponent } from './shared/components/layout/logged-layout/logged-layout.component';
-import { NotFoundComponent } from './pages/404/404.component';
+import { LoggedLayoutComponent } from '@shared/components/layout/logged-layout/logged-layout.component';
+import { NotFoundComponent } from '@shared/components/layout/not-found/not-found.component';
 
 /** Application route definitions mapping URL paths to page components. */
 export const appRoutes: Routes = [

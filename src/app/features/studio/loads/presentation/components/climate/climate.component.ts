@@ -8,8 +8,8 @@ import {
   ValidationErrors,
   Validators
 } from '@angular/forms';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';

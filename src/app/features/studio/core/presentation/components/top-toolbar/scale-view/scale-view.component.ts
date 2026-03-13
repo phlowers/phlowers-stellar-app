@@ -7,8 +7,8 @@ import { RadioButton } from 'primeng/radiobutton';
 import { SliderModule } from 'primeng/slider';
 import { Button } from 'primeng/button';
 
-import { InputNumberComponent } from '@src/app/ui/shared/components/atoms/input-number/input-number.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { InputNumberComponent } from '@shared/components/atoms/input-number/input-number.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@features/studio/core/services/plot.service';
 
 @Component({

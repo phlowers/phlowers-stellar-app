@@ -5,10 +5,10 @@ import { OnlineService, ServerStatus } from '@services/online/online.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@core/domain';
 import { BehaviorSubject } from 'rxjs';
-import { CardStudyComponent } from '@ui/shared/components/atoms/card-study/card-study.component';
-import { CardInfoComponent } from '@ui/shared/components/atoms/card-info/card-info.component';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
+import { CardStudyComponent } from '@shared/components/atoms/card-study/card-study.component';
+import { CardInfoComponent } from '@shared/components/atoms/card-info/card-info.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { provideRouter } from '@angular/router';
 
 describe('HomeComponent', () => {

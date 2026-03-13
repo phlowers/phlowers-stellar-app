@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
-import { IconComponent } from '@ui/shared/components/atoms/icon/icon.component';
-import { TagComponent } from '@ui/shared/components/atoms/tag/tag.component';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { TagComponent } from '@shared/components/atoms/tag/tag.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { AccordionModule } from 'primeng/accordion';
 import { Study } from '@core/domain';
 import { CommonModule, DatePipe } from '@angular/common';

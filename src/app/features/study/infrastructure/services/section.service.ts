@@ -9,7 +9,7 @@ import { Section } from '@core/domain';
 import { StudyEntity } from '@core/infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
-import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
+import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
 @Injectable({
