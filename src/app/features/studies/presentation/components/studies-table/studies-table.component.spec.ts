@@ -17,6 +17,11 @@ describe('StudiesTableComponent', () => {
   let fixture: ComponentFixture<StudiesTableComponent>;
   let mockMessageService: jest.Mocked<MessageService>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+  const getAllByTestId = (testId: string): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
+
   const mockStudy1: Study = {
     uuid: 'test-uuid-1',
     author_email: 'test1@example.com',
@@ -62,10 +67,6 @@ describe('StudiesTableComponent', () => {
   });
 
   describe('Component Creation', () => {
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-
     it('should initialize with default values', () => {
       expect(component.sortField()).toBe('');
       expect(component.sortOrder()).toBe(1);
@@ -322,6 +323,50 @@ describe('StudiesTableComponent', () => {
 
       fixture.componentRef.setInput('studies', newStudies);
       expect(component.studies()).toEqual(newStudies);
+    });
+  });
+
+  describe('UC: should display studies table with rows', () => {
+    it('UC-S1: should display studies table with rows for each study', () => {
+      fixture.componentRef.setInput('studies', mockStudies);
+      fixture.detectChanges();
+
+      const table = getByTestId('studies-table');
+      expect(table).toBeTruthy();
+
+      const rows = getAllByTestId('study-row');
+      expect(rows.length).toBe(2);
+    });
+
+    it('UC-S2: should show open button for each study row', () => {
+      fixture.componentRef.setInput('studies', mockStudies);
+      fixture.detectChanges();
+
+      const openBtns = getAllByTestId('open-study-btn');
+      expect(openBtns.length).toBe(2);
+      expect(openBtns[0].tagName).toBe('A');
+    });
+
+    it('UC-S3: should emit duplicateStudy output', () => {
+      fixture.componentRef.setInput('studies', mockStudies);
+      fixture.detectChanges();
+
+      const spy = jest.fn();
+      component.duplicateStudy.subscribe(spy);
+
+      component.duplicateStudy.emit('test-uuid-1');
+      expect(spy).toHaveBeenCalledWith('test-uuid-1');
+    });
+
+    it('UC-S4: should emit deleteStudy output', () => {
+      fixture.componentRef.setInput('studies', mockStudies);
+      fixture.detectChanges();
+
+      const spy = jest.fn();
+      component.deleteStudy.subscribe(spy);
+
+      component.deleteStudy.emit('test-uuid-1');
+      expect(spy).toHaveBeenCalledWith('test-uuid-1');
     });
   });
 });

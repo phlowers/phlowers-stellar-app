@@ -9,10 +9,10 @@
 
 <p-tabs [(value)]="activeTab">
   <p-tablist>
-    <p-tab value="terrainData" i18n>Terrain data</p-tab>
-    <p-tab value="parameterCalculation" i18n>Parameter calculation</p-tab>
-    <p-tab value="temperatureCalculation" i18n>Temperature calculation</p-tab>
-    <p-tab value="parameterAt15CWithoutWind" i18n>Parameter at 15°C without wind</p-tab>
+    <p-tab value="terrainData" i18n data-testid="terrain-data-tab">Terrain data</p-tab>
+    <p-tab value="parameterCalculation" i18n data-testid="parameter-calc-tab">Parameter calculation</p-tab>
+    <p-tab value="temperatureCalculation" i18n data-testid="temperature-calc-tab">Temperature calculation</p-tab>
+    <p-tab value="parameterAt15CWithoutWind" i18n data-testid="param-15c-tab">Parameter at 15°C without wind</p-tab>
   </p-tablist>
 
   <p-tabpanel value="terrainData">
@@ -50,7 +50,7 @@
       <app-icon icon="download" />
       <span i18n>Export</span>
     </button>
-    <button app-btn type="button" [disabled]="!isFormValid()" (click)="onSave()">
+    <button app-btn type="button" [disabled]="!isFormValid()" (click)="onSave()" data-testid="save-btn">
       <app-icon icon="save" />
       <span i18n>Save</span>
     </button>

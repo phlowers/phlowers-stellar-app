@@ -35,9 +35,10 @@
           [attr.aria-errormessage]="isNameDuplicate() ? 'charge-name-error-message' : null"
           required
           fluid
+          data-testid="charge-name-input"
         />
         @if (isNameDuplicate()) {
-          <p-message id="charge-name-error-message" severity="error" size="small" variant="simple" i18n>
+          <p-message id="charge-name-error-message" severity="error" size="small" variant="simple" i18n data-testid="name-error">
             The charge case name must be unique.
           </p-message>
         }
@@ -50,6 +51,7 @@
           name="personnelPresence"
           [ngModel]="personnelPresence()"
           (onChange)="updatePersonnelPresence($event.checked)"
+          data-testid="personnel-toggle"
         />
       </div>
 
@@ -71,18 +73,19 @@
           rows="3"
           cols="20"
           fluid
+          data-testid="description-textarea"
         ></textarea>
       </div>
     </form>
   </ng-template>
 
   <ng-template #footer>
-    <button app-btn type="button" btnSize="m" btnStyle="text" (click)="onClose()">
+    <button app-btn type="button" btnSize="m" btnStyle="text" (click)="onClose()" data-testid="close-btn">
       <app-icon icon="close" />
       <ng-container i18n>Close</ng-container>
     </button>
 
-    <button app-btn type="button" btnSize="m" (click)="onSubmit()" [disabled]="!isFormValid()">
+    <button app-btn type="button" btnSize="m" (click)="onSubmit()" [disabled]="!isFormValid()" data-testid="validate-btn">
       <app-icon icon="check" />
       <ng-container i18n>Validate</ng-container>
     </button>

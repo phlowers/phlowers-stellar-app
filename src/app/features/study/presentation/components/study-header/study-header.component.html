@@ -1,8 +1,16 @@
 <app-export-dialog></app-export-dialog>
 <section class="study-header">
-  <h1 class="study-header__title">{{ study()?.title }}</h1>
+  <h1 class="study-header__title" data-testid="study-title">{{ study()?.title }}</h1>
 
-  <button (click)="openModifyStudyModal.emit()" app-btn btnSize="s" btnStyle="text" aria-label="modify" i18n-aria-label>
+  <button
+    (click)="openModifyStudyModal.emit()"
+    app-btn
+    btnSize="s"
+    btnStyle="text"
+    aria-label="modify"
+    i18n-aria-label
+    data-testid="modify-btn"
+  >
     <app-icon icon="edit" />
   </button>
 
@@ -16,6 +24,7 @@
     (click)="toggleActiveDetail()"
     class="study-header__accodion-btn"
     [class.study-header__accodion-btn--open]="isDetailOpen()"
+    data-testid="details-toggle"
   >
     Details
     <app-icon icon="keyboard_arrow_down" iconRight />
@@ -39,7 +48,7 @@
 
   <hr class="study-header__separator" />
 
-  <button app-btn btnSize="s" btnStyle="text" (click)="duplicateStudy.emit(study()?.uuid!)">
+  <button app-btn btnSize="s" btnStyle="text" (click)="duplicateStudy.emit(study()?.uuid!)" data-testid="duplicate-btn">
     <app-icon icon="content_copy" />
     <ng-container i18n>Duplicate</ng-container>
   </button>
@@ -49,7 +58,7 @@
     <ng-container i18n>Publish</ng-container>
   </button>
 
-  <button app-btn btnSize="s" btnStyle="text" (click)="openExportDialog()">
+  <button app-btn btnSize="s" btnStyle="text" (click)="openExportDialog()" data-testid="export-btn">
     <app-icon icon="download" />
     <ng-container i18n>Export</ng-container>
   </button>

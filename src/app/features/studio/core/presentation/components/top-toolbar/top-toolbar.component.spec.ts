@@ -20,6 +20,9 @@ describe('StudioTopToolbarComponent', () => {
   let mockPlotService: jest.Mocked<PlotService>;
   let mockToolbarDialogService: jest.Mocked<ToolbarDialogService>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   beforeEach(async () => {
     // Mock PlotService
     mockPlotService = {
@@ -76,10 +79,6 @@ describe('StudioTopToolbarComponent', () => {
   });
 
   describe('Component Initialization', () => {
-    it('should create the component', () => {
-      expect(component).toBeTruthy();
-    });
-
     it('should initialize with correct default values', () => {
       expect(component.shortcutsModal()).toBe(false);
       expect(component.shortcutsCount()).toBe(0);
@@ -688,6 +687,34 @@ describe('StudioTopToolbarComponent', () => {
 
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('UC: top toolbar rendering', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('UC-TT1: should render invert toggle switch', () => {
+      const toggle = getByTestId('invert-toggle');
+      expect(toggle).toBeTruthy();
+    });
+
+    it('UC-TT2: should render tables dropdown', () => {
+      const dropdown = getByTestId('tables-dropdown');
+      expect(dropdown).toBeTruthy();
+    });
+
+    it('UC-TT3: should render tools dropdown', () => {
+      component.ngOnInit();
+      fixture.detectChanges();
+      const dropdown = getByTestId('tools-dropdown');
+      expect(dropdown).toBeTruthy();
+    });
+
+    it('UC-TT4: should render shortcuts button', () => {
+      const btn = getByTestId('shortcuts-btn');
+      expect(btn).toBeTruthy();
     });
   });
 });

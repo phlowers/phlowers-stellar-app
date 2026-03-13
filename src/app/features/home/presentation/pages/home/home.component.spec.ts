@@ -18,6 +18,11 @@ describe('HomeComponent', () => {
   let onlineServiceMock: jest.Mocked<OnlineService>;
   let studiesServiceMock: jest.Mocked<StudiesService>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+  const getAllByTestId = (testId: string): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
+
   const mockStudies: Study[] = [
     {
       uuid: '1',
@@ -75,10 +80,6 @@ describe('HomeComponent', () => {
   });
 
   describe('Component Creation', () => {
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-
     it('should initialize with default values', () => {
       expect(component.latestStudies()).toEqual([]);
       expect(component.updateStatus()).toBe('unknown');
@@ -108,26 +109,6 @@ describe('HomeComponent', () => {
       updateServiceMock.needUpdate$.next(false);
 
       expect(component.updateStatus()).toBe('unknown');
-    });
-  });
-
-  describe('ngOnInit', () => {
-    it('should subscribe to online and server status changes', () => {
-      const onlineSpy = jest.spyOn(onlineServiceMock.online$, 'subscribe');
-      const serverSpy = jest.spyOn(onlineServiceMock.serverOnline$, 'subscribe');
-
-      component.ngOnInit();
-
-      expect(onlineSpy).toHaveBeenCalled();
-      expect(serverSpy).toHaveBeenCalled();
-    });
-
-    it('should subscribe to studies service ready state', () => {
-      const readySpy = jest.spyOn(studiesServiceMock.ready, 'subscribe');
-
-      component.ngOnInit();
-
-      expect(readySpy).toHaveBeenCalled();
     });
   });
 
@@ -225,29 +206,6 @@ describe('HomeComponent', () => {
     });
   });
 
-  describe('Text Update Methods', () => {
-    it('should update specific text fields correctly', () => {
-      const originalText = component.homeText().newsTitle;
-
-      // Access private method through component instance
-      (component as any).updateText('newsTitle', 'Updated Title');
-
-      expect(component.homeText().newsTitle).toBe('Updated Title');
-      expect(component.homeText().newsTitle).not.toBe(originalText);
-    });
-
-    it('should preserve other text fields when updating one', () => {
-      const originalNewsText = component.homeText().newsText;
-      const originalUpdateTitle = component.homeText().updateTitle;
-
-      (component as any).updateText('serverTitle', 'New Server Title');
-
-      expect(component.homeText().newsText).toBe(originalNewsText);
-      expect(component.homeText().updateTitle).toBe(originalUpdateTitle);
-      expect(component.homeText().serverTitle).toBe('New Server Title');
-    });
-  });
-
   describe('ngOnDestroy', () => {
     it('should unsubscribe from all subscriptions', () => {
       const unsubscribeSpy = jest.spyOn(component['subscriptions'], 'unsubscribe');
@@ -304,6 +262,30 @@ describe('HomeComponent', () => {
       await fixture.whenStable();
 
       expect(component.latestStudies()).toEqual([]);
+    });
+  });
+
+  describe('UC: should display latest studies cards and navigate to studies page', () => {
+    it('UC-H1: should display latest studies cards', () => {
+      component.latestStudies.set(mockStudies);
+      fixture.detectChanges();
+
+      const list = getByTestId('latest-studies-list');
+      expect(list).toBeTruthy();
+
+      const cards = getAllByTestId('study-card');
+      expect(cards.length).toBe(2);
+    });
+  });
+
+  describe('UC: should display create study button linking to studies page', () => {
+    it('UC-H2: should display create study button', () => {
+      fixture.detectChanges();
+
+      const btn = getByTestId('create-study-btn');
+      expect(btn).toBeTruthy();
+      expect(btn?.tagName).toBe('A');
+      expect(btn?.getAttribute('href')).toContain('/studies');
     });
   });
 });

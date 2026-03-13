@@ -11,6 +11,9 @@ describe('NewStudyModalComponent', () => {
   let fixture: ComponentFixture<NewStudyModalComponent>;
   let studiesServiceMock: jest.Mocked<StudiesService>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   beforeEach(async () => {
     const messageServiceMock = {
       add: jest.fn(),
@@ -54,7 +57,45 @@ describe('NewStudyModalComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  describe('UC: should open create modal, fill title, validate', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.componentRef.setInput('mode', 'new');
+      fixture.detectChanges();
+    });
+
+    it('UC-S5: should render modal with title input and validate button', () => {
+      const modal = getByTestId('new-study-modal');
+      expect(modal).toBeTruthy();
+
+      const titleInput = getByTestId('study-title-input');
+      expect(titleInput).toBeTruthy();
+      expect(titleInput?.tagName).toBe('INPUT');
+
+      const descInput = getByTestId('study-description-input');
+      expect(descInput).toBeTruthy();
+      expect(descInput?.tagName).toBe('TEXTAREA');
+    });
+
+    it('UC-S6: should disable validate when title is empty', () => {
+      component.updateTitle('');
+      fixture.detectChanges();
+
+      const validateBtn = getByTestId('validate-btn') as HTMLButtonElement;
+      expect(validateBtn).toBeTruthy();
+      expect(validateBtn.disabled).toBe(true);
+
+      // Fill title, should enable
+      component.updateTitle('My Study');
+      fixture.detectChanges();
+
+      const validateBtnAfter = getByTestId('validate-btn') as HTMLButtonElement;
+      expect(validateBtnAfter.disabled).toBe(false);
+    });
+
+    it('should render cancel button', () => {
+      const cancelBtn = getByTestId('cancel-btn');
+      expect(cancelBtn).toBeTruthy();
+    });
   });
 });

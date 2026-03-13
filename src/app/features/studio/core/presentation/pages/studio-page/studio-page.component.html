@@ -69,6 +69,7 @@
           inputId="supports"
           appendTo="body"
           class="supports-select__p-select"
+          data-testid="support-select"
           [disabled]="plotService.loading() || plotService.isFreePositioningMode()"
           [options]="spanAmountChoiceOptions()"
           [ngModel]="plotService.spanAmountChoice()"

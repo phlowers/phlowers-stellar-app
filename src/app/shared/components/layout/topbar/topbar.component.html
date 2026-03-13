@@ -36,5 +36,5 @@
     <span i18n class="calculation__txt" [class.show]="workerError()"> Error </span>
   </p>
 
-  <p class="user">{{ user()?.email ?? 'No user' }}</p>
+  <p class="user" data-testid="user-info">{{ user()?.email ?? 'No user' }}</p>
 </header>

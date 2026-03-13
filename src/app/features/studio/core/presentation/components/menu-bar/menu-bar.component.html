@@ -6,13 +6,14 @@
     i18n-aria-label
     btnStyle="text"
     btnSize="s"
+    data-testid="back-to-study-btn"
   >
     <app-icon class="menubar__back-arrow" icon="arrow_back" />
   </a>
 
   <p class="menubar__title">
     <span class="text-s-600 pr-1" i18n>Section :</span>
-    <span class="text-m-600 menubar__title__content">
+    <span class="text-m-600 menubar__title__content" data-testid="section-name">
       {{ section()?.name }}
     </span>
   </p>
@@ -21,7 +22,7 @@
 
   <p class="mb-0">
     <span class="text-s-600 pr-1" i18n>IC :</span>
-    <span class="text-m-400">{{ initialCondition()?.name }}</span>
+    <span class="text-m-400" data-testid="ic-name">{{ initialCondition()?.name }}</span>
   </p>
 
   <hr class="menubar__separator" />
@@ -45,6 +46,7 @@
         i18n-ariaLabel
         class="menubar__select"
         [showClear]="false"
+        data-testid="charge-case-select"
       />
     </div>
 
@@ -55,6 +57,7 @@
       btnStyle="outlined"
       btnSize="s"
       (click)="openNewChargeModal.emit()"
+      data-testid="add-charge-btn"
     >
       <app-icon icon="add_circle" />
     </button>

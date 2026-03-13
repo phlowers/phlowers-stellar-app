@@ -30,6 +30,7 @@
     <label for="invert" class="text-m-600 m-0" i18n>Invert:</label>
     <p-toggleswitch
       inputId="invert"
+      data-testid="invert-toggle"
       [disabled]="plotService.isFreePositioningMode()"
       [(ngModel)]="plotService.plotOptions().invert"
       (onChange)="plotService.plotOptionsChange({ invert: $event.checked })"
@@ -43,6 +44,7 @@
   <hr class="toolbar__separator" />
 
   <p-multiselect
+    data-testid="display-multiselect"
     appendTo="body"
     i18n-placeholder
     placeholder="Display"
@@ -79,7 +81,7 @@
 
   <hr class="toolbar__separator" />
 
-  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="tablesDropdown()">
+  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="tablesDropdown()" data-testid="tables-dropdown">
     <ng-template #button let-toggleCallback="toggleCallback">
       <button (click)="toggleCallback($event)">
         <app-icon icon="table_chart" />
@@ -96,7 +98,7 @@
 
   <hr class="toolbar__separator" />
 
-  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="toolsDropdown()">
+  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="toolsDropdown()" data-testid="tools-dropdown">
     <ng-template #button let-toggleCallback="toggleCallback">
       <button (click)="toggleCallback($event)">
         <app-icon icon="build" />
@@ -134,6 +136,7 @@
     aria-label="Edit your selected tools shortcuts"
     i18n-aria-label
     (click)="shortcutsModal.set(true)"
+    data-testid="shortcuts-btn"
   >
     <app-icon icon="edit" />
   </button>

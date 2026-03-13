@@ -1,4 +1,5 @@
 <p-dialog
+  data-testid="new-study-modal"
   dismissableMask="true"
   [visible]="isOpen()"
   (visibleChange)="isOpenChange.emit(false)"
@@ -40,6 +41,7 @@
           required
           aria-describedby="title-description"
           fluid
+          data-testid="study-title-input"
         />
         <small id="title-description" class="text-s-600 ml-1" i18n> Give a name to your study </small>
       </div>
@@ -62,17 +64,18 @@
           rows="3"
           cols="20"
           fluid
+          data-testid="study-description-input"
         ></textarea>
       </div>
     </form>
   </ng-template>
 
   <ng-template #footer>
-    <button app-btn type="submit" btnSize="m" btnStyle="text" (click)="isOpenChange.emit(false)">
+    <button app-btn type="submit" btnSize="m" btnStyle="text" (click)="isOpenChange.emit(false)" data-testid="cancel-btn">
       <app-icon icon="close" />
       <span i18n>Cancel</span>
     </button>
-    <button app-btn type="button" btnSize="m" (click)="onSubmit()" [disabled]="titleLength() === 0">
+    <button app-btn type="button" btnSize="m" (click)="onSubmit()" [disabled]="titleLength() === 0" data-testid="validate-btn">
       <app-icon icon="check" />
       <span i18n>Validate</span>
     </button>

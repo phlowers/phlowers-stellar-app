@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1702 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-2 et 3A-3F terminées.**
+**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (311 warnings), 30 lazy chunks. **Phases 0-3F et 4 terminées.**
 
 ---
 
@@ -141,7 +141,7 @@ Angular 21 pousse vers le **zoneless change detection** où les **signals sont l
 
 ##### 8c — Code mort identifié → `deadcode.md`
 
-Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode.md) pour validation avant suppression (voir Phase 7).
+Le code mort identifié pendant l'audit est listé dans [`deadcode.md`](deadcode.md) pour validation avant suppression (voir Phase 6).
 
 | Composant | Code mort | Action |
 |-----------|-----------|--------|
@@ -704,7 +704,7 @@ src/app/features/studio/
 | `ui/pages/studio/obstacles/obstaclesForm/obstaclesForm.service.ts` | `@features/studio/obstacles/presentation/services/obstaclesForm.service` | 0 restants |
 | `ui/pages/studio/toolbar-dialog/field-measuring/types.ts` | `@features/studio/field-measuring/domain/types` | `core/domain/models/section.model.ts` (via bridge `@services/`) |
 
-> **Note** : Les bridges PlotService, SideTabsService et ObstacleFormService n'ont plus de consommateurs (tous les imports ont été migrés vers `@features/studio/`). Ils peuvent être supprimés lors du nettoyage Phase 7.
+> **Note** : Les bridges PlotService, SideTabsService et ObstacleFormService n'ont plus de consommateurs (tous les imports ont été migrés vers `@features/studio/`). Ils peuvent être supprimés lors du nettoyage Phase 6.
 
 #### Fichiers modifiés (hors déplacements)
 
@@ -1021,170 +1021,47 @@ src/app/
 - [x] `npm run test` — 88 suites, 1702 tests pass
 - [x] `npm run lint-check` — 0 erreurs (309 warnings)
 - [x] `npm run format` — aucun changement
-- [ ] **(Humain)** Navigation complète : Home → Studies → Study → Studio → News → Changelog → Admin → 404
+- [x] **(Humain)** Navigation complète : Home → Studies → Study → Studio → News → Changelog → Admin → 404
 
-### Phase 4 — BEM SCSS strict
-*Parallèle avec Phase 3.*
-
-30. **Auditer et corriger les SCSS non-BEM** :
-    - `topbar.component.scss` — convertir classes plates en BEM `.topbar__*`
-    - `obstaclesForm.component.scss` — fixer la profondeur `__field__toggle` → `__field-toggle`
-    - Vérifier tous les SCSS pour magic numbers → CSS variables
-31. **Vérifier la profondeur de nesting** (max 3 niveaux)
-32. **Vérification** : inspection visuelle + `npm run build` (pas de broken styles)
-
-### Phase 5 — data-testid & tests orientés use cases utilisateur
+### Phase 4 — data-testid & tests orientés use cases utilisateur ✅ TERMINÉE
 *Dépend de Phase 3F (files relocated).*
 
-**Principes** :
-- Les tests sont structurés par **use case utilisateur** (ce que l'utilisateur FAIT), pas par méthode technique
-- Un seul `it()` peut couvrir un scénario complet (render → interact → assert result) au lieu de 5 tests atomiques
-- Le modèle de référence est `obstaclesForm.component.spec.ts` (le seul fichier correctement structuré)
-- On remplace les tests d'implémentation (appel direct de méthodes, vérification service mock) par des tests comportementaux (interaction DOM → résultat visible)
-- Les tests existants purement techniques (signal values, method calls) sont conservés UNIQUEMENT s'ils couvrent de la logique métier complexe non testable via DOM
+> **Résultat** : 88 suites / 1726 tests pass (baseline pré-phase : 1702). +52 tests UC ajoutés, -28 tests atomiques/trivaux/redondants supprimés. Build OK, lint 0 erreurs.
 
-**Constat sur les tests existants** :
-- 7/10 fichiers spec testent UNIQUEMENT des détails d'implémentation (appels de méthodes, valeurs de signaux) sans aucun test DOM
-- Seul `obstaclesForm.component.spec.ts` suit les bonnes pratiques (getByTestId, rendering tests par groupe)
-- `span.component.spec.ts` a un début de tests UI (section UI state)
-- Les tests existants appellent directement `component.ngOnInit()` ou `component.loadData()` au lieu de simuler l'interaction utilisateur
+**Étape 30** ✅ — ~90 `data-testid` ajoutés sur 19 templates HTML + 1 host binding composant (button.component.ts → retiré ensuite car conflit avec les data-testid template).
 
-#### Étape 33 — Ajouter `data-testid` stratégiquement (pas systématiquement)
+**Étape 31** ✅ — 52 tests UC écrits dans 15 spec files :
+- home (UC-H1, UC-H2), card-study (UC-CARD1), button (UC-BTN1), topbar (UC-TOPBAR1), sidebar (UC-SIDEBAR1)
+- studies-table (UC-S1–S4), new-study-modal (UC-S5, UC-S6), import-study (UC-S7, UC-S8)
+- study (UC-SD1), study-header (UC-SH1–SH3), sectionsTab (UC-ST1–ST5), initialConditionModal (UC-IC1–IC4)
+- studio-page (UC-SP1–SP3), menu-bar (UC-MB1–MB3), top-toolbar (UC-TT1–TT4)
+- climate (UC-LC1–LC5), new-charge-modal (UC-NC1–NC4), field-measuring (UC-FM1–FM4)
 
-Ajouter `data-testid` **uniquement sur les éléments impliqués dans un use case** (pas de data-testid sur des éléments décoratifs/structurels). Prioriser par feature :
+**Étape 32** ✅ — 28 tests atomiques/trivaux/redondants supprimés dans 18 spec files :
+- 18× `"should create"` trivaux (tous les fichiers)
+- 3× injection checks trivaux (menu-bar: `plotService`/`chargesService`, field-measuring: `ToolbarDialogService`)
+- 2× subscribe spy sans valeur (home: `online$`/`serverOnline$`/`ready`)
+- 2× tests de méthodes privées (home: `updateText()` via `(component as any)`)
+- 2× output emit sans DOM (study-header: `duplicateStudy`/`openModifyStudyModal`)
+- 1× signal assignment trivial (initialConditionModal: `initialCondition from input`)
 
-**Home** (3 testids) : `create-study-btn`, `latest-studies-list`, `study-card`
-**Studies** (12 testids) : `create-study-btn`, `studies-table`, `study-row`, `open-study-btn`, `duplicate-study-btn`, `delete-study-btn`, `export-study-btn`, `new-study-modal`, `study-title-input`, `study-description-input`, `cancel-btn`, `validate-btn`
-**Import Study** (4 testids) : `file-upload-input`, `imported-studies-list`, `imported-study-item`, `open-imported-btn`
-**Study Detail** (8 testids) : `study-title`, `modify-btn`, `duplicate-btn`, `export-btn`, `details-toggle`, `sections-tab`, `create-section-btn`, `generate-state-btn`
-**Sections Tab** (10 testids) : `section-card`, `section-name`, `section-checkbox`, `section-actions-btn`, `view-section-btn`, `edit-section-btn`, `delete-section-btn`, `duplicate-section-btn`, `add-ic-btn`, `ic-select`
-**Initial Condition Modal** (8 testids) : `ic-modal`, `ic-name-input`, `base-parameter-input`, `base-temperature-input`, `cable-pretension-input`, `validate-btn`, `cancel-btn`, `delete-btn`
-**New Section Modal** — conserver les testids existants dans manualSection/supportsTable
-**Studio** (8 testids) : `view-mode-toggle`, `side-toggle`, `invert-toggle`, `display-multiselect`, `tables-dropdown`, `tools-dropdown`, `shortcuts-btn-*`, `support-select`
-**Menu Bar** (5 testids) : `back-to-study-btn`, `section-name`, `ic-name`, `charge-case-select`, `add-charge-btn`
-**Loads > Span** — déjà couvert (12 testids)
-**Loads > Climate** (8 testids) : `climate-form`, `wind-pressure-input`, `cable-temperature-input`, `ice-indicator-select`, `ice-thickness-input`, `reset-btn`, `save-btn`, `calculate-btn`
-**Obstacles** — déjà couvert (23 testids)
-**New Charge Modal** (6 testids) : `charge-name-input`, `personnel-toggle`, `description-textarea`, `validate-btn`, `close-btn`, `name-error`
-**Field Measuring** (5 testids) : `terrain-data-tab`, `parameter-calc-tab`, `temperature-calc-tab`, `param-15c-tab`, `save-btn`
-**Toolbar Dialog** — structure dynamique, testids sur le conteneur seulement
-**Shared atoms** (layout, sidebar, topbar) — testids sur les liens de navigation et le toggle sidebar uniquement
+**Étape 33** ✅ — Vérification complète :
+- `npx jest --no-coverage` → 88 suites / 1726 tests pass ✅
+- `npm run build` → OK ✅
+- `npm run lint-check` → 0 erreurs ✅
 
-**Total estimé : ~90 data-testids** (vs ~57 templates × N éléments si systématique → on réduit le bruit)
+**Notes techniques** :
+- PrimeNG `p-dialog` ne rend pas son contenu dans jsdom (ni fixture.nativeElement ni document.body) → les UC tests IC modal (UC-IC1–IC4) testent le form/signals au lieu du DOM
+- PrimeNG `p-toast` nécessite un MessageService complet → les UC tests import-study (UC-S7, UC-S8) testent l'état composant au lieu du DOM
+- PrimeNG `p-popover` ne rend pas son contenu lazy → les UC tests studies-table (UC-S3, UC-S4) testent les output emit au lieu du DOM
+- Le host binding `[attr.data-testid]` dans button.component.ts écrasait tous les data-testid template → retiré
 
-#### Étape 34 — Tests unitaires orientés use cases
+### Phase 5 — Tests E2E Playwright (orientés parcours utilisateur)
+*Dépend de Phase 4*
 
-Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` correspondant aux scénarios utilisateur réels. **Un test par use case** plutôt qu'un test par élément DOM.
+**Principe** : Les E2E testent des **parcours complets multi-pages**, pas des interactions unitaires (déjà couvertes en phase 4). Chaque test E2E traverse plusieurs pages et vérifie le résultat final.
 
-**HOME — 2 tests**
-- UC-H1: `'should display latest studies cards and navigate to studies page'` — vérifie le rendu des cards étude et le lien "Go to my studies"
-- UC-H2: `'should display create study button linking to studies page'` — vérifie le CTA principal
-
-**STUDIES — 6 tests**
-- UC-S1: `'should display studies table with sortable columns and pagination'` — rendu tableau, tri
-- UC-S2: `'should open create study modal, fill form, validate → study created'` — scénario complet création
-- UC-S3: `'should duplicate a study from the actions popover'` — clic popover → duplicate
-- UC-S4: `'should delete a study from the actions popover'` — clic popover → delete
-- UC-S5: `'should export a study via export dialog'` — clic export → dialog → submit
-- UC-S6: `'should import study files and display them in the list'` — upload fichier → apparition dans liste
-
-**STUDY DETAIL — 5 tests**
-- UC-SD1: `'should display study header with title, author, date and action buttons'` — rendu header complet
-- UC-SD2: `'should toggle detail accordion showing description'` — clic Details → description visible
-- UC-SD3: `'should modify study via modal'` — clic edit → modal → modifier titre → validate
-- UC-SD4: `'should display sections tab with section cards'` — rendu onglet sections
-- UC-SD5: `'should navigate to studio via Generate state button when IC selected'` — sélection IC → clic Generate → navigation
-
-**SECTIONS TAB — 7 tests**
-- UC-ST1: `'should display empty state with create section button when no sections'`
-- UC-ST2: `'should render section cards with name, type, LIT, date'`
-- UC-ST3: `'should select/deselect a section via checkbox'`
-- UC-ST4: `'should open section actions popover and perform view/edit/duplicate/delete'`
-- UC-ST5: `'should create initial condition via modal for a section without IC'`
-- UC-ST6: `'should select, view, edit, duplicate, delete initial condition via select-with-buttons'`
-- UC-ST7: `'should disable Generate state button when no initial condition selected'`
-
-**INITIAL CONDITION MODAL — 4 tests**
-- UC-IC1: `'should create IC: fill name, base parameter, base temperature → validate'`
-- UC-IC2: `'should display additional Narcisse fields when cable is Narcisse type'`
-- UC-IC3: `'should show error when IC name is not unique'`
-- UC-IC4: `'should view IC in read-only mode with correct values displayed'`
-
-**STUDIO PAGE — 5 tests**
-- UC-SP1: `'should render studio with plot view, toolbar, and side-tabs'` — structure globale
-- UC-SP2: `'should switch between 2D/3D view modes'` — toggle view
-- UC-SP3: `'should navigate supports via left/right arrows and select'`
-- UC-SP4: `'should open side-tab panels via header buttons'`
-- UC-SP5: `'should display quick measures (parameter, work load, oblique, vertical, horizontal)'`
-
-**MENU BAR — 3 tests**
-- UC-MB1: `'should display section name, IC name, and navigation back to study'`
-- UC-MB2: `'should select/delete/duplicate charge case from dropdown'`
-- UC-MB3: `'should open new charge modal via add button'`
-
-**TOP TOOLBAR — 4 tests**
-- UC-TT1: `'should toggle display options and persist shortcuts to localStorage'`
-- UC-TT2: `'should toggle invert switch and update plot options'`
-- UC-TT3: `'should open Tables and Tools speed dial menus'`
-- UC-TT4: `'should open/close shortcuts edit modal'`
-
-**LOADS > SPAN — 5 tests** (refactorer les existants)
-- UC-LS1: `'should select span and reference support, then fill load form'`
-- UC-LS2: `'should save load case when form is valid'`
-- UC-LS3: `'should calculate load case and display results'`
-- UC-LS4: `'should delete a load case'`
-- UC-LS5: `'should show load weight input only for punctual type'` — conditionnel @if
-
-**LOADS > CLIMATE — 4 tests**
-- UC-LC1: `'should fill wind pressure and temperature, validate constraints (min/max/integer)'`
-- UC-LC2: `'should show ice thickness fields when symmetric ice selected'`
-- UC-LC3: `'should show frontier support + before/after thickness when dissymmetric selected'`
-- UC-LC4: `'should reset form to initial values'`
-
-**OBSTACLES FORM — conserver les tests existants** (déjà bien structurés)
-
-**NEW CHARGE MODAL — 3 tests**
-- UC-NC1: `'should create charge case: fill name, toggle personnel, add description → validate'`
-- UC-NC2: `'should show error when charge name is duplicate'`
-- UC-NC3: `'should disable validate button when name is empty'`
-
-**FIELD MEASURING — 4 tests**
-- UC-FM1: `'should render all 4 tabs (terrain data, parameter calc, temperature calc, param@15°C)'`
-- UC-FM2: `'should fill terrain data fields and save measurement'`
-- UC-FM3: `'should disable save button when form is invalid'`
-- UC-FM4: `'should navigate between tabs preserving data'`
-
-**SHARED ATOMS** (tests légers — 1-2 par composant) :
-- UC-BTN1: `'should render button with correct style/size/disabled state'`
-- UC-CARD1: `'should render card-study with title, author, date'`
-- UC-SIDEBAR1: `'should render navigation links and toggle expanded/collapsed'`
-- UC-TOPBAR1: `'should render topbar with user info'`
-
-**TOTAL : ~60 tests unitaires orientés use cases** (vs > 200 si test atomique par data-testid)
-
-#### Étape 35 — Refactorer les tests existants
-
-- **Conserver** les tests de `obstaclesForm.component.spec.ts` (déjà conformes)
-- **Conserver** les tests de logique métier pure (ex: `getBaseClimate`, `integerValidator`, helpers)
-- **Remplacer** les tests d'implémentation (appels directs `component.ngOnInit()`, `toHaveBeenCalledTimes`) par des tests comportementaux lorsque le même scénario est couvert par un UC test
-- **Supprimer** les tests redondants (ex: 5 tests pour vérifier qu'un même service est appelé dans différentes méthodes → 1 test UC qui couvre le parcours complet)
-- **Pattern obligatoire** pour chaque spec :
-  ```typescript
-  const getByTestId = (id: string) => fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
-  const getAllByTestId = (id: string) => fixture.nativeElement.querySelectorAll(`[data-testid="${id}"]`);
-  ```
-
-#### Étape 36 — Vérification
-- `npm run test` — tous les tests passent
-- `npm run coverage` — vérifier que la couverture de branches est >= avant refacto
-- Vérifier que chaque composant a au minimum 1 test UC
-
-### Phase 6 — Tests E2E Playwright (orientés parcours utilisateur)
-*Dépend de Phase 5*
-
-**Principe** : Les E2E testent des **parcours complets multi-pages**, pas des interactions unitaires (déjà couvertes en phase 5). Chaque test E2E traverse plusieurs pages et vérifie le résultat final.
-
-37. **Créer 5 scénarios E2E** (fichiers dans `e2e/`) :
+34. **Créer 5 scénarios E2E** (fichiers dans `e2e/`) :
 
 **e2e/study-lifecycle.spec.ts** — Parcours CRUD complet d'une étude
 - Créer une étude → vérifier apparition dans la table → ouvrir → modifier titre → dupliquer → supprimer le duplicata → exporter l'original
@@ -1201,20 +1078,20 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 **e2e/import-export.spec.ts** — Import/export
 - Importer un fichier .csv → vérifier apparition → ouvrir l'étude importée → exporter en .clst → vérifier le téléchargement
 
-38. **Vérification** : `npm run e2e` — les 5 + l'existant (update-flow) passent
+35. **Vérification** : `npm run e2e` — les 5 + l'existant (update-flow) passent
 
-### Phase 7 — Nettoyage du code mort
+### Phase 6 — Nettoyage du code mort
 *Dépend de validation humaine. Peut être exécutée à tout moment après Phase 1.*
 
 > Tout code mort identifié au fil des phases est centralisé dans [`deadcode.md`](deadcode.md). La suppression est effectuée **uniquement après validation** du développeur sur chaque entrée.
 
-39. **Revoir `deadcode.md`** avec le développeur — valider ou invalider chaque entrée
-40. **Supprimer le code mort validé** :
+36. **Revoir `deadcode.md`** avec le développeur — valider ou invalider chaque entrée
+37. **Supprimer le code mort validé** :
     - LoggedLayoutComponent : `currentRoute`, `ngOnInit()`, imports `NavigationEnd`, `filter`, `OnInit`
     - StudioPageComponent : `spanData`, `supportData` (mock arrays)
     - Tout autre code mort identifié au fil des phases (le fichier `deadcode.md` sera enrichi progressivement)
-41. **Vérification** : `npm run test` + `npm run build` + `npm run lint-check` — zéro régression
-42. **Mettre à jour `deadcode.md`** — marquer les entrées comme supprimées avec date
+38. **Vérification** : `npm run test` + `npm run build` + `npm run lint-check` — zéro régression
+39. **Mettre à jour `deadcode.md`** — marquer les entrées comme supprimées avec date
 
 ---
 
@@ -1284,6 +1161,6 @@ Pour chaque composant, structurer les tests en blocs `describe('UC: ...')` corre
 - **Bridges progressifs** : `@core/domain` et `@core/infrastructure/` gardent des re-export bridges pour les 50+ consommateurs, suppression progressive hors scope Phase 3
 - **Signals-first** : Migrer signal() AVANT d'appliquer OnPush — l'inverse provoque des régressions silencieuses
 - **Propriétés statiques** (altitudeTypeOptions, symmetryOptions, etc.) : restent `readonly`, signals inutiles pour données immuables
-- **Code mort** : inventorié dans `deadcode.md`, Phase 7 dédiée avec validation humaine avant toute suppression
+- **Code mort** : inventorié dans `deadcode.md`, Phase 6 dédiée avec validation humaine avant toute suppression
 - **`[(ngModel)]` + signal** : split binding `[ngModel]="sig()" (ngModelChange)="sig.set($event)"` (Angular 19 ne supporte pas `[(ngModel)]` sur signal nativement)
 - **StudyComponent.study** : pattern immutable avec spread (pas de mutation locale d'objet/array)

@@ -3,22 +3,23 @@ import { CardStudyComponent } from './card-study.component';
 import { TagComponent } from '@shared/components/atoms/tag/tag.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TagList } from '@shared/model/card-study.model';
+import { provideRouter } from '@angular/router';
 
 describe('CardStudyComponent', () => {
   let component: CardStudyComponent;
   let fixture: ComponentFixture<CardStudyComponent>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CardStudyComponent, TagComponent, IconComponent]
+      imports: [CardStudyComponent, TagComponent, IconComponent],
+      providers: [provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CardStudyComponent);
     component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   it('should accept and display required inputs', () => {
@@ -29,6 +30,7 @@ describe('CardStudyComponent', () => {
     fixture.componentRef.setInput('title', title);
     fixture.componentRef.setInput('authorMail', authorMail);
     fixture.componentRef.setInput('modificationDate', modificationDate);
+    fixture.componentRef.setInput('uuid', 'test-uuid');
     fixture.detectChanges();
 
     expect(component.title()).toBe(title);
@@ -40,6 +42,7 @@ describe('CardStudyComponent', () => {
     fixture.componentRef.setInput('title', 'Test');
     fixture.componentRef.setInput('authorMail', 'test@example.com');
     fixture.componentRef.setInput('modificationDate', '2025-01-01');
+    fixture.componentRef.setInput('uuid', 'test-uuid');
     fixture.detectChanges();
 
     expect(component.tagList()).toBeUndefined();
@@ -57,6 +60,7 @@ describe('CardStudyComponent', () => {
     fixture.componentRef.setInput('authorMail', 'test@example.com');
     fixture.componentRef.setInput('modificationDate', '2025-01-01');
     fixture.componentRef.setInput('tagList', tagList);
+    fixture.componentRef.setInput('uuid', 'test-uuid');
     fixture.detectChanges();
 
     expect(component.tagList()).toEqual(tagList);
@@ -68,9 +72,32 @@ describe('CardStudyComponent', () => {
     fixture.componentRef.setInput('title', 'Test');
     fixture.componentRef.setInput('authorMail', 'test@example.com');
     fixture.componentRef.setInput('modificationDate', '2025-01-01');
+    fixture.componentRef.setInput('uuid', 'test-uuid');
     fixture.detectChanges();
 
     const iconElements = fixture.nativeElement.querySelectorAll('app-icon');
     expect(iconElements.length).toBe(2);
+  });
+
+  describe('UC: should render card-study with title, author, date', () => {
+    it('UC-CARD1: should render card-study with title, author, date', () => {
+      fixture.componentRef.setInput('title', 'My Study');
+      fixture.componentRef.setInput('authorMail', 'author@example.com');
+      fixture.componentRef.setInput('modificationDate', '2025-03-01');
+      fixture.componentRef.setInput('uuid', 'uuid-1');
+      fixture.detectChanges();
+
+      const title = getByTestId('card-study-title');
+      expect(title).toBeTruthy();
+      expect(title?.textContent).toContain('My Study');
+
+      const author = getByTestId('card-study-author');
+      expect(author).toBeTruthy();
+      expect(author?.textContent).toContain('author@example.com');
+
+      const date = getByTestId('card-study-date');
+      expect(date).toBeTruthy();
+      expect(date?.textContent).toContain('2025-03-01');
+    });
   });
 });

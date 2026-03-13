@@ -46,10 +46,6 @@ describe('ButtonComponent', () => {
   });
 
   describe('Component Creation', () => {
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-
     it('should have default values', () => {
       expect(component.btnSize()).toBe('m');
       expect(component.btnStyle()).toBe('base');
@@ -348,6 +344,17 @@ describe('ButtonComponent', () => {
 
       buttonElement.click();
       expect(hostComponent.clickCount).toBe(1);
+    });
+  });
+
+  describe('UC: should render with correct disabled state and style', () => {
+    it('UC-BTN1: should render with app-btn class and correct default style', () => {
+      fixture.detectChanges();
+
+      const btn = fixture.nativeElement;
+      expect(btn.classList.contains('app-btn')).toBe(true);
+      expect(btn.classList.contains('app-btn-m')).toBe(true);
+      expect(btn.classList.contains('app-btn-base')).toBe(true);
     });
   });
 });

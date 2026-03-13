@@ -1,9 +1,6 @@
 <p-dialog
+  data-testid="ic-modal"
   dismissableMask="true"
-  [visible]="isOpen()"
-  (visibleChange)="onVisibleChange($event)"
-  [style]="{ 'min-width': '50vw', 'max-width': '40.625rem' }"
-  [modal]="true"
 >
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
@@ -56,6 +53,7 @@
               aria-errormessage="initial-condition-name-error-message"
               pInputText
               formControlName="name"
+              data-testid="ic-name-input"
             />
             @if (!isNameUnique()) {
               <p-message id="initial-condition-name-error-message" severity="error" size="small" variant="simple" i18n>
@@ -77,6 +75,7 @@
               id="initial-condition-base-parameter"
               pInputText
               formControlName="base_parameters"
+              data-testid="base-parameter-input"
             />
           </div>
           <div>
@@ -92,6 +91,7 @@
                 id="initial-condition-base-temperature"
                 pInputText
                 formControlName="base_temperature"
+                data-testid="base-temperature-input"
               />
               <p-inputgroup-addon>°C</p-inputgroup-addon>
             </p-inputgroup>
@@ -106,6 +106,7 @@
                   id="initial-condition-cable-pretension"
                   pInputText
                   formControlName="cable_pretension"
+                  data-testid="cable-pretension-input"
                 />
                 <p-inputgroup-addon>%CRA</p-inputgroup-addon>
               </p-inputgroup>
@@ -225,7 +226,7 @@
 
   <ng-template #footer>
     @if (mode() === 'view') {
-      <button app-btn type="button" btnSize="m" btnStyle="danger" (click)="onDelete()">
+      <button app-btn type="button" btnSize="m" btnStyle="danger" (click)="onDelete()" data-testid="delete-btn">
         <app-icon icon="delete" />
         <span i18n>Delete</span>
       </button>
@@ -238,12 +239,12 @@
         <span i18n>Edit</span>
       </button>
     } @else {
-      <button app-btn type="submit" btnSize="m" btnStyle="outlined" (click)="isOpenChange.emit(false)">
+      <button app-btn type="submit" btnSize="m" btnStyle="outlined" (click)="isOpenChange.emit(false)" data-testid="cancel-btn">
         <app-icon icon="close" />
         <span i18n>Cancel</span>
       </button>
       @if (!isInsideToolsDialog()) {
-        <button app-btn type="button" [disabled]="!isFormValid()" btnSize="m" (click)="onSubmit(false)">
+      <button app-btn type="button" [disabled]="!isFormValid()" btnSize="m" (click)="onSubmit(false)" data-testid="validate-btn">
           <app-icon icon="check" />
           <span i18n>Validate</span>
         </button>

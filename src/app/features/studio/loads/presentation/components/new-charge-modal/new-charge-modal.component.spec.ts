@@ -24,6 +24,9 @@ describe('NewChargeModalComponent (Jest)', () => {
   let chargesService: MockChargesService;
   let plotService: MockPlotService;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   const mockCharge: Charge = {
     uuid: 'charge-uuid-1',
     name: 'Test Charge',
@@ -128,10 +131,6 @@ describe('NewChargeModalComponent (Jest)', () => {
     fixture.componentRef.setInput('isOpen', true);
     fixture.detectChanges();
     await fixture.whenStable();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   it('should display create title', () => {
@@ -349,5 +348,38 @@ describe('NewChargeModalComponent (Jest)', () => {
     await fixture.whenStable();
 
     expect(component.name()).toBe('CC 1');
+  });
+
+  describe('UC: new charge modal rendering', () => {
+    beforeEach(async () => {
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    });
+
+    it('UC-NC1: should render charge name input', () => {
+      const input = getByTestId('charge-name-input');
+      expect(input).toBeTruthy();
+    });
+
+    it('UC-NC2: should render personnel toggle switch', () => {
+      const toggle = getByTestId('personnel-toggle');
+      expect(toggle).toBeTruthy();
+    });
+
+    it('UC-NC3: should render validate and close buttons', () => {
+      expect(getByTestId('validate-btn')).toBeTruthy();
+      expect(getByTestId('close-btn')).toBeTruthy();
+    });
+
+    it('UC-NC4: should show name error when name is duplicate', () => {
+      component.updateName('Test Charge');
+      fixture.detectChanges();
+
+      const error = getByTestId('name-error');
+      expect(error).toBeTruthy();
+    });
   });
 });

@@ -20,20 +20,30 @@
       (change)="loadFiles($event)"
       accept=".csv,.clst"
       class="import-study__tool__input"
+      data-testid="file-upload-input"
     />
   </label>
 
   @if (this.newStudies().length > 0) {
-    <ul class="import-study__list">
+    <ul class="import-study__list" data-testid="imported-studies-list">
       @for (study of this.newStudies(); track study) {
-        <li class="import-study__list__item">
+        <li class="import-study__list__item" data-testid="imported-study-item">
           <p class="import-study__list__label">
             <app-icon icon="check" class="import-study__list__icon" />
             {{ study.title }}
           </p>
 
           <div class="import-study__list__btns">
-            <a [routerLink]="'/study/' + study.uuid" app-btn btnStyle="base" btnSize="s" i18n> Open </a>
+            <a
+              [routerLink]="'/study/' + study.uuid"
+              app-btn
+              btnStyle="base"
+              btnSize="s"
+              i18n
+              data-testid="open-imported-btn"
+            >
+              Open
+            </a>
           </div>
         </li>
       }

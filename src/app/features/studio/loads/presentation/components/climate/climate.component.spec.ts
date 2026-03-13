@@ -171,6 +171,9 @@ describe('ClimateComponent (Jest)', () => {
   let component: ClimateComponent;
   let fixture: ComponentFixture<ClimateComponent>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   const mockCharge: Charge = {
     uuid: 'test-charge-uuid',
     name: 'Test Charge',
@@ -243,10 +246,6 @@ describe('ClimateComponent (Jest)', () => {
     component = fixture.componentInstance;
     fixture.componentRef.setInput('chargeUuid', 'test-charge-uuid');
     fixture.detectChanges();
-  });
-
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
   });
 
   it('should initialize form with default values', () => {
@@ -463,6 +462,39 @@ describe('ClimateComponent (Jest)', () => {
       expect(plotService.temporaryLoadData?.climate.cableTemperature).toBe(20);
       expect(plotService.temporaryLoadData?.climate.windPressure).toBe(0);
       expect(plotService.temporaryLoadData?.climate.iceThickness).toBe(0);
+    });
+  });
+
+  describe('UC: climate form rendering', () => {
+    it('UC-LC1: should render the climate form', () => {
+      const form = getByTestId('climate-form');
+      expect(form).toBeTruthy();
+      expect(form!.tagName).toBe('FORM');
+    });
+
+    it('UC-LC2: should render wind pressure input', () => {
+      const input = getByTestId('wind-pressure-input');
+      expect(input).toBeTruthy();
+    });
+
+    it('UC-LC3: should render save and calculate buttons', () => {
+      expect(getByTestId('save-btn')).toBeTruthy();
+      expect(getByTestId('calculate-btn')).toBeTruthy();
+    });
+
+    it('UC-LC4: should render reset button', () => {
+      const resetBtn = getByTestId('reset-btn');
+      expect(resetBtn).toBeTruthy();
+    });
+
+    it('UC-LC5: should disable save and calculate buttons when form is invalid', () => {
+      component.form.controls.windPressure.setValue(null);
+      fixture.detectChanges();
+
+      const saveBtn = getByTestId('save-btn') as HTMLButtonElement;
+      const calcBtn = getByTestId('calculate-btn') as HTMLButtonElement;
+      expect(saveBtn.disabled).toBe(true);
+      expect(calcBtn.disabled).toBe(true);
     });
   });
 });

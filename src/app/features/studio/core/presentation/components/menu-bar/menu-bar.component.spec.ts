@@ -22,6 +22,9 @@ describe('StudioMenuBarComponent', () => {
   let mockChargesService: Partial<ChargesService>;
   let mockToolbarDialogService: Partial<ToolbarDialogService>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   const mockCharge1: Charge = {
     uuid: 'charge-uuid-1',
     name: 'Charge 1',
@@ -199,22 +202,6 @@ describe('StudioMenuBarComponent', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('Component Initialization', () => {
-    it('should create the component', () => {
-      expect(component).toBeTruthy();
-    });
-
-    it('should have access to plotService', () => {
-      expect(component.plotService).toBeDefined();
-      expect(component.plotService).toBe(mockPlotService);
-    });
-
-    it('should have access to chargesService', () => {
-      expect(component['chargesService']).toBeDefined();
-      expect(component['chargesService']).toBe(mockChargesService);
-    });
   });
 
   describe('charges computed signal', () => {
@@ -684,6 +671,25 @@ describe('StudioMenuBarComponent', () => {
       expect(charges).toHaveLength(2);
       expect(charges[0].label).toBe('Charge 1');
       expect(charges[1].label).toBe('Charge 1');
+    });
+  });
+
+  describe('UC: menu bar rendering', () => {
+    it('UC-MB1: should render back-to-study button', () => {
+      const btn = getByTestId('back-to-study-btn');
+      expect(btn).toBeTruthy();
+    });
+
+    it('UC-MB2: should display section name', () => {
+      const sectionName = getByTestId('section-name');
+      expect(sectionName).toBeTruthy();
+      expect(sectionName!.textContent).toContain('Section 1');
+    });
+
+    it('UC-MB3: should display initial condition name', () => {
+      const icName = getByTestId('ic-name');
+      expect(icName).toBeTruthy();
+      expect(icName!.textContent).toContain('Initial Condition 1');
     });
   });
 });

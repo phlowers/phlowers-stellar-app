@@ -9,6 +9,9 @@ describe('StudyHeader', () => {
   let fixture: ComponentFixture<StudyHeaderComponent>;
   let mockMessageService: jest.Mocked<MessageService>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   beforeEach(async () => {
     mockMessageService = {
       add: jest.fn()
@@ -22,10 +25,6 @@ describe('StudyHeader', () => {
     component = fixture.componentInstance;
     fixture.componentRef.setInput('study', null);
     fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   describe('toggleActiveDetail', () => {
@@ -49,19 +48,58 @@ describe('StudyHeader', () => {
     });
   });
 
-  describe('outputs', () => {
-    it('should emit duplicateStudy', () => {
-      const spy = jest.spyOn(component.duplicateStudy, 'emit');
+  describe('UC: display study title and action buttons', () => {
+    it('UC-SH1: should display study title when study is provided', () => {
+      fixture.componentRef.setInput('study', {
+        uuid: 'u1',
+        title: 'My Study',
+        author_email: 'a@b.com',
+        created_at_offline: '2025-01-01',
+        updated_at_offline: '2025-01-01',
+        shareable: false,
+        saved: true,
+        sections: []
+      });
+      fixture.detectChanges();
 
-      component.duplicateStudy.emit('uuid-123');
-      expect(spy).toHaveBeenCalledWith('uuid-123');
+      const title = getByTestId('study-title');
+      expect(title).toBeTruthy();
+      expect(title!.textContent).toContain('My Study');
     });
 
-    it('should emit openModifyStudyModal', () => {
-      const spy = jest.spyOn(component.openModifyStudyModal, 'emit');
+    it('UC-SH2: should render modify, duplicate and export buttons', () => {
+      fixture.componentRef.setInput('study', {
+        uuid: 'u1',
+        title: 'Study',
+        author_email: 'a@b.com',
+        created_at_offline: '2025-01-01',
+        updated_at_offline: '2025-01-01',
+        shareable: false,
+        saved: true,
+        sections: []
+      });
+      fixture.detectChanges();
 
-      component.openModifyStudyModal.emit();
-      expect(spy).toHaveBeenCalled();
+      expect(getByTestId('modify-btn')).toBeTruthy();
+      expect(getByTestId('duplicate-btn')).toBeTruthy();
+      expect(getByTestId('export-btn')).toBeTruthy();
+    });
+
+    it('UC-SH3: should render details toggle button', () => {
+      fixture.componentRef.setInput('study', {
+        uuid: 'u1',
+        title: 'Study',
+        author_email: 'a@b.com',
+        created_at_offline: '2025-01-01',
+        updated_at_offline: '2025-01-01',
+        shareable: false,
+        saved: true,
+        sections: []
+      });
+      fixture.detectChanges();
+
+      const detailsToggle = getByTestId('details-toggle');
+      expect(detailsToggle).toBeTruthy();
     });
   });
 });

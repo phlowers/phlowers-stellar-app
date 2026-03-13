@@ -1,5 +1,5 @@
 <section class="btn-wrapper">
-  <a routerLink="/studies" [queryParams]="{ create: 'true' }" app-btn i18n>
+  <a routerLink="/studies" [queryParams]="{ create: 'true' }" app-btn i18n data-testid="create-study-btn">
     <app-icon icon="add" />
     Create a new study
   </a>
@@ -46,9 +46,10 @@
     <h2 i18n class="text-xl-400 underline-text">My last studies</h2>
   </header>
 
-  <main class="study-cards">
+  <main class="study-cards" data-testid="latest-studies-list">
     @for (study of latestStudies(); track study.uuid) {
       <app-card-study
+        data-testid="study-card"
         [title]="study.title"
         [authorMail]="study.author_email"
         [modificationDate]="study.updated_at_offline"

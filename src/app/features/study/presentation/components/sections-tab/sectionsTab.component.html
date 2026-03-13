@@ -50,8 +50,9 @@
           })
         "
       >
-        <app-card class="section" role="article">
+        <app-card class="section" role="article" data-testid="section-card">
           <p-checkbox
+            data-testid="section-checkbox"
             ariaLabel="select this study's section"
             i18n-ariaLabel
             class="section__selector"
@@ -64,7 +65,7 @@
           <dl>
             <div class="contents">
               <dt i18n class="section__title-name">Section Name</dt>
-              <dd class="section__text-name">{{ section.name }}</dd>
+              <dd class="section__text-name" data-testid="section-name">{{ section.name }}</dd>
             </div>
             <div class="contents">
               <dt i18n class="section__title-type">Section type</dt>
@@ -185,6 +186,7 @@
             class="section__content-action"
             [ariaLabel]="'Actions for section ' + section.name"
             i18n-ariaLabel
+            data-testid="section-actions-btn"
           >
             <app-icon icon="more_horiz" />
           </button>
@@ -230,7 +232,14 @@
   </article>
 
   <div class="sticky-btn-wrapper">
-    <button i18n app-btn btnStyle="outlined" btnSize="m" (click)="openNewSectionModalCreate()">
+    <button
+      i18n
+      app-btn
+      btnStyle="outlined"
+      btnSize="m"
+      (click)="openNewSectionModalCreate()"
+      data-testid="create-section-btn"
+    >
       <app-icon icon="add" />
       Create a section
     </button>
@@ -241,6 +250,7 @@
       btnSize="m"
       [routerLink]="'/study/' + study()?.uuid + '/studio'"
       [queryParams]="{ sectionUuid: selectedSection() }"
+      data-testid="generate-state-btn"
     >
       <app-icon icon="play_circle" />
       <ng-container i18n>Generate a state</ng-container>

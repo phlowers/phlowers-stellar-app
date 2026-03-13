@@ -10,6 +10,9 @@ describe('TopbarComponent', () => {
   let mockPageTitleService: jest.Mocked<PageTitleService>;
   let pageTitleSubject: BehaviorSubject<string>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   beforeEach(async () => {
     pageTitleSubject = new BehaviorSubject<string>('');
 
@@ -24,10 +27,6 @@ describe('TopbarComponent', () => {
 
     fixture = TestBed.createComponent(TopbarComponent);
     component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   describe('initialization', () => {
@@ -88,6 +87,28 @@ describe('TopbarComponent', () => {
       component.ngOnDestroy();
 
       expect(unsubscribeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('UC: should render topbar with user info', () => {
+    it('UC-TOPBAR1: should render topbar with user info', () => {
+      fixture.detectChanges();
+
+      component.user.set({ email: 'user@example.com' } as any);
+      fixture.detectChanges();
+
+      const userInfo = getByTestId('user-info');
+      expect(userInfo).toBeTruthy();
+      expect(userInfo?.textContent).toContain('user@example.com');
+    });
+
+    it('should display "No user" when user is null', () => {
+      component.user.set(null);
+      fixture.detectChanges();
+
+      const userInfo = getByTestId('user-info');
+      expect(userInfo).toBeTruthy();
+      expect(userInfo?.textContent).toContain('No user');
     });
   });
 });

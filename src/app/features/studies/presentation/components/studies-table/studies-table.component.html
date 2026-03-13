@@ -1,4 +1,5 @@
 <p-table
+  data-testid="studies-table"
   [paginator]="true"
   [rows]="defaultRowsPerPage"
   [rowsPerPageOptions]="rowsPerPageOptions"
@@ -70,7 +71,7 @@
     </tr>
   </ng-template>
   <ng-template #body let-study>
-    <tr>
+    <tr data-testid="study-row">
       <td>
         <p-checkbox [binary]="true" />
       </td>
@@ -84,7 +85,9 @@
         </p>
       </td>
       <td>
-        <a [routerLink]="'/study/' + study.uuid" app-btn btnStyle="base" btnSize="s" i18n> Open </a>
+        <a [routerLink]="'/study/' + study.uuid" app-btn btnStyle="base" btnSize="s" i18n data-testid="open-study-btn">
+          Open
+        </a>
       </td>
       <td>
         <button (click)="popover.toggle($event)" app-btn btnSize="l" btnStyle="text">
@@ -92,15 +95,34 @@
         </button>
         <p-popover #popover>
           <ng-template pTemplate="content">
-            <button app-btn btnSize="s" btnStyle="text" (click)="duplicateStudy.emit(study.uuid)">
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              (click)="duplicateStudy.emit(study.uuid)"
+              data-testid="duplicate-study-btn"
+            >
               <app-icon icon="content_copy" />
               <span i18n>Duplicate</span>
             </button>
-            <button app-btn btnSize="s" btnStyle="text" (click)="openExportDialog(study.uuid)">
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              (click)="openExportDialog(study.uuid)"
+              data-testid="export-study-btn"
+            >
               <app-icon icon="download" />
               <ng-container i18n>Export</ng-container>
             </button>
-            <button app-btn btnSize="s" btnStyle="text" class="erase-btn" (click)="deleteStudy.emit(study.uuid)">
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              class="erase-btn"
+              (click)="deleteStudy.emit(study.uuid)"
+              data-testid="delete-study-btn"
+            >
               <app-icon icon="delete" />
               <span i18n>Delete</span>
             </button>

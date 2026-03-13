@@ -96,10 +96,6 @@ describe('StudioPageComponent', () => {
     jest.useRealTimers();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('toggleSidebar should toggle open state and width', () => {
     expect(component.sidebarOpen()).toBe(false);
     expect(component.sidebarWidth()).toBe(300); // initial width signal default
@@ -458,5 +454,23 @@ describe('StudioPageComponent', () => {
 
     expect(plotService.resetAll).toHaveBeenCalled();
     expect(unsubscribe).toHaveBeenCalled();
+  });
+
+  describe('UC: studio page initialization and navigation', () => {
+    it('UC-SP1: should redirect to studies when route params are missing', () => {
+      (route.snapshot.paramMap.get as jest.Mock).mockReturnValueOnce(null);
+      component.ngOnInit();
+      expect(router.navigate).toHaveBeenCalledWith(['/studies']);
+    });
+
+    it('UC-SP2: should initialize sidebar in closed state', () => {
+      expect(component.sidebarOpen()).toBe(false);
+    });
+
+    it('UC-SP3: should open sidebar on toggle', () => {
+      component.toggleSidebar();
+      expect(component.sidebarOpen()).toBe(true);
+      expect(component.sidebarWidth()).toBe(300);
+    });
   });
 });

@@ -1,5 +1,5 @@
 <article>
-  <h3>
+  <h3 data-testid="card-study-title">
     {{ title() }}
   </h3>
 
@@ -8,7 +8,7 @@
       <app-icon icon="person" />
       <span i18n>Author:</span>
     </dt>
-    <dd>
+    <dd data-testid="card-study-author">
       {{ authorMail() }}
     </dd>
 
@@ -16,7 +16,7 @@
       <app-icon icon="history" />
       <span i18n>Last changed:</span>
     </dt>
-    <dd>
+    <dd data-testid="card-study-date">
       {{ modificationDate() }}
     </dd>
   </dl>

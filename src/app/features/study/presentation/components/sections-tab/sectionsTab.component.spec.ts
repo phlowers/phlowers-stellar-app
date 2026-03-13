@@ -27,6 +27,12 @@ describe('SectionsTabComponent', () => {
   let component: SectionsTabComponent;
   let fixture: ComponentFixture<SectionsTabComponent>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+  const getAllByTestId = (testId: string): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
+
   beforeAll(() => {
     // Mock global matchMedia for PrimeNG 19
     Object.defineProperty(window, 'matchMedia', {
@@ -148,10 +154,6 @@ describe('SectionsTabComponent', () => {
     jest.spyOn(component.deleteInitialCondition, 'emit');
   });
 
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should display "No existing section" when sections is empty', () => {
     fixture.componentRef.setInput('study', { sections: [] });
     fixture.detectChanges();
@@ -244,5 +246,48 @@ describe('SectionsTabComponent', () => {
     fixture.detectChanges();
 
     expect(component.duplicateSection.emit).toHaveBeenCalledWith(mockSection);
+  });
+
+  describe('UC: display section list with actions', () => {
+    it('UC-ST1: should render section cards when sections exist', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const cards = getAllByTestId('section-card');
+      expect(cards.length).toBe(1);
+    });
+
+    it('UC-ST2: should display section name', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const name = getByTestId('section-name');
+      expect(name).toBeTruthy();
+      expect(name!.textContent).toContain('My Section');
+    });
+
+    it('UC-ST3: should render create section button when sections exist', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const btn = getByTestId('create-section-btn');
+      expect(btn).toBeTruthy();
+    });
+
+    it('UC-ST4: should render section actions button for each section', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const actionsBtn = getByTestId('section-actions-btn');
+      expect(actionsBtn).toBeTruthy();
+    });
+
+    it('UC-ST5: should render generate state button when sections exist', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const generateBtn = getByTestId('generate-state-btn');
+      expect(generateBtn).toBeTruthy();
+    });
   });
 });

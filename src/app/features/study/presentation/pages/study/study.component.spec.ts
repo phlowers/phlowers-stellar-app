@@ -5,6 +5,7 @@ import { of, BehaviorSubject, Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { signal } from '@angular/core';
 
 import { StudyComponent } from './study.component';
 import { StudiesService } from '@services/studies/studies.service';
@@ -54,6 +55,9 @@ describe('StudyComponent', () => {
   let mockMessageService: jest.Mocked<MessageService>;
   let readySubject: BehaviorSubject<boolean>;
   let paramsSubject: BehaviorSubject<{ uuid: string }>;
+
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   const mockStudy: Study = {
     uuid: 'test-uuid-1',
@@ -145,7 +149,8 @@ describe('StudyComponent', () => {
       getStudyAsObservable: jest.fn().mockReturnValue(of(mockStudy)),
       duplicateStudy: jest.fn().mockResolvedValue(mockStudy),
       updateStudy: jest.fn().mockResolvedValue(undefined),
-      ready: readySubject
+      ready: readySubject,
+      exportDialogData: signal(null)
     } as unknown as jest.Mocked<StudiesService>;
 
     mockRouter = {
@@ -204,10 +209,6 @@ describe('StudyComponent', () => {
   });
 
   describe('Component Creation', () => {
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-
     it('should initialize with default values', () => {
       expect(component.study()).toBeNull();
       expect(component.isNewStudyModalOpen()).toBeFalsy();
@@ -761,6 +762,18 @@ describe('StudyComponent', () => {
       });
 
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('UC: should display study header with sections tab', () => {
+    it('UC-SD1: should display sections tab', async () => {
+      component.ngOnInit();
+      readySubject.next(true);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const tab = getByTestId('sections-tab');
+      expect(tab).toBeTruthy();
     });
   });
 });

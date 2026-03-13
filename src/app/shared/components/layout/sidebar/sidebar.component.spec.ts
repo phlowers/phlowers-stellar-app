@@ -116,10 +116,6 @@ describe('SidebarComponent', () => {
     component = hostComponent.sidebarComponent;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize with proper sidebar classes', () => {
     expect(mockBodyClassList.add).toHaveBeenCalledWith('has-sidebar');
     expect(mockBodyClassList.add).toHaveBeenCalledWith('has-sidebar--expanded');
@@ -280,5 +276,29 @@ describe('SidebarComponent', () => {
     const mainLinks = hostFixture.debugElement.queryAll(By.css('.stelBar-main li a'));
     expect(mainLinks.length).toBe(3);
     expect(mainLinks[2].attributes['id']).toBe('new-link');
+  });
+
+  describe('UC: should render nav links and toggle expanded/collapsed', () => {
+    const getAllByTestId = (testId: string): HTMLElement[] =>
+      Array.from(hostFixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
+    const getByTestId = (testId: string): HTMLElement | null =>
+      hostFixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('UC-SIDEBAR1: should render nav links and toggle expanded/collapsed', () => {
+      hostFixture.detectChanges();
+
+      const navLinks = getAllByTestId('nav-link');
+      expect(navLinks.length).toBe(hostComponent.mainLinks.length + hostComponent.footerLinks.length);
+
+      const toggle = getByTestId('sidebar-toggle');
+      expect(toggle).toBeTruthy();
+      expect(toggle?.tagName).toBe('BUTTON');
+
+      // Toggle should flip the expanded state
+      const initialState = component.expandedStatus();
+      toggle?.click();
+      hostFixture.detectChanges();
+      expect(component.expandedStatus()).toBe(!initialState);
+    });
   });
 });

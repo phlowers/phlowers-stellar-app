@@ -1,5 +1,5 @@
-<form [formGroup]="form" class="climate">
-  <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" class="climate__reset">
+<form [formGroup]="form" class="climate" data-testid="climate-form">
+  <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" class="climate__reset" data-testid="reset-btn">
     <app-icon icon="refresh" />
     <ng-container i18n>Reset</ng-container>
   </button>
@@ -14,6 +14,7 @@
         id="windPressure"
         formControlName="windPressure"
         class="wind-input"
+        data-testid="wind-pressure-input"
         [min]="constraints.windPressure.min"
         [max]="constraints.windPressure.max"
         step="1"
@@ -55,6 +56,7 @@
         id="cableTemperature"
         formControlName="cableTemperature"
         class="temp-input"
+        data-testid="cable-temperature-input"
         [min]="constraints.cableTemperature.min"
         [max]="constraints.cableTemperature.max"
         step="1"
@@ -97,6 +99,7 @@
       optionLabel="label"
       optionValue="value"
       class="symmetry"
+      data-testid="ice-indicator-select"
     />
   </div>
 
@@ -115,6 +118,7 @@
           required
           [attr.aria-invalid]="form.controls.iceThickness.invalid || null"
           [attr.aria-errormessage]="getErrorIds('iceThickness', ['min', 'max'])"
+          data-testid="ice-thickness-input"
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
@@ -222,12 +226,12 @@
       <app-icon icon="delete" />
     </button>
 
-    <button app-btn type="submit" btnStyle="outlined" (click)="saveForm()" [disabled]="!isFormValid()">
+    <button app-btn type="submit" btnStyle="outlined" (click)="saveForm()" [disabled]="!isFormValid()" data-testid="save-btn">
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>
 
-    <button app-btn type="button" (click)="calculateForm()" [disabled]="!isFormValid()">
+    <button app-btn type="button" (click)="calculateForm()" [disabled]="!isFormValid()" data-testid="calculate-btn">
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>
     </button>

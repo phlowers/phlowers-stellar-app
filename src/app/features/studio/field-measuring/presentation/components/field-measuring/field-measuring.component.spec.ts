@@ -57,6 +57,9 @@ describe('FieldMeasuringComponent', () => {
   let fixture: ComponentFixture<FieldMeasuringComponent>;
   let toolbarDialogService: ToolbarDialogService;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   beforeEach(async () => {
     const mockMessageService = {
       add: jest.fn()
@@ -132,15 +135,6 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('Component Creation', () => {
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-
-    it('should inject ToolbarDialogService', () => {
-      expect(component['toolbarDialogService']).toBeDefined();
-      expect(component['toolbarDialogService']).toBeInstanceOf(ToolbarDialogService);
-    });
-
     it('should initialize measureData with createInitialMeasureData result', () => {
       // Component initializes with createInitialMeasureData(null, '') which creates mostly null values
       const measureData = component.measureData();
@@ -562,6 +556,33 @@ describe('FieldMeasuringComponent', () => {
       await component.onSave();
 
       expect(modifySpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('UC: field measuring rendering', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('UC-FM1: should render terrain data tab', () => {
+      const tab = getByTestId('terrain-data-tab');
+      expect(tab).toBeTruthy();
+      expect(tab!.textContent).toContain('Terrain data');
+    });
+
+    it('UC-FM2: should render parameter calculation tab', () => {
+      const tab = getByTestId('parameter-calc-tab');
+      expect(tab).toBeTruthy();
+    });
+
+    it('UC-FM3: should render temperature calculation tab', () => {
+      const tab = getByTestId('temperature-calc-tab');
+      expect(tab).toBeTruthy();
+    });
+
+    it('UC-FM4: should render param at 15C tab', () => {
+      const tab = getByTestId('param-15c-tab');
+      expect(tab).toBeTruthy();
     });
   });
 });

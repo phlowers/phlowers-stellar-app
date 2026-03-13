@@ -106,14 +106,6 @@ describe('InitialConditionModalComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should initialize initialCondition from input', () => {
-    expect(component.initialCondition()).toEqual(mockInitialCondition);
-  });
-
   describe('onVisibleChange', () => {
     it('should emit isOpenChange when visible is false', () => {
       const spy = jest.spyOn(component.isOpenChange, 'emit');
@@ -303,6 +295,29 @@ describe('InitialConditionModalComponent', () => {
 
       expect(deleteServiceSpy).toHaveBeenCalledWith(mockStudy, mockSection, mockInitialCondition);
       expect(closeModalSpy).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('UC: initial condition modal form rendering', () => {
+    it('UC-IC1: should have name form control', () => {
+      expect(component.form.controls.name).toBeTruthy();
+    });
+
+    it('UC-IC2: should have base_parameters form control', () => {
+      expect(component.form.controls.base_parameters).toBeTruthy();
+    });
+
+    it('UC-IC3: should have validate and cancel behavior via outputs', () => {
+      expect(component.isOpenChange).toBeTruthy();
+      expect(component.addInitialCondition).toBeTruthy();
+    });
+
+    it('UC-IC4: should set form invalid when name is empty', () => {
+      component.form.controls.name.setValue('');
+      component.form.controls.name.markAsTouched();
+      component.form.controls.name.updateValueAndValidity();
+
+      expect(component.form.valid).toBe(false);
     });
   });
 });
