@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B et 7 terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-13) — ~150 violations identifiées, plan de remédiation en 7 étapes (A-G). Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal() — reste 9 composants avec `subscribe()` manuel et 8 avec `@ViewChild`.
+**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B et 7 terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal() — reste 9 composants avec `subscribe()` manuel et **10 avec `@ViewChild`** (14 décorateurs). **Étape E (cross-features DDD)** réévaluée : ~60 imports cross-boundary dans ~38 fichiers (vs 5 dans 4 précédemment estimé).
 
 ---
 
@@ -1232,11 +1232,11 @@ src/app/core/
 - **Pas de nouvel alias `@styles/*`** : seul `app.config.ts` importe `primeng-preset`, import relatif suffisant
 - L'alias `@ui/*` supprimé — 0 consommateur dans le code source
 
-### Phase 8 — Audit de conformité CLAUDE.md & remédiation (audit rafraîchi 2026-03-13)
+### Phase 8 — Audit de conformité CLAUDE.md & remédiation (audit rafraîchi 2026-03-16)
 
-*Audit complet du code existant par rapport aux règles définies dans CLAUDE.md. ~150 violations identifiées, plan de remédiation priorisé en 6 étapes (A–F).*
+*Audit complet du code existant par rapport aux règles définies dans CLAUDE.md. ~200+ violations identifiées, plan de remédiation priorisé en 8 étapes (A–H). Phases 0–3F, 4, 6, 6B et 7 terminées.*
 
-> **Contexte** : Angular 19.2.4. Phases 0–3F, 4 et 7 terminées. L'audit précédent a été rafraîchi pour refléter l'état réel post-Phase 7.
+> **Contexte** : Angular 19.2.4. Aucune étape de Phase 8 n'a encore été implémentée. L'audit a été rafraîchi le 2026-03-16 pour refléter l'état réel post-Phase 7 + 6B — suppression des bridges, démantèlement de `ui/`.
 
 #### État de conformité actuel (60 composants)
 
@@ -1248,79 +1248,147 @@ src/app/core/
 | `input()` / `output()` signal API | 60/60 | ✅ 100% |
 | `signal()` / `computed()` pour l'état | 60/60 | ✅ 100% |
 | RxJS → `toSignal()` (pas de `subscribe()` manuel) | 51/60 | ⚠️ 85% |
-| `viewChild()` signal vs `@ViewChild` | 49/60 | ⚠️ 82% |
+| `viewChild()` signal vs `@ViewChild` | 46/60 | ⚠️ 77% |
 
 #### Résumé des violations restantes
 
 | Catégorie | Violations | Sévérité |
 |-----------|-----------|----------|
 | Import `Subscription` depuis `dexie` en couche présentation | 2 fichiers | 🔴 CRITIQUE |
-| `HttpClientTestingModule` (interdit) | 1 fichier | 🔴 CRITIQUE |
-| Texte français hardcodé / commentaires FR | 5 instances | 🟠 HAUTE |
-| Imports relatifs profonds (alias manquants) | 9 fichiers | 🟠 HAUTE |
-| Subscriptions RxJS manuelles (`subscribe()`) au lieu de `toSignal()` | 9 composants | 🟠 HAUTE |
-| Imports cross-features (DDD bounded contexts) | 5 imports dans 4 fichiers | 🟠 HAUTE |
-| `@ViewChild`/`@ContentChildren` à migrer vers `viewChild()`/`contentChildren()` | 11 décorateurs dans 8 composants | 🟡 MOYENNE |
+| `HttpClientTestingModule` + `RouterTestingModule` (interdits) | 1 fichier (`app.component.spec.ts`) | 🔴 CRITIQUE |
+| Texte français hardcodé / commentaires FR | 6 instances dans 2 fichiers | 🟠 HAUTE |
+| Imports relatifs profonds (alias manquants) | 8 fichiers dans `field-measuring/` | 🟠 HAUTE |
+| Subscriptions RxJS manuelles (`subscribe()`) au lieu de `toSignal()` | 9 composants, ~19 subscriptions | 🟠 HAUTE |
+| **Imports cross-features (DDD bounded contexts)** | **~60 imports dans ~38 fichiers** | 🟠 HAUTE |
+| **`shared/` → `features/` (DDD interdit)** | **18 imports dans 6 fichiers** | 🟠 HAUTE |
+| `@ViewChild`/`@ContentChildren` à migrer vers `viewChild()`/`contentChildren()` | 14 décorateurs dans 10 composants | 🟡 MOYENNE |
 | `data-testid` manquants sur éléments interactifs | ~60-80 éléments | 🟠 HAUTE |
 | `aria-label` / `aria-*` manquants | ~20 éléments | 🟡 MOYENNE |
 | Sélecteurs globaux SCSS dans composants | ~22 instances | 🟡 MOYENNE |
 | Noms de classes non-BEM | ~6 fichiers | 🟡 MOYENNE |
 | Imbrication SCSS profonde (4+) | ~5 fichiers | 🔵 BASSE |
+| `any` explicites (`no-explicit-any` warnings) | ~8 prod + ~180 specs | 🟡 MOYENNE |
 
 #### Étape A — Corrections critiques (quick fixes)
 
 52. **Corriger `import { Subscription } from 'dexie'` → `from 'rxjs'`** dans 2 fichiers :
     - `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` (ligne 7)
     - `src/app/features/study/presentation/pages/study/study.component.ts` (ligne 24)
-53. **Remplacer `HttpClientTestingModule`** par `provideHttpClient()` dans `src/app/app.component.spec.ts` (ligne 19, 154)
-54. **Supprimer le texte français hardcodé** dans `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.html` (lignes 170-180) — "bouton pour tests focus", "coucou contenu onglet…"
-55. **Supprimer le commentaire français** dans `src/app/shared/components/studio/free-positioning/free-positioning.component.spec.ts` (ligne 1) — "Vérifier et supprimer…"
+53. **Remplacer `HttpClientTestingModule` et `RouterTestingModule`** par `provideHttpClient()` + `provideRouter([])` dans `src/app/app.component.spec.ts` (lignes 16, 19, 154)
+54. **Supprimer le texte français hardcodé** dans `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.html` (lignes 170-180) — "bouton pour tests focus", "coucou contenu onglet sol/estimations" (4 instances)
+55. **Supprimer les commentaires français** dans `src/app/shared/components/studio/free-positioning/free-positioning.component.spec.ts` (lignes 1-2) — "Vérifier et supprimer tout import…", "Aucun import de HttpClientTestingModule…"
 
-#### Étape B — Import aliases (9 fichiers dans `field-measuring`)
+#### Étape B — Import aliases (8 fichiers dans `field-measuring`)
 
-56. **Convertir les 9 imports relatifs profonds** vers alias `@features/` :
-    - `calculus-setting.component.ts` : `'../../../domain/types'` → `'@features/studio/field-measuring/domain/types'`
-    - `papoto.component.ts` : `'../../../../domain/types'` → `'@features/studio/field-measuring/domain/types'`
-    - `papoto.component.spec.ts` : `'./../../../helpers'` + `'../../../mock-data'`
-    - `field-datas.component.ts` + `.spec.ts` : `'../../../domain/types'`
-    - `header.component.ts` + `.spec.ts` : `'../../../domain/types'`
-    - `field-measuring.component.ts` : `'../../../domain/types'`
+56. **Convertir les 8 imports relatifs profonds** vers alias `@features/` :
+
+    | Fichier | Import relatif | Remplacement |
+    |---------|---------------|-------------|
+    | `header.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `header.component.spec.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `field-datas.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `field-datas.component.spec.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `field-measuring.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `calculus-setting.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `papoto.component.ts` | `'../../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `papoto.component.spec.ts` | `'../../../mock-data'` | `'@features/studio/field-measuring/presentation/mock-data'` |
 
 #### Étape C — Migration `toSignal()` (9 composants avec Subscriptions RxJS manuelles)
 
 57. **Convertir les Subscriptions manuelles en `toSignal()` + `effect()`** :
-    - `src/app/app.component.ts` — `subscriptions: Subscription` + `.subscribe()` + ngOnInit/ngOnDestroy
-    - `src/app/shared/components/layout/topbar/topbar.component.ts` — `subscriptions: Subscription` + multiple `.subscribe()`
-    - `src/app/features/home/presentation/pages/home/home.component.ts` — `subscriptions: Subscription` + `.subscribe()` dans constructor
-    - `src/app/features/changelog/presentation/pages/changelog/changelog.component.ts` — `.subscribe()` imbriqués dans ngOnInit
-    - `src/app/features/news/presentation/pages/news/news.component.ts` — `.subscribe()` imbriqués dans ngOnInit
-    - `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` — `subscription: Subscription` + `.subscribe()`
-    - `src/app/features/study/presentation/pages/study/study.component.ts` — `subscription: Subscription` + `.subscribe()`
-    - `src/app/features/studies/presentation/pages/studies/studies.component.ts` — `.subscribe()` dans constructor et ngOnInit
-    - `src/app/features/study/presentation/components/sections-tab/initialConditionModal/initialConditionModal.component.ts` — `subscriptions: Subscription` redondant avec `takeUntilDestroyed`
 
-#### Étape D — Migration `viewChild()` signal-based (11 décorateurs dans 8 composants)
+    | Composant | Fichier | Subscriptions | Détail |
+    |-----------|---------|:---:|--------|
+    | AppComponent | `src/app/app.component.ts` | 3 | `online$`, `ready$`, `needUpdate$` |
+    | TopbarComponent | `src/app/shared/components/layout/topbar/topbar.component.ts` | 4 | `pageTitle$`, `user$`, `ready$`, `pyodideLoadError$` |
+    | HomeComponent | `src/app/features/home/presentation/pages/home/home.component.ts` | 3 | `needUpdate$`, `combineLatest`, `ready` |
+    | ChangelogComponent | `src/app/features/changelog/presentation/pages/changelog/changelog.component.ts` | 2 | `online$`, `getChangelogs()` |
+    | NewsComponent | `src/app/features/news/presentation/pages/news/news.component.ts` | 2 | `online$`, `getNews()` |
+    | StudioPageComponent | `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` | 2 | `ready`, `getStudyAsObservable()` |
+    | StudyComponent | `src/app/features/study/presentation/pages/study/study.component.ts` | 3 | `ready`, `route.params`, `getStudyAsObservable()` |
+    | StudiesComponent | `src/app/features/studies/presentation/pages/studies/studies.component.ts` | 2 | `studies`, `ready` |
+    | InitialConditionModalComponent | `src/app/features/study/presentation/components/sections-tab/initialConditionModal/initialConditionModal.component.ts` | 1 | `Subscription` redondant avec `takeUntilDestroyed` |
+
+#### Étape D — Migration `viewChild()` signal-based (14 décorateurs dans 10 composants)
 
 58. **Remplacer `@ViewChild`/`@ContentChild`/`@ContentChildren`/`@ViewChildren`** par les alternatives signal-based :
-    - `select-with-buttons.component.ts` — `@ViewChild('selectComponent')` → `viewChild('selectComponent')`
-    - `vtl-and-guying.component.ts` — 2× `@ViewChild` (header, footer)
-    - `loads-table.component.ts` — 2× `@ViewChild` (header, footer)
-    - `l0-sum.component.ts` — 2× `@ViewChild` (header, footer)
-    - `scale-view.component.ts` — `@ViewChild('popover')`
-    - `sectionsTab.component.ts` — `@ViewChild('popover')`
-    - `init.component.ts` — `@ViewChild('header')`
-    - `field-measuring.component.ts` — 2× `@ViewChild` (header, footer)
-    - `side-tab.component.ts` — `@ContentChild(TemplateRef)` → `contentChild(TemplateRef)`
-    - `side-tabs.component.ts` — `@ContentChildren` + 2× `@ViewChildren` → `contentChildren()` + `viewChildren()`
 
-#### Étape E — Architecture DDD (imports cross-features)
+    | Composant | Fichier | Décorateurs | Migration |
+    |-----------|---------|:-----------:|-----------|
+    | SelectWithButtonsComponent | `select-with-buttons.component.ts` | 1× `@ViewChild('selectComponent')` | → `viewChild('selectComponent')` |
+    | VtlAndGuyingComponent | `vtl-and-guying.component.ts` | 2× `@ViewChild` (header, footer) | → `viewChild()` |
+    | LoadsTableComponent | `loads-table.component.ts` | 2× `@ViewChild` (header, footer) | → `viewChild()` |
+    | L0SumComponent | `l0-sum.component.ts` | 2× `@ViewChild` (header, footer) | → `viewChild()` |
+    | ScaleViewComponent | `scale-view.component.ts` | 1× `@ViewChild('popover')` | → `viewChild('popover')` |
+    | SectionsTabComponent | `sectionsTab.component.ts` | 1× `@ViewChild('popover')` | → `viewChild('popover')` |
+    | InitComponent | `init.component.ts` | 1× `@ViewChild('header')` | → `viewChild('header')` |
+    | FieldMeasuringComponent | `field-measuring.component.ts` | 2× `@ViewChild` (header, footer) | → `viewChild()` |
+    | SideTabComponent | `side-tab.component.ts` | 1× `@ContentChild(TemplateRef)` | → `contentChild(TemplateRef)` |
+    | SideTabsComponent | `side-tabs.component.ts` | 1× `@ContentChildren` + 2× `@ViewChildren` | → `contentChildren()` + `viewChildren()` |
 
-59. **Résoudre les imports cross-features (5 imports dans 4 fichiers)** — extraire les composants/services partagés vers `@shared/` ou `@core/` :
-    - **studio → study** : `parameter-calculation-15-without-wind.component.ts` importe `InitialConditionModalComponent` depuis `@features/study/`
-    - **study → studio** (3 imports) : `sectionsTab.component.ts` importe `ToolbarDialogService`, `ToolbarDialogComponent` depuis `@features/studio/toolbar/` et `PlotService` depuis `@features/studio/core/`
-    - **study → studio** : `manualSection.component.ts` importe `PlotService` depuis `@features/studio/core/`
-    - **studies → study** : `studies.component.ts` importe `ExportDialogComponent` depuis `@features/study/`
-    - **study → studies** : `study.component.ts` importe `NewStudyModalComponent` depuis `@features/studies/`
+#### Étape E — Architecture DDD (imports cross-features) ← MISE À JOUR MAJEURE
+
+> **Scope réel post-Phase 6B** : ~60 imports cross-boundary dans ~38 fichiers (prod + spec). C'est la plus grosse dette architecturale restante.
+
+##### E.1 — `shared/` → `features/` (interdit en DDD : 18 imports dans 6 fichiers)
+
+Les composants `shared/components/studio/` dépendent de services `features/studio/`. **Solution** : déplacer ces composants dans `features/studio/presentation/components/`.
+
+| Fichier `shared/` | Imports `@features/studio/` | Action |
+|--------------------|----------------------------|--------|
+| `studio.component.ts` + `.spec.ts` | `PlotService` | → Déplacer vers `features/studio/core/presentation/components/studio/` |
+| `section-plot.component.ts` + `.spec.ts` | `PlotService`, `SideTabsService`, `ObstacleFormService`, `ObstaclesService` | → Déplacer vers `features/studio/core/presentation/components/section-plot/` |
+| `free-positioning.component.ts` + `.spec.ts` | `PlotService`, `SideTabsService`, `ObstacleFormService`, `ObstaclesService` | → Déplacer vers `features/studio/core/presentation/components/free-positioning/` |
+
+##### E.2 — `studio` → `study` (SectionService, ChargesService, InitialConditionService — ~20 imports dans ~14 fichiers)
+
+`SectionService`, `ChargesService` et `InitialConditionService` sont consommés massivement par `studio`. **Solutions** :
+- **Option A** (recommandée) : Déplacer ces 3 services vers `core/services/` (services transverses) car ils sont partagés entre `study` et `studio`
+- **Option B** : Créer des interfaces dans `shared/domain/` et les injecter via `InjectionToken`
+
+| Service | Fichiers studio consommateurs | Fichiers study consommateurs |
+|---------|:----:|:----:|
+| `SectionService` | 8 (plot.service, studio-page, toolbar-dialog, vtl-and-guying, field-measuring, obstaclesForm.service + specs) | 3 (sectionsTab, manualSection + specs) |
+| `ChargesService` | 5 (menu-bar, loads-table, loadForms.service, new-charge-modal + specs) | 1 (inline via SectionService) |
+| `InitialConditionService` | 2 (parameter-calculation-15-without-wind + spec) | 2 (initialConditionModal + spec) |
+
+##### E.3 — `studio` → `studies` (StudiesService — 7 imports dans 5 fichiers)
+
+`StudiesService` est consommé par `studio` pour accéder à l'étude courante.
+
+| Fichier studio | Import |
+|---------------|--------|
+| `studio-page.component.ts` + `.spec.ts` | `StudiesService` |
+| `parameter-calculation-15-without-wind.component.ts` + `.spec.ts` | `StudiesService` |
+| `field-measuring.component.ts` + `.spec.ts` | `StudiesService` |
+| `toolbar-dialog.component.spec.ts` | `StudiesService` |
+
+**Solution** : `StudiesService` est un service de données central → déplacer vers `core/services/` ou exposer un signal `currentStudy` via un service `core/`.
+
+##### E.4 — `study` → `studio` (PlotService, ToolbarDialog — 5 imports dans 2 fichiers + 1 route)
+
+| Fichier study | Import |
+|--------------|--------|
+| `sectionsTab.component.ts` | `ToolbarDialogService`, `ToolbarDialogComponent`, `PlotService` |
+| `manualSection.component.ts` | `PlotService` |
+| `study.routes.ts` | `StudioPageComponent` (lazy `loadComponent` — **acceptable** car c'est du routing) |
+
+**Solution** : `PlotService` → `core/services/` (voir E.2). `ToolbarDialogService/Component` → `shared/components/` ou injection par `InjectionToken`.
+
+##### E.5 — `study` ↔ `studies` (12 + 3 imports bidirectionnels)
+
+| Direction | Imports | Fichiers |
+|-----------|:-------:|:--------:|
+| `study` → `studies` (StudiesService) | 12 | 8 fichiers (study.component, study-header, export-dialog, section.service, charges.service, initial-condition.service + specs) |
+| `studies` → `study` (ExportDialogComponent, helpers) | 3 | 3 fichiers (studies.component, import-study.component, studies.service) |
+
+**Solution** : Ces deux features sont fortement couplées. Options :
+- **Option A** (recommandée) : Fusionner `study` et `studies` en un seul bounded context `studies` (l'étude et la liste d'études sont le même agrégat)
+- **Option B** : Déplacer `StudiesService` vers `core/services/` et les helpers vers `shared/domain/helpers/`
+
+##### E.6 — `studio` → `study/presentation` (InitialConditionModalComponent — 1 import)
+
+`parameter-calculation-15-without-wind.component.ts` importe `InitialConditionModalComponent` depuis `@features/study/` → Déplacer le composant vers `shared/components/` ou le dupliquer dans studio.
 
 #### Étape F — Accessibilité & `data-testid`
 
@@ -1364,13 +1432,42 @@ src/app/core/
     - `obstaclesForm.component.scss` : jusqu'à 6 niveaux (`.obstacles-form__points__point__form__input`)
     - `top-toolbar.component.scss` : 4 niveaux
 
+#### Étape H — Suppression des `any` explicites (`@typescript-eslint/no-explicit-any`)
+
+> **~8 warnings prod + ~180 warnings specs** dans ~37 fichiers. Remplacer chaque `any` par un type précis (`unknown`, type concret, ou generic).
+
+65. **Corriger les ~8 fichiers de production** :
+    - `replace-table-data.helper.ts` — `Table<T, any>`, `select-with-buttons.component.ts` — `Record<string, any>`, `autocomplete-filters.service.ts`, `unique.pipe.ts`
+    - `handle-task.ts` — `catch (error: any)`, `worker-python.service.ts`, `service-worker.ts` — `catch (e: any)`, `types.ts` changelog — `assets: any[]`
+    - `attachmentSetModal.component.ts` — `event: any`, `sectionsTab.component.ts` — `event: any`, `main.ts`, `news.service.ts`
+66. **Corriger les ~25 fichiers `.spec.ts`** (~180 occurrences) — top contributeurs :
+    - `obstacles.spec.ts` (~49), `service-worker.spec.ts` (~17), `loads-table.component.spec.ts` (~17)
+    - `free-positioning.component.spec.ts` (~16), `loadForms.service.spec.ts` (~13)
+    - `top-toolbar.component.spec.ts` (~9), `parameter-calculation-15-without-wind.component.spec.ts` (~9)
+    - `worker_update.service.spec.ts` (~8), `studies-table.component.spec.ts` (~6), `import-study.component.spec.ts` (~5)
+    - 15 autres fichiers (1–4 chacun)
+67. **Vérification** : `npm run lint-check` — 0 warnings `no-explicit-any` restants
+
 #### Décisions Phase 8
 
 - **`@ViewChild` vs `viewChild()`** : `@ViewChild` n'est pas officiellement deprecated en Angular 19 mais `viewChild()` est le pattern recommandé. Migration priorité moyenne (Étape D).
-- **`PlotService` cross-feature** : service utilisé par study ET studio — candidat #1 pour déplacement vers `@core/services/` ou `@shared/services/`
-- **Overrides SCSS vendor** (PrimeNG dans `src/styles/vendor-extension/`) : magic numbers acceptables en tant qu'overrides de thème tiers, hors scope de cette phase
+- **Imports cross-features (Étape E)** — la dette la plus structurante. L'audit initial sous-estimait le problème (5 imports vs ~60 réels). Trois stratégies possibles :
+  1. **Services partagés → `core/services/`** : `SectionService`, `ChargesService`, `InitialConditionService`, `StudiesService`, `PlotService` sont utilisés par 2+ features → candidats pour `core/services/`
+  2. **Composants `shared/studio/` → `features/studio/`** : 3 composants visualization (studio, section-plot, free-positioning) appartiennent logiquement à studio
+  3. **Fusion `study`/`studies`** : les deux features sont bidirectionnellement couplées (15+ imports) → considérer un seul bounded context
+- **Overrides SCSS vendor** (PrimeNG dans `src/styles/vendor-extension/`) : magic numbers acceptables en tant qu'overrides de thème tiers, hors scope
 - **Imports intra-studio** (toolbar → core, field-measuring → core) : acceptables — sous-features d'un même bounded context `studio`
 - **Vérification** après chaque étape : `npm run test` + `npm run build` + `npm run lint-check`
+
+---
+
+**Changements majeurs par rapport à l'audit du 2026-03-13 :**
+
+1. **Étape A** : ajout de `RouterTestingModule` (absent de l'audit précédent) dans `app.component.spec.ts`
+2. **Étape D** : corrigé de "11 décorateurs dans 8 composants" → **14 décorateurs dans 10 composants** (`init.component` et `field-measuring.component` manquaient)
+3. **Étape E** : réécriture complète — de "5 imports dans 4 fichiers" → **~60 imports dans ~38 fichiers**, découpée en 6 sous-étapes (E.1–E.6) avec inventaire exhaustif et stratégies de résolution
+4. **`viewChild()` taux** : corrigé de 82% → **77%** (14 décorateurs restants, pas 11)
+5. **Ajout `shared/ → features/`** comme violation DDD distincte (18 imports dans 6 fichiers — totalement absent de l'audit précédent)
 
 ---
 

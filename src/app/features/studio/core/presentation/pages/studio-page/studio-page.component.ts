@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { debounce } from 'lodash';
 import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
-import { Subscription } from 'dexie';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
@@ -69,7 +68,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     { label: $localize`Two spans`, value: 'double' },
     { label: $localize`All`, value: 'all' }
   ]);
-  subscription: Subscription | null = null;
+  subscription: { unsubscribe(): void } | null = null;
   isNewChargeModalOpen = signal(false);
   isFreePositioningToolOpen = signal(false);
 

@@ -13,10 +13,10 @@ import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { UserService } from '@services/user/user.service';
 import { UpdateService } from '@services/worker_update/worker_update.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -151,7 +151,8 @@ describe('AppComponent', () => {
     } as unknown as ObstaclesService;
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, NoopAnimationsModule, RouterTestingModule, HttpClientTestingModule, AppComponent]
+      imports: [FormsModule, NoopAnimationsModule, AppComponent],
+      providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
     TestBed.overrideProvider(WorkerPythonService, {
       useValue: mockWorkerService

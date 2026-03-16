@@ -1,5 +1,3 @@
-// Vérifier et supprimer tout import ou usage de HttpClientTestingModule ici, rien à supprimer
-// Aucun import de HttpClientTestingModule trouvé dans le fichier.
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { FormArray, FormBuilder } from '@angular/forms';

@@ -21,7 +21,6 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { NewStudyModalComponent } from '@features/studies/presentation/components/new-study-modal/new-study-modal.component';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'dexie';
 
 /**
  * Study detail page component.
@@ -52,7 +51,7 @@ import { Subscription } from 'dexie';
 export class StudyComponent implements OnInit, OnDestroy {
   readonly study = signal<Study | null>(null);
   isNewStudyModalOpen = signal<boolean>(false);
-  subscription: Subscription | null = null;
+  subscription: { unsubscribe(): void } | null = null;
   private readonly route = inject(ActivatedRoute);
   private readonly studiesService = inject(StudiesService);
   private readonly sectionService = inject(SectionService);
