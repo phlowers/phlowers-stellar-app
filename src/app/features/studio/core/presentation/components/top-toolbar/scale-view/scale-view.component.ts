@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -29,7 +29,7 @@ import { PlotService } from '@features/studio/core/services/plot.service';
   styleUrls: ['./scale-view.component.scss']
 })
 export class ScaleViewComponent {
-  @ViewChild('popover') popover!: Popover;
+  readonly popover = viewChild<Popover>('popover');
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   readonly popoverOpen = signal(false);
@@ -94,7 +94,7 @@ export class ScaleViewComponent {
 
   public togglePopover(event: Event): void {
     this.popoverOpen.update((open) => !open);
-    this.popover?.toggle(event);
+    this.popover()?.toggle(event);
   }
 
   private readonly scaleNormsMap: Record<string, { x: number; y: number; z: number; aspectMode: string }> = {

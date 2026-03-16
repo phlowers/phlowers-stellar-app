@@ -1,9 +1,8 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   TemplateRef,
-  ViewChild,
+  viewChild,
   computed,
   effect,
   inject,
@@ -40,9 +39,9 @@ interface L0Row {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Dialog component displaying a sortable table of L0 (natural cable length) values per span. */
-export class L0SumComponent implements AfterViewInit {
-  @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
-  @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
+export class L0SumComponent {
+  readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
+  readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly plotService = inject(PlotService);
@@ -61,6 +60,14 @@ export class L0SumComponent implements AfterViewInit {
 
   constructor() {
     effect(() => {
+      const header = this.headerTemplate();
+      const footer = this.footerTemplate();
+      if (header && footer) {
+        this.toolbarDialogService.setTemplates({ header, footer });
+      }
+    });
+
+    effect(() => {
       const litData: GetSectionOutput | null = this.plotService.litData();
       if (!litData?.L0) {
         this.l0Rows.set([]);
@@ -78,13 +85,6 @@ export class L0SumComponent implements AfterViewInit {
         };
       });
       this.l0Rows.set(spans);
-    });
-  }
-
-  ngAfterViewInit(): void {
-    this.toolbarDialogService.setTemplates({
-      header: this.headerTemplate,
-      footer: this.footerTemplate
     });
   }
 

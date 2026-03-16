@@ -247,13 +247,6 @@ describe('LoadsTableComponent', () => {
     });
   });
 
-  describe('ngAfterViewInit', () => {
-    it('should set templates on toolbar dialog service', () => {
-      component.ngAfterViewInit();
-      expect(mockToolbarDialogService.setTemplates).toHaveBeenCalled();
-    });
-  });
-
   describe('update methods', () => {
     it('should update name', () => {
       component.updateName('New Name');

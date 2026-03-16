@@ -1,9 +1,8 @@
 import {
   ChangeDetectionStrategy,
-  AfterViewInit,
   Component,
   TemplateRef,
-  ViewChild,
+  viewChild,
   computed,
   effect,
   inject,
@@ -64,9 +63,9 @@ interface SupportOption {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Dialog component for computing VTL (Vertical/Transverse/Longitudinal) forces and guying parameters. */
-export class VhlAndGuyingComponent implements AfterViewInit {
-  @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
-  @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
+export class VhlAndGuyingComponent {
+  readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
+  readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly sectionService = inject(SectionService);
@@ -161,6 +160,15 @@ export class VhlAndGuyingComponent implements AfterViewInit {
 
     // Initialize computed values
     this.updateSupportOptions();
+
+    effect(() => {
+      const header = this.headerTemplate();
+      const footer = this.footerTemplate();
+      if (header && footer) {
+        this.toolbarDialogService.setTemplates({ header, footer });
+        this.setFormValuesFromSection();
+      }
+    });
   }
 
   private updateSupportOptions(): void {
@@ -219,14 +227,6 @@ export class VhlAndGuyingComponent implements AfterViewInit {
     controls.hasPulley.setValue(inputs.hasPulley ?? false);
     controls.comment.setValue(section.vtl_and_guying?.comment ?? '');
     this.results.set(outputs ?? null);
-  }
-
-  ngAfterViewInit(): void {
-    this.setFormValuesFromSection();
-    this.toolbarDialogService.setTemplates({
-      header: this.headerTemplate,
-      footer: this.footerTemplate
-    });
   }
 
   onVisibleChange(visible: boolean) {

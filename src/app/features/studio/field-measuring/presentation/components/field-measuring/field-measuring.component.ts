@@ -4,9 +4,8 @@ import {
   signal,
   effect,
   inject,
-  ViewChild,
+  viewChild,
   TemplateRef,
-  AfterViewInit,
   OnDestroy,
   computed,
   untracked
@@ -57,9 +56,9 @@ import { MessageService } from 'primeng/api';
   styleUrls: ['./field-measuring.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
-  @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
+export class FieldMeasuringComponent implements OnDestroy {
+  readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
+  readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   public readonly plotService = inject(PlotService);
@@ -75,13 +74,6 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
     max_wind_pressure: 0,
     max_frost_width: 0
   });
-
-  ngAfterViewInit(): void {
-    this.toolbarDialogService.setTemplates({
-      header: this.headerTemplate,
-      footer: this.footerTemplate
-    });
-  }
 
   measureData = signal<FieldMeasure>(createInitialMeasureData(null, '', null, null));
 
@@ -103,6 +95,14 @@ export class FieldMeasuringComponent implements AfterViewInit, OnDestroy {
   private readonly messageService = inject(MessageService);
 
   constructor() {
+    effect(() => {
+      const header = this.headerTemplate();
+      const footer = this.footerTemplate();
+      if (header && footer) {
+        this.toolbarDialogService.setTemplates({ header, footer });
+      }
+    });
+
     effect(() => {
       if (this.toolbarDialogService.isOpen() && this.toolbarDialogService.phase() === 'main') {
         // Initialize data from PlotService when dialog opens

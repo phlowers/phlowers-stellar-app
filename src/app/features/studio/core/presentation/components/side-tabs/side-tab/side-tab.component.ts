@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ContentChild, input, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, contentChild, input, TemplateRef } from '@angular/core';
 
 @Component({
   selector: 'app-side-tab',
@@ -13,5 +13,5 @@ export class SideTabComponent {
   /** Whether this tab is disabled. */
   disabled = input<boolean>(false);
   /** Content template projected into the tab panel. */
-  @ContentChild(TemplateRef) template!: TemplateRef<unknown>;
+  readonly template = contentChild(TemplateRef);
 }

@@ -1,4 +1,4 @@
-import { Component, QueryList, ElementRef } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SideTabsComponent } from './side-tabs.component';
@@ -140,9 +140,7 @@ describe('SideTabsComponent', () => {
         offsetWidth: 300
       }
     };
-    component['panels'] = {
-      toArray: () => [mockPanel]
-    } as unknown as QueryList<ElementRef<HTMLElement>>;
+    component['panels'] = (() => [mockPanel]) as any;
 
     component['updateWidth']();
 
@@ -155,9 +153,7 @@ describe('SideTabsComponent', () => {
 
   it('focusPanel does nothing if panel element is missing', () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
-    component['panels'] = {
-      toArray: () => []
-    } as unknown as QueryList<ElementRef<HTMLElement>>;
+    component['panels'] = (() => []) as any;
     expect(() => component).not.toThrow();
   });
 
@@ -170,9 +166,7 @@ describe('SideTabsComponent', () => {
         focus: focusSpy
       }
     };
-    component['panels'] = {
-      toArray: () => [mockPanel]
-    } as unknown as QueryList<ElementRef<HTMLElement>>;
+    component['panels'] = (() => [mockPanel]) as any;
 
     component['focusPanel'](0);
 
@@ -185,9 +179,7 @@ describe('SideTabsComponent', () => {
 
   it('handlePanelFocusOut does nothing if panel is missing', () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
-    component['panels'] = {
-      toArray: () => [undefined]
-    } as unknown as QueryList<ElementRef<HTMLElement>>;
+    component['panels'] = (() => [undefined]) as any;
 
     expect(() => component.handlePanelFocusOut({ relatedTarget: null } as FocusEvent, 0)).not.toThrow();
   });
@@ -196,9 +188,7 @@ describe('SideTabsComponent', () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
 
     const panelEl = document.createElement('div');
-    component['panels'] = {
-      toArray: () => [{ nativeElement: panelEl }]
-    } as unknown as QueryList<ElementRef<HTMLElement>>;
+    component['panels'] = (() => [{ nativeElement: panelEl }]) as any;
 
     const insideEl = document.createElement('button');
     panelEl.appendChild(insideEl);

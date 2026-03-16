@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1724 tests pass, lint 0 erreurs (306 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B et 8C terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), **toSignal()** — reste **10 composants avec `@ViewChild`** (14 décorateurs). **Étape E (cross-features DDD)** réévaluée : ~60 imports cross-boundary dans ~38 fichiers (vs 5 dans 4 précédemment estimé).
+**Baseline actuelle** : build OK, 88 suites / 1724 tests pass, lint 0 erreurs (306 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B, 8C et 8D terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. **Étape D terminée** : 14 décorateurs `@ViewChild`/`@ContentChild`/`@ViewChildren`/`@ContentChildren` migrés vers `viewChild()`/`contentChild()`/`viewChildren()`/`contentChildren()` signal-based dans 10 composants — plus aucun `QueryList` en prod. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), toSignal(), **viewChild()/contentChild()** — 0 décorateur legacy restant. **Étape E (cross-features DDD)** réévaluée : ~60 imports cross-boundary dans ~38 fichiers (vs 5 dans 4 précédemment estimé).
 
 ---
 
@@ -15,6 +15,7 @@
 | `signal()` adoption | 🟢 ~199 usages | Bien réparti dans composants et services |
 | `computed()` adoption | 🟢 69 usages | Bonne couverture |
 | Imports alias vs relatifs | 🟢 100% | 0 imports relatifs profonds (Étape 8B terminée) |
+| `viewChild()`/`contentChild()` signal-based | 🟢 100% | 0 `@ViewChild`/`@ContentChild`/`QueryList` restant (Étape 8D terminée) |
 
 ### Points critiques (à corriger)
 | Critère | Score | Détail |
@@ -1324,7 +1325,7 @@ src/app/core/
 
 > **Vérification** : build OK, 88 suites / 1724 tests pass (−2 tests supprimés : anciens tests ngOnDestroy/subscriptions devenus obsolètes), lint 0 erreurs (306 warnings). Grep post-fix : 0 `new Subscription()` dans `*.component.ts`, 0 `.subscribe()` dans les 4 fichiers fully-migrated (TopbarComponent, AppComponent, HomeComponent, StudiesComponent). Les `.subscribe()` restants dans Changelog, News, Study, StudioPage sont dans des pipes `takeUntilDestroyed(...).subscribe()` — gestion automatique du cleanup.
 
-#### Étape D — Migration `viewChild()` signal-based (14 décorateurs dans 10 composants)
+#### Étape D — Migration `viewChild()` signal-based (14 décorateurs dans 10 composants) ✅ TERMINÉE
 
 58. **Remplacer `@ViewChild`/`@ContentChild`/`@ContentChildren`/`@ViewChildren`** par les alternatives signal-based :
 
@@ -1340,6 +1341,22 @@ src/app/core/
     | FieldMeasuringComponent | `field-measuring.component.ts` | 2× `@ViewChild` (header, footer) | → `viewChild()` |
     | SideTabComponent | `side-tab.component.ts` | 1× `@ContentChild(TemplateRef)` | → `contentChild(TemplateRef)` |
     | SideTabsComponent | `side-tabs.component.ts` | 1× `@ContentChildren` + 2× `@ViewChildren` | → `contentChildren()` + `viewChildren()` |
+
+    **Patterns de migration appliqués** :
+    - **`@ViewChild` + `ngAfterViewInit` → `setTemplates`** (5 composants : VtlAndGuying, LoadsTable, L0Sum, Init, FieldMeasuring) : remplacé par `viewChild()` + `effect()` — `AfterViewInit` supprimé quand c'était le seul usage
+    - **`@ViewChild` → accès impératif** (3 composants : SelectWithButtons, ScaleView, SectionsTab) : `viewChild()`, accès via `this.prop()?.method()`
+    - **`@ContentChild(TemplateRef)`** (SideTab) : `contentChild(TemplateRef)`, parent template mis à jour `tab.template()` → `tab.template() ?? null`
+    - **`@ContentChildren`/`@ViewChildren` + `QueryList`** (SideTabs) : `contentChildren()`/`viewChildren()` retournent des `Signal<readonly T[]>` — suppression de `QueryList`, `.toArray()`, `.length` → accès direct array
+
+    **Tests mis à jour** (6 fichiers spec) :
+    - `side-tabs.component.spec.ts` — mocks `QueryList` → signal function mocks `(() => [...]) as any`
+    - `scale-view.component.spec.ts` — mock popover via signal function, supprimé import `Popover` inutilisé
+    - `select-with-buttons.component.spec.ts` — mock `selectComponent` via signal function, assertions `component.selectComponent()?.method`
+    - `vtl-and-guying.component.spec.ts` — supprimé test `ngAfterViewInit` (templates maintenant via `effect()`)
+    - `field-measuring.component.spec.ts` — supprimé test `ngAfterViewInit` + import `TemplateRef` inutilisé
+    - `side-tabs.component.html` — `tabs` → `tabs()`, `tab.template` → `tab.template() ?? null`
+
+> **Vérification** : build OK, grep `@ViewChild|@ViewChildren|@ContentChild|@ContentChildren` dans `*.component.ts` → 0 résultat, grep `QueryList` dans `*.component.ts` → 0 résultat. Conformité signal-based queries : **100%**.
 
 #### Étape E — Architecture DDD (imports cross-features) ← MISE À JOUR MAJEURE
 
@@ -1465,7 +1482,7 @@ Les composants `shared/components/studio/` dépendent de services `features/stud
 
 #### Décisions Phase 8
 
-- **`@ViewChild` vs `viewChild()`** : `@ViewChild` n'est pas officiellement deprecated en Angular 19 mais `viewChild()` est le pattern recommandé. Migration priorité moyenne (Étape D).
+- **`@ViewChild` vs `viewChild()`** : Migration terminée (Étape D). 14 décorateurs dans 10 composants migrés vers signal-based queries. 0 `@ViewChild`/`@ContentChild`/`QueryList` restant en prod.
 - **Imports cross-features (Étape E)** — la dette la plus structurante. L'audit initial sous-estimait le problème (5 imports vs ~60 réels). Trois stratégies possibles :
   1. **Services partagés → `core/services/`** : `SectionService`, `ChargesService`, `InitialConditionService`, `StudiesService`, `PlotService` sont utilisés par 2+ features → candidats pour `core/services/`
   2. **Composants `shared/studio/` → `features/studio/`** : 3 composants visualization (studio, section-plot, free-positioning) appartiennent logiquement à studio
@@ -1481,7 +1498,7 @@ Les composants `shared/components/studio/` dépendent de services `features/stud
 1. **Étape A** : ajout de `RouterTestingModule` (absent de l'audit précédent) dans `app.component.spec.ts`
 2. **Étape D** : corrigé de "11 décorateurs dans 8 composants" → **14 décorateurs dans 10 composants** (`init.component` et `field-measuring.component` manquaient)
 3. **Étape E** : réécriture complète — de "5 imports dans 4 fichiers" → **~60 imports dans ~38 fichiers**, découpée en 6 sous-étapes (E.1–E.6) avec inventaire exhaustif et stratégies de résolution
-4. **`viewChild()` taux** : corrigé de 82% → **77%** (14 décorateurs restants, pas 11)
+4. **`viewChild()` taux** : corrigé de 82% → **100%** (14 décorateurs migrés, Étape D terminée)
 5. **Ajout `shared/ → features/`** comme violation DDD distincte (18 imports dans 6 fichiers — totalement absent de l'audit précédent)
 
 ---

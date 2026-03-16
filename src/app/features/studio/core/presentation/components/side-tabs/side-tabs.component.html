@@ -1,6 +1,6 @@
 <aside class="side-tab">
   <header class="side-tab__header" role="tablist" aria-orientation="vertical">
-    @for (tab of tabs; track $index) {
+    @for (tab of tabs(); track $index) {
       <button
         #btnRef
         [disabled]="tab.disabled()"
@@ -24,7 +24,7 @@
   </header>
 
   <main class="side-tab__main" [style.width]="panelWidth()">
-    @for (tab of tabs; track $index) {
+    @for (tab of tabs(); track $index) {
       <section
         #panelRef
         role="tabpanel"
@@ -42,7 +42,7 @@
             <ng-container i18n> Fold back </ng-container>
           </button>
         </header>
-        <ng-container *ngTemplateOutlet="tab.template" />
+        <ng-container *ngTemplateOutlet="tab.template() ?? null" />
       </section>
     }
   </main>

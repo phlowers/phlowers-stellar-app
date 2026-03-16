@@ -118,12 +118,6 @@ describe('VhlAndGuyingComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should set templates in ngAfterViewInit', () => {
-    const setTemplatesSpy = jest.spyOn(toolbarDialogService, 'setTemplates');
-    component.ngAfterViewInit();
-    expect(setTemplatesSpy).toHaveBeenCalled();
-  });
-
   it('should close tool when visible changes to false', () => {
     const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
     component.onVisibleChange(false);

@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -7,7 +6,7 @@ import {
   inject,
   signal,
   TemplateRef,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
@@ -57,9 +56,9 @@ interface SpanLoadRow {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Dialog component for viewing and editing charge case details and associated loads. */
-export class LoadsTableComponent implements AfterViewInit {
-  @ViewChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
-  @ViewChild('footer', { static: false }) footerTemplate!: TemplateRef<unknown>;
+export class LoadsTableComponent {
+  readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
+  readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly chargesService = inject(ChargesService);
@@ -122,6 +121,14 @@ export class LoadsTableComponent implements AfterViewInit {
   });
 
   constructor() {
+    effect(() => {
+      const header = this.headerTemplate();
+      const footer = this.footerTemplate();
+      if (header && footer) {
+        this.toolbarDialogService.setTemplates({ header, footer });
+      }
+    });
+
     effect(async () => {
       if (
         this.toolbarDialogService.isOpen() &&
@@ -142,13 +149,6 @@ export class LoadsTableComponent implements AfterViewInit {
           }
         }
       }
-    });
-  }
-
-  ngAfterViewInit(): void {
-    this.toolbarDialogService.setTemplates({
-      header: this.headerTemplate,
-      footer: this.footerTemplate
     });
   }
 

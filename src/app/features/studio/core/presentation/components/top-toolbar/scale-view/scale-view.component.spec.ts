@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { Popover } from 'primeng/popover';
 
 import { ScaleViewComponent } from './scale-view.component';
 import { PlotService } from '@features/studio/core/services/plot.service';
@@ -19,7 +18,6 @@ describe('ScaleViewComponent', () => {
     refreshProjection: jest.Mock;
   };
   let mockPopover: { toggle: jest.Mock };
-  let realPopover: Popover;
 
   beforeEach(async () => {
     resolutionSignal = signal(100);
@@ -43,8 +41,7 @@ describe('ScaleViewComponent', () => {
     fixture = TestBed.createComponent(ScaleViewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    realPopover = component['popover']; // save before mocking
-    component['popover'] = mockPopover as unknown as Popover;
+    (component as any)['popover'] = (() => mockPopover) as any;
   });
 
   afterEach(() => {
@@ -337,14 +334,15 @@ describe('ScaleViewComponent', () => {
     describe('Popover form content (opened)', () => {
       // These tests open the real PrimeNG Popover so its content is rendered to document.body.
       beforeEach(() => {
-        component['popover'] = realPopover;
+        // Restore the real viewChild signal for popover rendering
+        fixture = TestBed.createComponent(ScaleViewComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
         component.togglePopover(new Event('click'));
         fixture.detectChanges();
       });
 
       afterEach(() => {
-        // Re-mock the popover and clean up the overlay from body
-        component['popover'] = mockPopover as unknown as Popover;
         document.body.querySelectorAll('.p-popover').forEach((el) => el.remove());
       });
 

@@ -7,7 +7,7 @@ import {
   OnInit,
   output,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import { Select, SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +27,7 @@ import { ButtonComponent } from '../button/button.component';
  * @typeParam T - The option object type.
  */
 export class SelectWithButtonsComponent<T extends Record<string, any>> implements OnInit {
-  @ViewChild('selectComponent') selectComponent!: Select;
+  readonly selectComponent = viewChild<Select>('selectComponent');
   /** List of selectable options. */
   options = input.required<T[]>();
   /** Currently selected option value. */
@@ -83,15 +83,13 @@ export class SelectWithButtonsComponent<T extends Record<string, any>> implement
   clearSelectedOptionValue() {
     this.selectedOptionValue.set(undefined);
     this.selectOption.emit(undefined as any);
-    if (this.selectComponent) {
-      this.selectComponent.writeValue(null);
-      this.selectComponent.updateModel(null, null);
-    }
+    this.selectComponent()?.writeValue(null);
+    this.selectComponent()?.updateModel(null, null);
   }
 
   onSelectItem(item: T) {
     this.selectedOptionValue.set(item[this.optionValue()]);
     this.selectOption.emit(item);
-    this.selectComponent.hide();
+    this.selectComponent()?.hide();
   }
 }

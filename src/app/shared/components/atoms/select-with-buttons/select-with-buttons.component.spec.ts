@@ -54,12 +54,13 @@ describe('SelectWithButtonsComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    // mock ViewChild
-    component.selectComponent = {
+    // mock viewChild signal
+    const mockSelect = {
       writeValue: jest.fn(),
       updateModel: jest.fn(),
       hide: jest.fn()
-    } as any;
+    };
+    (component as any)['selectComponent'] = (() => mockSelect) as any;
   });
 
   afterEach(() => {
@@ -127,8 +128,8 @@ describe('SelectWithButtonsComponent', () => {
 
       expect(component.selectedOptionValue()).toBeUndefined();
       expect(spy).toHaveBeenCalledWith(undefined);
-      expect(component.selectComponent.writeValue).toHaveBeenCalledWith(null);
-      expect(component.selectComponent.updateModel).toHaveBeenCalledWith(null, null);
+      expect(component.selectComponent()?.writeValue).toHaveBeenCalledWith(null);
+      expect(component.selectComponent()?.updateModel).toHaveBeenCalledWith(null, null);
     });
 
     it('should emit selectOption and hide selectComponent onSelectItem', () => {
@@ -138,7 +139,7 @@ describe('SelectWithButtonsComponent', () => {
       component.onSelectItem(item);
 
       expect(spy).toHaveBeenCalledWith(item);
-      expect(component.selectComponent.hide).toHaveBeenCalled();
+      expect(component.selectComponent()?.hide).toHaveBeenCalled();
       expect(component.selectedOptionValue()).toBe('1');
     });
   });

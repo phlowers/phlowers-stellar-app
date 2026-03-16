@@ -1,13 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
+  contentChildren,
   effect,
   ElementRef,
   inject,
-  QueryList,
   signal,
-  ViewChildren
+  viewChildren
 } from '@angular/core';
 import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
@@ -28,9 +27,9 @@ const REFRESH_STUDIO_DELAY = 400;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideTabsComponent {
-  @ContentChildren(SideTabComponent) tabs!: QueryList<SideTabComponent>;
-  @ViewChildren('panelRef') panels!: QueryList<ElementRef<HTMLElement>>;
-  @ViewChildren('btnRef') btns!: QueryList<ElementRef<HTMLButtonElement>>;
+  readonly tabs = contentChildren(SideTabComponent);
+  readonly panels = viewChildren<ElementRef<HTMLElement>>('panelRef');
+  readonly btns = viewChildren<ElementRef<HTMLButtonElement>>('btnRef');
 
   public panelWidth = signal<string>('0px');
 
@@ -59,7 +58,7 @@ export class SideTabsComponent {
     }
 
     setTimeout(() => {
-      const el = this.panels.toArray()[idx as number]?.nativeElement;
+      const el = this.panels()[idx as number]?.nativeElement;
       if (el) {
         this.panelWidth.set(`${el.offsetWidth}px`);
       }
@@ -68,13 +67,13 @@ export class SideTabsComponent {
 
   private focusPanel(i: number) {
     setTimeout(() => {
-      const el = this.panels.toArray()[i]?.nativeElement;
+      const el = this.panels()[i]?.nativeElement;
       el?.focus({ preventScroll: true });
     });
   }
 
   private focusButton(i: number) {
-    const btn = this.btns.toArray()[i]?.nativeElement;
+    const btn = this.btns()[i]?.nativeElement;
     btn?.focus();
   }
 
@@ -96,7 +95,7 @@ export class SideTabsComponent {
   }
 
   handleKeyDown(event: KeyboardEvent, i: number) {
-    const count = this.btns.length;
+    const count = this.btns().length;
     let newIndex = i;
 
     switch (event.key) {
@@ -122,7 +121,7 @@ export class SideTabsComponent {
   }
 
   handlePanelFocusOut(event: FocusEvent, i: number) {
-    const panel = this.panels.toArray()[i]?.nativeElement;
+    const panel = this.panels()[i]?.nativeElement;
     const next = event.relatedTarget as HTMLElement | null;
 
     if (panel && next && panel.contains(next)) {

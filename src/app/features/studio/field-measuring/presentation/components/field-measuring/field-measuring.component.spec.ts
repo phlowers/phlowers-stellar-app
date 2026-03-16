@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, TemplateRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -151,21 +151,6 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('Lifecycle Hooks', () => {
-    it('should set templates on ngAfterViewInit', () => {
-      const setTemplatesSpy = jest.spyOn(toolbarDialogService, 'setTemplates');
-
-      // Create mock templates
-      component.headerTemplate = {} as TemplateRef<unknown>;
-      component.footerTemplate = {} as TemplateRef<unknown>;
-
-      component.ngAfterViewInit();
-
-      expect(setTemplatesSpy).toHaveBeenCalledWith({
-        header: component.headerTemplate,
-        footer: component.footerTemplate
-      });
-    });
-
     it('should clear templates on ngOnDestroy', () => {
       const setTemplatesSpy = jest.spyOn(toolbarDialogService, 'setTemplates');
 

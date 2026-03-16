@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { Section, InitialCondition, Study } from '@shared/domain';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -80,7 +80,7 @@ export class SectionsTabComponent {
   isInitialConditionModalOpen = signal<boolean>(false);
   initialConditionModalMode = signal<CreateEditView>('create');
   selectedSection = signal<string>('');
-  @ViewChild('popover') popover!: Popover;
+  readonly popover = viewChild<Popover>('popover');
   private readonly toolbarDialogService = inject(ToolbarDialogService);
 
   private readonly plotService = inject(PlotService);
