@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 import { PageTitleService } from '@shared/service/page-title/page-title.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { UserService } from '@services/user/user.service';
-import { User } from '@core/domain';
+import { User } from '@shared/domain';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
 @Component({

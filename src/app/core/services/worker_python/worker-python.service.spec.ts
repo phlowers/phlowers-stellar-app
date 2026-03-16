@@ -9,7 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { WorkerPythonService } from './worker-python.service';
 import { Task } from './tasks/types';
 import { firstValueFrom } from 'rxjs';
-import { CatalogCable, InitialCondition, Section, Support } from '@core/domain';
+import { CatalogCable, InitialCondition, Section, Support } from '@shared/domain';
 
 describe('WorkerService', () => {
   let service: WorkerPythonService;

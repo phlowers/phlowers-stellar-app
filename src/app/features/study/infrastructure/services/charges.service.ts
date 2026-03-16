@@ -5,9 +5,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
-import { Charge, Section } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
-import { StudiesService } from '@services/studies/studies.service';
+import { Charge, Section } from '@shared/domain';
+import { StudyEntity } from '@infrastructure/database';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { MessageService } from 'primeng/api';

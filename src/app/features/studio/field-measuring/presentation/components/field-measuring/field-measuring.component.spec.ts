@@ -8,13 +8,13 @@ import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { createTestMeasureData } from '../../helpers';
 import { MessageService } from 'primeng/api';
-import { SectionService } from '@services/sections/section.service';
-import { StudiesService } from '@services/studies/studies.service';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { BehaviorSubject } from 'rxjs';
-import { Section } from '@core/domain';
-import { LinesService } from '@services/lines/lines.service';
-import { CablesService } from '@services/cables/cables.service';
+import { Section } from '@shared/domain';
+import { LinesService } from '@shared/catalog/services/lines.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
 import { TRANSIT_BOUNDS } from '../../constants';
 
 @Component({

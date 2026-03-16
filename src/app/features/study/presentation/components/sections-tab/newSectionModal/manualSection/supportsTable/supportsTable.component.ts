@@ -6,8 +6,8 @@ import { CreateEditView } from '@shared/types';
 import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
-import { Support, CatalogChain } from '@core/domain';
-import { ChainsService } from '@services/chains/chains.service';
+import { Support, CatalogChain } from '@shared/domain';
+import { ChainsService } from '@shared/catalog/services/chains.service';
 import { SelectModule } from 'primeng/select';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -18,7 +18,7 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
 import { isNumber } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
-import { AttachmentService } from '@services/attachment/attachment.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import {
   buildCopyColumnChanges,

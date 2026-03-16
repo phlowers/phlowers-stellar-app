@@ -8,10 +8,10 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';
-import { ChargesService } from '@services/charges/charges.service';
+import { ChargesService } from '@features/study/infrastructure/services/charges.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { signal } from '@angular/core';
-import { Charge, SymmetryType } from '@core/domain';
+import { Charge, SymmetryType } from '@shared/domain';
 
 describe('getBaseClimate', () => {
   it('should return base climate with temperature from selected initial condition', () => {

@@ -1,7 +1,7 @@
 import { PlotObjectsType, PlotOptions } from './types';
 import { createDataObject, DataObject } from './createPlotDataObject';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { Support } from '@core/domain/models/support.model';
+import { Support } from '@shared/domain/models/support.model';
 
 /**
  * Builds an array of Plotly-compatible data objects for all section object types

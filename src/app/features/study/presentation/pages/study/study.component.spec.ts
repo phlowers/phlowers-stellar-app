@@ -8,11 +8,11 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 
 import { StudyComponent } from './study.component';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { SectionService } from '@features/study/infrastructure/services/section.service';
 import { InitialConditionService } from '@features/study/infrastructure/services/initial-condition.service';
-import { CablesService } from '@services/cables/cables.service';
-import { Section, InitialCondition, Study } from '@core/domain';
+import { CablesService } from '@shared/catalog/services/cables.service';
+import { Section, InitialCondition, Study } from '@shared/domain';
 
 // Mock uuid
 jest.mock('uuid', () => ({

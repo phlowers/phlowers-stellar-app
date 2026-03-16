@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { LoadFormsService } from './loadForms.service';
 import { PlotService } from '@features/studio/core/services/plot.service';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { Task } from '@src/app/core/services/worker_python/tasks/types';
-import { Section, Charge, SymmetryType } from '@core/domain';
-import { ChargeData, LoadType } from '@core/domain/models/charge.model';
+import { ChargesService } from '@features/study/infrastructure/services/charges.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
+import { Section, Charge, SymmetryType } from '@shared/domain';
+import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;

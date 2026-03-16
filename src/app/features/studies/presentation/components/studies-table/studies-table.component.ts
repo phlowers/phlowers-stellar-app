@@ -14,7 +14,7 @@ import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
-import { Study } from '@core/domain';
+import { Study } from '@shared/domain';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { StudiesService } from '@features/studies/infrastructure/services/studies.service';

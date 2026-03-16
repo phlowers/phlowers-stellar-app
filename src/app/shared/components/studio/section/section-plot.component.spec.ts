@@ -12,9 +12,9 @@ import { SideTabsService } from '@features/studio/core/services/side-tabs.servic
 import { ObstacleFormService } from '@features/studio/obstacles/presentation/services/obstaclesForm.service';
 import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
 import { DataObject } from './helpers/createPlotDataObject';
-import { Section, Support, SpanLoad } from '@core/domain';
-import { ChargeData } from '@core/domain/models/charge.model';
-import { Obstacle, ReferenceSupport, LateralDistanceType } from '@core/domain/models/obstacle.model';
+import { Section, Support, SpanLoad } from '@shared/domain';
+import { ChargeData } from '@shared/domain/models/charge.model';
+import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { LoadType } from './helpers/createLoadAnnotations';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;

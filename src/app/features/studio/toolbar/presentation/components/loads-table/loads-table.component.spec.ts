@@ -3,11 +3,11 @@ import { signal } from '@angular/core';
 
 import { LoadsTableComponent } from './loads-table.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
-import { ChargesService } from '@services/charges/charges.service';
+import { ChargesService } from '@features/study/infrastructure/services/charges.service';
 import { PlotService } from '@features/studio/core/services/plot.service';
-import { Charge, Section, Study } from '@core/domain';
-import { LoadType, SymmetryType } from '@core/domain/models/charge.model';
-import { Support } from '@core/domain/models/support.model';
+import { Charge, Section, Study } from '@shared/domain';
+import { LoadType, SymmetryType } from '@shared/domain/models/charge.model';
+import { Support } from '@shared/domain/models/support.model';
 
 describe('LoadsTableComponent', () => {
   let component: LoadsTableComponent;

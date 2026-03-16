@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { UserService } from './user.service';
-import { UserEntity } from '@core/infrastructure/database';
+import { UserEntity } from '@infrastructure/database';
 import { StorageService } from '@core/services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 

@@ -7,10 +7,10 @@
 
 import { TestBed } from '@angular/core/testing';
 import { ChargesService } from './charges.service';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { MessageService } from 'primeng/api';
-import { Charge, Section, SymmetryType } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { Charge, Section, SymmetryType } from '@shared/domain';
+import { StudyEntity } from '@infrastructure/database';
 
 // Mock uuid
 jest.mock('uuid', () => ({

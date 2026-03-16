@@ -2,10 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SupportsTableComponent } from './supportsTable.component';
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Support, CatalogChain } from '@core/domain';
+import { Support, CatalogChain } from '@shared/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ChainsService } from '@services/chains/chains.service';
-import { AttachmentService } from '@services/attachment/attachment.service';
+import { ChainsService } from '@shared/catalog/services/chains.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
 
 // Mock child component
 @Component({

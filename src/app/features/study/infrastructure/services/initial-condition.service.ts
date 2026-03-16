@@ -5,9 +5,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
-import { Section, InitialCondition } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
-import { StudiesService } from '@services/studies/studies.service';
+import { Section, InitialCondition } from '@shared/domain';
+import { StudyEntity } from '@infrastructure/database';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 

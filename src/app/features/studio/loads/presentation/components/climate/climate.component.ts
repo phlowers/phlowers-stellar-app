@@ -15,10 +15,10 @@ import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '@features/studio/core/services/plot.service';
-import { ChargesService } from '@core/services/charges/charges.service';
+import { ChargesService } from '@features/study/infrastructure/services/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '../../services/loadForms.service';
-import { ChargeData, ClimateCharge, SymmetryType } from '@core/domain/models/charge.model';
+import { ChargeData, ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
 import { MessageModule } from 'primeng/message';
 
 /** Validator that rejects non-integer numeric values. */

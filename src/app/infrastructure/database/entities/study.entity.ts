@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { Study } from '@core/domain';
+import { Study } from '@shared/domain';
 
 /**
  * Study entity for Dexie storage

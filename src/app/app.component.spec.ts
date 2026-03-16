@@ -17,11 +17,11 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { UserService } from '@services/user/user.service';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MaintenanceService } from '@services/maintenance/maintenance.service';
-import { LinesService } from '@services/lines/lines.service';
-import { CablesService } from '@services/cables/cables.service';
-import { ChainsService } from '@services/chains/chains.service';
-import { AttachmentService } from '@services/attachment/attachment.service';
+import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { LinesService } from '@shared/catalog/services/lines.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
+import { ChainsService } from '@shared/catalog/services/chains.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
 
 class Worker {

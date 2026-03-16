@@ -10,8 +10,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { ChainsService } from './chains.service';
 import { StorageService } from '@services/storage/storage.service';
-import { CatalogChainEntity } from '@core/infrastructure/database';
-import { ChainCsvDto } from '@core/infrastructure/dto';
+import { CatalogChainEntity } from '@infrastructure/database';
+import { ChainCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse

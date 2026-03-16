@@ -1,6 +1,6 @@
 import { createDataObject } from './createPlotDataObject';
 import { PlotObjectsType } from './types';
-import { Support } from '@core/domain/models/support.model';
+import { Support } from '@shared/domain/models/support.model';
 
 const createMockSupport = (overrides: Partial<Support> = {}): Support => ({
   uuid: 'test-uuid',

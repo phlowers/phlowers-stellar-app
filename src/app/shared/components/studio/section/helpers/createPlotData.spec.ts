@@ -2,7 +2,7 @@ import { createPlotData } from './createPlotData';
 import { PlotOptions } from './types';
 import { createDataObject } from './createPlotDataObject';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { Support } from '@core/domain/models/support.model';
+import { Support } from '@shared/domain/models/support.model';
 
 // Mock the createDataObject function
 jest.mock('./createPlotDataObject');

@@ -30,12 +30,12 @@ import { WorkerPythonService } from '@core/services/worker_python/worker-python.
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { formatStudioError } from '../helpers/errors';
-import { Support } from '@core/index';
+import { Support } from '@shared/domain';
 import { debounce, isNumber } from 'lodash';
 import { SideTabsService } from '@features/studio/core/services/side-tabs.service';
 import { ObstacleFormService } from '@features/studio/obstacles/presentation/services/obstaclesForm.service';
 import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
-import { Position3D, ReferenceSupport } from '@src/app/core/domain/models/obstacle.model';
+import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 
 // Constants
 const PLOT_CONFIG = {

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ChargesService } from '@services/charges/charges.service';
-import { Section, Study } from '@core/domain';
+import { ChargesService } from '@features/study/infrastructure/services/charges.service';
+import { Section, Study } from '@shared/domain';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';

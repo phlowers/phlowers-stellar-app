@@ -34,8 +34,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 
 import { AttachmentSetModalComponent } from './attachmentSetModal.component';
-import { AttachmentService } from '@services/attachment/attachment.service';
-import { CatalogAttachment, Support, Section } from '@core/domain';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { CatalogAttachment, Support, Section } from '@shared/domain';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
 // Mock plotly.js-dist-min to prevent errors in SupportPlotComponent

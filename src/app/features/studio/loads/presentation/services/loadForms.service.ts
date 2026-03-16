@@ -1,9 +1,9 @@
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { effect, inject, Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash';
-import { ChargesService } from '@src/app/core/services/charges/charges.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { Task } from '@src/app/core/services/worker_python/tasks/types';
+import { ChargesService } from '@features/study/infrastructure/services/charges.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 import { recheckSpanLoads } from '../helpers';
 
 @Injectable({

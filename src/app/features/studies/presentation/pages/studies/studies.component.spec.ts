@@ -11,8 +11,8 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { BehaviorSubject } from 'rxjs';
 import { StudiesComponent } from './studies.component';
 import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
-import { Study } from '@core/domain';
-import { CablesService } from '@services/cables/cables.service';
+import { Study } from '@shared/domain';
+import { CablesService } from '@shared/catalog/services/cables.service';
 
 describe('StudiesComponent', () => {
   let component: StudiesComponent;

@@ -7,8 +7,8 @@
 import { inject, Injectable } from '@angular/core';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { CatalogCableEntity } from '@core/infrastructure/database';
-import { CableCsvDto } from '@core/infrastructure/dto';
+import { CatalogCableEntity } from '@infrastructure/database';
+import { CableCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { convertStringToNumber } from '@shared/helpers/convertStringToNumber';

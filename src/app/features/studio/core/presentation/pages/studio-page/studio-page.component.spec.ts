@@ -4,9 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { ElementRef } from '@angular/core';
 import { PlotService } from '@features/studio/core/services/plot.service';
-import { StudiesService } from '@services/studies/studies.service';
-import { SectionService } from '@services/sections/section.service';
-import { Section, Study } from '@core/domain';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { Section, Study } from '@shared/domain';
 
 interface SignalFn<T> {
   (): T;

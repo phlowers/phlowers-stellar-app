@@ -2,8 +2,8 @@ import Plotly, { Camera, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-mi
 import { Side, View } from './types';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
-import { SpanLoad } from '@core/domain';
-import { Obstacle } from '@core/domain/models/obstacle.model';
+import { SpanLoad } from '@shared/domain';
+import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { DataObject } from './createPlotDataObject';
 import { createObstaclesAnnotations } from './obstacles';
 

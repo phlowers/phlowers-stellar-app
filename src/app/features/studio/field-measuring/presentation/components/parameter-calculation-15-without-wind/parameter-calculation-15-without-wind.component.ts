@@ -10,12 +10,12 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { FieldMeasure, ManualParameterCalculation15CWithoutWind } from '@features/studio/field-measuring/domain/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { InitialConditionModalComponent } from '@features/study/presentation/components/sections-tab/initialConditionModal/initialConditionModal.component';
-import { InitialCondition } from '@core/domain';
-import { StudiesService } from '@services/studies/studies.service';
+import { InitialCondition } from '@shared/domain';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import {
   InitialConditionFunctionsInput,
   InitialConditionService
-} from '@services/initial-conditions/initial-condition.service';
+} from '@features/study/infrastructure/services/initial-condition.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { Task } from '@services/worker_python/tasks/types';

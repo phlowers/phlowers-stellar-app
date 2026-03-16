@@ -1,5 +1,5 @@
-import { SpanLoad, Support } from '@core/domain';
-import { LoadType } from '@core/domain/models/charge.model';
+import { SpanLoad, Support } from '@shared/domain';
+import { LoadType } from '@shared/domain/models/charge.model';
 
 /** Default empty span load used as a template for new span loads. */
 export const emptySpanLoad: SpanLoad = {

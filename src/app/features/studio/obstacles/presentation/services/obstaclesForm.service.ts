@@ -1,8 +1,8 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { PlotService } from '@features/studio/core/services/plot.service';
-import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
-import { SectionService } from '@core/services/sections/section.service';
+import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';

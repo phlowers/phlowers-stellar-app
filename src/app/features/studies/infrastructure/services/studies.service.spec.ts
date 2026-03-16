@@ -10,8 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { StudiesService } from './studies.service';
 import { StorageService } from '@services/storage/storage.service';
-import { ProtoV4Parameters, ProtoV4Support, Support } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { ProtoV4Parameters, ProtoV4Support, Support } from '@shared/domain';
+import { StudyEntity } from '@infrastructure/database';
 import { liveQuery } from 'dexie';
 
 jest.mock('uuid', () => ({

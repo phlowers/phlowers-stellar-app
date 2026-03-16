@@ -7,9 +7,9 @@
 
 import { TestBed } from '@angular/core/testing';
 import { SectionService } from './section.service';
-import { StudiesService } from '@services/studies/studies.service';
-import { Section } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { Section } from '@shared/domain';
+import { StudyEntity } from '@infrastructure/database';
 
 // Mock uuid
 jest.mock('uuid', () => ({

@@ -1,4 +1,4 @@
-import { Obstacle, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
+import { Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
 

@@ -5,12 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
-import { ProtoV4Parameters, ProtoV4Support, Support, InitialCondition } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { ProtoV4Parameters, ProtoV4Support, Support, InitialCondition } from '@shared/domain';
+import { StudyEntity } from '@infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
-import { createEmptySection, createEmptySupport } from '@services/sections/helpers';
+import { createEmptySection, createEmptySupport } from '@features/study/domain/helpers/sections.helpers';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';

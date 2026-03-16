@@ -1,5 +1,5 @@
-import { CatalogChain } from '@core/domain/models/catalog/catalog-chain.model';
-import { CatalogAttachment, Support } from '@core/domain';
+import { CatalogChain } from '@shared/domain/models/catalog/catalog-chain.model';
+import { CatalogAttachment, Support } from '@shared/domain';
 import { isNumber, uniq } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 

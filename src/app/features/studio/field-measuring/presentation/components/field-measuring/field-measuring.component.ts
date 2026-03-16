@@ -29,13 +29,13 @@ import { FieldDatasComponent } from '../field-datas/field-datas.component';
 import { CalculusSettingComponent } from '../calculus-setting/calculus-setting.component';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { TemperatureCalculationComponent } from '../temperature-calculation/temperature-calculation.component';
-import { SectionService } from '@services/sections/section.service';
-import { StudiesService } from '@services/studies/studies.service';
-import { InitialCondition } from '@core/domain';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { InitialCondition } from '@shared/domain';
 import { ParameterCalculation15WithoutWindComponent } from '../parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 import { createInitialMeasureData } from '../../helpers';
-import { LinesService } from '@services/lines/lines.service';
-import { CablesService } from '@services/cables/cables.service';
+import { LinesService } from '@shared/catalog/services/lines.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
 import { isNumber } from 'lodash';
 import { MessageService } from 'primeng/api';
 

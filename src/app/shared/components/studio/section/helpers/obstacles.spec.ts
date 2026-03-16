@@ -1,4 +1,4 @@
-import { LateralDistanceType, Obstacle, ReferenceSupport } from '@core/domain/models/obstacle.model';
+import { LateralDistanceType, Obstacle, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import {
   ObstacleAnnotationData,
   getObstacleClickPayload,

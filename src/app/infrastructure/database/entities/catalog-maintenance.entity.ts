@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogMaintenance } from '@core/domain';
+import { CatalogMaintenance } from '@shared/domain';
 
 /**
  * Catalog maintenance entity for Dexie storage

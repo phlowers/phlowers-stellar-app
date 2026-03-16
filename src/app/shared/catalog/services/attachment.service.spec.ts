@@ -10,8 +10,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { AttachmentService } from './attachment.service';
 import { StorageService } from '@services/storage/storage.service';
-import { CatalogAttachmentEntity } from '@core/infrastructure/database';
-import { AttachmentCsvDto } from '@core/infrastructure/dto';
+import { CatalogAttachmentEntity } from '@infrastructure/database';
+import { AttachmentCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse

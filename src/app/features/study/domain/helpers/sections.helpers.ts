@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { Section, Support } from '@core/domain';
+import { Section, Support } from '@shared/domain';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

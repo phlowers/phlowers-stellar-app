@@ -1,4 +1,4 @@
-import { Section, Support } from '@core/domain';
+import { Section, Support } from '@shared/domain';
 import { hasSupportsBoundsErrors } from './newSectionModal.constants';
 
 const validSupport: Support = {

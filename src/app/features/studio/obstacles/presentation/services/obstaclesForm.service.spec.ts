@@ -2,11 +2,11 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
-import { SectionService } from '@core/services/sections/section.service';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
 import { MessageService } from 'primeng/api';
 import { signal } from '@angular/core';
-import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
-import { Section, Study, Support } from '@core/domain';
+import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { Section, Study, Support } from '@shared/domain';
 import { ObstacleFormService } from './obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from '../components/obstaclesForm/constants';
 

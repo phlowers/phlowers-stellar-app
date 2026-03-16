@@ -7,10 +7,10 @@
 
 import { TestBed } from '@angular/core/testing';
 import { StorageService } from './storage.service';
-import { AppDatabase } from '@core/infrastructure/database';
+import { AppDatabase } from '@infrastructure/database';
 
 // Mock AppDatabase
-jest.mock('@core/infrastructure/database', () => {
+jest.mock('@infrastructure/database', () => {
   return {
     AppDatabase: jest.fn().mockImplementation(() => {
       return {};

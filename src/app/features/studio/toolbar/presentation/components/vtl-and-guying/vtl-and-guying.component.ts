@@ -28,8 +28,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { Task } from '@services/worker_python/tasks/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { VtlAndGuying } from '@core/domain';
-import { SectionService } from '@services/sections/section.service';
+import { VtlAndGuying } from '@shared/domain';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 

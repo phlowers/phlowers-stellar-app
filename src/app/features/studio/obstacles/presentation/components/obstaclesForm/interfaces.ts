@@ -1,5 +1,5 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
-import { LateralDistanceType, Position3D, ReferenceSupport } from '@core/domain/models/obstacle.model';
+import { LateralDistanceType, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 
 /** Plain data representation of an obstacle form. */
 export interface ObstacleFormData {

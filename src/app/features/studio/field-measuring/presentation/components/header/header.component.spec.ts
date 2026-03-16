@@ -8,7 +8,7 @@ import { FieldMeasure } from '../../../domain/types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { createTestMeasureData } from '../../helpers';
 import { PlotService } from '@features/studio/core/services/plot.service';
-import { Support } from '@core/domain';
+import { Support } from '@shared/domain';
 
 @Component({
   selector: 'app-icon',

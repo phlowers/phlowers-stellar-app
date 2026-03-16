@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogCable } from '@core/domain';
+import { CatalogCable } from '@shared/domain';
 
 /**
  * Catalog cable entity for Dexie storage

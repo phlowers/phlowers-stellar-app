@@ -5,10 +5,10 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ToolbarDialogComponent } from './toolbar-dialog.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { MessageService } from 'primeng/api';
-import { SectionService } from '@services/sections/section.service';
-import { StudiesService } from '@services/studies/studies.service';
+import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { BehaviorSubject } from 'rxjs';
-import { CablesService } from '@services/cables/cables.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
 
 interface SignalFn<T> {
   (): T;

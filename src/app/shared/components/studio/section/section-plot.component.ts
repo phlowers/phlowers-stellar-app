@@ -9,13 +9,13 @@ import { PlotOptions } from './helpers/types';
 import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 import { PLOT_ID, PlotService, SelectedDisplayOptions } from '@features/studio/core/services/plot.service';
-import { SpanLoad } from '@src/app/core';
+import { SpanLoad } from '@shared/domain';
 import { LoadType } from './helpers/createLoadAnnotations';
 import { SideTabsService } from '@features/studio/core/services/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ObstacleFormService } from '@features/studio/obstacles/presentation/services/obstaclesForm.service';
-import { Obstacle } from '@core/domain/models/obstacle.model';
+import { Obstacle } from '@shared/domain/models/obstacle.model';
 import {
   appendExistingObstaclesWithFormObstacle,
   getObstacleClickPayload,

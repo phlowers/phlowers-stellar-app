@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewChargeModalComponent } from './new-charge-modal.component';
-import { Charge, Section, Study, SymmetryType } from '@core/domain';
+import { Charge, Section, Study, SymmetryType } from '@shared/domain';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { ChargesService } from '@services/charges/charges.service';
+import { ChargesService } from '@features/study/infrastructure/services/charges.service';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';

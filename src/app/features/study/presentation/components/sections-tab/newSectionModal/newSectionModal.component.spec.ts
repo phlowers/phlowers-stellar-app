@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
-import { Section, Study, Support } from '@core/domain';
+import { Section, Study, Support } from '@shared/domain';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { MaintenanceService } from '@services/maintenance/maintenance.service';
-import { LinesService } from '@services/lines/lines.service';
-import { ChainsService } from '@services/chains/chains.service';
+import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { LinesService } from '@shared/catalog/services/lines.service';
+import { ChainsService } from '@shared/catalog/services/chains.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { AttachmentService } from '@services/attachment/attachment.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { SectionService } from '@features/study/infrastructure/services/section.service';
 
 class MockMaintenanceService {

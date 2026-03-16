@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogAttachment } from '@core/domain';
+import { CatalogAttachment } from '@shared/domain';
 
 /**
  * Catalog attachment entity for Dexie storage

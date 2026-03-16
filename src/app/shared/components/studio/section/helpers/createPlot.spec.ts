@@ -7,7 +7,7 @@
 
 import { createPlot } from './createPlot';
 import Plotly from 'plotly.js-dist-min';
-import { SpanLoad } from '@core/domain';
+import { SpanLoad } from '@shared/domain';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
 

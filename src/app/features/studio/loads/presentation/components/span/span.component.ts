@@ -10,7 +10,7 @@ import { PlotService } from '@features/studio/core/services/plot.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { emptySpanLoad } from '../../helpers';
-import { LoadType, SpanLoad } from '@core/domain/models/charge.model';
+import { LoadType, SpanLoad } from '@shared/domain/models/charge.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoadControlName, SpanFormControls, SupportOption } from './span.interfaces';
 

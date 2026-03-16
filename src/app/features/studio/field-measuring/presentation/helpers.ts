@@ -1,4 +1,4 @@
-import { Section } from '@core/domain';
+import { Section } from '@shared/domain';
 import { FieldMeasure, FieldMeasureOutputs } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';

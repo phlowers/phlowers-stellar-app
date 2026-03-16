@@ -1,4 +1,4 @@
-import { LateralDistanceType } from '@src/app/core/domain/models/obstacle.model';
+import { LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { ObstacleFormData } from './interfaces';
 
 /** Delay in ms for debouncing obstacle point coordinate updates. */

@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InitialConditionModalComponent } from './initialConditionModal.component';
-import { Section, InitialCondition } from '@core/domain';
-import { CablesService } from '@services/cables/cables.service';
+import { Section, InitialCondition } from '@shared/domain';
+import { CablesService } from '@shared/catalog/services/cables.service';
 import { StorageService } from '@services/storage/storage.service';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { BehaviorSubject } from 'rxjs';
 
 describe('InitialConditionModalComponent', () => {

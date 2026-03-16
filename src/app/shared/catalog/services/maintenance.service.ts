@@ -7,8 +7,8 @@
 import { inject, Injectable } from '@angular/core';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { CatalogMaintenanceEntity } from '@core/infrastructure/database';
-import { MaintenanceCsvDto } from '@core/infrastructure/dto';
+import { CatalogMaintenanceEntity } from '@infrastructure/database';
+import { MaintenanceCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';

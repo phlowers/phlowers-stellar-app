@@ -6,7 +6,7 @@
  */
 import { inject, Injectable } from '@angular/core';
 import { StorageService } from '@services/storage/storage.service';
-import { UserEntity } from '@core/infrastructure/database';
+import { UserEntity } from '@infrastructure/database';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 /**

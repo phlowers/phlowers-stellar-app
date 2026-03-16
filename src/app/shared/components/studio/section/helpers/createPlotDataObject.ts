@@ -1,7 +1,7 @@
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
 import { SPAN_COLOR } from './plot.constants';
 import { PlotObjectsType, Side, View } from './types';
-import { Support } from '@core/domain/models/support.model';
+import { Support } from '@shared/domain/models/support.model';
 
 /**
  * Returns line styling for a given plot object type and view mode.

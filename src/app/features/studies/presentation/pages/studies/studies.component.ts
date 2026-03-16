@@ -16,7 +16,7 @@ import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
-import { Study } from '@core/domain';
+import { Study } from '@shared/domain';
 import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { CommonModule } from '@angular/common';
 import { StudiesTableComponent } from '@features/studies/presentation/components/studies-table/studies-table.component';

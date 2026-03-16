@@ -8,7 +8,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminComponent } from './admin';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { MessageService } from 'primeng/api';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { StorageService } from '@services/storage/storage.service';
 import { ConfirmationService } from 'primeng/api';
 import { BehaviorSubject, Subject } from 'rxjs';

@@ -3,9 +3,9 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TagComponent } from '@shared/components/atoms/tag/tag.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { AccordionModule } from 'primeng/accordion';
-import { Study } from '@core/domain';
+import { Study } from '@shared/domain';
 import { CommonModule, DatePipe } from '@angular/common';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { ExportDialogComponent } from './export-dialog/export-dialog.component';
 
 /**

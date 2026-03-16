@@ -1,4 +1,4 @@
-import { Section } from '@core/domain';
+import { Section } from '@shared/domain';
 import { SUPPORT_FIELD_LIMITS } from './manualSection/supportsTable/helpers';
 
 export const hasSupportsBoundsErrors = (section: Section): boolean => {

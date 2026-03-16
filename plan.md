@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (311 warnings), 30 lazy chunks. **Phases 0-3F, 4 et 7 terminées.** Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-13) — ~150 violations identifiées, plan de remédiation en 7 étapes (A-G). Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal() — reste 9 composants avec `subscribe()` manuel et 8 avec `@ViewChild`.
+**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B et 7 terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-13) — ~150 violations identifiées, plan de remédiation en 7 étapes (A-G). Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal() — reste 9 composants avec `subscribe()` manuel et 8 avec `@ViewChild`.
 
 ---
 
@@ -887,37 +887,13 @@ src/app/shared/                              ← NOUVEAU répertoire
 
 ```
 src/app/
-├── core/                                    ← Services transverses + bridges
-│   ├── domain/                              ← Bridges → @shared/domain/
-│   │   ├── index.ts
-│   │   └── models/
-│   │       ├── index.ts
-│   │       ├── charge.model.ts
-│   │       ├── obstacle.model.ts
-│   │       ├── support.model.ts
-│   │       └── catalog/
-│   │           └── catalog-chain.model.ts
-│   ├── infrastructure/                      ← Bridges → @infrastructure/
-│   │   ├── database/
-│   │   │   └── index.ts
-│   │   └── dto/
-│   │       └── index.ts
+├── core/                                    ← Services transverses uniquement (bridges supprimés Phase 6B)
 │   └── services/
 │       ├── storage/                         ← StorageService (REAL)
 │       ├── user/                            ← UserService (REAL)
 │       ├── online/                          ← OnlineService (REAL)
 │       ├── worker_python/                   ← WorkerPythonService (REAL)
-│       ├── worker_update/                   ← UpdateService (REAL)
-│       ├── cables/                          ← Bridge → @shared/catalog/
-│       ├── chains/                          ← Bridge → @shared/catalog/
-│       ├── lines/                           ← Bridge → @shared/catalog/
-│       ├── attachment/                      ← Bridge → @shared/catalog/
-│       ├── maintenance/                     ← Bridge → @shared/catalog/
-│       ├── studies/                         ← Bridge → @features/studies/
-│       ├── sections/                        ← Bridge → @features/study/
-│       ├── charges/                         ← Bridge → @features/study/
-│       ├── initial-conditions/              ← Bridge → @features/study/
-│       └── obstacles/                       ← Bridge → @features/studio/
+│       └── worker_update/                   ← UpdateService (REAL)
 ├── shared/                                  ← Tout le code partagé cross-feature (120 fichiers)
 │   ├── components/
 │   │   ├── atoms/                           ← 9 composants UI (button, icon, card, etc.)
@@ -975,19 +951,19 @@ src/app/
 |---------|-------------|
 | `jest.config.ts` | `'^@infrastructure/(.*)$': '<rootDir>/src/app/infrastructure/$1'` ajouté |
 
-#### Re-export bridges créés (Phase 3F)
+#### Re-export bridges créés (Phase 3F) → 🗑️ Supprimés en Phase 6B
 
-| Bridge (ancien chemin) | Redirige vers | Rôle |
-|------------------------|--------------|------|
-| `core/infrastructure/database/index.ts` | `@infrastructure/database/...` | AppDatabase, entities, schemas |
-| `core/infrastructure/dto/index.ts` | `@infrastructure/dto/...` | 6 CSV DTOs |
-| `core/domain/index.ts` | `@shared/domain/index` | Barrel domain |
-| `core/domain/models/index.ts` | `@shared/domain/models/index` | Barrel models |
-| `core/domain/models/charge.model.ts` | `@shared/domain/models/charge.model` | Charge, ClimateCharge, etc. |
-| `core/domain/models/obstacle.model.ts` | `@shared/domain/models/obstacle.model` | Obstacle, Position3D, etc. |
-| `core/domain/models/support.model.ts` | `@shared/domain/models/support.model` | Support |
-| `core/domain/models/catalog/catalog-chain.model.ts` | `@shared/domain/models/catalog/catalog-chain.model` | CatalogChain |
-| `features/studio/field-measuring/domain/types.ts` | `@shared/domain/models/field-measure.model` | FieldMeasure types |
+| Bridge (ancien chemin) | Redirigeait vers | Statut |
+|------------------------|-----------------|--------|
+| `core/infrastructure/database/index.ts` | `@infrastructure/database/...` | 🗑️ Supprimé Phase 6B |
+| `core/infrastructure/dto/index.ts` | `@infrastructure/dto/...` | 🗑️ Supprimé Phase 6B |
+| `core/domain/index.ts` | `@shared/domain/index` | 🗑️ Supprimé Phase 6B |
+| `core/domain/models/index.ts` | `@shared/domain/models/index` | 🗑️ Supprimé Phase 6B |
+| `core/domain/models/charge.model.ts` | `@shared/domain/models/charge.model` | 🗑️ Supprimé Phase 6B |
+| `core/domain/models/obstacle.model.ts` | `@shared/domain/models/obstacle.model` | 🗑️ Supprimé Phase 6B |
+| `core/domain/models/support.model.ts` | `@shared/domain/models/support.model` | 🗑️ Supprimé Phase 6B |
+| `core/domain/models/catalog/catalog-chain.model.ts` | `@shared/domain/models/catalog/catalog-chain.model` | 🗑️ Supprimé Phase 6B |
+| `features/studio/field-measuring/domain/types.ts` | `@shared/domain/models/field-measure.model` | Conservé (bridge intra-feature) |
 
 #### Décisions architecturales appliquées
 
@@ -995,8 +971,8 @@ src/app/
 - **`FieldMeasure` types → `shared/domain/models/field-measure.model.ts`** — déplacés depuis `features/studio/field-measuring/domain/types.ts` pour éliminer la dépendance `shared → features` (interdit en DDD)
 - **Pas de re-export bridges pour `@ui/shared/`** — les ~160 imports mis à jour en bulk car tous les consommateurs sont sous notre contrôle
 - **Re-export bridges pour `@core/domain` et `@core/infrastructure/`** — 50+ consommateurs via `@core/`, bridges permettent migration progressive
-- **`ui/styles/` reste dans `ui/`** — styles globaux liés au point d'entrée de l'app
-- **Bridges `core/services/` conservés** — 169 consommateurs, suppression progressive hors scope
+- **`ui/styles/` reste dans `ui/`** — styles globaux liés au point d'entrée de l'app → déplacés vers `src/styles/` en Phase 7
+- ~~**Bridges `core/services/` conservés** — 169 consommateurs, suppression progressive hors scope~~ → **Tous supprimés en Phase 6B**
 - **`NotFoundComponent` renommé** — `404.component.ts` → `not-found.component.ts` (convention standard)
 - **`ui/pages/` entièrement supprimé** — tous les bridges y avaient 0 consommateurs
 
@@ -1007,7 +983,7 @@ src/app/
 - [x] `shared/` contient ~120 fichiers (composants, helpers, models, services, catalog, domain)
 - [x] `src/app/infrastructure/` contient ~30 fichiers (database, dto)
 - [x] `@infrastructure/` alias ajouté dans `jest.config.ts`
-- [x] Re-export bridges dans `core/domain/` (7 fichiers) et `core/infrastructure/` (2 fichiers)
+- [x] Re-export bridges dans `core/domain/` (7 fichiers) et `core/infrastructure/` (2 fichiers) → **supprimés en Phase 6B**
 - [x] ~160 imports `@ui/shared/` → `@shared/` mis à jour
 - [x] `FieldMeasure` types déplacés vers `shared/domain/models/field-measure.model.ts`
 - [x] `features/studio/field-measuring/domain/types.ts` converti en re-export bridge
@@ -1107,9 +1083,103 @@ src/app/
 
 #### Décisions Phase 6
 
-- **Bridges actifs conservés** : 13 re-export bridges avec consommateurs actifs (studies, sections, cables, etc.) — migration hors scope
+- ~~**Bridges actifs conservés** : 13 re-export bridges avec consommateurs actifs (studies, sections, cables, etc.) — migration hors scope~~ → **Tous supprimés en Phase 6B**
 - **Migration obstacles** : le bridge avait en réalité 5 consommateurs non détectés initialement (`app.component`, `section-plot.component`, `free-positioning.component` + specs) — tous migrés vers import direct `@features/`
-- **`core/index.ts`** : la ligne `export * from './infrastructure'` qui référençait le fichier supprimé a été retirée
+- **`core/index.ts`** : la ligne `export * from './infrastructure'` qui référençait le fichier supprimé a été retirée → **fichier supprimé entièrement en Phase 6B** (ne contenait plus que `export * from './domain'`)
+
+### Phase 6B — Suppression des re-export bridges de `core/` ✅ TERMINÉE
+*Dépend de Phase 3F (bridges créés) et Phase 6 (premier nettoyage). Finalise la suppression de toutes les indirections d'import.*
+
+> Les bridges avaient été créés en Phase 3F pour permettre une migration progressive des imports. Tous les consommateurs ont été réécrits vers les chemins canoniques, puis les bridges et `core/index.ts` ont été supprimés.
+
+#### Ce qui a été fait
+
+40. ~~**Réécriture des imports `@core/domain/*`**~~ ✅ — ~80 fichiers, ~95 imports
+    - `@core/domain` → `@shared/domain`
+    - `@core/domain/models/*` → `@shared/domain/models/*`
+    - Variantes `@src/app/core/domain/*` et `@core/index` corrigées aussi
+
+41. ~~**Réécriture des imports `@core/infrastructure/*`**~~ ✅ — ~24 fichiers, ~36 imports
+    - `@core/infrastructure/database` → `@infrastructure/database`
+    - `@core/infrastructure/dto` → `@infrastructure/dto`
+
+42. ~~**Réécriture des imports `@core/services/*` bridges**~~ ✅ — 3 fichiers restants
+    - `@core/services/sections/section.service` → `@features/study/infrastructure/services/section.service`
+    - `@core/services/charges/charges.service` → `@features/study/infrastructure/services/charges.service`
+
+43. ~~**Réécriture des imports `@services/*` bridges**~~ ✅ — ~47 fichiers
+    - `@services/attachment/attachment.service` → `@shared/catalog/services/attachment.service`
+    - `@services/cables/cables.service` → `@shared/catalog/services/cables.service`
+    - `@services/chains/chains.service` → `@shared/catalog/services/chains.service`
+    - `@services/charges/charges.service` → `@features/study/infrastructure/services/charges.service`
+    - `@services/initial-conditions/initial-condition.service` → `@features/study/infrastructure/services/initial-condition.service`
+    - `@services/lines/lines.service` → `@shared/catalog/services/lines.service`
+    - `@services/maintenance/maintenance.service` → `@shared/catalog/services/maintenance.service`
+    - `@services/sections/helpers` → `@features/study/domain/helpers/sections.helpers`
+    - `@services/sections/section.service` → `@features/study/infrastructure/services/section.service`
+    - `@services/studies/studies.service` → `@features/studies/infrastructure/services/studies.service`
+    - `@src/app/core/services/worker_python/*` → `@services/worker_python/*` (service réel, conservation alias)
+
+44. ~~**Suppression de 20 bridge files + `core/index.ts`**~~ ✅ :
+    - `core/domain/` — 6 fichiers bridge (index.ts, models/index.ts, charge.model.ts, obstacle.model.ts, support.model.ts, catalog/catalog-chain.model.ts) + répertoire entier
+    - `core/infrastructure/` — 3 fichiers bridge (index.ts, database/index.ts, dto/index.ts) + répertoire entier
+    - `core/services/{obstacles,attachment,cables,chains,lines,maintenance,charges,initial-conditions,sections,studies}/` — 11 fichiers bridge + répertoires
+    - `core/index.ts` — barrel devenu vide après suppression des bridges
+
+45. ~~**Vérification**~~ ✅ :
+    - `npx tsc --noEmit` — 0 erreurs ✅
+    - `npm run test` — 88 suites, 1726 tests pass ✅
+    - `npx eslint src/` — 0 erreurs, 309 warnings (inchangé) ✅
+
+#### Architecture `core/` résultante (fin Phase 6B)
+
+```
+src/app/core/
+└── services/
+    ├── online/              ← OnlineService (RÉEL)
+    ├── storage/             ← StorageService + replace-table-data helper (RÉEL)
+    ├── user/                ← UserService (RÉEL)
+    ├── worker_python/       ← WorkerPythonService + tasks + .py scripts (RÉEL)
+    └── worker_update/       ← UpdateService + service-worker (RÉEL)
+```
+
+> Plus aucun bridge, plus de `core/domain/`, plus de `core/infrastructure/`, plus de `core/index.ts`. Seuls les 5 services transverses réels restent.
+
+#### Mapping complet des imports réécrits
+
+| Ancien chemin | Nouveau chemin |
+|---------------|----------------|
+| `@core/domain` | `@shared/domain` |
+| `@core/domain/models/*` | `@shared/domain/models/*` |
+| `@core/infrastructure/database` | `@infrastructure/database` |
+| `@core/infrastructure/dto` | `@infrastructure/dto` |
+| `@core/services/obstacles/obstacles.service` | `@features/studio/obstacles/infrastructure/services/obstacles.service` |
+| `@core/services/charges/charges.service` | `@features/study/infrastructure/services/charges.service` |
+| `@core/services/sections/section.service` | `@features/study/infrastructure/services/section.service` |
+| `@services/attachment/attachment.service` | `@shared/catalog/services/attachment.service` |
+| `@services/cables/cables.service` | `@shared/catalog/services/cables.service` |
+| `@services/chains/chains.service` | `@shared/catalog/services/chains.service` |
+| `@services/charges/charges.service` | `@features/study/infrastructure/services/charges.service` |
+| `@services/initial-conditions/initial-condition.service` | `@features/study/infrastructure/services/initial-condition.service` |
+| `@services/lines/lines.service` | `@shared/catalog/services/lines.service` |
+| `@services/maintenance/maintenance.service` | `@shared/catalog/services/maintenance.service` |
+| `@services/sections/helpers` | `@features/study/domain/helpers/sections.helpers` |
+| `@services/sections/section.service` | `@features/study/infrastructure/services/section.service` |
+| `@services/studies/studies.service` | `@features/studies/infrastructure/services/studies.service` |
+
+#### Definition of Done — Phase 6B
+
+- [x] `grep -rn "@core/domain" src/ --include="*.ts"` — 0 résultat
+- [x] `grep -rn "@core/infrastructure" src/ --include="*.ts"` — 0 résultat
+- [x] `grep -rn "@core/index" src/ --include="*.ts"` — 0 résultat
+- [x] `grep -rn "@services/attachment\|@services/cables\|@services/chains\|@services/charges\|@services/initial-conditions\|@services/lines\|@services/maintenance\|@services/sections\|@services/studies" src/ --include="*.ts"` — 0 résultat
+- [x] `core/domain/` n'existe plus
+- [x] `core/infrastructure/` n'existe plus
+- [x] `core/index.ts` n'existe plus
+- [x] Seuls les services réels restent dans `core/services/` (online, storage, user, worker_python, worker_update)
+- [x] `npx tsc --noEmit` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1726 tests pass
+- [x] `npx eslint src/` — 0 erreurs (309 warnings)
 
 ### Phase 7 — Démantèlement du répertoire `src/app/ui/` ✅ TERMINÉE
 *Dépendait de Phase 3 (toutes les pages et composants migrés vers `features/` et `shared/`).*

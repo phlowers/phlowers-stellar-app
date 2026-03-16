@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { SpanComponent } from './span.component';
 import { PlotService, SpanOption } from '@features/studio/core/services/plot.service';
 import { LoadFormsService } from '../../services/loadForms.service';
-import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@core/domain/models/charge.model';
+import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
 
 const mockSpanOptions: SpanOption[] = [
   { label: '1 - 2', value: 'support-1' },

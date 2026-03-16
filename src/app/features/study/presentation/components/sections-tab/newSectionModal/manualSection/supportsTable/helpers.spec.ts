@@ -1,4 +1,4 @@
-import { CatalogAttachment, Support } from '@core/domain';
+import { CatalogAttachment, Support } from '@shared/domain';
 import {
   buildChainFieldChanges,
   buildCopyColumnChanges,

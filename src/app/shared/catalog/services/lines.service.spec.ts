@@ -10,8 +10,8 @@ import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
 import { StorageService } from '@services/storage/storage.service';
-import { CatalogLineEntity } from '@core/infrastructure/database';
-import { LineCsvDto } from '@core/infrastructure/dto';
+import { CatalogLineEntity } from '@infrastructure/database';
+import { LineCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 import { sortBy } from 'lodash';
 

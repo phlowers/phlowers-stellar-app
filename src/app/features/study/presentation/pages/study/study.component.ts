@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudyHeaderComponent } from '@features/study/presentation/components/study-header/study-header.component';
-import { StudiesService } from '@services/studies/studies.service';
+import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { SectionService } from '@features/study/infrastructure/services/section.service';
 import {
   DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput,
   InitialConditionService
 } from '@features/study/infrastructure/services/initial-condition.service';
-import { Section, Study } from '@core/domain';
+import { Section, Study } from '@shared/domain';
 import { TabsModule } from 'primeng/tabs';
 import { AccordionModule } from 'primeng/accordion';
 import { RadioButtonModule } from 'primeng/radiobutton';

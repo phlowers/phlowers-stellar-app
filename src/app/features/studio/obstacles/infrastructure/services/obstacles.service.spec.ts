@@ -10,8 +10,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { ObstaclesService } from './obstacles.service';
 import { StorageService } from '@services/storage/storage.service';
-import { CatalogObstacleTypeEntity } from '@core/infrastructure/database';
-import { ObstacleTypeCsvDto } from '@core/infrastructure/dto';
+import { CatalogObstacleTypeEntity } from '@infrastructure/database';
+import { ObstacleTypeCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse

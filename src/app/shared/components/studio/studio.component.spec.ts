@@ -4,7 +4,7 @@ import { StudioComponent } from './studio.component';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { PlotService } from '@features/studio/core/services/plot.service';
 import { TaskError, DataError, GetSectionOutput } from '@services/worker_python/tasks/types';
-import { Section } from '@core/domain';
+import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';
 
 // Stub child component to avoid pulling in its dependency tree
