@@ -6,6 +6,7 @@
       [ngModel]="selectedCalculusType()"
       (ngModelChange)="selectedCalculusType.set($event)"
       inputId="papoto"
+      data-testid="papoto-radio"
     />
     <label for="papoto" i18n>PAPOTO</label>
   </div>
@@ -18,6 +19,7 @@
       (ngModelChange)="selectedCalculusType.set($event)"
       inputId="tangentAiming"
       [disabled]="true"
+      data-testid="tangent-aiming-radio"
     />
     <label for="tangentAiming" i18n>Tangent aiming</label>
   </div>
@@ -30,6 +32,7 @@
       (ngModelChange)="selectedCalculusType.set($event)"
       inputId="pep"
       [disabled]="true"
+      data-testid="pep-radio"
     />
     <label for="pep" i18n>PEP</label>
   </div>

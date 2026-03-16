@@ -20,6 +20,7 @@
       [customSort]="true"
       paginatorDropdownAppendTo="body"
       (sortFunction)="customSort($event)"
+      data-testid="l0-table"
     >
       <ng-template pTemplate="header">
         <tr>
@@ -61,7 +62,7 @@
 </ng-template>
 
 <ng-template #footer>
-  <button disabled="true" app-btn type="button" btnSize="m" (click)="onExport()">
+  <button disabled="true" app-btn type="button" btnSize="m" (click)="onExport()" data-testid="l0-export-btn">
     <app-icon icon="download" />
     <span i18n>Export</span>
   </button>

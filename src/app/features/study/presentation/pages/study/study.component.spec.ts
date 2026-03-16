@@ -769,4 +769,25 @@ describe('StudyComponent', () => {
       expect(tab).toBeTruthy();
     });
   });
+
+  describe('HTML rendering - tabs', () => {
+    beforeEach(async () => {
+      component.ngOnInit();
+      readySubject.next(true);
+      await fixture.whenStable();
+      fixture.detectChanges();
+    });
+
+    it('should render study-states-tab', () => {
+      expect(getByTestId('study-states-tab')).toBeTruthy();
+    });
+
+    it('should render measurements-tab', () => {
+      expect(getByTestId('measurements-tab')).toBeTruthy();
+    });
+
+    it('should render ground-obstacles-tab', () => {
+      expect(getByTestId('ground-obstacles-tab')).toBeTruthy();
+    });
+  });
 });

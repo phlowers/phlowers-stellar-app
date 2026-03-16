@@ -290,4 +290,80 @@ describe('SectionsTabComponent', () => {
       expect(generateBtn).toBeTruthy();
     });
   });
+
+  describe('HTML rendering - popover buttons', () => {
+    it('should render create-section-empty-btn when no sections exist', () => {
+      fixture.componentRef.setInput('study', { sections: [] });
+      fixture.detectChanges();
+
+      const btn = getByTestId('create-section-empty-btn');
+      expect(btn).toBeTruthy();
+      expect(btn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-view-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const viewBtn = getByTestId('section-view-btn');
+      expect(viewBtn).toBeTruthy();
+      expect(viewBtn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-edit-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const editBtn = getByTestId('section-edit-btn');
+      expect(editBtn).toBeTruthy();
+      expect(editBtn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-add-ic-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const addBtn = getByTestId('section-add-ic-btn');
+      expect(addBtn).toBeTruthy();
+      expect(addBtn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-duplicate-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const dupBtn = getByTestId('section-duplicate-btn');
+      expect(dupBtn).toBeTruthy();
+      expect(dupBtn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-delete-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const delBtn = getByTestId('section-delete-btn');
+      expect(delBtn).toBeTruthy();
+      expect(delBtn?.tagName).toBe('BUTTON');
+    });
+  });
 });

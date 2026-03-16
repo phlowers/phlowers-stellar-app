@@ -11,7 +11,9 @@
 >
   <ng-template #header>
     <tr>
-      <th id="checkbox"></th>
+      <th id="checkbox">
+        <p-checkbox [binary]="true" data-testid="select-all-checkbox" />
+      </th>
 
       <th id="title" pSortableColumn="title">
         <div i18n class="flex items-center gap-2">
@@ -73,7 +75,7 @@
   <ng-template #body let-study>
     <tr data-testid="study-row">
       <td>
-        <p-checkbox [binary]="true" />
+        <p-checkbox [binary]="true" data-testid="study-checkbox" />
       </td>
       <td>{{ study.title }}</td>
       <td>{{ study.author_email }}</td>
@@ -90,8 +92,16 @@
         </a>
       </td>
       <td>
-        <button (click)="popover.toggle($event)" app-btn btnSize="l" btnStyle="text">
-          <app-icon icon="more_horiz" />
+        <button
+          (click)="popover.toggle($event)"
+          app-btn
+          btnSize="l"
+          btnStyle="text"
+          data-testid="study-actions-btn"
+          aria-label="Study actions menu"
+          i18n-aria-label
+        >
+          <app-icon icon="more_horiz" aria-hidden="true" />
         </button>
         <p-popover #popover>
           <ng-template pTemplate="content">

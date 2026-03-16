@@ -18,6 +18,7 @@
       aria-describedby="mandatory-data-field"
       required
       [class.ng-invalid]="isNameAlreadyTaken()"
+      data-testid="measure-name-input"
     />
     @if (isNameAlreadyTaken()) {
       <p-message id="measure-name-error-message" severity="error" size="small" variant="simple" i18n
@@ -38,6 +39,7 @@
       [showIcon]="true"
       ariaDescribedBy="mandatory-data-field"
       [required]="true"
+      data-testid="date-picker"
     />
   </div>
 
@@ -52,6 +54,7 @@
         optionValue="value"
         allowEmpty="false"
         ariaLabelledBy="timeLabel"
+        data-testid="time-mode-selector"
       />
     </div>
 
@@ -66,6 +69,7 @@
       [showIcon]="true"
       ariaDescribedBy="mandatory-data-field"
       [required]="true"
+      data-testid="time-picker"
     />
   </div>
 
@@ -82,6 +86,7 @@
         (ngModelChange)="onFieldChange('ambientTemperature', $event)"
         aria-describedby="mandatory-data-field"
         required
+        data-testid="ambient-temperature-input"
       />
       <p-inputgroup-addon>°C</p-inputgroup-addon>
     </p-inputgroup>
@@ -98,6 +103,7 @@
         optionValue="value"
         allowEmpty="false"
         ariaLabelledBy="wind"
+        data-testid="wind-speed-unit-selector"
       />
     </div>
 
@@ -112,6 +118,7 @@
       (ngModelChange)="onFieldChange('windSpeed', $event)"
       aria-describedby="mandatory-data-field"
       required
+      data-testid="wind-speed-input"
     />
   </div>
 
@@ -128,6 +135,7 @@
       styleClass="w-full"
       ariaDescribedBy="mandatory-data-field"
       [required]="true"
+      data-testid="wind-direction-select"
     />
   </div>
 
@@ -144,6 +152,7 @@
       styleClass="w-full"
       ariaDescribedBy="mandatory-data-field"
       [required]="true"
+      data-testid="sky-cover-select"
     />
   </div>
 </div>

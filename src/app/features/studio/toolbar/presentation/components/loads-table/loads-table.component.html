@@ -25,6 +25,7 @@
       [ngModel]="name()"
       (ngModelChange)="updateName($event)"
       fluid
+      data-testid="load-name-input"
     />
 
     <label for="description" class="load-desc-label" i18n>
@@ -39,6 +40,7 @@
       [ngModel]="description()"
       (ngModelChange)="updateDescription($event)"
       fluid
+      data-testid="load-description-input"
     ></textarea>
   }
 
@@ -50,6 +52,7 @@
     [ngModel]="personnelPresence()"
     (onChange)="updatePersonnelPresence($event.checked)"
     [readonly]="mode() === 'view'"
+    data-testid="personnel-presence-toggle"
   />
 </section>
 
@@ -57,7 +60,7 @@
   <section>
     <h2 class="title underline-text" i18n>Climate condition</h2>
 
-    <p-table [value]="climateRows()" [tableStyle]="{ width: 'auto' }">
+    <p-table [value]="climateRows()" [tableStyle]="{ width: 'auto' }" data-testid="climate-table">
       <ng-template pTemplate="header">
         <tr>
           <th id="wind-pressure-col" i18n>Wind pressure</th>
@@ -97,7 +100,7 @@
   <section>
     <h2 class="title underline-text" i18n>Load / Marking</h2>
 
-    <p-table [value]="spanLoadRows()" [tableStyle]="{ width: 'auto' }">
+    <p-table [value]="spanLoadRows()" [tableStyle]="{ width: 'auto' }" data-testid="load-marking-table">
       <ng-template pTemplate="header">
         <tr>
           <th id="index-col" i18n>N°</th>
@@ -129,22 +132,22 @@
 
 <ng-template #footer>
   @if (mode() === 'view') {
-    <button app-btn disabled type="button" btnStyle="text">
+    <button app-btn disabled type="button" btnStyle="text" data-testid="report-btn">
       <app-icon icon="description" />
       <ng-container i18n>Report</ng-container>
     </button>
 
-    <button app-btn type="button" (click)="switchToEditMode()">
+    <button app-btn type="button" (click)="switchToEditMode()" data-testid="modify-btn">
       <app-icon icon="edit" />
       <ng-container i18n>Modify</ng-container>
     </button>
   } @else {
-    <button app-btn type="button" btnStyle="outlined" (click)="cancelEdit()">
+    <button app-btn type="button" btnStyle="outlined" (click)="cancelEdit()" data-testid="cancel-edit-btn">
       <app-icon icon="close" />
       <ng-container i18n>Cancel</ng-container>
     </button>
 
-    <button app-btn type="button" (click)="saveChanges()" [disabled]="!isFormValid()">
+    <button app-btn type="button" (click)="saveChanges()" [disabled]="!isFormValid()" data-testid="save-changes-btn">
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>

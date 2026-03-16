@@ -4,9 +4,13 @@
   class="{{ mode() === 'view' ? 'mt-0' : 'mt-4' }} h-full"
 >
   <p-tablist>
-    <p-tab (onSelect)="tabValue.set('general')" value="general" i18n> General </p-tab>
-    <p-tab (onSelect)="tabValue.set('supports')" value="supports" i18n> Supports list </p-tab>
-    <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n> Graphical view </p-tab>
+    <p-tab (onSelect)="tabValue.set('general')" value="general" i18n data-testid="general-tab"> General </p-tab>
+    <p-tab (onSelect)="tabValue.set('supports')" value="supports" i18n data-testid="supports-tab">
+      Supports list
+    </p-tab>
+    <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n data-testid="graphical-tab">
+      Graphical view
+    </p-tab>
   </p-tablist>
 
   <p-tabpanels class="grow">
@@ -30,6 +34,7 @@
                 [attr.aria-invalid]="!isNameUnique()"
                 aria-errormessage="section-name-error-message"
                 (ngModelChange)="onSectionChange()"
+                data-testid="section-name-input"
               />
               @if (!isNameUnique()) {
                 <p-message id="section-name-error-message" severity="error" size="small" variant="simple" i18n
@@ -54,6 +59,7 @@
                 (ngModelChange)="onSectionChange()"
                 [filter]="true"
                 filterBy="name"
+                data-testid="section-type-select"
               />
             </div>
 
@@ -89,6 +95,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="name"
+                data-testid="cable-name-select"
               />
             </div>
 
@@ -103,6 +110,7 @@
                 [(ngModel)]="section().cables_amount"
                 required
                 (ngModelChange)="onSectionChange()"
+                data-testid="cable-amount-select"
               />
             </div>
           </div>
@@ -164,6 +172,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="maintenance_center"
+                data-testid="maintenance-center-select"
               />
             </div>
 
@@ -181,6 +190,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="regional_team"
+                data-testid="regional-team-select"
               />
             </div>
 
@@ -198,6 +208,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="maintenance_team"
+                data-testid="maintenance-team-select"
               />
             </div>
           </div>
@@ -242,6 +253,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="voltage_idr"
+                data-testid="voltage-idr-select"
               />
             </div>
             <div class="flex flex-col [grid-area:b]">
@@ -260,6 +272,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="link_idr"
+                data-testid="link-idr-select"
               />
             </div>
             <div class="flex flex-col [grid-area:c]">
@@ -279,6 +292,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="link_adr"
+                data-testid="link-adr-select"
               />
             </div>
             <div class="flex flex-col [grid-area:d]">
@@ -297,6 +311,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="lit_idr"
+                data-testid="lit-idr-select"
               />
             </div>
 
@@ -316,6 +331,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="lit_adr"
+                data-testid="lit-adr-select"
               />
             </div>
 
@@ -335,6 +351,7 @@
                 [showClear]="true"
                 [filter]="true"
                 filterBy="branch_idr"
+                data-testid="branch-idr-select"
               />
             </div>
           </div>
@@ -381,13 +398,14 @@
             class="w-full"
             [(ngModel)]="section().comment"
             (ngModelChange)="onSectionChange()"
+            data-testid="comment-textarea"
           ></textarea>
         } @else if (mode() === 'view') {
           <p class="read-only-info">{{ section().comment }}</p>
         }
       </div>
       <div class="flex justify-end pt-6">
-        <button app-btn btnSize="m" btnStyle="outlined" (click)="onNextTab()">
+        <button app-btn btnSize="m" btnStyle="outlined" (click)="onNextTab()" data-testid="next-tab-btn">
           <app-icon icon="chevron_right" />
           <ng-container i18n>Next</ng-container>
         </button>
@@ -411,6 +429,7 @@
                 i18n-aria-label
                 (onBlur)="onSupportsAmountChangeBlur($event)"
                 (onInput)="onSupportsAmountChangeInput($event)"
+                data-testid="supports-amount-input"
               >
                 <ng-template #incrementbuttonicon>
                   <app-icon icon="add" />

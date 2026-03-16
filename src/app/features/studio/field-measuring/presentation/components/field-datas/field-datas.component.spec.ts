@@ -179,4 +179,57 @@ describe('FieldDatasComponent', () => {
       expect(component.measureData().windSpeed).toBe(20);
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render measure-name-input', () => {
+      const el = getByTestId('measure-name-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render date-picker', () => {
+      const el = getByTestId('date-picker');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render time-mode-selector', () => {
+      const el = getByTestId('time-mode-selector');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render time-picker', () => {
+      const el = getByTestId('time-picker');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render ambient-temperature-input', () => {
+      const el = getByTestId('ambient-temperature-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render wind-speed-unit-selector', () => {
+      const el = getByTestId('wind-speed-unit-selector');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render wind-speed-input', () => {
+      const el = getByTestId('wind-speed-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render wind-direction-select', () => {
+      const el = getByTestId('wind-direction-select');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render sky-cover-select', () => {
+      const el = getByTestId('sky-cover-select');
+      expect(el).toBeTruthy();
+    });
+  });
 });

@@ -11,6 +11,7 @@
     maxHeight: '100%'
   }"
   [modal]="true"
+  data-testid="attachment-set-dialog"
 >
   <ng-template #header>
     <p class="mb-0" i18n>Attachment set</p>
@@ -32,6 +33,7 @@
             filterBy="support_name"
             [showClear]="true"
             (onChange)="onAttachmentSelect($event, 'support_name')"
+            data-testid="support-name-select"
           />
         </div>
         <div class="flex flex-col gap-1">
@@ -46,6 +48,7 @@
             appendTo="body"
             [(ngModel)]="attachmentSet"
             (onChange)="onAttachmentSelect($event, 'attachment_set')"
+            data-testid="attachment-set-select"
           />
         </div>
         <p-divider class="!my-2" />
@@ -81,7 +84,7 @@
   </ng-template>
 
   <ng-template #footer>
-    <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onVisibleChange()">
+    <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onVisibleChange()" data-testid="close-btn">
       <app-icon icon="close" />
       <ng-container i18n>Close</ng-container>
     </button>
@@ -92,6 +95,7 @@
       btnStyle="base"
       [disabled]="!supportName() || attachmentSet() === undefined"
       (click)="validate()"
+      data-testid="validate-btn"
     >
       <app-icon icon="check" />
       <ng-container i18n>Validate</ng-container>

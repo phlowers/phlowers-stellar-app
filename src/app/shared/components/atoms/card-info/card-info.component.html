@@ -9,7 +9,14 @@
 
   @if (linkText() && linkRoute()) {
     <footer class="info-card__footer">
-      <a [routerLink]="linkRoute()" [attr.aria-label]="linkAriaLabel()" app-btn btnSize="s" btnStyle="text">
+      <a
+        [routerLink]="linkRoute()"
+        [attr.aria-label]="linkAriaLabel()"
+        app-btn
+        btnSize="s"
+        btnStyle="text"
+        data-testid="card-info-link"
+      >
         {{ linkText() }}
         <app-icon icon="keyboard_arrow_right" iconRight />
       </a>

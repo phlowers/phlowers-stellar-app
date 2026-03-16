@@ -103,4 +103,32 @@ describe('Init component', () => {
       expect(proceedSpy).not.toHaveBeenCalled();
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render new-measure-name-input', () => {
+      const el = getByTestId('new-measure-name-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render create-measure-btn', () => {
+      const el = getByTestId('create-measure-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render choose-measure-select', () => {
+      const el = getByTestId('choose-measure-select');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render choose-measure-btn', () => {
+      const el = getByTestId('choose-measure-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+  });
 });

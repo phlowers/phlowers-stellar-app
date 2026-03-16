@@ -623,4 +623,30 @@ describe('LoadsTableComponent', () => {
       expect(component.chargeUuid()).toBe('charge-uuid-1');
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render personnel-presence-toggle', () => {
+      const el = getByTestId('personnel-presence-toggle');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render load-name-input in edit mode', () => {
+      component.switchToEditMode();
+      fixture.detectChanges();
+      const el = getByTestId('load-name-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render load-description-input in edit mode', () => {
+      component.switchToEditMode();
+      fixture.detectChanges();
+      const el = getByTestId('load-description-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('TEXTAREA');
+    });
+  });
 });

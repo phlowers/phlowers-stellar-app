@@ -200,4 +200,21 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     expect(spanData[0].label).toContain('Span length');
     expect(spanExpandedData.length).toBe(6);
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    beforeEach(() => {
+      fixture.componentRef.setInput('index', 0);
+      fixture.componentRef.setInput('litData', mockLitData);
+      fixture.detectChanges();
+    });
+
+    it('should render expand-card-btn', () => {
+      const el = getByTestId('expand-card-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+  });
 });

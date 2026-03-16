@@ -441,4 +441,42 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.armLength()).toBe(5);
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+    const getByTestIdInBody = (testId: string): HTMLElement | null =>
+      document.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render attachment-set-dialog', () => {
+      expect(getByTestId('attachment-set-dialog')).toBeTruthy();
+    });
+
+    describe('when dialog is open', () => {
+      beforeEach(() => {
+        fixture.componentRef.setInput('isOpen', true);
+        fixture.detectChanges();
+      });
+
+      it('should render support-name-select', () => {
+        expect(getByTestIdInBody('support-name-select')).toBeTruthy();
+      });
+
+      it('should render attachment-set-select', () => {
+        expect(getByTestIdInBody('attachment-set-select')).toBeTruthy();
+      });
+
+      it('should render close-btn', () => {
+        const el = getByTestIdInBody('close-btn');
+        expect(el).toBeTruthy();
+        expect(el?.tagName).toBe('BUTTON');
+      });
+
+      it('should render validate-btn', () => {
+        const el = getByTestIdInBody('validate-btn');
+        expect(el).toBeTruthy();
+        expect(el?.tagName).toBe('BUTTON');
+      });
+    });
+  });
 });
