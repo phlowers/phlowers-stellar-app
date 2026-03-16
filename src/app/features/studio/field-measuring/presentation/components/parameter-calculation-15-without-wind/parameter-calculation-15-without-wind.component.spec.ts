@@ -408,4 +408,35 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render update-mode-selector', () => {
+      expect(getByTestId('update-mode-selector')).toBeTruthy();
+    });
+
+    it('should render calculate-parameter-btn', () => {
+      const el = getByTestId('calculate-parameter-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render parameter-papoto-input when mode is manual', () => {
+      component.updateMeasureData('updateMode15C', 'manual');
+      fixture.detectChanges();
+      const el = getByTestId('parameter-papoto-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render cable-temperature-input when mode is manual', () => {
+      component.updateMeasureData('updateMode15C', 'manual');
+      fixture.detectChanges();
+      const el = getByTestId('cable-temperature-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+  });
 });

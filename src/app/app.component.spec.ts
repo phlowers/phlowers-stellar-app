@@ -332,3 +332,117 @@ describe('AppComponent', () => {
     });
   });
 });
+
+describe('AppComponent - HTML rendering', () => {
+  let fixture: ComponentFixture<AppComponent>;
+
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+  beforeEach(async () => {
+    // @ts-expect-error worker
+    window.Worker = Worker;
+
+    const readySubject = new BehaviorSubject<boolean>(false);
+    const workerReadySubject = new BehaviorSubject<boolean>(true);
+
+    await TestBed.configureTestingModule({
+      imports: [FormsModule, NoopAnimationsModule, AppComponent],
+      providers: [provideRouter([]), provideHttpClient()]
+    }).compileComponents();
+    TestBed.overrideProvider(WorkerPythonService, {
+      useValue: { setup: jest.fn(), ready$: workerReadySubject }
+    });
+    TestBed.overrideProvider(StorageService, {
+      useValue: {
+        setPersistentStorage: jest.fn().mockResolvedValue(undefined),
+        createDatabase: jest.fn().mockResolvedValue(undefined),
+        ready$: readySubject,
+        db: {
+          users: { toArray: jest.fn().mockResolvedValue([]), add: jest.fn(), clear: jest.fn() },
+          maintenance: { toArray: jest.fn(), clear: jest.fn(), bulkAdd: jest.fn() },
+          lines: { count: jest.fn(), toArray: jest.fn(), bulkAdd: jest.fn() },
+          metadata: { get: jest.fn().mockResolvedValue(null), put: jest.fn().mockResolvedValue(undefined) }
+        }
+      }
+    });
+    TestBed.overrideProvider(OnlineService, {
+      useValue: { online$: new BehaviorSubject<boolean>(true) }
+    });
+    TestBed.overrideProvider(MessageService, {
+      useValue: { add: jest.fn(), messageObserver: new BehaviorSubject(null), clearObserver: new BehaviorSubject(null) }
+    });
+    TestBed.overrideProvider(UserService, {
+      useValue: { getUser: jest.fn().mockResolvedValue(null), createUser: jest.fn().mockResolvedValue(undefined) }
+    });
+    TestBed.overrideProvider(UpdateService, {
+      useValue: {
+        checkAppVersion: jest.fn(),
+        getLatestAssetList: jest.fn().mockResolvedValue(null),
+        needUpdate$: new BehaviorSubject<boolean>(false),
+        updateLoading: jest.fn().mockReturnValue(false),
+        latestVersion: jest.fn().mockReturnValue(null)
+      }
+    });
+    TestBed.overrideProvider(MaintenanceService, {
+      useValue: {
+        getMaintenance: jest.fn().mockResolvedValue([]),
+        importFromFile: jest.fn().mockResolvedValue(undefined),
+        ready: new BehaviorSubject<boolean>(true)
+      }
+    });
+    TestBed.overrideProvider(LinesService, {
+      useValue: {
+        getLinesCount: jest.fn().mockResolvedValue(0),
+        getLines: jest.fn().mockResolvedValue([]),
+        importFromFile: jest.fn().mockResolvedValue(undefined),
+        ready: new BehaviorSubject<boolean>(true)
+      }
+    });
+    TestBed.overrideProvider(CablesService, { useValue: { importFromFile: jest.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: jest.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(AttachmentService, {
+      useValue: { importFromFile: jest.fn().mockResolvedValue(undefined) }
+    });
+    TestBed.overrideProvider(ObstaclesService, {
+      useValue: { importFromFile: jest.fn().mockResolvedValue(undefined) }
+    });
+
+    fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+  });
+
+  it('should render update-dialog', () => {
+    const el = getByTestId('update-dialog');
+    expect(el).toBeTruthy();
+  });
+
+  it('should render user-login-dialog', () => {
+    const el = getByTestId('user-login-dialog');
+    expect(el).toBeTruthy();
+  });
+
+  it('should render user-login-form when dialog is open', () => {
+    fixture.componentInstance.userDialog.set(true);
+    fixture.detectChanges();
+    const el = getByTestId('user-login-form');
+    expect(el).toBeTruthy();
+    expect(el?.tagName).toBe('FORM');
+  });
+
+  it('should render email-input when dialog is open', () => {
+    fixture.componentInstance.userDialog.set(true);
+    fixture.detectChanges();
+    const el = getByTestId('email-input');
+    expect(el).toBeTruthy();
+    expect(el?.tagName).toBe('INPUT');
+  });
+
+  it('should render user-save-btn when dialog is open', () => {
+    fixture.componentInstance.userDialog.set(true);
+    fixture.detectChanges();
+    const el = getByTestId('user-save-btn');
+    expect(el).toBeTruthy();
+    expect(el?.tagName).toBe('BUTTON');
+  });
+});

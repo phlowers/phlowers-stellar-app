@@ -369,4 +369,31 @@ describe('StudiesTableComponent', () => {
       expect(spy).toHaveBeenCalledWith('test-uuid-1');
     });
   });
+
+  describe('HTML rendering - new data-testid elements', () => {
+    it('should render select-all checkbox in header', () => {
+      fixture.componentRef.setInput('studies', mockStudies);
+      fixture.detectChanges();
+
+      const el = getByTestId('select-all-checkbox');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render study checkbox for each row', () => {
+      fixture.componentRef.setInput('studies', mockStudies);
+      fixture.detectChanges();
+
+      const checkboxes = getAllByTestId('study-checkbox');
+      expect(checkboxes.length).toBe(2);
+    });
+
+    it('should render study actions button for each row', () => {
+      fixture.componentRef.setInput('studies', mockStudies);
+      fixture.detectChanges();
+
+      const btns = getAllByTestId('study-actions-btn');
+      expect(btns.length).toBe(2);
+      expect(btns[0].tagName).toBe('BUTTON');
+    });
+  });
 });

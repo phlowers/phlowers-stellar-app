@@ -7,6 +7,7 @@
     optionLabel="label"
     optionValue="value"
     allowEmpty="false"
+    data-testid="view-mode-selector"
   />
 
   <hr class="toolbar__separator" />
@@ -21,6 +22,7 @@
       optionValue="value"
       allowEmpty="false"
       [disabled]="plotService.plotOptions().view === '3d'"
+      data-testid="side-view-selector"
     />
   </div>
 

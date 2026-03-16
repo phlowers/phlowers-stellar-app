@@ -32,7 +32,7 @@
 
         <hr class="quick-measures__separator" />
 
-        <p-select [disabled]="true" />
+        <p-select [disabled]="true" data-testid="quick-measures-select" />
 
         <dl class="quick-measures__list">
           <div>
@@ -61,8 +61,11 @@
           [disabled]="isPreviousDisabled()"
           (click)="onSupportButtonClick('left')"
           class="supports-select__buttons supports-select__buttons--left"
+          aria-label="Previous support"
+          i18n-aria-label
+          data-testid="prev-support-btn"
         >
-          <app-icon icon="chevron_left" class="supports-select__buttons__icon" />
+          <app-icon icon="chevron_left" class="supports-select__buttons__icon" aria-hidden="true" />
         </button>
 
         <p-select
@@ -80,8 +83,11 @@
           [disabled]="isNextDisabled()"
           (click)="onSupportButtonClick('right')"
           class="supports-select__buttons supports-select__buttons--right"
+          aria-label="Next support"
+          i18n-aria-label
+          data-testid="next-support-btn"
         >
-          <app-icon icon="chevron_right" class="supports-select__buttons__icon" />
+          <app-icon icon="chevron_right" class="supports-select__buttons__icon" aria-hidden="true" />
         </button>
       </div>
 
@@ -106,7 +112,7 @@
   <app-side-tabs>
     <app-side-tab label="Charges">
       <ng-template>
-        <p-tabs value="0" class="load-tabs">
+        <p-tabs value="0" class="load-tabs" data-testid="load-tabs">
           <p-tablist>
             <p-tab value="0" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Climate condition</p-tab>
             <p-tab value="1" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Load / Marking</p-tab>
@@ -120,7 +126,13 @@
               <p i18n>In order to add charges, you need to create a charge case.</p>
             </div>
             <div class="flex justify-center">
-              <button app-btn btnStyle="outlined" btnSize="s" (click)="openNewChargeModal()">
+              <button
+                app-btn
+                btnStyle="outlined"
+                btnSize="s"
+                (click)="openNewChargeModal()"
+                data-testid="add-charge-case-btn"
+              >
                 <app-icon icon="add_circle" />
                 <ng-container i18n>Add a charge case</ng-container>
               </button>
@@ -163,7 +175,6 @@
     <app-side-tab label="Obstacles">
       <ng-template><app-obstacles-form /></ng-template>
     </app-side-tab>
-
   </app-side-tabs>
 </div>
 

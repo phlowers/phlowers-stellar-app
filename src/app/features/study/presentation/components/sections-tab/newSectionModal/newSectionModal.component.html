@@ -5,6 +5,7 @@
   i18n-header
   [style]="{ width: '95vw', height: '95vh' }"
   [modal]="true"
+  data-testid="new-section-dialog"
 >
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
@@ -34,6 +35,7 @@
               [ngModel]="source()"
               (ngModelChange)="source.set($event)"
               inputId="manual"
+              data-testid="source-manual-radio"
             />
             <label for="manual" class="ml-2" i18n>Manual</label>
             <app-icon icon="info" />
@@ -46,6 +48,7 @@
               (ngModelChange)="source.set($event)"
               inputId="referencial"
               [disabled]="true"
+              data-testid="source-referencial-radio"
             />
             <label for="referencial" class="ml-2" i18n>From local referencial</label>
             <app-icon icon="info" />
@@ -58,6 +61,7 @@
               (ngModelChange)="source.set($event)"
               inputId="distantReferencial"
               [disabled]="true"
+              data-testid="source-distant-referencial-radio"
             />
             <label for="distantReferencial" class="ml-2" i18n>From distant referencial</label>
             <app-icon icon="info" />
@@ -70,6 +74,7 @@
               (ngModelChange)="source.set($event)"
               inputId="extraction"
               [disabled]="true"
+              data-testid="source-extraction-radio"
             />
             <label for="extraction" class="ml-2" i18n>From a file</label>
             <app-icon icon="info" />
@@ -88,7 +93,7 @@
   </div>
   <ng-template #footer>
     @if (mode() !== 'view') {
-      <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onVisibleChange(false)">
+      <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onVisibleChange(false)" data-testid="cancel-section-btn">
         <app-icon icon="close" />
         <ng-container i18n>Cancel</ng-container>
       </button>
@@ -98,6 +103,7 @@
         btnSize="m"
         (click)="onValidate()"
         [disabled]="!areAllRequiredFieldsFilled() || !isNameUnique() || supportsBoundsErrors()"
+        data-testid="validate-section-btn"
       >
         <app-icon icon="save" />
         @if (mode() === 'create') {
@@ -108,17 +114,17 @@
       </button>
     } @else {
       <div class="flex gap-2">
-        <button app-btn type="button" btnSize="m" btnStyle="danger" (click)="onDeleteSection()">
+        <button app-btn type="button" btnSize="m" btnStyle="danger" (click)="onDeleteSection()" data-testid="delete-section-btn">
           <app-icon icon="delete" />
           <ng-container i18n>Delete</ng-container>
         </button>
       </div>
 
-      <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onDuplicateSection()">
+      <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onDuplicateSection()" data-testid="duplicate-section-btn">
         <app-icon icon="content_copy" />
         <ng-container i18n>Duplicate</ng-container>
       </button>
-      <button app-btn type="button" btnSize="m" (click)="onEditSection()">
+      <button app-btn type="button" btnSize="m" (click)="onEditSection()" data-testid="edit-section-btn">
         <app-icon icon="edit" />
         <ng-container i18n>Edit</ng-container>
       </button>

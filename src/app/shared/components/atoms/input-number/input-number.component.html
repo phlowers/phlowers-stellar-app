@@ -17,6 +17,7 @@
       type="number"
       [formControl]="pointsCountControl"
       class="stepper__input"
+      data-testid="number-input"
       [attr.min]="min()"
       [attr.max]="max()"
       [placeholder]="placeholder()"
@@ -36,6 +37,7 @@
         [disabled]="disabled() || isAtMin()"
         [attr.aria-label]="'Reduce'"
         i18n-aria-label
+        data-testid="decrement-btn"
         (click)="decrement()"
       >
         <span class="pi pi-minus" aria-hidden="true"></span>
@@ -50,6 +52,7 @@
         [disabled]="disabled() || isAtMax()"
         [attr.aria-label]="'Increase'"
         i18n-aria-label
+        data-testid="increment-btn"
         (click)="increment()"
       >
         <span class="pi pi-plus" aria-hidden="true"></span>

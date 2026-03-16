@@ -343,4 +343,104 @@ describe('Papoto component', () => {
       expect(component.calculatedElevation()).toBe(10.75);
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render help-btn', () => {
+      const el = getByTestId('help-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render import-station-data-btn', () => {
+      const el = getByTestId('import-station-data-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render left-support-select', () => {
+      const el = getByTestId('left-support-select');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render span-length-input', () => {
+      const el = getByTestId('span-length-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render elevation-difference-input', () => {
+      const el = getByTestId('elevation-difference-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render hl-input', () => {
+      const el = getByTestId('hl-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render h1-input', () => {
+      const el = getByTestId('h1-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render h2-input', () => {
+      const el = getByTestId('h2-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render h3-input', () => {
+      const el = getByTestId('h3-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render hr-input', () => {
+      const el = getByTestId('hr-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render vl-input', () => {
+      const el = getByTestId('vl-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render v1-input', () => {
+      const el = getByTestId('v1-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render v2-input', () => {
+      const el = getByTestId('v2-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render v3-input', () => {
+      const el = getByTestId('v3-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render vr-input', () => {
+      const el = getByTestId('vr-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render calculate-papoto-btn', () => {
+      const el = getByTestId('calculate-papoto-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+  });
 });

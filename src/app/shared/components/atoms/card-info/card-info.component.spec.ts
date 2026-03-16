@@ -123,4 +123,29 @@ describe('CardInfoComponent', () => {
       });
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render card-info-link when linkText and linkRoute are set', () => {
+      fixture.componentRef.setInput('title', 'Test');
+      fixture.componentRef.setInput('text', 'Test text');
+      fixture.componentRef.setInput('linkText', 'Learn More');
+      fixture.componentRef.setInput('linkRoute', '/details');
+      fixture.detectChanges();
+
+      const el = getByTestId('card-info-link');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('A');
+    });
+
+    it('should not render card-info-link when linkText is not set', () => {
+      fixture.componentRef.setInput('title', 'Test');
+      fixture.componentRef.setInput('text', 'Test text');
+      fixture.detectChanges();
+
+      expect(getByTestId('card-info-link')).toBeNull();
+    });
+  });
 });

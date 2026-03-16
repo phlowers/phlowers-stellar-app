@@ -195,4 +195,20 @@ describe('SelectWithButtonsComponent', () => {
       expect(clearBtn).toBeTruthy();
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render the select dropdown', () => {
+      const el = getByTestId('select-dropdown');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render the clear selection button when value is selected', () => {
+      const el = getByTestId('clear-selection-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+  });
 });

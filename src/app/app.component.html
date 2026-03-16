@@ -7,6 +7,7 @@
   modal="true"
   focusOnShow="false"
   draggable="false"
+  data-testid="update-dialog"
 >
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
@@ -44,11 +45,17 @@
   </ng-template>
   @if (!updateService.updateLoading()) {
     <ng-template #footer>
-      <button app-btn type="button" btnStyle="text" (click)="isUpdateDialogOpen.set(false)">
+      <button
+        app-btn
+        type="button"
+        btnStyle="text"
+        (click)="isUpdateDialogOpen.set(false)"
+        data-testid="update-later-btn"
+      >
         <app-icon icon="close" />
         <span i18n>Later</span>
       </button>
-      <button app-btn (click)="updateService.update()">
+      <button app-btn (click)="updateService.update()" data-testid="update-now-btn">
         <app-icon icon="sync" />
         <span i18n>Update now</span>
       </button>
@@ -63,6 +70,7 @@
   modal="true"
   focusOnShow="false"
   draggable="false"
+  data-testid="user-login-dialog"
 >
   <ng-template #header>
     <div class="login-header">
@@ -71,14 +79,23 @@
     </div>
   </ng-template>
   <ng-template #content>
-    <form [formGroup]="form" (ngSubmit)="saveUser()">
+    <form [formGroup]="form" (ngSubmit)="saveUser()" data-testid="user-login-form">
       <label i18n for="email">Email</label>
-      <input type="text" pInputText type="email" name="email" id="email" formControlName="email" required fluid />
+      <input
+        pInputText
+        type="email"
+        name="email"
+        id="email"
+        formControlName="email"
+        required
+        fluid
+        data-testid="email-input"
+      />
     </form>
   </ng-template>
 
   <ng-template #footer>
-    <button app-btn type="submit" [disabled]="!form.valid" (click)="saveUser()">
+    <button app-btn type="submit" [disabled]="!form.valid" (click)="saveUser()" data-testid="user-save-btn">
       <app-icon icon="login" />
       <span i18n>Save</span>
     </button>

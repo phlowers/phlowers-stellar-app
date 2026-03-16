@@ -331,4 +331,57 @@ describe('NewSectionModalComponent (Jest)', () => {
       expect(button.nativeElement.disabled).toBe(true);
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render new-section-dialog', () => {
+      expect(getByTestId('new-section-dialog')).toBeTruthy();
+    });
+
+    it('should render source-manual-radio in create mode', () => {
+      expect(getByTestId('source-manual-radio')).toBeTruthy();
+    });
+
+    it('should render source-referencial-radio in create mode', () => {
+      expect(getByTestId('source-referencial-radio')).toBeTruthy();
+    });
+
+    it('should render source-distant-referencial-radio in create mode', () => {
+      expect(getByTestId('source-distant-referencial-radio')).toBeTruthy();
+    });
+
+    it('should render source-extraction-radio in create mode', () => {
+      expect(getByTestId('source-extraction-radio')).toBeTruthy();
+    });
+
+    it('should render cancel-section-btn in create mode', () => {
+      const el = getByTestId('cancel-section-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render validate-section-btn in create mode', () => {
+      const el = getByTestId('validate-section-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render delete-section-btn in view mode', () => {
+      fixture.componentRef.setInput('mode', 'view');
+      fixture.detectChanges();
+      const el = getByTestId('delete-section-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render edit-section-btn in view mode', () => {
+      fixture.componentRef.setInput('mode', 'view');
+      fixture.detectChanges();
+      const el = getByTestId('edit-section-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+  });
 });

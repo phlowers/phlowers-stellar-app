@@ -490,4 +490,48 @@ describe('VhlAndGuyingComponent', () => {
     });
     expect(component.form.controls.selectedSupport.value).toBeNull();
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render guying-span-select', () => {
+      const el = getByTestId('guying-span-select');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render reference-support-select', () => {
+      const el = getByTestId('reference-support-select');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render export-vtl-btn', () => {
+      const el = getByTestId('export-vtl-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render altitude-input', () => {
+      const el = getByTestId('altitude-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render horizontal-distance-input', () => {
+      const el = getByTestId('horizontal-distance-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render with-pulley-checkbox', () => {
+      const el = getByTestId('with-pulley-checkbox');
+      expect(el).toBeTruthy();
+    });
+
+    it('should render calculate-btn', () => {
+      const el = getByTestId('calculate-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+  });
 });

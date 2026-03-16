@@ -457,6 +457,53 @@ describe('ManualSectionComponent', () => {
       expect(mockSection.voltage_idr).toBeUndefined();
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render general-tab', () => {
+      expect(getByTestId('general-tab')).toBeTruthy();
+    });
+
+    it('should render supports-tab', () => {
+      expect(getByTestId('supports-tab')).toBeTruthy();
+    });
+
+    it('should render graphical-tab', () => {
+      expect(getByTestId('graphical-tab')).toBeTruthy();
+    });
+
+    it('should render section-name-input', () => {
+      const el = getByTestId('section-name-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render section-type-select', () => {
+      expect(getByTestId('section-type-select')).toBeTruthy();
+    });
+
+    it('should render cable-name-select', () => {
+      expect(getByTestId('cable-name-select')).toBeTruthy();
+    });
+
+    it('should render cable-amount-select', () => {
+      expect(getByTestId('cable-amount-select')).toBeTruthy();
+    });
+
+    it('should render comment-textarea', () => {
+      const el = getByTestId('comment-textarea');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('TEXTAREA');
+    });
+
+    it('should render next-tab-btn', () => {
+      const el = getByTestId('next-tab-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+  });
 });
 
 function createSupportMock(): Support {

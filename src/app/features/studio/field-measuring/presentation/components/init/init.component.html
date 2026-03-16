@@ -26,6 +26,7 @@
     [class.ng-invalid]="isNameAlreadyTaken()"
     [attr.aria-invalid]="isNameAlreadyTaken()"
     [attr.aria-errormessage]="isNameAlreadyTaken() ? 'new-measure-name-error-message' : null"
+    data-testid="new-measure-name-input"
   />
   @if (isNameAlreadyTaken()) {
     <p-message id="new-measure-name-error-message" severity="error" size="small" variant="simple" i18n
@@ -39,6 +40,7 @@
       type="button"
       [disabled]="newMeasureNameControl.invalid || isNameAlreadyTaken()"
       (click)="createMeasure()"
+      data-testid="create-measure-btn"
     >
       <app-icon icon="add_circle" />
       <ng-container i18n>Create a new measurement</ng-container>
@@ -67,10 +69,17 @@
     optionLabel="label"
     optionValue="value"
     [formControl]="chooseMeasureControl"
+    data-testid="choose-measure-select"
   />
 
   <div class="mt-4 text-right">
-    <button app-btn type="button" [disabled]="chooseMeasureControl.invalid" (click)="chooseMeasure()">
+    <button
+      app-btn
+      type="button"
+      [disabled]="chooseMeasureControl.invalid"
+      (click)="chooseMeasure()"
+      data-testid="choose-measure-btn"
+    >
       <app-icon icon="check" />
       <ng-container i18n>Choose</ng-container>
     </button>

@@ -13,6 +13,7 @@
   [first]="first()"
   class="mb-4"
   paginatorStyleClass="!hidden"
+  data-testid="supports-table"
 >
   <ng-template pTemplate="header">
     <tr>
@@ -94,6 +95,7 @@
             [ngModel]="support.number"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'number', $event)"
             [id]="'supportNumber' + rowIndex"
+            data-testid="support-number-input"
           />
         } @else {
           <p class="read-only_info">{{ support.number }}</p>
@@ -115,6 +117,7 @@
               [disabled]="rowIndex === supports().length - 1"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
               [id]="'spanLength' + rowIndex"
+              data-testid="span-length-input"
               [attr.aria-invalid]="spanLengthInput.dirty && spanLengthInput.invalid"
               [attr.aria-errormessage]="
                 spanLengthInput.dirty && spanLengthInput.invalid ? 'spanLengthError' + rowIndex : null
@@ -156,6 +159,7 @@
               (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
               [id]="'attachmentHeight' + rowIndex"
+              data-testid="attachment-height-input"
               [attr.aria-invalid]="attachmentHeightInput.dirty && attachmentHeightInput.invalid"
               [attr.aria-errormessage]="
                 attachmentHeightInput.dirty && attachmentHeightInput.invalid ? 'attachmentHeightError' + rowIndex : null
@@ -197,6 +201,7 @@
               (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
               [id]="'spanAngle' + rowIndex"
+              data-testid="span-angle-input"
               [attr.aria-invalid]="spanAngleInput.dirty && spanAngleInput.invalid"
               [attr.aria-errormessage]="
                 spanAngleInput.dirty && spanAngleInput.invalid ? 'spanAngleError' + rowIndex : null
@@ -241,6 +246,7 @@
             filterBy="chain_name"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'chainName', $event)"
             [inputId]="'chainName' + rowIndex"
+            data-testid="chain-name-select"
           />
         } @else {
           <p class="read-only_info">
@@ -266,6 +272,7 @@
               [ngModel]="support.chainLength"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
               [id]="'chainLength' + rowIndex"
+              data-testid="chain-length-input"
               [attr.aria-invalid]="chainLengthInput.dirty && chainLengthInput.invalid"
               [attr.aria-errormessage]="
                 chainLengthInput.dirty && chainLengthInput.invalid ? 'chainLengthError' + rowIndex : null
@@ -307,6 +314,7 @@
               [ngModel]="support.chainWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
               [id]="'chainWeight' + rowIndex"
+              data-testid="chain-weight-input"
               [attr.aria-invalid]="chainWeightInput.dirty && chainWeightInput.invalid"
               [attr.aria-errormessage]="
                 chainWeightInput.dirty && chainWeightInput.invalid ? 'chainWeightError' + rowIndex : null
@@ -345,6 +353,7 @@
             [filter]="true"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
             [inputId]="'supportName' + rowIndex"
+            data-testid="support-name-select"
           />
         } @else {
           <p class="read-only_info one-line-text">{{ support.name }}</p>
@@ -365,6 +374,7 @@
               [ngModel]="support.attachmentSet"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentSet', $event)"
               [id]="'attachmentSet' + rowIndex"
+              data-testid="attachment-set-input"
               [attr.aria-invalid]="attachmentSetInput.dirty && attachmentSetInput.invalid"
               [attr.aria-errormessage]="
                 attachmentSetInput.dirty && attachmentSetInput.invalid ? 'attachmentSetError' + rowIndex : null
@@ -380,6 +390,7 @@
                 aria-label="open attachment set modal"
                 i18n-aria-label
                 (click)="openAttachmentSetModal(support.uuid)"
+                data-testid="open-attachment-set-modal-btn"
               >
                 <app-icon icon="visibility" class="text-black" />
               </button>
@@ -413,6 +424,7 @@
               (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
               [id]="'armLength' + rowIndex"
+              data-testid="arm-length-input"
               [attr.aria-invalid]="armLengthInput.dirty && armLengthInput.invalid"
               [attr.aria-errormessage]="
                 armLengthInput.dirty && armLengthInput.invalid ? 'armLengthError' + rowIndex : null
@@ -452,6 +464,7 @@
             optionValue="value"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'chainV', $event)"
             [inputId]="'chainV' + rowIndex"
+            data-testid="chain-v-select"
           />
         } @else {
           <p class="read-only_info">
@@ -474,6 +487,7 @@
               [ngModel]="support.counterWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
               [id]="'counterWeight' + rowIndex"
+              data-testid="counter-weight-input"
               [attr.aria-invalid]="counterWeightInput.dirty && counterWeightInput.invalid"
               [attr.aria-errormessage]="
                 counterWeightInput.dirty && counterWeightInput.invalid ? 'counterWeightError' + rowIndex : null
@@ -515,6 +529,7 @@
               (input)="truncateDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
               [id]="'supportFootAltitude' + rowIndex"
+              data-testid="support-foot-altitude-input"
               [attr.aria-invalid]="supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid"
               [attr.aria-errormessage]="
                 supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid
@@ -555,6 +570,7 @@
             optionValue="value"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentPosition', $event)"
             [inputId]="'attachmentPosition' + rowIndex"
+            data-testid="attachment-position-select"
           />
         } @else {
           <p class="read-only_info">{{ support.attachmentPosition }}</p>
@@ -575,6 +591,7 @@
               [ngModel]="support.chainSurface"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
               [id]="'chainSurface' + rowIndex"
+              data-testid="chain-surface-input"
               [attr.aria-invalid]="chainSurfaceInput.dirty && chainSurfaceInput.invalid"
               [attr.aria-errormessage]="
                 chainSurfaceInput.dirty && chainSurfaceInput.invalid ? 'chainSurfaceError' + rowIndex : null
@@ -608,7 +625,7 @@
       }
       @if (mode() === 'edit' || mode() === 'create') {
         <td class="sticky-right">
-          <button app-btn btnSize="s" btnStyle="text" class="w-auto" (click)="popover.toggle($event)">
+          <button app-btn btnSize="s" btnStyle="text" class="w-auto" (click)="popover.toggle($event)" data-testid="support-actions-btn">
             <span class="pi pi-ellipsis-h"></span>
           </button>
           <p-popover #popover>
@@ -619,6 +636,7 @@
                   btnSize="s"
                   btnStyle="text"
                   (click)="addSupport.emit({ index: rowIndex, position: 'before' })"
+                  data-testid="add-support-before-btn"
                 >
                   <app-icon icon="add" />
                   <span i18n>Add support before</span>
@@ -628,11 +646,12 @@
                   btnSize="s"
                   btnStyle="text"
                   (click)="addSupport.emit({ index: rowIndex, position: 'after' })"
+                  data-testid="add-support-after-btn"
                 >
                   <app-icon icon="add" />
                   <span i18n>Add support after</span>
                 </button>
-                <button app-btn btnSize="s" btnStyle="text" (click)="duplicateSupport.emit(support.uuid)">
+                <button app-btn btnSize="s" btnStyle="text" (click)="duplicateSupport.emit(support.uuid)" data-testid="duplicate-support-btn">
                   <app-icon icon="content_copy" />
                   <span i18n>Duplicate</span>
                 </button>
@@ -642,6 +661,7 @@
                   btnStyle="text"
                   class="erase-btn"
                   (click)="deleteSupport.emit(support.uuid)"
+                  data-testid="delete-support-btn"
                 >
                   <app-icon icon="delete" />
                   <span i18n>Delete support</span>

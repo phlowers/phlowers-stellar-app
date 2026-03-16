@@ -156,4 +156,35 @@ describe('TemperatureCalculationComponent', () => {
 
     expect(component.temperatureCalculationError()).toBe(false);
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render transit-input', () => {
+      const el = getByTestId('transit-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render wind-incidence-mode-selector', () => {
+      expect(getByTestId('wind-incidence-mode-selector')).toBeTruthy();
+    });
+
+    it('should render sky-cover-select', () => {
+      expect(getByTestId('sky-cover-select')).toBeTruthy();
+    });
+
+    it('should render measured-solar-flux-input', () => {
+      const el = getByTestId('measured-solar-flux-input');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should render calculate-temperature-btn', () => {
+      const el = getByTestId('calculate-temperature-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+  });
 });

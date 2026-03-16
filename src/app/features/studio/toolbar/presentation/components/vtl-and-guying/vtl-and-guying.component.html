@@ -18,6 +18,7 @@
             optionValue="value"
             formControlName="selectedSpan"
             appendTo="body"
+            data-testid="guying-span-select"
           />
         </div>
         <div class="vtl-guying__form-field">
@@ -29,6 +30,7 @@
             optionValue="value"
             formControlName="selectedSupport"
             appendTo="body"
+            data-testid="reference-support-select"
           />
         </div>
         <dl class="vtl-guying__support-type">
@@ -54,6 +56,7 @@
             (click)="onExportVhl()"
             class="vtl-guying__export-btn"
             [disabled]="true"
+            data-testid="export-vtl-btn"
           >
             <app-icon icon="download" />
             <span i18n>Export</span>
@@ -91,19 +94,36 @@
           <div class="vtl-guying__form-field">
             <label for="altitude-input" i18n>Altitude</label>
             <p-inputgroup>
-              <input id="altitude-input" type="number" pInputText formControlName="altitude" />
+              <input
+                id="altitude-input"
+                type="number"
+                pInputText
+                formControlName="altitude"
+                data-testid="altitude-input"
+              />
               <p-inputgroup-addon>m</p-inputgroup-addon>
             </p-inputgroup>
           </div>
           <div class="vtl-guying__form-field">
             <label for="horizontal-distance-input" i18n>Horizontal distance</label>
             <p-inputgroup>
-              <input pInputText type="number" id="horizontal-distance-input" formControlName="horizontalDistance" />
+              <input
+                pInputText
+                type="number"
+                id="horizontal-distance-input"
+                formControlName="horizontalDistance"
+                data-testid="horizontal-distance-input"
+              />
               <p-inputgroup-addon>m</p-inputgroup-addon>
             </p-inputgroup>
           </div>
           <div class="vtl-guying__form-field vtl-guying__form-field--checkbox">
-            <p-checkbox [binary]="true" formControlName="hasPulley" inputId="pulley-checkbox" />
+            <p-checkbox
+              [binary]="true"
+              formControlName="hasPulley"
+              inputId="pulley-checkbox"
+              data-testid="with-pulley-checkbox"
+            />
             <label for="pulley-checkbox" i18n>With pulley</label>
           </div>
         </div>
@@ -116,6 +136,7 @@
             [disabled]="!isFormValid()"
             (click)="onCalculate()"
             class="vtl-guying__calculate-btn"
+            data-testid="calculate-btn"
           >
             <app-icon icon="rocket_launch" />
             <span i18n>Calculate</span>
@@ -169,6 +190,7 @@
                 i18n-placeholder
                 placeholder="Add a comment for the export."
                 class="w-full h-full comment-textarea"
+                data-testid="comment-textarea"
               ></textarea>
             </div>
           </dl>
@@ -201,11 +223,11 @@
 }
 <ng-template #footer>
   <div class="vtl-guying__dialog-footer">
-    <button [disabled]="true" app-btn type="button" btnSize="m" (click)="onExport()">
+    <button [disabled]="true" app-btn type="button" btnSize="m" (click)="onExport()" data-testid="export-dialog-btn">
       <app-icon icon="download" />
       <span i18n>Export</span>
     </button>
-    <button app-btn type="button" btnSize="m" (click)="onSave()">
+    <button app-btn type="button" btnSize="m" (click)="onSave()" data-testid="save-results-btn">
       <app-icon icon="save" />
       <span i18n>Save</span>
     </button>

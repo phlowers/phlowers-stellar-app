@@ -649,4 +649,45 @@ describe('SupportsTableComponent', () => {
       });
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+    const getAllByTestId = (testId: string): HTMLElement[] =>
+      Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
+
+    it('should render supports-table', () => {
+      expect(getByTestId('supports-table')).toBeTruthy();
+    });
+
+    it('should render support-number-input for each support', () => {
+      const inputs = getAllByTestId('support-number-input');
+      expect(inputs.length).toBe(mockSupports.length);
+      expect(inputs[0].tagName).toBe('INPUT');
+    });
+
+    it('should render span-length-input for each support', () => {
+      expect(getAllByTestId('span-length-input').length).toBe(mockSupports.length);
+    });
+
+    it('should render attachment-height-input for each support', () => {
+      expect(getAllByTestId('attachment-height-input').length).toBe(mockSupports.length);
+    });
+
+    it('should render span-angle-input for each support', () => {
+      expect(getAllByTestId('span-angle-input').length).toBe(mockSupports.length);
+    });
+
+    it('should render chain-name-select for each support', () => {
+      expect(getAllByTestId('chain-name-select').length).toBe(mockSupports.length);
+    });
+
+    it('should render chain-length-input for each support', () => {
+      expect(getAllByTestId('chain-length-input').length).toBe(mockSupports.length);
+    });
+
+    it('should render support-actions-btn for each support', () => {
+      expect(getAllByTestId('support-actions-btn').length).toBe(mockSupports.length);
+    });
+  });
 });

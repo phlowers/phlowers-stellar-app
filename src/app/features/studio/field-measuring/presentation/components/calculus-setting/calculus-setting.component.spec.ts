@@ -100,4 +100,21 @@ describe('CalculusSetting component', () => {
     expect(fixture.debugElement.query(By.css('app-pep'))).toBeTruthy();
     expect(fixture.debugElement.query(By.css('app-tangent-aiming'))).toBeFalsy();
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render papoto-radio', () => {
+      expect(getByTestId('papoto-radio')).toBeTruthy();
+    });
+
+    it('should render tangent-aiming-radio', () => {
+      expect(getByTestId('tangent-aiming-radio')).toBeTruthy();
+    });
+
+    it('should render pep-radio', () => {
+      expect(getByTestId('pep-radio')).toBeTruthy();
+    });
+  });
 });

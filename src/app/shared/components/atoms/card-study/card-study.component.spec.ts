@@ -100,4 +100,18 @@ describe('CardStudyComponent', () => {
       expect(date?.textContent).toContain('2025-03-01');
     });
   });
+
+  describe('HTML rendering - go-to-study button', () => {
+    it('should render the go-to-study button', () => {
+      fixture.componentRef.setInput('title', 'My Study');
+      fixture.componentRef.setInput('authorMail', 'author@example.com');
+      fixture.componentRef.setInput('modificationDate', '2025-03-01');
+      fixture.componentRef.setInput('uuid', 'uuid-1');
+      fixture.detectChanges();
+
+      const btn = getByTestId('go-to-study-btn');
+      expect(btn).toBeTruthy();
+      expect(btn?.tagName).toBe('BUTTON');
+    });
+  });
 });

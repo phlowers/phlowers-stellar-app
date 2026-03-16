@@ -198,4 +198,31 @@ describe('StudiesComponent', () => {
       consoleErrorSpy.mockRestore();
     });
   });
+
+  describe('HTML rendering', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should render create-study-btn', () => {
+      const el = getByTestId('create-study-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render my-studies-tab', () => {
+      expect(getByTestId('my-studies-tab')).toBeTruthy();
+    });
+
+    it('should render search-study-tab', () => {
+      expect(getByTestId('search-study-tab')).toBeTruthy();
+    });
+
+    it('should render import-study-tab', () => {
+      expect(getByTestId('import-study-tab')).toBeTruthy();
+    });
+  });
 });

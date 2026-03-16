@@ -716,5 +716,15 @@ describe('StudioTopToolbarComponent', () => {
       const btn = getByTestId('shortcuts-btn');
       expect(btn).toBeTruthy();
     });
+
+    it('UC-TT5: should render view mode selector', () => {
+      const el = getByTestId('view-mode-selector');
+      expect(el).toBeTruthy();
+    });
+
+    it('UC-TT6: should render side view selector', () => {
+      const el = getByTestId('side-view-selector');
+      expect(el).toBeTruthy();
+    });
   });
 });

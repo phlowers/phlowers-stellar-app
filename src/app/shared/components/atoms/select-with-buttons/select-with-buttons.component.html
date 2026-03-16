@@ -11,6 +11,7 @@
   class="select-with-buttons"
   panelStyleClass="select-with-buttons-panel"
   [class.has-clear-btn]="selectedOptionValue() && showClear()"
+  data-testid="select-dropdown"
 >
   <ng-template #selectedItem let-selectedOption>
     @if (selectedOptionValue()) {
@@ -32,9 +33,10 @@
         btnStyle="text"
         ariaLabel="view"
         i18n-ariaLabel
+        data-testid="select-view-btn"
         (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); viewOption.emit(item)"
       >
-        <app-icon icon="visibility" />
+        <app-icon icon="visibility" aria-hidden="true" />
       </button>
 
       <p-divider layout="vertical" />
@@ -45,9 +47,10 @@
         btnStyle="text"
         ariaLabel="edit"
         i18n-ariaLabel
+        data-testid="select-edit-btn"
         (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); editOption.emit(item)"
       >
-        <app-icon icon="edit" />
+        <app-icon icon="edit" aria-hidden="true" />
       </button>
 
       <p-divider layout="vertical" />
@@ -58,9 +61,10 @@
         btnStyle="text"
         ariaLabel="duplicate"
         i18n-ariaLabel
+        data-testid="select-duplicate-btn"
         (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); duplicateOption.emit(item)"
       >
-        <app-icon icon="content_copy" />
+        <app-icon icon="content_copy" aria-hidden="true" />
       </button>
 
       <p-divider layout="vertical" />
@@ -72,9 +76,10 @@
         class="erase-btn"
         ariaLabel="delete"
         i18n-ariaLabel
+        data-testid="select-delete-btn"
         (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); deleteOption.emit(item)"
       >
-        <app-icon icon="delete" />
+        <app-icon icon="delete" aria-hidden="true" />
       </button>
     </div>
   </ng-template>
@@ -87,9 +92,10 @@
     btnSize="s"
     ariaLabel="clear selection"
     i18n-ariaLabel
+    data-testid="clear-selection-btn"
     (click)="clearSelectedOptionValue()"
     class="clear-button"
   >
-    <app-icon icon="close" />
+    <app-icon icon="close" aria-hidden="true" />
   </button>
 }

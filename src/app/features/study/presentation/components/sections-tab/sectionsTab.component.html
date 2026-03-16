@@ -26,7 +26,14 @@
 @if (study() && !study()!.sections!.length) {
   <section class="text-center">
     <h1 class="no-section-text text-xl-400" i18n>No existing section</h1>
-    <button i18n app-btn btnStyle="base" btnSize="l" (click)="openNewSectionModalCreate()">
+    <button
+      i18n
+      app-btn
+      btnStyle="base"
+      btnSize="l"
+      (click)="openNewSectionModalCreate()"
+      data-testid="create-section-empty-btn"
+    >
       <app-icon icon="add" />
       Create a section
     </button>
@@ -193,11 +200,11 @@
 
           <p-popover #popover>
             <ng-template pTemplate="content">
-              <button app-btn btnSize="s" btnStyle="text" (click)="viewSection(section)">
+              <button app-btn btnSize="s" btnStyle="text" (click)="viewSection(section)" data-testid="section-view-btn">
                 <app-icon icon="visibility" />
                 <span i18n>View</span>
               </button>
-              <button app-btn btnSize="s" btnStyle="text" (click)="editSection(section)">
+              <button app-btn btnSize="s" btnStyle="text" (click)="editSection(section)" data-testid="section-edit-btn">
                 <app-icon icon="edit" />
                 <span i18n>Edit</span>
               </button>
@@ -206,6 +213,7 @@
                 app-btn
                 btnSize="s"
                 btnStyle="text"
+                data-testid="section-add-ic-btn"
                 (click)="
                   $event.stopPropagation();
                   openInitialConditionModal(section, createInitialCondition(section), 'create')
@@ -215,12 +223,25 @@
                 <span i18n>Add an initial condition</span>
               </button>
 
-              <button app-btn btnSize="s" btnStyle="text" (click)="popover.hide(); duplicateSection.emit(section)">
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                (click)="popover.hide(); duplicateSection.emit(section)"
+                data-testid="section-duplicate-btn"
+              >
                 <app-icon icon="content_copy" />
                 <span i18n>Duplicate</span>
               </button>
 
-              <button app-btn btnSize="s" btnStyle="text" class="erase-btn" (click)="deleteSection.emit(section)">
+              <button
+                app-btn
+                btnSize="s"
+                btnStyle="text"
+                class="erase-btn"
+                (click)="deleteSection.emit(section)"
+                data-testid="section-delete-btn"
+              >
                 <app-icon icon="delete" />
                 <span i18n>Delete</span>
               </button>
