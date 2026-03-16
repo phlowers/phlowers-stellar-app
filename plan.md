@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (309 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B et 7 terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal() — reste 9 composants avec `subscribe()` manuel et **10 avec `@ViewChild`** (14 décorateurs). **Étape E (cross-features DDD)** réévaluée : ~60 imports cross-boundary dans ~38 fichiers (vs 5 dans 4 précédemment estimé).
+**Baseline actuelle** : build OK, 88 suites / 1724 tests pass, lint 0 erreurs (306 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B et 8C terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), **toSignal()** — reste **10 composants avec `@ViewChild`** (14 décorateurs). **Étape E (cross-features DDD)** réévaluée : ~60 imports cross-boundary dans ~38 fichiers (vs 5 dans 4 précédemment estimé).
 
 ---
 
@@ -14,7 +14,7 @@
 | `input()`/`output()` signal API | 🟢 100% prod | ~98 input() + 41 output() en prod, @Input/@Output uniquement dans 3 mocks .spec |
 | `signal()` adoption | 🟢 ~199 usages | Bien réparti dans composants et services |
 | `computed()` adoption | 🟢 69 usages | Bonne couverture |
-| Imports alias vs relatifs | 🟢 96%+ | Seulement 4 imports relatifs profonds |
+| Imports alias vs relatifs | 🟢 100% | 0 imports relatifs profonds (Étape 8B terminée) |
 
 ### Points critiques (à corriger)
 | Critère | Score | Détail |
@@ -1236,7 +1236,7 @@ src/app/core/
 
 *Audit complet du code existant par rapport aux règles définies dans CLAUDE.md. ~200+ violations identifiées, plan de remédiation priorisé en 8 étapes (A–H). Phases 0–3F, 4, 6, 6B et 7 terminées.*
 
-> **Contexte** : Angular 19.2.4. Aucune étape de Phase 8 n'a encore été implémentée. L'audit a été rafraîchi le 2026-03-16 pour refléter l'état réel post-Phase 7 + 6B — suppression des bridges, démantèlement de `ui/`.
+> **Contexte** : Angular 19.2.4. **Étapes A et B terminées (2026-03-16).** L'audit a été rafraîchi le 2026-03-16 pour refléter l'état réel post-Phase 7 + 6B — suppression des bridges, démantèlement de `ui/`.
 
 #### État de conformité actuel (60 composants)
 
@@ -1247,18 +1247,18 @@ src/app/core/
 | `inject()` (pas de constructor DI) | 60/60 | ✅ 100% |
 | `input()` / `output()` signal API | 60/60 | ✅ 100% |
 | `signal()` / `computed()` pour l'état | 60/60 | ✅ 100% |
-| RxJS → `toSignal()` (pas de `subscribe()` manuel) | 51/60 | ⚠️ 85% |
+| RxJS → `toSignal()` (pas de `subscribe()` manuel) | 60/60 | ✅ 100% |
 | `viewChild()` signal vs `@ViewChild` | 46/60 | ⚠️ 77% |
 
 #### Résumé des violations restantes
 
 | Catégorie | Violations | Sévérité |
 |-----------|-----------|----------|
-| Import `Subscription` depuis `dexie` en couche présentation | 2 fichiers | 🔴 CRITIQUE |
-| `HttpClientTestingModule` + `RouterTestingModule` (interdits) | 1 fichier (`app.component.spec.ts`) | 🔴 CRITIQUE |
-| Texte français hardcodé / commentaires FR | 6 instances dans 2 fichiers | 🟠 HAUTE |
-| Imports relatifs profonds (alias manquants) | 8 fichiers dans `field-measuring/` | 🟠 HAUTE |
-| Subscriptions RxJS manuelles (`subscribe()`) au lieu de `toSignal()` | 9 composants, ~19 subscriptions | 🟠 HAUTE |
+| ~~Import `Subscription` depuis `dexie` en couche présentation~~ | ~~2 fichiers~~ | ✅ CORRIGÉ |
+| ~~`HttpClientTestingModule` + `RouterTestingModule` (interdits)~~ | ~~1 fichier~~ | ✅ CORRIGÉ |
+| ~~Texte français hardcodé / commentaires FR~~ | ~~6 instances dans 2 fichiers~~ | ✅ CORRIGÉ |
+| ~~Imports relatifs profonds (alias manquants)~~ | ~~8 fichiers dans `field-measuring/`~~ | ✅ CORRIGÉ |
+| ~~Subscriptions RxJS manuelles (`subscribe()`) au lieu de `toSignal()`~~ | ~~9 composants, ~19 subscriptions~~ | ✅ CORRIGÉ |
 | **Imports cross-features (DDD bounded contexts)** | **~60 imports dans ~38 fichiers** | 🟠 HAUTE |
 | **`shared/` → `features/` (DDD interdit)** | **18 imports dans 6 fichiers** | 🟠 HAUTE |
 | `@ViewChild`/`@ContentChildren` à migrer vers `viewChild()`/`contentChildren()` | 14 décorateurs dans 10 composants | 🟡 MOYENNE |
@@ -1269,45 +1269,60 @@ src/app/core/
 | Imbrication SCSS profonde (4+) | ~5 fichiers | 🔵 BASSE |
 | `any` explicites (`no-explicit-any` warnings) | ~8 prod + ~180 specs | 🟡 MOYENNE |
 
-#### Étape A — Corrections critiques (quick fixes)
+#### Étape A — Corrections critiques (quick fixes) ✅ TERMINÉE (2026-03-16)
 
-52. **Corriger `import { Subscription } from 'dexie'` → `from 'rxjs'`** dans 2 fichiers :
-    - `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` (ligne 7)
-    - `src/app/features/study/presentation/pages/study/study.component.ts` (ligne 24)
-53. **Remplacer `HttpClientTestingModule` et `RouterTestingModule`** par `provideHttpClient()` + `provideRouter([])` dans `src/app/app.component.spec.ts` (lignes 16, 19, 154)
-54. **Supprimer le texte français hardcodé** dans `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.html` (lignes 170-180) — "bouton pour tests focus", "coucou contenu onglet sol/estimations" (4 instances)
-55. **Supprimer les commentaires français** dans `src/app/shared/components/studio/free-positioning/free-positioning.component.spec.ts` (lignes 1-2) — "Vérifier et supprimer tout import…", "Aucun import de HttpClientTestingModule…"
+52. ✅ **Corrigé `import { Subscription } from 'dexie'`** dans 2 fichiers — remplacé par un type inline `{ unsubscribe(): void }` compatible avec le `Subscription` Dexie retourné par `liveQuery().subscribe()` (et non `Subscription` RxJS qui est incompatible) :
+    - `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts`
+    - `src/app/features/study/presentation/pages/study/study.component.ts`
+53. ✅ **Remplacé `HttpClientTestingModule` et `RouterTestingModule`** par `provideHttpClient()` + `provideRouter([])` dans `src/app/app.component.spec.ts`
+54. ✅ **Supprimé le texte français hardcodé** dans `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.html` — 2 blocs `<app-side-tab>` placeholder ("Sol" et "Estimations") avec "coucou contenu onglet" et "bouton pour tests focus"
+55. ✅ **Supprimé les commentaires français** dans `src/app/shared/components/studio/free-positioning/free-positioning.component.spec.ts` (lignes 1-2)
 
-#### Étape B — Import aliases (8 fichiers dans `field-measuring`)
+> **Vérification** : build OK, 88 suites / 1726 tests pass, lint 0 erreurs (305 warnings), tous les grep checks passent (0 résultat pour dexie dans composants, HttpClientTestingModule, RouterTestingModule, texte FR hardcodé, commentaires FR).
 
-56. **Convertir les 8 imports relatifs profonds** vers alias `@features/` :
+#### Étape B — Import aliases (8 fichiers dans `field-measuring`) ✅ TERMINÉE (2026-03-16)
+
+56. ✅ **Converti 9 imports relatifs profonds (3+ niveaux) vers alias `@features/`** dans 8 fichiers de `field-measuring/presentation/components/` :
 
     | Fichier | Import relatif | Remplacement |
     |---------|---------------|-------------|
-    | `header.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
-    | `header.component.spec.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
-    | `field-datas.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
-    | `field-datas.component.spec.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
-    | `field-measuring.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
     | `calculus-setting.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
     | `papoto.component.ts` | `'../../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `papoto.component.spec.ts` | `'./../../../helpers'` | `'@features/studio/field-measuring/presentation/helpers'` |
     | `papoto.component.spec.ts` | `'../../../mock-data'` | `'@features/studio/field-measuring/presentation/mock-data'` |
+    | `field-datas.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `field-datas.component.spec.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `header.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `header.component.spec.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
+    | `field-measuring.component.ts` | `'../../../domain/types'` | `'@features/studio/field-measuring/domain/types'` |
 
-#### Étape C — Migration `toSignal()` (9 composants avec Subscriptions RxJS manuelles)
+> **Vérification** : build OK, 88 suites / 1726 tests pass (0 régression). Grep post-fix : 0 résultat pour `../../../domain/types`, `../../../../domain/types`, `../../../mock-data`, `./../../../helpers` dans `field-measuring/`.
 
-57. **Convertir les Subscriptions manuelles en `toSignal()` + `effect()`** :
+#### Étape C — Migration `toSignal()` (9 composants avec Subscriptions RxJS manuelles) ✅ TERMINÉE (2026-03-16)
 
-    | Composant | Fichier | Subscriptions | Détail |
-    |-----------|---------|:---:|--------|
-    | AppComponent | `src/app/app.component.ts` | 3 | `online$`, `ready$`, `needUpdate$` |
-    | TopbarComponent | `src/app/shared/components/layout/topbar/topbar.component.ts` | 4 | `pageTitle$`, `user$`, `ready$`, `pyodideLoadError$` |
-    | HomeComponent | `src/app/features/home/presentation/pages/home/home.component.ts` | 3 | `needUpdate$`, `combineLatest`, `ready` |
-    | ChangelogComponent | `src/app/features/changelog/presentation/pages/changelog/changelog.component.ts` | 2 | `online$`, `getChangelogs()` |
-    | NewsComponent | `src/app/features/news/presentation/pages/news/news.component.ts` | 2 | `online$`, `getNews()` |
-    | StudioPageComponent | `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` | 2 | `ready`, `getStudyAsObservable()` |
-    | StudyComponent | `src/app/features/study/presentation/pages/study/study.component.ts` | 3 | `ready`, `route.params`, `getStudyAsObservable()` |
-    | StudiesComponent | `src/app/features/studies/presentation/pages/studies/studies.component.ts` | 2 | `studies`, `ready` |
-    | InitialConditionModalComponent | `src/app/features/study/presentation/components/sections-tab/initialConditionModal/initialConditionModal.component.ts` | 1 | `Subscription` redondant avec `takeUntilDestroyed` |
+57. ✅ **Converti les 9 composants utilisant `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`** :
+
+    | # | Composant | Pattern migration | Détail |
+    |---|-----------|-------------------|--------|
+    | ✅ | InitialConditionModalComponent | Supprimé `Subscription` redondant | `takeUntilDestroyed` gérait déjà le cleanup — supprimé `Subscription`, `ngOnDestroy`, `OnDestroy` |
+    | ✅ | TopbarComponent | 4× `toSignal()` direct | `pageTitle$`, `user$`, `ready$`, `pyodideLoadError$` → `toSignal()` avec `initialValue` — supprimé `ngOnInit`, `ngOnDestroy`, `Subscription`, `OnInit`, `OnDestroy` |
+    | ✅ | AppComponent | 3× `toSignal()` + 3× `effect()` | `online$`, `ready$`, `needUpdate$` → `toSignal()`, side-effects dans `effect()` — supprimé `ngOnDestroy`, `Subscription`, `OnDestroy` |
+    | ✅ | StudiesComponent | 2× `toSignal()` + 2× `effect()` | `studies` BehaviorSubject + `ready` → `toSignal()`, logiques `ngOnInit` dans `effect()` et constructor — supprimé `ngOnInit`, `OnInit` |
+    | ✅ | ChangelogComponent | `switchMap` + `takeUntilDestroyed` + `toSignal` | Nested subscribe → `switchMap` pipe avec `tap` + `takeUntilDestroyed` — `isOnline` via `toSignal()` — supprimé `ngOnInit`, `OnInit` |
+    | ✅ | NewsComponent | `switchMap` + `takeUntilDestroyed` + `toSignal` | Même pattern que Changelog + `catchError` pour gestion d'erreur — supprimé `ngOnInit`, `OnInit` |
+    | ✅ | HomeComponent | 3× `toSignal()` + 3× `effect()` | `needUpdate$` + `combineLatest([online$, serverOnline$])` + `ready` → `toSignal()`, side-effects dans `effect()` — supprimé `ngOnInit`, `ngOnDestroy`, `Subscription`, `OnInit`, `OnDestroy` |
+    | ✅ | StudyComponent | `filter` + `switchMap` + `takeUntilDestroyed` | `ready` + `getStudyAsObservable()` → `filter(ready).pipe(switchMap(...))` + `from()` wrapper pour Dexie Observable — `route.params` avec `takeUntilDestroyed` — supprimé `ngOnDestroy`, `subscription` field, `OnDestroy` |
+    | ✅ | StudioPageComponent | `filter` + `switchMap` + `takeUntilDestroyed` | `ready` + `getStudyAsObservable()` → `filter(ready).pipe(switchMap(...))` + `from()` wrapper pour Dexie Observable — supprimé `subscription` field, gardé `ngOnDestroy` (contient `resetAll()`) |
+
+    **Tests mis à jour (6 fichiers spec)** :
+    - `topbar.component.spec.ts` — supprimé test `ngOnDestroy`/`subscriptions`, ajouté mocks `UserService`/`WorkerPythonService`, tests signaux reflètent les BehaviorSubjects
+    - `app.component.spec.ts` — ajouté `overrideComponent` template vide (évite crash PrimeNG Toast dans `detectChanges`), `TestBed.flushEffects()` pour flusher les effects async
+    - `studies.component.spec.ts` — ajouté `signal` import + `exportDialogData: signal(null)` au mock, `fixture.detectChanges()` après `next()` pour déclencher les effects
+    - `home.component.spec.ts` — supprimé test `ngOnDestroy`/`subscriptions`, ajouté `fixture.detectChanges()` après chaque `BehaviorSubject.next()` dans 13 tests
+    - `study.component.spec.ts` — supprimé test `ngOnDestroy`/`subscription`, remplacé import `Subscription` par pattern simplifié
+    - `studio-page.component.spec.ts` — simplifié test `ngOnDestroy` (plus de `subscription.unsubscribe`)
+
+> **Vérification** : build OK, 88 suites / 1724 tests pass (−2 tests supprimés : anciens tests ngOnDestroy/subscriptions devenus obsolètes), lint 0 erreurs (306 warnings). Grep post-fix : 0 `new Subscription()` dans `*.component.ts`, 0 `.subscribe()` dans les 4 fichiers fully-migrated (TopbarComponent, AppComponent, HomeComponent, StudiesComponent). Les `.subscribe()` restants dans Changelog, News, Study, StudioPage sont dans des pipes `takeUntilDestroyed(...).subscribe()` — gestion automatique du cleanup.
 
 #### Étape D — Migration `viewChild()` signal-based (14 décorateurs dans 10 composants)
 

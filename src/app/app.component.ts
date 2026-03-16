@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -13,13 +13,13 @@ import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 import { OnlineService } from '@services/online/online.service';
-import { StorageService } from '@services/storage/storage.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { UserService } from '@services/user/user.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AssetList, UpdateService } from '@services/worker_update/worker_update.service';
-import { Subscription } from 'rxjs';
+import { StorageService } from '@services/storage/storage.service';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -60,7 +60,7 @@ const modules = [
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
   readonly userDialog = signal(false);
   readonly isUpdateDialogOpen = signal(false);
@@ -69,7 +69,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }>;
 
   readonly submitted = signal(false);
-  private readonly subscriptions = new Subscription();
   private readonly messageService = inject(MessageService);
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
@@ -83,6 +82,10 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly attachmentService = inject(AttachmentService);
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
+  private readonly online = toSignal(this.onlineService.online$, { initialValue: false });
+  private readonly storageReady = toSignal(this.storageService.ready$, { initialValue: false });
+  private readonly needUpdate = toSignal(this.updateService.needUpdate$, { initialValue: false });
+
   constructor() {
     this.csvImporters = {
       'maintenance-teams.csv': () => this.maintenanceService.importFromFile(),
@@ -96,27 +99,25 @@ export class AppComponent implements OnInit, OnDestroy {
     this.form = new FormGroup({
       email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])
     });
-    this.subscriptions.add(
-      this.onlineService.online$.subscribe((online) => {
-        if (online) {
-          this.updateService.checkAppVersion();
-        }
-      })
-    );
-    this.subscriptions.add(
-      this.storageService.ready$.subscribe(async (ready) => {
-        if (ready) {
-          const user = await this.userService.getUser();
+
+    effect(() => {
+      if (this.online()) {
+        this.updateService.checkAppVersion();
+      }
+    });
+
+    effect(() => {
+      if (this.storageReady()) {
+        this.userService.getUser().then((user) => {
           this.userDialog.set(!user);
           this.setupData();
-        }
-      })
-    );
-    this.subscriptions.add(
-      this.updateService.needUpdate$.subscribe((needUpdate) => {
-        this.isUpdateDialogOpen.set(needUpdate);
-      })
-    );
+        });
+      }
+    });
+
+    effect(() => {
+      this.isUpdateDialogOpen.set(this.needUpdate());
+    });
   }
 
   async setupData() {
@@ -164,10 +165,6 @@ export class AppComponent implements OnInit, OnDestroy {
     for (const importFn of Object.values(this.csvImporters)) {
       await importFn();
     }
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
   }
 
   async saveUser() {

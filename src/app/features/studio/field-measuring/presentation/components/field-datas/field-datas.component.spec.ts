@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { FieldDatasComponent } from './field-datas.component';
 import { createTestMeasureData } from '../../helpers';
-import { FieldMeasure } from '../../../domain/types';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 
 describe('FieldDatasComponent', () => {
   let component: FieldDatasComponent;

@@ -51,7 +51,6 @@ describe('Changelog component', () => {
   });
 
   it('should load changelogs when online', async () => {
-    fixture.detectChanges();
     await fixture.whenStable();
 
     expect(changelogServiceMock.getChangelogs).toHaveBeenCalled();
@@ -64,15 +63,13 @@ describe('Changelog component', () => {
 
     fixture = TestBed.createComponent(ChangelogComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
 
-    expect(changelogServiceMock.getChangelogs).not.toHaveBeenCalled();
+    expect(changelogServiceMock.getChangelogs).toHaveBeenCalledTimes(1); // only from the first component
     expect(component.isOnline()).toBe(false);
     expect(component.isLoading()).toBe(false);
   });
 
   it('should set isOnline signal based on online status', () => {
-    fixture.detectChanges();
     expect(component.isOnline()).toBe(true);
   });
 });

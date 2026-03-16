@@ -446,14 +446,11 @@ describe('StudioPageComponent', () => {
     });
   });
 
-  it('ngOnDestroy should clean up subscription and reset plot service', () => {
-    const unsubscribe = jest.fn();
-    (component as unknown as { subscription: { unsubscribe: () => void } }).subscription = { unsubscribe };
-
+  it('ngOnDestroy should reset plot service', () => {
     component.ngOnDestroy();
 
     expect(plotService.resetAll).toHaveBeenCalled();
-    expect(unsubscribe).toHaveBeenCalled();
+    expect(plotService.isStudioActive()).toBe(false);
   });
 
   describe('UC: studio page initialization and navigation', () => {

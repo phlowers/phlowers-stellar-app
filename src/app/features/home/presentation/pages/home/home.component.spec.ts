@@ -83,7 +83,6 @@ describe('HomeComponent', () => {
     it('should initialize with default values', () => {
       expect(component.latestStudies()).toEqual([]);
       expect(component.updateStatus()).toBe('unknown');
-      expect(component.serverStatus()).toBe('unknown');
     });
 
     it('should initialize homeText with correct default values', () => {
@@ -101,6 +100,7 @@ describe('HomeComponent', () => {
 
       const newFixture = TestBed.createComponent(HomeComponent);
       const newComponent = newFixture.componentInstance;
+      newFixture.detectChanges();
 
       expect(newComponent.updateStatus()).toBe('warning');
     });
@@ -113,12 +113,9 @@ describe('HomeComponent', () => {
   });
 
   describe('Connectivity Status Logic', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-    });
-
     it('should set server status to offline when offline', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
+      fixture.detectChanges();
 
       expect(component.serverStatus()).toBe('offline');
     });
@@ -126,6 +123,7 @@ describe('HomeComponent', () => {
     it('should set server status to success when online and server is online', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
+      fixture.detectChanges();
 
       expect(component.serverStatus()).toBe('success');
     });
@@ -133,6 +131,7 @@ describe('HomeComponent', () => {
     it('should set server status to warning when online and server is loading', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
+      fixture.detectChanges();
 
       expect(component.serverStatus()).toBe('warning');
     });
@@ -140,18 +139,16 @@ describe('HomeComponent', () => {
     it('should set server status to offline when online and server is offline', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
+      fixture.detectChanges();
 
       expect(component.serverStatus()).toBe('offline');
     });
   });
 
   describe('Server Text Updates', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-    });
-
     it('should update server text for offline status', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
+      fixture.detectChanges();
 
       expect(component.homeText().serverText).toContain('Application in offline mode');
     });
@@ -159,6 +156,7 @@ describe('HomeComponent', () => {
     it('should update server text for warning status', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
+      fixture.detectChanges();
 
       expect(component.homeText().serverText).toContain('Trying to reach the servers');
     });
@@ -166,6 +164,7 @@ describe('HomeComponent', () => {
     it('should update server text for offline status when server is offline', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
+      fixture.detectChanges();
 
       expect(component.homeText().serverText).toContain('Application in offline mode');
     });
@@ -173,18 +172,16 @@ describe('HomeComponent', () => {
     it('should update server text for success status', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
+      fixture.detectChanges();
 
       expect(component.homeText().serverText).toContain('Server connexion success');
     });
   });
 
   describe('Studies Loading', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-    });
-
     it('should load latest studies when studies service is ready', async () => {
       (studiesServiceMock.ready as BehaviorSubject<boolean>).next(true);
+      fixture.detectChanges();
 
       // Wait for async operation
       await fixture.whenStable();
@@ -200,19 +197,10 @@ describe('HomeComponent', () => {
 
     it('should not load studies when studies service is not ready', () => {
       (studiesServiceMock.ready as BehaviorSubject<boolean>).next(false);
+      fixture.detectChanges();
 
       expect(studiesServiceMock.getLatestStudies).not.toHaveBeenCalled();
       expect(component.latestStudies()).toEqual([]);
-    });
-  });
-
-  describe('ngOnDestroy', () => {
-    it('should unsubscribe from all subscriptions', () => {
-      const unsubscribeSpy = jest.spyOn(component['subscriptions'], 'unsubscribe');
-
-      component.ngOnDestroy();
-
-      expect(unsubscribeSpy).toHaveBeenCalled();
     });
   });
 
@@ -244,21 +232,20 @@ describe('HomeComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle multiple rapid status changes', () => {
-      component.ngOnInit();
-
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
       (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
+      fixture.detectChanges();
 
       expect(component.serverStatus()).toBe('warning');
     });
 
     it('should handle studies service returning empty array', async () => {
       studiesServiceMock.getLatestStudies.mockResolvedValue([]);
-      component.ngOnInit();
 
       (studiesServiceMock.ready as BehaviorSubject<boolean>).next(true);
+      fixture.detectChanges();
       await fixture.whenStable();
 
       expect(component.latestStudies()).toEqual([]);

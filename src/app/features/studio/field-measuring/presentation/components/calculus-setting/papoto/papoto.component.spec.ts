@@ -5,8 +5,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { PapotoComponent } from './papoto.component';
-import { createTestMeasureData } from './../../../helpers';
-import { LEFT_SUPPORT_OPTIONS_MOCK } from '../../../mock-data';
+import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
+import { LEFT_SUPPORT_OPTIONS_MOCK } from '@features/studio/field-measuring/presentation/mock-data';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { PlotService } from '@features/studio/core/services/plot.service';

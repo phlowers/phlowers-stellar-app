@@ -6,7 +6,7 @@
  */
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { ChangeDetectionStrategy, OnInit, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { NewStudyModalComponent } from '@features/studies/presentation/components/new-study-modal/new-study-modal.component';
 import { ButtonModule } from 'primeng/button';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -23,6 +23,7 @@ import { StudiesTableComponent } from '@features/studies/presentation/components
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from '@features/studies/presentation/components/import-study/import-study.component';
 import { ExportDialogComponent } from '@features/study/presentation/components/study-header/export-dialog/export-dialog.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 /**
  * Main studies listing page.
@@ -51,33 +52,34 @@ import { ExportDialogComponent } from '@features/study/presentation/components/s
   providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StudiesComponent implements OnInit {
+export class StudiesComponent {
   readonly isNewStudyModalOpen = signal(false);
   readonly studies = signal<Study[]>([]);
   private readonly route = inject(ActivatedRoute);
   private readonly studiesService = inject(StudiesService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly rawStudies = toSignal(this.studiesService.studies, { initialValue: [] as Study[] });
+  private readonly studiesReady = toSignal(this.studiesService.ready, { initialValue: false });
 
   constructor() {
-    this.studiesService.studies.subscribe((studies) => {
-      this.studies.set(this.sortStudies(studies));
+    this.isNewStudyModalOpen.set(this.route.snapshot.queryParams['create'] === 'true');
+
+    effect(() => {
+      this.studies.set(this.sortStudies(this.rawStudies()));
+    });
+
+    effect(() => {
+      if (this.studiesReady()) {
+        this.studiesService.getStudies().then((studies) => {
+          this.studies.set(this.sortStudies(studies));
+        });
+      }
     });
   }
 
   sortStudies(studies: Study[]) {
     return [...studies].sort((a, b) => {
       return new Date(b.created_at_offline).getTime() - new Date(a.created_at_offline).getTime();
-    });
-  }
-
-  ngOnInit(): void {
-    this.isNewStudyModalOpen.set(this.route.snapshot.queryParams['create'] === 'true');
-    this.studiesService.ready.subscribe((ready) => {
-      if (ready) {
-        this.studiesService.getStudies().then((studies) => {
-          this.studies.set(this.sortStudies(studies));
-        });
-      }
     });
   }
 

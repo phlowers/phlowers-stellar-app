@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-  OnDestroy,
-  output,
-  signal
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
@@ -28,7 +18,6 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Study } from '@shared/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
-import { Subscription } from 'rxjs';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -67,8 +56,7 @@ const validators = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InitialConditionModalComponent implements OnDestroy {
-  private readonly subscriptions = new Subscription();
+export class InitialConditionModalComponent {
   private readonly destroyRef = inject(DestroyRef);
   /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
@@ -120,14 +108,12 @@ export class InitialConditionModalComponent implements OnDestroy {
   constructor() {
     this.form = this.fb.group(validators);
 
-    this.subscriptions.add(
-      this.form
-        .get('name')
-        ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((name) => {
-          this.onNameChange(name);
-        })
-    );
+    this.form
+      .get('name')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((name) => {
+        this.onNameChange(name);
+      });
 
     effect(() => {
       const input = this.initialConditionInput();
@@ -245,10 +231,6 @@ export class InitialConditionModalComponent implements OnDestroy {
   onDelete() {
     this.initialConditionService.deleteInitialCondition(this.study()!, this.section(), this.initialCondition());
     this.isOpenChange.emit(false);
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
   }
 
   isFormValid(): boolean {

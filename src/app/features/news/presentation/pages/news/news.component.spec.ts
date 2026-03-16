@@ -41,7 +41,6 @@ describe('News component', () => {
   });
 
   it('should load news when online', async () => {
-    fixture.detectChanges();
     await fixture.whenStable();
 
     expect(newsServiceMock.getNews).toHaveBeenCalled();
@@ -54,15 +53,13 @@ describe('News component', () => {
 
     fixture = TestBed.createComponent(NewsComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
 
-    expect(newsServiceMock.getNews).not.toHaveBeenCalled();
+    expect(newsServiceMock.getNews).toHaveBeenCalledTimes(1); // only from the first component
     expect(component.isOnline()).toBe(false);
     expect(component.isLoading()).toBe(false);
   });
 
   it('should set isOnline signal based on online status', () => {
-    fixture.detectChanges();
     expect(component.isOnline()).toBe(true);
   });
 });

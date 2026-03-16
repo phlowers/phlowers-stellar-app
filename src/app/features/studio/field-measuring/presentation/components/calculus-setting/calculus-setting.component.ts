@@ -4,7 +4,7 @@ import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
 import { TangentAimingComponent } from './tangent-aiming/tangent-aiming.component';
 import { PepComponent } from './pep/pep.component';
-import { FieldMeasure } from '../../../domain/types';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 
 @Component({
   selector: 'app-calculus-setting',

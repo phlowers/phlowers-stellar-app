@@ -9,6 +9,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { BehaviorSubject } from 'rxjs';
+import { signal } from '@angular/core';
 import { StudiesComponent } from './studies.component';
 import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { Study } from '@shared/domain';
@@ -53,7 +54,8 @@ describe('StudiesComponent', () => {
       ready: new BehaviorSubject<boolean>(false),
       getStudies: jest.fn(),
       duplicateStudy: jest.fn(),
-      deleteStudy: jest.fn()
+      deleteStudy: jest.fn(),
+      exportDialogData: signal(null)
     } as unknown as jest.Mocked<StudiesService>;
 
     mockConfirmationService = {
@@ -104,6 +106,7 @@ describe('StudiesComponent', () => {
     it('should subscribe to studies service studies observable', () => {
       const testStudies = [mockStudy, mockStudy2];
       mockStudiesService.studies.next(testStudies);
+      fixture.detectChanges();
 
       expect(component.studies()).toEqual([mockStudy2, mockStudy]);
     });
@@ -113,9 +116,11 @@ describe('StudiesComponent', () => {
       const updatedStudies = [mockStudy, mockStudy2];
 
       mockStudiesService.studies.next(initialStudies);
+      fixture.detectChanges();
       expect(component.studies()).toEqual(initialStudies);
 
       mockStudiesService.studies.next(updatedStudies);
+      fixture.detectChanges();
       expect(component.studies()).toEqual([mockStudy2, mockStudy]);
     });
   });
@@ -124,7 +129,9 @@ describe('StudiesComponent', () => {
     it('should set isNewStudyModalOpen to true when create query param is true', () => {
       mockActivatedRoute.snapshot.queryParams = { create: 'true' };
 
-      component.ngOnInit();
+      // Recreate component with the new route params
+      fixture = TestBed.createComponent(StudiesComponent);
+      component = fixture.componentInstance;
 
       expect(component.isNewStudyModalOpen()).toBeTruthy();
     });
@@ -132,7 +139,8 @@ describe('StudiesComponent', () => {
     it('should set isNewStudyModalOpen to false when create query param is not true', () => {
       mockActivatedRoute.snapshot.queryParams = { create: 'false' };
 
-      component.ngOnInit();
+      fixture = TestBed.createComponent(StudiesComponent);
+      component = fixture.componentInstance;
 
       expect(component.isNewStudyModalOpen()).toBeFalsy();
     });
@@ -140,8 +148,8 @@ describe('StudiesComponent', () => {
     it('should call getStudies when service is ready', async () => {
       mockStudiesService.getStudies.mockResolvedValue([mockStudy]);
 
-      component.ngOnInit();
       mockStudiesService.ready.next(true);
+      fixture.detectChanges();
 
       // Wait for the async operation to complete
       await fixture.whenStable();
@@ -153,8 +161,8 @@ describe('StudiesComponent', () => {
       const testStudies = [mockStudy, mockStudy2];
       mockStudiesService.getStudies.mockResolvedValue(testStudies);
 
-      component.ngOnInit();
       mockStudiesService.ready.next(true);
+      fixture.detectChanges();
 
       // Wait for the async operation to complete
       await fixture.whenStable();

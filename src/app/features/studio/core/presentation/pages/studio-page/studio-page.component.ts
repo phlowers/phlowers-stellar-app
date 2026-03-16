@@ -1,6 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter, from, switchMap } from 'rxjs';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { debounce } from 'lodash';
 import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
@@ -68,7 +79,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     { label: $localize`Two spans`, value: 'double' },
     { label: $localize`All`, value: 'all' }
   ]);
-  subscription: { unsubscribe(): void } | null = null;
   isNewChargeModalOpen = signal(false);
   isFreePositioningToolOpen = signal(false);
 
@@ -111,6 +121,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly studiesService = inject(StudiesService);
   private readonly sectionService = inject(SectionService);
+  private readonly destroyRef = inject(DestroyRef);
 
   previousSectionUuid = signal<string | null>(null);
 
@@ -119,38 +130,41 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const sectionUuid = this.route.snapshot.queryParamMap.get('sectionUuid');
     if (!studyUuid || !sectionUuid) {
       this.router.navigate(['/studies']);
+      return;
     }
     this.plotService.isStudioActive.set(true);
-    this.studiesService.ready.subscribe((ready) => {
-      if (ready && studyUuid) {
-        this.subscription = this.studiesService.getStudyAsObservable(studyUuid).subscribe((study) => {
-          if (study) {
-            this.plotService.study.set(study);
-            const section = study.sections.find((s) => s.uuid === sectionUuid);
-            if (section) {
-              this.plotService.section.set(section);
-              if (this.previousSectionUuid() !== section.uuid) {
-                this.plotService.plotOptionsChange({
-                  endSupport: section.supports.length - 1,
-                  startSupport: 0
-                });
-                this.previousSectionUuid.set(section.uuid);
-              }
-            } else {
-              this.router.navigate(['/studies']);
+
+    this.studiesService.ready
+      .pipe(
+        filter((ready) => ready && !!studyUuid),
+        switchMap(() => from(this.studiesService.getStudyAsObservable(studyUuid))),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((study) => {
+        if (study) {
+          this.plotService.study.set(study);
+          const section = study.sections.find((s) => s.uuid === sectionUuid);
+          if (section) {
+            this.plotService.section.set(section);
+            if (this.previousSectionUuid() !== section.uuid) {
+              this.plotService.plotOptionsChange({
+                endSupport: section.supports.length - 1,
+                startSupport: 0
+              });
+              this.previousSectionUuid.set(section.uuid);
             }
           } else {
             this.router.navigate(['/studies']);
           }
-        });
-      }
-    });
+        } else {
+          this.router.navigate(['/studies']);
+        }
+      });
   }
 
   ngOnDestroy(): void {
     this.plotService.isStudioActive.set(false);
     this.plotService.resetAll();
-    this.subscription?.unsubscribe();
   }
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {

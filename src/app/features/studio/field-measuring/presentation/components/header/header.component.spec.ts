@@ -4,7 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HeaderComponent } from './header.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { FieldMeasure } from '../../../domain/types';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { createTestMeasureData } from '../../helpers';
 import { PlotService } from '@features/studio/core/services/plot.service';

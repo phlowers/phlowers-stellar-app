@@ -7,7 +7,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { FieldMeasure } from '../../../domain/types';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TIME_MODE_OPTIONS, WIND_SPEED_UNIT_OPTIONS, WIND_DIRECTION_OPTIONS, SKY_COVER_OPTIONS } from '../../constants';
 import { MessageModule } from 'primeng/message';
 

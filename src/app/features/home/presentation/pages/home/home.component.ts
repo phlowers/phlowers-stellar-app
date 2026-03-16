@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { CardInfoComponent } from '@shared/components/atoms/card-info/card-info.component';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { OnlineService, ServerStatus } from '@services/online/online.service';
-import { Subscription, combineLatest } from 'rxjs';
+import { combineLatest } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CardState } from '@shared/model/card-info.model';
 import { CardStudyComponent } from '@shared/components/atoms/card-study/card-study.component';
 import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
@@ -73,8 +74,7 @@ type ServerStates = CardState;
   styleUrl: './home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomeComponent implements OnInit, OnDestroy {
-  private readonly subscriptions = new Subscription();
+export class HomeComponent {
   private readonly updateService = inject(UpdateService);
   private readonly onlineService = inject(OnlineService);
   private readonly studiesService = inject(StudiesService);
@@ -95,8 +95,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     return !isOnline;
   }
 
+  private readonly needUpdate = toSignal(this.updateService.needUpdate$, { initialValue: false });
+  private readonly connectivity = toSignal(
+    combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]),
+    { initialValue: [false, ServerStatus.LOADING] as [boolean, ServerStatus] }
+  );
+  private readonly studiesReady = toSignal(this.studiesService.ready, { initialValue: false });
+
   constructor() {
-    this.updateService.needUpdate$.subscribe((needUpdate) => {
+    effect(() => {
+      const needUpdate = this.needUpdate();
       // prettier-ignore
       if (needUpdate) { //NOSONAR
         this.updateStatus.set('warning');
@@ -111,27 +119,24 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.updateText('updateText', defaultTexts.updateText);
       }
     });
-  }
 
-  ngOnInit(): void {
-    this.subscriptions.add(
-      combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]).subscribe(
-        ([isOnline, serverStatus]) => {
-          const finalStatus = this.getConnectivityStatus(isOnline, serverStatus);
-          this.serverStatus.set(finalStatus);
-          this.updateServerText(finalStatus);
-        }
-      )
-    );
-    this.studiesService.ready.subscribe(async (value) => {
-      if (value) {
-        const studies = await this.studiesService.getLatestStudies();
-        this.latestStudies.set(
-          studies?.map((study) => ({
-            ...study,
-            updated_at_offline: timeAgo.format(new Date(study.updated_at_offline))
-          }))
-        );
+    effect(() => {
+      const [isOnline, serverStatus] = this.connectivity();
+      const finalStatus = this.getConnectivityStatus(isOnline, serverStatus);
+      this.serverStatus.set(finalStatus);
+      this.updateServerText(finalStatus);
+    });
+
+    effect(() => {
+      if (this.studiesReady()) {
+        this.studiesService.getLatestStudies().then((studies) => {
+          this.latestStudies.set(
+            studies?.map((study) => ({
+              ...study,
+              updated_at_offline: timeAgo.format(new Date(study.updated_at_offline))
+            }))
+          );
+        });
       }
     });
   }
@@ -175,9 +180,5 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.updateText('serverText', $localize`Server connexion success!`); // i18n Connexion aux serveurs réussi !
         break;
     }
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
   }
 }

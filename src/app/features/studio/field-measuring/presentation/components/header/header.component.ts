@@ -16,7 +16,7 @@ import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { FieldMeasure } from '../../../domain/types';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { isEqual } from 'lodash';
 
 @Component({

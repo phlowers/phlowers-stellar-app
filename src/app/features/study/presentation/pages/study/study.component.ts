@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter, from, switchMap } from 'rxjs';
 import { StudyHeaderComponent } from '@features/study/presentation/components/study-header/study-header.component';
 import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
 import { SectionService } from '@features/study/infrastructure/services/section.service';
@@ -48,10 +50,10 @@ import { CommonModule } from '@angular/common';
   styleUrl: './study.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StudyComponent implements OnInit, OnDestroy {
+export class StudyComponent implements OnInit {
   readonly study = signal<Study | null>(null);
   isNewStudyModalOpen = signal<boolean>(false);
-  subscription: { unsubscribe(): void } | null = null;
+  private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly studiesService = inject(StudiesService);
   private readonly sectionService = inject(SectionService);
@@ -63,29 +65,16 @@ export class StudyComponent implements OnInit, OnDestroy {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
       this.router.navigate(['/studies']);
+      return;
     }
-    this.studiesService.ready.subscribe((ready) => {
-      if (ready && uuid) {
-        this.refreshStudy(uuid);
-      }
-    });
-    this.route.params.subscribe((params) => {
-      const uuid = params['uuid'];
-      if (uuid) {
-        this.refreshStudy(uuid);
-      }
-    });
-  }
 
-  ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
-  refreshStudy(uuid: string) {
-    if (uuid && this.studiesService.ready.value) {
-      this.subscription = this.studiesService.getStudyAsObservable(uuid).subscribe((study: Study | undefined) => {
+    this.studiesService.ready
+      .pipe(
+        filter((ready) => ready),
+        switchMap(() => from(this.studiesService.getStudyAsObservable(uuid))),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((study: Study | undefined) => {
         if (study) {
           this.study.set({
             ...study,
@@ -95,6 +84,29 @@ export class StudyComponent implements OnInit, OnDestroy {
           this.router.navigate(['/studies']);
         }
       });
+
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const paramUuid = params['uuid'];
+      if (paramUuid && this.studiesService.ready.value) {
+        this.refreshStudy(paramUuid);
+      }
+    });
+  }
+
+  refreshStudy(uuid: string) {
+    if (uuid && this.studiesService.ready.value) {
+      from(this.studiesService.getStudyAsObservable(uuid))
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((study: Study | undefined) => {
+          if (study) {
+            this.study.set({
+              ...study,
+              sections: study.sections.sort((a, b) => -a.created_at.localeCompare(b.created_at))
+            });
+          } else {
+            this.router.navigate(['/studies']);
+          }
+        });
     }
   }
 

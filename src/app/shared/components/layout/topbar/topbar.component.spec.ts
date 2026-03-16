@@ -3,26 +3,49 @@ import { TopbarComponent } from './topbar.component';
 import { PageTitleService } from '@shared/service/page-title/page-title.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { BehaviorSubject } from 'rxjs';
+import { UserService } from '@services/user/user.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
 describe('TopbarComponent', () => {
   let component: TopbarComponent;
   let fixture: ComponentFixture<TopbarComponent>;
   let mockPageTitleService: jest.Mocked<PageTitleService>;
+  let mockUserService: jest.Mocked<UserService>;
+  let mockWorkerPythonService: jest.Mocked<WorkerPythonService>;
   let pageTitleSubject: BehaviorSubject<string>;
+  let userSubject: BehaviorSubject<any>;
+  let readySubject: BehaviorSubject<boolean>;
+  let errorSubject: BehaviorSubject<boolean>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   beforeEach(async () => {
     pageTitleSubject = new BehaviorSubject<string>('');
+    userSubject = new BehaviorSubject<any>(null);
+    readySubject = new BehaviorSubject<boolean>(true);
+    errorSubject = new BehaviorSubject<boolean>(false);
 
     mockPageTitleService = {
       pageTitle$: pageTitleSubject.asObservable()
     } as jest.Mocked<PageTitleService>;
 
+    mockUserService = {
+      user$: userSubject.asObservable()
+    } as unknown as jest.Mocked<UserService>;
+
+    mockWorkerPythonService = {
+      ready$: readySubject.asObservable(),
+      pyodideLoadError$: errorSubject
+    } as unknown as jest.Mocked<WorkerPythonService>;
+
     await TestBed.configureTestingModule({
       imports: [TopbarComponent, IconComponent],
-      providers: [{ provide: PageTitleService, useValue: mockPageTitleService }]
+      providers: [
+        { provide: PageTitleService, useValue: mockPageTitleService },
+        { provide: UserService, useValue: mockUserService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TopbarComponent);
@@ -66,27 +89,18 @@ describe('TopbarComponent', () => {
   });
 
   describe('worker status signals', () => {
-    it('should allow updating workerReady signal', () => {
-      component.workerReady.set(false);
-      expect(component.workerReady()).toBe(false);
-
-      component.workerReady.set(true);
+    it('should reflect workerReady from service', () => {
       expect(component.workerReady()).toBe(true);
+
+      readySubject.next(false);
+      expect(component.workerReady()).toBe(false);
     });
 
-    it('should have readonly workerError signal', () => {
+    it('should reflect workerError from service', () => {
       expect(component.workerError()).toBe(false);
-      // workerError is readonly, so we can't test setting it
-    });
-  });
 
-  describe('ngOnDestroy', () => {
-    it('should unsubscribe from subscriptions', () => {
-      const unsubscribeSpy = jest.spyOn(component['subscriptions'], 'unsubscribe');
-
-      component.ngOnDestroy();
-
-      expect(unsubscribeSpy).toHaveBeenCalled();
+      errorSubject.next(true);
+      expect(component.workerError()).toBe(true);
     });
   });
 
@@ -94,7 +108,7 @@ describe('TopbarComponent', () => {
     it('UC-TOPBAR1: should render topbar with user info', () => {
       fixture.detectChanges();
 
-      component.user.set({ email: 'user@example.com' } as any);
+      userSubject.next({ email: 'user@example.com' });
       fixture.detectChanges();
 
       const userInfo = getByTestId('user-info');
@@ -103,7 +117,7 @@ describe('TopbarComponent', () => {
     });
 
     it('should display "No user" when user is null', () => {
-      component.user.set(null);
+      userSubject.next(null);
       fixture.detectChanges();
 
       const userInfo = getByTestId('user-info');

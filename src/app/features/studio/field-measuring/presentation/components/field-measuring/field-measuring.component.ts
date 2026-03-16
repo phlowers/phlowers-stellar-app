@@ -16,7 +16,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from '../header/header.component';
-import { FieldMeasure } from '../../../domain/types';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import {
   WIND_DIRECTION_OPTIONS,

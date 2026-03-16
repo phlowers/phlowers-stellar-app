@@ -170,6 +170,7 @@ describe('AppComponent', () => {
     TestBed.overrideProvider(ChainsService, { useValue: mockChainsService });
     TestBed.overrideProvider(AttachmentService, { useValue: mockAttachmentService });
     TestBed.overrideProvider(ObstaclesService, { useValue: mockObstaclesService });
+    TestBed.overrideComponent(AppComponent, { set: { template: '' } });
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
   });
@@ -260,8 +261,9 @@ describe('AppComponent', () => {
       //@ts-expect-error mockResolvedValue does not exist on the mockUserService.getUser
       mockUserService.getUser.mockResolvedValue(null);
 
-      // Trigger the subscription in constructor
+      // Trigger the effect via toSignal
       readySubject.next(true);
+      fixture.detectChanges();
       await fixture.whenStable();
 
       expect(component.userDialog()).toBe(true);
@@ -271,8 +273,9 @@ describe('AppComponent', () => {
       //@ts-expect-error mockResolvedValue does not exist on the mockUserService.getUser
       mockUserService.getUser.mockResolvedValue({ email: 'test@example.com' });
 
-      // Trigger the subscription in constructor
+      // Trigger the effect via toSignal
       readySubject.next(true);
+      fixture.detectChanges();
       await fixture.whenStable();
 
       expect(component.userDialog()).toBe(false);
