@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { SpanComponent } from './span.component';
-import { PlotService, SpanOption } from '@features/studio/core/services/plot.service';
+import { PlotService, SpanOption } from '@services/plot/plot.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
 

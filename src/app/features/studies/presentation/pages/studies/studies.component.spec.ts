@@ -11,7 +11,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { BehaviorSubject } from 'rxjs';
 import { signal } from '@angular/core';
 import { StudiesComponent } from './studies.component';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@shared/domain';
 import { CablesService } from '@shared/catalog/services/cables.service';
 

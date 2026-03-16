@@ -16,8 +16,8 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { TableModule } from 'primeng/table';
-import { ChargesService } from '@features/study/infrastructure/services/charges.service';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { ChargesService } from '@services/charges/charges.service';
+import { PlotService } from '@services/plot/plot.service';
 import { ClimateCharge, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
 
 /** Row data representing climate parameters in the loads table. */

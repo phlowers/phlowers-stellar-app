@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { SectionPlotCardComponent } from './card/section-plot-card.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 @Component({

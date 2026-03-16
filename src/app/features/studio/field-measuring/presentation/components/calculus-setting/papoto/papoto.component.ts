@@ -12,7 +12,7 @@ import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { CommonModule } from '@angular/common';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 
 @Component({
   selector: 'app-papoto',

@@ -9,22 +9,22 @@ import { Popover, PopoverModule } from 'primeng/popover';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { InitialConditionModalComponent } from './initialConditionModal/initialConditionModal.component';
+import { InitialConditionModalComponent } from '@shared/components/initial-condition-modal/initialConditionModal.component';
 import { DividerModule } from 'primeng/divider';
 import {
   DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput
-} from '@features/study/infrastructure/services/initial-condition.service';
+} from '@services/initial-condition/initial-condition.service';
 import { CreateEditView } from '@shared/types';
 import { CheckboxModule } from 'primeng/checkbox';
-import { createEmptySection } from '@features/study/domain/helpers/sections.helpers';
+import { createEmptySection } from '@shared/domain/helpers/sections.helpers';
 import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
-import { ChargesService } from '@features/study/infrastructure/services/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.

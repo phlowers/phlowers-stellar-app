@@ -5,10 +5,10 @@ import { ParameterCalculation15WithoutWindComponent } from './parameter-calculat
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';
-import { SectionService } from '@features/study/infrastructure/services/section.service';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
-import { PlotService } from '@features/studio/core/services/plot.service';
-import { InitialConditionService } from '@features/study/infrastructure/services/initial-condition.service';
+import { SectionService } from '@services/section/section.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { PlotService } from '@services/plot/plot.service';
+import { InitialConditionService } from '@services/initial-condition/initial-condition.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { CablesService } from '@shared/catalog/services/cables.service';

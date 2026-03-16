@@ -1,5 +1,5 @@
 import { createDataObject } from './createPlotDataObject';
-import { PlotObjectsType } from './types';
+import { PlotObjectsType } from '@shared/types/plot.types';
 import { Support } from '@shared/domain/models/support.model';
 
 const createMockSupport = (overrides: Partial<Support> = {}): Support => ({

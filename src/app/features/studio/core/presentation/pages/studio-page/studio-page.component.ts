@@ -14,7 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, from, switchMap } from 'rxjs';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { debounce } from 'lodash';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
@@ -30,10 +30,10 @@ import { ClimateComponent } from '@features/studio/loads/presentation/components
 import { SpanComponent } from '@features/studio/loads/presentation/components/span/span.component';
 import { NewChargeModalComponent } from '@features/studio/loads/presentation/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
-import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { PlotService } from '@services/plot/plot.service';
+import { SectionService } from '@services/section/section.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
-import { FreePositioningComponent } from '@shared/components/studio/free-positioning/free-positioning.component';
+import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
 
 // debounce to make it more fluid when dragging the slider
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;

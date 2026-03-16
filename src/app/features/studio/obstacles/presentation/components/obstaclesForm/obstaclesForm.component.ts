@@ -6,14 +6,14 @@ import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
 import { debounce } from 'lodash';
-import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
-import { ObstacleFormService } from '../../services/obstaclesForm.service';
-import { DEBOUNCED_UPDATE_POINT_DELAY } from './constants';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { DEBOUNCED_UPDATE_POINT_DELAY } from '@shared/domain/obstacles/obstacle-form.constants';
 import { distinctUntilChanged, filter } from 'rxjs';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */

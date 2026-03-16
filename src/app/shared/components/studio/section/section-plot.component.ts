@@ -5,23 +5,23 @@ import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
-import { PlotOptions } from './helpers/types';
+import { PlotOptions } from '@shared/types/plot.types';
 import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
-import { PLOT_ID, PlotService, SelectedDisplayOptions } from '@features/studio/core/services/plot.service';
+import { PLOT_ID, PlotService, SelectedDisplayOptions } from '@services/plot/plot.service';
 import { SpanLoad } from '@shared/domain';
 import { LoadType } from './helpers/createLoadAnnotations';
-import { SideTabsService } from '@features/studio/core/services/side-tabs.service';
+import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { ObstacleFormService } from '@features/studio/obstacles/presentation/services/obstaclesForm.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import {
   appendExistingObstaclesWithFormObstacle,
   getObstacleClickPayload,
   ObstacleAnnotationData
 } from './helpers/obstacles';
-import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 

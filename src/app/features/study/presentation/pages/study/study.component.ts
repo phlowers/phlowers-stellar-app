@@ -3,13 +3,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, from, switchMap } from 'rxjs';
 import { StudyHeaderComponent } from '@features/study/presentation/components/study-header/study-header.component';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
-import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { SectionService } from '@services/section/section.service';
 import {
   DuplicateInitialConditionFunctionsInput,
   InitialConditionFunctionsInput,
   InitialConditionService
-} from '@features/study/infrastructure/services/initial-condition.service';
+} from '@services/initial-condition/initial-condition.service';
 import { Section, Study } from '@shared/domain';
 import { TabsModule } from 'primeng/tabs';
 import { AccordionModule } from 'primeng/accordion';
@@ -21,7 +21,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SectionsTabComponent } from '@features/study/presentation/components/sections-tab/sectionsTab.component';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { NewStudyModalComponent } from '@features/studies/presentation/components/new-study-modal/new-study-modal.component';
+import { NewStudyModalComponent } from '@shared/components/new-study-modal/new-study-modal.component';
 import { CommonModule } from '@angular/common';
 
 /**

@@ -2,9 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { signal } from '@angular/core';
 import { ObstaclesFormComponent } from './obstaclesForm.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
-import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
-import { ObstacleFormService } from '../../services/obstaclesForm.service';
+import { PlotService } from '@services/plot/plot.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('lodash', () => ({

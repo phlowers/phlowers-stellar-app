@@ -26,10 +26,10 @@ import {
 } from '../../constants';
 import { FieldDatasComponent } from '../field-datas/field-datas.component';
 import { CalculusSettingComponent } from '../calculus-setting/calculus-setting.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { TemperatureCalculationComponent } from '../temperature-calculation/temperature-calculation.component';
-import { SectionService } from '@features/study/infrastructure/services/section.service';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { SectionService } from '@services/section/section.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { InitialCondition } from '@shared/domain';
 import { ParameterCalculation15WithoutWindComponent } from '../parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 import { createInitialMeasureData } from '../../helpers';

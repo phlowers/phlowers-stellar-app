@@ -12,7 +12,7 @@ import { UpdateService } from '@services/worker_update/worker_update.service';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { StorageService } from '@services/storage/storage.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';

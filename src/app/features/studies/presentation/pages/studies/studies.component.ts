@@ -7,7 +7,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { NewStudyModalComponent } from '@features/studies/presentation/components/new-study-modal/new-study-modal.component';
+import { NewStudyModalComponent } from '@shared/components/new-study-modal/new-study-modal.component';
 import { ButtonModule } from 'primeng/button';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -17,12 +17,12 @@ import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
 import { Study } from '@shared/domain';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { CommonModule } from '@angular/common';
 import { StudiesTableComponent } from '@features/studies/presentation/components/studies-table/studies-table.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from '@features/studies/presentation/components/import-study/import-study.component';
-import { ExportDialogComponent } from '@features/study/presentation/components/study-header/export-dialog/export-dialog.component';
+import { ExportDialogComponent } from '@shared/components/export-dialog/export-dialog.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 /**

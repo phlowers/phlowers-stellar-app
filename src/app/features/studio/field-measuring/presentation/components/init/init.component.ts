@@ -16,7 +16,7 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { createInitialMeasureData } from '../../helpers';
 import { MessageModule } from 'primeng/message';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';

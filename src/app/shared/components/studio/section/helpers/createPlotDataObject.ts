@@ -1,6 +1,6 @@
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
 import { SPAN_COLOR } from './plot.constants';
-import { PlotObjectsType, Side, View } from './types';
+import { PlotObjectsType, Side, View } from '@shared/types/plot.types';
 import { Support } from '@shared/domain/models/support.model';
 
 /**

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input } f
 import { SectionPlotComponent } from './section/section-plot.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { formatStudioError } from './helpers/errors';
 
 @Component({

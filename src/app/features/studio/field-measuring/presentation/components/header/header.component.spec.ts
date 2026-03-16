@@ -7,7 +7,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { createTestMeasureData } from '../../helpers';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { Support } from '@shared/domain';
 
 @Component({

@@ -1,9 +1,9 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SideTabsComponent } from './side-tabs.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
-import { SideTabsService } from '@features/studio/core/services/side-tabs.service';
+import { PlotService } from '@services/plot/plot.service';
+import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { SideTabComponent } from './side-tab/side-tab.component';
 
 @Component({

@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { ScaleViewComponent } from './scale-view.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 
 describe('ScaleViewComponent', () => {
   let component: ScaleViewComponent;

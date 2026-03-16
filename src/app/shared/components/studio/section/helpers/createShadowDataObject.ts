@@ -6,7 +6,7 @@
  */
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
 import { getShadowColor, SHADOW_OPACITY } from './plot.constants';
-import { PlotObjectsType, Side, View } from './types';
+import { PlotObjectsType, Side, View } from '@shared/types/plot.types';
 
 /**
  * Creates line style for shadow traces.

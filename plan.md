@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 88 suites / 1724 tests pass, lint 0 erreurs (306 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B, 8C et 8D terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. **Étape D terminée** : 14 décorateurs `@ViewChild`/`@ContentChild`/`@ViewChildren`/`@ContentChildren` migrés vers `viewChild()`/`contentChild()`/`viewChildren()`/`contentChildren()` signal-based dans 10 composants — plus aucun `QueryList` en prod. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), toSignal(), **viewChild()/contentChild()** — 0 décorateur legacy restant. **Étape E (cross-features DDD)** réévaluée : ~60 imports cross-boundary dans ~38 fichiers (vs 5 dans 4 précédemment estimé).
+**Baseline actuelle** : build OK, 88 suites / 1724 tests pass, lint 0 erreurs (306 warnings), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B, 8C et 8D terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. **Étape D terminée** : 14 décorateurs `@ViewChild`/`@ContentChild`/`@ViewChildren`/`@ContentChildren` migrés vers `viewChild()`/`contentChild()`/`viewChildren()`/`contentChildren()` signal-based dans 10 composants — plus aucun `QueryList` en prod. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), toSignal(), **viewChild()/contentChild()** — 0 décorateur legacy restant. **Étape E terminée** : 69 imports cross-boundary résolus (71 → 2 restants). Services partagés (`StudiesService`, `SectionService`, `ChargesService`, `InitialConditionService`, `PlotService`, `SideTabsService`, `ObstaclesService`, `ObstacleFormService`) déplacés vers `core/services/`. Helpers (`sections.helpers`, `study.helpers`) et types (`plot.types`) déplacés vers `shared/`. Composants cross-feature (`ExportDialogComponent`, `NewStudyModalComponent`, `InitialConditionModalComponent`) déplacés vers `shared/components/`. `free-positioning` déplacé vers `features/studio/`. 3 re-export bridges supprimés. 2 violations résiduelles (`ToolbarDialogService` + `ToolbarDialogComponent` study→studio) documentées comme dette acceptée.
 
 ---
 
@@ -1249,7 +1249,7 @@ src/app/core/
 | `input()` / `output()` signal API | 60/60 | ✅ 100% |
 | `signal()` / `computed()` pour l'état | 60/60 | ✅ 100% |
 | RxJS → `toSignal()` (pas de `subscribe()` manuel) | 60/60 | ✅ 100% |
-| `viewChild()` signal vs `@ViewChild` | 46/60 | ⚠️ 77% |
+| `viewChild()` signal vs `@ViewChild` | 60/60 | ✅ 100% |
 
 #### Résumé des violations restantes
 
@@ -1260,9 +1260,9 @@ src/app/core/
 | ~~Texte français hardcodé / commentaires FR~~ | ~~6 instances dans 2 fichiers~~ | ✅ CORRIGÉ |
 | ~~Imports relatifs profonds (alias manquants)~~ | ~~8 fichiers dans `field-measuring/`~~ | ✅ CORRIGÉ |
 | ~~Subscriptions RxJS manuelles (`subscribe()`) au lieu de `toSignal()`~~ | ~~9 composants, ~19 subscriptions~~ | ✅ CORRIGÉ |
-| **Imports cross-features (DDD bounded contexts)** | **~60 imports dans ~38 fichiers** | 🟠 HAUTE |
-| **`shared/` → `features/` (DDD interdit)** | **18 imports dans 6 fichiers** | 🟠 HAUTE |
-| `@ViewChild`/`@ContentChildren` à migrer vers `viewChild()`/`contentChildren()` | 14 décorateurs dans 10 composants | 🟡 MOYENNE |
+| ~~Imports cross-features (DDD bounded contexts)~~ | ~~~60 imports dans ~38 fichiers~~ | ✅ CORRIGÉ (69/71 — 2 résiduels acceptés) |
+| ~~`shared/` → `features/` (DDD interdit)~~ | ~~18 imports dans 6 fichiers~~ | ✅ CORRIGÉ |
+| ~~`@ViewChild`/`@ContentChildren` à migrer vers `viewChild()`/`contentChildren()`~~ | ~~14 décorateurs dans 10 composants~~ | ✅ CORRIGÉ |
 | `data-testid` manquants sur éléments interactifs | ~60-80 éléments | 🟠 HAUTE |
 | `aria-label` / `aria-*` manquants | ~20 éléments | 🟡 MOYENNE |
 | Sélecteurs globaux SCSS dans composants | ~22 instances | 🟡 MOYENNE |
@@ -1358,69 +1358,122 @@ src/app/core/
 
 > **Vérification** : build OK, grep `@ViewChild|@ViewChildren|@ContentChild|@ContentChildren` dans `*.component.ts` → 0 résultat, grep `QueryList` dans `*.component.ts` → 0 résultat. Conformité signal-based queries : **100%**.
 
-#### Étape E — Architecture DDD (imports cross-features) ← MISE À JOUR MAJEURE
+#### Étape E — Architecture DDD (imports cross-features) ✅ TERMINÉE
 
-> **Scope réel post-Phase 6B** : ~60 imports cross-boundary dans ~38 fichiers (prod + spec). C'est la plus grosse dette architecturale restante.
+> **Scope réel post-Phase 6B** : 71 imports cross-boundary dans ~38 fichiers (prod + spec). 69 résolus, 2 résiduels acceptés comme dette technique.
 
-##### E.1 — `shared/` → `features/` (interdit en DDD : 18 imports dans 6 fichiers)
+##### Ce qui a été fait
 
-Les composants `shared/components/studio/` dépendent de services `features/studio/`. **Solution** : déplacer ces composants dans `features/studio/presentation/components/`.
+59. ~~**E.1 — Helpers `shared/` → `features/` → `shared/domain/helpers/`**~~ ✅
+    - `sections.helpers.ts` (`createEmptySection`, `createEmptySupport`) déplacé de `features/study/domain/helpers/` → `shared/domain/helpers/sections.helpers.ts`
+    - `study.helpers.ts` (`createEmptyStudy`) déplacé de `features/studies/domain/helpers/` → `shared/domain/helpers/study.helpers.ts`
+    - Tous les consommateurs (`studies.service.ts`, `import-study.component.ts`, `sectionsTab.component.ts`) mis à jour vers `@shared/domain/helpers/`
 
-| Fichier `shared/` | Imports `@features/studio/` | Action |
-|--------------------|----------------------------|--------|
-| `studio.component.ts` + `.spec.ts` | `PlotService` | → Déplacer vers `features/studio/core/presentation/components/studio/` |
-| `section-plot.component.ts` + `.spec.ts` | `PlotService`, `SideTabsService`, `ObstacleFormService`, `ObstaclesService` | → Déplacer vers `features/studio/core/presentation/components/section-plot/` |
-| `free-positioning.component.ts` + `.spec.ts` | `PlotService`, `SideTabsService`, `ObstacleFormService`, `ObstaclesService` | → Déplacer vers `features/studio/core/presentation/components/free-positioning/` |
+60. ~~**E.2 — `StudiesService` → `core/services/`**~~ ✅
+    - `StudiesService` déplacé de `features/studies/infrastructure/services/` → `core/services/studies/studies.service.ts` + `.spec.ts`
+    - ~20 consommateurs (study, studio, studies) mis à jour vers `@services/studies/studies.service`
+    - Élimine les imports cross-feature `studio → studies` et `study → studies`
 
-##### E.2 — `studio` → `study` (SectionService, ChargesService, InitialConditionService — ~20 imports dans ~14 fichiers)
+61. ~~**E.3 — Services partagés `study` → `core/services/`**~~ ✅
+    - `SectionService` déplacé de `features/study/infrastructure/services/` → `core/services/section/section.service.ts` + `.spec.ts`
+    - `ChargesService` déplacé de `features/study/infrastructure/services/` → `core/services/charges/charges.service.ts` + `.spec.ts`
+    - `InitialConditionService` déplacé de `features/study/infrastructure/services/` → `core/services/initial-condition/initial-condition.service.ts` + `.spec.ts`
+    - ~25 consommateurs (11 studio + 3 study + specs) mis à jour vers `@services/section/`, `@services/charges/`, `@services/initial-condition/`
+    - Élimine les imports cross-feature `studio → study`
 
-`SectionService`, `ChargesService` et `InitialConditionService` sont consommés massivement par `studio`. **Solutions** :
-- **Option A** (recommandée) : Déplacer ces 3 services vers `core/services/` (services transverses) car ils sont partagés entre `study` et `studio`
-- **Option B** : Créer des interfaces dans `shared/domain/` et les injecter via `InjectionToken`
+62. ~~**E.4 — Composants `shared/studio/` → résolution dépendances**~~ ✅
+    - `free-positioning/` déplacé de `shared/components/studio/` → `features/studio/core/presentation/components/free-positioning/`
+    - `StudioComponent` et `SupportPlotComponent` (aka `section-plot`) **conservés dans `shared/components/studio/`** — consommés par `features/study/` (les déplacer dans `features/studio/` créerait de nouveaux cross-boundary)
+    - Imports de `PlotService`, `SideTabsService`, `ObstacleFormService`, `ObstaclesService` réécrits vers `@services/` et `@features/studio/` canoniques
 
-| Service | Fichiers studio consommateurs | Fichiers study consommateurs |
-|---------|:----:|:----:|
-| `SectionService` | 8 (plot.service, studio-page, toolbar-dialog, vtl-and-guying, field-measuring, obstaclesForm.service + specs) | 3 (sectionsTab, manualSection + specs) |
-| `ChargesService` | 5 (menu-bar, loads-table, loadForms.service, new-charge-modal + specs) | 1 (inline via SectionService) |
-| `InitialConditionService` | 2 (parameter-calculation-15-without-wind + spec) | 2 (initialConditionModal + spec) |
+63. ~~**E.5 — Résolution des imports cross-feature restants**~~ ✅
+    - **E.5a** : `PlotService` déplacé de `features/studio/core/services/` → `core/services/plot/plot.service.ts` + `.spec.ts` — ~15 consommateurs mis à jour
+    - **E.5b** : `SideTabsService` déplacé → `core/services/side-tabs/side-tabs.service.ts` + `.spec.ts`
+    - **E.5c** : `ObstacleFormService` déplacé → `core/services/obstacle-form/obstaclesForm.service.ts`
+    - **E.5d** : `ExportDialogComponent` déplacé de `features/study/presentation/components/study-header/export-dialog/` → `shared/components/export-dialog/` — consommé par `study` et `studies`
+    - **E.5e** : `NewStudyModalComponent` déplacé de `features/studies/presentation/components/new-study-modal/` → `shared/components/new-study-modal/` — consommé par `study` et `studies`
+    - **E.5f** : `ObstaclesService` déplacé de `features/studio/obstacles/infrastructure/services/` → `core/services/obstacles/obstacles.service.ts` — consommé par `app.component.ts` (violation `app → features`)
+    - **E.5g** : Types plot (`PlotObjectsType`, `View`, `Side`, `PlotOptions`) extraits vers `shared/types/plot.types.ts` — importés canoniquement par tous les consommateurs
 
-##### E.3 — `studio` → `studies` (StudiesService — 7 imports dans 5 fichiers)
+64. ~~**E.6 — `InitialConditionModalComponent` → `shared/`**~~ ✅
+    - Déplacé de `features/study/presentation/components/sections-tab/initialConditionModal/` → `shared/components/initial-condition-modal/`
+    - Consommé par `parameter-calculation-15-without-wind.component.ts` (studio) et `sectionsTab.component.ts` (study) — les deux mis à jour
 
-`StudiesService` est consommé par `studio` pour accéder à l'étude courante.
+65. ~~**Nettoyage des re-export bridges**~~ ✅ — 3 bridges supprimés :
+    - `shared/components/studio/section/helpers/types.ts` (re-export vers `@shared/types/plot.types`) — supprimé, imports consommateurs réécrits
+    - Bridges obsolètes de services déplacés supprimés
 
-| Fichier studio | Import |
-|---------------|--------|
-| `studio-page.component.ts` + `.spec.ts` | `StudiesService` |
-| `parameter-calculation-15-without-wind.component.ts` + `.spec.ts` | `StudiesService` |
-| `field-measuring.component.ts` + `.spec.ts` | `StudiesService` |
-| `toolbar-dialog.component.spec.ts` | `StudiesService` |
+66. ~~**Vérification**~~ ✅ :
+    - `npm run build` — 0 erreurs
+    - `npm run test` — 88 suites, 1726 tests pass
+    - `grep -rn "@features/study" src/app/features/studio/ --include="*.ts"` — 0 résultat (sauf routes lazy load, accepté)
+    - `grep -rn "@features/studio" src/app/features/study/ --include="*.ts"` — 2 résultats résiduels (ToolbarDialogService + ToolbarDialogComponent dans sectionsTab)
+    - `grep -rn "@features/studies" src/app/features/study/ --include="*.ts"` — 0 résultat
+    - `grep -rn "@features/" src/app/shared/ --include="*.ts"` — 0 résultat
 
-**Solution** : `StudiesService` est un service de données central → déplacer vers `core/services/` ou exposer un signal `currentStudy` via un service `core/`.
+##### Violations résiduelles (2 — dette acceptée)
 
-##### E.4 — `study` → `studio` (PlotService, ToolbarDialog — 5 imports dans 2 fichiers + 1 route)
+| Fichier | Import cross-feature | Raison |
+|---------|---------------------|--------|
+| `sectionsTab.component.ts` | `ToolbarDialogService` depuis `@features/studio/` | Couplage UI étroit — le bouton "Generate state" ouvre le dialog studio directement. Découplage via event bus ou InjectionToken serait du sur-engineering |
+| `sectionsTab.component.ts` | `ToolbarDialogComponent` depuis `@features/studio/` | Même raison — le composant est importé pour le template (`imports: [...]`) |
 
-| Fichier study | Import |
-|--------------|--------|
-| `sectionsTab.component.ts` | `ToolbarDialogService`, `ToolbarDialogComponent`, `PlotService` |
-| `manualSection.component.ts` | `PlotService` |
-| `study.routes.ts` | `StudioPageComponent` (lazy `loadComponent` — **acceptable** car c'est du routing) |
+##### Architecture `core/services/` résultante (fin Étape E)
 
-**Solution** : `PlotService` → `core/services/` (voir E.2). `ToolbarDialogService/Component` → `shared/components/` ou injection par `InjectionToken`.
+```
+src/app/core/services/
+├── charges/                     ← ChargesService (déplacé depuis features/study/)
+├── initial-condition/           ← InitialConditionService (déplacé depuis features/study/)
+├── obstacle-form/               ← ObstacleFormService (déplacé depuis features/studio/)
+├── obstacles/                   ← ObstaclesService (déplacé depuis features/studio/)
+├── online/                      ← OnlineService (RÉEL, inchangé)
+├── plot/                        ← PlotService (déplacé depuis features/studio/)
+├── section/                     ← SectionService (déplacé depuis features/study/)
+├── side-tabs/                   ← SideTabsService (déplacé depuis features/studio/)
+├── storage/                     ← StorageService (RÉEL, inchangé)
+├── studies/                     ← StudiesService (déplacé depuis features/studies/)
+├── user/                        ← UserService (RÉEL, inchangé)
+├── worker_python/               ← WorkerPythonService (RÉEL, inchangé)
+└── worker_update/               ← UpdateService (RÉEL, inchangé)
+```
 
-##### E.5 — `study` ↔ `studies` (12 + 3 imports bidirectionnels)
+##### Composants déplacés vers `shared/`
 
-| Direction | Imports | Fichiers |
-|-----------|:-------:|:--------:|
-| `study` → `studies` (StudiesService) | 12 | 8 fichiers (study.component, study-header, export-dialog, section.service, charges.service, initial-condition.service + specs) |
-| `studies` → `study` (ExportDialogComponent, helpers) | 3 | 3 fichiers (studies.component, import-study.component, studies.service) |
+| Composant | Source | Destination |
+|-----------|--------|------------|
+| `ExportDialogComponent` | `features/study/presentation/components/study-header/export-dialog/` | `shared/components/export-dialog/` |
+| `NewStudyModalComponent` | `features/studies/presentation/components/new-study-modal/` | `shared/components/new-study-modal/` |
+| `InitialConditionModalComponent` | `features/study/presentation/components/sections-tab/initialConditionModal/` | `shared/components/initial-condition-modal/` |
 
-**Solution** : Ces deux features sont fortement couplées. Options :
-- **Option A** (recommandée) : Fusionner `study` et `studies` en un seul bounded context `studies` (l'étude et la liste d'études sont le même agrégat)
-- **Option B** : Déplacer `StudiesService` vers `core/services/` et les helpers vers `shared/domain/helpers/`
+##### Fichiers déplacés vers `shared/`
 
-##### E.6 — `studio` → `study/presentation` (InitialConditionModalComponent — 1 import)
+| Fichier | Source | Destination |
+|---------|--------|------------|
+| `sections.helpers.ts` | `features/study/domain/helpers/` | `shared/domain/helpers/` |
+| `study.helpers.ts` | `features/studies/domain/helpers/` | `shared/domain/helpers/` |
+| `plot.types.ts` | — (nouveau) | `shared/types/plot.types.ts` |
 
-`parameter-calculation-15-without-wind.component.ts` importe `InitialConditionModalComponent` depuis `@features/study/` → Déplacer le composant vers `shared/components/` ou le dupliquer dans studio.
+##### Décisions architecturales Étape E
+
+- **Option B retenue pour `study`↔`studies`** : pas de fusion — `StudiesService` déplacé vers `core/services/`, helpers vers `shared/domain/helpers/`, composants partagés vers `shared/components/`
+- **`StudioComponent` et `SupportPlotComponent` restent dans `shared/`** : déplacer vers `features/studio/` créerait des imports `study → studio` supplémentaires (ces composants sont utilisés dans study pour la preview)
+- **`ToolbarDialogService/Component`** : dette acceptée (2 violations) — le couplage est fonctionnel (bouton "Generate state" dans study déclenche le dialog studio), un découplage par event bus serait disproportionné
+- **Tous les services `providedIn: 'root'`** : aucun changement DI nécessaire lors des déplacements, seuls les chemins d'import changent
+
+##### Definition of Done — Étape E
+
+- [x] 69/71 imports cross-boundary résolus
+- [x] 8 services déplacés vers `core/services/` (StudiesService, SectionService, ChargesService, InitialConditionService, PlotService, SideTabsService, ObstaclesService, ObstacleFormService)
+- [x] 2 helpers déplacés vers `shared/domain/helpers/` (sections.helpers, study.helpers)
+- [x] 3 composants déplacés vers `shared/components/` (ExportDialog, NewStudyModal, InitialConditionModal)
+- [x] 1 composant déplacé vers `features/studio/` (free-positioning)
+- [x] Types plot extraits vers `shared/types/plot.types.ts`
+- [x] 3 re-export bridges supprimés
+- [x] 2 violations résiduelles documentées (ToolbarDialogService + ToolbarDialogComponent)
+- [x] `npm run build` — 0 erreurs
+- [x] `npm run test` — 88 suites, 1726 tests pass
+- [x] `grep` cross-feature : 0 résultat (sauf 2 résiduels documentés + routes lazy)
+- [x] `grep "@features/" src/app/shared/` — 0 résultat (shared ne dépend plus de features)
 
 #### Étape F — Accessibilité & `data-testid`
 
@@ -1483,10 +1536,7 @@ Les composants `shared/components/studio/` dépendent de services `features/stud
 #### Décisions Phase 8
 
 - **`@ViewChild` vs `viewChild()`** : Migration terminée (Étape D). 14 décorateurs dans 10 composants migrés vers signal-based queries. 0 `@ViewChild`/`@ContentChild`/`QueryList` restant en prod.
-- **Imports cross-features (Étape E)** — la dette la plus structurante. L'audit initial sous-estimait le problème (5 imports vs ~60 réels). Trois stratégies possibles :
-  1. **Services partagés → `core/services/`** : `SectionService`, `ChargesService`, `InitialConditionService`, `StudiesService`, `PlotService` sont utilisés par 2+ features → candidats pour `core/services/`
-  2. **Composants `shared/studio/` → `features/studio/`** : 3 composants visualization (studio, section-plot, free-positioning) appartiennent logiquement à studio
-  3. **Fusion `study`/`studies`** : les deux features sont bidirectionnellement couplées (15+ imports) → considérer un seul bounded context
+- **Imports cross-features (Étape E)** — ✅ terminée. 69/71 imports résolus. Services partagés → `core/services/`, helpers → `shared/domain/helpers/`, composants cross-feature → `shared/components/`. 2 violations résiduelles acceptées (`ToolbarDialogService` + `ToolbarDialogComponent` dans `sectionsTab.component.ts`).
 - **Overrides SCSS vendor** (PrimeNG dans `src/styles/vendor-extension/`) : magic numbers acceptables en tant qu'overrides de thème tiers, hors scope
 - **Imports intra-studio** (toolbar → core, field-measuring → core) : acceptables — sous-features d'un même bounded context `studio`
 - **Vérification** après chaque étape : `npm run test` + `npm run build` + `npm run lint-check`

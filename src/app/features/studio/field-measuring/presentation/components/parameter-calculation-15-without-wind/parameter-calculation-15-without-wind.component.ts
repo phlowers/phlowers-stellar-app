@@ -9,19 +9,19 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { FieldMeasure, ManualParameterCalculation15CWithoutWind } from '@features/studio/field-measuring/domain/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { InitialConditionModalComponent } from '@features/study/presentation/components/sections-tab/initialConditionModal/initialConditionModal.component';
+import { InitialConditionModalComponent } from '@shared/components/initial-condition-modal/initialConditionModal.component';
 import { InitialCondition } from '@shared/domain';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import {
   InitialConditionFunctionsInput,
   InitialConditionService
-} from '@features/study/infrastructure/services/initial-condition.service';
+} from '@services/initial-condition/initial-condition.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 
 /** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({

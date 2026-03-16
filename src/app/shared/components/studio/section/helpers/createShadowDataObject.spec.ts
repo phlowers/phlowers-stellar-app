@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { createShadowDataObject } from './createShadowDataObject';
-import { PlotObjectsType } from './types';
+import { PlotObjectsType } from '@shared/types/plot.types';
 
 describe('createShadowDataObject', () => {
   const testData: number[][][] = [

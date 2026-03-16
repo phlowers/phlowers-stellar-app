@@ -122,3 +122,18 @@
 | 🔍 Preuve | 0 consommateurs production — seul `plan.md` le mentionne |
 | ⚠️ Confiance | **HIGH** |
 | ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |
+
+---
+
+## Accepted Technical Debt — Cross-Feature Imports (Phase 8, Step E)
+
+### `ToolbarDialogService` + `ToolbarDialogComponent` — `study` → `studio`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/study/presentation/components/sections-tab/sectionsTab.component.ts` lines 25-26 |
+| Code | `import { ToolbarDialogService }` and `import { ToolbarDialogComponent }` from `@features/studio/toolbar/` |
+| 🔍 Reason | `ToolbarDialogService` has hard dependencies on 5 studio-specific components (`FieldMeasuringComponent`, `InitComponent`, `L0SumComponent`, `VhlAndGuyingComponent`, `LoadsTableComponent`). Moving to `core/` or `shared/` would create `core → features` violations. |
+| ⚠️ Status | **⏳ ACCEPTED DEBT** — 2 violations remaining out of 71 original |
+| Resolution | Requires decoupling `ToolbarDialogService` from concrete components via `InjectionToken` or a registry pattern. |
+| Detected on | 2026-03-16 |

@@ -9,7 +9,7 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
-import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { SectionService } from '@services/section/section.service';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };

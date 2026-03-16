@@ -22,7 +22,7 @@ import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
-import { ObstaclesService } from '@features/studio/obstacles/infrastructure/services/obstacles.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
 
 class Worker {
   url: string;

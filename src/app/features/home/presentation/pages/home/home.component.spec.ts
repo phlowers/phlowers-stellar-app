@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HomeComponent } from './home.component';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { OnlineService, ServerStatus } from '@services/online/online.service';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@shared/domain';
 import { BehaviorSubject } from 'rxjs';
 import { CardStudyComponent } from '@shared/components/atoms/card-study/card-study.component';

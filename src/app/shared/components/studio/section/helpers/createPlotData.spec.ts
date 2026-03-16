@@ -1,5 +1,5 @@
 import { createPlotData } from './createPlotData';
-import { PlotOptions } from './types';
+import { PlotOptions } from '@shared/types/plot.types';
 import { createDataObject } from './createPlotDataObject';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Support } from '@shared/domain/models/support.model';

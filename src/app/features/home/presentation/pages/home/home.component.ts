@@ -9,7 +9,7 @@ import { combineLatest } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CardState } from '@shared/model/card-info.model';
 import { CardStudyComponent } from '@shared/components/atoms/card-study/card-study.component';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@shared/domain';
 import TimeAgo from 'javascript-time-ago';
 import fr from 'javascript-time-ago/locale/fr';

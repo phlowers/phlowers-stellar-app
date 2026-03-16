@@ -3,15 +3,15 @@ import { RouterLink } from '@angular/router';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ProtoV4Parameters, ProtoV4Support, Section, Support, Study } from '@shared/domain';
 import Papa from 'papaparse';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
+import { StudiesService } from '@services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { convertStringToNumber } from '@shared/helpers/convertStringToNumber';
-import { createEmptyStudy } from '@features/studies/domain/helpers/study.helpers';
-import { createEmptySection, createEmptySupport } from '@features/study/domain/helpers/sections.helpers';
+import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
+import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 
 /**
  * Parse a ISO 8859-1 base64 string

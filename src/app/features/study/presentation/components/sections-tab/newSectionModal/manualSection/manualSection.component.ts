@@ -23,7 +23,7 @@ import { SupportsTableComponent } from './supportsTable/supportsTable.component'
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@shared/types';
 import { StudioComponent } from '@shared/components/studio/studio.component';
-import { createEmptySupport } from '@features/study/domain/helpers/sections.helpers';
+import { createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
@@ -34,7 +34,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 
 // debounce to make it more fluid when dragging the slider

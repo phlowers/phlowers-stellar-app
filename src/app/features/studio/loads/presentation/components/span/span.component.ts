@@ -6,7 +6,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { emptySpanLoad } from '../../helpers';

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, input, signal, WritableSignal } from '@angular/core';
 import { StudioComponent } from './studio.component';
 import { SectionPlotComponent } from './section/section-plot.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { TaskError, DataError, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';

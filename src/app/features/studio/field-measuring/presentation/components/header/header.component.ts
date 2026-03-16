@@ -10,7 +10,7 @@ import {
   untracked
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';

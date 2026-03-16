@@ -5,8 +5,8 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { AccordionModule } from 'primeng/accordion';
 import { Study } from '@shared/domain';
 import { CommonModule, DatePipe } from '@angular/common';
-import { StudiesService } from '@features/studies/infrastructure/services/studies.service';
-import { ExportDialogComponent } from './export-dialog/export-dialog.component';
+import { StudiesService } from '@services/studies/studies.service';
+import { ExportDialogComponent } from '@shared/components/export-dialog/export-dialog.component';
 
 /**
  * Header component for a study page.

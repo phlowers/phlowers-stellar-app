@@ -1,4 +1,4 @@
-import { PlotObjectsType, PlotOptions } from './types';
+import { PlotObjectsType, PlotOptions } from '@shared/types/plot.types';
 import { createDataObject, DataObject } from './createPlotDataObject';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Support } from '@shared/domain/models/support.model';

@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Data } from 'plotly.js-dist-min';
-import { PlotObjectsType, PlotOptions } from './types';
+import { PlotObjectsType, PlotOptions } from '@shared/types/plot.types';
 import { createShadowDataObject } from './createShadowDataObject';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 

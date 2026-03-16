@@ -17,7 +17,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PossibleIconNames } from '@shared/model/icon.model';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 

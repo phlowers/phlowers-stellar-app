@@ -9,7 +9,7 @@ import { createTestMeasureData } from '@features/studio/field-measuring/presenta
 import { LEFT_SUPPORT_OPTIONS_MOCK } from '@features/studio/field-measuring/presentation/mock-data';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError, GetSectionOutput } from '@services/worker_python/tasks/types';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 
 describe('Papoto component', () => {
   let component: PapotoComponent;

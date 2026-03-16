@@ -1,5 +1,5 @@
 import Plotly, { Camera, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
-import { Side, View } from './types';
+import { Side, View } from '@shared/types/plot.types';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { SpanLoad } from '@shared/domain';

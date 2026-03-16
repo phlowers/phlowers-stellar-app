@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioMenuBarComponent } from './menu-bar.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
-import { ChargesService } from '@features/study/infrastructure/services/charges.service';
+import { PlotService } from '@services/plot/plot.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';

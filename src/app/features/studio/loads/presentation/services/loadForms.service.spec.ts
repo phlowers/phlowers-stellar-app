@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { LoadFormsService } from './loadForms.service';
-import { PlotService } from '@features/studio/core/services/plot.service';
-import { ChargesService } from '@features/study/infrastructure/services/charges.service';
+import { PlotService } from '@services/plot/plot.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { Section, Charge, SymmetryType } from '@shared/domain';

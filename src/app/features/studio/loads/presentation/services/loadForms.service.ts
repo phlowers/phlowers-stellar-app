@@ -1,7 +1,7 @@
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { effect, inject, Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash';
-import { ChargesService } from '@features/study/infrastructure/services/charges.service';
+import { ChargesService } from '@services/charges/charges.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { recheckSpanLoads } from '../helpers';

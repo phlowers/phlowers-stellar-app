@@ -6,7 +6,7 @@
  */
 
 import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@shared/domain';
-import { View } from '@shared/components/studio/section/helpers/types';
+import { View } from '@shared/types/plot.types';
 import { Dictionary } from 'lodash';
 
 /**

@@ -6,7 +6,7 @@
  */
 import { createShadowPlotData } from './createShadowPlotData';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { PlotOptions } from './types';
+import { PlotOptions } from '@shared/types/plot.types';
 
 describe('createShadowPlotData', () => {
   const mockSectionOutput: GetSectionOutput = {

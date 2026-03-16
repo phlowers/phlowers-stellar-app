@@ -20,7 +20,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputTextModule } from 'primeng/inputtext';
@@ -28,7 +28,7 @@ import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { Task } from '@services/worker_python/tasks/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { VtlAndGuying } from '@shared/domain';
-import { SectionService } from '@features/study/infrastructure/services/section.service';
+import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 

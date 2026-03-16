@@ -9,8 +9,8 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { Charge } from '@shared/domain';
 import { v4 as uuidv4 } from 'uuid';
-import { ChargesService } from '@features/study/infrastructure/services/charges.service';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { ChargesService } from '@services/charges/charges.service';
+import { PlotService } from '@services/plot/plot.service';
 import { defaultClimaticCharge } from '../climate/climate.component';
 
 /** Creates a new charge with default climate values and an auto-generated name. */

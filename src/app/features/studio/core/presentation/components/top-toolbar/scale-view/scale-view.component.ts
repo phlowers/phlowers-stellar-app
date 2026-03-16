@@ -9,7 +9,7 @@ import { Button } from 'primeng/button';
 
 import { InputNumberComponent } from '@shared/components/atoms/input-number/input-number.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { PlotService } from '@features/studio/core/services/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 
 @Component({
   selector: 'app-scale-view',
