@@ -102,7 +102,7 @@ export class SectionsTabComponent {
   }
 
   selectSection(section: Section, event: CheckboxChangeEvent | { checked: boolean }) {
-    this.selectedSection.set(Boolean(event.checked) ? section.uuid : '');
+    this.selectedSection.set(event.checked ? section.uuid : '');
   }
 
   editSection(section: Section) {
