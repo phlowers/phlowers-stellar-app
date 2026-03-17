@@ -14,9 +14,9 @@
       "@app/*": ["./src/app/*"],
       "@core/*": ["./src/app/core/*"],
       "@services/*": ["./src/app/core/services/*"],
-      "@ui/*": ["./src/app/ui/*"],
-      "@plugins/*": ["./src/app/plugins/*"],
-      "@adapters/*": ["./src/app/adapters/*"]
+      "@features/*": ["./src/app/features/*"],
+      "@shared/*": ["./src/app/shared/*"],
+      "@infrastructure/*": ["./src/app/infrastructure/*"]
     },
   },
   "files": [

@@ -4,9 +4,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { StorageService } from '@services/storage/storage.service';
-import { UserEntity } from '@core/infrastructure/database';
+import { UserEntity } from '@infrastructure/database';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
@@ -33,7 +33,9 @@ export class UserService {
   /** Observable emitting the current `UserEntity` or `null` if no user exists. */
   public user$: Observable<UserEntity | null> = this.userSubject.asObservable();
 
-  constructor(private readonly storageService: StorageService) {
+  private readonly storageService = inject(StorageService);
+
+  constructor() {
     this.storageService.ready$.subscribe((ready) => {
       if (ready) {
         this.storageService.db?.users.toArray().then((users) => {

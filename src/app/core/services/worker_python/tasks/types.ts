@@ -5,8 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@core/domain';
-import { View } from '@ui/shared/components/studio/section/helpers/types';
+import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@shared/domain';
+import { View } from '@shared/types/plot.types';
 import { Dictionary } from 'lodash';
 
 /**

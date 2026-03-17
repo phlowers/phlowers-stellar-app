@@ -1,0 +1,87 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2">
+    <app-icon icon="calculate" />
+    <span i18n>Compute base parameter from terrain measurement</span>
+  </p>
+</ng-template>
+
+<p id="complementary-form-field-measuring-init" class="context-paragraph">
+  <app-icon icon="info" />
+  <ng-container i18n> Create a new measurment or select an existing one </ng-container>
+</p>
+
+<div>
+  <label for="new-measure">
+    <ng-container i18n>Measure's name</ng-container>
+    <sup class="mandatory">*</sup>
+  </label>
+  <input
+    id="new-measure"
+    type="text"
+    pInputText
+    fluid
+    required
+    aria-describedby="complementary-form-field-measuring-init"
+    [formControl]="newMeasureNameControl"
+    [class.ng-invalid]="isNameAlreadyTaken()"
+    [attr.aria-invalid]="isNameAlreadyTaken()"
+    [attr.aria-errormessage]="isNameAlreadyTaken() ? 'new-measure-name-error-message' : null"
+    data-testid="new-measure-name-input"
+  />
+  @if (isNameAlreadyTaken()) {
+    <p-message id="new-measure-name-error-message" severity="error" size="small" variant="simple" i18n
+      >Measure name must be unique.</p-message
+    >
+  }
+
+  <div class="mt-4 text-right">
+    <button
+      app-btn
+      type="button"
+      [disabled]="newMeasureNameControl.invalid || isNameAlreadyTaken()"
+      (click)="createMeasure()"
+      data-testid="create-measure-btn"
+    >
+      <app-icon icon="add_circle" />
+      <ng-container i18n>Create a new measurement</ng-container>
+    </button>
+  </div>
+</div>
+
+<hr />
+
+<div>
+  <label for="choose-measure">
+    <ng-container i18n>Choose an existing measure</ng-container>
+  </label>
+  <p-select
+    inputId="choose-measure"
+    required
+    fluid
+    showClear
+    appendTo="body"
+    emptyFilterMessage="No measures found"
+    i18n-emptyFilterMessage
+    emptyMessage="No measures"
+    i18n-emptyMessage
+    ariaLabelledBy="complementary-form-field-measuring-init"
+    [options]="measures()"
+    optionLabel="label"
+    optionValue="value"
+    [formControl]="chooseMeasureControl"
+    data-testid="choose-measure-select"
+  />
+
+  <div class="mt-4 text-right">
+    <button
+      app-btn
+      type="button"
+      [disabled]="chooseMeasureControl.invalid"
+      (click)="chooseMeasure()"
+      data-testid="choose-measure-btn"
+    >
+      <app-icon icon="check" />
+      <ng-container i18n>Choose</ng-container>
+    </button>
+  </div>
+</div>

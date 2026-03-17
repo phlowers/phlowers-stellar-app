@@ -4,17 +4,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Injectable, signal } from '@angular/core';
-import { ProtoV4Parameters, ProtoV4Support, Support, InitialCondition } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { inject, Injectable, signal } from '@angular/core';
+import { ProtoV4Parameters, ProtoV4Support, Support, InitialCondition } from '@shared/domain';
+import { StudyEntity } from '@infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
-import { createEmptySection, createEmptySupport } from '@services/sections/helpers';
-import { findDuplicateTitle } from '@ui/shared/helpers/duplicate';
+import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
-import { createEmptyStudy } from '@ui/pages/studies/components/new-study-modal/new-study-modal.component';
+import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
 
 /**
  * Field validation limits for support data imported from CSV.
@@ -51,10 +51,10 @@ export class StudiesService {
     isOpen: boolean;
   } | null>(null);
 
-  constructor(
-    private readonly storageService: StorageService,
-    private readonly messageService: MessageService
-  ) {
+  private readonly storageService = inject(StorageService);
+  private readonly messageService = inject(MessageService);
+
+  constructor() {
     this.storageService.ready$.subscribe((value) => {
       this.ready.next(value);
     });

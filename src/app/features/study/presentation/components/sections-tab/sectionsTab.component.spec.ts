@@ -1,0 +1,369 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SectionsTabComponent } from './sectionsTab.component';
+import { By } from '@angular/platform-browser';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { InitialCondition, Section } from '@shared/domain';
+import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { LinesService } from '@shared/catalog/services/lines.service';
+import { ActivatedRoute } from '@angular/router';
+import { MessageService } from 'primeng/api';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
+class MockMaintenanceService {
+  ready = { next: jest.fn() };
+  getMaintenance = jest.fn().mockResolvedValue([]);
+  importFromFile = jest.fn().mockResolvedValue(undefined);
+}
+
+class MockLinesService {
+  ready = { next: jest.fn() };
+  getLinesCount = jest.fn().mockResolvedValue(0);
+  getLines = jest.fn().mockResolvedValue([]);
+  importFromFile = jest.fn().mockResolvedValue(undefined);
+}
+
+describe('SectionsTabComponent', () => {
+  let component: SectionsTabComponent;
+  let fixture: ComponentFixture<SectionsTabComponent>;
+
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+  const getAllByTestId = (testId: string): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
+
+  beforeAll(() => {
+    // Mock global matchMedia for PrimeNG 19
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn()
+      }))
+    });
+  });
+
+  afterEach(() => {
+    const overlays = document.body.querySelectorAll('.p-select-overlay, .p-dropdown-panel, .p-overlay');
+    overlays.forEach((o) => o.remove());
+
+    // Restore console.error
+    jest.restoreAllMocks();
+  });
+
+  const mockSection: Section = {
+    uuid: 'uuid-123',
+    internal_id: 'internal-001',
+    name: 'My Section',
+    short_name: 'MS',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-02T00:00:00Z',
+    internal_catalog_id: 'catalog-001',
+    type: 'phase',
+    electric_phase_number: 1,
+    cable_name: 'Cable A',
+    cable_short_name: 'CA',
+    cables_amount: 2,
+    optical_fibers_amount: 12,
+    spans_amount: 5,
+    begin_span_name: 'SpanStart',
+    last_span_name: 'SpanEnd',
+    first_support_number: 100,
+    last_support_number: 200,
+    first_attachment_set: 'AttachSet1',
+    last_attachment_set: 'AttachSet2',
+    regional_maintenance_center_names: ['Center1', 'Center2'],
+    maintenance_center_names: ['Maint1', 'Maint2'],
+    regional_team_id: '1.23',
+    maintenance_team_id: '4.56',
+    maintenance_center_id: '7.89',
+    link_name: 'LinkX',
+    lit_code: 'LIT123',
+    lit_name: 'LIT123',
+    branch_name: 'BranchY',
+    branch_idr: 'BranchY',
+    voltage_idr: '230V',
+    comment: 'Test section comment',
+    supports_comment: 'Test supports comment',
+    supports: [],
+    obstacles: [],
+    initial_conditions: [
+      {
+        uuid: 'ic-1',
+        name: 'Initial Cond 1',
+        base_parameters: 0,
+        base_temperature: 20,
+        cable_pretension: 0,
+        min_temperature: 0,
+        max_wind_pressure: 0,
+        max_frost_width: 0
+      } as InitialCondition
+    ],
+    selected_initial_condition_uuid: 'ic-1',
+    charges: [],
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
+  };
+
+  const mockInitialCondition: InitialCondition = {
+    uuid: 'init-1',
+    name: 'Init Cond',
+    base_parameters: 0,
+    cable_pretension: 0,
+    min_temperature: 0,
+    max_wind_pressure: 0,
+    max_frost_width: 0,
+    base_temperature: 0
+  };
+
+  beforeEach(async () => {
+    // Suppress console errors for template binding issues
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const mockMessageService = {
+      add: jest.fn()
+    } as unknown as MessageService;
+    await TestBed.configureTestingModule({
+      imports: [SectionsTabComponent, NoopAnimationsModule],
+      providers: [
+        { provide: MaintenanceService, useClass: MockMaintenanceService },
+        { provide: LinesService, useClass: MockLinesService },
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(SectionsTabComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    jest.spyOn(component.deleteSection, 'emit');
+    jest.spyOn(component.duplicateSection, 'emit');
+    jest.spyOn(component.duplicateInitialCondition, 'emit');
+    jest.spyOn(component.deleteInitialCondition, 'emit');
+  });
+
+  it('should display "No existing section" when sections is empty', () => {
+    fixture.componentRef.setInput('study', { sections: [] });
+    fixture.detectChanges();
+
+    const noSectionMsg = fixture.debugElement.query(By.css('.no-section-text'));
+    expect(noSectionMsg.nativeElement.textContent).toContain('No existing section');
+  });
+
+  it('should render a section when sections input has data', () => {
+    const sectionWithName = { ...mockSection, name: 'My Section' };
+    fixture.componentRef.setInput('study', { sections: [sectionWithName] });
+    fixture.detectChanges();
+
+    const sectionName = fixture.debugElement.query(By.css('.section__text-name'));
+    expect(sectionName?.nativeElement?.textContent).toContain('My Section');
+  });
+
+  it('should open new section modal in create mode when clicking "Add a section"', () => {
+    // Set up the component with no sections to show the "Create a section" button
+    fixture.componentRef.setInput('study', { sections: [] });
+    fixture.detectChanges();
+
+    const btn = fixture.debugElement.query(By.css('button[app-btn]'));
+    expect(btn).toBeTruthy();
+    btn.triggerEventHandler('click', {});
+    fixture.detectChanges();
+
+    expect(component.isNewSectionModalOpen()).toBe(true);
+    expect(component.newSectionModalMode()).toBe('create');
+  });
+
+  it('editSection should set currentSection and open modal in edit mode', () => {
+    component.editSection(mockSection);
+
+    expect(component.currentSection()).toEqual(mockSection);
+    expect(component.newSectionModalMode()).toBe('edit');
+    expect(component.isNewSectionModalOpen()).toBe(true);
+  });
+
+  it('viewSection should set currentSection and open modal in view mode', () => {
+    component.viewSection(mockSection);
+
+    expect(component.currentSection()).toEqual(mockSection);
+    expect(component.newSectionModalMode()).toBe('view');
+    expect(component.isNewSectionModalOpen()).toBe(true);
+  });
+
+  it('openInitialConditionModal should update state correctly', () => {
+    component.openInitialConditionModal(mockSection, mockInitialCondition, 'edit');
+
+    expect(component.currentSection()).toEqual(mockSection);
+    expect(component.currentInitialCondition()).toEqual(mockInitialCondition);
+    expect(component.initialConditionModalMode()).toBe('edit');
+    expect(component.isInitialConditionModalOpen()).toBe(true);
+  });
+
+  it('should emit deleteSection when delete button clicked in popover', () => {
+    fixture.componentRef.setInput('study', { sections: [mockSection] });
+    fixture.detectChanges();
+
+    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+    expect(triggerBtn).toBeTruthy();
+    triggerBtn.click();
+    fixture.detectChanges();
+
+    const deleteBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.erase-btn');
+    expect(deleteBtn).toBeTruthy();
+    deleteBtn.click();
+    fixture.detectChanges();
+
+    expect(component.deleteSection.emit).toHaveBeenCalledWith(mockSection);
+  });
+
+  it('should emit duplicateSection when duplicate button clicked in popover', () => {
+    fixture.componentRef.setInput('study', { sections: [mockSection] });
+    fixture.detectChanges();
+
+    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+    expect(triggerBtn).toBeTruthy();
+    triggerBtn.click();
+    fixture.detectChanges();
+
+    const allBtns = fixture.nativeElement.querySelectorAll('p-popover button');
+    const duplicateButton = Array.from(allBtns).find((btn) =>
+      (btn as HTMLElement).textContent?.includes('Duplicate')
+    ) as HTMLButtonElement;
+    expect(duplicateButton).toBeTruthy();
+
+    duplicateButton.click();
+    fixture.detectChanges();
+
+    expect(component.duplicateSection.emit).toHaveBeenCalledWith(mockSection);
+  });
+
+  describe('UC: display section list with actions', () => {
+    it('UC-ST1: should render section cards when sections exist', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const cards = getAllByTestId('section-card');
+      expect(cards.length).toBe(1);
+    });
+
+    it('UC-ST2: should display section name', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const name = getByTestId('section-name');
+      expect(name).toBeTruthy();
+      expect(name!.textContent).toContain('My Section');
+    });
+
+    it('UC-ST3: should render create section button when sections exist', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const btn = getByTestId('create-section-btn');
+      expect(btn).toBeTruthy();
+    });
+
+    it('UC-ST4: should render section actions button for each section', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const actionsBtn = getByTestId('section-actions-btn');
+      expect(actionsBtn).toBeTruthy();
+    });
+
+    it('UC-ST5: should render generate state button when sections exist', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const generateBtn = getByTestId('generate-state-btn');
+      expect(generateBtn).toBeTruthy();
+    });
+  });
+
+  describe('HTML rendering - popover buttons', () => {
+    it('should render create-section-empty-btn when no sections exist', () => {
+      fixture.componentRef.setInput('study', { sections: [] });
+      fixture.detectChanges();
+
+      const btn = getByTestId('create-section-empty-btn');
+      expect(btn).toBeTruthy();
+      expect(btn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-view-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const viewBtn = getByTestId('section-view-btn');
+      expect(viewBtn).toBeTruthy();
+      expect(viewBtn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-edit-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const editBtn = getByTestId('section-edit-btn');
+      expect(editBtn).toBeTruthy();
+      expect(editBtn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-add-ic-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const addBtn = getByTestId('section-add-ic-btn');
+      expect(addBtn).toBeTruthy();
+      expect(addBtn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-duplicate-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const dupBtn = getByTestId('section-duplicate-btn');
+      expect(dupBtn).toBeTruthy();
+      expect(dupBtn?.tagName).toBe('BUTTON');
+    });
+
+    it('should render section-delete-btn in popover', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      fixture.detectChanges();
+
+      const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+      triggerBtn.click();
+      fixture.detectChanges();
+
+      const delBtn = getByTestId('section-delete-btn');
+      expect(delBtn).toBeTruthy();
+      expect(delBtn?.tagName).toBe('BUTTON');
+    });
+  });
+});

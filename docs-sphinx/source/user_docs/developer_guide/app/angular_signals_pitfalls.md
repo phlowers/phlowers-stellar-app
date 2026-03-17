@@ -13,7 +13,7 @@ It serves as a reference to avoid reproducing these errors in future development
 
 ## Bug #447 — Application freeze when changing span
 
-**Affected component**: `src/app/ui/pages/studio/loads/span/span.component.ts`
+**Affected component**: `src/app/features/studio/loads/presentation/components/span/span.component.ts`
 
 **Fix branch**: `fixbug/freeze-app-when-switch-span-in-charge`
 

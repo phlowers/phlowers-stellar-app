@@ -1,0 +1,689 @@
+<app-attachment-set-modal
+  [isOpen]="attachmentSetModalOpen()"
+  (isOpenChange)="attachmentSetModalOpen.set($event)"
+  [support]="supportForAttachmentSetModal()"
+  (validateForm)="onValidateFormAttachmentSetModal($event)"
+  [section]="null"
+/>
+<p-table
+  [value]="supports()"
+  [paginator]="true"
+  [rows]="rows()"
+  [rowsPerPageOptions]="rowsPerPageOptions()"
+  [first]="first()"
+  class="mb-4"
+  paginatorStyleClass="!hidden"
+  data-testid="supports-table"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th class="position-column sticky-left" id="position"></th>
+      <th id="support_number" (dblclick)="onSupportNumberDoubleClick('number')" class="integer-column">
+        <ng-container i18n>N° supp.</ng-container>
+        <sup class="mandatory">*</sup>
+      </th>
+      <th id="span_length" (dblclick)="onSupportNumberDoubleClick('spanLength')" class="decimal-column">
+        <ng-container i18n>Span l.</ng-container>
+        <sup class="mandatory">*</sup>
+      </th>
+      <th id="attachment_height" (dblclick)="onSupportNumberDoubleClick('attachmentHeight')" class="decimal-column">
+        <ng-container i18n>Attachment alt. (NGF)</ng-container>
+        <sup class="mandatory">*</sup>
+      </th>
+      <th id="span_angle" (dblclick)="onSupportNumberDoubleClick('spanAngle')" class="decimal-column">
+        <ng-container i18n>Angle</ng-container>
+        <sup class="mandatory">*</sup>
+      </th>
+      <th id="chain_name" (dblclick)="onSupportNumberDoubleClick('chainName')" i18n class="text-column">Chain name</th>
+      <th id="chain_length" (dblclick)="onSupportNumberDoubleClick('chainLength')" class="decimal-column">
+        <ng-container i18n>Chain l.</ng-container>
+        <sup class="mandatory">*</sup>
+      </th>
+      <th id="chain_weight" (dblclick)="onSupportNumberDoubleClick('chainWeight')" i18n class="decimal-column">
+        Chain w.
+      </th>
+      <th id="support_name" (dblclick)="onSupportNumberDoubleClick('name')" i18n class="text-column">Support name</th>
+
+      <th id="attachment_set" (dblclick)="onSupportNumberDoubleClick('attachmentSet')" i18n class="integer-column">
+        Attachment set
+      </th>
+      <th id="arm_length" (dblclick)="onSupportNumberDoubleClick('armLength')" i18n class="decimal-column">Arm l.</th>
+
+      <th id="chain_v" (dblclick)="onSupportNumberDoubleClick('chainV')" i18n class="boolean-column">Chain V</th>
+      <th id="counter_weight" (dblclick)="onSupportNumberDoubleClick('counterWeight')" i18n class="decimal-column">
+        Counter weight
+      </th>
+      <th
+        id="support_foot_altitude"
+        (dblclick)="onSupportNumberDoubleClick('supportFootAltitude')"
+        class="decimal-column"
+      >
+        <ng-container i18n>Supp. foot alt.</ng-container>
+        <app-icon class="align-middle pl-1" icon="rocket_launch" />
+      </th>
+      <th
+        id="attachment_position"
+        (dblclick)="onSupportNumberDoubleClick('attachmentPosition')"
+        i18n
+        class="decimal-column"
+      >
+        Attachment pos.
+      </th>
+      <th id="chain_surface" (dblclick)="onSupportNumberDoubleClick('chainSurface')" i18n class="decimal-column">
+        Chain surface
+      </th>
+      @if (mode() === 'view') {
+        <th id="tower_model">
+          <ng-container i18n>Tower</ng-container>
+        </th>
+      }
+
+      @if (mode() === 'create' || mode() === 'edit') {
+        <th class="sticky-right" id="actions" i18n>Actions</th>
+      }
+    </tr>
+  </ng-template>
+  <ng-template #body let-support let-index="index" let-rowIndex="rowIndex">
+    <tr>
+      <td class="sticky-left position-column">{{ rowIndex + 1 }}</td>
+      <td [class.integer-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <input
+            pInputText
+            aria-label="support number"
+            i18n-aria-label
+            [ngModel]="support.number"
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'number', $event)"
+            [id]="'supportNumber' + rowIndex"
+            data-testid="support-number-input"
+          />
+        } @else {
+          <p class="read-only_info">{{ support.number }}</p>
+        }
+      </td>
+      <td [class.decimal-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              step="0.01"
+              [min]="limits.spanLength.min"
+              [max]="limits.spanLength.max"
+              aria-label="span length"
+              i18n-aria-label
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              [ngModel]="support.spanLength"
+              [disabled]="rowIndex === supports().length - 1"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
+              [id]="'spanLength' + rowIndex"
+              data-testid="span-length-input"
+              [attr.aria-invalid]="spanLengthInput.dirty && spanLengthInput.invalid"
+              [attr.aria-errormessage]="
+                spanLengthInput.dirty && spanLengthInput.invalid ? 'spanLengthError' + rowIndex : null
+              "
+              #spanLengthInput="ngModel"
+            />
+            <p-inputgroup-addon>m</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (spanLengthInput.dirty && spanLengthInput.errors?.['min']) {
+            <p-message [id]="'spanLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.spanLength.min }}
+            </p-message>
+          } @else if (spanLengthInput.dirty && spanLengthInput.errors?.['max']) {
+            <p-message [id]="'spanLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.spanLength.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.spanLength }}
+            @if (isNumber(support.spanLength)) {
+              m
+            }
+          </p>
+        }
+      </td>
+      <td [class.decimal-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              step="0.01"
+              [min]="limits.attachmentHeight.min"
+              [max]="limits.attachmentHeight.max"
+              aria-label="attachment height"
+              i18n-aria-label
+              [ngModel]="support.attachmentHeight"
+              (input)="truncateDecimals($event)"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
+              [id]="'attachmentHeight' + rowIndex"
+              data-testid="attachment-height-input"
+              [attr.aria-invalid]="attachmentHeightInput.dirty && attachmentHeightInput.invalid"
+              [attr.aria-errormessage]="
+                attachmentHeightInput.dirty && attachmentHeightInput.invalid ? 'attachmentHeightError' + rowIndex : null
+              "
+              #attachmentHeightInput="ngModel"
+            />
+            <p-inputgroup-addon>m</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['min']) {
+            <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.attachmentHeight.min }}
+            </p-message>
+          } @else if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['max']) {
+            <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.attachmentHeight.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.attachmentHeight }}
+            @if (isNumber(support.attachmentHeight)) {
+              m
+            }
+          </p>
+        }
+      </td>
+      <td [class.decimal-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              step="0.01"
+              [min]="limits.spanAngle.min"
+              [max]="limits.spanAngle.max"
+              aria-label="span angle"
+              i18n-aria-label
+              [ngModel]="support.spanAngle"
+              (input)="truncateDecimals($event)"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
+              [id]="'spanAngle' + rowIndex"
+              data-testid="span-angle-input"
+              [attr.aria-invalid]="spanAngleInput.dirty && spanAngleInput.invalid"
+              [attr.aria-errormessage]="
+                spanAngleInput.dirty && spanAngleInput.invalid ? 'spanAngleError' + rowIndex : null
+              "
+              #spanAngleInput="ngModel"
+            />
+            <p-inputgroup-addon>Gr</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (spanAngleInput.dirty && spanAngleInput.errors?.['min']) {
+            <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.spanAngle.min }}
+            </p-message>
+          } @else if (spanAngleInput.dirty && spanAngleInput.errors?.['max']) {
+            <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.spanAngle.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.spanAngle }}
+            @if (isNumber(support.spanAngle)) {
+              Gr
+            }
+          </p>
+        }
+      </td>
+
+      <td class="text-column">
+        @if (mode() !== 'view') {
+          <p-select
+            [options]="allChainsOptions()"
+            aria-label="chain name"
+            i18n-aria-label
+            [ngModel]="support.chainName"
+            optionLabel="chain_name"
+            type="text"
+            (onFilter)="onChainNameFilter($event)"
+            [showClear]="true"
+            optionValue="chain_name"
+            appendTo="body"
+            [filter]="true"
+            filterBy="chain_name"
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'chainName', $event)"
+            [inputId]="'chainName' + rowIndex"
+            data-testid="chain-name-select"
+          />
+        } @else {
+          <p class="read-only_info">
+            {{ support.chainName }}
+            @if (isNumber(support.chainName)) {
+              Gr
+            }
+          </p>
+        }
+      </td>
+      <td [class.decimal-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              [min]="limits.chainLength.min"
+              [max]="limits.chainLength.max"
+              step="0.01"
+              aria-label="chain length"
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              i18n-aria-label
+              [ngModel]="support.chainLength"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
+              [id]="'chainLength' + rowIndex"
+              data-testid="chain-length-input"
+              [attr.aria-invalid]="chainLengthInput.dirty && chainLengthInput.invalid"
+              [attr.aria-errormessage]="
+                chainLengthInput.dirty && chainLengthInput.invalid ? 'chainLengthError' + rowIndex : null
+              "
+              #chainLengthInput="ngModel"
+            />
+            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (chainLengthInput.dirty && chainLengthInput.errors?.['min']) {
+            <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.chainLength.min }}
+            </p-message>
+          } @else if (chainLengthInput.dirty && chainLengthInput.errors?.['max']) {
+            <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.chainLength.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.chainLength }}
+            @if (isNumber(support.chainLength)) {
+              m
+            }
+          </p>
+        }
+      </td>
+      <td class="decimal-column">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              [min]="limits.chainWeight.min"
+              [max]="limits.chainWeight.max"
+              step="0.01"
+              aria-label="chain weight"
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              i18n-aria-label
+              [ngModel]="support.chainWeight"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
+              [id]="'chainWeight' + rowIndex"
+              data-testid="chain-weight-input"
+              [attr.aria-invalid]="chainWeightInput.dirty && chainWeightInput.invalid"
+              [attr.aria-errormessage]="
+                chainWeightInput.dirty && chainWeightInput.invalid ? 'chainWeightError' + rowIndex : null
+              "
+              #chainWeightInput="ngModel"
+            />
+            <p-inputgroup-addon>kg</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (chainWeightInput.dirty && chainWeightInput.errors?.['min']) {
+            <p-message [id]="'chainWeightError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.chainWeight.min }}
+            </p-message>
+          } @else if (chainWeightInput.dirty && chainWeightInput.errors?.['max']) {
+            <p-message [id]="'chainWeightError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.chainWeight.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.chainWeight }}
+            @if (isNumber(support.chainWeight)) {
+              kg
+            }
+          </p>
+        }
+      </td>
+      <td class="text-column">
+        @if (mode() !== 'view') {
+          <p-select
+            class="w-full"
+            [options]="allSupportFilterTable()"
+            (onFilter)="onSupportNameFilter($event)"
+            [(ngModel)]="support.name"
+            [showClear]="true"
+            appendTo="body"
+            [filter]="true"
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
+            [inputId]="'supportName' + rowIndex"
+            data-testid="support-name-select"
+          />
+        } @else {
+          <p class="read-only_info one-line-text">{{ support.name }}</p>
+        }
+      </td>
+      <td class="integer-column">
+        @if (mode() !== 'view') {
+          <p-iconfield>
+            <input
+              class="w-full"
+              pInputText
+              type="number"
+              [min]="limits.attachmentSet.min"
+              [max]="limits.attachmentSet.max"
+              [pKeyFilter]="onlyPositiveNumbers"
+              aria-label="attachment set"
+              i18n-aria-label
+              [ngModel]="support.attachmentSet"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentSet', $event)"
+              [id]="'attachmentSet' + rowIndex"
+              data-testid="attachment-set-input"
+              [attr.aria-invalid]="attachmentSetInput.dirty && attachmentSetInput.invalid"
+              [attr.aria-errormessage]="
+                attachmentSetInput.dirty && attachmentSetInput.invalid ? 'attachmentSetError' + rowIndex : null
+              "
+              #attachmentSetInput="ngModel"
+            />
+            <p-inputicon>
+              <button
+                app-btn
+                btnSize="s"
+                [disabled]="supplementarySupportFilterTable().includes(support.name || '')"
+                btnStyle="text"
+                aria-label="open attachment set modal"
+                i18n-aria-label
+                (click)="openAttachmentSetModal(support.uuid)"
+                data-testid="open-attachment-set-modal-btn"
+              >
+                <app-icon icon="visibility" class="text-black" />
+              </button>
+            </p-inputicon>
+          </p-iconfield>
+          @if (attachmentSetInput.dirty && attachmentSetInput.errors?.['min']) {
+            <p-message [id]="'attachmentSetError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.attachmentSet.min }}
+            </p-message>
+          } @else if (attachmentSetInput.dirty && attachmentSetInput.errors?.['max']) {
+            <p-message [id]="'attachmentSetError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.attachmentSet.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">{{ support.attachmentSet }}</p>
+        }
+      </td>
+      <td [class.decimal-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              step="0.01"
+              [min]="limits.armLength.min"
+              [max]="limits.armLength.max"
+              aria-label="arm length"
+              i18n-aria-label
+              [ngModel]="support.armLength"
+              (input)="truncateDecimals($event)"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
+              [id]="'armLength' + rowIndex"
+              data-testid="arm-length-input"
+              [attr.aria-invalid]="armLengthInput.dirty && armLengthInput.invalid"
+              [attr.aria-errormessage]="
+                armLengthInput.dirty && armLengthInput.invalid ? 'armLengthError' + rowIndex : null
+              "
+              #armLengthInput="ngModel"
+            />
+            <p-inputgroup-addon>m</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (armLengthInput.dirty && armLengthInput.errors?.['min']) {
+            <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.armLength.min }}
+            </p-message>
+          } @else if (armLengthInput.dirty && armLengthInput.errors?.['max']) {
+            <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.armLength.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.armLength }}
+            @if (isNumber(support.armLength)) {
+              m
+            }
+          </p>
+        }
+      </td>
+
+      <td>
+        @if (mode() !== 'view') {
+          <p-select
+            [options]="optionsChainV"
+            appendTo="body"
+            aria-label="chain V"
+            i18n-aria-label
+            [ngModel]="support.chainV"
+            optionLabel="label"
+            optionValue="value"
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'chainV', $event)"
+            [inputId]="'chainV' + rowIndex"
+            data-testid="chain-v-select"
+          />
+        } @else {
+          <p class="read-only_info">
+            {{ support.chainV ? optionsChainV[0].label : optionsChainV[1].label }}
+          </p>
+        }
+      </td>
+      <td class="decimal-column">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              [min]="limits.counterWeight.min"
+              [max]="limits.counterWeight.max"
+              step="0.01"
+              aria-label="counter weight"
+              i18n-aria-label
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              [ngModel]="support.counterWeight"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
+              [id]="'counterWeight' + rowIndex"
+              data-testid="counter-weight-input"
+              [attr.aria-invalid]="counterWeightInput.dirty && counterWeightInput.invalid"
+              [attr.aria-errormessage]="
+                counterWeightInput.dirty && counterWeightInput.invalid ? 'counterWeightError' + rowIndex : null
+              "
+              #counterWeightInput="ngModel"
+            />
+            <p-inputgroup-addon>kg</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (counterWeightInput.dirty && counterWeightInput.errors?.['min']) {
+            <p-message [id]="'counterWeightError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.counterWeight.min }}
+            </p-message>
+          } @else if (counterWeightInput.dirty && counterWeightInput.errors?.['max']) {
+            <p-message [id]="'counterWeightError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.counterWeight.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.counterWeight }}
+            @if (isNumber(support.counterWeight)) {
+              kg
+            }
+          </p>
+        }
+      </td>
+      <td [class.decimal-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              step="0.01"
+              [min]="limits.supportFootAltitude.min"
+              [max]="limits.supportFootAltitude.max"
+              aria-label="support foot altitude"
+              i18n-aria-label
+              [ngModel]="support.supportFootAltitude"
+              (input)="truncateDecimals($event)"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
+              [id]="'supportFootAltitude' + rowIndex"
+              data-testid="support-foot-altitude-input"
+              [attr.aria-invalid]="supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid"
+              [attr.aria-errormessage]="
+                supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid
+                  ? 'supportFootAltitudeError' + rowIndex
+                  : null
+              "
+              #supportFootAltitudeInput="ngModel"
+            />
+            <p-inputgroup-addon>m</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['min']) {
+            <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.supportFootAltitude.min }}
+            </p-message>
+          } @else if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['max']) {
+            <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.supportFootAltitude.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.supportFootAltitude }}
+            @if (isNumber(support.supportFootAltitude)) {
+              m
+            }
+          </p>
+        }
+      </td>
+      <td [class.decimal-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <p-select
+            [options]="optionsAttachmentPosition"
+            appendTo="body"
+            aria-label="attachment position"
+            i18n-aria-label
+            [ngModel]="support.attachmentPosition"
+            optionLabel="label"
+            optionValue="value"
+            (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentPosition', $event)"
+            [inputId]="'attachmentPosition' + rowIndex"
+            data-testid="attachment-position-select"
+          />
+        } @else {
+          <p class="read-only_info">{{ support.attachmentPosition }}</p>
+        }
+      </td>
+      <td [class.decimal-column]="mode() !== 'view'">
+        @if (mode() !== 'view') {
+          <p-inputgroup>
+            <input
+              pInputText
+              type="number"
+              [min]="limits.chainSurface.min"
+              [max]="limits.chainSurface.max"
+              step="0.01"
+              aria-label="chain surface"
+              i18n-aria-label
+              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
+              [ngModel]="support.chainSurface"
+              (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
+              [id]="'chainSurface' + rowIndex"
+              data-testid="chain-surface-input"
+              [attr.aria-invalid]="chainSurfaceInput.dirty && chainSurfaceInput.invalid"
+              [attr.aria-errormessage]="
+                chainSurfaceInput.dirty && chainSurfaceInput.invalid ? 'chainSurfaceError' + rowIndex : null
+              "
+              #chainSurfaceInput="ngModel"
+            />
+            <p-inputgroup-addon>m²</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['min']) {
+            <p-message [id]="'chainSurfaceError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Min. value:</ng-container>&nbsp;{{ limits.chainSurface.min }}
+            </p-message>
+          } @else if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['max']) {
+            <p-message [id]="'chainSurfaceError' + rowIndex" severity="error" size="small" variant="simple">
+              <ng-container i18n>Max. value:</ng-container>&nbsp;{{ limits.chainSurface.max }}
+            </p-message>
+          }
+        } @else {
+          <p class="read-only_info">
+            {{ support.chainSurface }}
+            @if (isNumber(support.chainSurface)) {
+              m²
+            }
+          </p>
+        }
+      </td>
+      @if (mode() === 'view') {
+        <td>
+          <p class="one-line-text">{{ support.towerModel }}</p>
+        </td>
+      }
+      @if (mode() === 'edit' || mode() === 'create') {
+        <td class="sticky-right">
+          <button
+            app-btn
+            btnSize="s"
+            btnStyle="text"
+            class="w-auto"
+            (click)="popover.toggle($event)"
+            data-testid="support-actions-btn"
+          >
+            <span class="pi pi-ellipsis-h"></span>
+          </button>
+          <p-popover #popover>
+            <ng-template pTemplate="content">
+              <div class="flex flex-col gap-2">
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  (click)="addSupport.emit({ index: rowIndex, position: 'before' })"
+                  data-testid="add-support-before-btn"
+                >
+                  <app-icon icon="add" />
+                  <span i18n>Add support before</span>
+                </button>
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  (click)="addSupport.emit({ index: rowIndex, position: 'after' })"
+                  data-testid="add-support-after-btn"
+                >
+                  <app-icon icon="add" />
+                  <span i18n>Add support after</span>
+                </button>
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  (click)="duplicateSupport.emit(support.uuid)"
+                  data-testid="duplicate-support-btn"
+                >
+                  <app-icon icon="content_copy" />
+                  <span i18n>Duplicate</span>
+                </button>
+                <button
+                  app-btn
+                  btnSize="s"
+                  btnStyle="text"
+                  class="erase-btn"
+                  (click)="deleteSupport.emit(support.uuid)"
+                  data-testid="delete-support-btn"
+                >
+                  <app-icon icon="delete" />
+                  <span i18n>Delete support</span>
+                </button>
+              </div>
+            </ng-template>
+          </p-popover>
+        </td>
+      }
+    </tr>
+  </ng-template>
+</p-table>

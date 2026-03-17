@@ -9,8 +9,8 @@ import { TestBed } from '@angular/core/testing';
 import { ChargesService } from './charges.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { MessageService } from 'primeng/api';
-import { Charge, Section, SymmetryType } from '@core/domain';
-import { StudyEntity } from '@core/infrastructure/database';
+import { Charge, Section, SymmetryType } from '@shared/domain';
+import { StudyEntity } from '@infrastructure/database';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -18,7 +18,7 @@ jest.mock('uuid', () => ({
 }));
 
 // Mock findDuplicateTitle
-jest.mock('@ui/shared/helpers/duplicate', () => ({
+jest.mock('@shared/helpers/duplicate', () => ({
   findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
 }));
 
