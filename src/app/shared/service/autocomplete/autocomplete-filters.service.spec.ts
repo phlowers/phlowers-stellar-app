@@ -182,7 +182,7 @@ describe('filterElements', () => {
     });
 
     it('should handle array values in elements', () => {
-      const filters: Partial<TestElement> = { tags: 'javascript' as any };
+      const filters: Partial<TestElement> = { tags: 'javascript' as unknown as string[] };
       const result = filterElements(testElements, filters);
 
       expect(result).toHaveLength(1);

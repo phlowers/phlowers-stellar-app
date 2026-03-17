@@ -60,7 +60,10 @@ describe('SelectWithButtonsComponent', () => {
       updateModel: jest.fn(),
       hide: jest.fn()
     };
-    (component as any)['selectComponent'] = (() => mockSelect) as any;
+    Object.defineProperty(component, 'selectComponent', {
+      value: (() => mockSelect) as unknown as ReturnType<(typeof component)['selectComponent']>,
+      writable: true
+    });
   });
 
   afterEach(() => {

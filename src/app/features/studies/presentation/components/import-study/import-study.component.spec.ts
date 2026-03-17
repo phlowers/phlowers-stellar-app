@@ -1653,8 +1653,8 @@ describe('ImportStudyComponent', () => {
       });
     });
 
-    const createMockStudyData = (uuid?: string): any => {
-      const studyData: any = {
+    const createMockStudyData = (uuid?: string): Record<string, unknown> => {
+      const studyData: Record<string, unknown> = {
         title: 'Test Study',
         description: 'Test Description',
         author_email: 'test@example.com',
@@ -1679,7 +1679,7 @@ describe('ImportStudyComponent', () => {
       return studyData;
     };
 
-    const encodeStudyToBase64 = (studyData: any): string => {
+    const encodeStudyToBase64 = (studyData: Record<string, unknown>): string => {
       const jsonString = JSON.stringify(studyData);
       return btoa(jsonString);
     };
@@ -2048,7 +2048,9 @@ describe('ImportStudyComponent', () => {
 
         setTimeout(() => {
           expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as any;
+          const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as Record<string, unknown> & {
+            sections: { supports: unknown[] }[];
+          };
           expect(createStudyCall.sections).toBeDefined();
           expect(createStudyCall.sections.length).toBe(1);
           expect(createStudyCall.sections[0].supports.length).toBe(2);
@@ -2177,7 +2179,7 @@ describe('ImportStudyComponent', () => {
     });
 
     it('UC-S8: should display imported studies list when studies are loaded', () => {
-      component.newStudies.set([{ uuid: 'uuid-1', title: 'Imported Study' } as any]);
+      component.newStudies.set([{ uuid: 'uuid-1', title: 'Imported Study' } as Partial<Study> as Study]);
 
       expect(component.newStudies().length).toBe(1);
       expect(component.newStudies()[0].uuid).toBe('uuid-1');

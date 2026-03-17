@@ -14,7 +14,7 @@ import { formatStudioError } from './helpers/errors';
   standalone: true
 })
 class SectionPlotStubComponent {
-  litData = input<any>();
+  litData = input<GetSectionOutput | null>();
 }
 
 const mockSection: Section = {

@@ -8,6 +8,8 @@ import {
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
 
+type ObstacleAnnotation = Partial<Plotly.Annotations> & { data?: ObstacleAnnotationData };
+
 const makeObstacle = (overrides: Partial<Obstacle> = {}): Obstacle => ({
   uuid: 'obs-1',
   supportUuid: 'sup-1',
@@ -180,8 +182,8 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
-    const label = annotations.find((a) => (a as any).text === 'Obstacle 1') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const label = annotations.find((a) => (a as ObstacleAnnotation).text === 'Obstacle 1') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 11, y: 22, z: 3 });
     expect(label).toMatchObject({ x: 11, y: 22, z: 3, text: 'Obstacle 1' });
   });
@@ -199,7 +201,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 11, y: 22, z: 33 });
   });
 
@@ -238,10 +240,14 @@ describe('createObstaclesAnnotations', () => {
     const annotations = createObstaclesAnnotations(params);
     // 2 points => 4 annotations (marker + label for each)
     expect(annotations).toHaveLength(4);
-    const marker0 = annotations.find((a: any) => a.text === '●' && a.data?.obstaclePositionIndex === 0) as any;
-    const marker1 = annotations.find((a: any) => a.text === '●' && a.data?.obstaclePositionIndex === 1) as any;
-    expect(marker0.font.color).toBe('black');
-    expect(marker1.font.color).toBe('red');
+    const marker0 = annotations.find(
+      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 0
+    ) as ObstacleAnnotation;
+    const marker1 = annotations.find(
+      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 1
+    ) as ObstacleAnnotation;
+    expect(marker0.font!.color).toBe('black');
+    expect(marker1.font!.color).toBe('red');
   });
 
   it('should use z-based y coordinate in 2d face view', () => {
@@ -259,7 +265,7 @@ describe('createObstaclesAnnotations', () => {
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
     // In 2d face view, y is the vertical axis (altitude). In absolute mode, it's the raw NGF altitude.
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 3, z: 3 });
   });
 
@@ -278,7 +284,7 @@ describe('createObstaclesAnnotations', () => {
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
     // In 2D, support altitude is carried by base.y (not base.z)
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 33, z: 33 });
   });
 
@@ -292,8 +298,8 @@ describe('createObstaclesAnnotations', () => {
       obstacles: [obstacle]
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
-    const label = annotations.find((a) => (a as any).text === 'Obstacle 1') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const label = annotations.find((a) => (a as ObstacleAnnotation).text === 'Obstacle 1') as ObstacleAnnotation;
     expect(marker.data).toEqual({ obstacleUuid: 'obs-1', obstaclePositionIndex: 0, type: 'obstacle' });
     expect(label.data).toEqual({ obstacleUuid: 'obs-1', obstaclePositionIndex: 0, type: 'obstacle' });
   });
@@ -309,16 +315,16 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
 
-    const annotations = createObstaclesAnnotations(params) as any[];
+    const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
     const marker = annotations.find((a) => a.text === '●');
     const label = annotations.find((a) => a.text === 'Obstacle 1');
 
-    expect(marker.captureevents).toBe(true);
-    expect(typeof marker.hovertext).toBe('string');
+    expect(marker!.captureevents).toBe(true);
+    expect(typeof marker!.hovertext).toBe('string');
 
-    expect(label.captureevents).toBe(false);
-    expect(label.hovertext).toBeUndefined();
-    expect(label.yshift).toBe(12);
+    expect(label!.captureevents).toBe(false);
+    expect(label!.hovertext).toBeUndefined();
+    expect(label!.yshift).toBe(12);
   });
 
   it('should use right support altitude for RIGHT-referenced obstacle with relative altitude in 3d', () => {
@@ -335,7 +341,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // altitude = position.z + rightBase.z = 5 + 80 = 85
     // x = rightBase.x - position.x = 50 - 2 = 48
     // y = rightBase.y + position.y = 40 + 3 = 43
@@ -357,7 +363,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // altitude = position.z + rightBase.y (2D) = 5 + 80 = 85
     // x = rightBase.x - position.x = 50 - 2 = 48
     expect(marker).toMatchObject({ x: 48, y: 85, z: 85 });
@@ -376,7 +382,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // x = rightBase.x - position.x = 100 - 5 = 95
     expect(marker.x).toBe(95);
   });
@@ -395,7 +401,7 @@ describe('createObstaclesAnnotations', () => {
       side: 'face'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // face view: x = refBase.x + position.y = 50 + 2 = 52
     // altitude absolute: y = z = 7
     expect(marker).toMatchObject({ x: 52, y: 7, z: 7 });
@@ -418,7 +424,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // Right support IS available (sup-2 is in allSupportObjects even though excluded from left-support list)
     // altitude = position.z + rightBase.z = 3 + 80 = 83
     // x = rightBase.x - position.x = 50 - 1 = 49
@@ -453,7 +459,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // rightBase = sup-3: (200, 80, 90)
     // altitude = 10 + 90 = 100, x = 200 - 5 = 195, y = 80 + 3 = 83
     expect(marker).toMatchObject({ x: 195, y: 83, z: 100 });
@@ -478,7 +484,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // rightBase = sup-3: (200, 40, 80)
     // altitude = 4 + 80 = 84, x = 200 - 3 = 197, y = 40 + 1 = 41
     expect(marker).toMatchObject({ x: 197, y: 41, z: 84 });
@@ -510,8 +516,12 @@ describe('createObstaclesAnnotations', () => {
     // 2 obstacles × 1 position × 2 annotations each = 4
     expect(annotations).toHaveLength(4);
 
-    const leftMarker = annotations.find((a: any) => a.text === '●' && a.data?.obstacleUuid === 'obs-left') as any;
-    const rightMarker = annotations.find((a: any) => a.text === '●' && a.data?.obstacleUuid === 'obs-right') as any;
+    const leftMarker = annotations.find(
+      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-left'
+    ) as ObstacleAnnotation;
+    const rightMarker = annotations.find(
+      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-right'
+    ) as ObstacleAnnotation;
 
     // LEFT: x = 0 + 5 = 5, y = 0 + 2 = 2, z = 10 + 30 = 40
     expect(leftMarker).toMatchObject({ x: 5, y: 2, z: 40 });
@@ -534,7 +544,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // face + RIGHT: x = refBase.x + position.y = 50 + 2 = 52
     // altitude relative 2D: supportAltitudeNgf = refBase.y = 80, altitude = 5 + 80 = 85
     expect(marker).toMatchObject({ x: 52, y: 85, z: 85 });
@@ -554,7 +564,7 @@ describe('createObstaclesAnnotations', () => {
       side: 'profile'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // profile + RIGHT: x = rightBase.x - position.x = 100 - 8 = 92
     // altitude absolute 2D: y = z = 15
     expect(marker).toMatchObject({ x: 92, y: 15, z: 15 });
@@ -578,10 +588,14 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(4);
-    const marker0 = annotations.find((a: any) => a.text === '●' && a.data?.obstaclePositionIndex === 0) as any;
-    const marker1 = annotations.find((a: any) => a.text === '●' && a.data?.obstaclePositionIndex === 1) as any;
-    expect(marker0.font.color).toBe('red');
-    expect(marker1.font.color).toBe('black');
+    const marker0 = annotations.find(
+      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 0
+    ) as ObstacleAnnotation;
+    const marker1 = annotations.find(
+      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 1
+    ) as ObstacleAnnotation;
+    expect(marker0.font!.color).toBe('red');
+    expect(marker1.font!.color).toBe('black');
   });
 
   it('should place obstacle at right support when position.x is 0', () => {
@@ -597,7 +611,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as any).text === '●') as any;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     // x = rightBase.x - 0 = 100
     expect(marker.x).toBe(100);
   });
@@ -622,7 +636,7 @@ describe('createObstaclesAnnotations', () => {
     // 3 positions × 2 annotations = 6
     expect(annotations).toHaveLength(6);
 
-    const markers = annotations.filter((a: any) => a.text === '●') as any[];
+    const markers = annotations.filter((a: ObstacleAnnotation) => a.text === '●') as ObstacleAnnotation[];
     // x = 200 - position.x for each
     expect(markers[0]).toMatchObject({ x: 190, y: 1, z: 5 });
     expect(markers[1]).toMatchObject({ x: 180, y: 2, z: 8 });

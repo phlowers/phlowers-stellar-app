@@ -252,7 +252,7 @@ describe('StudyComponent', () => {
         of({
           ...mockStudy,
           uuid: newUuid
-        }) as any
+        }) as unknown as ReturnType<typeof mockStudiesService.getStudyAsObservable>
       );
 
       // Emit new params value
@@ -271,7 +271,9 @@ describe('StudyComponent', () => {
 
       const newUuid = 'new-uuid-123';
       const updatedStudy = { ...mockStudy, uuid: newUuid };
-      mockStudiesService.getStudyAsObservable.mockReturnValue(of(updatedStudy) as any);
+      mockStudiesService.getStudyAsObservable.mockReturnValue(
+        of(updatedStudy) as unknown as ReturnType<typeof mockStudiesService.getStudyAsObservable>
+      );
 
       component.refreshStudy(newUuid);
       await fixture.whenStable();
@@ -666,7 +668,9 @@ describe('StudyComponent', () => {
   describe('Error Handling', () => {
     it('should handle getStudy errors gracefully', async () => {
       // Reset the mock to avoid interference from other tests
-      mockStudiesService.getStudyAsObservable.mockReturnValue(of(mockStudy) as any);
+      mockStudiesService.getStudyAsObservable.mockReturnValue(
+        of(mockStudy) as unknown as ReturnType<typeof mockStudiesService.getStudyAsObservable>
+      );
       readySubject.next(true);
       component.ngOnInit();
 

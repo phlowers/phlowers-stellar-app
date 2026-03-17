@@ -26,7 +26,7 @@ import { ButtonComponent } from '../button/button.component';
  * Generic select dropdown with action buttons (view, edit, duplicate, delete) for each option.
  * @typeParam T - The option object type.
  */
-export class SelectWithButtonsComponent<T extends Record<string, any>> implements OnInit {
+export class SelectWithButtonsComponent<T extends Record<string, unknown>> implements OnInit {
   readonly selectComponent = viewChild<Select>('selectComponent');
   /** List of selectable options. */
   options = input.required<T[]>();
@@ -82,13 +82,13 @@ export class SelectWithButtonsComponent<T extends Record<string, any>> implement
 
   clearSelectedOptionValue() {
     this.selectedOptionValue.set(undefined);
-    this.selectOption.emit(undefined as any);
+    this.selectOption.emit(undefined as unknown as T);
     this.selectComponent()?.writeValue(null);
     this.selectComponent()?.updateModel(null, null);
   }
 
   onSelectItem(item: T) {
-    this.selectedOptionValue.set(item[this.optionValue()]);
+    this.selectedOptionValue.set(item[this.optionValue()] as string);
     this.selectOption.emit(item);
     this.selectComponent()?.hide();
   }

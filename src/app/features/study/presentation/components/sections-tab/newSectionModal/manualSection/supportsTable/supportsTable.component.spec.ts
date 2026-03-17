@@ -16,7 +16,7 @@ class MockAttachmentSetModalComponent {
   isOpen = input(false);
   support = input<Support | undefined>(undefined);
   isOpenChange = output<boolean>();
-  validateForm = output<any>();
+  validateForm = output<Record<string, unknown>>();
 }
 
 // Mock services

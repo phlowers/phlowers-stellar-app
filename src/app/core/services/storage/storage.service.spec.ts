@@ -20,7 +20,7 @@ jest.mock('@infrastructure/database', () => {
 
 describe('StorageService', () => {
   let service: StorageService;
-  let originalNavigator: any;
+  let originalNavigator: Navigator;
 
   beforeEach(() => {
     // Save original navigator
@@ -114,7 +114,7 @@ describe('StorageService', () => {
     // Mock navigator without storage
     global.navigator = {
       ...originalNavigator,
-      storage: null
+      storage: null as unknown as StorageManager
     };
 
     // This should not throw an error

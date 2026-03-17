@@ -41,7 +41,10 @@ describe('ScaleViewComponent', () => {
     fixture = TestBed.createComponent(ScaleViewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    (component as any)['popover'] = (() => mockPopover) as any;
+    Object.defineProperty(component, 'popover', {
+      value: (() => mockPopover) as unknown as ReturnType<(typeof component)['popover']>,
+      writable: true
+    });
   });
 
   afterEach(() => {

@@ -4,7 +4,10 @@
  * @param filters - The filters to apply
  * @returns The filtered objects
  */
-export const filterElements = <Element extends Record<any, any>>(elements: Element[], filters: Element): Element[] => {
+export const filterElements = <Element extends Record<string, unknown>>(
+  elements: Element[],
+  filters: Element
+): Element[] => {
   const filteredElements = elements.filter((element) => {
     let found = true;
     Object.entries(filters).forEach(([key]) => {

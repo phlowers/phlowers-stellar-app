@@ -1,3 +1,4 @@
+import { PlotData } from 'plotly.js-dist-min';
 import { createDataObject } from './createPlotDataObject';
 import { PlotObjectsType } from '@shared/types/plot.types';
 import { Support } from '@shared/domain/models/support.model';
@@ -42,28 +43,19 @@ describe('createPlotDataObject', () => {
     it('should return red color for spans type', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).line
-      ).toEqual({ color: 'dodgerblue', dash: 'solid', width: 4 });
+      expect((result[0] as Partial<PlotData>).line).toEqual({ color: 'dodgerblue', dash: 'solid', width: 4 });
     });
 
     it('should return blue color for supports type', () => {
       const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).line
-      ).toEqual({ color: 'indigo', dash: 'solid', width: 4 });
+      expect((result[0] as Partial<PlotData>).line).toEqual({ color: 'indigo', dash: 'solid', width: 4 });
     });
 
     it('should return green color for insulators type', () => {
       const result = createDataObject(testData, 0, 1, 'insulators', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).line
-      ).toEqual({
+      expect((result[0] as Partial<PlotData>).line).toEqual({
         color: 'red',
         dash: 'solid',
         width: 4
@@ -73,10 +65,7 @@ describe('createPlotDataObject', () => {
     it('should return black color for unknown type', () => {
       const result = createDataObject(testData, 0, 1, 'unknown' as PlotObjectsType, '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).line
-      ).toEqual({
+      expect((result[0] as Partial<PlotData>).line).toEqual({
         color: 'black',
         dash: 'solid',
         width: 4
@@ -99,28 +88,19 @@ describe('createPlotDataObject', () => {
     it('should return text+lines mode for supports type', () => {
       const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).mode
-      ).toBe('text+lines+markers');
+      expect((result[0] as Partial<PlotData>).mode).toBe('text+lines+markers');
     });
 
     it('should return lines mode for spans type', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).mode
-      ).toBe('lines+markers');
+      expect((result[0] as Partial<PlotData>).mode).toBe('lines+markers');
     });
 
     it('should return lines mode for insulators type', () => {
       const result = createDataObject(testData, 0, 1, 'insulators', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).mode
-      ).toBe('lines+markers');
+      expect((result[0] as Partial<PlotData>).mode).toBe('lines+markers');
     });
   });
 
@@ -144,38 +124,26 @@ describe('createPlotDataObject', () => {
       const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile', supports);
 
       // Point [4,5,6] has the highest z (6), so index 1 gets the label
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).text
-      ).toEqual(['', '42']);
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', '42']);
     });
 
     it('should return empty strings when no support is provided', () => {
       const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).text
-      ).toEqual(['', '']);
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', '']);
     });
 
     it('should return empty strings when support number is null', () => {
       const supports = [createMockSupport({ uuid: 'uuid-1', number: null })];
       const result = createDataObject(testData, 0, 0, 'supports', '2d', 'profile', supports);
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).text
-      ).toEqual(['', '']);
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', '']);
     });
 
     it('should return empty array for non-supports type', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).text
-      ).toEqual([]);
+      expect((result[0] as Partial<PlotData>).text).toEqual([]);
     });
   });
 
@@ -209,49 +177,25 @@ describe('createPlotDataObject', () => {
     it('should handle 3d view correctly', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).type
-      ).toBe('scatter3d');
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).x
-      ).toBeDefined();
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).y
-      ).toBeDefined();
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).z
-      ).toBeDefined();
+      expect((result[0] as Partial<PlotData>).type).toBe('scatter3d');
+      expect((result[0] as Partial<PlotData>).x).toBeDefined();
+      expect((result[0] as Partial<PlotData>).y).toBeDefined();
+      expect((result[0] as Partial<PlotData>).z).toBeDefined();
     });
 
     it('should handle face side correctly in 2d view', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '2d', 'face');
 
       // In face side with 2d view, x should use y coordinates and y should use z coordinates
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).x
-      ).toEqual([10, 20, 30]); // y coordinates
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).y
-      ).toEqual([100, 200, 300]); // z coordinates
+      expect((result[0] as Partial<PlotData>).x).toEqual([10, 20, 30]); // y coordinates
+      expect((result[0] as Partial<PlotData>).y).toEqual([100, 200, 300]); // z coordinates
     });
 
     it('should include text properties', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).textposition
-      ).toBe('top center');
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).text
-      ).toEqual([]);
+      expect((result[0] as Partial<PlotData>).textposition).toBe('top center');
+      expect((result[0] as Partial<PlotData>).text).toEqual([]);
     });
 
     it('should handle spans type with correct slicing', () => {
@@ -271,31 +215,16 @@ describe('createPlotDataObject', () => {
     it('should map coordinates correctly for profile side in 2d view', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).x
-      ).toEqual([1, 2, 3]); // x coordinates
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).y
-      ).toEqual([100, 200, 300]); // z coordinates
+      expect((result[0] as Partial<PlotData>).x).toEqual([1, 2, 3]); // x coordinates
+      expect((result[0] as Partial<PlotData>).y).toEqual([100, 200, 300]); // z coordinates
     });
 
     it('should map coordinates correctly for 3d view', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).x
-      ).toEqual([1, 2, 3]); // x coordinates
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).y
-      ).toEqual([10, 20, 30]); // y coordinates
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).z
-      ).toEqual([100, 200, 300]); // z coordinates
+      expect((result[0] as Partial<PlotData>).x).toEqual([1, 2, 3]); // x coordinates
+      expect((result[0] as Partial<PlotData>).y).toEqual([10, 20, 30]); // y coordinates
+      expect((result[0] as Partial<PlotData>).z).toEqual([100, 200, 300]); // z coordinates
     });
   });
 
@@ -312,14 +241,8 @@ describe('createPlotDataObject', () => {
       const result = createDataObject(singleData, 0, 1, 'spans', '2d', 'profile');
 
       expect(result).toHaveLength(1);
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).x
-      ).toEqual([1]);
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).y
-      ).toEqual([3]);
+      expect((result[0] as Partial<PlotData>).x).toEqual([1]);
+      expect((result[0] as Partial<PlotData>).y).toEqual([3]);
     });
 
     it('should handle startSupport equal to endSupport for spans', () => {
@@ -381,14 +304,8 @@ describe('createPlotDataObject', () => {
       const result = createDataObject(testData, 0, 2, 'spans', '2d', 'profile');
 
       expect(result).toHaveLength(2);
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).x
-      ).toEqual([]);
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result[0] as any).y
-      ).toEqual([]);
+      expect((result[0] as Partial<PlotData>).x).toEqual([]);
+      expect((result[0] as Partial<PlotData>).y).toEqual([]);
     });
   });
 });

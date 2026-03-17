@@ -5,7 +5,7 @@ import { SectionPlotComponent } from './section-plot.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
-import { Data } from 'plotly.js-dist-min';
+import { Data, PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { PlotOptions } from '@shared/types/plot.types';
 import { PlotService, SelectedDisplayOptions } from '@services/plot/plot.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
@@ -247,7 +247,7 @@ describe('SectionPlotComponent', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
-    mockCreatePlot.mockResolvedValue(mockPlotElement as any);
+    mockCreatePlot.mockResolvedValue(mockPlotElement as unknown as PlotlyHTMLElement);
 
     litDataSignal.set(mockLitData);
     baseLitDataSignal.set(null);

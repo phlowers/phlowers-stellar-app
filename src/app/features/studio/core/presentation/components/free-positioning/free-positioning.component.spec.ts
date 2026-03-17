@@ -242,14 +242,14 @@ describe('FreePositioningComponent', () => {
           xaxis: { p2c: () => xValue },
           yaxis: { p2c: () => yValue }
         }
-      }) as any;
+      }) as unknown as HTMLElement;
 
     const makeClickEvent = () =>
       ({
         layerX: 10,
         layerY: 10,
         target: { tagName: 'CANVAS' }
-      }) as any;
+      }) as unknown as MouseEvent;
 
     it('should update y only on face click in absolute mode, keeping z unchanged', () => {
       positionsFormArray.clear();
@@ -257,7 +257,7 @@ describe('FreePositioningComponent', () => {
       mockObstaclesService.currentPointIndex.set(0);
 
       const plotElement = makeFakePlotElement(5, 25);
-      (component as any).handleClick(makeClickEvent(), 'face', plotElement);
+      component['handleClick'](makeClickEvent(), 'face', plotElement);
 
       expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
       expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
@@ -265,7 +265,7 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should update y only on face click in relative mode, keeping z unchanged', () => {
-      (mockObstacleFormService.form.get('altitudeType') as any).setValue('relative');
+      mockObstacleFormService.form.get('altitudeType')!.setValue('relative');
       component.referenceSupportAltitudeNgf.set(30);
 
       positionsFormArray.clear();
@@ -273,7 +273,7 @@ describe('FreePositioningComponent', () => {
       mockObstaclesService.currentPointIndex.set(0);
 
       const plotElement = makeFakePlotElement(5, 50);
-      (component as any).handleClick(makeClickEvent(), 'face', plotElement);
+      component['handleClick'](makeClickEvent(), 'face', plotElement);
 
       expect(positionsFormArray.at(0).get('x')?.value).toBe(10); // x kept
       expect(positionsFormArray.at(0).get('y')?.value).toBe(5); // y updated from xaxis
@@ -325,11 +325,11 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should include shared Y range in layout when set', () => {
-      const fakeFace = { id: 'face' } as any;
-      const fakeProfile = { id: 'profile' } as any;
+      const fakeFace = { id: 'face' } as unknown as Plotly.PlotlyHTMLElement;
+      const fakeProfile = { id: 'profile' } as unknown as Plotly.PlotlyHTMLElement;
       component.plotFace.set(fakeFace);
       component.plotProfile.set(fakeProfile);
-      (component as any).sharedYRange.set([0, 100]);
+      component['sharedYRange'].set([0, 100]);
 
       component.relayoutPlots();
 
@@ -352,14 +352,14 @@ describe('FreePositioningComponent', () => {
     it('should compute shared Y range from both plots data', () => {
       const fakeFace = {
         data: [{ y: [10, 20, 30] }]
-      } as any;
+      } as unknown as Plotly.PlotlyHTMLElement;
       const fakeProfile = {
         data: [{ y: [5, 15, 50] }]
-      } as any;
+      } as unknown as Plotly.PlotlyHTMLElement;
       component.plotFace.set(fakeFace);
       component.plotProfile.set(fakeProfile);
 
-      (component as any).synchronizeYAxisRanges();
+      component['synchronizeYAxisRanges']();
 
       // min=5, max=50, padding = (50-5)*0.05 = 2.25 → range = [2.75, 52.25]
       const range = component.sharedYRange() as [number, number];
@@ -379,19 +379,19 @@ describe('FreePositioningComponent', () => {
 
     it('should not synchronize when a plot is null', () => {
       component.plotFace.set(null);
-      component.plotProfile.set({ data: [{ y: [1] }] } as any);
+      component.plotProfile.set({ data: [{ y: [1] }] } as unknown as Plotly.PlotlyHTMLElement);
 
-      (component as any).synchronizeYAxisRanges();
+      component['synchronizeYAxisRanges']();
 
       expect(component.sharedYRange()).toBeNull();
       expect(Plotly.relayout).not.toHaveBeenCalled();
     });
 
     it('should not synchronize when both plots have no y data', () => {
-      component.plotFace.set({ data: [] } as any);
-      component.plotProfile.set({ data: [] } as any);
+      component.plotFace.set({ data: [] } as unknown as Plotly.PlotlyHTMLElement);
+      component.plotProfile.set({ data: [] } as unknown as Plotly.PlotlyHTMLElement);
 
-      (component as any).synchronizeYAxisRanges();
+      component['synchronizeYAxisRanges']();
 
       expect(component.sharedYRange()).toBeNull();
     });

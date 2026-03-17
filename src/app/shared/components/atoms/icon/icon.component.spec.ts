@@ -5,7 +5,7 @@ import { PossibleIconNames, ALL_ICONS } from '@shared/model/icon.model';
 describe('IconComponent', () => {
   let component: IconComponent;
   let fixture: ComponentFixture<IconComponent>;
-  let mockDocumentFonts: any;
+  let mockDocumentFonts: { check: jest.Mock; load: jest.Mock };
 
   beforeEach(async () => {
     mockDocumentFonts = {
@@ -198,7 +198,7 @@ describe('IconComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call isSymbolsReady on initialization', () => {
-      const isSymbolsReadySpy = jest.spyOn(component as any, 'isSymbolsReady');
+      const isSymbolsReadySpy = jest.spyOn(component as IconComponent, 'isSymbolsReady' as never);
 
       fixture.componentRef.setInput('icon', 'home');
       fixture.detectChanges();

@@ -6,21 +6,23 @@ import { BehaviorSubject } from 'rxjs';
 
 describe('UserService', () => {
   let service: UserService;
-  let storageServiceMock: any;
-  let usersTableMock: any;
+  let storageServiceMock: Partial<StorageService>;
+  let usersTableMock: { get: jest.Mock; put: jest.Mock; toArray: jest.Mock; add: jest.Mock; clear: jest.Mock };
   let readySubject: BehaviorSubject<boolean>;
 
   const testUser: UserEntity = { email: 'test@example.com' };
 
   beforeEach(() => {
     usersTableMock = {
+      get: jest.fn(),
+      put: jest.fn(),
       toArray: jest.fn(),
       add: jest.fn(),
       clear: jest.fn()
     };
     readySubject = new BehaviorSubject<boolean>(true);
     storageServiceMock = {
-      db: { users: usersTableMock },
+      db: { users: usersTableMock } as unknown as StorageService['db'],
       ready$: readySubject.asObservable()
     };
     TestBed.configureTestingModule({

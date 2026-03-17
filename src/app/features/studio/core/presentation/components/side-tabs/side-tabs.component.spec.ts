@@ -140,7 +140,7 @@ describe('SideTabsComponent', () => {
         offsetWidth: 300
       }
     };
-    component['panels'] = (() => [mockPanel]) as any;
+    component['panels'] = (() => [mockPanel]) as unknown as ReturnType<(typeof component)['panels']>;
 
     component['updateWidth']();
 
@@ -153,7 +153,7 @@ describe('SideTabsComponent', () => {
 
   it('focusPanel does nothing if panel element is missing', () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
-    component['panels'] = (() => []) as any;
+    component['panels'] = (() => []) as unknown as ReturnType<(typeof component)['panels']>;
     expect(() => component).not.toThrow();
   });
 
@@ -166,7 +166,7 @@ describe('SideTabsComponent', () => {
         focus: focusSpy
       }
     };
-    component['panels'] = (() => [mockPanel]) as any;
+    component['panels'] = (() => [mockPanel]) as unknown as ReturnType<(typeof component)['panels']>;
 
     component['focusPanel'](0);
 
@@ -179,7 +179,7 @@ describe('SideTabsComponent', () => {
 
   it('handlePanelFocusOut does nothing if panel is missing', () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
-    component['panels'] = (() => [undefined]) as any;
+    component['panels'] = (() => [undefined]) as unknown as ReturnType<(typeof component)['panels']>;
 
     expect(() => component.handlePanelFocusOut({ relatedTarget: null } as FocusEvent, 0)).not.toThrow();
   });
@@ -188,7 +188,7 @@ describe('SideTabsComponent', () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
 
     const panelEl = document.createElement('div');
-    component['panels'] = (() => [{ nativeElement: panelEl }]) as any;
+    component['panels'] = (() => [{ nativeElement: panelEl }]) as unknown as ReturnType<(typeof component)['panels']>;
 
     const insideEl = document.createElement('button');
     panelEl.appendChild(insideEl);

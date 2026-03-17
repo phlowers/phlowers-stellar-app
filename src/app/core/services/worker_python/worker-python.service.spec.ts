@@ -13,7 +13,7 @@ import { CatalogCable, InitialCondition, Section, Support } from '@shared/domain
 
 describe('WorkerService', () => {
   let service: WorkerPythonService;
-  let mockWorker: any;
+  let mockWorker: { postMessage: jest.Mock; onmessage: ((event: { data: Record<string, unknown> }) => void) | null };
   let postMessageSpy: jest.SpyInstance;
 
   // Mock data creation functions
@@ -134,10 +134,10 @@ describe('WorkerService', () => {
     };
 
     // Mock the Worker constructor
-    (global as any).Worker = jest.fn().mockImplementation(() => mockWorker);
+    (global as unknown as { Worker: jest.Mock }).Worker = jest.fn().mockImplementation(() => mockWorker);
 
     // Mock URL constructor
-    (global as any).URL = jest.fn().mockImplementation(() => 'mocked-url');
+    (global as unknown as { URL: jest.Mock }).URL = jest.fn().mockImplementation(() => 'mocked-url');
 
     TestBed.configureTestingModule({});
     service = TestBed.inject(WorkerPythonService);
@@ -171,7 +171,7 @@ describe('WorkerService', () => {
       service.setup();
 
       // Simulate worker message with loadTime
-      mockWorker.onmessage({ data: { loadTime: 100 } });
+      mockWorker.onmessage!({ data: { loadTime: 100 } });
 
       expect(service.times().loadTime).toBe(100);
       // @ts-expect-error - We are testing the private property
@@ -182,7 +182,7 @@ describe('WorkerService', () => {
       service.setup();
 
       // Simulate worker message with importTime
-      mockWorker.onmessage({ data: { importTime: 200 } });
+      mockWorker.onmessage!({ data: { importTime: 200 } });
 
       expect(service.times().importTime).toBe(200);
       // @ts-expect-error - We are testing the private property
@@ -199,7 +199,7 @@ describe('WorkerService', () => {
       service.handlerMap[mockId] = jest.fn();
 
       // Simulate worker message with id and result
-      mockWorker.onmessage({ data: { id: mockId, result: mockResult } });
+      mockWorker.onmessage!({ data: { id: mockId, result: mockResult } });
 
       expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult, undefined);
     });
@@ -226,7 +226,7 @@ describe('WorkerService', () => {
       // Simulate the response to resolve the promise
       const messageCall = postMessageSpy.mock.calls[0][0];
       const id = messageCall.id;
-      mockWorker.onmessage({ data: { id, result: undefined } });
+      mockWorker.onmessage!({ data: { id, result: undefined } });
 
       const response = await promise;
       expect(response.result).toBeUndefined();
@@ -264,7 +264,7 @@ describe('WorkerService', () => {
         section: {},
         color_select: {}
       };
-      mockWorker.onmessage({ data: { id, result: mockResult } });
+      mockWorker.onmessage!({ data: { id, result: mockResult } });
 
       const response = await promise;
       expect(response.result).toEqual(mockResult);
@@ -284,8 +284,8 @@ describe('WorkerService', () => {
       expect(call1.id).not.toBe(call2.id);
 
       // Resolve both promises
-      mockWorker.onmessage({ data: { id: call1.id, result: undefined } });
-      mockWorker.onmessage({ data: { id: call2.id, result: undefined } });
+      mockWorker.onmessage!({ data: { id: call1.id, result: undefined } });
+      mockWorker.onmessage!({ data: { id: call2.id, result: undefined } });
 
       const [response1, response2] = await Promise.all([promise1, promise2]);
       expect(response1.result).toBeUndefined();

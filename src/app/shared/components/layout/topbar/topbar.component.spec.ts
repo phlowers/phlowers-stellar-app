@@ -13,7 +13,7 @@ describe('TopbarComponent', () => {
   let mockUserService: jest.Mocked<UserService>;
   let mockWorkerPythonService: jest.Mocked<WorkerPythonService>;
   let pageTitleSubject: BehaviorSubject<string>;
-  let userSubject: BehaviorSubject<any>;
+  let userSubject: BehaviorSubject<{ email: string } | null>;
   let readySubject: BehaviorSubject<boolean>;
   let errorSubject: BehaviorSubject<boolean>;
 
@@ -22,7 +22,7 @@ describe('TopbarComponent', () => {
 
   beforeEach(async () => {
     pageTitleSubject = new BehaviorSubject<string>('');
-    userSubject = new BehaviorSubject<any>(null);
+    userSubject = new BehaviorSubject<{ email: string } | null>(null);
     readySubject = new BehaviorSubject<boolean>(true);
     errorSubject = new BehaviorSubject<boolean>(false);
 

@@ -15,7 +15,7 @@ describe('ExportDialogComponent', () => {
 
   beforeEach(async () => {
     mockStudiesService = {
-      exportDialogData: signal({ isOpen: true, uuid: 'test-uuid', title: 'Test Study' } as any),
+      exportDialogData: signal({ isOpen: true, uuid: 'test-uuid', title: 'Test Study' }),
       downloadStudy: jest.fn()
     };
 

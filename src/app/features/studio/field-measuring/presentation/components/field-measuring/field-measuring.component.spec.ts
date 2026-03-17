@@ -7,6 +7,7 @@ import { signal } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { createTestMeasureData } from '../../helpers';
+import { FieldMeasure } from '../../../domain/types';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
@@ -490,7 +491,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('onFieldChange edge cases', () => {
     it('should return early when measureData is falsy', () => {
-      component.measureData.set(null as any);
+      component.measureData.set(null as unknown as FieldMeasure);
 
       component.onFieldChange('name', 'New Name');
 
@@ -515,7 +516,7 @@ describe('FieldMeasuringComponent', () => {
         selected_field_measure_uuid: 'new-uuid'
       };
 
-      plotService.section = signal(mockSection as any);
+      plotService.section = signal(mockSection as unknown as Section);
       component.measureData.set(newMeasure);
 
       const modifySpy = jest.spyOn(plotService, 'modifySection');
@@ -533,8 +534,8 @@ describe('FieldMeasuringComponent', () => {
         field_measures: []
       };
 
-      plotService.section = signal(mockSection as any);
-      component.measureData.set(null as any);
+      plotService.section = signal(mockSection as unknown as Section);
+      component.measureData.set(null as unknown as FieldMeasure);
 
       const modifySpy = jest.spyOn(plotService, 'modifySection');
 

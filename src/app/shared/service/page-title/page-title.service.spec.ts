@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
-import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRoute, Event as RouterEvent } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { PageTitleService } from './page-title.service';
 
@@ -9,10 +9,10 @@ describe('PageTitleService', () => {
   let mockRouter: Partial<Router>;
   let mockActivatedRoute: Partial<ActivatedRoute>;
   let mockTitleService: Partial<Title>;
-  let routerEventsSubject: BehaviorSubject<any>;
+  let routerEventsSubject: BehaviorSubject<RouterEvent>;
 
   const createService = (): PageTitleService => {
-    routerEventsSubject = new BehaviorSubject<any>(null);
+    routerEventsSubject = new BehaviorSubject<RouterEvent>({} as RouterEvent);
 
     mockRouter = {
       events: routerEventsSubject.asObservable()
@@ -99,13 +99,13 @@ describe('PageTitleService', () => {
         expect(mockTitleService.setTitle).not.toHaveBeenCalled();
       });
 
-      routerEventsSubject.next({ type: 'someOtherEvent' });
+      routerEventsSubject.next({ type: 'someOtherEvent' } as unknown as RouterEvent);
     });
 
     it('should not update title when route title is null', () => {
       const testRoute = {
         ...mockActivatedRoute,
-        title: of(null as any)
+        title: of(null as unknown as string)
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });

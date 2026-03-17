@@ -4,6 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+import { PlotData } from 'plotly.js-dist-min';
 import { createShadowPlotData } from './createShadowPlotData';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { PlotOptions } from '@shared/types/plot.types';
@@ -76,8 +77,7 @@ describe('createShadowPlotData', () => {
   it('should use correct plot type for 3d view', () => {
     const result = createShadowPlotData(mockSectionOutput, defaultPlotOptions);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((result[0] as any).type).toBe('scatter3d');
+    expect((result[0] as Partial<PlotData>).type).toBe('scatter3d');
   });
 
   it('should use correct plot type for 2d view', () => {
@@ -88,16 +88,14 @@ describe('createShadowPlotData', () => {
 
     const result = createShadowPlotData(mockSectionOutput, options);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((result[0] as any).type).toBe('scatter');
+    expect((result[0] as Partial<PlotData>).type).toBe('scatter');
   });
 
   it('should set hoverinfo to skip for all shadow traces', () => {
     const result = createShadowPlotData(mockSectionOutput, defaultPlotOptions);
 
     result.forEach((trace) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((trace as any).hoverinfo).toBe('skip');
+      expect((trace as Partial<PlotData>).hoverinfo).toBe('skip');
     });
   });
 
@@ -105,8 +103,7 @@ describe('createShadowPlotData', () => {
     const result = createShadowPlotData(mockSectionOutput, defaultPlotOptions);
 
     result.forEach((trace) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((trace as any).showlegend).toBe(false);
+      expect((trace as Partial<PlotData>).showlegend).toBe(false);
     });
   });
 
@@ -114,8 +111,7 @@ describe('createShadowPlotData', () => {
     const result = createShadowPlotData(mockSectionOutput, defaultPlotOptions);
 
     result.forEach((trace) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((trace as any).line.dash).toBe('solid');
+      expect((trace as Partial<PlotData>).line!.dash).toBe('solid');
     });
   });
 });

@@ -9,15 +9,25 @@
       "@app/*": ["./src/app/*"],
       "@core/*": ["./src/app/core/*"],
       "@services/*": ["./src/app/core/services/*"],
-      "@plugins/*": ["./src/app/plugins/*"],
-      "@adapters/*": ["./src/app/adapters/*"]
+      "@features/*": ["./src/app/features/*"],
+      "@shared/*": ["./src/app/shared/*"],
+      "@infrastructure/*": ["./src/app/infrastructure/*"]
     }
   },
   "include": [
-    "../src/**/*.ts"
+    "../src/types.d.ts",
+    "../src/app/core/services/**/*.ts",
+    "../src/app/shared/catalog/services/**/*.ts",
+    "../src/app/shared/domain/**/*.ts",
+    "../src/app/infrastructure/**/*.ts",
+    "../src/app/features/changelog/**/*.ts",
+    "../src/app/features/news/**/*.ts"
   ],
   "exclude": [
     "../src/**/*.spec.ts",
-    "../src/test-setup.ts"
+    "../src/test-setup.ts",
+    "../src/**/*.worker.ts",
+    "../src/app/features/study/**/*.ts",
+    "../src/app/features/studio/**/*.ts"
   ]
 }
