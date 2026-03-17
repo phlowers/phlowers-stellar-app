@@ -11,12 +11,19 @@ import { ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
 import Plotly from 'plotly.js-dist-min';
 
-jest.mock('@shared/components/studio/section/helpers/createPlotData');
-jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn().mockResolvedValue({ data: [] } as unknown as Plotly.PlotlyHTMLElement),
-  relayout: jest.fn(),
-  purge: jest.fn(),
-  update: jest.fn().mockResolvedValue(undefined)
+vi.mock('@shared/components/studio/section/helpers/createPlotData');
+vi.mock('plotly.js-dist-min', () => ({
+  __esModule: true,
+  default: {
+    newPlot: vi.fn().mockResolvedValue({ data: [] } as unknown as Plotly.PlotlyHTMLElement),
+    relayout: vi.fn(),
+    purge: vi.fn(),
+    update: vi.fn().mockResolvedValue(undefined)
+  },
+  newPlot: vi.fn().mockResolvedValue({ data: [] } as unknown as Plotly.PlotlyHTMLElement),
+  relayout: vi.fn(),
+  purge: vi.fn(),
+  update: vi.fn().mockResolvedValue(undefined)
 }));
 
 const mockCreatePlotData = createPlotData as jest.MockedFunction<typeof createPlotData>;

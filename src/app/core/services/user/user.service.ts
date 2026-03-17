@@ -38,11 +38,14 @@ export class UserService {
   constructor() {
     this.storageService.ready$.subscribe((ready) => {
       if (ready) {
-        this.storageService.db?.users.toArray().then((users) => {
-          if (users?.length === 1) {
-            this.userSubject.next(users[0]);
-          }
-        });
+        const usersPromise = this.storageService.db?.users?.toArray?.();
+        if (usersPromise) {
+          usersPromise.then((users) => {
+            if (users?.length === 1) {
+              this.userSubject.next(users[0]);
+            }
+          });
+        }
       }
     });
   }

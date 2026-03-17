@@ -6,6 +6,7 @@ import { InitComponent } from '@features/studio/field-measuring/presentation/com
 
 describe('ToolbarDialogService', () => {
   let service: ToolbarDialogService;
+  const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
@@ -93,30 +94,24 @@ describe('ToolbarDialogService', () => {
       expect(service.isOpen()).toBe(false);
     });
 
-    it('should set currentTool to null after delay', (done) => {
+    it('should set currentTool to null after delay', async () => {
       service.closeTool();
 
       // Should still have currentTool immediately after close
       expect(service.currentTool()).toBe('field-measuring');
 
-      // Should clear currentTool after 300ms
-      setTimeout(() => {
-        expect(service.currentTool()).toBeNull();
-        done();
-      }, 350);
+      await wait(350);
+      expect(service.currentTool()).toBeNull();
     });
 
-    it('should allow reopening tool before timeout completes', (done) => {
+    it('should allow reopening tool before timeout completes', async () => {
       service.closeTool();
 
-      // Reopen before the 300ms timeout
-      setTimeout(() => {
-        service.openTool('field-measuring');
-        expect(service.currentTool()).toBe('field-measuring');
-        expect(service.isOpen()).toBe(true);
-        expect(service.phase()).toBe('init');
-        done();
-      }, 100);
+      await wait(100);
+      service.openTool('field-measuring');
+      expect(service.currentTool()).toBe('field-measuring');
+      expect(service.isOpen()).toBe(true);
+      expect(service.phase()).toBe('init');
     });
   });
 

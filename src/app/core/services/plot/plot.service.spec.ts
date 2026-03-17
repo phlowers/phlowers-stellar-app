@@ -20,7 +20,7 @@ import { Camera } from 'plotly.js-dist-min';
 import { BehaviorSubject } from 'rxjs';
 
 // Mock plotly
-jest.mock('plotly.js-dist-min', () => ({
+vi.mock('plotly.js-dist-min', () => ({
   purge: jest.fn()
 }));
 

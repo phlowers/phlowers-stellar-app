@@ -11,11 +11,11 @@ import { handleTask } from './tasks/handle-task';
 import pythonPackages from './python-packages.json';
 
 // Mock dependencies
-jest.mock('pyodide', () => ({
+vi.mock('pyodide', () => ({
   loadPyodide: jest.fn()
 }));
 
-jest.mock('./tasks/handle-task', () => ({
+vi.mock('./tasks/handle-task', () => ({
   handleTask: jest.fn()
 }));
 

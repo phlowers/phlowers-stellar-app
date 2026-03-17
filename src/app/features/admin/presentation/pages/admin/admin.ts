@@ -114,7 +114,7 @@ export class AdminComponent {
           detail: $localize`The app has been reset`
         });
         setTimeout(() => {
-          window.location.href = '/';
+          window.location.assign('/');
         }, 2000);
       }
     });

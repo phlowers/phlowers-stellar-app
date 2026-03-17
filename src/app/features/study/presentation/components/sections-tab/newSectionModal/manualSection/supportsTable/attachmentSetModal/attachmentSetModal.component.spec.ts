@@ -1,5 +1,5 @@
 // Mock plotly.js-dist-min
-jest.mock('plotly.js-dist-min', () => {
+vi.mock('plotly.js-dist-min', () => {
   const mockPlotly = {
     newPlot: jest.fn(),
     update: jest.fn(),
@@ -39,7 +39,7 @@ import { CatalogAttachment, Support, Section } from '@shared/domain';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
 // Mock plotly.js-dist-min to prevent errors in SupportPlotComponent
-jest.mock('plotly.js-dist-min', () => ({
+vi.mock('plotly.js-dist-min', () => ({
   __esModule: true,
   default: {
     purge: jest.fn(),

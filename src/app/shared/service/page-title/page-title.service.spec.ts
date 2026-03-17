@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute, Event as RouterEvent } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { PageTitleService } from './page-title.service';
 
 describe('PageTitleService', () => {
@@ -66,22 +66,34 @@ describe('PageTitleService', () => {
   });
 
   describe('router navigation events', () => {
-    it('should update title when NavigationEnd event occurs', (done) => {
+    it('should update title when NavigationEnd event occurs', () => {
       const testTitle = 'New Page Title';
-      const testRoute = {
-        ...mockActivatedRoute,
+      routerEventsSubject = new BehaviorSubject<RouterEvent>({} as RouterEvent);
+      const localRouter = { events: routerEventsSubject.asObservable() };
+      const localRoute: Partial<ActivatedRoute> = {
+        firstChild: null,
+        outlet: 'primary',
         title: of(testTitle)
       };
+      const localTitleService = {
+        setTitle: jest.fn(),
+        getTitle: jest.fn().mockReturnValue('')
+      };
 
-      TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });
-      const testService = TestBed.inject(PageTitleService);
-
-      testService.pageTitle$.subscribe((title) => {
-        expect(title).toBe(testTitle);
-        done();
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          PageTitleService,
+          { provide: Router, useValue: localRouter },
+          { provide: ActivatedRoute, useValue: localRoute },
+          { provide: Title, useValue: localTitleService }
+        ]
       });
 
+      TestBed.inject(PageTitleService);
       routerEventsSubject.next(new NavigationEnd(1, '/test', '/test'));
+
+      expect(localTitleService.setTitle).toHaveBeenCalledWith(testTitle);
     });
 
     it('should not update title for non-NavigationEnd events', () => {
@@ -156,7 +168,7 @@ describe('PageTitleService', () => {
   });
 
   describe('getCurrentTitle', () => {
-    it('should return current title value', (done) => {
+    it('should return current title value', () => {
       const testTitle = 'Current Title';
       const testRoute = {
         ...mockActivatedRoute,
@@ -165,13 +177,7 @@ describe('PageTitleService', () => {
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });
       const testService = TestBed.inject(PageTitleService);
-
-      testService.pageTitle$.subscribe(() => {
-        expect(testService.getCurrentTitle()).toBe(testTitle);
-        done();
-      });
-
-      routerEventsSubject.next(new NavigationEnd(1, '/test', '/test'));
+      expect(testService.getCurrentTitle()).toBe(testTitle);
     });
 
     it('should return empty string when no title is set', () => {
@@ -182,12 +188,9 @@ describe('PageTitleService', () => {
 
   describe('error handling', () => {
     it('should handle route title observable errors gracefully', () => {
-      const errorObservable = new BehaviorSubject<string>('Initial Title');
-      errorObservable.error(new Error('Route title error'));
-
       const testRoute = {
         ...mockActivatedRoute,
-        title: errorObservable.asObservable()
+        title: throwError(() => new Error('Route title error'))
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });

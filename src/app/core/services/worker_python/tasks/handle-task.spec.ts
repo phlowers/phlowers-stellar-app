@@ -9,12 +9,12 @@ import { handleTask, PyodideAPI } from './handle-task';
 import { Task } from './types';
 
 // Mock the pyodide module
-jest.mock('pyodide', () => ({
+vi.mock('pyodide', () => ({
   loadPyodide: jest.fn()
 }));
 
 // Mock the python script bundle
-jest.mock('./python-scripts/functions.py', () => 'mock functions script');
+vi.mock('./python-scripts/functions.py', () => 'mock functions script');
 
 describe('Task handlers', () => {
   let mockPyodide: jest.Mocked<PyodideAPI>;

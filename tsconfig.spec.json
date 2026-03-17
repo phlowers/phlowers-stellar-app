@@ -12,6 +12,7 @@
       "webworker"
     ],
     "types": [
+      "vitest/globals",
       "jest",
       "node",
       "@angular/localize"
@@ -43,6 +44,9 @@
       ]
     },
   },
+  "files": [
+    "src/test-setup.ts"
+  ],
   "include": [
     "src/**/*.spec.ts",
     "src/**/*.d.ts"

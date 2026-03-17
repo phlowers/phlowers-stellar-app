@@ -15,8 +15,12 @@ import { CableCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
-jest.mock('papaparse', () => ({
-  parse: jest.fn()
+vi.mock('papaparse', () => ({
+  __esModule: true,
+  default: {
+    parse: vi.fn()
+  },
+  parse: vi.fn()
 }));
 
 interface MockTable {

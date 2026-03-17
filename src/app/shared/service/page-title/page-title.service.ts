@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter, map, mergeMap, startWith } from 'rxjs/operators';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { catchError, filter, map, mergeMap, startWith } from 'rxjs/operators';
+import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +29,8 @@ export class PageTitleService {
           return route;
         }),
         filter((route) => route.outlet === 'primary'),
-        mergeMap((route) => route.title)
+        mergeMap((route) => route.title),
+        catchError(() => EMPTY)
       )
       .subscribe((title) => {
         if (title) {

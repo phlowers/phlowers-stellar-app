@@ -19,9 +19,9 @@ import { LoadType } from './helpers/createLoadAnnotations';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
-jest.mock('./helpers/createPlot');
-jest.mock('./helpers/createPlotData');
-jest.mock('./helpers/createShadowPlotData');
+vi.mock('./helpers/createPlot');
+vi.mock('./helpers/createPlotData');
+vi.mock('./helpers/createShadowPlotData');
 
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 

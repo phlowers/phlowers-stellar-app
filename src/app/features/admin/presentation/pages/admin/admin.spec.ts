@@ -24,6 +24,7 @@ import { OnlineService } from '@services/online/online.service';
 describe('AdminComponent', () => {
   let component: AdminComponent;
   let fixture: ComponentFixture<AdminComponent>;
+  let setTimeoutSpy: ReturnType<typeof vi.spyOn>;
   let updateServiceMock: jest.Mocked<UpdateService>;
   let messageServiceMock: jest.Mocked<MessageService>;
   let studiesServiceMock: jest.Mocked<StudiesService>;
@@ -217,14 +218,7 @@ describe('AdminComponent', () => {
         },
         writable: true
       });
-
-      // Mock window.location
-      Object.defineProperty(window, 'location', {
-        value: {
-          href: ''
-        },
-        writable: true
-      });
+      setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
 
       // Mock navigator.serviceWorker
       Object.defineProperty(navigator, 'serviceWorker', {
@@ -265,10 +259,7 @@ describe('AdminComponent', () => {
         detail: expect.any(String)
       });
 
-      // Wait for the setTimeout to execute
-      await new Promise((resolve) => setTimeout(resolve, 2100));
-
-      expect(window.location.href).toBe('/');
+      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
     });
 
     it('should not delete cache when confirmation is cancelled', () => {
@@ -278,7 +269,7 @@ describe('AdminComponent', () => {
 
       expect(window.caches.delete).not.toHaveBeenCalled();
       expect(messageServiceMock.add).not.toHaveBeenCalled();
-      expect(window.location.href).toBe('');
+      expect(setTimeoutSpy).not.toHaveBeenCalledWith(expect.any(Function), 2000);
     });
   });
 });

@@ -5,7 +5,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Support } from '@shared/domain/models/support.model';
 
 // Mock the createDataObject function
-jest.mock('./createPlotDataObject');
+vi.mock('./createPlotDataObject');
 const mockCreateDataObject = createDataObject as jest.MockedFunction<typeof createDataObject>;
 
 const mockSupports: Support[] = [

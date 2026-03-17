@@ -13,12 +13,12 @@ import { Charge, Section, SymmetryType } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 
 // Mock uuid
-jest.mock('uuid', () => ({
+vi.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid-123')
 }));
 
 // Mock findDuplicateTitle
-jest.mock('@shared/helpers/duplicate', () => ({
+vi.mock('@shared/helpers/duplicate', () => ({
   findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
 }));
 

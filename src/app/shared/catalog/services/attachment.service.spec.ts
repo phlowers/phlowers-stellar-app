@@ -15,12 +15,16 @@ import { AttachmentCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
-jest.mock('papaparse', () => ({
-  parse: jest.fn()
+vi.mock('papaparse', () => ({
+  __esModule: true,
+  default: {
+    parse: vi.fn()
+  },
+  parse: vi.fn()
 }));
 
 // Mock uuid
-jest.mock('uuid', () => ({
+vi.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid-123')
 }));
 

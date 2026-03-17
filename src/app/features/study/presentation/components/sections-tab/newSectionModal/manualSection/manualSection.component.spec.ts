@@ -1,25 +1,28 @@
 // Mock plotly.js-dist-min
-jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn(),
-  update: jest.fn(),
-  purge: jest.fn(),
-  relayout: jest.fn(),
-  restyle: jest.fn(),
-  react: jest.fn(),
-  redraw: jest.fn(),
-  toImage: jest.fn(),
-  downloadImage: jest.fn(),
-  extendTraces: jest.fn(),
-  prependTraces: jest.fn(),
-  addTraces: jest.fn(),
-  deleteTraces: jest.fn(),
-  moveTraces: jest.fn(),
-  animate: jest.fn(),
-  setPlotConfig: jest.fn(),
-  validate: jest.fn(),
-  d3: {
-    select: jest.fn(),
-    selectAll: jest.fn()
+vi.mock('plotly.js-dist-min', () => ({
+  __esModule: true,
+  default: {
+    newPlot: vi.fn(),
+    update: vi.fn(),
+    purge: vi.fn(),
+    relayout: vi.fn(),
+    restyle: vi.fn(),
+    react: vi.fn(),
+    redraw: vi.fn(),
+    toImage: vi.fn(),
+    downloadImage: vi.fn(),
+    extendTraces: vi.fn(),
+    prependTraces: vi.fn(),
+    addTraces: vi.fn(),
+    deleteTraces: vi.fn(),
+    moveTraces: vi.fn(),
+    animate: vi.fn(),
+    setPlotConfig: vi.fn(),
+    validate: vi.fn(),
+    d3: {
+      select: vi.fn(),
+      selectAll: vi.fn()
+    }
   }
 }));
 

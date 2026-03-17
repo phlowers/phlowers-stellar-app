@@ -14,11 +14,11 @@ import { ProtoV4Parameters, ProtoV4Support, Support } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 import { liveQuery } from 'dexie';
 
-jest.mock('uuid', () => ({
+vi.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid-123')
 }));
 
-jest.mock('dexie', () => {
+vi.mock('dexie', () => {
   class Dexie {
     version() {
       return {

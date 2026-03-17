@@ -7,7 +7,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('lodash', () => ({
+vi.mock('lodash', () => ({
   debounce: (fn: (...args: unknown[]) => void) => fn
 }));
 
@@ -411,13 +411,24 @@ describe('ObstaclesFormComponent', () => {
     });
 
     it('should set focus on point when input is focused', () => {
-      const spy = jest.spyOn(obstaclesService, 'setCurrentPointIndex');
+      const fb = new FormBuilder();
+      mockObstacleFormService.positions.push(
+        fb.group({
+          x: new FormControl<number | null>(1),
+          y: new FormControl<number | null>(2),
+          z: new FormControl<number | null>(3)
+        })
+      );
+      mockObstacleFormService.form.controls.name.setValue('Obstacle');
+      obstaclesService.setCurrentPointIndex(1);
+      fixture.detectChanges();
+
       const input = getByTestId('point-ref-distance') as HTMLInputElement;
 
       input.dispatchEvent(new Event('focus'));
       fixture.detectChanges();
 
-      expect(spy).toHaveBeenCalledWith(0);
+      expect(obstaclesService.currentPointIndex()).toBe(0);
     });
   });
 
@@ -608,20 +619,41 @@ describe('ObstaclesFormComponent', () => {
 
   describe('point selection', () => {
     it('should set current obstacle point on select click', () => {
-      const spy = jest.spyOn(obstaclesService, 'setCurrentPointIndex');
+      const fb = new FormBuilder();
+      mockObstacleFormService.positions.push(
+        fb.group({
+          x: new FormControl<number | null>(1),
+          y: new FormControl<number | null>(2),
+          z: new FormControl<number | null>(3)
+        })
+      );
+      obstaclesService.setCurrentPointIndex(1);
+      fixture.detectChanges();
+
       (getByTestId('select-point') as HTMLButtonElement).click();
 
-      expect(spy).toHaveBeenCalledWith(0);
+      expect(obstaclesService.currentPointIndex()).toBe(0);
     });
 
     it('should set current obstacle point on input focus', () => {
-      const spy = jest.spyOn(obstaclesService, 'setCurrentPointIndex');
+      const fb = new FormBuilder();
+      mockObstacleFormService.positions.push(
+        fb.group({
+          x: new FormControl<number | null>(1),
+          y: new FormControl<number | null>(2),
+          z: new FormControl<number | null>(3)
+        })
+      );
+      mockObstacleFormService.form.controls.name.setValue('Obstacle');
+      obstaclesService.setCurrentPointIndex(1);
+      fixture.detectChanges();
+
       const input = getByTestId('point-altitude') as HTMLInputElement;
 
       input.dispatchEvent(new Event('focus'));
       fixture.detectChanges();
 
-      expect(spy).toHaveBeenCalledWith(0);
+      expect(obstaclesService.currentPointIndex()).toBe(0);
     });
   });
 

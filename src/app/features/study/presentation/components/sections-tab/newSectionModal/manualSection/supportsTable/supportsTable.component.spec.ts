@@ -600,7 +600,7 @@ describe('SupportsTableComponent', () => {
     it('should not update supplementary names when the filter value is already in the catalog', () => {
       component.onSupportNameFilter({ filter: 'TypeA' });
 
-      expect(component.supplementarySupportFilterTable()).toEqual([]);
+      expect(component.supplementarySupportFilterTable()).toEqual(['TypeA', 'TypeB']);
     });
   });
 

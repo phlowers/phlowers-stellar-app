@@ -12,8 +12,12 @@ import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
 
 // Mock Plotly
-jest.mock('plotly.js-dist-min', () => ({
-  react: jest.fn()
+vi.mock('plotly.js-dist-min', () => ({
+  __esModule: true,
+  default: {
+    react: vi.fn()
+  },
+  react: vi.fn()
 }));
 
 describe('createPlot', () => {

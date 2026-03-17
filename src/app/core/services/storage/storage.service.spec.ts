@@ -6,11 +6,12 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom, take } from 'rxjs';
 import { StorageService } from './storage.service';
 import { AppDatabase } from '@infrastructure/database';
 
 // Mock AppDatabase
-jest.mock('@infrastructure/database', () => {
+vi.mock('@infrastructure/database', () => {
   return {
     AppDatabase: jest.fn().mockImplementation(() => {
       return {};
@@ -42,11 +43,9 @@ describe('StorageService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should initialize with ready$ as false', (done) => {
-    service.ready$.subscribe((isReady) => {
-      expect(isReady).toBeFalsy();
-      done();
-    });
+  it('should initialize with ready$ as false', async () => {
+    const isReady = await firstValueFrom(service.ready$.pipe(take(1)));
+    expect(isReady).toBeFalsy();
   });
 
   it('should create database and set ready to true', async () => {

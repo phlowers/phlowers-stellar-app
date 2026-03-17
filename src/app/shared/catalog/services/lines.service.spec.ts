@@ -16,17 +16,21 @@ import Papa from 'papaparse';
 import { sortBy } from 'lodash';
 
 // Mock Papa Parse
-jest.mock('papaparse', () => ({
-  parse: jest.fn()
+vi.mock('papaparse', () => ({
+  __esModule: true,
+  default: {
+    parse: vi.fn()
+  },
+  parse: vi.fn()
 }));
 
 // Mock uuid
-jest.mock('uuid', () => ({
+vi.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid-123')
 }));
 
 // Mock lodash
-jest.mock('lodash', () => ({
+vi.mock('lodash', () => ({
   sortBy: jest.fn((arr: unknown[]) => arr),
   uniqBy: jest.fn((arr: unknown[], iteratee: (item: unknown) => unknown) => {
     const seen = new Set();
