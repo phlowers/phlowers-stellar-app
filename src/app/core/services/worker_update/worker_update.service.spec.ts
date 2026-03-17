@@ -4,13 +4,13 @@ import { MessageService } from 'primeng/api';
 
 describe('UpdateService', () => {
   let service: UpdateService;
-  let mockServiceWorker: any;
-  let mockCaches: any;
-  let mockCache: any;
-  let mockFetch: any;
-  let originalServiceWorker: any;
-  let originalCaches: any;
-  let originalFetch: any;
+  let mockServiceWorker: { addEventListener: jest.Mock; getRegistration: jest.Mock };
+  let mockCaches: { open: jest.Mock };
+  let mockCache: { match: jest.Mock };
+  let mockFetch: jest.Mock;
+  let originalServiceWorker: ServiceWorkerContainer;
+  let originalCaches: CacheStorage;
+  let originalFetch: typeof fetch;
   let mockMessageService: MessageService;
 
   beforeEach(() => {
@@ -193,7 +193,7 @@ describe('UpdateService', () => {
   });
 
   describe('service worker message handling', () => {
-    let messageHandler: (event: any) => void;
+    let messageHandler: (event: { data: Record<string, unknown> }) => void;
 
     beforeEach(() => {
       // Extract the message handler function

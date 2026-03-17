@@ -294,8 +294,9 @@ export async function handleMessage(event: ExtendableMessageEvent) {
       default:
         console.warn(`SERVICE WORKER: Unknown message type: ${type}`);
     }
-  } catch (e: any) {
-    event.source?.postMessage({ message: 'error', error: e.message });
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    event.source?.postMessage({ message: 'error', error: errorMessage });
   }
 }
 

@@ -33,9 +33,9 @@ The project uses TypeScript path aliases to simplify imports and improve code re
 | `@app/*` | `./src/app/*` | Application folder |
 | `@core/*` | `./src/app/core/*` | Core module (domain, infrastructure) |
 | `@services/*` | `./src/app/core/services/*` | Application services |
-| `@ui/*` | `./src/app/ui/*` | UI components and pages |
-| `@plugins/*` | `./src/app/plugins/*` | Plugin modules |
-| `@adapters/*` | `./src/app/adapters/*` | Adapter modules |
+| `@features/*` | `./src/app/features/*` | Feature modules (DDD bounded contexts) |
+| `@shared/*` | `./src/app/shared/*` | Shared reusable components, pipes, directives |
+| `@infrastructure/*` | `./src/app/infrastructure/*` | Infrastructure (Dexie DB, DTOs) |
 
 ### Usage examples
 
@@ -46,7 +46,7 @@ import { StorageService } from '../../../core/services/storage/storage.service';
 // Use alias imports:
 import { StorageService } from '@services/storage/storage.service';
 import { Study } from '@core/domain';
-import { ButtonComponent } from '@ui/shared/components/atoms/button/button.component';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 ```
 
 ## Import lines and maintenance data

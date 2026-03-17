@@ -34,14 +34,14 @@
       "@services/*": [
         "./src/app/core/services/*"
       ],
-      "@ui/*": [
-        "./src/app/ui/*"
+      "@features/*": [
+        "./src/app/features/*"
       ],
-      "@plugins/*": [
-        "./src/app/plugins/*"
+      "@shared/*": [
+        "./src/app/shared/*"
       ],
-      "@adapters/*": [
-        "./src/app/adapters/*"
+      "@infrastructure/*": [
+        "./src/app/infrastructure/*"
       ]
     }
   },

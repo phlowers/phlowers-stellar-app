@@ -56,6 +56,7 @@ export class WorkerPythonService {
     runTime: 0
   });
   /** Map of pending task IDs to their resolve callbacks, used to correlate worker responses */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handlerMap: Record<string, (result: any, error: TaskError | null) => void> = {};
 
   /**

@@ -1,27 +1,34 @@
+import { TestBed } from '@angular/core/testing';
 import { UserService } from './user.service';
-import { UserEntity } from '@core/infrastructure/database';
+import { UserEntity } from '@infrastructure/database';
+import { StorageService } from '@core/services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 
 describe('UserService', () => {
   let service: UserService;
-  let storageServiceMock: any;
-  let usersTableMock: any;
+  let storageServiceMock: Partial<StorageService>;
+  let usersTableMock: { get: jest.Mock; put: jest.Mock; toArray: jest.Mock; add: jest.Mock; clear: jest.Mock };
   let readySubject: BehaviorSubject<boolean>;
 
   const testUser: UserEntity = { email: 'test@example.com' };
 
   beforeEach(() => {
     usersTableMock = {
+      get: jest.fn(),
+      put: jest.fn(),
       toArray: jest.fn(),
       add: jest.fn(),
       clear: jest.fn()
     };
     readySubject = new BehaviorSubject<boolean>(true);
     storageServiceMock = {
-      db: { users: usersTableMock },
+      db: { users: usersTableMock } as unknown as StorageService['db'],
       ready$: readySubject.asObservable()
     };
-    service = new UserService(storageServiceMock);
+    TestBed.configureTestingModule({
+      providers: [UserService, { provide: StorageService, useValue: storageServiceMock }]
+    });
+    service = TestBed.inject(UserService);
   });
 
   describe('createUser', () => {

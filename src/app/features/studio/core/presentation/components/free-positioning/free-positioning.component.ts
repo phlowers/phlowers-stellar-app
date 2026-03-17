@@ -1,0 +1,550 @@
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  OnDestroy,
+  signal,
+  Signal,
+  untracked
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+import Plotly, { ModeBarButtonAny, PlotlyHTMLElement } from 'plotly.js-dist-min';
+import { Options } from '@angular-slider/ngx-slider';
+import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
+import { Side } from '@shared/types/plot.types';
+import { GetSectionOutput, Task } from '@core/services/worker_python/tasks/types';
+import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { PlotService } from '@services/plot/plot.service';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { formatStudioError } from '@shared/components/studio/helpers/errors';
+import { Support } from '@shared/domain';
+import { debounce, isNumber } from 'lodash';
+import { SideTabsService } from '@services/side-tabs/side-tabs.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+
+// Constants
+const PLOT_CONFIG = {
+  HEIGHT: 500,
+  MARGIN_LEFT: 35,
+  MARGIN_RIGHT: 0,
+  MARGIN_TOP: 0,
+  MARGIN_BOTTOM: 35,
+  SHAPE_EXTENT: 1000,
+  PLOT_CREATION_DELAY_MS: 300,
+  MARKER_DELTA: 5
+} as const;
+
+export const DEBOUNCED_REFRESH_STUDIO_DELAY = 400;
+export const DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY = 100;
+const PLOT_IDS = {
+  FACE: 'plotly-output-single-span-face-2',
+  PROFILE: 'plotly-output-single-span-profile-2'
+} as const;
+
+const AXIS_CONFIG = {
+  backgroundcolor: 'gainsboro',
+  gridcolor: 'dimgray',
+  showbackground: true
+} as const;
+
+interface MousePosition {
+  x: string;
+  z: string;
+}
+
+interface PlotLayout {
+  margin: {
+    l: number;
+    r: number;
+    t: number;
+    b: number;
+  };
+  xaxis: {
+    p2c: (value: number) => number;
+  };
+  yaxis: {
+    p2c: (value: number) => number;
+  };
+}
+
+interface PlotAnnotation {
+  x: number;
+  y: number;
+  text: string;
+  showarrow: boolean;
+  arrowhead?: number;
+  standoff?: number;
+  font?: {
+    color?: string;
+    size?: number;
+  };
+}
+
+interface PlotElement extends HTMLElement {
+  _fullLayout?: PlotLayout;
+}
+
+@Component({
+  selector: 'app-free-positioning',
+  standalone: true,
+  imports: [CommonModule, FormsModule, DialogModule, InputNumberModule, ProgressSpinnerModule],
+  templateUrl: './free-positioning.component.html',
+  styleUrl: './free-positioning.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class FreePositioningComponent implements OnDestroy {
+  isLoading = signal<boolean>(true);
+
+  readonly referenceSupportAltitudeNgf = signal<number>(0);
+  readonly sharedYRange = signal<[number, number] | null>(null);
+
+  // State
+  options = signal<Options>({});
+  plotFace = signal<PlotlyHTMLElement | null>(null);
+  plotProfile = signal<PlotlyHTMLElement | null>(null);
+  profileMousePosition = signal<MousePosition | null>(null);
+  faceMousePosition = signal<MousePosition | null>(null);
+
+  getErrorString = computed(() => {
+    return formatStudioError(this.plotService.error());
+  });
+
+  // Dependencies
+  private readonly workerPythonService = inject(WorkerPythonService);
+  readonly plotService = inject(PlotService);
+  readonly sideTabsService = inject(SideTabsService);
+  readonly obstacleFormService = inject(ObstacleFormService);
+  readonly obstaclesService = inject(ObstaclesService);
+  private readonly positionsValue: Signal<unknown>;
+
+  constructor() {
+    this.positionsValue = toSignal(this.obstacleFormService.form.get('positions')?.valueChanges ?? of([]), {
+      initialValue: this.obstacleFormService.form.get('positions')?.value ?? []
+    });
+
+    effect(() => {
+      const plotOptions = this.plotService.plotOptions();
+      const workerReady = this.plotService.workerReady();
+      const litData = this.plotService.litData();
+
+      if (workerReady && litData && plotOptions) {
+        untracked(() => this.recreatePlots());
+      }
+    });
+
+    effect(() => {
+      this.sideTabsService.sideTabs();
+
+      untracked(() => {
+        setTimeout(() => {
+          this.relayoutPlots();
+        }, DEBOUNCED_REFRESH_STUDIO_DELAY);
+      });
+    });
+
+    effect(() => {
+      this.obstaclesService.currentPointIndex();
+      this.positionsValue();
+
+      untracked(() => this.debounceUpdateSelectedPositionMarkers());
+    });
+  }
+
+  recreatePlots = debounce(async () => {
+    this.destroyAllPlots();
+    const startSupport = this.plotService.plotOptions().startSupport;
+    this.isLoading.set(true);
+    const litData = await this.workerPythonService.runTask(Task.refreshProjection, {
+      startSupport: startSupport,
+      endSupport: startSupport + 1,
+      view: '2d'
+    });
+
+    const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
+      | ReferenceSupport
+      | undefined;
+    const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
+
+    const supports = this.plotService.section()?.supports ?? [];
+    this.sharedYRange.set(null);
+    await this.createPlot(litData.result.current, startSupport, 'face', supports);
+    await this.createPlot(litData.result.current, startSupport, 'profile', supports);
+    this.synchronizeYAxisRanges();
+    this.isLoading.set(false);
+  }, DEBOUNCED_REFRESH_STUDIO_DELAY);
+
+  private getSupportAltitudeNgf(litData: GetSectionOutput, supportIndex: number): number {
+    const supportPoints = litData?.supports?.[supportIndex];
+    const firstPoint = supportPoints?.[0];
+    const altitude = Array.isArray(firstPoint) ? firstPoint[2] : undefined;
+    return typeof altitude === 'number' && !Number.isNaN(altitude) ? altitude : 0;
+  }
+
+  private isAbsoluteAltitudeMode(): boolean {
+    return this.obstacleFormService.form.get('altitudeType')?.value === 'absolute';
+  }
+
+  debounceUpdateSelectedPositionMarkers = debounce(() => {
+    this.updateSelectedPositionMarkers();
+  }, DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY);
+
+  relayoutPlots(): void {
+    const facePlot = this.plotFace();
+    const profilePlot = this.plotProfile();
+    if (facePlot) {
+      Plotly.relayout(facePlot, this.getPlotLayout());
+    }
+    if (profilePlot) {
+      Plotly.relayout(profilePlot, this.getPlotLayout());
+    }
+  }
+
+  /**
+   * Destroys all plot instances
+   */
+  private destroyAllPlots(): void {
+    const facePlot = this.plotFace();
+    const profilePlot = this.plotProfile();
+
+    if (facePlot) {
+      Plotly.purge(facePlot);
+      this.plotFace.set(null);
+    }
+
+    if (profilePlot) {
+      Plotly.purge(profilePlot);
+      this.plotProfile.set(null);
+    }
+  }
+
+  /**
+   * Extracts all finite Y values from a plot's traces.
+   */
+  private extractYValues(plot: PlotlyHTMLElement): number[] {
+    return plot.data
+      .flatMap((trace) => {
+        const y = (trace as Plotly.ScatterData).y;
+        if (y == null) return [];
+        return Array.from(y as ArrayLike<number>);
+      })
+      .filter((v) => typeof v === 'number' && isFinite(v));
+  }
+
+  /**
+   * Computes a padded [min, max] range from an array of Y values.
+   * Returns null if the array is empty.
+   */
+  private computePaddedYRange(yValues: number[]): [number, number] | null {
+    if (yValues.length === 0) return null;
+
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const v of yValues) {
+      if (v < minY) minY = v;
+      if (v > maxY) maxY = v;
+    }
+    const padding = Math.max((maxY - minY) * 0.05, 1);
+    return [minY - padding, maxY + padding];
+  }
+
+  /**
+   * Applies a shared Y axis range to the given plots.
+   */
+  private applySharedYRange(plots: PlotlyHTMLElement[], range: [number, number]): void {
+    for (const plot of plots) {
+      void Plotly.relayout(plot, { 'yaxis.range': range, 'yaxis.autorange': false });
+    }
+  }
+
+  /**
+   * Synchronizes the Y axis range between face and profile plots
+   * so that both charts share the exact same vertical scale.
+   */
+  private synchronizeYAxisRanges(): void {
+    const facePlot = this.plotFace();
+    const profilePlot = this.plotProfile();
+    if (!facePlot || !profilePlot) return;
+
+    const allYValues = [...this.extractYValues(facePlot), ...this.extractYValues(profilePlot)];
+    const sharedRange = this.computePaddedYRange(allYValues);
+    if (!sharedRange) return;
+
+    this.sharedYRange.set(sharedRange);
+    this.applySharedYRange([facePlot, profilePlot], sharedRange);
+  }
+
+  /**
+   * Creates plot layout configuration
+   */
+  private getPlotLayout(): Partial<Plotly.Layout> {
+    const sharedRange = this.sharedYRange();
+
+    return {
+      autosize: true,
+      showlegend: false,
+      dragmode: 'pan',
+      margin: {
+        l: PLOT_CONFIG.MARGIN_LEFT,
+        r: PLOT_CONFIG.MARGIN_RIGHT,
+        t: PLOT_CONFIG.MARGIN_TOP,
+        b: PLOT_CONFIG.MARGIN_BOTTOM
+      },
+      yaxis: {
+        ...AXIS_CONFIG,
+        showticklabels: true,
+        showgrid: true,
+        showline: true,
+        ...(sharedRange ? { range: [...sharedRange], autorange: false } : {})
+      },
+      xaxis: {
+        ...AXIS_CONFIG,
+        showticklabels: true,
+        showgrid: true,
+        showline: true
+      }
+    };
+  }
+
+  /**
+   * Creates plot configuration options
+   */
+  private getPlotConfig(): Partial<Plotly.Config> {
+    return {
+      displayModeBar: true,
+      fillFrame: false,
+      responsive: true,
+      autosizable: true,
+      displaylogo: false,
+      modeBarButtons: [['zoomIn2d', 'zoomOut2d']] as ModeBarButtonAny[][]
+    };
+  }
+
+  /**
+   * Handles mouse move event for plot interaction
+   */
+  private handleMouseMove(evt: MouseEvent, type: Side, plotElement: PlotElement | null): void {
+    const layout = plotElement?._fullLayout;
+    if (!layout) return;
+
+    const x = evt.layerX - layout.margin.l;
+    const y = evt.layerY - layout.margin.t;
+
+    this.updateMousePosition(type, layout, x, y);
+  }
+
+  /**
+   * Updates mouse position display
+   */
+  private updateMousePosition(type: Side, layout: PlotLayout, x: number, y: number): void {
+    const position: MousePosition = {
+      x: Number(layout.xaxis.p2c(x)).toFixed(2),
+      z: Number(layout.yaxis.p2c(y)).toFixed(2)
+    };
+
+    if (type === 'profile') {
+      this.profileMousePosition.set(position);
+    } else {
+      this.faceMousePosition.set(position);
+    }
+  }
+
+  /**
+   * Handles click event for obstacle placement
+   */
+  private handleClick(evt: MouseEvent, type: Side, plotElement: PlotElement | null): void {
+    const layout = plotElement?._fullLayout;
+    if (!layout) return;
+
+    const x = evt.layerX - layout.margin.l;
+    const y = evt.layerY - layout.margin.t;
+    // TODO: try to find another way to detect if the click not on the background
+    const target = evt.target as Element & { className?: { baseVal?: string }; tagName?: string };
+    if (!target?.className?.baseVal?.includes('drag') && target.tagName !== 'CANVAS') {
+      return;
+    }
+
+    const previousSelected = this.obstaclesService.currentPointIndex();
+    if (!isNumber(previousSelected)) return;
+    const positions = this.obstacleFormService.positions.value as Position3D[];
+    const previousSelectedObstacle = positions.find((_o, index) => index === previousSelected);
+    if (!previousSelectedObstacle) return;
+
+    let newObstacle: Position3D;
+    if (type === 'profile') {
+      // Profile plot: update x and z, keep y
+      const clickedAbsoluteAltitude = parseFloat(layout.yaxis.p2c(y).toFixed(2));
+      const zValue = this.isAbsoluteAltitudeMode()
+        ? clickedAbsoluteAltitude
+        : parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
+      newObstacle = {
+        x: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        y: previousSelectedObstacle.y ?? null,
+        z: zValue
+      };
+    } else {
+      // Face plot: update y only, keep x and z
+      newObstacle = {
+        x: previousSelectedObstacle.x ?? null,
+        y: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        z: previousSelectedObstacle.z ?? null
+      };
+    }
+
+    // Update local selected position immediately for instant UI feedback
+    const positionGroup = this.obstacleFormService.positions.at(previousSelected);
+    if (positionGroup) {
+      positionGroup.patchValue(newObstacle);
+    }
+  }
+
+  /**
+   * Updates the annotations on both plots for the selected position
+   */
+  private updateSelectedPositionMarkers(): void {
+    const obstaclesPoints = this.obstacleFormService.positions.value as Position3D[];
+    this.updateMarkerForPlot(this.plotProfile(), 'profile', obstaclesPoints);
+    this.updateMarkerForPlot(this.plotFace(), 'face', obstaclesPoints);
+  }
+
+  private getAnnotations(obstaclesPoints: Position3D[], side: Side): PlotAnnotation[] {
+    const annotations: PlotAnnotation[] = [];
+    obstaclesPoints.forEach((position, index) => {
+      if (position.x === null || position.z === null) {
+        return;
+      }
+      // In face view, we need y; in profile view, we need x and z
+      if (side === 'face' && position.y === null) {
+        return;
+      }
+      const xCoord = side === 'profile' ? position.x : position.y!;
+      const yCoord = this.isAbsoluteAltitudeMode() ? position.z : position.z + this.referenceSupportAltitudeNgf();
+      annotations.push({
+        x: xCoord,
+        y: yCoord,
+        text: '+',
+        showarrow: false,
+        arrowhead: 6,
+        standoff: 20,
+        font: {
+          size: 30,
+          color: index === this.obstaclesService.currentPointIndex() ? 'red' : 'black'
+        }
+      });
+    });
+    return annotations;
+  }
+
+  /**
+   * Updates the annotation on a single plot
+   */
+  private updateMarkerForPlot(plot: PlotlyHTMLElement | null, side: Side, obstaclesPoints: Position3D[]): void {
+    const annotations = this.getAnnotations(obstaclesPoints, side);
+
+    if (!plot) return;
+
+    void Plotly.relayout(plot, { annotations });
+  }
+
+  /**
+   * Attaches event listeners to the plot
+   */
+  private attachEventListeners(type: Side, plotElement: PlotElement | null): void {
+    if (!plotElement) return;
+
+    plotElement.addEventListener('mousemove', (evt) => {
+      this.handleMouseMove(evt, type, plotElement);
+    });
+
+    plotElement.addEventListener('click', (evt) => {
+      this.handleClick(evt, type, plotElement);
+    });
+  }
+
+  /**
+   * Gets the plot ID for a given side
+   */
+  private getPlotId(side: Side): string {
+    return side === 'face' ? PLOT_IDS.FACE : PLOT_IDS.PROFILE;
+  }
+
+  /**
+   * Creates a plot for the specified span and side
+   */
+  async createPlot(litData: GetSectionOutput, selectedSpan: number, side: Side, supports: Support[]): Promise<void> {
+    try {
+      const plotId = this.getPlotId(side);
+
+      if (!litData) {
+        return;
+      }
+      const plotData = createPlotData(
+        litData,
+        {
+          view: '2d',
+          side: side,
+          startSupport: selectedSpan,
+          endSupport: selectedSpan + 1,
+          invert: false
+        },
+        supports
+      );
+
+      if (!plotData) {
+        return;
+      }
+
+      const plotElement = document.getElementById(plotId) as PlotElement | null;
+      if (!plotElement) {
+        console.warn(`Plot element not found: ${plotId}`);
+        return;
+      }
+      const annotations = this.getAnnotations(
+        this.obstacleFormService.form.get('positions')?.value as Position3D[],
+        side
+      );
+
+      // const width = plotElement.clientWidth;
+      const layout = this.getPlotLayout();
+      const config = this.getPlotConfig();
+
+      const plot = await Plotly.newPlot(plotId, plotData, { ...layout, annotations }, config);
+      this.attachEventListeners(side, plotElement);
+      this.setPlotReference(side, plot);
+    } catch (error) {
+      console.error(`Error creating plot for ${side}:`, error);
+    }
+  }
+
+  /**
+   * Sets the plot reference based on side
+   */
+  private setPlotReference(side: Side, plot: PlotlyHTMLElement): void {
+    if (side === 'face') {
+      this.plotFace.set(plot);
+    } else {
+      this.plotProfile.set(plot);
+    }
+  }
+
+  ngOnDestroy(): void {
+    // Safety net: always leave the mode when this component is destroyed
+    this.plotService.isFreePositioningMode.set(false);
+    this.destroyAllPlots();
+  }
+}

@@ -52,7 +52,7 @@ Object.defineProperty(global, 'performance', {
 });
 
 describe('Worker', () => {
-  let mockPyodide: any;
+  let mockPyodide: { runPython: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -87,7 +87,7 @@ describe('Worker', () => {
       });
 
       // Verify all packages are included
-      const allPackages = Object.values(pythonPackages).map((pkg: any) => 'test/pyodide/' + pkg.file_name);
+      const allPackages = Object.values(pythonPackages).map((pkg) => 'test/pyodide/' + pkg.file_name);
 
       const callArgs = (loadPyodide as jest.Mock).mock.calls[0][0];
       expect(callArgs.packages).toEqual(expect.arrayContaining(allPackages));

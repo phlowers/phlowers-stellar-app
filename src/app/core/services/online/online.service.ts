@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, distinctUntilChanged, fromEvent, map, merge, startWith } from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { environment } from '@src/environments/environment';
@@ -55,7 +55,9 @@ export class OnlineService {
   /** BehaviorSubject tracking the server's reachability status (LOADING, ONLINE, or OFFLINE) */
   public serverOnline$ = new BehaviorSubject<ServerStatus>(ServerStatus.LOADING);
 
-  constructor(private readonly httpClient: HttpClient) {
+  private readonly httpClient = inject(HttpClient);
+
+  constructor() {
     this.online$.subscribe((online) => {
       if (online) {
         this.httpClient

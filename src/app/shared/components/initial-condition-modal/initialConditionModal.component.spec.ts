@@ -1,0 +1,323 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { InitialConditionModalComponent } from './initialConditionModal.component';
+import { Section, InitialCondition } from '@shared/domain';
+import { CablesService } from '@shared/catalog/services/cables.service';
+import { StorageService } from '@services/storage/storage.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { BehaviorSubject } from 'rxjs';
+
+describe('InitialConditionModalComponent', () => {
+  let component: InitialConditionModalComponent;
+  let fixture: ComponentFixture<InitialConditionModalComponent>;
+
+  const mockSection: Section = {
+    uuid: 'section-1',
+    internal_id: 'int-1',
+    name: 'Section 1',
+    short_name: 'S1',
+    created_at: '',
+    updated_at: '',
+    internal_catalog_id: '',
+    type: 'phase',
+    electric_phase_number: 1,
+    cable_name: '',
+    cable_short_name: '',
+    cables_amount: 0,
+    optical_fibers_amount: 0,
+    spans_amount: 0,
+    begin_span_name: '',
+    last_span_name: '',
+    first_support_number: 0,
+    last_support_number: 0,
+    first_attachment_set: '',
+    last_attachment_set: '',
+    regional_maintenance_center_names: [],
+    maintenance_center_names: [],
+    regional_team_id: undefined,
+    maintenance_team_id: undefined,
+    maintenance_center_id: undefined,
+    link_name: undefined,
+    lit_code: undefined,
+    lit_name: undefined,
+    branch_name: undefined,
+    branch_idr: undefined,
+    voltage_idr: undefined,
+    comment: undefined,
+    supports_comment: undefined,
+    supports: [],
+    obstacles: [],
+    initial_conditions: [],
+    selected_initial_condition_uuid: undefined,
+    charges: [],
+    selected_charge_uuid: null,
+    field_measures: [],
+    selected_field_measure_uuid: undefined,
+    vtl_and_guying: undefined
+  };
+
+  const mockInitialCondition: InitialCondition = {
+    uuid: 'ic-1',
+    name: 'Cond 1',
+    base_parameters: 2000,
+    base_temperature: 20,
+    cable_pretension: 0,
+    min_temperature: 0,
+    max_wind_pressure: 0,
+    max_frost_width: 0
+  };
+
+  beforeEach(async () => {
+    // Create mock StorageService
+    const mockStorageService = {
+      ready$: new BehaviorSubject<boolean>(true),
+      db: {
+        cables: {
+          toArray: jest.fn().mockResolvedValue([])
+        }
+      }
+    } as unknown as StorageService;
+
+    // Create mock CablesService
+    const mockCablesService = {
+      getCables: jest.fn().mockResolvedValue([])
+    } as unknown as CablesService;
+
+    // Create mock StudiesService
+    const mockStudiesService = {
+      updateStudy: jest.fn().mockResolvedValue(undefined)
+    } as unknown as StudiesService;
+
+    await TestBed.configureTestingModule({
+      imports: [InitialConditionModalComponent],
+      providers: [
+        { provide: StorageService, useValue: mockStorageService },
+        { provide: CablesService, useValue: mockCablesService },
+        { provide: StudiesService, useValue: mockStudiesService }
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(InitialConditionModalComponent);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('section', mockSection);
+    fixture.componentRef.setInput('mode', 'create');
+    fixture.componentRef.setInput('initialConditionInput', mockInitialCondition);
+    fixture.componentRef.setInput('initialConditions', []);
+    fixture.componentRef.setInput('study', null);
+    fixture.detectChanges();
+  });
+
+  describe('onVisibleChange', () => {
+    it('should emit isOpenChange when visible is false', () => {
+      const spy = jest.spyOn(component.isOpenChange, 'emit');
+      component.onVisibleChange(false);
+      expect(spy).toHaveBeenCalledWith(false);
+    });
+
+    it('should not emit when visible is true', () => {
+      const spy = jest.spyOn(component.isOpenChange, 'emit');
+      component.onVisibleChange(true);
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onSubmit', () => {
+    it('should emit addInitialCondition when mode is create', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.detectChanges();
+
+      // Ensure form is valid by patching it with valid values
+      component.form.patchValue({
+        name: mockInitialCondition.name,
+        base_parameters: mockInitialCondition.base_parameters,
+        base_temperature: mockInitialCondition.base_temperature,
+        cable_pretension: mockInitialCondition.cable_pretension,
+        min_temperature: mockInitialCondition.min_temperature,
+        max_wind_pressure: mockInitialCondition.max_wind_pressure,
+        max_frost_width: mockInitialCondition.max_frost_width
+      });
+
+      const spyAdd = jest.spyOn(component.addInitialCondition, 'emit');
+      const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
+
+      component.onSubmit(false);
+
+      expect(spyOpen).toHaveBeenCalledWith(false);
+      expect(spyAdd).toHaveBeenCalledWith({
+        section: mockSection,
+        initialCondition: expect.objectContaining({
+          ...mockInitialCondition,
+          ...component.form.value
+        }),
+        generateState: false
+      });
+    });
+
+    it('should emit updateInitialCondition when mode is edit', () => {
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.detectChanges();
+
+      // Ensure form is valid by patching it with valid values
+      component.form.patchValue({
+        name: mockInitialCondition.name,
+        base_parameters: mockInitialCondition.base_parameters,
+        base_temperature: mockInitialCondition.base_temperature,
+        cable_pretension: mockInitialCondition.cable_pretension,
+        min_temperature: mockInitialCondition.min_temperature,
+        max_wind_pressure: mockInitialCondition.max_wind_pressure,
+        max_frost_width: mockInitialCondition.max_frost_width
+      });
+
+      const spyUpdate = jest.spyOn(component.updateInitialCondition, 'emit');
+      const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
+
+      component.onSubmit(false);
+
+      expect(spyOpen).toHaveBeenCalledWith(false);
+      expect(spyUpdate).toHaveBeenCalledWith({
+        section: mockSection,
+        initialCondition: expect.objectContaining({
+          ...mockInitialCondition,
+          ...component.form.value
+        }),
+        generateState: false
+      });
+    });
+
+    it('should do nothing when mode is view', () => {
+      fixture.componentRef.setInput('mode', 'view');
+      fixture.detectChanges();
+
+      // Ensure form is valid by patching it with valid values
+      component.form.patchValue({
+        name: mockInitialCondition.name,
+        base_parameters: mockInitialCondition.base_parameters,
+        base_temperature: mockInitialCondition.base_temperature,
+        cable_pretension: mockInitialCondition.cable_pretension,
+        min_temperature: mockInitialCondition.min_temperature,
+        max_wind_pressure: mockInitialCondition.max_wind_pressure,
+        max_frost_width: mockInitialCondition.max_frost_width
+      });
+
+      const spyAdd = jest.spyOn(component.addInitialCondition, 'emit');
+      const spyUpdate = jest.spyOn(component.updateInitialCondition, 'emit');
+      const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
+
+      component.onSubmit(false);
+
+      expect(spyOpen).toHaveBeenCalledWith(false);
+      expect(spyAdd).not.toHaveBeenCalled();
+      expect(spyUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isNumber', () => {
+    it('should return true for a number', () => {
+      expect(component.isNumber(5)).toBe(true);
+    });
+
+    it('should return true for zero', () => {
+      expect(component.isNumber(0)).toBe(true);
+    });
+
+    it('should return true for negative numbers', () => {
+      expect(component.isNumber(-5)).toBe(true);
+    });
+
+    it('should return true for floating point numbers', () => {
+      expect(component.isNumber(3.14)).toBe(true);
+    });
+  });
+
+  describe('onModify', () => {
+    it('should emit changeMode with edit', () => {
+      const spy = jest.spyOn(component.changeMode, 'emit');
+      component.onModify();
+      expect(spy).toHaveBeenCalledWith('edit');
+    });
+  });
+
+  describe('onNameChange', () => {
+    beforeEach(() => {
+      const initialConditions: InitialCondition[] = [
+        mockInitialCondition,
+        {
+          uuid: 'ic-2',
+          name: 'Existing Condition',
+          base_parameters: 2000,
+          base_temperature: 25,
+          cable_pretension: 0,
+          min_temperature: 0,
+          max_wind_pressure: 0,
+          max_frost_width: 0
+        }
+      ];
+      fixture.componentRef.setInput('initialConditions', initialConditions);
+      fixture.detectChanges();
+    });
+
+    it('should set isNameUnique to true for unique names', () => {
+      component.onNameChange('New Unique Name');
+      expect(component.isNameUnique()).toBe(true);
+    });
+
+    it('should set isNameUnique to false for duplicate names', () => {
+      component.onNameChange('Existing Condition');
+      expect(component.isNameUnique()).toBe(false);
+    });
+
+    it('should allow same name for the same initial condition (editing)', () => {
+      component.initialCondition.set(mockInitialCondition);
+      component.onNameChange('Cond 1');
+      expect(component.isNameUnique()).toBe(true);
+    });
+  });
+
+  describe('onDelete', () => {
+    it('should call deleteInitialCondition and close modal', () => {
+      const mockStudy = {
+        uuid: 'study-1',
+        title: 'Test Study',
+        description: '',
+        author_email: 'test@example.com',
+        sections: [mockSection],
+        shareable: true,
+        saved: true,
+        created_at_offline: '2025-01-01T00:00:00.000Z',
+        updated_at_offline: '2025-01-01T00:00:00.000Z'
+      };
+      fixture.componentRef.setInput('study', mockStudy);
+      fixture.detectChanges();
+
+      const deleteServiceSpy = jest.spyOn(component['initialConditionService'], 'deleteInitialCondition');
+      const closeModalSpy = jest.spyOn(component.isOpenChange, 'emit');
+
+      component.onDelete();
+
+      expect(deleteServiceSpy).toHaveBeenCalledWith(mockStudy, mockSection, mockInitialCondition);
+      expect(closeModalSpy).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('UC: initial condition modal form rendering', () => {
+    it('UC-IC1: should have name form control', () => {
+      expect(component.form.controls.name).toBeTruthy();
+    });
+
+    it('UC-IC2: should have base_parameters form control', () => {
+      expect(component.form.controls.base_parameters).toBeTruthy();
+    });
+
+    it('UC-IC3: should have validate and cancel behavior via outputs', () => {
+      expect(component.isOpenChange).toBeTruthy();
+      expect(component.addInitialCondition).toBeTruthy();
+    });
+
+    it('UC-IC4: should set form invalid when name is empty', () => {
+      component.form.controls.name.setValue('');
+      component.form.controls.name.markAsTouched();
+      component.form.controls.name.updateValueAndValidity();
+
+      expect(component.form.valid).toBe(false);
+    });
+  });
+});
