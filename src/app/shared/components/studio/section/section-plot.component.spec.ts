@@ -226,7 +226,10 @@ describe('SectionPlotComponent', () => {
   };
 
   const mockObstaclesService = {
-    currentPointIndex: signal(0)
+    currentPointIndex: signal(0),
+    selectedObstacleUuid: signal<string | null>(null),
+    selectedPointIndex: signal<number | null>(null),
+    setSelectedObstacle: jest.fn()
   };
 
   const createFormGet =
@@ -389,11 +392,7 @@ describe('SectionPlotComponent', () => {
       sectionSignal.set(sectionWithObstacles);
       litDataSignal.set(mockLitData);
 
-      mockObstacleFormService.form.value = {
-        ...mockObstacle,
-        uuid: 'obs-1'
-      };
-      mockObstacleFormService.form.get = createFormGet('obs-1');
+      mockObstaclesService.selectedObstacleUuid.set('obs-1');
 
       await component.refreshPlot();
 
@@ -666,8 +665,8 @@ describe('SectionPlotComponent', () => {
   });
 
   describe('getCurrentObstacleUuid Method', () => {
-    it('should return uuid from form', () => {
-      mockObstacleFormService.form.get = createFormGet('obs-1');
+    it('should return uuid from obstaclesService', () => {
+      mockObstaclesService.selectedObstacleUuid.set('obs-1');
 
       const result = component['getCurrentObstacleUuid']();
 
@@ -675,20 +674,15 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should return null when uuid is null', () => {
-      mockObstacleFormService.form.get = createFormGet(null);
+      mockObstaclesService.selectedObstacleUuid.set(null);
 
       const result = component['getCurrentObstacleUuid']();
 
       expect(result).toBeNull();
     });
 
-    it('should return null when form control not found', () => {
-      mockObstacleFormService.form.get = (key: string) => {
-        if (key === 'uuid') {
-          return null;
-        }
-        return { value: null, valueChanges: of(null) };
-      };
+    it('should return null when no obstacle is selected', () => {
+      mockObstaclesService.selectedObstacleUuid.set(null);
 
       const result = component['getCurrentObstacleUuid']();
 
@@ -829,7 +823,7 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should handle obstacle point index updates', async () => {
-      mockObstaclesService.currentPointIndex.set(5);
+      mockObstaclesService.selectedPointIndex.set(5);
       litDataSignal.set(mockLitData);
 
       await component.refreshPlot();

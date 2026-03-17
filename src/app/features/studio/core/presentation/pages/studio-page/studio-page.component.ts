@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,7 +16,10 @@ import { filter, from, switchMap } from 'rxjs';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { debounce } from 'lodash';
 import { StudiesService } from '@services/studies/studies.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { StudioComponent } from '@shared/components/studio/studio.component';
@@ -46,6 +50,7 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
     FormsModule,
     NgxSliderModule,
     InputNumberModule,
+    RadioButtonModule,
     SelectModule,
     TabsModule,
     StudioComponent,
@@ -65,7 +70,16 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('pointSelect', [
+      transition(':enter', [
+        style({ width: 0, opacity: 0, overflow: 'hidden' }),
+        animate('200ms ease-out', style({ width: '*', opacity: 1 }))
+      ]),
+      transition(':leave', [style({ overflow: 'hidden' }), animate('200ms ease-in', style({ width: 0, opacity: 0 }))])
+    ])
+  ]
 })
 export class StudioPageComponent implements OnInit, OnDestroy {
   sidebarWidth = signal(300);
@@ -112,6 +126,33 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     };
   });
 
+  public readonly distanceType!: 'oblique' | 'vertical' | 'horizontal';
+
+  filteredObstaclesOptions = computed(() => {
+    const section = this.plotService.section();
+    if (!section) return [];
+    const { startSupport, endSupport } = this.plotService.plotOptions();
+    const visibleSupportUuids = new Set(section.supports.slice(startSupport, endSupport).map((s) => s.uuid));
+    const options = section.obstacles
+      .filter((o) => visibleSupportUuids.has(o.supportUuid))
+      .map((o) => ({ label: o.name, value: o.uuid }));
+    // Always include the currently selected obstacle so the label persists when navigating spans
+    const selectedUuid = this.obstaclesService.selectedObstacleUuid();
+    if (selectedUuid && !options.some((o) => o.value === selectedUuid)) {
+      const selected = section.obstacles.find((o) => o.uuid === selectedUuid);
+      if (selected) options.push({ label: selected.name, value: selected.uuid });
+    }
+    return options;
+  });
+
+  obstaclePointOptions = computed(() => {
+    const uuid = this.obstaclesService.selectedObstacleUuid();
+    if (!uuid) return [];
+    const obstacle = this.plotService.section()?.obstacles.find((o) => o.uuid === uuid);
+    if (!obstacle) return [];
+    return obstacle.positions.map((_, index) => ({ label: $localize`Point ${index + 1}`, value: index }));
+  });
+
   toggleSidebar() {
     this.sidebarOpen.set(!this.sidebarOpen());
     this.sidebarWidth.set(this.sidebarOpen() ? 300 : 0);
@@ -119,6 +160,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   readonly plotService = inject(PlotService);
   readonly loadFormsService = inject(LoadFormsService);
+  public readonly obstaclesService = inject(ObstaclesService);
+  private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly studiesService = inject(StudiesService);
@@ -173,8 +216,15 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.plotService.plotOptionsChange({ [key]: value });
     const options = this.plotService.plotOptions();
     const diff = Math.abs(options.endSupport - options.startSupport);
-    this.plotService.spanAmountChoice.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
+    const spanAmount = this.getSpanAmount(diff);
+    this.plotService.spanAmountChoice.set(spanAmount);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
+
+  private getSpanAmount(diff: number): 'single' | 'double' | 'all' {
+    if (diff === 1) return 'single';
+    if (diff === 2) return 'double';
+    return 'all';
+  }
 
   updateSliderOptions({ value, highValue }: { value?: number | undefined; highValue?: number | undefined }) {
     const options = this.plotService.plotOptions();
@@ -196,16 +246,29 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.plotService.spanAmountChoice.set(value as 'single' | 'double' | 'all');
     const startSupport = this.plotService.plotOptions().startSupport;
     const maxSupport = (this.plotService.section()?.supports.length ?? 0) - 1;
-    const offset = value === 'single' ? 1 : value === 'double' ? 2 : null;
-    if (offset !== null) {
-      this.plotService.plotOptionsChange({
-        endSupport: Math.min(startSupport + offset, maxSupport)
-      });
-    } else {
+    if (value === 'all') {
       this.plotService.plotOptionsChange({
         startSupport: 0,
         endSupport: maxSupport
       });
+    } else {
+      const offset = value === 'single' ? 1 : 2;
+      this.plotService.plotOptionsChange({
+        endSupport: Math.min(startSupport + offset, maxSupport)
+      });
+    }
+  }
+
+  onObstacleSelect(uuid: string | null) {
+    const obstacle = uuid ? this.plotService.section()?.obstacles.find((o) => o.uuid === uuid) : null;
+    const pointIndex = obstacle?.positions.length === 1 ? 0 : null;
+    this.obstaclesService.setSelectedObstacle(uuid, pointIndex);
+    if (obstacle) {
+      const supportIndex = this.plotService.getSupportIndex(obstacle.supportUuid);
+      if (supportIndex >= 0) {
+        this.plotService.plotOptionsChange({ startSupport: supportIndex, endSupport: supportIndex + 1 });
+      }
+      this.obstacleFormService.setExistingObstacle(obstacle, pointIndex ?? 0);
     }
   }
 

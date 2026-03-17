@@ -2,10 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StudioPageComponent } from './studio-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import { ElementRef } from '@angular/core';
+import { ElementRef, signal } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PlotService } from '@services/plot/plot.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { SectionService } from '@services/section/section.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { Section, Study } from '@shared/domain';
 
 interface SignalFn<T> {
@@ -28,12 +32,14 @@ class PlotServiceMock {
   isStudioActive: SignalFn<boolean> = createSignalMock<boolean>(false);
   spanAmountChoice: SignalFn<'single' | 'double' | 'all'> = createSignalMock<'single' | 'double' | 'all'>('all');
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
-  section: SignalFn<Section | null> = createSignalMock<Section | null>(null);
+  // Real Angular signal so computed() in the component properly tracks it
+  section = signal<Section | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
   isFreePositioningMode: SignalFn<boolean> = createSignalMock<boolean>(false);
-  plotOptions = vi.fn().mockReturnValue({ invert: false });
-  plotOptionsChange = vi.fn();
-  resetAll = vi.fn();
+  plotOptions = jest.fn().mockReturnValue({ invert: false });
+  plotOptionsChange = jest.fn();
+  getSupportIndex = jest.fn().mockReturnValue(0);
+  resetAll = jest.fn();
 }
 
 // StudiesService mock
@@ -50,7 +56,8 @@ describe('StudioPageComponent', () => {
   let route: ActivatedRoute;
   let plotService: PlotServiceMock;
   let studiesService: StudiesServiceMock;
-  let sectionService: vi.Mocked<SectionService>;
+  let sectionService: jest.Mocked<SectionService>;
+  let obstaclesService: ObstaclesService;
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
@@ -73,6 +80,9 @@ describe('StudioPageComponent', () => {
         { provide: PlotService, useValue: plotService },
         { provide: StudiesService, useValue: studiesService },
         { provide: SectionService, useValue: sectionService },
+        { provide: ObstacleFormService, useValue: { setExistingObstacle: jest.fn() } },
+        provideHttpClient(),
+        provideHttpClientTesting(),
         {
           provide: ElementRef,
           useValue: {
@@ -88,6 +98,7 @@ describe('StudioPageComponent', () => {
 
     fixture = TestBed.createComponent(StudioPageComponent);
     component = fixture.componentInstance;
+    obstaclesService = TestBed.inject(ObstaclesService);
     router = TestBed.inject(Router);
     route = TestBed.inject(ActivatedRoute);
   });
@@ -130,12 +141,12 @@ describe('StudioPageComponent', () => {
 
     const study = {
       sections: [
-        { uuid: 'other', supports: [1] },
-        { uuid: sectionUuid, supports: [1, 2, 3] }
+        { uuid: 'other', supports: [1], obstacles: [] },
+        { uuid: sectionUuid, supports: [1, 2, 3], obstacles: [] }
       ]
     } as unknown as Study;
 
-    (studiesService.getStudyAsObservable as vi.Mock).mockReturnValue(of(study));
+    studiesService.getStudyAsObservable.mockReturnValue(of(study));
 
     const sectionSetSpy = vi.spyOn(plotService.section, 'set');
     const studySetSpy = vi.spyOn(plotService.study, 'set');
@@ -163,7 +174,7 @@ describe('StudioPageComponent', () => {
     const study = {
       sections: [{ uuid: 'a', supports: [1] }]
     } as unknown as Study;
-    (studiesService.getStudyAsObservable as vi.Mock).mockReturnValue(of(study));
+    studiesService.getStudyAsObservable.mockReturnValue(of(study));
 
     component.ngOnInit();
     studiesService.ready.next(true);
@@ -223,7 +234,7 @@ describe('StudioPageComponent', () => {
     (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
     (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
 
-    (studiesService.getStudyAsObservable as vi.Mock).mockReturnValue(of(null));
+    studiesService.getStudyAsObservable.mockReturnValue(of(null));
 
     component.ngOnInit();
     studiesService.ready.next(true);
@@ -468,6 +479,155 @@ describe('StudioPageComponent', () => {
       component.toggleSidebar();
       expect(component.sidebarOpen()).toBe(true);
       expect(component.sidebarWidth()).toBe(300);
+    });
+  });
+
+  describe('filteredObstaclesOptions', () => {
+    it('should return empty array when section is null', () => {
+      expect(component.filteredObstaclesOptions()).toEqual([]);
+    });
+
+    it('should include only obstacles whose supportUuid falls within the slider range', () => {
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 2 });
+      plotService.section.set({
+        supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
+        obstacles: [
+          { uuid: 'obs-0', name: 'Obstacle A', supportUuid: 'sup-0' },
+          { uuid: 'obs-1', name: 'Obstacle B', supportUuid: 'sup-1' },
+          { uuid: 'obs-2', name: 'Obstacle C', supportUuid: 'sup-2' }
+        ]
+      } as unknown as Section);
+
+      expect(component.filteredObstaclesOptions()).toEqual([
+        { label: 'Obstacle A', value: 'obs-0' },
+        { label: 'Obstacle B', value: 'obs-1' }
+      ]);
+    });
+
+    it('should exclude obstacles outside the slider range', () => {
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
+      plotService.section.set({
+        supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
+        obstacles: [
+          { uuid: 'obs-0', name: 'Obstacle A', supportUuid: 'sup-0' },
+          { uuid: 'obs-1', name: 'Obstacle B', supportUuid: 'sup-1' }
+        ]
+      } as unknown as Section);
+
+      expect(component.filteredObstaclesOptions()).toEqual([{ label: 'Obstacle B', value: 'obs-1' }]);
+    });
+
+    it('should always include the currently selected obstacle even when outside the slider range', () => {
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
+      plotService.section.set({
+        supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
+        obstacles: [
+          { uuid: 'obs-0', name: 'Obstacle A', supportUuid: 'sup-0' },
+          { uuid: 'obs-1', name: 'Obstacle B', supportUuid: 'sup-1' }
+        ]
+      } as unknown as Section);
+      obstaclesService.selectedObstacleUuid.set('obs-0');
+
+      expect(component.filteredObstaclesOptions()).toEqual([
+        { label: 'Obstacle B', value: 'obs-1' },
+        { label: 'Obstacle A', value: 'obs-0' }
+      ]);
+    });
+  });
+
+  describe('obstaclePointOptions', () => {
+    it('should return empty array when no obstacle is selected', () => {
+      expect(component.obstaclePointOptions()).toEqual([]);
+    });
+
+    it('should return labeled point options for the selected obstacle', () => {
+      plotService.section.set({
+        supports: [],
+        obstacles: [
+          {
+            uuid: 'obs-1',
+            name: 'Obstacle A',
+            supportUuid: 'sup-0',
+            positions: [
+              { x: 1, y: 2, z: 3 },
+              { x: 4, y: 5, z: 6 }
+            ]
+          }
+        ]
+      } as unknown as Section);
+
+      obstaclesService.selectedObstacleUuid.set('obs-1');
+
+      expect(component.obstaclePointOptions()).toEqual([
+        { label: 'Point 1', value: 0 },
+        { label: 'Point 2', value: 1 }
+      ]);
+    });
+
+    it('should return empty array when selected obstacle uuid does not match any obstacle', () => {
+      plotService.section.set({ supports: [], obstacles: [] } as unknown as Section);
+      obstaclesService.selectedObstacleUuid.set('non-existent');
+
+      expect(component.obstaclePointOptions()).toEqual([]);
+    });
+  });
+
+  describe('onObstacleSelect', () => {
+    it('should auto-select point index 0 when obstacle has exactly one point', () => {
+      plotService.section.set({
+        supports: [],
+        obstacles: [{ uuid: 'obs-1', name: 'Obstacle A', supportUuid: 'sup-0', positions: [{ x: 1, y: 2, z: 3 }] }]
+      } as unknown as Section);
+
+      component.onObstacleSelect('obs-1');
+
+      expect(obstaclesService.selectedObstacleUuid()).toBe('obs-1');
+      expect(obstaclesService.selectedPointIndex()).toBe(0);
+    });
+
+    it('should set null point index when obstacle has multiple points', () => {
+      plotService.section.set({
+        supports: [],
+        obstacles: [
+          {
+            uuid: 'obs-1',
+            name: 'Obstacle A',
+            supportUuid: 'sup-0',
+            positions: [
+              { x: 1, y: 2, z: 3 },
+              { x: 4, y: 5, z: 6 }
+            ]
+          }
+        ]
+      } as unknown as Section);
+      obstaclesService.selectedPointIndex.set(1);
+
+      component.onObstacleSelect('obs-1');
+
+      expect(obstaclesService.selectedObstacleUuid()).toBe('obs-1');
+      expect(obstaclesService.selectedPointIndex()).toBeNull();
+    });
+
+    it('should clear obstacle UUID and reset point index when called with null', () => {
+      obstaclesService.selectedObstacleUuid.set('obs-1');
+      obstaclesService.selectedPointIndex.set(2);
+
+      component.onObstacleSelect(null);
+
+      expect(obstaclesService.selectedObstacleUuid()).toBeNull();
+      expect(obstaclesService.selectedPointIndex()).toBeNull();
+    });
+
+    it('should navigate to the obstacle span and load it into the form', () => {
+      plotService.getSupportIndex.mockReturnValue(2);
+      plotService.section.set({
+        supports: [],
+        obstacles: [{ uuid: 'obs-1', name: 'Obstacle A', supportUuid: 'sup-2', positions: [{ x: 1, y: 2, z: 3 }] }]
+      } as unknown as Section);
+
+      component.onObstacleSelect('obs-1');
+
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 2, endSupport: 3 });
     });
   });
 });

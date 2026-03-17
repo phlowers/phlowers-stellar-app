@@ -18,36 +18,68 @@
 
     <section class="graph-tools-cards">
       <div class="quick-measures">
+        <p-select
+          ariaLabel="select an obstacle"
+          i18n-ariaLabel
+          styleClass="quick-measures__select"
+          [options]="filteredObstaclesOptions()"
+          [ngModel]="obstaclesService.selectedObstacleUuid()"
+          (ngModelChange)="onObstacleSelect($event)"
+          [disabled]="!filteredObstaclesOptions().length"
+          data-testid="quick-measures-select-obstacle"
+        />
+
+        @if (obstaclePointOptions().length > 1) {
+          <p-select
+            @pointSelect
+            ariaLabel="select an obstacle's point"
+            i18n-ariaLabel
+            styleClass="quick-measures__select"
+            [options]="obstaclePointOptions()"
+            [ngModel]="obstaclesService.selectedPointIndex()"
+            (ngModelChange)="obstaclesService.selectedPointIndex.set($event)"
+            data-testid="quick-measures-select-obstacle-point"
+          />
+        }
+
         <dl class="quick-measures__list">
           <div>
-            <dt class="quick-measures__list__title" i18n>Parameter (m)</dt>
-            <dd class="quick-measures__list__value">123</dd>
+            <dt class="quick-measures__list__title">
+              <label for="oblique-distance" i18n>Oblique</label>
+              <p-radiobutton
+                name="distanceType"
+                value="oblique"
+                inputId="oblique-distance"
+                [(ngModel)]="distanceType"
+              />
+            </dt>
+            <dd class="quick-measures__list__value">N/A m</dd>
           </div>
 
           <div>
-            <dt class="quick-measures__list__title" i18n>Work load %</dt>
-            <dd class="quick-measures__list__value">123</dd>
-          </div>
-        </dl>
-
-        <hr class="quick-measures__separator" />
-
-        <p-select [disabled]="true" data-testid="quick-measures-select" />
-
-        <dl class="quick-measures__list">
-          <div>
-            <dt class="quick-measures__list__title" i18n>Oblique (m)</dt>
-            <dd class="quick-measures__list__value"></dd>
+            <dt class="quick-measures__list__title">
+              <label for="vertical-distance" i18n>Vertical</label>
+              <p-radiobutton
+                name="distanceType"
+                value="vertical"
+                inputId="vertical-distance"
+                [(ngModel)]="distanceType"
+              />
+            </dt>
+            <dd class="quick-measures__list__value">N/A m</dd>
           </div>
 
           <div>
-            <dt class="quick-measures__list__title" i18n>Vertical (m)</dt>
-            <dd class="quick-measures__list__value"></dd>
-          </div>
-
-          <div>
-            <dt class="quick-measures__list__title" i18n>Horizontal (m)</dt>
-            <dd class="quick-measures__list__value"></dd>
+            <dt class="quick-measures__list__title">
+              <label for="horizontal-distance" i18n>Horizontal</label>
+              <p-radiobutton
+                name="distanceType"
+                value="horizontal"
+                inputId="horizontal-distance"
+                [(ngModel)]="distanceType"
+              />
+            </dt>
+            <dd class="quick-measures__list__value">N/A m</dd>
           </div>
         </dl>
       </div>

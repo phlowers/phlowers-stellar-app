@@ -125,8 +125,11 @@ describe('ObstacleFormService', () => {
   };
   let mockObstaclesService: {
     currentPointIndex: ReturnType<typeof signal<number>>;
-    setCurrentPointIndex: vi.Mock;
-    resetCurrentPointIndex: vi.Mock;
+    setCurrentPointIndex: jest.Mock;
+    resetCurrentPointIndex: jest.Mock;
+    selectedObstacleUuid: ReturnType<typeof signal<string | null>>;
+    selectedPointIndex: ReturnType<typeof signal<number | null>>;
+    setSelectedObstacle: jest.Mock;
   };
   let mockSectionService: { createOrUpdateSection: vi.Mock };
   let mockMessageService: { add: vi.Mock };
@@ -148,8 +151,11 @@ describe('ObstacleFormService', () => {
     };
     mockObstaclesService = {
       currentPointIndex: signal(0),
-      setCurrentPointIndex: vi.fn(),
-      resetCurrentPointIndex: vi.fn()
+      setCurrentPointIndex: jest.fn(),
+      resetCurrentPointIndex: jest.fn(),
+      selectedObstacleUuid: signal<string | null>(null),
+      selectedPointIndex: signal<number | null>(null),
+      setSelectedObstacle: jest.fn()
     };
     mockSectionService = {
       createOrUpdateSection: vi.fn().mockResolvedValue(undefined)
@@ -551,6 +557,7 @@ describe('ObstacleFormService', () => {
       expect(section.obstacles[0].positions).toHaveLength(1);
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
       expect(service.results().oblique).toBeCloseTo(Math.sqrt(14), 5);
+      expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith('new-uuid', 0);
       expect(mockMessageService.add).toHaveBeenCalled();
     });
     it('should update existing obstacle and save when obstacle exists for support', async () => {
@@ -583,6 +590,7 @@ describe('ObstacleFormService', () => {
       expect(updated.type).toBe('Tree');
       expect(updated.positions.length).toBe(1);
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
+      expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith('obs-1', 0);
     });
 
     it('should compute min distances correctly with multiple points', async () => {

@@ -277,6 +277,8 @@ export class ObstacleFormService {
     const obstacle = this.buildObstacleFromForm();
     this.upsertObstacleInSection(obstacle);
     await this.saveSection();
+    const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
+    this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
     // TODO: Implement calculation logic
     // For now, set mock results
     let minOblique = Number.POSITIVE_INFINITY;

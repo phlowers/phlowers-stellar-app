@@ -76,7 +76,8 @@ export class SectionPlotComponent {
     plotOptions: this.plotService.plotOptions(),
     displayOptions: this.plotService.selectedDisplayOptions(),
     axesNorms: this.plotService.axesNorms(),
-    pointIndex: this.obstaclesService.currentPointIndex(),
+    selectedObstacleUuid: this.obstaclesService.selectedObstacleUuid(),
+    selectedPointIndex: this.obstaclesService.selectedPointIndex(),
     sideTabs: this.sideTabsService.sideTabs(),
     positions: this.currentObstaclePositions(),
     name: this.currentObstacleName(),
@@ -141,7 +142,7 @@ export class SectionPlotComponent {
   }
 
   private getCurrentObstacleUuid(): string | null {
-    return this.obstacleFormService.form.get('uuid')?.value ?? null;
+    return this.obstaclesService.selectedObstacleUuid();
   }
 
   /** Rebuilds and redraws the section plot with the latest data, options, and obstacles. */
@@ -165,7 +166,7 @@ export class SectionPlotComponent {
 
       const camera = this.plotService.camera();
       const currentObstacleUuid = this.getCurrentObstacleUuid();
-      const currentObstaclePointIndex = this.obstaclesService.currentPointIndex();
+      const currentObstaclePointIndex = this.obstaclesService.selectedPointIndex() ?? 0;
       const axesNorms = this.plotService.axesNorms();
 
       const plot = await createPlot({
@@ -224,6 +225,7 @@ export class SectionPlotComponent {
         this.sideTabsService.sideTabs.set(0);
         this.loadFormsService.activeLoadTab.set('1');
         this.loadFormsService.selectedSpanSupportUuid.set(data.supportUuid);
+        this.obstaclesService.setSelectedObstacle(payload.obstacle.uuid, payload.obstaclePositionIndex);
       }
     });
 
