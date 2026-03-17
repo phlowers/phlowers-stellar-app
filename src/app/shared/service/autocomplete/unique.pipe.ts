@@ -25,10 +25,10 @@ export class UniquePipe implements PipeTransform {
    * @param label - The property name to use for uniqueness comparison
    * @returns An array with duplicate items removed based on the specified property
    */
-  transform<Item extends Record<string, unknown>>(items: Item[], label: keyof Item): Item[] {
+  transform<Item>(items: Item[] | null | undefined, label: keyof Item | string): Item[] {
     if (items !== undefined && items !== null) {
-      return uniqBy(items, label);
+      return uniqBy(items, label as string);
     }
-    return items;
+    return [];
   }
 }

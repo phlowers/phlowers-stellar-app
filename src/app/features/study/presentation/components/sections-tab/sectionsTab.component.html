@@ -117,13 +117,13 @@
                 onKeyDown="$event.stopPropagation()"
                 (keydown)="$event.stopPropagation()"
                 (click)="$event.stopPropagation()"
-                [options]="orderedInitialConditions(section.initial_conditions)"
+                [options]="$any(orderedInitialConditions(section.initial_conditions))"
                 [selectedOption]="section.selected_initial_condition_uuid"
                 ariaLabel="Select initial conditions"
                 i18n-ariaLabel
                 (selectOption)="
                   selectInitialConditionClick({
-                    initialCondition: $event,
+                    initialCondition: $any($event),
                     section: section
                   })
                 "
@@ -131,25 +131,25 @@
                 i18n-placeholder
                 (viewOption)="
                   viewInitialConditionClick({
-                    initialCondition: $event,
+                    initialCondition: $any($event),
                     section: section
                   })
                 "
                 (editOption)="
                   editInitialConditionClick({
-                    initialCondition: $event,
+                    initialCondition: $any($event),
                     section: section
                   })
                 "
                 (duplicateOption)="
                   duplicateInitialConditionClick({
-                    initialCondition: $event,
+                    initialCondition: $any($event),
                     section: section
                   })
                 "
                 (deleteOption)="
                   deleteInitialConditionClick({
-                    initialCondition: $event,
+                    initialCondition: $any($event),
                     section: section
                   })
                 "

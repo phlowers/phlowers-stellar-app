@@ -25,6 +25,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
+import { CheckboxChangeEvent } from 'primeng/checkbox';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
@@ -100,8 +101,8 @@ export class SectionsTabComponent {
     };
   }
 
-  selectSection(section: Section, event: { checked: boolean }) {
-    this.selectedSection.set(event.checked ? section.uuid : '');
+  selectSection(section: Section, event: CheckboxChangeEvent | { checked: boolean }) {
+    this.selectedSection.set(Boolean(event.checked) ? section.uuid : '');
   }
 
   editSection(section: Section) {
