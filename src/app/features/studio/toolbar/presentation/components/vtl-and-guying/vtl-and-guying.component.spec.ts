@@ -38,10 +38,10 @@ describe('VhlAndGuyingComponent', () => {
   let component: VhlAndGuyingComponent;
   let fixture: ComponentFixture<VhlAndGuyingComponent>;
   let toolbarDialogService: ToolbarDialogService;
-  let mockPlotService: jest.Mocked<PlotService>;
-  let mockWorkerPythonService: jest.Mocked<WorkerPythonService>;
-  let mockSectionService: jest.Mocked<SectionService>;
-  let mockMessageService: jest.Mocked<MessageService>;
+  let mockPlotService: vi.Mocked<PlotService>;
+  let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
+  let mockSectionService: vi.Mocked<SectionService>;
+  let mockMessageService: vi.Mocked<MessageService>;
 
   beforeEach(async () => {
     const mockLitData = {
@@ -64,28 +64,28 @@ describe('VhlAndGuyingComponent', () => {
       litData: signal(mockLitData),
       section: signal(mockSection),
       study: signal(mockStudy),
-      getSpanOptions: jest.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
-      getSupportOptions: jest.fn().mockReturnValue([
+      getSpanOptions: vi.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
+      getSupportOptions: vi.fn().mockReturnValue([
         { label: 1, value: 'LEFT' },
         { label: 2, value: 'RIGHT' }
       ])
-    } as unknown as jest.Mocked<PlotService>;
+    } as unknown as vi.Mocked<PlotService>;
 
     mockWorkerPythonService = {
-      runTask: jest.fn()
-    } as unknown as jest.Mocked<WorkerPythonService>;
+      runTask: vi.fn()
+    } as unknown as vi.Mocked<WorkerPythonService>;
 
     mockSectionService = {
       currentSection: signal({
         uuid: 'test-section-uuid',
         supports: [{ chainV: true }, { chainV: false }]
       }),
-      createOrUpdateSection: jest.fn().mockResolvedValue(undefined)
-    } as unknown as jest.Mocked<SectionService>;
+      createOrUpdateSection: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<SectionService>;
 
     mockMessageService = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
 
     await TestBed.configureTestingModule({
       imports: [VhlAndGuyingComponent],
@@ -119,13 +119,13 @@ describe('VhlAndGuyingComponent', () => {
   });
 
   it('should close tool when visible changes to false', () => {
-    const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+    const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
     component.onVisibleChange(false);
     expect(closeToolSpy).toHaveBeenCalled();
   });
 
   it('should not close tool when visible changes to true', () => {
-    const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+    const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
     component.onVisibleChange(true);
     expect(closeToolSpy).not.toHaveBeenCalled();
   });
@@ -175,7 +175,7 @@ describe('VhlAndGuyingComponent', () => {
   });
 
   it('should handle calculation error', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockWorkerPythonService.runTask.mockResolvedValue({
       result: {
         tensionInGuy: 0,
@@ -361,7 +361,7 @@ describe('VhlAndGuyingComponent', () => {
       chargeLIfPulley: 20
     });
 
-    const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+    const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
     component.onSave();
 
     expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(

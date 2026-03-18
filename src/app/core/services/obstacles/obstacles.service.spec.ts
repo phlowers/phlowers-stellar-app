@@ -24,11 +24,11 @@ vi.mock('papaparse', () => ({
 }));
 
 interface MockTable {
-  count: jest.Mock;
-  toArray: jest.Mock;
-  bulkAdd: jest.Mock;
-  clear?: jest.Mock;
-  where?: jest.Mock;
+  count: vi.Mock;
+  toArray: vi.Mock;
+  bulkAdd: vi.Mock;
+  clear?: vi.Mock;
+  where?: vi.Mock;
 }
 
 interface MockDb {
@@ -45,13 +45,13 @@ describe('ObstaclesService', () => {
   beforeEach(() => {
     // Create mock database tables
     mockObstacleTypesTable = {
-      count: jest.fn().mockResolvedValue(9),
-      toArray: jest.fn().mockResolvedValue([]),
-      bulkAdd: jest.fn().mockResolvedValue(undefined),
-      clear: jest.fn().mockResolvedValue(undefined),
-      where: jest.fn().mockReturnValue({
-        equals: jest.fn().mockReturnValue({
-          first: jest.fn().mockResolvedValue(undefined)
+      count: vi.fn().mockResolvedValue(9),
+      toArray: vi.fn().mockResolvedValue([]),
+      bulkAdd: vi.fn().mockResolvedValue(undefined),
+      clear: vi.fn().mockResolvedValue(undefined),
+      where: vi.fn().mockReturnValue({
+        equals: vi.fn().mockReturnValue({
+          first: vi.fn().mockResolvedValue(undefined)
         })
       })
     };
@@ -132,9 +132,9 @@ describe('ObstaclesService', () => {
         details: 'Vegetation (must also account for tree growth)'
       };
 
-      mockObstacleTypesTable.where = jest.fn().mockReturnValue({
-        equals: jest.fn().mockReturnValue({
-          first: jest.fn().mockResolvedValue(mockObstacleType)
+      mockObstacleTypesTable.where = vi.fn().mockReturnValue({
+        equals: vi.fn().mockReturnValue({
+          first: vi.fn().mockResolvedValue(mockObstacleType)
         })
       });
 
@@ -145,7 +145,7 @@ describe('ObstaclesService', () => {
   });
 
   describe('importFromFile', () => {
-    // Modern HTTP mocking: use jest.fn() and spy on fetch or HttpClient if needed
+    // Modern HTTP mocking: use vi.fn() and spy on fetch or HttpClient if needed
 
     it('should import obstacle types from CSV file successfully', async () => {
       const mockCsvData: ObstacleTypeCsvDto[] = [
@@ -165,7 +165,7 @@ describe('ObstaclesService', () => {
         'obstacle_type;obstacle_type_name;details\nordinary_ground;Ordinary ground;Ordinary ground (uncultivated, occasional presence of people)\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -211,7 +211,7 @@ describe('ObstaclesService', () => {
       const mockCsvContent = 'obstacle_type;obstacle_type_name;details\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -258,7 +258,7 @@ describe('ObstaclesService', () => {
       const mockCsvContent =
         'obstacle_type;obstacle_type_name;details\n;Invalid;Should be filtered out\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -296,7 +296,7 @@ describe('ObstaclesService', () => {
 
     it('should handle HTTP error gracefully', async () => {
       // Mock Papa Parse to call complete callback with empty data (from empty string)
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -355,7 +355,7 @@ describe('ObstaclesService', () => {
         { obstacle_type: 'vegetation', obstacle_type_name: 'Vegetation', details: 'Vegetation' }
       ];
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -397,7 +397,7 @@ describe('ObstaclesService', () => {
       const csvContent =
         'obstacle_type;obstacle_type_name;details\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         expect(options.delimiter).toBe(';');
         expect(options.header).toBe(true);
         expect(options.skipEmptyLines).toBe(true);
@@ -453,7 +453,7 @@ describe('ObstaclesService', () => {
         }
       ];
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -487,9 +487,9 @@ describe('ObstaclesService', () => {
 
   describe('getObstacleType - edge cases', () => {
     it('should return undefined when obstacle type is not found', async () => {
-      mockObstacleTypesTable.where = jest.fn().mockReturnValue({
-        equals: jest.fn().mockReturnValue({
-          first: jest.fn().mockResolvedValue(undefined)
+      mockObstacleTypesTable.where = vi.fn().mockReturnValue({
+        equals: vi.fn().mockReturnValue({
+          first: vi.fn().mockResolvedValue(undefined)
         })
       });
 

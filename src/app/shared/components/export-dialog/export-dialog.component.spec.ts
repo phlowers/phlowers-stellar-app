@@ -16,7 +16,7 @@ describe('ExportDialogComponent', () => {
   beforeEach(async () => {
     mockStudiesService = {
       exportDialogData: signal({ isOpen: true, uuid: 'test-uuid', title: 'Test Study' }),
-      downloadStudy: jest.fn()
+      downloadStudy: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -78,7 +78,7 @@ describe('ExportDialogComponent', () => {
       const exportDialogData = signal({ isOpen: true, uuid: 'test-uuid', title: 'My Study.clst' });
       mockStudiesService = {
         exportDialogData,
-        downloadStudy: jest.fn()
+        downloadStudy: vi.fn()
       };
 
       await TestBed.resetTestingModule()

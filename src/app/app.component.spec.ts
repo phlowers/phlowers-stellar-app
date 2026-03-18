@@ -59,50 +59,50 @@ describe('AppComponent', () => {
 
   const mockDb = {
     users: {
-      toArray: jest.fn(),
-      add: jest.fn(),
-      clear: jest.fn()
+      toArray: vi.fn(),
+      add: vi.fn(),
+      clear: vi.fn()
     },
     maintenance: {
-      toArray: jest.fn(),
-      clear: jest.fn(),
-      bulkAdd: jest.fn()
+      toArray: vi.fn(),
+      clear: vi.fn(),
+      bulkAdd: vi.fn()
     },
     lines: {
-      count: jest.fn(),
-      toArray: jest.fn(),
-      bulkAdd: jest.fn()
+      count: vi.fn(),
+      toArray: vi.fn(),
+      bulkAdd: vi.fn()
     },
     metadata: {
-      get: jest.fn().mockResolvedValue(null),
-      put: jest.fn().mockResolvedValue(undefined)
+      get: vi.fn().mockResolvedValue(null),
+      put: vi.fn().mockResolvedValue(undefined)
     }
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // @ts-expect-error worker
     window.Worker = Worker;
     readySubject = new BehaviorSubject<boolean>(false);
     workerReadySubject = new BehaviorSubject<boolean>(true);
 
     mockMessageService = {
-      add: jest.fn()
+      add: vi.fn()
     } as unknown as MessageService;
 
-    mockDb.users.toArray = jest.fn().mockResolvedValue([]);
-    mockDb.users.add = jest.fn();
-    mockDb.users.clear = jest.fn();
+    mockDb.users.toArray = vi.fn().mockResolvedValue([]);
+    mockDb.users.add = vi.fn();
+    mockDb.users.clear = vi.fn();
 
     mockStorageService = {
-      setPersistentStorage: jest.fn().mockResolvedValue(undefined),
-      createDatabase: jest.fn().mockResolvedValue(undefined),
+      setPersistentStorage: vi.fn().mockResolvedValue(undefined),
+      createDatabase: vi.fn().mockResolvedValue(undefined),
       ready$: readySubject,
       db: mockDb
     } as unknown as StorageService;
 
     mockWorkerService = {
-      setup: jest.fn(),
+      setup: vi.fn(),
       ready$: workerReadySubject
     } as unknown as WorkerPythonService;
 
@@ -111,43 +111,43 @@ describe('AppComponent', () => {
     } as unknown as OnlineService;
 
     mockUserService = {
-      getUser: jest.fn().mockResolvedValue(null),
-      createUser: jest.fn().mockResolvedValue(undefined)
+      getUser: vi.fn().mockResolvedValue(null),
+      createUser: vi.fn().mockResolvedValue(undefined)
     } as unknown as UserService;
 
     mockUpdateService = {
-      checkAppVersion: jest.fn(),
-      getLatestAssetList: jest.fn().mockResolvedValue(null),
+      checkAppVersion: vi.fn(),
+      getLatestAssetList: vi.fn().mockResolvedValue(null),
       needUpdate$: new BehaviorSubject<boolean>(false)
     } as unknown as UpdateService;
 
     mockMaintenanceService = {
-      getMaintenance: jest.fn().mockResolvedValue([]),
-      importFromFile: jest.fn().mockResolvedValue(undefined),
+      getMaintenance: vi.fn().mockResolvedValue([]),
+      importFromFile: vi.fn().mockResolvedValue(undefined),
       ready: new BehaviorSubject<boolean>(true)
     } as unknown as MaintenanceService;
 
     mockLinesService = {
-      getLinesCount: jest.fn().mockResolvedValue(0),
-      getLines: jest.fn().mockResolvedValue([]),
-      importFromFile: jest.fn().mockResolvedValue(undefined),
+      getLinesCount: vi.fn().mockResolvedValue(0),
+      getLines: vi.fn().mockResolvedValue([]),
+      importFromFile: vi.fn().mockResolvedValue(undefined),
       ready: new BehaviorSubject<boolean>(true)
     } as unknown as LinesService;
 
     mockCablesService = {
-      importFromFile: jest.fn().mockResolvedValue(undefined)
+      importFromFile: vi.fn().mockResolvedValue(undefined)
     } as unknown as CablesService;
 
     mockChainsService = {
-      importFromFile: jest.fn().mockResolvedValue(undefined)
+      importFromFile: vi.fn().mockResolvedValue(undefined)
     } as unknown as ChainsService;
 
     mockAttachmentService = {
-      importFromFile: jest.fn().mockResolvedValue(undefined)
+      importFromFile: vi.fn().mockResolvedValue(undefined)
     } as unknown as AttachmentService;
 
     mockObstaclesService = {
-      importFromFile: jest.fn().mockResolvedValue(undefined)
+      importFromFile: vi.fn().mockResolvedValue(undefined)
     } as unknown as ObstaclesService;
 
     await TestBed.configureTestingModule({
@@ -193,9 +193,9 @@ describe('AppComponent', () => {
     });
 
     it('should handle errors when initializing database', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const error = new Error('Database error');
-      (mockStorageService.createDatabase as jest.Mock).mockRejectedValue(error);
+      (mockStorageService.createDatabase as vi.Mock).mockRejectedValue(error);
 
       await component.setupWorker();
 
@@ -206,7 +206,7 @@ describe('AppComponent', () => {
 
   describe('setupData', () => {
     it('should skip import when stored hash matches latest hash', async () => {
-      // @ts-expect-error jest mock on service method
+      // @ts-expect-error vitest mock on service method
       mockUpdateService.getLatestAssetList.mockResolvedValue({
         data_hashes: {
           'lines.csv': 'hash-1'
@@ -222,7 +222,7 @@ describe('AppComponent', () => {
     });
 
     it('should import and update metadata when hash changes', async () => {
-      // @ts-expect-error jest mock on service method
+      // @ts-expect-error vitest mock on service method
       mockUpdateService.getLatestAssetList.mockResolvedValue({
         data_hashes: {
           'lines.csv': 'new-hash'
@@ -241,7 +241,7 @@ describe('AppComponent', () => {
     });
 
     it('should import all catalogs when manifest has no data_hashes', async () => {
-      // @ts-expect-error jest mock on service method
+      // @ts-expect-error vitest mock on service method
       mockUpdateService.getLatestAssetList.mockResolvedValue({});
 
       await component.setupData();
@@ -351,18 +351,18 @@ describe('AppComponent - HTML rendering', () => {
       providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
     TestBed.overrideProvider(WorkerPythonService, {
-      useValue: { setup: jest.fn(), ready$: workerReadySubject }
+      useValue: { setup: vi.fn(), ready$: workerReadySubject }
     });
     TestBed.overrideProvider(StorageService, {
       useValue: {
-        setPersistentStorage: jest.fn().mockResolvedValue(undefined),
-        createDatabase: jest.fn().mockResolvedValue(undefined),
+        setPersistentStorage: vi.fn().mockResolvedValue(undefined),
+        createDatabase: vi.fn().mockResolvedValue(undefined),
         ready$: readySubject,
         db: {
-          users: { toArray: jest.fn().mockResolvedValue([]), add: jest.fn(), clear: jest.fn() },
-          maintenance: { toArray: jest.fn(), clear: jest.fn(), bulkAdd: jest.fn() },
-          lines: { count: jest.fn(), toArray: jest.fn(), bulkAdd: jest.fn() },
-          metadata: { get: jest.fn().mockResolvedValue(null), put: jest.fn().mockResolvedValue(undefined) }
+          users: { toArray: vi.fn().mockResolvedValue([]), add: vi.fn(), clear: vi.fn() },
+          maintenance: { toArray: vi.fn(), clear: vi.fn(), bulkAdd: vi.fn() },
+          lines: { count: vi.fn(), toArray: vi.fn(), bulkAdd: vi.fn() },
+          metadata: { get: vi.fn().mockResolvedValue(null), put: vi.fn().mockResolvedValue(undefined) }
         }
       }
     });
@@ -370,42 +370,42 @@ describe('AppComponent - HTML rendering', () => {
       useValue: { online$: new BehaviorSubject<boolean>(true) }
     });
     TestBed.overrideProvider(MessageService, {
-      useValue: { add: jest.fn(), messageObserver: new BehaviorSubject(null), clearObserver: new BehaviorSubject(null) }
+      useValue: { add: vi.fn(), messageObserver: new BehaviorSubject(null), clearObserver: new BehaviorSubject(null) }
     });
     TestBed.overrideProvider(UserService, {
-      useValue: { getUser: jest.fn().mockResolvedValue(null), createUser: jest.fn().mockResolvedValue(undefined) }
+      useValue: { getUser: vi.fn().mockResolvedValue(null), createUser: vi.fn().mockResolvedValue(undefined) }
     });
     TestBed.overrideProvider(UpdateService, {
       useValue: {
-        checkAppVersion: jest.fn(),
-        getLatestAssetList: jest.fn().mockResolvedValue(null),
+        checkAppVersion: vi.fn(),
+        getLatestAssetList: vi.fn().mockResolvedValue(null),
         needUpdate$: new BehaviorSubject<boolean>(false),
-        updateLoading: jest.fn().mockReturnValue(false),
-        latestVersion: jest.fn().mockReturnValue(null)
+        updateLoading: vi.fn().mockReturnValue(false),
+        latestVersion: vi.fn().mockReturnValue(null)
       }
     });
     TestBed.overrideProvider(MaintenanceService, {
       useValue: {
-        getMaintenance: jest.fn().mockResolvedValue([]),
-        importFromFile: jest.fn().mockResolvedValue(undefined),
+        getMaintenance: vi.fn().mockResolvedValue([]),
+        importFromFile: vi.fn().mockResolvedValue(undefined),
         ready: new BehaviorSubject<boolean>(true)
       }
     });
     TestBed.overrideProvider(LinesService, {
       useValue: {
-        getLinesCount: jest.fn().mockResolvedValue(0),
-        getLines: jest.fn().mockResolvedValue([]),
-        importFromFile: jest.fn().mockResolvedValue(undefined),
+        getLinesCount: vi.fn().mockResolvedValue(0),
+        getLines: vi.fn().mockResolvedValue([]),
+        importFromFile: vi.fn().mockResolvedValue(undefined),
         ready: new BehaviorSubject<boolean>(true)
       }
     });
-    TestBed.overrideProvider(CablesService, { useValue: { importFromFile: jest.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: jest.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(CablesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
     TestBed.overrideProvider(AttachmentService, {
-      useValue: { importFromFile: jest.fn().mockResolvedValue(undefined) }
+      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
     });
     TestBed.overrideProvider(ObstaclesService, {
-      useValue: { importFromFile: jest.fn().mockResolvedValue(undefined) }
+      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
     });
 
     fixture = TestBed.createComponent(AppComponent);

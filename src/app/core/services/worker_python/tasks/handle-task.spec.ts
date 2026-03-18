@@ -10,42 +10,42 @@ import { Task } from './types';
 
 // Mock the pyodide module
 vi.mock('pyodide', () => ({
-  loadPyodide: jest.fn()
+  loadPyodide: vi.fn()
 }));
 
 // Mock the python script bundle
 vi.mock('./python-scripts/functions.py', () => 'mock functions script');
 
 describe('Task handlers', () => {
-  let mockPyodide: jest.Mocked<PyodideAPI>;
+  let mockPyodide: vi.Mocked<PyodideAPI>;
 
   beforeEach(() => {
     // Create a mock Pyodide instance
     mockPyodide = {
-      loadPackage: jest.fn().mockResolvedValue(undefined),
-      runPythonAsync: jest.fn().mockResolvedValue(undefined),
+      loadPackage: vi.fn().mockResolvedValue(undefined),
+      runPythonAsync: vi.fn().mockResolvedValue(undefined),
       globals: {
-        get: jest.fn(),
-        set: jest.fn()
+        get: vi.fn(),
+        set: vi.fn()
       }
-    } as unknown as jest.Mocked<PyodideAPI>;
+    } as unknown as vi.Mocked<PyodideAPI>;
 
     // Reset mocks between tests
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('handleTask', () => {
     it('should handle runTests task', async () => {
       // Setup
       const mockResult = { passed: 5, failed: 0 };
-      jest
+      vi
         .spyOn(performance, 'now')
         .mockReturnValueOnce(1000) // Start time
         .mockReturnValueOnce(1500); // End time
 
-      const mockToJs = jest.fn().mockReturnValue(mockResult);
-      (mockPyodide.globals.get as jest.Mock)
-        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: jest.fn() }))
+      const mockToJs = vi.fn().mockReturnValue(mockResult);
+      (mockPyodide.globals.get as vi.Mock)
+        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }))
         .mockReturnValueOnce(undefined as never);
 
       // Execute
@@ -72,14 +72,14 @@ describe('Task handlers', () => {
         section: { key1: 'section1', key2: 'section2' },
         color_select: { key1: 'color1', key2: 'color2' }
       };
-      jest
+      vi
         .spyOn(performance, 'now')
         .mockReturnValueOnce(1000) // Start time
         .mockReturnValueOnce(1200); // End time
 
-      const mockToJs = jest.fn().mockReturnValue(mockResult);
-      (mockPyodide.globals.get as jest.Mock)
-        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: jest.fn() }))
+      const mockToJs = vi.fn().mockReturnValue(mockResult);
+      (mockPyodide.globals.get as vi.Mock)
+        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }))
         .mockReturnValueOnce(undefined as never);
 
       // Execute
@@ -97,7 +97,7 @@ describe('Task handlers', () => {
 
     it('should handle unknown task', async () => {
       // Setup
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const unknownTask = 'unknownTask' as Task;
 
       // Execute

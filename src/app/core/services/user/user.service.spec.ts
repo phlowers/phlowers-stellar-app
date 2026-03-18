@@ -7,18 +7,18 @@ import { BehaviorSubject } from 'rxjs';
 describe('UserService', () => {
   let service: UserService;
   let storageServiceMock: Partial<StorageService>;
-  let usersTableMock: { get: jest.Mock; put: jest.Mock; toArray: jest.Mock; add: jest.Mock; clear: jest.Mock };
+  let usersTableMock: { get: vi.Mock; put: vi.Mock; toArray: vi.Mock; add: vi.Mock; clear: vi.Mock };
   let readySubject: BehaviorSubject<boolean>;
 
   const testUser: UserEntity = { email: 'test@example.com' };
 
   beforeEach(() => {
     usersTableMock = {
-      get: jest.fn(),
-      put: jest.fn(),
-      toArray: jest.fn().mockResolvedValue([]),
-      add: jest.fn(),
-      clear: jest.fn()
+      get: vi.fn(),
+      put: vi.fn(),
+      toArray: vi.fn().mockResolvedValue([]),
+      add: vi.fn(),
+      clear: vi.fn()
     };
     readySubject = new BehaviorSubject<boolean>(true);
     storageServiceMock = {

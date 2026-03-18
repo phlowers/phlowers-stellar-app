@@ -25,8 +25,8 @@ describe('PageTitleService', () => {
     };
 
     mockTitleService = {
-      setTitle: jest.fn(),
-      getTitle: jest.fn().mockReturnValue('')
+      setTitle: vi.fn(),
+      getTitle: vi.fn().mockReturnValue('')
     };
 
     TestBed.configureTestingModule({
@@ -43,7 +43,7 @@ describe('PageTitleService', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     TestBed.resetTestingModule();
   });
 
@@ -76,8 +76,8 @@ describe('PageTitleService', () => {
         title: of(testTitle)
       };
       const localTitleService = {
-        setTitle: jest.fn(),
-        getTitle: jest.fn().mockReturnValue('')
+        setTitle: vi.fn(),
+        getTitle: vi.fn().mockReturnValue('')
       };
 
       TestBed.resetTestingModule();

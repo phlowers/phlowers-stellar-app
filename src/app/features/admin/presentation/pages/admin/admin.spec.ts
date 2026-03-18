@@ -25,12 +25,12 @@ import { WINDOW } from '@core/tokens/window.token';
 describe('AdminComponent', () => {
   let component: AdminComponent;
   let fixture: ComponentFixture<AdminComponent>;
-  let updateServiceMock: jest.Mocked<UpdateService>;
-  let messageServiceMock: jest.Mocked<MessageService>;
-  let studiesServiceMock: jest.Mocked<StudiesService>;
-  let storageServiceMock: jest.Mocked<StorageService>;
-  let confirmationServiceMock: jest.Mocked<ConfirmationService>;
-  let onlineServiceMock: jest.Mocked<OnlineService>;
+  let updateServiceMock: vi.Mocked<UpdateService>;
+  let messageServiceMock: vi.Mocked<MessageService>;
+  let studiesServiceMock: vi.Mocked<StudiesService>;
+  let storageServiceMock: vi.Mocked<StorageService>;
+  let confirmationServiceMock: vi.Mocked<ConfirmationService>;
+  let onlineServiceMock: vi.Mocked<OnlineService>;
   let locationAssignMock: ReturnType<typeof vi.fn>;
   let windowMock: Partial<Window>;
 
@@ -51,35 +51,35 @@ describe('AdminComponent', () => {
       currentVersion: mockCurrentVersion,
       latestVersion: mockLatestVersion,
       needUpdate: false,
-      update: jest.fn(),
+      update: vi.fn(),
       sucessFullUpdate: new Subject<void>()
-    } as unknown as jest.Mocked<UpdateService>;
+    } as unknown as vi.Mocked<UpdateService>;
 
     messageServiceMock = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
 
     studiesServiceMock = {
-      deleteAllStudies: jest.fn()
-    } as unknown as jest.Mocked<StudiesService>;
+      deleteAllStudies: vi.fn()
+    } as unknown as vi.Mocked<StudiesService>;
 
     storageServiceMock = {
-      resetDatabase: jest.fn()
-    } as unknown as jest.Mocked<StorageService>;
+      resetDatabase: vi.fn()
+    } as unknown as vi.Mocked<StorageService>;
 
     confirmationServiceMock = {
-      confirm: jest.fn(),
-      close: jest.fn(),
+      confirm: vi.fn(),
+      close: vi.fn(),
       onAccept: new Subject<void>(),
       onReject: new Subject<void>(),
       requireConfirmation$: {
-        subscribe: jest.fn().mockReturnValue(new Subject<void>())
+        subscribe: vi.fn().mockReturnValue(new Subject<void>())
       }
-    } as unknown as jest.Mocked<ConfirmationService>;
+    } as unknown as vi.Mocked<ConfirmationService>;
 
     onlineServiceMock = {
       online$: new BehaviorSubject<boolean>(true)
-    } as unknown as jest.Mocked<OnlineService>;
+    } as unknown as vi.Mocked<OnlineService>;
 
     locationAssignMock = vi.fn();
     windowMock = { location: { assign: locationAssignMock } as Location };
@@ -117,7 +117,7 @@ describe('AdminComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Creation', () => {
@@ -222,7 +222,7 @@ describe('AdminComponent', () => {
       // Mock the caches API
       Object.defineProperty(window, 'caches', {
         value: {
-          delete: jest.fn().mockResolvedValue(undefined)
+          delete: vi.fn().mockResolvedValue(undefined)
         },
         writable: true
       });
@@ -230,9 +230,9 @@ describe('AdminComponent', () => {
       // Mock navigator.serviceWorker
       Object.defineProperty(navigator, 'serviceWorker', {
         value: {
-          getRegistrations: jest.fn().mockResolvedValue([
+          getRegistrations: vi.fn().mockResolvedValue([
             {
-              unregister: jest.fn().mockResolvedValue(true)
+              unregister: vi.fn().mockResolvedValue(true)
             }
           ])
         },

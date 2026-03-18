@@ -63,20 +63,20 @@ class MockSupportsTableComponent {
   template: ''
 })
 class MockStudioComponent {
-  refreshSection = jest.fn();
+  refreshSection = vi.fn();
 }
 
 // Mock services
 const mockMaintenanceService = {
-  getMaintenance: jest.fn().mockResolvedValue([] as CatalogMaintenance[])
+  getMaintenance: vi.fn().mockResolvedValue([] as CatalogMaintenance[])
 };
 
 const mockLinesService = {
-  getLines: jest.fn().mockResolvedValue([] as CatalogLine[])
+  getLines: vi.fn().mockResolvedValue([] as CatalogLine[])
 };
 
 const mockMessageService = {
-  add: jest.fn()
+  add: vi.fn()
 } as unknown as MessageService;
 
 // Mock data
@@ -200,7 +200,7 @@ describe('ManualSectionComponent', () => {
     (component.section as unknown as () => Section) = () => mockSection;
     (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'create';
     component.sectionChange = {
-      emit: jest.fn()
+      emit: vi.fn()
     } as unknown as typeof component.sectionChange;
     fixture.detectChanges();
   });
@@ -292,7 +292,7 @@ describe('ManualSectionComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call setupFilterTables on init', async () => {
-      const setupFilterTablesSpy = jest.spyOn(component, 'setupFilterTables');
+      const setupFilterTablesSpy = vi.spyOn(component, 'setupFilterTables');
       component.ngOnInit();
       expect(setupFilterTablesSpy).toHaveBeenCalled();
     });

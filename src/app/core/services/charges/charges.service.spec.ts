@@ -14,12 +14,12 @@ import { StudyEntity } from '@infrastructure/database';
 
 // Mock uuid
 vi.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-123')
+  v4: vi.fn(() => 'mock-uuid-123')
 }));
 
 // Mock findDuplicateTitle
 vi.mock('@shared/helpers/duplicate', () => ({
-  findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
+  findDuplicateTitle: vi.fn((titles, title) => `${title} (Copy 1)`)
 }));
 
 const mockChargeData: Charge = {
@@ -88,8 +88,8 @@ const mockSectionData: Section = {
 
 describe('ChargesService', () => {
   let service: ChargesService;
-  let mockStudiesService: jest.Mocked<StudiesService>;
-  let mockMessageService: jest.Mocked<MessageService>;
+  let mockStudiesService: vi.Mocked<StudiesService>;
+  let mockMessageService: vi.Mocked<MessageService>;
 
   const mockCharge: Charge = {
     ...mockChargeData,
@@ -117,13 +117,13 @@ describe('ChargesService', () => {
 
   beforeEach(() => {
     mockStudiesService = {
-      getStudy: jest.fn().mockResolvedValue(mockStudy),
-      updateStudy: jest.fn().mockResolvedValue(undefined)
-    } as unknown as jest.Mocked<StudiesService>;
+      getStudy: vi.fn().mockResolvedValue(mockStudy),
+      updateStudy: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<StudiesService>;
 
     mockMessageService = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
 
     TestBed.configureTestingModule({
       providers: [
@@ -137,7 +137,7 @@ describe('ChargesService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be created', () => {

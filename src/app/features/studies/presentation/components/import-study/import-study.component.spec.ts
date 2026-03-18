@@ -18,31 +18,31 @@ const createMockFileList = (files: File[]): FileList => {
 describe('ImportStudyComponent', () => {
   let component: ImportStudyComponent;
   let fixture: ComponentFixture<ImportStudyComponent>;
-  let studiesServiceMock: jest.Mocked<StudiesService>;
-  let mockConfirmationService: jest.Mocked<ConfirmationService>;
-  let mockMessageService: jest.Mocked<MessageService>;
+  let studiesServiceMock: vi.Mocked<StudiesService>;
+  let mockConfirmationService: vi.Mocked<ConfirmationService>;
+  let mockMessageService: vi.Mocked<MessageService>;
 
   beforeEach(async () => {
     studiesServiceMock = {
-      createStudyFromProtoV4: jest.fn().mockResolvedValue({} as Study),
-      deleteStudy: jest.fn().mockResolvedValue(undefined),
-      createStudy: jest.fn().mockResolvedValue('test-uuid'),
-      getStudy: jest.fn().mockResolvedValue({ uuid: 'test-uuid' } as Study)
-    } as unknown as jest.Mocked<StudiesService>;
+      createStudyFromProtoV4: vi.fn().mockResolvedValue({} as Study),
+      deleteStudy: vi.fn().mockResolvedValue(undefined),
+      createStudy: vi.fn().mockResolvedValue('test-uuid'),
+      getStudy: vi.fn().mockResolvedValue({ uuid: 'test-uuid' } as Study)
+    } as unknown as vi.Mocked<StudiesService>;
     mockMessageService = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
     const mockCablesService = {
-      getCables: jest
+      getCables: vi
         .fn()
         .mockResolvedValue([{ name: 'conducteur' }, { name: 'ASTER600' }, { name: 'câble par faisceau' }])
-    } as unknown as jest.Mocked<CablesService>;
+    } as unknown as vi.Mocked<CablesService>;
     mockConfirmationService = {
-      confirm: jest.fn()
-    } as unknown as jest.Mocked<ConfirmationService>;
+      confirm: vi.fn()
+    } as unknown as vi.Mocked<ConfirmationService>;
 
     // Mock Papa.parse
-    const mockParse = jest
+    const mockParse = vi
       .fn()
       .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
         if (config?.complete) {
@@ -103,19 +103,19 @@ describe('ImportStudyComponent', () => {
   describe('loadProtoV4File', () => {
     let mockFile: File;
     let mockFileReader: {
-      readAsDataURL: jest.Mock;
+      readAsDataURL: vi.Mock;
       onload: ((e: ProgressEvent<FileReader>) => void) | null;
     };
 
     beforeEach(() => {
       // Mock FileReader
       mockFileReader = {
-        readAsDataURL: jest.fn(),
+        readAsDataURL: vi.fn(),
         onload: null
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
+      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.csv', { type: 'text/csv' });
@@ -227,7 +227,7 @@ describe('ImportStudyComponent', () => {
     }, 10000);
 
     it('should show error message and return early when cable does not exist in database', async () => {
-      jest.spyOn(component, 'findCableInDatabase').mockResolvedValue(null);
+      vi.spyOn(component, 'findCableInDatabase').mockResolvedValue(null);
 
       // Create CSV with a conductor that doesn't exist in the database
       // The conductor is extracted from rawParameters[3], which corresponds to the 5th data line
@@ -292,7 +292,7 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should handle errors during file import and add to erroredFiles', async () => {
-      jest.spyOn(component, 'findCableInDatabase').mockRejectedValue(new Error('Database connection error'));
+      vi.spyOn(component, 'findCableInDatabase').mockRejectedValue(new Error('Database connection error'));
 
       const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -334,7 +334,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as ProgressEvent<FileReader>;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -357,10 +357,10 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should handle errors during Papa.parse and add to erroredFiles', async () => {
-      jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+      vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
       // Mock Papa.parse to throw an error
-      const mockParse = jest.fn().mockImplementation(() => {
+      const mockParse = vi.fn().mockImplementation(() => {
         throw new Error('Papa.parse failed');
       });
 
@@ -406,7 +406,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as ProgressEvent<FileReader>;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -442,7 +442,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         component.loadFiles(mockEvent);
 
@@ -477,7 +477,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         component.loadFiles(mockEvent);
 
@@ -512,7 +512,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         component.loadFiles(mockEvent);
 
@@ -534,7 +534,7 @@ describe('ImportStudyComponent', () => {
       });
 
       it('should successfully decode using parseISO88591Base64', async () => {
-        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -576,7 +576,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         component.loadFiles(mockEvent);
 
@@ -591,7 +591,7 @@ describe('ImportStudyComponent', () => {
         const fileDecodeErrors = component.erroredFiles().filter((name) => name === mockFile.name);
         if (fileDecodeErrors.length > 0) {
           const mockMessageService = TestBed.inject(MessageService);
-          const errorCalls = (mockMessageService.add as jest.Mock).mock.calls;
+          const errorCalls = (mockMessageService.add as vi.Mock).mock.calls;
           const decodeErrorMessages = errorCalls.filter(
             (call: unknown[]) =>
               Array.isArray(call) &&
@@ -606,7 +606,7 @@ describe('ImportStudyComponent', () => {
       }, 10000);
 
       it('should fallback to atob when parseISO88591Base64 fails', async () => {
-        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         // Create a base64 string that will cause parseISO88591Base64 to fail
         // but atob will succeed
@@ -638,7 +638,7 @@ describe('ImportStudyComponent', () => {
 
         // Mock atob to ensure it's called as fallback
         const originalAtob = global.atob;
-        const atobSpy = jest.fn().mockImplementation((str: string) => {
+        const atobSpy = vi.fn().mockImplementation((str: string) => {
           return originalAtob(str);
         });
         global.atob = atobSpy;
@@ -655,7 +655,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         component.loadFiles(mockEvent);
 
@@ -690,7 +690,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         component.loadFiles(mockEvent);
 
@@ -745,7 +745,7 @@ describe('ImportStudyComponent', () => {
 
     describe('Papa.parse error handling (lines 267-273)', () => {
       it('should execute reject path when parseError message is in errors', async () => {
-        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -775,9 +775,9 @@ describe('ImportStudyComponent', () => {
         const dataUrl = `data:text/csv;base64,${base64Content}`;
 
         // Mock createStudyFromProtoV4 to throw a known error (cableNotFound is in errors)
-        studiesServiceMock.createStudyFromProtoV4 = jest.fn().mockRejectedValue(new Error('cableNotFound'));
+        studiesServiceMock.createStudyFromProtoV4 = vi.fn().mockRejectedValue(new Error('cableNotFound'));
 
-        const mockParse = jest
+        const mockParse = vi
           .fn()
           .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
             if (config?.complete) {
@@ -835,7 +835,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        jest.spyOn(console, 'error').mockImplementation();
+        vi.spyOn(console, 'error').mockImplementation(() => {});
 
         component.loadFiles(mockEvent).catch(() => {
           // Errors are expected and handled
@@ -851,7 +851,7 @@ describe('ImportStudyComponent', () => {
       }, 10000);
 
       it('should throw fileParseError when parseError is not a known error', async () => {
-        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('ASTER600');
+        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('ASTER600');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -881,9 +881,9 @@ describe('ImportStudyComponent', () => {
         const dataUrl = `data:text/csv;base64,${base64Content}`;
 
         // Mock createStudyFromProtoV4 to throw an unknown error (not in errors)
-        studiesServiceMock.createStudyFromProtoV4 = jest.fn().mockRejectedValue(new Error('unknownError'));
+        studiesServiceMock.createStudyFromProtoV4 = vi.fn().mockRejectedValue(new Error('unknownError'));
 
-        const mockParse = jest
+        const mockParse = vi
           .fn()
           .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
             if (config?.complete) {
@@ -941,7 +941,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        jest.spyOn(console, 'error').mockImplementation();
+        vi.spyOn(console, 'error').mockImplementation(() => {});
 
         component.loadFiles(mockEvent).catch(() => {
           // Errors are expected and handled
@@ -968,7 +968,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -994,7 +994,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1020,7 +1020,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1045,7 +1045,7 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as Event;
 
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1062,7 +1062,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1083,7 +1083,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1104,7 +1104,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1125,7 +1125,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1146,7 +1146,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1168,7 +1168,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       component.loadFiles(mockEvent);
 
@@ -1239,19 +1239,19 @@ describe('ImportStudyComponent', () => {
   describe('loadAppFile', () => {
     let mockFile: File;
     let mockFileReader: {
-      readAsText: jest.Mock;
+      readAsText: vi.Mock;
       onload: ((e: ProgressEvent<FileReader>) => void) | null;
     };
 
     beforeEach(() => {
       // Mock FileReader
       mockFileReader = {
-        readAsText: jest.fn(),
+        readAsText: vi.fn(),
         onload: null
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
+      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.clst', {
@@ -1291,8 +1291,8 @@ describe('ImportStudyComponent', () => {
         description: 'Test Description'
       } as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
@@ -1327,8 +1327,8 @@ describe('ImportStudyComponent', () => {
         title: 'Test Study'
       } as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
@@ -1390,8 +1390,8 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
 
       component.loadAppFile(mockFile);
 
@@ -1440,8 +1440,8 @@ describe('ImportStudyComponent', () => {
         description: 'Custom Description'
       } as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
@@ -1489,7 +1489,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      studiesServiceMock.createStudy = jest.fn().mockRejectedValue(new Error('Database error'));
+      studiesServiceMock.createStudy = vi.fn().mockRejectedValue(new Error('Database error'));
 
       component.loadFiles(mockEvent);
 
@@ -1513,7 +1513,7 @@ describe('ImportStudyComponent', () => {
   describe('loadAppFile', () => {
     let mockFile: File;
     let mockFileReader: {
-      readAsText: jest.Mock;
+      readAsText: vi.Mock;
       onload: ((e: ProgressEvent<FileReader>) => void) | null;
       onerror: ((e: ProgressEvent<FileReader>) => void) | null;
     };
@@ -1521,13 +1521,13 @@ describe('ImportStudyComponent', () => {
     beforeEach(() => {
       // Mock FileReader
       mockFileReader = {
-        readAsText: jest.fn(),
+        readAsText: vi.fn(),
         onload: null,
         onerror: null
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
+      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.clst', {
@@ -1578,8 +1578,8 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
       const mockProgressEvent = {
         target: {
@@ -1631,15 +1631,15 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as unknown as Study;
 
-      studiesServiceMock.getStudy = jest
+      studiesServiceMock.getStudy = vi
         .fn()
         .mockResolvedValueOnce(existingStudy) // For promptIfStudyAlreadyExists
         .mockResolvedValueOnce(createdStudy); // For final getStudy
-      studiesServiceMock.deleteStudy = jest.fn().mockResolvedValue(undefined);
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.deleteStudy = vi.fn().mockResolvedValue(undefined);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
 
       // Mock confirmation service to accept
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation(async (options: { accept?: () => void | Promise<void>; reject?: () => void }) => {
           if (options.accept) {
@@ -1680,11 +1680,11 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as unknown as Study;
 
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(existingStudy);
-      studiesServiceMock.createStudy = jest.fn();
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(existingStudy);
+      studiesServiceMock.createStudy = vi.fn();
 
       // Mock confirmation service to reject
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
           if (options.reject) {
@@ -1729,8 +1729,8 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as unknown as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
       const mockProgressEvent = {
         target: {
@@ -1796,8 +1796,8 @@ describe('ImportStudyComponent', () => {
       const base64Content = encodeStudyToBase64(studyData);
       const newUuid = 'new-study-uuid';
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
 
       const mockProgressEvent = {
         target: {
@@ -1883,8 +1883,8 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as unknown as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
       const mockProgressEvent = {
         target: {
@@ -1925,7 +1925,7 @@ describe('ImportStudyComponent', () => {
     } as Study;
 
     it('should return true when study does not exist', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
 
       const result = await component.promptIfStudyAlreadyExists(testUuid);
 
@@ -1935,7 +1935,7 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should return true when study is undefined', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(undefined);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(undefined);
 
       const result = await component.promptIfStudyAlreadyExists(testUuid);
 
@@ -1945,11 +1945,11 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should show confirmation dialog and return true when user accepts', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
-      studiesServiceMock.deleteStudy = jest.fn().mockResolvedValue(undefined);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
+      studiesServiceMock.deleteStudy = vi.fn().mockResolvedValue(undefined);
 
       // Mock the confirm method to call the accept callback
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation(async (options: { accept?: () => void | Promise<void>; reject?: () => void }) => {
           // Simulate user accepting
@@ -1973,10 +1973,10 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should show confirmation dialog and return false when user rejects', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
 
       // Mock the confirm method to call the reject callback
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
           // Simulate user rejecting
@@ -2000,9 +2000,9 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should include study title in confirmation message', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
 
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
           if (options.reject) {

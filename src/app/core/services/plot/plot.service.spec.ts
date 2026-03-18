@@ -21,19 +21,19 @@ import { BehaviorSubject } from 'rxjs';
 
 // Mock plotly
 vi.mock('plotly.js-dist-min', () => ({
-  purge: jest.fn()
+  purge: vi.fn()
 }));
 
 interface MockWorkerPythonService extends Partial<WorkerPythonService> {
   ready: boolean;
-  runTask: jest.Mock;
+  runTask: vi.Mock;
   setReady?: (value: boolean) => void;
 }
 
 describe('PlotService', () => {
   let service: PlotService;
   let mockWorkerPythonService: MockWorkerPythonService;
-  let mockCablesService: jest.Mocked<CablesService>;
+  let mockCablesService: vi.Mocked<CablesService>;
 
   const mockGetSectionOutput: GetSectionOutput = {
     supports: [[[1, 2, 3]]],
@@ -193,7 +193,7 @@ describe('PlotService', () => {
       get ready$() {
         return readySubject.asObservable();
       },
-      runTask: jest.fn(),
+      runTask: vi.fn(),
       setReady: (value: boolean) => {
         readyValue = value;
         readySubject.next(value);
@@ -201,8 +201,8 @@ describe('PlotService', () => {
     };
 
     mockCablesService = {
-      getCable: jest.fn()
-    } as unknown as jest.Mocked<CablesService>;
+      getCable: vi.fn()
+    } as unknown as vi.Mocked<CablesService>;
 
     TestBed.configureTestingModule({
       providers: [
@@ -221,7 +221,7 @@ describe('PlotService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be created', () => {
@@ -489,11 +489,11 @@ describe('PlotService', () => {
   describe('purgePlot', () => {
     beforeEach(() => {
       // Mock document.getElementById
-      document.getElementById = jest.fn();
+      document.getElementById = vi.fn();
     });
 
     it('should call plotly.purge when plotly-output element exists', () => {
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -504,7 +504,7 @@ describe('PlotService', () => {
 
     it('should clear litData', () => {
       service.litData.set(mockGetSectionOutput);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -515,7 +515,7 @@ describe('PlotService', () => {
 
     it('should clear baseLitData', () => {
       service.baseLitData.set(mockGetSectionOutput);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -529,7 +529,7 @@ describe('PlotService', () => {
       service.baseLitData.set(mockGetSectionOutput);
       service.error.set(TaskError.CALCULATION_ERROR);
       service.loading.set(true);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -546,11 +546,11 @@ describe('PlotService', () => {
   describe('resetAll', () => {
     beforeEach(() => {
       // Mock document.getElementById
-      document.getElementById = jest.fn();
+      document.getElementById = vi.fn();
     });
 
     it('should call purgePlot', () => {
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -561,7 +561,7 @@ describe('PlotService', () => {
 
     it('should reset error to null', () => {
       service.error.set(TaskError.CALCULATION_ERROR);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -572,7 +572,7 @@ describe('PlotService', () => {
 
     it('should reset litData to null', () => {
       service.litData.set(mockGetSectionOutput);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -583,7 +583,7 @@ describe('PlotService', () => {
 
     it('should reset baseLitData to null', () => {
       service.baseLitData.set(mockGetSectionOutput);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -594,7 +594,7 @@ describe('PlotService', () => {
 
     it('should set loading to false', () => {
       service.loading.set(true);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -611,7 +611,7 @@ describe('PlotService', () => {
         endSupport: 10,
         invert: true
       });
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -632,7 +632,7 @@ describe('PlotService', () => {
         up: { x: 0, y: 0, z: 1 }
       };
       service.camera.set(mockCamera);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -643,7 +643,7 @@ describe('PlotService', () => {
 
     it('should reset section to null', () => {
       service.section.set(mockSection);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -665,7 +665,7 @@ describe('PlotService', () => {
         sections: [mockSection]
       };
       service.study.set(mockStudy);
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -707,7 +707,7 @@ describe('PlotService', () => {
       service.section.set(mockSection);
       service.study.set(mockStudy);
 
-      (document.getElementById as jest.Mock).mockReturnValue({
+      (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
@@ -731,7 +731,7 @@ describe('PlotService', () => {
     });
 
     it('should handle reset when plotly-output element does not exist', () => {
-      (document.getElementById as jest.Mock).mockReturnValue(null);
+      (document.getElementById as vi.Mock).mockReturnValue(null);
 
       service.error.set(TaskError.CALCULATION_ERROR);
       service.litData.set(mockGetSectionOutput);
@@ -1043,7 +1043,7 @@ describe('PlotService', () => {
 
     it('should not update if value is unchanged', () => {
       service.setResolution(75);
-      const storageSpy = jest.spyOn(Storage.prototype, 'setItem');
+      const storageSpy = vi.spyOn(Storage.prototype, 'setItem');
       service.setResolution(75);
       expect(storageSpy).not.toHaveBeenCalled();
       storageSpy.mockRestore();
@@ -1120,19 +1120,19 @@ describe('PlotService', () => {
 
   describe('getCamera', () => {
     it('should return null when plotly-output element does not exist', () => {
-      document.getElementById = jest.fn().mockReturnValue(null);
+      document.getElementById = vi.fn().mockReturnValue(null);
       expect(service.getCamera()).toBeNull();
     });
 
     it('should return camera from _fullLayout when available', () => {
       const mockCamera: Camera = { eye: { x: 1, y: 1, z: 1 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
       const mockElement = { _fullLayout: { scene: { camera: mockCamera } } };
-      document.getElementById = jest.fn().mockReturnValue(mockElement);
+      document.getElementById = vi.fn().mockReturnValue(mockElement);
       expect(service.getCamera()).toEqual(mockCamera);
     });
 
     it('should return null when element has no _fullLayout', () => {
-      document.getElementById = jest.fn().mockReturnValue({});
+      document.getElementById = vi.fn().mockReturnValue({});
       expect(service.getCamera()).toBeNull();
     });
   });
@@ -1141,7 +1141,7 @@ describe('PlotService', () => {
     it('should update camera signal when camera changes', () => {
       const mockCamera: Camera = { eye: { x: 2, y: 2, z: 2 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
       const mockElement = { _fullLayout: { scene: { camera: mockCamera } } };
-      document.getElementById = jest.fn().mockReturnValue(mockElement);
+      document.getElementById = vi.fn().mockReturnValue(mockElement);
       service.camera.set(null);
 
       service.refreshCamera();
@@ -1151,9 +1151,9 @@ describe('PlotService', () => {
 
     it('should not update camera signal when camera is the same', () => {
       const mockCamera: Camera = { eye: { x: 2, y: 2, z: 2 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
-      document.getElementById = jest.fn().mockReturnValue({ _fullLayout: { scene: { camera: mockCamera } } });
+      document.getElementById = vi.fn().mockReturnValue({ _fullLayout: { scene: { camera: mockCamera } } });
       service.camera.set(mockCamera);
-      const setCameraSpy = jest.spyOn(service.camera, 'set');
+      const setCameraSpy = vi.spyOn(service.camera, 'set');
 
       service.refreshCamera();
 

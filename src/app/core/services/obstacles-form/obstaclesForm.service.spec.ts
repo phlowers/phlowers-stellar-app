@@ -115,47 +115,47 @@ const mockStudy: Study = {
 describe('ObstacleFormService', () => {
   let service: ObstacleFormService;
   let mockPlotService: {
-    getSupportIndex: jest.Mock;
-    getSupportOptions: jest.Mock;
-    getSpanOptions: jest.Mock;
-    plotOptionsChange: jest.Mock;
+    getSupportIndex: vi.Mock;
+    getSupportOptions: vi.Mock;
+    getSpanOptions: vi.Mock;
+    plotOptionsChange: vi.Mock;
     spanAmountChoice: ReturnType<typeof signal<'single' | 'double' | 'all'>>;
     section: ReturnType<typeof signal<Section | null>>;
     study: ReturnType<typeof signal<Study | null>>;
   };
   let mockObstaclesService: {
     currentPointIndex: ReturnType<typeof signal<number>>;
-    setCurrentPointIndex: jest.Mock;
-    resetCurrentPointIndex: jest.Mock;
+    setCurrentPointIndex: vi.Mock;
+    resetCurrentPointIndex: vi.Mock;
   };
-  let mockSectionService: { createOrUpdateSection: jest.Mock };
-  let mockMessageService: { add: jest.Mock };
+  let mockSectionService: { createOrUpdateSection: vi.Mock };
+  let mockMessageService: { add: vi.Mock };
 
   beforeEach(() => {
     const sectionSignal = signal<Section | null>({ ...mockSection });
     const spanAmountChoiceSignal = signal<'single' | 'double' | 'all'>('all');
     mockPlotService = {
-      getSupportIndex: jest.fn().mockReturnValue(0),
-      getSupportOptions: jest.fn().mockReturnValue([
+      getSupportIndex: vi.fn().mockReturnValue(0),
+      getSupportOptions: vi.fn().mockReturnValue([
         { label: 1, value: 'LEFT' },
         { label: 2, value: 'RIGHT' }
       ]),
-      getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]),
-      plotOptionsChange: jest.fn(),
+      getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]),
+      plotOptionsChange: vi.fn(),
       spanAmountChoice: spanAmountChoiceSignal,
       section: sectionSignal,
       study: signal<Study | null>(mockStudy)
     };
     mockObstaclesService = {
       currentPointIndex: signal(0),
-      setCurrentPointIndex: jest.fn(),
-      resetCurrentPointIndex: jest.fn()
+      setCurrentPointIndex: vi.fn(),
+      resetCurrentPointIndex: vi.fn()
     };
     mockSectionService = {
-      createOrUpdateSection: jest.fn().mockResolvedValue(undefined)
+      createOrUpdateSection: vi.fn().mockResolvedValue(undefined)
     };
     mockMessageService = {
-      add: jest.fn()
+      add: vi.fn()
     };
 
     TestBed.configureTestingModule({
@@ -285,7 +285,7 @@ describe('ObstacleFormService', () => {
       expect(result).toBeDefined();
     }));
     it('should update plot and supportsOptions when supportUuid is valid', () => {
-      (mockPlotService.getSupportIndex as jest.Mock).mockReturnValue(0);
+      (mockPlotService.getSupportIndex as vi.Mock).mockReturnValue(0);
       service.resetFormForNewObstacle('sup-1');
       expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({
         startSupport: 0,
@@ -295,7 +295,7 @@ describe('ObstacleFormService', () => {
       expect(service.supportsOptions().length).toBeGreaterThanOrEqual(0);
     });
     it('should avoid plot change when support index is invalid', () => {
-      (mockPlotService.getSupportIndex as jest.Mock).mockReturnValue(-1);
+      (mockPlotService.getSupportIndex as vi.Mock).mockReturnValue(-1);
       service.resetFormForNewObstacle('sup-1');
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
       expect(service.supportsOptions().length).toBeGreaterThanOrEqual(0);
@@ -377,7 +377,7 @@ describe('ObstacleFormService', () => {
       ];
       mockPlotService.section.set({ ...mockSection, obstacles });
       mockPlotService.getSpanOptions.mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]);
-      jest
+      vi
         .spyOn(service as unknown as { findSupportForObstacle: () => Support | undefined }, 'findSupportForObstacle')
         .mockReturnValue({ uuid: 'sup-2', number: 2 } as unknown as Support);
 

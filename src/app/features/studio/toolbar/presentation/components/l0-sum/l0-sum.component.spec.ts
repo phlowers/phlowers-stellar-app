@@ -43,8 +43,8 @@ describe('L0SumComponent', () => {
     };
 
     const mockPlotService = {
-      loading: jest.fn().mockReturnValue(false),
-      litData: jest.fn().mockReturnValue(mockLitData)
+      loading: vi.fn().mockReturnValue(false),
+      litData: vi.fn().mockReturnValue(mockLitData)
     } as unknown as PlotService;
 
     await TestBed.configureTestingModule({
@@ -78,13 +78,13 @@ describe('L0SumComponent', () => {
 
   describe('onVisibleChange', () => {
     it('should call closeTool when visible is false', () => {
-      const closeSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      const closeSpy = vi.spyOn(toolbarDialogService, 'closeTool');
       component.onVisibleChange(false);
       expect(closeSpy).toHaveBeenCalled();
     });
 
     it('should not call closeTool when visible is true', () => {
-      const closeSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      const closeSpy = vi.spyOn(toolbarDialogService, 'closeTool');
       component.onVisibleChange(true);
       expect(closeSpy).not.toHaveBeenCalled();
     });
@@ -92,7 +92,7 @@ describe('L0SumComponent', () => {
 
   describe('onExport', () => {
     it('should log export data', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
       component.onExport();
       expect(consoleSpy).toHaveBeenCalledWith(
         'Export L0 sum',

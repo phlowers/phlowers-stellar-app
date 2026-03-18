@@ -13,7 +13,6 @@
     ],
     "types": [
       "vitest/globals",
-      "jest",
       "node",
       "@angular/localize"
     ],

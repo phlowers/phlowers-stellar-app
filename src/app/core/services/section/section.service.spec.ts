@@ -13,12 +13,12 @@ import { StudyEntity } from '@infrastructure/database';
 
 // Mock uuid
 vi.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-123')
+  v4: vi.fn(() => 'mock-uuid-123')
 }));
 
 // Mock findDuplicateTitle
 vi.mock('@shared/helpers/duplicate', () => ({
-  findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
+  findDuplicateTitle: vi.fn((titles, title) => `${title} (Copy 1)`)
 }));
 
 const mockSectionData: Section = {
@@ -68,7 +68,7 @@ const mockSectionData: Section = {
 
 describe('SectionService', () => {
   let service: SectionService;
-  let mockStudiesService: jest.Mocked<StudiesService>;
+  let mockStudiesService: vi.Mocked<StudiesService>;
 
   const mockSection: Section = {
     ...mockSectionData,
@@ -92,8 +92,8 @@ describe('SectionService', () => {
 
   beforeEach(() => {
     mockStudiesService = {
-      updateStudy: jest.fn().mockResolvedValue(undefined)
-    } as unknown as jest.Mocked<StudiesService>;
+      updateStudy: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<StudiesService>;
 
     TestBed.configureTestingModule({
       providers: [SectionService, { provide: StudiesService, useValue: mockStudiesService }]
@@ -102,13 +102,13 @@ describe('SectionService', () => {
     service = TestBed.inject(SectionService);
 
     // Mock Date to have predictable timestamps
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-01-15T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-15T12:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('should be created', () => {

@@ -18,10 +18,10 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 describe('StudiesComponent', () => {
   let component: StudiesComponent;
   let fixture: ComponentFixture<StudiesComponent>;
-  let mockStudiesService: jest.Mocked<StudiesService>;
-  let mockConfirmationService: jest.Mocked<ConfirmationService>;
-  let mockActivatedRoute: jest.Mocked<ActivatedRoute>;
-  let mockMessageService: jest.Mocked<MessageService>;
+  let mockStudiesService: vi.Mocked<StudiesService>;
+  let mockConfirmationService: vi.Mocked<ConfirmationService>;
+  let mockActivatedRoute: vi.Mocked<ActivatedRoute>;
+  let mockMessageService: vi.Mocked<MessageService>;
 
   const mockStudy: Study = {
     uuid: 'test-uuid-1',
@@ -52,25 +52,25 @@ describe('StudiesComponent', () => {
     mockStudiesService = {
       studies: new BehaviorSubject<Study[]>([]),
       ready: new BehaviorSubject<boolean>(false),
-      getStudies: jest.fn(),
-      duplicateStudy: jest.fn(),
-      deleteStudy: jest.fn(),
+      getStudies: vi.fn(),
+      duplicateStudy: vi.fn(),
+      deleteStudy: vi.fn(),
       exportDialogData: signal(null)
-    } as unknown as jest.Mocked<StudiesService>;
+    } as unknown as vi.Mocked<StudiesService>;
 
     mockConfirmationService = {
-      confirm: jest.fn()
-    } as unknown as jest.Mocked<ConfirmationService>;
+      confirm: vi.fn()
+    } as unknown as vi.Mocked<ConfirmationService>;
 
     mockActivatedRoute = {
       snapshot: {
         queryParams: {}
       }
-    } as unknown as jest.Mocked<ActivatedRoute>;
+    } as unknown as vi.Mocked<ActivatedRoute>;
 
     mockMessageService = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
 
     await TestBed.configureTestingModule({
       imports: [StudiesComponent],
@@ -79,7 +79,7 @@ describe('StudiesComponent', () => {
         { provide: ConfirmationService, useValue: mockConfirmationService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: MessageService, useValue: mockMessageService },
-        { provide: CablesService, useValue: { getCables: jest.fn().mockResolvedValue([]) } }
+        { provide: CablesService, useValue: { getCables: vi.fn().mockResolvedValue([]) } }
       ]
     }).compileComponents();
 
@@ -88,7 +88,7 @@ describe('StudiesComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Creation', () => {
@@ -182,7 +182,7 @@ describe('StudiesComponent', () => {
     });
 
     it('should handle duplicateStudy promise rejection gracefully', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const testUuid = 'test-uuid-123';
       mockStudiesService.duplicateStudy.mockRejectedValue(new Error('Duplicate failed'));
 

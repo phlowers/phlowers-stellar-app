@@ -31,16 +31,16 @@ class PlotServiceMock {
   section: SignalFn<Section | null> = createSignalMock<Section | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
   isFreePositioningMode: SignalFn<boolean> = createSignalMock<boolean>(false);
-  plotOptions = jest.fn().mockReturnValue({ invert: false });
-  plotOptionsChange = jest.fn();
-  resetAll = jest.fn();
+  plotOptions = vi.fn().mockReturnValue({ invert: false });
+  plotOptionsChange = vi.fn();
+  resetAll = vi.fn();
 }
 
 // StudiesService mock
 class StudiesServiceMock {
   ready = new Subject<boolean>();
-  getStudyAsObservable = jest.fn();
-  setCurrentStudy = jest.fn();
+  getStudyAsObservable = vi.fn();
+  setCurrentStudy = vi.fn();
 }
 
 describe('StudioPageComponent', () => {
@@ -50,23 +50,23 @@ describe('StudioPageComponent', () => {
   let route: ActivatedRoute;
   let plotService: PlotServiceMock;
   let studiesService: StudiesServiceMock;
-  let sectionService: jest.Mocked<SectionService>;
+  let sectionService: vi.Mocked<SectionService>;
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
     studiesService = new StudiesServiceMock();
-    sectionService = {} as unknown as jest.Mocked<SectionService>;
+    sectionService = {} as unknown as vi.Mocked<SectionService>;
 
     await TestBed.configureTestingModule({
       imports: [StudioPageComponent],
       providers: [
-        { provide: Router, useValue: { navigate: jest.fn() } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
         {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              paramMap: { get: jest.fn().mockReturnValue('study-1') },
-              queryParamMap: { get: jest.fn().mockReturnValue('section-1') }
+              paramMap: { get: vi.fn().mockReturnValue('study-1') },
+              queryParamMap: { get: vi.fn().mockReturnValue('section-1') }
             }
           }
         },
@@ -77,7 +77,7 @@ describe('StudioPageComponent', () => {
           provide: ElementRef,
           useValue: {
             nativeElement: {
-              querySelector: jest.fn().mockReturnValue(null) // prevent ResizeObserver branch
+              querySelector: vi.fn().mockReturnValue(null) // prevent ResizeObserver branch
             }
           }
         }
@@ -93,7 +93,7 @@ describe('StudioPageComponent', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('toggleSidebar should toggle open state and width', () => {
@@ -116,7 +116,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('ngOnInit should navigate when params are missing', () => {
-    (route.snapshot.paramMap.get as jest.Mock).mockReturnValueOnce(null);
+    (route.snapshot.paramMap.get as vi.Mock).mockReturnValueOnce(null);
 
     component.ngOnInit();
     expect(router.navigate).toHaveBeenCalledWith(['/studies']);
@@ -125,8 +125,8 @@ describe('StudioPageComponent', () => {
   it('ngOnInit should load study and section, then set plot options', () => {
     const studyUuid = 'study-1';
     const sectionUuid = 'section-1';
-    (route.snapshot.paramMap.get as jest.Mock).mockReturnValue(studyUuid);
-    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue(sectionUuid);
+    (route.snapshot.paramMap.get as vi.Mock).mockReturnValue(studyUuid);
+    (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue(sectionUuid);
 
     const study = {
       sections: [
@@ -135,10 +135,10 @@ describe('StudioPageComponent', () => {
       ]
     } as unknown as Study;
 
-    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(of(study));
+    (studiesService.getStudyAsObservable as vi.Mock).mockReturnValue(of(study));
 
-    const sectionSetSpy = jest.spyOn(plotService.section, 'set');
-    const studySetSpy = jest.spyOn(plotService.study, 'set');
+    const sectionSetSpy = vi.spyOn(plotService.section, 'set');
+    const studySetSpy = vi.spyOn(plotService.study, 'set');
 
     component.ngOnInit();
 
@@ -157,13 +157,13 @@ describe('StudioPageComponent', () => {
   });
 
   it('ngOnInit should navigate if section not found', () => {
-    (route.snapshot.paramMap.get as jest.Mock).mockReturnValue('study-1');
-    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue('missing-section');
+    (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+    (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('missing-section');
 
     const study = {
       sections: [{ uuid: 'a', supports: [1] }]
     } as unknown as Study;
-    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(of(study));
+    (studiesService.getStudyAsObservable as vi.Mock).mockReturnValue(of(study));
 
     component.ngOnInit();
     studiesService.ready.next(true);
@@ -175,18 +175,18 @@ describe('StudioPageComponent', () => {
   });
 
   it('debounceUpdateSliderOptions should call plotOptionsChange after delay', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     component.debounceUpdateSliderOptions('startSupport', 1);
     expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       startSupport: 1
     });
   });
 
   it('debounceUpdateSliderOptions should set supports to single when diff is 1', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 2,
@@ -194,13 +194,13 @@ describe('StudioPageComponent', () => {
     });
 
     component.debounceUpdateSliderOptions('endSupport', 3);
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
 
     expect(plotService.spanAmountChoice()).toBe('single');
   });
 
   it('debounceUpdateSliderOptions should set spanAmountChoice to double when diff is 2', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
@@ -208,7 +208,7 @@ describe('StudioPageComponent', () => {
     });
 
     component.debounceUpdateSliderOptions('endSupport', 3);
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
 
     expect(plotService.spanAmountChoice()).toBe('double');
   });
@@ -220,10 +220,10 @@ describe('StudioPageComponent', () => {
   });
 
   it('ngOnInit should navigate when study is null', () => {
-    (route.snapshot.paramMap.get as jest.Mock).mockReturnValue('study-1');
-    (route.snapshot.queryParamMap.get as jest.Mock).mockReturnValue('section-1');
+    (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+    (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
 
-    (studiesService.getStudyAsObservable as jest.Mock).mockReturnValue(of(null));
+    (studiesService.getStudyAsObservable as vi.Mock).mockReturnValue(of(null));
 
     component.ngOnInit();
     studiesService.ready.next(true);
@@ -233,7 +233,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('updateSliderOptions should debounce startSupport changes', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 0,
@@ -242,7 +242,7 @@ describe('StudioPageComponent', () => {
 
     component.updateSliderOptions({ value: 1, highValue: 3 });
 
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
 
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       startSupport: 1
@@ -250,7 +250,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('updateSliderOptions should debounce endSupport changes', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 0,
@@ -259,7 +259,7 @@ describe('StudioPageComponent', () => {
 
     component.updateSliderOptions({ value: 0, highValue: 5 });
 
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
 
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 5
@@ -267,7 +267,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('updateSliderOptions should not call debounce when values unchanged', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     plotService.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 0,
@@ -276,7 +276,7 @@ describe('StudioPageComponent', () => {
 
     component.updateSliderOptions({ value: 0, highValue: 3 });
 
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
 
     expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
   });
@@ -455,7 +455,7 @@ describe('StudioPageComponent', () => {
 
   describe('UC: studio page initialization and navigation', () => {
     it('UC-SP1: should redirect to studies when route params are missing', () => {
-      (route.snapshot.paramMap.get as jest.Mock).mockReturnValueOnce(null);
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValueOnce(null);
       component.ngOnInit();
       expect(router.navigate).toHaveBeenCalledWith(['/studies']);
     });

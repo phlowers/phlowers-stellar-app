@@ -69,7 +69,7 @@ describe('InputNumberComponent', () => {
 
   describe('registerOnChange', () => {
     it('should store and call the onChange callback', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       component.registerOnChange(cb);
       component.writeValue(50);
       // increment triggers onChange
@@ -80,7 +80,7 @@ describe('InputNumberComponent', () => {
 
   describe('registerOnTouched', () => {
     it('should store and call the onTouched callback', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       component.registerOnTouched(cb);
       component.markTouched();
       expect(cb).toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('InputNumberComponent', () => {
     });
 
     it('should call onTouched', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       component.registerOnTouched(cb);
       component.writeValue(100);
       component.increment();
@@ -152,7 +152,7 @@ describe('InputNumberComponent', () => {
     });
 
     it('should call onTouched', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       component.registerOnTouched(cb);
       component.writeValue(100);
       component.decrement();
@@ -162,14 +162,14 @@ describe('InputNumberComponent', () => {
 
   describe('markTouched', () => {
     it('should call onTouched when not disabled', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       component.registerOnTouched(cb);
       component.markTouched();
       expect(cb).toHaveBeenCalled();
     });
 
     it('should not call onTouched when disabled', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       component.registerOnTouched(cb);
       component.setDisabledState(true);
       component.markTouched();

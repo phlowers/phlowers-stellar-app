@@ -26,7 +26,7 @@ vi.mock('plotly.js-dist-min', () => ({
   update: vi.fn().mockResolvedValue(undefined)
 }));
 
-const mockCreatePlotData = createPlotData as jest.MockedFunction<typeof createPlotData>;
+const mockCreatePlotData = createPlotData as vi.MockedFunction<typeof createPlotData>;
 
 describe('FreePositioningComponent', () => {
   let component: FreePositioningComponent;
@@ -65,7 +65,7 @@ describe('FreePositioningComponent', () => {
   };
 
   const mockWorkerPythonService = {
-    runTask: jest.fn().mockResolvedValue({
+    runTask: vi.fn().mockResolvedValue({
       result: {
         supports: [[[1, 2, 3]]],
         insulators: [[[10, 20, 30]]],
@@ -126,8 +126,8 @@ describe('FreePositioningComponent', () => {
   let mockObstacleFormService: ReturnType<typeof buildMockObstacleFormService>;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     mockCreatePlotData.mockReturnValue([]);
     mockObstacleFormService = buildMockObstacleFormService();
 
@@ -157,8 +157,8 @@ describe('FreePositioningComponent', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   describe('Component creation', () => {
@@ -442,8 +442,8 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should return early when DOM element is not found', async () => {
-      jest.spyOn(document, 'getElementById').mockReturnValue(null);
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      vi.spyOn(document, 'getElementById').mockReturnValue(null);
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       await component.createPlot(mockLitData, 0, 'profile', []);
 
@@ -452,7 +452,7 @@ describe('FreePositioningComponent', () => {
 
     it('should call createPlotData and Plotly.newPlot when element exists', async () => {
       const fakeElement = document.createElement('div');
-      jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
+      vi.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
 
       await component.createPlot(mockLitData, 0, 'profile', []);
 
@@ -466,8 +466,8 @@ describe('FreePositioningComponent', () => {
 
     it('should set plotFace when side is face', async () => {
       const fakeElement = document.createElement('div');
-      jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
-      (Plotly.newPlot as jest.Mock).mockResolvedValue({ _face: true, data: [] } as unknown as Plotly.PlotlyHTMLElement);
+      vi.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
+      (Plotly.newPlot as vi.Mock).mockResolvedValue({ _face: true, data: [] } as unknown as Plotly.PlotlyHTMLElement);
 
       await component.createPlot(mockLitData, 0, 'face', []);
 
@@ -476,8 +476,8 @@ describe('FreePositioningComponent', () => {
 
     it('should set plotProfile when side is profile', async () => {
       const fakeElement = document.createElement('div');
-      jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
-      (Plotly.newPlot as jest.Mock).mockResolvedValue({
+      vi.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
+      (Plotly.newPlot as vi.Mock).mockResolvedValue({
         _profile: true,
         data: []
       } as unknown as Plotly.PlotlyHTMLElement);
@@ -489,11 +489,11 @@ describe('FreePositioningComponent', () => {
 
     it('should handle errors gracefully', async () => {
       const fakeElement = document.createElement('div');
-      jest.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
+      vi.spyOn(document, 'getElementById').mockReturnValue(fakeElement);
       mockCreatePlotData.mockImplementation(() => {
         throw new Error('plot data failure');
       });
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await component.createPlot(mockLitData, 0, 'face', []);
 
@@ -537,7 +537,7 @@ describe('FreePositioningComponent', () => {
 
       // Trigger via the debounced wrapper — flush timers
       component.debounceUpdateSelectedPositionMarkers();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
 
       expect(Plotly.relayout).toHaveBeenCalled();
     });
@@ -547,7 +547,7 @@ describe('FreePositioningComponent', () => {
       component.plotProfile.set(null);
 
       component.debounceUpdateSelectedPositionMarkers();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
 
       expect(Plotly.relayout).not.toHaveBeenCalled();
     });
@@ -563,10 +563,10 @@ describe('FreePositioningComponent', () => {
       component.plotProfile.set(fakePlot);
 
       component.debounceUpdateSelectedPositionMarkers();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
 
       // The annotations array in the relayout call should be empty
-      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
       const layout = relayoutCall[1];
       expect(layout.annotations).toEqual([]);
     });
@@ -582,10 +582,10 @@ describe('FreePositioningComponent', () => {
       component.plotProfile.set(null);
 
       component.debounceUpdateSelectedPositionMarkers();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
 
       // Face view requires y — annotation should be skipped for face, but profile would have it
-      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
       const layout = relayoutCall[1];
       expect(layout.annotations).toEqual([]);
     });
@@ -603,9 +603,9 @@ describe('FreePositioningComponent', () => {
       component.plotFace.set(null);
 
       component.debounceUpdateSelectedPositionMarkers();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
 
-      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
       const annotations = relayoutCall[1].annotations;
       expect(annotations[0].font.color).toBe('black');
       expect(annotations[1].font.color).toBe('red');
@@ -622,9 +622,9 @@ describe('FreePositioningComponent', () => {
       component.plotProfile.set(fakePlot);
 
       component.debounceUpdateSelectedPositionMarkers();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
 
-      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
       const annotations = relayoutCall[1].annotations;
       expect(annotations[0].y).toBe(3);
     });
@@ -645,9 +645,9 @@ describe('FreePositioningComponent', () => {
       component.plotProfile.set(fakePlot);
 
       component.debounceUpdateSelectedPositionMarkers();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
 
-      const relayoutCall = (Plotly.relayout as jest.Mock).mock.calls[0];
+      const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
       const annotations = relayoutCall[1].annotations;
       expect(annotations[0].y).toBe(33);
     });
@@ -683,21 +683,21 @@ describe('FreePositioningComponent', () => {
 
     const flushDebounceAndMicrotasks = async () => {
       // Advance past the debounce delay
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       // Flush the resolved promise from runTask
       await Promise.resolve();
       await Promise.resolve();
       await Promise.resolve();
       // Flush any remaining microtasks
-      jest.advanceTimersByTime(0);
+      vi.advanceTimersByTime(0);
       await Promise.resolve();
       await Promise.resolve();
     };
 
     beforeEach(() => {
       // Mock DOM elements so createPlot doesn't warn about missing elements
-      jest.spyOn(document, 'getElementById').mockReturnValue(document.createElement('div'));
-      jest.spyOn(console, 'warn').mockImplementation();
+      vi.spyOn(document, 'getElementById').mockReturnValue(document.createElement('div'));
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
     it('should use left support altitude when referenceSupport is null', async () => {

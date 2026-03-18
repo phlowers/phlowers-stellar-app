@@ -12,25 +12,25 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChargesService } from '@services/charges/charges.service';
 
 class MockMaintenanceService {
-  ready = { next: jest.fn() };
-  getMaintenance = jest.fn().mockResolvedValue([]);
-  importFromFile = jest.fn().mockResolvedValue(undefined);
+  ready = { next: vi.fn() };
+  getMaintenance = vi.fn().mockResolvedValue([]);
+  importFromFile = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockLinesService {
-  ready = { next: jest.fn() };
-  getLinesCount = jest.fn().mockResolvedValue(0);
-  getLines = jest.fn().mockResolvedValue([]);
-  importFromFile = jest.fn().mockResolvedValue(undefined);
+  ready = { next: vi.fn() };
+  getLinesCount = vi.fn().mockResolvedValue(0);
+  getLines = vi.fn().mockResolvedValue([]);
+  importFromFile = vi.fn().mockResolvedValue(undefined);
 }
 
 describe('SectionsTabComponent', () => {
   let component: SectionsTabComponent;
   let fixture: ComponentFixture<SectionsTabComponent>;
   let mockChargesService: {
-    setSelectedCharge: jest.Mock;
-    deleteCharge: jest.Mock;
-    duplicateCharge: jest.Mock;
+    setSelectedCharge: vi.Mock;
+    deleteCharge: vi.Mock;
+    duplicateCharge: vi.Mock;
   };
 
   const getByTestId = (testId: string): HTMLElement | null =>
@@ -43,15 +43,15 @@ describe('SectionsTabComponent', () => {
     // Mock global matchMedia for PrimeNG 19
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: jest.fn().mockImplementation((query) => ({
+      value: vi.fn().mockImplementation((query) => ({
         matches: false,
         media: query,
         onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn()
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
       }))
     });
   });
@@ -61,7 +61,7 @@ describe('SectionsTabComponent', () => {
     overlays.forEach((o) => o.remove());
 
     // Restore console.error
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const mockSection: Section = {
@@ -133,16 +133,16 @@ describe('SectionsTabComponent', () => {
 
   beforeEach(async () => {
     // Suppress console errors for template binding issues
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     const mockMessageService = {
-      add: jest.fn()
+      add: vi.fn()
     } as unknown as MessageService;
 
     mockChargesService = {
-      setSelectedCharge: jest.fn(),
-      deleteCharge: jest.fn(),
-      duplicateCharge: jest.fn()
+      setSelectedCharge: vi.fn(),
+      deleteCharge: vi.fn(),
+      duplicateCharge: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -162,11 +162,11 @@ describe('SectionsTabComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    jest.spyOn(component.deleteSection, 'emit');
-    jest.spyOn(component.duplicateSection, 'emit');
-    jest.spyOn(component.duplicateInitialCondition, 'emit');
-    jest.spyOn(component.deleteInitialCondition, 'emit');
-    jest.spyOn(component.setInitialCondition, 'emit');
+    vi.spyOn(component.deleteSection, 'emit');
+    vi.spyOn(component.duplicateSection, 'emit');
+    vi.spyOn(component.duplicateInitialCondition, 'emit');
+    vi.spyOn(component.deleteInitialCondition, 'emit');
+    vi.spyOn(component.setInitialCondition, 'emit');
   });
 
   it('should display "No existing section" when sections is empty', () => {
@@ -484,7 +484,7 @@ describe('SectionsTabComponent', () => {
       component.duplicateInitialConditionClick({ initialCondition: mockInitialCondition, section: mockSection });
 
       expect(component.duplicateInitialCondition.emit).toHaveBeenCalled();
-      const payload = (component.duplicateInitialCondition.emit as jest.Mock).mock.calls[0][0];
+      const payload = (component.duplicateInitialCondition.emit as vi.Mock).mock.calls[0][0];
       expect(payload.section).toEqual(mockSection);
       expect(payload.initialCondition).toEqual(mockInitialCondition);
       expect(typeof payload.newUuid).toBe('string');
@@ -531,9 +531,9 @@ describe('SectionsTabComponent', () => {
     });
 
     it('should open load table tool when viewing or editing a charge case with value', () => {
-      const openToolSpy = jest.spyOn((component as any).toolbarDialogService, 'openTool');
-      const studySetSpy = jest.spyOn((component as any).plotService.study, 'set');
-      const sectionSetSpy = jest.spyOn((component as any).plotService.section, 'set');
+      const openToolSpy = vi.spyOn((component as any).toolbarDialogService, 'openTool');
+      const studySetSpy = vi.spyOn((component as any).plotService.study, 'set');
+      const sectionSetSpy = vi.spyOn((component as any).plotService.section, 'set');
       fixture.componentRef.setInput('study', { uuid: 'study-1', sections: [mockSection] });
       fixture.detectChanges();
 
@@ -548,7 +548,7 @@ describe('SectionsTabComponent', () => {
     });
 
     it('should not open load table tool when charge has no value', () => {
-      const openToolSpy = jest.spyOn((component as any).toolbarDialogService, 'openTool');
+      const openToolSpy = vi.spyOn((component as any).toolbarDialogService, 'openTool');
       component.viewOrEditChargeCase({ label: 'Charge', value: '' }, 'edit', mockSection);
 
       expect(openToolSpy).not.toHaveBeenCalled();

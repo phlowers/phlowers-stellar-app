@@ -77,20 +77,20 @@ describe('SidebarComponent', () => {
   let hostComponent: TestHostComponent;
   let hostFixture: ComponentFixture<TestHostComponent>;
   let component: SidebarComponent;
-  let mockBodyClassList: { add: jest.Mock; remove: jest.Mock };
+  let mockBodyClassList: { add: vi.Mock; remove: vi.Mock };
 
   beforeEach(async () => {
     // Mock document.querySelector to return a mocked body element
     mockBodyClassList = {
-      add: jest.fn(),
-      remove: jest.fn()
+      add: vi.fn(),
+      remove: vi.fn()
     };
 
     const mockBody = document.createElement('body');
     mockBody.classList.add = mockBodyClassList.add;
     mockBody.classList.remove = mockBodyClassList.remove;
 
-    jest.spyOn(document, 'querySelector').mockReturnValue(mockBody);
+    vi.spyOn(document, 'querySelector').mockReturnValue(mockBody);
 
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
@@ -242,7 +242,7 @@ describe('SidebarComponent', () => {
   });
 
   it('should toggle menu when button is clicked', () => {
-    jest.spyOn(component, 'toggleMenu');
+    vi.spyOn(component, 'toggleMenu');
     const toggleButton = hostFixture.debugElement.query(By.css('button.stellar-sidebar__link'));
 
     toggleButton.triggerEventHandler('click', null);

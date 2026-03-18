@@ -24,10 +24,10 @@ vi.mock('papaparse', () => ({
 }));
 
 interface MockTable {
-  count: jest.Mock;
-  toArray: jest.Mock;
-  bulkAdd: jest.Mock;
-  clear?: jest.Mock;
+  count: vi.Mock;
+  toArray: vi.Mock;
+  bulkAdd: vi.Mock;
+  clear?: vi.Mock;
 }
 
 interface MockDb {
@@ -44,17 +44,17 @@ describe('ChainsService', () => {
   beforeEach(() => {
     // Create mock database tables
     mockChainsTable = {
-      count: jest.fn().mockResolvedValue(3),
-      toArray: jest.fn().mockResolvedValue([]),
-      bulkAdd: jest.fn().mockResolvedValue(undefined),
-      clear: jest.fn().mockResolvedValue(undefined)
+      count: vi.fn().mockResolvedValue(3),
+      toArray: vi.fn().mockResolvedValue([]),
+      bulkAdd: vi.fn().mockResolvedValue(undefined),
+      clear: vi.fn().mockResolvedValue(undefined)
     };
 
     mockDb = {
       catLines: {
-        count: jest.fn().mockResolvedValue(0),
-        toArray: jest.fn().mockResolvedValue([]),
-        bulkAdd: jest.fn().mockResolvedValue(undefined)
+        count: vi.fn().mockResolvedValue(0),
+        toArray: vi.fn().mockResolvedValue([]),
+        bulkAdd: vi.fn().mockResolvedValue(undefined)
       },
       catChains: mockChainsTable
     };
@@ -166,7 +166,7 @@ describe('ChainsService', () => {
       const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3\nChain 2,150,0,3,1';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -225,7 +225,7 @@ describe('ChainsService', () => {
       const mockCsvContent = 'name,length,weight\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -285,7 +285,7 @@ describe('ChainsService', () => {
 
       const mockCsvContent = 'name,length,weight\n,100,5,2,3\nChain 2,150,0,3,1';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -348,7 +348,7 @@ describe('ChainsService', () => {
 
       const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -416,7 +416,7 @@ describe('ChainsService', () => {
       const mockCsvContent =
         'name,length,weight,surface,v\nChain 1,100,5,2,3,false\n,150,0,3,1,true\nChain 3,200,0,4,2,false';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -486,7 +486,7 @@ describe('ChainsService', () => {
 
       const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {

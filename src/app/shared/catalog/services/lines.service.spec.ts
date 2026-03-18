@@ -26,13 +26,13 @@ vi.mock('papaparse', () => ({
 
 // Mock uuid
 vi.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-123')
+  v4: vi.fn(() => 'mock-uuid-123')
 }));
 
 // Mock lodash
 vi.mock('lodash', () => ({
-  sortBy: jest.fn((arr: unknown[]) => arr),
-  uniqBy: jest.fn((arr: unknown[], iteratee: (item: unknown) => unknown) => {
+  sortBy: vi.fn((arr: unknown[]) => arr),
+  uniqBy: vi.fn((arr: unknown[], iteratee: (item: unknown) => unknown) => {
     const seen = new Set();
     return arr.filter((item: unknown) => {
       const key = iteratee(item);
@@ -46,10 +46,10 @@ vi.mock('lodash', () => ({
 }));
 
 interface MockTable {
-  count: jest.Mock;
-  toArray: jest.Mock;
-  bulkAdd: jest.Mock;
-  clear?: jest.Mock;
+  count: vi.Mock;
+  toArray: vi.Mock;
+  bulkAdd: vi.Mock;
+  clear?: vi.Mock;
 }
 
 interface MockDb {
@@ -67,17 +67,17 @@ describe('LinesService', () => {
   beforeEach(() => {
     // Create mock database tables
     mockLinesTable = {
-      count: jest.fn().mockResolvedValue(5),
-      toArray: jest.fn().mockResolvedValue([]),
-      bulkAdd: jest.fn().mockResolvedValue(undefined),
-      clear: jest.fn().mockResolvedValue(undefined)
+      count: vi.fn().mockResolvedValue(5),
+      toArray: vi.fn().mockResolvedValue([]),
+      bulkAdd: vi.fn().mockResolvedValue(undefined),
+      clear: vi.fn().mockResolvedValue(undefined)
     };
 
     mockMaintenanceTable = {
-      count: jest.fn().mockResolvedValue(0),
-      toArray: jest.fn().mockResolvedValue([]),
-      bulkAdd: jest.fn().mockResolvedValue(undefined),
-      clear: jest.fn().mockResolvedValue(undefined)
+      count: vi.fn().mockResolvedValue(0),
+      toArray: vi.fn().mockResolvedValue([]),
+      bulkAdd: vi.fn().mockResolvedValue(undefined),
+      clear: vi.fn().mockResolvedValue(undefined)
     };
 
     mockDb = {
@@ -205,7 +205,7 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -246,7 +246,7 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -333,7 +333,7 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001\nLINK002,LIT002,LIT_ADR002,BRANCH002,BRANCH_ADR002,TENSION002,TENSION_ADR002';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -411,7 +411,7 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -474,7 +474,7 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -506,17 +506,17 @@ describe('LinesService', () => {
 
       await importPromise;
 
-      expect(sortBy as jest.Mock).toHaveBeenCalledWith(expect.any(Array), 'voltage_adr');
+      expect(sortBy as vi.Mock).toHaveBeenCalledWith(expect.any(Array), 'voltage_adr');
     });
 
     it('should handle HTTP error and return empty string', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const mockError = new ErrorEvent('Network error', {
         message: 'Failed to fetch'
       });
 
       // Mock Papa Parse to return empty data when HTTP error occurs
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -583,7 +583,7 @@ describe('LinesService', () => {
 
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,,,BRANCH001,,,';
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {

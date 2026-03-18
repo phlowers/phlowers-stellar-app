@@ -10,37 +10,37 @@ import { StudiesService } from '@services/studies/studies.service';
 describe('NewStudyModalComponent', () => {
   let component: NewStudyModalComponent;
   let fixture: ComponentFixture<NewStudyModalComponent>;
-  let studiesServiceMock: jest.Mocked<StudiesService>;
-  let routerMock: { navigate: jest.Mock };
+  let studiesServiceMock: vi.Mocked<StudiesService>;
+  let routerMock: { navigate: vi.Mock };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   beforeEach(async () => {
     const messageServiceMock = {
-      add: jest.fn(),
-      clear: jest.fn(),
+      add: vi.fn(),
+      clear: vi.fn(),
       messages: []
     };
 
     studiesServiceMock = {
-      createStudy: jest.fn().mockResolvedValue('study-uuid-1'),
-      createStudyFromProtoV4: jest.fn().mockReturnValue({
+      createStudy: vi.fn().mockResolvedValue('study-uuid-1'),
+      createStudyFromProtoV4: vi.fn().mockReturnValue({
         sections: [],
         shareable: false
       }),
-      getStudy: jest.fn().mockResolvedValue({
+      getStudy: vi.fn().mockResolvedValue({
         uuid: 'study-uuid-1',
         author_email: 'author@test.com',
         title: 'Initial title',
         description: 'Initial description',
         sections: []
       }),
-      updateStudy: jest.fn().mockResolvedValue(undefined)
-    } as unknown as jest.Mocked<StudiesService>;
+      updateStudy: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<StudiesService>;
 
     routerMock = {
-      navigate: jest.fn().mockResolvedValue(true)
+      navigate: vi.fn().mockResolvedValue(true)
     };
 
     await TestBed.configureTestingModule({
@@ -150,7 +150,7 @@ describe('NewStudyModalComponent', () => {
       component.updateTitle('My created study');
       component.updateDescription('My description');
 
-      const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
+      const isOpenChangeSpy = vi.spyOn(component.isOpenChange, 'emit');
 
       await component.onSubmit();
 
@@ -167,8 +167,8 @@ describe('NewStudyModalComponent', () => {
       component.updateTitle('Updated title');
       component.updateDescription('Updated description');
 
-      const refreshSpy = jest.spyOn(component.refreshStudy, 'emit');
-      const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
+      const refreshSpy = vi.spyOn(component.refreshStudy, 'emit');
+      const isOpenChangeSpy = vi.spyOn(component.isOpenChange, 'emit');
 
       await component.onSubmit();
 
@@ -184,7 +184,7 @@ describe('NewStudyModalComponent', () => {
       fixture.componentRef.setInput('studyUuid', 'missing-study');
       studiesServiceMock.getStudy.mockResolvedValueOnce(null as never);
 
-      const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
+      const isOpenChangeSpy = vi.spyOn(component.isOpenChange, 'emit');
 
       await component.onSubmit();
 

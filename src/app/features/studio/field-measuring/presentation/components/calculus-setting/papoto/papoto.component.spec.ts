@@ -15,20 +15,20 @@ describe('Papoto component', () => {
   let component: PapotoComponent;
   let fixture: ComponentFixture<PapotoComponent>;
   let componentRef: ComponentRef<PapotoComponent>;
-  let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
-  let plotServiceMock: jest.Mocked<PlotService>;
+  let workerPythonServiceMock: vi.Mocked<WorkerPythonService>;
+  let plotServiceMock: vi.Mocked<PlotService>;
 
   beforeEach(async () => {
     workerPythonServiceMock = {
-      runTask: jest.fn()
-    } as unknown as jest.Mocked<WorkerPythonService>;
+      runTask: vi.fn()
+    } as unknown as vi.Mocked<WorkerPythonService>;
 
     plotServiceMock = {
       litData: signal({
         span_length: [100, 150, 200],
         elevation: [5.5, 10.75, -3.25]
       })
-    } as unknown as jest.Mocked<PlotService>;
+    } as unknown as vi.Mocked<PlotService>;
 
     await TestBed.configureTestingModule({
       imports: [PapotoComponent],

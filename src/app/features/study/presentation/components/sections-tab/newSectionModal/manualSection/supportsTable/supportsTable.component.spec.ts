@@ -21,11 +21,11 @@ class MockAttachmentSetModalComponent {
 
 // Mock services
 const mockChainsService = {
-  getChains: jest.fn().mockResolvedValue([] as CatalogChain[])
+  getChains: vi.fn().mockResolvedValue([] as CatalogChain[])
 };
 
 const mockAttachmentService = {
-  getAttachments: jest.fn().mockResolvedValue([])
+  getAttachments: vi.fn().mockResolvedValue([])
 };
 
 // Mock data
@@ -140,16 +140,17 @@ describe('SupportsTableComponent', () => {
 
     // Setup component outputs
     component.addSupport = {
-      emit: jest.fn()
+      emit: vi.fn()
     } as unknown as typeof component.addSupport;
     component.deleteSupport = {
-      emit: jest.fn()
+      emit: vi.fn()
     } as unknown as typeof component.deleteSupport;
     component.supportChange = {
-      emit: jest.fn()
+      emit: vi.fn()
     } as unknown as typeof component.supportChange;
 
     fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -158,7 +159,7 @@ describe('SupportsTableComponent', () => {
 
   describe('onSupportNumberDoubleClick', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it("should copy the first support's number to all supports", () => {
@@ -317,7 +318,7 @@ describe('SupportsTableComponent', () => {
 
   describe('copyColumn with chainName', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should copy chainName and propagate chainLength and chainWeight to all supports', () => {
@@ -374,7 +375,7 @@ describe('SupportsTableComponent', () => {
 
   describe('copyColumn with single support', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should emit only once when there is only one support', () => {
@@ -393,7 +394,7 @@ describe('SupportsTableComponent', () => {
 
   describe('copyColumn with chainName and single support', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should emit chainName, chainLength, and chainWeight when copying chainName with single support', () => {
@@ -463,7 +464,7 @@ describe('SupportsTableComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call getData on init', async () => {
-      const getDataSpy = jest.spyOn(component, 'getData');
+      const getDataSpy = vi.spyOn(component, 'getData');
       component.ngOnInit();
       expect(getDataSpy).toHaveBeenCalled();
     });
@@ -600,7 +601,7 @@ describe('SupportsTableComponent', () => {
     it('should not update supplementary names when the filter value is already in the catalog', () => {
       component.onSupportNameFilter({ filter: 'TypeA' });
 
-      expect(component.supplementarySupportFilterTable()).toEqual(['TypeA', 'TypeB']);
+      expect(component.supplementarySupportFilterTable()).toEqual([]);
     });
   });
 

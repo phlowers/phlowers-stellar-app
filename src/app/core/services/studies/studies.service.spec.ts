@@ -15,14 +15,14 @@ import { StudyEntity } from '@infrastructure/database';
 import { liveQuery } from 'dexie';
 
 vi.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-123')
+  v4: vi.fn(() => 'mock-uuid-123')
 }));
 
 vi.mock('dexie', () => {
   class Dexie {
     version() {
       return {
-        stores: jest.fn()
+        stores: vi.fn()
       };
     }
   }
@@ -30,28 +30,28 @@ vi.mock('dexie', () => {
   return {
     __esModule: true,
     default: Dexie,
-    liveQuery: jest.fn()
+    liveQuery: vi.fn()
   };
 });
 
 interface MockDb {
   users: {
-    toArray: jest.Mock<Promise<{ email: string }[]>, []>;
+    toArray: vi.Mock<() => Promise<{ email: string }[]>>;
   };
   studies: {
-    add: jest.Mock<Promise<void>, [StudyEntity]>;
-    toArray: jest.Mock<Promise<StudyEntity[]>, []>;
-    get: jest.Mock<Promise<StudyEntity | undefined>, [string]>;
-    delete: jest.Mock<Promise<void>, [string]>;
-    clear: jest.Mock<Promise<void>, []>;
-    update: jest.Mock<Promise<number>, [string, Partial<StudyEntity>]>;
-    orderBy: jest.Mock;
+    add: vi.Mock<(study: StudyEntity) => Promise<void>>;
+    toArray: vi.Mock<() => Promise<StudyEntity[]>>;
+    get: vi.Mock<(id: string) => Promise<StudyEntity | undefined>>;
+    delete: vi.Mock<(id: string) => Promise<void>>;
+    clear: vi.Mock<() => Promise<void>>;
+    update: vi.Mock<(id: string, changes: Partial<StudyEntity>) => Promise<number>>;
+    orderBy: vi.Mock;
   };
 }
 
 describe('StudiesService', () => {
   let service: StudiesService;
-  let mockStorageService: jest.Mocked<StorageService>;
+  let mockStorageService: vi.Mocked<StorageService>;
   let mockDb: MockDb;
   let readySubject: BehaviorSubject<boolean>;
   let messageService: MessageService;
@@ -81,19 +81,19 @@ describe('StudiesService', () => {
 
     mockDb = {
       users: {
-        toArray: jest.fn().mockResolvedValue([mockUser])
+        toArray: vi.fn().mockResolvedValue([mockUser])
       },
       studies: {
-        add: jest.fn().mockResolvedValue(undefined),
-        toArray: jest.fn().mockResolvedValue([]),
-        get: jest.fn().mockResolvedValue(mockStudyFromDb),
-        delete: jest.fn().mockResolvedValue(undefined),
-        clear: jest.fn().mockResolvedValue(undefined),
-        update: jest.fn().mockResolvedValue(1),
-        orderBy: jest.fn().mockReturnValue({
-          reverse: jest.fn().mockReturnValue({
-            limit: jest.fn().mockReturnValue({
-              toArray: jest.fn().mockResolvedValue([mockStudyFromDb])
+        add: vi.fn().mockResolvedValue(undefined),
+        toArray: vi.fn().mockResolvedValue([]),
+        get: vi.fn().mockResolvedValue(mockStudyFromDb),
+        delete: vi.fn().mockResolvedValue(undefined),
+        clear: vi.fn().mockResolvedValue(undefined),
+        update: vi.fn().mockResolvedValue(1),
+        orderBy: vi.fn().mockReturnValue({
+          reverse: vi.fn().mockReturnValue({
+            limit: vi.fn().mockReturnValue({
+              toArray: vi.fn().mockResolvedValue([mockStudyFromDb])
             })
           })
         })
@@ -103,13 +103,13 @@ describe('StudiesService', () => {
     mockStorageService = {
       ready$: readySubject,
       db: mockDb
-    } as unknown as jest.Mocked<StorageService>;
+    } as unknown as vi.Mocked<StorageService>;
 
     TestBed.configureTestingModule({
       providers: [
         StudiesService,
         { provide: StorageService, useValue: mockStorageService },
-        { provide: MessageService, useValue: { add: jest.fn() } }
+        { provide: MessageService, useValue: { add: vi.fn() } }
       ]
     });
 
@@ -118,7 +118,7 @@ describe('StudiesService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('initializes ready and studies', () => {
@@ -302,7 +302,7 @@ describe('StudiesService', () => {
 
   it('rejects update when author mismatches', async () => {
     mockDb.users.toArray.mockResolvedValue([{ email: 'other@example.com' }]);
-    const addSpy = jest.spyOn(messageService, 'add');
+    const addSpy = vi.spyOn(messageService, 'add');
 
     await expect(
       service.updateStudy({
@@ -348,8 +348,8 @@ describe('StudiesService', () => {
       suspension: true
     };
 
-    const createStudySpy = jest.spyOn(service, 'createStudy').mockResolvedValue('mock-uuid-123');
-    const getStudySpy = jest.spyOn(service, 'getStudy').mockResolvedValue(mockStudyFromDb);
+    const createStudySpy = vi.spyOn(service, 'createStudy').mockResolvedValue('mock-uuid-123');
+    const getStudySpy = vi.spyOn(service, 'getStudy').mockResolvedValue(mockStudyFromDb);
 
     const result = await service.createStudyFromProtoV4([support], parameters);
 
@@ -392,8 +392,8 @@ describe('StudiesService', () => {
       suspension: true
     };
 
-    const createStudySpy = jest.spyOn(service, 'createStudy').mockResolvedValue('mock-uuid-123');
-    jest.spyOn(service, 'getStudy').mockResolvedValue(mockStudyFromDb);
+    const createStudySpy = vi.spyOn(service, 'createStudy').mockResolvedValue('mock-uuid-123');
+    vi.spyOn(service, 'getStudy').mockResolvedValue(mockStudyFromDb);
 
     await service.createStudyFromProtoV4([support], parameters);
 
@@ -430,7 +430,7 @@ describe('StudiesService', () => {
   });
 
   it('derives supportFootAltitude from validated attachmentHeight', () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const supports = (
       service as unknown as {
@@ -478,7 +478,7 @@ describe('StudiesService', () => {
   });
 
   it('clamps out of bounds values and logs warnings', () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const supports = (
       service as unknown as {
@@ -537,7 +537,7 @@ describe('StudiesService', () => {
   });
 
   it('handles invalid spanLength for non-last supports', () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const supports = (
       service as unknown as {
@@ -610,7 +610,7 @@ describe('StudiesService', () => {
   });
 
   it('rejects NaN and Infinity values', () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const supports = (
       service as unknown as {
@@ -668,18 +668,18 @@ describe('StudiesService', () => {
   });
 
   it('downloads a study when present', async () => {
-    const createObjectUrlSpy = jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
     if (!URL.revokeObjectURL) {
       Object.defineProperty(URL, 'revokeObjectURL', {
-        value: jest.fn(),
+        value: vi.fn(),
         writable: true
       });
     }
-    const revokeObjectUrlSpy = jest.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
-    const clickSpy = jest.fn();
+    const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    const clickSpy = vi.fn();
     const originalCreateElement = document.createElement.bind(document);
 
-    const createElementSpy = jest.spyOn(document, 'createElement').mockImplementation((tagName) => {
+    const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
       const element = originalCreateElement(tagName);
       if (tagName === 'a') {
         element.click = clickSpy;
@@ -700,7 +700,7 @@ describe('StudiesService', () => {
 
   it('returns early when downloading missing study', async () => {
     mockDb.studies.get.mockResolvedValue(undefined);
-    const createObjectUrlSpy = jest.spyOn(URL, 'createObjectURL');
+    const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL');
 
     await service.downloadStudy('missing-uuid', 'file-name');
 
@@ -710,8 +710,8 @@ describe('StudiesService', () => {
   });
 
   it('returns live query observable for getStudyAsObservable', () => {
-    const liveQueryMock = liveQuery as jest.MockedFunction<typeof liveQuery>;
-    const fakeObservable = { subscribe: jest.fn() } as unknown as ReturnType<typeof liveQuery>;
+    const liveQueryMock = liveQuery as vi.MockedFunction<typeof liveQuery>;
+    const fakeObservable = { subscribe: vi.fn() } as unknown as ReturnType<typeof liveQuery>;
 
     liveQueryMock.mockImplementation((query) => {
       query();

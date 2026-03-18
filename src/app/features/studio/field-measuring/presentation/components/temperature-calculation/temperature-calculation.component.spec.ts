@@ -14,12 +14,12 @@ describe('TemperatureCalculationComponent', () => {
   let component: TemperatureCalculationComponent;
   let fixture: ComponentFixture<TemperatureCalculationComponent>;
   let componentRef: ComponentRef<TemperatureCalculationComponent>;
-  let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
+  let workerPythonServiceMock: vi.Mocked<WorkerPythonService>;
 
   beforeEach(async () => {
     workerPythonServiceMock = {
-      runTask: jest.fn()
-    } as unknown as jest.Mocked<WorkerPythonService>;
+      runTask: vi.fn()
+    } as unknown as vi.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
       imports: [TemperatureCalculationComponent],

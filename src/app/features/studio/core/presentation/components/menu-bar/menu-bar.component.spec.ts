@@ -142,19 +142,19 @@ describe('StudioMenuBarComponent', () => {
         invert: false
       }),
       loading: signal(false),
-      plotOptionsChange: jest.fn()
+      plotOptionsChange: vi.fn()
     };
 
     // Mock ChargesService
     mockChargesService = {
-      setSelectedCharge: jest.fn().mockResolvedValue(undefined),
-      deleteCharge: jest.fn().mockResolvedValue(undefined),
-      duplicateCharge: jest.fn().mockResolvedValue(mockCharge1)
+      setSelectedCharge: vi.fn().mockResolvedValue(undefined),
+      deleteCharge: vi.fn().mockResolvedValue(undefined),
+      duplicateCharge: vi.fn().mockResolvedValue(mockCharge1)
     };
 
     // Mock ToolbarDialogService
     mockToolbarDialogService = {
-      openTool: jest.fn()
+      openTool: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -183,8 +183,8 @@ describe('StudioMenuBarComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              paramMap: { get: jest.fn() },
-              queryParamMap: { get: jest.fn() }
+              paramMap: { get: vi.fn() },
+              queryParamMap: { get: vi.fn() }
             }
           }
         }
@@ -201,7 +201,7 @@ describe('StudioMenuBarComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('charges computed signal', () => {
@@ -432,7 +432,7 @@ describe('StudioMenuBarComponent', () => {
 
   describe('launchChargeFunction', () => {
     it('should call function with correct parameters when value is provided', () => {
-      const mockFunction = jest.fn();
+      const mockFunction = vi.fn();
       const value = 'test-value';
 
       component.launchChargeFunction(mockFunction, value);
@@ -441,7 +441,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should not call function when value is empty string', () => {
-      const mockFunction = jest.fn();
+      const mockFunction = vi.fn();
 
       component.launchChargeFunction(mockFunction, '');
 
@@ -449,7 +449,7 @@ describe('StudioMenuBarComponent', () => {
     });
 
     it('should not call function when value is null', () => {
-      const mockFunction = jest.fn();
+      const mockFunction = vi.fn();
 
       component.launchChargeFunction(mockFunction, null as unknown as string);
 
@@ -460,7 +460,7 @@ describe('StudioMenuBarComponent', () => {
       fixture.componentRef.setInput('study', null);
       fixture.detectChanges();
 
-      const mockFunction = jest.fn();
+      const mockFunction = vi.fn();
       component.launchChargeFunction(mockFunction, 'test-value');
 
       expect(mockFunction).toHaveBeenCalledWith('', 'section-uuid-1', 'test-value');
@@ -470,7 +470,7 @@ describe('StudioMenuBarComponent', () => {
       fixture.componentRef.setInput('section', null);
       fixture.detectChanges();
 
-      const mockFunction = jest.fn();
+      const mockFunction = vi.fn();
       component.launchChargeFunction(mockFunction, 'test-value');
 
       expect(mockFunction).toHaveBeenCalledWith('study-uuid-1', '', 'test-value');

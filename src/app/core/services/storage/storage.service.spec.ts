@@ -13,7 +13,7 @@ import { AppDatabase } from '@infrastructure/database';
 // Mock AppDatabase
 vi.mock('@infrastructure/database', () => {
   return {
-    AppDatabase: jest.fn().mockImplementation(() => {
+    AppDatabase: vi.fn().mockImplementation(() => {
       return {};
     })
   };
@@ -28,7 +28,7 @@ describe('StorageService', () => {
     originalNavigator = global.navigator;
 
     // Reset AppDatabase mock
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     TestBed.configureTestingModule({});
     service = TestBed.inject(StorageService);
@@ -49,7 +49,7 @@ describe('StorageService', () => {
   });
 
   it('should create database and set ready to true', async () => {
-    const readySpy = jest.spyOn<any, any>(service['_ready'], 'next');
+    const readySpy = vi.spyOn<any, any>(service['_ready'], 'next');
 
     await service.createDatabase();
 
@@ -65,8 +65,8 @@ describe('StorageService', () => {
 
   // it('should try to enable persistent storage if available', async () => {
   //   // Mock navigator.storage
-  //   const persistMock = jest.fn().mockResolvedValue(true);
-  //   const persistedMock = jest.fn().mockResolvedValue(false);
+  //   const persistMock = vi.fn().mockResolvedValue(true);
+  //   const persistedMock = vi.fn().mockResolvedValue(false);
 
   //   global.navigator = {
   //     ...originalNavigator,
@@ -76,7 +76,7 @@ describe('StorageService', () => {
   //     }
   //   };
 
-  //   const consoleSpy = jest.spyOn(console, 'log');
+  //   const consoleSpy = vi.spyOn(console, 'log');
 
   //   await service.setPersistentStorage();
 
@@ -87,8 +87,8 @@ describe('StorageService', () => {
 
   // it('should not try to enable persistent storage if already enabled', async () => {
   //   // Mock navigator.storage with already persisted
-  //   const persistMock = jest.fn().mockResolvedValue(true);
-  //   const persistedMock = jest.fn().mockResolvedValue(true);
+  //   const persistMock = vi.fn().mockResolvedValue(true);
+  //   const persistedMock = vi.fn().mockResolvedValue(true);
 
   //   global.navigator = {
   //     ...originalNavigator,
@@ -98,7 +98,7 @@ describe('StorageService', () => {
   //     }
   //   };
 
-  //   const consoleSpy = jest.spyOn(console, 'log');
+  //   const consoleSpy = vi.spyOn(console, 'log');
 
   //   await service.setPersistentStorage();
 
@@ -121,8 +121,8 @@ describe('StorageService', () => {
   });
 
   it('should call persist when storage not yet persisted', async () => {
-    const persistMock = jest.fn().mockResolvedValue(true);
-    const persistedMock = jest.fn().mockResolvedValue(false);
+    const persistMock = vi.fn().mockResolvedValue(true);
+    const persistedMock = vi.fn().mockResolvedValue(false);
 
     Object.defineProperty(global.navigator, 'storage', {
       value: { persist: persistMock, persisted: persistedMock },
@@ -136,8 +136,8 @@ describe('StorageService', () => {
   });
 
   it('should not call persist when storage is already persisted', async () => {
-    const persistMock = jest.fn().mockResolvedValue(true);
-    const persistedMock = jest.fn().mockResolvedValue(true);
+    const persistMock = vi.fn().mockResolvedValue(true);
+    const persistedMock = vi.fn().mockResolvedValue(true);
 
     Object.defineProperty(global.navigator, 'storage', {
       value: { persist: persistMock, persisted: persistedMock },
@@ -151,7 +151,7 @@ describe('StorageService', () => {
   });
 
   it('should reset database by deleting and recreating', async () => {
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const deleteMock = vi.fn().mockResolvedValue(undefined);
     await service.createDatabase();
     service.db.delete = deleteMock;
 
@@ -163,10 +163,10 @@ describe('StorageService', () => {
 
   it('should throw and log error when createDatabase fails', async () => {
     const error = new Error('DB init failed');
-    (AppDatabase as jest.Mock).mockImplementationOnce(() => {
+    (AppDatabase as vi.Mock).mockImplementationOnce(() => {
       throw error;
     });
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     await expect(service.createDatabase()).rejects.toThrow('DB init failed');
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('createDatabase'), error);

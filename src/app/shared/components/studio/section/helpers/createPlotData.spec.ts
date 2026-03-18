@@ -6,7 +6,7 @@ import { Support } from '@shared/domain/models/support.model';
 
 // Mock the createDataObject function
 vi.mock('./createPlotDataObject');
-const mockCreateDataObject = createDataObject as jest.MockedFunction<typeof createDataObject>;
+const mockCreateDataObject = createDataObject as vi.MockedFunction<typeof createDataObject>;
 
 const mockSupports: Support[] = [
   {
@@ -59,7 +59,7 @@ describe('createPlotData', () => {
 
   beforeEach(() => {
     // Reset all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Setup default mock parameters
     mockParams = {

@@ -23,14 +23,14 @@ class MockObstacleFormService {
     horizontal: null as number | null
   });
 
-  returnToSpan = jest.fn();
-  resetFormForNewObstacle = jest.fn();
-  addPosition = jest.fn();
-  deletePoint = jest.fn();
-  deleteObstacle = jest.fn();
-  saveObstacle = jest.fn();
-  calculateAndSave = jest.fn();
-  canCalculateAndSave = jest.fn(() => true);
+  returnToSpan = vi.fn();
+  resetFormForNewObstacle = vi.fn();
+  addPosition = vi.fn();
+  deletePoint = vi.fn();
+  deleteObstacle = vi.fn();
+  saveObstacle = vi.fn();
+  calculateAndSave = vi.fn();
+  canCalculateAndSave = vi.fn(() => true);
 
   constructor() {
     const fb = new FormBuilder();
@@ -57,12 +57,12 @@ class MockObstacleFormService {
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
-  let mockPlotService: { getSpanOptions: jest.Mock; isFreePositioningMode: ReturnType<typeof signal> };
+  let mockPlotService: { getSpanOptions: vi.Mock; isFreePositioningMode: ReturnType<typeof signal> };
   let mockObstacleFormService: MockObstacleFormService;
   let obstaclesService: {
     currentPointIndex: ReturnType<typeof signal<number>>;
-    setCurrentPointIndex: jest.Mock;
-    resetCurrentPointIndex: jest.Mock;
+    setCurrentPointIndex: vi.Mock;
+    resetCurrentPointIndex: vi.Mock;
   };
 
   const getByTestId = (testId: string): HTMLElement | null =>
@@ -73,15 +73,15 @@ describe('ObstaclesFormComponent', () => {
 
   beforeEach(async () => {
     mockPlotService = {
-      getSpanOptions: jest.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
+      getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
       isFreePositioningMode: signal(false)
     };
     mockObstacleFormService = new MockObstacleFormService();
     const indexSignal = signal(0);
     obstaclesService = {
       currentPointIndex: indexSignal,
-      setCurrentPointIndex: jest.fn((i: number) => indexSignal.set(i)),
-      resetCurrentPointIndex: jest.fn()
+      setCurrentPointIndex: vi.fn((i: number) => indexSignal.set(i)),
+      resetCurrentPointIndex: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -94,7 +94,7 @@ describe('ObstaclesFormComponent', () => {
           useValue: {
             ...obstaclesService,
             ready: new BehaviorSubject<boolean>(true),
-            getObstacleTypes: jest.fn().mockResolvedValue([
+            getObstacleTypes: vi.fn().mockResolvedValue([
               { obstacle_type: 'ordinary_ground', obstacle_type_name: 'Ordinary ground', details: '' },
               { obstacle_type: 'vegetation', obstacle_type_name: 'Vegetation', details: '' }
             ])
@@ -109,7 +109,7 @@ describe('ObstaclesFormComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('HTML rendering - form structure', () => {
@@ -340,7 +340,7 @@ describe('ObstaclesFormComponent', () => {
     it('should not populate options when service is not ready', async () => {
       // Create a service with ready initially set to false
       const ready$ = new BehaviorSubject<boolean>(false);
-      const getObstacleTypes = jest.fn();
+      const getObstacleTypes = vi.fn();
       await TestBed.resetTestingModule()
         .configureTestingModule({
           imports: [ObstaclesFormComponent],
@@ -374,7 +374,7 @@ describe('ObstaclesFormComponent', () => {
     it('should handle null response from getObstacleTypes gracefully', async () => {
       const mockService = TestBed.inject(ObstaclesService) as unknown as {
         ready: BehaviorSubject<boolean>;
-        getObstacleTypes: jest.Mock;
+        getObstacleTypes: vi.Mock;
       };
       // Reset options
       component.obstacleTypeOptions.set([]);
@@ -779,7 +779,7 @@ describe('ObstaclesFormComponent', () => {
     });
 
     it('should be disabled when canCalculateAndSave returns false', () => {
-      mockObstacleFormService.canCalculateAndSave = jest.fn(() => false);
+      mockObstacleFormService.canCalculateAndSave = vi.fn(() => false);
       fixture.detectChanges();
 
       const button = getByTestId('calculate-save') as HTMLButtonElement;

@@ -18,13 +18,13 @@ class TestHostComponent {}
 
 describe('SideTabsComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
-  let plotServiceMock: { refreshCamera: jest.Mock };
+  let plotServiceMock: { refreshCamera: vi.Mock };
   let sideTabsService: SideTabsService;
   const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
   beforeEach(async () => {
     plotServiceMock = {
-      refreshCamera: jest.fn()
+      refreshCamera: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -158,7 +158,7 @@ describe('SideTabsComponent', () => {
   it('focusPanel focuses the panel element when it exists', async () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
 
-    const focusSpy = jest.fn();
+    const focusSpy = vi.fn();
     const mockPanel = {
       nativeElement: {
         focus: focusSpy

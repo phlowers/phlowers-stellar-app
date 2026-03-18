@@ -10,12 +10,6 @@ import '@analogjs/vitest-angular/setup-zone';
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 import { MessageService } from 'primeng/api';
-import { vi } from 'vitest';
-
-Object.defineProperty(globalThis, 'jest', {
-  value: vi,
-  writable: false
-});
 
 const testBed = getTestBed();
 if (!testBed.platform) {
