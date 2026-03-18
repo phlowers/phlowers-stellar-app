@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NewStudyModalComponent } from './new-study-modal.component';
@@ -10,6 +11,7 @@ describe('NewStudyModalComponent', () => {
   let component: NewStudyModalComponent;
   let fixture: ComponentFixture<NewStudyModalComponent>;
   let studiesServiceMock: jest.Mocked<StudiesService>;
+  let routerMock: { navigate: jest.Mock };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -22,12 +24,24 @@ describe('NewStudyModalComponent', () => {
     };
 
     studiesServiceMock = {
-      createStudy: jest.fn().mockResolvedValue(undefined),
+      createStudy: jest.fn().mockResolvedValue('study-uuid-1'),
       createStudyFromProtoV4: jest.fn().mockReturnValue({
         sections: [],
         shareable: false
-      })
+      }),
+      getStudy: jest.fn().mockResolvedValue({
+        uuid: 'study-uuid-1',
+        author_email: 'author@test.com',
+        title: 'Initial title',
+        description: 'Initial description',
+        sections: []
+      }),
+      updateStudy: jest.fn().mockResolvedValue(undefined)
     } as unknown as jest.Mocked<StudiesService>;
+
+    routerMock = {
+      navigate: jest.fn().mockResolvedValue(true)
+    };
 
     await TestBed.configureTestingModule({
       imports: [NewStudyModalComponent, BrowserAnimationsModule],
@@ -49,6 +63,10 @@ describe('NewStudyModalComponent', () => {
         {
           provide: StudiesService,
           useValue: studiesServiceMock
+        },
+        {
+          provide: Router,
+          useValue: routerMock
         }
       ]
     }).compileComponents();
@@ -96,6 +114,82 @@ describe('NewStudyModalComponent', () => {
     it('should render cancel button', () => {
       const cancelBtn = getByTestId('cancel-btn');
       expect(cancelBtn).toBeTruthy();
+    });
+  });
+
+  describe('state update helpers', () => {
+    it('should update title signal', () => {
+      component.updateTitle('New title');
+      expect(component.title()).toBe('New title');
+      expect(component.titleLength()).toBe('New title'.length);
+    });
+
+    it('should update description signal', () => {
+      component.updateDescription('New description');
+      expect(component.description()).toBe('New description');
+      expect(component.descriptionLength()).toBe('New description'.length);
+    });
+  });
+
+  describe('modify mode initialization effect', () => {
+    it('should copy input title and description when modal opens in modify mode', () => {
+      fixture.componentRef.setInput('titleInput', 'Existing title');
+      fixture.componentRef.setInput('descriptionInput', 'Existing description');
+      fixture.componentRef.setInput('mode', 'modify');
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+
+      expect(component.title()).toBe('Existing title');
+      expect(component.description()).toBe('Existing description');
+    });
+  });
+
+  describe('onSubmit in new mode', () => {
+    it('should create study, navigate and close modal', async () => {
+      fixture.componentRef.setInput('mode', 'new');
+      component.updateTitle('My created study');
+      component.updateDescription('My description');
+
+      const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
+
+      await component.onSubmit();
+
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      expect(routerMock.navigate).toHaveBeenCalledWith(['/study', 'study-uuid-1']);
+      expect(isOpenChangeSpy).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('onSubmit in modify mode', () => {
+    it('should update study, emit refreshStudy and close modal', async () => {
+      fixture.componentRef.setInput('mode', 'modify');
+      fixture.componentRef.setInput('studyUuid', 'study-uuid-1');
+      component.updateTitle('Updated title');
+      component.updateDescription('Updated description');
+
+      const refreshSpy = jest.spyOn(component.refreshStudy, 'emit');
+      const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
+
+      await component.onSubmit();
+
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('study-uuid-1');
+      expect(studiesServiceMock.updateStudy).toHaveBeenCalled();
+      expect(refreshSpy).toHaveBeenCalledWith('study-uuid-1');
+      expect(isOpenChangeSpy).toHaveBeenCalledWith(false);
+      expect(routerMock.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when study cannot be found', async () => {
+      fixture.componentRef.setInput('mode', 'modify');
+      fixture.componentRef.setInput('studyUuid', 'missing-study');
+      studiesServiceMock.getStudy.mockResolvedValueOnce(null as never);
+
+      const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
+
+      await component.onSubmit();
+
+      expect(studiesServiceMock.updateStudy).not.toHaveBeenCalled();
+      expect(isOpenChangeSpy).not.toHaveBeenCalled();
     });
   });
 });

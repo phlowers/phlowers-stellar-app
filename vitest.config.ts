@@ -25,7 +25,7 @@ export default defineConfig(() => ({
   test: {
     globals: true,
     environment: 'jsdom',
-     dangerouslyIgnoreUnhandledErrors: true,
+    dangerouslyIgnoreUnhandledErrors: true,
     deprecated: {
       disableCallbackTimeout: true,
       ignoreDeprecations: true

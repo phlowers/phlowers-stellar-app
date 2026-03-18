@@ -68,4 +68,69 @@ describe('ExportDialogComponent', () => {
       expect(el?.tagName).toBe('BUTTON');
     });
   });
+
+  describe('form initialization', () => {
+    it('should prefill filename from study title', () => {
+      expect(component.form.value.filename).toBe('Test Study');
+    });
+
+    it('should remove .clst suffix when prefilling filename', async () => {
+      const exportDialogData = signal({ isOpen: true, uuid: 'test-uuid', title: 'My Study.clst' });
+      mockStudiesService = {
+        exportDialogData,
+        downloadStudy: jest.fn()
+      };
+
+      await TestBed.resetTestingModule()
+        .configureTestingModule({
+          imports: [ExportDialogComponent, ReactiveFormsModule, NoopAnimationsModule],
+          providers: [{ provide: StudiesService, useValue: mockStudiesService }]
+        })
+        .compileComponents();
+
+      fixture = TestBed.createComponent(ExportDialogComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(component.form.value.filename).toBe('My Study');
+    });
+  });
+
+  describe('exportStudy', () => {
+    it('should download study and close dialog when form is valid', () => {
+      component.form.patchValue({ filename: 'export-name', exportFormat: 'clst' });
+
+      component.exportStudy();
+
+      expect(mockStudiesService.downloadStudy).toHaveBeenCalledWith('test-uuid', 'export-name');
+      expect(mockStudiesService.exportDialogData?.()).toBeNull();
+    });
+
+    it('should not download when form is invalid', () => {
+      component.form.patchValue({ filename: '', exportFormat: 'clst' });
+
+      component.exportStudy();
+
+      expect(mockStudiesService.downloadStudy).not.toHaveBeenCalled();
+      expect(mockStudiesService.exportDialogData?.()).not.toBeNull();
+    });
+
+    it('should not download when dialog data has no uuid', () => {
+      mockStudiesService.exportDialogData?.set({ isOpen: true, uuid: '', title: 'Test Study' });
+      component.form.patchValue({ filename: 'export-name', exportFormat: 'clst' });
+
+      component.exportStudy();
+
+      expect(mockStudiesService.downloadStudy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cancel', () => {
+    it('should close dialog without downloading', () => {
+      component.cancel();
+
+      expect(mockStudiesService.downloadStudy).not.toHaveBeenCalled();
+      expect(mockStudiesService.exportDialogData?.()).toBeNull();
+    });
+  });
 });

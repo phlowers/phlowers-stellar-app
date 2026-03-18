@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ChargesService } from '@services/charges/charges.service';
 
 class MockMaintenanceService {
   ready = { next: jest.fn() };
@@ -26,6 +27,11 @@ class MockLinesService {
 describe('SectionsTabComponent', () => {
   let component: SectionsTabComponent;
   let fixture: ComponentFixture<SectionsTabComponent>;
+  let mockChargesService: {
+    setSelectedCharge: jest.Mock;
+    deleteCharge: jest.Mock;
+    duplicateCharge: jest.Mock;
+  };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -132,11 +138,19 @@ describe('SectionsTabComponent', () => {
     const mockMessageService = {
       add: jest.fn()
     } as unknown as MessageService;
+
+    mockChargesService = {
+      setSelectedCharge: jest.fn(),
+      deleteCharge: jest.fn(),
+      duplicateCharge: jest.fn()
+    };
+
     await TestBed.configureTestingModule({
       imports: [SectionsTabComponent, NoopAnimationsModule],
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },
+        { provide: ChargesService, useValue: mockChargesService },
         { provide: MessageService, useValue: mockMessageService },
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
         provideHttpClient(),
@@ -152,6 +166,7 @@ describe('SectionsTabComponent', () => {
     jest.spyOn(component.duplicateSection, 'emit');
     jest.spyOn(component.duplicateInitialCondition, 'emit');
     jest.spyOn(component.deleteInitialCondition, 'emit');
+    jest.spyOn(component.setInitialCondition, 'emit');
   });
 
   it('should display "No existing section" when sections is empty', () => {
@@ -364,6 +379,179 @@ describe('SectionsTabComponent', () => {
       const delBtn = getByTestId('section-delete-btn');
       expect(delBtn).toBeTruthy();
       expect(delBtn?.tagName).toBe('BUTTON');
+    });
+  });
+
+  describe('component methods', () => {
+    it('should select and unselect section', () => {
+      component.selectSection(mockSection, { checked: true });
+      expect(component.selectedSection()).toBe(mockSection.uuid);
+
+      component.selectSection(mockSection, { checked: false });
+      expect(component.selectedSection()).toBe('');
+    });
+
+    it('should open create section modal with default state', () => {
+      component.openNewSectionModalCreate();
+
+      expect(component.newSectionModalMode()).toBe('create');
+      expect(component.isNewSectionModalOpen()).toBe(true);
+      expect(component.currentSection().uuid.length).toBeGreaterThan(0);
+    });
+
+    it('should update section modal open state', () => {
+      component.onModalOpenChange(true);
+      expect(component.isNewSectionModalOpen()).toBe(true);
+
+      component.onModalOpenChange(false);
+      expect(component.isNewSectionModalOpen()).toBe(false);
+    });
+
+    it('should update initial condition modal open state', () => {
+      component.onInitialConditionModalOpenChange(true);
+      expect(component.isInitialConditionModalOpen()).toBe(true);
+
+      component.onInitialConditionModalOpenChange(false);
+      expect(component.isInitialConditionModalOpen()).toBe(false);
+    });
+
+    it('should update initial condition modal mode', () => {
+      component.onInitialConditionModalChangeMode('view');
+      expect(component.initialConditionModalMode()).toBe('view');
+
+      component.onInitialConditionModalChangeMode('edit');
+      expect(component.initialConditionModalMode()).toBe('edit');
+    });
+
+    it('should compute selected initial condition uuid when valid', () => {
+      fixture.componentRef.setInput('study', { sections: [mockSection] });
+      component.selectedSection.set(mockSection.uuid);
+      fixture.detectChanges();
+
+      expect(component.getSelectedInitialConditionUuid()).toBe('ic-1');
+    });
+
+    it('should return undefined selected initial condition uuid when invalid', () => {
+      const studyWithInvalidSelected = {
+        sections: [{ ...mockSection, selected_initial_condition_uuid: 'missing-ic' }]
+      };
+      fixture.componentRef.setInput('study', studyWithInvalidSelected);
+      component.selectedSection.set(mockSection.uuid);
+      fixture.detectChanges();
+
+      expect(component.getSelectedInitialConditionUuid()).toBeUndefined();
+    });
+
+    it('should return orderedInitialConditions in reverse order and cloned', () => {
+      const input = [
+        { ...mockInitialCondition, uuid: 'ic-a' },
+        { ...mockInitialCondition, uuid: 'ic-b' }
+      ];
+
+      const ordered = component.orderedInitialConditions(input);
+      expect(ordered.map((ic) => ic.uuid)).toEqual(['ic-b', 'ic-a']);
+
+      ordered[0].name = 'Mutated';
+      expect(input[1].name).toBe('Init Cond');
+    });
+  });
+
+  describe('initial condition actions', () => {
+    it('should emit delete initial condition payload', () => {
+      component.deleteInitialConditionClick({ initialCondition: mockInitialCondition, section: mockSection });
+
+      expect(component.deleteInitialCondition.emit).toHaveBeenCalledWith({
+        section: mockSection,
+        initialCondition: mockInitialCondition
+      });
+    });
+
+    it('should open modal in view mode for viewInitialConditionClick', () => {
+      component.viewInitialConditionClick({ initialCondition: mockInitialCondition, section: mockSection });
+
+      expect(component.initialConditionModalMode()).toBe('view');
+      expect(component.isInitialConditionModalOpen()).toBe(true);
+    });
+
+    it('should open modal in edit mode for editInitialConditionClick', () => {
+      component.editInitialConditionClick({ initialCondition: mockInitialCondition, section: mockSection });
+
+      expect(component.initialConditionModalMode()).toBe('edit');
+      expect(component.isInitialConditionModalOpen()).toBe(true);
+    });
+
+    it('should emit duplicated initial condition payload with a generated uuid', () => {
+      component.duplicateInitialConditionClick({ initialCondition: mockInitialCondition, section: mockSection });
+
+      expect(component.duplicateInitialCondition.emit).toHaveBeenCalled();
+      const payload = (component.duplicateInitialCondition.emit as jest.Mock).mock.calls[0][0];
+      expect(payload.section).toEqual(mockSection);
+      expect(payload.initialCondition).toEqual(mockInitialCondition);
+      expect(typeof payload.newUuid).toBe('string');
+      expect(payload.newUuid.length).toBeGreaterThan(0);
+    });
+
+    it('should emit setInitialCondition payload', () => {
+      component.selectInitialConditionClick({ initialCondition: mockInitialCondition, section: mockSection });
+
+      expect(component.setInitialCondition.emit).toHaveBeenCalledWith({
+        section: mockSection,
+        initialCondition: mockInitialCondition
+      });
+    });
+  });
+
+  describe('charge case actions', () => {
+    it('should return mapped charge options', () => {
+      const sectionWithCharges = {
+        ...mockSection,
+        charges: [
+          { uuid: 'charge-1', name: 'Charge 1' },
+          { uuid: 'charge-2', name: 'Charge 2' }
+        ]
+      } as unknown as Section;
+
+      expect(component.getChargesOptions(sectionWithCharges)).toEqual([
+        { label: 'Charge 1', value: 'charge-1' },
+        { label: 'Charge 2', value: 'charge-2' }
+      ]);
+    });
+
+    it('should call chargesService methods for select, delete and duplicate', () => {
+      fixture.componentRef.setInput('study', { uuid: 'study-1', sections: [mockSection] });
+      fixture.detectChanges();
+
+      component.selectChargeCase({ label: 'Charge', value: 'charge-1' }, mockSection);
+      component.deleteChargeCase({ label: 'Charge', value: 'charge-1' }, mockSection);
+      component.duplicateChargeCase({ label: 'Charge', value: 'charge-1' }, mockSection);
+
+      expect(mockChargesService.setSelectedCharge).toHaveBeenCalledWith('study-1', mockSection.uuid, 'charge-1');
+      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-1', mockSection.uuid, 'charge-1');
+      expect(mockChargesService.duplicateCharge).toHaveBeenCalledWith('study-1', mockSection.uuid, 'charge-1');
+    });
+
+    it('should open load table tool when viewing or editing a charge case with value', () => {
+      const openToolSpy = jest.spyOn((component as any).toolbarDialogService, 'openTool');
+      const studySetSpy = jest.spyOn((component as any).plotService.study, 'set');
+      const sectionSetSpy = jest.spyOn((component as any).plotService.section, 'set');
+      fixture.componentRef.setInput('study', { uuid: 'study-1', sections: [mockSection] });
+      fixture.detectChanges();
+
+      component.viewOrEditChargeCase({ label: 'Charge', value: 'charge-1' }, 'view', mockSection);
+
+      expect(openToolSpy).toHaveBeenCalledWith('load-table', {
+        mode: 'view',
+        chargeUuid: 'charge-1'
+      });
+      expect(studySetSpy).toHaveBeenCalledWith(component.study());
+      expect(sectionSetSpy).toHaveBeenCalledWith(mockSection);
+    });
+
+    it('should not open load table tool when charge has no value', () => {
+      const openToolSpy = jest.spyOn((component as any).toolbarDialogService, 'openTool');
+      component.viewOrEditChargeCase({ label: 'Charge', value: '' }, 'edit', mockSection);
+
+      expect(openToolSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -119,4 +119,57 @@ describe('StorageService', () => {
     // This should not throw an error
     await expect(service.setPersistentStorage()).resolves.not.toThrow();
   });
+
+  it('should call persist when storage not yet persisted', async () => {
+    const persistMock = jest.fn().mockResolvedValue(true);
+    const persistedMock = jest.fn().mockResolvedValue(false);
+
+    Object.defineProperty(global.navigator, 'storage', {
+      value: { persist: persistMock, persisted: persistedMock },
+      configurable: true
+    });
+
+    await service.setPersistentStorage();
+
+    expect(persistedMock).toHaveBeenCalled();
+    expect(persistMock).toHaveBeenCalled();
+  });
+
+  it('should not call persist when storage is already persisted', async () => {
+    const persistMock = jest.fn().mockResolvedValue(true);
+    const persistedMock = jest.fn().mockResolvedValue(true);
+
+    Object.defineProperty(global.navigator, 'storage', {
+      value: { persist: persistMock, persisted: persistedMock },
+      configurable: true
+    });
+
+    await service.setPersistentStorage();
+
+    expect(persistedMock).toHaveBeenCalled();
+    expect(persistMock).not.toHaveBeenCalled();
+  });
+
+  it('should reset database by deleting and recreating', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    await service.createDatabase();
+    service.db.delete = deleteMock;
+
+    await service.resetDatabase();
+
+    expect(deleteMock).toHaveBeenCalled();
+    expect(service.db).toBeDefined();
+  });
+
+  it('should throw and log error when createDatabase fails', async () => {
+    const error = new Error('DB init failed');
+    (AppDatabase as jest.Mock).mockImplementationOnce(() => {
+      throw error;
+    });
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await expect(service.createDatabase()).rejects.toThrow('DB init failed');
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('createDatabase'), error);
+    consoleSpy.mockRestore();
+  });
 });

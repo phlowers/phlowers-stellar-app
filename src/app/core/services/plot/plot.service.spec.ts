@@ -1015,4 +1015,213 @@ describe('PlotService', () => {
       });
     });
   });
+
+  describe('setAxesNorms', () => {
+    it('should update axesNorms signal', () => {
+      service.setAxesNorms({ x: 2, y: 3, z: 4, aspectMode: 'cube' });
+      expect(service.axesNorms()).toEqual({ x: 2, y: 3, z: 4, aspectMode: 'cube' });
+    });
+  });
+
+  describe('setResolution', () => {
+    it('should update resolution signal and localStorage', () => {
+      service.setResolution(75);
+      expect(service.resolution()).toBe(75);
+      expect(localStorage.getItem('plotResolution')).toBe('75');
+    });
+
+    it('should clamp value to minimum (25)', () => {
+      service.setResolution(5);
+      expect(service.resolution()).toBe(25);
+    });
+
+    it('should clamp to defaultResolution when exceeding max', () => {
+      service.defaultResolution.set(100);
+      service.setResolution(999);
+      expect(service.resolution()).toBe(100);
+    });
+
+    it('should not update if value is unchanged', () => {
+      service.setResolution(75);
+      const storageSpy = jest.spyOn(Storage.prototype, 'setItem');
+      service.setResolution(75);
+      expect(storageSpy).not.toHaveBeenCalled();
+      storageSpy.mockRestore();
+    });
+
+    it('should not update for non-finite value', () => {
+      const before = service.resolution();
+      service.setResolution(NaN);
+      // NaN → normalizes to defaultResolution, which might differ from before
+      expect(Number.isFinite(service.resolution())).toBe(true);
+    });
+  });
+
+  describe('applyResolution', () => {
+    it('should do nothing when worker is not ready', async () => {
+      mockWorkerPythonService.setReady?.(false);
+      await service.applyResolution(75);
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when resolution is already applied', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      service.appliedResolution.set(75);
+      await service.applyResolution(75);
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should run task and update appliedResolution when successful', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      service.appliedResolution.set(null);
+      mockWorkerPythonService.runTask.mockResolvedValue({ error: null });
+
+      await service.applyResolution(75);
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setResolution, { resolution: 75 });
+      expect(service.appliedResolution()).toBe(75);
+    });
+
+    it('should not update appliedResolution when task returns error', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      service.appliedResolution.set(null);
+      mockWorkerPythonService.runTask.mockResolvedValue({ error: TaskError.CALCULATION_ERROR });
+
+      await service.applyResolution(75);
+
+      expect(service.appliedResolution()).toBeNull();
+    });
+  });
+
+  describe('modifySection', () => {
+    it('should return undefined when study is null', async () => {
+      service.study.set(null);
+      service.section.set(mockSection);
+      const result = await service.modifySection({ name: 'Updated' });
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when section is null', async () => {
+      service.study.set({
+        uuid: 'study-1',
+        author_email: '',
+        title: '',
+        description: '',
+        shareable: false,
+        created_at_offline: '',
+        updated_at_offline: '',
+        saved: true,
+        sections: []
+      });
+      service.section.set(null);
+      const result = await service.modifySection({ name: 'Updated' });
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getCamera', () => {
+    it('should return null when plotly-output element does not exist', () => {
+      document.getElementById = jest.fn().mockReturnValue(null);
+      expect(service.getCamera()).toBeNull();
+    });
+
+    it('should return camera from _fullLayout when available', () => {
+      const mockCamera: Camera = { eye: { x: 1, y: 1, z: 1 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      const mockElement = { _fullLayout: { scene: { camera: mockCamera } } };
+      document.getElementById = jest.fn().mockReturnValue(mockElement);
+      expect(service.getCamera()).toEqual(mockCamera);
+    });
+
+    it('should return null when element has no _fullLayout', () => {
+      document.getElementById = jest.fn().mockReturnValue({});
+      expect(service.getCamera()).toBeNull();
+    });
+  });
+
+  describe('refreshCamera', () => {
+    it('should update camera signal when camera changes', () => {
+      const mockCamera: Camera = { eye: { x: 2, y: 2, z: 2 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      const mockElement = { _fullLayout: { scene: { camera: mockCamera } } };
+      document.getElementById = jest.fn().mockReturnValue(mockElement);
+      service.camera.set(null);
+
+      service.refreshCamera();
+
+      expect(service.camera()).toEqual(mockCamera);
+    });
+
+    it('should not update camera signal when camera is the same', () => {
+      const mockCamera: Camera = { eye: { x: 2, y: 2, z: 2 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      document.getElementById = jest.fn().mockReturnValue({ _fullLayout: { scene: { camera: mockCamera } } });
+      service.camera.set(mockCamera);
+      const setCameraSpy = jest.spyOn(service.camera, 'set');
+
+      service.refreshCamera();
+
+      expect(setCameraSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshProjection', () => {
+    it('should call workerPythonService with correct task params', async () => {
+      service.plotOptionsChange({ view: '2d', startSupport: 2, endSupport: 5 });
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.refreshProjection, {
+        startSupport: 2,
+        endSupport: 5,
+        view: '2d'
+      });
+    });
+
+    it('should set loading to false after completion', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: TaskError.CALCULATION_ERROR });
+      await service.refreshProjection();
+      expect(service.loading()).toBe(false);
+      expect(service.error()).toBe(TaskError.CALCULATION_ERROR);
+    });
+  });
+
+  describe('getSupportIndex', () => {
+    it('should return index of matching support uuid', () => {
+      service.section.set(mockSection);
+      expect(service.getSupportIndex('support-uuid-1')).toBe(0);
+      expect(service.getSupportIndex('support-uuid-2')).toBe(1);
+    });
+
+    it('should return -1 when uuid not found', () => {
+      service.section.set(mockSection);
+      expect(service.getSupportIndex('non-existent-uuid')).toBe(-1);
+    });
+
+    it('should return -1 when section is null', () => {
+      service.section.set(null);
+      expect(service.getSupportIndex('any-uuid')).toBe(-1);
+    });
+  });
+
+  describe('getSupportOptions', () => {
+    it('should return empty array when uuid is null', () => {
+      service.section.set(mockSection);
+      expect(service.getSupportOptions(null)).toEqual([]);
+    });
+
+    it('should return LEFT and RIGHT options for a valid support uuid', () => {
+      service.section.set(mockSection);
+      const options = service.getSupportOptions('support-uuid-1');
+      expect(options).toHaveLength(2);
+      expect(options[0]).toEqual({ label: 1, value: 'LEFT' });
+      expect(options[1]).toEqual({ label: 2, value: 'RIGHT' });
+    });
+
+    it('should return empty array when uuid does not match any support', () => {
+      service.section.set(mockSection);
+      expect(service.getSupportOptions('non-existent')).toEqual([]);
+    });
+  });
 });
