@@ -12,7 +12,7 @@ describe('OnlineService', () => {
 
   beforeEach(() => {
     onlineState = false;
-    Object.defineProperty(window.navigator, 'onLine', {
+    Object.defineProperty(globalThis.navigator, 'onLine', {
       configurable: true,
       get: () => onlineState
     });
@@ -69,7 +69,7 @@ describe('OnlineService', () => {
     httpTestingController.expectNone(environment.apiUrl);
 
     onlineState = true;
-    window.dispatchEvent(new Event('online'));
+    globalThis.dispatchEvent(new Event('online'));
 
     const req = httpTestingController.expectOne(environment.apiUrl);
     req.flush({}, { status: 200, statusText: 'OK' });
@@ -89,7 +89,7 @@ describe('OnlineService', () => {
     );
 
     onlineState = true;
-    window.dispatchEvent(new Event('online'));
+    globalThis.dispatchEvent(new Event('online'));
 
     await expect(onlineEmission).resolves.toBe(true);
 

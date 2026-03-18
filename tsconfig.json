@@ -17,8 +17,7 @@
     "target": "ES2022",
     "module": "esnext",
     "types": [
-      "@angular/localize",
-      "jest"
+      "@angular/localize"
     ],
     "baseUrl": ".",
     "paths": {

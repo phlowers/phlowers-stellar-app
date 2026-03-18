@@ -9,5 +9,5 @@ import { InjectionToken } from '@angular/core';
 /** Injection token providing the global Window object for testability. */
 export const WINDOW = new InjectionToken<Window>('WINDOW', {
   providedIn: 'root',
-  factory: () => window
+  factory: () => globalThis as unknown as Window
 });

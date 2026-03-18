@@ -22,12 +22,8 @@ class MockResizeObserver {
   disconnect = vi.fn();
 }
 
-if (!window.ResizeObserver) {
-  window.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
-}
-
 if (!globalThis.ResizeObserver) {
-  globalThis.ResizeObserver = window.ResizeObserver;
+  globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
 }
 
 Object.defineProperty(document, 'fonts', {
@@ -38,7 +34,7 @@ Object.defineProperty(document, 'fonts', {
   writable: true
 });
 
-Object.defineProperty(window.URL, 'createObjectURL', {
+Object.defineProperty(globalThis.URL, 'createObjectURL', {
   value: vi.fn().mockReturnValue('mock-url'),
   configurable: true,
   writable: true

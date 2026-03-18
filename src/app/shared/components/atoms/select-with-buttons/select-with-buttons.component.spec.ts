@@ -8,8 +8,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { SelectWithButtonsComponent } from './select-with-buttons.component';
 
 describe('SelectWithButtonsComponent', () => {
-  let component: SelectWithButtonsComponent<Record<string, any>>;
-  let fixture: ComponentFixture<SelectWithButtonsComponent<Record<string, any>>>;
+  let component: SelectWithButtonsComponent<Record<string, unknown>>;
+  let fixture: ComponentFixture<SelectWithButtonsComponent<Record<string, unknown>>>;
 
   const mockOptions = [
     { id: '1', name: 'Option 1', description: 'First option' },
@@ -19,7 +19,7 @@ describe('SelectWithButtonsComponent', () => {
 
   beforeAll(() => {
     // PrimeNG overlay rendering needs matchMedia
-    Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(globalThis, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation((query) => ({
         matches: false,

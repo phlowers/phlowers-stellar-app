@@ -182,7 +182,7 @@ describe('StudiesComponent', () => {
     });
 
     it('should handle duplicateStudy promise rejection gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
       const testUuid = 'test-uuid-123';
       mockStudiesService.duplicateStudy.mockRejectedValue(new Error('Duplicate failed'));
 

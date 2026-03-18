@@ -189,7 +189,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -246,7 +246,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -305,7 +305,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -367,7 +367,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -432,7 +432,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -500,7 +500,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 

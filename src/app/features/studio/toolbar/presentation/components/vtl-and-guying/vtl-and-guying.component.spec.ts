@@ -175,7 +175,7 @@ describe('VhlAndGuyingComponent', () => {
   });
 
   it('should handle calculation error', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
     mockWorkerPythonService.runTask.mockResolvedValue({
       result: {
         tensionInGuy: 0,

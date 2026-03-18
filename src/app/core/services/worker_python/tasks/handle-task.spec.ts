@@ -97,7 +97,7 @@ describe('Task handlers', () => {
 
     it('should handle unknown task', async () => {
       // Setup
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
       const unknownTask = 'unknownTask' as Task;
 
       // Execute

@@ -41,7 +41,14 @@ module.exports = tseslint.config(
           style: 'kebab-case'
         }
       ],
-      '@typescript-eslint/no-explicit-any': 'warn'
+      '@typescript-eslint/no-explicit-any': 'error',
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'window',
+          message: 'Use globalThis instead of window for cross-environment compatibility.'
+        }
+      ]
     }
   },
   {

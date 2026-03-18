@@ -72,7 +72,7 @@ export class ChainsService {
    */
   async importFromFile() {
     const chains = this.http
-      .get(`${window.location.origin}/data/chains.csv`, {
+      .get(`${globalThis.location.origin}/data/chains.csv`, {
         responseType: 'text'
       })
       .pipe(

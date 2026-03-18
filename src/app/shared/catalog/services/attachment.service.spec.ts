@@ -208,7 +208,7 @@ describe('AttachmentService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/attachments.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -276,7 +276,7 @@ describe('AttachmentService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/attachments.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -355,7 +355,7 @@ describe('AttachmentService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/attachments.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -439,7 +439,7 @@ describe('AttachmentService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/attachments.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -528,7 +528,7 @@ describe('AttachmentService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/attachments.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -610,7 +610,7 @@ describe('AttachmentService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/attachments.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -649,7 +649,7 @@ describe('AttachmentService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request to return an error
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/attachments.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
       expect(req.request.method).toBe('GET');
       req.flush('Error', { status: 404, statusText: 'Not Found' });
 
@@ -716,7 +716,7 @@ describe('AttachmentService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/attachments.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
