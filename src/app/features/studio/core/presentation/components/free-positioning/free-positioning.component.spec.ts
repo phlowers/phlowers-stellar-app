@@ -443,7 +443,7 @@ describe('FreePositioningComponent', () => {
 
     it('should return early when DOM element is not found', async () => {
       vi.spyOn(document, 'getElementById').mockReturnValue(null);
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'warn').mockReturnValue(undefined);
 
       await component.createPlot(mockLitData, 0, 'profile', []);
 
@@ -493,7 +493,7 @@ describe('FreePositioningComponent', () => {
       mockCreatePlotData.mockImplementation(() => {
         throw new Error('plot data failure');
       });
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.createPlot(mockLitData, 0, 'face', []);
 
@@ -697,7 +697,7 @@ describe('FreePositioningComponent', () => {
     beforeEach(() => {
       // Mock DOM elements so createPlot doesn't warn about missing elements
       vi.spyOn(document, 'getElementById').mockReturnValue(document.createElement('div'));
-      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.spyOn(console, 'warn').mockReturnValue(undefined);
     });
 
     it('should use left support altitude when referenceSupport is null', async () => {

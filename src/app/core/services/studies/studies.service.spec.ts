@@ -430,7 +430,7 @@ describe('StudiesService', () => {
   });
 
   it('derives supportFootAltitude from validated attachmentHeight', () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockReturnValue(undefined);
 
     const supports = (
       service as unknown as {
@@ -478,7 +478,7 @@ describe('StudiesService', () => {
   });
 
   it('clamps out of bounds values and logs warnings', () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockReturnValue(undefined);
 
     const supports = (
       service as unknown as {
@@ -537,7 +537,7 @@ describe('StudiesService', () => {
   });
 
   it('handles invalid spanLength for non-last supports', () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockReturnValue(undefined);
 
     const supports = (
       service as unknown as {
@@ -610,7 +610,7 @@ describe('StudiesService', () => {
   });
 
   it('rejects NaN and Infinity values', () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockReturnValue(undefined);
 
     const supports = (
       service as unknown as {

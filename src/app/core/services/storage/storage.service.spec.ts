@@ -6,7 +6,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom, take } from 'rxjs';
+import { firstValueFrom, take, BehaviorSubject } from 'rxjs';
 import { StorageService } from './storage.service';
 import { AppDatabase } from '@infrastructure/database';
 
@@ -49,7 +49,7 @@ describe('StorageService', () => {
   });
 
   it('should create database and set ready to true', async () => {
-    const readySpy = vi.spyOn<any, any>(service['_ready'], 'next');
+    const readySpy = vi.spyOn<BehaviorSubject<boolean>, 'next'>(service['_ready'], 'next');
 
     await service.createDatabase();
 

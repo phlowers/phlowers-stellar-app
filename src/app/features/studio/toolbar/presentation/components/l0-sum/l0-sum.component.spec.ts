@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { SortEvent } from 'primeng/api';
 import { L0SumComponent } from './l0-sum.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -194,7 +195,7 @@ describe('L0SumComponent', () => {
         { span: '1-2', l0: 100, index: 0 }
       ];
       const event = { field: 'span', order: null, data };
-      expect(() => component.customSort(event as any)).not.toThrow();
+      expect(() => component.customSort(event as SortEvent)).not.toThrow();
     });
   });
 });

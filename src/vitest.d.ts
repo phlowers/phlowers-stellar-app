@@ -11,8 +11,9 @@
  * `vi.SpyInstance` as type annotations without explicit imports.
  */
 declare namespace vi {
-  type Mock<T extends (...args: any[]) => any = (...args: any[]) => any> = import('vitest').Mock<T>;
+  type Mock<T extends (...args: unknown[]) => unknown = (...args: unknown[]) => unknown> = import('vitest').Mock<T>;
   type Mocked<T> = import('vitest').Mocked<T>;
-  type MockedFunction<T extends (...args: any[]) => any> = import('vitest').MockedFunction<T>;
-  type SpyInstance<T extends (...args: any[]) => any = (...args: any[]) => any> = import('vitest').MockInstance<T>;
+  type MockedFunction<T extends (...args: unknown[]) => unknown> = import('vitest').MockedFunction<T>;
+  type SpyInstance<T extends (...args: unknown[]) => unknown = (...args: unknown[]) => unknown> =
+    import('vitest').MockInstance<T>;
 }

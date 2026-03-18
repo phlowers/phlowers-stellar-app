@@ -415,7 +415,7 @@ describe('SectionPlotComponent', () => {
       mockCreatePlot.mockRejectedValueOnce(new Error('Plot creation failed'));
       litDataSignal.set(mockLitData);
 
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.refreshPlot();
 
@@ -427,7 +427,7 @@ describe('SectionPlotComponent', () => {
       mockCreatePlot.mockRejectedValueOnce(error);
       litDataSignal.set(mockLitData);
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.refreshPlot();
 
@@ -820,7 +820,7 @@ describe('SectionPlotComponent', () => {
       mockCreatePlot.mockRejectedValueOnce(error);
       litDataSignal.set(mockLitData);
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.refreshPlot();
 
@@ -836,7 +836,7 @@ describe('SectionPlotComponent', () => {
       });
       litDataSignal.set(mockLitData);
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.refreshPlot();
 

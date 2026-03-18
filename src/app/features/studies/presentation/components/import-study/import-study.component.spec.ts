@@ -334,7 +334,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as ProgressEvent<FileReader>;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -406,7 +406,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as ProgressEvent<FileReader>;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -442,7 +442,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
@@ -477,7 +477,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
@@ -512,7 +512,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
@@ -576,7 +576,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
@@ -655,7 +655,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
@@ -690,7 +690,7 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
@@ -835,7 +835,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent).catch(() => {
           // Errors are expected and handled
@@ -941,7 +941,7 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent).catch(() => {
           // Errors are expected and handled
@@ -968,7 +968,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -994,7 +994,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -1020,7 +1020,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -1045,7 +1045,7 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as Event;
 
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -1062,7 +1062,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -1083,7 +1083,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -1104,7 +1104,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -1125,7 +1125,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -1146,7 +1146,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
@@ -1168,7 +1168,7 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 

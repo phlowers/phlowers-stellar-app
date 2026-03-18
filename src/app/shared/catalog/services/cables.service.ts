@@ -84,7 +84,7 @@ export class CablesService {
    */
   async importFromFile() {
     const cables = this.http
-      .get(`${window.location.origin}/data/cables.csv`, {
+      .get(`${globalThis.location.origin}/data/cables.csv`, {
         responseType: 'text'
       })
       .pipe(

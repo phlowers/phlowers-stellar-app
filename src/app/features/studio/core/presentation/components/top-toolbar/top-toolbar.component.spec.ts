@@ -163,7 +163,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Pose table', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockReturnValue(undefined);
       const tables = component.tablesDropdown();
 
       tables[2].command?.({});
@@ -173,7 +173,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Obstacles table', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockReturnValue(undefined);
       const tables = component.tablesDropdown();
 
       tables[3].command?.({});
@@ -183,7 +183,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Grounds table', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockReturnValue(undefined);
       const tables = component.tablesDropdown();
 
       tables[4].command?.({});
@@ -330,7 +330,7 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should handle corrupted localStorage data', () => {
       localStorage.setItem('toolsItemsState', 'invalid json');
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.ngOnInit();
 
@@ -397,7 +397,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 3 - Cable marking', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[2].action();
@@ -407,7 +407,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 4 - Strand RRTS', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[3].action();
@@ -417,7 +417,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 5 - Forest trenches', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[4].action();
@@ -427,7 +427,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 6 - Height & lateral distance', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[5].action();
@@ -437,7 +437,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 7 - Cable adjustment', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[6].action();
@@ -447,7 +447,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute all actions through toolsDropdown commands', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       component.ngOnInit();
       const tools = component.toolsDropdown();
 
@@ -658,7 +658,7 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should handle malformed JSON in localStorage', () => {
       localStorage.setItem('toolsItemsState', '{invalid json}');
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.ngOnInit();
 
@@ -682,7 +682,7 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should handle undefined in localStorage', () => {
       localStorage.setItem('toolsItemsState', 'undefined');
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.ngOnInit();
 

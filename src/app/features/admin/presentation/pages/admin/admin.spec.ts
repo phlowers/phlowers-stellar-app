@@ -220,7 +220,7 @@ describe('AdminComponent', () => {
       vi.useFakeTimers();
 
       // Mock the caches API
-      Object.defineProperty(window, 'caches', {
+      Object.defineProperty(globalThis, 'caches', {
         value: {
           delete: vi.fn().mockResolvedValue(undefined)
         },
@@ -263,7 +263,7 @@ describe('AdminComponent', () => {
       // Execute the accept callback
       await acceptCallback();
 
-      expect(window.caches.delete).toHaveBeenCalledWith('app-assets');
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('app-assets');
       expect(messageServiceMock.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -282,7 +282,7 @@ describe('AdminComponent', () => {
 
       // Don't call the accept callback
 
-      expect(window.caches.delete).not.toHaveBeenCalled();
+      expect(globalThis.caches.delete).not.toHaveBeenCalled();
       expect(messageServiceMock.add).not.toHaveBeenCalled();
       expect(vi.getTimerCount()).toBe(0);
     });

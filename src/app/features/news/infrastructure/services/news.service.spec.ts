@@ -29,7 +29,7 @@ describe('NewsService', () => {
     const expectedContent = '# Latest news';
     const requestPromise = firstValueFrom(service.getNews());
 
-    const req = httpTestingController.expectOne(`${window.location.origin}/data/news.md`);
+    const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/news.md`);
     expect(req.request.method).toBe('GET');
     expect(req.request.responseType).toBe('text');
 
@@ -41,7 +41,7 @@ describe('NewsService', () => {
   it('should propagate HTTP errors from backend', async () => {
     const requestPromise = firstValueFrom(service.getNews());
 
-    const req = httpTestingController.expectOne(`${window.location.origin}/data/news.md`);
+    const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/news.md`);
     req.flush('Not Found', {
       status: 404,
       statusText: 'Not Found'

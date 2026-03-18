@@ -71,6 +71,40 @@ export class ObstacleTypesService {
 > **Exception**: User-facing text in templates uses Angular i18n (`i18n` attribute or `$localize`) — the source language in templates may be English or French as long as translations are provided.
 
 ---
+### TypeScript strict rules — ESLint enforced
+
+#### No `any` type — Error
+
+**The use of `any` is strictly forbidden.** The ESLint rule `@typescript-eslint/no-explicit-any` is set to `'error'`. Always use proper types, generics, or `unknown` instead.
+
+```typescript
+// ✅ ALWAYS — use proper types
+function parse(data: unknown): MyType { ... }
+function getItems<T>(key: string): T[] { ... }
+
+// ❌ NEVER — any is forbidden
+function parse(data: any): any { ... }
+```
+
+> **Rationale:** `any` disables type checking and defeats the purpose of TypeScript strict mode. Use `unknown` when the type is truly unknown, then narrow it.
+
+#### `globalThis` over `window` — Required
+
+**Always use `globalThis` instead of `window`.** The ESLint rule `no-restricted-globals` bans `window` with an error. This ensures cross-environment compatibility (browser, Web Worker, SSR).
+
+```typescript
+// ✅ ALWAYS — use globalThis
+const url = globalThis.location?.href;
+globalThis.addEventListener('online', handler);
+
+// ❌ NEVER — window is banned
+const url = window.location.href;
+window.addEventListener('online', handler);
+```
+
+> **Rationale:** `window` is not available in Web Workers or server-side rendering contexts. `globalThis` is the standard cross-environment global object.
+
+---
 
 ## 2. DDD & Clean Architecture
 
@@ -1102,6 +1136,10 @@ Before each PR, check:
 **Language**
 - [ ] All code, comments, docs, commit messages, and PR descriptions are in **English**
 - [ ] No French or other non-English text in code, comments, or documentation (except i18n translation source text)
+
+**TypeScript strict**
+- [ ] No `any` type used — use proper types, generics, or `unknown`
+- [ ] No `window` usage — use `globalThis` instead
 
 **Angular & Signals**
 - [ ] `ChangeDetectionStrategy.OnPush` on all components

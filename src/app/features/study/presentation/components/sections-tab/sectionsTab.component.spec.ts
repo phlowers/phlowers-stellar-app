@@ -10,6 +10,8 @@ import { MessageService } from 'primeng/api';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChargesService } from '@services/charges/charges.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
+import { PlotService } from '@services/plot/plot.service';
 
 class MockMaintenanceService {
   ready = { next: vi.fn() };
@@ -41,7 +43,7 @@ describe('SectionsTabComponent', () => {
 
   beforeAll(() => {
     // Mock global matchMedia for PrimeNG 19
-    Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(globalThis, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation((query) => ({
         matches: false,
@@ -531,9 +533,12 @@ describe('SectionsTabComponent', () => {
     });
 
     it('should open load table tool when viewing or editing a charge case with value', () => {
-      const openToolSpy = vi.spyOn((component as any).toolbarDialogService, 'openTool');
-      const studySetSpy = vi.spyOn((component as any).plotService.study, 'set');
-      const sectionSetSpy = vi.spyOn((component as any).plotService.section, 'set');
+      const openToolSpy = vi.spyOn(
+        (component as unknown as { toolbarDialogService: ToolbarDialogService }).toolbarDialogService,
+        'openTool'
+      );
+      const studySetSpy = vi.spyOn((component as unknown as { plotService: PlotService }).plotService.study, 'set');
+      const sectionSetSpy = vi.spyOn((component as unknown as { plotService: PlotService }).plotService.section, 'set');
       fixture.componentRef.setInput('study', { uuid: 'study-1', sections: [mockSection] });
       fixture.detectChanges();
 
@@ -548,7 +553,10 @@ describe('SectionsTabComponent', () => {
     });
 
     it('should not open load table tool when charge has no value', () => {
-      const openToolSpy = vi.spyOn((component as any).toolbarDialogService, 'openTool');
+      const openToolSpy = vi.spyOn(
+        (component as unknown as { toolbarDialogService: ToolbarDialogService }).toolbarDialogService,
+        'openTool'
+      );
       component.viewOrEditChargeCase({ label: 'Charge', value: '' }, 'edit', mockSection);
 
       expect(openToolSpy).not.toHaveBeenCalled();

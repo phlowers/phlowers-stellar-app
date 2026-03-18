@@ -82,7 +82,7 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     // @ts-expect-error worker
-    window.Worker = Worker;
+    globalThis.Worker = Worker;
     readySubject = new BehaviorSubject<boolean>(false);
     workerReadySubject = new BehaviorSubject<boolean>(true);
 
@@ -193,7 +193,7 @@ describe('AppComponent', () => {
     });
 
     it('should handle errors when initializing database', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
       const error = new Error('Database error');
       (mockStorageService.createDatabase as vi.Mock).mockRejectedValue(error);
 
@@ -341,7 +341,7 @@ describe('AppComponent - HTML rendering', () => {
 
   beforeEach(async () => {
     // @ts-expect-error worker
-    window.Worker = Worker;
+    globalThis.Worker = Worker;
 
     const readySubject = new BehaviorSubject<boolean>(false);
     const workerReadySubject = new BehaviorSubject<boolean>(true);
