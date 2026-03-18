@@ -352,6 +352,29 @@ export class PlotService {
     }));
   });
 
+  /**
+   * Get span options with both index and UUID for components that need the span index.
+   * @returns Array of span options with value as {index, uuid} objects
+   */
+  getSpanOptionsWithIndex = computed<{ label: string; value: { index: number; uuid: string } | null }[]>(() => {
+    const supports = this.section()?.supports ?? [];
+    const supportRealNumberLength = supports.length + 1;
+    const supportsAmount = supportRealNumberLength ?? 0;
+    const spanAmount = Math.max(supportsAmount - 1, 0);
+    const spans = Array.from({ length: spanAmount }, (_, index) => ({
+      label: `${index + 1} - ${index + 2}`,
+      value:
+        supports[index]?.uuid && supports[index].uuid !== ''
+          ? {
+              index,
+              uuid: supports[index].uuid
+            }
+          : null
+    }));
+    spans.pop();
+    return spans;
+  });
+
   getSupportIndex = (supportUuid: string): number => {
     return this.section()?.supports?.findIndex((s) => s.uuid === supportUuid) ?? -1;
   };
