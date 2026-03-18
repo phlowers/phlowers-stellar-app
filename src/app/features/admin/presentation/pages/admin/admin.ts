@@ -21,6 +21,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LogLevel, Task } from '@services/worker_python/tasks/types';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { WINDOW } from '@core/tokens/window.token';
 
 /** Name of the service worker cache used for app assets. */
 const CACHE_NAME = 'app-assets';
@@ -59,6 +60,7 @@ export class AdminComponent {
   private readonly storageService = inject(StorageService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly window = inject(WINDOW);
 
   constructor() {
     this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
@@ -114,7 +116,7 @@ export class AdminComponent {
           detail: $localize`The app has been reset`
         });
         setTimeout(() => {
-          window.location.assign('/');
+          this.window.location.assign('/');
         }, 2000);
       }
     });

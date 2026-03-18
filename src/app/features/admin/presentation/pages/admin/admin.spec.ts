@@ -20,17 +20,19 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { OnlineService } from '@services/online/online.service';
+import { WINDOW } from '@core/tokens/window.token';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
   let fixture: ComponentFixture<AdminComponent>;
-  let setTimeoutSpy: ReturnType<typeof vi.spyOn>;
   let updateServiceMock: jest.Mocked<UpdateService>;
   let messageServiceMock: jest.Mocked<MessageService>;
   let studiesServiceMock: jest.Mocked<StudiesService>;
   let storageServiceMock: jest.Mocked<StorageService>;
   let confirmationServiceMock: jest.Mocked<ConfirmationService>;
   let onlineServiceMock: jest.Mocked<OnlineService>;
+  let locationAssignMock: ReturnType<typeof vi.fn>;
+  let windowMock: Partial<Window>;
 
   const mockCurrentVersion = {
     git_hash: 'abc123',
@@ -79,6 +81,9 @@ describe('AdminComponent', () => {
       online$: new BehaviorSubject<boolean>(true)
     } as unknown as jest.Mocked<OnlineService>;
 
+    locationAssignMock = vi.fn();
+    windowMock = { location: { assign: locationAssignMock } as Location };
+
     await TestBed.configureTestingModule({
       imports: [
         AdminComponent,
@@ -96,7 +101,8 @@ describe('AdminComponent', () => {
         { provide: StudiesService, useValue: studiesServiceMock },
         { provide: StorageService, useValue: storageServiceMock },
         { provide: ConfirmationService, useValue: confirmationServiceMock },
-        { provide: OnlineService, useValue: onlineServiceMock }
+        { provide: OnlineService, useValue: onlineServiceMock },
+        { provide: WINDOW, useValue: windowMock }
       ]
     })
       .overrideComponent(AdminComponent, {
@@ -211,6 +217,8 @@ describe('AdminComponent', () => {
 
   describe('resetApp', () => {
     beforeEach(() => {
+      vi.useFakeTimers();
+
       // Mock the caches API
       Object.defineProperty(window, 'caches', {
         value: {
@@ -218,7 +226,6 @@ describe('AdminComponent', () => {
         },
         writable: true
       });
-      setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
 
       // Mock navigator.serviceWorker
       Object.defineProperty(navigator, 'serviceWorker', {
@@ -231,6 +238,10 @@ describe('AdminComponent', () => {
         },
         writable: true
       });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
     });
 
     it('should show confirmation dialog when called', () => {
@@ -259,7 +270,11 @@ describe('AdminComponent', () => {
         detail: expect.any(String)
       });
 
-      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
+      expect(vi.getTimerCount()).toBe(1);
+
+      // Advance the timer and verify the redirect fires
+      vi.advanceTimersByTime(2000);
+      expect(locationAssignMock).toHaveBeenCalledWith('/');
     });
 
     it('should not delete cache when confirmation is cancelled', () => {
@@ -269,7 +284,7 @@ describe('AdminComponent', () => {
 
       expect(window.caches.delete).not.toHaveBeenCalled();
       expect(messageServiceMock.add).not.toHaveBeenCalled();
-      expect(setTimeoutSpy).not.toHaveBeenCalledWith(expect.any(Function), 2000);
+      expect(vi.getTimerCount()).toBe(0);
     });
   });
 });

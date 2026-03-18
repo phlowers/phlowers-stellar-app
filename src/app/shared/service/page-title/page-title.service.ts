@@ -29,8 +29,7 @@ export class PageTitleService {
           return route;
         }),
         filter((route) => route.outlet === 'primary'),
-        mergeMap((route) => route.title),
-        catchError(() => EMPTY)
+        mergeMap((route) => route.title.pipe(catchError(() => EMPTY)))
       )
       .subscribe((title) => {
         if (title) {

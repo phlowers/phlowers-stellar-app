@@ -16,7 +16,7 @@ describe('UserService', () => {
     usersTableMock = {
       get: jest.fn(),
       put: jest.fn(),
-      toArray: jest.fn(),
+      toArray: jest.fn().mockResolvedValue([]),
       add: jest.fn(),
       clear: jest.fn()
     };

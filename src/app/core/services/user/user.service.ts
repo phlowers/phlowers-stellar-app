@@ -38,14 +38,11 @@ export class UserService {
   constructor() {
     this.storageService.ready$.subscribe((ready) => {
       if (ready) {
-        const usersPromise = this.storageService.db?.users?.toArray?.();
-        if (usersPromise) {
-          usersPromise.then((users) => {
-            if (users?.length === 1) {
-              this.userSubject.next(users[0]);
-            }
-          });
-        }
+        this.storageService.db.users.toArray().then((users) => {
+          if (users.length === 1) {
+            this.userSubject.next(users[0]);
+          }
+        });
       }
     });
   }
@@ -55,14 +52,14 @@ export class UserService {
    * @param user The user to create
    */
   async createUser(user: UserEntity) {
-    const users = await this.storageService.db?.users.toArray();
-    if (users?.length !== 0) {
+    const users = await this.storageService.db.users.toArray();
+    if (users.length !== 0) {
       throw new Error('User already exists');
     }
     if (!validateEmail(user.email)) {
       throw new Error('Invalid email');
     }
-    await this.storageService.db?.users.add({ ...user });
+    await this.storageService.db.users.add({ ...user });
     this.userSubject.next(user);
   }
 
@@ -71,12 +68,12 @@ export class UserService {
    * @returns The user
    */
   async getUser() {
-    const users = await this.storageService.db?.users.toArray();
-    if (users?.length !== 1) {
-      await this.storageService.db?.users.clear();
+    const users = await this.storageService.db.users.toArray();
+    if (users.length !== 1) {
+      await this.storageService.db.users.clear();
       return null;
     } else {
-      return users?.[0];
+      return users[0];
     }
   }
 }
