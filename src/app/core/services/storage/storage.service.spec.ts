@@ -166,7 +166,7 @@ describe('StorageService', () => {
     (AppDatabase as jest.Mock).mockImplementationOnce(() => {
       throw error;
     });
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
     await expect(service.createDatabase()).rejects.toThrow('DB init failed');
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('createDatabase'), error);

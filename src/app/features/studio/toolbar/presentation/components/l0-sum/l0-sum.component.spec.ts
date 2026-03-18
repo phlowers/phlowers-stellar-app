@@ -92,7 +92,7 @@ describe('L0SumComponent', () => {
 
   describe('onExport', () => {
     it('should log export data', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
       component.onExport();
       expect(consoleSpy).toHaveBeenCalledWith(
         'Export L0 sum',

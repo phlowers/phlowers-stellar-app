@@ -1050,7 +1050,6 @@ describe('PlotService', () => {
     });
 
     it('should not update for non-finite value', () => {
-      const before = service.resolution();
       service.setResolution(NaN);
       // NaN → normalizes to defaultResolution, which might differ from before
       expect(Number.isFinite(service.resolution())).toBe(true);

@@ -5,11 +5,11 @@ import { SectionPlotCardsComponent } from '@features/studio/core/presentation/co
 import { PlotOptions } from '@shared/types/plot.types';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
-type MockPlotService = {
+interface MockPlotService {
   litData: WritableSignal<GetSectionOutput | null>;
   section: WritableSignal<object | null>;
   plotOptions: WritableSignal<PlotOptions>;
-};
+}
 
 describe('SectionPlotCardsComponent', () => {
   let component: SectionPlotCardsComponent;

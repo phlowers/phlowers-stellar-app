@@ -11,13 +11,13 @@ import {
 } from '@infrastructure/database/schemas';
 
 const dexieState = vi.hoisted(() => ({
-  instances: [] as Array<{ name: string; versionCalls: Array<{ version: number; schema?: Record<string, string> }> }>
+  instances: [] as { name: string; versionCalls: { version: number; schema?: Record<string, string> }[] }[]
 }));
 
 vi.mock('dexie', () => {
   class DexieMock {
     name: string;
-    versionCalls: Array<{ version: number; schema?: Record<string, string> }> = [];
+    versionCalls: { version: number; schema?: Record<string, string> }[] = [];
 
     constructor(name: string) {
       this.name = name;
