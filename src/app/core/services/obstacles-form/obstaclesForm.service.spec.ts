@@ -377,9 +377,10 @@ describe('ObstacleFormService', () => {
       ];
       mockPlotService.section.set({ ...mockSection, obstacles });
       mockPlotService.getSpanOptions.mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]);
-      vi
-        .spyOn(service as unknown as { findSupportForObstacle: () => Support | undefined }, 'findSupportForObstacle')
-        .mockReturnValue({ uuid: 'sup-2', number: 2 } as unknown as Support);
+      vi.spyOn(
+        service as unknown as { findSupportForObstacle: () => Support | undefined },
+        'findSupportForObstacle'
+      ).mockReturnValue({ uuid: 'sup-2', number: 2 } as unknown as Support);
 
       service.loadObstacle('obs-1');
 

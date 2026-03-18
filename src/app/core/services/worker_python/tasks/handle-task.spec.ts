@@ -38,8 +38,7 @@ describe('Task handlers', () => {
     it('should handle runTests task', async () => {
       // Setup
       const mockResult = { passed: 5, failed: 0 };
-      vi
-        .spyOn(performance, 'now')
+      vi.spyOn(performance, 'now')
         .mockReturnValueOnce(1000) // Start time
         .mockReturnValueOnce(1500); // End time
 
@@ -72,8 +71,7 @@ describe('Task handlers', () => {
         section: { key1: 'section1', key2: 'section2' },
         color_select: { key1: 'color1', key2: 'color2' }
       };
-      vi
-        .spyOn(performance, 'now')
+      vi.spyOn(performance, 'now')
         .mockReturnValueOnce(1000) // Start time
         .mockReturnValueOnce(1200); // End time
 

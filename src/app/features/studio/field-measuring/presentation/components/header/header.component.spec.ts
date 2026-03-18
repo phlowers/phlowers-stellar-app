@@ -310,9 +310,9 @@ describe('HeaderComponent', () => {
         ]
       };
       vi.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
-      vi
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       newComponent.fieldChange.subscribe(fieldChangeSpy);
 
@@ -351,9 +351,9 @@ describe('HeaderComponent', () => {
   describe('Spans Computed Property', () => {
     it('should return spans starting at index 0 when startSupport is 0', () => {
       const plotService = TestBed.inject(PlotService);
-      vi
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [0, 1] });
       fixture.detectChanges();
@@ -368,9 +368,9 @@ describe('HeaderComponent', () => {
       // Scenario: section has spans 1-2, 2-3, 3-4 (supports 0,1,2,3)
       // User selects spans 2-3 and 3-4 with the slider → startSupport=1, endSupport=3
       const plotService = TestBed.inject(PlotService);
-      vi
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2] });
       fixture.detectChanges();
@@ -384,9 +384,9 @@ describe('HeaderComponent', () => {
     it('should NOT include out-of-range spans when startSupport is non-zero', () => {
       // Regression: before the fix, selecting spans 2-3 and 3-4 showed 1-2 and 2-3 instead
       const plotService = TestBed.inject(PlotService);
-      vi
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2] });
       fixture.detectChanges();
@@ -409,9 +409,9 @@ describe('HeaderComponent', () => {
         ]
       };
       vi.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
-      vi
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       const fieldChangeSpy = vi.fn();
       const newFixture = TestBed.createComponent(HeaderComponent);
@@ -432,9 +432,9 @@ describe('HeaderComponent', () => {
 
     it('should return empty array when startSupport equals endSupport', () => {
       const plotService = TestBed.inject(PlotService);
-      vi
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 2, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 2, endSupport: 2 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: null });
       fixture.detectChanges();

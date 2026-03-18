@@ -42,47 +42,45 @@ describe('ImportStudyComponent', () => {
     } as unknown as vi.Mocked<ConfirmationService>;
 
     // Mock Papa.parse
-    const mockParse = vi
-      .fn()
-      .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
-        if (config?.complete) {
-          // Simulate successful parsing with async behavior
-          setTimeout(async () => {
-            const mockResult: Papa.ParseResult<Record<string, string>> = {
-              data: [
-                {
-                  num: '1',
-                  nom: '98',
-                  suspension: 'FAUX',
-                  alt_acc: '1075,53',
-                  long_bras: '0',
-                  angle_ligne: '-19,1',
-                  long_ch: '0',
-                  pds_ch: '0',
-                  surf_ch: '0',
-                  ctr_poids: '0',
-                  ch_en_V: 'FAUX',
-                  portée: '473,07'
-                }
-              ],
-              errors: [],
-              meta: {
-                delimiter: ';',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0
+    const mockParse = vi.fn().mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
+      if (config?.complete) {
+        // Simulate successful parsing with async behavior
+        setTimeout(async () => {
+          const mockResult: Papa.ParseResult<Record<string, string>> = {
+            data: [
+              {
+                num: '1',
+                nom: '98',
+                suspension: 'FAUX',
+                alt_acc: '1075,53',
+                long_bras: '0',
+                angle_ligne: '-19,1',
+                long_ch: '0',
+                pds_ch: '0',
+                surf_ch: '0',
+                ctr_poids: '0',
+                ch_en_V: 'FAUX',
+                portée: '473,07'
               }
-            };
-            // Call complete callback and await it since it's async
-            const result = config.complete!(mockResult, undefined) as unknown;
-            if (result && typeof result === 'object' && 'then' in result) {
-              await (result as Promise<void>);
+            ],
+            errors: [],
+            meta: {
+              delimiter: ';',
+              linebreak: '\n',
+              aborted: false,
+              truncated: false,
+              cursor: 0
             }
-          }, 0);
-        }
-        return {} as Papa.ParseResult<Record<string, string>>;
-      });
+          };
+          // Call complete callback and await it since it's async
+          const result = config.complete!(mockResult, undefined) as unknown;
+          if (result && typeof result === 'object' && 'then' in result) {
+            await (result as Promise<void>);
+          }
+        }, 0);
+      }
+      return {} as Papa.ParseResult<Record<string, string>>;
+    });
 
     (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
