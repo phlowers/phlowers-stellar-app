@@ -77,7 +77,7 @@ export class SectionPlotComponent {
     displayOptions: this.plotService.selectedDisplayOptions(),
     axesNorms: this.plotService.axesNorms(),
     selectedObstacleUuid: this.obstaclesService.selectedObstacleUuid(),
-    selectedPointIndex: this.obstaclesService.selectedPointIndex(),
+    activePointIndex: this.obstaclesService.activePointIndex(),
     sideTabs: this.sideTabsService.sideTabs(),
     positions: this.currentObstaclePositions(),
     name: this.currentObstacleName(),
@@ -166,7 +166,7 @@ export class SectionPlotComponent {
 
       const camera = this.plotService.camera();
       const currentObstacleUuid = this.getCurrentObstacleUuid();
-      const currentObstaclePointIndex = this.obstaclesService.selectedPointIndex() ?? 0;
+      const currentObstaclePointIndex = this.obstaclesService.activePointIndex() ?? 0;
       const axesNorms = this.plotService.axesNorms();
 
       const plot = await createPlot({

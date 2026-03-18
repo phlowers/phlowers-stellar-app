@@ -133,8 +133,8 @@
   <ul class="obstacles-form__points" data-testid="points-list">
     @for (obstacle of obstacleFormService.positions.controls; track $index) {
       <li
-        [class.obstacles-form__points__point--active]="obstaclesService.currentPointIndex() === $index"
-        [attr.aria-selected]="obstaclesService.currentPointIndex() === $index ? 'true' : 'false'"
+        [class.obstacles-form__points__point--active]="obstaclesService.activePointIndex() === $index"
+        [attr.aria-selected]="obstaclesService.activePointIndex() === $index ? 'true' : 'false'"
         class="obstacles-form__points__point"
         data-testid="point-item"
       >

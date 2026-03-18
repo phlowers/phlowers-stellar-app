@@ -148,7 +148,10 @@ export class ObstacleFormService {
   }, DEBOUNCED_UPDATE_POINT_DELAY);
 
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
-    this.focusPlotOnSupport(supportUuid);
+    if (supportUuid) {
+      const supports = this.plotService.getSupportOptions(supportUuid);
+      this.supportsOptions.set(supports.map((s) => ({ label: s.label, value: s.value })));
+    }
     this.debouncedResetForm(supportUuid);
     return this.form.value as Obstacle;
   }
@@ -223,7 +226,7 @@ export class ObstacleFormService {
   }
 
   deletePoint(index?: number): void {
-    const pointIndex = index ?? this.obstaclesService.currentPointIndex();
+    const pointIndex = index ?? this.obstaclesService.activePointIndex() ?? 0;
     this.removePosition(pointIndex);
     const newIndex = Math.max(0, this.positions.length - 1);
     this.obstaclesService.setCurrentPointIndex(newIndex);

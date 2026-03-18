@@ -36,8 +36,8 @@
             i18n-ariaLabel
             styleClass="quick-measures__select"
             [options]="obstaclePointOptions()"
-            [ngModel]="obstaclesService.selectedPointIndex()"
-            (ngModelChange)="obstaclesService.selectedPointIndex.set($event)"
+            [ngModel]="obstaclesService.activePointIndex()"
+            (ngModelChange)="obstaclesService.activePointIndex.set($event)"
             data-testid="quick-measures-select-obstacle-point"
           />
         }

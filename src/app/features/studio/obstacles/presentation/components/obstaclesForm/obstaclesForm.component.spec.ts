@@ -60,9 +60,9 @@ describe('ObstaclesFormComponent', () => {
   let mockPlotService: { getSpanOptions: vi.Mock; isFreePositioningMode: ReturnType<typeof signal> };
   let mockObstacleFormService: MockObstacleFormService;
   let obstaclesService: {
-    currentPointIndex: ReturnType<typeof signal<number>>;
-    setCurrentPointIndex: vi.Mock;
-    resetCurrentPointIndex: vi.Mock;
+    activePointIndex: ReturnType<typeof signal<number | null>>;
+    setCurrentPointIndex: jest.Mock;
+    resetCurrentPointIndex: jest.Mock;
   };
 
   const getByTestId = (testId: string): HTMLElement | null =>
@@ -77,11 +77,11 @@ describe('ObstaclesFormComponent', () => {
       isFreePositioningMode: signal(false)
     };
     mockObstacleFormService = new MockObstacleFormService();
-    const indexSignal = signal(0);
+    const indexSignal = signal<number | null>(null);
     obstaclesService = {
-      currentPointIndex: indexSignal,
-      setCurrentPointIndex: vi.fn((i: number) => indexSignal.set(i)),
-      resetCurrentPointIndex: vi.fn()
+      activePointIndex: indexSignal,
+      setCurrentPointIndex: jest.fn((i: number) => indexSignal.set(i)),
+      resetCurrentPointIndex: jest.fn()
     };
 
     await TestBed.configureTestingModule({

@@ -124,11 +124,10 @@ describe('ObstacleFormService', () => {
     study: ReturnType<typeof signal<Study | null>>;
   };
   let mockObstaclesService: {
-    currentPointIndex: ReturnType<typeof signal<number>>;
+    activePointIndex: ReturnType<typeof signal<number | null>>;
     setCurrentPointIndex: jest.Mock;
     resetCurrentPointIndex: jest.Mock;
     selectedObstacleUuid: ReturnType<typeof signal<string | null>>;
-    selectedPointIndex: ReturnType<typeof signal<number | null>>;
     setSelectedObstacle: jest.Mock;
   };
   let mockSectionService: { createOrUpdateSection: vi.Mock };
@@ -150,11 +149,10 @@ describe('ObstacleFormService', () => {
       study: signal<Study | null>(mockStudy)
     };
     mockObstaclesService = {
-      currentPointIndex: signal(0),
+      activePointIndex: signal<number | null>(null),
       setCurrentPointIndex: jest.fn(),
       resetCurrentPointIndex: jest.fn(),
       selectedObstacleUuid: signal<string | null>(null),
-      selectedPointIndex: signal<number | null>(null),
       setSelectedObstacle: jest.fn()
     };
     mockSectionService = {
@@ -290,21 +288,18 @@ describe('ObstacleFormService', () => {
       });
       expect(result).toBeDefined();
     }));
-    it('should update plot and supportsOptions when supportUuid is valid', () => {
-      (mockPlotService.getSupportIndex as vi.Mock).mockReturnValue(0);
-      service.resetFormForNewObstacle('sup-1');
-      expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({
-        startSupport: 0,
-        endSupport: 1
-      });
-      expect(mockPlotService.spanAmountChoice.set).toBeDefined();
-      expect(service.supportsOptions().length).toBeGreaterThanOrEqual(0);
-    });
-    it('should avoid plot change when support index is invalid', () => {
-      (mockPlotService.getSupportIndex as vi.Mock).mockReturnValue(-1);
+    it('should update supportsOptions when supportUuid is valid', () => {
       service.resetFormForNewObstacle('sup-1');
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
-      expect(service.supportsOptions().length).toBeGreaterThanOrEqual(0);
+      expect(service.supportsOptions()).toEqual([
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
+      ]);
+    });
+    it('should not update supportsOptions when supportUuid is null', () => {
+      service.resetFormForNewObstacle(null);
+      expect(mockPlotService.getSupportOptions).not.toHaveBeenCalled();
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });
   });
 
@@ -402,8 +397,8 @@ describe('ObstacleFormService', () => {
       expect(service.positions.length).toBe(1);
       expect(mockObstaclesService.setCurrentPointIndex).toHaveBeenCalled();
     });
-    it('should use currentPointIndex when index not provided', () => {
-      mockObstaclesService.currentPointIndex.set(0);
+    it('should use activePointIndex when index not provided', () => {
+      mockObstaclesService.activePointIndex.set(0);
       service.addPosition();
       service.deletePoint();
       expect(mockObstaclesService.setCurrentPointIndex).toHaveBeenCalled();

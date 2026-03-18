@@ -457,11 +457,16 @@ describe('StudioPageComponent', () => {
     });
   });
 
-  it('ngOnDestroy should reset plot service', () => {
+  it('ngOnDestroy should reset plot service and clear obstacle selection', () => {
+    obstaclesService.selectedObstacleUuid.set('obs-1');
+    obstaclesService.activePointIndex.set(2);
+
     component.ngOnDestroy();
 
     expect(plotService.resetAll).toHaveBeenCalled();
     expect(plotService.isStudioActive()).toBe(false);
+    expect(obstaclesService.selectedObstacleUuid()).toBeNull();
+    expect(obstaclesService.activePointIndex()).toBeNull();
   });
 
   describe('UC: studio page initialization and navigation', () => {
@@ -582,7 +587,7 @@ describe('StudioPageComponent', () => {
       component.onObstacleSelect('obs-1');
 
       expect(obstaclesService.selectedObstacleUuid()).toBe('obs-1');
-      expect(obstaclesService.selectedPointIndex()).toBe(0);
+      expect(obstaclesService.activePointIndex()).toBe(0);
     });
 
     it('should set null point index when obstacle has multiple points', () => {
@@ -600,22 +605,22 @@ describe('StudioPageComponent', () => {
           }
         ]
       } as unknown as Section);
-      obstaclesService.selectedPointIndex.set(1);
+      obstaclesService.activePointIndex.set(1);
 
       component.onObstacleSelect('obs-1');
 
       expect(obstaclesService.selectedObstacleUuid()).toBe('obs-1');
-      expect(obstaclesService.selectedPointIndex()).toBeNull();
+      expect(obstaclesService.activePointIndex()).toBeNull();
     });
 
     it('should clear obstacle UUID and reset point index when called with null', () => {
       obstaclesService.selectedObstacleUuid.set('obs-1');
-      obstaclesService.selectedPointIndex.set(2);
+      obstaclesService.activePointIndex.set(2);
 
       component.onObstacleSelect(null);
 
       expect(obstaclesService.selectedObstacleUuid()).toBeNull();
-      expect(obstaclesService.selectedPointIndex()).toBeNull();
+      expect(obstaclesService.activePointIndex()).toBeNull();
     });
 
     it('should navigate to the obstacle span and load it into the form', () => {

@@ -158,7 +158,7 @@ export class FreePositioningComponent implements OnDestroy {
     });
 
     effect(() => {
-      this.obstaclesService.currentPointIndex();
+      this.obstaclesService.activePointIndex();
       this.positionsValue();
 
       untracked(() => this.debounceUpdateSelectedPositionMarkers());
@@ -379,7 +379,7 @@ export class FreePositioningComponent implements OnDestroy {
       return;
     }
 
-    const previousSelected = this.obstaclesService.currentPointIndex();
+    const previousSelected = this.obstaclesService.activePointIndex();
     if (!isNumber(previousSelected)) return;
     const positions = this.obstacleFormService.positions.value as Position3D[];
     const previousSelectedObstacle = positions.find((_o, index) => index === previousSelected);
@@ -443,7 +443,7 @@ export class FreePositioningComponent implements OnDestroy {
         standoff: 20,
         font: {
           size: 30,
-          color: index === this.obstaclesService.currentPointIndex() ? 'red' : 'black'
+          color: index === this.obstaclesService.activePointIndex() ? 'red' : 'black'
         }
       });
     });

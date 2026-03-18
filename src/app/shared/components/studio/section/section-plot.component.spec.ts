@@ -226,9 +226,8 @@ describe('SectionPlotComponent', () => {
   };
 
   const mockObstaclesService = {
-    currentPointIndex: signal(0),
     selectedObstacleUuid: signal<string | null>(null),
-    selectedPointIndex: signal<number | null>(null),
+    activePointIndex: signal<number | null>(null),
     setSelectedObstacle: jest.fn()
   };
 
@@ -823,7 +822,7 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should handle obstacle point index updates', async () => {
-      mockObstaclesService.selectedPointIndex.set(5);
+      mockObstaclesService.activePointIndex.set(5);
       litDataSignal.set(mockLitData);
 
       await component.refreshPlot();

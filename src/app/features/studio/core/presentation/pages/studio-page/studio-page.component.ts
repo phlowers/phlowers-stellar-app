@@ -210,6 +210,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.plotService.isStudioActive.set(false);
     this.plotService.resetAll();
+    this.obstaclesService.setSelectedObstacle(null, null);
   }
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {

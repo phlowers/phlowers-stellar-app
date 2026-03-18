@@ -40,14 +40,11 @@ export class ObstaclesService {
    */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
-  /** Index of the currently selected obstacle point. */
-  currentPointIndex = signal<number>(0);
-
   /** UUID of the obstacle currently selected in the quick-measures p-select (drives plot highlighting). */
   selectedObstacleUuid = signal<string | null>(null);
 
-  /** Point index of the obstacle currently selected in the quick-measures p-select (drives plot highlighting). */
-  selectedPointIndex = signal<number | null>(null);
+  /** Index of the currently active obstacle point — shared by the form editor and plot highlighting. */
+  activePointIndex = signal<number | null>(null);
 
   private readonly storageService = inject(StorageService);
   private readonly http = inject(HttpClient);
@@ -58,20 +55,20 @@ export class ObstaclesService {
     });
   }
 
-  /** Sets the current obstacle point index. */
+  /** Sets the active obstacle point index. */
   setCurrentPointIndex(index: number): void {
-    this.currentPointIndex.set(index);
+    this.activePointIndex.set(index);
   }
 
-  /** Resets the current obstacle point index to zero. */
+  /** Resets the active obstacle point index to null (no point selected). */
   resetCurrentPointIndex(): void {
-    this.currentPointIndex.set(0);
+    this.activePointIndex.set(null);
   }
 
   /** Sets the selected obstacle and point for quick-measures display and plot highlighting. */
   setSelectedObstacle(uuid: string | null, pointIndex: number | null): void {
     this.selectedObstacleUuid.set(uuid);
-    this.selectedPointIndex.set(pointIndex);
+    this.activePointIndex.set(pointIndex);
   }
 
   /** Retrieve all obstacle types from the database.

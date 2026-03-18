@@ -92,7 +92,7 @@ export class ObstaclesFormComponent {
   );
 
   private readonly debouncedUpdatePoint = debounce((key: 'x' | 'y' | 'z', value: number) => {
-    const currentIndex = this.obstaclesService.currentPointIndex();
+    const currentIndex = this.obstaclesService.activePointIndex() ?? 0;
     const positionGroup = this.obstacleFormService.positions.at(currentIndex);
     if (positionGroup) {
       positionGroup.get(key)?.setValue(value);
