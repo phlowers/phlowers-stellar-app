@@ -1,5 +1,11 @@
 {
   "compileOnSave": false,
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.spec.json" },
+    { "path": "./tsconfig.e2e.json" }
+  ],
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
     "strict": true,
@@ -49,5 +55,8 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "exclude": [
+    "e2e/**/*"
+  ]
 }

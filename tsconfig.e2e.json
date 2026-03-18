@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "types": ["@playwright/test", "node"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": ["e2e/**/*.ts"],
+  "exclude": []
+}
