@@ -49,17 +49,17 @@ describe('SpanComponent', () => {
   beforeEach(async () => {
     mockPlotService = {
       getSpanOptions: signal<SpanOption[]>(mockSpanOptions),
-      getSupportIndex: jest.fn().mockReturnValue(0),
-      getSupportOptions: jest.fn().mockReturnValue(mockSupportOptions),
-      plotOptionsChange: jest.fn(),
+      getSupportIndex: vi.fn().mockReturnValue(0),
+      getSupportOptions: vi.fn().mockReturnValue(mockSupportOptions),
+      plotOptionsChange: vi.fn(),
       temporaryLoadData: null
     };
 
     mockLoadFormsService = {
-      initTemporaryLoadData: jest.fn(),
-      deleteLoad: jest.fn(),
-      saveTemporaryLoadDataInSection: jest.fn().mockResolvedValue(undefined),
-      calculateLoad: jest.fn().mockResolvedValue(undefined)
+      initTemporaryLoadData: vi.fn(),
+      deleteLoad: vi.fn(),
+      saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined),
+      calculateLoad: vi.fn().mockResolvedValue(undefined)
     };
 
     await TestBed.configureTestingModule({
@@ -76,7 +76,7 @@ describe('SpanComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates with default form state', () => {
@@ -266,7 +266,7 @@ describe('SpanComponent', () => {
     });
 
     beforeEach(() => {
-      (mockPlotService['getSupportIndex'] as jest.Mock).mockImplementation((uuid: string) =>
+      (mockPlotService['getSupportIndex'] as vi.Mock).mockImplementation((uuid: string) =>
         uuid === 'support-1' ? 0 : uuid === 'support-2' ? 1 : -1
       );
     });
@@ -277,7 +277,7 @@ describe('SpanComponent', () => {
         // Without untracked(), that read would register section() as a dependency of
         // spanSelectEffect, causing the effect to re-run on every Dexie emission.
         const internalSignal = signal(0);
-        (mockPlotService['getSupportIndex'] as jest.Mock).mockImplementation(() => {
+        (mockPlotService['getSupportIndex'] as vi.Mock).mockImplementation(() => {
           internalSignal(); // reads a signal — simulates reading section()
           return 0;
         });

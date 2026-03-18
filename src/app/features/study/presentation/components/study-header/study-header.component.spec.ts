@@ -7,15 +7,15 @@ import { StudyHeaderComponent } from './study-header.component';
 describe('StudyHeader', () => {
   let component: StudyHeaderComponent;
   let fixture: ComponentFixture<StudyHeaderComponent>;
-  let mockMessageService: jest.Mocked<MessageService>;
+  let mockMessageService: vi.Mocked<MessageService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   beforeEach(async () => {
     mockMessageService = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
     await TestBed.configureTestingModule({
       imports: [StudyHeaderComponent],
       providers: [provideNoopAnimations(), { provide: MessageService, useValue: mockMessageService }]

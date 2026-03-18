@@ -206,7 +206,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should emit fieldChange when onFieldChange is called', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('longitude', 45.12345678);
@@ -218,7 +218,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should emit correct field and value for different fields', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('latitude', -23.45678901);
@@ -247,7 +247,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should handle multiple field changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('longitude', 10);
@@ -266,7 +266,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should emit fieldChange when selectedSpan changes to valid span', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       // Change the selected span
@@ -280,7 +280,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should emit fieldChange with correct span indices', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onSpanChange([5, 6]);
@@ -294,7 +294,7 @@ describe('HeaderComponent', () => {
 
     it('should emit fieldChange for span initialization when spans are available and no span is set', () => {
       // Component should have emitted fieldChange for span initialization
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
 
       // Create a new component instance to capture initialization
       const newFixture = TestBed.createComponent(HeaderComponent);
@@ -309,10 +309,10 @@ describe('HeaderComponent', () => {
           { attachmentHeight: 15 } as Partial<Support>
         ]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
-      jest
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       newComponent.fieldChange.subscribe(fieldChangeSpy);
 
@@ -331,7 +331,7 @@ describe('HeaderComponent', () => {
 
     it('should emit fieldChange when onSpanChange is called', () => {
       // Subscribe and track calls
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       // Clear any previous calls from initialization
@@ -351,9 +351,9 @@ describe('HeaderComponent', () => {
   describe('Spans Computed Property', () => {
     it('should return spans starting at index 0 when startSupport is 0', () => {
       const plotService = TestBed.inject(PlotService);
-      jest
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [0, 1] });
       fixture.detectChanges();
@@ -368,9 +368,9 @@ describe('HeaderComponent', () => {
       // Scenario: section has spans 1-2, 2-3, 3-4 (supports 0,1,2,3)
       // User selects spans 2-3 and 3-4 with the slider → startSupport=1, endSupport=3
       const plotService = TestBed.inject(PlotService);
-      jest
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2] });
       fixture.detectChanges();
@@ -384,9 +384,9 @@ describe('HeaderComponent', () => {
     it('should NOT include out-of-range spans when startSupport is non-zero', () => {
       // Regression: before the fix, selecting spans 2-3 and 3-4 showed 1-2 and 2-3 instead
       const plotService = TestBed.inject(PlotService);
-      jest
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2] });
       fixture.detectChanges();
@@ -408,12 +408,12 @@ describe('HeaderComponent', () => {
           { attachmentHeight: 18 }
         ]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
-      jest
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       const newFixture = TestBed.createComponent(HeaderComponent);
       newFixture.componentInstance.fieldChange.subscribe(fieldChangeSpy);
       newFixture.componentRef.setInput('measureData', { ...mockMeasureData, span: null });
@@ -432,9 +432,9 @@ describe('HeaderComponent', () => {
 
     it('should return empty array when startSupport equals endSupport', () => {
       const plotService = TestBed.inject(PlotService);
-      jest
-        .spyOn(plotService, 'plotOptions')
-        .mockReturnValue({ startSupport: 2, endSupport: 2 } as ReturnType<typeof plotService.plotOptions>);
+      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 2, endSupport: 2 } as ReturnType<
+        typeof plotService.plotOptions
+      >);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: null });
       fixture.detectChanges();
@@ -454,14 +454,14 @@ describe('HeaderComponent', () => {
     });
 
     it('should calculate and set altitude from attachment heights when span changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
         supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: 12.5 }, { attachmentHeight: 15 }]
       };
 
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Change span to [0, 1]
       component.onSpanChange([0, 1]);
@@ -475,10 +475,10 @@ describe('HeaderComponent', () => {
     });
 
     it('should not set altitude when section is null', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
-      jest.spyOn(plotService, 'section').mockReturnValue(null);
+      vi.spyOn(plotService, 'section').mockReturnValue(null);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -490,11 +490,11 @@ describe('HeaderComponent', () => {
     });
 
     it('should not set altitude when section has no supports', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = { supports: null };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -506,13 +506,13 @@ describe('HeaderComponent', () => {
     });
 
     it('should not set altitude when left support is missing', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
         supports: [null, { attachmentHeight: 12.5 }]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -524,13 +524,13 @@ describe('HeaderComponent', () => {
     });
 
     it('should not set altitude when right support is missing', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
         supports: [{ attachmentHeight: 10.5 }, null]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -542,13 +542,13 @@ describe('HeaderComponent', () => {
     });
 
     it('should not set altitude when left attachment height is null', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
         supports: [{ attachmentHeight: null }, { attachmentHeight: 12.5 }]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -560,13 +560,13 @@ describe('HeaderComponent', () => {
     });
 
     it('should not set altitude when right attachment height is null', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
         supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: null }]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -578,13 +578,13 @@ describe('HeaderComponent', () => {
     });
 
     it('should handle different span indices correctly', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = {
         supports: [{ attachmentHeight: 10 }, { attachmentHeight: 15 }, { attachmentHeight: 20 }]
       };
-      jest.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       component.onSpanChange([1, 2]);
       fixture.detectChanges();
@@ -664,7 +664,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should handle negative coordinate values', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('longitude', -123.456);
@@ -687,7 +687,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should handle very large coordinate values', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('longitude', 180.0);

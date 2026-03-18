@@ -15,44 +15,47 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { Section, InitialCondition, Study } from '@shared/domain';
 
 // Mock uuid
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-123')
+vi.mock('uuid', () => ({
+  v4: vi.fn(() => 'mock-uuid-123')
 }));
 
-jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn(),
-  update: jest.fn(),
-  purge: jest.fn(),
-  relayout: jest.fn(),
-  restyle: jest.fn(),
-  react: jest.fn(),
-  redraw: jest.fn(),
-  toImage: jest.fn(),
-  downloadImage: jest.fn(),
-  extendTraces: jest.fn(),
-  prependTraces: jest.fn(),
-  addTraces: jest.fn(),
-  deleteTraces: jest.fn(),
-  moveTraces: jest.fn(),
-  animate: jest.fn(),
-  setPlotConfig: jest.fn(),
-  validate: jest.fn(),
-  d3: {
-    select: jest.fn(),
-    selectAll: jest.fn()
+vi.mock('plotly.js-dist-min', () => ({
+  __esModule: true,
+  default: {
+    newPlot: vi.fn(),
+    update: vi.fn(),
+    purge: vi.fn(),
+    relayout: vi.fn(),
+    restyle: vi.fn(),
+    react: vi.fn(),
+    redraw: vi.fn(),
+    toImage: vi.fn(),
+    downloadImage: vi.fn(),
+    extendTraces: vi.fn(),
+    prependTraces: vi.fn(),
+    addTraces: vi.fn(),
+    deleteTraces: vi.fn(),
+    moveTraces: vi.fn(),
+    animate: vi.fn(),
+    setPlotConfig: vi.fn(),
+    validate: vi.fn(),
+    d3: {
+      select: vi.fn(),
+      selectAll: vi.fn()
+    }
   }
 }));
 
 describe('StudyComponent', () => {
   let component: StudyComponent;
   let fixture: ComponentFixture<StudyComponent>;
-  let mockActivatedRoute: jest.Mocked<ActivatedRoute>;
-  let mockStudiesService: jest.Mocked<StudiesService>;
-  let mockSectionService: jest.Mocked<SectionService>;
-  let mockInitialConditionService: jest.Mocked<InitialConditionService>;
-  let mockCablesService: jest.Mocked<CablesService>;
-  let mockRouter: jest.Mocked<Router>;
-  let mockMessageService: jest.Mocked<MessageService>;
+  let mockActivatedRoute: vi.Mocked<ActivatedRoute>;
+  let mockStudiesService: vi.Mocked<StudiesService>;
+  let mockSectionService: vi.Mocked<SectionService>;
+  let mockInitialConditionService: vi.Mocked<InitialConditionService>;
+  let mockCablesService: vi.Mocked<CablesService>;
+  let mockRouter: vi.Mocked<Router>;
+  let mockMessageService: vi.Mocked<MessageService>;
   let readySubject: BehaviorSubject<boolean>;
   let paramsSubject: BehaviorSubject<{ uuid: string }>;
 
@@ -134,7 +137,7 @@ describe('StudyComponent', () => {
     });
 
     const mockParamMap = {
-      get: jest.fn().mockReturnValue('test-uuid-1')
+      get: vi.fn().mockReturnValue('test-uuid-1')
     };
 
     mockActivatedRoute = {
@@ -142,44 +145,44 @@ describe('StudyComponent', () => {
         paramMap: mockParamMap
       },
       params: paramsSubject.asObservable()
-    } as unknown as jest.Mocked<ActivatedRoute>;
+    } as unknown as vi.Mocked<ActivatedRoute>;
 
     mockStudiesService = {
-      getStudy: jest.fn().mockResolvedValue(mockStudy),
-      getStudyAsObservable: jest.fn().mockReturnValue(of(mockStudy)),
-      duplicateStudy: jest.fn().mockResolvedValue(mockStudy),
-      updateStudy: jest.fn().mockResolvedValue(undefined),
+      getStudy: vi.fn().mockResolvedValue(mockStudy),
+      getStudyAsObservable: vi.fn().mockReturnValue(of(mockStudy)),
+      duplicateStudy: vi.fn().mockResolvedValue(mockStudy),
+      updateStudy: vi.fn().mockResolvedValue(undefined),
       ready: readySubject,
       exportDialogData: signal(null)
-    } as unknown as jest.Mocked<StudiesService>;
+    } as unknown as vi.Mocked<StudiesService>;
 
     mockRouter = {
-      navigate: jest.fn()
-    } as unknown as jest.Mocked<Router>;
+      navigate: vi.fn()
+    } as unknown as vi.Mocked<Router>;
 
     mockSectionService = {
-      createOrUpdateSection: jest.fn().mockResolvedValue(undefined),
-      deleteSection: jest.fn().mockResolvedValue(undefined),
-      duplicateSection: jest.fn().mockResolvedValue(undefined)
-    } as unknown as jest.Mocked<SectionService>;
+      createOrUpdateSection: vi.fn().mockResolvedValue(undefined),
+      deleteSection: vi.fn().mockResolvedValue(undefined),
+      duplicateSection: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<SectionService>;
 
     mockInitialConditionService = {
-      addInitialCondition: jest.fn().mockResolvedValue(undefined),
-      deleteInitialCondition: jest.fn().mockResolvedValue(undefined),
-      updateInitialCondition: jest.fn().mockResolvedValue(undefined),
-      duplicateInitialCondition: jest.fn().mockResolvedValue(undefined),
-      setInitialCondition: jest.fn().mockResolvedValue(undefined)
-    } as unknown as jest.Mocked<InitialConditionService>;
+      addInitialCondition: vi.fn().mockResolvedValue(undefined),
+      deleteInitialCondition: vi.fn().mockResolvedValue(undefined),
+      updateInitialCondition: vi.fn().mockResolvedValue(undefined),
+      duplicateInitialCondition: vi.fn().mockResolvedValue(undefined),
+      setInitialCondition: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<InitialConditionService>;
 
     mockMessageService = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
 
     mockCablesService = {
-      getCables: jest.fn().mockResolvedValue([]),
-      importFromFile: jest.fn().mockResolvedValue(undefined),
+      getCables: vi.fn().mockResolvedValue([]),
+      importFromFile: vi.fn().mockResolvedValue(undefined),
       ready: new BehaviorSubject<boolean>(true)
-    } as unknown as jest.Mocked<CablesService>;
+    } as unknown as vi.Mocked<CablesService>;
 
     await TestBed.configureTestingModule({
       imports: [StudyComponent],
@@ -205,7 +208,7 @@ describe('StudyComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Creation', () => {
@@ -217,7 +220,7 @@ describe('StudyComponent', () => {
 
   describe('ngOnInit', () => {
     it('should navigate to studies if no uuid is provided', () => {
-      (mockActivatedRoute.snapshot.paramMap.get as jest.Mock).mockReturnValue(null);
+      (mockActivatedRoute.snapshot.paramMap.get as vi.Mock).mockReturnValue(null);
 
       component.ngOnInit();
 

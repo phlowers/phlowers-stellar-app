@@ -95,7 +95,7 @@ describe('StudioComponent', () => {
     loading: WritableSignal<boolean>;
     section: WritableSignal<Section | null>;
     workerReady: WritableSignal<boolean>;
-    refreshSection: jest.Mock;
+    refreshSection: vi.Mock;
   };
 
   beforeEach(async () => {
@@ -105,7 +105,7 @@ describe('StudioComponent', () => {
       loading: signal<boolean>(false),
       section: signal<Section | null>(null),
       workerReady: signal<boolean>(false),
-      refreshSection: jest.fn()
+      refreshSection: vi.fn()
     };
 
     await TestBed.configureTestingModule({

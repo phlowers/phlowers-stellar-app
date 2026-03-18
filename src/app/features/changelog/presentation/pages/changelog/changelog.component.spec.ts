@@ -11,8 +11,8 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 describe('Changelog component', () => {
   let component: ChangelogComponent;
   let fixture: ComponentFixture<ChangelogComponent>;
-  let changelogServiceMock: jest.Mocked<ChangelogService>;
-  let onlineServiceMock: jest.Mocked<OnlineService>;
+  let changelogServiceMock: vi.Mocked<ChangelogService>;
+  let onlineServiceMock: vi.Mocked<OnlineService>;
 
   const mockChangelogs = [
     {
@@ -24,12 +24,12 @@ describe('Changelog component', () => {
 
   beforeEach(async () => {
     changelogServiceMock = {
-      getChangelogs: jest.fn().mockReturnValue(of(mockChangelogs))
-    } as unknown as jest.Mocked<ChangelogService>;
+      getChangelogs: vi.fn().mockReturnValue(of(mockChangelogs))
+    } as unknown as vi.Mocked<ChangelogService>;
 
     onlineServiceMock = {
       online$: new BehaviorSubject<boolean>(true)
-    } as unknown as jest.Mocked<OnlineService>;
+    } as unknown as vi.Mocked<OnlineService>;
 
     await TestBed.configureTestingModule({
       imports: [ChangelogComponent],

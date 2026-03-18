@@ -18,8 +18,8 @@ import { signal } from '@angular/core';
 describe('StudioTopToolbarComponent', () => {
   let component: StudioTopToolbarComponent;
   let fixture: ComponentFixture<StudioTopToolbarComponent>;
-  let mockPlotService: jest.Mocked<PlotService>;
-  let mockToolbarDialogService: jest.Mocked<ToolbarDialogService>;
+  let mockPlotService: vi.Mocked<PlotService>;
+  let mockToolbarDialogService: vi.Mocked<ToolbarDialogService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -34,21 +34,21 @@ describe('StudioTopToolbarComponent', () => {
       }),
       loading: signal(false),
       isFreePositioningMode: signal(false),
-      plotOptionsChange: jest.fn(),
+      plotOptionsChange: vi.fn(),
       selectedDisplayOptions: signal({ loads: false }),
       section: signal(null),
       resolution: signal(100),
       defaultResolution: signal(100),
-      setResolution: jest.fn(),
-      applyResolution: jest.fn().mockResolvedValue(undefined),
-      setAxesNorms: jest.fn(),
-      refreshProjection: jest.fn().mockResolvedValue(undefined)
-    } as unknown as jest.Mocked<PlotService>;
+      setResolution: vi.fn(),
+      applyResolution: vi.fn().mockResolvedValue(undefined),
+      setAxesNorms: vi.fn(),
+      refreshProjection: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<PlotService>;
 
     // Mock ToolbarDialogService
     mockToolbarDialogService = {
-      openTool: jest.fn()
-    } as unknown as jest.Mocked<ToolbarDialogService>;
+      openTool: vi.fn()
+    } as unknown as vi.Mocked<ToolbarDialogService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -76,7 +76,7 @@ describe('StudioTopToolbarComponent', () => {
 
   afterEach(() => {
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Initialization', () => {
@@ -116,7 +116,7 @@ describe('StudioTopToolbarComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call loadToolsItemsState on init', () => {
-      const loadSpy = jest.spyOn(component as StudioTopToolbarComponent, 'loadToolsItemsState' as never);
+      const loadSpy = vi.spyOn(component as StudioTopToolbarComponent, 'loadToolsItemsState' as never);
       component.ngOnInit();
       expect(loadSpy).toHaveBeenCalled();
     });
@@ -163,7 +163,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Pose table', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'log').mockReturnValue(undefined);
       const tables = component.tablesDropdown();
 
       tables[2].command?.({});
@@ -173,7 +173,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Obstacles table', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'log').mockReturnValue(undefined);
       const tables = component.tablesDropdown();
 
       tables[3].command?.({});
@@ -183,7 +183,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Grounds table', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'log').mockReturnValue(undefined);
       const tables = component.tablesDropdown();
 
       tables[4].command?.({});
@@ -256,7 +256,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should call saveToolsItemsState', () => {
-      const saveSpy = jest.spyOn(component as StudioTopToolbarComponent, 'saveToolsItemsState' as never);
+      const saveSpy = vi.spyOn(component as StudioTopToolbarComponent, 'saveToolsItemsState' as never);
       component.updateCheckedCount();
       expect(saveSpy).toHaveBeenCalled();
     });
@@ -330,7 +330,7 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should handle corrupted localStorage data', () => {
       localStorage.setItem('toolsItemsState', 'invalid json');
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.ngOnInit();
 
@@ -397,7 +397,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 3 - Cable marking', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[2].action();
@@ -407,7 +407,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 4 - Strand RRTS', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[3].action();
@@ -417,7 +417,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 5 - Forest trenches', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[4].action();
@@ -427,7 +427,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 6 - Height & lateral distance', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[5].action();
@@ -437,7 +437,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 7 - Cable adjustment', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[6].action();
@@ -447,7 +447,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute all actions through toolsDropdown commands', () => {
-      const alertSpy = jest.spyOn(globalThis, 'alert').mockImplementation();
+      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       component.ngOnInit();
       const tools = component.toolsDropdown();
 
@@ -658,7 +658,7 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should handle malformed JSON in localStorage', () => {
       localStorage.setItem('toolsItemsState', '{invalid json}');
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.ngOnInit();
 
@@ -682,7 +682,7 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should handle undefined in localStorage', () => {
       localStorage.setItem('toolsItemsState', 'undefined');
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.ngOnInit();
 

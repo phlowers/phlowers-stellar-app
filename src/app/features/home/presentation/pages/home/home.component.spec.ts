@@ -14,9 +14,9 @@ import { provideRouter } from '@angular/router';
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let updateServiceMock: jest.Mocked<UpdateService>;
-  let onlineServiceMock: jest.Mocked<OnlineService>;
-  let studiesServiceMock: jest.Mocked<StudiesService>;
+  let updateServiceMock: vi.Mocked<UpdateService>;
+  let onlineServiceMock: vi.Mocked<OnlineService>;
+  let studiesServiceMock: vi.Mocked<StudiesService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -49,17 +49,17 @@ describe('HomeComponent', () => {
   beforeEach(async () => {
     updateServiceMock = {
       needUpdate$: new BehaviorSubject<boolean>(false)
-    } as jest.Mocked<UpdateService>;
+    } as vi.Mocked<UpdateService>;
 
     onlineServiceMock = {
       online$: new BehaviorSubject<boolean>(true),
       serverOnline$: new BehaviorSubject<ServerStatus>(ServerStatus.ONLINE)
-    } as unknown as jest.Mocked<OnlineService>;
+    } as unknown as vi.Mocked<OnlineService>;
 
     studiesServiceMock = {
       ready: new BehaviorSubject<boolean>(false),
-      getLatestStudies: jest.fn().mockResolvedValue(mockStudies)
-    } as unknown as jest.Mocked<StudiesService>;
+      getLatestStudies: vi.fn().mockResolvedValue(mockStudies)
+    } as unknown as vi.Mocked<StudiesService>;
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent, CardStudyComponent, CardInfoComponent, ButtonComponent, IconComponent],
@@ -76,7 +76,7 @@ describe('HomeComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Creation', () => {

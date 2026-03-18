@@ -23,7 +23,7 @@ describe('Init component', () => {
         endSupport: 10,
         invert: false
       }),
-      modifySection: jest.fn().mockResolvedValue(undefined)
+      modifySection: vi.fn().mockResolvedValue(undefined)
     } as unknown as PlotService;
 
     await TestBed.configureTestingModule({
@@ -77,7 +77,7 @@ describe('Init component', () => {
         field_measures: []
       };
       mockPlotService.section = signal<Section | null>(mockSection as Section);
-      const proceedSpy = jest.spyOn(toolbarDialogService, 'proceedToMainComponent');
+      const proceedSpy = vi.spyOn(toolbarDialogService, 'proceedToMainComponent');
 
       component.newMeasureNameControl.setValue('Valid Measure');
       component.newMeasureNameControl.markAsTouched();
@@ -93,7 +93,7 @@ describe('Init component', () => {
         field_measures: []
       };
       mockPlotService.section = signal<Section | null>(mockSection as Section);
-      const proceedSpy = jest.spyOn(toolbarDialogService, 'proceedToMainComponent');
+      const proceedSpy = vi.spyOn(toolbarDialogService, 'proceedToMainComponent');
 
       component.newMeasureNameControl.setValue('');
       component.newMeasureNameControl.markAsTouched();

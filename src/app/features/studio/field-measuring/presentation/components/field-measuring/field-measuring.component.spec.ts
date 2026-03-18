@@ -63,19 +63,19 @@ describe('FieldMeasuringComponent', () => {
 
   beforeEach(async () => {
     const mockMessageService = {
-      add: jest.fn()
+      add: vi.fn()
     } as unknown as MessageService;
 
     const mockStudiesService = {
       ready: new BehaviorSubject<boolean>(true),
-      currentStudy: jest.fn().mockReturnValue(null),
-      getStudy: jest.fn(),
-      getStudyAsObservable: jest.fn(),
-      updateStudy: jest.fn().mockResolvedValue(undefined)
+      currentStudy: vi.fn().mockReturnValue(null),
+      getStudy: vi.fn(),
+      getStudyAsObservable: vi.fn(),
+      updateStudy: vi.fn().mockResolvedValue(undefined)
     } as unknown as StudiesService;
 
     const mockSectionService = {
-      setCurrentSection: jest.fn()
+      setCurrentSection: vi.fn()
     } as unknown as SectionService;
 
     // Create a test measure with a proper UUID
@@ -91,15 +91,15 @@ describe('FieldMeasuringComponent', () => {
 
     const mockPlotService = {
       section: signal<Section | null>(mockSection),
-      modifySection: jest.fn().mockResolvedValue(undefined)
+      modifySection: vi.fn().mockResolvedValue(undefined)
     } as unknown as PlotService;
 
     const mockLinesService = {
-      getLines: jest.fn().mockResolvedValue([])
+      getLines: vi.fn().mockResolvedValue([])
     } as unknown as LinesService;
 
     const mockCablesService = {
-      getCables: jest.fn().mockResolvedValue([]),
+      getCables: vi.fn().mockResolvedValue([]),
       ready: new BehaviorSubject<boolean>(true)
     } as unknown as CablesService;
 
@@ -153,7 +153,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('Lifecycle Hooks', () => {
     it('should clear templates on ngOnDestroy', () => {
-      const setTemplatesSpy = jest.spyOn(toolbarDialogService, 'setTemplates');
+      const setTemplatesSpy = vi.spyOn(toolbarDialogService, 'setTemplates');
 
       component.ngOnDestroy();
 
@@ -189,7 +189,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('onVisibleChange', () => {
     it('should close tool when visible is false', () => {
-      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
 
       component.onVisibleChange(false);
 
@@ -197,7 +197,7 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should not close tool when visible is true', () => {
-      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
 
       component.onVisibleChange(true);
 
@@ -249,7 +249,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('onExport', () => {
     it('should log export data', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
+      const consoleSpy = vi.spyOn(console, 'log');
 
       component.onExport();
 
@@ -259,7 +259,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('onReport', () => {
     it('should log report data', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
+      const consoleSpy = vi.spyOn(console, 'log');
 
       component.onReport();
 
@@ -270,7 +270,7 @@ describe('FieldMeasuringComponent', () => {
   describe('onSave', () => {
     it('should call modifySection with updated field_measures', async () => {
       const plotService = TestBed.inject(PlotService);
-      const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
 
       // Open main dialog to initialize measureData from PlotService
       toolbarDialogService.openTool('field-measuring');
@@ -289,8 +289,8 @@ describe('FieldMeasuringComponent', () => {
 
     it('should return early if section is not available', async () => {
       const plotService = TestBed.inject(PlotService);
-      const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
-      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
 
       // Set section to null using the signal setter
       const sectionSignal = plotService.section as ReturnType<typeof signal<Section | null>>;
@@ -303,7 +303,7 @@ describe('FieldMeasuringComponent', () => {
     });
 
     it('should close tool dialog after saving', async () => {
-      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
 
       // Open main dialog to initialize measureData from PlotService
       toolbarDialogService.openTool('field-measuring');
@@ -364,7 +364,7 @@ describe('FieldMeasuringComponent', () => {
 
   describe('onImportStationData', () => {
     it('should log import station data message', () => {
-      const consoleSpy = jest.spyOn(console, 'log');
+      const consoleSpy = vi.spyOn(console, 'log');
 
       component.onImportStationData();
 
@@ -426,7 +426,7 @@ describe('FieldMeasuringComponent', () => {
 
     it('should handle multiple save calls', async () => {
       const plotService = TestBed.inject(PlotService);
-      const modifySectionSpy = jest.spyOn(plotService, 'modifySection');
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
 
       // Open main dialog to initialize measureData from PlotService
       toolbarDialogService.openTool('field-measuring');
@@ -468,7 +468,7 @@ describe('FieldMeasuringComponent', () => {
     it('should call initializeMeasureData when dialog opens to main view', async () => {
       const linesService = TestBed.inject(LinesService);
 
-      const getLinesSpy = jest.spyOn(linesService, 'getLines');
+      const getLinesSpy = vi.spyOn(linesService, 'getLines');
 
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
@@ -519,7 +519,7 @@ describe('FieldMeasuringComponent', () => {
       plotService.section = signal(mockSection as unknown as Section);
       component.measureData.set(newMeasure);
 
-      const modifySpy = jest.spyOn(plotService, 'modifySection');
+      const modifySpy = vi.spyOn(plotService, 'modifySection');
 
       await component.onSave();
 
@@ -537,7 +537,7 @@ describe('FieldMeasuringComponent', () => {
       plotService.section = signal(mockSection as unknown as Section);
       component.measureData.set(null as unknown as FieldMeasure);
 
-      const modifySpy = jest.spyOn(plotService, 'modifySection');
+      const modifySpy = vi.spyOn(plotService, 'modifySection');
 
       await component.onSave();
 

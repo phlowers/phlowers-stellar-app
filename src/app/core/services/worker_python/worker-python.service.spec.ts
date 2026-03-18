@@ -13,8 +13,8 @@ import { CatalogCable, InitialCondition, Section, Support } from '@shared/domain
 
 describe('WorkerService', () => {
   let service: WorkerPythonService;
-  let mockWorker: { postMessage: jest.Mock; onmessage: ((event: { data: Record<string, unknown> }) => void) | null };
-  let postMessageSpy: jest.SpyInstance;
+  let mockWorker: { postMessage: vi.Mock; onmessage: ((event: { data: Record<string, unknown> }) => void) | null };
+  let postMessageSpy: vi.SpyInstance;
 
   // Mock data creation functions
   const createMockSupport = (): Support => ({
@@ -129,21 +129,21 @@ describe('WorkerService', () => {
   beforeEach(() => {
     // Mock the Worker class
     mockWorker = {
-      postMessage: jest.fn(),
+      postMessage: vi.fn(),
       onmessage: null
     };
 
     // Mock the Worker constructor
-    (global as unknown as { Worker: jest.Mock }).Worker = jest.fn().mockImplementation(() => mockWorker);
+    (global as unknown as { Worker: vi.Mock }).Worker = vi.fn().mockImplementation(() => mockWorker);
 
     // Mock URL constructor
-    (global as unknown as { URL: jest.Mock }).URL = jest.fn().mockImplementation(() => 'mocked-url');
+    (global as unknown as { URL: vi.Mock }).URL = vi.fn().mockImplementation(() => 'mocked-url');
 
     TestBed.configureTestingModule({});
     service = TestBed.inject(WorkerPythonService);
 
     // Spy on worker's postMessage
-    postMessageSpy = jest.spyOn(mockWorker, 'postMessage');
+    postMessageSpy = vi.spyOn(mockWorker, 'postMessage');
   });
 
   it('should be created', () => {
@@ -196,7 +196,7 @@ describe('WorkerService', () => {
       const mockResult = { test: 'data' };
 
       // Set up a handler for the test id
-      service.handlerMap[mockId] = jest.fn();
+      service.handlerMap[mockId] = vi.fn();
 
       // Simulate worker message with id and result
       mockWorker.onmessage!({ data: { id: mockId, result: mockResult } });

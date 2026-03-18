@@ -1,7 +1,7 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 91 suites / 1845 tests pass, lint 0 erreurs (0 warnings `no-explicit-any`), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B, 8C, 8D, 8E, 8F et 8G terminées.** Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. **Étape D terminée** : 14 décorateurs `@ViewChild`/`@ContentChild`/`@ViewChildren`/`@ContentChildren` migrés vers `viewChild()`/`contentChild()`/`viewChildren()`/`contentChildren()` signal-based dans 10 composants — plus aucun `QueryList` en prod. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), toSignal(), **viewChild()/contentChild()** — 0 décorateur legacy restant. **Étape E terminée** : 69 imports cross-boundary résolus (71 → 2 restants). Services partagés (`StudiesService`, `SectionService`, `ChargesService`, `InitialConditionService`, `PlotService`, `SideTabsService`, `ObstaclesService`, `ObstacleFormService`) déplacés vers `core/services/`. Helpers (`sections.helpers`, `study.helpers`) et types (`plot.types`) déplacés vers `shared/`. Composants cross-feature (`ExportDialogComponent`, `NewStudyModalComponent`, `InitialConditionModalComponent`) déplacés vers `shared/components/`. `free-positioning` déplacé vers `features/studio/`. 3 re-export bridges supprimés. 2 violations résiduelles (`ToolbarDialogService` + `ToolbarDialogComponent` study→studio) documentées comme dette acceptée. **Étape F terminée** : ~190 `data-testid` ajoutés sur 28 templates HTML (2 passes), ~121 rendering tests créés dans 25 fichiers `.spec.ts` (3 nouveaux : `input-number`, `export-dialog`, `not-found`), 5 corrections accessibilité (`aria-hidden` sur icônes décoratives, `aria-label` sur boutons icon-only, correction attribut `type` dupliqué dans `app.component.html`). **Étape G terminée** : ~250 `any` explicites supprimés dans ~40 fichiers (12 production + ~28 specs). 1 seul `any` résiduel conservé avec `eslint-disable` (`handlerMap` dans `worker-python.service.ts` — variance de type). Types concrets, `unknown`, casts `as unknown as T`, bracket notation pour accès privé, `PlotlyHTMLElement`/`MouseEvent`/`FieldMeasure`/`GetSectionWithBaseOutput`/`RouterEvent`/`SelectedDisplayOptions` introduits. Nouveau type alias `ObstacleAnnotation` créé dans `obstacles.spec.ts`. Lint : 0 erreurs `no-explicit-any`.
+**Baseline actuelle** : build OK, 97 suites / 1967 tests pass, lint 0 erreurs (109 warnings i18n), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B, 8C, 8D, 8E, 8F, 8G, 9 et correctif lint post-Phase 9 terminés.** **Phase 9 terminée** : migration complète Jest → Vitest — ~1155 appels `jest.*` remplacés par `vi.*` dans ~70 fichiers `.spec.ts`, shim de compatibilité `jest → vi` supprimé de `test-setup.ts`, `"jest"` retiré de `tsconfig.spec.json` types, 6 dépendances Jest supprimées de `package.json` (`jest`, `jest-preset-angular`, `ts-jest-mock-import-meta`, `@types/jest`, `jest-raw-loader`, `jest-sonar`), `jest.config.ts` supprimé. **Correctif lint post-Phase 9 terminé (2026-03-18)** : 137 erreurs lint régressives corrigées — `window` → `globalThis` dans ~20 fichiers (sources + specs), `.mockImplementation(() => {})` → `.mockReturnValue(undefined)` dans 9 fichiers spec (47 occurrences), `any` résiduels dans 5 fichiers (`storage.service.spec.ts`, `l0-sum.component.spec.ts`, `sectionsTab.component.spec.ts` ×2, `select-with-buttons.component.spec.ts`, `vitest.d.ts`), parsing error dans `test-setup.ts` (bloc `}` surnuméraire). Lint : 0 erreurs, 109 warnings (i18n uniquement). Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. **Étape D terminée** : 14 décorateurs `@ViewChild`/`@ContentChild`/`@ViewChildren`/`@ContentChildren` migrés vers `viewChild()`/`contentChild()`/`viewChildren()`/`contentChildren()` signal-based dans 10 composants — plus aucun `QueryList` en prod. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), toSignal(), **viewChild()/contentChild()** — 0 décorateur legacy restant. **Étape E terminée** : 69 imports cross-boundary résolus (71 → 2 restants). Services partagés (`StudiesService`, `SectionService`, `ChargesService`, `InitialConditionService`, `PlotService`, `SideTabsService`, `ObstaclesService`, `ObstacleFormService`) déplacés vers `core/services/`. Helpers (`sections.helpers`, `study.helpers`) et types (`plot.types`) déplacés vers `shared/`. Composants cross-feature (`ExportDialogComponent`, `NewStudyModalComponent`, `InitialConditionModalComponent`) déplacés vers `shared/components/`. `free-positioning` déplacé vers `features/studio/`. 3 re-export bridges supprimés. 2 violations résiduelles (`ToolbarDialogService` + `ToolbarDialogComponent` study→studio) documentées comme dette acceptée. **Étape F terminée** : ~190 `data-testid` ajoutés sur 28 templates HTML (2 passes), ~121 rendering tests créés dans 25 fichiers `.spec.ts` (3 nouveaux : `input-number`, `export-dialog`, `not-found`), 5 corrections accessibilité (`aria-hidden` sur icônes décoratives, `aria-label` sur boutons icon-only, correction attribut `type` dupliqué dans `app.component.html`). **Étape G terminée** : ~250 `any` explicites supprimés dans ~40 fichiers (12 production + ~28 specs). 1 seul `any` résiduel conservé avec `eslint-disable` (`handlerMap` dans `worker-python.service.ts` — variance de type). Types concrets, `unknown`, casts `as unknown as T`, bracket notation pour accès privé, `PlotlyHTMLElement`/`MouseEvent`/`FieldMeasure`/`GetSectionWithBaseOutput`/`RouterEvent`/`SelectedDisplayOptions` introduits. Nouveau type alias `ObstacleAnnotation` créé dans `obstacles.spec.ts`. Lint : 0 erreurs `no-explicit-any`.
 
 ---
 
@@ -1580,6 +1580,137 @@ src/app/core/services/
 - **Overrides SCSS vendor** (PrimeNG dans `src/styles/vendor-extension/`) : magic numbers acceptables en tant qu'overrides de thème tiers, hors scope
 - **Imports intra-studio** (toolbar → core, field-measuring → core) : acceptables — sous-features d'un même bounded context `studio`
 - **Vérification** après chaque étape : `npm run test` + `npm run build` + `npm run lint-check`
+
+### Phase 9 — Migration complète Jest → Vitest ✅ TERMINÉE
+
+*Suppression de tous les appels Jest résiduels. Le projet utilisait déjà Vitest (`npm run test` → `vitest run`) mais un shim de compatibilité dans `test-setup.ts` (`Object.defineProperty(globalThis, 'jest', { value: vi })`) masquait ~1155 appels `jest.*` dans ~70 fichiers `.spec.ts`. De plus, `tsconfig.spec.json` déclarait encore `"jest"` dans ses types, et 6 dépendances Jest restaient en `dependencies`/`devDependencies`.*
+
+#### Étape 1 — Remplacer `jest.*` → `vi.*` dans tous les spec files ✅
+
+Substitutions mécaniques dans ~70 fichiers :
+
+| Ancien | Nouveau | Occurrences |
+|---|---|---|
+| `jest.fn(` | `vi.fn(` | 584 |
+| `jest.Mock` (type) | `vi.Mock` | 201 |
+| `jest.spyOn(` | `vi.spyOn(` | 182 |
+| `jest.Mocked<T>` | `vi.Mocked<T>` | 119 |
+| `jest.clearAllMocks()` | `vi.clearAllMocks()` | 30 |
+| `jest.advanceTimersByTime()` | `vi.advanceTimersByTime()` | 15 |
+| `jest.useFakeTimers()` | `vi.useFakeTimers()` | 8 |
+| `jest.MockedFunction<T>` | `vi.MockedFunction<T>` | 6 |
+| `jest.restoreAllMocks()` | `vi.restoreAllMocks()` | 4 |
+| `jest.useRealTimers()` | `vi.useRealTimers()` | 3 |
+| `jest.SpyInstance` | `vi.SpyInstance` | 1 |
+| `jest.setSystemTime()` | `vi.setSystemTime()` | 1 |
+| `jest.resetAllMocks()` | `vi.resetAllMocks()` | 1 |
+
+Corrections supplémentaires :
+- Appels multi-lignes (`jest` en fin de ligne + `.fn()` sur la suivante) corrigés
+- `.mockImplementation()` → `.mockImplementation(() => {})` (vitest exige un argument function)
+- `jest.Mock<ReturnType, Args>` (2 params Jest) → `vi.Mock<(...args: Args) => ReturnType>` (1 param fonction Vitest) dans `studies.service.spec.ts`
+- Création de `src/vitest.d.ts` — augmentation du namespace `vi` avec les alias de types (`vi.Mock`, `vi.Mocked`, `vi.MockedFunction`, `vi.SpyInstance`)
+
+#### Étape 2 — Nettoyer `test-setup.ts` ✅
+
+Suppression du shim de compatibilité (3 lignes) et de l'import `{ vi } from 'vitest'` devenu inutile :
+```typescript
+// SUPPRIMÉ
+import { vi } from 'vitest';
+Object.defineProperty(globalThis, 'jest', { value: vi, writable: false });
+```
+
+#### Étape 3 — Mettre à jour `tsconfig.spec.json` ✅
+
+Retrait de `"jest"` du tableau `types` (gardé : `"vitest/globals"`, `"node"`, `"@angular/localize"`).
+
+#### Étape 4 — Supprimer les dépendances Jest de `package.json` ✅
+
+6 dépendances supprimées :
+- `jest` (^29.7.0)
+- `jest-preset-angular` (^14.5.3)
+- `ts-jest-mock-import-meta` (^1.2.1)
+- `@types/jest` (^29.5.14)
+- `jest-raw-loader` (^1.0.1)
+- `jest-sonar` (^0.2.16)
+
+#### Étape 5 — Supprimer `jest.config.ts` ✅
+
+Fichier mort — n'était plus utilisé depuis la migration vers Vitest.
+
+#### Fichiers créés
+
+| Fichier | Rôle |
+|---|---|
+| `src/vitest.d.ts` | Augmentation namespace `vi` avec types `Mock`, `Mocked`, `MockedFunction`, `SpyInstance` |
+
+#### Fichiers supprimés
+
+| Fichier | Raison |
+|---|---|
+| `jest.config.ts` | Configuration Jest morte, remplacée par `vitest.config.ts` |
+
+##### Vérification
+
+- [x] `npm run test` → 97 suites, 1967 tests pass ✅
+- [x] `npx tsc --noEmit -p tsconfig.spec.json` → 3 erreurs (pré-existantes, non liées à la migration)
+- [x] `grep -r "jest\." src/ --include="*.spec.ts"` → 0 résultats ✅
+- [x] `grep -r "\bjest\b" src/ --include="*.spec.ts"` → 0 résultats ✅
+
+##### Décisions Phase 9
+
+- **`vi.Mocked<T>`** remplace `jest.Mocked<T>` (même sémantique, disponible via `vitest`)
+- **`vi.MockedFunction<T>`** remplace `jest.MockedFunction<T>` (exporté par `vitest`)
+- **`vi.Mock`** remplace `jest.Mock` — namespace `vi` augmenté dans `src/vitest.d.ts` pour permettre l'utilisation comme type
+- **3 erreurs TS pré-existantes** (non liées) : `storage.service.spec.ts` (cast `as vi.Mock`), `admin.spec.ts` (Location mock partiel), `changelog.service.spec.ts` (propriété `version` inexistante sur `ChangelogItem`)
+- **`jest.config.ts` supprimé** — les références dans les phases précédentes (0, 3A–3F, 6B, 7) sont désormais historiques
+
+### Correctif lint post-Phase 9 ✅ TERMINÉ (2026-03-18)
+
+> **Contexte** : La migration Jest → Vitest (Phase 9) a introduit 137 nouvelles erreurs lint régressives, portant le total de 0 erreurs à 137. Toutes ont été corrigées.
+
+#### Erreurs corrigées (137 au total)
+
+| Catégorie | Règle ESLint | Occurrences | Fichiers concernés |
+|-----------|-------------|:-----------:|--------------------|
+| `window` → `globalThis` | `no-restricted-globals` | ~60 | sources : `online.service.ts`, `worker_update.service.ts`, `window.token.ts`, `main.ts`, `news.service.ts`, `obstacles.service.ts`, `attachment/cables/chains/lines/maintenance.service.ts` (×6) ; specs : `online.service.spec.ts`, `worker_update.service.spec.ts`, `admin.spec.ts`, `news.service.spec.ts`, `app.component.spec.ts`, `sectionsTab.component.spec.ts`, `select-with-buttons.component.spec.ts`, `test-setup.ts` |
+| `.mockImplementation(() => {})` vide | `@typescript-eslint/no-empty-function` | 47 | 9 fichiers spec (`studies.service.spec.ts` ×4, `handle-task.spec.ts`, `import-study.component.spec.ts` ×21, `studies.component.spec.ts`, `free-positioning.component.spec.ts` ×3, `top-toolbar.component.spec.ts` ×12, `vtl-and-guying.component.spec.ts`, `section-plot.component.spec.ts` ×2) + `lines.service.spec.ts` |
+| `any` explicites | `@typescript-eslint/no-explicit-any` | 9 | `storage.service.spec.ts` (`vi.spyOn<any,any>`), `l0-sum.component.spec.ts` (`event as any`), `sectionsTab.component.spec.ts` ×2 (`component as any`), `select-with-buttons.component.spec.ts` (`Record<string, any>` ×2), `vitest.d.ts` (`any` dans type params ×4) |
+| Parsing error | — | 1 | `test-setup.ts` (accolade `}` surnuméraire introduite par erreur de sed) |
+
+#### Fixes appliqués
+
+68. ✅ **`window` → `globalThis` dans les fichiers sources** :
+    - `online.service.ts` : `fromEvent(window, ...)` + `window.navigator.onLine` → `fromEvent(globalThis, ...)` + `globalThis.navigator.onLine`
+    - `worker_update.service.ts` : `window.location.href` → `globalThis.location.href`
+    - `window.token.ts` : `factory: () => window` → `factory: () => globalThis as unknown as Window`
+    - `main.ts` : `(window as ...).global = window` + `window.addEventListener(...)` → `globalThis`
+    - `news.service.ts` : `window.location.origin` → `globalThis.location.origin`
+    - `obstacles.service.ts` : `window.location.origin` → `globalThis.location.origin`
+    - Catalog services (×5) : `window.location.origin` → `globalThis.location.origin` dans `attachment`, `cables`, `chains`, `lines`, `maintenance`
+
+69. ✅ **`window` → `globalThis` dans les fichiers spec** (sed batch) :
+    - Patterns remplacés : `Object.defineProperty(window,` → `Object.defineProperty(globalThis,`, `window.dispatchEvent` → `globalThis.dispatchEvent`, `window.navigator.` → `globalThis.navigator.`, `window.caches` → `globalThis.caches`, `window.fetch` → `globalThis.fetch`
+    - `window.Worker = Worker` → `globalThis.Worker = Worker` dans `app.component.spec.ts` (2 occurrences)
+    - `window.navigator.onLine` → `globalThis.navigator.onLine` dans `online.service.spec.ts`
+
+70. ✅ **`.mockImplementation(() => {})` → `.mockReturnValue(undefined)`** (sed batch sur 9 fichiers) :
+    - 47 occurrences dans les 9 fichiers spec listés ci-dessus
+    - `lines.service.spec.ts` : corrigé manuellement (1 occurrence)
+
+71. ✅ **`any` résiduels** :
+    - `storage.service.spec.ts` : `vi.spyOn<any, any>` → `vi.spyOn<BehaviorSubject<boolean>, 'next'>` + import `BehaviorSubject`
+    - `l0-sum.component.spec.ts` : `event as any` → `event as SortEvent` + import `SortEvent` depuis `primeng/api`
+    - `sectionsTab.component.spec.ts` : `component as any` (×2) → `component as unknown as { toolbarDialogService: ToolbarDialogService }` / `{ plotService: PlotService }` + imports ajoutés
+    - `select-with-buttons.component.spec.ts` : `Record<string, any>` → `Record<string, unknown>`
+    - `vitest.d.ts` : `any` dans les type params → `unknown`
+
+72. ✅ **Parsing error `test-setup.ts`** : accolade `}` surnuméraire supprimée (introduite lors du sed `window.ResizeObserver` → `globalThis.ResizeObserver` qui avait doublé le bloc `if`)
+
+#### Vérification
+
+- [x] `npm run lint-check` → 0 erreurs, 109 warnings (i18n uniquement) ✅
+- [x] Exit code 0 ✅
 
 ---
 

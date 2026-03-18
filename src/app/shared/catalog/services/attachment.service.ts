@@ -76,7 +76,7 @@ export class AttachmentService {
    */
   async importFromFile() {
     const attachments = this.http
-      .get(`${window.location.origin}/data/attachments.csv`, {
+      .get(`${globalThis.location.origin}/data/attachments.csv`, {
         responseType: 'text'
       })
       .pipe(

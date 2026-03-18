@@ -114,7 +114,7 @@ export class ObstaclesService {
   private async fetchCsvFile(): Promise<string> {
     return firstValueFrom(
       this.http
-        .get(`${window.location.origin}/data/obstacle_type_rte.csv`, {
+        .get(`${globalThis.location.origin}/data/obstacle_type_rte.csv`, {
           responseType: 'text'
         })
         .pipe(

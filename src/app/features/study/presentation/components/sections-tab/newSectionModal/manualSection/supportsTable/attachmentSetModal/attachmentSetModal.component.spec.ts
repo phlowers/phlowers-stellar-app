@@ -1,26 +1,26 @@
 // Mock plotly.js-dist-min
-jest.mock('plotly.js-dist-min', () => {
+vi.mock('plotly.js-dist-min', () => {
   const mockPlotly = {
-    newPlot: jest.fn(),
-    update: jest.fn(),
-    purge: jest.fn(),
-    relayout: jest.fn(),
-    restyle: jest.fn(),
-    react: jest.fn(),
-    redraw: jest.fn(),
-    toImage: jest.fn(),
-    downloadImage: jest.fn(),
-    extendTraces: jest.fn(),
-    prependTraces: jest.fn(),
-    addTraces: jest.fn(),
-    deleteTraces: jest.fn(),
-    moveTraces: jest.fn(),
-    animate: jest.fn(),
-    setPlotConfig: jest.fn(),
-    validate: jest.fn(),
+    newPlot: vi.fn(),
+    update: vi.fn(),
+    purge: vi.fn(),
+    relayout: vi.fn(),
+    restyle: vi.fn(),
+    react: vi.fn(),
+    redraw: vi.fn(),
+    toImage: vi.fn(),
+    downloadImage: vi.fn(),
+    extendTraces: vi.fn(),
+    prependTraces: vi.fn(),
+    addTraces: vi.fn(),
+    deleteTraces: vi.fn(),
+    moveTraces: vi.fn(),
+    animate: vi.fn(),
+    setPlotConfig: vi.fn(),
+    validate: vi.fn(),
     d3: {
-      select: jest.fn(),
-      selectAll: jest.fn()
+      select: vi.fn(),
+      selectAll: vi.fn()
     }
   };
   return {
@@ -39,21 +39,21 @@ import { CatalogAttachment, Support, Section } from '@shared/domain';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
 // Mock plotly.js-dist-min to prevent errors in SupportPlotComponent
-jest.mock('plotly.js-dist-min', () => ({
+vi.mock('plotly.js-dist-min', () => ({
   __esModule: true,
   default: {
-    purge: jest.fn(),
-    newPlot: jest.fn(),
-    restyle: jest.fn(),
-    relayout: jest.fn()
+    purge: vi.fn(),
+    newPlot: vi.fn(),
+    restyle: vi.fn(),
+    relayout: vi.fn()
   }
 }));
 
 describe('AttachmentSetModalComponent', () => {
   let component: AttachmentSetModalComponent;
   let fixture: ComponentFixture<AttachmentSetModalComponent>;
-  let attachmentServiceMock: jest.Mocked<AttachmentService>;
-  let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
+  let attachmentServiceMock: vi.Mocked<AttachmentService>;
+  let workerPythonServiceMock: vi.Mocked<WorkerPythonService>;
 
   const mockAttachments: CatalogAttachment[] = [
     {
@@ -160,12 +160,12 @@ describe('AttachmentSetModalComponent', () => {
 
   beforeEach(async () => {
     attachmentServiceMock = {
-      getAttachments: jest.fn().mockResolvedValue(mockAttachments)
-    } as unknown as jest.Mocked<AttachmentService>;
+      getAttachments: vi.fn().mockResolvedValue(mockAttachments)
+    } as unknown as vi.Mocked<AttachmentService>;
 
     workerPythonServiceMock = {
       ready: true
-    } as unknown as jest.Mocked<WorkerPythonService>;
+    } as unknown as vi.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
       imports: [AttachmentSetModalComponent, BrowserAnimationsModule, FormsModule],
@@ -228,7 +228,7 @@ describe('AttachmentSetModalComponent', () => {
   });
 
   it('should emit isOpenChange when visibility changes', () => {
-    const spy = jest.spyOn(component.isOpenChange, 'emit');
+    const spy = vi.spyOn(component.isOpenChange, 'emit');
 
     component.onVisibleChange();
     expect(spy).toHaveBeenCalledWith(false);
@@ -277,7 +277,7 @@ describe('AttachmentSetModalComponent', () => {
   });
 
   it('should emit validateForm with support uuid when support is provided', () => {
-    const spy = jest.spyOn(component.validateForm, 'emit');
+    const spy = vi.spyOn(component.validateForm, 'emit');
 
     component.supportName.set('Support A');
     component.attachmentSet.set(1);
@@ -286,7 +286,7 @@ describe('AttachmentSetModalComponent', () => {
     component.towerModel.set('Tower Model');
 
     // Mock the support input signal
-    jest.spyOn(component, 'support').mockReturnValue(mockSupport);
+    vi.spyOn(component, 'support').mockReturnValue(mockSupport);
 
     component.validate();
 
@@ -301,7 +301,7 @@ describe('AttachmentSetModalComponent', () => {
   });
 
   it('should handle empty values in validate method', () => {
-    const spy = jest.spyOn(component.validateForm, 'emit');
+    const spy = vi.spyOn(component.validateForm, 'emit');
 
     component.validate();
 

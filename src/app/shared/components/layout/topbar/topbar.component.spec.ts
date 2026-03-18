@@ -9,9 +9,9 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 describe('TopbarComponent', () => {
   let component: TopbarComponent;
   let fixture: ComponentFixture<TopbarComponent>;
-  let mockPageTitleService: jest.Mocked<PageTitleService>;
-  let mockUserService: jest.Mocked<UserService>;
-  let mockWorkerPythonService: jest.Mocked<WorkerPythonService>;
+  let mockPageTitleService: vi.Mocked<PageTitleService>;
+  let mockUserService: vi.Mocked<UserService>;
+  let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
   let pageTitleSubject: BehaviorSubject<string>;
   let userSubject: BehaviorSubject<{ email: string } | null>;
   let readySubject: BehaviorSubject<boolean>;
@@ -28,16 +28,16 @@ describe('TopbarComponent', () => {
 
     mockPageTitleService = {
       pageTitle$: pageTitleSubject.asObservable()
-    } as jest.Mocked<PageTitleService>;
+    } as vi.Mocked<PageTitleService>;
 
     mockUserService = {
       user$: userSubject.asObservable()
-    } as unknown as jest.Mocked<UserService>;
+    } as unknown as vi.Mocked<UserService>;
 
     mockWorkerPythonService = {
       ready$: readySubject.asObservable(),
       pyodideLoadError$: errorSubject
-    } as unknown as jest.Mocked<WorkerPythonService>;
+    } as unknown as vi.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
       imports: [TopbarComponent, IconComponent],

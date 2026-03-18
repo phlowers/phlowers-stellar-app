@@ -10,17 +10,17 @@ import { provideHttpClient } from '@angular/common/http';
 describe('News component', () => {
   let component: NewsComponent;
   let fixture: ComponentFixture<NewsComponent>;
-  let newsServiceMock: jest.Mocked<NewsService>;
-  let onlineServiceMock: jest.Mocked<OnlineService>;
+  let newsServiceMock: vi.Mocked<NewsService>;
+  let onlineServiceMock: vi.Mocked<OnlineService>;
 
   beforeEach(async () => {
     newsServiceMock = {
-      getNews: jest.fn().mockReturnValue(of('# Test News'))
-    } as unknown as jest.Mocked<NewsService>;
+      getNews: vi.fn().mockReturnValue(of('# Test News'))
+    } as unknown as vi.Mocked<NewsService>;
 
     onlineServiceMock = {
       online$: new BehaviorSubject<boolean>(true)
-    } as unknown as jest.Mocked<OnlineService>;
+    } as unknown as vi.Mocked<OnlineService>;
 
     await TestBed.configureTestingModule({
       imports: [NewsComponent],

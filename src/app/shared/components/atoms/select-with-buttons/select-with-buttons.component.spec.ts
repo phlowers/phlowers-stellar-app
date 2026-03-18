@@ -8,8 +8,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { SelectWithButtonsComponent } from './select-with-buttons.component';
 
 describe('SelectWithButtonsComponent', () => {
-  let component: SelectWithButtonsComponent<Record<string, any>>;
-  let fixture: ComponentFixture<SelectWithButtonsComponent<Record<string, any>>>;
+  let component: SelectWithButtonsComponent<Record<string, unknown>>;
+  let fixture: ComponentFixture<SelectWithButtonsComponent<Record<string, unknown>>>;
 
   const mockOptions = [
     { id: '1', name: 'Option 1', description: 'First option' },
@@ -19,17 +19,17 @@ describe('SelectWithButtonsComponent', () => {
 
   beforeAll(() => {
     // PrimeNG overlay rendering needs matchMedia
-    Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(globalThis, 'matchMedia', {
       writable: true,
-      value: jest.fn().mockImplementation((query) => ({
+      value: vi.fn().mockImplementation((query) => ({
         matches: false,
         media: query,
         onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn()
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
       }))
     });
   });
@@ -56,9 +56,9 @@ describe('SelectWithButtonsComponent', () => {
 
     // mock viewChild signal
     const mockSelect = {
-      writeValue: jest.fn(),
-      updateModel: jest.fn(),
-      hide: jest.fn()
+      writeValue: vi.fn(),
+      updateModel: vi.fn(),
+      hide: vi.fn()
     };
     Object.defineProperty(component, 'selectComponent', {
       value: (() => mockSelect) as unknown as ReturnType<(typeof component)['selectComponent']>,
@@ -113,19 +113,19 @@ describe('SelectWithButtonsComponent', () => {
 
   describe('Methods', () => {
     it('should emit selectOption when onSelectionChange is called with valid value', () => {
-      const spy = jest.spyOn(component.selectOption, 'emit');
+      const spy = vi.spyOn(component.selectOption, 'emit');
       component.onSelectionChange('2');
       expect(spy).toHaveBeenCalledWith(mockOptions[1]);
     });
 
     it('should not emit selectOption when value is null', () => {
-      const spy = jest.spyOn(component.selectOption, 'emit');
+      const spy = vi.spyOn(component.selectOption, 'emit');
       component.onSelectionChange(null);
       expect(spy).not.toHaveBeenCalled();
     });
 
     it('should clear selectedOptionValue and reset selectComponent when clearSelectedOptionValue is called', () => {
-      const spy = jest.spyOn(component.selectOption, 'emit');
+      const spy = vi.spyOn(component.selectOption, 'emit');
 
       component.clearSelectedOptionValue();
 
@@ -136,7 +136,7 @@ describe('SelectWithButtonsComponent', () => {
     });
 
     it('should emit selectOption and hide selectComponent onSelectItem', () => {
-      const spy = jest.spyOn(component.selectOption, 'emit');
+      const spy = vi.spyOn(component.selectOption, 'emit');
       const item = mockOptions[0];
 
       component.onSelectItem(item);

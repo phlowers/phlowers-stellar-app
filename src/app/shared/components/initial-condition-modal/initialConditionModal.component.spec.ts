@@ -72,19 +72,19 @@ describe('InitialConditionModalComponent', () => {
       ready$: new BehaviorSubject<boolean>(true),
       db: {
         cables: {
-          toArray: jest.fn().mockResolvedValue([])
+          toArray: vi.fn().mockResolvedValue([])
         }
       }
     } as unknown as StorageService;
 
     // Create mock CablesService
     const mockCablesService = {
-      getCables: jest.fn().mockResolvedValue([])
+      getCables: vi.fn().mockResolvedValue([])
     } as unknown as CablesService;
 
     // Create mock StudiesService
     const mockStudiesService = {
-      updateStudy: jest.fn().mockResolvedValue(undefined)
+      updateStudy: vi.fn().mockResolvedValue(undefined)
     } as unknown as StudiesService;
 
     await TestBed.configureTestingModule({
@@ -108,13 +108,13 @@ describe('InitialConditionModalComponent', () => {
 
   describe('onVisibleChange', () => {
     it('should emit isOpenChange when visible is false', () => {
-      const spy = jest.spyOn(component.isOpenChange, 'emit');
+      const spy = vi.spyOn(component.isOpenChange, 'emit');
       component.onVisibleChange(false);
       expect(spy).toHaveBeenCalledWith(false);
     });
 
     it('should not emit when visible is true', () => {
-      const spy = jest.spyOn(component.isOpenChange, 'emit');
+      const spy = vi.spyOn(component.isOpenChange, 'emit');
       component.onVisibleChange(true);
       expect(spy).not.toHaveBeenCalled();
     });
@@ -136,8 +136,8 @@ describe('InitialConditionModalComponent', () => {
         max_frost_width: mockInitialCondition.max_frost_width
       });
 
-      const spyAdd = jest.spyOn(component.addInitialCondition, 'emit');
-      const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
+      const spyAdd = vi.spyOn(component.addInitialCondition, 'emit');
+      const spyOpen = vi.spyOn(component.isOpenChange, 'emit');
 
       component.onSubmit(false);
 
@@ -167,8 +167,8 @@ describe('InitialConditionModalComponent', () => {
         max_frost_width: mockInitialCondition.max_frost_width
       });
 
-      const spyUpdate = jest.spyOn(component.updateInitialCondition, 'emit');
-      const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
+      const spyUpdate = vi.spyOn(component.updateInitialCondition, 'emit');
+      const spyOpen = vi.spyOn(component.isOpenChange, 'emit');
 
       component.onSubmit(false);
 
@@ -198,9 +198,9 @@ describe('InitialConditionModalComponent', () => {
         max_frost_width: mockInitialCondition.max_frost_width
       });
 
-      const spyAdd = jest.spyOn(component.addInitialCondition, 'emit');
-      const spyUpdate = jest.spyOn(component.updateInitialCondition, 'emit');
-      const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
+      const spyAdd = vi.spyOn(component.addInitialCondition, 'emit');
+      const spyUpdate = vi.spyOn(component.updateInitialCondition, 'emit');
+      const spyOpen = vi.spyOn(component.isOpenChange, 'emit');
 
       component.onSubmit(false);
 
@@ -230,7 +230,7 @@ describe('InitialConditionModalComponent', () => {
 
   describe('onModify', () => {
     it('should emit changeMode with edit', () => {
-      const spy = jest.spyOn(component.changeMode, 'emit');
+      const spy = vi.spyOn(component.changeMode, 'emit');
       component.onModify();
       expect(spy).toHaveBeenCalledWith('edit');
     });
@@ -288,8 +288,8 @@ describe('InitialConditionModalComponent', () => {
       fixture.componentRef.setInput('study', mockStudy);
       fixture.detectChanges();
 
-      const deleteServiceSpy = jest.spyOn(component['initialConditionService'], 'deleteInitialCondition');
-      const closeModalSpy = jest.spyOn(component.isOpenChange, 'emit');
+      const deleteServiceSpy = vi.spyOn(component['initialConditionService'], 'deleteInitialCondition');
+      const closeModalSpy = vi.spyOn(component.isOpenChange, 'emit');
 
       component.onDelete();
 

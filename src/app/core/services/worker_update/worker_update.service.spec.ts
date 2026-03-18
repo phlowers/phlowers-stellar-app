@@ -4,10 +4,10 @@ import { MessageService } from 'primeng/api';
 
 describe('UpdateService', () => {
   let service: UpdateService;
-  let mockServiceWorker: { addEventListener: jest.Mock; getRegistration: jest.Mock };
-  let mockCaches: { open: jest.Mock };
-  let mockCache: { match: jest.Mock };
-  let mockFetch: jest.Mock;
+  let mockServiceWorker: { addEventListener: vi.Mock; getRegistration: vi.Mock };
+  let mockCaches: { open: vi.Mock };
+  let mockCache: { match: vi.Mock };
+  let mockFetch: vi.Mock;
   let originalServiceWorker: ServiceWorkerContainer;
   let originalCaches: CacheStorage;
   let originalFetch: typeof fetch;
@@ -15,14 +15,14 @@ describe('UpdateService', () => {
 
   beforeEach(() => {
     mockMessageService = {
-      add: jest.fn()
+      add: vi.fn()
     } as unknown as MessageService;
     // Mock service worker
     mockServiceWorker = {
-      addEventListener: jest.fn(),
-      getRegistration: jest.fn().mockResolvedValue({
+      addEventListener: vi.fn(),
+      getRegistration: vi.fn().mockResolvedValue({
         active: {
-          postMessage: jest.fn()
+          postMessage: vi.fn()
         }
       })
     };
@@ -34,21 +34,21 @@ describe('UpdateService', () => {
 
     // Mock caches
     mockCache = {
-      match: jest.fn()
+      match: vi.fn()
     };
     mockCaches = {
-      open: jest.fn().mockResolvedValue(mockCache)
+      open: vi.fn().mockResolvedValue(mockCache)
     };
-    originalCaches = window.caches;
-    Object.defineProperty(window, 'caches', {
+    originalCaches = globalThis.caches;
+    Object.defineProperty(globalThis, 'caches', {
       value: mockCaches,
       writable: true
     });
 
     // Mock fetch
-    mockFetch = jest.fn();
-    originalFetch = window.fetch;
-    window.fetch = mockFetch;
+    mockFetch = vi.fn();
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = mockFetch;
 
     TestBed.configureTestingModule({
       providers: [UpdateService, { provide: MessageService, useValue: mockMessageService }]
@@ -64,11 +64,11 @@ describe('UpdateService', () => {
       value: originalServiceWorker,
       writable: true
     });
-    Object.defineProperty(window, 'caches', {
+    Object.defineProperty(globalThis, 'caches', {
       value: originalCaches,
       writable: true
     });
-    window.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   it('should be created', () => {
@@ -95,7 +95,7 @@ describe('UpdateService', () => {
       mockFetch.mockReset();
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce(mockAssetList)
+        json: vi.fn().mockResolvedValueOnce(mockAssetList)
       });
 
       service.latestVersion.set(null);
@@ -129,14 +129,14 @@ describe('UpdateService', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValueOnce({
           app_version: mockLatestVersion,
           files: ['file1.js', 'file2.css']
         })
       });
 
       mockCache.match.mockResolvedValueOnce({
-        json: jest.fn().mockResolvedValueOnce(mockCurrentVersion)
+        json: vi.fn().mockResolvedValueOnce(mockCurrentVersion)
       });
 
       await service.checkAppVersion();
@@ -175,7 +175,7 @@ describe('UpdateService', () => {
       service.currentVersion.set(mockCurrentVersion);
       service.latestVersion.set(mockLatestVersion);
 
-      const mockPostMessage = jest.fn();
+      const mockPostMessage = vi.fn();
       mockServiceWorker.getRegistration.mockResolvedValueOnce({
         active: {
           postMessage: mockPostMessage
@@ -208,14 +208,14 @@ describe('UpdateService', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValueOnce({
           app_version: mockCurrentVersion,
           files: ['file1.js', 'file2.css']
         })
       });
 
       mockCache.match.mockResolvedValueOnce({
-        json: jest.fn().mockResolvedValueOnce(mockCurrentVersion)
+        json: vi.fn().mockResolvedValueOnce(mockCurrentVersion)
       });
 
       service.updateLoading.set(true);
@@ -239,14 +239,14 @@ describe('UpdateService', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValueOnce({
           app_version: mockVersion,
           files: ['file1.js', 'file2.css']
         })
       });
 
       mockCache.match.mockResolvedValueOnce({
-        json: jest.fn().mockResolvedValueOnce(mockVersion)
+        json: vi.fn().mockResolvedValueOnce(mockVersion)
       });
 
       service.updateLoading.set(true);

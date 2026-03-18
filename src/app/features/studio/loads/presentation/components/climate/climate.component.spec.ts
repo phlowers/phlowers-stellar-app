@@ -104,12 +104,12 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal(null),
       section: signal({ uuid: 'section-uuid-1', supports: [] }),
-      calculateCharge: jest.fn()
+      calculateCharge: vi.fn()
     } as unknown as PlotService;
     const chargesServiceMock = {
-      getCharge: jest.fn().mockResolvedValue(mockCharge),
-      createOrUpdateCharge: jest.fn(),
-      deleteCharge: jest.fn()
+      getCharge: vi.fn().mockResolvedValue(mockCharge),
+      createOrUpdateCharge: vi.fn(),
+      deleteCharge: vi.fn()
     } as unknown as ChargesService;
 
     await TestBed.configureTestingModule({
@@ -117,7 +117,7 @@ describe('ClimateComponent effect edge cases', () => {
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: {} },
-        { provide: MessageService, useValue: { add: jest.fn() } },
+        { provide: MessageService, useValue: { add: vi.fn() } },
         { provide: ChargesService, useValue: chargesServiceMock }
       ]
     }).compileComponents();
@@ -136,12 +136,12 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal({ uuid: 'study-uuid-1' }),
       section: signal({ uuid: 'section-uuid-1', supports: [] }),
-      calculateCharge: jest.fn()
+      calculateCharge: vi.fn()
     } as unknown as PlotService;
     const chargesServiceMock = {
-      getCharge: jest.fn().mockResolvedValue(chargeWithoutData),
-      createOrUpdateCharge: jest.fn(),
-      deleteCharge: jest.fn()
+      getCharge: vi.fn().mockResolvedValue(chargeWithoutData),
+      createOrUpdateCharge: vi.fn(),
+      deleteCharge: vi.fn()
     } as unknown as ChargesService;
 
     await TestBed.configureTestingModule({
@@ -149,7 +149,7 @@ describe('ClimateComponent effect edge cases', () => {
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: WorkerPythonService, useValue: {} },
-        { provide: MessageService, useValue: { add: jest.fn() } },
+        { provide: MessageService, useValue: { add: vi.fn() } },
         { provide: ChargesService, useValue: chargesServiceMock }
       ]
     }).compileComponents();
@@ -197,8 +197,8 @@ describe('ClimateComponent (Jest)', () => {
     const plotServiceMock = {
       study: signal({ uuid: 'study-uuid-1' }),
       section: signal({ uuid: 'section-uuid-1' }),
-      calculateCharge: jest.fn(),
-      refreshCamera: jest.fn(),
+      calculateCharge: vi.fn(),
+      refreshCamera: vi.fn(),
       loading: signal(false),
       temporaryLoadData: {
         climate: {
@@ -214,21 +214,21 @@ describe('ClimateComponent (Jest)', () => {
       }
     } as unknown as PlotService;
     const messageServiceMock = {
-      add: jest.fn()
+      add: vi.fn()
     } as unknown as MessageService;
     const workerPythonServiceMock = {} as unknown as WorkerPythonService;
     const chargesServiceMock = {
-      getCharge: jest.fn().mockResolvedValue(mockCharge),
-      createOrUpdateCharge: jest.fn().mockResolvedValue(undefined),
-      deleteCharge: jest.fn().mockResolvedValue(undefined),
-      getSelectedChargeCase: jest.fn().mockResolvedValue(mockCharge)
+      getCharge: vi.fn().mockResolvedValue(mockCharge),
+      createOrUpdateCharge: vi.fn().mockResolvedValue(undefined),
+      deleteCharge: vi.fn().mockResolvedValue(undefined),
+      getSelectedChargeCase: vi.fn().mockResolvedValue(mockCharge)
     } as unknown as ChargesService;
 
     const loadFormsServiceMock = {
-      calculateLoad: jest.fn().mockResolvedValue(undefined),
-      saveTemporaryLoadDataInSection: jest.fn().mockResolvedValue(undefined),
-      initTemporaryLoadData: jest.fn(),
-      deleteLoad: jest.fn()
+      calculateLoad: vi.fn().mockResolvedValue(undefined),
+      saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined),
+      initTemporaryLoadData: vi.fn(),
+      deleteLoad: vi.fn()
     } as unknown as LoadFormsService;
 
     await TestBed.configureTestingModule({
@@ -286,14 +286,14 @@ describe('ClimateComponent (Jest)', () => {
 
   describe('button actions', () => {
     it('should call submitForm when submit button is clicked', () => {
-      const spy = jest.spyOn(component, 'saveForm');
+      const spy = vi.spyOn(component, 'saveForm');
       const submitButton = fixture.nativeElement.querySelector('button[type="submit"]');
       submitButton.click();
       expect(spy).toHaveBeenCalled();
     });
 
     it('should call calculForm when calculate button is clicked', () => {
-      const spy = jest.spyOn(component, 'calculateForm');
+      const spy = vi.spyOn(component, 'calculateForm');
       const buttons = [...fixture.nativeElement.querySelectorAll('button')] as HTMLElement[];
       const calcButton = buttons.find((b) => b.textContent?.includes('Calculate'));
       calcButton?.click();
@@ -301,7 +301,7 @@ describe('ClimateComponent (Jest)', () => {
     });
 
     it('should call resetForm when erase button is clicked', () => {
-      const spy = jest.spyOn(component, 'resetForm');
+      const spy = vi.spyOn(component, 'resetForm');
       const resetButton = fixture.nativeElement.querySelector('.climate__reset');
       resetButton.click();
       expect(spy).toHaveBeenCalled();

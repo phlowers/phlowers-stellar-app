@@ -10,7 +10,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
 
 class MockChargesService {
-  createOrUpdateCharge = jest.fn().mockResolvedValue(undefined);
+  createOrUpdateCharge = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockPlotService {
@@ -143,13 +143,13 @@ describe('NewChargeModalComponent (Jest)', () => {
   });
 
   it('should emit isOpenChange(false) when onClose() is called', () => {
-    const spy = jest.spyOn(component.isOpenChange, 'emit');
+    const spy = vi.spyOn(component.isOpenChange, 'emit');
     component.onClose();
     expect(spy).toHaveBeenCalledWith(false);
   });
 
   it('should emit isOpenChange(false) when dialog visibleChange event is triggered', () => {
-    const spy = jest.spyOn(component.isOpenChange, 'emit');
+    const spy = vi.spyOn(component.isOpenChange, 'emit');
     const dialog = fixture.debugElement.query(By.css('p-dialog'));
     dialog.triggerEventHandler('visibleChange', false);
     expect(spy).toHaveBeenCalledWith(false);
@@ -216,8 +216,8 @@ describe('NewChargeModalComponent (Jest)', () => {
     component.updatePersonnelPresence(false);
     component.updateDescription('New Description');
 
-    const validateSpy = jest.spyOn(component.validate, 'emit');
-    const isOpenChangeSpy = jest.spyOn(component.isOpenChange, 'emit');
+    const validateSpy = vi.spyOn(component.validate, 'emit');
+    const isOpenChangeSpy = vi.spyOn(component.isOpenChange, 'emit');
 
     await component.onSubmit();
 

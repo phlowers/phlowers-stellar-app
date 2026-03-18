@@ -18,12 +18,13 @@ class TestHostComponent {}
 
 describe('SideTabsComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
-  let plotServiceMock: { refreshCamera: jest.Mock };
+  let plotServiceMock: { refreshCamera: vi.Mock };
   let sideTabsService: SideTabsService;
+  const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
   beforeEach(async () => {
     plotServiceMock = {
-      refreshCamera: jest.fn()
+      refreshCamera: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -128,7 +129,7 @@ describe('SideTabsComponent', () => {
     expect(component.panelWidth()).toBe('0px');
   });
 
-  it('updateWidth sets panelWidth based on element offsetWidth when tab is open', (done) => {
+  it('updateWidth sets panelWidth based on element offsetWidth when tab is open', async () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
 
     // Set a tab to be open
@@ -144,11 +145,8 @@ describe('SideTabsComponent', () => {
 
     component['updateWidth']();
 
-    // Wait for setTimeout to complete
-    setTimeout(() => {
-      expect(component.panelWidth()).toBe('300px');
-      done();
-    }, 10);
+    await wait(10);
+    expect(component.panelWidth()).toBe('300px');
   });
 
   it('focusPanel does nothing if panel element is missing', () => {
@@ -157,10 +155,10 @@ describe('SideTabsComponent', () => {
     expect(() => component).not.toThrow();
   });
 
-  it('focusPanel focuses the panel element when it exists', (done) => {
+  it('focusPanel focuses the panel element when it exists', async () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
 
-    const focusSpy = jest.fn();
+    const focusSpy = vi.fn();
     const mockPanel = {
       nativeElement: {
         focus: focusSpy
@@ -170,11 +168,8 @@ describe('SideTabsComponent', () => {
 
     component['focusPanel'](0);
 
-    // Wait for setTimeout to complete
-    setTimeout(() => {
-      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
-      done();
-    }, 10);
+    await wait(10);
+    expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
   });
 
   it('handlePanelFocusOut does nothing if panel is missing', () => {
@@ -196,16 +191,13 @@ describe('SideTabsComponent', () => {
     component.handlePanelFocusOut({ relatedTarget: insideEl } as unknown as FocusEvent, 0);
   });
 
-  it('toggleTab calls plotService.refreshCamera after delay', (done) => {
+  it('toggleTab calls plotService.refreshCamera after delay', async () => {
     const buttons = getButtons();
 
     buttons[0].click();
     fixture.detectChanges();
 
-    // Wait for the REFRESH_STUDIO_DELAY (400ms)
-    setTimeout(() => {
-      expect(plotServiceMock.refreshCamera).toHaveBeenCalled();
-      done();
-    }, 450);
+    await wait(450);
+    expect(plotServiceMock.refreshCamera).toHaveBeenCalled();
   });
 });

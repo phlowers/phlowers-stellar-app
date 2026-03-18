@@ -36,16 +36,16 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
   let component: ParameterCalculation15WithoutWindComponent;
   let fixture: ComponentFixture<ParameterCalculation15WithoutWindComponent>;
   let componentRef: ComponentRef<ParameterCalculation15WithoutWindComponent>;
-  let workerPythonServiceMock: jest.Mocked<WorkerPythonService>;
+  let workerPythonServiceMock: vi.Mocked<WorkerPythonService>;
 
   beforeEach(async () => {
     workerPythonServiceMock = {
-      runTask: jest.fn(),
+      runTask: vi.fn(),
       ready$: new BehaviorSubject<boolean>(true)
-    } as unknown as jest.Mocked<WorkerPythonService>;
+    } as unknown as vi.Mocked<WorkerPythonService>;
 
     const mockMessageService = {
-      add: jest.fn()
+      add: vi.fn()
     } as unknown as MessageService;
 
     const mockSectionService = {
@@ -53,18 +53,18 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     } as unknown as SectionService;
 
     const mockStudiesService = {
-      currentStudy: jest.fn().mockReturnValue(null),
-      getStudy: jest.fn()
-    } as unknown as StudiesService & { currentStudy: jest.Mock };
+      currentStudy: vi.fn().mockReturnValue(null),
+      getStudy: vi.fn()
+    } as unknown as StudiesService & { currentStudy: vi.Mock };
 
     const mockInitialConditionService = {
-      addInitialCondition: jest.fn(),
-      setInitialCondition: jest.fn()
+      addInitialCondition: vi.fn(),
+      setInitialCondition: vi.fn()
     } as unknown as InitialConditionService;
 
     const mockCablesService = {
-      getCables: jest.fn().mockResolvedValue([]),
-      importFromFile: jest.fn().mockResolvedValue(undefined),
+      getCables: vi.fn().mockResolvedValue([]),
+      importFromFile: vi.fn().mockResolvedValue(undefined),
       ready: new BehaviorSubject<boolean>(true)
     } as unknown as CablesService;
 
@@ -72,7 +72,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       ready$: new BehaviorSubject<boolean>(true),
       db: {
         cables: {
-          toArray: jest.fn().mockResolvedValue([])
+          toArray: vi.fn().mockResolvedValue([])
         }
       }
     } as unknown as StorageService;
@@ -271,17 +271,17 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
   });
 
   describe('Add Initial Condition', () => {
-    let mockMessageService: jest.Mocked<MessageService>;
-    let mockStudiesService: jest.Mocked<StudiesService> & {
-      currentStudy: jest.Mock;
+    let mockMessageService: vi.Mocked<MessageService>;
+    let mockStudiesService: vi.Mocked<StudiesService> & {
+      currentStudy: vi.Mock;
     };
-    let mockInitialConditionService: jest.Mocked<InitialConditionService>;
+    let mockInitialConditionService: vi.Mocked<InitialConditionService>;
     let plotService: PlotService;
 
     beforeEach(() => {
-      mockMessageService = TestBed.inject(MessageService) as jest.Mocked<MessageService>;
-      mockStudiesService = TestBed.inject(StudiesService) as jest.Mocked<StudiesService> & { currentStudy: jest.Mock };
-      mockInitialConditionService = TestBed.inject(InitialConditionService) as jest.Mocked<InitialConditionService>;
+      mockMessageService = TestBed.inject(MessageService) as vi.Mocked<MessageService>;
+      mockStudiesService = TestBed.inject(StudiesService) as vi.Mocked<StudiesService> & { currentStudy: vi.Mock };
+      mockInitialConditionService = TestBed.inject(InitialConditionService) as vi.Mocked<InitialConditionService>;
       plotService = TestBed.inject(PlotService);
     });
 

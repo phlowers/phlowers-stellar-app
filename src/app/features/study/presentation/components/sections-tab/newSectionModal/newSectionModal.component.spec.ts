@@ -12,33 +12,33 @@ import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { SectionService } from '@services/section/section.service';
 
 class MockMaintenanceService {
-  ready = { next: jest.fn() };
-  getMaintenance = jest.fn().mockResolvedValue([]);
-  importFromFile = jest.fn().mockResolvedValue(undefined);
+  ready = { next: vi.fn() };
+  getMaintenance = vi.fn().mockResolvedValue([]);
+  importFromFile = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockLinesService {
-  ready = { next: jest.fn() };
-  getLinesCount = jest.fn().mockResolvedValue(0);
-  getLines = jest.fn().mockResolvedValue([]);
-  importFromFile = jest.fn().mockResolvedValue(undefined);
+  ready = { next: vi.fn() };
+  getLinesCount = vi.fn().mockResolvedValue(0);
+  getLines = vi.fn().mockResolvedValue([]);
+  importFromFile = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockChainsService {
-  ready = { next: jest.fn() };
-  getChains = jest.fn().mockResolvedValue([]);
-  importFromFile = jest.fn().mockResolvedValue(undefined);
+  ready = { next: vi.fn() };
+  getChains = vi.fn().mockResolvedValue([]);
+  importFromFile = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockAttachmentService {
-  ready = { next: jest.fn() };
-  getAttachments = jest.fn().mockResolvedValue([]);
-  importFromFile = jest.fn().mockResolvedValue(undefined);
+  ready = { next: vi.fn() };
+  getAttachments = vi.fn().mockResolvedValue([]);
+  importFromFile = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockSectionService {
-  duplicateSection = jest.fn().mockResolvedValue(undefined);
-  deleteSection = jest.fn();
+  duplicateSection = vi.fn().mockResolvedValue(undefined);
+  deleteSection = vi.fn();
 }
 
 describe('NewSectionModalComponent (Jest)', () => {
@@ -149,13 +149,13 @@ describe('NewSectionModalComponent (Jest)', () => {
   });
 
   it('should emit isOpenChange(false) when onVisibleChange(false)', () => {
-    const spy = jest.spyOn(component.isOpenChange, 'emit');
+    const spy = vi.spyOn(component.isOpenChange, 'emit');
     component.onVisibleChange(false);
     expect(spy).toHaveBeenCalledWith(false);
   });
 
   it('should emit sectionChange and update validation when onSectionChange called', () => {
-    const spy = jest.spyOn(component.sectionChange, 'emit');
+    const spy = vi.spyOn(component.sectionChange, 'emit');
     const updated = { ...mockSection, name: 'Updated Section' };
     component.onSectionChange(updated);
 
@@ -172,8 +172,8 @@ describe('NewSectionModalComponent (Jest)', () => {
   });
 
   it('should emit outputSection and close modal on validate', () => {
-    const spyOutput = jest.spyOn(component.outputSection, 'emit');
-    const spyOpen = jest.spyOn(component.isOpenChange, 'emit');
+    const spyOutput = vi.spyOn(component.outputSection, 'emit');
+    const spyOpen = vi.spyOn(component.isOpenChange, 'emit');
 
     component.onValidate();
 
@@ -220,7 +220,7 @@ describe('NewSectionModalComponent (Jest)', () => {
       const sectionService = TestBed.inject(SectionService) as unknown as MockSectionService;
       const newSection = { ...mockSection, uuid: 'new-uuid' };
       sectionService.duplicateSection.mockResolvedValue(newSection);
-      const spy = jest.spyOn(component.setSection, 'emit');
+      const spy = vi.spyOn(component.setSection, 'emit');
 
       await component.onDuplicateSection();
 
@@ -234,8 +234,8 @@ describe('NewSectionModalComponent (Jest)', () => {
       fixture.componentRef.setInput('mode', 'view');
       fixture.detectChanges();
 
-      const spySetMode = jest.spyOn(component.setMode, 'emit');
-      const spyCheckFields = jest.spyOn(component, 'checkFields');
+      const spySetMode = vi.spyOn(component.setMode, 'emit');
+      const spyCheckFields = vi.spyOn(component, 'checkFields');
 
       component.onEditSection();
 
@@ -250,7 +250,7 @@ describe('NewSectionModalComponent (Jest)', () => {
       fixture.detectChanges();
 
       const sectionService = TestBed.inject(SectionService) as unknown as MockSectionService;
-      const spy = jest.spyOn(component.isOpenChange, 'emit');
+      const spy = vi.spyOn(component.isOpenChange, 'emit');
 
       component.onDeleteSection();
 

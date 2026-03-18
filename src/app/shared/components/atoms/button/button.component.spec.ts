@@ -138,7 +138,7 @@ describe('ButtonComponent', () => {
 
   describe('Event Listener Management', () => {
     it('should add click event listener on init', () => {
-      const addEventListenerSpy = jest.spyOn(fixture.nativeElement, 'addEventListener');
+      const addEventListenerSpy = vi.spyOn(fixture.nativeElement, 'addEventListener');
 
       component.ngOnInit();
 
@@ -146,7 +146,7 @@ describe('ButtonComponent', () => {
     });
 
     it('should remove click event listener on destroy', () => {
-      const removeEventListenerSpy = jest.spyOn(fixture.nativeElement, 'removeEventListener');
+      const removeEventListenerSpy = vi.spyOn(fixture.nativeElement, 'removeEventListener');
 
       component.ngOnInit();
       component.ngOnDestroy();
@@ -187,9 +187,9 @@ describe('ButtonComponent', () => {
         bubbles: true,
         cancelable: true
       });
-      const preventDefaultSpy = jest.spyOn(clickEvent, 'preventDefault');
-      const stopPropagationSpy = jest.spyOn(clickEvent, 'stopPropagation');
-      const stopImmediatePropagationSpy = jest.spyOn(clickEvent, 'stopImmediatePropagation');
+      const preventDefaultSpy = vi.spyOn(clickEvent, 'preventDefault');
+      const stopPropagationSpy = vi.spyOn(clickEvent, 'stopPropagation');
+      const stopImmediatePropagationSpy = vi.spyOn(clickEvent, 'stopImmediatePropagation');
 
       buttonElement.dispatchEvent(clickEvent);
 

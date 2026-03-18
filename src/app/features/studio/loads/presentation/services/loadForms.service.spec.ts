@@ -10,8 +10,8 @@ import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
-  const fn = jest.fn(() => value) as jest.Mock & { set: jest.Mock };
-  fn.set = jest.fn((v: T) => {
+  const fn = vi.fn(() => value) as vi.Mock & { set: vi.Mock };
+  fn.set = vi.fn((v: T) => {
     value = v;
   });
   return fn;
@@ -19,9 +19,9 @@ function createSignalMock<T>(initialValue: T) {
 
 describe('LoadFormsService', () => {
   let service: LoadFormsService;
-  let mockPlotService: jest.Mocked<PlotService>;
-  let mockChargesService: jest.Mocked<ChargesService>;
-  let mockWorkerPythonService: jest.Mocked<WorkerPythonService>;
+  let mockPlotService: vi.Mocked<PlotService>;
+  let mockChargesService: vi.Mocked<ChargesService>;
+  let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
 
   const mockSection: Section = {
     uuid: 'section-uuid-1',
@@ -128,18 +128,18 @@ describe('LoadFormsService', () => {
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
-      refreshCamera: jest.fn()
-    } as unknown as jest.Mocked<PlotService>;
+      refreshCamera: vi.fn()
+    } as unknown as vi.Mocked<PlotService>;
 
     mockChargesService = {
-      getSelectedChargeCase: jest.fn(),
-      createOrUpdateCharge: jest.fn(),
-      deleteCharge: jest.fn()
-    } as unknown as jest.Mocked<ChargesService>;
+      getSelectedChargeCase: vi.fn(),
+      createOrUpdateCharge: vi.fn(),
+      deleteCharge: vi.fn()
+    } as unknown as vi.Mocked<ChargesService>;
 
     mockWorkerPythonService = {
-      runTask: jest.fn()
-    } as unknown as jest.Mocked<WorkerPythonService>;
+      runTask: vi.fn()
+    } as unknown as vi.Mocked<WorkerPythonService>;
 
     TestBed.configureTestingModule({
       providers: [
@@ -154,7 +154,7 @@ describe('LoadFormsService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be created', () => {

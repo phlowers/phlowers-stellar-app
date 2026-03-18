@@ -17,7 +17,7 @@ Development guide for the AI assistant on the **Stellar** project: an Angular 19
 | SCSS + BEM | Styling with strict BEM methodology |
 | Angular i18n | Standard Angular internationalization |
 | Tailwind CSS | Complementary CSS utilities |
-| Jest | Unit tests |
+| Vitest | Unit tests |
 | Clean Architecture + DDD | Overall architecture |
 
 
@@ -69,6 +69,40 @@ export class ObstacleTypesService {
 ```
 
 > **Exception**: User-facing text in templates uses Angular i18n (`i18n` attribute or `$localize`) — the source language in templates may be English or French as long as translations are provided.
+
+---
+### TypeScript strict rules — ESLint enforced
+
+#### No `any` type — Error
+
+**The use of `any` is strictly forbidden.** The ESLint rule `@typescript-eslint/no-explicit-any` is set to `'error'`. Always use proper types, generics, or `unknown` instead.
+
+```typescript
+// ✅ ALWAYS — use proper types
+function parse(data: unknown): MyType { ... }
+function getItems<T>(key: string): T[] { ... }
+
+// ❌ NEVER — any is forbidden
+function parse(data: any): any { ... }
+```
+
+> **Rationale:** `any` disables type checking and defeats the purpose of TypeScript strict mode. Use `unknown` when the type is truly unknown, then narrow it.
+
+#### `globalThis` over `window` — Required
+
+**Always use `globalThis` instead of `window`.** The ESLint rule `no-restricted-globals` bans `window` with an error. This ensures cross-environment compatibility (browser, Web Worker, SSR).
+
+```typescript
+// ✅ ALWAYS — use globalThis
+const url = globalThis.location?.href;
+globalThis.addEventListener('online', handler);
+
+// ❌ NEVER — window is banned
+const url = window.location.href;
+window.addEventListener('online', handler);
+```
+
+> **Rationale:** `window` is not available in Web Workers or server-side rendering contexts. `globalThis` is the standard cross-environment global object.
 
 ---
 
@@ -893,7 +927,7 @@ export class FeatureComponent {
 
 ---
 
-## 12. Unit tests (Jest)
+## 12. Unit tests (Vitest)
 
 
 ### Mandatory test coverage
@@ -917,6 +951,30 @@ import { provideHttpClient } from '@angular/common/http';
 
 > **Rationale:** Deprecated modules may be removed in future Angular versions and can cause maintenance and compatibility issues. Always prefer the official, modern testing APIs.
 
+#### Jest API — Forbidden
+
+**It is strictly forbidden to use Jest APIs (`jest.fn()`, `jest.spyOn()`, `jest.mock()`, `jest.Mocked`, `jest.Mock`, `jest.MockedFunction`) in any test file.** Always use the Vitest equivalents.
+
+Vitest globals are enabled (`globals: true` in `vitest.config.ts`), so `describe`, `it`, `expect`, `beforeEach`, `afterEach` are available without imports. For mocking utilities, use `vi` from `vitest`.
+
+```typescript
+// ✅ ALWAYS — Vitest API
+import { vi, type Mock } from 'vitest';
+
+const myMock = vi.fn();
+const spy = vi.spyOn(service, 'method');
+vi.mock('./my-module');
+let serviceMock: Mock<MyService>;
+
+// ❌ NEVER — Jest API
+const myMock = jest.fn();           // FORBIDDEN
+const spy = jest.spyOn(service, 'method'); // FORBIDDEN
+jest.mock('./my-module');            // FORBIDDEN
+let serviceMock: jest.Mocked<MyService>;   // FORBIDDEN
+```
+
+> **Rationale:** The project uses Vitest as its test runner. Jest APIs are not available natively — a compatibility shim exists only for legacy code and will be removed. All code must use Vitest APIs exclusively.
+
 - **Every new feature, service, or component must have corresponding unit tests before merging.**
 - **When modifying existing code, the related tests must be updated or extended** to cover the new/changed behavior.
 - Tests must be kept in sync with the implementation at all times — no orphaned tests, no untested features.
@@ -929,12 +987,12 @@ import { provideHttpClient } from '@angular/common/http';
 describe('NetworkDiagramComponent', () => {
   let component: NetworkDiagramComponent;
   let fixture: ComponentFixture<NetworkDiagramComponent>;
-  let networkServiceMock: jest.Mocked<NetworkService>;
+  let networkServiceMock: Mock<NetworkService>;
 
   beforeEach(async () => {
     networkServiceMock = {
-      getNetworks: jest.fn().mockResolvedValue([]),
-    } as any;
+      getNetworks: vi.fn().mockResolvedValue([]),
+    } as unknown as Mock<NetworkService>;
 
     await TestBed.configureTestingModule({
       imports: [NetworkDiagramComponent],
@@ -1079,6 +1137,10 @@ Before each PR, check:
 - [ ] All code, comments, docs, commit messages, and PR descriptions are in **English**
 - [ ] No French or other non-English text in code, comments, or documentation (except i18n translation source text)
 
+**TypeScript strict**
+- [ ] No `any` type used — use proper types, generics, or `unknown`
+- [ ] No `window` usage — use `globalThis` instead
+
 **Angular & Signals**
 - [ ] `ChangeDetectionStrategy.OnPush` on all components
 - [ ] `inject()` used (no constructor injection)
@@ -1110,6 +1172,7 @@ Before each PR, check:
 - [ ] HTML rendering tests exist for every `data-testid` element (structure, states, content)
 - [ ] `getByTestId` helper used for DOM assertions
 - [ ] Tests cover: existence, tag type, disabled/enabled, text content, ARIA attributes
+- [ ] No `jest.*` API used — use `vi.fn()`, `vi.spyOn()`, `vi.mock()`, `Mock<T>` from Vitest
 
 **i18n**
 - [ ] No hardcoded French/English text in templates

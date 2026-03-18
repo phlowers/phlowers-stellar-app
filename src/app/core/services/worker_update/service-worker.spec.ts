@@ -2,24 +2,24 @@ import { checkIfAppInstalled, installApp, updateApp, handleFetch, handleMessage 
 
 // Mock browser APIs
 const mockCache = {
-  open: jest.fn(),
-  match: jest.fn(),
-  addAll: jest.fn(),
-  put: jest.fn(),
-  add: jest.fn(),
-  keys: jest.fn(),
-  delete: jest.fn()
+  open: vi.fn(),
+  match: vi.fn(),
+  addAll: vi.fn(),
+  put: vi.fn(),
+  add: vi.fn(),
+  keys: vi.fn(),
+  delete: vi.fn()
 };
 
 const mockCaches = {
-  open: jest.fn().mockResolvedValue(mockCache),
-  match: jest.fn()
+  open: vi.fn().mockResolvedValue(mockCache),
+  match: vi.fn()
 };
 
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 
 const mockClients = {
-  matchAll: jest.fn()
+  matchAll: vi.fn()
 };
 
 const mockSelf = {
@@ -31,14 +31,14 @@ const mockSelf = {
 // Mock global objects
 global.caches = {
   ...mockCaches,
-  match: jest.fn()
+  match: vi.fn()
 } as unknown as CacheStorage;
 global.fetch = mockFetch as unknown as typeof fetch;
 global.Response = class MockResponse {
   constructor(body?: string | null, init?: Record<string, unknown>) {
     const response = {
-      json: jest.fn().mockResolvedValue(body),
-      text: jest.fn().mockResolvedValue(body),
+      json: vi.fn().mockResolvedValue(body),
+      text: vi.fn().mockResolvedValue(body),
       ...init
     };
     return response as unknown as Response;
@@ -49,8 +49,8 @@ global.Response = class MockResponse {
 } as unknown as typeof Response;
 global.console = {
   ...console,
-  log: jest.fn(),
-  error: jest.fn()
+  log: vi.fn(),
+  error: vi.fn()
 };
 
 // Mock service worker global scope
@@ -61,9 +61,9 @@ Object.defineProperty(global, 'self', {
 
 describe('Service Worker Functions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCaches.open.mockResolvedValue(mockCache);
-    (global.caches.match as jest.Mock).mockResolvedValue(null);
+    (global.caches.match as vi.Mock).mockResolvedValue(null);
   });
 
   describe('checkIfAppInstalled', () => {
@@ -101,9 +101,9 @@ describe('Service Worker Functions', () => {
 
     beforeEach(() => {
       mockFetch.mockResolvedValue({
-        json: jest.fn().mockResolvedValue(mockManifest)
+        json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockClients.matchAll.mockResolvedValue([{ postMessage: jest.fn() }, { postMessage: jest.fn() }]);
+      mockClients.matchAll.mockResolvedValue([{ postMessage: vi.fn() }, { postMessage: vi.fn() }]);
     });
 
     it('should install app successfully', async () => {
@@ -135,7 +135,7 @@ describe('Service Worker Functions', () => {
     it('should handle empty files array', async () => {
       const emptyManifest = { files: [], app_version: '1.0.0' };
       mockFetch.mockResolvedValue({
-        json: jest.fn().mockResolvedValue(emptyManifest)
+        json: vi.fn().mockResolvedValue(emptyManifest)
       });
 
       await installApp();
@@ -164,7 +164,7 @@ describe('Service Worker Functions', () => {
 
     beforeEach(() => {
       mockFetch.mockResolvedValue({
-        json: jest.fn().mockResolvedValue(mockManifest)
+        json: vi.fn().mockResolvedValue(mockManifest)
       });
       mockCache.keys.mockResolvedValue([
         { url: 'https://example.com/index.html' },
@@ -210,7 +210,7 @@ describe('Service Worker Functions', () => {
     it('should handle empty files array', async () => {
       const emptyManifest = { files: [], app_version: '1.1.0' };
       mockFetch.mockResolvedValue({
-        json: jest.fn().mockResolvedValue(emptyManifest)
+        json: vi.fn().mockResolvedValue(emptyManifest)
       });
 
       const result = await updateApp();
@@ -227,26 +227,26 @@ describe('Service Worker Functions', () => {
   });
 
   describe('handleFetch', () => {
-    let mockEvent: { respondWith: jest.Mock; request: { url: string; clone: jest.Mock } };
+    let mockEvent: { respondWith: vi.Mock; request: { url: string; clone: vi.Mock } };
 
     beforeEach(() => {
       mockEvent = {
         request: {
           url: 'https://example.com/',
-          clone: jest.fn().mockReturnValue({ url: 'https://example.com/' })
+          clone: vi.fn().mockReturnValue({ url: 'https://example.com/' })
         },
-        respondWith: jest.fn()
+        respondWith: vi.fn()
       };
     });
 
     it('should handle home page requests', async () => {
       mockEvent.request.url = 'https://example.com/';
       const mockResponse = new Response('<html>Home</html>');
-      (global.caches.match as jest.Mock).mockResolvedValue(mockResponse);
+      (global.caches.match as vi.Mock).mockResolvedValue(mockResponse);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect(global.caches.match as jest.Mock).toHaveBeenCalledWith('https://example.com/index.html');
+      expect(global.caches.match as vi.Mock).toHaveBeenCalledWith('https://example.com/index.html');
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 
@@ -261,17 +261,17 @@ describe('Service Worker Functions', () => {
     it('should handle other requests with cache hit', async () => {
       mockEvent.request.url = 'https://example.com/image.png';
       const mockResponse = new Response('console.log("test");');
-      (global.caches.match as jest.Mock).mockResolvedValue(mockResponse);
+      (global.caches.match as vi.Mock).mockResolvedValue(mockResponse);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect(global.caches.match as jest.Mock).toHaveBeenCalledWith(mockEvent.request);
+      expect(global.caches.match as vi.Mock).toHaveBeenCalledWith(mockEvent.request);
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 
     it('should handle other requests with cache miss', async () => {
       mockEvent.request.url = 'https://example.com/image.png';
-      (global.caches.match as jest.Mock).mockResolvedValue(null);
+      (global.caches.match as vi.Mock).mockResolvedValue(null);
       mockFetch.mockResolvedValue(new Response('console.log("test");'));
       const clonedRequest = { url: 'https://example.com/image.png' };
       mockEvent.request.clone.mockReturnValue(clonedRequest);
@@ -290,7 +290,7 @@ describe('Service Worker Functions', () => {
 
     it('should handle fetch errors gracefully', async () => {
       mockEvent.request.url = 'https://example.com/image.png';
-      (global.caches.match as jest.Mock).mockResolvedValue(null);
+      (global.caches.match as vi.Mock).mockResolvedValue(null);
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       await handleFetch(mockEvent as unknown as FetchEvent);
@@ -303,7 +303,7 @@ describe('Service Worker Functions', () => {
       const clonedRequest = { url: 'https://example.com/app.js' };
       const networkResponse = {
         ok: true,
-        clone: jest.fn().mockReturnValue({ ok: true, body: 'bundled-js' })
+        clone: vi.fn().mockReturnValue({ ok: true, body: 'bundled-js' })
       };
       mockEvent.request.clone.mockReturnValue(clonedRequest);
       mockFetch.mockResolvedValue(networkResponse as unknown as globalThis.Response);
@@ -346,19 +346,19 @@ describe('Service Worker Functions', () => {
   });
 
   describe('handleMessage', () => {
-    let mockEvent: { data: { type: string }; source: { postMessage: jest.Mock } | null };
+    let mockEvent: { data: { type: string }; source: { postMessage: vi.Mock } | null };
 
     beforeEach(() => {
       mockEvent = {
         data: { type: 'update' },
-        source: { postMessage: jest.fn() }
+        source: { postMessage: vi.fn() }
       };
     });
 
     it('should handle update message type', async () => {
       const mockManifest = { files: ['/app.js'], app_version: '1.1.0' };
       mockFetch.mockResolvedValue({
-        json: jest.fn().mockResolvedValue(mockManifest)
+        json: vi.fn().mockResolvedValue(mockManifest)
       });
       mockCache.keys.mockResolvedValue([]);
 
@@ -375,7 +375,7 @@ describe('Service Worker Functions', () => {
       mockEvent.data.type = 'install';
       const mockManifest = { files: ['/app.js'], app_version: '1.0.0' };
       mockFetch.mockResolvedValue({
-        json: jest.fn().mockResolvedValue(mockManifest)
+        json: vi.fn().mockResolvedValue(mockManifest)
       });
       mockClients.matchAll.mockResolvedValue([]);
       mockCache.addAll.mockResolvedValue(undefined);
@@ -414,7 +414,7 @@ describe('Service Worker Functions', () => {
       mockEvent.data.type = 'update';
       const mockManifest = { files: ['/app.js'], app_version: '1.1.0' };
       mockFetch.mockResolvedValue({
-        json: jest.fn().mockResolvedValue(mockManifest)
+        json: vi.fn().mockResolvedValue(mockManifest)
       });
       mockCache.keys.mockResolvedValue([]);
 

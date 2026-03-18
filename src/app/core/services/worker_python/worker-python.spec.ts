@@ -11,19 +11,19 @@ import { handleTask } from './tasks/handle-task';
 import pythonPackages from './python-packages.json';
 
 // Mock dependencies
-jest.mock('pyodide', () => ({
-  loadPyodide: jest.fn()
+vi.mock('pyodide', () => ({
+  loadPyodide: vi.fn()
 }));
 
-jest.mock('./tasks/handle-task', () => ({
-  handleTask: jest.fn()
+vi.mock('./tasks/handle-task', () => ({
+  handleTask: vi.fn()
 }));
 
 // Mock the Worker environment
-const mockPostMessage = jest.fn();
-const mockAddEventListener = jest.fn();
+const mockPostMessage = vi.fn();
+const mockAddEventListener = vi.fn();
 const mockPerformance = {
-  now: jest.fn()
+  now: vi.fn()
 };
 
 // Setup global objects to simulate web worker environment
@@ -52,11 +52,11 @@ Object.defineProperty(global, 'performance', {
 });
 
 describe('Worker', () => {
-  let mockPyodide: { runPython: jest.Mock };
+  let mockPyodide: { runPython: vi.Mock };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.resetAllMocks();
+    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     // Setup performance.now mock to return incremental values
     let timeCounter = 0;
@@ -67,11 +67,11 @@ describe('Worker', () => {
 
     // Setup mock Pyodide instance
     mockPyodide = {
-      runPython: jest.fn().mockResolvedValue(undefined)
+      runPython: vi.fn().mockResolvedValue(undefined)
     };
 
-    (loadPyodide as jest.Mock).mockResolvedValue(mockPyodide);
-    (handleTask as jest.Mock).mockResolvedValue({ result: 'success' });
+    (loadPyodide as vi.Mock).mockResolvedValue(mockPyodide);
+    (handleTask as vi.Mock).mockResolvedValue({ result: 'success' });
   });
 
   describe('loadPyodideAndPackages', () => {
@@ -89,7 +89,7 @@ describe('Worker', () => {
       // Verify all packages are included
       const allPackages = Object.values(pythonPackages).map((pkg) => 'test/pyodide/' + pkg.file_name);
 
-      const callArgs = (loadPyodide as jest.Mock).mock.calls[0][0];
+      const callArgs = (loadPyodide as vi.Mock).mock.calls[0][0];
       expect(callArgs.packages).toEqual(expect.arrayContaining(allPackages));
     });
 
