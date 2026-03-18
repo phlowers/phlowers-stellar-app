@@ -32,25 +32,25 @@ describe('ToolbarDialogComponent', () => {
 
   beforeEach(async () => {
     const mockMessageService = {
-      add: jest.fn()
+      add: vi.fn()
     } as unknown as MessageService;
 
     const mockStudiesService = {
       ready: new BehaviorSubject<boolean>(true),
-      currentStudy: jest.fn().mockReturnValue(null),
-      getStudy: jest.fn(),
-      getStudyAsObservable: jest.fn(),
-      updateStudy: jest.fn().mockResolvedValue(undefined)
+      currentStudy: vi.fn().mockReturnValue(null),
+      getStudy: vi.fn(),
+      getStudyAsObservable: vi.fn(),
+      updateStudy: vi.fn().mockResolvedValue(undefined)
     } as unknown as StudiesService;
 
     const mockSectionService = {
-      setCurrentSection: jest.fn(),
+      setCurrentSection: vi.fn(),
       currentSection: createSignalMock(null)
     } as unknown as SectionService;
 
     const mockCablesService = {
-      getCables: jest.fn().mockResolvedValue([]),
-      importFromFile: jest.fn().mockResolvedValue(undefined),
+      getCables: vi.fn().mockResolvedValue([]),
+      importFromFile: vi.fn().mockResolvedValue(undefined),
       ready: new BehaviorSubject<boolean>(true)
     } as unknown as CablesService;
 
@@ -143,14 +143,14 @@ describe('ToolbarDialogComponent', () => {
 
   describe('onDialogHide', () => {
     it('should call closeTool when not transitioning', () => {
-      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
       component.onDialogHide();
       expect(closeToolSpy).toHaveBeenCalled();
     });
 
     it('should call completePendingTransition when transitioning', () => {
-      const completeSpy = jest.spyOn(toolbarDialogService, 'completePendingTransition');
-      const closeToolSpy = jest.spyOn(toolbarDialogService, 'closeTool');
+      const completeSpy = vi.spyOn(toolbarDialogService, 'completePendingTransition');
+      const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
 

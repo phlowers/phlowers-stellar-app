@@ -5,12 +5,12 @@ import { PossibleIconNames, ALL_ICONS } from '@shared/model/icon.model';
 describe('IconComponent', () => {
   let component: IconComponent;
   let fixture: ComponentFixture<IconComponent>;
-  let mockDocumentFonts: { check: jest.Mock; load: jest.Mock };
+  let mockDocumentFonts: { check: vi.Mock; load: vi.Mock };
 
   beforeEach(async () => {
     mockDocumentFonts = {
-      check: jest.fn(),
-      load: jest.fn()
+      check: vi.fn(),
+      load: vi.fn()
     };
 
     Object.defineProperty(document, 'fonts', {
@@ -18,7 +18,7 @@ describe('IconComponent', () => {
       writable: true
     });
 
-    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
+    vi.spyOn(console, 'warn').mockImplementation(vi.fn());
 
     await TestBed.configureTestingModule({
       imports: [IconComponent]
@@ -29,7 +29,7 @@ describe('IconComponent', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Component Creation', () => {
@@ -198,7 +198,7 @@ describe('IconComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call isSymbolsReady on initialization', () => {
-      const isSymbolsReadySpy = jest.spyOn(component as IconComponent, 'isSymbolsReady' as never);
+      const isSymbolsReadySpy = vi.spyOn(component as IconComponent, 'isSymbolsReady' as never);
 
       fixture.componentRef.setInput('icon', 'home');
       fixture.detectChanges();

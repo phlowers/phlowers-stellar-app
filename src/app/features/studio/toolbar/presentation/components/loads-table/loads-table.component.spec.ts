@@ -179,13 +179,13 @@ describe('LoadsTableComponent', () => {
       phase: signal('main' as const),
       currentTool: signal(null),
       loadTableContext: signal(null),
-      setTemplates: jest.fn(),
-      closeTool: jest.fn()
+      setTemplates: vi.fn(),
+      closeTool: vi.fn()
     };
 
     mockChargesService = {
-      getCharge: jest.fn().mockResolvedValue(mockCharge),
-      createOrUpdateCharge: jest.fn().mockResolvedValue(undefined)
+      getCharge: vi.fn().mockResolvedValue(mockCharge),
+      createOrUpdateCharge: vi.fn().mockResolvedValue(undefined)
     };
 
     mockPlotService = {
@@ -330,7 +330,7 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should not save if existing charge is not found', async () => {
-      (mockChargesService.getCharge as jest.Mock).mockResolvedValue(null);
+      (mockChargesService.getCharge as vi.Mock).mockResolvedValue(null);
       component.chargeUuid.set('charge-uuid-1');
 
       await component.saveChanges();
@@ -369,7 +369,7 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should handle null charge data gracefully', async () => {
-      (mockChargesService.getCharge as jest.Mock).mockResolvedValue({
+      (mockChargesService.getCharge as vi.Mock).mockResolvedValue({
         ...mockCharge,
         data: undefined
       });

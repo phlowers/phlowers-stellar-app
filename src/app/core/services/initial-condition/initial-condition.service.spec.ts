@@ -12,18 +12,18 @@ import { Section, InitialCondition } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 
 // Mock uuid
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-123')
+vi.mock('uuid', () => ({
+  v4: vi.fn(() => 'mock-uuid-123')
 }));
 
 // Mock findDuplicateTitle
-jest.mock('@shared/helpers/duplicate', () => ({
-  findDuplicateTitle: jest.fn((titles, title) => `${title} (Copy 1)`)
+vi.mock('@shared/helpers/duplicate', () => ({
+  findDuplicateTitle: vi.fn((titles, title) => `${title} (Copy 1)`)
 }));
 
 describe('InitialConditionService', () => {
   let service: InitialConditionService;
-  let mockStudiesService: jest.Mocked<StudiesService>;
+  let mockStudiesService: vi.Mocked<StudiesService>;
 
   const mockInitialCondition: InitialCondition = {
     uuid: 'ic-uuid-1',
@@ -95,9 +95,9 @@ describe('InitialConditionService', () => {
 
   beforeEach(() => {
     mockStudiesService = {
-      updateStudy: jest.fn().mockResolvedValue(undefined),
-      getStudy: jest.fn().mockResolvedValue(mockStudy)
-    } as unknown as jest.Mocked<StudiesService>;
+      updateStudy: vi.fn().mockResolvedValue(undefined),
+      getStudy: vi.fn().mockResolvedValue(mockStudy)
+    } as unknown as vi.Mocked<StudiesService>;
 
     TestBed.configureTestingModule({
       providers: [InitialConditionService, { provide: StudiesService, useValue: mockStudiesService }]
@@ -107,7 +107,7 @@ describe('InitialConditionService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be created', () => {

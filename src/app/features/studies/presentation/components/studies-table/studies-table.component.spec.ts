@@ -15,7 +15,7 @@ import { MessageService } from 'primeng/api';
 describe('StudiesTableComponent', () => {
   let component: StudiesTableComponent;
   let fixture: ComponentFixture<StudiesTableComponent>;
-  let mockMessageService: jest.Mocked<MessageService>;
+  let mockMessageService: vi.Mocked<MessageService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -50,8 +50,8 @@ describe('StudiesTableComponent', () => {
 
   beforeEach(async () => {
     mockMessageService = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
 
     await TestBed.configureTestingModule({
       imports: [StudiesTableComponent],
@@ -63,7 +63,7 @@ describe('StudiesTableComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Creation', () => {
@@ -154,7 +154,7 @@ describe('StudiesTableComponent', () => {
 
   describe('Output Events', () => {
     it('should emit deleteStudy event', () => {
-      const deleteSpy = jest.fn();
+      const deleteSpy = vi.fn();
       component.deleteStudy.subscribe(deleteSpy);
 
       const testUuid = 'test-uuid-123';
@@ -164,7 +164,7 @@ describe('StudiesTableComponent', () => {
     });
 
     it('should emit duplicateStudy event', () => {
-      const duplicateSpy = jest.fn();
+      const duplicateSpy = vi.fn();
       component.duplicateStudy.subscribe(duplicateSpy);
 
       const testUuid = 'test-uuid-456';
@@ -351,7 +351,7 @@ describe('StudiesTableComponent', () => {
       fixture.componentRef.setInput('studies', mockStudies);
       fixture.detectChanges();
 
-      const spy = jest.fn();
+      const spy = vi.fn();
       component.duplicateStudy.subscribe(spy);
 
       component.duplicateStudy.emit('test-uuid-1');
@@ -362,7 +362,7 @@ describe('StudiesTableComponent', () => {
       fixture.componentRef.setInput('studies', mockStudies);
       fixture.detectChanges();
 
-      const spy = jest.fn();
+      const spy = vi.fn();
       component.deleteStudy.subscribe(spy);
 
       component.deleteStudy.emit('test-uuid-1');

@@ -39,7 +39,7 @@ describe('FieldDatasComponent', () => {
 
   describe('onFieldChange', () => {
     it('should emit fieldChange event with correct field and value', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('date', new Date('2024-01-01'));
@@ -51,7 +51,7 @@ describe('FieldDatasComponent', () => {
     });
 
     it('should handle time field changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('time', '14:30');
@@ -63,7 +63,7 @@ describe('FieldDatasComponent', () => {
     });
 
     it('should handle season field changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('season', 'winter');
@@ -75,7 +75,7 @@ describe('FieldDatasComponent', () => {
     });
 
     it('should handle ambientTemperature field changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('ambientTemperature', 25.5);
@@ -87,7 +87,7 @@ describe('FieldDatasComponent', () => {
     });
 
     it('should handle windSpeed field changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('windSpeed', 10.5);
@@ -99,7 +99,7 @@ describe('FieldDatasComponent', () => {
     });
 
     it('should handle windSpeedUnit field changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('windSpeedUnit', 'ms');
@@ -111,7 +111,7 @@ describe('FieldDatasComponent', () => {
     });
 
     it('should handle windDirection field changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('windDirection', 'South');
@@ -123,7 +123,7 @@ describe('FieldDatasComponent', () => {
     });
 
     it('should handle skyCover field changes', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('skyCover', '4 (partly cloudy)');
@@ -135,7 +135,7 @@ describe('FieldDatasComponent', () => {
     });
 
     it('should handle null values', () => {
-      const fieldChangeSpy = jest.fn();
+      const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
       component.onFieldChange('ambientTemperature', null);

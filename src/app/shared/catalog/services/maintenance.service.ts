@@ -73,7 +73,7 @@ export class MaintenanceService {
    */
   async importFromFile() {
     const maintenanceTeams = this.http
-      .get(`${window.location.origin}/data/maintenance-teams.csv`, {
+      .get(`${globalThis.location.origin}/data/maintenance-teams.csv`, {
         responseType: 'text'
       })
       .pipe(

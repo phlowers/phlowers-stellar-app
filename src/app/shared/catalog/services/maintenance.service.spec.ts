@@ -15,15 +15,19 @@ import { MaintenanceCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 
 // Mock Papa Parse
-jest.mock('papaparse', () => ({
-  parse: jest.fn()
+vi.mock('papaparse', () => ({
+  __esModule: true,
+  default: {
+    parse: vi.fn()
+  },
+  parse: vi.fn()
 }));
 
 interface MockTable {
-  count: jest.Mock;
-  toArray: jest.Mock;
-  bulkAdd: jest.Mock;
-  clear?: jest.Mock;
+  count: vi.Mock;
+  toArray: vi.Mock;
+  bulkAdd: vi.Mock;
+  clear?: vi.Mock;
 }
 
 interface MockDb {
@@ -40,17 +44,17 @@ describe('MaintenanceService', () => {
   beforeEach(() => {
     // Create mock database tables
     mockMaintenanceTable = {
-      count: jest.fn().mockResolvedValue(3),
-      toArray: jest.fn().mockResolvedValue([]),
-      bulkAdd: jest.fn().mockResolvedValue(undefined),
-      clear: jest.fn().mockResolvedValue(undefined)
+      count: vi.fn().mockResolvedValue(3),
+      toArray: vi.fn().mockResolvedValue([]),
+      bulkAdd: vi.fn().mockResolvedValue(undefined),
+      clear: vi.fn().mockResolvedValue(undefined)
     };
 
     mockDb = {
       catLines: {
-        count: jest.fn().mockResolvedValue(0),
-        toArray: jest.fn().mockResolvedValue([]),
-        bulkAdd: jest.fn().mockResolvedValue(undefined)
+        count: vi.fn().mockResolvedValue(0),
+        toArray: vi.fn().mockResolvedValue([]),
+        bulkAdd: vi.fn().mockResolvedValue(undefined)
       },
       catMaintenance: mockMaintenanceTable
     };
@@ -159,7 +163,7 @@ describe('MaintenanceService', () => {
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,EEL002,Team 2';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -185,7 +189,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -216,7 +220,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent = 'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -242,7 +246,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -275,7 +279,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent =
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,EEL002,Team 2';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -301,7 +305,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -337,7 +341,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent =
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -363,7 +367,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -402,7 +406,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent =
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,,Team 2\nCM003,Maintenance Center 3,GMR003,Regional Center 3,EEL003,Team 3';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -428,7 +432,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
@@ -470,7 +474,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent =
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1';
 
-      (Papa.parse as jest.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -496,7 +500,7 @@ describe('MaintenanceService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${window.location.origin}/data/maintenance-teams.csv`);
+      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 

@@ -137,3 +137,17 @@
 | ⚠️ Status | **⏳ ACCEPTED DEBT** — 2 violations remaining out of 71 original |
 | Resolution | Requires decoupling `ToolbarDialogService` from concrete components via `InjectionToken` or a registry pattern. |
 | Detected on | 2026-03-16 |
+
+---
+
+## 10. `jest.config.ts` — root file
+
+| | |
+|---|---|
+| 📍 Source | `jest.config.ts` (project root) |
+| Code | Full Jest configuration file (`JestConfigWithTsJest`) |
+| 🔍 Preuve | Project uses Vitest as test runner (`vitest.config.ts`, `npm run test` → `vitest run`). Jest config is unused. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Delete `jest.config.ts` and `fileTransformer.js` (Jest-specific transform) |
+| Status | ⏳ PENDING REVIEW |
+| Detected on | 2026-03-18 |

@@ -12,12 +12,12 @@ describe('ScaleViewComponent', () => {
   let mockPlotService: {
     resolution: ReturnType<typeof signal<number>>;
     defaultResolution: ReturnType<typeof signal<number>>;
-    setResolution: jest.Mock;
-    applyResolution: jest.Mock;
-    setAxesNorms: jest.Mock;
-    refreshProjection: jest.Mock;
+    setResolution: vi.Mock;
+    applyResolution: vi.Mock;
+    setAxesNorms: vi.Mock;
+    refreshProjection: vi.Mock;
   };
-  let mockPopover: { toggle: jest.Mock };
+  let mockPopover: { toggle: vi.Mock };
 
   beforeEach(async () => {
     resolutionSignal = signal(100);
@@ -25,13 +25,13 @@ describe('ScaleViewComponent', () => {
     mockPlotService = {
       resolution: resolutionSignal,
       defaultResolution: signal(250),
-      setResolution: jest.fn(),
-      applyResolution: jest.fn().mockResolvedValue(undefined),
-      setAxesNorms: jest.fn(),
-      refreshProjection: jest.fn().mockResolvedValue(undefined)
+      setResolution: vi.fn(),
+      applyResolution: vi.fn().mockResolvedValue(undefined),
+      setAxesNorms: vi.fn(),
+      refreshProjection: vi.fn().mockResolvedValue(undefined)
     };
 
-    mockPopover = { toggle: jest.fn() };
+    mockPopover = { toggle: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [ScaleViewComponent],
@@ -48,7 +48,7 @@ describe('ScaleViewComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Initialization', () => {
@@ -97,7 +97,7 @@ describe('ScaleViewComponent', () => {
     });
 
     it('should not update sliderControl when the resolution value has not changed', () => {
-      const spy = jest.spyOn(component.sliderControl, 'setValue');
+      const spy = vi.spyOn(component.sliderControl, 'setValue');
 
       resolutionSignal.set(100); // same value — signal does not change
       fixture.detectChanges();
@@ -106,7 +106,7 @@ describe('ScaleViewComponent', () => {
     });
 
     it('should not update pointsControl when the resolution value has not changed', () => {
-      const spy = jest.spyOn(component.pointsControl, 'setValue');
+      const spy = vi.spyOn(component.pointsControl, 'setValue');
 
       resolutionSignal.set(100); // same value — signal does not change
       fixture.detectChanges();
@@ -134,7 +134,7 @@ describe('ScaleViewComponent', () => {
       component.sliderControl.setValue(60);
       fixture.detectChanges();
 
-      const spy = jest.spyOn(component.pointsControl, 'setValue');
+      const spy = vi.spyOn(component.pointsControl, 'setValue');
       component.sliderControl.setValue(60); // same value — toSignal does not update signal
       fixture.detectChanges();
 
@@ -145,7 +145,7 @@ describe('ScaleViewComponent', () => {
       component.pointsControl.setValue(60);
       fixture.detectChanges();
 
-      const spy = jest.spyOn(component.sliderControl, 'setValue');
+      const spy = vi.spyOn(component.sliderControl, 'setValue');
       component.pointsControl.setValue(60); // same value — toSignal does not update signal
       fixture.detectChanges();
 
@@ -325,7 +325,7 @@ describe('ScaleViewComponent', () => {
       });
 
       it('clicking the inner button should call togglePopover', () => {
-        const spy = jest.spyOn(component, 'togglePopover');
+        const spy = vi.spyOn(component, 'togglePopover');
         const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"] button');
 
         btn.click();
@@ -406,7 +406,7 @@ describe('ScaleViewComponent', () => {
       });
 
       it('clicking the validate inner button should call onValidate', () => {
-        const spy = jest.spyOn(component, 'onValidate').mockResolvedValue(undefined);
+        const spy = vi.spyOn(component, 'onValidate').mockResolvedValue(undefined);
         const innerBtn = document.body.querySelector<HTMLButtonElement>('[data-testid="scale-validate-btn"] button');
 
         innerBtn?.click();

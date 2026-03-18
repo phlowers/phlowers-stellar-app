@@ -19,15 +19,15 @@ import { LoadType } from './helpers/createLoadAnnotations';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
-jest.mock('./helpers/createPlot');
-jest.mock('./helpers/createPlotData');
-jest.mock('./helpers/createShadowPlotData');
+vi.mock('./helpers/createPlot');
+vi.mock('./helpers/createPlotData');
+vi.mock('./helpers/createShadowPlotData');
 
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 
-const mockCreatePlot = createPlot as jest.MockedFunction<typeof createPlot>;
-const mockCreatePlotData = createPlotData as jest.MockedFunction<typeof createPlotData>;
-const mockCreateShadowPlotData = createShadowPlotData as jest.MockedFunction<typeof createShadowPlotData>;
+const mockCreatePlot = createPlot as vi.MockedFunction<typeof createPlot>;
+const mockCreatePlotData = createPlotData as vi.MockedFunction<typeof createPlotData>;
+const mockCreateShadowPlotData = createShadowPlotData as vi.MockedFunction<typeof createShadowPlotData>;
 
 const mockSupports: Support[] = [
   {
@@ -190,7 +190,7 @@ describe('SectionPlotComponent', () => {
     } as Data
   ];
 
-  const mockPlotElement = { on: jest.fn() };
+  const mockPlotElement = { on: vi.fn() };
 
   const litDataSignal = signal<GetSectionOutput | null>(null);
   const baseLitDataSignal = signal<GetSectionOutput | null>(null);
@@ -245,7 +245,7 @@ describe('SectionPlotComponent', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
     mockCreatePlot.mockResolvedValue(mockPlotElement as unknown as PlotlyHTMLElement);
 
@@ -274,7 +274,7 @@ describe('SectionPlotComponent', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Component Initialization', () => {
@@ -415,7 +415,7 @@ describe('SectionPlotComponent', () => {
       mockCreatePlot.mockRejectedValueOnce(new Error('Plot creation failed'));
       litDataSignal.set(mockLitData);
 
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.refreshPlot();
 
@@ -427,7 +427,7 @@ describe('SectionPlotComponent', () => {
       mockCreatePlot.mockRejectedValueOnce(error);
       litDataSignal.set(mockLitData);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.refreshPlot();
 
@@ -820,7 +820,7 @@ describe('SectionPlotComponent', () => {
       mockCreatePlot.mockRejectedValueOnce(error);
       litDataSignal.set(mockLitData);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.refreshPlot();
 
@@ -836,7 +836,7 @@ describe('SectionPlotComponent', () => {
       });
       litDataSignal.set(mockLitData);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       await component.refreshPlot();
 

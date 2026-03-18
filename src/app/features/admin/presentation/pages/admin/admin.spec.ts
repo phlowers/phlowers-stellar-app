@@ -20,16 +20,19 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { OnlineService } from '@services/online/online.service';
+import { WINDOW } from '@core/tokens/window.token';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
   let fixture: ComponentFixture<AdminComponent>;
-  let updateServiceMock: jest.Mocked<UpdateService>;
-  let messageServiceMock: jest.Mocked<MessageService>;
-  let studiesServiceMock: jest.Mocked<StudiesService>;
-  let storageServiceMock: jest.Mocked<StorageService>;
-  let confirmationServiceMock: jest.Mocked<ConfirmationService>;
-  let onlineServiceMock: jest.Mocked<OnlineService>;
+  let updateServiceMock: vi.Mocked<UpdateService>;
+  let messageServiceMock: vi.Mocked<MessageService>;
+  let studiesServiceMock: vi.Mocked<StudiesService>;
+  let storageServiceMock: vi.Mocked<StorageService>;
+  let confirmationServiceMock: vi.Mocked<ConfirmationService>;
+  let onlineServiceMock: vi.Mocked<OnlineService>;
+  let locationAssignMock: ReturnType<typeof vi.fn>;
+  let windowMock: Partial<Window>;
 
   const mockCurrentVersion = {
     git_hash: 'abc123',
@@ -48,35 +51,38 @@ describe('AdminComponent', () => {
       currentVersion: mockCurrentVersion,
       latestVersion: mockLatestVersion,
       needUpdate: false,
-      update: jest.fn(),
+      update: vi.fn(),
       sucessFullUpdate: new Subject<void>()
-    } as unknown as jest.Mocked<UpdateService>;
+    } as unknown as vi.Mocked<UpdateService>;
 
     messageServiceMock = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
 
     studiesServiceMock = {
-      deleteAllStudies: jest.fn()
-    } as unknown as jest.Mocked<StudiesService>;
+      deleteAllStudies: vi.fn()
+    } as unknown as vi.Mocked<StudiesService>;
 
     storageServiceMock = {
-      resetDatabase: jest.fn()
-    } as unknown as jest.Mocked<StorageService>;
+      resetDatabase: vi.fn()
+    } as unknown as vi.Mocked<StorageService>;
 
     confirmationServiceMock = {
-      confirm: jest.fn(),
-      close: jest.fn(),
+      confirm: vi.fn(),
+      close: vi.fn(),
       onAccept: new Subject<void>(),
       onReject: new Subject<void>(),
       requireConfirmation$: {
-        subscribe: jest.fn().mockReturnValue(new Subject<void>())
+        subscribe: vi.fn().mockReturnValue(new Subject<void>())
       }
-    } as unknown as jest.Mocked<ConfirmationService>;
+    } as unknown as vi.Mocked<ConfirmationService>;
 
     onlineServiceMock = {
       online$: new BehaviorSubject<boolean>(true)
-    } as unknown as jest.Mocked<OnlineService>;
+    } as unknown as vi.Mocked<OnlineService>;
+
+    locationAssignMock = vi.fn();
+    windowMock = { location: { assign: locationAssignMock } as Location };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -95,7 +101,8 @@ describe('AdminComponent', () => {
         { provide: StudiesService, useValue: studiesServiceMock },
         { provide: StorageService, useValue: storageServiceMock },
         { provide: ConfirmationService, useValue: confirmationServiceMock },
-        { provide: OnlineService, useValue: onlineServiceMock }
+        { provide: OnlineService, useValue: onlineServiceMock },
+        { provide: WINDOW, useValue: windowMock }
       ]
     })
       .overrideComponent(AdminComponent, {
@@ -110,7 +117,7 @@ describe('AdminComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Creation', () => {
@@ -210,18 +217,12 @@ describe('AdminComponent', () => {
 
   describe('resetApp', () => {
     beforeEach(() => {
-      // Mock the caches API
-      Object.defineProperty(window, 'caches', {
-        value: {
-          delete: jest.fn().mockResolvedValue(undefined)
-        },
-        writable: true
-      });
+      vi.useFakeTimers();
 
-      // Mock window.location
-      Object.defineProperty(window, 'location', {
+      // Mock the caches API
+      Object.defineProperty(globalThis, 'caches', {
         value: {
-          href: ''
+          delete: vi.fn().mockResolvedValue(undefined)
         },
         writable: true
       });
@@ -229,14 +230,18 @@ describe('AdminComponent', () => {
       // Mock navigator.serviceWorker
       Object.defineProperty(navigator, 'serviceWorker', {
         value: {
-          getRegistrations: jest.fn().mockResolvedValue([
+          getRegistrations: vi.fn().mockResolvedValue([
             {
-              unregister: jest.fn().mockResolvedValue(true)
+              unregister: vi.fn().mockResolvedValue(true)
             }
           ])
         },
         writable: true
       });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
     });
 
     it('should show confirmation dialog when called', () => {
@@ -258,17 +263,18 @@ describe('AdminComponent', () => {
       // Execute the accept callback
       await acceptCallback();
 
-      expect(window.caches.delete).toHaveBeenCalledWith('app-assets');
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('app-assets');
       expect(messageServiceMock.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
         detail: expect.any(String)
       });
 
-      // Wait for the setTimeout to execute
-      await new Promise((resolve) => setTimeout(resolve, 2100));
+      expect(vi.getTimerCount()).toBe(1);
 
-      expect(window.location.href).toBe('/');
+      // Advance the timer and verify the redirect fires
+      vi.advanceTimersByTime(2000);
+      expect(locationAssignMock).toHaveBeenCalledWith('/');
     });
 
     it('should not delete cache when confirmation is cancelled', () => {
@@ -276,9 +282,9 @@ describe('AdminComponent', () => {
 
       // Don't call the accept callback
 
-      expect(window.caches.delete).not.toHaveBeenCalled();
+      expect(globalThis.caches.delete).not.toHaveBeenCalled();
       expect(messageServiceMock.add).not.toHaveBeenCalled();
-      expect(window.location.href).toBe('');
+      expect(vi.getTimerCount()).toBe(0);
     });
   });
 });

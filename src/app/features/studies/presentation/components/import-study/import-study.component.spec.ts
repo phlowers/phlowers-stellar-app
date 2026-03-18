@@ -6,74 +6,81 @@ import Papa from 'papaparse';
 import { Study } from '@shared/domain';
 import { CablesService } from '@shared/catalog/services/cables.service';
 
+const waitFor = (ms = 0): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+const createMockFileList = (files: File[]): FileList => {
+  return Object.assign(files, {
+    length: files.length,
+    item: (index: number) => files[index] || null
+  }) as FileList;
+};
+
 describe('ImportStudyComponent', () => {
   let component: ImportStudyComponent;
   let fixture: ComponentFixture<ImportStudyComponent>;
-  let studiesServiceMock: jest.Mocked<StudiesService>;
-  let mockConfirmationService: jest.Mocked<ConfirmationService>;
-  let mockMessageService: jest.Mocked<MessageService>;
+  let studiesServiceMock: vi.Mocked<StudiesService>;
+  let mockConfirmationService: vi.Mocked<ConfirmationService>;
+  let mockMessageService: vi.Mocked<MessageService>;
 
   beforeEach(async () => {
     studiesServiceMock = {
-      createStudyFromProtoV4: jest.fn().mockResolvedValue({} as Study),
-      deleteStudy: jest.fn().mockResolvedValue(undefined),
-      createStudy: jest.fn().mockResolvedValue('test-uuid'),
-      getStudy: jest.fn().mockResolvedValue({ uuid: 'test-uuid' } as Study)
-    } as unknown as jest.Mocked<StudiesService>;
+      createStudyFromProtoV4: vi.fn().mockResolvedValue({} as Study),
+      deleteStudy: vi.fn().mockResolvedValue(undefined),
+      createStudy: vi.fn().mockResolvedValue('test-uuid'),
+      getStudy: vi.fn().mockResolvedValue({ uuid: 'test-uuid' } as Study)
+    } as unknown as vi.Mocked<StudiesService>;
     mockMessageService = {
-      add: jest.fn()
-    } as unknown as jest.Mocked<MessageService>;
+      add: vi.fn()
+    } as unknown as vi.Mocked<MessageService>;
     const mockCablesService = {
-      getCables: jest
+      getCables: vi
         .fn()
         .mockResolvedValue([{ name: 'conducteur' }, { name: 'ASTER600' }, { name: 'câble par faisceau' }])
-    } as unknown as jest.Mocked<CablesService>;
+    } as unknown as vi.Mocked<CablesService>;
     mockConfirmationService = {
-      confirm: jest.fn()
-    } as unknown as jest.Mocked<ConfirmationService>;
+      confirm: vi.fn()
+    } as unknown as vi.Mocked<ConfirmationService>;
 
     // Mock Papa.parse
-    const mockParse = jest
-      .fn()
-      .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
-        if (config?.complete) {
-          // Simulate successful parsing with async behavior
-          setTimeout(async () => {
-            const mockResult: Papa.ParseResult<Record<string, string>> = {
-              data: [
-                {
-                  num: '1',
-                  nom: '98',
-                  suspension: 'FAUX',
-                  alt_acc: '1075,53',
-                  long_bras: '0',
-                  angle_ligne: '-19,1',
-                  long_ch: '0',
-                  pds_ch: '0',
-                  surf_ch: '0',
-                  ctr_poids: '0',
-                  ch_en_V: 'FAUX',
-                  portée: '473,07'
-                }
-              ],
-              errors: [],
-              meta: {
-                delimiter: ';',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0
+    const mockParse = vi.fn().mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
+      if (config?.complete) {
+        // Simulate successful parsing with async behavior
+        setTimeout(async () => {
+          const mockResult: Papa.ParseResult<Record<string, string>> = {
+            data: [
+              {
+                num: '1',
+                nom: '98',
+                suspension: 'FAUX',
+                alt_acc: '1075,53',
+                long_bras: '0',
+                angle_ligne: '-19,1',
+                long_ch: '0',
+                pds_ch: '0',
+                surf_ch: '0',
+                ctr_poids: '0',
+                ch_en_V: 'FAUX',
+                portée: '473,07'
               }
-            };
-            // Call complete callback and await it since it's async
-            const result = config.complete!(mockResult, undefined) as unknown;
-            if (result && typeof result === 'object' && 'then' in result) {
-              await (result as Promise<void>);
+            ],
+            errors: [],
+            meta: {
+              delimiter: ';',
+              linebreak: '\n',
+              aborted: false,
+              truncated: false,
+              cursor: 0
             }
-          }, 0);
-        }
-        return {} as Papa.ParseResult<Record<string, string>>;
-      });
+          };
+          // Call complete callback and await it since it's async
+          const result = config.complete!(mockResult, undefined) as unknown;
+          if (result && typeof result === 'object' && 'then' in result) {
+            await (result as Promise<void>);
+          }
+        }, 0);
+      }
+      return {} as Papa.ParseResult<Record<string, string>>;
+    });
 
     (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
@@ -94,30 +101,23 @@ describe('ImportStudyComponent', () => {
   describe('loadProtoV4File', () => {
     let mockFile: File;
     let mockFileReader: {
-      readAsDataURL: jest.Mock;
+      readAsDataURL: vi.Mock;
       onload: ((e: ProgressEvent<FileReader>) => void) | null;
     };
 
     beforeEach(() => {
       // Mock FileReader
       mockFileReader = {
-        readAsDataURL: jest.fn(),
+        readAsDataURL: vi.fn(),
         onload: null
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
+      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.csv', { type: 'text/csv' });
     });
-
-    const createMockFileList = (files: File[]): FileList => {
-      return Object.assign(files, {
-        length: files.length,
-        item: (index: number) => files[index] || null
-      }) as FileList;
-    };
 
     it('should handle no file selected gracefully', () => {
       const mockEvent = {
@@ -145,7 +145,7 @@ describe('ImportStudyComponent', () => {
       expect(mockFileReader.readAsDataURL).not.toHaveBeenCalled();
     });
 
-    it('should handle FileReader errors gracefully', (done) => {
+    it('should handle FileReader errors gracefully', async () => {
       const mockEvent = {
         target: {
           files: createMockFileList([mockFile])
@@ -164,14 +164,11 @@ describe('ImportStudyComponent', () => {
         mockFileReaderWithError.onerror({} as ProgressEvent<FileReader>);
       }
 
-      // Wait for async operations to complete
-      setTimeout(() => {
-        expect(component.loading()).toBe(false);
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(component.loading()).toBe(false);
     });
 
-    it('should process valid ProtoV4 file successfully', (done) => {
+    it('should process valid ProtoV4 file successfully', async () => {
       // Create a minimal CSV that matches the expected structure
       const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -217,30 +214,18 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      // Simulate FileReader onload
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        // Wait for Papa.parse to complete and async operations to finish
-        // The complete callback is async, so we need to wait for it
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudyFromProtoV4).toHaveBeenCalled();
-          // Wait a bit more for the complete callback to finish and update newStudies
-          setTimeout(() => {
-            // Check that the study was added (side effect of complete callback)
-            expect(component.newStudies().length).toBeGreaterThan(0);
-            // Note: loading might still be true because the Promise never resolves
-            // but in practice, the operations complete
-            done();
-          }, 150);
-        }, 100);
-      }, 10);
+      await waitFor(250);
+      expect(studiesServiceMock.createStudyFromProtoV4).toHaveBeenCalled();
+      expect(component.newStudies().length).toBeGreaterThan(0);
     }, 10000);
 
-    it('should show error message and return early when cable does not exist in database', (done) => {
-      jest.spyOn(component, 'findCableInDatabase').mockResolvedValue(null);
+    it('should show error message and return early when cable does not exist in database', async () => {
+      vi.spyOn(component, 'findCableInDatabase').mockResolvedValue(null);
 
       // Create CSV with a conductor that doesn't exist in the database
       // The conductor is extracted from rawParameters[3], which corresponds to the 5th data line
@@ -287,28 +272,25 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(mockMessageService.add).toHaveBeenCalledWith({
-            severity: 'error',
-            summary: expect.any(String),
-            detail: 'Cable not found in database',
-            life: 3000
-          });
-          expect(studiesServiceMock.createStudyFromProtoV4).not.toHaveBeenCalled();
-          expect(component.erroredFiles()).toContain(mockFile.name);
-          expect(component.loading()).toBe(false);
-          done();
-        }, 100);
-      }, 10);
+      await waitFor(100);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Cable not found in database',
+        life: 3000
+      });
+      expect(studiesServiceMock.createStudyFromProtoV4).not.toHaveBeenCalled();
+      expect(component.erroredFiles()).toContain(mockFile.name);
+      expect(component.loading()).toBe(false);
     });
 
-    it('should handle errors during file import and add to erroredFiles', (done) => {
-      jest.spyOn(component, 'findCableInDatabase').mockRejectedValue(new Error('Database connection error'));
+    it('should handle errors during file import and add to erroredFiles', async () => {
+      vi.spyOn(component, 'findCableInDatabase').mockRejectedValue(new Error('Database connection error'));
 
       const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -350,36 +332,33 @@ describe('ImportStudyComponent', () => {
       } as unknown as ProgressEvent<FileReader>;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing study', expect.any(Error));
-          expect(mockMessageService.add).toHaveBeenCalledWith({
-            severity: 'error',
-            summary: expect.any(String),
-            detail: expect.any(String),
-            life: 3000
-          });
-          expect(component.erroredFiles()).toContain(mockFile.name);
-          expect(studiesServiceMock.createStudyFromProtoV4).not.toHaveBeenCalled();
-          consoleErrorSpy.mockRestore();
-          done();
-        }, 100);
-      }, 10);
+      await waitFor(100);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing study', expect.any(Error));
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
+      expect(component.erroredFiles()).toContain(mockFile.name);
+      expect(studiesServiceMock.createStudyFromProtoV4).not.toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
 
-    it('should handle errors during Papa.parse and add to erroredFiles', (done) => {
-      jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+    it('should handle errors during Papa.parse and add to erroredFiles', async () => {
+      vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
       // Mock Papa.parse to throw an error
-      const mockParse = jest.fn().mockImplementation(() => {
+      const mockParse = vi.fn().mockImplementation(() => {
         throw new Error('Papa.parse failed');
       });
 
@@ -425,32 +404,29 @@ describe('ImportStudyComponent', () => {
       } as unknown as ProgressEvent<FileReader>;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing study', expect.any(Error));
-          expect(mockMessageService.add).toHaveBeenCalledWith({
-            severity: 'error',
-            summary: expect.any(String),
-            detail: expect.any(String),
-            life: 3000
-          });
-          expect(component.erroredFiles()).toContain(mockFile.name);
-          consoleErrorSpy.mockRestore();
-          done();
-        }, 100);
-      }, 10);
+      await waitFor(100);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing study', expect.any(Error));
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
+      expect(component.erroredFiles()).toContain(mockFile.name);
+      consoleErrorSpy.mockRestore();
     });
 
     describe('file reading and decoding (lines 211-228)', () => {
-      it('should throw fileReadError when result is null', (done) => {
+      it('should throw fileReadError when result is null', async () => {
         const mockEvent = {
           target: {
             files: createMockFileList([mockFile])
@@ -464,31 +440,28 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
 
-          setTimeout(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
-            expect(mockMessageService.add).toHaveBeenCalledWith({
-              severity: 'error',
-              summary: expect.any(String),
-              detail: 'Error reading file',
-              life: 3000
-            });
-            expect(component.erroredFiles()).toContain(mockFile.name);
-            consoleErrorSpy.mockRestore();
-            done();
-          }, 100);
-        }, 10);
+        await waitFor(100);
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
+        expect(mockMessageService.add).toHaveBeenCalledWith({
+          severity: 'error',
+          summary: expect.any(String),
+          detail: 'Error reading file',
+          life: 3000
+        });
+        expect(component.erroredFiles()).toContain(mockFile.name);
+        consoleErrorSpy.mockRestore();
       });
 
-      it('should throw fileReadError when result is undefined', (done) => {
+      it('should throw fileReadError when result is undefined', async () => {
         const mockEvent = {
           target: {
             files: createMockFileList([mockFile])
@@ -502,31 +475,28 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
 
-          setTimeout(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
-            expect(mockMessageService.add).toHaveBeenCalledWith({
-              severity: 'error',
-              summary: expect.any(String),
-              detail: 'Error reading file',
-              life: 3000
-            });
-            expect(component.erroredFiles()).toContain(mockFile.name);
-            consoleErrorSpy.mockRestore();
-            done();
-          }, 100);
-        }, 10);
+        await waitFor(100);
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
+        expect(mockMessageService.add).toHaveBeenCalledWith({
+          severity: 'error',
+          summary: expect.any(String),
+          detail: 'Error reading file',
+          life: 3000
+        });
+        expect(component.erroredFiles()).toContain(mockFile.name);
+        consoleErrorSpy.mockRestore();
       });
 
-      it('should throw fileReadError when result is empty string', (done) => {
+      it('should throw fileReadError when result is empty string', async () => {
         const mockEvent = {
           target: {
             files: createMockFileList([mockFile])
@@ -540,32 +510,29 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
 
-          setTimeout(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
-            expect(mockMessageService.add).toHaveBeenCalledWith({
-              severity: 'error',
-              summary: expect.any(String),
-              detail: 'Error reading file',
-              life: 3000
-            });
-            expect(component.erroredFiles()).toContain(mockFile.name);
-            consoleErrorSpy.mockRestore();
-            done();
-          }, 100);
-        }, 10);
+        await waitFor(100);
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
+        expect(mockMessageService.add).toHaveBeenCalledWith({
+          severity: 'error',
+          summary: expect.any(String),
+          detail: 'Error reading file',
+          life: 3000
+        });
+        expect(component.erroredFiles()).toContain(mockFile.name);
+        consoleErrorSpy.mockRestore();
       });
 
-      it('should successfully decode using parseISO88591Base64', (done) => {
-        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+      it('should successfully decode using parseISO88591Base64', async () => {
+        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -607,46 +574,37 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
 
-          // Wait for Papa.parse to complete
-          setTimeout(() => {
-            // Verify no decode error was logged
-            const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
-            expect(decodeErrorCalls.length).toBe(0);
-            // Verify the file was not added to erroredFiles due to decode errors
-            // (it might be there for other reasons, but not decode errors)
-            const fileDecodeErrors = component.erroredFiles().filter((name) => name === mockFile.name);
-            // If file is in erroredFiles, it should not be due to decode error
-            if (fileDecodeErrors.length > 0) {
-              // Check that the error message is not about decoding
-              const mockMessageService = TestBed.inject(MessageService);
-              const errorCalls = (mockMessageService.add as jest.Mock).mock.calls;
-              const decodeErrorMessages = errorCalls.filter(
-                (call: unknown[]) =>
-                  Array.isArray(call) &&
-                  call[0] &&
-                  typeof call[0] === 'object' &&
-                  'detail' in call[0] &&
-                  call[0].detail === 'Error decoding file'
-              );
-              expect(decodeErrorMessages.length).toBe(0);
-            }
-            consoleErrorSpy.mockRestore();
-            done();
-          }, 200);
-        }, 10);
+        await waitFor(200);
+        const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
+        expect(decodeErrorCalls.length).toBe(0);
+        const fileDecodeErrors = component.erroredFiles().filter((name) => name === mockFile.name);
+        if (fileDecodeErrors.length > 0) {
+          const mockMessageService = TestBed.inject(MessageService);
+          const errorCalls = (mockMessageService.add as vi.Mock).mock.calls;
+          const decodeErrorMessages = errorCalls.filter(
+            (call: unknown[]) =>
+              Array.isArray(call) &&
+              call[0] &&
+              typeof call[0] === 'object' &&
+              'detail' in call[0] &&
+              call[0].detail === 'Error decoding file'
+          );
+          expect(decodeErrorMessages.length).toBe(0);
+        }
+        consoleErrorSpy.mockRestore();
       }, 10000);
 
-      it('should fallback to atob when parseISO88591Base64 fails', (done) => {
-        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+      it('should fallback to atob when parseISO88591Base64 fails', async () => {
+        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         // Create a base64 string that will cause parseISO88591Base64 to fail
         // but atob will succeed
@@ -678,7 +636,7 @@ describe('ImportStudyComponent', () => {
 
         // Mock atob to ensure it's called as fallback
         const originalAtob = global.atob;
-        const atobSpy = jest.fn().mockImplementation((str: string) => {
+        const atobSpy = vi.fn().mockImplementation((str: string) => {
           return originalAtob(str);
         });
         global.atob = atobSpy;
@@ -695,30 +653,24 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
 
-          // Wait for Papa.parse to complete
-          setTimeout(() => {
-            // Verify atob was called (as fallback or primary)
-            expect(atobSpy).toHaveBeenCalled();
-            // Verify no decode error was logged
-            const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
-            expect(decodeErrorCalls.length).toBe(0);
-            global.atob = originalAtob;
-            consoleErrorSpy.mockRestore();
-            done();
-          }, 200);
-        }, 10);
+        await waitFor(200);
+        expect(atobSpy).toHaveBeenCalled();
+        const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
+        expect(decodeErrorCalls.length).toBe(0);
+        global.atob = originalAtob;
+        consoleErrorSpy.mockRestore();
       }, 10000);
 
-      it('should throw fileDecodeError when both parseISO88591Base64 and atob fail', (done) => {
+      it('should throw fileDecodeError when both parseISO88591Base64 and atob fail', async () => {
         // Create invalid base64 that will fail both decoding methods
         const invalidBase64 = '!!!invalid base64!!!';
         const dataUrl = `data:text/csv;base64,${invalidBase64}`;
@@ -736,31 +688,28 @@ describe('ImportStudyComponent', () => {
         } as unknown as ProgressEvent<FileReader>;
 
         const mockMessageService = TestBed.inject(MessageService);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent);
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
 
-          setTimeout(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error decoding base64', expect.any(Error));
-            expect(mockMessageService.add).toHaveBeenCalledWith({
-              severity: 'error',
-              summary: expect.any(String),
-              detail: 'Error decoding file',
-              life: 3000
-            });
-            expect(component.erroredFiles()).toContain(mockFile.name);
-            consoleErrorSpy.mockRestore();
-            done();
-          }, 100);
-        }, 10);
+        await waitFor(100);
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error decoding base64', expect.any(Error));
+        expect(mockMessageService.add).toHaveBeenCalledWith({
+          severity: 'error',
+          summary: expect.any(String),
+          detail: 'Error decoding file',
+          life: 3000
+        });
+        expect(component.erroredFiles()).toContain(mockFile.name);
+        consoleErrorSpy.mockRestore();
       });
 
-      it('should handle result without data URL prefix', (done) => {
+      it('should handle result without data URL prefix', async () => {
         // Test when result doesn't have 'data:text/csv;base64,' prefix
         const mockCsvContent = `num;nom;suspension
 1;98;FAUX`;
@@ -783,22 +732,18 @@ describe('ImportStudyComponent', () => {
 
         component.loadFiles(mockEvent);
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
 
-          setTimeout(() => {
-            // Should handle gracefully - might fail but shouldn't crash
-            done();
-          }, 100);
-        }, 10);
+        await waitFor(100);
       });
     });
 
     describe('Papa.parse error handling (lines 267-273)', () => {
-      it('should execute reject path when parseError message is in errors', (done) => {
-        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+      it('should execute reject path when parseError message is in errors', async () => {
+        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -828,9 +773,9 @@ describe('ImportStudyComponent', () => {
         const dataUrl = `data:text/csv;base64,${base64Content}`;
 
         // Mock createStudyFromProtoV4 to throw a known error (cableNotFound is in errors)
-        studiesServiceMock.createStudyFromProtoV4 = jest.fn().mockRejectedValue(new Error('cableNotFound'));
+        studiesServiceMock.createStudyFromProtoV4 = vi.fn().mockRejectedValue(new Error('cableNotFound'));
 
-        const mockParse = jest
+        const mockParse = vi
           .fn()
           .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
             if (config?.complete) {
@@ -888,32 +833,23 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        jest.spyOn(console, 'error').mockImplementation();
-
-        let doneCalled = false;
-        const safeDone = () => {
-          if (!doneCalled) {
-            doneCalled = true;
-            done();
-          }
-        };
+        vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent).catch(() => {
           // Errors are expected and handled
-          safeDone();
         });
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
-          // Coverage: code path executed (lines 267-273) - reject called for known error
-          setTimeout(() => safeDone(), 500);
-        }, 10);
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        // Coverage: code path executed (lines 267-273) - reject called for known error
+        await waitFor(500);
       }, 10000);
 
-      it('should throw fileParseError when parseError is not a known error', (done) => {
-        jest.spyOn(component, 'findCableInDatabase').mockResolvedValue('ASTER600');
+      it('should throw fileParseError when parseError is not a known error', async () => {
+        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('ASTER600');
 
         const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
@@ -943,9 +879,9 @@ describe('ImportStudyComponent', () => {
         const dataUrl = `data:text/csv;base64,${base64Content}`;
 
         // Mock createStudyFromProtoV4 to throw an unknown error (not in errors)
-        studiesServiceMock.createStudyFromProtoV4 = jest.fn().mockRejectedValue(new Error('unknownError'));
+        studiesServiceMock.createStudyFromProtoV4 = vi.fn().mockRejectedValue(new Error('unknownError'));
 
-        const mockParse = jest
+        const mockParse = vi
           .fn()
           .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
             if (config?.complete) {
@@ -1003,34 +939,25 @@ describe('ImportStudyComponent', () => {
           }
         } as unknown as ProgressEvent<FileReader>;
 
-        jest.spyOn(console, 'error').mockImplementation();
-
-        let doneCalled = false;
-        const safeDone = () => {
-          if (!doneCalled) {
-            doneCalled = true;
-            done();
-          }
-        };
+        vi.spyOn(console, 'error').mockReturnValue(undefined);
 
         component.loadFiles(mockEvent).catch(() => {
           // Errors are expected and handled
-          safeDone();
         });
 
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload(mockProgressEvent);
-          }
-          // Coverage: code path executed (lines 267-273) - fileParseError thrown for unknown error
-          setTimeout(() => safeDone(), 500);
-        }, 10);
+        await waitFor(10);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
+        }
+
+        // Coverage: code path executed (lines 267-273) - fileParseError thrown for unknown error
+        await waitFor(500);
       }, 10000);
     });
   });
 
   describe('loadFiles error handling (lines 340-349)', () => {
-    it('should handle known error types and show specific error message', (done) => {
+    it('should handle known error types and show specific error message', async () => {
       // Create an event that will throw when accessing target.files
       const mockEvent = {
         get target() {
@@ -1039,26 +966,24 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
       // Wait for async operations
-      setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', expect.any(Error));
-        expect(component.loading()).toBe(false);
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Error reading file',
-          life: 3000
-        });
-        consoleErrorSpy.mockRestore();
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', expect.any(Error));
+      expect(component.loading()).toBe(false);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Error reading file',
+        life: 3000
+      });
+      consoleErrorSpy.mockRestore();
     });
 
-    it('should handle unknown error types and show generic error message', (done) => {
+    it('should handle unknown error types and show generic error message', async () => {
       // Create an event that will throw an unknown error when accessing target
       const mockEvent = {
         get target() {
@@ -1067,26 +992,24 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
       // Wait for async operations
-      setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', expect.any(Error));
-        expect(component.loading()).toBe(false);
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Error importing study',
-          life: 3000
-        });
-        consoleErrorSpy.mockRestore();
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', expect.any(Error));
+      expect(component.loading()).toBe(false);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Error importing study',
+        life: 3000
+      });
+      consoleErrorSpy.mockRestore();
     });
 
-    it('should handle non-Error exceptions and show generic error message', (done) => {
+    it('should handle non-Error exceptions and show generic error message', async () => {
       // Create an event that will throw a non-Error exception
       const mockEvent = {
         get target() {
@@ -1095,26 +1018,24 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
       // Wait for async operations
-      setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', 'string error');
-        expect(component.loading()).toBe(false);
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Error importing study',
-          life: 3000
-        });
-        consoleErrorSpy.mockRestore();
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', 'string error');
+      expect(component.loading()).toBe(false);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Error importing study',
+        life: 3000
+      });
+      consoleErrorSpy.mockRestore();
     });
 
-    it('should set loading to false when error occurs', (done) => {
+    it('should set loading to false when error occurs', async () => {
       // Create an event that will throw an error
       const mockEvent = {
         get target() {
@@ -1122,18 +1043,16 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as Event;
 
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
       // Wait for async operations
-      setTimeout(() => {
-        expect(component.loading()).toBe(false);
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(component.loading()).toBe(false);
     });
 
-    it('should handle fileReadError in catch block', (done) => {
+    it('should handle fileReadError in catch block', async () => {
       const mockEvent = {
         get target() {
           throw new Error('fileReadError');
@@ -1141,22 +1060,20 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Error reading file',
-          life: 3000
-        });
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Error reading file',
+        life: 3000
+      });
     });
 
-    it('should handle fileDecodeError in catch block', (done) => {
+    it('should handle fileDecodeError in catch block', async () => {
       const mockEvent = {
         get target() {
           throw new Error('fileDecodeError');
@@ -1164,22 +1081,20 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Error decoding file',
-          life: 3000
-        });
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Error decoding file',
+        life: 3000
+      });
     });
 
-    it('should handle fileParseError in catch block', (done) => {
+    it('should handle fileParseError in catch block', async () => {
       const mockEvent = {
         get target() {
           throw new Error('fileParseError');
@@ -1187,22 +1102,20 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Error parsing file',
-          life: 3000
-        });
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Error parsing file',
+        life: 3000
+      });
     });
 
-    it('should handle cableNotFound error in catch block', (done) => {
+    it('should handle cableNotFound error in catch block', async () => {
       const mockEvent = {
         get target() {
           throw new Error('cableNotFound');
@@ -1210,22 +1123,20 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Cable not found in database',
-          life: 3000
-        });
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Cable not found in database',
+        life: 3000
+      });
     });
 
-    it('should handle studyImportError in catch block', (done) => {
+    it('should handle studyImportError in catch block', async () => {
       const mockEvent = {
         get target() {
           throw new Error('studyImportError');
@@ -1233,22 +1144,20 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      jest.spyOn(console, 'error').mockImplementation();
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Error importing study',
-          life: 3000
-        });
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Error importing study',
+        life: 3000
+      });
     });
 
-    it('should handle null error gracefully', (done) => {
+    it('should handle null error gracefully', async () => {
       // Create an event that throws null (though this is unusual)
       const mockEvent = {
         get target() {
@@ -1257,22 +1166,20 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', null);
-        expect(component.loading()).toBe(false);
-        expect(mockMessageService.add).toHaveBeenCalledWith({
-          severity: 'error',
-          summary: expect.any(String),
-          detail: 'Error importing study',
-          life: 3000
-        });
-        consoleErrorSpy.mockRestore();
-        done();
-      }, 100);
+      await waitFor(100);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', null);
+      expect(component.loading()).toBe(false);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: 'Error importing study',
+        life: 3000
+      });
+      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -1330,26 +1237,19 @@ describe('ImportStudyComponent', () => {
   describe('loadAppFile', () => {
     let mockFile: File;
     let mockFileReader: {
-      readAsText: jest.Mock;
+      readAsText: vi.Mock;
       onload: ((e: ProgressEvent<FileReader>) => void) | null;
-    };
-
-    const createMockFileList = (files: File[]): FileList => {
-      return Object.assign(files, {
-        length: files.length,
-        item: (index: number) => files[index] || null
-      }) as FileList;
     };
 
     beforeEach(() => {
       // Mock FileReader
       mockFileReader = {
-        readAsText: jest.fn(),
+        readAsText: vi.fn(),
         onload: null
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
+      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.clst', {
@@ -1357,7 +1257,7 @@ describe('ImportStudyComponent', () => {
       });
     });
 
-    it('should successfully load and import a valid app file', (done) => {
+    it('should successfully load and import a valid app file', async () => {
       const mockStudyData = {
         title: 'Test Study',
         description: 'Test Description',
@@ -1389,30 +1289,25 @@ describe('ImportStudyComponent', () => {
         description: 'Test Description'
       } as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
       expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
 
-      // Simulate FileReader onload
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        // Wait for async operations
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
-          expect(component.newStudies()).toContainEqual(mockCreatedStudy);
-          done();
-        }, 10);
-      }, 10);
+      await waitFor(10);
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
+      expect(component.newStudies()).toContainEqual(mockCreatedStudy);
     });
 
-    it('should handle file with no sections', (done) => {
+    it('should handle file with no sections', async () => {
       const mockStudyData = {
         title: 'Test Study',
         description: 'Test Description'
@@ -1430,25 +1325,22 @@ describe('ImportStudyComponent', () => {
         title: 'Test Study'
       } as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          expect(component.newStudies()).toContainEqual(mockCreatedStudy);
-          done();
-        }, 10);
-      }, 10);
+      await waitFor(10);
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      expect(component.newStudies()).toContainEqual(mockCreatedStudy);
     });
 
-    it('should handle invalid JSON in file', (done) => {
+    it('should handle invalid JSON in file', async () => {
       const invalidBase64 = btoa('invalid json content');
       const mockProgressEvent = {
         target: {
@@ -1466,27 +1358,24 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(mockMessageService.add).toHaveBeenCalledWith({
-            severity: 'error',
-            summary: expect.any(String),
-            detail: expect.any(String),
-            life: 3000
-          });
-          expect(component.erroredFiles()).toContain(mockFile.name);
-          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
-          expect(component.loading()).toBe(false);
-          done();
-        }, 100);
-      }, 10);
+      await waitFor(100);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
+      expect(component.erroredFiles()).toContain(mockFile.name);
+      expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+      expect(component.loading()).toBe(false);
     });
 
-    it('should handle case when getStudy returns null', (done) => {
+    it('should handle case when getStudy returns null', async () => {
       const mockStudyData = {
         title: 'Test Study',
         description: 'Test Description'
@@ -1499,26 +1388,23 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
 
       component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
-          expect(component.newStudies()).not.toContainEqual(expect.objectContaining({ uuid: 'test-uuid' }));
-          done();
-        }, 10);
-      }, 10);
+      await waitFor(10);
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
+      expect(component.newStudies()).not.toContainEqual(expect.objectContaining({ uuid: 'test-uuid' }));
     });
 
-    it('should properly merge study data with empty study structure', (done) => {
+    it('should properly merge study data with empty study structure', async () => {
       const mockStudyData = {
         title: 'Custom Title',
         description: 'Custom Description',
@@ -1552,39 +1438,36 @@ describe('ImportStudyComponent', () => {
         description: 'Custom Description'
       } as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue('test-uuid');
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockCreatedStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
       component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as unknown as {
-            title: string;
-            description: string;
-            sections: {
-              name: string;
-              supports: { number: number | string | null }[];
-            }[];
-          };
-          expect(createStudyCall.title).toBe('Custom Title');
-          expect(createStudyCall.description).toBe('Custom Description');
-          expect(createStudyCall.sections).toBeDefined();
-          expect(createStudyCall.sections.length).toBe(1);
-          expect(createStudyCall.sections[0].name).toBe('Custom Section');
-          expect(createStudyCall.sections[0].supports.length).toBe(1);
-          expect(createStudyCall.sections[0].supports[0].number).toBe(5);
-          done();
-        }, 10);
-      }, 10);
+      await waitFor(10);
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as unknown as {
+        title: string;
+        description: string;
+        sections: {
+          name: string;
+          supports: { number: number | string | null }[];
+        }[];
+      };
+      expect(createStudyCall.title).toBe('Custom Title');
+      expect(createStudyCall.description).toBe('Custom Description');
+      expect(createStudyCall.sections).toBeDefined();
+      expect(createStudyCall.sections.length).toBe(1);
+      expect(createStudyCall.sections[0].name).toBe('Custom Section');
+      expect(createStudyCall.sections[0].supports.length).toBe(1);
+      expect(createStudyCall.sections[0].supports[0].number).toBe(5);
     });
 
-    it('should handle error during createStudy', (done) => {
+    it('should handle error during createStudy', async () => {
       const mockStudyData = {
         title: 'Test Study',
         description: 'Test Description'
@@ -1604,34 +1487,31 @@ describe('ImportStudyComponent', () => {
       } as unknown as Event;
 
       const mockMessageService = TestBed.inject(MessageService);
-      studiesServiceMock.createStudy = jest.fn().mockRejectedValue(new Error('Database error'));
+      studiesServiceMock.createStudy = vi.fn().mockRejectedValue(new Error('Database error'));
 
       component.loadFiles(mockEvent);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(mockMessageService.add).toHaveBeenCalledWith({
-            severity: 'error',
-            summary: expect.any(String),
-            detail: expect.any(String),
-            life: 3000
-          });
-          expect(component.erroredFiles()).toContain(mockFile.name);
-          expect(component.loading()).toBe(false);
-          done();
-        }, 100);
-      }, 10);
+      await waitFor(100);
+      expect(mockMessageService.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: expect.any(String),
+        detail: expect.any(String),
+        life: 3000
+      });
+      expect(component.erroredFiles()).toContain(mockFile.name);
+      expect(component.loading()).toBe(false);
     });
   });
 
   describe('loadAppFile', () => {
     let mockFile: File;
     let mockFileReader: {
-      readAsText: jest.Mock;
+      readAsText: vi.Mock;
       onload: ((e: ProgressEvent<FileReader>) => void) | null;
       onerror: ((e: ProgressEvent<FileReader>) => void) | null;
     };
@@ -1639,13 +1519,13 @@ describe('ImportStudyComponent', () => {
     beforeEach(() => {
       // Mock FileReader
       mockFileReader = {
-        readAsText: jest.fn(),
+        readAsText: vi.fn(),
         onload: null,
         onerror: null
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: jest.Mock }).FileReader = jest.fn(() => mockFileReader);
+      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.clst', {
@@ -1684,7 +1564,7 @@ describe('ImportStudyComponent', () => {
       return btoa(jsonString);
     };
 
-    it('should successfully import a study without existing UUID', (done) => {
+    it('should successfully import a study without existing UUID', async () => {
       const studyData = createMockStudyData();
       const base64Content = encodeStudyToBase64(studyData);
       const newUuid = 'new-study-uuid';
@@ -1696,8 +1576,8 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
       const mockProgressEvent = {
         target: {
@@ -1705,37 +1585,30 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component
-        .loadAppFile(mockFile)
-        .then(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
-          expect(component.newStudies().length).toBe(1);
-          expect(component.newStudies()[0].uuid).toBe(newUuid);
-          expect(mockMessageService.add).toHaveBeenCalledWith(
-            expect.objectContaining({
-              severity: 'success',
-              summary: expect.any(String),
-              detail: expect.any(String)
-            })
-          );
-          done();
-        })
-        .catch((error) => {
-          done(error);
-        });
+      const importPromise = component.loadAppFile(mockFile);
 
       expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
 
-      // Simulate FileReader onload
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
-      }, 10);
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
+
+      await importPromise;
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
+      expect(component.newStudies().length).toBe(1);
+      expect(component.newStudies()[0].uuid).toBe(newUuid);
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'success',
+          summary: expect.any(String),
+          detail: expect.any(String)
+        })
+      );
     });
 
-    it('should successfully import a study with existing UUID when user accepts', (done) => {
+    it('should successfully import a study with existing UUID when user accepts', async () => {
       const existingUuid = 'existing-uuid';
       const studyData = createMockStudyData(existingUuid);
       const base64Content = encodeStudyToBase64(studyData);
@@ -1756,15 +1629,15 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as unknown as Study;
 
-      studiesServiceMock.getStudy = jest
+      studiesServiceMock.getStudy = vi
         .fn()
         .mockResolvedValueOnce(existingStudy) // For promptIfStudyAlreadyExists
         .mockResolvedValueOnce(createdStudy); // For final getStudy
-      studiesServiceMock.deleteStudy = jest.fn().mockResolvedValue(undefined);
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.deleteStudy = vi.fn().mockResolvedValue(undefined);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
 
       // Mock confirmation service to accept
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation(async (options: { accept?: () => void | Promise<void>; reject?: () => void }) => {
           if (options.accept) {
@@ -1778,24 +1651,21 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      const importPromise = component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(existingUuid);
-          expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(existingUuid);
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          expect(component.newStudies().length).toBe(1);
-          done();
-        }, 10);
-      }, 10);
+      await importPromise;
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(existingUuid);
+      expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(existingUuid);
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      expect(component.newStudies().length).toBe(1);
     });
 
-    it('should not import a study with existing UUID when user rejects', (done) => {
+    it('should not import a study with existing UUID when user rejects', async () => {
       const existingUuid = 'existing-uuid';
       const studyData = createMockStudyData(existingUuid);
       const base64Content = encodeStudyToBase64(studyData);
@@ -1808,11 +1678,11 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as unknown as Study;
 
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(existingStudy);
-      studiesServiceMock.createStudy = jest.fn();
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(existingStudy);
+      studiesServiceMock.createStudy = vi.fn();
 
       // Mock confirmation service to reject
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
           if (options.reject) {
@@ -1826,23 +1696,20 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      const importPromise = component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(existingUuid);
-          expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
-          expect(component.newStudies().length).toBe(0);
-          done();
-        }, 10);
-      }, 10);
+      await importPromise;
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(existingUuid);
+      expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+      expect(component.newStudies().length).toBe(0);
     });
 
-    it('should handle study without sections', (done) => {
+    it('should handle study without sections', async () => {
       const studyData = {
         title: 'Test Study',
         description: 'Test Description',
@@ -1860,8 +1727,8 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as unknown as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
       const mockProgressEvent = {
         target: {
@@ -1869,22 +1736,19 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      const importPromise = component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          expect(component.newStudies().length).toBe(1);
-          done();
-        }, 10);
-      }, 10);
+      await importPromise;
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      expect(component.newStudies().length).toBe(1);
     });
 
-    it('should handle invalid JSON in file', (done) => {
+    it('should handle invalid JSON in file', async () => {
       const invalidBase64 = btoa('invalid json content');
 
       const mockProgressEvent = {
@@ -1893,22 +1757,19 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile).catch((error) => {
-        expect(error).toBeInstanceOf(Error);
-        expect(error.message).toBe('fileParseError');
-        expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
-        expect(component.newStudies().length).toBe(0);
-        done();
-      });
+      const promise = component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
-      }, 10);
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
+
+      await expect(promise).rejects.toMatchObject({ message: 'fileParseError' });
+      expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+      expect(component.newStudies().length).toBe(0);
     });
 
-    it('should handle invalid base64 content', (done) => {
+    it('should handle invalid base64 content', async () => {
       const invalidBase64 = 'not-valid-base64!!!';
 
       const mockProgressEvent = {
@@ -1917,27 +1778,24 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile).catch((error) => {
-        expect(error).toBeInstanceOf(Error);
-        expect(error.message).toBe('fileDecodeError');
-        expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
-        done();
-      });
+      const promise = component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
-      }, 10);
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
+
+      await expect(promise).rejects.toMatchObject({ message: 'fileDecodeError' });
+      expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
     });
 
-    it('should handle missing study after creation', (done) => {
+    it('should handle missing study after creation', async () => {
       const studyData = createMockStudyData();
       const base64Content = encodeStudyToBase64(studyData);
       const newUuid = 'new-study-uuid';
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
 
       const mockProgressEvent = {
         target: {
@@ -1945,20 +1803,17 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      const importPromise = component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
-          expect(component.newStudies().length).toBe(0);
-          done();
-        }, 10);
-      }, 10);
+      await importPromise;
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
+      expect(component.newStudies().length).toBe(0);
     });
 
     it('should handle FileReader error', () => {
@@ -1980,20 +1835,16 @@ describe('ImportStudyComponent', () => {
 
       const promise = component.loadAppFile(mockFile);
 
-      // Trigger the onload handler
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
-      }, 10);
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-      // Wait for the promise to reject
-      // Note: null gets decoded (throws fileDecodeError internally) then parsed as JSON (throws fileParseError)
-      await expect(promise).rejects.toThrow('fileParseError');
+      await expect(promise).rejects.toMatchObject({ message: 'fileParseError' });
       expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
     });
 
-    it('should properly merge sections and supports with empty defaults', (done) => {
+    it('should properly merge sections and supports with empty defaults', async () => {
       const studyData = {
         title: 'Test Study',
         sections: [
@@ -2030,8 +1881,8 @@ describe('ImportStudyComponent', () => {
         saved: true
       } as unknown as Study;
 
-      studiesServiceMock.createStudy = jest.fn().mockResolvedValue(newUuid);
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(createdStudy);
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
       const mockProgressEvent = {
         target: {
@@ -2039,25 +1890,22 @@ describe('ImportStudyComponent', () => {
         }
       } as unknown as ProgressEvent<FileReader>;
 
-      component.loadAppFile(mockFile);
+      const importPromise = component.loadAppFile(mockFile);
 
-      setTimeout(() => {
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+      await waitFor(10);
+      if (mockFileReader.onload) {
+        mockFileReader.onload(mockProgressEvent);
+      }
 
-        setTimeout(() => {
-          expect(studiesServiceMock.createStudy).toHaveBeenCalled();
-          const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as Record<string, unknown> & {
-            sections: { supports: unknown[] }[];
-          };
-          expect(createStudyCall.sections).toBeDefined();
-          expect(createStudyCall.sections.length).toBe(1);
-          expect(createStudyCall.sections[0].supports.length).toBe(2);
-          expect(component.newStudies().length).toBe(1);
-          done();
-        }, 10);
-      }, 10);
+      await importPromise;
+      expect(studiesServiceMock.createStudy).toHaveBeenCalled();
+      const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as Record<string, unknown> & {
+        sections: { supports: unknown[] }[];
+      };
+      expect(createStudyCall.sections).toBeDefined();
+      expect(createStudyCall.sections.length).toBe(1);
+      expect(createStudyCall.sections[0].supports.length).toBe(2);
+      expect(component.newStudies().length).toBe(1);
     });
   });
 
@@ -2075,7 +1923,7 @@ describe('ImportStudyComponent', () => {
     } as Study;
 
     it('should return true when study does not exist', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(null);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
 
       const result = await component.promptIfStudyAlreadyExists(testUuid);
 
@@ -2085,7 +1933,7 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should return true when study is undefined', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(undefined);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(undefined);
 
       const result = await component.promptIfStudyAlreadyExists(testUuid);
 
@@ -2095,11 +1943,11 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should show confirmation dialog and return true when user accepts', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
-      studiesServiceMock.deleteStudy = jest.fn().mockResolvedValue(undefined);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
+      studiesServiceMock.deleteStudy = vi.fn().mockResolvedValue(undefined);
 
       // Mock the confirm method to call the accept callback
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation(async (options: { accept?: () => void | Promise<void>; reject?: () => void }) => {
           // Simulate user accepting
@@ -2123,10 +1971,10 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should show confirmation dialog and return false when user rejects', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
 
       // Mock the confirm method to call the reject callback
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
           // Simulate user rejecting
@@ -2150,9 +1998,9 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should include study title in confirmation message', async () => {
-      studiesServiceMock.getStudy = jest.fn().mockResolvedValue(mockStudy);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
 
-      mockConfirmationService.confirm = jest
+      mockConfirmationService.confirm = vi
         .fn()
         .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
           if (options.reject) {

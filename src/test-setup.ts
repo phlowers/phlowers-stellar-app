@@ -5,49 +5,65 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import '@angular/localize/init';
-import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
-import { TestBed } from '@angular/core/testing';
+import '@angular/compiler';
+import '@analogjs/vitest-angular/setup-zone';
+import { getTestBed, TestBed } from '@angular/core/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 import { MessageService } from 'primeng/api';
 
-window.ResizeObserver =
-  window.ResizeObserver ||
-  jest.fn().mockImplementation(() => ({
-    disconnect: jest.fn(),
-    observe: jest.fn(),
-    unobserve: jest.fn()
-  }));
+const testBed = getTestBed();
+if (!testBed.platform) {
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+}
+
+class MockResizeObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+
+if (!globalThis.ResizeObserver) {
+  globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
+}
 
 Object.defineProperty(document, 'fonts', {
   value: {
-    check: jest.fn().mockReturnValue(true),
-    load: jest.fn().mockResolvedValue(undefined)
+    check: vi.fn().mockReturnValue(true),
+    load: vi.fn().mockResolvedValue(undefined)
   },
   writable: true
 });
 
-setupZoneTestEnv();
-
-// Mock URL.createObjectURL
-Object.defineProperty(window.URL, 'createObjectURL', {
-  value: jest.fn().mockReturnValue('mock-url')
+Object.defineProperty(globalThis.URL, 'createObjectURL', {
+  value: vi.fn().mockReturnValue('mock-url'),
+  configurable: true,
+  writable: true
 });
 
-// Mock Plotly
-jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn().mockResolvedValue({}),
-  relayout: jest.fn().mockResolvedValue({}),
-  Data: jest.fn()
-}));
+vi.mock('plotly.js-dist-min', () => {
+  const plotlyMock = {
+    newPlot: vi.fn().mockResolvedValue({}),
+    react: vi.fn().mockResolvedValue({}),
+    relayout: vi.fn().mockResolvedValue({}),
+    purge: vi.fn(),
+    Data: vi.fn()
+  };
+
+  return {
+    __esModule: true,
+    default: plotlyMock,
+    ...plotlyMock
+  };
+});
 
 const mockMessageService = {
-  add: jest.fn()
-} as unknown as MessageService;
+  add: vi.fn()
+};
 
 export const globalTestSetup = {
   providers: [{ provide: MessageService, useValue: mockMessageService }]
 };
 
-// Configure TestBed globally before each test
 beforeEach(() => {
   TestBed.configureTestingModule(globalTestSetup);
 });

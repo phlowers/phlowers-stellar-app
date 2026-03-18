@@ -1,25 +1,28 @@
 // Mock plotly.js-dist-min
-jest.mock('plotly.js-dist-min', () => ({
-  newPlot: jest.fn(),
-  update: jest.fn(),
-  purge: jest.fn(),
-  relayout: jest.fn(),
-  restyle: jest.fn(),
-  react: jest.fn(),
-  redraw: jest.fn(),
-  toImage: jest.fn(),
-  downloadImage: jest.fn(),
-  extendTraces: jest.fn(),
-  prependTraces: jest.fn(),
-  addTraces: jest.fn(),
-  deleteTraces: jest.fn(),
-  moveTraces: jest.fn(),
-  animate: jest.fn(),
-  setPlotConfig: jest.fn(),
-  validate: jest.fn(),
-  d3: {
-    select: jest.fn(),
-    selectAll: jest.fn()
+vi.mock('plotly.js-dist-min', () => ({
+  __esModule: true,
+  default: {
+    newPlot: vi.fn(),
+    update: vi.fn(),
+    purge: vi.fn(),
+    relayout: vi.fn(),
+    restyle: vi.fn(),
+    react: vi.fn(),
+    redraw: vi.fn(),
+    toImage: vi.fn(),
+    downloadImage: vi.fn(),
+    extendTraces: vi.fn(),
+    prependTraces: vi.fn(),
+    addTraces: vi.fn(),
+    deleteTraces: vi.fn(),
+    moveTraces: vi.fn(),
+    animate: vi.fn(),
+    setPlotConfig: vi.fn(),
+    validate: vi.fn(),
+    d3: {
+      select: vi.fn(),
+      selectAll: vi.fn()
+    }
   }
 }));
 
@@ -60,20 +63,20 @@ class MockSupportsTableComponent {
   template: ''
 })
 class MockStudioComponent {
-  refreshSection = jest.fn();
+  refreshSection = vi.fn();
 }
 
 // Mock services
 const mockMaintenanceService = {
-  getMaintenance: jest.fn().mockResolvedValue([] as CatalogMaintenance[])
+  getMaintenance: vi.fn().mockResolvedValue([] as CatalogMaintenance[])
 };
 
 const mockLinesService = {
-  getLines: jest.fn().mockResolvedValue([] as CatalogLine[])
+  getLines: vi.fn().mockResolvedValue([] as CatalogLine[])
 };
 
 const mockMessageService = {
-  add: jest.fn()
+  add: vi.fn()
 } as unknown as MessageService;
 
 // Mock data
@@ -197,7 +200,7 @@ describe('ManualSectionComponent', () => {
     (component.section as unknown as () => Section) = () => mockSection;
     (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'create';
     component.sectionChange = {
-      emit: jest.fn()
+      emit: vi.fn()
     } as unknown as typeof component.sectionChange;
     fixture.detectChanges();
   });
@@ -289,7 +292,7 @@ describe('ManualSectionComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call setupFilterTables on init', async () => {
-      const setupFilterTablesSpy = jest.spyOn(component, 'setupFilterTables');
+      const setupFilterTablesSpy = vi.spyOn(component, 'setupFilterTables');
       component.ngOnInit();
       expect(setupFilterTablesSpy).toHaveBeenCalled();
     });
