@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { TabsModule } from 'primeng/tabs';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
@@ -37,21 +38,53 @@ class MockIconComponent {}
   standalone: true,
   template: ''
 })
-class MockHeaderComponent {}
+class MockHeaderComponent {
+  @Input() measureData: unknown;
+  @Output() fieldChange = new EventEmitter<unknown>();
+}
 
 @Component({
   selector: 'app-field-datas',
   standalone: true,
   template: ''
 })
-class MockFieldDatasComponent {}
+class MockFieldDatasComponent {
+  @Input() isNameAlreadyTaken: boolean = false;
+  @Input() measureData: unknown;
+  @Output() fieldChange = new EventEmitter<unknown>();
+}
 
 @Component({
   selector: 'app-calculus-setting',
   standalone: true,
   template: ''
 })
-class MockCalculusSettingComponent {}
+class MockCalculusSettingComponent {
+  @Input() measureData: unknown;
+  @Output() measureDataChange = new EventEmitter<unknown>();
+}
+
+@Component({
+  selector: 'app-temperature-calculation',
+  standalone: true,
+  template: ''
+})
+class MockTemperatureCalculationComponent {
+  @Input() windDirectionOptions: unknown[] = [];
+  @Input() skyCoverOptions: unknown[] = [];
+  @Input() measureData: unknown;
+  @Output() measureDataChange = new EventEmitter<unknown>();
+}
+
+@Component({
+  selector: 'app-parameter-at-15c-without-wind',
+  standalone: true,
+  template: ''
+})
+class MockParameterAt15cWithoutWindComponent {
+  @Input() measureData: unknown;
+  @Output() measureDataChange = new EventEmitter<unknown>();
+}
 
 describe('FieldMeasuringComponent', () => {
   let component: FieldMeasuringComponent;
@@ -120,11 +153,14 @@ describe('FieldMeasuringComponent', () => {
       .overrideComponent(FieldMeasuringComponent, {
         set: {
           imports: [
+            TabsModule,
             MockButtonComponent,
             MockIconComponent,
             MockHeaderComponent,
             MockFieldDatasComponent,
-            MockCalculusSettingComponent
+            MockCalculusSettingComponent,
+            MockTemperatureCalculationComponent,
+            MockParameterAt15cWithoutWindComponent
           ]
         }
       })

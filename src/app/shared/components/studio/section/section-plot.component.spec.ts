@@ -259,6 +259,7 @@ describe('SectionPlotComponent', () => {
     vi.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
     mockCreatePlot.mockResolvedValue(mockPlotElement as unknown as PlotlyHTMLElement);
+    mockCreateShadowPlotData.mockReturnValue([]);
 
     litDataSignal.set(mockLitData);
     baseLitDataSignal.set(null);

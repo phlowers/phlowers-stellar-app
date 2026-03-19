@@ -262,6 +262,8 @@ describe('ObstaclesFormComponent', () => {
     });
 
     it('should mark the active point item with aria-selected', () => {
+      obstaclesService.activePointIndex.set(0);
+      fixture.detectChanges();
       const pointItems = fixture.nativeElement.querySelectorAll('[data-testid="point-item"]');
       expect(pointItems[0].getAttribute('aria-selected')).toBe('true');
     });
@@ -429,7 +431,7 @@ describe('ObstaclesFormComponent', () => {
       input.dispatchEvent(new Event('focus'));
       fixture.detectChanges();
 
-      expect(obstaclesService.currentPointIndex()).toBe(0);
+      expect(obstaclesService.activePointIndex()).toBe(0);
     });
   });
 
@@ -634,7 +636,7 @@ describe('ObstaclesFormComponent', () => {
       const spy = vi.spyOn(obstaclesService, 'setCurrentPointIndex');
       (getByTestId('select-point') as HTMLButtonElement).click();
 
-      expect(obstaclesService.currentPointIndex()).toBe(0);
+      expect(obstaclesService.activePointIndex()).toBe(0);
     });
 
     it('should set current obstacle point on input focus', () => {
@@ -656,7 +658,7 @@ describe('ObstaclesFormComponent', () => {
       input.dispatchEvent(new Event('focus'));
       fixture.detectChanges();
 
-      expect(obstaclesService.currentPointIndex()).toBe(0);
+      expect(obstaclesService.activePointIndex()).toBe(0);
     });
   });
 

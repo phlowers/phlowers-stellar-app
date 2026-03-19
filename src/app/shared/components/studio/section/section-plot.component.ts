@@ -96,12 +96,9 @@ export class SectionPlotComponent {
 
   constructor() {
     // Setup effect for debounced state change
-    effect(
-      () => {
-        this.debouncedPlotState();
-      },
-      { allowSignalWrites: true }
-    );
+    effect(() => {
+      this.debouncedPlotState();
+    });
   }
 
   /**
