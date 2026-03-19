@@ -163,6 +163,24 @@
 
         &__result {
           @apply flex items-center gap-4 py-1;
+
+          .app-icon {
+            color: var(--grey-white);
+            font-size: 1.25rem;
+            border-radius: 1.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            line-height: 1.5rem;
+            text-align: center;
+
+            &.criterion-ok {
+              background-color: var(--main-success);
+            }
+
+            &.criterion-ko {
+              background-color: var(--main-error);
+            }
+          }
         }
       }
 
@@ -177,24 +195,6 @@
         color: var(--star-dust-950);
       }
     }
-  }
-}
-
-.papoto__results__list .crit__result .app-icon {
-  color: var(--grey-white);
-  font-size: 1.25rem;
-  border-radius: 1.5rem;
-  width: 1.5rem;
-  height: 1.5rem;
-  line-height: 1.5rem;
-  text-align: center;
-
-  &.criterion-ok {
-    background-color: var(--main-success);
-  }
-
-  &.criterion-ko {
-    background-color: var(--main-error);
   }
 }
 

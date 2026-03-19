@@ -60,10 +60,6 @@
         .side-tab__btn-label {
           color: var(--grey-200);
         }
-
-        .side-tab__btn-icon {
-          color: var(--grey-200);
-        }
       }
 
       &:not(:first-child) {
@@ -131,14 +127,14 @@
         z-index: 7;
       }
 
-      &__btn-shadow {
+      .side-tab__btn-shadow {
         @apply absolute left-0 top-0 w-full h-full;
         @extend %_btn-bblr;
         z-index: 1;
         box-shadow: map.get(app.$elevation, neutral-3);
       }
 
-      &__btn-label {
+      .side-tab__btn-label {
         @apply relative;
         z-index: 6;
       }
