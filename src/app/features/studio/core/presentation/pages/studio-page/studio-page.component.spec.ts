@@ -36,10 +36,10 @@ class PlotServiceMock {
   section = signal<Section | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
   isFreePositioningMode: SignalFn<boolean> = createSignalMock<boolean>(false);
-  plotOptions = jest.fn().mockReturnValue({ invert: false });
-  plotOptionsChange = jest.fn();
-  getSupportIndex = jest.fn().mockReturnValue(0);
-  resetAll = jest.fn();
+  plotOptions = vi.fn().mockReturnValue({ invert: false });
+  plotOptionsChange = vi.fn();
+  getSupportIndex = vi.fn().mockReturnValue(0);
+  resetAll = vi.fn();
 }
 
 // StudiesService mock
@@ -56,7 +56,7 @@ describe('StudioPageComponent', () => {
   let route: ActivatedRoute;
   let plotService: PlotServiceMock;
   let studiesService: StudiesServiceMock;
-  let sectionService: jest.Mocked<SectionService>;
+  let sectionService: vi.Mocked<SectionService>;
   let obstaclesService: ObstaclesService;
 
   beforeEach(async () => {
@@ -80,7 +80,7 @@ describe('StudioPageComponent', () => {
         { provide: PlotService, useValue: plotService },
         { provide: StudiesService, useValue: studiesService },
         { provide: SectionService, useValue: sectionService },
-        { provide: ObstacleFormService, useValue: { setExistingObstacle: jest.fn() } },
+        { provide: ObstacleFormService, useValue: { setExistingObstacle: vi.fn() } },
         provideHttpClient(),
         provideHttpClientTesting(),
         {

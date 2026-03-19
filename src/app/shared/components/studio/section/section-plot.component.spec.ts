@@ -228,7 +228,7 @@ describe('SectionPlotComponent', () => {
   const mockObstaclesService = {
     selectedObstacleUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
-    setSelectedObstacle: jest.fn()
+    setSelectedObstacle: vi.fn()
   };
 
   const createFormGet =

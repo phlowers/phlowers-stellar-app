@@ -125,10 +125,10 @@ describe('ObstacleFormService', () => {
   };
   let mockObstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
-    setCurrentPointIndex: jest.Mock;
-    resetCurrentPointIndex: jest.Mock;
+    setCurrentPointIndex: vi.Mock;
+    resetCurrentPointIndex: vi.Mock;
     selectedObstacleUuid: ReturnType<typeof signal<string | null>>;
-    setSelectedObstacle: jest.Mock;
+    setSelectedObstacle: vi.Mock;
   };
   let mockSectionService: { createOrUpdateSection: vi.Mock };
   let mockMessageService: { add: vi.Mock };
@@ -150,10 +150,10 @@ describe('ObstacleFormService', () => {
     };
     mockObstaclesService = {
       activePointIndex: signal<number | null>(null),
-      setCurrentPointIndex: jest.fn(),
-      resetCurrentPointIndex: jest.fn(),
+      setCurrentPointIndex: vi.fn(),
+      resetCurrentPointIndex: vi.fn(),
       selectedObstacleUuid: signal<string | null>(null),
-      setSelectedObstacle: jest.fn()
+      setSelectedObstacle: vi.fn()
     };
     mockSectionService = {
       createOrUpdateSection: vi.fn().mockResolvedValue(undefined)

@@ -61,8 +61,8 @@ describe('ObstaclesFormComponent', () => {
   let mockObstacleFormService: MockObstacleFormService;
   let obstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
-    setCurrentPointIndex: jest.Mock;
-    resetCurrentPointIndex: jest.Mock;
+    setCurrentPointIndex: vi.Mock;
+    resetCurrentPointIndex: vi.Mock;
   };
 
   const getByTestId = (testId: string): HTMLElement | null =>
@@ -80,8 +80,8 @@ describe('ObstaclesFormComponent', () => {
     const indexSignal = signal<number | null>(null);
     obstaclesService = {
       activePointIndex: indexSignal,
-      setCurrentPointIndex: jest.fn((i: number) => indexSignal.set(i)),
-      resetCurrentPointIndex: jest.fn()
+      setCurrentPointIndex: vi.fn((i: number) => indexSignal.set(i)),
+      resetCurrentPointIndex: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -423,6 +423,7 @@ describe('ObstaclesFormComponent', () => {
       obstaclesService.setCurrentPointIndex(1);
       fixture.detectChanges();
 
+      const spy = vi.spyOn(obstaclesService, 'setCurrentPointIndex');
       const input = getByTestId('point-ref-distance') as HTMLInputElement;
 
       input.dispatchEvent(new Event('focus'));
@@ -630,6 +631,7 @@ describe('ObstaclesFormComponent', () => {
       obstaclesService.setCurrentPointIndex(1);
       fixture.detectChanges();
 
+      const spy = vi.spyOn(obstaclesService, 'setCurrentPointIndex');
       (getByTestId('select-point') as HTMLButtonElement).click();
 
       expect(obstaclesService.currentPointIndex()).toBe(0);
@@ -648,6 +650,7 @@ describe('ObstaclesFormComponent', () => {
       obstaclesService.setCurrentPointIndex(1);
       fixture.detectChanges();
 
+      const spy = vi.spyOn(obstaclesService, 'setCurrentPointIndex');
       const input = getByTestId('point-altitude') as HTMLInputElement;
 
       input.dispatchEvent(new Event('focus'));
