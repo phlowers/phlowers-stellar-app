@@ -8,7 +8,6 @@ import { inject, Injectable } from '@angular/core';
 import { Section, InitialCondition } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
-import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
 /**
@@ -91,7 +90,7 @@ export class InitialConditionService {
     initialCondition: InitialCondition
   ): Promise<void> {
     await this.updateStudyWithModification(study, (studyCopy) => {
-      studyCopy.sections = study.sections.map((s) =>
+      studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
           ? {
               ...s,
@@ -137,7 +136,7 @@ export class InitialConditionService {
     initialCondition: InitialCondition
   ): Promise<void> {
     await this.updateStudyWithModification(study, (studyCopy) => {
-      studyCopy.sections = study.sections.map((s) =>
+      studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
           ? {
               ...s,
@@ -166,7 +165,7 @@ export class InitialConditionService {
     newUuid: string
   ): Promise<string> {
     await this.updateStudyWithModification(study, (studyCopy) => {
-      studyCopy.sections = study.sections.map((s) =>
+      studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
           ? {
               ...s,
@@ -174,11 +173,7 @@ export class InitialConditionService {
                 ...(s.initial_conditions || []),
                 {
                   ...initialCondition,
-                  uuid: newUuid,
-                  name: findDuplicateTitle(
-                    s.initial_conditions?.map((ic) => ic.name),
-                    initialCondition.name
-                  )
+                  uuid: newUuid
                 }
               ]
             }

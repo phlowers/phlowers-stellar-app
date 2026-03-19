@@ -17,6 +17,7 @@
   [study]="study()"
   (addInitialCondition)="addInitialCondition.emit($event)"
   (updateInitialCondition)="updateInitialCondition.emit($event)"
+  (deleteInitialCondition)="deleteInitialCondition.emit($event)"
   [mode]="initialConditionModalMode()"
   (duplicateInitialCondition)="duplicateInitialConditionFromModal($event)"
   [initialConditionInput]="currentInitialCondition()"

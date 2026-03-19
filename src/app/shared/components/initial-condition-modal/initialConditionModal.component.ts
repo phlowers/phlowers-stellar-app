@@ -6,10 +6,7 @@ import { Section, InitialCondition } from '@shared/domain';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  InitialConditionFunctionsInput,
-  InitialConditionService
-} from '@services/initial-condition/initial-condition.service';
+import { InitialConditionFunctionsInput } from '@services/initial-condition/initial-condition.service';
 import { MessageModule } from 'primeng/message';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
@@ -70,6 +67,7 @@ export class InitialConditionModalComponent {
   mode = input.required<'view' | 'edit' | 'create'>();
   changeMode = output<'view' | 'edit' | 'create'>();
   addInitialCondition = output<InitialConditionFunctionsInput>();
+  deleteInitialCondition = output<InitialConditionFunctionsInput>();
   duplicateInitialCondition = output<{
     initialCondition: InitialCondition;
     newUuid: string;
@@ -93,7 +91,6 @@ export class InitialConditionModalComponent {
   public onlyPositiveNumbers = /^[0-9]*$/;
   private readonly fb = inject(FormBuilder);
   private readonly cablesService = inject(CablesService);
-  private readonly initialConditionService = inject(InitialConditionService);
 
   form: FormGroup;
 
@@ -196,40 +193,38 @@ export class InitialConditionModalComponent {
     this.changeMode.emit('edit');
   }
 
-  async onDuplicate() {
+  onDuplicate() {
     const newUuid = uuidv4();
-    await this.duplicateInitialCondition.emit({
-      initialCondition: {
-        ...this.initialCondition(),
-        name: findDuplicateTitle(
-          this.initialConditions().map((ic) => ic.name),
-          this.initialCondition().name
-        )
-      },
+    const duplicatedName = findDuplicateTitle(
+      this.initialConditions().map((ic) => ic.name),
+      this.initialCondition().name
+    );
+    const duplicatedIc: InitialCondition = {
+      ...this.initialCondition(),
+      uuid: newUuid,
+      name: duplicatedName
+    };
+    this.duplicateInitialCondition.emit({
+      initialCondition: duplicatedIc,
       newUuid
     });
-    const studyUuid = this.study()?.uuid ?? '';
-    const initialCondition = await this.initialConditionService.getInitialCondition(
-      studyUuid,
-      this.section().uuid,
-      newUuid
-    );
-    if (initialCondition) {
-      this.initialCondition.set(initialCondition);
-      this.form.patchValue({
-        name: initialCondition.name,
-        base_parameters: initialCondition.base_parameters,
-        base_temperature: initialCondition.base_temperature,
-        cable_pretension: initialCondition.cable_pretension,
-        min_temperature: initialCondition.min_temperature,
-        max_wind_pressure: initialCondition.max_wind_pressure,
-        max_frost_width: initialCondition.max_frost_width
-      });
-    }
+    this.initialCondition.set(duplicatedIc);
+    this.form.patchValue({
+      name: duplicatedIc.name,
+      base_parameters: duplicatedIc.base_parameters,
+      base_temperature: duplicatedIc.base_temperature,
+      cable_pretension: duplicatedIc.cable_pretension,
+      min_temperature: duplicatedIc.min_temperature,
+      max_wind_pressure: duplicatedIc.max_wind_pressure,
+      max_frost_width: duplicatedIc.max_frost_width
+    });
   }
 
   onDelete() {
-    this.initialConditionService.deleteInitialCondition(this.study()!, this.section(), this.initialCondition());
+    this.deleteInitialCondition.emit({
+      section: this.section(),
+      initialCondition: this.initialCondition()
+    });
     this.isOpenChange.emit(false);
   }
 

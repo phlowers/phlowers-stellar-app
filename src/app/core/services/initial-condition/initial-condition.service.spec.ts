@@ -187,8 +187,13 @@ describe('InitialConditionService', () => {
   describe('duplicateInitialCondition', () => {
     it('should duplicate an initial condition with a new UUID', async () => {
       const newUuid = 'new-ic-uuid';
+      const duplicatedIc: InitialCondition = {
+        ...mockInitialCondition,
+        uuid: newUuid,
+        name: 'Initial Condition 1 (Copy 1)'
+      };
 
-      const result = await service.duplicateInitialCondition(mockStudy, mockSection, mockInitialCondition, newUuid);
+      const result = await service.duplicateInitialCondition(mockStudy, mockSection, duplicatedIc, newUuid);
 
       expect(result).toBe(newUuid);
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
@@ -237,6 +242,69 @@ describe('InitialConditionService', () => {
 
       expect(mockStudiesService.getStudy).toHaveBeenCalledWith('study-uuid-1');
       expect(result).toEqual(mockInitialCondition);
+    });
+  });
+
+  describe('clone isolation', () => {
+    it('should not mutate original study when updating initial condition', async () => {
+      const originalSections = JSON.stringify(mockStudy.sections);
+      const updatedIC: InitialCondition = {
+        ...mockInitialCondition,
+        base_temperature: 99
+      };
+
+      await service.updateInitialCondition(mockStudy, mockSection, updatedIC);
+
+      expect(JSON.stringify(mockStudy.sections)).toBe(originalSections);
+    });
+
+    it('should not mutate original study when deleting initial condition', async () => {
+      const originalSections = JSON.stringify(mockStudy.sections);
+
+      await service.deleteInitialCondition(mockStudy, mockSection, mockInitialCondition);
+
+      expect(JSON.stringify(mockStudy.sections)).toBe(originalSections);
+    });
+
+    it('should not mutate original study when duplicating initial condition', async () => {
+      const originalSections = JSON.stringify(mockStudy.sections);
+
+      await service.duplicateInitialCondition(mockStudy, mockSection, mockInitialCondition, 'dup-uuid');
+
+      expect(JSON.stringify(mockStudy.sections)).toBe(originalSections);
+    });
+  });
+
+  describe('deleteInitialCondition - selected IC', () => {
+    it('should clear selected_initial_condition_uuid when deleting the selected IC', async () => {
+      await service.deleteInitialCondition(mockStudy, mockSection, mockInitialCondition);
+
+      const calledStudy = mockStudiesService.updateStudy.mock.calls[0][0];
+      const updatedSection = calledStudy.sections.find((s: Section) => s.uuid === mockSection.uuid);
+      expect(updatedSection?.selected_initial_condition_uuid).toBeUndefined();
+    });
+
+    it('should preserve selected_initial_condition_uuid when deleting a non-selected IC', async () => {
+      const otherIC: InitialCondition = {
+        ...mockInitialCondition,
+        uuid: 'other-ic-uuid',
+        name: 'Other IC'
+      };
+      const sectionWithMultipleICs: Section = {
+        ...mockSection,
+        initial_conditions: [mockInitialCondition, otherIC],
+        selected_initial_condition_uuid: 'ic-uuid-1'
+      };
+      const studyWithMultipleICs: StudyEntity = {
+        ...mockStudy,
+        sections: [sectionWithMultipleICs]
+      };
+
+      await service.deleteInitialCondition(studyWithMultipleICs, sectionWithMultipleICs, otherIC);
+
+      const calledStudy = mockStudiesService.updateStudy.mock.calls[0][0];
+      const updatedSection = calledStudy.sections.find((s: Section) => s.uuid === sectionWithMultipleICs.uuid);
+      expect(updatedSection?.selected_initial_condition_uuid).toBe('ic-uuid-1');
     });
   });
 });

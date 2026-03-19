@@ -1,14 +1,27 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { InitialConditionModalComponent } from './initialConditionModal.component';
 import { Section, InitialCondition } from '@shared/domain';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { StorageService } from '@services/storage/storage.service';
-import { StudiesService } from '@services/studies/studies.service';
 import { BehaviorSubject } from 'rxjs';
+
+// Mock uuid
+vi.mock('uuid', () => ({
+  v4: vi.fn(() => 'mock-uuid-duplicate')
+}));
+
+// Mock findDuplicateTitle
+vi.mock('@shared/helpers/duplicate', () => ({
+  findDuplicateTitle: vi.fn((_titles: string[], title: string) => `${title} (Copy 1)`)
+}));
 
 describe('InitialConditionModalComponent', () => {
   let component: InitialConditionModalComponent;
   let fixture: ComponentFixture<InitialConditionModalComponent>;
+
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   const mockSection: Section = {
     uuid: 'section-1',
@@ -82,17 +95,12 @@ describe('InitialConditionModalComponent', () => {
       getCables: vi.fn().mockResolvedValue([])
     } as unknown as CablesService;
 
-    // Create mock StudiesService
-    const mockStudiesService = {
-      updateStudy: vi.fn().mockResolvedValue(undefined)
-    } as unknown as StudiesService;
-
     await TestBed.configureTestingModule({
       imports: [InitialConditionModalComponent],
       providers: [
         { provide: StorageService, useValue: mockStorageService },
         { provide: CablesService, useValue: mockCablesService },
-        { provide: StudiesService, useValue: mockStudiesService }
+        provideNoopAnimations()
       ]
     }).compileComponents();
 
@@ -273,28 +281,96 @@ describe('InitialConditionModalComponent', () => {
   });
 
   describe('onDelete', () => {
-    it('should call deleteInitialCondition and close modal', () => {
-      const mockStudy = {
-        uuid: 'study-1',
-        title: 'Test Study',
-        description: '',
-        author_email: 'test@example.com',
-        sections: [mockSection],
-        shareable: true,
-        saved: true,
-        created_at_offline: '2025-01-01T00:00:00.000Z',
-        updated_at_offline: '2025-01-01T00:00:00.000Z'
-      };
-      fixture.componentRef.setInput('study', mockStudy);
+    it('should emit deleteInitialCondition output and close modal', () => {
+      component.initialCondition.set(mockInitialCondition);
       fixture.detectChanges();
 
-      const deleteServiceSpy = vi.spyOn(component['initialConditionService'], 'deleteInitialCondition');
+      const deleteSpy = vi.spyOn(component.deleteInitialCondition, 'emit');
       const closeModalSpy = vi.spyOn(component.isOpenChange, 'emit');
 
       component.onDelete();
 
-      expect(deleteServiceSpy).toHaveBeenCalledWith(mockStudy, mockSection, mockInitialCondition);
+      expect(deleteSpy).toHaveBeenCalledWith({
+        section: mockSection,
+        initialCondition: mockInitialCondition
+      });
       expect(closeModalSpy).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('onDuplicate', () => {
+    it('should emit duplicateInitialCondition and update local state', () => {
+      const existingIc: InitialCondition = {
+        uuid: 'ic-original',
+        name: 'Original IC',
+        base_parameters: 1500,
+        base_temperature: 20,
+        cable_pretension: 5,
+        min_temperature: -10,
+        max_wind_pressure: 500,
+        max_frost_width: 3
+      };
+      component.initialCondition.set(existingIc);
+      fixture.componentRef.setInput('initialConditions', [existingIc]);
+      fixture.detectChanges();
+
+      const duplicateSpy = vi.spyOn(component.duplicateInitialCondition, 'emit');
+
+      component.onDuplicate();
+
+      expect(duplicateSpy).toHaveBeenCalledWith({
+        initialCondition: {
+          ...existingIc,
+          uuid: 'mock-uuid-duplicate',
+          name: 'Original IC (Copy 1)'
+        },
+        newUuid: 'mock-uuid-duplicate'
+      });
+
+      // Local state should be updated with duplicated IC
+      const updatedIc = component.initialCondition();
+      expect(updatedIc.uuid).toBe('mock-uuid-duplicate');
+      expect(updatedIc.name).toBe('Original IC (Copy 1)');
+      expect(updatedIc.base_parameters).toBe(1500);
+      expect(updatedIc.base_temperature).toBe(20);
+
+      // Form should be patched with duplicated values
+      expect(component.form.value.name).toBe('Original IC (Copy 1)');
+      expect(component.form.value.base_parameters).toBe(1500);
+    });
+  });
+
+  describe('isFormValid', () => {
+    it('should return true when form is valid and name is unique', () => {
+      component.form.patchValue({
+        name: 'Valid Name',
+        base_parameters: 2000,
+        base_temperature: 15
+      });
+      component.isNameUnique.set(true);
+
+      expect(component.isFormValid()).toBe(true);
+    });
+
+    it('should return false when form is invalid', () => {
+      component.form.patchValue({
+        name: '',
+        base_parameters: null
+      });
+      component.isNameUnique.set(true);
+
+      expect(component.isFormValid()).toBe(false);
+    });
+
+    it('should return false when name is not unique', () => {
+      component.form.patchValue({
+        name: 'Duplicate Name',
+        base_parameters: 2000,
+        base_temperature: 15
+      });
+      component.isNameUnique.set(false);
+
+      expect(component.isFormValid()).toBe(false);
     });
   });
 
@@ -318,6 +394,153 @@ describe('InitialConditionModalComponent', () => {
       component.form.controls.name.updateValueAndValidity();
 
       expect(component.form.valid).toBe(false);
+    });
+  });
+
+  describe('HTML rendering - dialog visibility', () => {
+    it('should render p-dialog with data-testid ic-modal', () => {
+      const dialog = getByTestId('ic-modal');
+      expect(dialog).toBeTruthy();
+      expect(dialog?.tagName).toBe('P-DIALOG');
+    });
+
+    it('should render cancel button in create mode', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+
+      const btn = getByTestId('cancel-btn') as HTMLButtonElement;
+      expect(btn).toBeTruthy();
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.type).toBe('submit');
+    });
+
+    it('should render validate button in create mode', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+
+      const btn = getByTestId('validate-btn') as HTMLButtonElement;
+      expect(btn).toBeTruthy();
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.type).toBe('button');
+    });
+
+    it('should disable validate button when form is invalid', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('isOpen', true);
+      component.form.patchValue({ name: '', base_parameters: null });
+      fixture.detectChanges();
+
+      const btn = getByTestId('validate-btn') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should enable validate button when form is valid and name is unique', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('isOpen', true);
+      component.form.patchValue({
+        name: 'Valid Name',
+        base_parameters: 2000,
+        base_temperature: 15
+      });
+      component.isNameUnique.set(true);
+      fixture.detectChanges();
+
+      const btn = getByTestId('validate-btn') as HTMLButtonElement;
+      expect(btn.disabled).toBe(false);
+    });
+
+    it('should render delete button in view mode', () => {
+      fixture.componentRef.setInput('mode', 'view');
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+
+      const btn = getByTestId('delete-btn') as HTMLButtonElement;
+      expect(btn).toBeTruthy();
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.type).toBe('button');
+    });
+  });
+
+  describe('HTML rendering - form inputs', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+    });
+
+    it('should render ic-name-input as a text INPUT with required attribute', () => {
+      const input = getByTestId('ic-name-input') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.tagName).toBe('INPUT');
+      expect(input.type).toBe('text');
+      expect(input.required).toBe(true);
+      expect(input.id).toBe('initial-condition-name');
+    });
+
+    it('should set aria-invalid to false on ic-name-input when name is unique', () => {
+      component.isNameUnique.set(true);
+      fixture.detectChanges();
+
+      const input = getByTestId('ic-name-input') as HTMLInputElement;
+      expect(input.getAttribute('aria-invalid')).toBe('false');
+    });
+
+    it('should set aria-invalid to true on ic-name-input when name is not unique', () => {
+      component.isNameUnique.set(false);
+      fixture.detectChanges();
+
+      const input = getByTestId('ic-name-input') as HTMLInputElement;
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+    });
+
+    it('should render base-parameter-input as a number INPUT with required attribute', () => {
+      const input = getByTestId('base-parameter-input') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.tagName).toBe('INPUT');
+      expect(input.type).toBe('number');
+      expect(input.required).toBe(true);
+      expect(input.id).toBe('initial-condition-base-parameter');
+    });
+
+    it('should render base-temperature-input as a number INPUT with required attribute', () => {
+      const input = getByTestId('base-temperature-input') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.tagName).toBe('INPUT');
+      expect(input.type).toBe('number');
+      expect(input.required).toBe(true);
+      expect(input.id).toBe('initial-condition-base-temperature');
+    });
+  });
+
+  describe('onSubmit with generateState', () => {
+    it('should pass generateState true when submitted with true', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.detectChanges();
+
+      component.form.patchValue({
+        name: 'Test IC',
+        base_parameters: 2000,
+        base_temperature: 15
+      });
+
+      const spyAdd = vi.spyOn(component.addInitialCondition, 'emit');
+      component.onSubmit(true);
+
+      expect(spyAdd).toHaveBeenCalledWith(expect.objectContaining({ generateState: true }));
+    });
+
+    it('should not emit when form is invalid', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.detectChanges();
+
+      component.form.patchValue({ name: '', base_parameters: null });
+
+      const spyAdd = vi.spyOn(component.addInitialCondition, 'emit');
+      component.onSubmit(false);
+
+      expect(spyAdd).not.toHaveBeenCalled();
     });
   });
 });
