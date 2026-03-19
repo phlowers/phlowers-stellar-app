@@ -21,7 +21,24 @@ function pyFileTransformer() {
 }
 
 export default defineConfig(() => ({
-  plugins: [angular(), viteTsConfigPaths(), pyFileTransformer()],
+  plugins: [
+    angular(),
+    viteTsConfigPaths({
+      projects: ['./tsconfig.spec.json']
+    }),
+    pyFileTransformer()
+  ],
+  resolve: {
+    alias: {
+      '@src': '/src',
+      '@app': '/src/app',
+      '@core': '/src/app/core',
+      '@services': '/src/app/core/services',
+      '@features': '/src/app/features',
+      '@shared': '/src/app/shared',
+      '@infrastructure': '/src/app/infrastructure'
+    }
+  },
   test: {
     globals: true,
     environment: 'jsdom',

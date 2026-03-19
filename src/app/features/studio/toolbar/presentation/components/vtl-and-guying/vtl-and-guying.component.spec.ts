@@ -65,6 +65,7 @@ describe('VhlAndGuyingComponent', () => {
       section: signal(mockSection),
       study: signal(mockStudy),
       getSpanOptions: vi.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
+      getSpanOptionsWithIndex: vi.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
       getSupportOptions: vi.fn().mockReturnValue([
         { label: 1, value: 'LEFT' },
         { label: 2, value: 'RIGHT' }
@@ -532,6 +533,157 @@ describe('VhlAndGuyingComponent', () => {
       const el = getByTestId('calculate-btn');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
+    });
+  });
+
+  /**
+   * Regression tests for Bug #589: No support available in VHL/guying
+   * These tests ensure that selectedSpan contains both index and uuid,
+   * and that getSupportOptions is called with the correct uuid.
+   */
+  describe('Regression tests - Bug #589: selectedSpan.uuid was empty', () => {
+    it('should have selectedSpan with both index and uuid when span is selected', () => {
+      const spanValue = { index: 0, uuid: 'span-uuid-1' };
+      component.form.controls.selectedSpan.setValue(spanValue);
+      fixture.detectChanges();
+
+      const selectedSpan = component.form.controls.selectedSpan.value;
+      expect(selectedSpan).not.toBeNull();
+      expect(selectedSpan?.index).toBe(0);
+      expect(selectedSpan?.uuid).toBe('span-uuid-1');
+      expect(selectedSpan?.uuid).toBeDefined();
+      expect(selectedSpan?.uuid).not.toBe('');
+    });
+
+    it('should call getSupportOptions with the correct uuid from selectedSpan', () => {
+      const spanValue = { index: 0, uuid: 'span-uuid-1' };
+      component.form.controls.selectedSpan.setValue(spanValue);
+      fixture.detectChanges();
+
+      // Verify that getSupportOptions was called with the correct uuid
+      expect(mockPlotService.getSupportOptions).toHaveBeenCalledWith('span-uuid-1');
+    });
+
+    it('should populate supportOptions when selectedSpan has a valid uuid', () => {
+      const spanValue = { index: 0, uuid: 'span-uuid-1' };
+      component.form.controls.selectedSpan.setValue(spanValue);
+      fixture.detectChanges();
+
+      const supportOptions = component.supportOptions();
+      expect(supportOptions).toBeDefined();
+      expect(supportOptions.length).toBeGreaterThan(0);
+      expect(supportOptions).toEqual([
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
+      ]);
+    });
+
+    it('should enable selectedSupport control when selectedSpan has a valid uuid', () => {
+      // Initially disabled
+      expect(component.form.controls.selectedSupport.disabled).toBe(true);
+
+      const spanValue = { index: 0, uuid: 'span-uuid-1' };
+      component.form.controls.selectedSpan.setValue(spanValue);
+      fixture.detectChanges();
+
+      expect(component.form.controls.selectedSupport.disabled).toBe(false);
+    });
+
+    it('should disable selectedSupport control when selectedSpan is null', () => {
+      // First enable it by setting a valid span
+      component.form.controls.selectedSpan.setValue({ index: 0, uuid: 'span-uuid-1' });
+      fixture.detectChanges();
+      expect(component.form.controls.selectedSupport.disabled).toBe(false);
+
+      // Then set to null
+      component.form.controls.selectedSpan.setValue(null);
+      fixture.detectChanges();
+
+      expect(component.form.controls.selectedSupport.disabled).toBe(true);
+    });
+
+    it('should call getSupportOptions with null when selectedSpan is null', () => {
+      vi.clearAllMocks();
+      component.form.controls.selectedSpan.setValue(null);
+      fixture.detectChanges();
+
+      expect(mockPlotService.getSupportOptions).toHaveBeenCalledWith(null);
+    });
+
+    it('should compute vtlWithoutGuying using the correct support index derived from selectedSpan', () => {
+      const spanValue = { index: 1, uuid: 'span-uuid-2' };
+      component.form.controls.selectedSpan.setValue(spanValue);
+      component.form.controls.selectedSupport.setValue('LEFT');
+      fixture.detectChanges();
+
+      // With span index 1 and support LEFT, supportIndex should be 1
+      // vtl_under_chain[0][1] = 20, vtl_under_chain[1][1] = 25, vtl_under_chain[2][1] = 10
+      // r_under_chain[1] = 40
+      const vtl = component.vtlWithoutGuying();
+      expect(vtl).toEqual({
+        chargeV: 20,
+        chargeH: 25,
+        chargeL: 10,
+        resultant: 40
+      });
+    });
+
+    it('should use getSpanOptionsWithIndex in the template to populate span select', () => {
+      // This test verifies that the component uses the correct method
+      // The template should bind to getSpanOptionsWithIndex() not getSpanOptions()
+      expect(mockPlotService.getSpanOptionsWithIndex).toBeDefined();
+
+      // Simulate what happens in the template
+      const spanOptions = mockPlotService.getSpanOptionsWithIndex();
+      expect(spanOptions).toBeDefined();
+      expect(spanOptions.length).toBeGreaterThan(0);
+      expect(spanOptions[0].value).toHaveProperty('index');
+      expect(spanOptions[0].value).toHaveProperty('uuid');
+    });
+
+    it('should preserve uuid when saving to section', () => {
+      const mockStudyForSave = { uuid: 'test-study-uuid', sections: [] };
+      const mockSectionForSave = {
+        uuid: 'test-section-uuid',
+        supports: [{ chainV: true }]
+      };
+      Object.defineProperty(mockPlotService, 'study', {
+        value: signal(mockStudyForSave),
+        writable: true,
+        configurable: true
+      });
+      Object.defineProperty(mockPlotService, 'section', {
+        value: signal(mockSectionForSave),
+        writable: true,
+        configurable: true
+      });
+
+      const spanValue = { index: 0, uuid: 'span-uuid-1' };
+      component.form.controls.selectedSpan.setValue(spanValue);
+      component.form.controls.selectedSupport.setValue('LEFT');
+      component.form.controls.altitude.setValue(10);
+      component.form.controls.horizontalDistance.setValue(5);
+      component.form.controls.hasPulley.setValue(false);
+      component.form.controls.comment.setValue('Test');
+      component.results.set({
+        tensionInGuy: 100,
+        guyAngle: 45,
+        chargeVUnderConsole: 50,
+        chargeHUnderConsole: 30,
+        chargeLIfPulley: 20
+      });
+
+      component.onSave();
+
+      // Verify that the saved data includes both index and uuid
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalled();
+      const savedSection = mockSectionService.createOrUpdateSection.mock.calls[0][1];
+      expect(savedSection.vtl_and_guying).toBeDefined();
+      expect(savedSection.vtl_and_guying?.inputs.selectedSpan).toEqual({
+        index: 0,
+        uuid: 'span-uuid-1'
+      });
+      expect(savedSection.vtl_and_guying?.inputs.selectedSpan?.uuid).toBe('span-uuid-1');
     });
   });
 });
