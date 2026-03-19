@@ -12,6 +12,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
+import { vi } from 'vitest';
 
 @Component({
   selector: 'app-button',
@@ -687,3 +688,7 @@ describe('VhlAndGuyingComponent', () => {
     });
   });
 });
+function beforeEach(arg0: () => Promise<void>) {
+  throw new Error('Function not implemented.');
+}
+
