@@ -21,8 +21,8 @@
     @extend %tools-grid-layout;
     grid-template-areas:
       'line1 line1 line1 . .'
-      'HL H1 H2 H3 HR'
-      'VL V1 V2 V3 VR';
+      'hl h1 h2 h3 hr'
+      'vl v1 v2 v3 vr';
 
     &__line1 {
       grid-area: line1;
@@ -34,7 +34,7 @@
         '. lengthDesc elevationDesc';
     }
 
-    .leftSupport {
+    .left-support {
       &__label {
         grid-area: supportLabel;
         align-self: end;
@@ -45,7 +45,7 @@
       }
     }
 
-    .spanLength {
+    .span-length {
       &__label {
         grid-area: lengthLabel;
         align-self: end;
@@ -63,7 +63,7 @@
       }
     }
 
-    .MED {
+    .med {
       &__label {
         grid-area: elevationLabel;
         align-self: end;
@@ -81,44 +81,44 @@
       }
     }
 
-    .HL {
-      grid-area: HL;
+    .hl {
+      grid-area: hl;
     }
 
-    .H1 {
-      grid-area: H1;
+    .h1 {
+      grid-area: h1;
     }
 
-    .H2 {
-      grid-area: H2;
+    .h2 {
+      grid-area: h2;
     }
 
-    .H3 {
-      grid-area: H3;
+    .h3 {
+      grid-area: h3;
     }
 
-    .HR {
-      grid-area: HR;
+    .hr {
+      grid-area: hr;
     }
 
-    .VL {
-      grid-area: VL;
+    .vl {
+      grid-area: vl;
     }
 
-    .V1 {
-      grid-area: V1;
+    .v1 {
+      grid-area: v1;
     }
 
-    .V2 {
-      grid-area: V2;
+    .v2 {
+      grid-area: v2;
     }
 
-    .V3 {
-      grid-area: V3;
+    .v3 {
+      grid-area: v3;
     }
 
-    .VR {
-      grid-area: VR;
+    .vr {
+      grid-area: vr;
     }
   }
 
@@ -135,15 +135,15 @@
     &__list {
       @extend %tools-grid-layout;
       grid-template-areas:
-        'param incertainParam . . .'
+        'param incertain-param . . .'
         'param12 param23 param13 crit .';
 
       .param {
         grid-area: param;
       }
 
-      .incertainParam {
-        grid-area: incertainParam;
+      .incertain-param {
+        grid-area: incertain-param;
       }
 
       .param12 {
@@ -163,38 +163,38 @@
 
         &__result {
           @apply flex items-center gap-4 py-1;
-
-          .app-icon {
-            color: var(--grey-white);
-            font-size: 1.25rem;
-            border-radius: 1.5rem;
-            width: 1.5rem;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: center;
-
-            &.criterion-ok {
-              background-color: var(--main-success);
-            }
-
-            &.criterion-ko {
-              background-color: var(--main-error);
-            }
-          }
         }
       }
 
-      dt {
+      & dt {
         @apply px-1;
         color: var(--star-dust-900);
       }
 
-      dd {
+      & dd {
         @apply px-1 py-2;
         @extend %text-m-400;
         color: var(--star-dust-950);
       }
     }
+  }
+}
+
+.papoto__results__list .crit__result .app-icon {
+  color: var(--grey-white);
+  font-size: 1.25rem;
+  border-radius: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  line-height: 1.5rem;
+  text-align: center;
+
+  &.criterion-ok {
+    background-color: var(--main-success);
+  }
+
+  &.criterion-ko {
+    background-color: var(--main-error);
   }
 }
 

@@ -1,6 +1,6 @@
 @use 'abstract.extracts' as app;
 
-p {
+:host p {
   display: inline-block;
   @extend %text-s-400;
   color: var(--grey-750);

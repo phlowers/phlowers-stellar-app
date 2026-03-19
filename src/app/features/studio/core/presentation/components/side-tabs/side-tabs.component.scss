@@ -45,7 +45,7 @@
       @supports not (writing-mode: sideways-lr) {
         @apply flex items-center justify-center;
 
-        &__label {
+        .side-tab__btn-label {
           @apply inline-block py-8 -rotate-90;
         }
       }
@@ -53,15 +53,15 @@
       &:disabled {
         pointer-events: none;
 
-        .side-tab__header__btn__bxsh {
+        .side-tab__btn-shadow {
           box-shadow: inset 0 0 0 0.0625rem var(--grey-200);
         }
 
-        .side-tab__header__btn__label {
+        .side-tab__btn-label {
           color: var(--grey-200);
         }
 
-        .side-tab__header__btn__icon {
+        .side-tab__btn-icon {
           color: var(--grey-200);
         }
       }
@@ -71,7 +71,7 @@
         padding-top: $_btn-px + $_btn-overlap-size;
         @extend %_btn-btlr;
 
-        .side-tab__header__btn__bxsh {
+        .side-tab__btn-shadow {
           @extend %_btn-btlr;
         }
       }
@@ -109,13 +109,13 @@
         &::before {
           @apply opacity-100;
         }
+      }
 
-        &:hover {
-          &,
-          &::before,
-          &::after {
-            background-color: var(--grey-50);
-          }
+      &.active:hover {
+        &,
+        &::before,
+        &::after {
+          background-color: var(--grey-50);
         }
       }
 
@@ -131,21 +131,21 @@
         z-index: 7;
       }
 
-      &__bxsh {
+      &__btn-shadow {
         @apply absolute left-0 top-0 w-full h-full;
         @extend %_btn-bblr;
         z-index: 1;
         box-shadow: map.get(app.$elevation, neutral-3);
       }
 
-      &__label {
+      &__btn-label {
         @apply relative;
         z-index: 6;
       }
 
       // "reset" active sibling buttons to let active one go above visually.
       &:has(+ &.active) {
-        .side-tab__header__btn__bxsh,
+        .side-tab__btn-shadow,
         &::after {
           z-index: 0;
         }
@@ -173,8 +173,7 @@
       &.active {
         @apply opacity-100 h-full;
         background: $_active-btn-bgc;
-        transition: opacity $_panel-transition-timing $_panel-transition-timing
-          $_panel-transition-effect;
+        transition: opacity $_panel-transition-timing $_panel-transition-timing $_panel-transition-effect;
 
         @starting-style {
           opacity: 0;

@@ -152,29 +152,29 @@
             <h3 class="vtl-guying__section-title" i18n>Results:</h3>
           </div>
           <dl class="vtl-guying__results-fields">
-            <div class="vtl-guying__result-field tensionInGuy">
+            <div class="vtl-guying__result-field tension-in-guy">
               <dt i18n>Tension in the guy line</dt>
               <dd class="vtl-guying__result-value">
                 {{ (results()?.tensionInGuy | number: '1.0-3') ?? '-' }}&nbsp;daN
               </dd>
             </div>
-            <div class="vtl-guying__result-field guyAngle">
+            <div class="vtl-guying__result-field guy-angle">
               <dt i18n>Angle guy line / Horizon</dt>
               <dd class="vtl-guying__result-value">{{ (results()?.guyAngle | number: '1.0-3') ?? '-' }}&nbsp;°</dd>
             </div>
-            <div class="vtl-guying__result-field chargeVUnderConsole">
+            <div class="vtl-guying__result-field charge-v-under-console">
               <dt i18n>Charge V under console</dt>
               <dd class="vtl-guying__result-value">
                 {{ (results()?.chargeVUnderConsole | number: '1.0-3') ?? '-' }}&nbsp;daN
               </dd>
             </div>
-            <div class="vtl-guying__result-field chargeHUnderConsole">
+            <div class="vtl-guying__result-field charge-h-under-console">
               <dt i18n>Charge T under console</dt>
               <dd class="vtl-guying__result-value">
                 {{ (results()?.chargeHUnderConsole | number: '1.0-3') ?? '-' }}&nbsp;daN
               </dd>
             </div>
-            <div class="vtl-guying__result-field chargeLIfPulley">
+            <div class="vtl-guying__result-field charge-l-if-pulley">
               <dt i18n>Charge L (if pulley)</dt>
               <dd class="vtl-guying__result-value">
                 {{ (results()?.chargeLIfPulley | number: '1.0-3') ?? '-' }}&nbsp;daN

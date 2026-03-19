@@ -1,4 +1,4 @@
-input {
+:host input {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
@@ -38,7 +38,7 @@ input {
   min-width: 5rem;
 }
 
-td {
+:host td {
   vertical-align: top;
 
   > *:not(button) {

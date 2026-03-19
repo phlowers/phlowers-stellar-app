@@ -1,11 +1,11 @@
 @use 'abstract.extracts' as app;
 
-dt {
+:host dt {
   @extend %label-style;
   color: var(--grey-800);
 }
 
-dd {
+:host dd {
   @extend %text-m-400;
   color: var(--star-dust-950);
   padding: 0.375rem 0.5rem;
@@ -23,11 +23,11 @@ dd {
     grid-template-areas:
       'conductor__label transit__label . . .'
       'conductor__value transit__value . . .'
-      'ambientTemp__label windSpeed__label windDirection__label windIncidence__label windIncidence__label'
-      'ambientTemp__value windSpeed__value windDirection__value windIncidence__value windIncidence__value'
+      'ambient-temp__label wind-speed__label wind-direction__label wind-incidence__label wind-incidence__label'
+      'ambient-temp__value wind-speed__value wind-direction__value wind-incidence__value wind-incidence__value'
       'solar solar solar solar solar'
-      'skyCover__label diffusedSolarFlux__label directSolarFlux__label diffusedPlusDirectSolarFlux__label measuredDiffusedPlusDirectSolarFlux__label'
-      'skyCover__value diffusedSolarFlux__value directSolarFlux__value diffusedPlusDirectSolarFlux__value measuredDiffusedPlusDirectSolarFlux__value'
+      'sky-cover__label diffused-solar-flux__label direct-solar-flux__label diffused-plus-direct-solar-flux__label measured-diffused-plus-direct-solar-flux__label'
+      'sky-cover__value diffused-solar-flux__value direct-solar-flux__value diffused-plus-direct-solar-flux__value measured-diffused-plus-direct-solar-flux__value'
       '. . . . measuredDiffusedPlusDirectSolarFluxInfo';
     row-gap: 0rem;
 
@@ -51,12 +51,12 @@ dd {
       grid-area: conductor__value;
     }
 
-    .ambientTemp__label {
-      grid-area: ambientTemp__label;
+    .ambient-temp__label {
+      grid-area: ambient-temp__label;
     }
 
-    .ambientTemp__value {
-      grid-area: ambientTemp__value;
+    .ambient-temp__value {
+      grid-area: ambient-temp__value;
     }
 
     .transit__label {
@@ -67,29 +67,29 @@ dd {
       grid-area: transit__value;
     }
 
-    .windSpeed__label {
-      grid-area: windSpeed__label;
+    .wind-speed__label {
+      grid-area: wind-speed__label;
     }
 
-    .windSpeed__value {
-      grid-area: windSpeed__value;
+    .wind-speed__value {
+      grid-area: wind-speed__value;
     }
 
-    .windDirection__label {
-      grid-area: windDirection__label;
+    .wind-direction__label {
+      grid-area: wind-direction__label;
     }
 
-    .windDirection__value {
-      grid-area: windDirection__value;
+    .wind-direction__value {
+      grid-area: wind-direction__value;
     }
 
-    .windIncidence__label {
-      grid-area: windIncidence__label;
+    .wind-incidence__label {
+      grid-area: wind-incidence__label;
       @apply flex flex-row gap-2 items-center;
     }
 
-    .windIncidence__value {
-      grid-area: windIncidence__value;
+    .wind-incidence__value {
+      grid-area: wind-incidence__value;
     }
 
     .solar {
@@ -99,44 +99,44 @@ dd {
       color: var(--star-dust-950);
     }
 
-    .skyCover__label {
-      grid-area: skyCover__label;
+    .sky-cover__label {
+      grid-area: sky-cover__label;
     }
 
-    .skyCover__value {
-      grid-area: skyCover__value;
+    .sky-cover__value {
+      grid-area: sky-cover__value;
     }
 
-    .diffusedSolarFlux__label {
-      grid-area: diffusedSolarFlux__label;
+    .diffused-solar-flux__label {
+      grid-area: diffused-solar-flux__label;
     }
 
-    .diffusedSolarFlux__value {
-      grid-area: diffusedSolarFlux__value;
+    .diffused-solar-flux__value {
+      grid-area: diffused-solar-flux__value;
     }
 
-    .directSolarFlux__label {
-      grid-area: directSolarFlux__label;
+    .direct-solar-flux__label {
+      grid-area: direct-solar-flux__label;
     }
 
-    .directSolarFlux__value {
-      grid-area: directSolarFlux__value;
+    .direct-solar-flux__value {
+      grid-area: direct-solar-flux__value;
     }
 
-    .diffusedPlusDirectSolarFlux__label {
-      grid-area: diffusedPlusDirectSolarFlux__label;
+    .diffused-plus-direct-solar-flux__label {
+      grid-area: diffused-plus-direct-solar-flux__label;
     }
 
-    .diffusedPlusDirectSolarFlux__value {
-      grid-area: diffusedPlusDirectSolarFlux__value;
+    .diffused-plus-direct-solar-flux__value {
+      grid-area: diffused-plus-direct-solar-flux__value;
     }
 
-    .measuredDiffusedPlusDirectSolarFlux__label {
-      grid-area: measuredDiffusedPlusDirectSolarFlux__label;
+    .measured-diffused-plus-direct-solar-flux__label {
+      grid-area: measured-diffused-plus-direct-solar-flux__label;
     }
 
-    .measuredDiffusedPlusDirectSolarFlux__value {
-      grid-area: measuredDiffusedPlusDirectSolarFlux__value;
+    .measured-diffused-plus-direct-solar-flux__value {
+      grid-area: measured-diffused-plus-direct-solar-flux__value;
     }
 
     .solar-fluxs-impact {
@@ -161,19 +161,19 @@ dd {
       @extend %tools-grid-layout;
       @apply mt-3;
       grid-template-areas:
-        'cableTemperature uncertaintyCableTemperature . . .'
-        'solarFlux . . . .';
+        'cable-temperature uncertainty-cable-temperature . . .'
+        'solar-flux . . . .';
 
-      .solarFlux {
-        grid-area: solarFlux;
+      .solar-flux {
+        grid-area: solar-flux;
       }
 
-      .cableTemperature {
-        grid-area: cableTemperature;
+      .cable-temperature {
+        grid-area: cable-temperature;
       }
 
-      .uncertaintyCableTemperature {
-        grid-area: uncertaintyCableTemperature;
+      .uncertainty-cable-temperature {
+        grid-area: uncertainty-cable-temperature;
       }
     }
   }

@@ -16,7 +16,7 @@
 </p>
 
 <div class="parameter-calculation-15-without-wind__form">
-  <div class="updateMode">
+  <div class="update-mode">
     <p id="updateModeLabel" class="mb-0" i18n>Update mode</p>
     <p-selectbutton
       [options]="updateModeOptions"
@@ -31,7 +31,7 @@
   </div>
 
   @if (measureData().updateMode15C === 'manual') {
-    <div class="parameterPapoto">
+    <div class="parameter-papoto">
       <label for="parameterPapoto-input" i18n>Parameter (Papoto, etc.)</label>
       <p-inputgroup>
         <input
@@ -48,7 +48,7 @@
       </p-inputgroup>
     </div>
 
-    <div class="parameterUncertaintyPapoto">
+    <div class="parameter-uncertainty-papoto">
       <label for="parameterUncertaintyPapoto-input" i18n> Uncertainty parameter </label>
       <p-inputgroup>
         <input
@@ -63,7 +63,7 @@
       </p-inputgroup>
     </div>
 
-    <div class="cableTemperature">
+    <div class="cable-temperature">
       <label for="cableTemperature-input" i18n>Cable temperature</label>
       <p-inputgroup>
         <input
@@ -80,7 +80,7 @@
       </p-inputgroup>
     </div>
 
-    <div class="cableTemperatureUncertainty">
+    <div class="cable-temperature-uncertainty">
       <label for="cableTemperatureUncertainty-input" i18n> Uncertainty cable temperature </label>
       <p-inputgroup>
         <input
@@ -101,7 +101,7 @@
     </div>
   } @else {
     <dl class="contents">
-      <div class="parameterPapoto">
+      <div class="parameter-papoto">
         <dt id="parameterPapoto-display" i18n>Parameter (Papoto, etc.)</dt>
         <dd>
           {{ (measureData().outputs.papoto?.parameter | number: '1.0-2') ?? '-' }}
@@ -109,7 +109,7 @@
         </dd>
       </div>
 
-      <div class="parameterUncertaintyPapoto">
+      <div class="parameter-uncertainty-papoto">
         <dt id="parameterUncertaintyPapoto-display">
           <del i18n> Uncertainty parameter </del>
         </dt>
@@ -118,7 +118,7 @@
         </dd>
       </div>
 
-      <div class="cableTemperature">
+      <div class="cable-temperature">
         <dt i18n>Cable temperature</dt>
         <dd>
           {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
@@ -126,7 +126,7 @@
         </dd>
       </div>
 
-      <div class="cableTemperatureUncertainty">
+      <div class="cable-temperature-uncertainty">
         <dt>
           <del i18n>Uncertainty cable temperature</del>
         </dt>
@@ -150,21 +150,21 @@
     <h2 class="parameter-calculation-15-without-wind__results__title" i18n>Results :</h2>
 
     <dl class="parameter-calculation-15-without-wind__results__list">
-      <div class="parameter15CMinusUncertainty">
+      <div class="parameter-15c-minus-uncertainty">
         <dt i18n>Parameter at 15°C - uncertainty</dt>
         <dd>
           {{ (measureData().outputs.parameter15C?.parameter15CMinusUncertainty | number: '1.0-3') ?? '-' }}
           m
         </dd>
       </div>
-      <div class="parameter15C">
+      <div class="parameter-15c">
         <dt i18n>Parameter at 15°C</dt>
         <dd>
           {{ (measureData().outputs.parameter15C?.parameter15C | number: '1.0-3') ?? '-' }}
           m
         </dd>
       </div>
-      <div class="parameter15CPlusUncertainty">
+      <div class="parameter-15c-plus-uncertainty">
         <dt i18n>Parameter at 15°C + uncertainty</dt>
         <dd>
           {{ (measureData().outputs.parameter15C?.parameter15CPlusUncertainty | number: '1.0-3') ?? '-' }}
@@ -177,7 +177,7 @@
       <button
         app-btn
         btnStyle="outlined"
-        class="createInitialMinus"
+        class="create-initial-minus"
         (click)="onCreateInitialCondition('minus')"
         data-testid="create-initial-minus-btn"
       >
@@ -188,7 +188,7 @@
       <button
         app-btn
         btnStyle="outlined"
-        class="createInitialNominal"
+        class="create-initial-nominal"
         (click)="onCreateInitialCondition('nominal')"
         data-testid="create-initial-nominal-btn"
       >
@@ -199,7 +199,7 @@
       <button
         app-btn
         btnStyle="outlined"
-        class="createInitialPlus"
+        class="create-initial-plus"
         (click)="onCreateInitialCondition('plus')"
         data-testid="create-initial-plus-btn"
       >

@@ -153,24 +153,26 @@
 
         &__item {
           @apply flex flex-col;
-
-          &__term {
-            color: var(--star-dust-900);
-            padding: 0.125rem 0.25rem;
-          }
-
-          &__def {
-            @extend %text-m-400;
-            color: var(--star-dust-950);
-            padding: 0.375rem 0.5rem;
-          }
         }
       }
     }
   }
+
+  &__sticky__results__grid__item {
+    &__term {
+      color: var(--star-dust-900);
+      padding: 0.125rem 0.25rem;
+    }
+
+    &__def {
+      @extend %text-m-400;
+      color: var(--star-dust-950);
+      padding: 0.375rem 0.5rem;
+    }
+  }
 }
 
-input {
+.obstacles-form input {
   @apply w-full;
 }
 

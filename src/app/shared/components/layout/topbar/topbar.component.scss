@@ -1,12 +1,12 @@
 @use 'abstract.extracts' as app;
 
-header,
+:host header,
 .calculation {
   display: flex;
   align-items: center;
 }
 
-header {
+:host header {
   gap: 1.5rem;
   padding: 1rem 1.5rem;
   min-height: 4rem;

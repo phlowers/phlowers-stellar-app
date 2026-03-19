@@ -1267,7 +1267,7 @@ src/app/core/
 | ~~`aria-label` / `aria-*` manquants~~ | ~~~20 éléments~~ | ✅ CORRIGÉ (Étape F — aria-hidden, aria-label, type dupliqué) |
 | Sélecteurs globaux SCSS dans composants | ~22 instances | 🟡 MOYENNE |
 | Noms de classes non-BEM | ~6 fichiers | 🟡 MOYENNE |
-| Imbrication SCSS profonde (4+) | ~5 fichiers | 🔵 BASSE |
+| Imbrication SCSS profonde (6+) | ~5 fichiers | 🔵 BASSE |
 | ~~`any` explicites (`no-explicit-any` warnings)~~ | ~~~8 prod + ~180 specs~~ | ✅ CORRIGÉ (Étape G — ~250 any supprimés, 1 résiduel avec eslint-disable) |
 
 #### Étape A — Corrections critiques (quick fixes) ✅ TERMINÉE (2026-03-16)
