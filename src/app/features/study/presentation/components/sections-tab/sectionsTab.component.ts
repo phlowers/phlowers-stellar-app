@@ -16,7 +16,7 @@ import {
   InitialConditionFunctionsInput
 } from '@services/initial-condition/initial-condition.service';
 import { CreateEditView } from '@shared/types';
-import { CheckboxModule } from 'primeng/checkbox';
+import { CheckboxModule, CheckboxChangeEvent } from 'primeng/checkbox';
 import { createEmptySection } from '@shared/domain/helpers/sections.helpers';
 import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
@@ -25,7 +25,6 @@ import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
-import { CheckboxChangeEvent } from 'primeng/checkbox';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
