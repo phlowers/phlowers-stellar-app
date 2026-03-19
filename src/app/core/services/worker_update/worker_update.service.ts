@@ -178,12 +178,16 @@ export class UpdateService {
   async checkAppVersion() {
     const currentVersion = await this.getCurrentVersion();
     const latestVersion = await this.getLatestVersion();
+    if (currentVersion) {
+      this.currentVersion.set(currentVersion);
+    }
+    if (latestVersion) {
+      this.latestVersion.set(latestVersion);
+    }
     if (!currentVersion || !latestVersion) {
       this.needUpdate$.next(false);
       return;
     }
-    this.currentVersion.set(currentVersion);
-    this.latestVersion.set(latestVersion);
     if (!isEqual(currentVersion, latestVersion)) {
       this.needUpdate$.next(true);
     } else {

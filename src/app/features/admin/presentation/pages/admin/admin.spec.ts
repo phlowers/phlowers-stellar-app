@@ -52,6 +52,7 @@ describe('AdminComponent', () => {
       latestVersion: mockLatestVersion,
       needUpdate: false,
       update: vi.fn(),
+      checkAppVersion: vi.fn().mockResolvedValue(undefined),
       sucessFullUpdate: new Subject<void>()
     } as unknown as vi.Mocked<UpdateService>;
 
@@ -123,6 +124,10 @@ describe('AdminComponent', () => {
   describe('Component Creation', () => {
     it('should create', () => {
       expect(component).toBeTruthy();
+    });
+
+    it('should call checkAppVersion on init', () => {
+      expect(updateServiceMock.checkAppVersion).toHaveBeenCalled();
     });
 
     it('should initialize with default values', () => {

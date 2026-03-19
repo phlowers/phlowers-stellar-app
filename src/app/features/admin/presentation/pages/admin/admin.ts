@@ -64,6 +64,7 @@ export class AdminComponent {
 
   constructor() {
     this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
+    this.updateService.checkAppVersion();
   }
   updateAvailable = false;
   newVersion = '';

@@ -157,6 +157,73 @@ describe('UpdateService', () => {
       expect(service.latestVersion()).toBeNull();
       expect(service.needUpdate$.value).toBe(false);
     });
+
+    it('should not overwrite existing signal values with null', async () => {
+      const existingCurrent = {
+        git_hash: 'existing',
+        build_datetime_utc: '2023-06-01T00:00:00.000000',
+        version: '2.0.0'
+      };
+      const existingLatest = {
+        git_hash: 'existing-latest',
+        build_datetime_utc: '2023-06-02T00:00:00.000000',
+        version: '2.1.0'
+      };
+
+      service.currentVersion.set(existingCurrent);
+      service.latestVersion.set(existingLatest);
+
+      mockCache.match.mockResolvedValueOnce(null);
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      await service.checkAppVersion();
+
+      expect(service.currentVersion()).toEqual(existingCurrent);
+      expect(service.latestVersion()).toEqual(existingLatest);
+      expect(service.needUpdate$.value).toBe(false);
+    });
+
+    it('should still set currentVersion signal when latestVersion is unavailable', async () => {
+      const mockCurrentVersion = {
+        git_hash: 'def456',
+        build_datetime_utc: '2022-12-31T00:00:00.000000',
+        version: '1.0.0'
+      };
+
+      mockCache.match.mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValueOnce(mockCurrentVersion)
+      });
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      await service.checkAppVersion();
+
+      expect(service.currentVersion()).toEqual(mockCurrentVersion);
+      expect(service.latestVersion()).toBeNull();
+      expect(service.needUpdate$.value).toBe(false);
+    });
+
+    it('should still set latestVersion signal when currentVersion is unavailable', async () => {
+      const mockLatestVersion = {
+        git_hash: 'abc123',
+        build_datetime_utc: '2023-01-01T00:00:00.000000',
+        version: '1.0.1'
+      };
+
+      mockCache.match.mockResolvedValueOnce(null);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValueOnce({
+          app_version: mockLatestVersion,
+          files: ['file1.js']
+        })
+      });
+
+      await service.checkAppVersion();
+
+      expect(service.currentVersion()).toBeNull();
+      expect(service.latestVersion()).toEqual(mockLatestVersion);
+      expect(service.needUpdate$.value).toBe(false);
+    });
   });
 
   describe('update', () => {
