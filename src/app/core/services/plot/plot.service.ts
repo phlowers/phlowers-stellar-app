@@ -318,17 +318,24 @@ export class PlotService {
     }
   }
 
+  /**
+   * Helper to compute the number of spans from supports count.
+   * A span exists between each adjacent pair of supports, so N supports = N-1 spans.
+   * @param supports Array of supports
+   * @returns Number of spans (always >= 0)
+   */
+  private getSpanCount(supports: Section['supports']): number {
+    return Math.max(supports.length - 1, 0);
+  }
+
   getSpanOptions = computed<SpanOption[]>(() => {
     const supports = this.section()?.supports ?? [];
-    const supportRealNumberLength = supports.length + 1;
-    const supportsAmount = supportRealNumberLength ?? 0;
-    const spanAmount = Math.max(supportsAmount - 1, 0);
-    const spans = Array.from({ length: spanAmount }, (_, index) => ({
+    const spanCount = this.getSpanCount(supports);
+
+    return Array.from({ length: spanCount }, (_, index) => ({
       label: `${index + 1} - ${index + 2}`,
       value: supports[index]?.uuid ?? null
     }));
-    spans.pop();
-    return spans;
   });
 
   /**
@@ -337,21 +344,12 @@ export class PlotService {
    */
   getSpanOptionsWithIndex = computed<{ label: string; value: { index: number; uuid: string } | null }[]>(() => {
     const supports = this.section()?.supports ?? [];
-    const supportRealNumberLength = supports.length + 1;
-    const supportsAmount = supportRealNumberLength ?? 0;
-    const spanAmount = Math.max(supportsAmount - 1, 0);
-    const spans = Array.from({ length: spanAmount }, (_, index) => ({
+    const spanCount = this.getSpanCount(supports);
+
+    return Array.from({ length: spanCount }, (_, index) => ({
       label: `${index + 1} - ${index + 2}`,
-      value:
-        supports[index]?.uuid && supports[index].uuid !== ''
-          ? {
-              index,
-              uuid: supports[index].uuid
-            }
-          : null
+      value: supports[index]?.uuid && supports[index].uuid !== '' ? { index, uuid: supports[index].uuid } : null
     }));
-    spans.pop();
-    return spans;
   });
 
   getSupportIndex = (supportUuid: string): number => {
