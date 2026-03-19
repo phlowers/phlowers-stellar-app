@@ -192,11 +192,11 @@ export class StudyComponent implements OnInit {
     if (!study) {
       return;
     }
-    await this.initialConditionService.setInitialCondition(
-      study,
-      study.sections.find((s) => s?.uuid === section?.uuid)!,
-      initialCondition.uuid
-    );
+    const updatedSection = study.sections.find((s) => s?.uuid === section?.uuid);
+    if (!updatedSection) {
+      return;
+    }
+    await this.initialConditionService.setInitialCondition(study, updatedSection, initialCondition.uuid);
 
     this.messageService.add({
       severity: 'success',
@@ -216,11 +216,11 @@ export class StudyComponent implements OnInit {
     if (!study) {
       return;
     }
-    await this.initialConditionService.setInitialCondition(
-      study,
-      study.sections.find((s) => s?.uuid === section?.uuid)!,
-      initialCondition.uuid
-    );
+    const addedSection = study.sections.find((s) => s?.uuid === section?.uuid);
+    if (!addedSection) {
+      return;
+    }
+    await this.initialConditionService.setInitialCondition(study, addedSection, initialCondition.uuid);
 
     this.messageService.add({
       severity: 'success',

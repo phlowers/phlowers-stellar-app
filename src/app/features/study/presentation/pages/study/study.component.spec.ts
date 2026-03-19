@@ -443,6 +443,7 @@ describe('StudyComponent', () => {
   describe('addInitialCondition', () => {
     beforeEach(() => {
       component.study.set({ ...mockStudy, sections: [mockSection] });
+      mockStudiesService.getStudy.mockResolvedValue({ ...mockStudy, sections: [mockSection] });
     });
 
     it('should add initial condition to section', async () => {
@@ -470,6 +471,7 @@ describe('StudyComponent', () => {
         initial_conditions: [mockInitialCondition]
       };
       component.study.set({ ...mockStudy, sections: [sectionWithConditions] });
+      mockStudiesService.getStudy.mockResolvedValue({ ...mockStudy, sections: [sectionWithConditions] });
 
       const newInitialCondition = {
         ...mockInitialCondition,
@@ -579,6 +581,7 @@ describe('StudyComponent', () => {
         initial_conditions: [mockInitialCondition]
       };
       component.study.set({ ...mockStudy, sections: [sectionWithConditions] });
+      mockStudiesService.getStudy.mockResolvedValue({ ...mockStudy, sections: [sectionWithConditions] });
     });
 
     it('should update initial condition in section', async () => {
@@ -725,6 +728,7 @@ describe('StudyComponent', () => {
         initial_conditions: null as unknown as InitialCondition[]
       };
       component.study.set({ ...mockStudy, sections: [sectionWithNullConditions] });
+      mockStudiesService.getStudy.mockResolvedValue({ ...mockStudy, sections: [sectionWithNullConditions] });
 
       await component.addInitialCondition({
         section: sectionWithNullConditions,
@@ -795,6 +799,44 @@ describe('StudyComponent', () => {
 
     it('should render ground-obstacles-tab', () => {
       expect(getByTestId('ground-obstacles-tab')).toBeTruthy();
+    });
+  });
+
+  describe('addInitialCondition - section not found guard', () => {
+    it('should not call setInitialCondition when section is not found in refreshed study', async () => {
+      component.study.set({ ...mockStudy, sections: [mockSection] });
+      // After addInitialCondition, getStudy returns a study without the target section
+      mockStudiesService.getStudy.mockResolvedValue({
+        ...mockStudy,
+        sections: []
+      });
+
+      await component.addInitialCondition({
+        section: mockSection,
+        initialCondition: mockInitialCondition
+      });
+
+      expect(mockInitialConditionService.addInitialCondition).toHaveBeenCalled();
+      expect(mockInitialConditionService.setInitialCondition).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateInitialCondition - section not found guard', () => {
+    it('should not call setInitialCondition when section is not found in refreshed study', async () => {
+      component.study.set({ ...mockStudy, sections: [mockSection] });
+      // After updateInitialCondition, getStudy returns a study without the target section
+      mockStudiesService.getStudy.mockResolvedValue({
+        ...mockStudy,
+        sections: []
+      });
+
+      await component.updateInitialCondition({
+        section: mockSection,
+        initialCondition: mockInitialCondition
+      });
+
+      expect(mockInitialConditionService.updateInitialCondition).toHaveBeenCalled();
+      expect(mockInitialConditionService.setInitialCondition).not.toHaveBeenCalled();
     });
   });
 });

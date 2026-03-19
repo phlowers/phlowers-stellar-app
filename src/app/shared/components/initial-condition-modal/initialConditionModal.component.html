@@ -1,4 +1,4 @@
-<p-dialog data-testid="ic-modal" dismissableMask="true">
+<p-dialog data-testid="ic-modal" dismissableMask="true" [visible]="isOpen()" (visibleChange)="onVisibleChange($event)">
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
       @if (mode() === 'create') {
