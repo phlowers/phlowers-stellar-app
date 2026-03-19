@@ -146,7 +146,7 @@ export class SectionsTabComponent {
       initialCondition: initialCondition,
       newUuid
     });
-    this.currentInitialCondition.set({ ...initialCondition, uuid: newUuid });
+    this.currentInitialCondition.set(initialCondition);
     this.initialConditionModalMode.set('edit');
   }
 

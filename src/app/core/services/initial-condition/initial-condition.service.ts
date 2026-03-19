@@ -8,7 +8,6 @@ import { inject, Injectable } from '@angular/core';
 import { Section, InitialCondition } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
-import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 
 /**
@@ -174,11 +173,7 @@ export class InitialConditionService {
                 ...(s.initial_conditions || []),
                 {
                   ...initialCondition,
-                  uuid: newUuid,
-                  name: findDuplicateTitle(
-                    s.initial_conditions?.map((ic) => ic.name),
-                    initialCondition.name
-                  )
+                  uuid: newUuid
                 }
               ]
             }

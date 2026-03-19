@@ -187,8 +187,13 @@ describe('InitialConditionService', () => {
   describe('duplicateInitialCondition', () => {
     it('should duplicate an initial condition with a new UUID', async () => {
       const newUuid = 'new-ic-uuid';
+      const duplicatedIc: InitialCondition = {
+        ...mockInitialCondition,
+        uuid: newUuid,
+        name: 'Initial Condition 1 (Copy 1)'
+      };
 
-      const result = await service.duplicateInitialCondition(mockStudy, mockSection, mockInitialCondition, newUuid);
+      const result = await service.duplicateInitialCondition(mockStudy, mockSection, duplicatedIc, newUuid);
 
       expect(result).toBe(newUuid);
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(

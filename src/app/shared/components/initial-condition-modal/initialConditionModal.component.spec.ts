@@ -319,7 +319,11 @@ describe('InitialConditionModalComponent', () => {
       component.onDuplicate();
 
       expect(duplicateSpy).toHaveBeenCalledWith({
-        initialCondition: existingIc,
+        initialCondition: {
+          ...existingIc,
+          uuid: 'mock-uuid-duplicate',
+          name: 'Original IC (Copy 1)'
+        },
         newUuid: 'mock-uuid-duplicate'
       });
 
@@ -395,7 +399,9 @@ describe('InitialConditionModalComponent', () => {
 
   describe('HTML rendering - dialog visibility', () => {
     it('should render p-dialog with data-testid ic-modal', () => {
-      expect(getByTestId('ic-modal')).toBeTruthy();
+      const dialog = getByTestId('ic-modal');
+      expect(dialog).toBeTruthy();
+      expect(dialog?.tagName).toBe('P-DIALOG');
     });
 
     it('should render cancel button in create mode', () => {
@@ -403,7 +409,10 @@ describe('InitialConditionModalComponent', () => {
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
 
-      expect(getByTestId('cancel-btn')).toBeTruthy();
+      const btn = getByTestId('cancel-btn') as HTMLButtonElement;
+      expect(btn).toBeTruthy();
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.type).toBe('submit');
     });
 
     it('should render validate button in create mode', () => {
@@ -411,7 +420,35 @@ describe('InitialConditionModalComponent', () => {
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
 
-      expect(getByTestId('validate-btn')).toBeTruthy();
+      const btn = getByTestId('validate-btn') as HTMLButtonElement;
+      expect(btn).toBeTruthy();
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.type).toBe('button');
+    });
+
+    it('should disable validate button when form is invalid', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('isOpen', true);
+      component.form.patchValue({ name: '', base_parameters: null });
+      fixture.detectChanges();
+
+      const btn = getByTestId('validate-btn') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should enable validate button when form is valid and name is unique', () => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('isOpen', true);
+      component.form.patchValue({
+        name: 'Valid Name',
+        base_parameters: 2000,
+        base_temperature: 15
+      });
+      component.isNameUnique.set(true);
+      fixture.detectChanges();
+
+      const btn = getByTestId('validate-btn') as HTMLButtonElement;
+      expect(btn.disabled).toBe(false);
     });
 
     it('should render delete button in view mode', () => {
@@ -419,7 +456,10 @@ describe('InitialConditionModalComponent', () => {
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
 
-      expect(getByTestId('delete-btn')).toBeTruthy();
+      const btn = getByTestId('delete-btn') as HTMLButtonElement;
+      expect(btn).toBeTruthy();
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.type).toBe('button');
     });
   });
 
@@ -430,16 +470,47 @@ describe('InitialConditionModalComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should render ic-name-input', () => {
-      expect(getByTestId('ic-name-input')).toBeTruthy();
+    it('should render ic-name-input as a text INPUT with required attribute', () => {
+      const input = getByTestId('ic-name-input') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.tagName).toBe('INPUT');
+      expect(input.type).toBe('text');
+      expect(input.required).toBe(true);
+      expect(input.id).toBe('initial-condition-name');
     });
 
-    it('should render base-parameter-input', () => {
-      expect(getByTestId('base-parameter-input')).toBeTruthy();
+    it('should set aria-invalid to false on ic-name-input when name is unique', () => {
+      component.isNameUnique.set(true);
+      fixture.detectChanges();
+
+      const input = getByTestId('ic-name-input') as HTMLInputElement;
+      expect(input.getAttribute('aria-invalid')).toBe('false');
     });
 
-    it('should render base-temperature-input', () => {
-      expect(getByTestId('base-temperature-input')).toBeTruthy();
+    it('should set aria-invalid to true on ic-name-input when name is not unique', () => {
+      component.isNameUnique.set(false);
+      fixture.detectChanges();
+
+      const input = getByTestId('ic-name-input') as HTMLInputElement;
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+    });
+
+    it('should render base-parameter-input as a number INPUT with required attribute', () => {
+      const input = getByTestId('base-parameter-input') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.tagName).toBe('INPUT');
+      expect(input.type).toBe('number');
+      expect(input.required).toBe(true);
+      expect(input.id).toBe('initial-condition-base-parameter');
+    });
+
+    it('should render base-temperature-input as a number INPUT with required attribute', () => {
+      const input = getByTestId('base-temperature-input') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.tagName).toBe('INPUT');
+      expect(input.type).toBe('number');
+      expect(input.required).toBe(true);
+      expect(input.id).toBe('initial-condition-base-temperature');
     });
   });
 

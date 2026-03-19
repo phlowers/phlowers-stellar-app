@@ -205,7 +205,7 @@ export class InitialConditionModalComponent {
       name: duplicatedName
     };
     this.duplicateInitialCondition.emit({
-      initialCondition: this.initialCondition(),
+      initialCondition: duplicatedIc,
       newUuid
     });
     this.initialCondition.set(duplicatedIc);
