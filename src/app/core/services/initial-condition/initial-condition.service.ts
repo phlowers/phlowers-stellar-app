@@ -91,7 +91,7 @@ export class InitialConditionService {
     initialCondition: InitialCondition
   ): Promise<void> {
     await this.updateStudyWithModification(study, (studyCopy) => {
-      studyCopy.sections = study.sections.map((s) =>
+      studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
           ? {
               ...s,
@@ -137,7 +137,7 @@ export class InitialConditionService {
     initialCondition: InitialCondition
   ): Promise<void> {
     await this.updateStudyWithModification(study, (studyCopy) => {
-      studyCopy.sections = study.sections.map((s) =>
+      studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
           ? {
               ...s,
@@ -166,7 +166,7 @@ export class InitialConditionService {
     newUuid: string
   ): Promise<string> {
     await this.updateStudyWithModification(study, (studyCopy) => {
-      studyCopy.sections = study.sections.map((s) =>
+      studyCopy.sections = studyCopy.sections.map((s) =>
         s?.uuid === section?.uuid
           ? {
               ...s,
