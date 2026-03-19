@@ -299,6 +299,58 @@ describe('PlotService', () => {
     });
   });
 
+  describe('getSpanOptionsWithIndex', () => {
+    it('should compute spans from section supports with index and uuid', () => {
+      const supports = [
+        { ...mockSection.supports[0], uuid: 'support-uuid-a', number: '1' },
+        { ...mockSection.supports[1], uuid: 'support-uuid-b', number: '2' },
+        { ...mockSection.supports[0], uuid: 'support-uuid-c', number: '3' }
+      ];
+      service.section.set({ ...mockSection, supports });
+
+      const spans = service.getSpanOptionsWithIndex();
+
+      expect(spans).toHaveLength(2);
+      expect(spans[0]).toEqual({
+        label: '1 - 2',
+        value: { index: 0, uuid: 'support-uuid-a' }
+      });
+      expect(spans[1]).toEqual({
+        label: '2 - 3',
+        value: { index: 1, uuid: 'support-uuid-b' }
+      });
+    });
+
+    it('should return empty array when section has no supports', () => {
+      service.section.set({ ...mockSection, supports: [] });
+
+      const spans = service.getSpanOptionsWithIndex();
+
+      expect(spans).toEqual([]);
+    });
+
+    it('should handle null uuid in supports', () => {
+      const supports = [
+        { ...mockSection.supports[0], uuid: '', number: '1' },
+        { ...mockSection.supports[1], uuid: 'support-uuid-b', number: '2' },
+        { ...mockSection.supports[0], uuid: 'support-uuid-c', number: '3' }
+      ];
+      service.section.set({ ...mockSection, supports });
+
+      const spans = service.getSpanOptionsWithIndex();
+
+      expect(spans).toHaveLength(2);
+      expect(spans[0]).toEqual({
+        label: '1 - 2',
+        value: null
+      });
+      expect(spans[1]).toEqual({
+        label: '2 - 3',
+        value: { index: 1, uuid: 'support-uuid-b' }
+      });
+    });
+  });
+
   describe('refreshSection', () => {
     it('should clear error and litData at start', async () => {
       service.error.set(TaskError.CALCULATION_ERROR);
