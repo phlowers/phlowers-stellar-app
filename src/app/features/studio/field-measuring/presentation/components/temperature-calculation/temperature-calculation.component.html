@@ -8,8 +8,8 @@
     <dt i18n class="conductor__label">Cable name</dt>
     <dd class="conductor__value">{{ measureData().cableName }}</dd>
 
-    <dt i18n class="ambientTemp__label">Ambient temperature (°C)</dt>
-    <dd class="ambientTemp__value">{{ measureData().ambientTemperature }} °C</dd>
+    <dt i18n class="ambient-temp__label">Ambient temperature (°C)</dt>
+    <dd class="ambient-temp__value">{{ measureData().ambientTemperature }} °C</dd>
   </dl>
 
   <label for="transit" i18n class="transit__label">Transit</label>
@@ -46,16 +46,16 @@
   </div>
 
   <dl class="contents with-mt-labels">
-    <dt for="windSpeed" i18n class="windSpeed__label">Wind speed</dt>
-    <dd class="windSpeed__value">
+    <dt for="windSpeed" i18n class="wind-speed__label">Wind speed</dt>
+    <dd class="wind-speed__value">
       {{ measureData().windSpeed }}
       {{ measureData().windSpeedUnit === 'ms' ? 'm/s' : 'km/h' }}
     </dd>
 
-    <dt id="windDirection" i18n class="windDirection__label">Wind direction</dt>
-    <dd class="windDirection__value">{{ localizedWindDirection() }}</dd>
+    <dt id="windDirection" i18n class="wind-direction__label">Wind direction</dt>
+    <dd class="wind-direction__value">{{ localizedWindDirection() }}</dd>
 
-    <dt class="windIncidence__label">
+    <dt class="wind-incidence__label">
       <p id="windIncidenceLabel" class="mb-0" i18n>Wind incidence (degrees)</p>
       <p-selectbutton
         [options]="windIncidenceModeOptions"
@@ -69,7 +69,7 @@
         data-testid="wind-incidence-mode-selector"
       />
     </dt>
-    <dd class="windIncidence__value">
+    <dd class="wind-incidence__value">
       @if (measureData().windIncidenceMode === 'auto') {
         {{ measureData().windIncidence }}
       } @else {
@@ -80,7 +80,7 @@
 
   <h3 class="solar underline-text justify-self-start" i18n>Solar flux :</h3>
 
-  <label for="skyCover" i18n class="skyCover__label">Sky cover</label>
+  <label for="skyCover" i18n class="sky-cover__label">Sky cover</label>
   <p-select
     inputId="skyCover"
     [options]="skyCoverOptions()"
@@ -92,25 +92,25 @@
     [fluid]="true"
     aria-describedby="mandatory-temperature"
     [required]="true"
-    class="skyCover__value"
+    class="sky-cover__value"
     data-testid="sky-cover-select"
   />
 
   <dl class="contents">
-    <dt i18n class="diffusedSolarFlux__label">Diffused solar flux</dt>
-    <dd class="diffusedSolarFlux__value">{{ measureData().diffusedSolarFlux }} W/m²</dd>
+    <dt i18n class="diffused-solar-flux__label">Diffused solar flux</dt>
+    <dd class="diffused-solar-flux__value">{{ measureData().diffusedSolarFlux }} W/m²</dd>
 
-    <dt i18n class="directSolarFlux__label">Direct solar flux</dt>
-    <dd class="directSolarFlux__value">{{ measureData().directSolarFlux }} W/m²</dd>
+    <dt i18n class="direct-solar-flux__label">Direct solar flux</dt>
+    <dd class="direct-solar-flux__value">{{ measureData().directSolarFlux }} W/m²</dd>
 
-    <dt i18n class="diffusedPlusDirectSolarFlux__label">Diffused + direct solar flux</dt>
-    <dd class="diffusedPlusDirectSolarFlux__value">{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
+    <dt i18n class="diffused-plus-direct-solar-flux__label">Diffused + direct solar flux</dt>
+    <dd class="diffused-plus-direct-solar-flux__value">{{ measureData().diffusedPlusDirectSolarFlux }} W/m²</dd>
   </dl>
 
-  <label for="measuredDiffusedPlusDirectSolarFlux" i18n class="measuredDiffusedPlusDirectSolarFlux__label">
+  <label for="measuredDiffusedPlusDirectSolarFlux" i18n class="measured-diffused-plus-direct-solar-flux__label">
     Measured diffused + direct solar flux (not required)
   </label>
-  <p-inputgroup class="measuredDiffusedPlusDirectSolarFlux__value">
+  <p-inputgroup class="measured-diffused-plus-direct-solar-flux__value">
     <input
       id="measuredDiffusedPlusDirectSolarFlux"
       type="number"
@@ -139,14 +139,14 @@
     <h2 class="temperature-calculation__results__title" i18n>Results:</h2>
 
     <dl class="temperature-calculation__results__list">
-      <div class="cableTemperature">
+      <div class="cable-temperature">
         <dt i18n>Cable temperature</dt>
         <dd>
           {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
           °C
         </dd>
       </div>
-      <div class="uncertaintyCableTemperature">
+      <div class="uncertainty-cable-temperature">
         <dt>
           <del i18n> Uncertainty cable temperature </del>
         </dt>
@@ -157,7 +157,7 @@
           </del>
         </dd>
       </div>
-      <div class="solarFlux">
+      <div class="solar-flux">
         <dt i18n>Solar flux on the cable</dt>
         <dd>
           {{ (measureData().outputs.cableTemperature?.cableSolarFlux | number: '1.0-3') ?? '-' }}

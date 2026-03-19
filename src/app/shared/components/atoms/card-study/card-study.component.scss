@@ -5,11 +5,10 @@
   @apply inline-flex items-stretch justify-stretch;
 }
 
-article {
+:host article {
   @apply relative flex flex-col w-full p-4 rounded-lg overflow-hidden;
   background-color: var(--grey-white);
-  box-shadow:
-    map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3);
+  box-shadow: map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3);
   transition: background-color 0.3s ease-in-out;
 
   &:hover {
@@ -21,24 +20,24 @@ article {
   }
 }
 
-h3 {
+:host h3 {
   @apply mb-2;
   @extend %heading-xs;
   color: var(--grey-950);
   overflow-wrap: break-word;
 }
 
-dl {
+:host dl {
   @apply overflow-hidden grow;
   color: var(--grey-700);
 }
 
-dt,
-dd {
+:host dt,
+:host dd {
   @apply float-start mb-2;
 }
 
-dt {
+:host dt {
   @apply flex items-center gap-2 clear-start;
 
   app-icon {
@@ -46,15 +45,15 @@ dt {
   }
 }
 
-dd {
+:host dd {
   @apply ml-1;
 }
 
-ul {
+:host ul {
   @apply flex flex-wrap gap-2;
 }
 
-button {
+:host button {
   @apply h-0 w-0;
   text-indent: -999rem;
 

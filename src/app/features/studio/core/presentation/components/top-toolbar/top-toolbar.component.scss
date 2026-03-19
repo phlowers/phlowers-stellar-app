@@ -106,7 +106,7 @@
     @apply flex items-center border-b gap-4 py-2 px-3;
     border-color: var(--star-dust-300);
 
-    label {
+    & label {
       margin: 0.125rem 0rem 0.0625rem;
       color: var(--star-dust-950);
     }

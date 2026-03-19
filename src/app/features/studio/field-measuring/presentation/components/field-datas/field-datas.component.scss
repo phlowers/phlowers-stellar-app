@@ -47,7 +47,7 @@
         @apply flex items-end justify-between gap-1;
         @extend %label-spacing;
 
-        label {
+        & label {
           margin: 0rem;
         }
       }

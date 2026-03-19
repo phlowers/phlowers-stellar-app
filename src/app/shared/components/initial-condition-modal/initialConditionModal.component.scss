@@ -17,19 +17,19 @@
     }
   }
 
-  dt {
+  & dt {
     @extend %label-style;
   }
 
   label,
-  dt {
+  & dt {
     &.extreme-historical-conditions {
       @extend %text-s-600;
       color: var(--star-dust-950);
     }
   }
 
-  input {
+  & input {
     @apply block w-full;
   }
 }

@@ -125,13 +125,13 @@ body.has-sidebar {
     }
   }
 
-  hr {
+  & hr {
     border-top-color: var(--grey-white);
     margin: 0.6875rem 0;
   }
 }
 
-.stelBar-header {
+.stel-bar-header {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -160,11 +160,11 @@ body.has-sidebar {
   }
 }
 
-.stelBar-main {
+.stel-bar-main {
   flex-grow: 1;
 }
 
-.stelBar-footer {
+.stel-bar-footer {
   button.stellar-sidebar__link {
     margin-bottom: 0;
     width: calc(100% + 0.5rem);

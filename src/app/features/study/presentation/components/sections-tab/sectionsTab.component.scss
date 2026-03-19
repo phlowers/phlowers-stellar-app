@@ -20,7 +20,7 @@
   align-items: start;
   gap: 0.25rem 1rem;
 
-  dl {
+  & dl {
     display: contents;
   }
 
@@ -88,7 +88,7 @@
     justify-self: center;
   }
 
-  dt,
+  & dt,
   &__title-init,
   &__title-action,
   &__title-charges {
@@ -96,7 +96,7 @@
     color: var(--grey-700);
   }
 
-  dd {
+  & dd {
     @extend %text-m-400;
     color: var(--grey-900);
   }
@@ -108,8 +108,5 @@
 
 .sticky-btn-wrapper {
   @apply sticky text-right p-6 -bottom-6 -inset-x-6 -mx-6 flex gap-2 justify-end;
-  background-image: linear-gradient(
-    rgb(from var(--grey-white) r g b / 0),
-    rgb(from var(--grey-white) r g b / 0.9) 70%
-  );
+  background-image: linear-gradient(rgb(from var(--grey-white) r g b / 0), rgb(from var(--grey-white) r g b / 0.9) 70%);
 }

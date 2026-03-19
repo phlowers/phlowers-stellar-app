@@ -30,13 +30,13 @@
   &__accodion-btn {
     color: var(--secondary-900);
 
-    app-icon {
+    & app-icon {
       color: var(--grey-950);
       transition: transform 0.15s ease-out;
     }
 
     &--open {
-      app-icon {
+      & app-icon {
         transform: rotate(180deg);
       }
     }
@@ -70,7 +70,7 @@
       align-items: start;
       gap: 0.5rem;
 
-      p {
+      & p {
         margin-top: 0.1875rem;
         margin-bottom: 0rem;
       }

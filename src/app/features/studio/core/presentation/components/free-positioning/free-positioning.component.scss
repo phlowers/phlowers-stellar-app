@@ -11,10 +11,10 @@
   color: var(--main-error);
 }
 
-dl {
+:host dl {
   @apply flex gap-1 text-sm font-semibold;
 }
 
-dd {
+:host dd {
   @apply pr-2;
 }

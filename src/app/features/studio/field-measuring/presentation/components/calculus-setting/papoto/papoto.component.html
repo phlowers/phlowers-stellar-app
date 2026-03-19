@@ -15,7 +15,7 @@
 
 <div class="papoto__form">
   <div class="papoto__form__line1">
-    <label for="leftSupport" class="leftSupport__label" i18n> Left support </label>
+    <label for="leftSupport" class="left-support__label" i18n> Left support </label>
     <p-select
       inputId="leftSupport"
       [options]="retrievedLeftSupportOptions()"
@@ -26,12 +26,12 @@
       [fluid]="true"
       aria-describedby="mandatory-papoto"
       [required]="true"
-      class="leftSupport__input"
+      class="left-support__input"
       data-testid="left-support-select"
     />
 
-    <label for="spanLength" i18n class="spanLength__label"> Measured span length </label>
-    <p-inputgroup class="spanLength__input">
+    <label for="spanLength" i18n class="span-length__label"> Measured span length </label>
+    <p-inputgroup class="span-length__input">
       <input
         id="spanLength"
         type="number"
@@ -45,7 +45,7 @@
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
-    <p id="spanLength-calculated" class="spanLength__desc">
+    <p id="spanLength-calculated" class="span-length__desc">
       <ng-container i18n> Calculated value:</ng-container>
       @if (calculatedSpanLength() !== null) {
         {{ calculatedSpanLength() | number: '1.0-2' }} m
@@ -54,8 +54,8 @@
       }
     </p>
 
-    <label for="measuredElevationDifference" i18n class="MED__label"> Elevation diff. of measured attach. </label>
-    <p-inputgroup class="MED__input">
+    <label for="measuredElevationDifference" i18n class="med__label"> Elevation diff. of measured attach. </label>
+    <p-inputgroup class="med__input">
       <input
         id="measuredElevationDifference"
         type="number"
@@ -68,7 +68,7 @@
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
-    <p id="measuredElevationDifference-calculated" class="MED__desc">
+    <p id="measuredElevationDifference-calculated" class="med__desc">
       <ng-container i18n> Calculated value:</ng-container>
       @if (calculatedElevation() !== null) {
         {{ calculatedElevation() | number: '1.0-2' }} m
@@ -78,7 +78,7 @@
     </p>
   </div>
 
-  <div class="HL">
+  <div class="hl">
     <label for="HL" i18n>HL</label>
     <p-inputgroup>
       <input
@@ -95,7 +95,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="H1">
+  <div class="h1">
     <label for="H1" i18n>H1</label>
     <p-inputgroup>
       <input
@@ -112,7 +112,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="H2">
+  <div class="h2">
     <label for="H2" i18n>H2</label>
     <p-inputgroup>
       <input
@@ -129,7 +129,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="H3">
+  <div class="h3">
     <label for="H3" i18n>H3</label>
     <p-inputgroup>
       <input
@@ -146,7 +146,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="HR">
+  <div class="hr">
     <label for="HR" i18n>HR</label>
     <p-inputgroup>
       <input
@@ -163,7 +163,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="VL">
+  <div class="vl">
     <label for="VL" i18n>VL</label>
     <p-inputgroup>
       <input
@@ -180,7 +180,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="V1">
+  <div class="v1">
     <label for="V1" i18n>V1</label>
     <p-inputgroup>
       <input
@@ -197,7 +197,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="V2">
+  <div class="v2">
     <label for="V2" i18n>V2</label>
     <p-inputgroup>
       <input
@@ -214,7 +214,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="V3">
+  <div class="v3">
     <label for="V3" i18n>V3</label>
     <p-inputgroup>
       <input
@@ -231,7 +231,7 @@
     </p-inputgroup>
   </div>
 
-  <div class="VR">
+  <div class="vr">
     <label for="VR" i18n>VR</label>
     <p-inputgroup>
       <input
@@ -266,7 +266,7 @@
         <dd>{{ measureData().outputs.papoto?.parameter | number: '1.0-2' }} m</dd>
       </div>
 
-      <div class="incertainParam">
+      <div class="incertain-param">
         <dt i18n><del>uncertainty parameter</del></dt>
         <dd><del>-</del></dd>
       </div>
