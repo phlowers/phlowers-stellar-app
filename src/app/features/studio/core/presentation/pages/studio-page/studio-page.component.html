@@ -51,6 +51,7 @@
                 value="oblique"
                 inputId="oblique-distance"
                 [(ngModel)]="distanceType"
+                [disabled]="!filteredObstaclesOptions().length"
               />
             </dt>
             <dd class="quick-measures__list__value">N/A m</dd>
@@ -64,6 +65,7 @@
                 value="vertical"
                 inputId="vertical-distance"
                 [(ngModel)]="distanceType"
+                [disabled]="!filteredObstaclesOptions().length"
               />
             </dt>
             <dd class="quick-measures__list__value">N/A m</dd>
@@ -77,6 +79,7 @@
                 value="horizontal"
                 inputId="horizontal-distance"
                 [(ngModel)]="distanceType"
+                [disabled]="!filteredObstaclesOptions().length"
               />
             </dt>
             <dd class="quick-measures__list__value">N/A m</dd>

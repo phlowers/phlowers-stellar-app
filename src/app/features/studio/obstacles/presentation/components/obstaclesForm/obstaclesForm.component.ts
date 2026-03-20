@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -39,7 +40,8 @@ import { distinctUntilChanged, filter } from 'rxjs';
     ButtonComponent,
     IconComponent,
     ToggleSwitchModule,
-    FormsModule
+    FormsModule,
+    DecimalPipe
   ],
   templateUrl: './obstaclesForm.component.html',
   styleUrl: './obstaclesForm.component.scss',
@@ -111,8 +113,8 @@ export class ObstaclesFormComponent {
 
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {
     const targetValue = (event.target as HTMLInputElement).value;
-    const numericValue = parseFloat(targetValue);
-    this.debouncedUpdatePoint(key, isNaN(numericValue) ? 0 : numericValue);
+    const numericValue = Number.parseFloat(targetValue);
+    this.debouncedUpdatePoint(key, Number.isNaN(numericValue) ? 0 : numericValue);
   }
 
   setCurrentObstaclePoint(index: number) {
