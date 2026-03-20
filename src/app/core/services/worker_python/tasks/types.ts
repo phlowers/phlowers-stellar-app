@@ -7,6 +7,7 @@
 
 import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@shared/domain';
 import { View } from '@shared/types/plot.types';
+import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { Dictionary } from 'lodash';
 
 /**
@@ -19,30 +20,34 @@ import { Dictionary } from 'lodash';
  * @category Worker Types
  */
 export enum Task {
-  /** Run unit tests in Python environment */
+  //  Run unit tests in Python environment
   runTests = 'runTests',
-  /** Calculate line geometry (LIT - Ligne Informatisée de Transport) */
+  //  Calculate line geometry (LIT - Ligne Informatisée de Transport)
   getLit = 'getLit',
-  /** Change climate/load state and recalculate */
+  // Change climate/load state and recalculate
   changeState = 'changeState',
-  /** Refresh the projection view */
+  // Refresh the projection view
   refreshProjection = 'refreshProjection',
-  /** Get coordinates for support display */
+  // Get coordinates for support display
   getSupportCoordinates = 'getSupportCoordinates',
-  /** Calculate PAPOTO (field measurement) parameters */
+  // Calculate PAPOTO (field measurement) parameters
   calculatePapoto = 'calculatePapoto',
-  /** Calculate guying forces and angles */
+  // Calculate guying forces and angles
   calculateGuying = 'calculateGuying',
-  /** Set Python logging level */
+  // Set Python logging level
   setLogLevel = 'setLogLevel',
-  /** Calculate cable temperature from ambient conditions */
+  // Calculate cable temperature from ambient conditions
   temperatureCalculation = 'temperatureCalculation',
-  /** Calculate parameter at 15°C without wind */
+  // Calculate parameter at 15°C without wind
   calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind',
-  /** Set the number of calculation points per span */
+  // Set the number of calculation points per span
   setResolution = 'setResolution',
-  /** Get Python-side configuration constants */
-  getConfig = 'getConfig'
+  // Get Python-side configuration constants
+  getConfig = 'getConfig',
+  // Add obstacles coordinates
+  addObstacles = 'addObstacles',
+  // calculate obstacles distances
+  calculateObstaclesDistances = 'calculateObstaclesDistances'
 }
 
 /**
@@ -123,6 +128,13 @@ export interface GetSectionOutput {
   arc_length: number[];
   /** Horizontal component of cable tension at each span (daN) */
   T_h: number[];
+  // obstacles coordinates
+  obstacles: {
+    name: string[];
+    points: {
+      position: [number, number, number];
+    }[];
+  }[];
 }
 
 /**
@@ -243,6 +255,10 @@ export interface TaskInputs {
   };
   /** Inputs for getConfig task: no inputs */
   [Task.getConfig]: undefined;
+  // Inputs for addObstacles task
+  [Task.addObstacles]: Obstacle[];
+  // Inputs for calculateObstaclesDistances task
+  [Task.calculateObstaclesDistances]: {};
 }
 
 /**
@@ -307,5 +323,20 @@ export interface TaskOutputs {
   /** Output from getConfig task */
   [Task.getConfig]: {
     resolution: number;
+  };
+  // Output from addObstacles task
+  [Task.addObstacles]: GetSectionWithBaseOutput;
+  // Output from calculateObstaclesDistances task
+  [Task.calculateObstaclesDistances]: {
+    obstacleName: string;
+    points: {
+      pointIndex: number;
+      linePoint: [number, number, number];
+      virtualPointHorizontal: [number, number, number];
+      virtualPointVertical: [number, number, number];
+      distanceDiagonal: number;
+      distanceHorizontal: number;
+      distanceVertical: number;
+    }[];
   };
 }
