@@ -45,7 +45,7 @@ export enum Task {
   // Get Python-side configuration constants
   getConfig = 'getConfig',
   // Add obstacles coordinates
-  addObstacles = 'addObstacles',
+  addObstacle = 'addObstacles',
   // calculate obstacles distances
   calculateObstaclesDistances = 'calculateObstaclesDistances'
 }
@@ -129,11 +129,9 @@ export interface GetSectionOutput {
   /** Horizontal component of cable tension at each span (daN) */
   T_h: number[];
   // obstacles coordinates
-  obstacles: {
-    name: string[];
-    points: {
-      position: [number, number, number];
-    }[];
+  obstacles?: {
+    name: string;
+    points: [number, number, number][];
   }[];
 }
 
@@ -256,9 +254,26 @@ export interface TaskInputs {
   /** Inputs for getConfig task: no inputs */
   [Task.getConfig]: undefined;
   // Inputs for addObstacles task
-  [Task.addObstacles]: Obstacle[];
+  [Task.addObstacle]: Obstacle;
   // Inputs for calculateObstaclesDistances task
-  [Task.calculateObstaclesDistances]: {};
+  [Task.calculateObstaclesDistances]: {
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+}
+
+export interface Distance {
+  obstacleUuid?: string;
+  points?: {
+    pointIndex: number;
+    linePoint: [number, number, number];
+    virtualPointHorizontal: [number, number, number];
+    virtualPointVertical: [number, number, number];
+    distanceDiagonal: number;
+    distanceHorizontal: number;
+    distanceVertical: number;
+  };
 }
 
 /**
@@ -277,7 +292,11 @@ export interface TaskOutputs {
   /** Output from changeState task: recalculated geometry with optional base state */
   [Task.changeState]: GetSectionWithBaseOutput;
   /** Output from refreshProjection task: reprojected geometry with optional base state */
-  [Task.refreshProjection]: GetSectionWithBaseOutput;
+  [Task.refreshProjection]: {
+    sectionOutput: GetSectionWithBaseOutput,
+    distances: Distance[]
+  };
+
   /** Output from getSupportCoordinates task: 2D display coordinates for supports */
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
@@ -325,18 +344,7 @@ export interface TaskOutputs {
     resolution: number;
   };
   // Output from addObstacles task
-  [Task.addObstacles]: GetSectionWithBaseOutput;
+  [Task.addObstacle]: GetSectionWithBaseOutput;
   // Output from calculateObstaclesDistances task
-  [Task.calculateObstaclesDistances]: {
-    obstacleName: string;
-    points: {
-      pointIndex: number;
-      linePoint: [number, number, number];
-      virtualPointHorizontal: [number, number, number];
-      virtualPointVertical: [number, number, number];
-      distanceDiagonal: number;
-      distanceHorizontal: number;
-      distanceVertical: number;
-    }[];
-  };
+  [Task.calculateObstaclesDistances]: Distance[];
 }

@@ -66,7 +66,7 @@ const tasks: Record<
     function: 'get_config',
     externalPackages: []
   },
-  [Task.addObstacles]: {
+  [Task.addObstacle]: {
     function: 'add_obstacles',
     externalPackages: []
   },

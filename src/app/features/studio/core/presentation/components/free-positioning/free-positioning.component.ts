@@ -179,12 +179,12 @@ export class FreePositioningComponent implements OnDestroy {
       | ReferenceSupport
       | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
-    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.sectionOutput.current, referenceSupportIndex));
 
     const supports = this.plotService.section()?.supports ?? [];
     this.sharedYRange.set(null);
-    await this.createPlot(litData.result.current, startSupport, 'face', supports);
-    await this.createPlot(litData.result.current, startSupport, 'profile', supports);
+    await this.createPlot(litData.result.sectionOutput.current, startSupport, 'face', supports);
+    await this.createPlot(litData.result.sectionOutput.current, startSupport, 'profile', supports);
     this.synchronizeYAxisRanges();
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);

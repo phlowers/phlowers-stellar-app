@@ -10,6 +10,8 @@ import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from '@shared/domai
 import { ObstacleFormGroupData } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { WorkerPythonService } from '../worker_python/worker-python.service';
+import { Task } from '../worker_python/tasks/types';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -21,6 +23,7 @@ export class ObstacleFormService {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
+  private readonly workerPythonService = inject(WorkerPythonService);
 
   form: FormGroup<ObstacleFormGroupData> = this.fb.group({
     uuid: [defaultObstacleForm.uuid],
@@ -282,33 +285,30 @@ export class ObstacleFormService {
     await this.saveSection();
     const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
     this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
-    // TODO: Implement calculation logic
-    // For now, set mock results
-    let minOblique = Number.POSITIVE_INFINITY;
-    let minVertical = Number.POSITIVE_INFINITY;
-    let minHorizontal = Number.POSITIVE_INFINITY;
-    for (const position of obstacle.positions) {
-      const { x, y, z } = position;
-      if (x === null || y === null || z === null) {
-        continue;
+
+    const { result: sectionOutput, error: errorAddObstacle } = await this.workerPythonService.runTask(Task.addObstacle, obstacle)
+
+    const { result: distances, error: errorDistances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, 
+      {
+        startSupport: this.plotService.plotOptions().startSupport,
+        endSupport: this.plotService.plotOptions().endSupport,
+        view: this.plotService.plotOptions().view
       }
-      const absZ = Math.abs(z);
-      const horizontal = Math.hypot(x, y);
-      const oblique = Math.hypot(horizontal, z);
-      if (oblique < minOblique) {
-        minOblique = oblique;
-      }
-      if (absZ < minVertical) {
-        minVertical = absZ;
-      }
-      if (horizontal < minHorizontal) {
-        minHorizontal = horizontal;
-      }
-    }
+    )
+
+    this.plotService.litData.set(sectionOutput?.current ?? null);
+    // TODO: Draw distances + obstacles
+    this.plotService.error.set(errorAddObstacle);
+    this.plotService.error.set(errorDistances);
+    this.plotService.loading.set(false);
+
+    // TODO: change obstacle.name to obstacle.uuid
+    const currentDistances = distances?.find(d => d.obstacleUuid === obstacle.name);
+
     this.results.set({
-      oblique: Number.isFinite(minOblique) ? minOblique : null,
-      vertical: Number.isFinite(minVertical) ? minVertical : null,
-      horizontal: Number.isFinite(minHorizontal) ? minHorizontal : null
+      oblique: currentDistances?.points?.distanceDiagonal ?? null,
+      vertical: currentDistances?.points?.distanceVertical ?? null,
+      horizontal: currentDistances?.points?.distanceHorizontal ?? null
     });
   }
 

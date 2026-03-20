@@ -267,8 +267,8 @@ export class PlotService {
       endSupport: this.plotOptions().endSupport,
       view: this.plotOptions().view
     });
-    this.litData.set(result?.current ?? null);
-    this.baseLitData.set(result?.base ?? null);
+    this.litData.set(result.sectionOutput?.current ?? null);
+    this.baseLitData.set(result.sectionOutput?.base ?? null);
     this.error.set(error);
     this.loading.set(false);
   };
