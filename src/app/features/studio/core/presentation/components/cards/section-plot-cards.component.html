@@ -1,8 +1,17 @@
-<article class="articles" [@expandCollapse]="arraysOfSupports().length <= 3 ? 'expanded' : 'collapsed'">
+<article
+  class="articles"
+  data-testid="cards-article"
+  [@expandCollapse]="arraysOfSupports().length <= 3 ? 'expanded' : 'collapsed'"
+>
   @for (support of arraysOfSupports(); track $index) {
-    <app-section-plot-card [litData]="litData()" [type]="'support'" [index]="support" />
+    <app-section-plot-card data-testid="support-card" [litData]="litData()" [type]="'support'" [index]="support" />
     @if ($index < arraysOfSupports().length - 1) {
-      <app-section-plot-card [litData]="litData()" [type]="'span'" [index]="support" />
+      <app-section-plot-card
+        data-testid="span-card"
+        [litData]="litData()"
+        [type]="'span'"
+        [index]="spanIndex($index)"
+      />
     }
   }
 </article>
