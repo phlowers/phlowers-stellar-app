@@ -1,5 +1,9 @@
 <form [formGroup]="form" class="span__form" data-testid="span-form">
-  <div class="span__reset">
+  <div class="span__reset flex justify-between items-center">
+    <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="zoomToSpan()" data-testid="span-zoom">
+      <app-icon icon="search" />
+      <ng-container i18n>Zoom</ng-container>
+    </button>
     <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" data-testid="span-reset">
       <app-icon icon="refresh" />
       <ng-container i18n>Reset</ng-container>

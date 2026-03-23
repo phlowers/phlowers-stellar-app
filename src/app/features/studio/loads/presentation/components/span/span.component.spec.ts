@@ -59,7 +59,9 @@ describe('SpanComponent', () => {
       initTemporaryLoadData: vi.fn(),
       deleteLoad: vi.fn(),
       saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined),
-      calculateLoad: vi.fn().mockResolvedValue(undefined)
+      calculateLoad: vi.fn().mockResolvedValue(undefined),
+      activeLoadTab: signal('0'),
+      selectedSpanSupportUuid: signal<string | null>(null)
     };
 
     await TestBed.configureTestingModule({
@@ -94,17 +96,14 @@ describe('SpanComponent', () => {
   });
 
   describe('Span selection', () => {
-    it('updates supports options and plot options when span is selected', () => {
+    it('updates supports options when span is selected', () => {
       component.form.controls.spanSelect.setValue('support-1');
       fixture.detectChanges();
 
       expect(mockPlotService['getSupportOptions']).toHaveBeenCalledWith('support-1');
       expect(component.supportsOptions()).toEqual(mockSupportOptions);
       expect(component.form.controls.referenceSupport.enabled).toBe(true);
-      expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledWith({
-        startSupport: 0,
-        endSupport: 1
-      });
+      expect(mockPlotService['plotOptionsChange']).not.toHaveBeenCalled();
     });
 
     it('resets supports and disables referenceSupport when span is cleared', () => {
@@ -272,7 +271,7 @@ describe('SpanComponent', () => {
     });
 
     describe('Bug 1 — spanSelectEffect must not track section() as a reactive dependency', () => {
-      it('should not call plotOptionsChange again when a signal read inside getSupportIndex changes', () => {
+      it('should not call plotOptionsChange when a signal read inside getSupportIndex changes', () => {
         // Simulate the real PlotService.getSupportIndex which reads section() internally.
         // Without untracked(), that read would register section() as a dependency of
         // spanSelectEffect, causing the effect to re-run on every Dexie emission.
@@ -285,14 +284,31 @@ describe('SpanComponent', () => {
         component.form.controls.spanSelect.setValue('support-1');
         fixture.detectChanges();
 
-        expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledTimes(1);
+        // Zoom is no longer triggered automatically on span selection — only via zoomToSpan()
+        expect(mockPlotService['plotOptionsChange']).not.toHaveBeenCalled();
 
         // Simulate a section() change (e.g. a new Dexie emission with a fresh object reference)
         internalSignal.set(1);
         fixture.detectChanges();
 
-        // spanSelectEffect must NOT have re-run because getSupportIndex is wrapped in untracked()
+        // Confirm no spurious plotOptionsChange call was triggered
+        expect(mockPlotService['plotOptionsChange']).not.toHaveBeenCalled();
+      });
+
+      it('zoomToSpan() calls plotOptionsChange with the correct span index', () => {
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+
+        component.zoomToSpan();
+
         expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledTimes(1);
+        expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledWith({ startSupport: 0, endSupport: 1 });
+      });
+
+      it('zoomToSpan() does nothing when no span is selected', () => {
+        component.zoomToSpan();
+
+        expect(mockPlotService['plotOptionsChange']).not.toHaveBeenCalled();
       });
     });
 

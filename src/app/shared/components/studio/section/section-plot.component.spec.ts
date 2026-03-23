@@ -16,6 +16,7 @@ import { Section, Support, SpanLoad } from '@shared/domain';
 import { ChargeData } from '@shared/domain/models/charge.model';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { LoadType } from './helpers/createLoadAnnotations';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -209,11 +210,17 @@ describe('SectionPlotComponent', () => {
     camera: cameraSignal,
     isFreePositioningMode: isFreePositioningModeSignal,
     axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
-    temporaryLoadData: null as ChargeData | null | undefined
+    temporaryLoadData: null as ChargeData | null | undefined,
+    plotOptionsChange: vi.fn()
   };
 
   const mockSideTabsService = {
     sideTabs: signal<number | null>(null)
+  };
+
+  const mockLoadFormsService = {
+    activeLoadTab: signal<string>('0'),
+    selectedSpanSupportUuid: signal<string | null>(null)
   };
 
   const mockObstaclesService = {
@@ -264,7 +271,8 @@ describe('SectionPlotComponent', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: SideTabsService, useValue: mockSideTabsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
-        { provide: ObstaclesService, useValue: mockObstaclesService }
+        { provide: ObstaclesService, useValue: mockObstaclesService },
+        { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();
 
@@ -547,7 +555,12 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should include punctual load when loadWeight is 0 but loadPosition is non-zero', () => {
-      const punctualLoad = { supportUuid: 's0', loadWeight: 0, loadPosition: 100, type: LoadType.PUNCTUAL } as unknown as SpanLoad;
+      const punctualLoad = {
+        supportUuid: 's0',
+        loadWeight: 0,
+        loadPosition: 100,
+        type: LoadType.PUNCTUAL
+      } as unknown as SpanLoad;
       mockPlotService.temporaryLoadData = {
         spanLoads: [punctualLoad]
       } as unknown as ChargeData;
@@ -869,6 +882,66 @@ describe('SectionPlotComponent', () => {
       const container = fixture.nativeElement.querySelector('[data-testid="section-plot-container"]');
       expect(container).toBeTruthy();
       expect(container.id).toBe('plotly-output');
+    });
+  });
+
+  describe('addEventListenersToPlot — span load click', () => {
+    let capturedHandler: ((event: { annotation?: { data?: unknown } }) => void) | null = null;
+
+    beforeEach(() => {
+      capturedHandler = null;
+      mockLoadFormsService.activeLoadTab.set('0');
+      mockLoadFormsService.selectedSpanSupportUuid.set(null);
+      mockSideTabsService.sideTabs.set(null);
+    });
+
+    const makePlotWithCapture = () => {
+      return {
+        on: (_: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
+          capturedHandler = fn;
+        }
+      } as unknown as PlotlyHTMLElement;
+    };
+
+    it('should open Charges side tab and select span when span load annotation is clicked', () => {
+      sectionSignal.set({ ...mockSection, supports: mockSupports });
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
+
+      expect(mockSideTabsService.sideTabs()).toBe(0);
+      expect(mockLoadFormsService.activeLoadTab()).toBe('1');
+      expect(mockLoadFormsService.selectedSpanSupportUuid()).toBe('s0');
+    });
+
+    it('should set selectedSpanSupportUuid to the clicked support uuid', () => {
+      sectionSignal.set({ ...mockSection, supports: mockSupports });
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's1' } } });
+
+      expect(mockLoadFormsService.selectedSpanSupportUuid()).toBe('s1');
+    });
+
+    it('should open Charges tab even when supportUuid is unknown (SpanComponent handles validation)', () => {
+      sectionSignal.set({ ...mockSection, supports: mockSupports });
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 'unknown-uuid' } } });
+
+      expect(mockSideTabsService.sideTabs()).toBe(0);
+      expect(mockLoadFormsService.activeLoadTab()).toBe('1');
+      expect(mockLoadFormsService.selectedSpanSupportUuid()).toBe('unknown-uuid');
+    });
+
+    it('should not process span load click when annotation data is absent', () => {
+      sectionSignal.set({ ...mockSection, supports: mockSupports });
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({});
+
+      expect(mockSideTabsService.sideTabs()).toBeNull();
+      expect(mockLoadFormsService.activeLoadTab()).toBe('0');
     });
   });
 });
