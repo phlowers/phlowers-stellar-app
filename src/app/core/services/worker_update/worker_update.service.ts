@@ -89,10 +89,10 @@ export class UpdateService {
       if (event.data.message) {
         switch (event.data.message) {
           case 'worker_ready':
-            await this.checkAppVersion();
+            await this.checkAppVersion({ silent: true });
             break;
           case 'update_complete':
-            await this.checkAppVersion();
+            await this.checkAppVersion({ silent: true });
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'success',
@@ -102,7 +102,7 @@ export class UpdateService {
             globalThis.location.href = '/';
             break;
           case 'install_complete':
-            await this.checkAppVersion();
+            await this.checkAppVersion({ silent: true });
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'success',
@@ -175,9 +175,16 @@ export class UpdateService {
    * Compares the cached version with the server version and updates
    * the needUpdate$ subject accordingly.
    */
-  async checkAppVersion() {
-    const currentVersion = await this.getCurrentVersion();
-    const latestVersion = await this.getLatestVersion();
+  async checkAppVersion({ silent = false }: { silent?: boolean } = {}) {
+    let currentVersion: AppVersion | null = null;
+    let latestVersion: AppVersion | null = null;
+    try {
+      currentVersion = await this.getCurrentVersion();
+      latestVersion = await this.getLatestVersion();
+    } catch {
+      this.needUpdate$.next(false);
+      return;
+    }
     if (currentVersion) {
       this.currentVersion.set(currentVersion);
     }
@@ -193,11 +200,13 @@ export class UpdateService {
     } else {
       this.needUpdate$.next(false);
     }
-    this.messageService.add({
-      severity: 'info',
-      summary: $localize`App version`,
-      detail: $localize`App version checked`
-    });
+    if (!silent) {
+      this.messageService.add({
+        severity: 'info',
+        summary: $localize`App version`,
+        detail: $localize`App version checked`
+      });
+    }
   }
 
   /**

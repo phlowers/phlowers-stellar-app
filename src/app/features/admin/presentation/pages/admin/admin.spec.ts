@@ -126,8 +126,8 @@ describe('AdminComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should call checkAppVersion on init', () => {
-      expect(updateServiceMock.checkAppVersion).toHaveBeenCalled();
+    it('should not call checkAppVersion in constructor', () => {
+      expect(updateServiceMock.checkAppVersion).not.toHaveBeenCalled();
     });
 
     it('should initialize with default values', () => {

@@ -158,6 +158,21 @@ describe('UpdateService', () => {
       expect(service.needUpdate$.value).toBe(false);
     });
 
+    it('should handle Cache API errors gracefully and preserve existing signals', async () => {
+      const existingCurrent = {
+        git_hash: 'existing',
+        build_datetime_utc: '2023-06-01T00:00:00.000000',
+        version: '2.0.0'
+      };
+      service.currentVersion.set(existingCurrent);
+
+      mockCaches.open.mockRejectedValueOnce(new Error('Cache API unavailable'));
+
+      await expect(service.checkAppVersion()).resolves.toBeUndefined();
+      expect(service.currentVersion()).toEqual(existingCurrent);
+      expect(service.needUpdate$.value).toBe(false);
+    });
+
     it('should not overwrite existing signal values with null', async () => {
       const existingCurrent = {
         git_hash: 'existing',
@@ -223,6 +238,52 @@ describe('UpdateService', () => {
       expect(service.currentVersion()).toBeNull();
       expect(service.latestVersion()).toEqual(mockLatestVersion);
       expect(service.needUpdate$.value).toBe(false);
+    });
+
+    it('should show toast when silent is false (default)', async () => {
+      const mockVersion = {
+        git_hash: 'abc123',
+        build_datetime_utc: '2023-01-01T00:00:00.000000',
+        version: '1.0.0'
+      };
+
+      mockCache.match.mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValueOnce(mockVersion)
+      });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValueOnce({
+          app_version: mockVersion,
+          files: ['file1.js']
+        })
+      });
+
+      await service.checkAppVersion();
+
+      expect(mockMessageService.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'info' }));
+    });
+
+    it('should not show toast when silent is true', async () => {
+      const mockVersion = {
+        git_hash: 'abc123',
+        build_datetime_utc: '2023-01-01T00:00:00.000000',
+        version: '1.0.0'
+      };
+
+      mockCache.match.mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValueOnce(mockVersion)
+      });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValueOnce({
+          app_version: mockVersion,
+          files: ['file1.js']
+        })
+      });
+
+      await service.checkAppVersion({ silent: true });
+
+      expect(mockMessageService.add).not.toHaveBeenCalled();
     });
   });
 

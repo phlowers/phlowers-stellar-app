@@ -102,7 +102,7 @@ export class AppComponent implements OnInit {
 
     effect(() => {
       if (this.online()) {
-        this.updateService.checkAppVersion();
+        this.updateService.checkAppVersion({ silent: true });
       }
     });
 
