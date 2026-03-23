@@ -109,7 +109,11 @@ export class SectionPlotComponent {
 
     const spanLoads =
       this.plotService.temporaryLoadData?.spanLoads?.filter(
-        (load) => !!load && (!!load.loadWeight || load.type === LoadType.MARKING)
+        (load) =>
+          !!load &&
+          (load.type === LoadType.MARKING
+            ? load.loadPosition !== 0
+            : load.loadWeight !== 0 || load.loadPosition !== 0)
       ) ?? [];
 
     return supportsUuids.map((supportUuid) => spanLoads.find((load) => load.supportUuid === supportUuid) ?? null);

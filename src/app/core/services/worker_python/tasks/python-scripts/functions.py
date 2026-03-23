@@ -221,7 +221,16 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
                 load_position_list.append(0)
 
             if span['type'] == 'punctual':
-                load_weight_list_daN.append(span["loadWeight"])
+                # Use a tiny epsilon instead of 0 so the PlotEngine registers
+                # the load position and returns coordinates in get_loads_coords.
+                # A zero mass causes PlotEngine.get_loads_coords() to return no
+                # entry for that span, which prevents the marker from being drawn
+                # in createLoadAnnotations.ts (condition: spanIndex in load_coords).
+                # TODO: replace this epsilon with a proper PlotEngine API if
+                # mechaphlowers ever exposes register_load_position() without mass.
+                # See: docs-sphinx/source/user_docs/developer_guide/bugfixes/load_weight_zero_marker_fix.md
+                weight = span["loadWeight"]
+                load_weight_list_daN.append(weight if weight != 0 else 1e-6)
             else:
                 load_weight_list_daN.append(0.01)
         except KeyError as e:
@@ -238,12 +247,17 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
 
 
 def apply_span_loads(span_loads: list):
-    """Parse span loads and add them to the engine if any are non-zero."""
+    """Set span loads on the engine, replacing any previously applied loads.
+
+    Always calls engine.add_loads to ensure stale loads from previous
+    calculations are cleared, even when all new loads are zero.
+    """
     global plt_line, engine
+    if not span_loads:
+        return
     load_position_meters, load_mass = parse_span_loads(span_loads)
-    if (load_position_meters != 0).any() and (load_mass != 0).any():
-        engine.add_loads(load_position_meters, load_mass)
-        plt_line = plt_line.generate_reset()
+    engine.add_loads(load_position_meters, load_mass)
+    plt_line = plt_line.generate_reset()
 
 
 def get_section_middle_span(start_support: int, end_support: int):

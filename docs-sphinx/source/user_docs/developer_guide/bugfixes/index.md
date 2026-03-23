@@ -6,4 +6,5 @@ Documentation of important bug fixes in Stellar.
 :maxdepth: 2
 
 csv_import_validation_fix
+load_weight_zero_marker_fix
 ```

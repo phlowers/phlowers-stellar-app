@@ -174,12 +174,8 @@ export class SpanComponent {
       emitEvent: false
     });
     this.form.controls.type.setValue(load.type, { emitEvent: false });
-    this.form.controls.loadWeight.setValue(load.loadWeight ?? 0, {
-      emitEvent: false
-    });
-    this.form.controls.loadPosition.setValue(load.loadPosition ?? 0, {
-      emitEvent: false
-    });
+    this.form.controls.loadWeight.setValue(load.loadWeight ?? 0);
+    this.form.controls.loadPosition.setValue(load.loadPosition ?? 0);
   }
 
   private onLoadControlChange(controlName: LoadControlName, value: unknown) {

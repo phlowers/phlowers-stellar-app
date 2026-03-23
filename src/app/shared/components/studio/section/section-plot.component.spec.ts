@@ -534,8 +534,8 @@ describe('SectionPlotComponent', () => {
     it('should filter loads without weight or non-marking type', () => {
       mockPlotService.temporaryLoadData = {
         spanLoads: [
-          { supportUuid: 's0', loadWeight: 0, type: 'other' } as unknown as SpanLoad,
-          { supportUuid: 's1', loadWeight: 100, type: 'weight' } as unknown as SpanLoad
+          { supportUuid: 's0', loadWeight: 0, loadPosition: 0, type: 'other' } as unknown as SpanLoad,
+          { supportUuid: 's1', loadWeight: 100, loadPosition: 0, type: 'weight' } as unknown as SpanLoad
         ]
       } as unknown as ChargeData;
 
@@ -543,7 +543,20 @@ describe('SectionPlotComponent', () => {
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
-      expect(result[1]).toEqual({ supportUuid: 's1', loadWeight: 100, type: 'weight' });
+      expect(result[1]).toEqual({ supportUuid: 's1', loadWeight: 100, loadPosition: 0, type: 'weight' });
+    });
+
+    it('should include punctual load when loadWeight is 0 but loadPosition is non-zero', () => {
+      const punctualLoad = { supportUuid: 's0', loadWeight: 0, loadPosition: 100, type: LoadType.PUNCTUAL } as unknown as SpanLoad;
+      mockPlotService.temporaryLoadData = {
+        spanLoads: [punctualLoad]
+      } as unknown as ChargeData;
+
+      const displayOptions = { loads: true, baseState: false };
+      const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toBe(punctualLoad);
     });
 
     it('should include marking loads even without weight', () => {
