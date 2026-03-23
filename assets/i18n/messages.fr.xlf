@@ -157,10 +157,10 @@
         <target>Page non trouvée</target>
       </segment>
     </unit>
-    <unit id="4020663284410482277">
+    <unit id="7601213978629574297">
       <segment state="initial">
-        <source>Go to home page</source>
-        <target>Aller à la page d&apos;accueil</target>
+        <source> Go to home page </source>
+        <target> Aller à la page d&apos;accueil </target>
       </segment>
     </unit>
     <unit id="6713690242020777174">
@@ -3478,8 +3478,8 @@
       </segment>
     </unit>
     <unit id="scaleView.form.ariaLabel">
-      <segment state="translated">
-        <source>View configuration</source>
+      <segment state="initial">
+        <source>Configuration de la vue</source>
         <target>Configuration de la vue</target>
       </segment>
     </unit>
@@ -3559,6 +3559,24 @@
       <segment state="initial">
         <source>Punctual load</source>
         <target>Charge ponctuelle</target>
+      </segment>
+    </unit>
+    <unit id="7000098318478933999">
+      <segment state="initial">
+        <source>Study actions menu</source>
+        <target>Menu des actions d'étude</target>
+      </segment>
+    </unit>
+    <unit id="1215291740212922013">
+      <segment state="initial">
+        <source>Previous support</source>
+        <target>Support précédent</target>
+      </segment>
+    </unit>
+    <unit id="4145253276478738862">
+      <segment state="initial">
+        <source>Next support</source>
+        <target>Support suivant</target>
       </segment>
     </unit>
   </file>
