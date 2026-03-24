@@ -216,5 +216,12 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
     });
+
+    it('should render card-title', () => {
+      const el = getByTestId('card-title');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('P');
+      expect(el?.textContent?.trim()).toBe('N°1');
+    });
   });
 });

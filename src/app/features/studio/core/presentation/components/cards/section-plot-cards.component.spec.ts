@@ -1,5 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { PlotService } from '@services/plot/plot.service';
 import { SectionPlotCardsComponent } from '@features/studio/core/presentation/components/cards/section-plot-cards.component';
 import { PlotOptions } from '@shared/types/plot.types';
@@ -10,6 +11,42 @@ interface MockPlotService {
   section: WritableSignal<object | null>;
   plotOptions: WritableSignal<PlotOptions>;
 }
+
+const mockLitData: GetSectionOutput = {
+  supports: [[[1, 2, 3]], [[4, 5, 6]], [[7, 8, 9]], [[10, 11, 12]], [[13, 14, 15]]],
+  insulators: [[[1, 2, 3]], [[4, 5, 6]], [[7, 8, 9]], [[10, 11, 12]], [[13, 14, 15]]],
+  spans: [[[1, 2, 3]], [[4, 5, 6]], [[7, 8, 9]], [[10, 11, 12]]],
+  line_angle: [0.1, 0.2, 0.3, 0.4, 0.5],
+  vtl_under_chain: [
+    [1, 2, 3, 4, 5],
+    [6, 7, 8, 9, 10],
+    [11, 12, 13, 14, 15]
+  ],
+  r_under_chain: [10, 20, 30, 40, 50],
+  vtl_under_console: [
+    [1, 2, 3, 4, 5],
+    [6, 7, 8, 9, 10],
+    [11, 12, 13, 14, 15]
+  ],
+  r_under_console: [10, 20, 30, 40, 50],
+  ground_altitude: [100, 200, 300, 400, 500],
+  load_angle: [0.1, 0.2, 0.3, 0.4, 0.5],
+  displacement: [
+    [1, 2, 3, 4, 5],
+    [6, 7, 8, 9, 10],
+    [11, 12, 13, 14, 15]
+  ],
+  loads_coords: {},
+  span_length: [100, 200, 300, 400],
+  elevation: [10, 20, 30, 40],
+  parameter: [1900, 2000, 2100, 2200],
+  tension_sup: [5000, 4000, 3000, 2000],
+  tension_inf: [4000, 3000, 2000, 1000],
+  L0: [100, 200, 300, 400],
+  horizontal_distance: [99, 199, 299, 399],
+  arc_length: [101, 201, 301, 401],
+  T_h: [3000, 2000, 1000, 500]
+};
 
 describe('SectionPlotCardsComponent', () => {
   let component: SectionPlotCardsComponent;
@@ -102,5 +139,207 @@ describe('SectionPlotCardsComponent', () => {
     });
 
     expect(component.arraysOfSupports()).toEqual([]);
+  });
+
+  describe('spanIndex', () => {
+    it('should return the lower support index between two adjacent supports in normal order', () => {
+      plotServiceMock.section.set({ uuid: 'section-1' });
+      plotServiceMock.plotOptions.set({
+        view: '3d',
+        side: 'profile',
+        startSupport: 2,
+        endSupport: 4,
+        invert: false
+      });
+
+      // arraysOfSupports = [2, 3, 4]
+      expect(component.spanIndex(0)).toBe(2); // min(2, 3)
+      expect(component.spanIndex(1)).toBe(3); // min(3, 4)
+    });
+
+    it('should return the lower support index between two adjacent supports in inverted order', () => {
+      plotServiceMock.section.set({ uuid: 'section-1' });
+      plotServiceMock.plotOptions.set({
+        view: '3d',
+        side: 'profile',
+        startSupport: 2,
+        endSupport: 4,
+        invert: true
+      });
+
+      // arraysOfSupports = [4, 3, 2]
+      expect(component.spanIndex(0)).toBe(3); // min(4, 3)
+      expect(component.spanIndex(1)).toBe(2); // min(3, 2)
+    });
+  });
+});
+
+describe('SectionPlotCardsComponent - HTML rendering', () => {
+  let fixture: ComponentFixture<SectionPlotCardsComponent>;
+  let plotServiceMock: MockPlotService;
+
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+  const getAllByTestId = (testId: string): NodeListOf<HTMLElement> =>
+    fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`);
+
+  beforeEach(async () => {
+    plotServiceMock = {
+      litData: signal<GetSectionOutput | null>(null),
+      section: signal<object | null>(null),
+      plotOptions: signal<PlotOptions>({
+        view: '3d',
+        side: 'profile',
+        startSupport: 0,
+        endSupport: 1,
+        invert: false
+      })
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [SectionPlotCardsComponent, NoopAnimationsModule],
+      providers: [{ provide: PlotService, useValue: plotServiceMock }]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(SectionPlotCardsComponent);
+  });
+
+  it('should render cards-article', () => {
+    plotServiceMock.section.set({ uuid: 'section-1' });
+    plotServiceMock.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 2,
+      endSupport: 4,
+      invert: false
+    });
+    fixture.detectChanges();
+
+    const article = getByTestId('cards-article');
+    expect(article).toBeTruthy();
+    expect(article?.tagName).toBe('ARTICLE');
+  });
+
+  it('should render support and span cards in normal order', () => {
+    plotServiceMock.section.set({ uuid: 'section-1' });
+    plotServiceMock.litData.set(mockLitData);
+    plotServiceMock.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 2,
+      endSupport: 4,
+      invert: false
+    });
+    fixture.detectChanges();
+
+    const supportCards = getAllByTestId('support-card');
+    const spanCards = getAllByTestId('span-card');
+    expect(supportCards.length).toBe(3);
+    expect(spanCards.length).toBe(2);
+  });
+
+  it('should render support card titles in ascending order when not inverted', () => {
+    plotServiceMock.section.set({ uuid: 'section-1' });
+    plotServiceMock.litData.set(mockLitData);
+    plotServiceMock.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 2,
+      endSupport: 4,
+      invert: false
+    });
+    fixture.detectChanges();
+
+    const titles = getAllByTestId('card-title');
+    // Order: support N°3, span 3-4, support N°4, span 4-5, support N°5
+    const titleTexts = Array.from(titles).map((el) => el.textContent?.trim());
+    expect(titleTexts).toEqual(['N°3', '3-4', 'N°4', '4-5', 'N°5']);
+  });
+
+  it('should render support card titles in descending order when inverted', () => {
+    plotServiceMock.section.set({ uuid: 'section-1' });
+    plotServiceMock.litData.set(mockLitData);
+    plotServiceMock.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 2,
+      endSupport: 4,
+      invert: true
+    });
+    fixture.detectChanges();
+
+    const titles = getAllByTestId('card-title');
+    // Order: support N°5, span 4-5, support N°4, span 3-4, support N°3
+    const titleTexts = Array.from(titles).map((el) => el.textContent?.trim());
+    expect(titleTexts).toEqual(['N°5', '4-5', 'N°4', '3-4', 'N°3']);
+  });
+
+  it('should render span cards with correct titles when inverted', () => {
+    plotServiceMock.section.set({ uuid: 'section-1' });
+    plotServiceMock.litData.set(mockLitData);
+    plotServiceMock.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 2,
+      endSupport: 4,
+      invert: true
+    });
+    fixture.detectChanges();
+
+    const spanCards = getAllByTestId('span-card');
+    const spanTitles = Array.from(spanCards).map((card) =>
+      card.querySelector('[data-testid="card-title"]')?.textContent?.trim()
+    );
+    // Inverted: spans between [4,3] and [3,2] → spanIndex = 3 and 2 → titles "4-5" and "3-4"
+    expect(spanTitles).toEqual(['4-5', '3-4']);
+  });
+
+  it('should not render any cards when support range exceeds three', () => {
+    plotServiceMock.section.set({ uuid: 'section-1' });
+    plotServiceMock.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 0,
+      endSupport: 4,
+      invert: false
+    });
+    fixture.detectChanges();
+
+    const supportCards = getAllByTestId('support-card');
+    const spanCards = getAllByTestId('span-card');
+    expect(supportCards.length).toBe(0);
+    expect(spanCards.length).toBe(0);
+  });
+
+  it('should update card order when toggling invert', () => {
+    plotServiceMock.section.set({ uuid: 'section-1' });
+    plotServiceMock.litData.set(mockLitData);
+    plotServiceMock.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 2,
+      endSupport: 4,
+      invert: false
+    });
+    fixture.detectChanges();
+
+    let titles = getAllByTestId('card-title');
+    let titleTexts = Array.from(titles).map((el) => el.textContent?.trim());
+    expect(titleTexts).toEqual(['N°3', '3-4', 'N°4', '4-5', 'N°5']);
+
+    // Toggle invert
+    plotServiceMock.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 2,
+      endSupport: 4,
+      invert: true
+    });
+    fixture.detectChanges();
+
+    titles = getAllByTestId('card-title');
+    titleTexts = Array.from(titles).map((el) => el.textContent?.trim());
+    expect(titleTexts).toEqual(['N°5', '4-5', 'N°4', '3-4', 'N°3']);
   });
 });
