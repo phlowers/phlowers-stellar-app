@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+  untracked
+} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -65,13 +74,11 @@ export class ObstaclesFormComponent {
 
   readonly altitudeTypeOptions = [
     { label: $localize`Absolute (NGF)`, value: 'absolute' },
-    { label: $localize`Relative to support`, value: 'relative' }
+    { label: $localize`Relative to support`, value: 'relative' },
+    { label: $localize`Relative to cable attachment`, value: 'relative_cable' }
   ];
 
-  readonly lateralDistanceTypeOptions = [
-    { label: $localize`Span axis`, value: 'SPAN_AXIS' },
-    { label: $localize`Line axis`, value: 'LINE_AXIS' }
-  ];
+  readonly lateralDistanceTypeOptions = [{ label: $localize`Span axis`, value: 'SPAN_AXIS' }];
 
   readonly spansOptions = computed(() => {
     return this.plotService.getSpanOptions();
@@ -94,10 +101,12 @@ export class ObstaclesFormComponent {
 
   private readonly supportUuidEffect = effect(() => {
     const supportUuid = this.supportUuidValue();
-    if (!supportUuid) {
-      this.plotService.isFreePositioningMode.set(false);
-    }
-    this.obstacleFormService.resetFormForNewObstacle(supportUuid);
+    untracked(() => {
+      if (!supportUuid) {
+        this.plotService.isFreePositioningMode.set(false);
+      }
+      this.obstacleFormService.resetFormForNewObstacle(supportUuid);
+    });
   });
 
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {

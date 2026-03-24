@@ -156,7 +156,7 @@ const createPositionAnnotations = (
   coords: Coordinates,
   color: string
 ): Partial<Plotly.Annotations>[] => {
-  const hovertext = `ref. support dist.: ${(position.x ?? 0).toFixed(2)}m<br />line axis dist.: ${(position.y ?? 0).toFixed(2)}m<br />point alt.: ${coords.z.toFixed(2)}m`;
+  const hovertext = `x : ${(position.x ?? 0).toFixed(2)}m<br />y : ${(position.y ?? 0).toFixed(2)}m<br />z : ${coords.z.toFixed(2)}m`;
   const data = {
     obstacleUuid: obstacle.uuid,
     obstaclePositionIndex: positionIndex,
