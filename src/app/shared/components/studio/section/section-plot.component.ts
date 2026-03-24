@@ -58,6 +58,15 @@ export class SectionPlotComponent {
     initialValue: ''
   });
 
+  private readonly currentAltitudeType = toSignal(this.obstacleFormService.form.get('altitudeType')!.valueChanges, {
+    initialValue: 'absolute'
+  });
+
+  private readonly currentReferenceSupport = toSignal(
+    this.obstacleFormService.form.get('referenceSupport')!.valueChanges,
+    { initialValue: null }
+  );
+
   // Computed state
   private readonly plotState = computed(() => ({
     litData: this.litData(),
@@ -68,7 +77,9 @@ export class SectionPlotComponent {
     pointIndex: this.obstaclesService.currentPointIndex(),
     sideTabs: this.sideTabsService.sideTabs(),
     positions: this.currentObstaclePositions(),
-    name: this.currentObstacleName()
+    name: this.currentObstacleName(),
+    altitudeType: this.currentAltitudeType(),
+    referenceSupport: this.currentReferenceSupport()
   }));
 
   // Debounced plot refresh with signal
@@ -167,6 +178,7 @@ export class SectionPlotComponent {
         currentObstacleUuid,
         currentObstaclePointIndex,
         obstacles,
+        supports,
         axesNorms
       });
       if (plot) {
