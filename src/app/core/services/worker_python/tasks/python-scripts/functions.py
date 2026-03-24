@@ -250,10 +250,13 @@ def apply_span_loads(span_loads: list):
     """Set span loads on the engine, replacing any previously applied loads.
 
     Always calls engine.add_loads to ensure stale loads from previous
-    calculations are cleared, even when all new loads are zero.
+    calculations are cleared, even when the list is empty or all loads are zero.
     """
     global plt_line, engine
     if not span_loads:
+        # Clear any previously applied loads by passing empty arrays
+        engine.add_loads(np.array([]), np.array([]))
+        plt_line = plt_line.generate_reset()
         return
     load_position_meters, load_mass = parse_span_loads(span_loads)
     engine.add_loads(load_position_meters, load_mass)

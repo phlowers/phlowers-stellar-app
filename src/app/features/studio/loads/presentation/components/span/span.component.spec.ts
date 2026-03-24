@@ -434,4 +434,30 @@ describe('SpanComponent', () => {
       expect(getByTestId('load-weight')).toBeNull();
     });
   });
+
+  describe('HTML rendering - zoom button', () => {
+    it('should render the zoom button', () => {
+      const btn = getByTestId('span-zoom');
+      expect(btn).toBeTruthy();
+      expect(btn?.tagName).toBe('BUTTON');
+    });
+
+    it('should call plotOptionsChange when zoom button is clicked with a selected span', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+
+      const btn = getByTestId('span-zoom') as HTMLButtonElement;
+      btn.click();
+
+      expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledTimes(1);
+      expect(mockPlotService['plotOptionsChange']).toHaveBeenCalledWith({ startSupport: 0, endSupport: 1 });
+    });
+
+    it('should not call plotOptionsChange when zoom button is clicked with no span selected', () => {
+      const btn = getByTestId('span-zoom') as HTMLButtonElement;
+      btn.click();
+
+      expect(mockPlotService['plotOptionsChange']).not.toHaveBeenCalled();
+    });
+  });
 });
