@@ -186,6 +186,7 @@ export class SectionPlotComponent {
     (
       plot as Plotly.PlotlyHTMLElement & {
         on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
+        on(e: 'plotly_relayout', fn: () => void): void;
       }
     ).on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
@@ -203,6 +204,14 @@ export class SectionPlotComponent {
         });
         this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
       }
+    });
+
+    (
+      plot as Plotly.PlotlyHTMLElement & {
+        on(e: 'plotly_relayout', fn: () => void): void;
+      }
+    ).on('plotly_relayout', () => {
+      this.plotService.refreshCamera();
     });
   };
 }

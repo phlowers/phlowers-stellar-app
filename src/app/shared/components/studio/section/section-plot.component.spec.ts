@@ -209,7 +209,8 @@ describe('SectionPlotComponent', () => {
     camera: cameraSignal,
     isFreePositioningMode: isFreePositioningModeSignal,
     axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
-    temporaryLoadData: null as ChargeData | null | undefined
+    temporaryLoadData: null as ChargeData | null | undefined,
+    refreshCamera: vi.fn()
   };
 
   const mockSideTabsService = {
@@ -856,6 +857,27 @@ describe('SectionPlotComponent', () => {
       const container = fixture.nativeElement.querySelector('[data-testid="section-plot-container"]');
       expect(container).toBeTruthy();
       expect(container.id).toBe('plotly-output');
+    });
+  });
+
+  describe('addEventListenersToPlot', () => {
+    it('should register plotly_relayout listener that calls refreshCamera', async () => {
+      const listeners = new Map<string, () => void>();
+      const plotWithListeners = {
+        on: vi.fn((event: string, callback: () => void) => {
+          listeners.set(event, callback);
+        })
+      };
+      mockCreatePlot.mockResolvedValueOnce(plotWithListeners as unknown as PlotlyHTMLElement);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(listeners.has('plotly_relayout')).toBe(true);
+
+      listeners.get('plotly_relayout')!();
+
+      expect(mockPlotService.refreshCamera).toHaveBeenCalledOnce();
     });
   });
 });
