@@ -7,4 +7,5 @@ Documentation of important bug fixes in Stellar.
 
 csv_import_validation_fix
 load_weight_zero_marker_fix
+incoherent_load_calculus_610
 ```
