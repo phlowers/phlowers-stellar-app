@@ -1,5 +1,5 @@
 import { PlotService } from '@services/plot/plot.service';
-import { effect, inject, Injectable } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
@@ -11,6 +11,11 @@ import { recheckSpanLoads } from '../helpers';
 })
 /** Service coordinating load form state, persisting charge data, and triggering load calculations via the Python worker. */
 export class LoadFormsService {
+  /** Active tab value for the load p-tabs panel ("0" = Climate, "1" = Load/Marking). */
+  readonly activeLoadTab = signal<string>('0');
+
+  /** UUID of the span support to select in the span form, set when clicking a load annotation. Cleared after consumption. */
+  readonly selectedSpanSupportUuid = signal<string | null>(null);
   /**
    * Initialize the temporary load data by getting the selected charge case and checking the span loads
    */

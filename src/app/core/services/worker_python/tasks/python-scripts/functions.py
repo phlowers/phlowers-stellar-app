@@ -196,19 +196,30 @@ base_plt_line = None
 
 
 def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
-    """Convert raw span load dicts into position and mass arrays."""
+    """Convert raw span load dicts into position and mass arrays.
+
+    Always returns arrays of size N = engine.support_number, matching the full
+    SectionArray (including the last anchor row).  engine.add_loads requires
+    "arrays of size matching the number of supports" (mechaphlowers docstring).
+
+    span_loads may have fewer entries than N when the charge was saved before all
+    supports existed, or when recheckSpanLoads was not applied before persisting.
+    Missing entries default to position=0, mass=0 (no load on that span).
+    """
     global engine
-    load_position_list = []
-    load_weight_list_daN = []
+    section_size = engine.support_number
     span_lengths = engine.section_array.data["span_length"].to_numpy()
-    for index, span in enumerate(span_loads):
+    load_position_list = [0.0] * section_size
+    load_weight_list_daN = [0.0] * section_size
+
+    for index, span in enumerate(span_loads[:section_size]):
         try:
             if span['referenceSupport'] == 'LEFT':
-                load_position_list.append(span["loadPosition"])
+                load_position_list[index] = span["loadPosition"]
             elif span['referenceSupport'] == 'RIGHT':
                 if 0 <= index < len(span_lengths):
                     span_length = span_lengths[index]
-                    load_position_list.append(span_length - span["loadPosition"])
+                    load_position_list[index] = span_length - span["loadPosition"]
                 else:
                     logging.warning(
                         "Span load index %s is out of bounds for span_length array (size %s). "
@@ -216,34 +227,49 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
                         index,
                         len(span_lengths),
                     )
-                    load_position_list.append(0)
             else:
-                load_position_list.append(0)
+                load_position_list[index] = 0
 
             if span['type'] == 'punctual':
-                load_weight_list_daN.append(span["loadWeight"])
+                # Use a tiny epsilon instead of 0 so the PlotEngine registers
+                # the load position and returns coordinates in get_loads_coords.
+                # A zero mass causes PlotEngine.get_loads_coords() to return no
+                # entry for that span, which prevents the marker from being drawn
+                # in createLoadAnnotations.ts (condition: spanIndex in load_coords).
+                # TODO: replace this epsilon with a proper PlotEngine API if
+                # mechaphlowers ever exposes register_load_position() without mass.
+                # See: docs-sphinx/source/user_docs/developer_guide/bugfixes/load_weight_zero_marker_fix.md
+                weight = span["loadWeight"]
+                load_weight_list_daN[index] = weight if weight != 0 else 1e-6
             else:
-                load_weight_list_daN.append(0.01)
+                load_weight_list_daN[index] = 0.01
         except KeyError as e:
             logging.warning(
                 "Span load at index %s is missing required key %s. "
-                "Skipping with defaults (position=0, weight=0.01).",
+                "Skipping with defaults (position=0, weight=0).",
                 index,
                 e,
             )
-            load_position_list.append(0)
-            load_weight_list_daN.append(0.01)
     load_mass_kg = units(load_weight_list_daN, 'daN').to('kg').magnitude
     return np.array(load_position_list), np.array(load_mass_kg)
 
 
 def apply_span_loads(span_loads: list):
-    """Parse span loads and add them to the engine if any are non-zero."""
+    """Set span loads on the engine, replacing any previously applied loads.
+
+    Always calls engine.add_loads to ensure stale loads from previous
+    calculations are cleared, even when the list is empty or all loads are zero.
+    """
     global plt_line, engine
-    load_position_meters, load_mass = parse_span_loads(span_loads)
-    if (load_position_meters != 0).any() and (load_mass != 0).any():
-        engine.add_loads(load_position_meters, load_mass)
+    if not span_loads:
+        # Clear any previously applied loads with a zero array of the right size
+        n = engine.support_number
+        engine.add_loads(np.zeros(n), np.zeros(n))
         plt_line = plt_line.generate_reset()
+        return
+    load_position_meters, load_mass = parse_span_loads(span_loads)
+    engine.add_loads(load_position_meters, load_mass)
+    plt_line = plt_line.generate_reset()
 
 
 def get_section_middle_span(start_support: int, end_support: int):

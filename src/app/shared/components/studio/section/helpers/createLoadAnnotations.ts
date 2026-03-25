@@ -7,6 +7,17 @@ const LOAD_ICON = '&#xf5cd;';
 const MARKING_ICON = '&#xf08d;';
 
 /**
+ * Data payload attached to a Plotly span load annotation for click event handling.
+ * @category Studio
+ */
+export interface SpanLoadAnnotationData {
+  /** Discriminator indicating this annotation represents a span load. */
+  type: 'spanLoad';
+  /** UUID of the support associated with this span load. */
+  supportUuid: string;
+}
+
+/**
  * Enumeration of load types used in plot annotations.
  * @category Studio
  */
@@ -45,9 +56,9 @@ const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
  * @param plotParams - The plot parameters including span loads, view, side, and coordinate data.
  * @returns An array of Plotly `Annotations` for load indicators.
  */
-export const createLoadAnnotations = (plotParams: CreatePlotParams): Plotly.Annotations[] => {
+export const createLoadAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
   const { side, view } = plotParams;
-  const annotations: Plotly.Annotations[] = [];
+  const annotations: Partial<Plotly.Annotations>[] = [];
   const load_coords = cloneDeep(plotParams.litData.loads_coords);
   plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
     if (spanLoad && spanIndex + plotParams.startSupport in load_coords) {
@@ -56,10 +67,11 @@ export const createLoadAnnotations = (plotParams: CreatePlotParams): Plotly.Anno
         ...BASE_ANNOTATION,
         x: side === 'face' && view === '2d' ? current_load_coord[1] : current_load_coord[0],
         y: plotParams.view === '2d' ? current_load_coord[2] : current_load_coord[1],
-        //@ts-expect-error Plotly.js-dist-min does not support z axis
+        // z and data are non-standard Plotly annotation properties used for 3D rendering and event handling
         z: current_load_coord[2],
-        text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON
-      });
+        text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON,
+        data: { type: 'spanLoad', supportUuid: spanLoad.supportUuid } as SpanLoadAnnotationData
+      } as Partial<Plotly.Annotations>);
     }
   });
   return annotations;

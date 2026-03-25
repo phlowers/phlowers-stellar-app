@@ -85,6 +85,14 @@ export class SpanComponent {
     this.onSpanSelectChange(value ?? null);
   });
 
+  private readonly externalSpanSelectionEffect = effect(() => {
+    const uuid = this.loadFormsService.selectedSpanSupportUuid();
+    if (uuid) {
+      this.form.controls.spanSelect.setValue(uuid);
+      this.loadFormsService.selectedSpanSupportUuid.set(null);
+    }
+  });
+
   private readonly loadPositionEffect = effect(() => {
     const value = this.loadControlSignals.loadPosition();
     if (value !== undefined) this.onLoadControlChange('loadPosition', value);
@@ -135,6 +143,17 @@ export class SpanComponent {
     return this.form.invalid;
   }
 
+  zoomToSpan(): void {
+    const uuid = this.form.controls.spanSelect.value;
+    if (!uuid) return;
+    const index = this.plotService.getSupportIndex(uuid);
+    if (index < 0) return;
+    this.plotService.plotOptionsChange({
+      startSupport: index,
+      endSupport: index + 1
+    });
+  }
+
   private findSelectedLoad(): SpanLoad | undefined {
     const uuidToFind = this.form.controls.spanSelect.value;
     if (!uuidToFind) {
@@ -158,10 +177,6 @@ export class SpanComponent {
 
     this.supportsOptions.set(untracked(() => this.plotService.getSupportOptions(supportUuid)));
     this.form.controls.referenceSupport.enable({ emitEvent: false });
-    this.plotService.plotOptionsChange({
-      startSupport: index,
-      endSupport: index + 1
-    });
     this.applySelectedLoadValues();
   }
 
@@ -174,12 +189,8 @@ export class SpanComponent {
       emitEvent: false
     });
     this.form.controls.type.setValue(load.type, { emitEvent: false });
-    this.form.controls.loadWeight.setValue(load.loadWeight ?? 0, {
-      emitEvent: false
-    });
-    this.form.controls.loadPosition.setValue(load.loadPosition ?? 0, {
-      emitEvent: false
-    });
+    this.form.controls.loadWeight.setValue(load.loadWeight ?? 0);
+    this.form.controls.loadPosition.setValue(load.loadPosition ?? 0);
   }
 
   private onLoadControlChange(controlName: LoadControlName, value: unknown) {

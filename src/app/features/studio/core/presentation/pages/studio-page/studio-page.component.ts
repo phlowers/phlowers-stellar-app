@@ -32,6 +32,7 @@ import { NewChargeModalComponent } from '@features/studio/loads/presentation/com
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { SectionService } from '@services/section/section.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
 import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
 
@@ -117,6 +118,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   readonly plotService = inject(PlotService);
+  readonly loadFormsService = inject(LoadFormsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly studiesService = inject(StudiesService);

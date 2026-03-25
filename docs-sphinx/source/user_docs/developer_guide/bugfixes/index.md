@@ -1,9 +1,0 @@
-# Bug Fixes
-
-Documentation of important bug fixes in Stellar.
-
-```{toctree}
-:maxdepth: 2
-
-csv_import_validation_fix
-```
