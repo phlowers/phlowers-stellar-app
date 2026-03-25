@@ -60,4 +60,10 @@ export class SectionPlotCardsComponent {
     }
     return this.plotService.plotOptions().invert ? [...array].reverse() : array;
   });
+
+  /** Returns the correct span index between two adjacent supports in the iteration. */
+  spanIndex(loopIndex: number): number {
+    const supports = this.arraysOfSupports();
+    return Math.min(supports[loopIndex], supports[loopIndex + 1]);
+  }
 }

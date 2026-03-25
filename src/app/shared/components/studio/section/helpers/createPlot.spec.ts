@@ -268,4 +268,44 @@ describe('createPlot', () => {
       expect(layoutArg.xaxis.autorange).toBe(true);
     });
   });
+
+  describe('3D invert camera behaviour', () => {
+    it('should set camera eye.y positive when invert is true and camera is null', () => {
+      createPlot({ ...defaultParams, view: '3d', invert: true, camera: null });
+
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      expect(layoutArg.scene.camera.eye.y).toBeGreaterThan(0);
+    });
+
+    it('should set camera eye.y negative when invert is false and camera is null', () => {
+      createPlot({ ...defaultParams, view: '3d', invert: false, camera: null });
+
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      expect(layoutArg.scene.camera.eye.y).toBeLessThan(0);
+    });
+
+    it('should set camera eye.y positive when invert is true and camera is provided', () => {
+      const inputCamera = { center: { x: 0, y: 0, z: 0 }, eye: { x: 0.02, y: -3.5, z: 0.2 }, up: { x: 0, y: 0, z: 1 } };
+      createPlot({ ...defaultParams, view: '3d', invert: true, camera: inputCamera });
+
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      expect(layoutArg.scene.camera.eye.y).toBeGreaterThan(0);
+    });
+
+    it('should set camera eye.y negative when invert is false and camera is provided', () => {
+      const inputCamera = { center: { x: 0, y: 0, z: 0 }, eye: { x: 0.02, y: 3.5, z: 0.2 }, up: { x: 0, y: 0, z: 1 } };
+      createPlot({ ...defaultParams, view: '3d', invert: false, camera: inputCamera });
+
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      expect(layoutArg.scene.camera.eye.y).toBeLessThan(0);
+    });
+
+    it('should not mutate the original camera object', () => {
+      const inputCamera = { center: { x: 0, y: 0, z: 0 }, eye: { x: 0.02, y: -3.5, z: 0.2 }, up: { x: 0, y: 0, z: 1 } };
+      const originalY = inputCamera.eye.y;
+      createPlot({ ...defaultParams, view: '3d', invert: true, camera: inputCamera });
+
+      expect(inputCamera.eye.y).toBe(originalY);
+    });
+  });
 });

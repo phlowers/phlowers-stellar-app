@@ -10,7 +10,7 @@ import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 import { PLOT_ID, PlotService, SelectedDisplayOptions } from '@services/plot/plot.service';
 import { SpanLoad } from '@shared/domain';
-import { LoadType } from './helpers/createLoadAnnotations';
+import { LoadType, SpanLoadAnnotationData } from './helpers/createLoadAnnotations';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -22,6 +22,7 @@ import {
   ObstacleAnnotationData
 } from './helpers/obstacles';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -45,6 +46,7 @@ export class SectionPlotComponent {
   private readonly sideTabsService = inject(SideTabsService);
   private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly obstaclesService = inject(ObstaclesService);
+  private readonly loadFormsService = inject(LoadFormsService);
 
   // Signals
   private readonly isPlotRefreshing = signal(false);
@@ -120,7 +122,9 @@ export class SectionPlotComponent {
 
     const spanLoads =
       this.plotService.temporaryLoadData?.spanLoads?.filter(
-        (load) => !!load && (!!load.loadWeight || load.type === LoadType.MARKING)
+        (load) =>
+          !!load &&
+          (load.type === LoadType.MARKING ? load.loadPosition !== 0 : load.loadWeight !== 0 || load.loadPosition !== 0)
       ) ?? [];
 
     return supportsUuids.map((supportUuid) => spanLoads.find((load) => load.supportUuid === supportUuid) ?? null);
@@ -193,7 +197,7 @@ export class SectionPlotComponent {
 
   addEventListenersToPlot = (plot: Plotly.PlotlyHTMLElement) => {
     interface ClickAnnotationEvent {
-      annotation?: { data?: ObstacleAnnotationData };
+      annotation?: { data?: ObstacleAnnotationData | SpanLoadAnnotationData };
     }
     (
       plot as Plotly.PlotlyHTMLElement & {
@@ -204,7 +208,7 @@ export class SectionPlotComponent {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.plotService.section();
         const payload = getObstacleClickPayload(
-          event?.annotation?.data,
+          event?.annotation?.data as ObstacleAnnotationData,
           section?.obstacles ?? [],
           section?.supports ?? []
         );
@@ -215,6 +219,11 @@ export class SectionPlotComponent {
           endSupport: payload.supportIndex + 1
         });
         this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
+      } else if (event?.annotation?.data?.type === 'spanLoad') {
+        const data = event.annotation.data as SpanLoadAnnotationData;
+        this.sideTabsService.sideTabs.set(0);
+        this.loadFormsService.activeLoadTab.set('1');
+        this.loadFormsService.selectedSpanSupportUuid.set(data.supportUuid);
       }
     });
 

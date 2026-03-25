@@ -55,6 +55,11 @@ const normalCamera = () => ({
     x: 0.02,
     y: -3.5,
     z: 0.2
+  },
+  up: {
+    x: 0,
+    y: 0,
+    z: 1
   }
 });
 
@@ -65,13 +70,15 @@ const axis = {
 };
 
 const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => {
-  if (plotParams.camera) {
-    const y = Math.abs(plotParams.camera.eye?.y || 0);
-    plotParams.camera.eye = {
-      ...plotParams.camera.eye,
+  const baseCamera = plotParams.camera ?? normalCamera();
+  const y = Math.abs(baseCamera.eye?.y || 0);
+  const camera: Partial<Camera> = {
+    ...baseCamera,
+    eye: {
+      ...baseCamera.eye,
       y: plotParams.invert ? y : y * -1
-    };
-  }
+    }
+  };
   return {
     aspectmode:
       plotParams.axesNorms?.aspectMode &&
@@ -89,11 +96,7 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
       z: plotParams.axesNorms?.z ?? 0.5
     },
     annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)],
-    camera: plotParams.camera
-      ? plotParams.camera
-      : {
-          ...normalCamera()
-        }
+    camera
   };
 };
 

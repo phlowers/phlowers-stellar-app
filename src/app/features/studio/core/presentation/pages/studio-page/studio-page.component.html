@@ -112,7 +112,12 @@
   <app-side-tabs>
     <app-side-tab label="Charges">
       <ng-template>
-        <p-tabs value="0" class="load-tabs" data-testid="load-tabs">
+        <p-tabs
+          [value]="loadFormsService.activeLoadTab()"
+          (valueChange)="loadFormsService.activeLoadTab.set($event.toString())"
+          class="load-tabs"
+          data-testid="load-tabs"
+        >
           <p-tablist>
             <p-tab value="0" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Climate condition</p-tab>
             <p-tab value="1" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Load / Marking</p-tab>
