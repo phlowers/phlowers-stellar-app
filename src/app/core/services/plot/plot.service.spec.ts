@@ -274,6 +274,33 @@ describe('PlotService', () => {
       service.plotOptionsChange({ invert: true });
       expect(service.plotOptions().invert).toBe(true);
     });
+
+    it('should set spanAmountChoice to single when diff is 1', () => {
+      service.plotOptionsChange({ startSupport: 2, endSupport: 3 });
+      expect(service.spanAmountChoice()).toBe('single');
+    });
+
+    it('should set spanAmountChoice to double when diff is 2', () => {
+      service.plotOptionsChange({ startSupport: 1, endSupport: 3 });
+      expect(service.spanAmountChoice()).toBe('double');
+    });
+
+    it('should set spanAmountChoice to all when diff is greater than 2', () => {
+      service.plotOptionsChange({ startSupport: 0, endSupport: 5 });
+      expect(service.spanAmountChoice()).toBe('all');
+    });
+
+    it('should not change spanAmountChoice when only view changes', () => {
+      service.spanAmountChoice.set('single');
+      service.plotOptionsChange({ view: '2d' });
+      expect(service.spanAmountChoice()).toBe('single');
+    });
+
+    it('should not change spanAmountChoice when only invert changes', () => {
+      service.spanAmountChoice.set('double');
+      service.plotOptionsChange({ invert: true });
+      expect(service.spanAmountChoice()).toBe('double');
+    });
   });
 
   describe('getSpanOptions', () => {

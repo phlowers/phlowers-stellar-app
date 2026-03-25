@@ -197,6 +197,10 @@ export class PlotService {
     const oldOptions = untracked(() => this.plotOptions());
     const newOptions = { ...oldOptions, ...values };
     this.plotOptions.set(newOptions);
+    if ('startSupport' in values || 'endSupport' in values) {
+      const diff = Math.abs(newOptions.endSupport - newOptions.startSupport);
+      this.spanAmountChoice.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
+    }
     this.refreshCamera();
     if (
       checkIfProjectionNeedRefresh(
