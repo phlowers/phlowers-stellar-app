@@ -12,10 +12,10 @@ import { LoadFormsService } from '../../services/loadForms.service';
 import { emptySpanLoad } from '../../helpers';
 import { LoadType, SpanLoad } from '@shared/domain/models/charge.model';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { LoadControlName, SpanFormControls, SupportOption } from './span.interfaces';
+import { LoadControlName, SpanFormControls, SupportOption } from './load-marking.interfaces';
 
 @Component({
-  selector: 'app-span',
+  selector: 'app-load-marking',
   imports: [
     ReactiveFormsModule,
     InputText,
@@ -27,12 +27,12 @@ import { LoadControlName, SpanFormControls, SupportOption } from './span.interfa
     ToggleSwitchModule,
     FormsModule
   ],
-  templateUrl: './span.component.html',
-  styleUrl: './span.component.scss',
+  templateUrl: './load-marking.component.html',
+  styleUrl: './load-marking.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Component for configuring span-level loads including type, weight, and position relative to supports. */
-export class SpanComponent {
+export class LoadMarkingComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   readonly loadFormsService = inject(LoadFormsService);

@@ -32,8 +32,8 @@ import { SectionPlotCardsComponent } from '../../components/cards/section-plot-c
 import { SideTabsComponent } from '../../components/side-tabs/side-tabs.component';
 import { SideTabComponent } from '../../components/side-tabs/side-tab/side-tab.component';
 import { ClimateComponent } from '@features/studio/loads/presentation/components/climate/climate.component';
-import { SpanComponent } from '@features/studio/loads/presentation/components/span/span.component';
-import { NewChargeModalComponent } from '@features/studio/loads/presentation/components/new-charge-modal/new-charge-modal.component';
+import { LoadMarkingComponent } from '@src/app/features/studio/loads/presentation/components/load-marking/load-marking.component';
+import { NewChargeModalComponent } from '@src/app/shared/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
@@ -61,7 +61,7 @@ import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/he
     SideTabsComponent,
     SideTabComponent,
     ClimateComponent,
-    SpanComponent,
+    LoadMarkingComponent,
     NewChargeModalComponent,
     ToolbarDialogComponent,
     ObstaclesFormComponent,
