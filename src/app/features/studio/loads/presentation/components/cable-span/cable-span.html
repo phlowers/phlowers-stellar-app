@@ -1,1 +1,109 @@
-<p>cable-span works!</p>,
+<form [formGroup]="form" class="cable-span__form" data-testid="cable-span-form">
+  <div class="cable-span__reset">
+    <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" data-testid="cable-span-reset">
+      <app-icon icon="refresh" />
+      <ng-container i18n>Reset</ng-container>
+    </button>
+  </div>
+
+  <div>
+    <label for="scope" i18n>Span</label>
+    <p-select
+      inputId="scope"
+      [options]="spansOptions()"
+      fluid
+      formControlName="scope"
+      optionLabel="label"
+      optionValue="value"
+      (onChange)="onScopeChange($event.value)"
+      data-testid="cable-span-scope"
+    />
+  </div>
+
+  <div>
+    <label for="supportRef" i18n>Reference support</label>
+    <p-select
+      inputId="supportRef"
+      [options]="supportRefOptions()"
+      fluid
+      formControlName="supportRef"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="cable-span-support-ref"
+    />
+  </div>
+
+  <div class="col-span-2">
+    <label for="widthCable" i18n>Cable modification</label>
+    <p-select
+      inputId="widthCable"
+      fluid
+      [options]="widthCableOptions"
+      formControlName="widthCable"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="cable-span-width-cable"
+    />
+  </div>
+
+  <div>
+    <label for="sizeCable" i18n>Cable length mod.</label>
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="sizeCable"
+        fluid
+        formControlName="sizeCable"
+        data-testid="cable-span-size-cable"
+      />
+      <p-inputgroup-addon i18n="@@unit.meters">m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div>
+    <label for="distanceSupportRef" i18n>Dist. to ref. support</label>
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="distanceSupportRef"
+        fluid
+        formControlName="distanceSupportRef"
+        data-testid="cable-span-distance-support-ref"
+      />
+      <p-inputgroup-addon i18n="@@unit.meters">m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="cable-span__btns">
+    <button
+      app-btn
+      btnStyle="danger"
+      type="button"
+      aria-label="delete cable span"
+      i18n-aria-label
+      (click)="deleteForm()"
+      data-testid="cable-span-delete"
+    >
+      <app-icon icon="delete" />
+    </button>
+
+    <button
+      app-btn
+      type="submit"
+      btnStyle="outlined"
+      (click)="saveForm()"
+      [disabled]="isFormInvalid()"
+      data-testid="cable-span-save"
+    >
+      <app-icon icon="save" />
+      <ng-container i18n>Save</ng-container>
+    </button>
+
+    <button app-btn [disabled]="isFormInvalid()" type="button" (click)="calculate()" data-testid="cable-span-calculate">
+      <app-icon icon="rocket_launch" />
+      <ng-container i18n>Calculate</ng-container>
+    </button>
+  </div>
+</form>
