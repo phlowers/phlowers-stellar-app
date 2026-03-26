@@ -76,7 +76,28 @@ interface PointVisuals {
 }
 
 /**
- * Builds distance line/marker traces and a distance value annotation for one obstacle point.
+ * Creates a text-only 2D scatter trace at the midpoint of the solid segment.
+ * Using a trace with `mode: 'text'` and `textposition` offsets the label in
+ * screen space (pixels), so it always appears beside the line regardless of
+ * its angle — no manual perpendicular-offset math needed.
+ */
+const createTextTrace = (mid: { x: number; y: number }, text: string): DataObject =>
+  ({
+    x: [mid.x],
+    y: [mid.y],
+    type: 'scatter',
+    mode: 'text',
+    text: [text],
+    textposition: 'top center',
+    textfont: { color: DISTANCE_COLOR, size: 11 },
+    showlegend: false,
+    hoverinfo: 'skip',
+    name: 'distance-label',
+    supportUuid: undefined
+  }) as DataObject;
+
+/**
+ * Builds distance line/marker traces and a distance value label for one obstacle point.
  *
  * Segment patterns per distance type:
  * - oblique:    solid line directly from linePoint → obstaclePoint
@@ -85,7 +106,9 @@ interface PointVisuals {
  * - horizontal: dotted line from linePoint → virtualPointHorizontal (vertical segment),
  *               solid line from virtualPointHorizontal → obstaclePoint (horizontal span)
  *
- * The numeric distance value is shown as an annotation at the midpoint of the solid segment.
+ * In 2D the distance value is rendered as a text-only scatter trace (textposition offsets
+ * it in screen-pixel space, keeping it beside the line for any orientation).
+ * In 3D it falls back to a scene annotation with a diagonal pixel shift.
  */
 const createPointVisuals = (
   obstacleCoord: Coord3,
@@ -117,7 +140,7 @@ const createPointVisuals = (
 
   traces.push(createMarkerTrace(linePoint, view, side));
 
-  // Annotation at midpoint of the solid segment with the numeric distance value
+  // Resolve the midpoint and distance value for the solid segment label
   let solidMid: Coord3;
   let distanceValue: number;
   if (distanceType === 'vertical') {
@@ -132,16 +155,24 @@ const createPointVisuals = (
   }
 
   const solidMidMapped = mapCoord(solidMid, view, side);
-  const is3d = view === '3d';
+  const labelText = `${distanceValue.toFixed(2)} m`;
 
+  if (view !== '3d') {
+    // 2D: use a text-only scatter trace — textposition handles the screen-space offset
+    traces.push(createTextTrace(solidMidMapped as { x: number; y: number }, labelText));
+    return { traces, annotation: null };
+  }
+
+  // 3D: scene annotations support xshift/yshift for a diagonal pixel offset
   const annotation = {
     showarrow: false,
-    text: `${distanceValue.toFixed(2)} m`,
+    text: labelText,
     font: { color: DISTANCE_COLOR, size: 11 },
     x: solidMidMapped.x,
     y: solidMidMapped.y,
-    ...(is3d ? { z: solidMidMapped.z } : {}),
+    z: solidMidMapped.z,
     xshift: 10,
+    yshift: 10,
     captureevents: false
   } as Partial<Plotly.Annotations>;
 

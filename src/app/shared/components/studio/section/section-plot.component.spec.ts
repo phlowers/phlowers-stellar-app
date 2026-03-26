@@ -26,9 +26,9 @@ vi.mock('./helpers/createShadowPlotData');
 
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 
-const mockCreatePlot = createPlot as vi.MockedFunction<typeof createPlot>;
-const mockCreatePlotData = createPlotData as vi.MockedFunction<typeof createPlotData>;
-const mockCreateShadowPlotData = createShadowPlotData as vi.MockedFunction<typeof createShadowPlotData>;
+const mockCreatePlot = vi.mocked(createPlot);
+const mockCreatePlotData = vi.mocked(createPlotData);
+const mockCreateShadowPlotData = vi.mocked(createShadowPlotData);
 
 const mockSupports: Support[] = [
   {
@@ -213,7 +213,7 @@ describe('SectionPlotComponent', () => {
     axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
     temporaryLoadData: null as ChargeData | null | undefined,
     plotOptionsChange: noopMock,
-    refreshCamera: noopMock
+    refreshCamera: noopMock,
     distances: signal([]),
     distanceType: signal<'oblique' | 'vertical' | 'horizontal'>('oblique')
   };
@@ -847,6 +847,7 @@ describe('SectionPlotComponent', () => {
 
     const makePlotWithCapture = () => {
       const self = {
+        removeAllListeners: vi.fn(),
         on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
           if (event === 'plotly_clickannotation') {
             capturedHandler = fn;

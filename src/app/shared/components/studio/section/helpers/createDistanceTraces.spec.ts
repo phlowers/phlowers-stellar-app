@@ -273,6 +273,54 @@ describe('createDistanceTraces', () => {
     });
   });
 
+  describe('2D distance label trace', () => {
+    it('should add a distance-label text trace for oblique in 2D', () => {
+      const result = createDistanceTraces(basePlotParams({ view: '2d', side: 'profile', distanceType: 'oblique' }));
+      const label = result.find((t: DataObject) => t.name === 'distance-label');
+      expect(label).toBeDefined();
+      expect((label as Record<string, unknown>).mode).toBe('text');
+      expect((label as Record<string, unknown>).textposition).toBe('top center');
+    });
+
+    it('should place oblique label at midpoint of linePoint → obstacleCoord', () => {
+      // mid([100,0,40], [120,0,5]) = [110, 0, 22.5] → profile: x=110, y=22.5
+      const result = createDistanceTraces(basePlotParams({ view: '2d', side: 'profile', distanceType: 'oblique' }));
+      const label = result.find((t: DataObject) => t.name === 'distance-label');
+      expect((label as Record<string, unknown>).x).toEqual([110]);
+      expect((label as Record<string, unknown>).y).toEqual([22.5]);
+    });
+
+    it('should show distanceDiagonal for oblique', () => {
+      const result = createDistanceTraces(basePlotParams({ view: '2d', side: 'profile', distanceType: 'oblique' }));
+      const label = result.find((t: DataObject) => t.name === 'distance-label');
+      expect((label as Record<string, unknown>).text).toEqual(['234.00 m']);
+    });
+
+    it('should show distanceVertical for vertical', () => {
+      const result = createDistanceTraces(basePlotParams({ view: '2d', side: 'profile', distanceType: 'vertical' }));
+      const label = result.find((t: DataObject) => t.name === 'distance-label');
+      expect((label as Record<string, unknown>).text).toEqual(['35.00 m']);
+    });
+
+    it('should show distanceHorizontal for horizontal', () => {
+      const result = createDistanceTraces(basePlotParams({ view: '2d', side: 'profile', distanceType: 'horizontal' }));
+      const label = result.find((t: DataObject) => t.name === 'distance-label');
+      expect((label as Record<string, unknown>).text).toEqual(['20.00 m']);
+    });
+
+    it('should use the distance color for the font', () => {
+      const result = createDistanceTraces(basePlotParams({ view: '2d', side: 'profile', distanceType: 'oblique' }));
+      const label = result.find((t: DataObject) => t.name === 'distance-label');
+      expect(((label as Record<string, unknown>).textfont as Record<string, unknown>).color).toBe(DISTANCE_COLOR);
+    });
+
+    it('should not produce a distance-label trace in 3D', () => {
+      const result = createDistanceTraces(basePlotParams({ view: '3d', distanceType: 'oblique' }));
+      const label = result.find((t: DataObject) => t.name === 'distance-label');
+      expect(label).toBeUndefined();
+    });
+  });
+
   describe('common trace properties', () => {
     it('should hide legend and hover info on all traces', () => {
       const result = createDistanceTraces(basePlotParams());
@@ -328,14 +376,11 @@ describe('createDistanceAnnotations', () => {
       expect((result[0] as Record<string, unknown>).z).toBe(22.5);
     });
 
-    it('should place annotation at midpoint mapped for 2D profile', () => {
-      // mid([100,0,40], [120,0,5]) = [110, 0, 22.5] → profile: x=110, y=22.5
+    it('should return empty array for 2D (label is rendered as a text trace instead)', () => {
       const result = createDistanceAnnotations(
         basePlotParams({ view: '2d', side: 'profile', distanceType: 'oblique' })
       );
-      expect(result[0].x).toBe(110);
-      expect(result[0].y).toBe(22.5);
-      expect((result[0] as Record<string, unknown>).z).toBeUndefined();
+      expect(result).toEqual([]);
     });
   });
 

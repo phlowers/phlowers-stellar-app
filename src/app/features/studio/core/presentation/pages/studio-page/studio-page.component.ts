@@ -36,6 +36,7 @@ import { SpanComponent } from '@features/studio/loads/presentation/components/sp
 import { NewChargeModalComponent } from '@features/studio/loads/presentation/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
 import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
@@ -155,6 +156,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   readonly plotService = inject(PlotService);
+  readonly loadFormsService = inject(LoadFormsService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
   private readonly route = inject(ActivatedRoute);

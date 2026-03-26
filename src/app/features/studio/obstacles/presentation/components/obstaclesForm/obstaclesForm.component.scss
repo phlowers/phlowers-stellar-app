@@ -28,9 +28,6 @@
     @apply flex flex-row justify-between items-center;
   }
 
-  // obstacles-form__divided-line
-  // obstacles-form__divided-line--three
-
   &__grid-2-cols {
     @apply grid grid-cols-2;
     grid-template-areas:

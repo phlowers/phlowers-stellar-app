@@ -392,6 +392,53 @@ export class PlotService {
     return this.section()?.supports?.findIndex((s) => s.uuid === supportUuid) ?? -1;
   };
 
+  /**
+   * Re-applies all obstacles from the current section, starting from the correct base state.
+   *
+   * If a load state is active (temporaryLoadData is set), first restores that state via
+   * Task.changeState before adding obstacles, so that obstacles are always layered on top
+   * of the correct base. Then iterates over each obstacle, calls Task.addObstacle for each,
+   * and if any obstacles exist, calls Task.calculateObstaclesDistances to refresh the
+   * distances signal. Updates litData and distances signals on completion.
+   */
+  async reapplyObstacles(): Promise<void> {
+    const section = untracked(() => this.section());
+    const obstacles = section?.obstacles ?? [];
+    const plotOptions = untracked(() => this.plotOptions());
+
+    let currentLitData = untracked(() => this.litData());
+
+    // Restore the load-applied base state before re-adding obstacles
+    if (this.temporaryLoadData) {
+      const { result: loadResult } = await this.workerPythonService.runTask(Task.changeState, {
+        climate: this.temporaryLoadData.climate,
+        spanLoads: this.temporaryLoadData.spanLoads
+      });
+      if (loadResult?.current) {
+        currentLitData = loadResult.current;
+        this.baseLitData.set(loadResult.base ?? null);
+      }
+    }
+
+    for (const obstacle of obstacles) {
+      const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
+      if (obstacleResult?.current) {
+        currentLitData = obstacleResult.current;
+      }
+    }
+
+    if (obstacles.length) {
+      const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
+        startSupport: plotOptions.startSupport,
+        endSupport: plotOptions.endSupport,
+        view: plotOptions.view
+      });
+      this.distances.set(distances ?? []);
+    }
+
+    this.litData.set(currentLitData);
+  }
+
   getSupportOptions = (supportUuid: string | null): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
     if (supportUuid === null) {
       return [];

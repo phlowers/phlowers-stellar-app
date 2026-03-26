@@ -83,7 +83,7 @@ export class SectionPlotComponent {
     positions: this.currentObstaclePositions(),
     name: this.currentObstacleName(),
     altitudeType: this.currentAltitudeType(),
-    referenceSupport: this.currentReferenceSupport()
+    referenceSupport: this.currentReferenceSupport(),
     distances: this.plotService.distances(),
     distanceType: this.plotService.distanceType()
   }));
@@ -213,13 +213,13 @@ export class SectionPlotComponent {
         );
         if (!payload) return;
         this.sideTabsService.sideTabs.set(1);
+        this.obstaclesService.setSelectedObstacle(payload.obstacle.uuid, payload.obstaclePositionIndex);
         this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
       } else if (event?.annotation?.data?.type === 'spanLoad') {
         const data = event.annotation.data as SpanLoadAnnotationData;
         this.sideTabsService.sideTabs.set(0);
         this.loadFormsService.activeLoadTab.set('1');
         this.loadFormsService.selectedSpanSupportUuid.set(data.supportUuid);
-        this.obstaclesService.setSelectedObstacle(payload.obstacle.uuid, payload.obstaclePositionIndex);
       }
     });
 

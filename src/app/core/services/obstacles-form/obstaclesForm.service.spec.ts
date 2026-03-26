@@ -9,8 +9,8 @@ import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@sh
 import { Section, Study, Support } from '@shared/domain';
 import { ObstacleFormService } from './obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from '@shared/domain/obstacles/obstacle-form.constants';
-import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Distance } from '@services/worker_python/tasks/types';
+import { ChargeData } from '@shared/domain/models/charge.model';
 
 const mockSupports: Support[] = [
   {
@@ -121,6 +121,8 @@ describe('ObstacleFormService', () => {
     getSupportOptions: vi.Mock;
     getSpanOptions: vi.Mock;
     plotOptionsChange: vi.Mock;
+    reapplyObstacles: vi.Mock;
+    temporaryLoadData: ChargeData | null;
     spanAmountChoice: ReturnType<typeof signal<'single' | 'double' | 'all'>>;
     section: ReturnType<typeof signal<Section | null>>;
     study: ReturnType<typeof signal<Study | null>>;
@@ -130,9 +132,6 @@ describe('ObstacleFormService', () => {
     error: ReturnType<typeof signal<unknown>>;
     distances: ReturnType<typeof signal<Distance[]>>;
     distanceType: ReturnType<typeof signal<'oblique' | 'vertical' | 'horizontal'>>;
-  };
-  let mockWorkerPythonService: {
-    runTask: vi.Mock;
   };
   let mockObstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
@@ -155,6 +154,8 @@ describe('ObstacleFormService', () => {
       ]),
       getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]),
       plotOptionsChange: vi.fn(),
+      reapplyObstacles: vi.fn().mockResolvedValue(undefined),
+      temporaryLoadData: null,
       spanAmountChoice: spanAmountChoiceSignal,
       section: sectionSignal,
       study: signal<Study | null>(mockStudy),
@@ -164,9 +165,6 @@ describe('ObstacleFormService', () => {
       error: signal(null),
       distances: signal<Distance[]>([]),
       distanceType: signal<'oblique' | 'vertical' | 'horizontal'>('oblique')
-    };
-    mockWorkerPythonService = {
-      runTask: vi.fn().mockResolvedValue({ result: null, error: null })
     };
     mockObstaclesService = {
       activePointIndex: signal<number | null>(null),
@@ -189,8 +187,7 @@ describe('ObstacleFormService', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: ObstaclesService, useValue: mockObstaclesService },
         { provide: SectionService, useValue: mockSectionService },
-        { provide: MessageService, useValue: mockMessageService },
-        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
+        { provide: MessageService, useValue: mockMessageService }
       ]
     });
     service = TestBed.inject(ObstacleFormService);
@@ -603,11 +600,12 @@ describe('ObstacleFormService', () => {
           distanceVertical: 5,
         }]
       }];
-      mockWorkerPythonService.runTask
-        .mockResolvedValueOnce({ result: null, error: null })
-        .mockResolvedValueOnce({ result: mockDistances, error: null });
+      // Simulate reapplyObstacles setting distances (its internal responsibility)
+      mockPlotService.reapplyObstacles.mockImplementation(async () => {
+        mockPlotService.distances.set(mockDistances);
+      });
 
-      service.form.patchValue({ ...validFormBase, uuid: 'obs-dist' });
+      service.form.patchValue({ ...validFormBase, uuid: 'obs-dist', name: 'New Obstacle' });
       service.addPosition({ x: 1, y: 2, z: 3 });
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
       mockPlotService.section.set(section);
@@ -622,11 +620,7 @@ describe('ObstacleFormService', () => {
       expect(service.results().vertical).toBe(5);
     });
 
-    it('should set results to null when Python returns no matching distance', async () => {
-      mockWorkerPythonService.runTask
-        .mockResolvedValueOnce({ result: null, error: null })
-        .mockResolvedValueOnce({ result: [], error: null });
-
+    it('should set results to null when reapplyObstacles yields no matching distance', async () => {
       service.form.patchValue({ ...validFormBase, uuid: 'obs-nomatch' });
       service.addPosition({ x: 1, y: 2, z: 3 });
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
@@ -665,12 +659,7 @@ describe('ObstacleFormService', () => {
       expect(service.results().vertical).toBe(30);
     });
 
-    it('should store full distances array in plotService', async () => {
-      const mockDistances: Distance[] = [{ obstacleUuid: 'New Obstacle', points: [] }];
-      mockWorkerPythonService.runTask
-        .mockResolvedValueOnce({ result: null, error: null })
-        .mockResolvedValueOnce({ result: mockDistances, error: null });
-
+    it('should call reapplyObstacles to update plot state after saving', async () => {
       service.form.patchValue({ ...validFormBase, uuid: 'obs-store' });
       service.addPosition({ x: 1, y: 2, z: 3 });
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
@@ -679,7 +668,37 @@ describe('ObstacleFormService', () => {
 
       await service.calculateAndSave();
 
-      expect(mockPlotService.distances()).toEqual(mockDistances);
+      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+    });
+
+    it('should call reapplyObstacles with temporaryLoadData set so loads are re-applied', async () => {
+      const mockChargeData: ChargeData = {
+        climate: { windPressure: 100, cableTemperature: 20, symmetryType: 'SYMMETRIC' as ChargeData['climate']['symmetryType'], iceThickness: null, frontierSupportNumber: null, iceThicknessBefore: null, iceThicknessAfter: null },
+        spanLoads: []
+      };
+      mockPlotService.temporaryLoadData = mockChargeData;
+      service.form.patchValue({ ...validFormBase, uuid: 'obs-loads' });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      await service.calculateAndSave();
+
+      // reapplyObstacles is responsible for re-applying loads + obstacles together
+      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+    });
+
+    it('should set loading to false after calculateAndSave', async () => {
+      service.form.patchValue({ ...validFormBase, uuid: 'obs-loading' });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockPlotService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      await service.calculateAndSave();
+
+      expect(mockPlotService.loading()).toBe(false);
     });
   });
 

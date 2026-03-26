@@ -11,8 +11,6 @@ import { ObstacleFormGroupData, PositionFormGroup } from '@shared/domain/obstacl
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
-import { WorkerPythonService } from '../worker_python/worker-python.service';
-import { Task } from '../worker_python/tasks/types';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -24,7 +22,6 @@ export class ObstacleFormService {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
-  private readonly workerPythonService = inject(WorkerPythonService);
 
   form: FormGroup<ObstacleFormGroupData> = this.fb.group({
     uuid: [defaultObstacleForm.uuid],
@@ -179,7 +176,7 @@ export class ObstacleFormService {
     this.clearPositions();
   }
 
-loadObstacle(uuid: string): void {
+  loadObstacle(uuid: string): void {
     const obstacle = this.findObstacle(uuid);
     if (!obstacle) {
       return;
@@ -269,23 +266,10 @@ loadObstacle(uuid: string): void {
     const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
     this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
 
-    const { result: sectionOutput, error: errorAddObstacle } = await this.workerPythonService.runTask(
-      Task.addObstacle,
-      obstacle
-    );
-
-    const { result: distances, error: errorDistances } = await this.workerPythonService.runTask(
-      Task.calculateObstaclesDistances,
-      {
-        startSupport: this.plotService.plotOptions().startSupport,
-        endSupport: this.plotService.plotOptions().endSupport,
-        view: this.plotService.plotOptions().view
-      }
-    );
-
-    this.plotService.litData.set(sectionOutput?.current ?? null);
-    this.plotService.distances.set(distances ?? []);
-    this.plotService.error.set(errorAddObstacle ?? errorDistances);
+    // Re-apply all obstacles (including the newly saved one) on top of the correct base state.
+    // reapplyObstacles re-applies loads first if temporaryLoadData is set, then adds all
+    // section obstacles and recalculates distances — keeping both loads and obstacles in sync.
+    await this.plotService.reapplyObstacles();
     this.plotService.loading.set(false);
   }
 

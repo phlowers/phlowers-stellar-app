@@ -2,8 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { LoadFormsService } from './loadForms.service';
 import { PlotService } from '@services/plot/plot.service';
 import { ChargesService } from '@services/charges/charges.service';
-import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError, GetSectionOutput, GetSectionWithBaseOutput } from '@services/worker_python/tasks/types';
 import { Section, Charge, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
@@ -21,7 +19,6 @@ describe('LoadFormsService', () => {
   let service: LoadFormsService;
   let mockPlotService: vi.Mocked<PlotService>;
   let mockChargesService: vi.Mocked<ChargesService>;
-  let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
 
   const mockSection: Section = {
     uuid: 'section-uuid-1',
@@ -128,7 +125,8 @@ describe('LoadFormsService', () => {
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
-      refreshCamera: vi.fn()
+      refreshCamera: vi.fn(),
+      reapplyObstacles: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
 
     mockChargesService = {
@@ -137,16 +135,11 @@ describe('LoadFormsService', () => {
       deleteCharge: vi.fn()
     } as unknown as vi.Mocked<ChargesService>;
 
-    mockWorkerPythonService = {
-      runTask: vi.fn()
-    } as unknown as vi.Mocked<WorkerPythonService>;
-
     TestBed.configureTestingModule({
       providers: [
         LoadFormsService,
         { provide: PlotService, useValue: mockPlotService },
-        { provide: ChargesService, useValue: mockChargesService },
-        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
+        { provide: ChargesService, useValue: mockChargesService }
       ]
     });
 
@@ -269,73 +262,41 @@ describe('LoadFormsService', () => {
 
       await service.calculateLoad();
 
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      expect(mockPlotService.reapplyObstacles).not.toHaveBeenCalled();
+      expect(mockPlotService.refreshCamera).not.toHaveBeenCalled();
     });
 
-    it('should call runTask with changeState task', async () => {
+    it('should call refreshCamera and reapplyObstacles when temporaryLoadData is set', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.section.mockReturnValue(mockSection);
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: {} as unknown as GetSectionWithBaseOutput,
-        error: null
-      });
 
       await service.calculateLoad();
 
       expect(mockPlotService.refreshCamera).toHaveBeenCalled();
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.changeState,
-        expect.objectContaining({
-          climate: mockChargeData.climate,
-          spanLoads: expect.any(Array)
-        })
-      );
+      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+    });
+
+    it('should update temporaryLoadData spanLoads with rechecked values before delegating', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockPlotService.section.mockReturnValue(mockSection);
+
+      await service.calculateLoad();
+
+      // After recheckSpanLoads, the spanLoads should include an entry for each support
+      expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
+      expect(mockPlotService.temporaryLoadData?.spanLoads.some(
+        (l) => l.supportUuid === 'support-uuid-1'
+      )).toBe(true);
     });
 
     it('should set loading to true then false', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.section.mockReturnValue(mockSection);
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: {} as unknown as GetSectionWithBaseOutput,
-        error: null
-      });
 
       await service.calculateLoad();
 
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
-    });
-
-    it('should set litData and baseLitData from task result', async () => {
-      const mockCurrentData = { spans: [[]] } as unknown as GetSectionOutput;
-      const mockBaseData = { spans: [[]] } as unknown as GetSectionOutput;
-      const mockError = 'test-error' as unknown as TaskError;
-      mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue(mockSection);
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current: mockCurrentData, base: mockBaseData },
-        error: mockError
-      });
-
-      await service.calculateLoad();
-
-      expect(mockPlotService.litData.set).toHaveBeenCalledWith(mockCurrentData);
-      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(mockBaseData);
-      expect(mockPlotService.error.set).toHaveBeenCalledWith(mockError);
-    });
-
-    it('should set litData to null when result is null', async () => {
-      mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue(mockSection);
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: null as unknown as GetSectionWithBaseOutput,
-        error: null
-      });
-
-      await service.calculateLoad();
-
-      expect(mockPlotService.litData.set).toHaveBeenCalledWith(null);
-      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(null);
     });
   });
 
