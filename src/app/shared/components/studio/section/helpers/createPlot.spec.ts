@@ -10,6 +10,7 @@ import Plotly from 'plotly.js-dist-min';
 import { SpanLoad } from '@shared/domain';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
+import { type Mock } from 'vitest';
 
 // Mock Plotly
 vi.mock('plotly.js-dist-min', () => ({
@@ -41,7 +42,7 @@ describe('createPlot', () => {
     });
 
     // Mock Plotly.react to return a resolved promise
-    (Plotly.react as vi.Mock).mockResolvedValue(undefined);
+    (Plotly.react as Mock).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -98,7 +99,8 @@ describe('createPlot', () => {
     endSupport: 0,
     obstacles: [],
     currentObstacleUuid: null,
-    currentObstaclePointIndex: 0
+    currentObstaclePointIndex: 0,
+    supports: []
   };
 
   describe('basic functionality', () => {
@@ -131,14 +133,14 @@ describe('createPlot', () => {
     it('should configure scene with data aspectmode', () => {
       createPlot({ ...defaultParams });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.scene.aspectmode).toBe('manual');
     });
 
     it('should configure scene with correct aspectratio', () => {
       createPlot({ ...defaultParams });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.scene.aspectratio).toEqual({ x: 3, y: 0.2, z: 0.5 });
     });
   });
@@ -147,7 +149,7 @@ describe('createPlot', () => {
     it('should have basic layout properties', () => {
       createPlot({ ...defaultParams, view: '2d' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.showlegend).toBe(false);
       expect(layoutArg.plot_bgcolor).toBe('gainsboro');
@@ -156,7 +158,7 @@ describe('createPlot', () => {
     it('should have correct margin configuration', () => {
       createPlot({ ...defaultParams, view: '2d' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.margin).toEqual({
         l: 50,
         r: 0,
@@ -168,21 +170,21 @@ describe('createPlot', () => {
     it('should configure xaxis with autorange true for profile side', () => {
       createPlot({ ...defaultParams, view: '2d' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.xaxis.autorange).toBe(true);
     });
 
     it('should configure xaxis with autorange true for face side', () => {
       createPlot({ ...defaultParams, view: '2d', side: 'face' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.xaxis.autorange).toBe(true);
     });
 
     it('should configure xaxis with common properties', () => {
       createPlot({ ...defaultParams, view: '2d' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.xaxis.backgroundcolor).toBe('gainsboro');
       expect(layoutArg.xaxis.gridcolor).toBe('dimgray');
       expect(layoutArg.xaxis.showbackground).toBe(true);
@@ -194,7 +196,7 @@ describe('createPlot', () => {
     it('should configure yaxis with scaleratio and scaleanchor for face side', () => {
       createPlot({ ...defaultParams, view: '2d', side: 'face' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.scaleratio).toBe(0.2);
       expect(layoutArg.yaxis.scaleanchor).toBe('x');
     });
@@ -202,7 +204,7 @@ describe('createPlot', () => {
     it('should configure yaxis without scaleratio and scaleanchor for profile side', () => {
       createPlot({ ...defaultParams, view: '2d' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.scaleratio).toBeUndefined();
       expect(layoutArg.yaxis.scaleanchor).toBeUndefined();
     });
@@ -210,7 +212,7 @@ describe('createPlot', () => {
     it('should configure yaxis with common properties', () => {
       createPlot({ ...defaultParams, view: '2d' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.backgroundcolor).toBe('gainsboro');
       expect(layoutArg.yaxis.gridcolor).toBe('dimgray');
       expect(layoutArg.yaxis.showbackground).toBe(true);
@@ -222,7 +224,7 @@ describe('createPlot', () => {
     it('should not have scene property in 2d layout', () => {
       createPlot({ ...defaultParams, view: '2d' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.scene).toBeUndefined();
     });
 
@@ -244,7 +246,7 @@ describe('createPlot', () => {
         side: 'face'
       });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.xaxis.autorange).toBe(true);
       expect(layoutArg.yaxis.scaleratio).toBe(0.2);
@@ -253,7 +255,7 @@ describe('createPlot', () => {
     it('should work with invert parameter set to true', () => {
       createPlot({ ...defaultParams, view: '2d', invert: true });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.xaxis.autorange).toBe('reversed');
     });
@@ -261,7 +263,7 @@ describe('createPlot', () => {
     it('should work with invert parameter set to false', () => {
       createPlot({ ...defaultParams, view: '2d', side: 'face' });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.xaxis.autorange).toBe(true);
     });

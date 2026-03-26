@@ -60,6 +60,15 @@ export class SectionPlotComponent {
     initialValue: ''
   });
 
+  private readonly currentAltitudeType = toSignal(this.obstacleFormService.form.get('altitudeType')!.valueChanges, {
+    initialValue: 'absolute'
+  });
+
+  private readonly currentReferenceSupport = toSignal(
+    this.obstacleFormService.form.get('referenceSupport')!.valueChanges,
+    { initialValue: null }
+  );
+
   // Computed state
   private readonly plotState = computed(() => ({
     litData: this.litData(),
@@ -70,7 +79,9 @@ export class SectionPlotComponent {
     pointIndex: this.obstaclesService.currentPointIndex(),
     sideTabs: this.sideTabsService.sideTabs(),
     positions: this.currentObstaclePositions(),
-    name: this.currentObstacleName()
+    name: this.currentObstacleName(),
+    altitudeType: this.currentAltitudeType(),
+    referenceSupport: this.currentReferenceSupport()
   }));
 
   // Debounced plot refresh with signal
@@ -171,6 +182,7 @@ export class SectionPlotComponent {
         currentObstacleUuid,
         currentObstaclePointIndex,
         obstacles,
+        supports,
         axesNorms
       });
       if (plot) {
@@ -190,6 +202,7 @@ export class SectionPlotComponent {
     (
       plot as Plotly.PlotlyHTMLElement & {
         on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
+        on(e: 'plotly_relayout', fn: () => void): void;
       }
     ).on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
@@ -212,6 +225,14 @@ export class SectionPlotComponent {
         this.loadFormsService.activeLoadTab.set('1');
         this.loadFormsService.selectedSpanSupportUuid.set(data.supportUuid);
       }
+    });
+
+    (
+      plot as Plotly.PlotlyHTMLElement & {
+        on(e: 'plotly_relayout', fn: () => void): void;
+      }
+    ).on('plotly_relayout', () => {
+      this.plotService.refreshCamera();
     });
   };
 }
