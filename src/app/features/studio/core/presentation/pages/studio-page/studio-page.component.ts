@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
@@ -35,18 +36,15 @@ import { SpanComponent } from '@features/studio/loads/presentation/components/sp
 import { NewChargeModalComponent } from '@features/studio/loads/presentation/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
-import { SectionService } from '@services/section/section.service';
-import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
 import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
-
-// debounce to make it more fluid when dragging the slider
-const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
+import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
   selector: 'app-studio-page',
   imports: [
+    DecimalPipe,
     FormsModule,
     NgxSliderModule,
     InputNumberModule,
@@ -126,8 +124,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     };
   });
 
-  public readonly distanceType!: 'oblique' | 'vertical' | 'horizontal';
-
   filteredObstaclesOptions = computed(() => {
     const section = this.plotService.section();
     if (!section) return [];
@@ -159,13 +155,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   readonly plotService = inject(PlotService);
-  readonly loadFormsService = inject(LoadFormsService);
   public readonly obstaclesService = inject(ObstaclesService);
-  private readonly obstacleFormService = inject(ObstacleFormService);
+  public readonly obstacleFormService = inject(ObstacleFormService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly studiesService = inject(StudiesService);
-  private readonly sectionService = inject(SectionService);
   private readonly destroyRef = inject(DestroyRef);
 
   previousSectionUuid = signal<string | null>(null);
@@ -219,7 +213,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const diff = Math.abs(options.endSupport - options.startSupport);
     const spanAmount = this.getSpanAmount(diff);
     this.plotService.spanAmountChoice.set(spanAmount);
-  }, DEBOUNCED_REFRESH_STUDIO_DELAY);
+  }, STUDIO_PLOT_DEBOUNCE_DELAY);
 
   private getSpanAmount(diff: number): 'single' | 'double' | 'all' {
     if (diff === 1) return 'single';
@@ -261,14 +255,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onObstacleSelect(uuid: string | null) {
+    this.plotService.distanceType.set(null);
     const obstacle = uuid ? this.plotService.section()?.obstacles.find((o) => o.uuid === uuid) : null;
     const pointIndex = obstacle?.positions.length === 1 ? 0 : null;
     this.obstaclesService.setSelectedObstacle(uuid, pointIndex);
     if (obstacle) {
-      const supportIndex = this.plotService.getSupportIndex(obstacle.supportUuid);
-      if (supportIndex >= 0) {
-        this.plotService.plotOptionsChange({ startSupport: supportIndex, endSupport: supportIndex + 1 });
-      }
       this.obstacleFormService.setExistingObstacle(obstacle, pointIndex ?? 0);
     }
   }

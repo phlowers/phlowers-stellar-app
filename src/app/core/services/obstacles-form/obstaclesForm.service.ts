@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PlotService } from '@services/plot/plot.service';
 import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { SectionService } from '@services/section/section.service';
@@ -7,9 +7,10 @@ import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from '@shared/domain/obstacles/obstacle-form.constants';
-import { ObstacleFormGroupData } from '@shared/domain/obstacles/obstacle-form.interfaces';
+import { ObstacleFormGroupData, PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { WorkerPythonService } from '../worker_python/worker-python.service';
 import { Task } from '../worker_python/tasks/types';
 
@@ -33,30 +34,10 @@ export class ObstacleFormService {
     referenceSupport: [defaultObstacleForm.referenceSupport, Validators.required],
     altitudeType: [defaultObstacleForm.altitudeType, Validators.required],
     lateralDistanceType: [defaultObstacleForm.lateralDistanceType, Validators.required],
-    positions: this.fb.array<
-      FormGroup<{
-        x: FormControl<number | null>;
-        y: FormControl<number | null>;
-        z: FormControl<number | null>;
-      }>
-    >(this.fb.array(this.buildPositionControls(defaultObstacleForm.positions)).controls)
+    positions: this.fb.array<PositionFormGroup>(this.fb.array(this.buildPositionControls(defaultObstacleForm.positions)).controls)
   });
 
-  private readonly positionsSnapshot = signal<Position3D[]>([]);
-
-  constructor() {
-    // Subscribe to FormArray changes to keep the snapshot updated
-    this.positions.valueChanges.subscribe((positions) => {
-      this.positionsSnapshot.set(positions as Position3D[]);
-    });
-
-    // Initialize the snapshot with the current positions value
-    this.positionsSnapshot.set(this.positions.value as Position3D[]);
-  }
-
-  private buildPositionControls(
-    positions: Position3D[]
-  ): FormGroup<{ x: FormControl<number | null>; y: FormControl<number | null>; z: FormControl<number | null> }>[] {
+  private buildPositionControls(positions: Position3D[]): PositionFormGroup[] {
     return positions.map((position) => this.createPositionGroup(position));
   }
 
@@ -64,11 +45,12 @@ export class ObstacleFormService {
     return this.form.get('positions') as FormArray;
   }
 
-  createPositionGroup(position: Position3D = { x: null, y: null, z: null }): FormGroup<{
-    x: FormControl<number | null>;
-    y: FormControl<number | null>;
-    z: FormControl<number | null>;
-  }> {
+  private readonly positionsSnapshot = toSignal(
+    this.positions.valueChanges as Observable<Position3D[]>,
+    { initialValue: this.positions.value as Position3D[] }
+  );
+
+  createPositionGroup(position: Position3D = { x: null, y: null, z: null }): PositionFormGroup {
     return this.fb.group({
       x: [position.x],
       y: [position.y],
@@ -95,10 +77,8 @@ export class ObstacleFormService {
   }
 
   setExistingObstacle(obstacle: Obstacle, index: number): void {
-    // When selecting an existing obstacle (e.g. by clicking it on the plot),
-    // ensure the reference support options are refreshed for the obstacle span.
-    // This also keeps the plot focused on the correct support.
-    this.focusPlotOnSupport(obstacle.supportUuid);
+    // Refresh the reference support options for the obstacle's span.
+    this.refreshSupportsOptions(obstacle.supportUuid);
     this.form.patchValue(
       {
         uuid: obstacle.uuid,
@@ -115,31 +95,47 @@ export class ObstacleFormService {
     this.obstaclesService.setCurrentPointIndex(index);
   }
 
-  readonly supportsOptions = signal<{ label: number; value: string }[]>([]);
+  readonly supportsOptions = signal<{ label: number; value: 'LEFT' | 'RIGHT' }[]>([]);
 
-  readonly results = signal<{
-    oblique: number | null;
-    vertical: number | null;
-    horizontal: number | null;
-  }>({
-    oblique: null,
-    vertical: null,
-    horizontal: null
+  /**
+   * Distance results for the currently selected obstacle and point, derived reactively
+   * from the plotService distances. Updates automatically when distances are recalculated
+   * (after calculateAndSave) or restored (after refreshSection on re-open).
+   */
+  readonly results = computed(() => {
+    const distances = this.plotService.distances();
+    // TODO: Python currently uses obstacle.name as the key in distance results instead of UUID.
+    // Once the Python layer is updated to use obstacle.uuid, replace formValue().name with formValue().uuid.
+    const obstacleName = this.formValue().name;
+    const pointIndex = this.obstaclesService.activePointIndex();
+
+    if (!distances.length || !obstacleName || pointIndex === null) {
+      return { oblique: null, vertical: null, horizontal: null };
+    }
+
+    const obstacleDistances = distances.find((d) => d.obstacleUuid === obstacleName);
+    const pointDistances = obstacleDistances?.points?.find((p) => p.pointIndex === pointIndex);
+
+    return {
+      oblique: pointDistances?.distanceDiagonal ?? null,
+      vertical: pointDistances?.distanceVertical ?? null,
+      horizontal: pointDistances?.distanceHorizontal ?? null
+    };
   });
 
   readonly formValue = toSignal(this.form.valueChanges, {
     initialValue: this.form.getRawValue()
   });
 
-  readonly isFormValidSignal = computed(() => {
+  readonly isFormValid = computed(() => {
     this.formValue(); // to recalculate
     return this.form.valid;
   });
 
-  readonly canCalculateAndSaveSignal = computed(() => {
+  readonly canCalculateAndSave = computed(() => {
     const positions = this.positionsSnapshot();
     return (
-      this.isFormValidSignal() &&
+      this.isFormValid() &&
       positions.length > 0 &&
       positions.every((position: Position3D) => position.x !== null && position.y !== null && position.z !== null)
     );
@@ -147,7 +143,6 @@ export class ObstacleFormService {
 
   private readonly debouncedResetForm = debounce((supportUuid: string | null) => {
     this.resetForm(supportUuid);
-    this.resetResults();
   }, DEBOUNCED_UPDATE_POINT_DELAY);
 
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
@@ -159,17 +154,9 @@ export class ObstacleFormService {
     return this.form.value as Obstacle;
   }
 
-  private focusPlotOnSupport(supportUuid: string | null) {
+  private refreshSupportsOptions(supportUuid: string | null) {
     if (!supportUuid) {
       return;
-    }
-    const supportIndex = this.plotService.getSupportIndex(supportUuid);
-    if (supportIndex >= 0) {
-      this.plotService.plotOptionsChange({
-        startSupport: supportIndex,
-        endSupport: supportIndex + 1
-      });
-      this.plotService.spanAmountChoice.set('single');
     }
     const supports = this.plotService.getSupportOptions(supportUuid);
     this.supportsOptions.set(
@@ -192,11 +179,7 @@ export class ObstacleFormService {
     this.clearPositions();
   }
 
-  private resetResults() {
-    this.results.set({ oblique: null, vertical: null, horizontal: null });
-  }
-
-  loadObstacle(uuid: string): void {
+loadObstacle(uuid: string): void {
     const obstacle = this.findObstacle(uuid);
     if (!obstacle) {
       return;
@@ -286,36 +269,36 @@ export class ObstacleFormService {
     const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
     this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
 
-    const { result: sectionOutput, error: errorAddObstacle } = await this.workerPythonService.runTask(Task.addObstacle, obstacle)
+    const { result: sectionOutput, error: errorAddObstacle } = await this.workerPythonService.runTask(
+      Task.addObstacle,
+      obstacle
+    );
 
-    const { result: distances, error: errorDistances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, 
+    const { result: distances, error: errorDistances } = await this.workerPythonService.runTask(
+      Task.calculateObstaclesDistances,
       {
         startSupport: this.plotService.plotOptions().startSupport,
         endSupport: this.plotService.plotOptions().endSupport,
         view: this.plotService.plotOptions().view
       }
-    )
+    );
 
     this.plotService.litData.set(sectionOutput?.current ?? null);
-    // TODO: Draw distances + obstacles
-    this.plotService.error.set(errorAddObstacle);
-    this.plotService.error.set(errorDistances);
+    this.plotService.distances.set(distances ?? []);
+    this.plotService.error.set(errorAddObstacle ?? errorDistances);
     this.plotService.loading.set(false);
-
-    // TODO: change obstacle.name to obstacle.uuid
-    const currentDistances = distances?.find(d => d.obstacleUuid === obstacle.name);
-
-    this.results.set({
-      oblique: currentDistances?.points?.distanceDiagonal ?? null,
-      vertical: currentDistances?.points?.distanceVertical ?? null,
-      horizontal: currentDistances?.points?.distanceHorizontal ?? null
-    });
   }
 
-  private buildObstacleFromForm(): Obstacle {
+  buildObstacleFromForm(): Obstacle {
     const formValue = this.form.value;
+    // Use || so empty string also triggers UUID generation (defaultObstacleForm.uuid = '')
+    const uuid = formValue.uuid || uuidv4();
+    // Persist generated UUID back to the form so repeated calls use the same obstacle
+    if (!formValue.uuid) {
+      this.form.get('uuid')?.setValue(uuid, { emitEvent: false });
+    }
     return {
-      uuid: formValue.uuid ?? uuidv4(),
+      uuid,
       supportUuid: formValue.supportUuid!,
       name: formValue.name ?? '',
       type: formValue.type ?? '',
@@ -354,14 +337,6 @@ export class ObstacleFormService {
       summary: $localize`Success`,
       detail: $localize`Obstacle saved`
     });
-  }
-
-  isFormValid(): boolean {
-    return this.isFormValidSignal();
-  }
-
-  canCalculateAndSave(): boolean {
-    return this.canCalculateAndSaveSignal();
   }
 
   getErrorIds(controlName: string, errorTypes: string[]): string | null {

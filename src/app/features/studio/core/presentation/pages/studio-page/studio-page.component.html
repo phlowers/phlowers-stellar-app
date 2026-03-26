@@ -50,11 +50,18 @@
                 name="distanceType"
                 value="oblique"
                 inputId="oblique-distance"
-                [(ngModel)]="distanceType"
+                [(ngModel)]="plotService.distanceType"
                 [disabled]="!filteredObstaclesOptions().length"
+                data-testid="oblique-distance-radio"
               />
             </dt>
-            <dd class="quick-measures__list__value">N/A m</dd>
+            <dd class="quick-measures__list__value" data-testid="distance-oblique-value">
+              @if (obstacleFormService.results().oblique !== null) {
+                {{ obstacleFormService.results().oblique | number:'1.0-2' }} m
+              } @else {
+                -
+              }
+            </dd>
           </div>
 
           <div>
@@ -64,11 +71,18 @@
                 name="distanceType"
                 value="vertical"
                 inputId="vertical-distance"
-                [(ngModel)]="distanceType"
+                [(ngModel)]="plotService.distanceType"
                 [disabled]="!filteredObstaclesOptions().length"
+                data-testid="vertical-distance-radio"
               />
             </dt>
-            <dd class="quick-measures__list__value">N/A m</dd>
+            <dd class="quick-measures__list__value" data-testid="distance-vertical-value">
+              @if (obstacleFormService.results().vertical !== null) {
+                {{ obstacleFormService.results().vertical | number:'1.0-2' }} m
+              } @else {
+                -
+              }
+            </dd>
           </div>
 
           <div>
@@ -78,11 +92,18 @@
                 name="distanceType"
                 value="horizontal"
                 inputId="horizontal-distance"
-                [(ngModel)]="distanceType"
+                [(ngModel)]="plotService.distanceType"
                 [disabled]="!filteredObstaclesOptions().length"
+                data-testid="horizontal-distance-radio"
               />
             </dt>
-            <dd class="quick-measures__list__value">N/A m</dd>
+            <dd class="quick-measures__list__value" data-testid="distance-horizontal-value">
+              @if (obstacleFormService.results().horizontal !== null) {
+                {{ obstacleFormService.results().horizontal | number:'1.0-2' }} m
+              } @else {
+                -
+              }
+            </dd>
           </div>
         </dl>
       </div>

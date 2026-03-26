@@ -541,11 +541,10 @@ def add_obstacles(js_inputs: dict):
     get_coordinates_result["obstacles"] = [
         {
             "name": "obstacle_mock",
-            "points": [[100, 20, 0]]
+            "points": [[80, 20, 0]]
         }]
     result = {
         "current": get_coordinates_result,
-        # "base": get_coordinates_result,
     }
     return result
 
@@ -554,15 +553,15 @@ def calculate_obstacles_distances(js_inputs: dict):
 
     result = [{
         "obstacleUuid": "obstacle_mock",
-        "points" : {
+        "points" : [{
             "pointIndex": 0,
-            "linePoint": [100, 0, 40],
-            "virtualPointHorizontal": [100, 20, 0],
-            "virtualPointVertical": [100, 0, 40],
+            "linePoint": [87.13, -8.2, 12.76],
+            "virtualPointHorizontal": [87.13, -8.2, 0],
+            "virtualPointVertical": [80, 20, 12.76],
             "distanceDiagonal": 234,
             "distanceHorizontal": 555,
             "distanceVertical": 666,
-        }
+        }]
     }]
     return result
 

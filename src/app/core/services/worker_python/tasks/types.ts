@@ -263,17 +263,19 @@ export interface TaskInputs {
   };
 }
 
+export interface DistancePoint {
+  pointIndex: number;
+  linePoint: [number, number, number];
+  virtualPointHorizontal: [number, number, number];
+  virtualPointVertical: [number, number, number];
+  distanceDiagonal: number;
+  distanceHorizontal: number;
+  distanceVertical: number;
+}
+
 export interface Distance {
   obstacleUuid?: string;
-  points?: {
-    pointIndex: number;
-    linePoint: [number, number, number];
-    virtualPointHorizontal: [number, number, number];
-    virtualPointVertical: [number, number, number];
-    distanceDiagonal: number;
-    distanceHorizontal: number;
-    distanceVertical: number;
-  };
+  points: DistancePoint[];
 }
 
 /**

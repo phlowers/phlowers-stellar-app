@@ -1,6 +1,6 @@
 import { computed, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
 import { PlotOptions } from '@shared/types/plot.types';
-import { DataError, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
+import { DataError, Distance, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
 import { Section, Study } from '@shared/domain';
 import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
@@ -81,6 +81,14 @@ export interface SelectedDisplayOptions {
   baseState: boolean;
 }
 
+/** Normalization factors for the plot axes and Plotly aspect mode. */
+export interface AxesNorms {
+  x: number;
+  y: number;
+  z: number;
+  aspectMode: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -90,7 +98,7 @@ export class PlotService {
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
 
-  readonly axesNorms = signal<{ x: number; y: number; z: number; aspectMode: string }>({
+  readonly axesNorms = signal<AxesNorms>({
     x: 1,
     y: 1,
     z: 1,
@@ -112,6 +120,8 @@ export class PlotService {
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
   spanAmountChoice = signal<'single' | 'double' | 'all'>('all');
+  distances = signal<Distance[]>([]);
+  distanceType = signal<'oblique' | 'vertical' | 'horizontal' | null>(null);
 
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions
@@ -176,6 +186,8 @@ export class PlotService {
     this.study.set(null);
     this.spanAmountChoice.set('all');
     this.axesNorms.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    this.distances.set([]);
+    this.distanceType.set(null);
     this.injector.get(ObstacleFormService).clearPositions();
     this.obstaclesService.resetCurrentPointIndex();
     this.sideTabsService.sideTabs.set(null);
@@ -233,9 +245,29 @@ export class PlotService {
       return;
     }
     const { result, error } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
-    this.litData.set(result?.current ?? null);
+    let currentLitData = result?.current ?? null;
     this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
+
+    // Re-add obstacles from the section so that annotations and distance traces are preserved
+    // across section reloads (e.g. re-opening the study or after a save).
+    if (!error && section.obstacles?.length && currentLitData) {
+      for (const obstacle of section.obstacles) {
+        const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
+        if (obstacleResult?.current) {
+          currentLitData = obstacleResult.current;
+        }
+      }
+      const options = untracked(() => this.plotOptions());
+      const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
+        startSupport: options.startSupport,
+        endSupport: options.endSupport,
+        view: options.view
+      });
+      this.distances.set(distances ?? []);
+    }
+
+    this.litData.set(currentLitData);
     this.loading.set(false);
   };
 
@@ -267,8 +299,8 @@ export class PlotService {
       endSupport: this.plotOptions().endSupport,
       view: this.plotOptions().view
     });
-    this.litData.set(result.sectionOutput?.current ?? null);
-    this.baseLitData.set(result.sectionOutput?.base ?? null);
+    this.litData.set(result?.sectionOutput?.current ?? null);
+    this.baseLitData.set(result?.sectionOutput?.base ?? null);
     this.error.set(error);
     this.loading.set(false);
   };
@@ -284,7 +316,7 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  public setAxesNorms(norms: { x: number; y: number; z: number; aspectMode: string }): void {
+  public setAxesNorms(norms: AxesNorms): void {
     this.axesNorms.set(norms);
   }
 

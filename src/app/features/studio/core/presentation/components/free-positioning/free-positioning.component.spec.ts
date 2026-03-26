@@ -119,7 +119,20 @@ describe('FreePositioningComponent', () => {
 
     return {
       form,
-      positions: positionsFormArray
+      positions: positionsFormArray,
+      buildObstacleFromForm: vi.fn().mockReturnValue({
+        uuid: null,
+        name: 'test',
+        type: 'tree',
+        supportUuid: 's0',
+        referenceSupport: null,
+        altitudeType: 'absolute',
+        lateralDistanceType: 'left',
+        positions: [
+          { x: 1, y: 2, z: 3 },
+          { x: 4, y: 5, z: 6 }
+        ]
+      })
     };
   };
 

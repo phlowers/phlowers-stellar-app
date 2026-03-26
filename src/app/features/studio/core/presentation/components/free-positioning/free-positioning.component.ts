@@ -36,6 +36,7 @@ import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
 
 // Constants
 const PLOT_CONFIG = {
@@ -54,12 +55,6 @@ export const DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY = 100;
 const PLOT_IDS = {
   FACE: 'plotly-output-single-span-face-2',
   PROFILE: 'plotly-output-single-span-profile-2'
-} as const;
-
-const AXIS_CONFIG = {
-  backgroundcolor: 'gainsboro',
-  gridcolor: 'dimgray',
-  showbackground: true
 } as const;
 
 interface MousePosition {
@@ -169,22 +164,19 @@ export class FreePositioningComponent implements OnDestroy {
     this.destroyAllPlots();
     const startSupport = this.plotService.plotOptions().startSupport;
     this.isLoading.set(true);
-    const litData = await this.workerPythonService.runTask(Task.refreshProjection, {
-      startSupport: startSupport,
-      endSupport: startSupport + 1,
-      view: '2d'
-    });
+    const obstacle = this.obstacleFormService.buildObstacleFromForm();
+    const litData = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
 
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
       | ReferenceSupport
       | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
-    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.sectionOutput.current, referenceSupportIndex));
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
 
     const supports = this.plotService.section()?.supports ?? [];
     this.sharedYRange.set(null);
-    await this.createPlot(litData.result.sectionOutput.current, startSupport, 'face', supports);
-    await this.createPlot(litData.result.sectionOutput.current, startSupport, 'profile', supports);
+    await this.createPlot(litData.result.current, startSupport, 'face', supports);
+    await this.createPlot(litData.result.current, startSupport, 'profile', supports);
     this.synchronizeYAxisRanges();
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
@@ -306,14 +298,14 @@ export class FreePositioningComponent implements OnDestroy {
         b: PLOT_CONFIG.MARGIN_BOTTOM
       },
       yaxis: {
-        ...AXIS_CONFIG,
+        ...PLOT_AXIS_CONFIG,
         showticklabels: true,
         showgrid: true,
         showline: true,
         ...(sharedRange ? { range: [...sharedRange], autorange: false } : {})
       },
       xaxis: {
-        ...AXIS_CONFIG,
+        ...PLOT_AXIS_CONFIG,
         showticklabels: true,
         showgrid: true,
         showline: true

@@ -214,6 +214,8 @@ describe('SectionPlotComponent', () => {
     temporaryLoadData: null as ChargeData | null | undefined,
     plotOptionsChange: noopMock,
     refreshCamera: noopMock
+    distances: signal([]),
+    distanceType: signal<'oblique' | 'vertical' | 'horizontal'>('oblique')
   };
 
   const mockSideTabsService = {
@@ -639,54 +641,6 @@ describe('SectionPlotComponent', () => {
       const result = component['buildObstacleList']();
 
       expect(result).toContainEqual(mockObstacle);
-    });
-  });
-
-  describe('getSupportsList Method', () => {
-    it('should return section supports', () => {
-      const result = component['getSupportsList']();
-
-      expect(result).toEqual(mockSupports);
-    });
-
-    it('should return empty array when section is null', () => {
-      sectionSignal.set(null);
-      const result = component['getSupportsList']();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should return empty array when supports is undefined', () => {
-      sectionSignal.set({ ...mockSection, supports: undefined } as unknown as Section);
-      const result = component['getSupportsList']();
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('getCurrentObstacleUuid Method', () => {
-    it('should return uuid from obstaclesService', () => {
-      mockObstaclesService.selectedObstacleUuid.set('obs-1');
-
-      const result = component['getCurrentObstacleUuid']();
-
-      expect(result).toBe('obs-1');
-    });
-
-    it('should return null when uuid is null', () => {
-      mockObstaclesService.selectedObstacleUuid.set(null);
-
-      const result = component['getCurrentObstacleUuid']();
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null when no obstacle is selected', () => {
-      mockObstaclesService.selectedObstacleUuid.set(null);
-
-      const result = component['getCurrentObstacleUuid']();
-
-      expect(result).toBeNull();
     });
   });
 

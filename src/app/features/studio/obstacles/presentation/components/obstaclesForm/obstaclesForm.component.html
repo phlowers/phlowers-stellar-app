@@ -278,9 +278,8 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Oblique</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-oblique">
-              {{ (obstacleFormService.results().oblique | number:'1.0-2') ?? 'N/A' }}
+              {{ (obstacleFormService.results().oblique) ? (obstacleFormService.results().oblique | number:'1.0-2') + ' m' : '-' }}
             </span>
-            <ng-container i18n>m</ng-container>
           </dd>
         </div>
 
@@ -288,9 +287,8 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Vertical</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-vertical">
-              {{ (obstacleFormService.results().vertical | number:'1.0-2') ?? 'N/A' }}
+              {{ (obstacleFormService.results().vertical) ? (obstacleFormService.results().vertical | number:'1.0-2') + ' m' : '-' }}
             </span>
-            <ng-container i18n>m</ng-container>
           </dd>
         </div>
 
@@ -298,9 +296,8 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Horizontal</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-horizontal">
-              {{ (obstacleFormService.results().horizontal | number:'1.0-2') ?? 'N/A' }}
+              {{ (obstacleFormService.results().horizontal) ? (obstacleFormService.results().horizontal | number:'1.0-2') + ' m' : '-' }}
             </span>
-            <ng-container i18n>m</ng-container>
           </dd>
         </div>
       </dl>

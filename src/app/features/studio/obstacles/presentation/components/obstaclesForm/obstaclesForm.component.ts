@@ -19,7 +19,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '@services/plot/plot.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
-import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { debounce } from 'lodash';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
@@ -101,14 +101,27 @@ export class ObstaclesFormComponent {
     }
   }, DEBOUNCED_UPDATE_POINT_DELAY);
 
+  private firstSupportUuidEffectRun = true;
+
   private readonly supportUuidEffect = effect(() => {
     const supportUuid = this.supportUuidValue();
-    untracked(() => {
-      if (!supportUuid) {
-        this.plotService.isFreePositioningMode.set(false);
-      }
-      this.obstacleFormService.resetFormForNewObstacle(supportUuid);
-    });
+    if (this.firstSupportUuidEffectRun) {
+      this.firstSupportUuidEffectRun = false;
+      return;
+    }
+    if (!supportUuid) {
+      this.plotService.isFreePositioningMode.set(false);
+    }
+    // Skip reset when editing an existing saved obstacle — the span dropdown re-emitting
+    // (e.g. after PrimeNG refreshes its options following a section save) must not wipe the form.
+    const currentFormUuid = untracked(() => this.obstacleFormService.form.value.uuid);
+    const isEditingExisting =
+      !!currentFormUuid &&
+      untracked(() => !!this.plotService.section()?.obstacles?.some((o) => o.uuid === currentFormUuid));
+    if (isEditingExisting) {
+      return;
+    }
+    this.obstacleFormService.resetFormForNewObstacle(supportUuid);
   });
 
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {
@@ -119,9 +132,5 @@ export class ObstaclesFormComponent {
 
   setCurrentObstaclePoint(index: number) {
     this.obstaclesService.setCurrentPointIndex(index);
-  }
-
-  freePositioningChange(event: ToggleSwitchChangeEvent) {
-    this.plotService.isFreePositioningMode.set(event.checked);
   }
 }
