@@ -192,6 +192,7 @@ describe('SectionPlotComponent', () => {
   ];
 
   const mockPlotElement = { on: vi.fn() };
+  const noopMock = vi.fn();
 
   const litDataSignal = signal<GetSectionOutput | null>(null);
   const baseLitDataSignal = signal<GetSectionOutput | null>(null);
@@ -211,7 +212,8 @@ describe('SectionPlotComponent', () => {
     isFreePositioningMode: isFreePositioningModeSignal,
     axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
     temporaryLoadData: null as ChargeData | null | undefined,
-    plotOptionsChange: vi.fn()
+    plotOptionsChange: noopMock,
+    refreshCamera: noopMock
   };
 
   const mockSideTabsService = {
@@ -896,11 +898,15 @@ describe('SectionPlotComponent', () => {
     });
 
     const makePlotWithCapture = () => {
-      return {
-        on: (_: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
-          capturedHandler = fn;
+      const self = {
+        on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
+          if (event === 'plotly_clickannotation') {
+            capturedHandler = fn;
+          }
+          return self;
         }
       } as unknown as PlotlyHTMLElement;
+      return self;
     };
 
     it('should open Charges side tab and select span when span load annotation is clicked', () => {
