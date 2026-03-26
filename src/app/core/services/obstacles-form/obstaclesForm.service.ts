@@ -31,7 +31,9 @@ export class ObstacleFormService {
     referenceSupport: [defaultObstacleForm.referenceSupport, Validators.required],
     altitudeType: [defaultObstacleForm.altitudeType, Validators.required],
     lateralDistanceType: [defaultObstacleForm.lateralDistanceType, Validators.required],
-    positions: this.fb.array<PositionFormGroup>(this.fb.array(this.buildPositionControls(defaultObstacleForm.positions)).controls)
+    positions: this.fb.array<PositionFormGroup>(
+      this.fb.array(this.buildPositionControls(defaultObstacleForm.positions)).controls
+    )
   });
 
   private buildPositionControls(positions: Position3D[]): PositionFormGroup[] {
@@ -42,10 +44,9 @@ export class ObstacleFormService {
     return this.form.get('positions') as FormArray;
   }
 
-  private readonly positionsSnapshot = toSignal(
-    this.positions.valueChanges as Observable<Position3D[]>,
-    { initialValue: this.positions.value as Position3D[] }
-  );
+  private readonly positionsSnapshot = toSignal(this.positions.valueChanges as Observable<Position3D[]>, {
+    initialValue: this.positions.value as Position3D[]
+  });
 
   createPositionGroup(position: Position3D = { x: null, y: null, z: null }): PositionFormGroup {
     return this.fb.group({

@@ -284,9 +284,7 @@ describe('LoadFormsService', () => {
 
       // After recheckSpanLoads, the spanLoads should include an entry for each support
       expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
-      expect(mockPlotService.temporaryLoadData?.spanLoads.some(
-        (l) => l.supportUuid === 'support-uuid-1'
-      )).toBe(true);
+      expect(mockPlotService.temporaryLoadData?.spanLoads.some((l) => l.supportUuid === 'support-uuid-1')).toBe(true);
     });
 
     it('should set loading to true then false', async () => {

@@ -49,7 +49,7 @@ class MockHeaderComponent {
   template: ''
 })
 class MockFieldDatasComponent {
-  @Input() isNameAlreadyTaken: boolean = false;
+  @Input() isNameAlreadyTaken = false;
   @Input() measureData: unknown;
   @Output() fieldChange = new EventEmitter<unknown>();
 }

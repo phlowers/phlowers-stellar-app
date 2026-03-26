@@ -295,8 +295,8 @@ export interface TaskOutputs {
   [Task.changeState]: GetSectionWithBaseOutput;
   /** Output from refreshProjection task: reprojected geometry with optional base state */
   [Task.refreshProjection]: {
-    sectionOutput: GetSectionWithBaseOutput,
-    distances: Distance[]
+    sectionOutput: GetSectionWithBaseOutput;
+    distances: Distance[];
   };
 
   /** Output from getSupportCoordinates task: 2D display coordinates for supports */

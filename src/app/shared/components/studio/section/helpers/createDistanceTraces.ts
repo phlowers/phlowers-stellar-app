@@ -27,11 +27,7 @@ const mapCoord = (coord: Coord3, view: string, side: string): { x: number; y: nu
   };
 };
 
-const midpoint3d = (a: Coord3, b: Coord3): Coord3 => [
-  (a[0] + b[0]) / 2,
-  (a[1] + b[1]) / 2,
-  (a[2] + b[2]) / 2
-];
+const midpoint3d = (a: Coord3, b: Coord3): Coord3 => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
 
 const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string, dash: Dash): DataObject => {
   const fromMapped = mapCoord(from, view, side);

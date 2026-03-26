@@ -425,7 +425,6 @@ describe('ObstaclesFormComponent', () => {
       obstaclesService.setCurrentPointIndex(1);
       fixture.detectChanges();
 
-      const spy = vi.spyOn(obstaclesService, 'setCurrentPointIndex');
       const input = getByTestId('point-ref-distance') as HTMLInputElement;
 
       input.dispatchEvent(new Event('focus'));
@@ -633,7 +632,6 @@ describe('ObstaclesFormComponent', () => {
       obstaclesService.setCurrentPointIndex(1);
       fixture.detectChanges();
 
-      const spy = vi.spyOn(obstaclesService, 'setCurrentPointIndex');
       (getByTestId('select-point') as HTMLButtonElement).click();
 
       expect(obstaclesService.activePointIndex()).toBe(0);
@@ -652,7 +650,6 @@ describe('ObstaclesFormComponent', () => {
       obstaclesService.setCurrentPointIndex(1);
       fixture.detectChanges();
 
-      const spy = vi.spyOn(obstaclesService, 'setCurrentPointIndex');
       const input = getByTestId('point-altitude') as HTMLInputElement;
 
       input.dispatchEvent(new Event('focus'));

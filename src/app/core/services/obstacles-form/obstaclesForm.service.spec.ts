@@ -588,18 +588,22 @@ describe('ObstacleFormService', () => {
     });
 
     it('should set results from Python distance data for the last point', async () => {
-      const mockDistances: Distance[] = [{
-        obstacleUuid: 'New Obstacle',
-        points: [{
-          pointIndex: 0,
-          linePoint: [10, 0, 5],
-          virtualPointHorizontal: [10, 5, 0],
-          virtualPointVertical: [10, 0, 5],
-          distanceDiagonal: 42,
-          distanceHorizontal: 10,
-          distanceVertical: 5,
-        }]
-      }];
+      const mockDistances: Distance[] = [
+        {
+          obstacleUuid: 'New Obstacle',
+          points: [
+            {
+              pointIndex: 0,
+              linePoint: [10, 0, 5],
+              virtualPointHorizontal: [10, 5, 0],
+              virtualPointVertical: [10, 0, 5],
+              distanceDiagonal: 42,
+              distanceHorizontal: 10,
+              distanceVertical: 5
+            }
+          ]
+        }
+      ];
       // Simulate reapplyObstacles setting distances (its internal responsibility)
       mockPlotService.reapplyObstacles.mockImplementation(async () => {
         mockPlotService.distances.set(mockDistances);
@@ -637,18 +641,22 @@ describe('ObstacleFormService', () => {
 
     it('should derive results from distances when obstacle is selected after re-open', () => {
       // Simulates re-opening a study: distances restored by refreshSection, then user selects an obstacle
-      const mockDistances: Distance[] = [{
-        obstacleUuid: 'Existing Obstacle',
-        points: [{
-          pointIndex: 0,
-          linePoint: [10, 0, 5],
-          virtualPointHorizontal: [10, 5, 0],
-          virtualPointVertical: [10, 0, 5],
-          distanceDiagonal: 100,
-          distanceHorizontal: 50,
-          distanceVertical: 30,
-        }]
-      }];
+      const mockDistances: Distance[] = [
+        {
+          obstacleUuid: 'Existing Obstacle',
+          points: [
+            {
+              pointIndex: 0,
+              linePoint: [10, 0, 5],
+              virtualPointHorizontal: [10, 5, 0],
+              virtualPointVertical: [10, 0, 5],
+              distanceDiagonal: 100,
+              distanceHorizontal: 50,
+              distanceVertical: 30
+            }
+          ]
+        }
+      ];
 
       mockPlotService.distances.set(mockDistances);
       service.form.patchValue({ name: 'Existing Obstacle' });
@@ -673,7 +681,15 @@ describe('ObstacleFormService', () => {
 
     it('should call reapplyObstacles with temporaryLoadData set so loads are re-applied', async () => {
       const mockChargeData: ChargeData = {
-        climate: { windPressure: 100, cableTemperature: 20, symmetryType: 'SYMMETRIC' as ChargeData['climate']['symmetryType'], iceThickness: null, frontierSupportNumber: null, iceThicknessBefore: null, iceThicknessAfter: null },
+        climate: {
+          windPressure: 100,
+          cableTemperature: 20,
+          symmetryType: 'SYMMETRIC' as ChargeData['climate']['symmetryType'],
+          iceThickness: null,
+          frontierSupportNumber: null,
+          iceThicknessBefore: null,
+          iceThicknessAfter: null
+        },
         spanLoads: []
       };
       mockPlotService.temporaryLoadData = mockChargeData;

@@ -24,7 +24,6 @@ import {
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 
-const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 
 @Component({

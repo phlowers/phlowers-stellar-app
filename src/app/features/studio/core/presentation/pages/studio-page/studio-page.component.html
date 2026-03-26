@@ -57,7 +57,7 @@
             </dt>
             <dd class="quick-measures__list__value" data-testid="distance-oblique-value">
               @if (obstacleFormService.results().oblique !== null) {
-                {{ obstacleFormService.results().oblique | number:'1.0-2' }} m
+                {{ obstacleFormService.results().oblique | number: '1.0-2' }} m
               } @else {
                 -
               }
@@ -78,7 +78,7 @@
             </dt>
             <dd class="quick-measures__list__value" data-testid="distance-vertical-value">
               @if (obstacleFormService.results().vertical !== null) {
-                {{ obstacleFormService.results().vertical | number:'1.0-2' }} m
+                {{ obstacleFormService.results().vertical | number: '1.0-2' }} m
               } @else {
                 -
               }
@@ -99,7 +99,7 @@
             </dt>
             <dd class="quick-measures__list__value" data-testid="distance-horizontal-value">
               @if (obstacleFormService.results().horizontal !== null) {
-                {{ obstacleFormService.results().horizontal | number:'1.0-2' }} m
+                {{ obstacleFormService.results().horizontal | number: '1.0-2' }} m
               } @else {
                 -
               }

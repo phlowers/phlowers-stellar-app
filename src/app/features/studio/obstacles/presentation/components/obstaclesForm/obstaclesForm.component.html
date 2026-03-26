@@ -167,7 +167,13 @@
         </div>
 
         <div class="obstacles-form__points__point__form">
-          <label [for]="'altitudePoint' + $index" class="obstacles-form__points__point__form__label alt-point-label"> z : </label>
+          <label
+            i18n
+            [for]="'altitudePoint' + $index"
+            class="obstacles-form__points__point__form__label alt-point-label"
+          >
+            z :
+          </label>
 
           <p-inputgroup class="obstacles-form__points__point__form__input">
             <input
@@ -185,7 +191,11 @@
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
 
-          <label [for]="'distanceToRefSupport' + $index" class="obstacles-form__points__point__form__label dist-ref-label">
+          <label
+            i18n
+            [for]="'distanceToRefSupport' + $index"
+            class="obstacles-form__points__point__form__label dist-ref-label"
+          >
             x :
           </label>
 
@@ -205,7 +215,10 @@
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
 
-          <label [for]="'distanceToLineAxis' + $index" class="obstacles-form__points__point__form__label dist-axis-label">
+          <label
+            [for]="'distanceToLineAxis' + $index"
+            class="obstacles-form__points__point__form__label dist-axis-label"
+          >
             y :
           </label>
 
@@ -278,7 +291,11 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Oblique</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-oblique">
-              {{ (obstacleFormService.results().oblique) ? (obstacleFormService.results().oblique | number:'1.0-2') + ' m' : '-' }}
+              {{
+                obstacleFormService.results().oblique
+                  ? (obstacleFormService.results().oblique | number: '1.0-2') + ' m'
+                  : '-'
+              }}
             </span>
           </dd>
         </div>
@@ -287,7 +304,11 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Vertical</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-vertical">
-              {{ (obstacleFormService.results().vertical) ? (obstacleFormService.results().vertical | number:'1.0-2') + ' m' : '-' }}
+              {{
+                obstacleFormService.results().vertical
+                  ? (obstacleFormService.results().vertical | number: '1.0-2') + ' m'
+                  : '-'
+              }}
             </span>
           </dd>
         </div>
@@ -296,7 +317,11 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Horizontal</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-horizontal">
-              {{ (obstacleFormService.results().horizontal) ? (obstacleFormService.results().horizontal | number:'1.0-2') + ' m' : '-' }}
+              {{
+                obstacleFormService.results().horizontal
+                  ? (obstacleFormService.results().horizontal | number: '1.0-2') + ' m'
+                  : '-'
+              }}
             </span>
           </dd>
         </div>
