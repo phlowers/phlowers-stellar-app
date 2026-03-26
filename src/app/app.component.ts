@@ -12,7 +12,6 @@ import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
-import { OnlineService } from '@services/online/online.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { UserService } from '@services/user/user.service';
@@ -26,11 +25,17 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { AppUpdateOrchestratorService } from '@services/worker_update/app-update-orchestrator.service';
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
 
 /** Regex pattern for validating email addresses. */
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+interface ProtectedDataSnapshot {
+  userCount: number;
+  studyCount: number;
+}
 
 const modules = [
   RouterModule,
@@ -73,8 +78,8 @@ export class AppComponent implements OnInit {
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
   private readonly userService = inject(UserService);
-  private readonly onlineService = inject(OnlineService);
   readonly updateService = inject(UpdateService);
+  private readonly appUpdateOrchestratorService = inject(AppUpdateOrchestratorService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
@@ -82,7 +87,6 @@ export class AppComponent implements OnInit {
   private readonly attachmentService = inject(AttachmentService);
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
-  private readonly online = toSignal(this.onlineService.online$, { initialValue: false });
   private readonly storageReady = toSignal(this.storageService.ready$, { initialValue: false });
   private readonly needUpdate = toSignal(this.updateService.needUpdate$, { initialValue: false });
 
@@ -100,17 +104,20 @@ export class AppComponent implements OnInit {
       email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])
     });
 
-    effect(() => {
-      if (this.online()) {
-        this.updateService.checkAppVersion({ silent: true });
-      }
-    });
+    /**
+     * PHASE 1 REFACTORING: Removed online-triggered update check.
+     * Update verification moved to single startup check in Phase 2 (AppUpdateOrchestratorService).
+     * No longer re-checking on online/offline transitions.
+     * See plan-update.md Phase 1 for details.
+     */
 
     effect(() => {
       if (this.storageReady()) {
         this.userService.getUser().then((user) => {
           this.userDialog.set(!user);
-          this.setupData();
+          this.setupData().finally(() => {
+            void this.appUpdateOrchestratorService.initiateStartupCheck();
+          });
         });
       }
     });
@@ -121,6 +128,7 @@ export class AppComponent implements OnInit {
   }
 
   async setupData() {
+    const protectedDataSnapshot = await this.captureProtectedDataSnapshot();
     const manifest = await this.fetchLatestManifestSafe();
     const dataHashes = manifest?.data_hashes || {};
     const hashEntries = Object.entries(dataHashes);
@@ -128,6 +136,7 @@ export class AppComponent implements OnInit {
     // Fallback for legacy builds without per-CSV hashes.
     if (hashEntries.length === 0) {
       await this.importAllCatalogs();
+      await this.assertProtectedDataSnapshot(protectedDataSnapshot);
       return;
     }
 
@@ -149,6 +158,30 @@ export class AppComponent implements OnInit {
         value: latestHash,
         updated_at: new Date().toISOString()
       });
+    }
+
+    await this.assertProtectedDataSnapshot(protectedDataSnapshot);
+  }
+
+  private async captureProtectedDataSnapshot(): Promise<ProtectedDataSnapshot | null> {
+    const database = this.storageService.db;
+    if (!database) {
+      return null;
+    }
+
+    const [userCount, studyCount] = await Promise.all([database.users.count(), database.studies.count()]);
+    return { userCount, studyCount };
+  }
+
+  private async assertProtectedDataSnapshot(snapshot: ProtectedDataSnapshot | null): Promise<void> {
+    const database = this.storageService.db;
+    if (!snapshot || !database) {
+      return;
+    }
+
+    const [userCount, studyCount] = await Promise.all([database.users.count(), database.studies.count()]);
+    if (userCount !== snapshot.userCount || studyCount !== snapshot.studyCount) {
+      throw new Error('Protected data integrity check failed after catalog synchronization');
     }
   }
 
@@ -209,6 +242,6 @@ export class AppComponent implements OnInit {
   }
 
   onUpdateClick() {
-    this.updateService.update();
+    this.appUpdateOrchestratorService.acceptUpdate();
   }
 }

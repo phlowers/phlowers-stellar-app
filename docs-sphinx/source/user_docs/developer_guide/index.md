@@ -11,6 +11,7 @@ installation/index
 app/index
 plot/index
 bugfixes/index
+update-oidc-developer-guide
 ```
 
 

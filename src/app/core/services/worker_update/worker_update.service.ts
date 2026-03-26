@@ -1,9 +1,10 @@
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, isDevMode, signal } from '@angular/core';
 
 import { environment } from '@src/environments/environment';
 import { isEqual } from 'lodash';
 import { MessageService } from 'primeng/api';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 /**
  * Represents the application version information.
@@ -82,6 +83,7 @@ export class UpdateService {
    */
   needUpdate$ = new BehaviorSubject<boolean>(false);
 
+  private readonly httpClient = inject(HttpClient);
   private readonly messageService = inject(MessageService);
 
   constructor() {
@@ -149,20 +151,14 @@ export class UpdateService {
    */
   async getLatestAssetList(): Promise<AssetList | null> {
     try {
-      const response = await fetch('/assets_list.json', {
-        cache: 'no-store',
-        headers: {
-          'cache-control': 'no-cache',
-          pragma: 'no-cache'
-        }
-      });
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = (await response.json()) as AssetList;
-      return data;
+      return await firstValueFrom(
+        this.httpClient.get<AssetList>('/assets_list.json', {
+          headers: {
+            'cache-control': 'no-cache',
+            pragma: 'no-cache'
+          }
+        })
+      );
     } catch {
       return null;
     }

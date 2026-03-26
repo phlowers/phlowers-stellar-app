@@ -56,12 +56,32 @@ async function readSnapshot(page: import('@playwright/test').Page): Promise<Snap
   });
 }
 
-test('updates app assets and CSV catalogs when a new version is published', async ({ page, request }) => {
-  const scenarioResponse = await request.post('/__e2e/scenario?v=v1');
-  expect(scenarioResponse.ok()).toBeTruthy();
+async function getManifestFetchCount(request: import('@playwright/test').APIRequestContext): Promise<number> {
+  const response = await request.get('/__e2e/manifest-fetch-count');
+  const body = (await response.json()) as { count: number };
+  return body.count;
+}
 
+/**
+ * Scenario: user accepts an available update at startup.
+ *
+ * Flow:
+ *  1. Install app at v1 (first page load triggers Service Worker install)
+ *  2. Server switches to v2
+ *  3. Page reload triggers the single startup check via AppUpdateOrchestratorService
+ *  4. Update dialog becomes visible (user consent required)
+ *  5. User clicks "Update now"
+ *  6. Service Worker updates caches; page auto-reloads to v2
+ */
+test('user accepts update from dialog when new version is available at startup', async ({ page, request }) => {
+  // Reset server state so manifest fetch count starts at 0.
+  await request.post('/__e2e/reset');
+
+  // Set server to v1 and perform first load so the Service Worker installs v1.
+  await request.post('/__e2e/scenario?v=v1');
   await page.goto('/');
 
+  // Wait until v1 is installed in cache.
   await expect
     .poll(async () => {
       const snapshot = await readSnapshot(page);
@@ -81,14 +101,25 @@ test('updates app assets and CSV catalogs when a new version is published', asyn
   expect(beforeUpdate.hasAssetV2).toBeFalsy();
   expect(beforeUpdate.cableHash).not.toBeNull();
 
-  const scenarioUpdateResponse = await request.post('/__e2e/scenario?v=v2');
-  expect(scenarioUpdateResponse.ok()).toBeTruthy();
+  // Switch server to v2 and reset manifest counter before the reload.
+  await request.post('/__e2e/scenario?v=v2');
+  await request.post('/__e2e/reset');
+  await request.post('/__e2e/scenario?v=v2');
 
-  await page.evaluate(async () => {
-    const registration = await navigator.serviceWorker.getRegistration();
-    registration?.active?.postMessage({ type: 'update' });
-  });
+  // Reload triggers AppUpdateOrchestratorService startup check.
+  await page.reload();
 
+  // Update dialog must appear — user consent is required.
+  const updateDialog = page.locator('[data-testid="update-dialog"]');
+  await expect(updateDialog).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('[data-testid="update-now-btn"]')).toBeVisible();
+  await expect(page.locator('[data-testid="update-later-btn"]')).toBeVisible();
+
+  // User accepts — calls AppUpdateOrchestratorService.acceptUpdate() → posts
+  // { type: 'update' } to Service Worker → update_complete → page reloads.
+  await page.locator('[data-testid="update-now-btn"]').click();
+
+  // Wait until cache is updated to v2.
   await expect
     .poll(async () => {
       const snapshot = await readSnapshot(page);
@@ -102,4 +133,88 @@ test('updates app assets and CSV catalogs when a new version is published', asyn
   expect(afterUpdate.cableName).toBe('E2E_CABLE_V2');
   expect(afterUpdate.cableHash).not.toBeNull();
   expect(afterUpdate.cableHash).not.toBe(beforeUpdate.cableHash);
+
+  // The orchestrator performs exactly one manifest fetch per boot cycle.
+  // (Counter was reset before reload, so this reflects the new session.)
+  const fetchCount = await getManifestFetchCount(request);
+  expect(fetchCount).toBeGreaterThanOrEqual(1);
+  // At most: orchestrator fetch + SW update fetch + possible post-reload check.
+  expect(fetchCount).toBeLessThanOrEqual(3);
+});
+
+/**
+ * Scenario: user declines an available update at startup.
+ *
+ * When the user clicks "Later" the dialog closes and the cache must remain
+ * at the current (v1) version — no assets must be overwritten.
+ */
+test('user declines update from dialog and app stays at current version', async ({ page, request }) => {
+  await request.post('/__e2e/reset');
+
+  // Install v1.
+  await request.post('/__e2e/scenario?v=v1');
+  await page.goto('/');
+
+  await expect
+    .poll(async () => {
+      const snapshot = await readSnapshot(page);
+      return snapshot.appVersion;
+    })
+    .toBe('1.0.0-e2e');
+
+  const beforeDecline = await readSnapshot(page);
+  expect(beforeDecline.hasAssetV1).toBeTruthy();
+
+  // Switch server to v2 before reload.
+  await request.post('/__e2e/scenario?v=v2');
+  await request.post('/__e2e/reset');
+  await request.post('/__e2e/scenario?v=v2');
+
+  await page.reload();
+
+  // Dialog must be visible.
+  const updateDialog = page.locator('[data-testid="update-dialog"]');
+  await expect(updateDialog).toBeVisible({ timeout: 30_000 });
+
+  // User clicks "Later" — dialog closes, no cache mutation.
+  await page.locator('[data-testid="update-later-btn"]').click();
+  await expect(updateDialog).not.toBeVisible();
+
+  // Cache version must still be v1.
+  const afterDecline = await readSnapshot(page);
+  expect(afterDecline.appVersion).toBe('1.0.0-e2e');
+  expect(afterDecline.hasAssetV1).toBeTruthy();
+  expect(afterDecline.hasAssetV2).toBeFalsy();
+  expect(afterDecline.cableName).toBe('E2E_CABLE_V1');
+});
+
+/**
+ * Scenario: no update available at startup.
+ *
+ * When the cached version matches the server version the dialog must NOT appear.
+ */
+test('no update dialog shown when versions match at startup', async ({ page, request }) => {
+  await request.post('/__e2e/reset');
+
+  // Install v1.
+  await request.post('/__e2e/scenario?v=v1');
+  await page.goto('/');
+
+  await expect
+    .poll(async () => {
+      const snapshot = await readSnapshot(page);
+      return snapshot.appVersion;
+    })
+    .toBe('1.0.0-e2e');
+
+  // Reload with server still at v1 — orchestrator should find no version difference.
+  await page.reload();
+
+  // Dialog must NOT appear.
+  const updateDialog = page.locator('[data-testid="update-dialog"]');
+  await expect(updateDialog).not.toBeVisible({ timeout: 10_000 });
+
+  // Version in cache remains v1.
+  const snapshot = await readSnapshot(page);
+  expect(snapshot.appVersion).toBe('1.0.0-e2e');
 });

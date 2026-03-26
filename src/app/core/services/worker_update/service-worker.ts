@@ -18,17 +18,6 @@ function fetchLatestManifest() {
   });
 }
 
-function areVersionsEqual(first: AppVersion | null, second: AppVersion | null): boolean {
-  if (!first || !second) {
-    return false;
-  }
-  return (
-    first.git_hash === second.git_hash &&
-    first.build_datetime_utc === second.build_datetime_utc &&
-    first.version === second.version
-  );
-}
-
 async function getCachedAppVersion(): Promise<AppVersion | null> {
   const cache = await caches.open(CACHE_NAME);
   const cachedVersionResponse = await getOrMigrateAppVersionCacheEntry(cache);
@@ -300,32 +289,22 @@ export async function handleMessage(event: ExtendableMessageEvent) {
   }
 }
 
-async function fetchLatestManifestOrThrow(): Promise<AssetManifest> {
-  const latestManifestResponse = await fetchLatestManifest();
-  if (!latestManifestResponse.ok) {
-    throw new Error(`Manifest fetch failed with status ${latestManifestResponse.status}`);
-  }
-  return latestManifestResponse.json();
-}
-
 async function activateWhenAppInstalled() {
+  /**
+   * PHASE 1 REFACTORING: Removed automatic update logic from SW activate.
+   * Service Worker now only validates cache state; does NOT fetch manifest or mutate cache.
+   * App orchestration (OIDC token + user consent) moved to Angular main thread.
+   * See plan-update.md Phase 1 for details.
+   */
   const cachedVersion = await getCachedAppVersion();
-  const latestManifest = await fetchLatestManifestOrThrow();
 
-  if (!areVersionsEqual(cachedVersion, latestManifest.app_version)) {
-    console.log('SERVICE WORKER: new App version detected during activate, updating cached assets');
-    const updatedManifest = await updateApp();
-    await postMessageToAllClients('update_complete', {
-      latest_version: updatedManifest.app_version,
-      data_hashes: updatedManifest.data_hashes || {}
-    });
-    return;
-  }
-
+  // Post worker_ready signal to app; app will orchestrate updates via HttpClient + OIDC token
+  // No version comparison or automatic updates here
+  console.log('SERVICE WORKER: Activated (cached state validated, no auto-update)');
   await postMessageToAllClients('worker_ready', {
-    latest_version: latestManifest.app_version,
+    latest_version: cachedVersion,
     current_version: cachedVersion,
-    data_hashes: latestManifest.data_hashes || {}
+    data_hashes: {} // Will be populated by app orchestrator if update is accepted
   });
 }
 

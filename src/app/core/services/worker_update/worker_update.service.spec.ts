@@ -1,16 +1,28 @@
 import { TestBed } from '@angular/core/testing';
-import { UpdateService } from './worker_update.service';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
+import { UpdateService } from '@services/worker_update/worker_update.service';
 import { MessageService } from 'primeng/api';
+
+async function expectManifestRequest(httpMock: HttpTestingController): Promise<TestRequest> {
+  let request: TestRequest | null = null;
+
+  await vi.waitFor(() => {
+    request = httpMock.expectOne('/assets_list.json');
+    expect(request.request.url).toBe('/assets_list.json');
+  });
+
+  return request as TestRequest;
+}
 
 describe('UpdateService', () => {
   let service: UpdateService;
   let mockServiceWorker: { addEventListener: vi.Mock; getRegistration: vi.Mock };
   let mockCaches: { open: vi.Mock };
   let mockCache: { match: vi.Mock };
-  let mockFetch: vi.Mock;
+  let httpMock: HttpTestingController;
   let originalServiceWorker: ServiceWorkerContainer;
   let originalCaches: CacheStorage;
-  let originalFetch: typeof fetch;
   let mockMessageService: MessageService;
 
   beforeEach(() => {
@@ -45,15 +57,16 @@ describe('UpdateService', () => {
       writable: true
     });
 
-    // Mock fetch
-    mockFetch = vi.fn();
-    originalFetch = globalThis.fetch;
-    globalThis.fetch = mockFetch;
-
     TestBed.configureTestingModule({
-      providers: [UpdateService, { provide: MessageService, useValue: mockMessageService }]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        UpdateService,
+        { provide: MessageService, useValue: mockMessageService }
+      ]
     });
     service = TestBed.inject(UpdateService);
+    httpMock = TestBed.inject(HttpTestingController);
     service.latestVersion.set(null);
     service.currentVersion.set(null);
   });
@@ -68,7 +81,7 @@ describe('UpdateService', () => {
       value: originalCaches,
       writable: true
     });
-    globalThis.fetch = originalFetch;
+    httpMock.verify();
   });
 
   it('should be created', () => {
@@ -92,28 +105,19 @@ describe('UpdateService', () => {
 
       mockCache.match.mockReset();
       mockCache.match.mockResolvedValue(null);
-      mockFetch.mockReset();
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce(mockAssetList)
-      });
-
       service.latestVersion.set(null);
       service.currentVersion.set(null);
       service.needUpdate$.next(false);
 
-      await service.checkAppVersion();
+      const checkPromise = service.checkAppVersion();
+      const req = await expectManifestRequest(httpMock);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('cache-control')).toBe('no-cache');
+      expect(req.request.headers.get('pragma')).toBe('no-cache');
+      req.flush(mockAssetList);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/assets_list.json',
-        expect.objectContaining({
-          cache: 'no-store',
-          headers: expect.objectContaining({
-            'cache-control': 'no-cache',
-            pragma: 'no-cache'
-          })
-        })
-      );
+      await checkPromise;
+
       expect(service.currentVersion()).toBeNull();
     });
 
@@ -127,19 +131,17 @@ describe('UpdateService', () => {
         build_datetime_utc: '2022-12-31T00:00:00.000000'
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockLatestVersion,
-          files: ['file1.js', 'file2.css']
-        })
-      });
-
       mockCache.match.mockResolvedValueOnce({
         json: vi.fn().mockResolvedValueOnce(mockCurrentVersion)
       });
 
-      await service.checkAppVersion();
+      const checkPromise = service.checkAppVersion();
+      (await expectManifestRequest(httpMock)).flush({
+        app_version: mockLatestVersion,
+        files: ['file1.js', 'file2.css']
+      });
+
+      await checkPromise;
 
       expect(mockCaches.open).toHaveBeenCalledWith('app-assets');
       expect(mockCache.match).toHaveBeenCalledWith('/app_version');
@@ -149,10 +151,12 @@ describe('UpdateService', () => {
     });
 
     it('should handle fetch errors gracefully', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
       mockCache.match.mockResolvedValueOnce(null);
 
-      await expect(service.checkAppVersion()).resolves.toBeUndefined();
+      const checkPromise = service.checkAppVersion();
+      (await expectManifestRequest(httpMock)).error(new ProgressEvent('error'), { status: 500 });
+
+      await expect(checkPromise).resolves.toBeUndefined();
       expect(service.currentVersion()).toBeNull();
       expect(service.latestVersion()).toBeNull();
       expect(service.needUpdate$.value).toBe(false);
@@ -189,9 +193,10 @@ describe('UpdateService', () => {
       service.latestVersion.set(existingLatest);
 
       mockCache.match.mockResolvedValueOnce(null);
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      const checkPromise = service.checkAppVersion();
+      (await expectManifestRequest(httpMock)).error(new ProgressEvent('error'), { status: 500 });
 
-      await service.checkAppVersion();
+      await checkPromise;
 
       expect(service.currentVersion()).toEqual(existingCurrent);
       expect(service.latestVersion()).toEqual(existingLatest);
@@ -208,9 +213,10 @@ describe('UpdateService', () => {
       mockCache.match.mockResolvedValueOnce({
         json: vi.fn().mockResolvedValueOnce(mockCurrentVersion)
       });
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      const checkPromise = service.checkAppVersion();
+      (await expectManifestRequest(httpMock)).error(new ProgressEvent('error'), { status: 500 });
 
-      await service.checkAppVersion();
+      await checkPromise;
 
       expect(service.currentVersion()).toEqual(mockCurrentVersion);
       expect(service.latestVersion()).toBeNull();
@@ -225,15 +231,13 @@ describe('UpdateService', () => {
       };
 
       mockCache.match.mockResolvedValueOnce(null);
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockLatestVersion,
-          files: ['file1.js']
-        })
+      const checkPromise = service.checkAppVersion();
+      (await expectManifestRequest(httpMock)).flush({
+        app_version: mockLatestVersion,
+        files: ['file1.js']
       });
 
-      await service.checkAppVersion();
+      await checkPromise;
 
       expect(service.currentVersion()).toBeNull();
       expect(service.latestVersion()).toEqual(mockLatestVersion);
@@ -250,15 +254,13 @@ describe('UpdateService', () => {
       mockCache.match.mockResolvedValueOnce({
         json: vi.fn().mockResolvedValueOnce(mockVersion)
       });
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockVersion,
-          files: ['file1.js']
-        })
+      const checkPromise = service.checkAppVersion();
+      (await expectManifestRequest(httpMock)).flush({
+        app_version: mockVersion,
+        files: ['file1.js']
       });
 
-      await service.checkAppVersion();
+      await checkPromise;
 
       expect(mockMessageService.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'info' }));
     });
@@ -273,15 +275,13 @@ describe('UpdateService', () => {
       mockCache.match.mockResolvedValueOnce({
         json: vi.fn().mockResolvedValueOnce(mockVersion)
       });
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockVersion,
-          files: ['file1.js']
-        })
+      const checkPromise = service.checkAppVersion({ silent: true });
+      (await expectManifestRequest(httpMock)).flush({
+        app_version: mockVersion,
+        files: ['file1.js']
       });
 
-      await service.checkAppVersion({ silent: true });
+      await checkPromise;
 
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });
@@ -334,26 +334,25 @@ describe('UpdateService', () => {
         build_datetime_utc: '2023-01-01T00:00:00.000000'
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockCurrentVersion,
-          files: ['file1.js', 'file2.css']
-        })
-      });
-
       mockCache.match.mockResolvedValueOnce({
         json: vi.fn().mockResolvedValueOnce(mockCurrentVersion)
       });
 
       service.updateLoading.set(true);
 
-      await messageHandler({
+      const messagePromise = messageHandler({
         data: {
           message: 'update_complete',
           current_version: mockCurrentVersion
         }
       });
+
+      (await expectManifestRequest(httpMock)).flush({
+        app_version: mockCurrentVersion,
+        files: ['file1.js', 'file2.css']
+      });
+
+      await messagePromise;
 
       expect(service.updateLoading()).toBe(false);
       expect(service.currentVersion()).toEqual(mockCurrentVersion);
@@ -365,26 +364,25 @@ describe('UpdateService', () => {
         build_datetime_utc: '2023-01-01T00:00:00.000000'
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockVersion,
-          files: ['file1.js', 'file2.css']
-        })
-      });
-
       mockCache.match.mockResolvedValueOnce({
         json: vi.fn().mockResolvedValueOnce(mockVersion)
       });
 
       service.updateLoading.set(true);
 
-      await messageHandler({
+      const messagePromise = messageHandler({
         data: {
           message: 'install_complete',
           latest_version: mockVersion
         }
       });
+
+      (await expectManifestRequest(httpMock)).flush({
+        app_version: mockVersion,
+        files: ['file1.js', 'file2.css']
+      });
+
+      await messagePromise;
 
       expect(service.updateLoading()).toBe(false);
       expect(service.currentVersion()).toEqual(mockVersion);

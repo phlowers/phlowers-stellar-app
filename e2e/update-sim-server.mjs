@@ -13,7 +13,8 @@ if (!fs.existsSync(DIST_DIR)) {
 }
 
 const state = {
-  scenario: 'v1'
+  scenario: 'v1',
+  manifestFetchCount: 0
 };
 
 const csvVersions = {
@@ -130,7 +131,20 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  if (pathname === '/__e2e/reset' && request.method === 'POST') {
+    state.scenario = 'v1';
+    state.manifestFetchCount = 0;
+    send(response, 200, JSON.stringify({ ok: true }), 'application/json; charset=utf-8');
+    return;
+  }
+
+  if (pathname === '/__e2e/manifest-fetch-count') {
+    send(response, 200, JSON.stringify({ count: state.manifestFetchCount }), 'application/json; charset=utf-8');
+    return;
+  }
+
   if (pathname === '/assets_list.json') {
+    state.manifestFetchCount++;
     send(response, 200, JSON.stringify(currentManifest()), 'application/json; charset=utf-8');
     return;
   }

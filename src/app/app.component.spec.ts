@@ -16,6 +16,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { UserService } from '@services/user/user.service';
+import { AppUpdateOrchestratorService } from '@services/worker_update/app-update-orchestrator.service';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -24,18 +25,34 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 
-class Worker {
+class MockWorker implements Partial<Worker> {
   url: string;
-  onmessage: (msg: string) => void;
-  constructor(stringUrl: string) {
-    this.url = stringUrl;
-    this.onmessage = () => {
-      // Mock worker message handler - no-op for tests
-    };
+  onerror: ((this: AbstractWorker, ev: ErrorEvent) => unknown) | null = null;
+  onmessage: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
+  onmessageerror: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
+
+  constructor(stringUrl: string | URL) {
+    this.url = String(stringUrl);
   }
 
-  postMessage(msg: string) {
-    this.onmessage(msg);
+  postMessage(message: string): void {
+    this.onmessage?.call(this as Worker, new MessageEvent<string>('message', { data: message }));
+  }
+
+  terminate(): void {
+    // No-op for tests.
+  }
+
+  addEventListener(): void {
+    // No-op for tests.
+  }
+
+  removeEventListener(): void {
+    // No-op for tests.
+  }
+
+  dispatchEvent(): boolean {
+    return true;
   }
 }
 
@@ -48,6 +65,7 @@ describe('AppComponent', () => {
   let mockOnlineService: OnlineService;
   let mockUserService: UserService;
   let mockUpdateService: UpdateService;
+  let mockAppUpdateOrchestratorService: AppUpdateOrchestratorService;
   let mockMaintenanceService: MaintenanceService;
   let mockLinesService: LinesService;
   let mockCablesService: CablesService;
@@ -59,9 +77,13 @@ describe('AppComponent', () => {
 
   const mockDb = {
     users: {
+      count: vi.fn(),
       toArray: vi.fn(),
       add: vi.fn(),
       clear: vi.fn()
+    },
+    studies: {
+      count: vi.fn()
     },
     maintenance: {
       toArray: vi.fn(),
@@ -80,9 +102,10 @@ describe('AppComponent', () => {
   };
 
   beforeEach(async () => {
+    mockDb.users.count = vi.fn().mockResolvedValue(1);
     vi.clearAllMocks();
-    // @ts-expect-error worker
-    globalThis.Worker = Worker;
+    mockDb.studies.count = vi.fn().mockResolvedValue(2);
+    globalThis.Worker = MockWorker as typeof Worker;
     readySubject = new BehaviorSubject<boolean>(false);
     workerReadySubject = new BehaviorSubject<boolean>(true);
 
@@ -120,6 +143,11 @@ describe('AppComponent', () => {
       getLatestAssetList: vi.fn().mockResolvedValue(null),
       needUpdate$: new BehaviorSubject<boolean>(false)
     } as unknown as UpdateService;
+
+    mockAppUpdateOrchestratorService = {
+      initiateStartupCheck: vi.fn().mockResolvedValue(undefined),
+      acceptUpdate: vi.fn()
+    } as unknown as AppUpdateOrchestratorService;
 
     mockMaintenanceService = {
       getMaintenance: vi.fn().mockResolvedValue([]),
@@ -162,6 +190,7 @@ describe('AppComponent', () => {
     TestBed.overrideProvider(MessageService, { useValue: mockMessageService });
     TestBed.overrideProvider(UserService, { useValue: mockUserService });
     TestBed.overrideProvider(UpdateService, { useValue: mockUpdateService });
+    TestBed.overrideProvider(AppUpdateOrchestratorService, { useValue: mockAppUpdateOrchestratorService });
     TestBed.overrideProvider(MaintenanceService, {
       useValue: mockMaintenanceService
     });
@@ -254,6 +283,27 @@ describe('AppComponent', () => {
       expect(mockObstaclesService.importFromFile).toHaveBeenCalledTimes(1);
       expect(mockDb.metadata.put).not.toHaveBeenCalled();
     });
+
+    it('should validate protected users and studies counts before and after catalog sync', async () => {
+      // @ts-expect-error vitest mock on service method
+      mockUpdateService.getLatestAssetList.mockResolvedValue({});
+
+      await component.setupData();
+
+      expect(mockDb.users.count).toHaveBeenCalledTimes(2);
+      expect(mockDb.studies.count).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw when protected users or studies data changes during catalog sync', async () => {
+      // @ts-expect-error vitest mock on service method
+      mockUpdateService.getLatestAssetList.mockResolvedValue({});
+      mockDb.users.count.mockResolvedValueOnce(1).mockResolvedValueOnce(2);
+      mockDb.studies.count.mockResolvedValueOnce(2).mockResolvedValueOnce(2);
+
+      await expect(component.setupData()).rejects.toThrow(
+        'Protected data integrity check failed after catalog synchronization'
+      );
+    });
   });
 
   describe('User dialog', () => {
@@ -340,8 +390,7 @@ describe('AppComponent - HTML rendering', () => {
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   beforeEach(async () => {
-    // @ts-expect-error worker
-    globalThis.Worker = Worker;
+    globalThis.Worker = MockWorker as typeof Worker;
 
     const readySubject = new BehaviorSubject<boolean>(false);
     const workerReadySubject = new BehaviorSubject<boolean>(true);
@@ -359,7 +408,13 @@ describe('AppComponent - HTML rendering', () => {
         createDatabase: vi.fn().mockResolvedValue(undefined),
         ready$: readySubject,
         db: {
-          users: { toArray: vi.fn().mockResolvedValue([]), add: vi.fn(), clear: vi.fn() },
+          users: {
+            count: vi.fn().mockResolvedValue(0),
+            toArray: vi.fn().mockResolvedValue([]),
+            add: vi.fn(),
+            clear: vi.fn()
+          },
+          studies: { count: vi.fn().mockResolvedValue(0) },
           maintenance: { toArray: vi.fn(), clear: vi.fn(), bulkAdd: vi.fn() },
           lines: { count: vi.fn(), toArray: vi.fn(), bulkAdd: vi.fn() },
           metadata: { get: vi.fn().mockResolvedValue(null), put: vi.fn().mockResolvedValue(undefined) }
@@ -374,6 +429,9 @@ describe('AppComponent - HTML rendering', () => {
     });
     TestBed.overrideProvider(UserService, {
       useValue: { getUser: vi.fn().mockResolvedValue(null), createUser: vi.fn().mockResolvedValue(undefined) }
+    });
+    TestBed.overrideProvider(AppUpdateOrchestratorService, {
+      useValue: { initiateStartupCheck: vi.fn().mockResolvedValue(undefined), acceptUpdate: vi.fn() }
     });
     TestBed.overrideProvider(UpdateService, {
       useValue: {

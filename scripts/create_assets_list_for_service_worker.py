@@ -114,24 +114,29 @@ def main(language):
     print("-" * 50)
     print(f"Total files: {len(files)}")
     output_file = f"dist/{language}/assets_list.json"
+    build_info_file = f"dist/{language}/build-info.json"
     package_json_file = "package.json"
     with open(package_json_file, "r") as f:
         package_json = json.load(f)
     version = package_json["version"]
     csv_hashes = collect_csv_hashes(target_dir)
+    app_version = {
+        "git_hash": get_git_revision_hash(),
+        "build_datetime_utc": datetime.utcnow()
+        .replace(tzinfo=simple_utc())
+        .isoformat(),
+        "version": version,
+    }
     res = {
-        "app_version": {
-            "git_hash": get_git_revision_hash(),
-            "build_datetime_utc": datetime.utcnow()
-            .replace(tzinfo=simple_utc())
-            .isoformat(),
-            "version": version,
-        },
+        "app_version": app_version,
         "data_hashes": csv_hashes,
         "files": [file for file in files if os.path.basename(file) not in blacklist],
     }
     with open(output_file, "w") as f:
         json.dump(res, f, indent=2)
+
+    with open(build_info_file, "w") as f:
+        json.dump({"app_version": app_version, "data_hashes": csv_hashes}, f, indent=2)
 
 
 if __name__ == "__main__":
