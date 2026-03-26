@@ -1,6 +1,14 @@
-<form [formGroup]="form" class="cable-span__form" data-testid="cable-span-form">
+<form [formGroup]="form" class="cable-span__form" [attr.aria-busy]="isLoading()" data-testid="cable-span-form">
   <div class="cable-span__reset">
-    <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" data-testid="cable-span-reset">
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="resetForm()"
+      [disabled]="isLoading()"
+      data-testid="cable-span-reset"
+    >
       <app-icon icon="refresh" />
       <ng-container i18n>Reset</ng-container>
     </button>
@@ -15,6 +23,7 @@
       formControlName="scope"
       optionLabel="label"
       optionValue="value"
+      [filter]="true"
       (onChange)="onScopeChange($event.value)"
       data-testid="cable-span-scope"
     />
@@ -54,6 +63,9 @@
         type="number"
         id="sizeCable"
         fluid
+        min="0"
+        max="1000"
+        step="0.01"
         formControlName="sizeCable"
         data-testid="cable-span-size-cable"
       />
@@ -69,6 +81,9 @@
         type="number"
         id="distanceSupportRef"
         fluid
+        min="0"
+        max="5000"
+        step="0.01"
         formControlName="distanceSupportRef"
         data-testid="cable-span-distance-support-ref"
       />
@@ -84,6 +99,7 @@
       aria-label="delete cable span"
       i18n-aria-label
       (click)="deleteForm()"
+      [disabled]="isLoading() || !hasSavedModification()"
       data-testid="cable-span-delete"
     >
       <app-icon icon="delete" />
@@ -94,16 +110,26 @@
       type="submit"
       btnStyle="outlined"
       (click)="saveForm()"
-      [disabled]="isFormInvalid()"
+      [disabled]="isFormInvalid() || isLoading() || !isDirtySinceLastSave()"
       data-testid="cable-span-save"
     >
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>
 
-    <button app-btn [disabled]="isFormInvalid()" type="button" (click)="calculate()" data-testid="cable-span-calculate">
+    <button
+      app-btn
+      [disabled]="isFormInvalid() || isLoading()"
+      type="button"
+      (click)="calculate()"
+      data-testid="cable-span-calculate"
+    >
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>
     </button>
   </div>
+
+  @if (error()) {
+  <div class="cable-span__error" role="alert" aria-live="assertive" data-testid="cable-span-error">{{ error() }}</div>
+  }
 </form>

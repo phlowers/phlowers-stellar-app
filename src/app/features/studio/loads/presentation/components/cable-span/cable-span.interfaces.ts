@@ -12,7 +12,7 @@ export interface CableSpanFormControls {
   /** Type of cable length modification. */
   widthCable: FormControl<CableWidthType | null>;
   /** Cable length modification value in meters. */
-  sizeCable: FormControl<number>;
+  sizeCable: FormControl<number | null>;
   /** Distance to reference support in meters. */
-  distanceSupportRef: FormControl<number>;
+  distanceSupportRef: FormControl<number | null>;
 }

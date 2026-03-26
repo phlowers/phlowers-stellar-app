@@ -1,0 +1,431 @@
+/**
+ * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
+import { CableModificationsService, CableModificationParams } from './cableModifications.service';
+import { PlotService } from '@services/plot/plot.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { StudiesService } from '@services/studies/studies.service';
+import { Task, GetSectionOutput, GetSectionWithBaseOutput, TaskError } from '@services/worker_python/tasks/types';
+import { Section } from '@shared/domain';
+import { Study } from '@shared/domain/models/study.model';
+import { StudyEntity } from '@infrastructure/database';
+
+function createSignalMock<T>(initialValue: T) {
+  let value = initialValue;
+  const fn = vi.fn(() => value) as vi.Mock & { set: vi.Mock };
+  fn.set = vi.fn((v: T) => {
+    value = v;
+  });
+  return fn;
+}
+
+const mockSectionBase: Section = {
+  uuid: 'section-uuid-1',
+  internal_id: 'INT-001',
+  name: 'Test Section',
+  short_name: 'TS',
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  internal_catalog_id: 'CAT-001',
+  type: 'phase',
+  electric_phase_number: 1,
+  cable_name: 'Test Cable',
+  cable_short_name: 'TC',
+  cables_amount: 1,
+  optical_fibers_amount: 0,
+  spans_amount: 1,
+  begin_span_name: 'S1',
+  last_span_name: 'S2',
+  first_support_number: 1,
+  last_support_number: 2,
+  first_attachment_set: 'Set1',
+  last_attachment_set: 'Set2',
+  regional_maintenance_center_names: [],
+  maintenance_center_names: [],
+  regional_team_id: undefined,
+  maintenance_team_id: undefined,
+  maintenance_center_id: undefined,
+  link_name: undefined,
+  lit_code: undefined,
+  lit_name: undefined,
+  branch_name: undefined,
+  branch_idr: undefined,
+  voltage_idr: undefined,
+  comment: undefined,
+  supports_comment: undefined,
+  supports: [{ uuid: 'support-uuid-1' } as Section['supports'][0]],
+  obstacles: [],
+  initial_conditions: [],
+  selected_initial_condition_uuid: undefined,
+  charges: [],
+  selected_charge_uuid: null,
+  field_measures: [],
+  selected_field_measure_uuid: undefined,
+  vtl_and_guying: undefined,
+  cable_modifications: [],
+  selected_cable_modification_uuid: null
+};
+
+const mockStudy: StudyEntity = {
+  uuid: 'study-uuid-1',
+  author_email: 'test@test.com',
+  title: 'Test Study',
+  description: '',
+  shareable: false,
+  created_at_offline: '2025-01-01T00:00:00.000Z',
+  updated_at_offline: '2025-01-01T00:00:00.000Z',
+  saved: true,
+  sections: [mockSectionBase]
+};
+
+const mockParams: CableModificationParams = {
+  spanUuid: 'support-uuid-1',
+  supportRef: 'LEFT',
+  widthCable: 'lengthening',
+  sizeCable: 0.5,
+  distanceSupportRef: 10
+};
+
+describe('CableModificationsService', () => {
+  let service: CableModificationsService;
+  let mockPlotService: vi.Mocked<PlotService>;
+  let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
+  let mockStudiesService: vi.Mocked<StudiesService>;
+
+  beforeEach(() => {
+    mockPlotService = {
+      section: createSignalMock<Section | null>(mockSectionBase),
+      study: createSignalMock<Study | null>({ uuid: 'study-uuid-1' } as Study),
+      loading: createSignalMock(false),
+      litData: createSignalMock(null),
+      baseLitData: createSignalMock(null),
+      error: createSignalMock(null),
+      refreshCamera: vi.fn(),
+      getSupportIndex: vi.fn().mockReturnValue(0)
+    } as unknown as vi.Mocked<PlotService>;
+
+    mockWorkerPythonService = {
+      runTask: vi.fn()
+    } as unknown as vi.Mocked<WorkerPythonService>;
+
+    mockStudiesService = {
+      getStudy: vi.fn().mockResolvedValue(mockStudy),
+      updateStudy: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<StudiesService>;
+
+    TestBed.configureTestingModule({
+      providers: [
+        CableModificationsService,
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+        { provide: StudiesService, useValue: mockStudiesService }
+      ]
+    });
+
+    service = TestBed.inject(CableModificationsService);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  // ---------------------------------------------------------------------------
+  // calculate()
+  // ---------------------------------------------------------------------------
+  describe('calculate()', () => {
+    it('should return early when spanIndex is -1', async () => {
+      mockPlotService.getSupportIndex.mockReturnValue(-1);
+
+      await service.calculate(mockParams);
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should call refreshCamera and set loading to true then false', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { current: {} as GetSectionOutput, base: null },
+        error: null
+      });
+
+      await service.calculate(mockParams);
+
+      expect(mockPlotService.refreshCamera).toHaveBeenCalled();
+      expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
+      expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
+    });
+
+    it('should call runTask with cableModification task and correct inputs', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { current: {} as GetSectionOutput, base: null },
+        error: null
+      });
+
+      await service.calculate(mockParams);
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.cableModification, {
+        spanIndex: 0,
+        widthCable: mockParams.widthCable,
+        sizeCable: mockParams.sizeCable,
+        distanceSupportRef: mockParams.distanceSupportRef,
+        supportRef: mockParams.supportRef
+      });
+    });
+
+    it('should update litData and baseLitData from task result', async () => {
+      const current = { spans: [[]] } as unknown as GetSectionOutput;
+      const base = { spans: [[]] } as unknown as GetSectionOutput;
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { current, base } as GetSectionWithBaseOutput,
+        error: null
+      });
+
+      await service.calculate(mockParams);
+
+      expect(mockPlotService.litData.set).toHaveBeenCalledWith(current);
+      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(base);
+    });
+
+    it('should set litData and baseLitData to null when result is null', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null as unknown as GetSectionWithBaseOutput,
+        error: null
+      });
+
+      await service.calculate(mockParams);
+
+      expect(mockPlotService.litData.set).toHaveBeenCalledWith(null);
+      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(null);
+    });
+
+    it('should propagate task error to plotService.error', async () => {
+      const taskError = TaskError.CALCULATION_ERROR;
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null as unknown as GetSectionWithBaseOutput,
+        error: taskError
+      });
+
+      await service.calculate(mockParams);
+
+      expect(mockPlotService.error.set).toHaveBeenCalledWith(taskError);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // save()
+  // ---------------------------------------------------------------------------
+  describe('save()', () => {
+    it('should return early when studyUuid is missing', async () => {
+      mockPlotService.study.mockReturnValue(null);
+
+      await service.save({
+        spanUuid: 'su',
+        supportRef: 'LEFT',
+        widthCable: 'lengthening',
+        sizeCable: 1,
+        distanceSupportRef: 5
+      });
+
+      expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
+    });
+
+    it('should return early when sectionUuid is missing', async () => {
+      mockPlotService.section.mockReturnValue(null);
+
+      await service.save({
+        spanUuid: 'su',
+        supportRef: 'LEFT',
+        widthCable: 'lengthening',
+        sizeCable: 1,
+        distanceSupportRef: 5
+      });
+
+      expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
+    });
+
+    it('should return early when study is not found', async () => {
+      mockStudiesService.getStudy.mockResolvedValue(undefined);
+
+      await service.save({
+        spanUuid: 'su',
+        supportRef: 'LEFT',
+        widthCable: 'lengthening',
+        sizeCable: 1,
+        distanceSupportRef: 5
+      });
+
+      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+    });
+
+    it('should add new cable modification and call updateStudy', async () => {
+      const modification = {
+        spanUuid: 'support-uuid-1',
+        supportRef: 'LEFT' as const,
+        widthCable: 'lengthening' as const,
+        sizeCable: 0.5,
+        distanceSupportRef: 10
+      };
+
+      await service.save(modification);
+
+      expect(mockStudiesService.updateStudy).toHaveBeenCalled();
+      const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
+      expect(section?.cable_modifications).toHaveLength(1);
+      expect(section?.cable_modifications[0].spanUuid).toBe('support-uuid-1');
+    });
+
+    it('should set selected_cable_modification_uuid after save', async () => {
+      const modification = {
+        spanUuid: 'support-uuid-1',
+        supportRef: 'LEFT' as const,
+        widthCable: 'lengthening' as const,
+        sizeCable: 0.5,
+        distanceSupportRef: 10
+      };
+
+      await service.save(modification);
+
+      const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
+      expect(section?.selected_cable_modification_uuid).toBeTruthy();
+    });
+
+    it('should update an existing cable modification', async () => {
+      const existingUuid = 'existing-mod-uuid';
+      const studyWithMod: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSectionBase,
+            cable_modifications: [
+              {
+                uuid: existingUuid,
+                spanUuid: 'support-uuid-1',
+                supportRef: 'LEFT',
+                widthCable: 'lengthening',
+                sizeCable: 0.1,
+                distanceSupportRef: 5
+              }
+            ]
+          }
+        ]
+      };
+      mockStudiesService.getStudy.mockResolvedValue(studyWithMod);
+
+      await service.save({
+        uuid: existingUuid,
+        spanUuid: 'support-uuid-1',
+        supportRef: 'RIGHT',
+        widthCable: 'shortening',
+        sizeCable: 0.9,
+        distanceSupportRef: 20
+      });
+
+      const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
+      expect(section?.cable_modifications).toHaveLength(1);
+      expect(section?.cable_modifications[0].sizeCable).toBe(0.9);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // delete()
+  // ---------------------------------------------------------------------------
+  describe('delete()', () => {
+    it('should return early when studyUuid is missing', async () => {
+      mockPlotService.study.mockReturnValue(null);
+
+      await service.delete('some-uuid');
+
+      expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
+    });
+
+    it('should return early when sectionUuid is missing', async () => {
+      mockPlotService.section.mockReturnValue(null);
+
+      await service.delete('some-uuid');
+
+      expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
+    });
+
+    it('should remove the modification from section and call updateStudy', async () => {
+      const uuid = 'mod-to-delete';
+      const studyWithMod: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSectionBase,
+            cable_modifications: [
+              {
+                uuid,
+                spanUuid: 'support-uuid-1',
+                supportRef: 'LEFT',
+                widthCable: 'lengthening',
+                sizeCable: 1,
+                distanceSupportRef: 5
+              }
+            ],
+            selected_cable_modification_uuid: uuid
+          }
+        ]
+      };
+      mockStudiesService.getStudy.mockResolvedValue(studyWithMod);
+
+      await service.delete(uuid);
+
+      expect(mockStudiesService.updateStudy).toHaveBeenCalled();
+      const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
+      expect(section?.cable_modifications).toHaveLength(0);
+      expect(section?.selected_cable_modification_uuid).toBeNull();
+    });
+
+    it('should not change selection when deleted uuid was not selected', async () => {
+      const uuid = 'mod-to-delete';
+      const otherId = 'other-mod';
+      const studyWithMod: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSectionBase,
+            cable_modifications: [
+              {
+                uuid,
+                spanUuid: 'su1',
+                supportRef: 'LEFT',
+                widthCable: 'lengthening',
+                sizeCable: 1,
+                distanceSupportRef: 5
+              },
+              {
+                uuid: otherId,
+                spanUuid: 'su1',
+                supportRef: 'RIGHT',
+                widthCable: 'shortening',
+                sizeCable: 2,
+                distanceSupportRef: 3
+              }
+            ],
+            selected_cable_modification_uuid: otherId
+          }
+        ]
+      };
+      mockStudiesService.getStudy.mockResolvedValue(studyWithMod);
+
+      await service.delete(uuid);
+
+      const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
+      expect(section?.selected_cable_modification_uuid).toBe(otherId);
+    });
+  });
+});
