@@ -167,11 +167,9 @@
         </div>
 
         <div class="obstacles-form__points__point__form">
-          <label [for]="'altitudePoint' + $index" class="obstacles-form__points__point__form__label alt-point-label">
-            z :
-          </label>
+          <label [for]="'altitudePoint' + $index" class="obstacles-point__form__label alt-point-label"> z : </label>
 
-          <p-inputgroup class="obstacles-form__points__point__form__input">
+          <p-inputgroup class="obstacles-point__form__input">
             <input
               (input)="onPositionInput($event, 'z')"
               pInputText
@@ -187,14 +185,11 @@
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
 
-          <label
-            [for]="'distanceToRefSupport' + $index"
-            class="obstacles-form__points__point__form__label dist-ref-label"
-          >
+          <label [for]="'distanceToRefSupport' + $index" class="obstacles-point__form__label dist-ref-label">
             x :
           </label>
 
-          <p-inputgroup class="obstacles-form__points__point__form__input">
+          <p-inputgroup class="obstacles-point__form__input">
             <input
               pInputText
               (input)="onPositionInput($event, 'x')"
@@ -210,14 +205,11 @@
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
 
-          <label
-            [for]="'distanceToLineAxis' + $index"
-            class="obstacles-form__points__point__form__label dist-axis-label"
-          >
+          <label [for]="'distanceToLineAxis' + $index" class="obstacles-point__form__label dist-axis-label">
             y :
           </label>
 
-          <p-inputgroup class="obstacles-form__points__point__form__input">
+          <p-inputgroup class="obstacles-point__form__input">
             <input
               pInputText
               (input)="onPositionInput($event, 'y')"
