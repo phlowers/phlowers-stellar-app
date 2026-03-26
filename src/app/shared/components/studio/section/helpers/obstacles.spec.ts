@@ -7,6 +7,7 @@ import {
 } from './obstacles';
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
+import { Support } from '@shared/domain/models/support.model';
 
 type ObstacleAnnotation = Partial<Plotly.Annotations> & { data?: ObstacleAnnotationData };
 
@@ -150,6 +151,7 @@ describe('createObstaclesAnnotations', () => {
     obstacles: [],
     currentObstacleUuid: null,
     currentObstaclePointIndex: 0,
+    supports: [],
     ...overrides
   });
 
@@ -286,6 +288,140 @@ describe('createObstaclesAnnotations', () => {
     // In 2D, support altitude is carried by base.y (not base.z)
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 33, z: 33 });
+  });
+
+  it('should use support foot altitude for relative altitude type', () => {
+    const obstacle = makeObstacle({
+      altitudeType: 'relative',
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 5 }]
+    });
+    const supports = [
+      { uuid: 'sup-1', supportFootAltitude: 100 } as Support,
+      { uuid: 'sup-2', supportFootAltitude: 120 } as Support
+    ];
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
+      obstacles: [obstacle],
+      supports,
+      view: '3d'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    // relative to support foot: z = 5 + 100 = 105
+    expect(marker.z).toBe(105);
+  });
+
+  it('should use cable attachment altitude for relative_cable altitude type', () => {
+    const obstacle = makeObstacle({
+      altitudeType: 'relative_cable',
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 5 }]
+    });
+    const supports = [
+      { uuid: 'sup-1', supportFootAltitude: 100, attachmentHeight: 165 } as Support,
+      { uuid: 'sup-2', supportFootAltitude: 120, attachmentHeight: 180 } as Support
+    ];
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
+      obstacles: [obstacle],
+      supports,
+      view: '3d'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    // relative to cable attachment: z = 5 + 165 (attachmentHeight from domain)
+    expect(marker.z).toBe(170);
+  });
+
+  it('should use RIGHT support foot altitude when referenceSupport is RIGHT and altitudeType is relative', () => {
+    const obstacle = makeObstacle({
+      altitudeType: 'relative',
+      referenceSupport: ReferenceSupport.RIGHT,
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 5 }]
+    });
+    const supports = [
+      { uuid: 'sup-1', supportFootAltitude: 100 } as Support,
+      { uuid: 'sup-2', supportFootAltitude: 120 } as Support
+    ];
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
+      obstacles: [obstacle],
+      supports,
+      view: '3d'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    // relative to RIGHT support foot: z = 5 + 120 = 125
+    expect(marker.z).toBe(125);
+  });
+
+  it('should fallback to plot base altitude when supportFootAltitude is null for relative type', () => {
+    const obstacle = makeObstacle({
+      altitudeType: 'relative',
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 5 }]
+    });
+    const supports = [
+      { uuid: 'sup-1', supportFootAltitude: null } as unknown as Support,
+      { uuid: 'sup-2', supportFootAltitude: null } as unknown as Support
+    ];
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
+      obstacles: [obstacle],
+      supports,
+      view: '3d'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    // fallback to plot base altitude: z = 5 + 200 = 205
+    expect(marker.z).toBe(205);
+  });
+
+  it('should fallback to plot base altitude for relative_cable when attachmentHeight is null', () => {
+    const obstacle = makeObstacle({
+      altitudeType: 'relative_cable',
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 5 }]
+    });
+    const supports = [
+      { uuid: 'sup-1', supportFootAltitude: 100, attachmentHeight: null } as unknown as Support,
+      { uuid: 'sup-2', supportFootAltitude: 120, attachmentHeight: null } as unknown as Support
+    ];
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
+      obstacles: [obstacle],
+      supports,
+      view: '3d'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    // fallback to plot base altitude: z = 5 + 200 = 205
+    expect(marker.z).toBe(205);
+  });
+
+  it('should use RIGHT support attachmentHeight for relative_cable with RIGHT reference', () => {
+    const obstacle = makeObstacle({
+      altitudeType: 'relative_cable',
+      referenceSupport: ReferenceSupport.RIGHT,
+      supportUuid: 'sup-1',
+      positions: [{ x: 1, y: 2, z: 5 }]
+    });
+    const supports = [
+      { uuid: 'sup-1', supportFootAltitude: 100, attachmentHeight: 165 } as Support,
+      { uuid: 'sup-2', supportFootAltitude: 120, attachmentHeight: 180 } as Support
+    ];
+    const params = basePlotParams({
+      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
+      obstacles: [obstacle],
+      supports,
+      view: '3d'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    // RIGHT support attachmentHeight = 180: z = 5 + 180 = 185
+    expect(marker.z).toBe(185);
   });
 
   it('should include annotation data for event handling', () => {

@@ -6,6 +6,7 @@ import { SpanLoad } from '@shared/domain';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { DataObject } from './createPlotDataObject';
 import { createObstaclesAnnotations } from './obstacles';
+import { Support } from '@shared/domain/models/support.model';
 
 /**
  * Parameters required to create or update a Plotly section plot.
@@ -38,6 +39,8 @@ export interface CreatePlotParams {
   currentObstacleUuid: string | null;
   /** Index of the currently selected obstacle position point. */
   currentObstaclePointIndex: number;
+  /** Domain support models for altitude lookups. */
+  supports?: Support[];
   /** Normalization factors for the axes and Plotly aspect mode. */
   axesNorms?: { x: number; y: number; z: number; aspectMode: string };
 }

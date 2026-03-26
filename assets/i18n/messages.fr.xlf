@@ -3351,12 +3351,6 @@
         <target>Axe de la portée</target>
       </segment>
     </unit>
-    <unit id="4441055613955460887">
-      <segment state="initial">
-        <source>Line axis</source>
-        <target>Axe de la ligne</target>
-      </segment>
-    </unit>
     <unit id="381912160634740127">
       <segment state="initial">
         <source>Add point</source>
@@ -3403,24 +3397,6 @@
       <segment state="initial">
         <source>Select point</source>
         <target>Sélectionner le point</target>
-      </segment>
-    </unit>
-    <unit id="8394386160100993545">
-      <segment state="initial">
-        <source> Alt. point </source>
-        <target> Alt. point </target>
-      </segment>
-    </unit>
-    <unit id="4761670130264103669">
-      <segment state="initial">
-        <source> Ref. supp. dist. </source>
-        <target> Dist. supp. réf. </target>
-      </segment>
-    </unit>
-    <unit id="5519374178045650857">
-      <segment state="initial">
-        <source> Line axis dist. </source>
-        <target> Dist. axe ligne </target>
       </segment>
     </unit>
     <unit id="3876336363073925034">
@@ -3564,7 +3540,7 @@
     <unit id="7000098318478933999">
       <segment state="initial">
         <source>Study actions menu</source>
-        <target>Menu des actions d'étude</target>
+        <target>Menu des actions d&apos;étude</target>
       </segment>
     </unit>
     <unit id="1215291740212922013">
@@ -3577,6 +3553,12 @@
       <segment state="initial">
         <source>Next support</source>
         <target>Support suivant</target>
+      </segment>
+    </unit>
+    <unit id="7413830724399618712">
+      <segment state="initial">
+        <source>Relative to cable attachment</source>
+        <target>Relative accr. câble</target>
       </segment>
     </unit>
   </file>

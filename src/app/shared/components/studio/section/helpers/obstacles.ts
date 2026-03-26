@@ -105,12 +105,10 @@ const computeAnnotationCoords = (
   position: Position3D,
   side: string,
   is2d: boolean,
-  rightBase?: Coordinates
+  rightBase?: Coordinates,
+  supportFootAltitude?: number | null,
+  cableAttachmentAltitude?: number | null
 ): Coordinates => {
-  // Z meaning depends on altitudeType:
-  // - 'relative': position.z is a delta from the reference support altitude
-  // - 'absolute': position.z is an NGF altitude (referenced to 0)
-  const isAbsoluteAltitude = obstacle.altitudeType === 'absolute';
   const isRightReference = obstacle.referenceSupport === ReferenceSupport.RIGHT;
 
   // Choose which support base to use for altitude and lateral positioning.
@@ -118,11 +116,24 @@ const computeAnnotationCoords = (
   // available, use the right support; otherwise fall back to the left (base).
   const refBase = isRightReference && rightBase ? rightBase : base;
 
-  // In 2D plots, Plotly's vertical axis is `y` and represents altitude (NGF).
-  // The support altitude in plot-coordinates is stored in `refBase.y`.
-  // In 3D plots, altitude is `z` and stored in `refBase.z`.
-  const supportAltitudeNgf = is2d ? refBase.y : refBase.z;
-  const altitudeNgf = (position.z ?? 0) + (isAbsoluteAltitude ? 0 : supportAltitudeNgf);
+  // Fallback altitude from the plotly support base coordinate when domain
+  // altitudes are unavailable (first point of the support data object).
+  const plotBaseAltitude = is2d ? refBase.y : refBase.z;
+
+  // Compute altitude offset based on altitudeType:
+  // - 'absolute': position.z is an NGF altitude, no offset
+  // - 'relative': position.z is a delta from the support foot altitude
+  // - 'relative_cable': position.z is a delta from the cable attachment altitude
+  let altitudeOffset: number;
+  if (obstacle.altitudeType === 'relative_cable') {
+    altitudeOffset = cableAttachmentAltitude ?? plotBaseAltitude;
+  } else if (obstacle.altitudeType === 'relative') {
+    altitudeOffset = supportFootAltitude ?? plotBaseAltitude;
+  } else {
+    altitudeOffset = 0;
+  }
+
+  const altitudeNgf = (position.z ?? 0) + altitudeOffset;
 
   // Compute X coordinate based on view/side and reference support direction.
   // In profile view, position.x = distance along span from the reference support.
@@ -156,7 +167,7 @@ const createPositionAnnotations = (
   coords: Coordinates,
   color: string
 ): Partial<Plotly.Annotations>[] => {
-  const hovertext = `ref. support dist.: ${(position.x ?? 0).toFixed(2)}m<br />line axis dist.: ${(position.y ?? 0).toFixed(2)}m<br />point alt.: ${coords.z.toFixed(2)}m`;
+  const hovertext = `x : ${(position.x ?? 0).toFixed(2)}m<br />y : ${(position.y ?? 0).toFixed(2)}m<br />z : ${coords.z.toFixed(2)}m`;
   const data = {
     obstacleUuid: obstacle.uuid,
     obstaclePositionIndex: positionIndex,
@@ -202,7 +213,15 @@ const createPositionAnnotations = (
  * @returns An array of partial Plotly annotation objects representing obstacles.
  */
 export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const { obstacles, data: dataObjects, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
+  const {
+    obstacles,
+    data: dataObjects,
+    view,
+    side,
+    currentObstacleUuid,
+    currentObstaclePointIndex,
+    supports
+  } = plotParams;
   const is2d = view === '2d';
 
   // Get all support objects (including the last one, needed as right-side reference)
@@ -211,6 +230,9 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
   const leftSupportObjects = allSupportObjects.slice(0, -1);
 
   const supportByUuid = new Map(leftSupportObjects.map((s) => [s.supportUuid, s]));
+
+  // Build a map of domain supports by UUID for altitude lookup
+  const domainSupportByUuid = new Map((supports ?? []).map((s) => [s.uuid, s]));
 
   const relevantObstacles = obstacles.filter((o) => supportByUuid.has(o.supportUuid));
 
@@ -227,9 +249,26 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
       leftIndex >= 0 && leftIndex + 1 < allSupportObjects.length ? allSupportObjects[leftIndex + 1] : undefined;
     const rightBase = rightSupportObject ? getBaseCoordinates(rightSupportObject) : undefined;
 
+    // Resolve domain support for the reference support (left or right)
+    const isRightRef = obstacle.referenceSupport === ReferenceSupport.RIGHT;
+    const refSupportUuid =
+      isRightRef && rightSupportObject?.supportUuid ? rightSupportObject.supportUuid : obstacle.supportUuid;
+    const domainSupport = domainSupportByUuid.get(refSupportUuid);
+    const supportFootAltitude = domainSupport?.supportFootAltitude ?? null;
+    const cableAttachmentAltitude = domainSupport?.attachmentHeight ?? null;
+
     return obstacle.positions.flatMap((position, index) => {
       if (!isValidPosition(position)) return [];
-      const coords = computeAnnotationCoords(base, obstacle, position, side, is2d, rightBase);
+      const coords = computeAnnotationCoords(
+        base,
+        obstacle,
+        position,
+        side,
+        is2d,
+        rightBase,
+        supportFootAltitude,
+        cableAttachmentAltitude
+      );
       const color = getHighlightColor(obstacle.uuid, index, currentObstacleUuid, currentObstaclePointIndex);
       return createPositionAnnotations(obstacle, index, position, coords, color);
     });

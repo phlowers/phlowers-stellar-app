@@ -1503,21 +1503,6 @@
         <source>delete point</source>
       </segment>
     </unit>
-    <unit id="8394386160100993545">
-      <segment>
-        <source> Alt. point </source>
-      </segment>
-    </unit>
-    <unit id="4761670130264103669">
-      <segment>
-        <source> Ref. supp. dist. </source>
-      </segment>
-    </unit>
-    <unit id="5519374178045650857">
-      <segment>
-        <source> Line axis dist. </source>
-      </segment>
-    </unit>
     <unit id="1498958297880085534">
       <segment>
         <source>delete obstacle</source>
@@ -1566,11 +1551,6 @@
     <unit id="4305399083978919436">
       <segment>
         <source>Span axis</source>
-      </segment>
-    </unit>
-    <unit id="4441055613955460887">
-      <segment>
-        <source>Line axis</source>
       </segment>
     </unit>
     <unit id="3989668595571335837">
@@ -2958,6 +2938,11 @@
     <unit id="7000098318478933999">
       <segment>
         <source>Study actions menu</source>
+      </segment>
+    </unit>
+    <unit id="7413830724399618712">
+      <segment>
+        <source>Relative to cable attachment</source>
       </segment>
     </unit>
   </file>
