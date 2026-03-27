@@ -2925,21 +2925,6 @@
         <source>select an obstacle&apos;s point</source>
       </segment>
     </unit>
-    <unit id="2236725227074458440">
-      <segment>
-        <source> y: </source>
-      </segment>
-    </unit>
-    <unit id="2314671845594102198">
-      <segment>
-        <source> x: </source>
-      </segment>
-    </unit>
-    <unit id="5436737525137652350">
-      <segment>
-        <source> z: </source>
-      </segment>
-    </unit>
     <unit id="586523524817836245">
       <segment>
         <source>Point <ph id="0" equiv="PH" disp="index + 1"/></source>

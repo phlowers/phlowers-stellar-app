@@ -3573,23 +3573,5 @@
         <target>Zoom</target>
       </segment>
     </unit>
-    <unit id="5436737525137652350">
-      <segment state="initial">
-        <source> z: </source>
-        <target> z : </target>
-      </segment>
-    </unit>
-    <unit id="2314671845594102198">
-      <segment state="initial">
-        <source> x: </source>
-        <target> x : </target>
-      </segment>
-    </unit>
-    <unit id="2236725227074458440">
-      <segment state="initial">
-        <source> y: </source>
-        <target> y : </target>
-      </segment>
-    </unit>
   </file>
 </xliff>
