@@ -32,4 +32,5 @@ Understand how app files and catalog data are updated safely.
 welcome
 obstacles
 application_update
+charge-cable-manip-at-span
 ```
