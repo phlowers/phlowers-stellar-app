@@ -12,6 +12,8 @@ import logging
 from importlib.metadata import version
 import sys
 import json
+
+from stellar_engine import guying
 RESOLUTION = 100
 # init a logger to print to stdout
 logger = logging.getLogger("mechaphlowers")
@@ -25,7 +27,7 @@ formatter = logging.Formatter(
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-print(f"mechaphlowers version: {version('mechaphlowers')}")
+logger.info(f"mechaphlowers version: {version('mechaphlowers')}")
 
 
 def init_config():
@@ -63,12 +65,6 @@ def set_log_level(js_inputs: dict):
     logger.setLevel(logging.DEBUG if log_level else logging.WARNING)
     return {"success": True}
 
-
-def set_resolution(js_inputs: dict):
-    python_inputs = js_to_python(js_inputs)
-    resolution = python_inputs["resolution"]
-    mph.options.graphics.resolution = resolution
-    return {"success": True, "resolution": resolution}
 
 
 def get_config():
@@ -451,60 +447,7 @@ def refresh_projection(js_inputs: dict):
     }
 
 
-def get_support_coordinates(js_inputs: dict):
-    python_inputs = js_to_python(js_inputs)
-    coordinates = python_inputs["coordinates"]
-    shape_values = np.array(coordinates)
-    shape_set_number = np.array(python_inputs["attachmentSetNumbers"])
 
-    pyl_shape = SupportShape(
-        name="pyl",
-        xyz_arms=shape_values,
-        set_number=shape_set_number,
-    )
-    return {
-        "shape_points": pyl_shape.support_points,
-        "text_display_points": pyl_shape.labels_points,
-        "text_to_display": pyl_shape.set_number,
-    }
-
-
-def calculate_papoto(js_inputs: dict):
-    python_inputs = js_to_python(js_inputs)
-    spanLength = python_inputs["spanLength"]
-    HL = python_inputs["HL"]
-    H1 = python_inputs["H1"]
-    H2 = python_inputs["H2"]
-    H3 = python_inputs["H3"]
-    HR = python_inputs["HR"]
-    VL = python_inputs["VL"]
-    V1 = python_inputs["V1"]
-    V2 = python_inputs["V2"]
-    V3 = python_inputs["V3"]
-    VR = python_inputs["VR"]
-    papoto = PapotoParameterMeasure()
-    papoto(
-        a=spanLength,
-        HL=HL,
-        VL=VL,
-        HR=HR,
-        VR=VR,
-        H1=H1,
-        V1=V1,
-        H2=H2,
-        V2=V2,
-        H3=H3,
-        V3=V3,
-    )
-
-    return {
-        "parameter": papoto.parameter[0],
-        # "uncertainty_parameter": 0, # uncertainty isn't set yet in mechaphlowers
-        "parameter_1_2": papoto.parameter_1_2[0],
-        "parameter_2_3": papoto.parameter_2_3[0],
-        "parameter_1_3": papoto.parameter_1_3[0],
-        "check_validity": bool(papoto.check_validity()[0]),
-    }
 
 
 init_config()

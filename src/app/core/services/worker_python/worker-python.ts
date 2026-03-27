@@ -9,7 +9,7 @@
 import { loadPyodide } from 'pyodide';
 import change_state from './tasks/python-scripts/change_state.py';
 import functions from './tasks/python-scripts/functions.py';
-import tools from './tasks/python-scripts/tools.py';
+import tools from './tasks/python-scripts/api.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
