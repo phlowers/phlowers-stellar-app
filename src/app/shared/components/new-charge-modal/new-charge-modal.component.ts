@@ -11,7 +11,7 @@ import { Charge } from '@shared/domain';
 import { v4 as uuidv4 } from 'uuid';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
-import { defaultClimaticCharge } from '../../../features/studio/loads/presentation/components/climate/climate.component';
+import { defaultClimaticCharge } from '@features/studio/loads/presentation/components/climate/climate.component';
 
 /** Creates a new charge with default climate values and an auto-generated name. */
 const newCharge = (currentCharges: Charge[]): Charge => {

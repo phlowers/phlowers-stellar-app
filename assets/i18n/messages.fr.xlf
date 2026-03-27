@@ -3571,6 +3571,34 @@
       <segment state="initial">
         <source>Point <ph id="0" equiv="PH" disp="index + 1"/></source>
         <target>Point <ph id="0" equiv="PH" disp="index + 1"/></target>
+    <unit id="8572591079205275141">
+      <segment state="initial">
+        <source>Cable modification</source>
+        <target>Cable modification</target>
+      </segment>
+    </unit>
+    <unit id="4411211492569880517">
+      <segment state="initial">
+        <source>Cable length mod.</source>
+        <target>Cable length mod.</target>
+      </segment>
+    </unit>
+    <unit id="6785528195531593984">
+      <segment state="initial">
+        <source>delete cable span</source>
+        <target>delete cable span</target>
+      </segment>
+    </unit>
+    <unit id="4131248965561242896">
+      <segment state="initial">
+        <source>Lengthening</source>
+        <target>Lengthening</target>
+      </segment>
+    </unit>
+    <unit id="6494949896986424409">
+      <segment state="initial">
+        <source>Shortening</source>
+        <target>Shortening</target>
       </segment>
     </unit>
     <unit id="6421460271971606186">

@@ -20,6 +20,17 @@ export type { CableModificationParams };
 })
 /** Service coordinating cable modification calculations, persistence, and deletion. */
 export class CableModificationsService {
+  /**
+   * Clear any persisted form data in memory for a given span (if such logic is needed).
+   * This is a placeholder: adapt if you avez une logique de cache ou de persistance locale.
+   * @param spanUuid UUID of the span whose form data should be cleared
+   */
+  clearPersistedFormData(spanUuid: string): void {
+    // If you have a cache or local storage for form data, clear it here.
+    // Example for localStorage:
+    // localStorage.removeItem(`cable-span-form-${spanUuid}`);
+    // If not used, this is a no-op.
+  }
   private readonly plotService = inject(PlotService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly studiesService = inject(StudiesService);

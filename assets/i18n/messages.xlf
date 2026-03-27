@@ -2933,6 +2933,14 @@
     <unit id="586523524817836245">
       <segment>
         <source>Point <ph id="0" equiv="PH" disp="index + 1"/></source>
+    <unit id="4131248965561242896">
+      <segment>
+        <source>Lengthening</source>
+      </segment>
+    </unit>
+    <unit id="4411211492569880517">
+      <segment>
+        <source>Cable length mod.</source>
       </segment>
     </unit>
     <unit id="6421460271971606186">
@@ -2958,6 +2966,19 @@
     <unit id="971451359136104256">
       <segment>
         <source>y:</source>
+    <unit id="6494949896986424409">
+      <segment>
+        <source>Shortening</source>
+      </segment>
+    </unit>
+    <unit id="6785528195531593984">
+      <segment>
+        <source>delete cable span</source>
+      </segment>
+    </unit>
+    <unit id="8572591079205275141">
+      <segment>
+        <source>Cable modification</source>
       </segment>
     </unit>
   </file>

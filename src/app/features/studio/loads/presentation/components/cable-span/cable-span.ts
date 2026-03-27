@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { merge } from 'rxjs';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -44,11 +44,11 @@ export class CableSpanComponent {
       { value: null, disabled: true },
       { validators: [Validators.required] }
     ),
-    widthCable: new FormControl<CableWidthType | null>(null, { validators: [Validators.required] }),
-    sizeCable: new FormControl<number | null>(null, {
+    widthCable: new FormControl<CableWidthType | null>('lengthening', { validators: [Validators.required] }),
+    sizeCable: new FormControl<number | null>(0, {
       validators: [Validators.required, Validators.min(0), Validators.max(1000)]
     }),
-    distanceSupportRef: new FormControl<number | null>(null, {
+    distanceSupportRef: new FormControl<number | null>(0, {
       validators: [Validators.required, Validators.min(0), Validators.max(5000)]
     })
   });
@@ -63,15 +63,9 @@ export class CableSpanComponent {
     { label: $localize`Shortening`, value: 'shortening' as CableWidthType }
   ];
 
-  private readonly scopeSignal = toSignal(this.form.controls.scope.valueChanges, {
-    initialValue: this.form.controls.scope.value
-  });
-
-  /** Whether a modification is already saved for the selected span (RG.LON-CAB.SUP-BTN.1). */
-  readonly hasSavedModification = computed(() => {
-    const spanUuid = this.scopeSignal();
-    if (!spanUuid) return false;
-    return (this.plotService.section()?.cable_modifications ?? []).some((m) => m.spanUuid === spanUuid);
+  hasSavedModification = signal<boolean>(true);
+  readonly hasActiveModification = computed(() => {
+    return this.hasSavedModification();
   });
 
   /** UUID of the section last seen — used to reset the form when the section changes. */
@@ -125,7 +119,6 @@ export class CableSpanComponent {
 
     this.supportRefOptions.set(untracked(() => this.plotService.getSupportOptions(uuid)));
     this.form.controls.supportRef.enable({ emitEvent: false });
-    // RG.LON-CAB.SUP.2: pre-select first support by default
     this.form.controls.supportRef.setValue('LEFT', { emitEvent: false });
 
     this.plotService.plotOptionsChange({
@@ -133,9 +126,9 @@ export class CableSpanComponent {
       endSupport: index + 1
     });
 
-    // RG.LON-CAB.POR.4: reload saved modification for this span if one exists
     const savedMod = untracked(() => this.plotService.section()?.cable_modifications?.find((m) => m.spanUuid === uuid));
     if (savedMod) {
+      this.hasSavedModification.set(false);
       this.form.patchValue(
         {
           supportRef: savedMod.supportRef,
@@ -146,30 +139,74 @@ export class CableSpanComponent {
         { emitEvent: false }
       );
     } else {
-      this.form.patchValue({ widthCable: null, sizeCable: null, distanceSupportRef: null }, { emitEvent: false });
+      this.form.patchValue({ widthCable: 'lengthening', sizeCable: 0, distanceSupportRef: 0 }, { emitEvent: false });
+      this.hasSavedModification.set(true);
     }
-    // Selecting a span is not a user content edit — reset dirty
+    this.statesFormControls();
     this.isDirtySinceLastSave.set(false);
   }
 
   resetForm(): void {
-    this.form.reset();
-    this.form.controls.supportRef.disable({ emitEvent: false });
-    this.supportRefOptions.set([]);
+    const currentScope = this.form.controls.scope.value;
+    this.form.patchValue(
+      {
+        supportRef: 'LEFT',
+        widthCable: 'lengthening',
+        sizeCable: null,
+        distanceSupportRef: null
+      },
+      { emitEvent: false }
+    );
+    // If there is an active span, keep it selected and its support options
+    if (currentScope) {
+      this.form.controls.scope.setValue(currentScope, { emitEvent: false });
+    }
+    this.statesFormControls();
     this.isDirtySinceLastSave.set(false);
+  }
+
+  private statesFormControls() {
+    this.form.controls.widthCable.markAsPristine();
+    this.form.controls.widthCable.markAsUntouched();
+    this.form.controls.sizeCable.markAsPristine();
+    this.form.controls.sizeCable.markAsUntouched();
+    this.form.controls.distanceSupportRef.markAsPristine();
+    this.form.controls.distanceSupportRef.markAsUntouched();
+    this.form.controls.supportRef.markAsPristine();
+    this.form.controls.supportRef.markAsUntouched();
+  }
+
+  /** Reload section from DB and update plotService.section signal */
+  private async reloadSectionFromDb(): Promise<void> {
+    const studyUuid = this.plotService.study()?.uuid;
+    const sectionUuid = this.plotService.section()?.uuid;
+    if (!studyUuid || !sectionUuid) return;
+    const study = await this.cableModificationsService['studiesService'].getStudy(studyUuid);
+    if (!study) return;
+    const section = study.sections.find((s) => s?.uuid === sectionUuid);
+    if (section) {
+      this.plotService.section.set(section);
+    }
   }
 
   async saveForm(): Promise<void> {
     if (this.form.invalid) return;
     const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = this.form.getRawValue();
     if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
-    await this.cableModificationsService.save({
-      spanUuid: scope,
-      supportRef,
-      widthCable,
-      sizeCable,
-      distanceSupportRef
-    });
+    this.isLoading.set(true);
+    await this.cableModificationsService
+      .save({
+        spanUuid: scope,
+        supportRef,
+        widthCable,
+        sizeCable,
+        distanceSupportRef
+      })
+      .finally(() => {
+        this.isLoading.set(false);
+        this.hasSavedModification.set(false);
+      });
+    await this.reloadSectionFromDb();
     this.isDirtySinceLastSave.set(false);
   }
 
@@ -177,7 +214,6 @@ export class CableSpanComponent {
     if (this.form.invalid) return;
     const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = this.form.getRawValue();
     if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
-    this.isLoading.set(true);
     this.error.set(null);
     this.cableModificationsService
       .calculate({
@@ -190,9 +226,6 @@ export class CableSpanComponent {
       .then(() => {
         const workerError = this.plotService.error();
         this.error.set(workerError ? String(workerError) : null);
-      })
-      .finally(() => {
-        this.isLoading.set(false);
       });
   }
 
@@ -202,9 +235,28 @@ export class CableSpanComponent {
       ? (this.plotService.section()?.cable_modifications?.find((m) => m.spanUuid === spanUuid)?.uuid ?? null)
       : null;
     if (uuid) {
-      this.cableModificationsService.delete(uuid);
+      this.cableModificationsService.delete(uuid).then(async () => {
+        await this.reloadSectionFromDb();
+        if (spanUuid) {
+          this.cableModificationsService.clearPersistedFormData(spanUuid);
+        }
+      });
+    } else {
+      // Suppression des données persistées en mémoire pour ce span
+      if (spanUuid) {
+        this.cableModificationsService.clearPersistedFormData(spanUuid);
+      }
     }
-    this.resetForm();
+    this.form.patchValue(
+      {
+        supportRef: 'LEFT',
+        widthCable: 'lengthening',
+        sizeCable: 0,
+        distanceSupportRef: 0
+      },
+      { emitEvent: false }
+    );
+    this.hasSavedModification.set(true);
   }
 
   isFormInvalid(): boolean {

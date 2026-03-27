@@ -75,7 +75,7 @@
         formControlName="sizeCable"
         data-testid="cable-span-size-cable"
       />
-      <p-inputgroup-addon i18n="@@unit.meters">m</p-inputgroup-addon>
+      <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
   </div>
 
@@ -93,7 +93,7 @@
         formControlName="distanceSupportRef"
         data-testid="cable-span-distance-support-ref"
       />
-      <p-inputgroup-addon i18n="@@unit.meters">m</p-inputgroup-addon>
+      <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
   </div>
 
@@ -105,7 +105,7 @@
       aria-label="delete cable span"
       i18n-aria-label
       (click)="deleteForm()"
-      [disabled]="isLoading() || !hasSavedModification()"
+      [disabled]="hasSavedModification()"
       data-testid="cable-span-delete"
     >
       <app-icon icon="delete" />
