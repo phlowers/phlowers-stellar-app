@@ -8,7 +8,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { PlotService, SpanOption } from '@services/plot/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { CableSpanFormControls, CableWidthType } from './cable-span.interfaces';
 import { CableModificationsService } from '../../services/cableModifications.service';
 
@@ -53,15 +53,8 @@ export class CableSpanComponent {
     })
   });
 
-  /** Span options using actual support numbers per RG.LON-CAB.POR.1. */
-  readonly spansOptions = computed<SpanOption[]>(() => {
-    const supports = this.plotService.section()?.supports ?? [];
-    const spanCount = Math.max(supports.length - 1, 0);
-    return Array.from({ length: spanCount }, (_, i) => ({
-      label: `${supports[i]?.number ?? i + 1} - ${supports[i + 1]?.number ?? i + 2}`,
-      value: supports[i]?.uuid ?? null
-    }));
-  });
+  /** Span options per RG.LON-CAB.POR.1. */
+  readonly spansOptions = this.plotService.getSpanOptions;
 
   readonly supportRefOptions = signal<{ label: number; value: 'LEFT' | 'RIGHT' }[]>([]);
 
