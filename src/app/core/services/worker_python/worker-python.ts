@@ -7,14 +7,13 @@
 /// <reference lib="webworker" />
 
 import { loadPyodide } from 'pyodide';
-import change_state from './tasks/python-scripts/change_state.py';
 import functions from './tasks/python-scripts/functions.py';
 import tools from './tasks/python-scripts/api.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [functions, change_state, tools];
+const pythonFiles = [functions, tools];
 
 /** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;

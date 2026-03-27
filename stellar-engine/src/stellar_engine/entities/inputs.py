@@ -42,3 +42,26 @@ class TemperatureCalculationInputs:
     windSpeed: float
     windSpeedUnit: Literal['kmh', 'ms']
     windDirection: str
+
+
+@dataclass
+class ClimateCharge:
+    windPressure: float
+    cableTemperature: float
+    symmetryType: str
+    iceThickness: float
+    frontierSupportNumber: float
+    iceThicknessBefore: float
+    iceThicknessAfter: float
+
+
+@dataclass
+class SpanLoad:
+    loadPosition: float
+    loadWeight: float
+
+
+@dataclass
+class ChangeStateInput:
+    climate: ClimateCharge
+    spanLoads: list[SpanLoad]

@@ -13,7 +13,6 @@ from importlib.metadata import version
 import sys
 import json
 
-from stellar_engine import guying
 RESOLUTION = 100
 # init a logger to print to stdout
 logger = logging.getLogger("mechaphlowers")
@@ -28,7 +27,8 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 logger.info(f"mechaphlowers version: {version('mechaphlowers')}")
-
+import stellar_engine
+logger.info(f"stellar_engine version: {version('stellar_engine')}")
 
 def init_config():
     mph.options.graphics.resolution = RESOLUTION
