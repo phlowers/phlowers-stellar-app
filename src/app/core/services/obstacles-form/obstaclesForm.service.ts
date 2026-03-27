@@ -23,6 +23,8 @@ export class ObstacleFormService {
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
 
+  private readonly defaultPosition = { x: null, y: null, z: null } as const satisfies Position3D;
+
   form: FormGroup<ObstacleFormGroupData> = this.fb.group({
     uuid: [defaultObstacleForm.uuid],
     name: [defaultObstacleForm.name, Validators.required],
@@ -48,7 +50,7 @@ export class ObstacleFormService {
     initialValue: this.positions.value as Position3D[]
   });
 
-  createPositionGroup(position: Position3D = { x: null, y: null, z: null }): PositionFormGroup {
+  createPositionGroup(position: Position3D = this.defaultPosition): PositionFormGroup {
     return this.fb.group({
       x: [position.x],
       y: [position.y],
@@ -147,6 +149,8 @@ export class ObstacleFormService {
     if (supportUuid) {
       const supports = this.plotService.getSupportOptions(supportUuid);
       this.supportsOptions.set(supports.map((s) => ({ label: s.label, value: s.value })));
+    } else {
+      this.supportsOptions.set([]);
     }
     this.debouncedResetForm(supportUuid);
     return this.form.value as Obstacle;
@@ -223,7 +227,7 @@ export class ObstacleFormService {
     }
     await this.removeObstacleFromSection(obstacleUuid);
     this.resetFormForNewObstacle(null);
-    this.obstaclesService.resetCurrentPointIndex();
+    this.obstaclesService.setSelectedObstacle(null, null);
   }
 
   private async removeObstacleFromSection(obstacleUuid: string): Promise<void> {
@@ -251,7 +255,6 @@ export class ObstacleFormService {
     if (this.form.invalid) {
       return;
     }
-    //TODO: Implement save logic
     const obstacle = this.buildObstacleFromForm();
     this.upsertObstacleInSection(obstacle);
     await this.saveSection();

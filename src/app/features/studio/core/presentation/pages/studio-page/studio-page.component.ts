@@ -223,7 +223,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     return 'all';
   }
 
-  updateSliderOptions({ value, highValue }: { value?: number | undefined; highValue?: number | undefined }) {
+  updateSliderOptions({ value, highValue }: { value?: number; highValue?: number }) {
     const options = this.plotService.plotOptions();
     [
       { val: value, key: 'startSupport' as const, opt: options.startSupport },

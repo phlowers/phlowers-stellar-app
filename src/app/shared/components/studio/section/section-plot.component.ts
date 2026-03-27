@@ -5,10 +5,10 @@ import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
-import { PlotOptions } from '@shared/types/plot.types';
+import { PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
 import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
-import { PLOT_ID, PlotService, SelectedDisplayOptions } from '@services/plot/plot.service';
+import { PlotService } from '@services/plot/plot.service';
 import { SpanLoad } from '@shared/domain';
 import { LoadType, SpanLoadAnnotationData } from './helpers/createLoadAnnotations';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
@@ -206,7 +206,7 @@ export class SectionPlotComponent {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.plotService.section();
         const payload = getObstacleClickPayload(
-          event?.annotation?.data as ObstacleAnnotationData,
+          event?.annotation?.data,
           section?.obstacles ?? [],
           section?.supports ?? []
         );
@@ -215,7 +215,7 @@ export class SectionPlotComponent {
         this.obstaclesService.setSelectedObstacle(payload.obstacle.uuid, payload.obstaclePositionIndex);
         this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
       } else if (event?.annotation?.data?.type === 'spanLoad') {
-        const data = event.annotation.data as SpanLoadAnnotationData;
+        const data = event.annotation.data;
         this.sideTabsService.sideTabs.set(0);
         this.loadFormsService.activeLoadTab.set('1');
         this.loadFormsService.selectedSpanSupportUuid.set(data.supportUuid);

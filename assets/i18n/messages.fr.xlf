@@ -1409,36 +1409,6 @@
         <target>Température de base</target>
       </segment>
     </unit>
-    <unit id="2205679024859102357">
-      <segment state="initial">
-        <source>Parameter (m)</source>
-        <target>Paramètre (m)</target>
-      </segment>
-    </unit>
-    <unit id="5909128736797701112">
-      <segment state="initial">
-        <source>Work load %</source>
-        <target>Charge %</target>
-      </segment>
-    </unit>
-    <unit id="3494570942698291859">
-      <segment state="initial">
-        <source>Oblique (m)</source>
-        <target>Oblique (m)</target>
-      </segment>
-    </unit>
-    <unit id="6560642783363072934">
-      <segment state="initial">
-        <source>Vertical (m)</source>
-        <target>Vertical (m)</target>
-      </segment>
-    </unit>
-    <unit id="2143129387317692084">
-      <segment state="initial">
-        <source>Horizontal (m)</source>
-        <target>Horizontal (m)</target>
-      </segment>
-    </unit>
     <unit id="3885497195825665706">
       <segment state="initial">
         <source>Next</source>
@@ -3559,6 +3529,66 @@
       <segment state="initial">
         <source>Relative to cable attachment</source>
         <target>Relative accr. câble</target>
+      </segment>
+    </unit>
+    <unit id="6819720842118170063">
+      <segment state="initial">
+        <source>x:</source>
+        <target>x :</target>
+      </segment>
+    </unit>
+    <unit id="7299873402477300128">
+      <segment state="initial">
+        <source>z:</source>
+        <target>z :</target>
+      </segment>
+    </unit>
+    <unit id="971451359136104256">
+      <segment state="initial">
+        <source>y:</source>
+        <target>y :</target>
+      </segment>
+    </unit>
+    <unit id="6650741004975354715">
+      <segment state="initial">
+        <source>select an obstacle</source>
+        <target>sélectionner un obstacle</target>
+      </segment>
+    </unit>
+    <unit id="1390016399255311535">
+      <segment state="initial">
+        <source>select an obstacle&apos;s point</source>
+        <target>Sélectionner le point d&apos;un obstacle</target>
+      </segment>
+    </unit>
+    <unit id="586523524817836245">
+      <segment state="initial">
+        <source>Point <ph id="0" equiv="PH" disp="index + 1"/></source>
+        <target>Point <ph id="0" equiv="PH" disp="index + 1"/></target>
+      </segment>
+    </unit>
+    <unit id="6421460271971606186">
+      <segment state="initial">
+        <source>Zoom</source>
+        <target>Zoom</target>
+      </segment>
+    </unit>
+    <unit id="5436737525137652350">
+      <segment state="initial">
+        <source> z: </source>
+        <target> z : </target>
+      </segment>
+    </unit>
+    <unit id="2314671845594102198">
+      <segment state="initial">
+        <source> x: </source>
+        <target> x : </target>
+      </segment>
+    </unit>
+    <unit id="2236725227074458440">
+      <segment state="initial">
+        <source> y: </source>
+        <target> y : </target>
       </segment>
     </unit>
   </file>

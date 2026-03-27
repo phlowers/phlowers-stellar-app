@@ -16,19 +16,19 @@ Obstacles represent physical objects near power lines (buildings, trees, etc.) w
 │  (features/studio/obstacles/)     (shared/components/studio/section/)   │
 │         │                                   │                           │
 │         │ reads/writes                      │ reads                     │
-└─────────┼───────────────────────────────────┼─────────────────────────-─┘
+└─────────┼───────────────────────────────────┼───────────────────────────┘
           │                                   │
-┌─────────▼───────────────────────────────────▼────────────────────────────┐
-│  Service layer                                                           │
-│                                                                          │
-│  ObstaclesFormService   LoadFormsService   PlotService   ObstaclesService│
-│  (core/services/        (features/studio/  (core/services (core/services)│
-│   obstacles-form/)       loads/)            /plot/)                      │
-│         │                    │                 │               │         │
-│         └────────────────────┴──► reapplyObstacles()          │ signals  │
-│                                          │                     │         │
-│                                    runTask() ×N                │         │
-└──────────────────────────────────────────┼─────────────────────┼─────────┘
+┌─────────▼───────────────────────────────────▼──────────────────────────────┐
+│  Service layer                                                             │
+│                                                                            │
+│  ObstaclesFormService   LoadFormsService   PlotService   ObstaclesService  │
+│  (core/services/        (features/studio/  (core/services (core/services)  │
+│   obstacles-form/)       loads/)            /plot/)                        │
+│         │                    │                 │               │           │
+│         └────────────────────┴──► reapplyObstacles()           │ signals   │
+│                                          │                     │           │
+│                                    runTask() ×N                │           │
+└──────────────────────────────────────────┼─────────────────────┼───────────┘
                                            │                     │
 ┌──────────────────────────────────────────▼─────────────────────▼─────────┐
 │  Worker layer                                                            │

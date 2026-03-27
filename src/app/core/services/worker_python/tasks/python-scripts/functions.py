@@ -471,11 +471,12 @@ def refresh_projection(js_inputs: dict):
     base_coords = get_coordinates(
         base_plt_line, project, start_support, end_support) if base_plt_line else None
 
-    return {"sectionOutput": {
-        "current": current_coords,
-        "base": base_coords
+    return {
+        "sectionOutput": {
+            "current": current_coords,
+            "base": base_coords
         },
-        "distances" : [{}]
+        "distances" : []
     }
 
 

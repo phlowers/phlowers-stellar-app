@@ -136,7 +136,6 @@ describe('ObstacleFormService', () => {
   let mockObstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
     setCurrentPointIndex: vi.Mock;
-    resetCurrentPointIndex: vi.Mock;
     selectedObstacleUuid: ReturnType<typeof signal<string | null>>;
     setSelectedObstacle: vi.Mock;
   };
@@ -169,7 +168,6 @@ describe('ObstacleFormService', () => {
     mockObstaclesService = {
       activePointIndex: signal<number | null>(null),
       setCurrentPointIndex: vi.fn(),
-      resetCurrentPointIndex: vi.fn(),
       selectedObstacleUuid: signal<string | null>(null),
       setSelectedObstacle: vi.fn()
     };
@@ -312,10 +310,15 @@ describe('ObstacleFormService', () => {
         { label: 2, value: 'RIGHT' }
       ]);
     });
-    it('should not update supportsOptions when supportUuid is null', () => {
+    it('should clear supportsOptions when supportUuid is null', () => {
+      // Pre-populate so we can verify the clear
+      service.supportsOptions.set([
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
+      ]);
       service.resetFormForNewObstacle(null);
       expect(mockPlotService.getSupportOptions).not.toHaveBeenCalled();
-      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+      expect(service.supportsOptions()).toEqual([]);
     });
   });
 
@@ -477,7 +480,7 @@ describe('ObstacleFormService', () => {
           detail: expect.any(String)
         })
       );
-      expect(mockObstaclesService.resetCurrentPointIndex).toHaveBeenCalled();
+      expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith(null, null);
     });
   });
 
@@ -862,8 +865,8 @@ describe('ObstacleFormService', () => {
       invokeUpsert(obstacle);
 
       expect(section.obstacles).toBeDefined();
-      expect(section.obstacles!.length).toBe(1);
-      expect(section.obstacles![0].uuid).toBe('obs-new');
+      expect(section.obstacles.length).toBe(1);
+      expect(section.obstacles[0].uuid).toBe('obs-new');
     });
 
     it('should replace existing obstacle at the correct index', () => {

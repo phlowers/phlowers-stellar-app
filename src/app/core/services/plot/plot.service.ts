@@ -1,5 +1,5 @@
 import { computed, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
-import { PlotOptions } from '@shared/types/plot.types';
+import { AxesNorms, PlotOptions, PLOT_ID, SelectedDisplayOptions, SpanOption } from '@shared/types/plot.types';
 import { DataError, Distance, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
 import { Section, Study } from '@shared/domain';
 import { Subscription } from 'rxjs';
@@ -14,19 +14,8 @@ import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 
-/** DOM element ID used for the Plotly chart container. */
-export const PLOT_ID = 'plotly-output';
-
 const MIN_RESOLUTION = 25;
 const RESOLUTION_STORAGE_KEY = 'plotResolution';
-
-/** Option for a span dropdown selector. */
-export interface SpanOption {
-  /** Display label for the span option. */
-  label: string;
-  /** UUID value of the span, or null if not applicable. */
-  value: string | null;
-}
 
 /**
  * Checks whether a projection refresh is needed based on changed plot options.
@@ -60,7 +49,7 @@ export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions
 };
 
 /** Default plot options used when initializing or resetting the studio view. */
-export const defaultPlotOptions: PlotOptions = {
+const defaultPlotOptions: PlotOptions = {
   view: '3d',
   side: 'profile',
   startSupport: 0,
@@ -72,22 +61,6 @@ const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   loads: true,
   baseState: false
 };
-
-/** Options controlling which overlays are visible on the plot. */
-export interface SelectedDisplayOptions {
-  /** Whether load results are displayed. */
-  loads: boolean;
-  /** Whether base state results are displayed. */
-  baseState: boolean;
-}
-
-/** Normalization factors for the plot axes and Plotly aspect mode. */
-export interface AxesNorms {
-  x: number;
-  y: number;
-  z: number;
-  aspectMode: string;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -151,7 +124,7 @@ export class PlotService {
     effect(() => {
       if (this.workerReady()) {
         this.workerPythonService.runTask(Task.getConfig, undefined).then(({ result }) => {
-          if (result && result.resolution) {
+          if (result?.resolution) {
             // Update default resolution from Python config
             this.defaultResolution.set(result.resolution);
             // Re-clamp current resolution if it exceeds the loaded value
@@ -189,7 +162,7 @@ export class PlotService {
     this.distances.set([]);
     this.distanceType.set(null);
     this.injector.get(ObstacleFormService).clearPositions();
-    this.obstaclesService.resetCurrentPointIndex();
+    this.obstaclesService.setSelectedObstacle(null, null);
     this.sideTabsService.sideTabs.set(null);
   };
 
@@ -211,7 +184,13 @@ export class PlotService {
     this.plotOptions.set(newOptions);
     if ('startSupport' in values || 'endSupport' in values) {
       const diff = Math.abs(newOptions.endSupport - newOptions.startSupport);
-      this.spanAmountChoice.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
+      if (diff === 1) {
+        this.spanAmountChoice.set('single');
+      } else if (diff === 2) {
+        this.spanAmountChoice.set('double');
+      } else {
+        this.spanAmountChoice.set('all');
+      }
     }
     this.refreshCamera();
     if (
@@ -249,9 +228,14 @@ export class PlotService {
     this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
 
-    // Re-add obstacles from the section so that annotations and distance traces are preserved
-    // across section reloads (e.g. re-opening the study or after a save).
-    if (!error && section.obstacles?.length && currentLitData) {
+    if (error) {
+      this.distances.set([]);
+      this.distanceType.set(null);
+    } else if (!section.obstacles?.length) {
+      this.distances.set([]);
+    } else if (currentLitData) {
+      // Re-add obstacles from the section so that annotations and distance traces are preserved
+      // across section reloads (e.g. re-opening the study or after a save).
       for (const obstacle of section.obstacles) {
         const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
         if (obstacleResult?.current) {

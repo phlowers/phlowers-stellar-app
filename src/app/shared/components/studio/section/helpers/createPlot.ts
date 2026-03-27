@@ -1,15 +1,14 @@
 import Plotly, { Camera, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
-import { Side, View } from '@shared/types/plot.types';
+import { AxesNorms, Side, View } from '@shared/types/plot.types';
 import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { SpanLoad } from '@shared/domain';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { DataObject } from './createPlotDataObject';
-import { createDistanceAnnotations, createDistanceTraces } from './createDistanceTraces';
+import { createDistanceVisuals } from './createDistanceTraces';
 import { createObstaclesAnnotations } from './obstacles';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
-import { AxesNorms } from '@services/plot/plot.service';
 
 /**
  * Parameters required to create or update a Plotly section plot.
@@ -70,7 +69,10 @@ const normalCamera = () => ({
   }
 });
 
-const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => {
+const createScene = (
+  plotParams: CreatePlotParams,
+  distanceAnnotations: Partial<Plotly.Annotations>[]
+): Partial<Layout['scene']> => {
   const baseCamera = plotParams.camera ?? normalCamera();
   const y = Math.abs(baseCamera.eye?.y || 0);
   const camera: Partial<Camera> = {
@@ -99,7 +101,7 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
     annotations: [
       ...createLoadAnnotations(plotParams),
       ...createObstaclesAnnotations(plotParams),
-      ...createDistanceAnnotations(plotParams)
+      ...distanceAnnotations
     ],
     camera
   };
@@ -121,7 +123,10 @@ const config = {
   ] as ModeBarDefaultButtons[]
 };
 
-const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
+const layout3d = (
+  plotParams: CreatePlotParams,
+  distanceAnnotations: Partial<Plotly.Annotations>[]
+): Partial<Layout> => ({
   autosize: true,
   showlegend: false,
   margin: {
@@ -130,10 +135,13 @@ const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
     t: 0,
     b: 0
   },
-  scene: createScene(plotParams)
+  scene: createScene(plotParams, distanceAnnotations)
 });
 
-const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams) => {
+const layout2d = (
+  plotParams: CreatePlotParams,
+  distanceAnnotations: Partial<Plotly.Annotations>[]
+): Partial<Layout> => {
   let scaleratio: number | undefined;
   if (plotParams.axesNorms) {
     if (plotParams.side === 'face') {
@@ -173,7 +181,7 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams)
     annotations: [
       ...createLoadAnnotations(plotParams),
       ...createObstaclesAnnotations(plotParams),
-      ...createDistanceAnnotations(plotParams)
+      ...distanceAnnotations
     ]
   };
 };
@@ -192,8 +200,9 @@ export const createPlot = (plotParams: CreatePlotParams) => {
     console.warn(`Plot element not found: ${plotParams.plotId}`);
     return;
   }
-  const baseLayout = plotParams.view === '3d' ? layout3d(plotParams) : layout2d(plotParams);
-  const distanceTraces = createDistanceTraces(plotParams);
+  const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(plotParams);
+  const baseLayout =
+    plotParams.view === '3d' ? layout3d(plotParams, distanceAnnotations) : layout2d(plotParams, distanceAnnotations);
   const allData = [...plotParams.data, ...distanceTraces];
 
   // Use Plotly.react to update data without resetting camera/zoom

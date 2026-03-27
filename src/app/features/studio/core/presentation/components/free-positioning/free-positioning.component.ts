@@ -235,7 +235,7 @@ export class FreePositioningComponent implements OnDestroy {
         if (y == null) return [];
         return Array.from(y as ArrayLike<number>);
       })
-      .filter((v) => typeof v === 'number' && isFinite(v));
+      .filter((v) => typeof v === 'number' && Number.isFinite(v));
   }
 
   /**
@@ -365,11 +365,9 @@ export class FreePositioningComponent implements OnDestroy {
 
     const x = evt.layerX - layout.margin.l;
     const y = evt.layerY - layout.margin.t;
-    // TODO: try to find another way to detect if the click not on the background
-    const target = evt.target as Element & { className?: { baseVal?: string }; tagName?: string };
-    if (!target?.className?.baseVal?.includes('drag') && target.tagName !== 'CANVAS') {
-      return;
-    }
+    const plotWidth = plotElement.clientWidth - layout.margin.l - layout.margin.r;
+    const plotHeight = plotElement.clientHeight - layout.margin.t - layout.margin.b;
+    if (x < 0 || x > plotWidth || y < 0 || y > plotHeight) return;
 
     const previousSelected = this.obstaclesService.activePointIndex();
     if (!isNumber(previousSelected)) return;
@@ -380,12 +378,12 @@ export class FreePositioningComponent implements OnDestroy {
     let newObstacle: Position3D;
     if (type === 'profile') {
       // Profile plot: update x and z, keep y
-      const clickedAbsoluteAltitude = parseFloat(layout.yaxis.p2c(y).toFixed(2));
+      const clickedAbsoluteAltitude = Number.parseFloat(layout.yaxis.p2c(y).toFixed(2));
       const zValue = this.isAbsoluteAltitudeMode()
         ? clickedAbsoluteAltitude
-        : parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
+        : Number.parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
       newObstacle = {
-        x: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        x: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
         y: previousSelectedObstacle.y ?? null,
         z: zValue
       };
@@ -393,7 +391,7 @@ export class FreePositioningComponent implements OnDestroy {
       // Face plot: update y only, keep x and z
       newObstacle = {
         x: previousSelectedObstacle.x ?? null,
-        y: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        y: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
         z: previousSelectedObstacle.z ?? null
       };
     }
@@ -511,7 +509,6 @@ export class FreePositioningComponent implements OnDestroy {
         side
       );
 
-      // const width = plotElement.clientWidth;
       const layout = this.getPlotLayout();
       const config = this.getPlotConfig();
 

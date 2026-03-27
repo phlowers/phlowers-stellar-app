@@ -2,12 +2,11 @@ import { Dash } from 'plotly.js-dist-min';
 import { Distance, DistancePoint, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
+import { Coord3, PointVisuals } from './distance.types';
 
 const DISTANCE_COLOR = '#674883';
 const DISTANCE_LINE_WIDTH = 4;
 const LINE_POINT_MARKER_SIZE = 6;
-
-type Coord3 = [number, number, number];
 
 /**
  * Maps a 3D coordinate tuple to Plotly x/y(/z) values based on the current view and side.
@@ -65,11 +64,6 @@ const createMarkerTrace = (point: Coord3, view: string, side: string): DataObjec
     supportUuid: undefined
   } as DataObject;
 };
-
-interface PointVisuals {
-  traces: DataObject[];
-  annotation: Partial<Plotly.Annotations> | null;
-}
 
 /**
  * Creates a text-only 2D scatter trace at the midpoint of the solid segment.
@@ -213,30 +207,33 @@ const buildDistanceVisuals = (
 };
 
 /**
+ * Builds all distance traces and annotations in a single pass.
+ * Prefer this over calling `createDistanceTraces` and `createDistanceAnnotations`
+ * separately to avoid computing `buildDistanceVisuals` twice per render.
+ */
+export const createDistanceVisuals = (
+  plotParams: CreatePlotParams
+): { traces: DataObject[]; annotations: Partial<Plotly.Annotations>[] } => {
+  const { distances, distanceType, litData, view, side } = plotParams;
+
+  if (!distances?.length || !litData?.obstacles?.length || !distanceType) {
+    return { traces: [], annotations: [] };
+  }
+
+  return buildDistanceVisuals(distances, distanceType, litData, view, side);
+};
+
+/**
  * Creates Plotly data traces for obstacle distance visualization.
  * For each distance entry, looks up the obstacle's absolute coordinates
  * from litData and draws lines/markers based on the selected distance type.
  */
-export const createDistanceTraces = (plotParams: CreatePlotParams): DataObject[] => {
-  const { distances, distanceType, litData, view, side } = plotParams;
-
-  if (!distances?.length || !litData?.obstacles?.length || !distanceType) {
-    return [];
-  }
-
-  return buildDistanceVisuals(distances, distanceType, litData, view, side).traces;
-};
+export const createDistanceTraces = (plotParams: CreatePlotParams): DataObject[] =>
+  createDistanceVisuals(plotParams).traces;
 
 /**
  * Creates Plotly annotations displaying distance values near the solid measurement segment.
  * Intended to be included in the layout annotations (both 2D and 3D scene annotations).
  */
-export const createDistanceAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const { distances, distanceType, litData, view, side } = plotParams;
-
-  if (!distances?.length || !litData?.obstacles?.length || !distanceType) {
-    return [];
-  }
-
-  return buildDistanceVisuals(distances, distanceType, litData, view, side).annotations;
-};
+export const createDistanceAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] =>
+  createDistanceVisuals(plotParams).annotations;

@@ -16,14 +16,10 @@ const emptySpanLoad: SpanLoad = {
  * @returns The corrected span loads array
  */
 export const recheckSpanLoads = (loads: SpanLoad[], supports: Support[]): SpanLoad[] => {
-  const loadsSupportUuid = loads.map((load) => load.supportUuid);
-  const supportUuids = supports.map((support) => support.uuid);
-  const missingSupportUuids = supportUuids.filter((uuid) => !loadsSupportUuid.includes(uuid));
-  missingSupportUuids.forEach((uuid) => {
-    loads.push({
-      ...emptySpanLoad,
-      supportUuid: uuid
-    });
-  });
-  return loads.filter((load) => supportUuids.includes(load.supportUuid));
+  const existingUuids = new Set(loads.map((load) => load.supportUuid));
+  const supportUuids = new Set(supports.map((support) => support.uuid));
+  const missingLoads = [...supportUuids]
+    .filter((uuid) => !existingUuids.has(uuid))
+    .map((uuid) => ({ ...emptySpanLoad, supportUuid: uuid }));
+  return [...loads, ...missingLoads].filter((load) => supportUuids.has(load.supportUuid));
 };

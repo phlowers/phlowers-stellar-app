@@ -11,12 +11,17 @@ import { provideHttpClient } from '@angular/common/http';
 import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
-import { Task, TaskError, DataError, GetSectionWithBaseOutput, Distance } from '@services/worker_python/tasks/types';
-import { CatalogCable, Section, Study } from '@shared/domain';
+import {
+  Task,
+  TaskError,
+  DataError,
+  GetSectionWithBaseOutput,
+  GetSectionOutput,
+  Distance
+} from '@services/worker_python/tasks/types';
+import { CatalogCable, Section, Study, SymmetryType } from '@shared/domain';
 import { Obstacle, LateralDistanceType, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
-import { SymmetryType } from '@shared/domain';
-import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
@@ -679,6 +684,23 @@ describe('PlotService', () => {
         expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.addObstacle, expect.anything());
       });
 
+      it('should clear distances and distanceType when getLit returns an error', async () => {
+        service.distances.set([mockDistance]);
+        service.distanceType.set('oblique');
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.getLit) {
+            return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: TaskError.CALCULATION_ERROR });
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+        const sectionWithObstacles: Section = { ...mockSection, obstacles: [mockObstacle] };
+
+        await service.refreshSection(sectionWithObstacles);
+
+        expect(service.distances()).toEqual([]);
+        expect(service.distanceType()).toBeNull();
+      });
+
       it('should not call Task.addObstacle when section has no obstacles', async () => {
         await service.refreshSection(mockSection);
 
@@ -687,6 +709,14 @@ describe('PlotService', () => {
           Task.calculateObstaclesDistances,
           expect.anything()
         );
+      });
+
+      it('should clear distances when section has no obstacles', async () => {
+        service.distances.set([mockDistance]);
+
+        await service.refreshSection(mockSection);
+
+        expect(service.distances()).toEqual([]);
       });
     });
   });

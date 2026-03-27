@@ -51,69 +51,69 @@
 
   &__points {
     @apply flex flex-col gap-3 min-h-0 overflow-y-auto overflow-x-hidden;
+  }
 
-    &__point {
-      %_content-hover-select {
-        @apply relative;
-        z-index: 1;
+  &__point {
+    %_content-hover-select {
+      @apply relative;
+      z-index: 1;
+    }
+
+    @apply relative p-2;
+    border: 0.0625rem solid rgb(255 255 255 / 0);
+    border-radius: 0.25rem;
+    transition:
+      border-color 0.2s ease-in-out,
+      background-color 0.2s ease-in-out;
+
+    &--active {
+      border-color: var(--main-primary);
+    }
+
+    &:hover {
+      background-color: var(--primary-100);
+    }
+
+    &__select {
+      @apply overflow-hidden;
+
+      &,
+      &::after {
+        @apply absolute inset-0;
+      }
+      &::after {
+        content: '';
       }
 
-      @apply relative p-2;
-      border: 0.0625rem solid rgb(255 255 255 / 0);
-      border-radius: 0.25rem;
-      transition:
-        border-color 0.2s ease-in-out,
-        background-color 0.2s ease-in-out;
+      &:focus-visible::after {
+        @extend %focus-state;
+      }
+    }
 
-      &--active {
-        border-color: var(--main-primary);
+    &__header {
+      @apply flex flex-row justify-between items-center mb-1;
+
+      &__label {
+        @extend %text-xl-400;
+        margin: 0;
       }
 
-      &:hover {
-        background-color: var(--primary-100);
+      &__btn {
+        @extend %_content-hover-select;
       }
+    }
 
-      &__select {
-        @apply overflow-hidden;
+    &__form {
+      @apply grid grid-cols-3;
+      grid-template-areas:
+        'altPointLabel distRefLabel distAxisLabel'
+        'altPointInput distRefInput distAxisInput'
+        'altPointError distRefError distAxisError';
+      column-gap: 0.625rem;
 
-        &,
-        &::after {
-          @apply absolute inset-0;
-        }
-        &::after {
-          content: '';
-        }
-
-        &:focus-visible::after {
-          @extend %focus-state;
-        }
-      }
-
-      &__header {
-        @apply flex flex-row justify-between items-center mb-1;
-
-        &__label {
-          @extend %text-xl-400;
-          margin: 0;
-        }
-
-        &__btn {
-          @extend %_content-hover-select;
-        }
-      }
-
-      &__form {
-        @apply grid grid-cols-3;
-        grid-template-areas:
-          'altPointLabel distRefLabel distAxisLabel'
-          'altPointInput distRefInput distAxisInput'
-          'altPointError distRefError distAxisError';
-        column-gap: 0.625rem;
-
-        &__label,
-        &__input {
-          @extend %_content-hover-select;
-        }
+      &__label,
+      &__input {
+        @extend %_content-hover-select;
       }
     }
   }
