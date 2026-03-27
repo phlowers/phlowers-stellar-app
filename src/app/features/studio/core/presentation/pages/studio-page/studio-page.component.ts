@@ -32,15 +32,15 @@ import { SectionPlotCardsComponent } from '../../components/cards/section-plot-c
 import { SideTabsComponent } from '../../components/side-tabs/side-tabs.component';
 import { SideTabComponent } from '../../components/side-tabs/side-tab/side-tab.component';
 import { ClimateComponent } from '@features/studio/loads/presentation/components/climate/climate.component';
-import { LoadMarkingComponent } from '@src/app/features/studio/loads/presentation/components/load-marking/load-marking.component';
-import { NewChargeModalComponent } from '@src/app/shared/components/new-charge-modal/new-charge-modal.component';
+import { LoadMarkingComponent } from '@features/studio/loads/presentation/components/load-marking/load-marking.component';
+import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
 import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
-import { CableSpanComponent } from '@src/app/features/studio/loads/presentation/components/cable-span/cable-span';
+import { CableSpanComponent } from '@features/studio/loads/presentation/components/cable-span/cable-span';
 
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({

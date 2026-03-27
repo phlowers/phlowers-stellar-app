@@ -6,7 +6,8 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { CableModificationsService, CableModificationParams } from './cableModifications.service';
+import { CableModificationsService } from './cableModifications.service';
+import { CableModificationParams } from './cableModifications.service.interfaces';
 import { PlotService } from '@services/plot/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
@@ -297,6 +298,45 @@ describe('CableModificationsService', () => {
       const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
       const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.selected_cable_modification_uuid).toBeTruthy();
+    });
+
+    it('should update an existing cable modification by spanUuid when no uuid is provided', async () => {
+      const existingUuid = 'existing-mod-uuid';
+      const studyWithMod: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSectionBase,
+            cable_modifications: [
+              {
+                uuid: existingUuid,
+                spanUuid: 'support-uuid-1',
+                supportRef: 'LEFT',
+                widthCable: 'lengthening',
+                sizeCable: 0.1,
+                distanceSupportRef: 5
+              }
+            ]
+          }
+        ]
+      };
+      mockStudiesService.getStudy.mockResolvedValue(studyWithMod);
+
+      // No uuid provided — should still find and replace by spanUuid
+      await service.save({
+        spanUuid: 'support-uuid-1',
+        supportRef: 'RIGHT',
+        widthCable: 'shortening',
+        sizeCable: 0.9,
+        distanceSupportRef: 20
+      });
+
+      const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
+      expect(section?.cable_modifications).toHaveLength(1);
+      expect(section?.cable_modifications[0].uuid).toBe(existingUuid);
+      expect(section?.cable_modifications[0].sizeCable).toBe(0.9);
+      expect(section?.cable_modifications[0].supportRef).toBe('RIGHT');
     });
 
     it('should update an existing cable modification', async () => {

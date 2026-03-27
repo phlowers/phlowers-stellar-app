@@ -1,4 +1,10 @@
-<form [formGroup]="form" class="cable-span__form" [attr.aria-busy]="isLoading()" data-testid="cable-span-form">
+<form
+  [formGroup]="form"
+  class="cable-span__form"
+  [attr.aria-busy]="isLoading()"
+  (ngSubmit)="saveForm()"
+  data-testid="cable-span-form"
+>
   <div class="cable-span__reset">
     <button
       app-btn
@@ -109,7 +115,6 @@
       app-btn
       type="submit"
       btnStyle="outlined"
-      (click)="saveForm()"
       [disabled]="isFormInvalid() || isLoading() || !isDirtySinceLastSave()"
       data-testid="cable-span-save"
     >

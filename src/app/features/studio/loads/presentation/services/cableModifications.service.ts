@@ -11,15 +11,9 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { StudiesService } from '@services/studies/studies.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { CableModification } from '@shared/domain';
+import { CableModificationParams } from './cableModifications.service.interfaces';
 
-/** Parameters required to trigger a cable modification calculation. */
-export interface CableModificationParams {
-  spanUuid: string;
-  supportRef: 'LEFT' | 'RIGHT';
-  widthCable: 'lengthening' | 'shortening';
-  sizeCable: number;
-  distanceSupportRef: number;
-}
+export type { CableModificationParams };
 
 @Injectable({
   providedIn: 'root'
@@ -79,14 +73,17 @@ export class CableModificationsService {
       return;
     }
 
+    const existingForSpan = section.cable_modifications?.find((m) => m.spanUuid === modification.spanUuid);
+
     const toSave: CableModification = {
       ...modification,
-      uuid: modification.uuid ?? uuidv4()
+      uuid: existingForSpan?.uuid ?? modification.uuid ?? uuidv4()
     };
 
-    const existing = section.cable_modifications?.find((m) => m.uuid === toSave.uuid);
-    if (existing) {
-      section.cable_modifications = section.cable_modifications.map((m) => (m.uuid === toSave.uuid ? toSave : m));
+    if (existingForSpan) {
+      section.cable_modifications = section.cable_modifications.map((m) =>
+        m.spanUuid === toSave.spanUuid ? toSave : m
+      );
     } else {
       section.cable_modifications = [toSave, ...(section.cable_modifications ?? [])];
     }
