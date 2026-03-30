@@ -265,10 +265,12 @@ def apply_span_loads(span_loads: list):
         # Clear any previously applied loads with a zero array of the right size
         n = engine.support_number
         load_position_meters, load_mass = np.zeros(n), np.zeros(n)
+        engine.add_loads(load_position_meters, load_mass)
+        plt_line.reset(engine)
+    load_position_meters, load_mass = parse_span_loads(span_loads)
     if (load_position_meters != 0).any() and (load_mass != 0).any():
-        load_position_meters, load_mass = parse_span_loads(span_loads)
-    engine.add_loads(load_position_meters, load_mass)
-    plt_line.reset(engine)
+        engine.add_loads(load_position_meters, load_mass)
+        plt_line.reset(engine)
 
 
 def get_section_middle_span(start_support: int, end_support: int):
