@@ -1,69 +1,79 @@
 # Plan: Refactorisation Architecture & Code — phlowers-stellar-app
 
 ## TL;DR
-**Baseline actuelle** : build OK, 97 suites / 1967 tests pass, lint 0 erreurs (109 warnings i18n), 30 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B, 8C, 8D, 8E, 8F, 8G, 9 et correctif lint post-Phase 9 terminés.** **Phase 9 terminée** : migration complète Jest → Vitest — ~1155 appels `jest.*` remplacés par `vi.*` dans ~70 fichiers `.spec.ts`, shim de compatibilité `jest → vi` supprimé de `test-setup.ts`, `"jest"` retiré de `tsconfig.spec.json` types, 6 dépendances Jest supprimées de `package.json` (`jest`, `jest-preset-angular`, `ts-jest-mock-import-meta`, `@types/jest`, `jest-raw-loader`, `jest-sonar`), `jest.config.ts` supprimé. **Correctif lint post-Phase 9 terminé (2026-03-18)** : 137 erreurs lint régressives corrigées — `window` → `globalThis` dans ~20 fichiers (sources + specs), `.mockImplementation(() => {})` → `.mockReturnValue(undefined)` dans 9 fichiers spec (47 occurrences), `any` résiduels dans 5 fichiers (`storage.service.spec.ts`, `l0-sum.component.spec.ts`, `sectionsTab.component.spec.ts` ×2, `select-with-buttons.component.spec.ts`, `vitest.d.ts`), parsing error dans `test-setup.ts` (bloc `}` surnuméraire). Lint : 0 erreurs, 109 warnings (i18n uniquement). Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. **Étape D terminée** : 14 décorateurs `@ViewChild`/`@ContentChild`/`@ViewChildren`/`@ContentChildren` migrés vers `viewChild()`/`contentChild()`/`viewChildren()`/`contentChildren()` signal-based dans 10 composants — plus aucun `QueryList` en prod. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), toSignal(), **viewChild()/contentChild()** — 0 décorateur legacy restant. **Étape E terminée** : 69 imports cross-boundary résolus (71 → 2 restants). Services partagés (`StudiesService`, `SectionService`, `ChargesService`, `InitialConditionService`, `PlotService`, `SideTabsService`, `ObstaclesService`, `ObstacleFormService`) déplacés vers `core/services/`. Helpers (`sections.helpers`, `study.helpers`) et types (`plot.types`) déplacés vers `shared/`. Composants cross-feature (`ExportDialogComponent`, `NewStudyModalComponent`, `InitialConditionModalComponent`) déplacés vers `shared/components/`. `free-positioning` déplacé vers `features/studio/`. 3 re-export bridges supprimés. 2 violations résiduelles (`ToolbarDialogService` + `ToolbarDialogComponent` study→studio) documentées comme dette acceptée. **Étape F terminée** : ~190 `data-testid` ajoutés sur 28 templates HTML (2 passes), ~121 rendering tests créés dans 25 fichiers `.spec.ts` (3 nouveaux : `input-number`, `export-dialog`, `not-found`), 5 corrections accessibilité (`aria-hidden` sur icônes décoratives, `aria-label` sur boutons icon-only, correction attribut `type` dupliqué dans `app.component.html`). **Étape G terminée** : ~250 `any` explicites supprimés dans ~40 fichiers (12 production + ~28 specs). 1 seul `any` résiduel conservé avec `eslint-disable` (`handlerMap` dans `worker-python.service.ts` — variance de type). Types concrets, `unknown`, casts `as unknown as T`, bracket notation pour accès privé, `PlotlyHTMLElement`/`MouseEvent`/`FieldMeasure`/`GetSectionWithBaseOutput`/`RouterEvent`/`SelectedDisplayOptions` introduits. Nouveau type alias `ObstacleAnnotation` créé dans `obstacles.spec.ts`. Lint : 0 erreurs `no-explicit-any`.
+**Baseline actuelle** : build OK, 99 suites / 2061 tests pass, lint 0 erreurs (109 warnings i18n), 43 lazy chunks. **Phases 0-3F, 4, 6, 6B, 7, 8A, 8B, 8C, 8D, 8E, 8F, 8G, 9 et correctif lint post-Phase 9 terminés.** **Phase 9 terminée** : migration complète Jest → Vitest — ~1155 appels `jest.*` remplacés par `vi.*` dans ~70 fichiers `.spec.ts`, shim de compatibilité `jest → vi` supprimé de `test-setup.ts`, `"jest"` retiré de `tsconfig.spec.json` types, 6 dépendances Jest supprimées de `package.json` (`jest`, `jest-preset-angular`, `ts-jest-mock-import-meta`, `@types/jest`, `jest-raw-loader`, `jest-sonar`), `jest.config.ts` supprimé. **Correctif lint post-Phase 9 terminé (2026-03-18)** : 137 erreurs lint régressives corrigées — `window` → `globalThis` dans ~20 fichiers (sources + specs), `.mockImplementation(() => {})` → `.mockReturnValue(undefined)` dans 9 fichiers spec (47 occurrences), `any` résiduels dans 5 fichiers (`storage.service.spec.ts`, `l0-sum.component.spec.ts`, `sectionsTab.component.spec.ts` ×2, `select-with-buttons.component.spec.ts`, `vitest.d.ts`), parsing error dans `test-setup.ts` (bloc `}` surnuméraire). Lint : 0 erreurs, 109 warnings (i18n uniquement). Phase 6B : suppression des 20 re-export bridges de `core/` (domain, infrastructure, services) — ~140 imports consommateurs réécrits vers chemins canoniques (`@shared/domain/`, `@infrastructure/`, `@features/`). Phase 8 (audit conformité CLAUDE.md, rafraîchi 2026-03-16) — **~200+ violations identifiées**, plan de remédiation en **8 étapes (A-H)**. **Étape A terminée** : 4 corrections critiques (import dexie→inline type, modules deprecated, texte FR hardcodé, commentaires FR). **Étape B terminée** : 9 imports relatifs profonds convertis vers alias `@features/` dans 8 fichiers de `field-measuring/`. **Étape C terminée** : 9 composants migrés de `subscribe()` + `Subscription` manuels vers `toSignal()` / `effect()` / `takeUntilDestroyed()`. **Étape D terminée** : 14 décorateurs `@ViewChild`/`@ContentChild`/`@ViewChildren`/`@ContentChildren` migrés vers `viewChild()`/`contentChild()`/`viewChildren()`/`contentChildren()` signal-based dans 10 composants — plus aucun `QueryList` en prod. Conformité Angular : 100% standalone, OnPush, inject(), input()/output(), signal(), toSignal(), **viewChild()/contentChild()** — 0 décorateur legacy restant. **Étape E terminée** : 69 imports cross-boundary résolus (71 → 2 restants). Services partagés (`StudiesService`, `SectionService`, `ChargesService`, `InitialConditionService`, `PlotService`, `SideTabsService`, `ObstaclesService`, `ObstacleFormService`) déplacés vers `core/services/`. Helpers (`sections.helpers`, `study.helpers`) et types (`plot.types`) déplacés vers `shared/`. Composants cross-feature (`ExportDialogComponent`, `NewStudyModalComponent`, `InitialConditionModalComponent`) déplacés vers `shared/components/`. `free-positioning` déplacé vers `features/studio/`. 3 re-export bridges supprimés. 2 violations résiduelles (`ToolbarDialogService` + `ToolbarDialogComponent` study→studio) documentées comme dette acceptée. **Étape F terminée** : ~190 `data-testid` ajoutés sur 28 templates HTML (2 passes), ~121 rendering tests créés dans 25 fichiers `.spec.ts` (3 nouveaux : `input-number`, `export-dialog`, `not-found`), 5 corrections accessibilité (`aria-hidden` sur icônes décoratives, `aria-label` sur boutons icon-only, correction attribut `type` dupliqué dans `app.component.html`). **Étape G terminée** : ~250 `any` explicites supprimés dans ~40 fichiers (12 production + ~28 specs). 1 seul `any` résiduel conservé avec `eslint-disable` (`handlerMap` dans `worker-python.service.ts` — variance de type). Types concrets, `unknown`, casts `as unknown as T`, bracket notation pour accès privé, `PlotlyHTMLElement`/`MouseEvent`/`FieldMeasure`/`GetSectionWithBaseOutput`/`RouterEvent`/`SelectedDisplayOptions` introduits. Nouveau type alias `ObstacleAnnotation` créé dans `obstacles.spec.ts`. Lint : 0 erreurs `no-explicit-any`.
 
 ---
 
 ## Audit du code actuel
 
-### Points forts (déjà conformes)
+### Points forts (conformes)
 | Critère | Score | Détail |
 |---------|-------|--------|
-| `standalone: true` (pas de NgModule) | 🟢 100% | 0 NgModule trouvé |
-| `input()`/`output()` signal API | 🟢 100% prod | ~98 input() + 41 output() en prod, @Input/@Output uniquement dans 3 mocks .spec |
-| `signal()` adoption | 🟢 ~199 usages | Bien réparti dans composants et services |
+| `standalone: true` (pas de NgModule) | 🟢 100% | 60/60 composants standalone, 0 NgModule |
+| `ChangeDetectionStrategy.OnPush` | 🟢 100% | 61 fichiers (60 composants + 1 directive/pipe) |
+| `inject()` (pas de constructor DI) | 🟢 100% | 187 `inject()`, 0 constructor injection |
+| `input()`/`output()` signal API | 🟢 100% | 91 `input()` + 42 `output()`, 0 `@Input`/`@Output` legacy |
+| `viewChild()`/`contentChild()` signal-based | 🟢 100% | 3 usages signal-based, 0 `@ViewChild`/`@ContentChild` legacy |
+| `signal()` adoption | 🟢 181 usages | Bien réparti dans composants et services |
 | `computed()` adoption | 🟢 69 usages | Bonne couverture |
-| Imports alias vs relatifs | 🟢 100% | 0 imports relatifs profonds (Étape 8B terminée) |
-| `viewChild()`/`contentChild()` signal-based | 🟢 100% | 0 `@ViewChild`/`@ContentChild`/`QueryList` restant (Étape 8D terminée) |
+| `effect()` adoption | 🟢 49 usages | Side effects réactifs |
+| `toSignal()` adoption | 🟢 26 usages | Conversion Observable → Signal |
+| Imports alias vs relatifs | 🟢 100% | 0 imports relatifs profonds, 0 cross-boundary violations |
+| Re-export bridges | 🟢 0 restants | Tous nettoyés (Phase 6B) |
+| Lazy loading routes | 🟢 100% | 13 routes lazy (`loadComponent`/`loadChildren`), 43 chunks |
+| Architecture DDD (features) | 🟢 7 bounded contexts | `admin`, `changelog`, `home`, `news`, `studies`, `studio`, `study` |
+| `any` explicites | 🟢 1 résiduel | 1 seul `any` avec `eslint-disable` (`worker-python.service.ts`) |
+| Vitest (pas de Jest) | 🟢 100% | 99 suites / 2061 tests, 0 dépendance Jest |
+| Lint | 🟢 0 erreurs | 109 warnings (i18n uniquement) |
 
-### Points critiques (à corriger)
+### Points restants à améliorer
 | Critère | Score | Détail |
 |---------|-------|--------|
-| `ChangeDetectionStrategy.OnPush` | 🔴 1/~55 | Seul `scale-view.component.ts` l'a |
-| `data-testid` coverage | 🟡 32/61 templates | Étapes 4 + 8F (2 passes) — ~190 data-testid, ~121 rendering tests dans 25 specs |
-| Lazy loading routes | 🟢 100% | 7 routes lazy via `loadComponent`/`loadChildren`, 30 chunks |
-| Architecture DDD | 🔴 Inexistante | Pas de features/, pas d'use-cases, pas de repository interfaces |
-| Constructor injection | 🟡 22 fichiers | ~30% encore en constructor DI |
+| `data-testid` coverage | 🟡 45/59 templates | 282 `data-testid`, 14 templates sans `data-testid` (76% couverture) |
 | BEM SCSS | 🟡 Mixte | Majorité OK, quelques fichiers non-BEM (topbar, etc.) |
-| @Input/@Output dans tests | 🟡 3 fichiers | Mocks spec utilisent encore les decorators legacy |
+| Architecture DDD (use-cases) | 🟡 Partielle | Features structurées, mais pas de `domain/repositories/` interfaces ni `application/use-cases/` formels |
 
-### Architecture actuelle vs cible DDD
+### Architecture actuelle
 
-**Actuelle** (horizontale):
 ```
 src/app/
-├── core/           # domain/models + infrastructure/database + services (mélangés)
-├── ui/             # app.routes + pages/ + shared/ + styles/
+├── core/              # Services transverses (PWA, Pyodide, DB, storage, workers)
+├── shared/            # Composants réutilisables, pipes, models, domain, helpers
+├── infrastructure/    # IndexedDB (Dexie), DTOs, adapters
+├── features/          # 7 bounded contexts DDD
+│   ├── admin/         # presentation/
+│   ├── changelog/     # infrastructure/ + presentation/
+│   ├── home/          # presentation/
+│   ├── news/          # infrastructure/ + presentation/
+│   ├── studies/       # domain/ + infrastructure/ + presentation/
+│   ├── studio/        # core/ + obstacles/ + loads/ + toolbar/ + field-measuring/
+│   └── study/         # domain/ + infrastructure/ + presentation/
+├── ui/                # app.routes + layout + shared components restants
+└── app.routes.ts      # Lazy loading vers feature routes
 ```
 
-**Cible** (verticale DDD):
+**Cible** (DDD complet, non encore atteint) :
 ```
-src/app/
-├── core/           # Services transverses (PWA, Pyodide, Plotly)
-├── shared/         # Composants réutilisables, pipes, models UI
-├── infrastructure/ # IndexedDB (Dexie), DTOs, adapters
-├── features/       # Bounded contexts DDD (studies, studio, sections, etc.)
-│   └── <feature>/
-│       ├── domain/          # Entities, Value Objects, Repository interfaces
-│       ├── application/     # Use cases, services métier
-│       ├── infrastructure/  # Implémentations repo spécifiques au feature
-│       └── presentation/    # Composants Angular, pages, routes
-└── app.routes.ts   # Lazy loading vers feature routes
+src/app/features/<feature>/
+├── domain/          # Entities, Value Objects, Repository interfaces
+├── application/     # Use cases, services métier
+├── infrastructure/  # Implémentations repo spécifiques au feature
+└── presentation/    # Composants Angular, pages, routes
 ```
 
 ### Routes actuelles (100% lazy loaded)
-- `/` → HomeComponent (lazy `loadComponent`)
-- `/studies` → StudiesComponent (lazy `loadComponent`)
-- `/admin` → AdminComponent (lazy `loadComponent`)
-- `/study/:uuid` → StudyComponent (lazy `loadChildren` → `study.routes.ts`)
+- `/` → HomeComponent (lazy `loadChildren` → `@features/home/`)
+- `/studies` → StudiesComponent (lazy `loadChildren` → `@features/studies/`)
+- `/admin` → AdminComponent (lazy `loadChildren` → `@features/admin/`)
+- `/study/:uuid` → StudyComponent (lazy `loadChildren` → `@features/study/`)
 - `/study/:uuid/studio` → StudioPageComponent (lazy via `study.routes.ts`)
-- `/news` → NewsComponent (lazy `loadComponent`)
-- `/changelog` → ChangelogComponent (lazy `loadComponent`)
+- `/news` → NewsComponent (lazy `loadChildren` → `@features/news/`)
+- `/changelog` → ChangelogComponent (lazy `loadChildren` → `@features/changelog/`)
 - `/studio` → StudioPageComponent (lazy `loadComponent`)
 - `/**` → NotFoundComponent (eager — wildcard)
 
-Shell `LoggedLayoutComponent` eagerly loaded (layout obligatoire).
+Shell `LoggedLayoutComponent` eagerly loaded (layout obligatoire). 43 lazy chunks générés.
 
 ### Compatibilité Angular 21
 - `signal()`, `input()`, `output()`, `computed()`, `effect()` → stables et renforcés en ng21

@@ -2,34 +2,6 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { isDevMode } from '@angular/core';
 
 /**
- * OidcTokenInterceptor — Phase 2 refactoring
- *
- * Injects OIDC Bearer token into HTTP requests for update-related endpoints.
- *
- * @remarks
- * This interceptor enables update orchestration to work with Apache OIDC module
- * while maintaining compatibility with offline mode (no token needed for catalog requests).
- *
- * **Token source:**
- * - Reads OIDC token from localStorage key `oidc_token` (set by Apache OIDC module or login flow)
- * - Token should be stored post-authentication
- * - If token is missing, request proceeds without Authorization header (fallback to public access)
- *
- * **Scope:**
- * - Adds Bearer token to `/assets_list.json` requests (app manifest)
- * - Optionally extends to other critical update-related endpoints
- * - Catalog CSV requests from IndexedDB don't need token (read-only public data)
- *
- * **Design rationale:**
- * Service Worker cannot access OIDC tokens (no DOM/localStorage in Worker context).
- * Therefore, all authenticated fetches (manifest, optional catalog updates) must be
- * orchestrated from Angular main thread via HttpClient, which has access to token.
- *
- * @category Services
- * @category Interceptors
- * @category Phase 2 Refactoring
- */
-/**
  * Functional OIDC Token Interceptor (Angular 19 best practice).
  *
  * Injects OIDC Bearer token into protected HTTP requests.

@@ -2,35 +2,6 @@ import { inject, Injectable, signal } from '@angular/core';
 import { AssetList, UpdateService } from '@services/worker_update/worker_update.service';
 import { isEqual } from 'lodash';
 
-/**
- * AppUpdateOrchestratorService — Phase 2 refactoring
- *
- * Orchestrates application update checks with the following guarantees:
- * - **Single-check-per-boot**: Only one version check when app initializes (no re-checks on online/offline)
- * - **User consent mandatory**: Updates only proceed after explicit user approval via popup
- * - **Stateful**: Tracks whether startup check has been performed this session
- * - **OIDC-compatible**: Delegates manifest fetches to `UpdateService` (token-aware)
- * - **Fail-safe**: Network errors or missing versions don't block app startup
- *
- * @remarks
- * This service replaces the previous auto-update mechanisms. The Service Worker
- * no longer triggers updates on activate; the orchestrator runs once at app startup
- * and delegates manifest retrieval to `UpdateService` for OIDC token injection.
- *
- * Usage (in AppComponent constructor):
- * ```typescript
- * constructor() {
- *   effect(() => {
- *     if (this.storageReady()) {
- *       this.orchestrator.initiateStartupCheck();
- *     }
- *   });
- * }
- * ```
- *
- * @category Services
- * @category Phase 2 Refactoring
- */
 @Injectable({ providedIn: 'root' })
 export class AppUpdateOrchestratorService {
   /** Whether the startup version check has been completed this session */
@@ -63,11 +34,9 @@ export class AppUpdateOrchestratorService {
    */
   async initiateStartupCheck(): Promise<void> {
     if (this.startupCheckCompleted()) {
-      console.log('ORCHESTRATOR: Startup check already completed, skipping');
       return;
     }
 
-    console.log('ORCHESTRATOR: Starting single startup version check');
     this.isCheckingVersion.set(true);
 
     try {
@@ -86,16 +55,13 @@ export class AppUpdateOrchestratorService {
 
       // Compare versions
       if (currentVersion && !isEqual(currentVersion, latestAssets.app_version)) {
-        console.log('ORCHESTRATOR: New version available, triggering update dialog');
         this.updateService.latestVersion.set(latestAssets.app_version);
         this.updateService.needUpdate$.next(true);
 
         // The AppComponent will show the update dialog. User interaction is necessary.
         // When user clicks "Update now", AppComponent will call acceptUpdate().
         // When user clicks "Later" or closes dialog, the app continues without update.
-      } else {
-        console.log('ORCHESTRATOR: Application is up to date or cached version unavailable');
-      }
+      } 
     } catch (error) {
       this.latestManifest = null;
       console.error('ORCHESTRATOR: Startup check failed, app continues with cached state:', error);
@@ -115,7 +81,6 @@ export class AppUpdateOrchestratorService {
   acceptUpdate(): void {
     const serviceWorkerController = navigator.serviceWorker.controller;
     if (serviceWorkerController) {
-      console.log('ORCHESTRATOR: User accepted update, posting update message to Service Worker');
       if (this.latestManifest) {
         serviceWorkerController.postMessage({ type: 'update', manifest: this.latestManifest });
       } else {

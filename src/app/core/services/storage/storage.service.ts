@@ -8,11 +8,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AppDatabase } from '@infrastructure/database';
-
-interface ProtectedTablesSnapshot {
-  userCount: number;
-  studyCount: number;
-}
+import { ProtectedTablesSnapshot } from './protected-tables-snapshot.interface';
 
 @Injectable({
   providedIn: 'root'

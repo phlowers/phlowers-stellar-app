@@ -39,18 +39,6 @@ class MockWorker implements Partial<Worker> {
     this.onmessage?.call(this as Worker, new MessageEvent<string>('message', { data: message }));
   }
 
-  terminate(): void {
-    // No-op for tests.
-  }
-
-  addEventListener(): void {
-    // No-op for tests.
-  }
-
-  removeEventListener(): void {
-    // No-op for tests.
-  }
-
   dispatchEvent(): boolean {
     return true;
   }

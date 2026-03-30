@@ -301,12 +301,6 @@ export async function handleMessage(event: ExtendableMessageEvent) {
 }
 
 async function activateWhenAppInstalled() {
-  /**
-   * PHASE 1 REFACTORING: Removed automatic update logic from SW activate.
-   * Service Worker now only validates cache state; does NOT fetch manifest or mutate cache.
-   * App orchestration (OIDC token + user consent) moved to Angular main thread.
-   * See plan-update.md Phase 1 for details.
-   */
   const cachedVersion = await getCachedAppVersion();
 
   // Post worker_ready signal to app; app will orchestrate updates via HttpClient + OIDC token

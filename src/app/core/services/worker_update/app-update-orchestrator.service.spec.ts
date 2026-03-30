@@ -12,7 +12,7 @@ interface MockServiceWorkerContainer {
   addEventListener: ReturnType<typeof vi.fn>;
 }
 
-describe('AppUpdateOrchestratorService — Phase 2', () => {
+describe('AppUpdateOrchestratorService', () => {
   let service: AppUpdateOrchestratorService;
   let updateService: UpdateService;
   let navigatorSpy: { serviceWorker: MockServiceWorkerContainer };

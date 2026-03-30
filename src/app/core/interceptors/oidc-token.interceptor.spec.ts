@@ -18,7 +18,7 @@ function forwardRequest(): {
   };
 }
 
-describe('OidcTokenInterceptor — Phase 2', () => {
+describe('OidcTokenInterceptor', () => {
   beforeEach(() => {
     localStorage.clear();
   });

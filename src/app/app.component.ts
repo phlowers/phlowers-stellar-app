@@ -99,13 +99,6 @@ export class AppComponent implements OnInit {
       email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])
     });
 
-    /**
-     * PHASE 1 REFACTORING: Removed online-triggered update check.
-     * Update verification moved to single startup check in Phase 2 (AppUpdateOrchestratorService).
-     * No longer re-checking on online/offline transitions.
-     * See plan-update.md Phase 1 for details.
-     */
-
     effect(() => {
       if (this.storageReady()) {
         void this.userService
