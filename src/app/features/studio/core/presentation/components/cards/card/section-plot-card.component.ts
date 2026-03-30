@@ -241,13 +241,15 @@ export class SectionPlotCardComponent {
   // Expanded data for span type
   spanExpandedData = computed((): DataField[] => {
     const litData = this.litData();
+    const sag = litData?.sag;
+    const sagS2 = litData?.sag_s2;
     const horizontalDistance = litData?.horizontal_distance;
     const arcLength = litData?.arc_length;
     const th = litData?.T_h;
     const tensionInf = litData?.tension_inf;
     return [
-      { label: $localize`Arrow F1:`, value: '-', unit: 'm' },
-      { label: $localize`Arrow F2:`, value: '-', unit: 'm' },
+      { label: $localize`Arrow F1:`, value: this.getFormatedNumberIndex(sag), unit: 'm' },
+      { label: $localize`Arrow F2:`, value: this.getFormatedNumberIndex(sagS2), unit: 'm' },
       {
         label: $localize`Horizontal dist. acc.:`,
         value: this.getFormatedNumberIndex(horizontalDistance),

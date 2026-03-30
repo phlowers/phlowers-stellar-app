@@ -26,7 +26,7 @@ def apply_span_loads(
     load_position_meters, load_mass = parse_span_loads(engine, span_loads)
     if (load_position_meters != 0).any() and (load_mass != 0).any():
         engine.add_loads(load_position_meters, load_mass)
-        plot_engine = plot_engine.generate_reset()
+        plot_engine.reset(engine)
 
 
 def parse_span_loads(

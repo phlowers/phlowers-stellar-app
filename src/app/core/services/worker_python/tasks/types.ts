@@ -123,6 +123,8 @@ export interface GetSectionOutput {
   arc_length: number[];
   /** Horizontal component of cable tension at each span (daN) */
   T_h: number[];
+  sag: number[];
+  sag_s2: number[];
 }
 
 /**
