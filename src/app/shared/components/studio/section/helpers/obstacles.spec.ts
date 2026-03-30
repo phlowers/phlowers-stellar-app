@@ -9,7 +9,12 @@ import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
 import { Support } from '@shared/domain/models/support.model';
 
-type ObstacleAnnotation = Partial<Plotly.Annotations> & { data?: ObstacleAnnotationData };
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
+
+type ObstacleAnnotation = Partial<Plotly.Annotations> & { z?: number; data?: ObstacleAnnotationData };
+
+const makeLitData = (obstacles: { name: string; points: [number, number, number][] }[]): GetSectionOutput =>
+  ({ obstacles }) as unknown as GetSectionOutput;
 
 const makeObstacle = (overrides: Partial<Obstacle> = {}): Obstacle => ({
   uuid: 'obs-1',
@@ -152,6 +157,8 @@ describe('createObstaclesAnnotations', () => {
     currentObstacleUuid: null,
     currentObstaclePointIndex: 0,
     supports: [],
+    distances: [],
+    distanceType: 'oblique' as const,
     ...overrides
   });
 
@@ -178,8 +185,8 @@ describe('createObstaclesAnnotations', () => {
       positions: [{ x: 1, y: 2, z: 3 }]
     });
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 50, 50)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[11, 22, 3]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -196,9 +203,10 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 3 }]
     });
+    // Python computes altitude = position.z + support.z = 3 + 30 = 33
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 50, 50)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[11, 22, 33]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -217,9 +225,10 @@ describe('createObstaclesAnnotations', () => {
         { x: 1, y: 2, z: 3 }
       ]
     });
+    // Python filters invalid positions; only the 1 valid point is returned in litData
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)],
-      obstacles: [obstacle]
+      obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 3]] }])
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
@@ -234,8 +243,16 @@ describe('createObstaclesAnnotations', () => {
       ]
     });
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([
+        {
+          name: 'Obstacle 1',
+          points: [
+            [1, 2, 3],
+            [4, 5, 6]
+          ]
+        }
+      ]),
       currentObstacleUuid: 'obs-1',
       currentObstaclePointIndex: 1
     });
@@ -257,16 +274,15 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 3 }]
     });
+    // In 2D face view: px = cy, py = cz. Python returns [cx, cy, cz] = [1, 12, 3].
     const params = basePlotParams({
-      // In 2D plots, support altitude (NGF) is stored in the DataObject's y coordinate
-      data: [makeSupportDataObject('sup-1', 10, 30, 0), makeSupportDataObject('sup-2', 50, 50, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 12, 3]] }]),
       view: '2d',
       side: 'face'
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    // In 2d face view, y is the vertical axis (altitude). In absolute mode, it's the raw NGF altitude.
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 3, z: 3 });
   });
@@ -277,150 +293,121 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 3 }]
     });
+    // Python computes altitude = position.z + support.y (2D NGF) = 3 + 30 = 33.
+    // In 2D face: px = cy = 12, py = cz = 33.
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 30, 0), makeSupportDataObject('sup-2', 50, 50, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 12, 33]] }]),
       view: '2d',
       side: 'face'
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    // In 2D, support altitude is carried by base.y (not base.z)
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 33, z: 33 });
   });
 
-  it('should use support foot altitude for relative altitude type', () => {
+  it('should use support foot altitude for relative altitude type (Python computes absolute z)', () => {
     const obstacle = makeObstacle({
       altitudeType: 'relative',
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 5 }]
     });
-    const supports = [
-      { uuid: 'sup-1', supportFootAltitude: 100 } as Support,
-      { uuid: 'sup-2', supportFootAltitude: 120 } as Support
-    ];
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
       obstacles: [obstacle],
-      supports,
+      // Python computes absolute z: position.z + supportFootAltitude = 5 + 100 = 105
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 105]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // relative to support foot: z = 5 + 100 = 105
     expect(marker.z).toBe(105);
   });
 
-  it('should use cable attachment altitude for relative_cable altitude type', () => {
+  it('should use cable attachment altitude for relative_cable altitude type (Python computes absolute z)', () => {
     const obstacle = makeObstacle({
       altitudeType: 'relative_cable',
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 5 }]
     });
-    const supports = [
-      { uuid: 'sup-1', supportFootAltitude: 100, attachmentHeight: 165 } as Support,
-      { uuid: 'sup-2', supportFootAltitude: 120, attachmentHeight: 180 } as Support
-    ];
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
       obstacles: [obstacle],
-      supports,
+      // Python computes absolute z: position.z + attachmentHeight = 5 + 165 = 170
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 170]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // relative to cable attachment: z = 5 + 165 (attachmentHeight from domain)
     expect(marker.z).toBe(170);
   });
 
-  it('should use RIGHT support foot altitude when referenceSupport is RIGHT and altitudeType is relative', () => {
+  it('should use RIGHT support foot altitude when referenceSupport is RIGHT and altitudeType is relative (Python computes absolute z)', () => {
     const obstacle = makeObstacle({
       altitudeType: 'relative',
       referenceSupport: ReferenceSupport.RIGHT,
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 5 }]
     });
-    const supports = [
-      { uuid: 'sup-1', supportFootAltitude: 100 } as Support,
-      { uuid: 'sup-2', supportFootAltitude: 120 } as Support
-    ];
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
       obstacles: [obstacle],
-      supports,
+      // Python computes absolute z using RIGHT support: position.z + rightSupportFootAltitude = 5 + 120 = 125
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 125]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // relative to RIGHT support foot: z = 5 + 120 = 125
     expect(marker.z).toBe(125);
   });
 
-  it('should fallback to plot base altitude when supportFootAltitude is null for relative type', () => {
+  it('should fallback to plot base altitude when supportFootAltitude is null for relative type (Python computes absolute z)', () => {
     const obstacle = makeObstacle({
       altitudeType: 'relative',
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 5 }]
     });
-    const supports = [
-      { uuid: 'sup-1', supportFootAltitude: null } as unknown as Support,
-      { uuid: 'sup-2', supportFootAltitude: null } as unknown as Support
-    ];
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
       obstacles: [obstacle],
-      supports,
+      // Python falls back to plot base altitude: position.z + baseAltitude = 5 + 200 = 205
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 205]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // fallback to plot base altitude: z = 5 + 200 = 205
     expect(marker.z).toBe(205);
   });
 
-  it('should fallback to plot base altitude for relative_cable when attachmentHeight is null', () => {
+  it('should fallback to plot base altitude for relative_cable when attachmentHeight is null (Python computes absolute z)', () => {
     const obstacle = makeObstacle({
       altitudeType: 'relative_cable',
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 5 }]
     });
-    const supports = [
-      { uuid: 'sup-1', supportFootAltitude: 100, attachmentHeight: null } as unknown as Support,
-      { uuid: 'sup-2', supportFootAltitude: 120, attachmentHeight: null } as unknown as Support
-    ];
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
       obstacles: [obstacle],
-      supports,
+      // Python falls back to plot base altitude: position.z + baseAltitude = 5 + 200 = 205
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 205]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // fallback to plot base altitude: z = 5 + 200 = 205
     expect(marker.z).toBe(205);
   });
 
-  it('should use RIGHT support attachmentHeight for relative_cable with RIGHT reference', () => {
+  it('should use RIGHT support attachmentHeight for relative_cable with RIGHT reference (Python computes absolute z)', () => {
     const obstacle = makeObstacle({
       altitudeType: 'relative_cable',
       referenceSupport: ReferenceSupport.RIGHT,
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 5 }]
     });
-    const supports = [
-      { uuid: 'sup-1', supportFootAltitude: 100, attachmentHeight: 165 } as Support,
-      { uuid: 'sup-2', supportFootAltitude: 120, attachmentHeight: 180 } as Support
-    ];
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 200), makeSupportDataObject('sup-2', 100, 0, 250)],
       obstacles: [obstacle],
-      supports,
+      // Python computes absolute z using RIGHT support attachmentHeight: position.z + 180 = 5 + 180 = 185
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 185]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // RIGHT support attachmentHeight = 180: z = 5 + 180 = 185
     expect(marker.z).toBe(185);
   });
 
@@ -430,8 +417,8 @@ describe('createObstaclesAnnotations', () => {
       positions: [{ x: 1, y: 2, z: 3 }]
     });
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)],
-      obstacles: [obstacle]
+      obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 3]] }])
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
@@ -446,8 +433,8 @@ describe('createObstaclesAnnotations', () => {
       positions: [{ x: 1, y: 2, z: 3 }]
     });
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 50, 50)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[11, 22, 3]] }]),
       view: '3d'
     });
 
@@ -470,17 +457,15 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 2, y: 3, z: 5 }]
     });
+    // Python computes: altitude = 5 + 80 = 85, x = 50 - 2 = 48, y = 40 + 3 = 43
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 40, 80)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[48, 43, 85]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // altitude = position.z + rightBase.z = 5 + 80 = 85
-    // x = rightBase.x - position.x = 50 - 2 = 48
-    // y = rightBase.y + position.y = 40 + 3 = 43
     expect(marker).toMatchObject({ x: 48, y: 43, z: 85 });
   });
 
@@ -491,17 +476,17 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 2, y: 3, z: 5 }]
     });
+    // Python computes: altitude = 5 + 80 = 85, x = 50 - 2 = 48.
+    // In 2D profile: px = cx = 48, py = cz = 85.
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 30, 0), makeSupportDataObject('sup-2', 50, 80, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[48, 0, 85]] }]),
       view: '2d',
       side: 'profile'
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // altitude = position.z + rightBase.y (2D) = 5 + 80 = 85
-    // x = rightBase.x - position.x = 50 - 2 = 48
     expect(marker).toMatchObject({ x: 48, y: 85, z: 85 });
   });
 
@@ -512,14 +497,14 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 5, y: 2, z: 10 }]
     });
+    // Python computes: x = rightBase.x - position.x = 100 - 5 = 95
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 100, 0, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[95, 2, 10]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // x = rightBase.x - position.x = 100 - 5 = 95
     expect(marker.x).toBe(95);
   });
 
@@ -530,16 +515,16 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 7 }]
     });
+    // Python computes: x = refBase.x + position.y = 50 + 2 = 52, altitude absolute: z = 7.
+    // In 2D face: px = cy = 52, py = cz = 7.
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 30, 0), makeSupportDataObject('sup-2', 50, 80, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 52, 7]] }]),
       view: '2d',
       side: 'face'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // face view: x = refBase.x + position.y = 50 + 2 = 52
-    // altitude absolute: y = z = 7
     expect(marker).toMatchObject({ x: 52, y: 7, z: 7 });
   });
 
@@ -550,38 +535,21 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 3 }]
     });
-    // Only two supports: sup-1 is the left support of the last span.
-    // Since slice(0, -1) removes the last support, only sup-1 is left.
-    // The right support (sup-2) is the last one, so it's still in allSupportObjects.
+    // Python computes using right support: altitude = 3 + 80 = 83, x = 50 - 1 = 49
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 20, 30), makeSupportDataObject('sup-2', 50, 40, 80)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[49, 43, 83]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // Right support IS available (sup-2 is in allSupportObjects even though excluded from left-support list)
-    // altitude = position.z + rightBase.z = 3 + 80 = 83
-    // x = rightBase.x - position.x = 50 - 1 = 49
     expect(marker).toMatchObject({ x: 49, z: 83 });
   });
 
   it('should fall back to left support when only one support data object exists', () => {
-    // Two supports but sup-1 is at index 0 and no next support exists beyond it.
-    // We need at least 2 supports for sup-1 to not be sliced off.
-    // With only one non-terminal support, the right support cannot be resolved
-    // from allSupportObjects beyond leftIndex.
-    // Actually, with 2 supports, sup-2 at index 1 IS the right support.
-    // To truly have no right support, we need 3 supports and test the second span.
+    // Python computes: rightBase = sup-3 (200, 80, 90), altitude = 10 + 90 = 100, x = 200 - 5 = 195, y = 80 + 3 = 83
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 0, 0, 0),
-        makeSupportDataObject('sup-2', 100, 50, 60),
-        makeSupportDataObject('sup-3', 200, 80, 90)
-      ],
-      // sup-2 is the left support of the last span (sup-2 → sup-3)
-      // sup-3 is the right support of that span — it IS in allSupportObjects
       obstacles: [
         makeObstacle({
           uuid: 'obs-edge',
@@ -591,13 +559,12 @@ describe('createObstaclesAnnotations', () => {
           positions: [{ x: 5, y: 3, z: 10 }]
         })
       ],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[195, 83, 100]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // rightBase = sup-3: (200, 80, 90)
-    // altitude = 10 + 90 = 100, x = 200 - 5 = 195, y = 80 + 3 = 83
     expect(marker).toMatchObject({ x: 195, y: 83, z: 100 });
   });
 
@@ -608,21 +575,15 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-2',
       positions: [{ x: 3, y: 1, z: 4 }]
     });
+    // Python computes: rightBase = sup-3 (200, 40, 80), altitude = 4 + 80 = 84, x = 200 - 3 = 197, y = 40 + 1 = 41
     const params = basePlotParams({
-      data: [
-        makeSupportDataObject('sup-1', 0, 0, 10),
-        makeSupportDataObject('sup-2', 100, 20, 50),
-        makeSupportDataObject('sup-3', 200, 40, 80),
-        makeSupportDataObject('sup-4', 300, 60, 120)
-      ],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[197, 41, 84]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // rightBase = sup-3: (200, 40, 80)
-    // altitude = 4 + 80 = 84, x = 200 - 3 = 197, y = 40 + 1 = 41
     expect(marker).toMatchObject({ x: 197, y: 41, z: 84 });
   });
 
@@ -643,9 +604,13 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 5, y: 2, z: 10 }]
     });
+    // Python computes LEFT: x=5, y=2, z=40; RIGHT: x=95, y=2, z=80
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 30), makeSupportDataObject('sup-2', 100, 0, 70)],
       obstacles: [leftObstacle, rightObstacle],
+      litData: makeLitData([
+        { name: 'Left Obs', points: [[5, 2, 40]] },
+        { name: 'Right Obs', points: [[95, 2, 80]] }
+      ]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -659,9 +624,7 @@ describe('createObstaclesAnnotations', () => {
       (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-right'
     ) as ObstacleAnnotation;
 
-    // LEFT: x = 0 + 5 = 5, y = 0 + 2 = 2, z = 10 + 30 = 40
     expect(leftMarker).toMatchObject({ x: 5, y: 2, z: 40 });
-    // RIGHT: x = 100 - 5 = 95, y = 0 + 2 = 2, z = 10 + 70 = 80
     expect(rightMarker).toMatchObject({ x: 95, y: 2, z: 80 });
   });
 
@@ -672,17 +635,17 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 1, y: 2, z: 5 }]
     });
+    // Python computes: x = refBase.x + position.y = 50 + 2 = 52, altitude = 5 + 80 = 85.
+    // In 2D face: px = cy = 52, py = cz = 85.
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 10, 30, 0), makeSupportDataObject('sup-2', 50, 80, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 52, 85]] }]),
       view: '2d',
       side: 'face'
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // face + RIGHT: x = refBase.x + position.y = 50 + 2 = 52
-    // altitude relative 2D: supportAltitudeNgf = refBase.y = 80, altitude = 5 + 80 = 85
     expect(marker).toMatchObject({ x: 52, y: 85, z: 85 });
   });
 
@@ -693,16 +656,16 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 8, y: 2, z: 15 }]
     });
+    // Python computes: x = rightBase.x - position.x = 100 - 8 = 92, altitude absolute: z = 15.
+    // In 2D profile: px = cx = 92, py = cz = 15.
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 30, 0), makeSupportDataObject('sup-2', 100, 80, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[92, 0, 15]] }]),
       view: '2d',
       side: 'profile'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // profile + RIGHT: x = rightBase.x - position.x = 100 - 8 = 92
-    // altitude absolute 2D: y = z = 15
     expect(marker).toMatchObject({ x: 92, y: 15, z: 15 });
   });
 
@@ -717,8 +680,16 @@ describe('createObstaclesAnnotations', () => {
       ]
     });
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 100, 0, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([
+        {
+          name: 'Obstacle 1',
+          points: [
+            [99, 0, 0],
+            [96, 0, 0]
+          ]
+        }
+      ]),
       currentObstacleUuid: 'obs-right',
       currentObstaclePointIndex: 0
     });
@@ -741,14 +712,14 @@ describe('createObstaclesAnnotations', () => {
       supportUuid: 'sup-1',
       positions: [{ x: 0, y: 0, z: 10 }]
     });
+    // Python computes: x = rightBase.x - 0 = 100
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 100, 50, 60)],
       obstacles: [obstacle],
+      litData: makeLitData([{ name: 'Obstacle 1', points: [[100, 0, 10]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
-    // x = rightBase.x - 0 = 100
     expect(marker.x).toBe(100);
   });
 
@@ -763,9 +734,19 @@ describe('createObstaclesAnnotations', () => {
         { x: 30, y: 3, z: 12 }
       ]
     });
+    // Python computes: x = 200 - position.x for each point
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 200, 0, 0)],
       obstacles: [obstacle],
+      litData: makeLitData([
+        {
+          name: 'Obstacle 1',
+          points: [
+            [190, 1, 5],
+            [180, 2, 8],
+            [170, 3, 12]
+          ]
+        }
+      ]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -773,7 +754,6 @@ describe('createObstaclesAnnotations', () => {
     expect(annotations).toHaveLength(6);
 
     const markers = annotations.filter((a: ObstacleAnnotation) => a.text === '●') as ObstacleAnnotation[];
-    // x = 200 - position.x for each
     expect(markers[0]).toMatchObject({ x: 190, y: 1, z: 5 });
     expect(markers[1]).toMatchObject({ x: 180, y: 2, z: 8 });
     expect(markers[2]).toMatchObject({ x: 170, y: 3, z: 12 });

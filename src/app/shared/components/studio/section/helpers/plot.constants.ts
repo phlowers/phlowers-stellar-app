@@ -20,3 +20,13 @@ export const SHADOW_OPACITY = 0.3;
 export const getShadowColor = (view: '2d' | '3d'): string => {
   return view === '3d' ? SPAN_COLOR : `rgba(${SPAN_COLOR_RGB},${SHADOW_OPACITY})`;
 };
+
+/** Debounce delay in ms for studio plot refresh operations. */
+export const STUDIO_PLOT_DEBOUNCE_DELAY = 300;
+
+/** Shared Plotly axis background configuration used across all plot views. */
+export const PLOT_AXIS_CONFIG = {
+  backgroundcolor: 'gainsboro',
+  gridcolor: 'dimgray',
+  showbackground: true
+};

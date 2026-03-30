@@ -6,8 +6,8 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
 import { Data, PlotlyHTMLElement } from 'plotly.js-dist-min';
-import { PlotOptions } from '@shared/types/plot.types';
-import { PlotService, SelectedDisplayOptions } from '@services/plot/plot.service';
+import { PlotOptions, SelectedDisplayOptions } from '@shared/types/plot.types';
+import { PlotService } from '@services/plot/plot.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
@@ -26,9 +26,9 @@ vi.mock('./helpers/createShadowPlotData');
 
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 
-const mockCreatePlot = createPlot as vi.MockedFunction<typeof createPlot>;
-const mockCreatePlotData = createPlotData as vi.MockedFunction<typeof createPlotData>;
-const mockCreateShadowPlotData = createShadowPlotData as vi.MockedFunction<typeof createShadowPlotData>;
+const mockCreatePlot = vi.mocked(createPlot);
+const mockCreatePlotData = vi.mocked(createPlotData);
+const mockCreateShadowPlotData = vi.mocked(createShadowPlotData);
 
 const mockSupports: Support[] = [
   {
@@ -213,7 +213,9 @@ describe('SectionPlotComponent', () => {
     axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
     temporaryLoadData: null as ChargeData | null | undefined,
     plotOptionsChange: noopMock,
-    refreshCamera: noopMock
+    refreshCamera: noopMock,
+    distances: signal([]),
+    distanceType: signal<'oblique' | 'vertical' | 'horizontal'>('oblique')
   };
 
   const mockSideTabsService = {
@@ -226,7 +228,9 @@ describe('SectionPlotComponent', () => {
   };
 
   const mockObstaclesService = {
-    currentPointIndex: signal(0)
+    selectedObstacleUuid: signal<string | null>(null),
+    activePointIndex: signal<number | null>(null),
+    setSelectedObstacle: vi.fn()
   };
 
   const createFormGet =
@@ -257,6 +261,7 @@ describe('SectionPlotComponent', () => {
     vi.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
     mockCreatePlot.mockResolvedValue(mockPlotElement as unknown as PlotlyHTMLElement);
+    mockCreateShadowPlotData.mockReturnValue([]);
 
     litDataSignal.set(mockLitData);
     baseLitDataSignal.set(null);
@@ -389,11 +394,7 @@ describe('SectionPlotComponent', () => {
       sectionSignal.set(sectionWithObstacles);
       litDataSignal.set(mockLitData);
 
-      mockObstacleFormService.form.value = {
-        ...mockObstacle,
-        uuid: 'obs-1'
-      };
-      mockObstacleFormService.form.get = createFormGet('obs-1');
+      mockObstaclesService.selectedObstacleUuid.set('obs-1');
 
       await component.refreshPlot();
 
@@ -643,59 +644,6 @@ describe('SectionPlotComponent', () => {
     });
   });
 
-  describe('getSupportsList Method', () => {
-    it('should return section supports', () => {
-      const result = component['getSupportsList']();
-
-      expect(result).toEqual(mockSupports);
-    });
-
-    it('should return empty array when section is null', () => {
-      sectionSignal.set(null);
-      const result = component['getSupportsList']();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should return empty array when supports is undefined', () => {
-      sectionSignal.set({ ...mockSection, supports: undefined } as unknown as Section);
-      const result = component['getSupportsList']();
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('getCurrentObstacleUuid Method', () => {
-    it('should return uuid from form', () => {
-      mockObstacleFormService.form.get = createFormGet('obs-1');
-
-      const result = component['getCurrentObstacleUuid']();
-
-      expect(result).toBe('obs-1');
-    });
-
-    it('should return null when uuid is null', () => {
-      mockObstacleFormService.form.get = createFormGet(null);
-
-      const result = component['getCurrentObstacleUuid']();
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null when form control not found', () => {
-      mockObstacleFormService.form.get = (key: string) => {
-        if (key === 'uuid') {
-          return null;
-        }
-        return { value: null, valueChanges: of(null) };
-      };
-
-      const result = component['getCurrentObstacleUuid']();
-
-      expect(result).toBeNull();
-    });
-  });
-
   describe('Debounced Effect', () => {
     it('should not refresh plot before debounce delay', fakeAsync(() => {
       mockCreatePlot.mockClear();
@@ -829,7 +777,7 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should handle obstacle point index updates', async () => {
-      mockObstaclesService.currentPointIndex.set(5);
+      mockObstaclesService.activePointIndex.set(5);
       litDataSignal.set(mockLitData);
 
       await component.refreshPlot();
@@ -899,6 +847,7 @@ describe('SectionPlotComponent', () => {
 
     const makePlotWithCapture = () => {
       const self = {
+        removeAllListeners: vi.fn(),
         on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
           if (event === 'plotly_clickannotation') {
             capturedHandler = fn;

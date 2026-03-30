@@ -39,3 +39,30 @@ export interface PlotOptions {
   /** Whether to invert the plot axis direction. */
   invert: boolean;
 }
+
+/** DOM element ID used for the Plotly chart container. */
+export const PLOT_ID = 'plotly-output';
+
+/** Option for a span dropdown selector. */
+export interface SpanOption {
+  /** Display label for the span option. */
+  label: string;
+  /** UUID value of the span, or null if not applicable. */
+  value: string | null;
+}
+
+/** Options controlling which overlays are visible on the plot. */
+export interface SelectedDisplayOptions {
+  /** Whether load results are displayed. */
+  loads: boolean;
+  /** Whether base state results are displayed. */
+  baseState: boolean;
+}
+
+/** Normalization factors for the plot axes and Plotly aspect mode. */
+export interface AxesNorms {
+  x: number;
+  y: number;
+  z: number;
+  aspectMode: string;
+}

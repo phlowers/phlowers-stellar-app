@@ -22,7 +22,6 @@ describe('CalculusSetting component', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
     componentRef.setInput('measureData', createTestMeasureData());
-    componentRef.setInput('selectedSpan', []);
     fixture.detectChanges();
   });
 

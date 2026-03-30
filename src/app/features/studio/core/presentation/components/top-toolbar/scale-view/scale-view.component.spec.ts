@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { ScaleViewComponent } from './scale-view.component';
+
 import { PlotService } from '@services/plot/plot.service';
 
 describe('ScaleViewComponent', () => {
@@ -341,7 +342,10 @@ describe('ScaleViewComponent', () => {
         fixture = TestBed.createComponent(ScaleViewComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-        component.togglePopover(new Event('click'));
+        // Click the real trigger button so event.target is a DOM element (not null),
+        // preventing absolutePosition from throwing in JSDOM.
+        const btn = fixture.nativeElement.querySelector<HTMLButtonElement>('[data-testid="scale-view-trigger"] button');
+        btn?.click();
         fixture.detectChanges();
       });
 

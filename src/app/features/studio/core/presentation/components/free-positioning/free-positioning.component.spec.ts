@@ -97,7 +97,7 @@ describe('FreePositioningComponent', () => {
   };
 
   const mockObstaclesService = {
-    currentPointIndex: signal(0)
+    activePointIndex: signal<number | null>(0)
   };
 
   let positionsFormArray: FormArray;
@@ -119,7 +119,20 @@ describe('FreePositioningComponent', () => {
 
     return {
       form,
-      positions: positionsFormArray
+      positions: positionsFormArray,
+      buildObstacleFromForm: vi.fn().mockReturnValue({
+        uuid: null,
+        name: 'test',
+        type: 'tree',
+        supportUuid: 's0',
+        referenceSupport: null,
+        altitudeType: 'absolute',
+        lateralDistanceType: 'left',
+        positions: [
+          { x: 1, y: 2, z: 3 },
+          { x: 4, y: 5, z: 6 }
+        ]
+      })
     };
   };
 
@@ -208,7 +221,7 @@ describe('FreePositioningComponent', () => {
       // absolute by default
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 0, y: 0, z: 0 }));
-      mockObstaclesService.currentPointIndex.set(0);
+      mockObstaclesService.activePointIndex.set(0);
 
       const plotElement = makeFakePlotElement(100, 50);
       (component as unknown as { handleClick: (evt: unknown, type: string, plotElement: unknown) => void }).handleClick(
@@ -227,7 +240,7 @@ describe('FreePositioningComponent', () => {
 
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 0, y: 0, z: 0 }));
-      mockObstaclesService.currentPointIndex.set(0);
+      mockObstaclesService.activePointIndex.set(0);
 
       const plotElement = makeFakePlotElement(100, 50);
       (component as unknown as { handleClick: (evt: unknown, type: string, plotElement: unknown) => void }).handleClick(
@@ -261,7 +274,7 @@ describe('FreePositioningComponent', () => {
     it('should update y only on face click in absolute mode, keeping z unchanged', () => {
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
-      mockObstaclesService.currentPointIndex.set(0);
+      mockObstaclesService.activePointIndex.set(0);
 
       const plotElement = makeFakePlotElement(5, 25);
       component['handleClick'](makeClickEvent(), 'face', plotElement);
@@ -277,7 +290,7 @@ describe('FreePositioningComponent', () => {
 
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 10, y: 0, z: 7 }));
-      mockObstaclesService.currentPointIndex.set(0);
+      mockObstaclesService.activePointIndex.set(0);
 
       const plotElement = makeFakePlotElement(5, 50);
       component['handleClick'](makeClickEvent(), 'face', plotElement);
@@ -594,7 +607,7 @@ describe('FreePositioningComponent', () => {
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 1, y: 2, z: 3 }));
       positionsFormArray.push(fb.group({ x: 4, y: 5, z: 6 }));
-      mockObstaclesService.currentPointIndex.set(1);
+      mockObstaclesService.activePointIndex.set(1);
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
