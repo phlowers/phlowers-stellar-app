@@ -2,9 +2,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
-import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
-import { recheckSpanLoads } from '../helpers';
+import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +35,6 @@ export class LoadFormsService {
 
   private readonly plotService = inject(PlotService);
   private readonly chargesService = inject(ChargesService);
-  private readonly workerPythonService = inject(WorkerPythonService);
 
   constructor() {
     effect(() => {
@@ -64,7 +61,7 @@ export class LoadFormsService {
   };
 
   /**
-   * Calculate the load by running the change state task
+   * Calculate the load by running the change state task, then re-apply all saved obstacles on top.
    */
   calculateLoad = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
@@ -75,13 +72,15 @@ export class LoadFormsService {
     this.plotService.loading.set(true);
 
     const currentSection = this.plotService.section();
-    const { result, error } = await this.workerPythonService.runTask(Task.changeState, {
-      climate: temporaryLoadData!.climate,
-      spanLoads: recheckSpanLoads(temporaryLoadData!.spanLoads, currentSection?.supports ?? [])
-    });
-    this.plotService.litData.set(result?.current ?? null);
-    this.plotService.baseLitData.set(result?.base ?? null);
-    this.plotService.error.set(error);
+    // Ensure spanLoads are valid against current supports before storing in temporaryLoadData
+    this.plotService.temporaryLoadData = {
+      ...temporaryLoadData,
+      spanLoads: recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? [])
+    };
+
+    // Delegate full computation (changeState + obstacle re-application) to reapplyObstacles
+    await this.plotService.reapplyObstacles();
+
     this.plotService.loading.set(false);
   };
 

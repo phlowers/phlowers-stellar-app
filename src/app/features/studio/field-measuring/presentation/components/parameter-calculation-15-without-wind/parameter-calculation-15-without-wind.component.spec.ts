@@ -40,7 +40,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
   beforeEach(async () => {
     workerPythonServiceMock = {
-      runTask: vi.fn(),
+      runTask: vi.fn().mockResolvedValue({ result: null, error: null }),
       ready$: new BehaviorSubject<boolean>(true)
     } as unknown as vi.Mocked<WorkerPythonService>;
 
