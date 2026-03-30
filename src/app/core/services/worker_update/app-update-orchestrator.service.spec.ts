@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AppUpdateOrchestratorService } from '@services/worker_update/app-update-orchestrator.service';
 import { AppVersion, AssetList, UpdateService } from '@services/worker_update/worker_update.service';
 
@@ -16,7 +15,6 @@ interface MockServiceWorkerContainer {
 describe('AppUpdateOrchestratorService — Phase 2', () => {
   let service: AppUpdateOrchestratorService;
   let updateService: UpdateService;
-  let httpMock: HttpTestingController;
   let navigatorSpy: { serviceWorker: MockServiceWorkerContainer };
 
   const mockVersionV1: AppVersion = {
@@ -52,23 +50,18 @@ describe('AppUpdateOrchestratorService — Phase 2', () => {
     });
 
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), AppUpdateOrchestratorService, UpdateService]
+      providers: [provideHttpClient(), AppUpdateOrchestratorService, UpdateService]
     });
 
     service = TestBed.inject(AppUpdateOrchestratorService);
     updateService = TestBed.inject(UpdateService);
-    httpMock = TestBed.inject(HttpTestingController);
 
-    // Mock UpdateService.getCurrentVersion
+    // Mock UpdateService methods used by orchestrator
     vi.spyOn(updateService, 'getCurrentVersion').mockResolvedValue(mockVersionV1);
+    vi.spyOn(updateService, 'getLatestAssetList').mockResolvedValue(mockAssetListV2);
   });
 
   afterEach(() => {
-    try {
-      httpMock.verify();
-    } catch {
-      // Ignore httpMock verification errors in case of early failures
-    }
     // Reset navigator mock
     Object.defineProperty(navigator, 'serviceWorker', {
       value: {},
@@ -79,15 +72,9 @@ describe('AppUpdateOrchestratorService — Phase 2', () => {
 
   describe('initiateStartupCheck', () => {
     it('should fetch latest assets and detect new version available', async () => {
-      const checkPromise = service.initiateStartupCheck();
+      await service.initiateStartupCheck();
 
-      const req = httpMock.expectOne('/assets_list.json');
-      expect(req.request.method).toBe('GET');
-      expect(req.request.headers.get('cache-control')).toBe('no-cache');
-      req.flush(mockAssetListV2);
-
-      await checkPromise;
-
+      expect(updateService.getLatestAssetList).toHaveBeenCalledTimes(1);
       expect(updateService.latestVersion()).toEqual(mockVersionV2);
       expect(updateService.needUpdate$.value).toBe(true);
       expect(service.startupCheckCompleted()).toBe(true);
@@ -97,24 +84,16 @@ describe('AppUpdateOrchestratorService — Phase 2', () => {
       // Mock getCurrentVersion to return mockVersionV2 (same as latest)
       vi.mocked(updateService.getCurrentVersion).mockResolvedValue(mockVersionV2);
 
-      const checkPromise = service.initiateStartupCheck();
-
-      const req = httpMock.expectOne('/assets_list.json');
-      req.flush(mockAssetListV2);
-
-      await checkPromise;
+      await service.initiateStartupCheck();
 
       expect(updateService.needUpdate$.value).toBe(false);
       expect(service.startupCheckCompleted()).toBe(true);
     });
 
     it('should handle fetch errors gracefully without blocking app', async () => {
-      const checkPromise = service.initiateStartupCheck();
+      vi.mocked(updateService.getLatestAssetList).mockResolvedValue(null);
 
-      const req = httpMock.expectOne('/assets_list.json');
-      req.error(new ProgressEvent('error'), { status: 500 });
-
-      await checkPromise;
+      await service.initiateStartupCheck();
 
       expect(service.startupCheckCompleted()).toBe(true);
       expect(updateService.needUpdate$.value).toBe(false);
@@ -122,33 +101,20 @@ describe('AppUpdateOrchestratorService — Phase 2', () => {
 
     it('should skip subsequent checks in same session (single-check-per-boot guarantee)', async () => {
       // First check
-      const check1 = service.initiateStartupCheck();
-      const req1 = httpMock.expectOne('/assets_list.json');
-      req1.flush(mockAssetListV2);
-      await check1;
+      await service.initiateStartupCheck();
 
       expect(service.startupCheckCompleted()).toBe(true);
 
       // Second check in same session should be no-op
-      const check2 = service.initiateStartupCheck();
-      await check2;
+      await service.initiateStartupCheck();
 
-      // No additional HTTP request should be made
-      httpMock.expectNone('/assets_list.json');
+      expect(updateService.getLatestAssetList).toHaveBeenCalledTimes(1);
     });
 
     it('should set isCheckingVersion during check', async () => {
       expect(service.isCheckingVersion()).toBe(false);
 
-      const checkPromise = service.initiateStartupCheck();
-
-      // isCheckingVersion might flip back to false immediately due to async timing
-      // but at some point it should become true during the fetch
-      const req = httpMock.expectOne('/assets_list.json');
-
-      // We expect at least one promise completion
-      req.flush(mockAssetListV2);
-      await checkPromise;
+      await service.initiateStartupCheck();
 
       expect(service.isCheckingVersion()).toBe(false);
       expect(service.startupCheckCompleted()).toBe(true);
@@ -156,7 +122,23 @@ describe('AppUpdateOrchestratorService — Phase 2', () => {
   });
 
   describe('acceptUpdate', () => {
-    it('should post update message to Service Worker controller', () => {
+    it('should post update message with manifest when available', async () => {
+      const postMessageSpy = vi.fn();
+      Object.defineProperty(navigator, 'serviceWorker', {
+        value: {
+          controller: { postMessage: postMessageSpy }
+        },
+        writable: true
+      });
+
+      await service.initiateStartupCheck();
+      service.acceptUpdate();
+
+      expect(postMessageSpy).toHaveBeenCalledWith({ type: 'update', manifest: mockAssetListV2 });
+      expect(updateService.updateLoading()).toBe(true);
+    });
+
+    it('should post update message without manifest when not available', () => {
       const postMessageSpy = vi.fn();
       Object.defineProperty(navigator, 'serviceWorker', {
         value: {
@@ -185,19 +167,11 @@ describe('AppUpdateOrchestratorService — Phase 2', () => {
     });
   });
 
-  describe('OIDC token integration (HttpClient)', () => {
-    it('should use HttpClient for manifest fetch (supports interceptor token injection)', async () => {
-      const checkPromise = service.initiateStartupCheck();
+  describe('OIDC token integration', () => {
+    it('should delegate manifest fetch to UpdateService (interceptor-aware path)', async () => {
+      await service.initiateStartupCheck();
 
-      const req = httpMock.expectOne('/assets_list.json');
-      // Verify default headers are set
-      expect(req.request.headers.get('cache-control')).toBe('no-cache');
-      expect(req.request.headers.get('pragma')).toBe('no-cache');
-
-      req.flush(mockAssetListV2);
-      await checkPromise;
-
-      // Ensure HTTP call was made (token would be auto-added by interceptor in real flow)
+      expect(updateService.getLatestAssetList).toHaveBeenCalledTimes(1);
       expect(updateService.needUpdate$.value).toBe(true);
     });
   });

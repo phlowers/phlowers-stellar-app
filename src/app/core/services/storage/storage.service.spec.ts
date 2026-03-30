@@ -172,4 +172,45 @@ describe('StorageService', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('createDatabase'), error);
     consoleSpy.mockRestore();
   });
+
+  describe('assertProtectedTablesUnchanged', () => {
+    it('should execute operation and validate protected tables remain unchanged', async () => {
+      const usersCount = vi.fn().mockResolvedValue(1);
+      const studiesCount = vi.fn().mockResolvedValue(2);
+      service.db = {
+        users: { count: usersCount },
+        studies: { count: studiesCount }
+      } as unknown as AppDatabase;
+
+      const operation = vi.fn().mockResolvedValue(undefined);
+
+      await service.assertProtectedTablesUnchanged(operation);
+
+      expect(operation).toHaveBeenCalledTimes(1);
+      expect(usersCount).toHaveBeenCalledTimes(2);
+      expect(studiesCount).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw when protected tables change after operation', async () => {
+      const usersCount = vi.fn().mockResolvedValueOnce(1).mockResolvedValueOnce(2);
+      const studiesCount = vi.fn().mockResolvedValue(2);
+      service.db = {
+        users: { count: usersCount },
+        studies: { count: studiesCount }
+      } as unknown as AppDatabase;
+
+      await expect(service.assertProtectedTablesUnchanged(async () => Promise.resolve())).rejects.toThrow(
+        'Protected data integrity check failed after catalog synchronization'
+      );
+    });
+
+    it('should still execute operation when database is unavailable', async () => {
+      service.db = undefined as unknown as AppDatabase;
+      const operation = vi.fn().mockResolvedValue(undefined);
+
+      await service.assertProtectedTablesUnchanged(operation);
+
+      expect(operation).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -121,6 +121,7 @@ describe('AppComponent', () => {
       setPersistentStorage: vi.fn().mockResolvedValue(undefined),
       createDatabase: vi.fn().mockResolvedValue(undefined),
       ready$: readySubject,
+      assertProtectedTablesUnchanged: vi.fn(async (operation: () => Promise<void>) => operation()),
       db: mockDb
     } as unknown as StorageService;
 
@@ -284,21 +285,23 @@ describe('AppComponent', () => {
       expect(mockDb.metadata.put).not.toHaveBeenCalled();
     });
 
-    it('should validate protected users and studies counts before and after catalog sync', async () => {
+    it('should delegate protected table integrity assertion to StorageService', async () => {
       // @ts-expect-error vitest mock on service method
       mockUpdateService.getLatestAssetList.mockResolvedValue({});
 
       await component.setupData();
 
-      expect(mockDb.users.count).toHaveBeenCalledTimes(2);
-      expect(mockDb.studies.count).toHaveBeenCalledTimes(2);
+      expect(
+        (mockStorageService as unknown as { assertProtectedTablesUnchanged: ReturnType<typeof vi.fn> })
+          .assertProtectedTablesUnchanged
+      ).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw when protected users or studies data changes during catalog sync', async () => {
-      // @ts-expect-error vitest mock on service method
-      mockUpdateService.getLatestAssetList.mockResolvedValue({});
-      mockDb.users.count.mockResolvedValueOnce(1).mockResolvedValueOnce(2);
-      mockDb.studies.count.mockResolvedValueOnce(2).mockResolvedValueOnce(2);
+    it('should throw when StorageService detects protected data changes during catalog sync', async () => {
+      const integrityError = new Error('Protected data integrity check failed after catalog synchronization');
+      (
+        mockStorageService as unknown as { assertProtectedTablesUnchanged: ReturnType<typeof vi.fn> }
+      ).assertProtectedTablesUnchanged.mockRejectedValue(integrityError);
 
       await expect(component.setupData()).rejects.toThrow(
         'Protected data integrity check failed after catalog synchronization'
@@ -407,6 +410,7 @@ describe('AppComponent - HTML rendering', () => {
         setPersistentStorage: vi.fn().mockResolvedValue(undefined),
         createDatabase: vi.fn().mockResolvedValue(undefined),
         ready$: readySubject,
+        assertProtectedTablesUnchanged: vi.fn(async (operation: () => Promise<void>) => operation()),
         db: {
           users: {
             count: vi.fn().mockResolvedValue(0),

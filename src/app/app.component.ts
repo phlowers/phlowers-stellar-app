@@ -32,11 +32,6 @@ import { ProgressBarModule } from 'primeng/progressbar';
 /** Regex pattern for validating email addresses. */
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-interface ProtectedDataSnapshot {
-  userCount: number;
-  studyCount: number;
-}
-
 const modules = [
   RouterModule,
   CommonModule,
@@ -113,12 +108,35 @@ export class AppComponent implements OnInit {
 
     effect(() => {
       if (this.storageReady()) {
-        this.userService.getUser().then((user) => {
-          this.userDialog.set(!user);
-          this.setupData().finally(() => {
+        void this.userService
+          .getUser()
+          .then(async (user) => {
+            this.userDialog.set(!user);
+
+            try {
+              await this.setupData();
+            } catch (error) {
+              console.error('Error during startup catalog synchronization', error);
+              this.messageService.add({
+                severity: 'error',
+                summary: $localize`Error`,
+                detail: $localize`Catalog synchronization failed during startup`,
+                life: 5000
+              });
+            } finally {
+              await this.appUpdateOrchestratorService.initiateStartupCheck();
+            }
+          })
+          .catch((error: unknown) => {
+            console.error('Error during startup user bootstrap', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: $localize`Error`,
+              detail: $localize`Unable to initialize startup user context`,
+              life: 5000
+            });
             void this.appUpdateOrchestratorService.initiateStartupCheck();
           });
-        });
       }
     });
 
@@ -128,61 +146,37 @@ export class AppComponent implements OnInit {
   }
 
   async setupData() {
-    const protectedDataSnapshot = await this.captureProtectedDataSnapshot();
-    const manifest = await this.fetchLatestManifestSafe();
-    const dataHashes = manifest?.data_hashes || {};
-    const hashEntries = Object.entries(dataHashes);
+    await this.storageService.assertProtectedTablesUnchanged(async () => {
+      const manifest = await this.fetchLatestManifestSafe();
+      const dataHashes = manifest?.data_hashes || {};
+      const hashEntries = Object.entries(dataHashes);
 
-    // Fallback for legacy builds without per-CSV hashes.
-    if (hashEntries.length === 0) {
-      await this.importAllCatalogs();
-      await this.assertProtectedDataSnapshot(protectedDataSnapshot);
-      return;
-    }
-
-    for (const [csvFileName, importFn] of Object.entries(this.csvImporters)) {
-      const latestHash = dataHashes[csvFileName];
-      if (!latestHash) {
-        continue;
+      // Fallback for legacy builds without per-CSV hashes.
+      if (hashEntries.length === 0) {
+        await this.importAllCatalogs();
+        return;
       }
 
-      const metadataKey = `catalog_hash:${csvFileName}`;
-      const storedHash = await this.storageService.db?.metadata.get(metadataKey);
-      if (storedHash?.value === latestHash) {
-        continue;
+      for (const [csvFileName, importFn] of Object.entries(this.csvImporters)) {
+        const latestHash = dataHashes[csvFileName];
+        if (!latestHash) {
+          continue;
+        }
+
+        const metadataKey = `catalog_hash:${csvFileName}`;
+        const storedHash = await this.storageService.db?.metadata.get(metadataKey);
+        if (storedHash?.value === latestHash) {
+          continue;
+        }
+
+        await importFn();
+        await this.storageService.db?.metadata.put({
+          key: metadataKey,
+          value: latestHash,
+          updated_at: new Date().toISOString()
+        });
       }
-
-      await importFn();
-      await this.storageService.db?.metadata.put({
-        key: metadataKey,
-        value: latestHash,
-        updated_at: new Date().toISOString()
-      });
-    }
-
-    await this.assertProtectedDataSnapshot(protectedDataSnapshot);
-  }
-
-  private async captureProtectedDataSnapshot(): Promise<ProtectedDataSnapshot | null> {
-    const database = this.storageService.db;
-    if (!database) {
-      return null;
-    }
-
-    const [userCount, studyCount] = await Promise.all([database.users.count(), database.studies.count()]);
-    return { userCount, studyCount };
-  }
-
-  private async assertProtectedDataSnapshot(snapshot: ProtectedDataSnapshot | null): Promise<void> {
-    const database = this.storageService.db;
-    if (!snapshot || !database) {
-      return;
-    }
-
-    const [userCount, studyCount] = await Promise.all([database.users.count(), database.studies.count()]);
-    if (userCount !== snapshot.userCount || studyCount !== snapshot.studyCount) {
-      throw new Error('Protected data integrity check failed after catalog synchronization');
-    }
+    });
   }
 
   private async fetchLatestManifestSafe(): Promise<AssetList | null> {

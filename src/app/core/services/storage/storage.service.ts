@@ -9,6 +9,11 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AppDatabase } from '@infrastructure/database';
 
+interface ProtectedTablesSnapshot {
+  userCount: number;
+  studyCount: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -60,5 +65,42 @@ export class StorageService {
   async resetDatabase() {
     await this.db?.delete();
     await this.createDatabase();
+  }
+
+  /**
+   * Execute an operation and ensure protected tables (`users`, `studies`) remain unchanged.
+   *
+   * @remarks
+   * This is used to guarantee catalog synchronization does not modify protected data.
+   * If no database is available, the operation is still executed without integrity assertion.
+   *
+   * @param operation - Async operation to execute under integrity check
+   */
+  async assertProtectedTablesUnchanged(operation: () => Promise<void>): Promise<void> {
+    const snapshot = await this.captureProtectedTablesSnapshot();
+    await operation();
+    await this.assertProtectedTablesSnapshot(snapshot);
+  }
+
+  private async captureProtectedTablesSnapshot(): Promise<ProtectedTablesSnapshot | null> {
+    const database = this.db;
+    if (!database) {
+      return null;
+    }
+
+    const [userCount, studyCount] = await Promise.all([database.users.count(), database.studies.count()]);
+    return { userCount, studyCount };
+  }
+
+  private async assertProtectedTablesSnapshot(snapshot: ProtectedTablesSnapshot | null): Promise<void> {
+    const database = this.db;
+    if (!snapshot || !database) {
+      return;
+    }
+
+    const [userCount, studyCount] = await Promise.all([database.users.count(), database.studies.count()]);
+    if (userCount !== snapshot.userCount || studyCount !== snapshot.studyCount) {
+      throw new Error('Protected data integrity check failed after catalog synchronization');
+    }
   }
 }

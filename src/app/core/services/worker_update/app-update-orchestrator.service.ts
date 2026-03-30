@@ -1,6 +1,4 @@
-import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { AssetList, UpdateService } from '@services/worker_update/worker_update.service';
 import { isEqual } from 'lodash';
 
@@ -11,13 +9,13 @@ import { isEqual } from 'lodash';
  * - **Single-check-per-boot**: Only one version check when app initializes (no re-checks on online/offline)
  * - **User consent mandatory**: Updates only proceed after explicit user approval via popup
  * - **Stateful**: Tracks whether startup check has been performed this session
- * - **OIDC-compatible**: Uses HttpClient (token-aware) for all manifest fetches
+ * - **OIDC-compatible**: Delegates manifest fetches to `UpdateService` (token-aware)
  * - **Fail-safe**: Network errors or missing versions don't block app startup
  *
  * @remarks
  * This service replaces the previous auto-update mechanisms. The Service Worker
  * no longer triggers updates on activate; the orchestrator runs once at app startup
- * and delegates all HTTP communication to Angular's HttpClient for OIDC token injection.
+ * and delegates manifest retrieval to `UpdateService` for OIDC token injection.
  *
  * Usage (in AppComponent constructor):
  * ```typescript
@@ -42,7 +40,7 @@ export class AppUpdateOrchestratorService {
   readonly isCheckingVersion = signal(false);
 
   private readonly updateService = inject(UpdateService);
-  private readonly httpClient = inject(HttpClient);
+  private latestManifest: AssetList | null = null;
 
   /**
    * Initiates the single startup version check for this app session.
@@ -53,7 +51,7 @@ export class AppUpdateOrchestratorService {
    *
    * This method:
    * 1. Checks if startup check already completed → returns early if so
-   * 2. Fetches the latest manifest via HttpClient (OIDC token auto-injected)
+   * 2. Fetches the latest manifest via `UpdateService.getLatestAssetList()`
    * 3. Compares cached vs. latest version
    * 4. Triggers update dialog popup if new version available
    * 5. Waits for user consent (user clicks "Update now" or "Later")
@@ -73,8 +71,9 @@ export class AppUpdateOrchestratorService {
     this.isCheckingVersion.set(true);
 
     try {
-      // Fetch latest version from server (uses HttpClient for OIDC token support)
-      const latestAssets = await this.getLatestAssetListViaHttpClient();
+      // Fetch latest version from server through UpdateService (OIDC-aware HttpClient path)
+      const latestAssets = await this.updateService.getLatestAssetList();
+      this.latestManifest = latestAssets;
 
       if (!latestAssets) {
         console.warn('ORCHESTRATOR: Could not fetch latest manifest, continuing with cached version');
@@ -98,6 +97,7 @@ export class AppUpdateOrchestratorService {
         console.log('ORCHESTRATOR: Application is up to date or cached version unavailable');
       }
     } catch (error) {
+      this.latestManifest = null;
       console.error('ORCHESTRATOR: Startup check failed, app continues with cached state:', error);
     } finally {
       this.isCheckingVersion.set(false);
@@ -113,46 +113,17 @@ export class AppUpdateOrchestratorService {
    * the atomic cache swap and manifest processing.
    */
   acceptUpdate(): void {
-    const registration = navigator.serviceWorker.controller;
-    if (registration) {
+    const serviceWorkerController = navigator.serviceWorker.controller;
+    if (serviceWorkerController) {
       console.log('ORCHESTRATOR: User accepted update, posting update message to Service Worker');
-      registration.postMessage({ type: 'update' });
+      if (this.latestManifest) {
+        serviceWorkerController.postMessage({ type: 'update', manifest: this.latestManifest });
+      } else {
+        serviceWorkerController.postMessage({ type: 'update' });
+      }
       this.updateService.updateLoading.set(true);
     } else {
       console.warn('ORCHESTRATOR: No Service Worker controller available');
-    }
-  }
-
-  /**
-   * Fetch the latest asset manifest via HttpClient.
-   *
-   * @remarks
-   * This replaces the raw fetch() call in UpdateService.getLatestAssetList()
-   * and enables OIDC token auto-injection while maintaining error safety.
-   *
-   * @returns Promise<AssetList | null> — Latest manifest or null on any error
-   */
-  private async getLatestAssetListViaHttpClient(): Promise<AssetList | null> {
-    try {
-      // HttpClient (via interceptor) will auto-inject OIDC Bearer token if available
-      const response = await firstValueFrom(
-        this.httpClient.get<AssetList>('/assets_list.json', {
-          headers: {
-            'cache-control': 'no-cache',
-            pragma: 'no-cache'
-          }
-        })
-      );
-
-      if (!response) {
-        console.warn('ORCHESTRATOR: Empty response from /assets_list.json');
-        return null;
-      }
-
-      return response;
-    } catch (error) {
-      console.error('ORCHESTRATOR: Failed to fetch latest asset list via HttpClient:', error);
-      return null;
     }
   }
 }

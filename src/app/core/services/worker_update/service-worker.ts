@@ -11,11 +11,21 @@ const LEGACY_APP_VERSION_CACHE_KEY = 'app_version';
 function fetchLatestManifest() {
   return fetch('/assets_list.json', {
     cache: 'no-store',
+    credentials: 'include',
     headers: {
       'cache-control': 'no-cache',
       pragma: 'no-cache'
     }
   });
+}
+
+function isAssetManifest(value: unknown): value is AssetManifest {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<AssetManifest>;
+  return typeof candidate.app_version !== 'undefined' && Array.isArray(candidate.files);
 }
 
 async function getCachedAppVersion(): Promise<AppVersion | null> {
@@ -125,9 +135,9 @@ export async function installApp() {
  * stale entries no longer present in the manifest.
  * @returns The updated asset manifest.
  */
-export async function updateApp() {
+export async function updateApp(manifestOverride?: AssetManifest) {
   console.log('SERVICE WORKER: Update requested');
-  const manifest: AssetManifest = await fetchLatestManifest().then((manifest) => manifest.json());
+  const manifest: AssetManifest = manifestOverride ?? (await fetchLatestManifest().then((response) => response.json()));
   const files = manifest.files || [];
   const cache = await caches.open(CACHE_NAME);
   let addedCount = 0;
@@ -260,12 +270,13 @@ export async function handleFetch(event: FetchEvent) {
  * @param event - The ExtendableMessageEvent containing the command
  */
 export async function handleMessage(event: ExtendableMessageEvent) {
-  const type = event.data.type;
+  const type = typeof event.data?.type === 'string' ? event.data.type : '';
+  const providedManifest = isAssetManifest(event.data?.manifest) ? event.data.manifest : undefined;
   let manifest: AssetManifest | null = null;
   try {
     switch (type) {
       case 'update':
-        manifest = await updateApp();
+        manifest = await updateApp(providedManifest);
         event.source?.postMessage({
           message: 'update_complete',
           latest_version: manifest.app_version,

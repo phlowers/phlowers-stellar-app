@@ -113,6 +113,7 @@ describe('Service Worker Functions', () => {
         '/assets_list.json',
         expect.objectContaining({
           cache: 'no-store',
+          credentials: 'include',
           headers: expect.objectContaining({
             'cache-control': 'no-cache',
             pragma: 'no-cache'
@@ -364,6 +365,21 @@ describe('Service Worker Functions', () => {
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
+      expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
+        message: 'update_complete',
+        latest_version: '1.1.0',
+        data_hashes: {}
+      });
+    });
+
+    it('should handle update message with manifest payload without fetching manifest', async () => {
+      const mockManifest = { files: ['/app.js'], app_version: '1.1.0' };
+      mockEvent.data = { type: 'update', manifest: mockManifest };
+      mockCache.keys.mockResolvedValue([]);
+
+      await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
+
+      expect(mockFetch).not.toHaveBeenCalledWith('/assets_list.json', expect.anything());
       expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
         message: 'update_complete',
         latest_version: '1.1.0',

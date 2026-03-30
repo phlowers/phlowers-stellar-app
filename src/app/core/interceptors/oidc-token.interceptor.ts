@@ -1,4 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { isDevMode } from '@angular/core';
 
 /**
  * OidcTokenInterceptor — Phase 2 refactoring
@@ -37,6 +38,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 export const oidcTokenInterceptor: HttpInterceptorFn = (req, next) => {
   const OIDC_TOKEN_KEY = 'oidc_token';
   const PROTECTED_PATHS = ['/assets_list.json'];
+  const isDevelopment = isDevMode();
 
   // Check if this request is one that may require OIDC token
   if (PROTECTED_PATHS.some((path) => req.url.includes(path))) {
@@ -48,8 +50,10 @@ export const oidcTokenInterceptor: HttpInterceptorFn = (req, next) => {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('OIDC INTERCEPTOR: Token injected for', req.url);
-    } else {
+      if (isDevelopment) {
+        console.log('OIDC INTERCEPTOR: Token injected for', req.url);
+      }
+    } else if (isDevelopment) {
       console.log('OIDC INTERCEPTOR: No token available for', req.url, '- proceeding without Authorization');
     }
   }
@@ -69,7 +73,8 @@ export const oidcTokenInterceptor: HttpInterceptorFn = (req, next) => {
  */
 function getOidcToken(key: string): string | null {
   try {
-    const tokenValue = localStorage.getItem(key);
+    const storage = globalThis.localStorage;
+    const tokenValue = storage?.getItem(key) ?? null;
     if (!tokenValue) {
       return null;
     }
