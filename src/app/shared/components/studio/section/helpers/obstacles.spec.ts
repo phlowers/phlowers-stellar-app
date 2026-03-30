@@ -7,7 +7,6 @@ import {
 } from './obstacles';
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
-import { Support } from '@shared/domain/models/support.model';
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
