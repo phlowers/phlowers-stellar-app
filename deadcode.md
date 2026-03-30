@@ -151,3 +151,17 @@
 | Impact suppression | Delete `jest.config.ts` and `fileTransformer.js` (Jest-specific transform) |
 | Status | ⏳ PENDING REVIEW |
 | Detected on | 2026-03-18 |
+
+---
+
+## 11. `loadObstacle` / `patchFormFromObstacle` / `findObstacle` — `src/app/core/services/obstacles-form/obstaclesForm.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/obstacles-form/obstaclesForm.service.ts` |
+| Code | Public `loadObstacle(uuid)` + private helpers `patchFormFromObstacle` and `findObstacle` |
+| 🔍 Preuve | `loadObstacle` is never called from any component or service — only referenced in its own spec file. Its logic partially duplicates `setExistingObstacle`. The two private helpers are only reachable via `loadObstacle`. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Remove `loadObstacle`, `patchFormFromObstacle`, `findSupportForObstacle`, and `findObstacle` (~30 lines) and their spec coverage |
+| Status | ⏳ PENDING REVIEW |
+| Detected on | 2026-03-26 |

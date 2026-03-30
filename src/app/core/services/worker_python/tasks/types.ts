@@ -7,6 +7,7 @@
 
 import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@shared/domain';
 import { View } from '@shared/types/plot.types';
+import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { Dictionary } from 'lodash';
 
 /**
@@ -19,30 +20,34 @@ import { Dictionary } from 'lodash';
  * @category Worker Types
  */
 export enum Task {
-  /** Run unit tests in Python environment */
+  //  Run unit tests in Python environment
   runTests = 'runTests',
-  /** Calculate line geometry (LIT - Ligne Informatisée de Transport) */
+  //  Calculate line geometry (LIT - Ligne Informatisée de Transport)
   getLit = 'getLit',
-  /** Change climate/load state and recalculate */
+  // Change climate/load state and recalculate
   changeState = 'changeState',
-  /** Refresh the projection view */
+  // Refresh the projection view
   refreshProjection = 'refreshProjection',
-  /** Get coordinates for support display */
+  // Get coordinates for support display
   getSupportCoordinates = 'getSupportCoordinates',
-  /** Calculate PAPOTO (field measurement) parameters */
+  // Calculate PAPOTO (field measurement) parameters
   calculatePapoto = 'calculatePapoto',
-  /** Calculate guying forces and angles */
+  // Calculate guying forces and angles
   calculateGuying = 'calculateGuying',
-  /** Set Python logging level */
+  // Set Python logging level
   setLogLevel = 'setLogLevel',
-  /** Calculate cable temperature from ambient conditions */
+  // Calculate cable temperature from ambient conditions
   temperatureCalculation = 'temperatureCalculation',
-  /** Calculate parameter at 15°C without wind */
+  // Calculate parameter at 15°C without wind
   calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind',
-  /** Set the number of calculation points per span */
+  // Set the number of calculation points per span
   setResolution = 'setResolution',
-  /** Get Python-side configuration constants */
-  getConfig = 'getConfig'
+  // Get Python-side configuration constants
+  getConfig = 'getConfig',
+  // Add obstacles coordinates
+  addObstacle = 'addObstacles',
+  // calculate obstacles distances
+  calculateObstaclesDistances = 'calculateObstaclesDistances'
 }
 
 /**
@@ -123,6 +128,11 @@ export interface GetSectionOutput {
   arc_length: number[];
   /** Horizontal component of cable tension at each span (daN) */
   T_h: number[];
+  // obstacles coordinates
+  obstacles?: {
+    name: string;
+    points: [number, number, number][];
+  }[];
 }
 
 /**
@@ -243,6 +253,29 @@ export interface TaskInputs {
   };
   /** Inputs for getConfig task: no inputs */
   [Task.getConfig]: undefined;
+  // Inputs for addObstacles task
+  [Task.addObstacle]: Obstacle;
+  // Inputs for calculateObstaclesDistances task
+  [Task.calculateObstaclesDistances]: {
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+}
+
+export interface DistancePoint {
+  pointIndex: number;
+  linePoint: [number, number, number];
+  virtualPointHorizontal: [number, number, number];
+  virtualPointVertical: [number, number, number];
+  distanceDiagonal: number;
+  distanceHorizontal: number;
+  distanceVertical: number;
+}
+
+export interface Distance {
+  obstacleUuid?: string;
+  points: DistancePoint[];
 }
 
 /**
@@ -261,7 +294,11 @@ export interface TaskOutputs {
   /** Output from changeState task: recalculated geometry with optional base state */
   [Task.changeState]: GetSectionWithBaseOutput;
   /** Output from refreshProjection task: reprojected geometry with optional base state */
-  [Task.refreshProjection]: GetSectionWithBaseOutput;
+  [Task.refreshProjection]: {
+    sectionOutput: GetSectionWithBaseOutput;
+    distances: Distance[];
+  };
+
   /** Output from getSupportCoordinates task: 2D display coordinates for supports */
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
@@ -308,4 +345,8 @@ export interface TaskOutputs {
   [Task.getConfig]: {
     resolution: number;
   };
+  // Output from addObstacles task
+  [Task.addObstacle]: GetSectionWithBaseOutput;
+  // Output from calculateObstaclesDistances task
+  [Task.calculateObstaclesDistances]: Distance[];
 }

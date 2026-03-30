@@ -1,3 +1,5 @@
+import { DecimalPipe } from '@angular/common';
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,7 +17,10 @@ import { filter, from, switchMap } from 'rxjs';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { debounce } from 'lodash';
 import { StudiesService } from '@services/studies/studies.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { StudioComponent } from '@shared/components/studio/studio.component';
@@ -31,21 +36,20 @@ import { SpanComponent } from '@features/studio/loads/presentation/components/sp
 import { NewChargeModalComponent } from '@features/studio/loads/presentation/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
-import { SectionService } from '@services/section/section.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
 import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
-
-// debounce to make it more fluid when dragging the slider
-const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
+import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
   selector: 'app-studio-page',
   imports: [
+    DecimalPipe,
     FormsModule,
     NgxSliderModule,
     InputNumberModule,
+    RadioButtonModule,
     SelectModule,
     TabsModule,
     StudioComponent,
@@ -65,7 +69,16 @@ const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('pointSelect', [
+      transition(':enter', [
+        style({ width: 0, opacity: 0, overflow: 'hidden' }),
+        animate('200ms ease-out', style({ width: '*', opacity: 1 }))
+      ]),
+      transition(':leave', [style({ overflow: 'hidden' }), animate('200ms ease-in', style({ width: 0, opacity: 0 }))])
+    ])
+  ]
 })
 export class StudioPageComponent implements OnInit, OnDestroy {
   sidebarWidth = signal(300);
@@ -112,6 +125,31 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     };
   });
 
+  filteredObstaclesOptions = computed(() => {
+    const section = this.plotService.section();
+    if (!section) return [];
+    const { startSupport, endSupport } = this.plotService.plotOptions();
+    const visibleSupportUuids = new Set(section.supports.slice(startSupport, endSupport).map((s) => s.uuid));
+    const options = section.obstacles
+      .filter((o) => visibleSupportUuids.has(o.supportUuid))
+      .map((o) => ({ label: o.name, value: o.uuid }));
+    // Always include the currently selected obstacle so the label persists when navigating spans
+    const selectedUuid = this.obstaclesService.selectedObstacleUuid();
+    if (selectedUuid && !options.some((o) => o.value === selectedUuid)) {
+      const selected = section.obstacles.find((o) => o.uuid === selectedUuid);
+      if (selected) options.push({ label: selected.name, value: selected.uuid });
+    }
+    return options;
+  });
+
+  obstaclePointOptions = computed(() => {
+    const uuid = this.obstaclesService.selectedObstacleUuid();
+    if (!uuid) return [];
+    const obstacle = this.plotService.section()?.obstacles.find((o) => o.uuid === uuid);
+    if (!obstacle) return [];
+    return obstacle.positions.map((_, index) => ({ label: $localize`Point ${index + 1}`, value: index }));
+  });
+
   toggleSidebar() {
     this.sidebarOpen.set(!this.sidebarOpen());
     this.sidebarWidth.set(this.sidebarOpen() ? 300 : 0);
@@ -119,10 +157,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   readonly plotService = inject(PlotService);
   readonly loadFormsService = inject(LoadFormsService);
+  public readonly obstaclesService = inject(ObstaclesService);
+  public readonly obstacleFormService = inject(ObstacleFormService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly studiesService = inject(StudiesService);
-  private readonly sectionService = inject(SectionService);
   private readonly destroyRef = inject(DestroyRef);
 
   previousSectionUuid = signal<string | null>(null);
@@ -167,16 +206,24 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.plotService.isStudioActive.set(false);
     this.plotService.resetAll();
+    this.obstaclesService.setSelectedObstacle(null, null);
   }
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {
     this.plotService.plotOptionsChange({ [key]: value });
     const options = this.plotService.plotOptions();
     const diff = Math.abs(options.endSupport - options.startSupport);
-    this.plotService.spanAmountChoice.set(diff === 1 ? 'single' : diff === 2 ? 'double' : 'all');
-  }, DEBOUNCED_REFRESH_STUDIO_DELAY);
+    const spanAmount = this.getSpanAmount(diff);
+    this.plotService.spanAmountChoice.set(spanAmount);
+  }, STUDIO_PLOT_DEBOUNCE_DELAY);
 
-  updateSliderOptions({ value, highValue }: { value?: number | undefined; highValue?: number | undefined }) {
+  private getSpanAmount(diff: number): 'single' | 'double' | 'all' {
+    if (diff === 1) return 'single';
+    if (diff === 2) return 'double';
+    return 'all';
+  }
+
+  updateSliderOptions({ value, highValue }: { value?: number; highValue?: number }) {
     const options = this.plotService.plotOptions();
     [
       { val: value, key: 'startSupport' as const, opt: options.startSupport },
@@ -196,16 +243,26 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.plotService.spanAmountChoice.set(value as 'single' | 'double' | 'all');
     const startSupport = this.plotService.plotOptions().startSupport;
     const maxSupport = (this.plotService.section()?.supports.length ?? 0) - 1;
-    const offset = value === 'single' ? 1 : value === 'double' ? 2 : null;
-    if (offset !== null) {
-      this.plotService.plotOptionsChange({
-        endSupport: Math.min(startSupport + offset, maxSupport)
-      });
-    } else {
+    if (value === 'all') {
       this.plotService.plotOptionsChange({
         startSupport: 0,
         endSupport: maxSupport
       });
+    } else {
+      const offset = value === 'single' ? 1 : 2;
+      this.plotService.plotOptionsChange({
+        endSupport: Math.min(startSupport + offset, maxSupport)
+      });
+    }
+  }
+
+  onObstacleSelect(uuid: string | null) {
+    this.plotService.distanceType.set(null);
+    const obstacle = uuid ? this.plotService.section()?.obstacles.find((o) => o.uuid === uuid) : null;
+    const pointIndex = obstacle?.positions.length === 1 ? 0 : null;
+    this.obstaclesService.setSelectedObstacle(uuid, pointIndex);
+    if (obstacle) {
+      this.obstacleFormService.setExistingObstacle(obstacle, pointIndex ?? 0);
     }
   }
 

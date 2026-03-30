@@ -1,6 +1,5 @@
-import { Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { CreatePlotParams } from './createPlot';
-import { DataObject } from './createPlotDataObject';
 
 /**
  * Data payload attached to a Plotly obstacle annotation for click event handling.
@@ -34,7 +33,7 @@ export const getObstacleClickPayload = (
   obstacles: Obstacle[],
   supports: { uuid: string }[]
 ): ObstacleClickPayload | null => {
-  if (!data || data.type !== 'obstacle' || data.obstacleUuid == null) {
+  if (data?.type !== 'obstacle' || data.obstacleUuid == null) {
     return null;
   }
   const obstacle = obstacles.find((o) => o.uuid === data.obstacleUuid);
@@ -70,7 +69,7 @@ export const appendExistingObstaclesWithFormObstacle = (
   existingObstacles: Obstacle[],
   formObstacle: Obstacle | null
 ): Obstacle[] => {
-  if (!formObstacle || !formObstacle.uuid) {
+  if (!formObstacle?.uuid) {
     return existingObstacles;
   }
   const existingIndex = existingObstacles.findIndex((obstacle) => obstacle.uuid === formObstacle.uuid);
@@ -81,78 +80,6 @@ export const appendExistingObstaclesWithFormObstacle = (
   return [...remaining, formObstacle];
 };
 
-interface Coordinates {
-  x: number;
-  y: number;
-  z: number;
-}
-
-const getBaseCoordinates = (supportObject: DataObject): Coordinates => {
-  const data = supportObject as Record<string, unknown>;
-  return {
-    x: (data['x'] as number[])?.[0] ?? 0,
-    y: (data['y'] as number[])?.[0] ?? 0,
-    z: (data['z'] as number[])?.[0] ?? 0
-  };
-};
-
-const isValidPosition = (position: Position3D): boolean =>
-  position.x !== null && position.y !== null && position.z !== null;
-
-const computeAnnotationCoords = (
-  base: Coordinates,
-  obstacle: Obstacle,
-  position: Position3D,
-  side: string,
-  is2d: boolean,
-  rightBase?: Coordinates,
-  supportFootAltitude?: number | null,
-  cableAttachmentAltitude?: number | null
-): Coordinates => {
-  const isRightReference = obstacle.referenceSupport === ReferenceSupport.RIGHT;
-
-  // Choose which support base to use for altitude and lateral positioning.
-  // When the obstacle references the RIGHT support and its coordinates are
-  // available, use the right support; otherwise fall back to the left (base).
-  const refBase = isRightReference && rightBase ? rightBase : base;
-
-  // Fallback altitude from the plotly support base coordinate when domain
-  // altitudes are unavailable (first point of the support data object).
-  const plotBaseAltitude = is2d ? refBase.y : refBase.z;
-
-  // Compute altitude offset based on altitudeType:
-  // - 'absolute': position.z is an NGF altitude, no offset
-  // - 'relative': position.z is a delta from the support foot altitude
-  // - 'relative_cable': position.z is a delta from the cable attachment altitude
-  let altitudeOffset: number;
-  if (obstacle.altitudeType === 'relative_cable') {
-    altitudeOffset = cableAttachmentAltitude ?? plotBaseAltitude;
-  } else if (obstacle.altitudeType === 'relative') {
-    altitudeOffset = supportFootAltitude ?? plotBaseAltitude;
-  } else {
-    altitudeOffset = 0;
-  }
-
-  const altitudeNgf = (position.z ?? 0) + altitudeOffset;
-
-  // Compute X coordinate based on view/side and reference support direction.
-  // In profile view, position.x = distance along span from the reference support.
-  // In face view, position.y = lateral distance from the line axis.
-  let x: number;
-  if (is2d && side === 'face') {
-    x = refBase.x + (position.y ?? 0);
-  } else if (isRightReference && rightBase) {
-    // Distance is measured from the right support; subtract to get plot position.
-    x = rightBase.x - (position.x ?? 0);
-  } else {
-    x = base.x + (position.x ?? 0);
-  }
-
-  const y = is2d ? altitudeNgf : refBase.y + (position.y ?? 0);
-  const z = altitudeNgf;
-  return { x, y, z };
-};
-
 const getHighlightColor = (
   obstacleUuid: string,
   positionIndex: number,
@@ -160,117 +87,68 @@ const getHighlightColor = (
   currentObstaclePointIndex: number
 ): string => (obstacleUuid === currentObstacleUuid && positionIndex === currentObstaclePointIndex ? 'red' : 'black');
 
-const createPositionAnnotations = (
-  obstacle: Obstacle,
-  positionIndex: number,
-  position: Position3D,
-  coords: Coordinates,
-  color: string
-): Partial<Plotly.Annotations>[] => {
-  const hovertext = `x : ${(position.x ?? 0).toFixed(2)}m<br />y : ${(position.y ?? 0).toFixed(2)}m<br />z : ${coords.z.toFixed(2)}m`;
-  const data = {
-    obstacleUuid: obstacle.uuid,
-    obstaclePositionIndex: positionIndex,
-    type: 'obstacle' as const
-  };
-
-  // Dot marker at the exact coordinates
-  const marker =
-    // z and data are non-standard Plotly annotation properties used for 3D rendering and event handling
-    {
-      ...BASE_ANNOTATION,
-      x: coords.x,
-      y: coords.y,
-      z: coords.z,
-      text: '●',
-      font: { ...BASE_ANNOTATION.font, color, size: 14 },
-      hovertext,
-      data
-    } as Partial<Plotly.Annotations>;
-
-  // Label just above the point (no arrow)
-  const label = {
-    ...BASE_ANNOTATION,
-    x: coords.x,
-    y: coords.y,
-    z: coords.z,
-    text: obstacle.name,
-    yshift: 12,
-    font: { ...BASE_ANNOTATION.font, color },
-    captureevents: false,
-    data
-  } as Partial<Plotly.Annotations>;
-
-  return [marker, label];
-};
-
 /**
- * Creates Plotly annotation objects for all valid obstacle positions in the current plot view.
- * Each annotation is positioned relative to its parent support and color-highlighted
- * when it matches the currently selected obstacle point.
+ * Creates Plotly annotation objects for all obstacle points returned by Python (`litData.obstacles`).
+ * Coordinates are absolute 3D values mapped directly to the plot axes using the same convention
+ * as distance traces: 3D → (x,y,z); 2D profile → (x→x, z→y); 2D face → (y→x, z→y).
  * @category Studio
- * @param plotParams - The plot parameters including obstacles, data objects, view, and selection state.
+ * @param plotParams - The plot parameters including litData, obstacles, view, side, and selection state.
  * @returns An array of partial Plotly annotation objects representing obstacles.
  */
 export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const {
-    obstacles,
-    data: dataObjects,
-    view,
-    side,
-    currentObstacleUuid,
-    currentObstaclePointIndex,
-    supports
-  } = plotParams;
+  const { litData, obstacles, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
   const is2d = view === '2d';
 
-  // Get all support objects (including the last one, needed as right-side reference)
-  const allSupportObjects = dataObjects.filter((dataObject) => dataObject.name === 'supports');
-  // Exclude the last support — it should not own obstacles (left-support list)
-  const leftSupportObjects = allSupportObjects.slice(0, -1);
+  if (!litData?.obstacles?.length) {
+    return [];
+  }
 
-  const supportByUuid = new Map(leftSupportObjects.map((s) => [s.supportUuid, s]));
+  return litData.obstacles.flatMap((litObstacle) => {
+    // Match to a form obstacle by name to resolve its UUID for click event handling
+    const formObstacle = obstacles.find((o) => o.name === litObstacle.name);
+    const obstacleUuid = formObstacle?.uuid ?? litObstacle.name;
+    const obstacleName = formObstacle?.name ?? litObstacle.name;
 
-  // Build a map of domain supports by UUID for altitude lookup
-  const domainSupportByUuid = new Map((supports ?? []).map((s) => [s.uuid, s]));
+    return litObstacle.points.flatMap(([cx, cy, cz], pointIndex) => {
+      // Map absolute Python coords [x, y, z] to Plotly axes
+      const px = is2d && side === 'face' ? cy : cx;
+      const py = is2d ? cz : cy;
+      const pz = cz;
 
-  const relevantObstacles = obstacles.filter((o) => supportByUuid.has(o.supportUuid));
+      const color = getHighlightColor(obstacleUuid, pointIndex, currentObstacleUuid, currentObstaclePointIndex);
+      const annotationData = {
+        obstacleUuid,
+        obstaclePositionIndex: pointIndex,
+        type: 'obstacle' as const
+      };
+      const hovertext = `x: ${cx.toFixed(2)}, y: ${cy.toFixed(2)}, alt.: ${cz.toFixed(2)}m`;
 
-  return relevantObstacles.flatMap((obstacle) => {
-    const supportObject = supportByUuid.get(obstacle.supportUuid);
-    if (!supportObject) return [];
+      // Dot marker — z and data are non-standard Plotly properties for 3D and click handling
+      const marker = {
+        ...BASE_ANNOTATION,
+        x: px,
+        y: py,
+        z: pz,
+        text: '●',
+        font: { ...BASE_ANNOTATION.font, color, size: 14 },
+        hovertext,
+        data: annotationData
+      } as Partial<Plotly.Annotations>;
 
-    const base = getBaseCoordinates(supportObject);
+      // Label just above the point
+      const label = {
+        ...BASE_ANNOTATION,
+        x: px,
+        y: py,
+        z: pz,
+        text: obstacleName,
+        yshift: 12,
+        font: { ...BASE_ANNOTATION.font, color },
+        captureevents: false,
+        data: annotationData
+      } as Partial<Plotly.Annotations>;
 
-    // Resolve the right (next) support of this span so RIGHT-referenced
-    // obstacles can use its altitude and position as the reference point.
-    const leftIndex = allSupportObjects.indexOf(supportObject);
-    const rightSupportObject =
-      leftIndex >= 0 && leftIndex + 1 < allSupportObjects.length ? allSupportObjects[leftIndex + 1] : undefined;
-    const rightBase = rightSupportObject ? getBaseCoordinates(rightSupportObject) : undefined;
-
-    // Resolve domain support for the reference support (left or right)
-    const isRightRef = obstacle.referenceSupport === ReferenceSupport.RIGHT;
-    const refSupportUuid =
-      isRightRef && rightSupportObject?.supportUuid ? rightSupportObject.supportUuid : obstacle.supportUuid;
-    const domainSupport = domainSupportByUuid.get(refSupportUuid);
-    const supportFootAltitude = domainSupport?.supportFootAltitude ?? null;
-    const cableAttachmentAltitude = domainSupport?.attachmentHeight ?? null;
-
-    return obstacle.positions.flatMap((position, index) => {
-      if (!isValidPosition(position)) return [];
-      const coords = computeAnnotationCoords(
-        base,
-        obstacle,
-        position,
-        side,
-        is2d,
-        rightBase,
-        supportFootAltitude,
-        cableAttachmentAltitude
-      );
-      const color = getHighlightColor(obstacle.uuid, index, currentObstacleUuid, currentObstaclePointIndex);
-      return createPositionAnnotations(obstacle, index, position, coords, color);
+      return [marker, label];
     });
   });
 };

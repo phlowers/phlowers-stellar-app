@@ -838,31 +838,6 @@
         <source>Base temperature</source>
       </segment>
     </unit>
-    <unit id="2143129387317692084">
-      <segment>
-        <source>Horizontal (m)</source>
-      </segment>
-    </unit>
-    <unit id="2205679024859102357">
-      <segment>
-        <source>Parameter (m)</source>
-      </segment>
-    </unit>
-    <unit id="3494570942698291859">
-      <segment>
-        <source>Oblique (m)</source>
-      </segment>
-    </unit>
-    <unit id="5909128736797701112">
-      <segment>
-        <source>Work load %</source>
-      </segment>
-    </unit>
-    <unit id="6560642783363072934">
-      <segment>
-        <source>Vertical (m)</source>
-      </segment>
-    </unit>
     <unit id="3854993654974680287">
       <segment>
         <source>Support {first} to {last} of {totalRecords}</source>
@@ -2943,6 +2918,41 @@
     <unit id="7413830724399618712">
       <segment>
         <source>Relative to cable attachment</source>
+      </segment>
+    </unit>
+    <unit id="1390016399255311535">
+      <segment>
+        <source>select an obstacle&apos;s point</source>
+      </segment>
+    </unit>
+    <unit id="586523524817836245">
+      <segment>
+        <source>Point <ph id="0" equiv="PH" disp="index + 1"/></source>
+      </segment>
+    </unit>
+    <unit id="6421460271971606186">
+      <segment>
+        <source>Zoom</source>
+      </segment>
+    </unit>
+    <unit id="6650741004975354715">
+      <segment>
+        <source>select an obstacle</source>
+      </segment>
+    </unit>
+    <unit id="6819720842118170063">
+      <segment>
+        <source>x:</source>
+      </segment>
+    </unit>
+    <unit id="7299873402477300128">
+      <segment>
+        <source>z:</source>
+      </segment>
+    </unit>
+    <unit id="971451359136104256">
+      <segment>
+        <source>y:</source>
       </segment>
     </unit>
   </file>

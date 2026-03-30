@@ -6,7 +6,6 @@ import { HeaderComponent } from './header.component';
 import { Section } from '@shared/domain';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { createTestMeasureData } from '../../helpers';
 import { PlotService } from '@services/plot/plot.service';
 import { Support } from '@shared/domain';
@@ -23,7 +22,6 @@ describe('HeaderComponent', () => {
   let fixture: ComponentFixture<HeaderComponent>;
 
   const mockMeasureData: FieldMeasure = createTestMeasureData();
-  const mockSpanOptions: SelectOption[] = SPAN_OPTIONS;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -43,7 +41,6 @@ describe('HeaderComponent', () => {
   describe('Component Creation', () => {
     it('should create', () => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       expect(component).toBeTruthy();
     });
 
@@ -77,7 +74,6 @@ describe('HeaderComponent', () => {
   describe('Header Info Display', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -133,7 +129,6 @@ describe('HeaderComponent', () => {
   describe('Location Fields Display', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -201,7 +196,6 @@ describe('HeaderComponent', () => {
   describe('Field Change Events', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -261,7 +255,6 @@ describe('HeaderComponent', () => {
   describe('Span Change Events', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -319,7 +312,6 @@ describe('HeaderComponent', () => {
       // Set measure data without a span
       const measureDataWithoutSpan = { ...mockMeasureData, span: null };
       newFixture.componentRef.setInput('measureData', measureDataWithoutSpan);
-      newFixture.componentRef.setInput('spanOptions', mockSpanOptions);
       newFixture.detectChanges();
 
       // Should have emitted fieldChange with span set to first span [0, 1]
@@ -449,7 +441,6 @@ describe('HeaderComponent', () => {
     beforeEach(() => {
       plotService = TestBed.inject(PlotService);
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -600,7 +591,6 @@ describe('HeaderComponent', () => {
   describe('Grid Layout', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -631,7 +621,6 @@ describe('HeaderComponent', () => {
       };
 
       fixture.componentRef.setInput('measureData', dataWithNulls);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
 
       expect(fixture.nativeElement).toBeTruthy();
@@ -639,7 +628,6 @@ describe('HeaderComponent', () => {
 
     it('should handle empty span options array', () => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', []);
       fixture.detectChanges();
 
       const spanSelect = fixture.nativeElement.querySelector('#portee');
@@ -655,7 +643,6 @@ describe('HeaderComponent', () => {
       };
 
       fixture.componentRef.setInput('measureData', dataWithZeros);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
 
       const element = fixture.nativeElement;
@@ -702,7 +689,6 @@ describe('HeaderComponent', () => {
   describe('Label Attributes', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -726,7 +712,6 @@ describe('HeaderComponent', () => {
   describe('Definition List Structure', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 

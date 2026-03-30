@@ -1,12 +1,14 @@
 import Plotly, { Camera, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
-import { Side, View } from '@shared/types/plot.types';
-import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { AxesNorms, Side, View } from '@shared/types/plot.types';
+import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { SpanLoad } from '@shared/domain';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { DataObject } from './createPlotDataObject';
+import { createDistanceVisuals } from './createDistanceTraces';
 import { createObstaclesAnnotations } from './obstacles';
 import { Support } from '@shared/domain/models/support.model';
+import { PLOT_AXIS_CONFIG } from './plot.constants';
 
 /**
  * Parameters required to create or update a Plotly section plot.
@@ -42,7 +44,11 @@ export interface CreatePlotParams {
   /** Domain support models for altitude lookups. */
   supports?: Support[];
   /** Normalization factors for the axes and Plotly aspect mode. */
-  axesNorms?: { x: number; y: number; z: number; aspectMode: string };
+  axesNorms?: AxesNorms;
+  /** Distance data from Python calculation for drawing distance lines. */
+  distances: Distance[];
+  /** Which distance type is currently selected for visualization. */
+  distanceType: 'oblique' | 'vertical' | 'horizontal' | null;
 }
 
 const normalCamera = () => ({
@@ -63,13 +69,10 @@ const normalCamera = () => ({
   }
 });
 
-const axis = {
-  backgroundcolor: 'gainsboro',
-  gridcolor: 'dimgray',
-  showbackground: true
-};
-
-const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => {
+const createScene = (
+  plotParams: CreatePlotParams,
+  distanceAnnotations: Partial<Plotly.Annotations>[]
+): Partial<Layout['scene']> => {
   const baseCamera = plotParams.camera ?? normalCamera();
   const y = Math.abs(baseCamera.eye?.y || 0);
   const camera: Partial<Camera> = {
@@ -87,15 +90,19 @@ const createScene = (plotParams: CreatePlotParams): Partial<Layout['scene']> => 
       )
         ? (plotParams.axesNorms.aspectMode as 'auto' | 'data' | 'cube' | 'manual')
         : 'manual',
-    xaxis: axis,
-    yaxis: axis,
-    zaxis: axis,
+    xaxis: PLOT_AXIS_CONFIG,
+    yaxis: PLOT_AXIS_CONFIG,
+    zaxis: PLOT_AXIS_CONFIG,
     aspectratio: {
       x: plotParams.axesNorms?.x ?? 3,
       y: plotParams.axesNorms?.y ?? 0.2,
       z: plotParams.axesNorms?.z ?? 0.5
     },
-    annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)],
+    annotations: [
+      ...createLoadAnnotations(plotParams),
+      ...createObstaclesAnnotations(plotParams),
+      ...distanceAnnotations
+    ],
     camera
   };
 };
@@ -116,7 +123,10 @@ const config = {
   ] as ModeBarDefaultButtons[]
 };
 
-const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
+const layout3d = (
+  plotParams: CreatePlotParams,
+  distanceAnnotations: Partial<Plotly.Annotations>[]
+): Partial<Layout> => ({
   autosize: true,
   showlegend: false,
   margin: {
@@ -125,10 +135,13 @@ const layout3d = (plotParams: CreatePlotParams): Partial<Layout> => ({
     t: 0,
     b: 0
   },
-  scene: createScene(plotParams)
+  scene: createScene(plotParams, distanceAnnotations)
 });
 
-const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams) => {
+const layout2d = (
+  plotParams: CreatePlotParams,
+  distanceAnnotations: Partial<Plotly.Annotations>[]
+): Partial<Layout> => {
   let scaleratio: number | undefined;
   if (plotParams.axesNorms) {
     if (plotParams.side === 'face') {
@@ -151,21 +164,25 @@ const layout2d: (plotParams: CreatePlotParams) => Partial<Layout> = (plotParams)
       b: 20
     },
     xaxis: {
-      ...axis,
+      ...PLOT_AXIS_CONFIG,
       autorange: plotParams.invert ? 'reversed' : true,
       showticklabels: true,
       showgrid: true,
       showline: true
     },
     yaxis: {
-      ...axis,
+      ...PLOT_AXIS_CONFIG,
       showticklabels: true,
       showgrid: true,
       showline: true,
       scaleratio,
-      scaleanchor: scaleratio !== undefined ? 'x' : undefined
+      scaleanchor: scaleratio === undefined ? undefined : 'x'
     },
-    annotations: [...createLoadAnnotations(plotParams), ...createObstaclesAnnotations(plotParams)]
+    annotations: [
+      ...createLoadAnnotations(plotParams),
+      ...createObstaclesAnnotations(plotParams),
+      ...distanceAnnotations
+    ]
   };
 };
 
@@ -183,9 +200,12 @@ export const createPlot = (plotParams: CreatePlotParams) => {
     console.warn(`Plot element not found: ${plotParams.plotId}`);
     return;
   }
-  const baseLayout = plotParams.view === '3d' ? layout3d(plotParams) : layout2d(plotParams);
+  const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(plotParams);
+  const baseLayout =
+    plotParams.view === '3d' ? layout3d(plotParams, distanceAnnotations) : layout2d(plotParams, distanceAnnotations);
+  const allData = [...plotParams.data, ...distanceTraces];
 
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does
-  return Plotly.react(plotParams.plotId, plotParams.data, baseLayout, config);
+  return Plotly.react(plotParams.plotId, allData, baseLayout, config);
 };

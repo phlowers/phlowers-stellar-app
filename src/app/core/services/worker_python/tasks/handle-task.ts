@@ -65,6 +65,14 @@ const tasks: Record<
   [Task.getConfig]: {
     function: 'get_config',
     externalPackages: []
+  },
+  [Task.addObstacle]: {
+    function: 'add_obstacles',
+    externalPackages: []
+  },
+  [Task.calculateObstaclesDistances]: {
+    function: 'calculate_obstacles_distances',
+    externalPackages: []
   }
 };
 

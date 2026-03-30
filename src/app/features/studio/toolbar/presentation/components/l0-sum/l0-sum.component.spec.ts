@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { SortEvent } from 'primeng/api';
+import { TableModule } from 'primeng/table';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { L0SumComponent } from './l0-sum.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -18,7 +21,9 @@ class MockButtonComponent {}
   standalone: true,
   template: ''
 })
-class MockIconComponent {}
+class MockIconComponent {
+  icon = input<string>();
+}
 
 describe('L0SumComponent', () => {
   let component: L0SumComponent;
@@ -53,7 +58,7 @@ describe('L0SumComponent', () => {
     })
       .overrideComponent(L0SumComponent, {
         set: {
-          imports: [MockButtonComponent, MockIconComponent]
+          imports: [CommonModule, TableModule, ProgressSpinnerModule, MockButtonComponent, MockIconComponent]
         }
       })
       .compileComponents();

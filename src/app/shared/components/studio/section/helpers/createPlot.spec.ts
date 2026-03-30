@@ -100,7 +100,9 @@ describe('createPlot', () => {
     obstacles: [],
     currentObstacleUuid: null,
     currentObstaclePointIndex: 0,
-    supports: []
+    supports: [],
+    distances: [],
+    distanceType: 'oblique' as const
   };
 
   describe('basic functionality', () => {

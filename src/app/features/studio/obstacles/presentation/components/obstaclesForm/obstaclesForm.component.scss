@@ -28,9 +28,6 @@
     @apply flex flex-row justify-between items-center;
   }
 
-  // obstacles-form__divided-line
-  // obstacles-form__divided-line--three
-
   &__grid-2-cols {
     @apply grid grid-cols-2;
     grid-template-areas:
@@ -54,8 +51,11 @@
 
   &__points {
     @apply flex flex-col gap-3 min-h-0 overflow-y-auto overflow-x-hidden;
+  }
 
-    &__point {
+  // at root to keep SCSS reading natural without adding unnecessary nesting levels or specificity.
+  @at-root {
+    .obstacles-item {
       %_content-hover-select {
         @apply relative;
         z-index: 1;
@@ -94,15 +94,15 @@
 
       &__header {
         @apply flex flex-row justify-between items-center mb-1;
+      }
 
-        &__label {
-          @extend %text-xl-400;
-          margin: 0;
-        }
+      &__title {
+        @extend %text-xl-400;
+        margin: 0;
+      }
 
-        &__btn {
-          @extend %_content-hover-select;
-        }
+      &__erase-btn {
+        @extend %_content-hover-select;
       }
 
       &__form {
@@ -112,11 +112,11 @@
           'altPointInput distRefInput distAxisInput'
           'altPointError distRefError distAxisError';
         column-gap: 0.625rem;
+      }
 
-        &__label,
-        &__input {
-          @extend %_content-hover-select;
-        }
+      &__label,
+      &__input {
+        @extend %_content-hover-select;
       }
     }
   }

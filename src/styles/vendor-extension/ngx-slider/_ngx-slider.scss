@@ -1,3 +1,5 @@
+@use 'abstract.extracts' as app;
+
 $_unselected-color: var(--primary-200);
 $_selected-color: var(--main-primary);
 
@@ -40,9 +42,25 @@ $_selected-color: var(--main-primary);
       background-color: var(--grey-white);
     }
 
-    &.ngx-slider-pointer-max::after {
-      transform: rotate(180deg);
-      left: -0.3125rem;
+    &.ngx-slider-active::before {
+      @extend %focus-state;
+      @apply absolute rounded-full;
+      content: '';
+      top: 0.75rem;
+      left: 0rem;
+      width: 1rem;
+      aspect-ratio: 1;
+    }
+
+    &.ngx-slider-pointer-max {
+      &::before {
+        left: -0.3125rem;
+      }
+
+      &::after {
+        transform: rotate(180deg);
+        left: -0.3125rem;
+      }
     }
   }
 

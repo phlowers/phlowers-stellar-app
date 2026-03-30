@@ -13,6 +13,13 @@ export interface ObstacleFormData {
   positions: Position3D[];
 }
 
+/** Typed reactive form group for a single 3D position. */
+export type PositionFormGroup = FormGroup<{
+  x: FormControl<number | null>;
+  y: FormControl<number | null>;
+  z: FormControl<number | null>;
+}>;
+
 /** Typed reactive form controls for the obstacle form. */
 export interface ObstacleFormGroupData {
   uuid: FormControl<string | null>;
@@ -22,11 +29,5 @@ export interface ObstacleFormGroupData {
   referenceSupport: FormControl<ReferenceSupport | null>;
   altitudeType: FormControl<string | null>;
   lateralDistanceType: FormControl<LateralDistanceType | null>;
-  positions: FormArray<
-    FormGroup<{
-      x: FormControl<number | null>;
-      y: FormControl<number | null>;
-      z: FormControl<number | null>;
-    }>
-  >;
+  positions: FormArray<PositionFormGroup>;
 }
