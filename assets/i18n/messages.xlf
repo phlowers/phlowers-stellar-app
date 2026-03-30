@@ -1248,11 +1248,6 @@
         <source>Angle balancement:</source>
       </segment>
     </unit>
-    <unit id="8617343657467703647">
-      <segment>
-        <source>Cable slope acc.:</source>
-      </segment>
-    </unit>
     <unit id="7700218431791238836">
       <segment>
         <source>Span length:</source>
@@ -2925,6 +2920,16 @@
         <source> The charge case name must be unique. </source>
       </segment>
     </unit>
+    <unit id="6003852886679002771">
+      <segment>
+        <source>Cable slope left att.:</source>
+      </segment>
+    </unit>
+    <unit id="2889125383687756313">
+      <segment>
+        <source>Cable slope right att.:</source>
+      </segment>
+    </unit>
     <unit id="1215291740212922013">
       <segment>
         <source>Previous support</source>
@@ -2943,6 +2948,11 @@
     <unit id="7413830724399618712">
       <segment>
         <source>Relative to cable attachment</source>
+      </segment>
+    </unit>
+    <unit id="6421460271971606186">
+      <segment>
+        <source>Zoom</source>
       </segment>
     </unit>
   </file>

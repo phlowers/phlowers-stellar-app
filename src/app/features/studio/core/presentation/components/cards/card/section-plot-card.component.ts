@@ -190,11 +190,6 @@ export class SectionPlotCardComponent {
             label: $localize`Angle balancement:`,
             value: this.getFormatedNumberIndex(loadAngle),
             unit: '°'
-          },
-          {
-            label: $localize`Cable slope acc.:`,
-            value: this.getFormatedNumberIndex(loadAngle),
-            unit: '°'
           }
         ]
       }
@@ -247,6 +242,8 @@ export class SectionPlotCardComponent {
     const arcLength = litData?.arc_length;
     const th = litData?.T_h;
     const tensionInf = litData?.tension_inf;
+    const slopeLeft = litData?.slope_left;
+    const slopeRight = litData?.slope_right;
     return [
       { label: $localize`Arrow F1:`, value: this.getFormatedNumberIndex(sag), unit: 'm' },
       { label: $localize`Arrow F2:`, value: this.getFormatedNumberIndex(sagS2), unit: 'm' },
@@ -269,6 +266,16 @@ export class SectionPlotCardComponent {
         label: $localize`Inf tension  acc.:`,
         value: this.getFormatedNumberIndex(tensionInf),
         unit: 'daN'
+      },
+      {
+        label: $localize`Cable slope left att.:`,
+        value: this.getFormatedNumberIndex(slopeLeft),
+        unit: '°'
+      },
+      {
+        label: $localize`Cable slope right att.:`,
+        value: this.getFormatedNumberIndex(slopeRight),
+        unit: '°'
       }
     ];
   });

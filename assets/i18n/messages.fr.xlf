@@ -2033,12 +2033,6 @@
         <target>Déplacement chaîne acc.</target>
       </segment>
     </unit>
-    <unit id="8617343657467703647">
-      <segment state="initial">
-        <source>Cable slope acc.:</source>
-        <target>Pente du câble acc. :</target>
-      </segment>
-    </unit>
     <unit id="7700218431791238836">
       <segment state="initial">
         <source>Span length:</source>
@@ -3543,6 +3537,24 @@
         <target>Menu des actions d&apos;étude</target>
       </segment>
     </unit>
+    <unit id="6003852886679002771">
+      <segment state="initial">
+        <source>Cable slope left att.:</source>
+        <target>Pente du câble acc. gauche:</target>
+      </segment>
+    </unit>
+    <unit id="2889125383687756313">
+      <segment state="initial">
+        <source>Cable slope right att.:</source>
+        <target>Pente du câble acc. droit:</target>
+      </segment>
+    </unit>
+    <unit id="7000098318478933999">
+      <segment state="initial">
+        <source>Study actions menu</source>
+        <target>Study actions menu</target>
+      </segment>
+    </unit>
     <unit id="1215291740212922013">
       <segment state="initial">
         <source>Previous support</source>
@@ -3559,6 +3571,12 @@
       <segment state="initial">
         <source>Relative to cable attachment</source>
         <target>Relative accr. câble</target>
+      </segment>
+    </unit>
+    <unit id="6421460271971606186">
+      <segment state="initial">
+        <source>Zoom</source>
+        <target>Zoom</target>
       </segment>
     </unit>
   </file>
