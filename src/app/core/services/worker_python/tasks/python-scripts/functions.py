@@ -239,7 +239,7 @@ def apply_span_loads(span_loads: list):
     load_position_meters, load_mass = parse_span_loads(span_loads)
     if (load_position_meters != 0).any() and (load_mass != 0).any():
         engine.add_loads(load_position_meters, load_mass)
-        plt_line.reset(engine)
+        plt_line = plt_line.generate_reset()
 
 
 def get_section_middle_span(start_support: int, end_support: int):
@@ -375,7 +375,7 @@ def init_section(js_inputs: dict):
     )
 
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
-    plt_line = PlotEngine(engine)
+    plt_line = PlotEngine.builder_from_balance_engine(engine)
     engine.solve_adjustment()
     engine.solve_change_state()
 
@@ -390,7 +390,7 @@ def init_section(js_inputs: dict):
     base_section.angles_sense = "clockwise"
     base_engine = BalanceEngine(
         cable_array=cable_array, section_array=base_section)
-    base_plt_line = PlotEngine(base_engine)
+    base_plt_line = PlotEngine.builder_from_balance_engine(base_engine)
     base_engine.solve_adjustment()
     base_engine.solve_change_state()
 
