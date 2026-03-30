@@ -5,30 +5,34 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
-import numpy as np
-from mechaphlowers import BalanceEngine, PlotEngine, SupportShape, units
-from stellar_engine.entities.inputs import ClimateCharge
-
 # ????
 import logging
 
+import numpy as np
+from mechaphlowers import BalanceEngine, PlotEngine, units
+
+from stellar_engine.entities.inputs import ClimateCharge
 from stellar_engine.entities.output import get_coordinates
+
 logger = logging.getLogger("mechaphlowers")
 # Set logger level to WARNING so info messages are shown
 logger.setLevel(logging.WARNING)
 
-def apply_span_loads(span_loads: list):
+
+def apply_span_loads(
+    engine: BalanceEngine, plot_engine: PlotEngine, span_loads: list
+):
     """Parse span loads and add them to the engine if any are non-zero."""
-    global plt_line, engine
-    load_position_meters, load_mass = parse_span_loads(span_loads)
+    load_position_meters, load_mass = parse_span_loads(engine, span_loads)
     if (load_position_meters != 0).any() and (load_mass != 0).any():
         engine.add_loads(load_position_meters, load_mass)
-        plt_line = plt_line.generate_reset()
+        plot_engine = plot_engine.generate_reset()
 
 
-def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
+def parse_span_loads(
+    engine: BalanceEngine, span_loads: list
+) -> tuple[np.ndarray, np.ndarray]:
     """Convert raw span load dicts into position and mass arrays."""
-    global engine
     load_position_list = []
     load_weight_list_daN = []
     span_lengths = engine.section_array.data["span_length"].to_numpy()
@@ -39,7 +43,9 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
             elif span['referenceSupport'] == 'RIGHT':
                 if 0 <= index < len(span_lengths):
                     span_length = span_lengths[index]
-                    load_position_list.append(span_length - span["loadPosition"])
+                    load_position_list.append(
+                        span_length - span["loadPosition"]
+                    )
                 else:
                     logging.warning(
                         "Span load index %s is out of bounds for span_length array (size %s). "
@@ -68,9 +74,13 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
     return np.array(load_position_list), np.array(load_mass_kg)
 
 
-
-def change_state(change_state_inputs: dict, engine: BalanceEngine, plot_engine: PlotEngine, base_engine: BalanceEngine, base_plt_line: PlotEngine):
-
+def change_state(
+    change_state_inputs: dict,
+    engine: BalanceEngine,
+    plot_engine: PlotEngine,
+    base_engine: BalanceEngine,
+    base_plt_line: PlotEngine,
+):
     # logger.debug("python_inputs: ", str(js_inputs))
     # print("change_state_inputs", change_state_inputs)
     climate = ClimateCharge(**change_state_inputs["climate"])
@@ -80,7 +90,7 @@ def change_state(change_state_inputs: dict, engine: BalanceEngine, plot_engine: 
     cable_temperature = climate.cableTemperature
     ice_thickness = climate.iceThickness / 100  # in meters in the engine
 
-    apply_span_loads(change_state_inputs["spanLoads"])
+    apply_span_loads(engine, plot_engine, change_state_inputs["spanLoads"])
 
     engine.solve_adjustment()
     engine.solve_change_state(
@@ -90,9 +100,16 @@ def change_state(change_state_inputs: dict, engine: BalanceEngine, plot_engine: 
         wind_sense="clockwise",
     )
     section_length = len(engine.section_array.data)
-    base_section_length = len(
-        base_engine.section_array.data) if base_engine else section_length
+    base_section_length = (
+        len(base_engine.section_array.data) if base_engine else section_length
+    )
     return {
-        "current": get_coordinates(engine, plot_engine, False, 0, section_length - 1),
-        "base": get_coordinates(engine, base_plt_line, False, 0, base_section_length - 1) if base_plt_line else None
+        "current": get_coordinates(
+            engine, plot_engine, False, 0, section_length - 1
+        ),
+        "base": get_coordinates(
+            engine, base_plt_line, False, 0, base_section_length - 1
+        )
+        if base_plt_line
+        else None,
     }

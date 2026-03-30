@@ -9,7 +9,7 @@ import numpy as np
 from mechaphlowers import SupportShape
 
 
-def get_support_coordinates(inputs): # pyodide.ffi
+def get_support_coordinates(inputs):  # pyodide.ffi
     coordinates = inputs["coordinates"]
     shape_values = np.array(coordinates)
     shape_set_number = np.array(inputs["attachmentSetNumbers"])

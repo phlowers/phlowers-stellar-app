@@ -34,4 +34,3 @@ def calculate_guying(inputs: dict, engine: BalanceEngine):
         "chargeLIfPulley": guying_results.longitudinal_force.to("daN").m,
         "chargeHUnderConsole": 0,
     }
-
