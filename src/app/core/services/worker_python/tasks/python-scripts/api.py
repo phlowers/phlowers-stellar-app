@@ -60,9 +60,9 @@ def set_resolution(js_inputs):
     mph.options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
 
-def change_state(js_input):
-    change_state_inputs = js_to_python(js_inputs)  # type: ignore
-    return run_solver.change_state(change_state_inputs, engine, plt_line, base_engine, base_plt_line)
+# def change_state(js_input):
+#     change_state_inputs = js_to_python(js_inputs)  # type: ignore
+#     return run_solver.change_state(change_state_inputs, engine, plt_line, base_engine, base_plt_line)
 
 def refresh_projection(js_inputs: dict):
     global plt_line, base_plt_line
