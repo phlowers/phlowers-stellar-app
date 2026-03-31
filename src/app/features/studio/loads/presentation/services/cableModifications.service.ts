@@ -25,7 +25,7 @@ export class CableModificationsService {
    * This is a placeholder: adapt if you avez une logique de cache ou de persistance locale.
    * @param spanUuid UUID of the span whose form data should be cleared
    */
-  clearPersistedFormData(spanUuid: string): void {
+  clearPersistedFormData(_spanUuid: string): void {
     // If you have a cache or local storage for form data, clear it here.
     // Example for localStorage:
     // localStorage.removeItem(`cable-span-form-${spanUuid}`);

@@ -40,7 +40,7 @@ import { LoadFormsService } from '@features/studio/loads/presentation/services/l
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
 import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
-import { CableSpanComponent } from '@features/studio/loads/presentation/components/cable-span/cable-span';
+import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
 
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
@@ -57,7 +57,7 @@ import { CableSpanComponent } from '@features/studio/loads/presentation/componen
     ButtonComponent,
     IconComponent,
     StudioTopToolbarComponent,
-    CableSpanComponent,
+    CableLengthChangeComponent,
     StudioMenuBarComponent,
     SectionPlotCardsComponent,
     SideTabsComponent,

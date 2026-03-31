@@ -8,7 +8,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { signal } from '@angular/core';
-import { CableSpanComponent } from './cable-span';
+import { CableLengthChangeComponent } from './cable-length-change';
 import { PlotService } from '@services/plot/plot.service';
 import { CableModificationsService } from '../../services/cableModifications.service';
 import { Section } from '@shared/domain';
@@ -32,9 +32,9 @@ const mockSection: Partial<Section> = {
   selected_cable_modification_uuid: null
 };
 
-describe('CableSpanComponent', () => {
-  let component: CableSpanComponent;
-  let fixture: ComponentFixture<CableSpanComponent>;
+describe('CableLengthChangeComponent', () => {
+  let component: CableLengthChangeComponent;
+  let fixture: ComponentFixture<CableLengthChangeComponent>;
   let mockPlotService: vi.Mocked<PlotService>;
   let mockCableModificationsService: vi.Mocked<CableModificationsService>;
 
@@ -68,7 +68,7 @@ describe('CableSpanComponent', () => {
     } as unknown as vi.Mocked<CableModificationsService>;
 
     await TestBed.configureTestingModule({
-      imports: [CableSpanComponent],
+      imports: [CableLengthChangeComponent],
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
@@ -76,7 +76,7 @@ describe('CableSpanComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CableSpanComponent);
+    fixture = TestBed.createComponent(CableLengthChangeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -94,58 +94,58 @@ describe('CableSpanComponent', () => {
   // ---------------------------------------------------------------------------
   describe('HTML rendering - form structure', () => {
     it('should render the form', () => {
-      const form = getByTestId('cable-span-form');
+      const form = getByTestId('cable-length-change-form');
       expect(form).toBeTruthy();
       expect(form?.tagName).toBe('FORM');
     });
 
     it('should render the reset button', () => {
-      const btn = getByTestId('cable-span-reset');
+      const btn = getByTestId('cable-length-change-reset');
       expect(btn).toBeTruthy();
       expect(btn?.tagName).toBe('BUTTON');
     });
 
     it('should render the span select', () => {
-      const select = getByTestId('cable-span-scope');
+      const select = getByTestId('cable-length-change-scope');
       expect(select).toBeTruthy();
     });
 
     it('should render the support ref select', () => {
-      const select = getByTestId('cable-span-support-ref');
+      const select = getByTestId('cable-length-change-support-ref');
       expect(select).toBeTruthy();
     });
 
     it('should render the width cable select', () => {
-      const select = getByTestId('cable-span-width-cable');
+      const select = getByTestId('cable-length-change-width-cable');
       expect(select).toBeTruthy();
     });
 
     it('should render the size cable input', () => {
-      const input = getByTestId('cable-span-size-cable') as HTMLInputElement;
+      const input = getByTestId('cable-length-change-size-cable') as HTMLInputElement;
       expect(input).toBeTruthy();
       expect(input?.tagName).toBe('INPUT');
     });
 
     it('should render the distance to support input', () => {
-      const input = getByTestId('cable-span-distance-support-ref') as HTMLInputElement;
+      const input = getByTestId('cable-length-change-distance-support-ref') as HTMLInputElement;
       expect(input).toBeTruthy();
       expect(input?.tagName).toBe('INPUT');
     });
 
     it('should render the save button', () => {
-      const btn = getByTestId('cable-span-save');
+      const btn = getByTestId('cable-length-change-save');
       expect(btn).toBeTruthy();
       expect(btn?.tagName).toBe('BUTTON');
     });
 
     it('should render the delete button', () => {
-      const btn = getByTestId('cable-span-delete');
+      const btn = getByTestId('cable-length-change-delete');
       expect(btn).toBeTruthy();
       expect(btn?.tagName).toBe('BUTTON');
     });
 
     it('should render the calculate button', () => {
-      const btn = getByTestId('cable-span-calculate');
+      const btn = getByTestId('cable-length-change-calculate');
       expect(btn).toBeTruthy();
       expect(btn?.tagName).toBe('BUTTON');
     });
@@ -156,7 +156,7 @@ describe('CableSpanComponent', () => {
   // ---------------------------------------------------------------------------
   describe('HTML rendering - button states', () => {
     it('should disable save button when form is invalid', () => {
-      const btn = getByTestId('cable-span-save') as HTMLButtonElement;
+      const btn = getByTestId('cable-length-change-save') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 
@@ -165,7 +165,7 @@ describe('CableSpanComponent', () => {
       component.form.controls.scope.setValue(null);
       component.form.controls.supportRef.setValue(null);
       fixture.detectChanges();
-      const btn = getByTestId('cable-span-calculate') as HTMLButtonElement;
+      const btn = getByTestId('cable-length-change-calculate') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 
@@ -180,7 +180,7 @@ describe('CableSpanComponent', () => {
       component.form.controls.supportRef.setValue('LEFT');
       component.isDirtySinceLastSave.set(false);
       fixture.detectChanges();
-      const btn = getByTestId('cable-span-save') as HTMLButtonElement;
+      const btn = getByTestId('cable-length-change-save') as HTMLButtonElement;
       // Le bouton peut rester activé selon la logique actuelle
       expect([true, false]).toContain(btn.disabled);
     });
@@ -196,13 +196,13 @@ describe('CableSpanComponent', () => {
       component.form.controls.supportRef.setValue('LEFT');
       component.isDirtySinceLastSave.set(true);
       fixture.detectChanges();
-      const btn = getByTestId('cable-span-save') as HTMLButtonElement;
+      const btn = getByTestId('cable-length-change-save') as HTMLButtonElement;
       expect(btn.disabled).toBe(false);
     });
 
     it('should disable delete button when no modification is saved for the span', () => {
       fixture.detectChanges();
-      const btn = getByTestId('cable-span-delete') as HTMLButtonElement;
+      const btn = getByTestId('cable-length-change-delete') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 
@@ -222,7 +222,7 @@ describe('CableSpanComponent', () => {
       } as unknown as Section);
       component.form.controls.scope.setValue('support-uuid-1');
       fixture.detectChanges();
-      const btn = getByTestId('cable-span-delete') as HTMLButtonElement;
+      const btn = getByTestId('cable-length-change-delete') as HTMLButtonElement;
       // Selon la logique actuelle, le bouton peut rester désactivé si d'autres conditions ne sont pas remplies
       // On accepte les deux cas pour éviter un faux négatif
       expect([true, false]).toContain(btn.disabled);
@@ -232,10 +232,10 @@ describe('CableSpanComponent', () => {
       component.isLoading.set(true);
       fixture.detectChanges();
 
-      const save = getByTestId('cable-span-save') as HTMLButtonElement;
-      const calculate = getByTestId('cable-span-calculate') as HTMLButtonElement;
-      const reset = getByTestId('cable-span-reset') as HTMLButtonElement;
-      const deleteBtn = getByTestId('cable-span-delete') as HTMLButtonElement;
+      const save = getByTestId('cable-length-change-save') as HTMLButtonElement;
+      const calculate = getByTestId('cable-length-change-calculate') as HTMLButtonElement;
+      const reset = getByTestId('cable-length-change-reset') as HTMLButtonElement;
+      const deleteBtn = getByTestId('cable-length-change-delete') as HTMLButtonElement;
 
       expect(save.disabled).toBe(true);
       expect(calculate.disabled).toBe(true);
@@ -249,25 +249,25 @@ describe('CableSpanComponent', () => {
   // ---------------------------------------------------------------------------
   describe('HTML rendering - accessibility', () => {
     it('should not set aria-busy when not loading', () => {
-      const form = getByTestId('cable-span-form');
+      const form = getByTestId('cable-length-change-form');
       expect(form?.getAttribute('aria-busy')).toBe('false');
     });
 
     it('should set aria-busy when loading', () => {
       component.isLoading.set(true);
       fixture.detectChanges();
-      const form = getByTestId('cable-span-form');
+      const form = getByTestId('cable-length-change-form');
       expect(form?.getAttribute('aria-busy')).toBe('true');
     });
 
     it('should not render the error block initially', () => {
-      expect(getByTestId('cable-span-error')).toBeNull();
+      expect(getByTestId('cable-length-change-error')).toBeNull();
     });
 
     it('should render the error block when error is set', () => {
       component.error.set('CALCULATION_ERROR');
       fixture.detectChanges();
-      const errorBlock = getByTestId('cable-span-error');
+      const errorBlock = getByTestId('cable-length-change-error');
       expect(errorBlock).toBeTruthy();
       expect(errorBlock?.getAttribute('role')).toBe('alert');
     });

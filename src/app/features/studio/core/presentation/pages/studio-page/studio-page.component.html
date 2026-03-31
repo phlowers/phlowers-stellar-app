@@ -178,7 +178,7 @@
             <p-tab value="0" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Climate condition</p-tab>
             <p-tab value="1" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Load / Marking</p-tab>
             <p-tab value="2" [disabled]="true" i18n>Cable manip. at support</p-tab>
-            <p-tab value="3" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Cable manip. at span</p-tab>
+            <p-tab value="3" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Cable length change</p-tab>
           </p-tablist>
 
           @if (!plotService.section()?.charges?.length) {
@@ -222,7 +222,7 @@
 
               <p-tabpanel value="3">
                 <p class="m-0">
-                  <app-cable-span></app-cable-span>
+                  <app-cable-length-change></app-cable-length-change>
                 </p>
               </p-tabpanel>
             </p-tabpanels>

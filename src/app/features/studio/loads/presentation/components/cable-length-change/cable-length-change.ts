@@ -9,11 +9,11 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { PlotService } from '@services/plot/plot.service';
-import { CableSpanFormControls, CableWidthType } from './cable-span.interfaces';
+import { CableLengthChangeFormControls, CableWidthType } from './cable-length-change.interfaces';
 import { CableModificationsService } from '../../services/cableModifications.service';
 
 @Component({
-  selector: 'app-cable-span',
+  selector: 'app-cable-length-change',
   imports: [
     ReactiveFormsModule,
     InputText,
@@ -23,12 +23,12 @@ import { CableModificationsService } from '../../services/cableModifications.ser
     ButtonComponent,
     IconComponent
   ],
-  templateUrl: './cable-span.html',
-  styleUrl: './cable-span.scss',
+  templateUrl: './cable-length-change.html',
+  styleUrl: './cable-length-change.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Component for configuring cable length modifications (shortening or lengthening) on a span. */
-export class CableSpanComponent {
+export class CableLengthChangeComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   private readonly cableModificationsService = inject(CableModificationsService);
@@ -38,7 +38,7 @@ export class CableSpanComponent {
   /** Whether the form has been modified since the last save (RG.LON-CAB.ENR-BTN.1). */
   readonly isDirtySinceLastSave = signal(false);
 
-  readonly form = this.fb.group<CableSpanFormControls>({
+  readonly form = this.fb.group<CableLengthChangeFormControls>({
     scope: new FormControl<string | null>(null, { validators: [Validators.required] }),
     supportRef: new FormControl<'LEFT' | 'RIGHT' | null>(
       { value: null, disabled: true },
