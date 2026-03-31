@@ -33,8 +33,8 @@
     padding: 0.5rem 1rem 0rem;
     grid-template-areas:
       'climate .'
-      'load-marking cable-length-change'
-      'cable-support-manip cable-span-manip';
+      'loadMarking cableLengthChange'
+      'cableSupportManip cableSpanManip';
   }
 
   .p-tab {
@@ -68,18 +68,18 @@
   }
 
   .load-marking {
-    grid-area: load-marking;
+    grid-area: loadMarking;
   }
 
   .cable-length {
-    grid-area: cable-length-change;
+    grid-area: cableLengthChange;
   }
 
   .cable-support {
-    grid-area: cable-support-manip;
+    grid-area: cableSupportManip;
   }
 
   .cable-span {
-    grid-area: cable-span-manip;
+    grid-area: cableSpanManip;
   }
 }
