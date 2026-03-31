@@ -12,6 +12,7 @@ import logging
 from importlib.metadata import version
 import sys
 import json
+
 RESOLUTION = 100
 # init a logger to print to stdout
 logger = logging.getLogger("mechaphlowers")
@@ -25,8 +26,9 @@ formatter = logging.Formatter(
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-print(f"mechaphlowers version: {version('mechaphlowers')}")
-
+logger.info(f"mechaphlowers version: {version('mechaphlowers')}")
+import stellar_engine
+logger.info(f"stellar_engine version: {version('stellar_engine')}")
 
 def init_config():
     mph.options.graphics.resolution = RESOLUTION
@@ -63,12 +65,6 @@ def set_log_level(js_inputs: dict):
     logger.setLevel(logging.DEBUG if log_level else logging.WARNING)
     return {"success": True}
 
-
-def set_resolution(js_inputs: dict):
-    python_inputs = js_to_python(js_inputs)
-    resolution = python_inputs["resolution"]
-    mph.options.graphics.resolution = resolution
-    return {"success": True, "resolution": resolution}
 
 
 def get_config():
@@ -265,12 +261,10 @@ def apply_span_loads(span_loads: list):
         # Clear any previously applied loads with a zero array of the right size
         n = engine.support_number
         load_position_meters, load_mass = np.zeros(n), np.zeros(n)
-        engine.add_loads(load_position_meters, load_mass)
-        plt_line.reset(engine)
-    load_position_meters, load_mass = parse_span_loads(span_loads)
-    if (load_position_meters != 0).any() and (load_mass != 0).any():
-        engine.add_loads(load_position_meters, load_mass)
-        plt_line.reset(engine)
+    else:
+        load_position_meters, load_mass = parse_span_loads(span_loads)
+    engine.add_loads(load_position_meters, load_mass)
+    plt_line.reset(engine)
 
 
 def get_section_middle_span(start_support: int, end_support: int):
@@ -458,84 +452,11 @@ def init_section(js_inputs: dict):
         "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
     }
 
-
-def refresh_projection(js_inputs: dict):
-    global plt_line, base_plt_line
+def set_resolution(js_inputs):
     python_inputs = js_to_python(js_inputs)
-    start_support = python_inputs["startSupport"]
-    end_support = python_inputs["endSupport"]
-    view = python_inputs["view"]
-    project = view == "2d"
-
-    current_coords = get_coordinates(
-        plt_line, project, start_support, end_support)
-    base_coords = get_coordinates(
-        base_plt_line, project, start_support, end_support) if base_plt_line else None
-
-    return {
-        "sectionOutput": {
-            "current": current_coords,
-            "base": base_coords
-        },
-        "distances" : []
-    }
-
-
-
-def get_support_coordinates(js_inputs: dict):
-    python_inputs = js_to_python(js_inputs)
-    coordinates = python_inputs["coordinates"]
-    shape_values = np.array(coordinates)
-    shape_set_number = np.array(python_inputs["attachmentSetNumbers"])
-
-    pyl_shape = SupportShape(
-        name="pyl",
-        xyz_arms=shape_values,
-        set_number=shape_set_number,
-    )
-    return {
-        "shape_points": pyl_shape.support_points,
-        "text_display_points": pyl_shape.labels_points,
-        "text_to_display": pyl_shape.set_number,
-    }
-
-
-def calculate_papoto(js_inputs: dict):
-    python_inputs = js_to_python(js_inputs)
-    spanLength = python_inputs["spanLength"]
-    HL = python_inputs["HL"]
-    H1 = python_inputs["H1"]
-    H2 = python_inputs["H2"]
-    H3 = python_inputs["H3"]
-    HR = python_inputs["HR"]
-    VL = python_inputs["VL"]
-    V1 = python_inputs["V1"]
-    V2 = python_inputs["V2"]
-    V3 = python_inputs["V3"]
-    VR = python_inputs["VR"]
-    papoto = PapotoParameterMeasure()
-    papoto(
-        a=spanLength,
-        HL=HL,
-        VL=VL,
-        HR=HR,
-        VR=VR,
-        H1=H1,
-        V1=V1,
-        H2=H2,
-        V2=V2,
-        H3=H3,
-        V3=V3,
-    )
-
-    return {
-        "parameter": papoto.parameter[0],
-        # "uncertainty_parameter": 0, # uncertainty isn't set yet in mechaphlowers
-        "parameter_1_2": papoto.parameter_1_2[0],
-        "parameter_2_3": papoto.parameter_2_3[0],
-        "parameter_1_3": papoto.parameter_1_3[0],
-        "check_validity": bool(papoto.check_validity()[0]),
-    }
+    resolution = python_inputs["resolution"]
+    mph.options.graphics.resolution = resolution
+    return {"success": True, "resolution": resolution}
 
 
 def add_obstacles(js_inputs: dict):

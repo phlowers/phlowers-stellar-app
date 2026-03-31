@@ -206,7 +206,7 @@ export class SectionPlotComponent {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.plotService.section();
         const payload = getObstacleClickPayload(
-          event?.annotation?.data,
+          event?.annotation?.data as ObstacleAnnotationData,
           section?.obstacles ?? [],
           section?.supports ?? []
         );

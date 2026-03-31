@@ -1,41 +1,25 @@
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Literal
-import pint
+# Copyright (c) 2026, RTE (http://www.rte-france.com)
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
+
 import numpy as np
-from mechaphlowers import ThermalEngine, units
+from mechaphlowers import BalanceEngine, ThermalEngine, units
 
-@dataclass
-class TemperatureCalculationInputs:
-    cableName: str
-    ambientTemperature: float
-    longitude: float
-    latitude: float
-    transit: float
-    skyCover: str
-    altitude: float
-    azimuth: float
-    date: datetime
-    time: datetime
-    windSpeed: float
-    windSpeedUnit: Literal['kmh', 'ms']
-    windDirection: str
+from stellar_engine.entities.inputs import TemperatureCalculationInputs
 
 
-def default_converter(value, _ignored1, _ignored2):
-    """Convert js Date object into python Datetime object
-    """
-    if value.constructor.name == "Date":
-        return datetime.fromtimestamp(value.valueOf()/1000)
-    return value
-
-def temperature_calculation(js_inputs):
-    global engine
-    python_inputs = js_inputs.to_py(default_converter=default_converter)
-    temp_inputs = TemperatureCalculationInputs(**python_inputs)
+def temperature_calculation(inputs: dict, engine: BalanceEngine):
+    temp_inputs = TemperatureCalculationInputs(**inputs)
     thermal_engine = ThermalEngine()
     unit_map = {"kmh": "km/h", "ms": "m/s"}
-    wind_speed = units(temp_inputs.windSpeed, unit_map[temp_inputs.windSpeedUnit]).to("m/s").m
+    wind_speed = (
+        units(temp_inputs.windSpeed, unit_map[temp_inputs.windSpeedUnit])
+        .to("m/s")
+        .m
+    )
     direction_map = {
         'North': 0,
         'North-East': 45,
@@ -62,9 +46,8 @@ def temperature_calculation(js_inputs):
         wind_angle=np.array([wind_angle]),
     )
     temperature_result = thermal_engine.steady_temperature()
-    print(temperature_result)
     return {
         "cableSolarFlux": None,
         "cableTemperature": temperature_result.data["t_core"].iloc[0],
-        "cableTemperatureUncertainty": 0
+        "cableTemperatureUncertainty": 0,
     }
