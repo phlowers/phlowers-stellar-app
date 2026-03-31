@@ -82,9 +82,25 @@ npm run set-up-mechaphlowers:local-cdn -- /path/to/cdn
 # (the local wheel's dependency versions override upstream resolution)
 npm run set-up-mechaphlowers:local-mechaphlowers
 
+# Only rebuild stellar-engine and update its wheel (skip all other steps)
+npm run set-up-mechaphlowers:engine-only
+
 # With custom NPM registry
 npm run set-up-mechaphlowers -- --npm-registry-url https://registry.npmmirror.com/
 ```
+
+### `--engine-only`
+
+Rebuild only `stellar-engine` and update its wheel in `public/pyodide/` without re-downloading Pyodide, resolving dependencies, or recompiling other packages. This is useful during development when only `stellar-engine` source code has changed.
+
+The script will:
+
+1. Build a new `stellar-engine` wheel
+2. Remove the old `stellar_engine*.whl` from `public/pyodide/`
+3. Copy the new wheel in place
+4. Update only the `stellar-engine` entry in `python-packages.json`
+
+Can be combined with `--local-mechaphlowers` to patch the mechaphlowers version before building.
 
 ### `--local-mechaphlowers`
 
@@ -149,4 +165,4 @@ npm run set-up-mechaphlowers
 
 ---
 
-**Last update**: February 19, 2026
+**Last update**: March 31, 2026

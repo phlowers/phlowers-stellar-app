@@ -1,11 +1,21 @@
-from mechaphlowers import BalanceEngine
+# Copyright (c) 2026, RTE (http://www.rte-france.com)
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
+from mechaphlowers import (
+    BalanceEngine,
+)
 from mechaphlowers.core.models.guying import Guying
 
-from stellar_engine.validation import GuyingInputs
+from stellar_engine.entities.inputs import (
+    GuyingInputs,
+)
 
 
 def calculate_guying(inputs: dict, engine: BalanceEngine):
-    guying_inputs = GuyingInputs(**inputs.to_py())
+    guying_inputs = GuyingInputs(**inputs)
     guying = Guying(engine)
     guying_results = guying.compute(
         index=guying_inputs.selectedSpanIndex,

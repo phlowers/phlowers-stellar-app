@@ -25,6 +25,7 @@
     "set-up-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers_v2.py",
     "set-up-mechaphlowers:local-cdn": "uv run ./scripts/set_up_mechaphlowers_v2.py --local-cdn-dir",
     "set-up-mechaphlowers:local-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers_v2.py --local-mechaphlowers",
+    "set-up-mechaphlowers:engine-only": "uv run ./scripts/set_up_mechaphlowers_v2.py --engine-only",
     "set-env-variables": "uv run ./scripts/set-env-variables.py",
     "create-mock-data": "uv run ./scripts/create_mock_data.py",
     "create-assets-list-for-service-worker:fr": "uv run  --no-cache ./scripts/create_assets_list_for_service_worker.py --language fr",

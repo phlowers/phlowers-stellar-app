@@ -892,7 +892,7 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "mechaphlowers", specifier = ">=0.6.0rc2" }]
+requires-dist = [{ name = "mechaphlowers", specifier = "==0.6.0rc2" }]
 
 [package.metadata.requires-dev]
 all = [
