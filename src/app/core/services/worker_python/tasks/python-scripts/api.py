@@ -12,7 +12,7 @@ from stellar_engine.tools import (
     temperature,
     papoto,
 )
-from stellar_engine.plot import plot_2d, plot_settings, supports_coords, run_solver 
+from stellar_engine.plot import plot_settings, supports_coords 
 
 # duplicate from functions.py
 

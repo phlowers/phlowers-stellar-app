@@ -4,11 +4,13 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from mechaphlowers import BalanceEngine, PlotEngine
+from mechaphlowers import PlotEngine
 from mechaphlowers.plotting.utils import compute_aspect_ratio
 
 
-def get_aspect_ratio(inputs: dict, plot_engine: PlotEngine)-> dict[str, float]:
+def get_aspect_ratio(
+    inputs: dict, plot_engine: PlotEngine
+) -> dict[str, float]:
     x_scale = inputs["x"]
     y_scale = inputs["y"]
     z_scale = inputs["z"]

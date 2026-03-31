@@ -10,9 +10,9 @@ import { Button } from 'primeng/button';
 import { InputNumberComponent } from '@shared/components/atoms/input-number/input-number.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@services/plot/plot.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { Task } from '@src/app/core/services/worker_python/tasks/types';
-import { AxesNorms } from '@src/app/shared/types/plot.types';
+import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { Task } from '@core/services/worker_python/tasks/types';
+import { AxesNorms } from '@shared/types/plot.types';
 
 @Component({
   selector: 'app-scale-view',
@@ -113,7 +113,7 @@ export class ScaleViewComponent {
     const scaleNorms = this.scaleNormsMap[scale] ?? { x: 1, y: 1, z: 1, aspectMode: 'data' };
     const aspectMode = scaleNorms.aspectMode;
     const { result: result, error } = await this.workerPythonService.runTask(Task.getAspectRatio, scaleNorms);
-    return error ? { x: 1, y: 1, z: 1, aspectMode: 'data' } : { ...result, aspectMode };
+    return error || !result ? scaleNorms : { ...result, aspectMode };
   }
 
   public async onValidate(): Promise<void> {
