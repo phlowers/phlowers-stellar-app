@@ -120,6 +120,8 @@ export const createEmptySection = (): Section => {
     selected_charge_uuid: null,
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    vtl_and_guying: undefined
+    vtl_and_guying: undefined,
+    cable_modifications: [],
+    selected_cable_modification_uuid: null
   };
 };

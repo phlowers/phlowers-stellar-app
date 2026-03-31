@@ -47,7 +47,9 @@ export enum Task {
   // Add obstacles coordinates
   addObstacle = 'addObstacles',
   // calculate obstacles distances
-  calculateObstaclesDistances = 'calculateObstaclesDistances'
+  calculateObstaclesDistances = 'calculateObstaclesDistances',
+  /** Apply a cable length modification (lengthen or shorten) on a span */
+  cableModification = 'cableModification'
 }
 
 /**
@@ -268,6 +270,14 @@ export interface TaskInputs {
     endSupport: number;
     view: View;
   };
+  /** Inputs for cableModification task */
+  [Task.cableModification]: {
+    spanIndex: number;
+    widthCable: 'lengthening' | 'shortening';
+    sizeCable: number;
+    distanceSupportRef: number;
+    supportRef: 'LEFT' | 'RIGHT';
+  };
 }
 
 export interface DistancePoint {
@@ -356,4 +366,6 @@ export interface TaskOutputs {
   [Task.addObstacle]: GetSectionWithBaseOutput;
   // Output from calculateObstaclesDistances task
   [Task.calculateObstaclesDistances]: Distance[];
+  /** Output from cableModification task: recalculated geometry with optional base state */
+  [Task.cableModification]: GetSectionWithBaseOutput;
 }
