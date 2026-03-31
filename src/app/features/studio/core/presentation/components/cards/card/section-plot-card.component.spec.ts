@@ -198,7 +198,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     expect(spanData.length).toBe(5);
     expect(support[0].fields.length).toBe(4);
     expect(spanData[0].label).toContain('Span length');
-    expect(spanExpandedData.length).toBe(6);
+    expect(spanExpandedData.length).toBe(8);
   });
 
   describe('HTML rendering', () => {

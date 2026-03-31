@@ -116,6 +116,10 @@ export interface GetSectionOutput {
   elevation: number[];
   /** Cable sag parameter (unitless) at each span */
   parameter: number[];
+  // Slope angle of the left support of the span
+  slope_left: number[];
+  // Slope angle of the right support of the span
+  slope_right: number[];
   /** Superior (upper) tension at each support (daN) */
   tension_sup: number[];
   /** Inferior (lower) tension at each support (daN) */
@@ -128,6 +132,9 @@ export interface GetSectionOutput {
   arc_length: number[];
   /** Horizontal component of cable tension at each span (daN) */
   T_h: number[];
+  // sag S1 and S2
+  sag: number[];
+  sag_s2: number[];
   // obstacles coordinates
   obstacles?: {
     name: string;

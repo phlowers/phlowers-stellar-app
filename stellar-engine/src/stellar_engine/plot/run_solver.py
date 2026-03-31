@@ -27,9 +27,7 @@ def apply_span_loads(
     if (load_position_meters != 0).any() and (load_mass != 0).any():
         engine.add_loads(load_position_meters, load_mass)
         # Bug here: plot_engine is not correctly reset
-        plot_engine = plot_engine.generate_reset()
-        # To uncomment with new version of mechaphlowers
-        # plt_line.reset(engine)
+        plot_engine.reset(engine)
 
 
 def parse_span_loads(
