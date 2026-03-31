@@ -10,6 +10,9 @@ import { Button } from 'primeng/button';
 import { InputNumberComponent } from '@shared/components/atoms/input-number/input-number.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@services/plot/plot.service';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { Task } from '@src/app/core/services/worker_python/tasks/types';
+import { AxesNorms } from '@src/app/shared/types/plot.types';
 
 @Component({
   selector: 'app-scale-view',
@@ -32,6 +35,8 @@ export class ScaleViewComponent {
   readonly popover = viewChild<Popover>('popover');
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
+  private readonly workerPythonService = inject(WorkerPythonService);
+
   readonly popoverOpen = signal(false);
   get scaleMax(): number {
     return this.plotService.defaultResolution();
@@ -97,20 +102,18 @@ export class ScaleViewComponent {
     this.popover()?.toggle(event);
   }
 
-  private readonly scaleNormsMap: Record<string, { x: number; y: number; z: number; aspectMode: string }> = {
+  private readonly scaleNormsMap: Record<string, AxesNorms> = {
     plan: { x: 0.2, y: 1, z: 1, aspectMode: 'manual' },
     geo: { x: 1, y: 1, z: 1, aspectMode: 'manual' },
     celeste: { x: 1, y: 1, z: 0.5, aspectMode: 'manual' },
     auto: { x: 1, y: 1, z: 1, aspectMode: 'data' }
   };
 
-  private getScaleNorms(scale: string): {
-    x: number;
-    y: number;
-    z: number;
-    aspectMode: string;
-  } {
-    return this.scaleNormsMap[scale] ?? { x: 1, y: 1, z: 1, aspectMode: 'data' };
+  private async getScaleNorms(scale: string): Promise<AxesNorms> {
+    const scaleNorms = this.scaleNormsMap[scale] ?? { x: 1, y: 1, z: 1, aspectMode: 'data' };
+    const aspectMode = scaleNorms.aspectMode;
+    const { result: result, error } = await this.workerPythonService.runTask(Task.getAspectRatio, scaleNorms);
+    return error ? { x: 1, y: 1, z: 1, aspectMode: 'data' } : { ...result, aspectMode };
   }
 
   public async onValidate(): Promise<void> {
@@ -118,11 +121,10 @@ export class ScaleViewComponent {
 
     const resolution = this.pointsControl.value;
     const scale = this.formScaleView.get('scale')?.value as string;
-
     this.plotService.setResolution(resolution);
     await this.plotService.applyResolution(resolution);
 
-    const norms = this.getScaleNorms(scale);
+    const norms = await this.getScaleNorms(scale);
     this.plotService.setAxesNorms(norms);
 
     await this.plotService.refreshProjection();
