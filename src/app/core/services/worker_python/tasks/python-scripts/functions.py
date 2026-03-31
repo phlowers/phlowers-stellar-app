@@ -65,6 +65,11 @@ def set_log_level(js_inputs: dict):
     logger.setLevel(logging.DEBUG if log_level else logging.WARNING)
     return {"success": True}
 
+def set_resolution(js_inputs):
+    python_inputs = js_to_python(js_inputs)
+    resolution = python_inputs["resolution"]
+    mph.options.graphics.resolution = resolution
+    return {"success": True, "resolution": resolution}
 
 
 def get_config():
@@ -452,12 +457,26 @@ def init_section(js_inputs: dict):
         "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
     }
 
-def set_resolution(js_inputs):
+def refresh_projection(js_inputs: dict):
+    global plt_line, base_plt_line
     python_inputs = js_to_python(js_inputs)
-    resolution = python_inputs["resolution"]
-    mph.options.graphics.resolution = resolution
-    return {"success": True, "resolution": resolution}
+    start_support = python_inputs["startSupport"]
+    end_support = python_inputs["endSupport"]
+    view = python_inputs["view"]
+    project = view == "2d"
 
+    current_coords = get_coordinates(
+        plt_line, project, start_support, end_support)
+    base_coords = get_coordinates(
+        base_plt_line, project, start_support, end_support) if base_plt_line else None
+
+    return {
+        "sectionOutput": {
+            "current": current_coords,
+            "base": base_coords
+        },
+        "distances" : []
+    }
 
 def add_obstacles(js_inputs: dict):
     get_coordinates_result = get_coordinates(plt_line, False, 0, len(engine.section_array.data) - 1)
