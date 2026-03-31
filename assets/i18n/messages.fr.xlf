@@ -3519,12 +3519,6 @@
         <target>Pente du câble acc. droit:</target>
       </segment>
     </unit>
-    <unit id="7000098318478933999">
-      <segment state="initial">
-        <source>Study actions menu</source>
-        <target>Study actions menu</target>
-      </segment>
-    </unit>
     <unit id="1215291740212922013">
       <segment state="initial">
         <source>Previous support</source>
