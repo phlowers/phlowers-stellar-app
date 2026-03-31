@@ -10,5 +10,6 @@ export const environment = {
   version: '0.0.0',
   buildTime: '2025-05-14T02:20:46.200198',
   appName: 'STELLAR',
-  changelogUrl: 'https://api.github.com/repos/phlowers/mechaphlowers/releases'
+  changelogUrl: 'https://api.github.com/repos/phlowers/mechaphlowers/releases',
+  oidcLoginUrl: '/oidc/login'
 };

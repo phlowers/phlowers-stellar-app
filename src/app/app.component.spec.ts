@@ -11,7 +11,6 @@ import { OnlineService } from '@services/online/online.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
-import { FormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -51,7 +50,6 @@ describe('AppComponent', () => {
   let mockStorageService: StorageService;
   let mockWorkerService: WorkerPythonService;
   let mockOnlineService: OnlineService;
-  let mockUserService: UserService;
   let mockUpdateService: UpdateService;
   let mockAppUpdateOrchestratorService: AppUpdateOrchestratorService;
   let mockMaintenanceService: MaintenanceService;
@@ -60,7 +58,6 @@ describe('AppComponent', () => {
   let mockChainsService: ChainsService;
   let mockAttachmentService: AttachmentService;
   let mockObstaclesService: ObstaclesService;
-  let readySubject: BehaviorSubject<boolean>;
   let workerReadySubject: BehaviorSubject<boolean>;
 
   const mockDb = {
@@ -94,7 +91,6 @@ describe('AppComponent', () => {
     vi.clearAllMocks();
     mockDb.studies.count = vi.fn().mockResolvedValue(2);
     globalThis.Worker = MockWorker as typeof Worker;
-    readySubject = new BehaviorSubject<boolean>(false);
     workerReadySubject = new BehaviorSubject<boolean>(true);
 
     mockMessageService = {
@@ -108,7 +104,7 @@ describe('AppComponent', () => {
     mockStorageService = {
       setPersistentStorage: vi.fn().mockResolvedValue(undefined),
       createDatabase: vi.fn().mockResolvedValue(undefined),
-      ready$: readySubject,
+      ready$: new BehaviorSubject<boolean>(true),
       assertProtectedTablesUnchanged: vi.fn(async (operation: () => Promise<void>) => operation()),
       db: mockDb
     } as unknown as StorageService;
@@ -121,11 +117,6 @@ describe('AppComponent', () => {
     mockOnlineService = {
       online$: new BehaviorSubject<boolean>(true)
     } as unknown as OnlineService;
-
-    mockUserService = {
-      getUser: vi.fn().mockResolvedValue(null),
-      createUser: vi.fn().mockResolvedValue(undefined)
-    } as unknown as UserService;
 
     mockUpdateService = {
       checkAppVersion: vi.fn(),
@@ -168,7 +159,7 @@ describe('AppComponent', () => {
     } as unknown as ObstaclesService;
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, NoopAnimationsModule, AppComponent],
+      imports: [NoopAnimationsModule, AppComponent],
       providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
     TestBed.overrideProvider(WorkerPythonService, {
@@ -177,7 +168,13 @@ describe('AppComponent', () => {
     TestBed.overrideProvider(StorageService, { useValue: mockStorageService });
     TestBed.overrideProvider(OnlineService, { useValue: mockOnlineService });
     TestBed.overrideProvider(MessageService, { useValue: mockMessageService });
-    TestBed.overrideProvider(UserService, { useValue: mockUserService });
+    TestBed.overrideProvider(UserService, {
+      useValue: {
+        getUser: vi.fn().mockResolvedValue(null),
+        createUser: vi.fn().mockResolvedValue(undefined),
+        user$: new BehaviorSubject(null)
+      }
+    });
     TestBed.overrideProvider(UpdateService, { useValue: mockUpdateService });
     TestBed.overrideProvider(AppUpdateOrchestratorService, { useValue: mockAppUpdateOrchestratorService });
     TestBed.overrideProvider(MaintenanceService, {
@@ -201,24 +198,10 @@ describe('AppComponent', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
   });
 
-  describe('setupWorker', () => {
-    it('should setup worker and initialize database', async () => {
-      await component.setupWorker();
-
+  describe('ngOnInit', () => {
+    it('should setup worker on init', () => {
+      component.ngOnInit();
       expect(mockWorkerService.setup).toHaveBeenCalled();
-      expect(mockStorageService.setPersistentStorage).toHaveBeenCalled();
-      expect(mockStorageService.createDatabase).toHaveBeenCalled();
-    });
-
-    it('should handle errors when initializing database', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
-      const error = new Error('Database error');
-      (mockStorageService.createDatabase as vi.Mock).mockRejectedValue(error);
-
-      await component.setupWorker();
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating database', error);
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -296,82 +279,6 @@ describe('AppComponent', () => {
       );
     });
   });
-
-  describe('User dialog', () => {
-    it('should show user dialog if no users exist', async () => {
-      //@ts-expect-error mockResolvedValue does not exist on the mockUserService.getUser
-      mockUserService.getUser.mockResolvedValue(null);
-
-      // Trigger the effect via toSignal
-      readySubject.next(true);
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      expect(component.userDialog()).toBe(true);
-    });
-
-    it('should not show user dialog if a user exists', async () => {
-      //@ts-expect-error mockResolvedValue does not exist on the mockUserService.getUser
-      mockUserService.getUser.mockResolvedValue({ email: 'test@example.com' });
-
-      // Trigger the effect via toSignal
-      readySubject.next(true);
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      expect(component.userDialog()).toBe(false);
-    });
-
-    it('should save valid user and close dialog', async () => {
-      component.form.setValue({ email: 'test@example.com' });
-      //@ts-expect-error mockResolvedValue does not exist on the mockUserService.createUser
-      mockUserService.createUser.mockResolvedValue(undefined);
-
-      await component.saveUser();
-
-      expect(component.submitted()).toBe(true);
-      expect(mockUserService.createUser).toHaveBeenCalledWith({
-        email: 'test@example.com'
-      });
-      expect(component.userDialog()).toBe(false);
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: 'Successful',
-        detail: 'User info set',
-        life: 3000
-      });
-    });
-
-    it('should not save user with empty email', async () => {
-      component.form.setValue({ email: '' });
-
-      await component.saveUser();
-
-      expect(component.submitted()).toBe(true);
-      expect(mockDb.users.add).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Email validation', () => {
-    it('should validate correct email formats', () => {
-      // Import the validateEmail function from the component file
-      const validateEmail = (email: string) => {
-        return String(email)
-          .toLowerCase()
-          .match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-          );
-      };
-
-      expect(validateEmail('test@example.com')).toBeTruthy();
-      expect(validateEmail('test.name@example.co.uk')).toBeTruthy();
-      expect(validateEmail('test+label@example.com')).toBeTruthy();
-
-      expect(validateEmail('invalid-email')).toBeFalsy();
-      expect(validateEmail('test@')).toBeFalsy();
-      expect(validateEmail('@example.com')).toBeFalsy();
-    });
-  });
 });
 
 describe('AppComponent - HTML rendering', () => {
@@ -383,11 +290,10 @@ describe('AppComponent - HTML rendering', () => {
   beforeEach(async () => {
     globalThis.Worker = MockWorker as typeof Worker;
 
-    const readySubject = new BehaviorSubject<boolean>(false);
     const workerReadySubject = new BehaviorSubject<boolean>(true);
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, NoopAnimationsModule, AppComponent],
+      imports: [NoopAnimationsModule, AppComponent],
       providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
     TestBed.overrideProvider(WorkerPythonService, {
@@ -397,7 +303,7 @@ describe('AppComponent - HTML rendering', () => {
       useValue: {
         setPersistentStorage: vi.fn().mockResolvedValue(undefined),
         createDatabase: vi.fn().mockResolvedValue(undefined),
-        ready$: readySubject,
+        ready$: new BehaviorSubject<boolean>(true),
         assertProtectedTablesUnchanged: vi.fn(async (operation: () => Promise<void>) => operation()),
         db: {
           users: {
@@ -420,7 +326,11 @@ describe('AppComponent - HTML rendering', () => {
       useValue: { add: vi.fn(), messageObserver: new BehaviorSubject(null), clearObserver: new BehaviorSubject(null) }
     });
     TestBed.overrideProvider(UserService, {
-      useValue: { getUser: vi.fn().mockResolvedValue(null), createUser: vi.fn().mockResolvedValue(undefined) }
+      useValue: {
+        getUser: vi.fn().mockResolvedValue(null),
+        createUser: vi.fn().mockResolvedValue(undefined),
+        user$: new BehaviorSubject(null)
+      }
     });
     TestBed.overrideProvider(AppUpdateOrchestratorService, {
       useValue: { initiateStartupCheck: vi.fn().mockResolvedValue(undefined), acceptUpdate: vi.fn() }
@@ -465,34 +375,5 @@ describe('AppComponent - HTML rendering', () => {
   it('should render update-dialog', () => {
     const el = getByTestId('update-dialog');
     expect(el).toBeTruthy();
-  });
-
-  it('should render user-login-dialog', () => {
-    const el = getByTestId('user-login-dialog');
-    expect(el).toBeTruthy();
-  });
-
-  it('should render user-login-form when dialog is open', () => {
-    fixture.componentInstance.userDialog.set(true);
-    fixture.detectChanges();
-    const el = getByTestId('user-login-form');
-    expect(el).toBeTruthy();
-    expect(el?.tagName).toBe('FORM');
-  });
-
-  it('should render email-input when dialog is open', () => {
-    fixture.componentInstance.userDialog.set(true);
-    fixture.detectChanges();
-    const el = getByTestId('email-input');
-    expect(el).toBeTruthy();
-    expect(el?.tagName).toBe('INPUT');
-  });
-
-  it('should render user-save-btn when dialog is open', () => {
-    fixture.componentInstance.userDialog.set(true);
-    fixture.detectChanges();
-    const el = getByTestId('user-save-btn');
-    expect(el).toBeTruthy();
-    expect(el?.tagName).toBe('BUTTON');
   });
 });

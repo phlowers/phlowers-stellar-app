@@ -6,15 +6,12 @@
  */
 import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
-import { InputTextModule } from 'primeng/inputtext';
+import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { UserService } from '@services/user/user.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AssetList, UpdateService } from '@services/worker_update/worker_update.service';
@@ -29,19 +26,13 @@ import { AppUpdateOrchestratorService } from '@services/worker_update/app-update
 import { DividerModule } from 'primeng/divider';
 import { ProgressBarModule } from 'primeng/progressbar';
 
-/** Regex pattern for validating email addresses. */
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
 const modules = [
   RouterModule,
   CommonModule,
-  FormsModule,
   ToastModule,
-  InputTextModule,
   DialogModule,
   ButtonComponent,
   IconComponent,
-  ReactiveFormsModule,
   DividerModule,
   ProgressBarModule
 ];
@@ -49,8 +40,9 @@ const modules = [
 /**
  * Root application component.
  *
- * Handles user registration, service worker setup, database initialization,
+ * Handles Pyodide worker setup, catalog synchronization,
  * online/offline status monitoring, and application update prompts.
+ * Authentication and database initialization are handled by APP_INITIALIZER (AuthService).
  */
 @Component({
   selector: 'app-root',
@@ -62,17 +54,11 @@ const modules = [
 })
 export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
-  readonly userDialog = signal(false);
   readonly isUpdateDialogOpen = signal(false);
-  form: FormGroup<{
-    email: FormControl<string | null>;
-  }>;
 
-  readonly submitted = signal(false);
   private readonly messageService = inject(MessageService);
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
-  private readonly userService = inject(UserService);
   readonly updateService = inject(UpdateService);
   private readonly appUpdateOrchestratorService = inject(AppUpdateOrchestratorService);
   private readonly maintenanceService = inject(MaintenanceService);
@@ -82,7 +68,6 @@ export class AppComponent implements OnInit {
   private readonly attachmentService = inject(AttachmentService);
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
-  private readonly storageReady = toSignal(this.storageService.ready$, { initialValue: false });
   private readonly needUpdate = toSignal(this.updateService.needUpdate$, { initialValue: false });
 
   constructor() {
@@ -95,47 +80,30 @@ export class AppComponent implements OnInit {
       'obstacle_type_rte.csv': () => this.obstacleTypesService.importFromFile()
     };
 
-    this.form = new FormGroup({
-      email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])
-    });
-
-    effect(() => {
-      if (this.storageReady()) {
-        void this.userService
-          .getUser()
-          .then(async (user) => {
-            this.userDialog.set(!user);
-
-            try {
-              await this.setupData();
-            } catch (error) {
-              console.error('Error during startup catalog synchronization', error);
-              this.messageService.add({
-                severity: 'error',
-                summary: $localize`Error`,
-                detail: $localize`Catalog synchronization failed during startup`,
-                life: 5000
-              });
-            } finally {
-              await this.appUpdateOrchestratorService.initiateStartupCheck();
-            }
-          })
-          .catch((error: unknown) => {
-            console.error('Error during startup user bootstrap', error);
-            this.messageService.add({
-              severity: 'error',
-              summary: $localize`Error`,
-              detail: $localize`Unable to initialize startup user context`,
-              life: 5000
-            });
-            void this.appUpdateOrchestratorService.initiateStartupCheck();
-          });
-      }
-    });
-
     effect(() => {
       this.isUpdateDialogOpen.set(this.needUpdate());
     });
+  }
+
+  ngOnInit() {
+    this.workerService.setup();
+    void this.startupSequence();
+  }
+
+  private async startupSequence(): Promise<void> {
+    try {
+      await this.setupData();
+    } catch (error) {
+      console.error('Error during startup catalog synchronization', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: $localize`Error`,
+        detail: $localize`Catalog synchronization failed during startup`,
+        life: 5000
+      });
+    } finally {
+      await this.appUpdateOrchestratorService.initiateStartupCheck();
+    }
   }
 
   async setupData() {
@@ -185,47 +153,6 @@ export class AppComponent implements OnInit {
     for (const importFn of Object.values(this.csvImporters)) {
       await importFn();
     }
-  }
-
-  async saveUser() {
-    this.submitted.set(true);
-    if (this.form.valid) {
-      await this.userService.createUser({ email: this.form.value.email! }).catch((err) => {
-        console.error('Error creating user', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: $localize`Error`,
-          detail: $localize`Error creating user`,
-          life: 3000
-        });
-      });
-      this.messageService.add({
-        severity: 'success',
-        summary: $localize`Successful`,
-        detail: $localize`User info set`,
-        life: 3000
-      });
-      this.userDialog.set(false);
-    }
-  }
-
-  async setupWorker() {
-    try {
-      this.workerService.setup();
-      await this.storageService.setPersistentStorage();
-      await this.storageService.createDatabase();
-    } catch (err) {
-      console.error('Error creating database', err);
-    }
-  }
-
-  ngOnInit() {
-    this.setupWorker();
-  }
-
-  isInvalid(controlName: string) {
-    const control = this.form.get(controlName);
-    return control?.invalid && control.touched;
   }
 
   onUpdateClick() {

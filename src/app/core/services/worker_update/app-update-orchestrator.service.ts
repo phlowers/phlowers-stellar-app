@@ -61,7 +61,7 @@ export class AppUpdateOrchestratorService {
         // The AppComponent will show the update dialog. User interaction is necessary.
         // When user clicks "Update now", AppComponent will call acceptUpdate().
         // When user clicks "Later" or closes dialog, the app continues without update.
-      } 
+      }
     } catch (error) {
       this.latestManifest = null;
       console.error('ORCHESTRATOR: Startup check failed, app continues with cached state:', error);

@@ -7,12 +7,14 @@
 import { Routes } from '@angular/router';
 import { LoggedLayoutComponent } from '@shared/components/layout/logged-layout/logged-layout.component';
 import { NotFoundComponent } from '@shared/components/layout/not-found/not-found.component';
+import { authGuard } from '@core/guards/auth.guard';
 
 /** Application route definitions mapping URL paths to page components. */
 export const appRoutes: Routes = [
   {
     path: '',
     component: LoggedLayoutComponent,
+    canActivate: [authGuard],
     children: [
       {
         path: '',
