@@ -1,0 +1,142 @@
+<form
+  [formGroup]="form"
+  class="cable-length-change__form"
+  [attr.aria-busy]="isLoading()"
+  (ngSubmit)="saveForm()"
+  data-testid="cable-length-change-form"
+>
+  <div class="cable-length-change__reset">
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="resetForm()"
+      [disabled]="isLoading()"
+      data-testid="cable-length-change-reset"
+    >
+      <app-icon icon="refresh" />
+      <ng-container i18n>Reset</ng-container>
+    </button>
+  </div>
+
+  <div>
+    <label for="scope" i18n>Span</label>
+    <p-select
+      inputId="scope"
+      [options]="spansOptions()"
+      fluid
+      formControlName="scope"
+      optionLabel="label"
+      optionValue="value"
+      [filter]="true"
+      (onChange)="onScopeChange($event.value)"
+      data-testid="cable-length-change-scope"
+    />
+  </div>
+
+  <div>
+    <label for="supportRef" i18n>Reference support</label>
+    <p-select
+      inputId="supportRef"
+      [options]="supportRefOptions()"
+      fluid
+      formControlName="supportRef"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="cable-length-change-support-ref"
+    />
+  </div>
+
+  <div class="col-span-2">
+    <label for="widthCable" i18n>Cable modification</label>
+    <p-select
+      inputId="widthCable"
+      fluid
+      [options]="widthCableOptions"
+      formControlName="widthCable"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="cable-length-change-width-cable"
+    />
+  </div>
+
+  <div>
+    <label for="sizeCable" i18n>Cable length mod.</label>
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="sizeCable"
+        fluid
+        min="0"
+        max="1000"
+        step="0.01"
+        formControlName="sizeCable"
+        data-testid="cable-length-change-size-cable"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div>
+    <label for="distanceSupportRef" i18n>Dist. to ref. support</label>
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="distanceSupportRef"
+        fluid
+        min="0"
+        max="5000"
+        step="0.01"
+        formControlName="distanceSupportRef"
+        data-testid="cable-length-change-distance-support-ref"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="cable-length-change__btns">
+    <button
+      app-btn
+      btnStyle="danger"
+      type="button"
+      aria-label="delete cable length change"
+      i18n-aria-label
+      (click)="deleteForm()"
+      [disabled]="hasSavedModification()"
+      data-testid="cable-length-change-delete"
+    >
+      <app-icon icon="delete" />
+    </button>
+
+    <button
+      app-btn
+      type="submit"
+      btnStyle="outlined"
+      [disabled]="isFormInvalid() || isLoading() || !isDirtySinceLastSave()"
+      data-testid="cable-length-change-save"
+    >
+      <app-icon icon="save" />
+      <ng-container i18n>Save</ng-container>
+    </button>
+
+    <button
+      app-btn
+      [disabled]="isFormInvalid() || isLoading()"
+      type="button"
+      (click)="calculate()"
+      data-testid="cable-length-change-calculate"
+    >
+      <app-icon icon="rocket_launch" />
+      <ng-container i18n>Calculate</ng-container>
+    </button>
+  </div>
+
+  @if (error()) {
+  <div class="cable-length-change__error" role="alert" aria-live="assertive" data-testid="cable-length-change-error">
+    {{ error() }}
+  </div>
+  }
+</form>

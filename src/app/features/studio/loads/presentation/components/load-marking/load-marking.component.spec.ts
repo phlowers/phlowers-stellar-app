@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { SpanComponent } from './span.component';
-import { SpanOption } from '@shared/types/plot.types';
+import { LoadMarkingComponent } from './load-marking.component';
 import { PlotService } from '@services/plot/plot.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
+import { SpanOption } from '@src/app/shared/types/plot.types';
 
 const mockSpanOptions: SpanOption[] = [
   { label: '1 - 2', value: 'support-1' },
@@ -38,9 +38,9 @@ const createTemporaryLoadData = (overrides: Partial<SpanLoad> = {}): ChargeData 
   ]
 });
 
-describe('SpanComponent', () => {
-  let component: SpanComponent;
-  let fixture: ComponentFixture<SpanComponent>;
+describe('LoadMarkingComponent', () => {
+  let component: LoadMarkingComponent;
+  let fixture: ComponentFixture<LoadMarkingComponent>;
   let mockPlotService: Record<string, unknown>;
   let mockLoadFormsService: Record<string, unknown>;
 
@@ -66,14 +66,14 @@ describe('SpanComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [SpanComponent],
+      imports: [LoadMarkingComponent],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SpanComponent);
+    fixture = TestBed.createComponent(LoadMarkingComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -266,7 +266,7 @@ describe('SpanComponent', () => {
     });
 
     beforeEach(() => {
-      (mockPlotService['getSupportIndex'] as vi.Mock).mockImplementation((uuid: string) =>
+      (mockPlotService['getSupportIndex'] as vi.Mock).mockImplementation((uuid: unknown) =>
         uuid === 'support-1' ? 0 : uuid === 'support-2' ? 1 : -1
       );
     });

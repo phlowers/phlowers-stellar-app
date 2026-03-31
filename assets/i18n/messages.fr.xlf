@@ -4,7 +4,7 @@
     <unit id="4768749765465246664">
       <segment>
         <source>Email</source>
-        <target>Email</target>
+        <target>Courriel</target>
       </segment>
     </unit>
     <unit id="7884682505577720946">
@@ -1090,7 +1090,7 @@
     <unit id="7866511975225263216">
       <segment state="initial">
         <source>Go back to study</source>
-        <target>Go back to study</target>
+        <target>Retourner à l’étude</target>
       </segment>
     </unit>
     <unit id="187187500641108332">
@@ -1106,7 +1106,7 @@
     <unit id="997715536640361323">
       <segment state="initial">
         <source>Expand details</source>
-        <target>Expand details</target>
+        <target>Développer les détails</target>
       </segment>
     </unit>
     <unit id="4740697952012289999">
@@ -1665,12 +1665,6 @@
       <segment state="initial">
         <source>Cable manip. at support</source>
         <target>Câble manip. au support</target>
-      </segment>
-    </unit>
-    <unit id="1964106600703167330">
-      <segment state="initial">
-        <source>Cable manip. at span</source>
-        <target>Câble manip. à la portée</target>
       </segment>
     </unit>
     <unit id="8033045192563886902">
@@ -2942,7 +2936,7 @@
     <unit id="5463714848868355880">
       <segment state="initial">
         <source>Tower</source>
-        <target>Tower</target>
+        <target>Pylône</target>
       </segment>
     </unit>
     <unit id="2050780142571489753">
@@ -3573,10 +3567,46 @@
         <target>Point <ph id="0" equiv="PH" disp="index + 1"/></target>
       </segment>
     </unit>
+    <unit id="8572591079205275141">
+      <segment state="initial">
+        <source>Cable modification</source>
+        <target>Modification du câble</target>
+      </segment>
+    </unit>
+    <unit id="4411211492569880517">
+      <segment state="initial">
+        <source>Cable length mod.</source>
+        <target>Modif. longueur câble</target>
+      </segment>
+    </unit>
+    <unit id="4131248965561242896">
+      <segment state="initial">
+        <source>Lengthening</source>
+        <target>Allongement</target>
+      </segment>
+    </unit>
+    <unit id="6494949896986424409">
+      <segment state="initial">
+        <source>Shortening</source>
+        <target>Raccourcissement</target>
+      </segment>
+    </unit>
     <unit id="6421460271971606186">
       <segment state="initial">
         <source>Zoom</source>
         <target>Zoom</target>
+      </segment>
+    </unit>
+    <unit id="285378064919178685">
+      <segment state="initial">
+        <source>Cable length change</source>
+        <target>Modification de longueur du câble</target>
+      </segment>
+    </unit>
+    <unit id="5507190015256557833">
+      <segment state="initial">
+        <source>delete cable length change</source>
+        <target>Supprimer la modification de longueur du câble</target>
       </segment>
     </unit>
   </file>

@@ -11,6 +11,7 @@
 export type { User } from './user.model';
 export type { Study } from './study.model';
 export type { Section } from './section.model';
+export type { CableModification } from './cable-modification.model';
 export type { Support } from './support.model';
 export type { Charge, ClimateCharge, SpanLoad } from './charge.model';
 export { SymmetryType } from './charge.model';

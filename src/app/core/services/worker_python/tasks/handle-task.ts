@@ -73,6 +73,10 @@ const tasks: Record<
   [Task.calculateObstaclesDistances]: {
     function: 'calculate_obstacles_distances',
     externalPackages: []
+  },
+  [Task.cableModification]: {
+    function: 'cable_modification',
+    externalPackages: []
   }
 };
 
@@ -87,12 +91,12 @@ const tasks: Record<
  * @param inputs - Input data forwarded to the Python function.
  * @returns An object containing the `result`, `runTime` in ms, and any `error`.
  */
-export async function handleTask<taskId extends Task>(
+export async function handleTask(
   pyodide: PyodideAPI,
   task: Task,
-  inputs: TaskInputs[taskId]
+  inputs: TaskInputs[Task]
 ): Promise<{
-  result: TaskOutputs[taskId] | null;
+  result: TaskOutputs[Task] | null;
   runTime: number;
   error: TaskError | null;
 }> {
@@ -109,12 +113,12 @@ export async function handleTask<taskId extends Task>(
     }
     pyodide.globals.set('js_inputs', inputs);
 
-    const functionToRun = pyodide.globals.get(tasks[task].function) as (inputs?: TaskInputs[taskId]) => PyProxy;
+    const functionToRun = pyodide.globals.get(tasks[task].function) as (inputs?: TaskInputs[Task]) => PyProxy;
     const result = inputs ? functionToRun(inputs) : functionToRun();
     const resultJs = result.toJs({ dict_converter: Object.fromEntries });
     result.destroy();
     return {
-      result: resultJs as TaskOutputs[taskId],
+      result: resultJs as TaskOutputs[Task],
       runTime: performance.now() - start,
       error: null
     };
