@@ -53,13 +53,6 @@ def get_support_coordinates(js_inputs):
     return supports_coords.get_support_coordinates(js_to_python(js_inputs))
 
 
-
-def set_resolution(js_inputs):
-    python_inputs = js_to_python(js_inputs)
-    resolution = python_inputs["resolution"]
-    mph.options.graphics.resolution = resolution
-    return {"success": True, "resolution": resolution}
-
 # def change_state(js_input):
 #     change_state_inputs = js_to_python(js_inputs)  # type: ignore
 #     return run_solver.change_state(change_state_inputs, engine, plt_line, base_engine, base_plt_line)

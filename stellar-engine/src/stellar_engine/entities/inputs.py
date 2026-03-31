@@ -37,8 +37,9 @@ class TemperatureCalculationInputs:
     skyCover: str
     altitude: float
     azimuth: float
-    date: datetime
-    time: datetime
+    # datetime.datetime instead?
+    date: datetime.datetime
+    time: datetime.datetime
     windSpeed: float
     windSpeedUnit: Literal['kmh', 'ms']
     windDirection: str

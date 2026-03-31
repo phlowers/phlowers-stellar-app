@@ -5,14 +5,18 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
+import logging
+
 from mechaphlowers import BalanceEngine, param_calibration
 
 from stellar_engine.entities.inputs import ParameterCalibrationInputs
 
+logger = logging.getLogger(__name__)
+
 
 def parameter_15_without_wind(inputs: dict, engine: BalanceEngine):
     param_calibr_inputs = ParameterCalibrationInputs(**inputs)
-    print(param_calibr_inputs)
+    logger.debug("%s", param_calibr_inputs)
     param_result = param_calibration(
         measured_parameter=param_calibr_inputs.parameterPapoto,
         measured_temperature=param_calibr_inputs.cableTemperatureCalibration,

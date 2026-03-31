@@ -460,6 +460,11 @@ def init_section(js_inputs: dict):
         "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
     }
 
+def set_resolution(js_inputs):
+    python_inputs = js_to_python(js_inputs)
+    resolution = python_inputs["resolution"]
+    mph.options.graphics.resolution = resolution
+    return {"success": True, "resolution": resolution}
 
 
 def add_obstacles(js_inputs: dict):

@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
-# ????
+# TODO: investigate to see if logging is imported correctly
 import logging
 
 import numpy as np
@@ -26,6 +26,7 @@ def apply_span_loads(
     load_position_meters, load_mass = parse_span_loads(engine, span_loads)
     if (load_position_meters != 0).any() and (load_mass != 0).any():
         engine.add_loads(load_position_meters, load_mass)
+        # Bug here: plot_engine is not correctly reset
         plot_engine = plot_engine.generate_reset()
         # To uncomment with new version of mechaphlowers
         # plt_line.reset(engine)
@@ -49,6 +50,7 @@ def parse_span_loads(
                         span_length - span["loadPosition"]
                     )
                 else:
+                    # use logger instead?
                     logging.warning(
                         "Span load index %s is out of bounds for span_length array (size %s). "
                         "Defaulting load position to 0.",
@@ -105,6 +107,7 @@ def change_state(
     base_section_length = (
         len(base_engine.section_array.data) if base_engine else section_length
     )
+    # TODO: weird consistency base/current engine
     return {
         "current": get_coordinates(
             engine, plot_engine, False, 0, section_length - 1

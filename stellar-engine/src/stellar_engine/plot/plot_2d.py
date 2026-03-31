@@ -23,6 +23,7 @@ def refresh_projection(
     current_coords = get_coordinates(
         balance_engine, plot_engine, project, start_support, end_support
     )
+    # TODO: weird consistency base/current engine
     base_coords = (
         get_coordinates(
             balance_engine, base_plt_line, project, start_support, end_support
