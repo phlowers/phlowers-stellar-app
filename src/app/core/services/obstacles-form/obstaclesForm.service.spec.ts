@@ -320,6 +320,33 @@ describe('ObstacleFormService', () => {
       expect(mockPlotService.getSupportOptions).not.toHaveBeenCalled();
       expect(service.supportsOptions()).toEqual([]);
     });
+
+    it('should immediately set supportUuid to null when called with null, allowing re-selection of the same span to repopulate supportsOptions', fakeAsync(() => {
+      // Step 1: select span 'sup-1' and populate supportsOptions
+      service.form.get('supportUuid')?.setValue('sup-1');
+      service.resetFormForNewObstacle('sup-1');
+      expect(service.supportsOptions()).toEqual([
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
+      ]);
+
+      // Step 2: click "create new obstacle" — clears options and must immediately null supportUuid
+      service.resetFormForNewObstacle(null);
+      expect(service.supportsOptions()).toEqual([]);
+      // supportUuid must be null synchronously so the component's distinctUntilChanged()
+      // can detect a subsequent re-selection of the same span as a genuine change
+      expect(service.form.get('supportUuid')?.value).toBeNull();
+
+      // Step 3: re-select the same span 'sup-1' — simulates what the component effect does
+      // after detecting the null → 'sup-1' transition
+      service.resetFormForNewObstacle('sup-1');
+      expect(service.supportsOptions()).toEqual([
+        { label: 1, value: 'LEFT' },
+        { label: 2, value: 'RIGHT' }
+      ]);
+
+      tick(DEBOUNCED_UPDATE_POINT_DELAY);
+    }));
   });
 
   describe('loadObstacle', () => {

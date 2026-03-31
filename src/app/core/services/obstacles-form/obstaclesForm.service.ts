@@ -151,6 +151,8 @@ export class ObstacleFormService {
       this.supportsOptions.set(supports.map((s) => ({ label: s.label, value: s.value })));
     } else {
       this.supportsOptions.set([]);
+      // Clear supportUuid and emit value to ensure the re-slection of the same span won't block support selection.
+      this.form.get('supportUuid')?.setValue(null, { emitEvent: true });
     }
     this.debouncedResetForm(supportUuid);
     return this.form.value as Obstacle;
