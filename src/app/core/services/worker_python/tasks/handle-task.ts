@@ -77,6 +77,10 @@ const tasks: Record<
   [Task.cableModification]: {
     function: 'cable_modification',
     externalPackages: []
+  },
+  [Task.getAspectRatio]: {
+    function: 'get_aspect_ratio',
+    externalPackages: []
   }
 };
 

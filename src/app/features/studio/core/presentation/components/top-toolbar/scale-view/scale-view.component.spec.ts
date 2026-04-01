@@ -5,6 +5,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ScaleViewComponent } from './scale-view.component';
 
 import { PlotService } from '@services/plot/plot.service';
+import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 
 describe('ScaleViewComponent', () => {
   let component: ScaleViewComponent;
@@ -19,6 +20,7 @@ describe('ScaleViewComponent', () => {
     refreshProjection: vi.Mock;
   };
   let mockPopover: { toggle: vi.Mock };
+  let mockWorkerPythonService: { runTask: vi.Mock };
 
   beforeEach(async () => {
     resolutionSignal = signal(100);
@@ -34,9 +36,17 @@ describe('ScaleViewComponent', () => {
 
     mockPopover = { toggle: vi.fn() };
 
+    mockWorkerPythonService = {
+      runTask: vi.fn().mockResolvedValue({ result: null, error: null })
+    };
+
     await TestBed.configureTestingModule({
       imports: [ScaleViewComponent],
-      providers: [{ provide: PlotService, useValue: mockPlotService }, provideNoopAnimations()]
+      providers: [
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+        provideNoopAnimations()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ScaleViewComponent);
