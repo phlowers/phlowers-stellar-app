@@ -32,4 +32,7 @@ def refresh_projection(
         else None
     )
 
-    return {"current": current_coords, "base": base_coords}
+    return {
+        "sectionOutput": {"current": current_coords, "base": base_coords},
+        "distances": [],
+    }
