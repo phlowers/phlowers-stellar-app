@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, OnDestroy, signal } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
@@ -25,11 +25,20 @@ export class StudioComponent implements OnDestroy {
   protected readonly plotService = inject(PlotService);
   private readonly notificationService = inject(NotificationService);
 
+  // State
+  readonly plotInitialized = signal(false);
+
   constructor() {
     effect(() => {
       const error = this.plotService.error();
       if (error !== null) {
         this.notificationService.error(formatStudioError(error));
+      }
+    });
+
+    effect(() => {
+      if (this.plotService.litData() !== null) {
+        this.plotInitialized.set(true);
       }
     });
 
