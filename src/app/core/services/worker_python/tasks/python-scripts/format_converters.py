@@ -28,9 +28,9 @@ def convert_jsnull(obj):
 
     return obj
 
+
 def default_converter(value, _ignored1, _ignored2):
-    """Convert js Date object into python Datetime object
-    """
+    """Convert js Date object into python Datetime object"""
     if value.constructor.name == "Date":
-        return datetime.fromtimestamp(value.valueOf()/1000)
+        return datetime.fromtimestamp(value.valueOf() / 1000)
     return value
