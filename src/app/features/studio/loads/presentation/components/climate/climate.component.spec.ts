@@ -104,7 +104,8 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal(null),
       section: signal({ uuid: 'section-uuid-1', supports: [] }),
-      calculateCharge: vi.fn()
+      calculateCharge: vi.fn(),
+      loading: signal(false)
     } as unknown as PlotService;
     const chargesServiceMock = {
       getCharge: vi.fn().mockResolvedValue(mockCharge),
@@ -136,7 +137,8 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal({ uuid: 'study-uuid-1' }),
       section: signal({ uuid: 'section-uuid-1', supports: [] }),
-      calculateCharge: vi.fn()
+      calculateCharge: vi.fn(),
+      loading: signal(false)
     } as unknown as PlotService;
     const chargesServiceMock = {
       getCharge: vi.fn().mockResolvedValue(chargeWithoutData),
@@ -246,6 +248,27 @@ describe('ClimateComponent (Jest)', () => {
     component = fixture.componentInstance;
     fixture.componentRef.setInput('chargeUuid', 'test-charge-uuid');
     fixture.detectChanges();
+  });
+
+  describe('isCalculating computed', () => {
+    it('should reflect plotService.loading() as false by default', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true when plotService.loading() is true', () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.loading as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+    });
+
+    it('should go back to false when plotService.loading() returns to false', () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.loading as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+
+      (plotService.loading as ReturnType<typeof signal>).set(false);
+      expect(component.isCalculating()).toBe(false);
+    });
   });
 
   it('should initialize form with default values', () => {

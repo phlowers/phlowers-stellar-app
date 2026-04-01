@@ -60,7 +60,9 @@ const mockSection: Section = {
   selected_charge_uuid: null,
   field_measures: [],
   selected_field_measure_uuid: undefined,
-  vtl_and_guying: undefined
+  vtl_and_guying: undefined,
+  cable_modifications: [],
+  selected_cable_modification_uuid: null
 };
 
 const mockLitData: GetSectionOutput = {
@@ -237,8 +239,34 @@ describe('StudioComponent', () => {
     });
   });
 
+  describe('plotInitialized signal', () => {
+    it('should start as false', () => {
+      expect(component.plotInitialized()).toBe(false);
+    });
+
+    it('should become true when litData changes from null to a value', () => {
+      expect(component.plotInitialized()).toBe(false);
+
+      mockPlotService.litData.set(mockLitData);
+      fixture.detectChanges();
+
+      expect(component.plotInitialized()).toBe(true);
+    });
+
+    it('should remain true once set even if litData goes back to null', () => {
+      mockPlotService.litData.set(mockLitData);
+      fixture.detectChanges();
+      expect(component.plotInitialized()).toBe(true);
+
+      mockPlotService.litData.set(null);
+      fixture.detectChanges();
+
+      expect(component.plotInitialized()).toBe(true);
+    });
+  });
+
   describe('Template – loading state', () => {
-    it('should show spinner when loading', () => {
+    it('should show spinner when loading and not yet initialized', () => {
       mockPlotService.loading.set(true);
       fixture.detectChanges();
 
@@ -248,6 +276,18 @@ describe('StudioComponent', () => {
 
     it('should not show spinner when not loading', () => {
       mockPlotService.loading.set(false);
+      fixture.detectChanges();
+
+      const spinner = fixture.nativeElement.querySelector('p-progress-spinner');
+      expect(spinner).toBeFalsy();
+    });
+
+    it('should not show spinner when loading but already initialized', () => {
+      mockPlotService.litData.set(mockLitData);
+      fixture.detectChanges();
+      expect(component.plotInitialized()).toBe(true);
+
+      mockPlotService.loading.set(true);
       fixture.detectChanges();
 
       const spinner = fixture.nativeElement.querySelector('p-progress-spinner');

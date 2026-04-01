@@ -74,7 +74,8 @@ describe('ObstaclesFormComponent', () => {
   beforeEach(async () => {
     mockPlotService = {
       getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
-      isFreePositioningMode: signal(false)
+      isFreePositioningMode: signal(false),
+      loading: signal(false)
     };
     mockObstacleFormService = new MockObstacleFormService();
     const indexSignal = signal<number | null>(null);
@@ -110,6 +111,25 @@ describe('ObstaclesFormComponent', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('isCalculating computed', () => {
+    it('should reflect plotService.loading() as false by default', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true when plotService.loading() is true', () => {
+      (mockPlotService.loading as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+    });
+
+    it('should go back to false when plotService.loading() returns to false', () => {
+      (mockPlotService.loading as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+
+      (mockPlotService.loading as ReturnType<typeof signal>).set(false);
+      expect(component.isCalculating()).toBe(false);
+    });
   });
 
   describe('HTML rendering - form structure', () => {
