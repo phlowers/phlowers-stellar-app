@@ -335,14 +335,20 @@ def compile_wheels(cdn_names: set[str]) -> None:
     if cdn_count:
         print(f"  Skipping {cdn_count} CDN wheels (already compiled)")
  
-    subprocess.run(
+    result = subprocess.run(
         [
             "uvx", "--from", "pyodide-build", "pyodide", "py-compile",
             "--compression-level", "6", str(PYODIDE_DIR),
         ],
         capture_output=True, text=True,
     )
- 
+    
+    if result.returncode:
+        print(f"  ✗ pyodide py-compile failed (exit {result.returncode})")
+        print(f"    stdout: {result.stdout}")
+        print(f"    stderr: {result.stderr}")
+        raise SystemExit(1)
+
     for name in moved:
         shutil.move(str(safe / name), str(PYODIDE_DIR / name))
     safe.rmdir()
