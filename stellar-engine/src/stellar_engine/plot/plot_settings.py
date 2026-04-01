@@ -15,8 +15,6 @@ def get_aspect_ratio(
     y_scale = inputs["y"]
     z_scale = inputs["z"]
     span, supports, insulators = plot_engine.get_points_for_plot()
-    print("Computing aspect ratio...................")
-    print(f"python inputs: {inputs}")
     result = compute_aspect_ratio(
         span,
         supports,
