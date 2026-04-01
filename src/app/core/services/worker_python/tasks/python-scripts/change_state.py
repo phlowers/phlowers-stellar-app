@@ -31,7 +31,14 @@ class ChangeStateInput:
 
 
 def change_state(js_inputs: dict):
-    global engine, plt_line, base_plt_line, base_engine, js_to_python, apply_span_loads, get_coordinates
+    global \
+        engine, \
+        plt_line, \
+        base_plt_line, \
+        base_engine, \
+        js_to_python, \
+        apply_span_loads, \
+        get_coordinates
 
     # logger.debug("python_inputs: ", str(js_inputs))
     change_state_inputs = js_to_python(js_inputs)  # type: ignore
@@ -53,9 +60,12 @@ def change_state(js_inputs: dict):
         wind_sense="clockwise",
     )
     section_length = len(engine.section_array.data)
-    base_section_length = len(
-        base_engine.section_array.data) if base_engine else section_length
+    base_section_length = (
+        len(base_engine.section_array.data) if base_engine else section_length
+    )
     return {
         "current": get_coordinates(plt_line, False, 0, section_length - 1),
-        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1) if base_plt_line else None
+        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
+        if base_plt_line
+        else None,
     }
