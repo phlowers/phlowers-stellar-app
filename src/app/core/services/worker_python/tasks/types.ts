@@ -6,7 +6,7 @@
  */
 
 import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@shared/domain';
-import { View } from '@shared/types/plot.types';
+import { AxesNorms, View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { Dictionary } from 'lodash';
 
@@ -49,7 +49,9 @@ export enum Task {
   // calculate obstacles distances
   calculateObstaclesDistances = 'calculateObstaclesDistances',
   /** Apply a cable length modification (lengthen or shorten) on a span */
-  cableModification = 'cableModification'
+  cableModification = 'cableModification',
+  // get aspect ratio for plotting scale
+  getAspectRatio = 'getAspectRatio'
 }
 
 /**
@@ -278,6 +280,7 @@ export interface TaskInputs {
     distanceSupportRef: number;
     supportRef: 'LEFT' | 'RIGHT';
   };
+  [Task.getAspectRatio]: AxesNorms;
 }
 
 export interface DistancePoint {
@@ -368,4 +371,9 @@ export interface TaskOutputs {
   [Task.calculateObstaclesDistances]: Distance[];
   /** Output from cableModification task: recalculated geometry with optional base state */
   [Task.cableModification]: GetSectionWithBaseOutput;
+  [Task.getAspectRatio]: {
+    x: number;
+    y: number;
+    z: number;
+  };
 }
