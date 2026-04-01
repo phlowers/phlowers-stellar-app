@@ -14,7 +14,10 @@ from stellar_engine.entities.inputs import (
     SpanLoad,
     TemperatureCalculationInputs,
 )
-from stellar_engine.entities.output import get_coordinates, get_section_middle_span
+from stellar_engine.entities.output import (
+    get_coordinates,
+    get_section_middle_span,
+)
 
 __all__ = [
     "GuyingInputs",

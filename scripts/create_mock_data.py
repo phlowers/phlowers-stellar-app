@@ -50,7 +50,7 @@ class Attachment(TypedDict):
     cable_attachment_z: float
     cable_attachment_x: float
     cable_attachment_y: float
-    
+
 
 class Branch(TypedDict):
     uuid: str
@@ -59,7 +59,7 @@ class Branch(TypedDict):
     short_name: str
     created_at: str
     updated_at: str
-    
+
 
 class Section(TypedDict):
     uuid: str
@@ -81,7 +81,7 @@ class Section(TypedDict):
     last_support_number: int
     first_attachment_set: str
     last_attachment_set: str
-    
+
 
 class TransitLink(TypedDict):
     uuid: str
@@ -90,7 +90,7 @@ class TransitLink(TypedDict):
     short_name: str
     created_at: str
     updated_at: str
-    
+
 
 class Tension(TypedDict):
     uuid: str
@@ -99,7 +99,7 @@ class Tension(TypedDict):
     short_name: str
     created_at: str
     updated_at: str
-    
+
 
 class Span(TypedDict):
     uuid: str
@@ -121,7 +121,7 @@ class Span(TypedDict):
     last_attachment_set_internal_id: str
     first_chain_catalog_internal_id: str
     last_chain_catalog_internal_id: str
-    
+
 
 class Line(TypedDict):
     uuid: str
@@ -130,7 +130,7 @@ class Line(TypedDict):
     short_name: str
     created_at: str
     updated_at: str
-    
+
 
 class MaintenanceCenter(TypedDict):
     uuid: str
@@ -138,7 +138,7 @@ class MaintenanceCenter(TypedDict):
     name: str
     created_at: str
     updated_at: str
-    
+
 
 class RegionalMaintenanceCenter(TypedDict):
     uuid: str
@@ -146,7 +146,7 @@ class RegionalMaintenanceCenter(TypedDict):
     name: str
     created_at: str
     updated_at: str
-    
+
 
 def generate_uuid():
     return str(uuid.uuid4())
@@ -154,7 +154,7 @@ def generate_uuid():
 
 def generate_timestamp():
     fake = Faker()
-    return fake.date_time_between(start_date='-2y', end_date='now').isoformat()
+    return fake.date_time_between(start_date="-2y", end_date="now").isoformat()
 
 
 def generate_attachment(index: int) -> Attachment:
@@ -333,7 +333,9 @@ def generate_mock_data(count: int = 10):
         "spans": [generate_span(i) for i in range(count)],
         "lines": [generate_line(i) for i in range(count)],
         "maintenance_centers": [generate_maintenance_center(i) for i in range(count)],
-        "regional_maintenance_centers": [generate_regional_maintenance_center(i) for i in range(count)],
+        "regional_maintenance_centers": [
+            generate_regional_maintenance_center(i) for i in range(count)
+        ],
     }
     return data
 
@@ -341,15 +343,16 @@ def generate_mock_data(count: int = 10):
 if __name__ == "__main__":
     # Generate mock data
     mock_data = generate_mock_data(20)
-    
+
     # Save to JSON file relative to the current file create file if it doesn't exist
-    file_path = os.path.join(os.path.dirname(__file__), "@core/store/database/mock_data.json")
+    file_path = os.path.join(
+        os.path.dirname(__file__), "@core/store/database/mock_data.json"
+    )
     if not os.path.exists(file_path):
         with open(file_path, "a") as f:
             json.dump(mock_data, f, indent=2)
     else:
         with open(file_path, "w+") as f:
             json.dump(mock_data, f, indent=2)
-    
+
     print(f"Mock data generated and saved to mock_data.json")
-    

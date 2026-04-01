@@ -15,10 +15,12 @@ def cable_modification(js_inputs: dict):
 
     _inputs = js_to_python(js_inputs)  # type: ignore
     span_index = _inputs["spanIndex"]
-    width_cable = _inputs["widthCable"]   # 'lengthening' | 'shortening'
+    width_cable = _inputs["widthCable"]  # 'lengthening' | 'shortening'
     size_cable = float(_inputs["sizeCable"])
 
-    print(f"[cable_modification] span_index={span_index}, widthCable={width_cable}, sizeCable={size_cable}m")
+    print(
+        f"[cable_modification] span_index={span_index}, widthCable={width_cable}, sizeCable={size_cable}m"
+    )
 
     # Simulation: convert cable length change → equivalent temperature delta
     # Formula: ΔL = L * α * ΔT  →  ΔT ≈ sizeCable / (span_length_m * 23e-6)
@@ -35,7 +37,9 @@ def cable_modification(js_inputs: dict):
     base_temperature = 15.0  # °C reference
     simulated_temperature = base_temperature + delta_temp
 
-    print(f"[cable_modification] simulated temperature = {simulated_temperature:.1f}°C (delta={delta_temp:+.1f}°C)")
+    print(
+        f"[cable_modification] simulated temperature = {simulated_temperature:.1f}°C (delta={delta_temp:+.1f}°C)"
+    )
 
     engine.solve_adjustment()
     engine.solve_change_state(
@@ -46,10 +50,13 @@ def cable_modification(js_inputs: dict):
     )
 
     section_length = len(engine.section_array.data)
-    base_section_length = len(
-        base_engine.section_array.data) if base_engine else section_length
+    base_section_length = (
+        len(base_engine.section_array.data) if base_engine else section_length
+    )
 
     return {
         "current": get_coordinates(plt_line, False, 0, section_length - 1),
-        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1) if base_plt_line else None
+        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
+        if base_plt_line
+        else None,
     }
