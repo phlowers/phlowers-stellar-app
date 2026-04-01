@@ -5,13 +5,9 @@ import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
 from typing import Optional
 from dataclasses import dataclass
-from mechaphlowers.entities.shapes import SupportShape
-from mechaphlowers.data.measures import PapotoParameterMeasure
-from functools import wraps
 import logging
 from importlib.metadata import version
 import sys
-import json
 
 RESOLUTION = 100
 # init a logger to print to stdout
@@ -21,14 +17,14 @@ logger.setLevel(logging.WARNING)
 
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 logger.info(f"mechaphlowers version: {version('mechaphlowers')}")
-import stellar_engine
+
 logger.info(f"stellar_engine version: {version('stellar_engine')}")
+
 
 def init_config():
     mph.options.graphics.resolution = RESOLUTION
@@ -64,6 +60,7 @@ def set_log_level(js_inputs: dict):
     print("log_level: ", log_level)
     logger.setLevel(logging.DEBUG if log_level else logging.WARNING)
     return {"success": True}
+
 
 def set_resolution(js_inputs):
     python_inputs = js_to_python(js_inputs)
@@ -215,9 +212,9 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
 
     for index, span in enumerate(span_loads[:section_size]):
         try:
-            if span['referenceSupport'] == 'LEFT':
+            if span["referenceSupport"] == "LEFT":
                 load_position_list[index] = span["loadPosition"]
-            elif span['referenceSupport'] == 'RIGHT':
+            elif span["referenceSupport"] == "RIGHT":
                 if 0 <= index < len(span_lengths):
                     span_length = span_lengths[index]
                     load_position_list[index] = span_length - span["loadPosition"]
@@ -231,7 +228,7 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
             else:
                 load_position_list[index] = 0
 
-            if span['type'] == 'punctual':
+            if span["type"] == "punctual":
                 # Use a tiny epsilon instead of 0 so the PlotEngine registers
                 # the load position and returns coordinates in get_loads_coords.
                 # A zero mass causes PlotEngine.get_loads_coords() to return no
@@ -251,7 +248,7 @@ def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
                 index,
                 e,
             )
-    load_mass_kg = units(load_weight_list_daN, 'daN').to('kg').magnitude
+    load_mass_kg = units(load_weight_list_daN, "daN").to("kg").magnitude
     return np.array(load_position_list), np.array(load_mass_kg)
 
 
@@ -290,14 +287,13 @@ def get_coordinates(
     vtl_under_console = list(engine.balance_model.vhl_under_console().vhl)
     # vtl = vtl_under_chain.vtl)
 
-    loads_coords = plt_line.get_loads_coords(
-        project=project, frame_index=middle_span)
+    loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span)
     line_angle_rad = engine.section_array.data.line_angle.to_numpy()
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
         "supports": supports.coords,
-        "line_angle": units(line_angle_rad, 'rad').to('grad').m.tolist(),
+        "line_angle": units(line_angle_rad, "rad").to("grad").m.tolist(),
         "vtl_under_chain": [v.value().tolist() for v in vtl_under_chain],
         "vtl_under_console": [v.value().tolist() for v in vtl_under_console],
         "r_under_chain": engine.balance_model.vhl_under_chain().R.value().tolist(),
@@ -328,8 +324,7 @@ def init_section(js_inputs: dict):
             if condition["uuid"] == input_section["selected_initial_condition_uuid"]
         )
     )
-    input_charges = input_section["charges"] if "charges" in input_section else [
-    ]
+    input_charges = input_section["charges"] if "charges" in input_section else []
     input_charge = (
         None
         if not input_charges
@@ -340,8 +335,7 @@ def init_section(js_inputs: dict):
         )
     )
     initial_condition = (
-        InitialCondition(
-            **input_initial_condition) if input_initial_condition else None
+        InitialCondition(**input_initial_condition) if input_initial_condition else None
     )
     cable = Cable(**input_cable)
 
@@ -418,8 +412,7 @@ def init_section(js_inputs: dict):
         initial_condition.base_temperature if initial_condition else 15
     )
     base_section.angles_sense = "clockwise"
-    base_engine = BalanceEngine(
-        cable_array=cable_array, section_array=base_section)
+    base_engine = BalanceEngine(cable_array=cable_array, section_array=base_section)
     base_plt_line = PlotEngine(base_engine)
     base_engine.solve_adjustment()
     base_engine.solve_change_state()
@@ -454,8 +447,9 @@ def init_section(js_inputs: dict):
     base_section_length = len(base_engine.section_array.data)
     return {
         "current": get_coordinates(plt_line, False, 0, section_length - 1),
-        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
+        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1),
     }
+
 
 def refresh_projection(js_inputs: dict):
     global plt_line, base_plt_line
@@ -465,26 +459,26 @@ def refresh_projection(js_inputs: dict):
     view = python_inputs["view"]
     project = view == "2d"
 
-    current_coords = get_coordinates(
-        plt_line, project, start_support, end_support)
-    base_coords = get_coordinates(
-        base_plt_line, project, start_support, end_support) if base_plt_line else None
+    current_coords = get_coordinates(plt_line, project, start_support, end_support)
+    base_coords = (
+        get_coordinates(base_plt_line, project, start_support, end_support)
+        if base_plt_line
+        else None
+    )
 
     return {
-        "sectionOutput": {
-            "current": current_coords,
-            "base": base_coords
-        },
-        "distances" : []
+        "sectionOutput": {"current": current_coords, "base": base_coords},
+        "distances": [],
     }
 
+
 def add_obstacles(js_inputs: dict):
-    get_coordinates_result = get_coordinates(plt_line, False, 0, len(engine.section_array.data) - 1)
+    get_coordinates_result = get_coordinates(
+        plt_line, False, 0, len(engine.section_array.data) - 1
+    )
     get_coordinates_result["obstacles"] = [
-        {
-            "name": "obstacle_mock",
-            "points": [[80, 20, 0]]
-        }]
+        {"name": "obstacle_mock", "points": [[80, 20, 0]]}
+    ]
     result = {
         "current": get_coordinates_result,
     }
@@ -492,19 +486,23 @@ def add_obstacles(js_inputs: dict):
 
 
 def calculate_obstacles_distances(js_inputs: dict):
-
-    result = [{
-        "obstacleUuid": "obstacle_mock",
-        "points" : [{
-            "pointIndex": 0,
-            "linePoint": [87.13, -8.2, 12.76],
-            "virtualPointHorizontal": [87.13, -8.2, 0],
-            "virtualPointVertical": [80, 20, 12.76],
-            "distanceDiagonal": 234,
-            "distanceHorizontal": 555,
-            "distanceVertical": 666,
-        }]
-    }]
+    result = [
+        {
+            "obstacleUuid": "obstacle_mock",
+            "points": [
+                {
+                    "pointIndex": 0,
+                    "linePoint": [87.13, -8.2, 12.76],
+                    "virtualPointHorizontal": [87.13, -8.2, 0],
+                    "virtualPointVertical": [80, 20, 12.76],
+                    "distanceDiagonal": 234,
+                    "distanceHorizontal": 555,
+                    "distanceVertical": 666,
+                }
+            ],
+        }
+    ]
     return result
+
 
 init_config()
