@@ -45,7 +45,6 @@ export class AppUpdateOrchestratorService {
       this.latestManifest = latestAssets;
 
       if (!latestAssets) {
-        console.warn('ORCHESTRATOR: Could not fetch latest manifest, continuing with cached version');
         this.startupCheckCompleted.set(true);
         return;
       }
