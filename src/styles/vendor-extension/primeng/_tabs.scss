@@ -31,6 +31,10 @@
     grid-template-columns: calc(50% - 0.0625rem) calc(50% - 0.0625rem);
     grid-gap: 0.125rem;
     padding: 0.5rem 1rem 0rem;
+    grid-template-areas:
+      'climate .'
+      'loadMarking cableLengthChange'
+      'cableSupportManip cableSpanManip';
   }
 
   .p-tab {
@@ -57,5 +61,25 @@
 
   .p-tablist-active-bar {
     @apply hidden;
+  }
+
+  .climate {
+    grid-area: climate;
+  }
+
+  .load-marking {
+    grid-area: loadMarking;
+  }
+
+  .cable-length {
+    grid-area: cableLengthChange;
+  }
+
+  .cable-support {
+    grid-area: cableSupportManip;
+  }
+
+  .cable-span {
+    grid-area: cableSpanManip;
   }
 }

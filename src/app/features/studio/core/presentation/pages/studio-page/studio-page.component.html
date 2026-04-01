@@ -175,10 +175,17 @@
           data-testid="load-tabs"
         >
           <p-tablist>
-            <p-tab value="0" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Climate condition</p-tab>
-            <p-tab value="1" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Load / Marking</p-tab>
-            <p-tab value="2" [disabled]="true" i18n>Cable manip. at support</p-tab>
-            <p-tab value="3" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Cable length change</p-tab>
+            <p-tab value="0" [disabled]="!plotService.section()?.selected_charge_uuid" class="climate" i18n>
+              Climate condition
+            </p-tab>
+            <p-tab value="1" [disabled]="!plotService.section()?.selected_charge_uuid" class="load-marking" i18n>
+              Load / Marking
+            </p-tab>
+            <p-tab value="2" [disabled]="!plotService.section()?.selected_charge_uuid" class="cable-length" i18n>
+              Cable length change
+            </p-tab>
+            <p-tab value="3" [disabled]="true" class="cable-support" i18n>Cable manip. at support</p-tab>
+            <p-tab value="4" [disabled]="true" class="cable-span" i18n>Cable manip. at span</p-tab>
           </p-tablist>
 
           @if (!plotService.section()?.charges?.length) {
@@ -211,18 +218,22 @@
               </p-tabpanel>
 
               <p-tabpanel value="2">
-                <p class="m-0">
-                  At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                  deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                  provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                  fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                  est eligendi optio cumque nihil impedit quo minus.
-                </p>
+                <app-cable-length-change></app-cable-length-change>
               </p-tabpanel>
 
               <p-tabpanel value="3">
                 <p class="m-0">
-                  <app-cable-length-change></app-cable-length-change>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse, praesentium eveniet quisquam numquam
+                  maiores cum vel perferendis minus explicabo? Laudantium voluptas facere nobis tenetur ipsum quis et in
+                  quibusdam ea.
+                </p>
+              </p-tabpanel>
+
+              <p-tabpanel value="4">
+                <p class="m-0">
+                  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cumque consequuntur vero, iste ducimus ipsam
+                  soluta ab libero maxime, excepturi quia, veniam nostrum. Debitis necessitatibus veritatis mollitia
+                  numquam? Optio, minus cum.
                 </p>
               </p-tabpanel>
             </p-tabpanels>

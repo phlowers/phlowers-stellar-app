@@ -1018,9 +1018,9 @@
         <source>Cable manip. at support</source>
       </segment>
     </unit>
-    <unit id="285378064919178685">
+    <unit id="7283456687925421567">
       <segment>
-        <source>Cable length change</source>
+        <source> Cable length change </source>
       </segment>
     </unit>
     <unit id="8033045192563886902">
@@ -2895,11 +2895,6 @@
         <source>Cable slope right att.:</source>
       </segment>
     </unit>
-    <unit id="1215291740212922013">
-      <segment>
-        <source>Add a description to the charge case</source>
-      </segment>
-    </unit>
     <unit id="2587240527868724590">
       <segment>
         <source>CC</source>
@@ -2983,6 +2978,26 @@
     <unit id="4323470180912194028">
       <segment>
         <source>Copy</source>
+      </segment>
+    </unit>
+    <unit id="1964106600703167330">
+      <segment>
+        <source>Cable manip. at span</source>
+      </segment>
+    </unit>
+    <unit id="2033387769986799452">
+      <segment>
+        <source>Add a description to the charge case</source>
+      </segment>
+    </unit>
+    <unit id="5405643706975513454">
+      <segment>
+        <source> Climate condition </source>
+      </segment>
+    </unit>
+    <unit id="5574365677854298291">
+      <segment>
+        <source> Load / Marking </source>
       </segment>
     </unit>
   </file>
