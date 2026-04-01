@@ -12,7 +12,7 @@ from stellar_engine.tools import (
     temperature,
     papoto,
 )
-from stellar_engine.plot import plot_2d, supports_coords
+from stellar_engine.plot import plot_2d, plot_settings, supports_coords
 
 # duplicate from functions.py
 
@@ -63,3 +63,8 @@ def refresh_projection(js_inputs: dict):
     global plt_line, base_plt_line
     python_inputs = js_to_python(js_inputs)
     return plot_2d.refresh_projection(python_inputs, engine, plt_line, base_plt_line)
+
+
+def set_resolution(js_inputs):
+    return plot_settings.set_resolution(js_inputs.to_py())
+
