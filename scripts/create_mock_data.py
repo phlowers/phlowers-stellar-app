@@ -355,4 +355,4 @@ if __name__ == "__main__":
         with open(file_path, "w+") as f:
             json.dump(mock_data, f, indent=2)
 
-    print(f"Mock data generated and saved to mock_data.json")
+    print("Mock data generated and saved to mock_data.json")
