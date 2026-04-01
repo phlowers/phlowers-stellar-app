@@ -9,13 +9,12 @@
 import { loadPyodide } from 'pyodide';
 import functions from './tasks/python-scripts/functions.py';
 import tools from './tasks/python-scripts/api.py';
-import change_state from './tasks/python-scripts/change_state.py';
 import cable_modification from './tasks/python-scripts/cable_modification.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [functions, change_state, tools, cable_modification];
+const pythonFiles = [functions, tools, cable_modification];
 
 /** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;

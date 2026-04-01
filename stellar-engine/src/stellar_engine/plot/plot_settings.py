@@ -5,8 +5,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import mechaphlowers
-from mechaphlowers import PlotEngine
-from mechaphlowers.plotting.utils import compute_aspect_ratio
+
 
 def set_resolution(inputs):
     resolution = inputs["resolution"]
