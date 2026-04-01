@@ -255,6 +255,7 @@
         type="button"
         (click)="obstacleFormService.calculateAndSave()"
         [disabled]="!obstacleFormService.canCalculateAndSave()"
+        [btnLoading]="isCalculating()"
         data-testid="calculate-save"
       >
         <app-icon icon="rocket_launch" />

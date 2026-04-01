@@ -54,6 +54,7 @@ export class ObstaclesFormComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);
+  readonly isCalculating = computed(() => this.plotService.loading());
 
   constructor() {
     this.obstaclesService.ready
