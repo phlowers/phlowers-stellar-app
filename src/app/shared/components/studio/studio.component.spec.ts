@@ -3,6 +3,7 @@ import { Component, input, signal, WritableSignal } from '@angular/core';
 import { StudioComponent } from './studio.component';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { PlotService } from '@services/plot/plot.service';
+import { NotificationService } from '@core/services/notification/notification.service';
 import { TaskError, DataError, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';
@@ -83,7 +84,11 @@ const mockLitData: GetSectionOutput = {
   tension_inf: [],
   horizontal_distance: [],
   arc_length: [],
-  T_h: []
+  T_h: [],
+  slope_left: [],
+  slope_right: [],
+  sag: [],
+  sag_s2: []
 };
 
 describe('StudioComponent', () => {
@@ -95,8 +100,9 @@ describe('StudioComponent', () => {
     loading: WritableSignal<boolean>;
     section: WritableSignal<Section | null>;
     workerReady: WritableSignal<boolean>;
-    refreshSection: vi.Mock;
+    refreshSection: ReturnType<typeof vi.fn>;
   };
+  let mockNotificationService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     mockPlotService = {
@@ -107,10 +113,14 @@ describe('StudioComponent', () => {
       workerReady: signal<boolean>(false),
       refreshSection: vi.fn()
     };
+    mockNotificationService = { error: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [StudioComponent],
-      providers: [{ provide: PlotService, useValue: mockPlotService }]
+      providers: [
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: NotificationService, useValue: mockNotificationService }
+      ]
     })
       .overrideComponent(StudioComponent, {
         remove: { imports: [SectionPlotComponent] },
@@ -133,35 +143,44 @@ describe('StudioComponent', () => {
       expect(component['plotService']).toBe(mockPlotService);
     });
 
+    it('should inject NotificationService', () => {
+      expect(component['notificationService']).toBe(mockNotificationService);
+    });
+
     it('should have isPreview input set to false', () => {
       expect(component.isPreview()).toBe(false);
     });
   });
 
-  describe('errorString computed', () => {
-    it('should format null error', () => {
+  describe('Effect – error notification', () => {
+    it('should not call notificationService.error when error is null', () => {
       mockPlotService.error.set(null);
-      expect(component.errorString()).toBe(formatStudioError(null));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).not.toHaveBeenCalled();
     });
 
-    it('should format TaskError.CALCULATION_ERROR', () => {
+    it('should call notificationService.error with formatted message on CALCULATION_ERROR', () => {
       mockPlotService.error.set(TaskError.CALCULATION_ERROR);
-      expect(component.errorString()).toBe(formatStudioError(TaskError.CALCULATION_ERROR));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.CALCULATION_ERROR));
     });
 
-    it('should format DataError.NO_CABLE_FOUND', () => {
+    it('should call notificationService.error with formatted message on NO_CABLE_FOUND', () => {
       mockPlotService.error.set(DataError.NO_CABLE_FOUND);
-      expect(component.errorString()).toBe(formatStudioError(DataError.NO_CABLE_FOUND));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(DataError.NO_CABLE_FOUND));
     });
 
-    it('should format TaskError.SOLVER_DID_NOT_CONVERGE', () => {
+    it('should call notificationService.error with formatted message on SOLVER_DID_NOT_CONVERGE', () => {
       mockPlotService.error.set(TaskError.SOLVER_DID_NOT_CONVERGE);
-      expect(component.errorString()).toBe(formatStudioError(TaskError.SOLVER_DID_NOT_CONVERGE));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.SOLVER_DID_NOT_CONVERGE));
     });
 
-    it('should format TaskError.PYODIDE_LOAD_ERROR', () => {
+    it('should call notificationService.error with formatted message on PYODIDE_LOAD_ERROR', () => {
       mockPlotService.error.set(TaskError.PYODIDE_LOAD_ERROR);
-      expect(component.errorString()).toBe(formatStudioError(TaskError.PYODIDE_LOAD_ERROR));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.PYODIDE_LOAD_ERROR));
     });
   });
 
@@ -237,23 +256,24 @@ describe('StudioComponent', () => {
   });
 
   describe('Template – error state', () => {
-    it('should show error message when error is set', () => {
+    it('should show rocket image when error is set', () => {
       mockPlotService.loading.set(false);
       mockPlotService.error.set(TaskError.CALCULATION_ERROR);
       fixture.detectChanges();
 
-      const errorEl = fixture.nativeElement.querySelector('.text-red-500');
-      expect(errorEl).toBeTruthy();
-      expect(errorEl.textContent).toContain(formatStudioError(TaskError.CALCULATION_ERROR));
+      const errorImg = fixture.nativeElement.querySelector('[data-testid="studio-error-image"]') as HTMLImageElement;
+      expect(errorImg).toBeTruthy();
+      expect(errorImg.tagName).toBe('IMG');
+      expect(errorImg.src).toContain('rocket.png');
     });
 
-    it('should not show error message when no error', () => {
+    it('should not show rocket image when no error', () => {
       mockPlotService.loading.set(false);
       mockPlotService.error.set(null);
       fixture.detectChanges();
 
-      const errorEl = fixture.nativeElement.querySelector('.text-red-500');
-      expect(errorEl).toBeFalsy();
+      const errorImg = fixture.nativeElement.querySelector('[data-testid="studio-error-image"]');
+      expect(errorImg).toBeFalsy();
     });
   });
 
@@ -283,6 +303,17 @@ describe('StudioComponent', () => {
 
       const plot = fixture.nativeElement.querySelector('app-section-plot');
       expect(plot).toBeFalsy();
+    });
+  });
+
+  describe('ngOnDestroy', () => {
+    it('should reset plotService.error to null on destroy', () => {
+      mockPlotService.error.set(TaskError.CALCULATION_ERROR);
+      fixture.detectChanges();
+
+      fixture.destroy();
+
+      expect(mockPlotService.error()).toBeNull();
     });
   });
 });
