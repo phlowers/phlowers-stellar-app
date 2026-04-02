@@ -12,7 +12,7 @@ from stellar_engine.tools import (
     temperature,
     papoto,
 )
-from stellar_engine.plot import supports_coords
+from stellar_engine.plot import obstacles, supports_coords
 
 # duplicate from functions.py
 
@@ -63,3 +63,14 @@ def get_support_coordinates(js_inputs):
 #     global plt_line, base_plt_line
 #     python_inputs = js_to_python(js_inputs)
 #     return plot_2d.refresh_projection(python_inputs, engine, plt_line, base_plt_line)
+
+
+
+def add_obstacles(js_inputs):
+    global engine, plt_line
+    return obstacles.add_obstacles(js_inputs.to_py(), engine, plt_line)
+
+
+
+def calculate_obstacles_distances(js_inputs):
+    return obstacles.compute_distances(js_inputs.to_py())

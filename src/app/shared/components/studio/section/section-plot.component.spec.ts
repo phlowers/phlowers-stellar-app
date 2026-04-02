@@ -123,6 +123,7 @@ const mockSection: Section = {
 const mockObstacle: Obstacle = {
   uuid: 'obs-1',
   supportUuid: 's0',
+  supportIndex: 0,
   name: 'Test Obstacle',
   type: 'House',
   altitudeType: 'absolute',

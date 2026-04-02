@@ -236,6 +236,7 @@ export class PlotService {
     } else if (currentLitData) {
       // Re-add obstacles from the section so that annotations and distance traces are preserved
       // across section reloads (e.g. re-opening the study or after a save).
+      console.log("refreshSection")
       for (const obstacle of section.obstacles) {
         const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
         if (obstacleResult?.current) {
@@ -403,7 +404,7 @@ export class PlotService {
         this.baseLitData.set(loadResult.base ?? null);
       }
     }
-
+    console.log("reapplyObstacles")
     for (const obstacle of obstacles) {
       const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
       if (obstacleResult?.current) {

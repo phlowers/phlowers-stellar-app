@@ -287,9 +287,11 @@ export class ObstacleFormService {
     if (!formValue.uuid) {
       this.form.get('uuid')?.setValue(uuid, { emitEvent: false });
     }
+    const supportUuid = formValue.supportUuid!;
     return {
       uuid,
-      supportUuid: formValue.supportUuid!,
+      supportUuid,
+      supportIndex: this.plotService.getSupportIndex(supportUuid),
       name: formValue.name ?? '',
       type: formValue.type ?? '',
       altitudeType: formValue.altitudeType ?? '',

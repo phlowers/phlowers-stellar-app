@@ -45,7 +45,7 @@ export enum Task {
   // Get Python-side configuration constants
   getConfig = 'getConfig',
   // Add obstacles coordinates
-  addObstacle = 'addObstacles',
+  addObstacle = 'addObstacle',
   // calculate obstacles distances
   calculateObstaclesDistances = 'calculateObstaclesDistances',
   /** Apply a cable length modification (lengthen or shorten) on a span */
@@ -262,7 +262,7 @@ export interface TaskInputs {
   };
   /** Inputs for getConfig task: no inputs */
   [Task.getConfig]: undefined;
-  // Inputs for addObstacles task
+  // Inputs for addObstacle task
   [Task.addObstacle]: Obstacle;
   // Inputs for calculateObstaclesDistances task
   [Task.calculateObstaclesDistances]: {
@@ -362,7 +362,7 @@ export interface TaskOutputs {
   [Task.getConfig]: {
     resolution: number;
   };
-  // Output from addObstacles task
+  // Output from addObstacle task
   [Task.addObstacle]: GetSectionWithBaseOutput;
   // Output from calculateObstaclesDistances task
   [Task.calculateObstaclesDistances]: Distance[];
