@@ -7,13 +7,13 @@
 """Plot package: Visualization and solver execution utilities."""
 
 from stellar_engine.plot.plot_2d import refresh_projection
+from stellar_engine.plot.plot_settings import get_aspect_ratio
 from stellar_engine.plot.run_solver import (
     apply_span_loads,
     change_state,
     parse_span_loads,
 )
 from stellar_engine.plot.supports_coords import get_support_coordinates
-from stellar_engine.plot.plot_settings import get_aspect_ratio
 
 __all__ = [
     "refresh_projection",
