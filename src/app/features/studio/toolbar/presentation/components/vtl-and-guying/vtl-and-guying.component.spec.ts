@@ -139,7 +139,9 @@ describe('VhlAndGuyingComponent', () => {
     it('should be true during onCalculate and false after', async () => {
       let resolveTask!: (value: { result: TaskOutputs[Task.calculateGuying]; error: TaskError | null }) => void;
       mockWorkerPythonService.runTask.mockReturnValueOnce(
-        new Promise((res) => { resolveTask = res; })
+        new Promise((res) => {
+          resolveTask = res;
+        })
       );
 
       component.form.controls.altitude.setValue(10);
@@ -150,7 +152,10 @@ describe('VhlAndGuyingComponent', () => {
       const calcPromise = component.onCalculate();
       expect(component.isCalculating()).toBe(true);
 
-      resolveTask({ result: { tensionInGuy: 0, guyAngle: 0, chargeVUnderConsole: 0, chargeHUnderConsole: 0, chargeLIfPulley: 0 }, error: null });
+      resolveTask({
+        result: { tensionInGuy: 0, guyAngle: 0, chargeVUnderConsole: 0, chargeHUnderConsole: 0, chargeLIfPulley: 0 },
+        error: null
+      });
       await calcPromise;
 
       expect(component.isCalculating()).toBe(false);

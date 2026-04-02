@@ -250,7 +250,13 @@
 </div>
 
 <div class="text-right">
-  <button app-btn (click)="calculatePapoto()" [disabled]="!isFormValid()" [btnLoading]="isCalculating()" data-testid="calculate-papoto-btn">
+  <button
+    app-btn
+    (click)="calculatePapoto()"
+    [disabled]="!isFormValid()"
+    [btnLoading]="isCalculating()"
+    data-testid="calculate-papoto-btn"
+  >
     <app-icon icon="rocket_launch" />
     <ng-container i18n>Calculate</ng-container>
   </button>

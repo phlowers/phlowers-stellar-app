@@ -101,7 +101,9 @@ describe('Papoto component', () => {
     it('should be true during calculation and false after', async () => {
       let resolveTask!: (value: { result: TaskOutputs[Task.calculatePapoto]; error: TaskError | null }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
-        new Promise((res) => { resolveTask = res; })
+        new Promise((res) => {
+          resolveTask = res;
+        })
       );
 
       component.updateField('leftSupport', '12');
@@ -121,7 +123,10 @@ describe('Papoto component', () => {
       const calcPromise = component.calculatePapoto();
       expect(component.isCalculating()).toBe(true);
 
-      resolveTask({ result: { parameter: 0, parameter_1_2: 0, parameter_2_3: 0, parameter_1_3: 0, check_validity: true }, error: null });
+      resolveTask({
+        result: { parameter: 0, parameter_1_2: 0, parameter_2_3: 0, parameter_1_3: 0, check_validity: true },
+        error: null
+      });
       await calcPromise;
 
       expect(component.isCalculating()).toBe(false);

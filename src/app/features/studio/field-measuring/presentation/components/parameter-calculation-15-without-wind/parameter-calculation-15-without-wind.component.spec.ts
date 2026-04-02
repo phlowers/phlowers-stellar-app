@@ -141,9 +141,14 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     });
 
     it('should be true during calculation and false after', async () => {
-      let resolveTask!: (value: { result: TaskOutputs[Task.calculateParameter15CWithoutWind]; error: TaskError | null }) => void;
+      let resolveTask!: (value: {
+        result: TaskOutputs[Task.calculateParameter15CWithoutWind];
+        error: TaskError | null;
+      }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
-        new Promise((res) => { resolveTask = res; })
+        new Promise((res) => {
+          resolveTask = res;
+        })
       );
 
       component.updateMeasureData('updateMode15C', 'manual');
@@ -155,7 +160,10 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       const calcPromise = component.calculateParameter15C();
       expect(component.isCalculating()).toBe(true);
 
-      resolveTask({ result: { parameter15CMinusUncertainty: 0, parameter15C: 0, parameter15CPlusUncertainty: 0 }, error: null });
+      resolveTask({
+        result: { parameter15CMinusUncertainty: 0, parameter15C: 0, parameter15CPlusUncertainty: 0 },
+        error: null
+      });
       await calcPromise;
 
       expect(component.isCalculating()).toBe(false);

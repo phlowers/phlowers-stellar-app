@@ -135,7 +135,9 @@ describe('TemperatureCalculationComponent', () => {
     it('should be true during calculation and false after', async () => {
       let resolveTask!: (value: { result: TaskOutputs[Task.temperatureCalculation]; error: TaskError | null }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
-        new Promise((res) => { resolveTask = res; })
+        new Promise((res) => {
+          resolveTask = res;
+        })
       );
 
       component.updateField('cableName', 'ASTER570');
