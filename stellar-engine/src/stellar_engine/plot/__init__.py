@@ -13,6 +13,7 @@ from stellar_engine.plot.run_solver import (
     parse_span_loads,
 )
 from stellar_engine.plot.supports_coords import get_support_coordinates
+from stellar_engine.plot.plot_settings import get_aspect_ratio
 
 __all__ = [
     "refresh_projection",
@@ -20,4 +21,5 @@ __all__ = [
     "apply_span_loads",
     "parse_span_loads",
     "change_state",
+    "get_aspect_ratio",
 ]
