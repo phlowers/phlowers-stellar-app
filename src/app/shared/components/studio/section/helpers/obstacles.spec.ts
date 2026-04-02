@@ -18,6 +18,7 @@ const makeLitData = (obstacles: { name: string; points: [number, number, number]
 const makeObstacle = (overrides: Partial<Obstacle> = {}): Obstacle => ({
   uuid: 'obs-1',
   supportUuid: 'sup-1',
+  supportIndex: 0,
   name: 'Obstacle 1',
   type: 'tree',
   altitudeType: 'absolute',

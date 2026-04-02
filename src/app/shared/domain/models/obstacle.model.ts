@@ -13,6 +13,8 @@ export interface Obstacle {
   uuid: string;
   /** UUID of the support this obstacle is referenced from */
   supportUuid: string;
+  /** Index of the support linked to supportUuid */
+  supportIndex: number;
   /** Display name of the obstacle */
   name: string;
   /** Type of obstacle (e.g., building, tree, river) */

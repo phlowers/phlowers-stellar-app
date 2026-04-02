@@ -208,10 +208,10 @@ def generate_section_array(supports: list[Support]):
     return pd.DataFrame(section_data)
 
 
-engine = None
-plt_line = None
-base_engine = None
-base_plt_line = None
+engine: BalanceEngine
+plt_line: PlotEngine
+base_engine: BalanceEngine
+base_plt_line: PlotEngine
 
 
 def parse_span_loads(span_loads: list) -> tuple[np.ndarray, np.ndarray]:
@@ -535,38 +535,6 @@ def refresh_projection(js_inputs: dict):
         "distances": [],
     }
 
-
-def add_obstacles(js_inputs: dict):
-    get_coordinates_result = get_coordinates(
-        plt_line, False, 0, len(engine.section_array.data) - 1
-    )
-    get_coordinates_result["obstacles"] = [
-        {"name": "obstacle_mock", "points": [[80, 20, 0]]}
-    ]
-    result = {
-        "current": get_coordinates_result,
-    }
-    return result
-
-
-def calculate_obstacles_distances(js_inputs: dict):
-    result = [
-        {
-            "obstacleUuid": "obstacle_mock",
-            "points": [
-                {
-                    "pointIndex": 0,
-                    "linePoint": [87.13, -8.2, 12.76],
-                    "virtualPointHorizontal": [87.13, -8.2, 0],
-                    "virtualPointVertical": [80, 20, 12.76],
-                    "distanceDiagonal": 234,
-                    "distanceHorizontal": 555,
-                    "distanceVertical": 666,
-                }
-            ],
-        }
-    ]
-    return result
 
 
 init_config()

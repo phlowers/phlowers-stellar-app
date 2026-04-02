@@ -12,7 +12,7 @@ from stellar_engine.tools import (
     temperature,
     papoto,
 )
-from stellar_engine.plot import plot_settings, supports_coords
+from stellar_engine.plot import plot_settings, supports_coords, obstacles
 
 # duplicate from functions.py
 
@@ -73,3 +73,14 @@ def get_aspect_ratio(js_inputs):
 def get_wind_incidence(js_inputs):
     python_inputs = js_to_python(js_inputs)
     return temperature.get_wind_attack_angle(python_inputs)
+
+
+def add_obstacles(js_inputs):
+    global engine, plt_line
+    return obstacles.add_obstacles(js_inputs.to_py(), engine, plt_line)
+
+
+
+def calculate_obstacles_distances(js_inputs):
+    return obstacles.compute_distances(js_inputs.to_py())
+

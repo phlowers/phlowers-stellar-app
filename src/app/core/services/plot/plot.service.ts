@@ -461,7 +461,6 @@ export class PlotService {
         this.baseLitData.set(loadResult.base ?? null);
       }
     }
-
     for (const obstacle of obstacles) {
       const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
       if (obstacleResult?.current) {
