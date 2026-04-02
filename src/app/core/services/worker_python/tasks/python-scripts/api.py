@@ -94,4 +94,3 @@ def clear_obstacles():
 
 def calculate_obstacles_distances(js_inputs):
     return obstacles.compute_distances(js_inputs.to_py())
-
