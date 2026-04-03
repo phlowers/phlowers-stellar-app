@@ -1,4 +1,5 @@
-import { TaskError, DataError } from '@core/services/worker_python/tasks/types';
+import { DataError, PythonErrorCode, TaskError } from '@core/services/worker_python/tasks/types';
+import { formatPythonError } from '@core/services/worker_python/tasks/python-error-messages';
 
 /** Map of known error codes to their localized display messages. */
 const ERROR_MESSAGES = {
@@ -10,8 +11,16 @@ const ERROR_MESSAGES = {
 
 /**
  * Formats a `TaskError` or `DataError` into a localized human-readable string.
- * Returns a generic "Unknown error" message when the error code is unrecognized.
+ * If a `pythonErrorCode` is provided and recognized, its message takes priority.
+ * Falls back to the `ERROR_MESSAGES` map, then to a generic "Unknown error" message.
  */
-export const formatStudioError = (error: TaskError | DataError | null) => {
+export const formatStudioError = (
+  error: TaskError | DataError | null,
+  pythonErrorCode: PythonErrorCode | null = null
+): string => {
+  const pythonMessage = formatPythonError(pythonErrorCode);
+  if (pythonMessage !== null) {
+    return pythonMessage;
+  }
   return ERROR_MESSAGES[error as keyof typeof ERROR_MESSAGES] ?? $localize`Unknown error`;
 };

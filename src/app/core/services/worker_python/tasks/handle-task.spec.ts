@@ -57,7 +57,7 @@ describe('Task handlers', () => {
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockResult, runTime: 500, error: null });
+      expect(result).toEqual({ result: mockResult, runTime: 500, error: null, pythonErrorCode: null });
     });
 
     it('should handle getLit task', async () => {
@@ -90,7 +90,7 @@ describe('Task handlers', () => {
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockResult, runTime: 200, error: null });
+      expect(result).toEqual({ result: mockResult, runTime: 200, error: null, pythonErrorCode: null });
     });
 
     it('should handle unknown task', async () => {
@@ -106,7 +106,8 @@ describe('Task handlers', () => {
       expect(result).toEqual({
         result: null,
         runTime: expect.any(Number),
-        error: 'CALCULATION_ERROR'
+        error: 'CALCULATION_ERROR',
+        pythonErrorCode: null
       });
     });
   });

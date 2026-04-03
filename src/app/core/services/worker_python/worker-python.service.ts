@@ -8,7 +8,7 @@
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
+import { PythonErrorCode, Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
 
 /**
  * Service for managing the Python (Pyodide) web worker.
@@ -56,8 +56,10 @@ export class WorkerPythonService {
     runTime: 0
   });
   /** Map of pending task IDs to their resolve callbacks, used to correlate worker responses */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handlerMap: Record<string, (result: any, error: TaskError | null) => void> = {};
+  handlerMap: Record<
+    string,
+    (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void
+  > = {};
 
   /**
    * Observable indicating whether the worker is ready.
@@ -100,7 +102,7 @@ export class WorkerPythonService {
         const activateDebugLogs = localStorage.getItem('activateDebugLogs') === 'true';
         this.runTask(Task.setLogLevel, { activateDebugLogs });
       } else if (data.id) {
-        this.handlerMap[data.id](data.result, data.error);
+        this.handlerMap[data.id](data.result, data.error, data.pythonErrorCode ?? null);
       }
     };
   }
@@ -127,14 +129,18 @@ export class WorkerPythonService {
   runTask<taskId extends Task>(
     task: taskId,
     inputs: TaskInputs[taskId]
-  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null }> {
+  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
     const id = uuidv4();
     return new Promise((resolve) => {
       this.worker?.postMessage({ task, inputs, id });
-      this.handlerMap[id] = (result: TaskOutputs[taskId], error: TaskError | null) => {
+      this.handlerMap[id] = ((
+        result: TaskOutputs[taskId],
+        error: TaskError | null,
+        pythonErrorCode: PythonErrorCode | null
+      ) => {
         delete this.handlerMap[id];
-        resolve({ result, error });
-      };
+        resolve({ result, error, pythonErrorCode });
+      }) as (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void;
     });
   }
 }
