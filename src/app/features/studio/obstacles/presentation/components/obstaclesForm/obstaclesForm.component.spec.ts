@@ -57,7 +57,12 @@ class MockObstacleFormService {
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
-  let mockPlotService: { getSpanOptions: vi.Mock; isFreePositioningMode: ReturnType<typeof signal> };
+  let mockPlotService: {
+    getSpanOptions: vi.Mock;
+    isFreePositioningMode: ReturnType<typeof signal<boolean>>;
+    loading: ReturnType<typeof signal<boolean>>;
+    section: ReturnType<typeof signal<null>>;
+  };
   let mockObstacleFormService: MockObstacleFormService;
   let obstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
@@ -75,7 +80,8 @@ describe('ObstaclesFormComponent', () => {
     mockPlotService = {
       getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
       isFreePositioningMode: signal(false),
-      loading: signal(false)
+      loading: signal(false),
+      section: signal(null)
     };
     mockObstacleFormService = new MockObstacleFormService();
     const indexSignal = signal<number | null>(null);

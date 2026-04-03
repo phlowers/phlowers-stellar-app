@@ -169,7 +169,7 @@ describe('ClimateComponent effect edge cases', () => {
   });
 });
 
-describe('ClimateComponent (Jest)', () => {
+describe('ClimateComponent', () => {
   let component: ClimateComponent;
   let fixture: ComponentFixture<ClimateComponent>;
 
