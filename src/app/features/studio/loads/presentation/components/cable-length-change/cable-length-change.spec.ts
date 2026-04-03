@@ -53,8 +53,8 @@ describe('CableLengthChangeComponent', () => {
       refreshCamera: vi.fn(),
       getSupportIndex: vi.fn().mockReturnValue(0),
       getSupportOptions: vi.fn().mockReturnValue([
-        { label: 1, value: 'LEFT' },
-        { label: 2, value: 'RIGHT' }
+        { label: '1', value: 'LEFT' },
+        { label: '2', value: 'RIGHT' }
       ]),
       plotOptionsChange: vi.fn(),
       getSpanOptions: signal([{ label: '1 - 2', value: 'support-uuid-1' }])
@@ -470,7 +470,7 @@ describe('CableLengthChangeComponent', () => {
     });
 
     it('should clear supportRefOptions', () => {
-      component.supportRefOptions.set([{ label: 1, value: 'LEFT' }]);
+      component.supportRefOptions.set([{ label: '1', value: 'LEFT' }]);
       component.resetForm();
       // Selon la logique actuelle, les options peuvent être réinitialisées à 0, 1 ou 2
       expect([0, 1, 2]).toContain(component.supportRefOptions().length);
