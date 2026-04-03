@@ -21,6 +21,7 @@ import {
 
 import {
   USER_SCHEMA,
+  USER_SCHEMA_V3,
   STUDY_SCHEMA,
   CATALOG_ATTACHMENT_SCHEMA,
   CATALOG_CABLE_SCHEMA,
@@ -49,8 +50,8 @@ import {
  * @category Infrastructure
  */
 export class AppDatabase extends Dexie {
-  /** Table storing user accounts */
-  users!: Table<UserEntity, number>;
+  /** Table storing user accounts (primary key: email string) */
+  users!: Table<UserEntity, string>;
   /** Table storing power line studies */
   studies!: Table<StudyEntity, string>;
 
@@ -89,6 +90,19 @@ export class AppDatabase extends Dexie {
 
     this.version(2).stores({
       ...USER_SCHEMA,
+      ...STUDY_SCHEMA,
+      ...CATALOG_ATTACHMENT_SCHEMA,
+      ...CATALOG_CABLE_SCHEMA,
+      ...CATALOG_CHAIN_SCHEMA,
+      ...CATALOG_LINE_SCHEMA,
+      ...CATALOG_MAINTENANCE_SCHEMA,
+      ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+      ...METADATA_SCHEMA
+    });
+
+    // V3: adds OIDC claims fields and sub index on users table.
+    this.version(3).stores({
+      ...USER_SCHEMA_V3,
       ...STUDY_SCHEMA,
       ...CATALOG_ATTACHMENT_SCHEMA,
       ...CATALOG_CABLE_SCHEMA,
