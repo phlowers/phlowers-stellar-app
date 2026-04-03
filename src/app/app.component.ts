@@ -6,19 +6,13 @@
  */
 import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
-import { InputTextModule } from 'primeng/inputtext';
 import { NotificationService } from '@services/notification/notification.service';
-import { OnlineService } from '@services/online/online.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { UserService } from '@services/user/user.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { AssetList, UpdateService } from '@services/worker_update/worker_update.service';
+import { AssetManifest, UpdateService } from '@services/worker_update/worker_update.service';
 import { StorageService } from '@services/storage/storage.service';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -29,20 +23,15 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { DividerModule } from 'primeng/divider';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ProgressBarModule } from 'primeng/progressbar';
-
-/** Regex pattern for validating email addresses. */
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+import { DialogModule } from 'primeng/dialog';
 
 const modules = [
   RouterModule,
   CommonModule,
-  FormsModule,
   ToastModule,
-  InputTextModule,
   DialogModule,
   ButtonComponent,
   IconComponent,
-  ReactiveFormsModule,
   DividerModule,
   ProgressBarModule
 ];
@@ -50,8 +39,8 @@ const modules = [
 /**
  * Root application component.
  *
- * Handles user registration, service worker setup, database initialization,
- * online/offline status monitoring, and application update prompts.
+ * Handles catalog CSV setup, online/offline status monitoring, and application update prompts.
+ * User authentication is handled by AuthService (OIDC via Apache) and APP_INITIALIZER.
  */
 @Component({
   selector: 'app-root',
@@ -63,18 +52,12 @@ const modules = [
 })
 export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
-  readonly userDialog = signal(false);
   readonly isUpdateDialogOpen = signal(false);
-  form: FormGroup<{
-    email: FormControl<string | null>;
-  }>;
 
   readonly submitted = signal(false);
   private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
-  private readonly userService = inject(UserService);
-  private readonly onlineService = inject(OnlineService);
   readonly updateService = inject(UpdateService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
@@ -84,9 +67,6 @@ export class AppComponent implements OnInit {
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
-  private readonly online = toSignal(this.onlineService.online$, { initialValue: false });
-  private readonly storageReady = toSignal(this.storageService.ready$, { initialValue: false });
-  private readonly needUpdate = toSignal(this.updateService.needUpdate$, { initialValue: false });
 
   constructor() {
     this.csvImporters = {
@@ -98,27 +78,8 @@ export class AppComponent implements OnInit {
       'obstacle_type_rte.csv': () => this.obstacleTypesService.importFromFile()
     };
 
-    this.form = new FormGroup({
-      email: new FormControl<string>('', [Validators.required, Validators.pattern(emailRegex)])
-    });
-
     effect(() => {
-      if (this.online()) {
-        this.updateService.checkAppVersion({ silent: true });
-      }
-    });
-
-    effect(() => {
-      if (this.storageReady()) {
-        this.userService.getUser().then((user) => {
-          this.userDialog.set(!user);
-          this.setupData();
-        });
-      }
-    });
-
-    effect(() => {
-      this.isUpdateDialogOpen.set(this.needUpdate());
+      this.isUpdateDialogOpen.set(this.updateService.needUpdate());
     });
   }
 
@@ -154,7 +115,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private async fetchLatestManifestSafe(): Promise<AssetList | null> {
+  private async fetchLatestManifestSafe(): Promise<AssetManifest | null> {
     try {
       return await this.updateService.getLatestAssetList();
     } catch (error) {
@@ -195,15 +156,14 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.setupWorker();
-  }
-
-  isInvalid(controlName: string) {
-    const control = this.form.get(controlName);
-    return control?.invalid && control.touched;
-  }
-
-  onUpdateClick() {
-    this.updateService.update();
+    // Step 5: setup CSV catalogs — must not block step 6
+    this.setupData()
+      .catch((err) => {
+        console.error('Error during data setup', err);
+      })
+      .finally(() => {
+        // Step 6: init Python worker — always runs, even if setupData fails
+        this.workerService.setup();
+      });
   }
 }

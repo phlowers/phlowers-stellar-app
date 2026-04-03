@@ -79,6 +79,17 @@ describe('UpdateService', () => {
     expect(mockServiceWorker.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
   });
 
+  it('should NOT handle worker_ready message (listener removed in V2)', () => {
+    const messageHandler: (event: { data: Record<string, unknown> }) => void =
+      mockServiceWorker.addEventListener.mock.calls[0][1];
+    const checkAppVersionSpy = vi.spyOn(service, 'checkAppVersion');
+
+    messageHandler({ data: { message: 'worker_ready' } });
+
+    // worker_ready no longer triggers checkAppVersion
+    expect(checkAppVersionSpy).not.toHaveBeenCalled();
+  });
+
   describe('getAppVersion', () => {
     it('should fetch latest version from assets_list.json', async () => {
       const mockLatestVersion = {
@@ -100,7 +111,7 @@ describe('UpdateService', () => {
 
       service.latestVersion.set(null);
       service.currentVersion.set(null);
-      service.needUpdate$.next(false);
+      service.needUpdate.set(false);
 
       await service.checkAppVersion();
 
@@ -145,7 +156,7 @@ describe('UpdateService', () => {
       expect(mockCache.match).toHaveBeenCalledWith('/app_version');
       expect(service.currentVersion()).toEqual(mockCurrentVersion);
       expect(service.latestVersion()).toEqual(mockLatestVersion);
-      expect(service.needUpdate$.value).toBe(true);
+      expect(service.needUpdate()).toBe(true);
     });
 
     it('should handle fetch errors gracefully', async () => {
@@ -155,7 +166,7 @@ describe('UpdateService', () => {
       await expect(service.checkAppVersion()).resolves.toBeUndefined();
       expect(service.currentVersion()).toBeNull();
       expect(service.latestVersion()).toBeNull();
-      expect(service.needUpdate$.value).toBe(false);
+      expect(service.needUpdate()).toBe(false);
     });
 
     it('should handle Cache API errors gracefully and preserve existing signals', async () => {
@@ -170,7 +181,7 @@ describe('UpdateService', () => {
 
       await expect(service.checkAppVersion()).resolves.toBeUndefined();
       expect(service.currentVersion()).toEqual(existingCurrent);
-      expect(service.needUpdate$.value).toBe(false);
+      expect(service.needUpdate()).toBe(false);
     });
 
     it('should not overwrite existing signal values with null', async () => {
@@ -195,7 +206,7 @@ describe('UpdateService', () => {
 
       expect(service.currentVersion()).toEqual(existingCurrent);
       expect(service.latestVersion()).toEqual(existingLatest);
-      expect(service.needUpdate$.value).toBe(false);
+      expect(service.needUpdate()).toBe(false);
     });
 
     it('should still set currentVersion signal when latestVersion is unavailable', async () => {
@@ -214,7 +225,7 @@ describe('UpdateService', () => {
 
       expect(service.currentVersion()).toEqual(mockCurrentVersion);
       expect(service.latestVersion()).toBeNull();
-      expect(service.needUpdate$.value).toBe(false);
+      expect(service.needUpdate()).toBe(false);
     });
 
     it('should still set latestVersion signal when currentVersion is unavailable', async () => {
@@ -237,7 +248,7 @@ describe('UpdateService', () => {
 
       expect(service.currentVersion()).toBeNull();
       expect(service.latestVersion()).toEqual(mockLatestVersion);
-      expect(service.needUpdate$.value).toBe(false);
+      expect(service.needUpdate()).toBe(false);
     });
 
     it('should show toast when silent is false (default)', async () => {
@@ -287,6 +298,59 @@ describe('UpdateService', () => {
     });
   });
 
+  describe('checkForUpdateOnce', () => {
+    it('should call install() when currentVersion is null (first launch)', async () => {
+      mockCache.match.mockResolvedValue(null); // no cached version
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          app_version: { git_hash: 'abc', build_datetime_utc: '2024', version: '1.0.0' },
+          files: []
+        })
+      });
+      const mockRegistration = { active: { postMessage: vi.fn() } };
+      mockServiceWorker.getRegistration.mockResolvedValue(mockRegistration);
+
+      await service.checkForUpdateOnce();
+
+      expect(mockRegistration.active.postMessage).toHaveBeenCalledWith({ type: 'install' });
+    });
+
+    it('should set needUpdate true when versions differ', async () => {
+      const current = { git_hash: 'old', build_datetime_utc: '2024', version: '1.0.0' };
+      const latest = { git_hash: 'new', build_datetime_utc: '2025', version: '2.0.0' };
+      mockCache.match.mockResolvedValue({ json: vi.fn().mockResolvedValue(current) });
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ app_version: latest, files: [] })
+      });
+
+      await service.checkForUpdateOnce();
+
+      expect(service.needUpdate()).toBe(true);
+    });
+
+    it('should not set needUpdate when versions are equal', async () => {
+      const version = { git_hash: 'abc', build_datetime_utc: '2024', version: '1.0.0' };
+      mockCache.match.mockResolvedValue({ json: vi.fn().mockResolvedValue(version) });
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ app_version: version, files: [] })
+      });
+
+      await service.checkForUpdateOnce();
+
+      expect(service.needUpdate()).toBe(false);
+    });
+
+    it('should not throw when server is unreachable', async () => {
+      mockCache.match.mockResolvedValue(null);
+      mockFetch.mockRejectedValue(new Error('Network error'));
+
+      await expect(service.checkForUpdateOnce()).resolves.toBeUndefined();
+    });
+  });
+
   describe('update', () => {
     it('should set updateLoading to true and send message to service worker', async () => {
       const mockCurrentVersion = {
@@ -317,6 +381,32 @@ describe('UpdateService', () => {
       expect(mockPostMessage).toHaveBeenCalledWith({
         type: 'update'
       });
+    });
+
+    it('should reset updateLoading when no active registration is found', async () => {
+      mockServiceWorker.getRegistration.mockResolvedValueOnce(null);
+
+      await service.update();
+
+      expect(service.updateLoading()).toBe(false);
+    });
+
+    it('should reset updateLoading when registration has no active worker', async () => {
+      mockServiceWorker.getRegistration.mockResolvedValueOnce({ active: null });
+
+      await service.update();
+
+      expect(service.updateLoading()).toBe(false);
+    });
+  });
+
+  describe('install', () => {
+    it('should reset updateLoading when no active registration is found', async () => {
+      mockServiceWorker.getRegistration.mockResolvedValueOnce(null);
+
+      await service.install();
+
+      expect(service.updateLoading()).toBe(false);
     });
   });
 
@@ -389,7 +479,65 @@ describe('UpdateService', () => {
       expect(service.updateLoading()).toBe(false);
       expect(service.currentVersion()).toEqual(mockVersion);
       expect(service.latestVersion()).toEqual(mockVersion);
-      expect(service.needUpdate$.value).toBe(false);
+      expect(service.needUpdate()).toBe(false);
+    });
+
+    it('should handle error message from service worker', async () => {
+      service.updateLoading.set(true);
+
+      await messageHandler({
+        data: {
+          message: 'error',
+          error: 'Update failed: network error'
+        }
+      });
+
+      expect(service.updateLoading()).toBe(false);
+      expect(mockMessageService.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));
+    });
+  });
+
+  describe('manifest caching', () => {
+    it('should return the same promise on subsequent calls to getLatestAssetList', async () => {
+      const mockAssetList = { app_version: { git_hash: 'a', build_datetime_utc: '2024', version: '1.0.0' }, files: [] };
+      mockFetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(mockAssetList) });
+
+      const first = await service.getLatestAssetList();
+      const second = await service.getLatestAssetList();
+
+      expect(first).toStrictEqual(second);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should re-fetch after clearManifestCache is called', async () => {
+      const mockAssetList = { app_version: { git_hash: 'a', build_datetime_utc: '2024', version: '1.0.0' }, files: [] };
+      mockFetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(mockAssetList) });
+
+      await service.getLatestAssetList();
+      service.clearManifestCache();
+      await service.getLatestAssetList();
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should auto-invalidate cache after checkAppVersion completes', async () => {
+      const mockVersion = { git_hash: 'abc', build_datetime_utc: '2024', version: '1.0.0' };
+      mockCache.match.mockResolvedValue({ json: vi.fn().mockResolvedValue(mockVersion) });
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ app_version: mockVersion, files: [] })
+      });
+
+      await service.checkAppVersion({ silent: true });
+
+      // After checkAppVersion, a new call to getLatestAssetList should trigger a fresh fetch
+      mockFetch.mockClear();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ app_version: mockVersion, files: [] })
+      });
+      await service.getLatestAssetList();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
   });
 });

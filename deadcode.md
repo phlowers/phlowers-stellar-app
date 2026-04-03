@@ -203,3 +203,159 @@
 - **Status**: ⏳ PENDING REVIEW
 
 ---
+
+## 16. `getCachedAppVersion` + `areVersionsEqual` + `getOrMigrateAppVersionCacheEntry` + `LEGACY_APP_VERSION_CACHE_KEY` — `core/services/worker_update/service-worker.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
+| Code | Private functions `getCachedAppVersion()`, `areVersionsEqual()`, `getOrMigrateAppVersionCacheEntry()`, and constant `LEGACY_APP_VERSION_CACHE_KEY` |
+| 🔍 Preuve | All were only used by the V1 activate logic removed in V2 (OIDC migration). No remaining callers. Also removed unused `AppVersion` type import. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed ~50 lines of dead code and the legacy cache migration path. |
+| ✅ Validé | 🗑️ SUPPRIMÉ — 02/04/2026 |
+
+---
+
+## 17. `postMessageToAllClients` — `core/services/worker_update/service-worker.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
+| Code | `async function postMessageToAllClients(message, payload)` |
+| 🔍 Preuve | Only used by the removed V1 activate logic (`activateWhenAppInstalled`, `activateWhenAppNotInstalled`). No remaining callers after V2 migration. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed ~10 lines. |
+| ✅ Validé | 🗑️ SUPPRIMÉ — 02/04/2026 |
+
+---
+
+## 18. `checkIfAppInstalled` — `core/services/worker_update/service-worker.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
+| Code | `export async function checkIfAppInstalled()` |
+| 🔍 Preuve | Exported function never called in production code. Only referenced in `service-worker.spec.ts`. Was part of V1 activate logic. In V2, the update check is driven by `UpdateService.checkForUpdateOnce()` which reads cache directly via `getCurrentVersion()`. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Remove ~5 lines + update spec to remove corresponding tests. |
+| Status | ✅ INTERNALIZED — export removed, function kept private, tests removed (2026-04-03) |
+| Detected on | 2026-04-02 |
+
+---
+
+## 19. Duplicate `install_complete` message — `installApp()` in `service-worker.ts` (BUG FIX)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
+| Code | `installApp()` contained `clients.matchAll()` + `client.postMessage({ message: 'install_complete' })` |
+| 🔍 Preuve | `handleMessage()` already sends `install_complete` to `event.source` after `installApp()` returns. The internal broadcast in `installApp()` caused duplicate messages to the triggering client. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed ~8 lines of duplicate client notification from `installApp()`. `handleMessage()` is now the single source of client notification. |
+| ✅ Validé | 🐛 FIXED — 02/04/2026 |
+
+---
+
+## 20. `lodash.isEqual` import — `core/services/worker_update/worker_update.service.ts` (CLEANUP)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/worker_update.service.ts` |
+| Code | `import { isEqual } from 'lodash'` used for comparing two `AppVersion` objects (3 string fields) |
+| 🔍 Preuve | Deep equality via lodash is unnecessary for a flat object with 3 string properties. Replaced with a dedicated `areVersionsEqual()` method. Reduces bundle size by removing the lodash dependency from this service. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Replaced with inline `areVersionsEqual()` — 3 string comparisons. |
+| ✅ Validé | 🔧 REPLACED — 02/04/2026 |
+
+---
+
+## 21. `isFirstUseOffline` signal — `core/services/auth/auth.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/auth/auth.service.ts` |
+| Code | `readonly isFirstUseOffline = signal(false);` |
+| 🔍 Preuve | Signal defined in AuthService but never consumed by any component, template, or other service. Only referenced in `auth.service.spec.ts`. No UI ever reads this signal. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed signal and simplified `initialize()` (no longer sets the flag on first-use offline). Simplified OIDC+PKCE auth simplification. |
+| ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+
+---
+
+## 22. `OidcClaims` type alias — `core/services/auth/auth.service.ts` (CLEANUP)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/auth/auth.service.ts` |
+| Code | `export type OidcClaims = Required<Pick<User, 'email'>> & Pick<User, 'sub' \| 'given_name' \| 'family_name' \| 'roles'>;` |
+| 🔍 Preuve | Overly complex type-level gymnastics (`Required<Pick<>>`) for what is a simple flat interface with 5 fields. Replaced with a plain `interface OidcClaims { email: string; sub?: string; ... }` — clearer and self-contained. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Replaced type alias with explicit interface — no behavioral change. |
+| ✅ Validé | 🔧 REPLACED — 03/04/2026 |
+
+---
+
+## 23. `checkIfAppInstalled` — `core/services/worker_update/service-worker.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
+| Code | `async function checkIfAppInstalled()` — checks for `app_version` entry in cache |
+| 🔍 Preuve | Was previously exported, internalized in Phase 6 but kept "for testability". No runtime caller, no test references it. Dead code with no justification to keep. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed function entirely. No callers affected. |
+| ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+
+---
+
+## 24. `noCacheHeaders` function — `core/services/worker_update/service-worker.ts` (CLEANUP)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
+| Code | `const noCacheHeaders = () => { ... }` — arrow function recreating `Headers` object on every call |
+| 🔍 Preuve | Unnecessary allocation per fetch call. Replaced with immutable `NO_CACHE_INIT` constant — same semantics, zero overhead. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Replaced with `const NO_CACHE_INIT: RequestInit` constant. |
+| ✅ Validé | 🔧 REPLACED — 03/04/2026 |
+
+---
+
+## 25. `export type { AppVersion }` re-export — `core/services/worker_update/worker_update.service.ts` (CLEANUP)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/worker_update.service.ts` line 8 |
+| Code | `export type { AppVersion } from './service-worker.interfaces';` |
+| 🔍 Preuve | `AppVersion` is only used internally within `worker_update.service.ts` (local type annotations). No other file in the codebase imports `AppVersion` from this service. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Changed to a plain `import type` — no external consumers affected. |
+| ✅ Validé | 🔧 REPLACED — 03/04/2026 |
+
+---
+
+## 26. `createUser()` + `validateEmail()` + `user$` + `userSubject` — `core/services/user/user.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/user/user.service.ts` |
+| Code | `async createUser(user)`, `const validateEmail`, `private readonly userSubject`, `public user$`, constructor `ready$.subscribe(...)` |
+| 🔍 Preuve | `createUser()` had no runtime callers (only in tests). `user$` was consumed only by TopbarComponent, which now reads `AuthService.currentUser` signal directly. `validateEmail` was only used inside `createUser`. The `ready$` subscription in the constructor was an unmanaged leak. AuthService is the canonical write path for the `users` table. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed `createUser`, `validateEmail`, `userSubject`, `user$`, constructor subscription, and `BehaviorSubject`/`Observable` imports. UserService simplified to read-only `getUser()`. TopbarComponent now uses `AuthService.currentUser` signal. |
+| ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+
+---
+
+## 27. `mockCurrentVersion` + `mockLatestVersion` dev constants — `core/services/worker_update/worker_update.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/worker_update/worker_update.service.ts` lines 10-20 |
+| Code | `const mockCurrentVersion` and `const mockLatestVersion` used to initialize signals in `isDevMode()` |
+| 🔍 Preuve | Dev-only mock versions with hardcoded hashes (`0000...`, `1111...`) always caused `needUpdate=true` in dev mode. This created confusing false-positive update prompts during development. Signals now start as `null` in all modes, consistent with production behavior. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed both constants, removed `isDevMode` and `environment` imports. Signals initialized to `null`. |
+| ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+

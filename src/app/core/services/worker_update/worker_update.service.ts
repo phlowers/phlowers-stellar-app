@@ -1,48 +1,10 @@
-import { inject, Injectable, isDevMode, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 
-import { environment } from '@src/environments/environment';
-import { isEqual } from 'lodash';
 import { MessageService } from 'primeng/api';
-import { BehaviorSubject } from 'rxjs';
+import type { AssetManifest } from './service-worker.interfaces';
 
-/**
- * Represents the application version information.
- *
- * @category Types
- */
-export interface AppVersion {
-  /** Full git commit hash of the build. */
-  git_hash: string;
-  /** UTC datetime string when the build was produced. */
-  build_datetime_utc: string;
-  /** Semantic version string. */
-  version: string;
-}
-
-/** Structure of the `assets_list.json` manifest used by the Service Worker.
- *
- * @category Types
- */
-export interface AssetList {
-  /** The version metadata for this build. */
-  app_version: AppVersion;
-  /** Per-CSV hashes used to detect catalog updates. */
-  data_hashes?: Record<string, string>;
-  /** List of asset file paths to cache. */
-  files: string[];
-}
-
-const mockCurrentVersion: AppVersion = {
-  git_hash: '0000000000000000000000000000000000000000',
-  build_datetime_utc: environment.buildTime,
-  version: environment.version
-};
-
-const mockLatestVersion: AppVersion = {
-  git_hash: '1111111111111111111111111111111111111111',
-  build_datetime_utc: '0000-00-00T00:00:00.000000',
-  version: '0.0.0'
-};
+export type { AssetManifest } from './service-worker.interfaces';
+import type { AppVersion } from './service-worker.interfaces';
 
 /**
  * Service for managing application updates via Service Worker.
@@ -56,11 +18,9 @@ const mockLatestVersion: AppVersion = {
  * @example
  * ```typescript
  * // Check if update is needed
- * this.updateService.needUpdate$.subscribe(needsUpdate => {
- *   if (needsUpdate) {
- *     this.showUpdatePrompt();
- *   }
- * });
+ * if (this.updateService.needUpdate()) {
+ *   this.showUpdatePrompt();
+ * }
  *
  * // Trigger an update
  * await this.updateService.update();
@@ -71,28 +31,33 @@ const mockLatestVersion: AppVersion = {
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
   /** Signal containing the currently installed application version, or null if unknown */
-  currentVersion = signal<AppVersion | null>(isDevMode() ? mockCurrentVersion : null);
+  currentVersion = signal<AssetManifest['app_version'] | null>(null);
   /** Signal containing the latest available application version, or null if unknown */
-  latestVersion = signal<AppVersion | null>(isDevMode() ? mockLatestVersion : null);
+  latestVersion = signal<AssetManifest['app_version'] | null>(null);
   /** Signal indicating whether an update or install operation is in progress */
   updateLoading = signal(false);
 
   /**
-   * BehaviorSubject that emits true when an update is available.
+   * Signal that emits true when an update is available.
    */
-  needUpdate$ = new BehaviorSubject<boolean>(false);
+  readonly needUpdate = signal(false);
 
   private readonly messageService = inject(MessageService);
+  private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
 
   constructor() {
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
     navigator.serviceWorker.addEventListener('message', async (event) => {
       if (event.data.message) {
         switch (event.data.message) {
-          case 'worker_ready':
-            await this.checkAppVersion({ silent: true });
-            break;
           case 'update_complete':
-            await this.checkAppVersion({ silent: true });
+            try {
+              await this.checkAppVersion({ silent: true });
+            } catch {
+              // Version check failed — proceed with reload anyway.
+            }
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'success',
@@ -108,6 +73,14 @@ export class UpdateService {
               severity: 'success',
               summary: $localize`Install successful`,
               detail: $localize`The application has been installed`
+            });
+            break;
+          case 'error':
+            this.updateLoading.set(false);
+            this.messageService.add({
+              severity: 'error',
+              summary: $localize`Update failed`,
+              detail: event.data.error ?? $localize`An unknown error occurred during the update`
             });
             break;
         }
@@ -146,8 +119,22 @@ export class UpdateService {
 
   /**
    * Fetch the latest asset manifest from the server with no-cache semantics.
+   * The result is cached for subsequent calls within the same startup cycle.
+   * Call {@link clearManifestCache} to force a fresh fetch.
    */
-  async getLatestAssetList(): Promise<AssetList | null> {
+  async getLatestAssetList(): Promise<AssetManifest | null> {
+    if (!this.cachedManifestPromise) {
+      this.cachedManifestPromise = this.fetchManifest();
+    }
+    return this.cachedManifestPromise;
+  }
+
+  /** Clear the cached manifest so the next call to {@link getLatestAssetList} re-fetches. */
+  clearManifestCache(): void {
+    this.cachedManifestPromise = null;
+  }
+
+  private async fetchManifest(): Promise<AssetManifest | null> {
     try {
       const response = await fetch('/assets_list.json', {
         cache: 'no-store',
@@ -161,7 +148,7 @@ export class UpdateService {
         return null;
       }
 
-      const data = (await response.json()) as AssetList;
+      const data = (await response.json()) as AssetManifest;
       return data;
     } catch {
       return null;
@@ -173,7 +160,7 @@ export class UpdateService {
    *
    * @remarks
    * Compares the cached version with the server version and updates
-   * the needUpdate$ subject accordingly.
+   * the needUpdate signal accordingly.
    */
   async checkAppVersion({ silent = false }: { silent?: boolean } = {}) {
     let currentVersion: AppVersion | null = null;
@@ -182,8 +169,10 @@ export class UpdateService {
       currentVersion = await this.getCurrentVersion();
       latestVersion = await this.getLatestVersion();
     } catch {
-      this.needUpdate$.next(false);
+      this.needUpdate.set(false);
       return;
+    } finally {
+      this.clearManifestCache();
     }
     if (currentVersion) {
       this.currentVersion.set(currentVersion);
@@ -192,13 +181,13 @@ export class UpdateService {
       this.latestVersion.set(latestVersion);
     }
     if (!currentVersion || !latestVersion) {
-      this.needUpdate$.next(false);
+      this.needUpdate.set(false);
       return;
     }
-    if (!isEqual(currentVersion, latestVersion)) {
-      this.needUpdate$.next(true);
+    if (!this.areVersionsEqual(currentVersion, latestVersion)) {
+      this.needUpdate.set(true);
     } else {
-      this.needUpdate$.next(false);
+      this.needUpdate.set(false);
     }
     if (!silent) {
       this.messageService.add({
@@ -210,6 +199,48 @@ export class UpdateService {
   }
 
   /**
+   * Perform a single update/install check at application startup.
+   *
+   * @remarks
+   * Called once from `APP_INITIALIZER`. If `currentVersion` is null (first launch,
+   * nothing cached), triggers `install()` instead of `update()`.
+   * Does not trigger any polling or repeated checks.
+   */
+  async checkForUpdateOnce(): Promise<void> {
+    try {
+      const currentVersion = await this.getCurrentVersion();
+      const latestVersion = await this.getLatestVersion();
+
+      if (currentVersion) {
+        this.currentVersion.set(currentVersion);
+      }
+      if (latestVersion) {
+        this.latestVersion.set(latestVersion);
+      }
+
+      if (!latestVersion) {
+        // Server unreachable — nothing to do.
+        return;
+      }
+
+      if (!currentVersion) {
+        // First launch: nothing cached yet — install the app into the SW cache.
+        await this.install();
+        return;
+      }
+
+      if (!this.areVersionsEqual(currentVersion, latestVersion)) {
+        // An update is available — signal the UI.
+        this.needUpdate.set(true);
+      }
+    } catch {
+      // Non-blocking: startup must not fail because of an update-check failure.
+    } finally {
+      this.clearManifestCache();
+    }
+  }
+
+  /**
    * Trigger an application update via the Service Worker.
    *
    * @remarks
@@ -217,13 +248,7 @@ export class UpdateService {
    * and cache the new version. A page reload is required after completion.
    */
   async update() {
-    this.updateLoading.set(true);
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (registration) {
-      registration.active?.postMessage({
-        type: 'update'
-      });
-    }
+    await this.postMessageToSW('update');
   }
 
   /**
@@ -233,10 +258,27 @@ export class UpdateService {
    * Used for first-time installations to cache all application assets.
    */
   async install() {
-    this.updateLoading.set(true);
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (registration) {
-      registration.active?.postMessage({ type: 'install' });
+    await this.postMessageToSW('install');
+  }
+
+  private async postMessageToSW(type: 'update' | 'install'): Promise<void> {
+    if (!('serviceWorker' in navigator)) {
+      return;
     }
+    this.updateLoading.set(true);
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (!registration?.active) {
+        this.updateLoading.set(false);
+        return;
+      }
+      registration.active.postMessage({ type });
+    } catch {
+      this.updateLoading.set(false);
+    }
+  }
+
+  private areVersionsEqual(a: AppVersion, b: AppVersion): boolean {
+    return a.git_hash === b.git_hash && a.build_datetime_utc === b.build_datetime_utc && a.version === b.version;
   }
 }
