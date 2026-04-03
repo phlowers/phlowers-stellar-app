@@ -4,7 +4,7 @@ import { LoadType } from '@shared/domain/models/charge.model';
 /** Option representing a support side selection (LEFT or RIGHT). */
 export interface SupportOption {
   /** Display label (support number). */
-  label: number;
+  label: string;
   /** Support side value. */
   value: 'LEFT' | 'RIGHT';
 }
