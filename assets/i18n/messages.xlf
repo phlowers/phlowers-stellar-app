@@ -3020,5 +3020,20 @@
         <source>An error occurred</source>
       </segment>
     </unit>
+    <unit id="2656270638371326231">
+      <segment>
+        <source>Point alt.</source>
+      </segment>
+    </unit>
+    <unit id="5122879481650738554">
+      <segment>
+        <source>Ref. support dist.</source>
+      </segment>
+    </unit>
+    <unit id="7382072301605955850">
+      <segment>
+        <source>Line axis dist.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

@@ -3413,7 +3413,7 @@
     </unit>
     <unit id="scaleView.form.ariaLabel">
       <segment state="initial">
-        <source>Configuration de la vue</source>
+        <source>View configuration</source>
         <target>Configuration de la vue</target>
       </segment>
     </unit>
@@ -3649,6 +3649,24 @@
       <segment state="initial">
         <source>An error occurred</source>
         <target>Une erreur s&apos;est produite</target>
+      </segment>
+    </unit>
+    <unit id="2656270638371326231">
+      <segment state="initial">
+        <source>Point alt.</source>
+        <target>Alt. point</target>
+      </segment>
+    </unit>
+    <unit id="5122879481650738554">
+      <segment state="initial">
+        <source>Ref. support dist.</source>
+        <target>Dist. supp. réf.</target>
+      </segment>
+    </unit>
+    <unit id="7382072301605955850">
+      <segment state="initial">
+        <source>Line axis dist.</source>
+        <target>Dist. axe ligne.</target>
       </segment>
     </unit>
   </file>

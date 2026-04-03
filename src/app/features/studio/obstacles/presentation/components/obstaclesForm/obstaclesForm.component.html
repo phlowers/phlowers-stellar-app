@@ -165,7 +165,13 @@
         </div>
 
         <div class="obstacles-item__form">
-          <label i18n [for]="'altitudePoint' + $index" class="obstacles-item__label alt-point-label">z:</label>
+          <label
+            i18n
+            [for]="'altitudePoint' + $index"
+            class="obstacles-item__label alt-point-label"
+            data-testid="label-point-altitude"
+            >Point alt.</label
+          >
 
           <p-inputgroup class="obstacles-item__input">
             <input
@@ -183,7 +189,13 @@
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
 
-          <label i18n [for]="'distanceToRefSupport' + $index" class="obstacles-item__label dist-ref-label">x:</label>
+          <label
+            i18n
+            [for]="'distanceToRefSupport' + $index"
+            class="obstacles-item__label dist-ref-label"
+            data-testid="label-ref-distance"
+            >Ref. support dist.</label
+          >
 
           <p-inputgroup class="obstacles-item__input">
             <input
@@ -201,7 +213,13 @@
             <p-inputgroup-addon i18n>m</p-inputgroup-addon>
           </p-inputgroup>
 
-          <label i18n [for]="'distanceToLineAxis' + $index" class="obstacles-item__label dist-axis-label">y:</label>
+          <label
+            i18n
+            [for]="'distanceToLineAxis' + $index"
+            class="obstacles-item__label dist-axis-label"
+            data-testid="label-axis-distance"
+            >Line axis dist.</label
+          >
 
           <p-inputgroup class="obstacles-item__input">
             <input
