@@ -368,9 +368,9 @@ describe('ScaleViewComponent', () => {
         expect(form).toBeTruthy();
       });
 
-      it('form should have aria-label "Configuration de la vue"', () => {
+      it('form should have aria-label "View configuration"', () => {
         const form = document.body.querySelector('[data-testid="scale-view-form"]');
-        expect(form?.getAttribute('aria-label')).toBe('Configuration de la vue');
+        expect(form?.getAttribute('aria-label')).toBe('View configuration');
       });
 
       it('scale fieldset should be present', () => {

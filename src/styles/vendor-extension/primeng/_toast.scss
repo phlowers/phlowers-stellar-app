@@ -1,0 +1,16 @@
+@use 'abstract.extracts' as app;
+
+.p-toast {
+  --p-button-rounded-border-radius: 0;
+
+  .p-toast-message-content .p-toast-close-button {
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+
+    &:focus-visible {
+      @extend %focus-state;
+    }
+  }
+}
