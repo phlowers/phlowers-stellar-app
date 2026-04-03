@@ -277,6 +277,42 @@ describe('ObstaclesFormComponent', () => {
     });
   });
 
+  describe('HTML rendering - point labels', () => {
+    it('should render "Point alt." as the altitude label', () => {
+      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-point-altitude"]');
+      expect(labels.length).toBe(1);
+      expect(labels[0].textContent.trim()).toBe('Point alt.');
+    });
+
+    it('should render "Ref. support dist." as the reference support distance label', () => {
+      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-ref-distance"]');
+      expect(labels.length).toBe(1);
+      expect(labels[0].textContent.trim()).toBe('Ref. support dist.');
+    });
+
+    it('should render "Line axis dist." as the line axis distance label', () => {
+      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-axis-distance"]');
+      expect(labels.length).toBe(1);
+      expect(labels[0].textContent.trim()).toBe('Line axis dist.');
+    });
+
+    it('should render one label per point for each label type when multiple positions exist', () => {
+      const fb = new FormBuilder();
+      mockObstacleFormService.positions.push(
+        fb.group({
+          x: new FormControl<number | null>(1),
+          y: new FormControl<number | null>(2),
+          z: new FormControl<number | null>(3)
+        })
+      );
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-point-altitude"]').length).toBe(2);
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-ref-distance"]').length).toBe(2);
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-axis-distance"]').length).toBe(2);
+    });
+  });
+
   describe('HTML rendering - results display', () => {
     it('should display " - " for all results initially', () => {
       expect(getByTestId('result-oblique')?.textContent).toContain(' - ');
