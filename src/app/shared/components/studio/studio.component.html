@@ -5,9 +5,13 @@
     </div>
   } @else if (plotService.error()) {
     <div class="absolute inset-0 flex justify-center items-center">
-      <p class="text-red-500 text-2xl font-bold">
-        {{ errorString() }}
-      </p>
+      <img
+        src="/img/rocket.png"
+        alt="An error occurred"
+        i18n-alt="@@studio.error.image.alt"
+        class="max-w-sm opacity-80"
+        data-testid="studio-error-image"
+      />
     </div>
   } @else {
     <figure class="contents m-0">

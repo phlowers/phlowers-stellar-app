@@ -6,12 +6,12 @@ import Papa from 'papaparse';
 import { StudiesService } from '@services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { ToastModule } from 'primeng/toast';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { convertStringToNumber } from '@shared/helpers/convertStringToNumber';
 import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import { NotificationService } from '@services/notification/notification.service';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -86,24 +86,14 @@ const formatProtoV4Parameters = (rawParameters: string[], fileName: string): Pro
 /**
  * Builds a PrimeNG toast message for a given import error type.
  * @param type - Key identifying the error in the `errors` map
- * @returns Toast message configuration object
+ * @returns Toast detail string for the error
  */
-const importErrorMessage = (type: keyof typeof errors) => {
-  return {
-    severity: 'error',
-    summary: $localize`Error`,
-    detail: errors[type] || $localize`Error importing study`,
-    life: 3000
-  };
+const importErrorDetail = (type: keyof typeof errors): string => {
+  return errors[type] || $localize`Error importing study`;
 };
 
-/** Toast message shown on successful study import. */
-const importSuccessMessage = {
-  severity: 'success',
-  summary: $localize`Success`,
-  detail: $localize`Study imported successfully`,
-  life: 3000
-};
+/** Detail message shown on successful study import. */
+const importSuccessDetail = $localize`Study imported successfully`;
 
 /**
  * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
@@ -112,7 +102,7 @@ const importSuccessMessage = {
  */
 @Component({
   selector: 'app-import-study',
-  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent, ToastModule],
+  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent],
   templateUrl: './import-study.component.html',
   styleUrl: './import-study.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -122,7 +112,7 @@ export class ImportStudyComponent {
   newStudies = signal<Study[]>([]);
   erroredFiles = signal<string[]>([]);
   private readonly studiesService = inject(StudiesService);
-  private readonly messageService = inject(MessageService);
+  private readonly notificationService = inject(NotificationService);
   private readonly cablesService = inject(CablesService);
   private readonly confirmationService = inject(ConfirmationService);
 
@@ -196,7 +186,7 @@ export class ImportStudyComponent {
     }
 
     this.newStudies.set([...this.newStudies(), createdStudy]);
-    this.messageService.add(importSuccessMessage);
+    this.notificationService.success(importSuccessDetail);
   }
 
   private async processAppFileContent(result: string, resolve: () => void): Promise<void> {
@@ -325,7 +315,7 @@ export class ImportStudyComponent {
       .createStudyFromProtoV4(supports, parameters)
       .then((study) => {
         this.newStudies.set([...this.newStudies(), study]);
-        this.messageService.add(importSuccessMessage);
+        this.notificationService.success(importSuccessDetail);
         resolve();
       })
       .catch((parseError: unknown) => {
@@ -411,11 +401,7 @@ export class ImportStudyComponent {
       return;
     }
 
-    this.messageService.add({
-      severity: 'error',
-      summary: $localize`Error`,
-      detail: errors.fileTypeNotAllowed
-    });
+    this.notificationService.error(errors.fileTypeNotAllowed);
     this.erroredFiles.set([...this.erroredFiles(), ...invalidFiles.map((file) => file.name)]);
   }
 
@@ -429,7 +415,7 @@ export class ImportStudyComponent {
   private handleFileError(fileError: unknown, fileName: string): void {
     const errorType = this.getErrorType(fileError);
     console.error('Error importing file', fileError);
-    this.messageService.add(importErrorMessage(errorType));
+    this.notificationService.error(importErrorDetail(errorType));
     this.erroredFiles.set([...this.erroredFiles(), fileName]);
   }
 
@@ -455,7 +441,7 @@ export class ImportStudyComponent {
     console.error('Error in loadFiles', error);
     this.loading.set(false);
     const errorType = this.getErrorType(error);
-    this.messageService.add(importErrorMessage(errorType));
+    this.notificationService.error(importErrorDetail(errorType));
   }
 
   async loadFiles(event: Event) {

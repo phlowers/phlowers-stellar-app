@@ -19,8 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { StepperModule } from 'primeng/stepper';
 import { InputTextModule } from 'primeng/inputtext';
 import { SectionsTabComponent } from '@features/study/presentation/components/sections-tab/sectionsTab.component';
-import { MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
+import { NotificationService } from '@services/notification/notification.service';
 import { NewStudyModalComponent } from '@shared/components/new-study-modal/new-study-modal.component';
 import { CommonModule } from '@angular/common';
 
@@ -42,7 +41,6 @@ import { CommonModule } from '@angular/common';
     StepperModule,
     InputTextModule,
     SectionsTabComponent,
-    ToastModule,
     CommonModule,
     NewStudyModalComponent
   ],
@@ -59,7 +57,7 @@ export class StudyComponent implements OnInit {
   private readonly sectionService = inject(SectionService);
   private readonly initialConditionService = inject(InitialConditionService);
   private readonly router = inject(Router);
-  private readonly messageService = inject(MessageService);
+  private readonly notificationService = inject(NotificationService);
 
   ngOnInit(): void {
     const uuid = this.route.snapshot.paramMap.get('uuid');
@@ -114,18 +112,18 @@ export class StudyComponent implements OnInit {
     this.isNewStudyModalOpen.set(true);
   }
 
-  duplicateStudy(uuid: string) {
-    this.studiesService.duplicateStudy(uuid).then((study) => {
-      if (study) {
-        this.router.navigate(['/study', study?.uuid]);
-      }
-    });
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Study Duplicated`,
-      life: 3000
-    });
+  duplicateStudy(uuid: string): Promise<void> {
+    return this.studiesService
+      .duplicateStudy(uuid)
+      .then((study) => {
+        if (study) {
+          this.router.navigate(['/study', study.uuid]);
+          this.notificationService.success($localize`Study Duplicated`);
+        }
+      })
+      .catch(() => {
+        this.notificationService.error($localize`Study Duplication Failed`);
+      });
   }
 
   async createOrUpdateSection(section: Section) {
@@ -141,12 +139,7 @@ export class StudyComponent implements OnInit {
 
     await this.sectionService.createOrUpdateSection(studyWithSections, section);
 
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: existingSection ? $localize`Section Updated` : $localize`Section Created`,
-      life: 3000
-    });
+    this.notificationService.success(existingSection ? $localize`Section Updated` : $localize`Section Created`);
   }
 
   async deleteSection(section: Section) {
@@ -157,12 +150,7 @@ export class StudyComponent implements OnInit {
 
     await this.sectionService.deleteSection(study, section);
 
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Section Deleted`,
-      life: 3000
-    });
+    this.notificationService.success($localize`Section Deleted`);
   }
 
   async duplicateSection(section: Section) {
@@ -173,12 +161,7 @@ export class StudyComponent implements OnInit {
 
     await this.sectionService.duplicateSection(study, section);
 
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Section Duplicated`,
-      life: 3000
-    });
+    this.notificationService.success($localize`Section Duplicated`);
   }
 
   async updateInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
@@ -198,12 +181,7 @@ export class StudyComponent implements OnInit {
     }
     await this.initialConditionService.setInitialCondition(study, updatedSection, initialCondition.uuid);
 
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Initial Condition Updated`,
-      life: 3000
-    });
+    this.notificationService.success($localize`Initial Condition Updated`);
   }
 
   async addInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
@@ -222,12 +200,7 @@ export class StudyComponent implements OnInit {
     }
     await this.initialConditionService.setInitialCondition(study, addedSection, initialCondition.uuid);
 
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Initial Condition Added`,
-      life: 3000
-    });
+    this.notificationService.success($localize`Initial Condition Added`);
   }
 
   async deleteInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
@@ -238,12 +211,7 @@ export class StudyComponent implements OnInit {
 
     await this.initialConditionService.deleteInitialCondition(study, section, initialCondition);
 
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Initial Condition Deleted`,
-      life: 3000
-    });
+    this.notificationService.success($localize`Initial Condition Deleted`);
   }
 
   async duplicateInitialCondition({ section, initialCondition, newUuid }: DuplicateInitialConditionFunctionsInput) {
@@ -255,12 +223,7 @@ export class StudyComponent implements OnInit {
     await this.initialConditionService.duplicateInitialCondition(study, section, initialCondition, newUuid);
     await this.initialConditionService.setInitialCondition(study, section, newUuid);
 
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Initial Condition Duplicated`,
-      life: 3000
-    });
+    this.notificationService.success($localize`Initial Condition Duplicated`);
   }
 
   async setInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {

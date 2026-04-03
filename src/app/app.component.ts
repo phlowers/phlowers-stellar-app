@@ -11,7 +11,7 @@ import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
-import { MessageService } from 'primeng/api';
+import { NotificationService } from '@services/notification/notification.service';
 import { OnlineService } from '@services/online/online.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -69,7 +69,7 @@ export class AppComponent implements OnInit {
   }>;
 
   readonly submitted = signal(false);
-  private readonly messageService = inject(MessageService);
+  private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
   private readonly userService = inject(UserService);
@@ -170,21 +170,14 @@ export class AppComponent implements OnInit {
   async saveUser() {
     this.submitted.set(true);
     if (this.form.valid) {
-      await this.userService.createUser({ email: this.form.value.email! }).catch((err) => {
+      try {
+        await this.userService.createUser({ email: this.form.value.email! });
+      } catch (err) {
         console.error('Error creating user', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: $localize`Error`,
-          detail: $localize`Error creating user`,
-          life: 3000
-        });
-      });
-      this.messageService.add({
-        severity: 'success',
-        summary: $localize`Successful`,
-        detail: $localize`User info set`,
-        life: 3000
-      });
+        this.notificationService.error($localize`Error creating user`);
+        return;
+      }
+      this.notificationService.success($localize`User info set`);
       this.userDialog.set(false);
     }
   }

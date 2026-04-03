@@ -6,7 +6,7 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { MessageService } from 'primeng/api';
+import { NotificationService } from '@services/notification/notification.service';
 import { OnlineService } from '@services/online/online.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -42,7 +42,7 @@ class Worker {
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
-  let mockMessageService: MessageService;
+  let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let mockStorageService: StorageService;
   let mockWorkerService: WorkerPythonService;
   let mockOnlineService: OnlineService;
@@ -86,9 +86,10 @@ describe('AppComponent', () => {
     readySubject = new BehaviorSubject<boolean>(false);
     workerReadySubject = new BehaviorSubject<boolean>(true);
 
-    mockMessageService = {
-      add: vi.fn()
-    } as unknown as MessageService;
+    mockNotificationService = {
+      success: vi.fn(),
+      error: vi.fn()
+    };
 
     mockDb.users.toArray = vi.fn().mockResolvedValue([]);
     mockDb.users.add = vi.fn();
@@ -159,7 +160,7 @@ describe('AppComponent', () => {
     });
     TestBed.overrideProvider(StorageService, { useValue: mockStorageService });
     TestBed.overrideProvider(OnlineService, { useValue: mockOnlineService });
-    TestBed.overrideProvider(MessageService, { useValue: mockMessageService });
+    TestBed.overrideProvider(NotificationService, { useValue: mockNotificationService });
     TestBed.overrideProvider(UserService, { useValue: mockUserService });
     TestBed.overrideProvider(UpdateService, { useValue: mockUpdateService });
     TestBed.overrideProvider(MaintenanceService, {
@@ -293,12 +294,7 @@ describe('AppComponent', () => {
         email: 'test@example.com'
       });
       expect(component.userDialog()).toBe(false);
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: 'Successful',
-        detail: 'User info set',
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith('User info set');
     });
 
     it('should not save user with empty email', async () => {
@@ -369,8 +365,8 @@ describe('AppComponent - HTML rendering', () => {
     TestBed.overrideProvider(OnlineService, {
       useValue: { online$: new BehaviorSubject<boolean>(true) }
     });
-    TestBed.overrideProvider(MessageService, {
-      useValue: { add: vi.fn(), messageObserver: new BehaviorSubject(null), clearObserver: new BehaviorSubject(null) }
+    TestBed.overrideProvider(NotificationService, {
+      useValue: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() }
     });
     TestBed.overrideProvider(UserService, {
       useValue: { getUser: vi.fn().mockResolvedValue(null), createUser: vi.fn().mockResolvedValue(undefined) }
@@ -410,6 +406,11 @@ describe('AppComponent - HTML rendering', () => {
 
     fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
+  });
+
+  it('should render app-toast', () => {
+    const el = getByTestId('app-toast');
+    expect(el).toBeTruthy();
   });
 
   it('should render update-dialog', () => {

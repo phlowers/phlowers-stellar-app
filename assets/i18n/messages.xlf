@@ -795,7 +795,7 @@
     </unit>
     <unit id="scaleView.form.ariaLabel">
       <segment>
-        <source>Configuration de la vue</source>
+        <source>View configuration</source>
       </segment>
     </unit>
     <unit id="scaleView.scale.legend">
@@ -2998,6 +2998,26 @@
     <unit id="5574365677854298291">
       <segment>
         <source> Load / Marking </source>
+      </segment>
+    </unit>
+    <unit id="314315645942131479">
+      <segment>
+        <source>Info</source>
+      </segment>
+    </unit>
+    <unit id="6759205696902713848">
+      <segment>
+        <source>Warning</source>
+      </segment>
+    </unit>
+    <unit id="8821344400638330739">
+      <segment>
+        <source>Study Duplication Failed</source>
+      </segment>
+    </unit>
+    <unit id="studio.error.image.alt">
+      <segment>
+        <source>An error occurred</source>
       </segment>
     </unit>
   </file>

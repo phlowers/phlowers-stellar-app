@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject } from 'rxjs';
-import { MessageService } from 'primeng/api';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
@@ -12,6 +11,7 @@ import { StudiesService } from '@services/studies/studies.service';
 import { SectionService } from '@services/section/section.service';
 import { InitialConditionService } from '@services/initial-condition/initial-condition.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
+import { NotificationService } from '@services/notification/notification.service';
 import { Section, InitialCondition, Study } from '@shared/domain';
 
 // Mock uuid
@@ -55,7 +55,7 @@ describe('StudyComponent', () => {
   let mockInitialConditionService: vi.Mocked<InitialConditionService>;
   let mockCablesService: vi.Mocked<CablesService>;
   let mockRouter: vi.Mocked<Router>;
-  let mockMessageService: vi.Mocked<MessageService>;
+  let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let readySubject: BehaviorSubject<boolean>;
   let paramsSubject: BehaviorSubject<{ uuid: string }>;
 
@@ -174,9 +174,10 @@ describe('StudyComponent', () => {
       setInitialCondition: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<InitialConditionService>;
 
-    mockMessageService = {
-      add: vi.fn()
-    } as unknown as vi.Mocked<MessageService>;
+    mockNotificationService = {
+      success: vi.fn(),
+      error: vi.fn()
+    };
 
     mockCablesService = {
       getCables: vi.fn().mockResolvedValue([]),
@@ -196,7 +197,7 @@ describe('StudyComponent', () => {
         },
         { provide: CablesService, useValue: mockCablesService },
         { provide: Router, useValue: mockRouter },
-        { provide: MessageService, useValue: mockMessageService },
+        { provide: NotificationService, useValue: mockNotificationService },
         provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting()
@@ -319,27 +320,26 @@ describe('StudyComponent', () => {
 
       expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith('test-uuid');
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/study', 'duplicated-uuid']);
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
-    it('should not navigate when duplication fails', async () => {
+    it('should not navigate when duplication returns null', async () => {
       mockStudiesService.duplicateStudy.mockResolvedValue(null);
 
       await component.duplicateStudy('test-uuid');
 
       expect(mockStudiesService.duplicateStudy).toHaveBeenCalledWith('test-uuid');
       expect(mockRouter.navigate).not.toHaveBeenCalled();
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
+    });
+
+    it('should show error toast when duplication rejects', async () => {
+      mockStudiesService.duplicateStudy.mockRejectedValue(new Error('DB error'));
+
+      await component.duplicateStudy('test-uuid');
+
+      expect(mockRouter.navigate).not.toHaveBeenCalled();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(expect.any(String));
     });
   });
 
@@ -354,12 +354,7 @@ describe('StudyComponent', () => {
       await component.createOrUpdateSection(updatedSection);
 
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study(), updatedSection);
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should create new section', async () => {
@@ -368,12 +363,7 @@ describe('StudyComponent', () => {
       await component.createOrUpdateSection(newSection);
 
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(component.study(), newSection);
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should not update when study is null', async () => {
@@ -382,7 +372,7 @@ describe('StudyComponent', () => {
       await component.createOrUpdateSection(mockSection);
 
       expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
-      expect(mockMessageService.add).not.toHaveBeenCalled();
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
     });
   });
 
@@ -395,12 +385,7 @@ describe('StudyComponent', () => {
       await component.deleteSection(mockSection);
 
       expect(mockSectionService.deleteSection).toHaveBeenCalledWith(component.study(), mockSection);
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should not delete when study is null', async () => {
@@ -409,7 +394,7 @@ describe('StudyComponent', () => {
       await component.deleteSection(mockSection);
 
       expect(mockSectionService.deleteSection).not.toHaveBeenCalled();
-      expect(mockMessageService.add).not.toHaveBeenCalled();
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
     });
   });
 
@@ -422,12 +407,7 @@ describe('StudyComponent', () => {
       await component.duplicateSection(mockSection);
 
       expect(mockSectionService.duplicateSection).toHaveBeenCalledWith(component.study(), mockSection);
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should not duplicate when study is null', async () => {
@@ -436,7 +416,7 @@ describe('StudyComponent', () => {
       await component.duplicateSection(mockSection);
 
       expect(mockSectionService.duplicateSection).not.toHaveBeenCalled();
-      expect(mockMessageService.add).not.toHaveBeenCalled();
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
     });
   });
 
@@ -457,12 +437,7 @@ describe('StudyComponent', () => {
         mockSection,
         mockInitialCondition
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should add initial condition to section with existing conditions', async () => {
@@ -487,12 +462,7 @@ describe('StudyComponent', () => {
         sectionWithConditions,
         newInitialCondition
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should not add when study is null', async () => {
@@ -504,7 +474,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.addInitialCondition).not.toHaveBeenCalled();
-      expect(mockMessageService.add).not.toHaveBeenCalled();
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
     });
   });
 
@@ -528,12 +498,7 @@ describe('StudyComponent', () => {
         mockSection,
         mockInitialCondition
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should not delete when study is null', async () => {
@@ -545,7 +510,7 @@ describe('StudyComponent', () => {
       });
 
       expect(mockInitialConditionService.deleteInitialCondition).not.toHaveBeenCalled();
-      expect(mockMessageService.add).not.toHaveBeenCalled();
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
     });
 
     it('should handle section with no initial conditions', async () => {
@@ -565,12 +530,7 @@ describe('StudyComponent', () => {
         sectionWithoutConditions,
         mockInitialCondition
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
   });
 
@@ -600,12 +560,7 @@ describe('StudyComponent', () => {
         mockSection,
         updatedIC
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
   });
 
@@ -633,12 +588,7 @@ describe('StudyComponent', () => {
         mockInitialCondition,
         newUuid
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
   });
 
@@ -714,12 +664,7 @@ describe('StudyComponent', () => {
         { ...studyWithNullSections, sections: [] },
         mockSection
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should handle section with null initial conditions', async () => {
@@ -740,12 +685,7 @@ describe('StudyComponent', () => {
         sectionWithNullConditions,
         mockInitialCondition
       );
-      expect(mockMessageService.add).toHaveBeenCalledWith({
-        severity: 'success',
-        summary: expect.any(String),
-        detail: expect.any(String),
-        life: 3000
-      });
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
     });
 
     it('should handle multiple rapid updates', async () => {

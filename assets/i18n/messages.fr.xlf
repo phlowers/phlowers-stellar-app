@@ -3627,5 +3627,29 @@
         <target>Manip. câble dans la portée</target>
       </segment>
     </unit>
+    <unit id="314315645942131479">
+      <segment state="initial">
+        <source>Info</source>
+        <target>Info</target>
+      </segment>
+    </unit>
+    <unit id="6759205696902713848">
+      <segment state="initial">
+        <source>Warning</source>
+        <target>Avertissement</target>
+      </segment>
+    </unit>
+    <unit id="8821344400638330739">
+      <segment state="initial">
+        <source>Study Duplication Failed</source>
+        <target>Échec de la duplication de l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="studio.error.image.alt">
+      <segment state="initial">
+        <source>An error occurred</source>
+        <target>Une erreur s&apos;est produite</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
