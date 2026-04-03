@@ -358,4 +358,3 @@
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Removed both constants, removed `isDevMode` and `environment` imports. Signals initialized to `null`. |
 | ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
-
