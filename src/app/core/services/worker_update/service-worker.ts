@@ -1,8 +1,23 @@
-import type { AppVersion, AssetManifest } from './service-worker.interfaces';
+import type { AssetManifest } from './service-worker.interfaces';
 
 const CACHE_NAME = 'app-assets';
 const APP_VERSION_CACHE_KEY = '/app_version';
-const LEGACY_APP_VERSION_CACHE_KEY = 'app_version';
+/** Timeout (ms) for network-first fetch before falling back to cache. */
+const NETWORK_FIRST_TIMEOUT_MS = 3000;
+
+/**
+ * Fetch with an AbortController timeout.
+ * Aborts the request after `timeoutMs` milliseconds so the SW can fall back to cache faster.
+ */
+function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  timeoutMs = NETWORK_FIRST_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(input, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
 
 /**
  * Fetches the latest asset manifest (`assets_list.json`) from the server.
@@ -18,79 +33,14 @@ function fetchLatestManifest() {
   });
 }
 
-function areVersionsEqual(first: AppVersion | null, second: AppVersion | null): boolean {
-  if (!first || !second) {
-    return false;
-  }
-  return (
-    first.git_hash === second.git_hash &&
-    first.build_datetime_utc === second.build_datetime_utc &&
-    first.version === second.version
-  );
-}
-
-async function getCachedAppVersion(): Promise<AppVersion | null> {
-  const cache = await caches.open(CACHE_NAME);
-  const cachedVersionResponse = await getOrMigrateAppVersionCacheEntry(cache);
-  if (!cachedVersionResponse) {
-    return null;
-  }
-  try {
-    return await cachedVersionResponse.json();
-  } catch (error) {
-    console.warn('SERVICE WORKER: cached app version is invalid JSON', error);
-    return null;
-  }
-}
-
-async function getOrMigrateAppVersionCacheEntry(cache: Cache): Promise<Response | null> {
-  const currentVersionResponse = await cache.match(APP_VERSION_CACHE_KEY);
-  if (currentVersionResponse) {
-    return currentVersionResponse;
-  }
-
-  const legacyVersionResponse = await cache.match(LEGACY_APP_VERSION_CACHE_KEY);
-  if (!legacyVersionResponse) {
-    return null;
-  }
-
-  // Migrate old key to the current key so future reads are consistent.
-  await cache.put(APP_VERSION_CACHE_KEY, legacyVersionResponse.clone());
-  await cache.delete(LEGACY_APP_VERSION_CACHE_KEY);
-  return legacyVersionResponse;
-}
-
-async function postMessageToAllClients(message: string, payload: Record<string, unknown> = {}) {
-  const clients = await (self as unknown as ServiceWorkerGlobalScope).clients.matchAll({
-    includeUncontrolled: true,
-    type: 'window'
-  });
-  for (const client of clients) {
-    client.postMessage({ message, ...payload });
-  }
-}
-
 function shouldUseNetworkFirst(request: Request): boolean {
   if (request.mode === 'navigate') {
     return true;
   }
   const url = new URL(request.url);
   const path = url.pathname;
-  return path === '/assets_list.json' || path.endsWith('.html') || path.endsWith('.js') || path.endsWith('.css');
-}
-
-/**
- * Checks whether the application has been installed by looking
- * for an `app_version` entry in the cache.
- * @returns `true` if the app is installed.
- */
-export async function checkIfAppInstalled() {
-  const cache = await caches.open(CACHE_NAME);
-  const appVersion = await getOrMigrateAppVersionCacheEntry(cache);
-  if (appVersion) {
-    return true;
-  }
-  return false;
+  // Note: /assets_list.json is handled by shouldBypassSW() before reaching this function.
+  return path.endsWith('.html') || path.endsWith('.js') || path.endsWith('.css');
 }
 
 /**
@@ -101,8 +51,11 @@ export async function checkIfAppInstalled() {
  */
 export async function installApp() {
   console.log('SERVICE WORKER: Beginning app installation');
-  const latestManifest = await fetchLatestManifest();
-  const manifest: AssetManifest = await latestManifest.json();
+  const response = await fetchLatestManifest();
+  if (!response.ok) {
+    throw new Error(`Manifest fetch failed with status ${response.status}`);
+  }
+  const manifest: AssetManifest = await response.json();
   const filesToInstall = manifest.files || [];
   const buildVersion = manifest.app_version;
   const cache = await caches.open(CACHE_NAME);
@@ -116,17 +69,6 @@ export async function installApp() {
     })
   );
   console.log(`SERVICE WORKER: App installed (version ${buildVersion}, ${filesToInstall.length} files)`);
-  for (const client of await (self as unknown as ServiceWorkerGlobalScope).clients.matchAll({
-    includeUncontrolled: true,
-    type: 'window'
-  })) {
-    client.postMessage({
-      message: 'install_complete',
-      latest_version: buildVersion,
-      current_version: buildVersion,
-      data_hashes: manifest.data_hashes || {}
-    });
-  }
   return manifest;
 }
 
@@ -138,7 +80,11 @@ export async function installApp() {
  */
 export async function updateApp() {
   console.log('SERVICE WORKER: Update requested');
-  const manifest: AssetManifest = await fetchLatestManifest().then((manifest) => manifest.json());
+  const response = await fetchLatestManifest();
+  if (!response.ok) {
+    throw new Error(`Manifest fetch failed with status ${response.status}`);
+  }
+  const manifest: AssetManifest = await response.json();
   const files = manifest.files || [];
   const cache = await caches.open(CACHE_NAME);
   let addedCount = 0;
@@ -155,9 +101,7 @@ export async function updateApp() {
     }
   }
   const cacheKeys = (await cache.keys()).map((key) => key.url.replace(self.location.origin, ''));
-  const keysToDelete = cacheKeys.filter(
-    (key) => key !== APP_VERSION_CACHE_KEY && key !== LEGACY_APP_VERSION_CACHE_KEY && !files.includes(key)
-  );
+  const keysToDelete = cacheKeys.filter((key) => key !== APP_VERSION_CACHE_KEY && !files.includes(key));
   for (const key of keysToDelete) {
     await cache.delete(key);
   }
@@ -176,15 +120,27 @@ export async function updateApp() {
   return manifest;
 }
 
-const noCacheHeaders = () => {
-  const myHeaders = new Headers();
-  myHeaders.append('pragma', 'no-cache');
-  myHeaders.append('cache-control', 'no-cache');
-  return {
-    method: 'GET',
-    headers: myHeaders
-  };
+const NO_CACHE_INIT: RequestInit = {
+  method: 'GET',
+  headers: {
+    pragma: 'no-cache',
+    'cache-control': 'no-cache'
+  }
 };
+
+/**
+ * Returns true for URL paths that must be bypassed completely by the SW
+ * (no cache read, no cache write). These are OIDC/Apache routes and the
+ * asset manifest which the main thread must always receive fresh from the server.
+ */
+function shouldBypassSW(url: string): boolean {
+  try {
+    const path = new URL(url).pathname;
+    return path.startsWith('/auth/') || path === '/assets_list.json';
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Handle fetch events from the Service Worker.
@@ -199,16 +155,33 @@ const noCacheHeaders = () => {
 export async function handleFetch(event: FetchEvent) {
   const url = event.request.url;
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
+
+  // Full bypass: /auth/* (OIDC) and /assets_list.json must never be intercepted.
+  if (shouldBypassSW(url)) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   if (url === scope) {
-    // case for home page
-    const newUrl = scope + 'index.html';
+    // Home page: network-first so Apache can redirect when OIDC session expires.
+    // 3xx responses are passed through without caching.
     event.respondWith(
-      caches.match(newUrl).then((response) => {
-        if (response) {
-          return response;
+      (async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const indexUrl = scope + 'index.html';
+        try {
+          const networkResponse = await fetchWithTimeout(event.request.clone());
+          if (networkResponse && networkResponse.ok) {
+            await cache.put(indexUrl, networkResponse.clone());
+            return networkResponse;
+          }
+          // 3xx or non-ok: return directly without caching (preserves Apache redirects).
+          return networkResponse;
+        } catch {
+          const cached = await cache.match(indexUrl);
+          return cached ?? Response.error();
         }
-        return fetch(event.request.clone());
-      })
+      })()
     );
   } else if (url.includes('celesteback')) {
     // redirect to the backend
@@ -220,7 +193,8 @@ export async function handleFetch(event: FetchEvent) {
         (async () => {
           const cache = await caches.open(CACHE_NAME);
           try {
-            const networkResponse = await fetch(event.request.clone(), noCacheHeaders());
+            const networkResponse = await fetchWithTimeout(event.request.clone(), NO_CACHE_INIT);
+            // Only cache successful (2xx) responses — never cache 3xx redirects.
             if (networkResponse && networkResponse.ok) {
               await cache.put(event.request, networkResponse.clone());
             }
@@ -244,7 +218,7 @@ export async function handleFetch(event: FetchEvent) {
           return response;
         }
         const fetchRequest = event.request.clone();
-        return fetch(fetchRequest, noCacheHeaders()).catch((error) => {
+        return fetch(fetchRequest, NO_CACHE_INIT).catch((error) => {
           console.error('Fetch failed:', error);
           return Response.error();
         });
@@ -300,74 +274,24 @@ export async function handleMessage(event: ExtendableMessageEvent) {
   }
 }
 
-async function fetchLatestManifestOrThrow(): Promise<AssetManifest> {
-  const latestManifestResponse = await fetchLatestManifest();
-  if (!latestManifestResponse.ok) {
-    throw new Error(`Manifest fetch failed with status ${latestManifestResponse.status}`);
-  }
-  return latestManifestResponse.json();
-}
-
-async function activateWhenAppInstalled() {
-  const cachedVersion = await getCachedAppVersion();
-  const latestManifest = await fetchLatestManifestOrThrow();
-
-  if (!areVersionsEqual(cachedVersion, latestManifest.app_version)) {
-    console.log('SERVICE WORKER: new App version detected during activate, updating cached assets');
-    const updatedManifest = await updateApp();
-    await postMessageToAllClients('update_complete', {
-      latest_version: updatedManifest.app_version,
-      data_hashes: updatedManifest.data_hashes || {}
-    });
-    return;
-  }
-
-  await postMessageToAllClients('worker_ready', {
-    latest_version: latestManifest.app_version,
-    current_version: cachedVersion,
-    data_hashes: latestManifest.data_hashes || {}
-  });
-}
-
-async function activateWhenAppNotInstalled() {
-  try {
-    console.log('SERVICE WORKER: App not installed, installing now');
-    const manifest = await installApp();
-    await postMessageToAllClients('worker_ready', {
-      latest_version: manifest.app_version,
-      current_version: manifest.app_version,
-      data_hashes: manifest.data_hashes || {}
-    });
-  } catch (err) {
-    console.error('SERVICE WORKER: Installation failed', err);
-  }
-}
-
+/**
+ * Handle the activate event.
+ *
+ * V2 behaviour: only claim clients. No auto-install or auto-update.
+ * The first-launch install is triggered by `UpdateService.checkForUpdateOnce()`
+ * from the Angular `APP_INITIALIZER`.
+ */
 async function handleActivate() {
   console.log('SERVICE WORKER: Activating service worker');
   await (self as unknown as ServiceWorkerGlobalScope).clients.claim();
-
-  try {
-    const installed = await checkIfAppInstalled();
-    if (installed) {
-      await activateWhenAppInstalled();
-      return;
-    }
-
-    await activateWhenAppNotInstalled();
-  } catch (error) {
-    console.warn('SERVICE WORKER: activate flow failed, using cached state when available', error);
-    const cachedVersion = await getCachedAppVersion();
-    await postMessageToAllClients('worker_ready', {
-      latest_version: cachedVersion,
-      current_version: cachedVersion,
-      data_hashes: {}
-    });
-  }
 }
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('activate', (event) => {
-  event.waitUntil(handleActivate());
+  event.waitUntil(
+    handleActivate().catch((err) => {
+      console.error('SERVICE WORKER: Activation failed', err);
+    })
+  );
 });
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('message', handleMessage);

@@ -80,3 +80,5 @@ docs-sphinx/build/
 .venv
 stellar-engine/input/*.whl
 test-results/
+# OIDC dev mock — personal claims file (contains user-specific test data)
+dev-mock/oidc-claims.json

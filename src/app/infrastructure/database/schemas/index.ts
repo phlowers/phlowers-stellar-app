@@ -6,7 +6,7 @@
  */
 
 // Database schemas barrel export
-export { USER_SCHEMA } from './user.schema';
+export { USER_SCHEMA, USER_SCHEMA_V3 } from './user.schema';
 export { STUDY_SCHEMA } from './study.schema';
 export { CATALOG_ATTACHMENT_SCHEMA } from './catalog-attachment.schema';
 export { CATALOG_CABLE_SCHEMA } from './catalog-cable.schema';

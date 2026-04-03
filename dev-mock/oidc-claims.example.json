@@ -1,0 +1,7 @@
+{
+  "email": "dev.user@example.com",
+  "sub": "sub-dev-00000000",
+  "given_name": "Dev",
+  "family_name": "User",
+  "roles": ["viewer", "editor"]
+}
