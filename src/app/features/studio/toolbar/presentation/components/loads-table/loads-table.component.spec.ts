@@ -170,7 +170,9 @@ describe('LoadsTableComponent', () => {
     selected_charge_uuid: 'charge-uuid-1',
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    vtl_and_guying: undefined
+    vtl_and_guying: undefined,
+    cable_modifications: [],
+    selected_cable_modification_uuid: null
   };
 
   beforeEach(async () => {
@@ -419,12 +421,12 @@ describe('LoadsTableComponent', () => {
       const rows = component.spanLoadRows();
       expect(rows).toHaveLength(2);
       expect(rows[0].spanLabel).toBe('1 - 2');
-      expect(rows[0].referenceSupport).toBe(1);
+      expect(rows[0].referenceSupport).toBe('1');
       expect(rows[0].type).toBe(LoadType.PUNCTUAL);
       expect(rows[0].loadWeight).toBe(100);
       expect(rows[0].loadPosition).toBe(50);
       expect(rows[1].spanLabel).toBe('2 - 3');
-      expect(rows[1].referenceSupport).toBe(3);
+      expect(rows[1].referenceSupport).toBe('3');
       expect(rows[1].type).toBe(LoadType.MARKING);
     });
 
