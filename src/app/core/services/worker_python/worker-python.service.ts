@@ -102,7 +102,12 @@ export class WorkerPythonService {
         const activateDebugLogs = localStorage.getItem('activateDebugLogs') === 'true';
         this.runTask(Task.setLogLevel, { activateDebugLogs });
       } else if (data.id) {
-        this.handlerMap[data.id](data.result, data.error, data.pythonErrorCode ?? null);
+        const handler = this.handlerMap[data.id];
+        if (handler) {
+          const error = (data.error as TaskError) ?? null;
+          const pythonErrorCode = (data.pythonErrorCode as PythonErrorCode) ?? null;
+          handler(data.result, error, pythonErrorCode);
+        }
       }
     };
   }
