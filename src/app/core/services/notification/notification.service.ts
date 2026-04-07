@@ -25,7 +25,7 @@ export class NotificationService {
    * Displays a success toast (green).
    * @param detail - Main message body
    * @param summary - Toast title, defaults to "Successful"
-   * @param life - Display duration in ms, defaults to 3000
+   * @param life - Display duration in ms, defaults to 10000
    */
   success(detail: string, summary: string = $localize`Successful`, life: number = DEFAULT_LIFE): void {
     this.messageService.add({ severity: 'success', summary, detail, life });
@@ -35,7 +35,7 @@ export class NotificationService {
    * Displays an error toast (red).
    * @param detail - Main message body
    * @param summary - Toast title, defaults to "Error"
-   * @param life - Display duration in ms, defaults to 3000
+   * @param life - Display duration in ms, defaults to 10000
    */
   error(detail: string, summary: string = $localize`Error`, life: number = DEFAULT_LIFE): void {
     this.messageService.add({ severity: 'error', summary, detail, life });
@@ -45,7 +45,7 @@ export class NotificationService {
    * Displays an info toast (blue).
    * @param detail - Main message body
    * @param summary - Toast title, defaults to "Info"
-   * @param life - Display duration in ms, defaults to 3000
+   * @param life - Display duration in ms, defaults to 10000
    */
   info(detail: string, summary: string = $localize`Info`, life: number = DEFAULT_LIFE): void {
     this.messageService.add({ severity: 'info', summary, detail, life });
@@ -55,7 +55,7 @@ export class NotificationService {
    * Displays a warning toast (orange).
    * @param detail - Main message body
    * @param summary - Toast title, defaults to "Warning"
-   * @param life - Display duration in ms, defaults to 3000
+   * @param life - Display duration in ms, defaults to 10000
    */
   warning(detail: string, summary: string = $localize`Warning`, life: number = DEFAULT_LIFE): void {
     this.messageService.add({ severity: 'warn', summary, detail, life });

@@ -16,6 +16,10 @@ describe('LoggerService', () => {
     service = TestBed.inject(LoggerService);
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('log', () => {
     it('should call console.log with the provided message', () => {
       const spy = vi.spyOn(console, 'log').mockReturnValue(undefined);

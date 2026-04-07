@@ -9,6 +9,8 @@ import { MessageService } from 'primeng/api';
 import { vi, type Mock } from 'vitest';
 import { NotificationService } from './notification.service';
 
+const DEFAULT_LIFE = 10000;
+
 describe('NotificationService', () => {
   let service: NotificationService;
   let mockMessageService: { add: Mock };
@@ -31,7 +33,7 @@ describe('NotificationService', () => {
         severity: 'success',
         summary: expect.any(String),
         detail: 'Operation completed',
-        life: 10000
+        life: DEFAULT_LIFE
       });
     });
 
@@ -42,7 +44,7 @@ describe('NotificationService', () => {
         severity: 'success',
         summary: 'Custom Title',
         detail: 'Done',
-        life: 10000
+        life: DEFAULT_LIFE
       });
     });
 
@@ -66,7 +68,7 @@ describe('NotificationService', () => {
         severity: 'error',
         summary: expect.any(String),
         detail: 'Something went wrong',
-        life: 10000
+        life: DEFAULT_LIFE
       });
     });
 
@@ -77,7 +79,7 @@ describe('NotificationService', () => {
         severity: 'error',
         summary: 'Critical Error',
         detail: 'Failed',
-        life: 10000
+        life: DEFAULT_LIFE
       });
     });
 
@@ -101,7 +103,7 @@ describe('NotificationService', () => {
         severity: 'info',
         summary: expect.any(String),
         detail: 'For your information',
-        life: 10000
+        life: DEFAULT_LIFE
       });
     });
 
@@ -112,7 +114,7 @@ describe('NotificationService', () => {
         severity: 'info',
         summary: 'FYI',
         detail: 'Note',
-        life: 10000
+        life: DEFAULT_LIFE
       });
     });
   });
@@ -125,7 +127,7 @@ describe('NotificationService', () => {
         severity: 'warn',
         summary: expect.any(String),
         detail: 'Proceed with caution',
-        life: 10000
+        life: DEFAULT_LIFE
       });
     });
 
@@ -136,7 +138,7 @@ describe('NotificationService', () => {
         severity: 'warn',
         summary: 'Attention',
         detail: 'Be careful',
-        life: 10000
+        life: DEFAULT_LIFE
       });
     });
   });

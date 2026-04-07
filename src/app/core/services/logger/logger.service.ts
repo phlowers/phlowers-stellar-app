@@ -15,22 +15,22 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class LoggerService {
   /** Logs a general-purpose message. */
-  log(message: string, ...data: unknown[]): void {
+  log(message: unknown, ...data: unknown[]): void {
     console.log(message, ...data);
   }
 
   /** Logs an error message. */
-  error(message: string, ...data: unknown[]): void {
+  error(message: unknown, ...data: unknown[]): void {
     console.error(message, ...data);
   }
 
   /** Logs a warning message. */
-  warn(message: string, ...data: unknown[]): void {
+  warn(message: unknown, ...data: unknown[]): void {
     console.warn(message, ...data);
   }
 
   /** Logs an informational message. */
-  info(message: string, ...data: unknown[]): void {
+  info(message: unknown, ...data: unknown[]): void {
     console.info(message, ...data);
   }
 }
