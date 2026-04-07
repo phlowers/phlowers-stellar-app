@@ -367,7 +367,7 @@ export class PlotService {
     const spanCount = this.getSpanCount(supports);
 
     return Array.from({ length: spanCount }, (_, index) => ({
-      label: `${formatSupportNumber(supports[index].number!)} - ${formatSupportNumber(supports[index + 1].number!)}`,
+      label: `${formatSupportNumber(supports[index].number)} - ${formatSupportNumber(supports[index + 1].number)}`,
       value: supports[index]?.uuid ?? null
     }));
   });
@@ -381,7 +381,7 @@ export class PlotService {
     const spanCount = this.getSpanCount(supports);
 
     return Array.from({ length: spanCount }, (_, index) => ({
-      label: `${formatSupportNumber(supports[index].number!)} - ${formatSupportNumber(supports[index + 1].number!)}`,
+      label: `${formatSupportNumber(supports[index].number)} - ${formatSupportNumber(supports[index + 1].number)}`,
       value: supports[index]?.uuid && supports[index].uuid !== '' ? { index, uuid: supports[index].uuid } : null
     }));
   });
@@ -438,19 +438,19 @@ export class PlotService {
   }
 
   getSupportOptions = (supportUuid: string | null): { label: string; value: 'LEFT' | 'RIGHT' }[] => {
-    if (supportUuid === null) {
+    const supports = this.section()?.supports;
+    if (supportUuid === null || !supports) {
       return [];
     }
-    const supports = this.section()?.supports;
-    const spanIndex = supports?.findIndex((s) => s.uuid === supportUuid);
-    if (spanIndex !== undefined && spanIndex >= 0 && supports) {
+    const spanIndex = supports.findIndex((s) => s.uuid === supportUuid);
+    if (spanIndex >= 0 && spanIndex + 1 < supports.length) {
       return [
         {
-          label: formatSupportNumber(supports[spanIndex].number!),
+          label: formatSupportNumber(supports[spanIndex].number),
           value: 'LEFT'
         },
         {
-          label: formatSupportNumber(supports[spanIndex + 1].number!),
+          label: formatSupportNumber(supports[spanIndex + 1].number),
           value: 'RIGHT'
         }
       ];

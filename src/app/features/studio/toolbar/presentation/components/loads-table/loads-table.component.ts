@@ -109,12 +109,24 @@ export class LoadsTableComponent {
       .map((load) => {
         const supportIndex = supports.findIndex((s) => s.uuid === load.supportUuid);
         const hasNextSupport = supportIndex >= 0 && supportIndex + 1 < supports.length;
+
+        if (!hasNextSupport) {
+          return {
+            spanLabel: '-',
+            referenceSupport: '-',
+            type: load.type,
+            loadWeight: load.loadWeight,
+            loadPosition: load.loadPosition
+          };
+        }
+
         const leftNum = supports[supportIndex]?.number;
         const rightNum = supports[supportIndex + 1]?.number;
         const left = leftNum ? formatSupportNumber(leftNum) : String(supportIndex + 1);
         const right = rightNum ? formatSupportNumber(rightNum) : String(supportIndex + 2);
         const spanLabel = hasNextSupport ? `${left} - ${right}` : '-';
         const referenceSupport = load.referenceSupport === 'LEFT' ? left : right;
+
         return {
           spanLabel,
           referenceSupport,

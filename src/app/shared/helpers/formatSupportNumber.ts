@@ -10,10 +10,12 @@ export const SUPPORT_NUMBER_MAX_LENGTH = 5;
 
 /**
  * Returns a display-safe support number, truncated to SUPPORT_NUMBER_MAX_LENGTH characters.
+ * Returns '?' when the number is null.
  *
- * @param number - The support number string
- * @returns Display support number truncated to SUPPORT_NUMBER_MAX_LENGTH characters
+ * @param number - The support number string, or null
+ * @returns Display support number truncated to SUPPORT_NUMBER_MAX_LENGTH characters, or '?'
  */
-export function formatSupportNumber(number: string): string {
+export function formatSupportNumber(number: string | null): string {
+  if (number === null) return '-';
   return number.slice(0, SUPPORT_NUMBER_MAX_LENGTH);
 }
