@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, input, OnInit, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, OnInit, signal, computed, inject } from '@angular/core';
 import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '@shared/model/icon.model';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 @Component({
   selector: 'app-icon',
@@ -22,6 +23,7 @@ export class IconComponent implements OnInit {
   fill = input<boolean>(false);
 
   symbolsReady = signal(false);
+  private readonly logger = inject(LoggerService);
 
   isCustomSvgIcon = computed(() => {
     return CUSTOM_SVG_ICONS.includes(this.icon() as CustomSvgIconNames);
@@ -45,7 +47,7 @@ export class IconComponent implements OnInit {
       await document.fonts.load('1em "Material Symbols Rounded"');
       this.symbolsReady.set(true);
     } catch (error) {
-      console.warn('Material Symbols Rounded font failed to load:', error);
+      this.logger.warn('Material Symbols Rounded font failed to load:', error);
     }
   }
 }

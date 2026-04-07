@@ -37,6 +37,7 @@ import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { isNumber } from 'lodash';
 import { MessageService } from 'primeng/api';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /** Main field measuring tool component with tabs for terrain data, parameter calculation, temperature, and parameter at 15°C. */
 @Component({
@@ -93,6 +94,7 @@ export class FieldMeasuringComponent implements OnDestroy {
   private readonly linesService = inject(LinesService);
   readonly cableService = inject(CablesService);
   private readonly messageService = inject(MessageService);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
     effect(() => {
@@ -170,7 +172,7 @@ export class FieldMeasuringComponent implements OnDestroy {
     );
 
     if (!section || !selectedFieldMeasure) {
-      console.warn('No section available');
+      this.logger.warn('No section available');
       this.toolbarDialogService.closeTool();
       return;
     }
@@ -212,12 +214,12 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   onExport() {
     // TODO: Implement export functionality
-    console.log('Export', this.measureData());
+    this.logger.log('Export', this.measureData());
   }
 
   onReport() {
     // TODO: Implement report functionality
-    console.log('Report', this.measureData());
+    this.logger.log('Report', this.measureData());
   }
 
   async onSave() {
@@ -247,6 +249,6 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   onImportStationData() {
     // TODO: Implement station data import functionality
-    console.log('Import station data');
+    this.logger.log('Import station data');
   }
 }

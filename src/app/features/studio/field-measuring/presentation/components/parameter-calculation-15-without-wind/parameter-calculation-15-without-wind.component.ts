@@ -22,6 +22,7 @@ import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
 import { PlotService } from '@services/plot/plot.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({
@@ -78,6 +79,7 @@ export class ParameterCalculation15WithoutWindComponent {
   readonly studiesService = inject(StudiesService);
   private readonly initialConditionService = inject(InitialConditionService);
   private readonly messageService = inject(MessageService);
+  private readonly logger = inject(LoggerService);
 
   isFormValid = computed(() => {
     const isManual = this.measureData().updateMode15C === 'manual';
@@ -130,7 +132,7 @@ export class ParameterCalculation15WithoutWindComponent {
     }));
     const data = this.measureData();
     if (!this.isFormValid()) {
-      console.error('Missing required fields for parameter calculation');
+      this.logger.error('Missing required fields for parameter calculation');
       this.parameter15CError.set(true);
       return;
     }

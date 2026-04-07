@@ -8,7 +8,7 @@ import { Injectable, inject } from '@angular/core';
 import { MessageService } from 'primeng/api';
 
 /** Default toast duration in milliseconds. */
-const DEFAULT_LIFE = 3000;
+const DEFAULT_LIFE = 10000;
 
 /**
  * Global notification service for displaying toast messages.

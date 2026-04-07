@@ -23,6 +23,7 @@ import {
 } from './helpers/obstacles';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 
@@ -47,6 +48,7 @@ export class SectionPlotComponent {
   private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly loadFormsService = inject(LoadFormsService);
+  private readonly logger = inject(LoggerService);
 
   // Signals
   private readonly isPlotRefreshing = signal(false);
@@ -185,7 +187,7 @@ export class SectionPlotComponent {
         this.addEventListenersToPlot(plot);
       }
     } catch (error) {
-      console.error('Error refreshing plot:', error);
+      this.logger.error('Error refreshing plot:', error);
     } finally {
       this.isPlotRefreshing.set(false);
     }
