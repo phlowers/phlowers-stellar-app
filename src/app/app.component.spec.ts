@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { AppComponent } from './app.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -73,7 +74,7 @@ describe('AppComponent', () => {
     mockUpdateService = {
       checkForUpdateOnce: vi.fn().mockResolvedValue(undefined),
       getLatestAssetList: vi.fn().mockResolvedValue(null),
-      needUpdate$: new BehaviorSubject<boolean>(false),
+      needUpdate: signal(false),
       updateLoading: vi.fn().mockReturnValue(false),
       latestVersion: vi.fn().mockReturnValue(null),
       update: vi.fn()
@@ -195,8 +196,7 @@ describe('AppComponent', () => {
 
   describe('ngOnInit — V2 startup sequence', () => {
     it('should call workerService.setup() even if setupData() fails', async () => {
-      // @ts-expect-error vitest mock
-      mockUpdateService.getLatestAssetList.mockRejectedValue(new Error('Network error'));
+      vi.spyOn(component, 'setupData').mockRejectedValue(new Error('setup failed'));
 
       component.ngOnInit();
       await fixture.whenStable();
@@ -229,7 +229,12 @@ describe('AppComponent - HTML rendering', () => {
         createDatabase: vi.fn().mockResolvedValue(undefined),
         ready$: new BehaviorSubject<boolean>(true),
         db: {
-          users: { toArray: vi.fn().mockResolvedValue([]), get: vi.fn().mockResolvedValue(undefined), put: vi.fn(), clear: vi.fn() },
+          users: {
+            toArray: vi.fn().mockResolvedValue([]),
+            get: vi.fn().mockResolvedValue(undefined),
+            put: vi.fn(),
+            clear: vi.fn()
+          },
           metadata: { get: vi.fn().mockResolvedValue(null), put: vi.fn().mockResolvedValue(undefined) }
         }
       }
@@ -241,7 +246,7 @@ describe('AppComponent - HTML rendering', () => {
       useValue: {
         checkForUpdateOnce: vi.fn().mockResolvedValue(undefined),
         getLatestAssetList: vi.fn().mockResolvedValue(null),
-        needUpdate$: new BehaviorSubject<boolean>(false),
+        needUpdate: signal(false),
         updateLoading: vi.fn().mockReturnValue(false),
         latestVersion: vi.fn().mockReturnValue(null),
         update: vi.fn()
