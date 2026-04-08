@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { HomeComponent } from './home.component';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { OnlineService, ServerStatus } from '@services/online/online.service';
@@ -48,7 +49,7 @@ describe('HomeComponent', () => {
 
   beforeEach(async () => {
     updateServiceMock = {
-      needUpdate$: new BehaviorSubject<boolean>(false)
+      needUpdate: signal(false)
     } as vi.Mocked<UpdateService>;
 
     onlineServiceMock = {
@@ -96,7 +97,7 @@ describe('HomeComponent', () => {
 
   describe('Constructor Behavior', () => {
     it('should set update status to warning when update is needed', () => {
-      updateServiceMock.needUpdate$.next(true);
+      updateServiceMock.needUpdate.set(true);
 
       const newFixture = TestBed.createComponent(HomeComponent);
       const newComponent = newFixture.componentInstance;
@@ -106,7 +107,7 @@ describe('HomeComponent', () => {
     });
 
     it('should not change update status when no update is needed', () => {
-      updateServiceMock.needUpdate$.next(false);
+      updateServiceMock.needUpdate.set(false);
 
       expect(component.updateStatus()).toBe('unknown');
     });
