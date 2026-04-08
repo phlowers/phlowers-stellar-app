@@ -1,13 +1,6 @@
-import { computed, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
+import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { AxesNorms, PlotOptions, PLOT_ID, SelectedDisplayOptions, SpanOption } from '@shared/types/plot.types';
-import {
-  DataError,
-  Distance,
-  GetSectionOutput,
-  PythonErrorCode,
-  Task,
-  TaskError
-} from '@services/worker_python/tasks/types';
+import { DataError, GetSectionOutput, PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { Section, Study } from '@shared/domain';
 import { Subscription } from 'rxjs';
@@ -20,8 +13,8 @@ import { SectionService } from '@services/section/section.service';
 import { ChargeData } from '@shared/domain/models/charge.model';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
-import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 const MIN_RESOLUTION = 25;
 const RESOLUTION_STORAGE_KEY = 'plotResolution';
@@ -103,8 +96,6 @@ export class PlotService {
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
   spanAmountChoice = signal<'single' | 'double' | 'all'>('all');
-  distances = signal<Distance[]>([]);
-  distanceType = signal<'oblique' | 'vertical' | 'horizontal' | null>(null);
 
   plotOptions = signal<PlotOptions>({
     ...defaultPlotOptions
@@ -113,14 +104,13 @@ export class PlotService {
     ...defaultSelectedDisplayOptions
   });
 
-  private readonly injector = inject(Injector);
-
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly cableService = inject(CablesService);
   private readonly sectionService = inject(SectionService);
   private readonly sideTabsService = inject(SideTabsService);
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
+  private readonly obstacleStateService = inject(ObstacleStateService);
 
   constructor() {
     const storedResolution = Number(localStorage.getItem(RESOLUTION_STORAGE_KEY));
@@ -171,9 +161,7 @@ export class PlotService {
     this.study.set(null);
     this.spanAmountChoice.set('all');
     this.axesNorms.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
-    this.distances.set([]);
-    this.distanceType.set(null);
-    this.injector.get(ObstacleFormService).clearPositions();
+    this.obstacleStateService.reset();
     this.obstaclesService.setSelectedObstacle(null, null);
     this.sideTabsService.sideTabs.set(null);
   };
@@ -237,79 +225,30 @@ export class PlotService {
       return;
     }
     const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
-    let currentLitData: GetSectionOutput | null = result?.current ?? null;
     this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
     this.pythonErrorCode.set(pythonErrorCode ?? null);
 
     if (error) {
-      this.distances.set([]);
-      this.distanceType.set(null);
-    } else {
-      currentLitData = await this.applyTemporaryLoad(currentLitData);
-      currentLitData = await this.applySectionObstacles(section, currentLitData);
+      this.obstacleStateService.reset();
+      this.loading.set(false);
+      return;
     }
 
-    this.litData.set(currentLitData);
+    const sectionLitData = result?.current ?? null;
+    const obstacles = section.obstacles ?? [];
+    if (obstacles.length > 0 && sectionLitData) {
+      const syncedOutput = await this.obstacleStateService.syncObstacles(
+        obstacles,
+        untracked(() => this.plotOptions())
+      );
+      this.litData.set({ ...sectionLitData, obstacles: syncedOutput?.obstacles ?? [] });
+    } else {
+      this.obstacleStateService.reset();
+      this.litData.set(sectionLitData);
+    }
     this.loading.set(false);
   };
-
-  /**
-   * Applies the active load case (temporaryLoadData) on top of the given lit data.
-   * If no load data is active, or if currentLitData is null, returns the input unchanged.
-   * @param currentLitData - The current section output to apply the load onto (may be null)
-   * @returns Updated section output with the load state applied, or the original if nothing to apply
-   */
-  private async applyTemporaryLoad(currentLitData: GetSectionOutput | null): Promise<GetSectionOutput | null> {
-    if (!this.temporaryLoadData || !currentLitData) {
-      return currentLitData;
-    }
-    const { result: loadResult } = await this.workerPythonService.runTask(Task.changeState, {
-      climate: this.temporaryLoadData.climate,
-      spanLoads: this.temporaryLoadData.spanLoads
-    });
-    if (loadResult?.current) {
-      this.baseLitData.set(loadResult.base ?? null);
-      return loadResult.current;
-    }
-    return currentLitData;
-  }
-
-  /**
-   * Re-adds all obstacles from the section and refreshes the distances signal.
-   * If the section has no obstacles, resets the distances to an empty array.
-   * @param section - The section whose obstacles should be applied
-   * @param currentLitData - The current section output to layer obstacles onto (may be null)
-   * @returns Updated section output after obstacle application, or the original value if no obstacles
-   */
-  private async applySectionObstacles(
-    section: Section,
-    currentLitData: GetSectionOutput | null
-  ): Promise<GetSectionOutput | null> {
-    if (!section.obstacles?.length) {
-      this.distances.set([]);
-      return currentLitData;
-    }
-    if (!currentLitData) {
-      return currentLitData;
-    }
-    // Re-add obstacles from the section so that annotations and distance traces are preserved
-    // across section reloads (e.g. re-opening the study or after a save).
-    for (const obstacle of section.obstacles) {
-      const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
-      if (obstacleResult?.current) {
-        currentLitData = obstacleResult.current;
-      }
-    }
-    const options = untracked(() => this.plotOptions());
-    const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
-      startSupport: options.startSupport,
-      endSupport: options.endSupport,
-      view: options.view
-    });
-    this.distances.set(distances ?? []);
-    return currentLitData;
-  }
 
   getCamera = () => {
     const plot = document.getElementById(PLOT_ID);
@@ -341,6 +280,7 @@ export class PlotService {
     });
     this.litData.set(result?.sectionOutput?.current ?? null);
     this.baseLitData.set(result?.sectionOutput?.base ?? null);
+    this.obstacleStateService.setDistances(result?.distances ?? []);
     this.error.set(error);
     this.pythonErrorCode.set(pythonErrorCode ?? null);
     this.loading.set(false);
@@ -433,53 +373,6 @@ export class PlotService {
   getSupportIndex = (supportUuid: string): number => {
     return this.section()?.supports?.findIndex((s) => s.uuid === supportUuid) ?? -1;
   };
-
-  /**
-   * Re-applies all obstacles from the current section, starting from the correct base state.
-   *
-   * If a load state is active (temporaryLoadData is set), first restores that state via
-   * Task.changeState before adding obstacles, so that obstacles are always layered on top
-   * of the correct base. Then iterates over each obstacle, calls Task.addObstacle for each,
-   * and if any obstacles exist, calls Task.calculateObstaclesDistances to refresh the
-   * distances signal. Updates litData and distances signals on completion.
-   */
-  async reapplyObstacles(): Promise<void> {
-    const section = untracked(() => this.section());
-    const obstacles = section?.obstacles ?? [];
-    const plotOptions = untracked(() => this.plotOptions());
-
-    let currentLitData = untracked(() => this.litData());
-
-    // Restore the load-applied base state before re-adding obstacles
-    if (this.temporaryLoadData) {
-      const { result: loadResult } = await this.workerPythonService.runTask(Task.changeState, {
-        climate: this.temporaryLoadData.climate,
-        spanLoads: this.temporaryLoadData.spanLoads
-      });
-      if (loadResult?.current) {
-        currentLitData = loadResult.current;
-        this.baseLitData.set(loadResult.base ?? null);
-      }
-    }
-    for (const obstacle of obstacles) {
-      const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
-      if (obstacleResult?.current) {
-        currentLitData = obstacleResult.current;
-      }
-    }
-
-    if (obstacles.length) {
-      const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
-        startSupport: plotOptions.startSupport,
-        endSupport: plotOptions.endSupport,
-        view: plotOptions.view
-      });
-      this.distances.set(distances ?? []);
-    }
-
-    this.litData.set(currentLitData);
-  }
-
   getSupportOptions = (supportUuid: string | null): { label: string; value: 'LEFT' | 'RIGHT' }[] => {
     const supports = this.section()?.supports;
     if (supportUuid === null || !supports) {

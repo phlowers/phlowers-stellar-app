@@ -5,41 +5,27 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from mechaphlowers import BalanceEngine, PlotEngine
-from stellar_engine.entities.output import get_coordinates
+from mechaphlowers.entities.arrays import ObstacleArray
+import pandas as pd
 
-def add_obstacles(inputs: dict, balance_engine: BalanceEngine, plot_engine: PlotEngine):
-    get_coordinates_result = get_coordinates(
-        balance_engine, plot_engine, False, 0, len(balance_engine.section_array.data) - 1
-    )
-    print(inputs)
-    print("eeeeeeeeeeeeeee")
-    # {'uuid': 'a029fc13-6682-4587-8db6-45a442a5b019',
-    # 'supportUuid': '40d3d38e-683e-412a-a1c5-aafaa7773d59',
-    # 'name': 'obstacle_mock',
-    # 'type': 'House',
-    # 'altitudeType': 'absolute',
-    # 'lateralDistanceType': 'SPAN_AXIS',
-    # 'referenceSupport': 'LEFT',
-    # 'positions': [{'x': 0, 'y': 0, 'z': 0}]
-    # }
-    plot_engine.position_engine.add_obstacles()
-    # if hasattr(plot_engine.position_engine, "obstacle_array"):
-    #     plot_engine.position_engine.obstacles_array.add_obstacle(
-    #         name=inputs['name'],
-    #         coords=
-    #         span_index=,
-    #         object_type=inputs["type"],
-    #         support_reference=inputs["referenceSupport"].toLowerCase(),
-    #         span_length=,
-    #     )
-    get_coordinates_result["obstacles"] = [
-        {"name": "obstacle_mock", "points": [[80, 20, 0]]}
-    ]
-    result = {
-        "current": get_coordinates_result,
-    }
-    obstacles_dict = plot_engine.obstacles_dict()
-    return None
+def add_obstacles(inputs: list, balance_engine: BalanceEngine, plot_engine: PlotEngine):
+    rows = []
+    for obstacle in inputs:
+        for i, pos in enumerate(obstacle['positions']):
+            rows.append({
+                "name": obstacle['uuid'],
+                "point_index": i,
+                "span_index": obstacle['supportIndex'],
+                "x": pos['x'],
+                "y": pos['y'],
+                "z": pos['z'],
+                "object_type": obstacle['type'],
+            })
+
+    plot_engine.add_obstacles(ObstacleArray(pd.DataFrame(rows)))
+
+    obs = plot_engine.obstacles_dict()
+    return {"obstacles": [{"uuid": key, "points": value.tolist()} for key, value in obs.items()]}
 
 def compute_distances(inputs: dict):
     result = [

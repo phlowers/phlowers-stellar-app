@@ -39,6 +39,7 @@ import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
@@ -187,6 +188,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   readonly loadFormsService = inject(LoadFormsService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
+  protected readonly obstacleStateService = inject(ObstacleStateService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly studiesService = inject(StudiesService);
@@ -250,6 +252,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.plotService.isStudioActive.set(false);
     this.plotService.resetAll();
     this.obstaclesService.setSelectedObstacle(null, null);
+    this.obstacleFormService.clearPositions();
   }
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {
@@ -300,7 +303,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onObstacleSelect(uuid: string | null) {
-    this.plotService.distanceType.set(null);
+    this.obstacleStateService.distanceType.set(null);
     const obstacle = uuid ? this.plotService.section()?.obstacles.find((o) => o.uuid === uuid) : null;
     const pointIndex = obstacle?.positions.length === 1 ? 0 : null;
     this.obstaclesService.setSelectedObstacle(uuid, pointIndex);

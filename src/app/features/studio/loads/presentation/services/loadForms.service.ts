@@ -4,6 +4,9 @@ import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
 import { emptySpanLoad } from '../helpers';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +39,8 @@ export class LoadFormsService {
 
   private readonly plotService = inject(PlotService);
   private readonly chargesService = inject(ChargesService);
+  private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly obstacleStateService = inject(ObstacleStateService);
 
   constructor() {
     effect(() => {
@@ -69,7 +74,7 @@ export class LoadFormsService {
   };
 
   /**
-   * Calculate the load by running the change state task, then re-apply all saved obstacles on top.
+   * Calculate the load by running the changeState task, then re-sync all saved obstacles on top.
    */
   calculateLoad = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
@@ -80,14 +85,31 @@ export class LoadFormsService {
     this.plotService.loading.set(true);
 
     const currentSection = this.plotService.section();
-    // Ensure spanLoads are valid against current supports before storing in temporaryLoadData
+    const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
     this.plotService.temporaryLoadData = {
       ...temporaryLoadData,
-      spanLoads: recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? [])
+      spanLoads: checkedSpanLoads
     };
 
-    // Delegate full computation (changeState + obstacle re-application) to reapplyObstacles
-    await this.plotService.reapplyObstacles();
+    const { result: changeResult } = await this.workerPythonService.runTask(Task.changeState, {
+      climate: temporaryLoadData.climate,
+      spanLoads: checkedSpanLoads
+    });
+    if (changeResult) {
+      this.plotService.litData.set(changeResult.current);
+      this.plotService.baseLitData.set(changeResult.base);
+    }
+
+    const obstacles = currentSection?.obstacles ?? [];
+    if (obstacles.length > 0) {
+      const syncedOutput = await this.obstacleStateService.syncObstacles(obstacles, this.plotService.plotOptions());
+      if (syncedOutput) {
+        const current = this.plotService.litData();
+        if (current) {
+          this.plotService.litData.set({ ...current, obstacles: syncedOutput.obstacles });
+        }
+      }
+    }
 
     this.plotService.loading.set(false);
   };

@@ -55,7 +55,7 @@ const makeLitDataWithObstacles = (): GetSectionOutput => ({
   T_h: [],
   obstacles: [
     {
-      name: 'obstacle_mock',
+      uuid: 'obstacle_mock',
       points: [[120, 0, 5]]
     }
   ]

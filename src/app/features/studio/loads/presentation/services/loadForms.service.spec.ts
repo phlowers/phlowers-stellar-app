@@ -5,6 +5,9 @@ import { ChargesService } from '@services/charges/charges.service';
 import { Section, Charge, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
@@ -19,6 +22,8 @@ describe('LoadFormsService', () => {
   let service: LoadFormsService;
   let mockPlotService: vi.Mocked<PlotService>;
   let mockChargesService: vi.Mocked<ChargesService>;
+  let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
+  let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn> };
 
   const mockSection: Section = {
     uuid: 'section-uuid-1',
@@ -126,7 +131,7 @@ describe('LoadFormsService', () => {
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
       refreshCamera: vi.fn(),
-      reapplyObstacles: vi.fn().mockResolvedValue(undefined)
+      plotOptions: createSignalMock({ startSupport: 0, endSupport: 1, view: '3d' })
     } as unknown as vi.Mocked<PlotService>;
 
     mockChargesService = {
@@ -135,11 +140,21 @@ describe('LoadFormsService', () => {
       deleteCharge: vi.fn()
     } as unknown as vi.Mocked<ChargesService>;
 
+    mockWorkerPythonService = {
+      runTask: vi.fn().mockResolvedValue({ result: null, error: null })
+    };
+
+    mockObstacleStateService = {
+      syncObstacles: vi.fn().mockResolvedValue(null)
+    };
+
     TestBed.configureTestingModule({
       providers: [
         LoadFormsService,
         { provide: PlotService, useValue: mockPlotService },
-        { provide: ChargesService, useValue: mockChargesService }
+        { provide: ChargesService, useValue: mockChargesService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+        { provide: ObstacleStateService, useValue: mockObstacleStateService }
       ]
     });
 
@@ -307,18 +322,18 @@ describe('LoadFormsService', () => {
 
       await service.calculateLoad();
 
-      expect(mockPlotService.reapplyObstacles).not.toHaveBeenCalled();
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
       expect(mockPlotService.refreshCamera).not.toHaveBeenCalled();
     });
 
-    it('should call refreshCamera and reapplyObstacles when temporaryLoadData is set', async () => {
+    it('should call refreshCamera and runTask(changeState) when temporaryLoadData is set', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.section.mockReturnValue(mockSection);
 
       await service.calculateLoad();
 
       expect(mockPlotService.refreshCamera).toHaveBeenCalled();
-      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
     });
 
     it('should update temporaryLoadData spanLoads with rechecked values before delegating', async () => {

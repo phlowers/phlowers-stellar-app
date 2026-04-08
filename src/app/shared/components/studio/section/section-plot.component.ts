@@ -24,6 +24,7 @@ import {
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 
@@ -49,6 +50,9 @@ export class SectionPlotComponent {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly logger = inject(LoggerService);
+  private readonly obstacleStateService = inject(ObstacleStateService);
+  private readonly logger = inject(LoggerService);
+  private readonly obstacleStateService = inject(ObstacleStateService);
 
   // Signals
   private readonly isPlotRefreshing = signal(false);
@@ -85,8 +89,8 @@ export class SectionPlotComponent {
     name: this.currentObstacleName(),
     altitudeType: this.currentAltitudeType(),
     referenceSupport: this.currentReferenceSupport(),
-    distances: this.plotService.distances(),
-    distanceType: this.plotService.distanceType()
+    distances: this.obstacleStateService.distances(),
+    distanceType: this.obstacleStateService.distanceType()
   }));
 
   // Debounced plot refresh with signal
@@ -162,8 +166,8 @@ export class SectionPlotComponent {
       const currentObstaclePointIndex = this.obstaclesService.activePointIndex() ?? 0;
       const axesNorms = this.plotService.axesNorms();
 
-      const distances = this.plotService.distances();
-      const distanceType = this.plotService.distanceType();
+      const distances = this.obstacleStateService.distances();
+      const distanceType = this.obstacleStateService.distanceType();
       const plot = await createPlot({
         plotId: PLOT_ID,
         data: plotData,

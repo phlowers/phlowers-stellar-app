@@ -17,6 +17,7 @@ import {
   DataError,
   GetSectionWithBaseOutput,
   GetSectionOutput,
+  ObstacleOutput,
   Distance
 } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study, SymmetryType } from '@shared/domain';
@@ -26,6 +27,7 @@ import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { BehaviorSubject } from 'rxjs';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 // Mock plotly
 vi.mock('plotly.js-dist-min', () => ({
@@ -43,6 +45,7 @@ describe('PlotService', () => {
   let service: PlotService;
   let mockWorkerPythonService: MockWorkerPythonService;
   let mockCablesService: vi.Mocked<CablesService>;
+  let obstacleStateService: ObstacleStateService;
 
   const mockGetSectionOutput: GetSectionOutput = {
     supports: [[[1, 2, 3]]],
@@ -246,6 +249,7 @@ describe('PlotService', () => {
     });
 
     service = TestBed.inject(PlotService);
+    obstacleStateService = TestBed.inject(ObstacleStateService);
   });
 
   afterEach(() => {
@@ -596,6 +600,7 @@ describe('PlotService', () => {
       const mockObstacle: Obstacle = {
         uuid: 'obstacle-uuid-1',
         supportUuid: 'support-uuid-1',
+        supportIndex: 0,
         name: 'Test Obstacle',
         type: 'building',
         altitudeType: 'absolute',
@@ -604,9 +609,8 @@ describe('PlotService', () => {
         positions: [{ x: 100, y: 20, z: 5 }]
       };
 
-      const mockObstacleOutput: GetSectionOutput = {
-        ...mockGetSectionOutput,
-        obstacles: [{ name: 'obstacle-uuid-1', points: [[100, 20, 5]] }]
+      const mockObstacleOutput: ObstacleOutput = {
+        obstacles: [{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] }]
       };
 
       const mockDistance: Distance = {
@@ -632,7 +636,7 @@ describe('PlotService', () => {
             return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: null });
           }
           if (task === Task.addObstacle) {
-            return Promise.resolve({ result: { current: mockObstacleOutput }, error: null });
+            return Promise.resolve({ result: mockObstacleOutput, error: null });
           }
           if (task === Task.calculateObstaclesDistances) {
             return Promise.resolve({ result: [mockDistance], error: null });
@@ -641,15 +645,15 @@ describe('PlotService', () => {
         });
       });
 
-      it('should call Task.addObstacle for each obstacle in section', async () => {
+      it('should call Task.addObstacle once with all section obstacles', async () => {
         const sectionWithObstacles: Section = { ...mockSection, obstacles: [mockObstacle] };
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, mockObstacle);
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, [mockObstacle]);
       });
 
-      it('should call Task.addObstacle for every obstacle when section has multiple', async () => {
+      it('should call Task.addObstacle once with all obstacles when section has multiple', async () => {
         const secondObstacle: Obstacle = { ...mockObstacle, uuid: 'obstacle-uuid-2' };
         const sectionWithObstacles: Section = {
           ...mockSection,
@@ -658,8 +662,7 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, mockObstacle);
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, secondObstacle);
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, [mockObstacle, secondObstacle]);
       });
 
       it('should call Task.calculateObstaclesDistances after adding obstacles', async () => {
@@ -678,15 +681,15 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(service.distances()).toEqual([mockDistance]);
+        expect(obstacleStateService.distances()).toEqual([mockDistance]);
       });
 
-      it('should update litData with the obstacle result', async () => {
+      it('should update litData with the obstacle result merged into section data', async () => {
         const sectionWithObstacles: Section = { ...mockSection, obstacles: [mockObstacle] };
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(service.litData()).toEqual(mockObstacleOutput);
+        expect(service.litData()).toEqual({ ...mockGetSectionOutput, obstacles: mockObstacleOutput.obstacles });
       });
 
       it('should not call Task.addObstacle when getLit returns an error', async () => {
@@ -704,8 +707,8 @@ describe('PlotService', () => {
       });
 
       it('should clear distances and distanceType when getLit returns an error', async () => {
-        service.distances.set([mockDistance]);
-        service.distanceType.set('oblique');
+        obstacleStateService.distances.set([mockDistance]);
+        obstacleStateService.distanceType.set('oblique');
         mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
           if (task === Task.getLit) {
             return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: TaskError.CALCULATION_ERROR });
@@ -716,8 +719,8 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(service.distances()).toEqual([]);
-        expect(service.distanceType()).toBeNull();
+        expect(obstacleStateService.distances()).toEqual([]);
+        expect(obstacleStateService.distanceType()).toBeNull();
       });
 
       it('should not call Task.addObstacle when section has no obstacles', async () => {
@@ -731,11 +734,11 @@ describe('PlotService', () => {
       });
 
       it('should clear distances when section has no obstacles', async () => {
-        service.distances.set([mockDistance]);
+        obstacleStateService.distances.set([mockDistance]);
 
         await service.refreshSection(mockSection);
 
-        expect(service.distances()).toEqual([]);
+        expect(obstacleStateService.distances()).toEqual([]);
       });
     });
 
@@ -1494,7 +1497,7 @@ describe('PlotService', () => {
     it('should call workerPythonService with correct task params', async () => {
       service.plotOptionsChange({ view: '2d', startSupport: 2, endSupport: 5 });
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [] },
         error: null
       });
 
@@ -1512,6 +1515,58 @@ describe('PlotService', () => {
       await service.refreshProjection();
       expect(service.loading()).toBe(false);
       expect(service.error()).toBe(TaskError.CALCULATION_ERROR);
+    });
+
+    it('should set litData directly from sectionOutput.current', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [] },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(service.litData()).toEqual(mockGetSectionOutput);
+    });
+
+    it('should set distances from result', async () => {
+      const mockDist: Distance = {
+        obstacleUuid: 'x', points: [{ pointIndex: 0, linePoint: [0,0,0], virtualPointHorizontal: [0,0,0], virtualPointVertical: [0,0,0], distanceDiagonal: 1, distanceHorizontal: 2, distanceVertical: 3 }]
+      };
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [mockDist] },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(obstacleStateService.distances()).toEqual([mockDist]);
+    });
+
+    it('should include obstacle coordinates returned by Python in litData', async () => {
+      const sectionOutputWithObstacles: GetSectionOutput = {
+        ...mockGetSectionOutput,
+        obstacles: [{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] }]
+      };
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { sectionOutput: { current: sectionOutputWithObstacles, base: mockGetSectionOutput }, distances: [] },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(service.litData()).toEqual(sectionOutputWithObstacles);
+      expect(service.litData()?.obstacles).toEqual([{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] }]);
+    });
+
+    it('should NOT call Task.addObstacle — obstacle coordinates come from sectionOutput', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [] },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.addObstacle, expect.anything());
     });
   });
 
@@ -1550,152 +1605,6 @@ describe('PlotService', () => {
     it('should return empty array when uuid does not match any support', () => {
       service.section.set(mockSection);
       expect(service.getSupportOptions('non-existent')).toEqual([]);
-    });
-  });
-
-  describe('reapplyObstacles', () => {
-    const mockObstacle: Obstacle = {
-      uuid: 'obstacle-uuid-1',
-      supportUuid: 'support-uuid-1',
-      name: 'Test Obstacle',
-      type: 'building',
-      altitudeType: 'absolute',
-      referenceSupport: ReferenceSupport.LEFT,
-      lateralDistanceType: LateralDistanceType.SPAN_AXIS,
-      positions: [{ x: 100, y: 20, z: 5 }]
-    };
-
-    const mockObstacleOutput: GetSectionOutput = {
-      ...mockGetSectionOutput,
-      obstacles: [{ name: 'obstacle-uuid-1', points: [[100, 20, 5]] }]
-    };
-
-    const mockDistance: Distance = {
-      obstacleUuid: 'obstacle-uuid-1',
-      points: [
-        {
-          pointIndex: 0,
-          linePoint: [100, 0, 40],
-          virtualPointHorizontal: [100, 20, 0],
-          virtualPointVertical: [100, 0, 40],
-          distanceDiagonal: 234,
-          distanceHorizontal: 555,
-          distanceVertical: 666
-        }
-      ]
-    };
-
-    const mockChargeData: ChargeData = {
-      climate: {
-        windPressure: 100,
-        cableTemperature: 20,
-        symmetryType: SymmetryType.SYMMETRIC,
-        iceThickness: null,
-        frontierSupportNumber: null,
-        iceThicknessBefore: null,
-        iceThicknessAfter: null
-      },
-      spanLoads: [
-        {
-          supportUuid: 'support-uuid-1',
-          loadPosition: 0.5,
-          loadWeight: 100,
-          type: LoadType.PUNCTUAL,
-          referenceSupport: 'LEFT'
-        }
-      ]
-    };
-
-    const mockLoadOutput: GetSectionOutput = {
-      ...mockGetSectionOutput,
-      loads_coords: { 'support-uuid-1': [0.5, 0, 10] }
-    };
-
-    beforeEach(() => {
-      mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
-        if (task === Task.changeState) {
-          return Promise.resolve({ result: { current: mockLoadOutput, base: mockGetSectionOutput }, error: null });
-        }
-        if (task === Task.addObstacle) {
-          return Promise.resolve({ result: { current: mockObstacleOutput }, error: null });
-        }
-        if (task === Task.calculateObstaclesDistances) {
-          return Promise.resolve({ result: [mockDistance], error: null });
-        }
-        return Promise.resolve({ result: null, error: null });
-      });
-    });
-
-    it('should re-add all section obstacles and update litData', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-      service.litData.set(mockGetSectionOutput);
-
-      await service.reapplyObstacles();
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, mockObstacle);
-      expect(service.litData()).toEqual(mockObstacleOutput);
-    });
-
-    it('should call Task.changeState first when temporaryLoadData is set', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-      service.temporaryLoadData = mockChargeData;
-
-      await service.reapplyObstacles();
-
-      const calls = mockWorkerPythonService.runTask.mock.calls.map((c: unknown[]) => c[0]);
-      const changeStateIndex = calls.indexOf(Task.changeState);
-      const addObstacleIndex = calls.indexOf(Task.addObstacle);
-      expect(changeStateIndex).toBeGreaterThanOrEqual(0);
-      expect(addObstacleIndex).toBeGreaterThan(changeStateIndex);
-    });
-
-    it('should not call Task.changeState when temporaryLoadData is null', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-      service.temporaryLoadData = null;
-
-      await service.reapplyObstacles();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.changeState, expect.anything());
-    });
-
-    it('should call Task.calculateObstaclesDistances after adding obstacles', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-
-      await service.reapplyObstacles();
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.calculateObstaclesDistances,
-        expect.objectContaining({ startSupport: expect.any(Number), endSupport: expect.any(Number) })
-      );
-    });
-
-    it('should update distances signal after recalculation', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-
-      await service.reapplyObstacles();
-
-      expect(service.distances()).toEqual([mockDistance]);
-    });
-
-    it('should not call Task.calculateObstaclesDistances when section has no obstacles', async () => {
-      service.section.set({ ...mockSection, obstacles: [] });
-
-      await service.reapplyObstacles();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(
-        Task.calculateObstaclesDistances,
-        expect.anything()
-      );
-    });
-
-    it('should apply loads then obstacles so both are reflected in litData', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-      service.temporaryLoadData = mockChargeData;
-
-      await service.reapplyObstacles();
-
-      // After changeState + addObstacle, litData should be the obstacle output (last update wins)
-      expect(service.litData()).toEqual(mockObstacleOutput);
     });
   });
 });

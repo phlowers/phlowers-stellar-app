@@ -104,10 +104,10 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
   }
 
   return litData.obstacles.flatMap((litObstacle) => {
-    // Match to a form obstacle by name to resolve its UUID for click event handling
-    const formObstacle = obstacles.find((o) => o.name === litObstacle.name);
-    const obstacleUuid = formObstacle?.uuid ?? litObstacle.name;
-    const obstacleName = formObstacle?.name ?? litObstacle.name;
+    // Resolve display name from the domain obstacle matching by UUID
+    const obstacleUuid = litObstacle.uuid;
+    const formObstacle = obstacles.find((o) => o.uuid === litObstacle.uuid);
+    const obstacleName = formObstacle?.name ?? '';
 
     return litObstacle.points.flatMap(([cx, cy, cz], pointIndex) => {
       // Map absolute Python coords [x, y, z] to Plotly axes

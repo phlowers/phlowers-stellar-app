@@ -184,7 +184,7 @@ const buildDistanceVisuals = (
       continue;
     }
 
-    const obstacle = litData.obstacles?.find((o) => o.name === distance.obstacleUuid);
+    const obstacle = litData.obstacles?.find((o) => o.uuid === distance.obstacleUuid);
     if (!obstacle) {
       continue;
     }

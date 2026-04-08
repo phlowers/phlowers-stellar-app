@@ -723,8 +723,9 @@ describe('FreePositioningComponent', () => {
 
     it('should use left support altitude when referenceSupport is null', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { current: litDataWithTwoSupports }
+        result: { obstacles: [] }, error: null
       });
+      litDataSignal.set(litDataWithTwoSupports);
       mockObstacleFormService.form.get('referenceSupport')?.setValue(null);
 
       component.recreatePlots();
@@ -735,8 +736,9 @@ describe('FreePositioningComponent', () => {
 
     it('should use left support altitude when referenceSupport is LEFT', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { current: litDataWithTwoSupports }
+        result: { obstacles: [] }, error: null
       });
+      litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.LEFT
       );
@@ -749,8 +751,9 @@ describe('FreePositioningComponent', () => {
 
     it('should use right support altitude when referenceSupport is RIGHT', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { current: litDataWithTwoSupports }
+        result: { obstacles: [] }, error: null
       });
+      litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.RIGHT
       );

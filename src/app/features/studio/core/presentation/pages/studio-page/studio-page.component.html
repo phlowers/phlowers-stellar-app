@@ -124,7 +124,7 @@
                 name="distanceType"
                 value="oblique"
                 inputId="oblique-distance"
-                [(ngModel)]="plotService.distanceType"
+                [(ngModel)]="obstacleStateService.distanceType"
                 [disabled]="!filteredObstaclesOptions().length"
                 data-testid="oblique-distance-radio"
               />
@@ -145,7 +145,7 @@
                 name="distanceType"
                 value="vertical"
                 inputId="vertical-distance"
-                [(ngModel)]="plotService.distanceType"
+                [(ngModel)]="obstacleStateService.distanceType"
                 [disabled]="!filteredObstaclesOptions().length"
                 data-testid="vertical-distance-radio"
               />
@@ -166,7 +166,7 @@
                 name="distanceType"
                 value="horizontal"
                 inputId="horizontal-distance"
-                [(ngModel)]="plotService.distanceType"
+                [(ngModel)]="obstacleStateService.distanceType"
                 [disabled]="!filteredObstaclesOptions().length"
                 data-testid="horizontal-distance-radio"
               />

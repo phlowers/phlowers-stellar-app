@@ -12,7 +12,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 type ObstacleAnnotation = Partial<Plotly.Annotations> & { z?: number; data?: ObstacleAnnotationData };
 
-const makeLitData = (obstacles: { name: string; points: [number, number, number][] }[]): GetSectionOutput =>
+const makeLitData = (obstacles: { uuid: string; points: [number, number, number][] }[]): GetSectionOutput =>
   ({ obstacles }) as unknown as GetSectionOutput;
 
 const makeObstacle = (overrides: Partial<Obstacle> = {}): Obstacle => ({
@@ -186,7 +186,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[11, 22, 3]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[11, 22, 3]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -206,7 +206,7 @@ describe('createObstaclesAnnotations', () => {
     // Python computes altitude = position.z + support.z = 3 + 30 = 33
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[11, 22, 33]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[11, 22, 33]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -228,7 +228,7 @@ describe('createObstaclesAnnotations', () => {
     // Python filters invalid positions; only the 1 valid point is returned in litData
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 3]] }])
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 3]] }])
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
@@ -246,7 +246,7 @@ describe('createObstaclesAnnotations', () => {
       obstacles: [obstacle],
       litData: makeLitData([
         {
-          name: 'Obstacle 1',
+          uuid: 'obs-1',
           points: [
             [1, 2, 3],
             [4, 5, 6]
@@ -277,7 +277,7 @@ describe('createObstaclesAnnotations', () => {
     // In 2D face view: px = cy, py = cz. Python returns [cx, cy, cz] = [1, 12, 3].
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 12, 3]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 12, 3]] }]),
       view: '2d',
       side: 'face'
     });
@@ -297,7 +297,7 @@ describe('createObstaclesAnnotations', () => {
     // In 2D face: px = cy = 12, py = cz = 33.
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 12, 33]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 12, 33]] }]),
       view: '2d',
       side: 'face'
     });
@@ -316,7 +316,7 @@ describe('createObstaclesAnnotations', () => {
     const params = basePlotParams({
       obstacles: [obstacle],
       // Python computes absolute z: position.z + supportFootAltitude = 5 + 100 = 105
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 105]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 105]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -333,7 +333,7 @@ describe('createObstaclesAnnotations', () => {
     const params = basePlotParams({
       obstacles: [obstacle],
       // Python computes absolute z: position.z + attachmentHeight = 5 + 165 = 170
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 170]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 170]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -351,7 +351,7 @@ describe('createObstaclesAnnotations', () => {
     const params = basePlotParams({
       obstacles: [obstacle],
       // Python computes absolute z using RIGHT support: position.z + rightSupportFootAltitude = 5 + 120 = 125
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 125]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 125]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -368,7 +368,7 @@ describe('createObstaclesAnnotations', () => {
     const params = basePlotParams({
       obstacles: [obstacle],
       // Python falls back to plot base altitude: position.z + baseAltitude = 5 + 200 = 205
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 205]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 205]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -385,7 +385,7 @@ describe('createObstaclesAnnotations', () => {
     const params = basePlotParams({
       obstacles: [obstacle],
       // Python falls back to plot base altitude: position.z + baseAltitude = 5 + 200 = 205
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 205]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 205]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -403,7 +403,7 @@ describe('createObstaclesAnnotations', () => {
     const params = basePlotParams({
       obstacles: [obstacle],
       // Python computes absolute z using RIGHT support attachmentHeight: position.z + 180 = 5 + 180 = 185
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 185]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 185]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -418,7 +418,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 2, 3]] }])
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 3]] }])
     });
     const annotations = createObstaclesAnnotations(params);
     const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
@@ -434,7 +434,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[11, 22, 3]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[11, 22, 3]] }]),
       view: '3d'
     });
 
@@ -460,7 +460,7 @@ describe('createObstaclesAnnotations', () => {
     // Python computes: altitude = 5 + 80 = 85, x = 50 - 2 = 48, y = 40 + 3 = 43
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[48, 43, 85]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[48, 43, 85]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -480,7 +480,7 @@ describe('createObstaclesAnnotations', () => {
     // In 2D profile: px = cx = 48, py = cz = 85.
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[48, 0, 85]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[48, 0, 85]] }]),
       view: '2d',
       side: 'profile'
     });
@@ -500,7 +500,7 @@ describe('createObstaclesAnnotations', () => {
     // Python computes: x = rightBase.x - position.x = 100 - 5 = 95
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[95, 2, 10]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[95, 2, 10]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -519,7 +519,7 @@ describe('createObstaclesAnnotations', () => {
     // In 2D face: px = cy = 52, py = cz = 7.
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 52, 7]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 52, 7]] }]),
       view: '2d',
       side: 'face'
     });
@@ -538,7 +538,7 @@ describe('createObstaclesAnnotations', () => {
     // Python computes using right support: altitude = 3 + 80 = 83, x = 50 - 1 = 49
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[49, 43, 83]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[49, 43, 83]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -559,7 +559,7 @@ describe('createObstaclesAnnotations', () => {
           positions: [{ x: 5, y: 3, z: 10 }]
         })
       ],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[195, 83, 100]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[195, 83, 100]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -578,7 +578,7 @@ describe('createObstaclesAnnotations', () => {
     // Python computes: rightBase = sup-3 (200, 40, 80), altitude = 4 + 80 = 84, x = 200 - 3 = 197, y = 40 + 1 = 41
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[197, 41, 84]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[197, 41, 84]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -608,8 +608,8 @@ describe('createObstaclesAnnotations', () => {
     const params = basePlotParams({
       obstacles: [leftObstacle, rightObstacle],
       litData: makeLitData([
-        { name: 'Left Obs', points: [[5, 2, 40]] },
-        { name: 'Right Obs', points: [[95, 2, 80]] }
+        { uuid: 'obs-left', points: [[5, 2, 40]] },
+        { uuid: 'obs-right', points: [[95, 2, 80]] }
       ]),
       view: '3d'
     });
@@ -639,7 +639,7 @@ describe('createObstaclesAnnotations', () => {
     // In 2D face: px = cy = 52, py = cz = 85.
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[1, 52, 85]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 52, 85]] }]),
       view: '2d',
       side: 'face'
     });
@@ -660,7 +660,7 @@ describe('createObstaclesAnnotations', () => {
     // In 2D profile: px = cx = 92, py = cz = 15.
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[92, 0, 15]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[92, 0, 15]] }]),
       view: '2d',
       side: 'profile'
     });
@@ -683,7 +683,7 @@ describe('createObstaclesAnnotations', () => {
       obstacles: [obstacle],
       litData: makeLitData([
         {
-          name: 'Obstacle 1',
+          uuid: 'obs-right',
           points: [
             [99, 0, 0],
             [96, 0, 0]
@@ -715,7 +715,7 @@ describe('createObstaclesAnnotations', () => {
     // Python computes: x = rightBase.x - 0 = 100
     const params = basePlotParams({
       obstacles: [obstacle],
-      litData: makeLitData([{ name: 'Obstacle 1', points: [[100, 0, 10]] }]),
+      litData: makeLitData([{ uuid: 'obs-1', points: [[100, 0, 10]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -739,7 +739,7 @@ describe('createObstaclesAnnotations', () => {
       obstacles: [obstacle],
       litData: makeLitData([
         {
-          name: 'Obstacle 1',
+          uuid: 'obs-1',
           points: [
             [190, 1, 5],
             [180, 2, 8],

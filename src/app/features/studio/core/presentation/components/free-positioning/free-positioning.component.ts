@@ -167,18 +167,26 @@ export class FreePositioningComponent implements OnDestroy {
     const startSupport = this.plotService.plotOptions().startSupport;
     this.isLoading.set(true);
     const obstacle = this.obstacleFormService.buildObstacleFromForm();
-    const litData = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
+    const sectionObstacles = this.plotService.section()?.obstacles ?? [];
+    const allObstacles = sectionObstacles.some((o) => o.uuid === obstacle.uuid)
+      ? sectionObstacles.map((o) => (o.uuid === obstacle.uuid ? obstacle : o))
+      : [...sectionObstacles, obstacle];
+    const plotOptions = this.plotService.plotOptions();
+    const filteredObstacles = allObstacles.filter(
+      (o) => o.supportIndex >= plotOptions.startSupport && o.supportIndex < plotOptions.endSupport
+    );
+    const litData = await this.workerPythonService.runTask(Task.addObstacle, filteredObstacles);
 
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
       | ReferenceSupport
       | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
-    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(this.plotService.litData()!, referenceSupportIndex));
 
     const supports = this.plotService.section()?.supports ?? [];
     this.sharedYRange.set(null);
-    await this.createPlot(litData.result.current, startSupport, 'face', supports);
-    await this.createPlot(litData.result.current, startSupport, 'profile', supports);
+    await this.createPlot(this.plotService.litData()!, startSupport, 'face', supports);
+    await this.createPlot(this.plotService.litData()!, startSupport, 'profile', supports);
     this.synchronizeYAxisRanges();
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);

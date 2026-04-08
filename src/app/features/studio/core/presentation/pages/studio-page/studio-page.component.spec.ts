@@ -15,6 +15,7 @@ import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TabsModule } from 'primeng/tabs';
 import { PlotService } from '@services/plot/plot.service';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { SectionService } from '@services/section/section.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
@@ -73,12 +74,14 @@ describe('StudioPageComponent', () => {
   let sectionService: vi.Mocked<SectionService>;
   let obstaclesService: ObstaclesService;
   let obstacleFormService: vi.Mocked<ObstacleFormService>;
+  let mockObstacleStateService: { distanceType: SignalFn<'oblique' | 'vertical' | 'horizontal' | null> };
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
     studiesService = new StudiesServiceMock();
     sectionService = {} as unknown as vi.Mocked<SectionService>;
-    obstacleFormService = { setExistingObstacle: vi.fn() } as unknown as vi.Mocked<ObstacleFormService>;
+    obstacleFormService = { setExistingObstacle: vi.fn(), clearPositions: vi.fn() } as unknown as vi.Mocked<ObstacleFormService>;
+    mockObstacleStateService = { distanceType: createSignalMock<'oblique' | 'vertical' | 'horizontal' | null>(null) };
 
     await TestBed.configureTestingModule({
       imports: [StudioPageComponent],
@@ -97,6 +100,7 @@ describe('StudioPageComponent', () => {
         { provide: StudiesService, useValue: studiesService },
         { provide: SectionService, useValue: sectionService },
         { provide: ObstacleFormService, useValue: obstacleFormService },
+        { provide: ObstacleStateService, useValue: mockObstacleStateService },
         provideHttpClient(),
         provideHttpClientTesting(),
         {
@@ -640,7 +644,7 @@ describe('StudioPageComponent', () => {
     });
 
     it('should reset distanceType to null when selecting an obstacle', () => {
-      plotService.distanceType.set('oblique');
+      mockObstacleStateService.distanceType.set('oblique');
       plotService.section.set({
         supports: [],
         obstacles: [{ uuid: 'obs-1', name: 'Obstacle A', supportUuid: 'sup-0', positions: [{ x: 1, y: 2, z: 3 }] }]
@@ -648,15 +652,15 @@ describe('StudioPageComponent', () => {
 
       component.onObstacleSelect('obs-1');
 
-      expect(plotService.distanceType()).toBeNull();
+      expect(mockObstacleStateService.distanceType()).toBeNull();
     });
 
     it('should reset distanceType to null when deselecting an obstacle', () => {
-      plotService.distanceType.set('vertical');
+      mockObstacleStateService.distanceType.set('vertical');
 
       component.onObstacleSelect(null);
 
-      expect(plotService.distanceType()).toBeNull();
+      expect(mockObstacleStateService.distanceType()).toBeNull();
     });
 
     it('should load the obstacle into the form when selected', () => {

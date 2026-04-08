@@ -6,11 +6,13 @@ import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from '@shared/domain/obstacles/obstacle-form.constants';
 import { ObstacleFormGroupData, PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { ObstacleOutput } from '@services/worker_python/tasks/types';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -20,6 +22,7 @@ export class ObstacleFormService {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   private readonly obstaclesService = inject(ObstaclesService);
+  private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
 
@@ -103,17 +106,15 @@ export class ObstacleFormService {
    * (after calculateAndSave) or restored (after refreshSection on re-open).
    */
   readonly results = computed(() => {
-    const distances = this.plotService.distances();
-    // TODO: Python currently uses obstacle.name as the key in distance results instead of UUID.
-    // Once the Python layer is updated to use obstacle.uuid, replace formValue().name with formValue().uuid.
-    const obstacleName = this.formValue().name;
+    const distances = this.obstacleStateService.distances();
+    const obstacleUuid = this.formValue().uuid;
     const pointIndex = this.obstaclesService.activePointIndex();
 
-    if (!distances.length || !obstacleName || pointIndex === null) {
+    if (!distances.length || !obstacleUuid || pointIndex === null) {
       return { oblique: null, vertical: null, horizontal: null };
     }
 
-    const obstacleDistances = distances.find((d) => d.obstacleUuid === obstacleName);
+    const obstacleDistances = distances.find((d) => d.obstacleUuid === obstacleUuid);
     const pointDistances = obstacleDistances?.points?.find((p) => p.pointIndex === pointIndex);
 
     return {
@@ -239,6 +240,11 @@ export class ObstacleFormService {
     obstacles.splice(obstacleIndex, 1);
     section.obstacles = obstacles;
     await this.sectionService.createOrUpdateSection(study, section);
+
+    const obstacleOutput = await this.obstacleStateService.deleteObstacle(obstacleUuid);
+    this.applyObstacleOutputToLitData(obstacleOutput);
+    await this.obstacleStateService.calculateDistances(this.plotService.plotOptions());
+
     this.messageService.add({
       severity: 'success',
       summary: $localize`Success`,
@@ -260,16 +266,34 @@ export class ObstacleFormService {
       return;
     }
     const obstacle = this.buildObstacleFromForm();
+
+    // 1. Merge new/updated obstacle into the in-memory section
     this.upsertObstacleInSection(obstacle);
+    const allObstacles = this.plotService.section()?.obstacles ?? [obstacle];
+
+    // 2. Register all obstacles in Python worker — get computed render positions for current span
+    const obstacleOutput = await this.obstacleStateService.addObstacle(allObstacles, this.plotService.plotOptions());
+
+    // 3. Update rendering (litData.obstacles)
+    this.applyObstacleOutputToLitData(obstacleOutput);
+
+    // 4. Persist domain object to IndexedDB
     await this.saveSection();
+
+    // 5. Recalculate distances
+    await this.obstacleStateService.calculateDistances(this.plotService.plotOptions());
+
+    // 5. Update UI selection
     const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
     this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
-
-    // Re-apply all obstacles (including the newly saved one) on top of the correct base state.
-    // reapplyObstacles re-applies loads first if temporaryLoadData is set, then adds all
-    // section obstacles and recalculates distances — keeping both loads and obstacles in sync.
-    await this.plotService.reapplyObstacles();
     this.plotService.loading.set(false);
+  }
+
+  private applyObstacleOutputToLitData(obstacleOutput: ObstacleOutput | null): void {
+    if (!obstacleOutput) return;
+    const current = this.plotService.litData();
+    if (!current) return;
+    this.plotService.litData.set({ ...current, obstacles: obstacleOutput.obstacles });
   }
 
   buildObstacleFromForm(): Obstacle {
