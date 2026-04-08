@@ -24,18 +24,18 @@ Migration strategy is **progressive via facade**: `PlotService` re-delegates ext
 
 ```
 src/app/core/services/plot/
-├── plot-options.utils.ts          ← checkIfProjectionNeedRefresh (pure function, exported)
-├── plot-resolution.service.ts     ← Phase 1
-├── plot-resolution.service.spec.ts
-├── plot-options.service.ts        ← Phase 2 (renamed from PlotViewService)
-├── plot-options.service.spec.ts
-├── plot-span.service.ts           ← Phase 3 (renamed from PlotNavigationService)
+├── plot-options.utils.ts           ✅ DONE — checkIfProjectionNeedRefresh (pure function, exported)
+├── plot-resolution.service.ts      ✅ DONE — Phase 1
+├── plot-resolution.service.spec.ts ✅ DONE — 21 tests
+├── plot-options.service.ts         ✅ DONE — Phase 2
+├── plot-options.service.spec.ts    ✅ DONE — 28 tests
+├── plot-span.service.ts            ← Phase 3 (renamed from PlotNavigationService)
 └── plot-span.service.spec.ts
 ```
 
 ---
 
-## Phase 1 — `PlotResolutionService` (low risk, fully isolated)
+## ✅ Phase 1 — `PlotResolutionService` (low risk, fully isolated) — DONE
 
 **Create** `src/app/core/services/plot/plot-resolution.service.ts`
 
@@ -57,7 +57,7 @@ src/app/core/services/plot/
 
 ---
 
-## Phase 2 — `PlotOptionsService` (medium risk, many readers)
+## ✅ Phase 2 — `PlotOptionsService` (medium risk, many readers) — DONE
 
 **Create** `src/app/core/services/plot/plot-options.service.ts`
 
@@ -80,7 +80,7 @@ src/app/core/services/plot/
 
 ---
 
-## Phase 3 — `PlotSpanService` (low risk, pure computed)
+## Phase 3 — `PlotSpanService` (low risk, pure computed) ← NEXT
 
 **Create** `src/app/core/services/plot/plot-span.service.ts`
 
@@ -149,9 +149,28 @@ export const checkIfProjectionNeedRefresh = (
 
 ## Checklist before starting each phase
 
+**Phase 1** ✅
+- [x] Run `npm run test` baseline — all tests green
+- [x] Implement phase
+- [x] Create `.spec.ts` for each new service (21 tests)
+- [x] Run `npm run test` — no regression
+
+**Phase 2** ✅
+- [x] Run `npm run test` baseline — 124 tests green
+- [x] Implement phase
+- [x] Create `.spec.ts` for each new service (28 tests)
+- [x] Run `npm run test` — 152 tests, no regression
+
+**Phase 3** ⏳
 - [ ] Run `npm run test` baseline — all tests green
 - [ ] Implement phase
 - [ ] Create `.spec.ts` for each new service
+- [ ] Run `npm run test` — no regression
+- [ ] Run `npm run lint` — no errors
+
+**Phase 4** ⏳
+- [ ] Run `npm run test` baseline — all tests green
+- [ ] Implement phase
 - [ ] Run `npm run test` — no regression
 - [ ] Run `npm run lint` — no errors
 
@@ -162,15 +181,15 @@ export const checkIfProjectionNeedRefresh = (
 | # | Point | Where |
 |---|---|---|
 | Extracted services | `PlotResolutionService`, `PlotOptionsService`, `PlotSpanService` | Phases 1–3 |
-| Pure utility | `checkIfProjectionNeedRefresh` in `plot-options.utils.ts` | Phase 1 |
-| No circular dependency | `plotOptionsChange` callback pattern | Phase 2 |
-| Unit tests | Spec file per new service | Phases 1–3 |
-| `resetAll` coordination | `reset()` methods on sub-services | Phase 4 |
-| `DOCUMENT` token | `getCamera()`, `purgePlot()` | Phase 4 |
+| Pure utility | `checkIfProjectionNeedRefresh` in `plot-options.utils.ts` | ✅ Phase 1 |
+| No circular dependency | `plotOptionsChange` callback pattern | ✅ Phase 2 |
+| Unit tests | Spec file per new service | ✅ Phase 1 (21) ✅ Phase 2 (28) ⏳ Phase 3 |
+| `resetAll` coordination | `plotOptionsService.reset()` called from `PlotService` | ✅ Phase 2 |
+| `DOCUMENT` token | `getCamera()` in `PlotOptionsService` ✅ · `purgePlot()` in Phase 4 |
 | `temporaryLoadData` | Stays in `PlotService` | Phase 4 |
-| `subscription` memory leak | `OnDestroy` in `PlotResolutionService` | Phase 1 |
+| `subscription` memory leak | `OnDestroy` in `PlotResolutionService` | ✅ Phase 1 |
 | `console.error` → logger | `LoggerService` in `PlotService` | Phase 4 |
-| `localStorage` → `globalThis` | `PlotResolutionService` | Phase 1 |
+| `localStorage` → `globalThis` | `PlotResolutionService` | ✅ Phase 1 |
 
 ---
 

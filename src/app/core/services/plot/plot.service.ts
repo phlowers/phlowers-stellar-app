@@ -1,16 +1,15 @@
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
-import { AxesNorms, PlotOptions, PLOT_ID, SelectedDisplayOptions, SpanOption } from '@shared/types/plot.types';
+import { AxesNorms, PlotOptions, PLOT_ID, SpanOption } from '@shared/types/plot.types';
 import { DataError, GetSectionOutput, PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { Section, Study } from '@shared/domain';
 import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
-import { checkIfProjectionNeedRefresh } from './plot-options.utils';
+import { PlotOptionsService } from './plot-options.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
-import { isEqual } from 'lodash';
 import { SectionService } from '@services/section/section.service';
 import { ChargeData } from '@shared/domain/models/charge.model';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
@@ -18,57 +17,28 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
-/** Default plot options used when initializing or resetting the studio view. */
-const defaultPlotOptions: PlotOptions = {
-  view: '3d',
-  side: 'profile',
-  startSupport: 0,
-  endSupport: 1,
-  invert: false
-};
-
-const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
-  loads: true,
-  baseState: false
-};
-
 @Injectable({
   providedIn: 'root'
 })
 /** Service managing the Plotly-based section visualization, including data fetching, plot options, and camera state. */
 export class PlotService {
-  isFreePositioningMode = signal<boolean>(false);
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
   pythonErrorCode = signal<PythonErrorCode | null>(null);
-
-  readonly axesNorms = signal<AxesNorms>({
-    x: 1,
-    y: 1,
-    z: 1,
-    aspectMode: 'data'
-  });
 
   litData = signal<GetSectionOutput | null>(null);
   baseLitData = signal<GetSectionOutput | null>(null);
   loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
-  camera = signal<Camera | null>(null);
 
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
   section = signal<Section | null>(null);
   spanAmountChoice = signal<'single' | 'double' | 'all'>('all');
 
-  plotOptions = signal<PlotOptions>({
-    ...defaultPlotOptions
-  });
-  selectedDisplayOptions = signal<SelectedDisplayOptions>({
-    ...defaultSelectedDisplayOptions
-  });
-
   private readonly resolutionService = inject(PlotResolutionService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly cableService = inject(CablesService);
   private readonly sectionService = inject(SectionService);
@@ -81,6 +51,13 @@ export class PlotService {
   readonly resolution = this.resolutionService.resolution;
   readonly appliedResolution = this.resolutionService.appliedResolution;
   readonly defaultResolution = this.resolutionService.defaultResolution;
+
+  // Facade re-delegations — same signal references as PlotOptionsService
+  readonly plotOptions = this.plotOptionsService.plotOptions;
+  readonly selectedDisplayOptions = this.plotOptionsService.selectedDisplayOptions;
+  readonly axesNorms = this.plotOptionsService.axesNorms;
+  readonly camera = this.plotOptionsService.camera;
+  readonly isFreePositioningMode = this.plotOptionsService.isFreePositioningMode;
 
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
@@ -100,16 +77,11 @@ export class PlotService {
     this.litData.set(null);
     this.baseLitData.set(null);
     this.loading.set(false);
-    this.isFreePositioningMode.set(false);
-    this.plotOptions.set({
-      ...defaultPlotOptions
-    });
-    this.camera.set(null);
+    this.plotOptionsService.reset();
     this.isStudioActive.set(false);
     this.section.set(null);
     this.study.set(null);
     this.spanAmountChoice.set('all');
-    this.axesNorms.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedObstacle(null, null);
     this.sideTabsService.sideTabs.set(null);
@@ -127,11 +99,10 @@ export class PlotService {
     });
   };
 
-  plotOptionsChange(values: Partial<PlotOptions>) {
-    const oldOptions = untracked(() => this.plotOptions());
-    const newOptions = { ...oldOptions, ...values };
-    this.plotOptions.set(newOptions);
+  plotOptionsChange(values: Partial<PlotOptions>): void {
     if ('startSupport' in values || 'endSupport' in values) {
+      const currentOptions = this.plotOptionsService.plotOptions();
+      const newOptions = { ...currentOptions, ...values };
       const diff = Math.abs(newOptions.endSupport - newOptions.startSupport);
       if (diff === 1) {
         this.spanAmountChoice.set('single');
@@ -141,16 +112,11 @@ export class PlotService {
         this.spanAmountChoice.set('all');
       }
     }
-    this.refreshCamera();
-    if (
-      checkIfProjectionNeedRefresh(
-        oldOptions,
-        newOptions,
-        untracked(() => this.loading())
-      )
-    ) {
-      this.refreshProjection();
-    }
+    this.plotOptionsService.plotOptionsChange(
+      values,
+      () => this.loading(),
+      () => this.refreshProjection()
+    );
   }
 
   refreshSection = async (section: Section) => {
@@ -199,26 +165,9 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  getCamera = () => {
-    const plot = document.getElementById(PLOT_ID);
-    if (!plot) {
-      return null;
-    }
-    return (plot as HTMLElement & { _fullLayout?: { scene?: { camera?: Camera } } })._fullLayout?.scene?.camera ?? null;
-  };
+  getCamera = (): Camera | null => this.plotOptionsService.getCamera();
 
-  refreshCamera = (): Camera | null => {
-    const camera = this.getCamera();
-    if (
-      !isEqual(
-        camera,
-        untracked(() => this.camera())
-      )
-    ) {
-      this.camera.set(camera);
-    }
-    return camera;
-  };
+  refreshCamera = (): Camera | null => this.plotOptionsService.refreshCamera();
 
   refreshProjection = async () => {
     this.loading.set(true);
@@ -248,7 +197,7 @@ export class PlotService {
   };
 
   public setAxesNorms(norms: AxesNorms): void {
-    this.axesNorms.set(norms);
+    this.plotOptionsService.setAxesNorms(norms);
   }
 
   setResolution(value: number): void {
