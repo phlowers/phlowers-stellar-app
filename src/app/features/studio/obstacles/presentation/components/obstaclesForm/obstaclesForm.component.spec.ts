@@ -16,7 +16,7 @@ class MockObstacleFormService {
   positions: FormArray<
     FormGroup<{ x: FormControl<number | null>; y: FormControl<number | null>; z: FormControl<number | null> }>
   >;
-  supportsOptions = signal([{ label: 1, value: 1 }]);
+  supportsOptions = signal([{ label: '1', value: 'LEFT' as const }]);
   results = signal({
     oblique: null as number | null,
     vertical: null as number | null,

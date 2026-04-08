@@ -45,7 +45,11 @@ const mockLitData: GetSectionOutput = {
   L0: [100, 200, 300, 400],
   horizontal_distance: [99, 199, 299, 399],
   arc_length: [101, 201, 301, 401],
-  T_h: [3000, 2000, 1000, 500]
+  T_h: [3000, 2000, 1000, 500],
+  slope_left: [0.01, 0.02, 0.03, 0.04],
+  slope_right: [0.05, 0.06, 0.07, 0.08],
+  sag: [1.1, 1.2, 1.3, 1.4],
+  sag_s2: [2.1, 2.2, 2.3, 2.4]
 };
 
 describe('SectionPlotCardsComponent', () => {
@@ -252,9 +256,9 @@ describe('SectionPlotCardsComponent - HTML rendering', () => {
     fixture.detectChanges();
 
     const titles = getAllByTestId('card-title');
-    // Order: support N°3, span 3-4, support N°4, span 4-5, support N°5
+    // Order: support 3, span 3-4, support 4, span 4-5, support 5
     const titleTexts = Array.from(titles).map((el) => el.textContent?.trim());
-    expect(titleTexts).toEqual(['N°3', '3-4', 'N°4', '4-5', 'N°5']);
+    expect(titleTexts).toEqual(['3', '3-4', '4', '4-5', '5']);
   });
 
   it('should render support card titles in descending order when inverted', () => {
@@ -270,9 +274,9 @@ describe('SectionPlotCardsComponent - HTML rendering', () => {
     fixture.detectChanges();
 
     const titles = getAllByTestId('card-title');
-    // Order: support N°5, span 4-5, support N°4, span 3-4, support N°3
+    // Order: support 5, span 4-5, support 4, span 3-4, support 3
     const titleTexts = Array.from(titles).map((el) => el.textContent?.trim());
-    expect(titleTexts).toEqual(['N°5', '4-5', 'N°4', '3-4', 'N°3']);
+    expect(titleTexts).toEqual(['5', '4-5', '4', '3-4', '3']);
   });
 
   it('should render span cards with correct titles when inverted', () => {
@@ -326,7 +330,7 @@ describe('SectionPlotCardsComponent - HTML rendering', () => {
 
     let titles = getAllByTestId('card-title');
     let titleTexts = Array.from(titles).map((el) => el.textContent?.trim());
-    expect(titleTexts).toEqual(['N°3', '3-4', 'N°4', '4-5', 'N°5']);
+    expect(titleTexts).toEqual(['3', '3-4', '4', '4-5', '5']);
 
     // Toggle invert
     plotServiceMock.plotOptions.set({
@@ -340,6 +344,6 @@ describe('SectionPlotCardsComponent - HTML rendering', () => {
 
     titles = getAllByTestId('card-title');
     titleTexts = Array.from(titles).map((el) => el.textContent?.trim());
-    expect(titleTexts).toEqual(['N°5', '4-5', 'N°4', '3-4', 'N°3']);
+    expect(titleTexts).toEqual(['5', '4-5', '4', '3-4', '3']);
   });
 });

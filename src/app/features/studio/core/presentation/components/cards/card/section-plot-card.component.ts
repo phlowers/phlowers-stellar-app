@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, computed, inject } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { round } from 'lodash';
+import { PlotService } from '@services/plot/plot.service';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 /** Represents a single data field with label, value, and unit. */
 interface DataField {
@@ -59,9 +61,20 @@ export class SectionPlotCardComponent {
   /** Zero-based index of the support or span. */
   index = input.required<number>();
 
+  private readonly plotService = inject(PlotService);
+
   cardTitle = computed(() => {
     const idx = this.index();
-    return this.type() === 'support' ? `N°${idx + 1}` : `${idx + 1}-${idx + 2}`;
+    const supports = this.plotService.section()?.supports;
+    if (this.type() === 'support') {
+      const num = supports?.[idx]?.number;
+      return num ? formatSupportNumber(num) : String(idx + 1);
+    }
+    const numLeft = supports?.[idx]?.number;
+    const numRight = supports?.[idx + 1]?.number;
+    const left = numLeft ? formatSupportNumber(numLeft) : String(idx + 1);
+    const right = numRight ? formatSupportNumber(numRight) : String(idx + 2);
+    return `${left}-${right}`;
   });
 
   cardColor = computed(() => (this.type() === 'support' ? 'icon-wrapper--support' : 'icon-wrapper--line'));

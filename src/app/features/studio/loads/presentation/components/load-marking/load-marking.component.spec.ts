@@ -12,8 +12,8 @@ const mockSpanOptions: SpanOption[] = [
 ];
 
 const mockSupportOptions = [
-  { label: 1, value: 'LEFT' as const },
-  { label: 2, value: 'RIGHT' as const }
+  { label: '1', value: 'LEFT' as const },
+  { label: '2', value: 'RIGHT' as const }
 ];
 
 const createTemporaryLoadData = (overrides: Partial<SpanLoad> = {}): ChargeData => ({

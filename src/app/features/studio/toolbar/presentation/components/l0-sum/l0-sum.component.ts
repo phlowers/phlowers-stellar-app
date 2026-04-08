@@ -9,6 +9,7 @@ import {
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -74,12 +75,14 @@ export class L0SumComponent {
         return;
       }
 
+      const supports = this.plotService.section()?.supports ?? [];
       const spans: L0Row[] = litData.L0.map((value, index) => {
-        const start = index + 1;
-        const end = index + 2;
-        const label = `${start}-${end}`;
+        const leftNum = supports[index]?.number;
+        const rightNum = supports[index + 1]?.number;
+        const left = leftNum ? formatSupportNumber(leftNum) : String(index + 1);
+        const right = rightNum ? formatSupportNumber(rightNum) : String(index + 2);
         return {
-          span: label,
+          span: `${left}-${right}`,
           l0: value,
           index
         };

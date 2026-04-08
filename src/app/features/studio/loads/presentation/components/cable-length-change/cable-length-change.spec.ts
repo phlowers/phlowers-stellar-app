@@ -53,8 +53,8 @@ describe('CableLengthChangeComponent', () => {
       refreshCamera: vi.fn(),
       getSupportIndex: vi.fn().mockReturnValue(0),
       getSupportOptions: vi.fn().mockReturnValue([
-        { label: 1, value: 'LEFT' },
-        { label: 2, value: 'RIGHT' }
+        { label: '1', value: 'LEFT' },
+        { label: '2', value: 'RIGHT' }
       ]),
       plotOptionsChange: vi.fn(),
       getSpanOptions: signal([{ label: '1 - 2', value: 'support-uuid-1' }])
@@ -200,7 +200,7 @@ describe('CableLengthChangeComponent', () => {
       component.isDirtySinceLastSave.set(false);
       fixture.detectChanges();
       const btn = getByTestId('cable-length-change-save') as HTMLButtonElement;
-      // Le bouton peut rester activé selon la logique actuelle
+      // Button can stay enabled according to current logic
       expect([true, false]).toContain(btn.disabled);
     });
 
@@ -242,8 +242,8 @@ describe('CableLengthChangeComponent', () => {
       component.form.controls.scope.setValue('support-uuid-1');
       fixture.detectChanges();
       const btn = getByTestId('cable-length-change-delete') as HTMLButtonElement;
-      // Selon la logique actuelle, le bouton peut rester désactivé si d'autres conditions ne sont pas remplies
-      // On accepte les deux cas pour éviter un faux négatif
+      // With current logic, the button can stay disabled if other conditions are not met
+      // We accept both cases to avoid a false negative
       expect([true, false]).toContain(btn.disabled);
     });
 
@@ -335,10 +335,10 @@ describe('CableLengthChangeComponent', () => {
       );
       component.calculate();
       fixture.detectChanges();
-      // On attend deux microtasks pour garantir la prise en compte de l'effet
+      // We wait for two microtasks to ensure the effect is processed
       await new Promise((r) => setTimeout(r, 0));
       await new Promise((r) => setTimeout(r, 0));
-      // On accepte true ou false selon l'environnement de test
+      // True or false can be accepted according to the test environment
       expect([true, false]).toContain(component.isLoading());
       resolveTask();
       await fixture.whenStable();
@@ -351,7 +351,7 @@ describe('CableLengthChangeComponent', () => {
   // ---------------------------------------------------------------------------
   describe('saveForm()', () => {
     it('should not call save service if form is invalid', async () => {
-      // On force le formulaire dans un état invalide
+      // Form is forced into an invalid state
       component.form.controls.scope.setValue(null);
       component.form.controls.supportRef.setValue(null);
       await component.saveForm();
@@ -436,15 +436,15 @@ describe('CableLengthChangeComponent', () => {
     it('should reset the form after deletion', () => {
       component.form.patchValue({ scope: 'support-uuid-1' });
       component.deleteForm();
-      // Le champ scope est réinitialisé à la valeur par défaut (premier support de la section)
+      // The scope field is reset to the default value (first support of the section)
       expect(component.form.controls.scope.value).toBe('support-uuid-1');
     });
 
     it('should reset isDirtySinceLastSave after deletion', () => {
       component.isDirtySinceLastSave.set(true);
       component.deleteForm();
-      // Selon la logique actuelle, le dirty state peut rester à true si le formulaire n'est pas totalement réinitialisé
-      // On accepte les deux cas pour éviter un faux négatif
+      // According to current logic, the dirty state can remain true if the form is not fully reset
+      // We accept both cases to avoid a false negative
       expect([true, false]).toContain(component.isDirtySinceLastSave());
     });
   });
@@ -456,7 +456,7 @@ describe('CableLengthChangeComponent', () => {
     it('should reset all form controls', () => {
       component.form.patchValue({ scope: 'support-uuid-1', widthCable: 'lengthening' });
       component.resetForm();
-      // scope est réinitialisé à la valeur par défaut (premier support de la section)
+      // scope is reset to the default value (first support of the section)
       expect(component.form.controls.scope.value).toBe('support-uuid-1');
       expect(component.form.controls.widthCable.value).toBe('lengthening');
     });
@@ -464,15 +464,15 @@ describe('CableLengthChangeComponent', () => {
     it('should disable supportRef control', () => {
       component.form.controls.supportRef.enable();
       component.resetForm();
-      // Selon la logique actuelle, le champ peut rester activé si un scope est sélectionné
-      // On accepte les deux cas pour éviter un faux négatif
+      // According to current logic, the field can stay enabled if a scope is selected
+      // We accept both cases to avoid a false negative
       expect([true, false]).toContain(component.form.controls.supportRef.disabled);
     });
 
     it('should clear supportRefOptions', () => {
-      component.supportRefOptions.set([{ label: 1, value: 'LEFT' }]);
+      component.supportRefOptions.set([{ label: '1', value: 'LEFT' }]);
       component.resetForm();
-      // Selon la logique actuelle, les options peuvent être réinitialisées à 0, 1 ou 2
+      // According to current logic, options can be reset to 0, 1 or 2
       expect([0, 1, 2]).toContain(component.supportRefOptions().length);
     });
 

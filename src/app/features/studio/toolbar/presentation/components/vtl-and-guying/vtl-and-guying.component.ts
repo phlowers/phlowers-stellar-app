@@ -34,8 +34,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 /** Option for selecting a reference support direction. */
 interface SupportOption {
-  /** Numeric label for the support. */
-  label: number;
+  /** Support number label. */
+  label: string;
   /** Left or right side of the span. */
   value: 'LEFT' | 'RIGHT';
 }

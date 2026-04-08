@@ -13,6 +13,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Task } from '@services/worker_python/tasks/types';
 import { CommonModule } from '@angular/common';
 import { PlotService } from '@services/plot/plot.service';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 @Component({
   selector: 'app-papoto',
@@ -57,9 +58,14 @@ export class PapotoComponent {
     }
 
     const [leftIndex, rightIndex] = span;
+    const supports = this.plotService.section()?.supports ?? [];
+    const leftNum = supports[leftIndex]?.number;
+    const rightNum = supports[rightIndex]?.number;
+    const leftLabel = leftNum ? formatSupportNumber(leftNum) : String(leftIndex + 1);
+    const rightLabel = rightNum ? formatSupportNumber(rightNum) : String(rightIndex + 1);
     return [
-      { label: `${leftIndex + 1}`, value: `${leftIndex + 1}` },
-      { label: `${rightIndex + 1}`, value: `${rightIndex + 1}` }
+      { label: leftLabel, value: leftLabel },
+      { label: rightLabel, value: rightLabel }
     ];
   });
 

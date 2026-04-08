@@ -50,7 +50,8 @@ describe('L0SumComponent', () => {
 
     const mockPlotService = {
       loading: vi.fn().mockReturnValue(false),
-      litData: vi.fn().mockReturnValue(mockLitData)
+      litData: vi.fn().mockReturnValue(mockLitData),
+      section: vi.fn().mockReturnValue(null)
     } as unknown as PlotService;
 
     await TestBed.configureTestingModule({
@@ -200,7 +201,7 @@ describe('L0SumComponent', () => {
         { span: '1-2', l0: 100, index: 0 }
       ];
       const event = { field: 'span', order: null, data };
-      expect(() => component.customSort(event as SortEvent)).not.toThrow();
+      expect(() => component.customSort(event as unknown as SortEvent)).not.toThrow();
     });
   });
 });
