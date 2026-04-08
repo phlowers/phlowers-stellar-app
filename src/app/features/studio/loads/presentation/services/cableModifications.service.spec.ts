@@ -106,6 +106,7 @@ describe('CableModificationsService', () => {
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
+      pythonErrorCode: createSignalMock(null),
       refreshCamera: vi.fn(),
       getSupportIndex: vi.fn().mockReturnValue(0)
     } as unknown as vi.Mocked<PlotService>;
@@ -154,7 +155,8 @@ describe('CableModificationsService', () => {
     it('should call refreshCamera and set loading to true then false', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: { current: {} as GetSectionOutput, base: null },
-        error: null
+        error: null,
+        pythonErrorCode: null
       });
 
       await service.calculate(mockParams);
@@ -167,7 +169,8 @@ describe('CableModificationsService', () => {
     it('should call runTask with cableModification task and correct inputs', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: { current: {} as GetSectionOutput, base: null },
-        error: null
+        error: null,
+        pythonErrorCode: null
       });
 
       await service.calculate(mockParams);
@@ -186,7 +189,8 @@ describe('CableModificationsService', () => {
       const base = { spans: [[]] } as unknown as GetSectionOutput;
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: { current, base } as GetSectionWithBaseOutput,
-        error: null
+        error: null,
+        pythonErrorCode: null
       });
 
       await service.calculate(mockParams);
@@ -198,7 +202,8 @@ describe('CableModificationsService', () => {
     it('should set litData and baseLitData to null when result is null', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null as unknown as GetSectionWithBaseOutput,
-        error: null
+        error: null,
+        pythonErrorCode: null
       });
 
       await service.calculate(mockParams);
@@ -211,7 +216,8 @@ describe('CableModificationsService', () => {
       const taskError = TaskError.CALCULATION_ERROR;
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null as unknown as GetSectionWithBaseOutput,
-        error: taskError
+        error: taskError,
+        pythonErrorCode: null
       });
 
       await service.calculate(mockParams);

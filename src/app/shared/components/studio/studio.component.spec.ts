@@ -4,7 +4,7 @@ import { StudioComponent } from './studio.component';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { PlotService } from '@services/plot/plot.service';
 import { NotificationService } from '@core/services/notification/notification.service';
-import { TaskError, DataError, GetSectionOutput } from '@services/worker_python/tasks/types';
+import { TaskError, DataError, GetSectionOutput, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';
 
@@ -96,6 +96,7 @@ describe('StudioComponent', () => {
   let fixture: ComponentFixture<StudioComponent>;
   let mockPlotService: {
     error: WritableSignal<TaskError | DataError | null>;
+    pythonErrorCode: WritableSignal<PythonErrorCode | null>;
     litData: WritableSignal<GetSectionOutput | null>;
     loading: WritableSignal<boolean>;
     section: WritableSignal<Section | null>;
@@ -107,6 +108,7 @@ describe('StudioComponent', () => {
   beforeEach(async () => {
     mockPlotService = {
       error: signal<TaskError | DataError | null>(null),
+      pythonErrorCode: signal<PythonErrorCode | null>(null),
       litData: signal<GetSectionOutput | null>(null),
       loading: signal<boolean>(false),
       section: signal<Section | null>(null),
@@ -181,6 +183,15 @@ describe('StudioComponent', () => {
       mockPlotService.error.set(TaskError.PYODIDE_LOAD_ERROR);
       fixture.detectChanges();
       expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.PYODIDE_LOAD_ERROR));
+    });
+
+    it('should use pythonErrorCode message when pythonErrorCode is set', () => {
+      mockPlotService.error.set(TaskError.CALCULATION_ERROR);
+      mockPlotService.pythonErrorCode.set(PythonErrorCode.SolverError);
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.SolverError)
+      );
     });
   });
 

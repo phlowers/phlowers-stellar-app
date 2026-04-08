@@ -6,7 +6,7 @@
  */
 import { loadPyodide } from 'pyodide';
 import type { PyProxy } from 'pyodide/ffi';
-import { Task, TaskError, TaskInputs, TaskOutputs } from './types';
+import { PythonErrorCode, Task, TaskError, TaskInputs, TaskOutputs } from './types';
 
 /** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
@@ -103,6 +103,7 @@ export async function handleTask(
   result: TaskOutputs[Task] | null;
   runTime: number;
   error: TaskError | null;
+  pythonErrorCode: PythonErrorCode | null;
 }> {
   const start = performance.now();
   try {
@@ -124,7 +125,8 @@ export async function handleTask(
     return {
       result: resultJs as TaskOutputs[Task],
       runTime: performance.now() - start,
-      error: null
+      error: null,
+      pythonErrorCode: null
     };
   } catch (error: unknown) {
     console.error(error);
@@ -133,10 +135,12 @@ export async function handleTask(
     if (errorMessage.toLowerCase().includes('did not converge')) {
       errorType = TaskError.SOLVER_DID_NOT_CONVERGE;
     }
+    const pythonErrorCode = Object.values(PythonErrorCode).find((code) => errorMessage.includes(code)) ?? null;
     return {
       result: null,
       runTime: performance.now() - start,
-      error: errorType
+      error: errorType,
+      pythonErrorCode
     };
   }
 }

@@ -3035,5 +3035,40 @@
         <source>Line axis dist.</source>
       </segment>
     </unit>
+    <unit id="4303103723944581948">
+      <segment>
+        <source>A solver error occurred.</source>
+      </segment>
+    </unit>
+    <unit id="272496911380424275">
+      <segment>
+        <source>The insulator chain is suspected to have reversed (above horizontal position).</source>
+      </segment>
+    </unit>
+    <unit id="3239031258153870723">
+      <segment>
+        <source>The solver failed to converge.</source>
+      </segment>
+    </unit>
+    <unit id="4796814092512031875">
+      <segment>
+        <source>A shape mismatch was detected in arrays.</source>
+      </segment>
+    </unit>
+    <unit id="8369628526290763854">
+      <segment>
+        <source>A data-related warning was raised.</source>
+      </segment>
+    </unit>
+    <unit id="8058206957724761513">
+      <segment>
+        <source>A balance engine warning was raised.</source>
+      </segment>
+    </unit>
+    <unit id="1162997080399948086">
+      <segment>
+        <source>RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
