@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { ProtoV4Parameters, ProtoV4Support, Support, InitialCondition } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
@@ -53,6 +54,7 @@ export class StudiesService {
 
   private readonly storageService = inject(StorageService);
   private readonly messageService = inject(MessageService);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
     this.storageService.ready$.subscribe((value) => {
@@ -269,7 +271,7 @@ export class StudiesService {
 
     // Check for NaN/Infinity
     if (!Number.isFinite(value)) {
-      console.warn(
+      this.logger.warn(
         `CSV Import Warning: Support ${supportIndex + 1} (${supportNumber || 'N/A'}) - ` +
           `${fieldName} = ${value} is not a finite number (NaN or Infinity). Converted to null.`
       );
@@ -278,7 +280,7 @@ export class StudiesService {
 
     const limit = SUPPORT_FIELD_LIMITS[fieldName];
     if (limit && (value < limit.min || value > limit.max)) {
-      console.warn(
+      this.logger.warn(
         `CSV Import Warning: Support ${supportIndex + 1} (${supportNumber || 'N/A'}) - ` +
           `${fieldName} = ${value} is out of bounds [${limit.min}, ${limit.max}]. Value will be clamped.`
       );
@@ -298,12 +300,12 @@ export class StudiesService {
       let spanLength: number | null = null;
       if (!isLastSupport) {
         if (hasInvalidSpanLength) {
-          console.warn(
+          this.logger.warn(
             `CSV Import Warning: Support ${index + 1} (${supportId}) has invalid spanLength: ${support.portée}. ` +
               `Expected value between 5-5000m. Converted to null.`
           );
         } else if (support.portée < 5 || support.portée > 5000) {
-          console.warn(
+          this.logger.warn(
             `CSV Import Warning: Support ${index + 1} (${supportId}) - ` +
               `spanLength = ${support.portée} is out of bounds [5, 5000]. Value will be clamped.`
           );

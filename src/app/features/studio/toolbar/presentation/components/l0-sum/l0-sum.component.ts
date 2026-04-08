@@ -20,6 +20,7 @@ import { PossibleIconNames } from '@shared/model/icon.model';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 
 /** Row data for the L0 summary table. */
@@ -46,6 +47,7 @@ export class L0SumComponent {
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly plotService = inject(PlotService);
+  private readonly logger = inject(LoggerService);
 
   readonly l0Rows = signal<L0Row[]>([]);
 
@@ -99,7 +101,7 @@ export class L0SumComponent {
 
   onExport() {
     // TODO: Implement export functionality
-    console.log('Export L0 sum', {
+    this.logger.log('Export L0 sum', {
       rows: this.l0Rows(),
       total: this.totalL0()
     });

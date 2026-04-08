@@ -31,6 +31,7 @@ import { VtlAndGuying } from '@shared/domain';
 import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /** Option for selecting a reference support direction. */
 interface SupportOption {
@@ -73,6 +74,7 @@ export class VhlAndGuyingComponent {
   public readonly plotService = inject(PlotService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly fb = inject(FormBuilder);
+  private readonly logger = inject(LoggerService);
 
   form: FormGroup<{
     selectedSpan: FormControl<VtlAndGuying['inputs']['selectedSpan']>;
@@ -251,7 +253,7 @@ export class VhlAndGuyingComponent {
         selectedSupport: formValue.selectedSupport || null
       });
       if (error) {
-        console.error(error);
+        this.logger.error(error);
         return;
       }
       this.results.set(result);

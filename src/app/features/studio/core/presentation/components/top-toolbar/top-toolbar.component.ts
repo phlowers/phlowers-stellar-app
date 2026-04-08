@@ -13,6 +13,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ScaleViewComponent } from './scale-view/scale-view.component';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 @Component({
   selector: 'app-studio-top-toolbar',
@@ -36,6 +37,7 @@ import { ScaleViewComponent } from './scale-view/scale-view.component';
 /** Top toolbar component providing view controls, display options, and tool/table menus. */
 export class StudioTopToolbarComponent implements OnInit {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
+  private readonly logger = inject(LoggerService);
 
   items = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
@@ -61,21 +63,21 @@ export class StudioTopToolbarComponent implements OnInit {
       label: $localize`Pose table`, // Tableau de pose
       disabled: true,
       command: () => {
-        console.log('Add action triggered');
+        this.logger.log('Add action triggered');
       }
     },
     {
       label: $localize`Obstacles table`, // Tableau d'obstacles
       disabled: true,
       command: () => {
-        console.log('Add action triggered');
+        this.logger.log('Add action triggered');
       }
     },
     {
       label: $localize`Grounds table`, // Tableau de sols
       disabled: true,
       command: () => {
-        console.log('Add action triggered');
+        this.logger.log('Add action triggered');
       }
     }
   ]);
@@ -265,7 +267,7 @@ export class StudioTopToolbarComponent implements OnInit {
 
         this.toolsItems.set(updatedItems);
       } catch (error) {
-        console.error('Error loading tools items state:', error);
+        this.logger.error('Error loading tools items state:', error);
       }
     }
   }

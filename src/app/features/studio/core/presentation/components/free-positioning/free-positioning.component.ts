@@ -37,6 +37,7 @@ import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.serv
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 // Constants
 const PLOT_CONFIG = {
@@ -125,6 +126,7 @@ export class FreePositioningComponent implements OnDestroy {
   readonly sideTabsService = inject(SideTabsService);
   readonly obstacleFormService = inject(ObstacleFormService);
   readonly obstaclesService = inject(ObstaclesService);
+  private readonly logger = inject(LoggerService);
   private readonly positionsValue: Signal<unknown>;
 
   constructor() {
@@ -501,7 +503,7 @@ export class FreePositioningComponent implements OnDestroy {
 
       const plotElement = document.getElementById(plotId) as PlotElement | null;
       if (!plotElement) {
-        console.warn(`Plot element not found: ${plotId}`);
+        this.logger.warn(`Plot element not found: ${plotId}`);
         return;
       }
       const annotations = this.getAnnotations(
@@ -516,7 +518,7 @@ export class FreePositioningComponent implements OnDestroy {
       this.attachEventListeners(side, plotElement);
       this.setPlotReference(side, plot);
     } catch (error) {
-      console.error(`Error creating plot for ${side}:`, error);
+      this.logger.error(`Error creating plot for ${side}:`, error);
     }
   }
 
