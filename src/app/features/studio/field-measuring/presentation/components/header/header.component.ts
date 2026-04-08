@@ -18,6 +18,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { isEqual } from 'lodash';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 @Component({
   selector: 'app-header',
@@ -38,11 +39,16 @@ export class HeaderComponent {
 
   readonly spans = computed<{ label: string; value: number[]; supports: number[] }[]>(() => {
     const { startSupport, endSupport } = this.plotService.plotOptions();
+    const supports = this.plotService.section()?.supports ?? [];
     const spanAmount = Math.max(endSupport - startSupport, 0);
     return Array.from({ length: spanAmount }, (_, index) => {
       const actualIndex = index + startSupport;
+      const leftNum = supports[actualIndex]?.number;
+      const rightNum = supports[actualIndex + 1]?.number;
+      const left = leftNum ? formatSupportNumber(leftNum) : String(actualIndex + 1);
+      const right = rightNum ? formatSupportNumber(rightNum) : String(actualIndex + 2);
       return {
-        label: `${actualIndex + 1} - ${actualIndex + 2}`,
+        label: `${left} - ${right}`,
         value: [actualIndex, actualIndex + 1],
         supports: [actualIndex, actualIndex + 1]
       };

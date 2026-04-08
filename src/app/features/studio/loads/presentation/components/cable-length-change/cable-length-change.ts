@@ -57,7 +57,7 @@ export class CableLengthChangeComponent {
   /** Span options per RG.LON-CAB.POR.1. */
   readonly spansOptions = this.plotService.getSpanOptions;
 
-  readonly supportRefOptions = signal<{ label: number; value: 'LEFT' | 'RIGHT' }[]>([]);
+  readonly supportRefOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
 
   readonly widthCableOptions = [
     { label: $localize`Lengthening`, value: 'lengthening' as CableWidthType },

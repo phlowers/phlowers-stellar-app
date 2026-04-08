@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { VhlAndGuyingComponent } from './vtl-and-guying.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { signal } from '@angular/core';
 import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -67,8 +66,8 @@ describe('VhlAndGuyingComponent', () => {
       getSpanOptions: vi.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
       getSpanOptionsWithIndex: vi.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
       getSupportOptions: vi.fn().mockReturnValue([
-        { label: 1, value: 'LEFT' },
-        { label: 2, value: 'RIGHT' }
+        { label: '1', value: 'LEFT' },
+        { label: '2', value: 'RIGHT' }
       ])
     } as unknown as vi.Mocked<PlotService>;
 
@@ -271,8 +270,8 @@ describe('VhlAndGuyingComponent', () => {
     fixture.detectChanges();
     const options = component.supportOptions();
     expect(options).toEqual([
-      { label: 1, value: 'LEFT' },
-      { label: 2, value: 'RIGHT' }
+      { label: '1', value: 'LEFT' },
+      { label: '2', value: 'RIGHT' }
     ]);
   });
 
@@ -496,7 +495,7 @@ describe('VhlAndGuyingComponent', () => {
     component.form.controls.horizontalDistance.setValue(5);
     component.form.controls.hasPulley.setValue(true);
     component.form.controls.comment.setValue('Test comment');
-    component.supportOptions.set([{ label: 1, value: 'LEFT' }]);
+    component.supportOptions.set([{ label: '1', value: 'LEFT' }]);
     component.supportType.set('Suspension');
     component.vtlWithoutGuying.set({
       chargeV: 10,
@@ -616,8 +615,8 @@ describe('VhlAndGuyingComponent', () => {
       expect(supportOptions).toBeDefined();
       expect(supportOptions.length).toBeGreaterThan(0);
       expect(supportOptions).toEqual([
-        { label: 1, value: 'LEFT' },
-        { label: 2, value: 'RIGHT' }
+        { label: '1', value: 'LEFT' },
+        { label: '2', value: 'RIGHT' }
       ]);
     });
 

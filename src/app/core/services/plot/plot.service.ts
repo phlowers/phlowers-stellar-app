@@ -8,6 +8,7 @@ import {
   Task,
   TaskError
 } from '@services/worker_python/tasks/types';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { Section, Study } from '@shared/domain';
 import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
@@ -366,7 +367,7 @@ export class PlotService {
     const spanCount = this.getSpanCount(supports);
 
     return Array.from({ length: spanCount }, (_, index) => ({
-      label: `${index + 1} - ${index + 2}`,
+      label: `${formatSupportNumber(supports[index].number)} - ${formatSupportNumber(supports[index + 1].number)}`,
       value: supports[index]?.uuid ?? null
     }));
   });
@@ -380,7 +381,7 @@ export class PlotService {
     const spanCount = this.getSpanCount(supports);
 
     return Array.from({ length: spanCount }, (_, index) => ({
-      label: `${index + 1} - ${index + 2}`,
+      label: `${formatSupportNumber(supports[index].number)} - ${formatSupportNumber(supports[index + 1].number)}`,
       value: supports[index]?.uuid && supports[index].uuid !== '' ? { index, uuid: supports[index].uuid } : null
     }));
   });
@@ -436,19 +437,20 @@ export class PlotService {
     this.litData.set(currentLitData);
   }
 
-  getSupportOptions = (supportUuid: string | null): { label: number; value: 'LEFT' | 'RIGHT' }[] => {
-    if (supportUuid === null) {
+  getSupportOptions = (supportUuid: string | null): { label: string; value: 'LEFT' | 'RIGHT' }[] => {
+    const supports = this.section()?.supports;
+    if (supportUuid === null || !supports) {
       return [];
     }
-    const spanIndex = this.section()?.supports?.findIndex((s) => s.uuid === supportUuid);
-    if (spanIndex !== undefined && spanIndex >= 0) {
+    const spanIndex = supports.findIndex((s) => s.uuid === supportUuid);
+    if (spanIndex >= 0 && spanIndex + 1 < supports.length) {
       return [
         {
-          label: spanIndex + 1,
+          label: formatSupportNumber(supports[spanIndex].number),
           value: 'LEFT'
         },
         {
-          label: spanIndex + 2,
+          label: formatSupportNumber(supports[spanIndex + 1].number),
           value: 'RIGHT'
         }
       ];

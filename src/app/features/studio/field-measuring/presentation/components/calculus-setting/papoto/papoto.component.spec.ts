@@ -27,7 +27,8 @@ describe('Papoto component', () => {
       litData: signal({
         span_length: [100, 150, 200],
         elevation: [5.5, 10.75, -3.25]
-      })
+      }),
+      section: signal(null)
     } as unknown as vi.Mocked<PlotService>;
 
     await TestBed.configureTestingModule({

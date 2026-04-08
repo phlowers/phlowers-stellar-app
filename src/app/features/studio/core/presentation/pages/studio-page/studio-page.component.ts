@@ -41,6 +41,7 @@ import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/
 import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
@@ -121,7 +122,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       animateOnMove: false,
       disabled: this.plotService.loading() || this.plotService.isFreePositioningMode(),
       translate: (value: number) => {
-        return (value + 1).toString();
+        const num = this.plotService.section()?.supports?.[value]?.number;
+        return num ? formatSupportNumber(num) : String(value + 1);
       },
       rightToLeft: this.plotService.plotOptions().invert
     };

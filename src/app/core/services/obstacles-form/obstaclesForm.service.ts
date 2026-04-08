@@ -95,7 +95,7 @@ export class ObstacleFormService {
     this.obstaclesService.setCurrentPointIndex(index);
   }
 
-  readonly supportsOptions = signal<{ label: number; value: 'LEFT' | 'RIGHT' }[]>([]);
+  readonly supportsOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
 
   /**
    * Distance results for the currently selected obstacle and point, derived reactively
@@ -147,8 +147,7 @@ export class ObstacleFormService {
 
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
     if (supportUuid) {
-      const supports = this.plotService.getSupportOptions(supportUuid);
-      this.supportsOptions.set(supports.map((s) => ({ label: s.label, value: s.value })));
+      this.supportsOptions.set(this.plotService.getSupportOptions(supportUuid));
     } else {
       this.supportsOptions.set([]);
       // Clear supportUuid and emit value to ensure the re-slection of the same span won't block support selection.
@@ -162,13 +161,7 @@ export class ObstacleFormService {
     if (!supportUuid) {
       return;
     }
-    const supports = this.plotService.getSupportOptions(supportUuid);
-    this.supportsOptions.set(
-      supports.map((s) => ({
-        label: s.label,
-        value: s.value
-      }))
-    );
+    this.supportsOptions.set(this.plotService.getSupportOptions(supportUuid));
   }
 
   private resetForm(supportUuid: string | null) {
