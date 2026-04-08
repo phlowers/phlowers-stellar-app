@@ -34,6 +34,7 @@ export class CableLengthChangeComponent {
   private readonly cableModificationsService = inject(CableModificationsService);
 
   readonly isLoading = signal(false);
+  readonly isCalculating = computed(() => this.plotService.loading());
   readonly error = signal<string | null>(null);
   /** Whether the form has been modified since the last save (RG.LON-CAB.ENR-BTN.1). */
   readonly isDirtySinceLastSave = signal(false);

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -97,6 +97,8 @@ export class ClimateComponent {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   readonly constraints = climateConstraints;
+
+  readonly isCalculating = computed(() => this.plotService.loading());
 
   form: FormGroup<{
     windPressure: FormControl<number | null>;

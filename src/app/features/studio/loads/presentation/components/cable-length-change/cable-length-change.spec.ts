@@ -45,7 +45,7 @@ describe('CableLengthChangeComponent', () => {
     mockPlotService = {
       section: createSignalMock<Partial<Section> | null>(mockSection),
       study: createSignalMock(null),
-      loading: createSignalMock(false),
+      loading: signal(false),
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
@@ -87,6 +87,25 @@ describe('CableLengthChangeComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('isCalculating computed', () => {
+    it('should reflect plotService.loading() as false by default', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true when plotService.loading() is true', () => {
+      mockPlotService.loading.set(true);
+      expect(component.isCalculating()).toBe(true);
+    });
+
+    it('should go back to false when plotService.loading() returns to false', () => {
+      mockPlotService.loading.set(true);
+      expect(component.isCalculating()).toBe(true);
+
+      mockPlotService.loading.set(false);
+      expect(component.isCalculating()).toBe(false);
+    });
   });
 
   // ---------------------------------------------------------------------------

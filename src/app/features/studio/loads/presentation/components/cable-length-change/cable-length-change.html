@@ -116,6 +116,7 @@
       type="submit"
       btnStyle="outlined"
       [disabled]="isFormInvalid() || isLoading() || !isDirtySinceLastSave()"
+      [btnLoading]="isCalculating()"
       data-testid="cable-length-change-save"
     >
       <app-icon icon="save" />
@@ -125,6 +126,7 @@
     <button
       app-btn
       [disabled]="isFormInvalid() || isLoading()"
+      [btnLoading]="isCalculating()"
       type="button"
       (click)="calculate()"
       data-testid="cable-length-change-calculate"

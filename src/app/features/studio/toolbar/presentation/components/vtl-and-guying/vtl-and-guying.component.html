@@ -134,6 +134,7 @@
             btnStyle="base"
             type="button"
             [disabled]="!isFormValid()"
+            [btnLoading]="isCalculating()"
             (click)="onCalculate()"
             class="vtl-guying__calculate-btn"
             data-testid="calculate-btn"

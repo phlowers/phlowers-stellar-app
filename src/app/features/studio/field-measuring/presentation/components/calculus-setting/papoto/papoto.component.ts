@@ -87,6 +87,7 @@ export class PapotoComponent {
   papotoHelpDialog = signal<boolean>(false);
 
   papotoError = signal<boolean>(false);
+  readonly isCalculating = signal(false);
 
   isFormValid = computed(() => {
     const data = this.measureData();
@@ -122,27 +123,31 @@ export class PapotoComponent {
       ...d,
       outputs: { ...d.outputs, papoto: null }
     }));
-    const { result, error } = await this.workerPythonService.runTask(Task.calculatePapoto, {
-      spanLength: data.spanLength || 0,
-      measuredElevationDifference: data.measuredElevationDifference || 0,
-      HL: data.HL || 0,
-      H1: data.H1 || 0,
-      H2: data.H2 || 0,
-      H3: data.H3 || 0,
-      HR: data.HR || 0,
-      VL: data.VL || 0,
-      V1: data.V1 || 0,
-      V2: data.V2 || 0,
-      V3: data.V3 || 0,
-      VR: data.VR || 0
-    });
-    if (error) {
-      this.papotoError.set(true);
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.calculatePapoto, {
+        spanLength: data.spanLength || 0,
+        measuredElevationDifference: data.measuredElevationDifference || 0,
+        HL: data.HL || 0,
+        H1: data.H1 || 0,
+        H2: data.H2 || 0,
+        H3: data.H3 || 0,
+        HR: data.HR || 0,
+        VL: data.VL || 0,
+        V1: data.V1 || 0,
+        V2: data.V2 || 0,
+        V3: data.V3 || 0,
+        VR: data.VR || 0
+      });
+      if (error) {
+        this.papotoError.set(true);
+      }
+      this.measureData.update((d) => ({
+        ...d,
+        outputs: { ...d.outputs, papoto: result }
+      }));
+    } finally {
+      this.isCalculating.set(false);
     }
-
-    this.measureData.update((d) => ({
-      ...d,
-      outputs: { ...d.outputs, papoto: result }
-    }));
   }
 }
