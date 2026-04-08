@@ -201,7 +201,7 @@ describe('WorkerService', () => {
       // Simulate worker message with id and result
       mockWorker.onmessage!({ data: { id: mockId, result: mockResult } });
 
-      expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult, undefined);
+      expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult, null, null);
     });
   });
 
@@ -230,7 +230,7 @@ describe('WorkerService', () => {
 
       const response = await promise;
       expect(response.result).toBeUndefined();
-      expect(response.error).toBeUndefined();
+      expect(response.error).toBeNull();
     });
 
     it('should post message to worker with getLit task', async () => {
@@ -268,7 +268,7 @@ describe('WorkerService', () => {
 
       const response = await promise;
       expect(response.result).toEqual(mockResult);
-      expect(response.error).toBeUndefined();
+      expect(response.error).toBeNull();
     });
 
     it('should generate unique id for each task', async () => {
@@ -289,9 +289,9 @@ describe('WorkerService', () => {
 
       const [response1, response2] = await Promise.all([promise1, promise2]);
       expect(response1.result).toBeUndefined();
-      expect(response1.error).toBeUndefined();
+      expect(response1.error).toBeNull();
       expect(response2.result).toBeUndefined();
-      expect(response2.error).toBeUndefined();
+      expect(response2.error).toBeNull();
     });
   });
 

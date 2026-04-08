@@ -1,6 +1,13 @@
 import { computed, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
 import { AxesNorms, PlotOptions, PLOT_ID, SelectedDisplayOptions, SpanOption } from '@shared/types/plot.types';
-import { DataError, Distance, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
+import {
+  DataError,
+  Distance,
+  GetSectionOutput,
+  PythonErrorCode,
+  Task,
+  TaskError
+} from '@services/worker_python/tasks/types';
 import { Section, Study } from '@shared/domain';
 import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
@@ -70,6 +77,7 @@ export class PlotService {
   isFreePositioningMode = signal<boolean>(false);
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
+  pythonErrorCode = signal<PythonErrorCode | null>(null);
 
   readonly axesNorms = signal<AxesNorms>({
     x: 1,
@@ -146,6 +154,7 @@ export class PlotService {
   resetAll = () => {
     this.purgePlot();
     this.error.set(null);
+    this.pythonErrorCode.set(null);
     this.litData.set(null);
     this.baseLitData.set(null);
     this.loading.set(false);
@@ -206,6 +215,7 @@ export class PlotService {
 
   refreshSection = async (section: Section) => {
     this.error.set(null);
+    this.pythonErrorCode.set(null);
     this.litData.set(null);
     this.baseLitData.set(null);
     this.section.set(section);
@@ -223,10 +233,11 @@ export class PlotService {
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
     }
-    const { result, error } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
+    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
     let currentLitData = result?.current ?? null;
     this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
+    this.pythonErrorCode.set(pythonErrorCode ?? null);
 
     if (error) {
       this.distances.set([]);
@@ -278,7 +289,7 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
-    const { result, error } = await this.workerPythonService.runTask(Task.refreshProjection, {
+    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.refreshProjection, {
       startSupport: this.plotOptions().startSupport,
       endSupport: this.plotOptions().endSupport,
       view: this.plotOptions().view
@@ -286,6 +297,7 @@ export class PlotService {
     this.litData.set(result?.sectionOutput?.current ?? null);
     this.baseLitData.set(result?.sectionOutput?.base ?? null);
     this.error.set(error);
+    this.pythonErrorCode.set(pythonErrorCode ?? null);
     this.loading.set(false);
   };
 
@@ -297,6 +309,7 @@ export class PlotService {
     this.litData.set(null);
     this.baseLitData.set(null);
     this.error.set(null);
+    this.pythonErrorCode.set(null);
     this.loading.set(false);
   };
 

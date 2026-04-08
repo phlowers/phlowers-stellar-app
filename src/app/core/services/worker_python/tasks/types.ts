@@ -65,6 +65,29 @@ export enum DataError {
 }
 
 /**
+ * Python exception class names raised by the mechaphlowers library.
+ * Used to map Python-side errors to localized user-facing messages.
+ *
+ * @category Worker Types
+ */
+export enum PythonErrorCode {
+  /** Generic solver error */
+  SolverError = 'SolverError',
+  /** Insulator chain suspected to have reversed above horizontal position */
+  SuspectedChainReversal = 'SuspectedChainReversal',
+  /** Numerical solver failed to converge */
+  ConvergenceError = 'ConvergenceError',
+  /** Shape mismatch detected in arrays */
+  ShapeError = 'ShapeError',
+  /** Data-related warning */
+  DataWarning = 'DataWarning',
+  /** Balance engine warning */
+  BalanceEngineWarning = 'BalanceEngineWarning',
+  /** RTS catalog data missing or contains NaN values */
+  RtsDataNotAvailable = 'RtsDataNotAvailable'
+}
+
+/**
  * Error codes for task execution failures.
  *
  * @category Worker Types

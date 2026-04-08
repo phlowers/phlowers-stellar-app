@@ -48,7 +48,7 @@ export class CableModificationsService {
     this.plotService.refreshCamera();
     this.plotService.loading.set(true);
 
-    const { result, error } = await this.workerPythonService.runTask(Task.cableModification, {
+    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.cableModification, {
       spanIndex,
       widthCable: params.widthCable,
       sizeCable: params.sizeCable,
@@ -59,6 +59,7 @@ export class CableModificationsService {
     this.plotService.litData.set(result?.current ?? null);
     this.plotService.baseLitData.set(result?.base ?? null);
     this.plotService.error.set(error);
+    this.plotService.pythonErrorCode.set(pythonErrorCode ?? null);
     this.plotService.loading.set(false);
   };
 

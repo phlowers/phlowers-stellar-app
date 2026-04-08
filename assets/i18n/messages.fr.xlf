@@ -3669,5 +3669,47 @@
         <target>Dist. axe ligne.</target>
       </segment>
     </unit>
+    <unit id="4303103723944581948">
+      <segment state="translated">
+        <source>A solver error occurred.</source>
+        <target>Une erreur de solveur s'est produite.</target>
+      </segment>
+    </unit>
+    <unit id="272496911380424275">
+      <segment state="translated">
+        <source>The insulator chain is suspected to have reversed (above horizontal position).</source>
+        <target>La chaîne d'isolateurs est suspectée d'avoir basculé (position au-dessus de l'horizontale).</target>
+      </segment>
+    </unit>
+    <unit id="3239031258153870723">
+      <segment state="translated">
+        <source>The solver failed to converge.</source>
+        <target>Le solveur n'a pas convergé.</target>
+      </segment>
+    </unit>
+    <unit id="4796814092512031875">
+      <segment state="translated">
+        <source>A shape mismatch was detected in arrays.</source>
+        <target>Une incohérence de dimensions a été détectée dans les tableaux.</target>
+      </segment>
+    </unit>
+    <unit id="8369628526290763854">
+      <segment state="translated">
+        <source>A data-related warning was raised.</source>
+        <target>Un avertissement lié aux données a été émis.</target>
+      </segment>
+    </unit>
+    <unit id="8058206957724761513">
+      <segment state="translated">
+        <source>A balance engine warning was raised.</source>
+        <target>Un avertissement du moteur d'équilibrage a été émis.</target>
+      </segment>
+    </unit>
+    <unit id="1162997080399948086">
+      <segment state="translated">
+        <source>RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.</source>
+        <target>Les données du catalogue RTS (rts_cable, rts_layer_*) sont absentes ou contiennent des valeurs NaN.</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

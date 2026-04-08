@@ -50,6 +50,7 @@ describe('FreePositioningComponent', () => {
     obstacles: []
   });
   const errorSignal = signal<unknown>(null);
+  const pythonErrorCodeSignal = signal<unknown>(null);
   const loadingSignal = signal(false);
 
   const mockPlotService = {
@@ -58,6 +59,7 @@ describe('FreePositioningComponent', () => {
     litData: litDataSignal,
     section: sectionSignal,
     error: errorSignal,
+    pythonErrorCode: pythonErrorCodeSignal,
     loading: loadingSignal,
     camera: signal(null),
     isFreePositioningMode: signal(false),
@@ -306,6 +308,12 @@ describe('FreePositioningComponent', () => {
       errorSignal.set(null);
       // formatStudioError returns 'Unknown error' for null
       expect(component.getErrorString()).toBeTruthy();
+    });
+
+    it('should return python-specific message when pythonErrorCode is set', () => {
+      errorSignal.set('CALCULATION_ERROR');
+      pythonErrorCodeSignal.set('SolverError');
+      expect(component.getErrorString()).toContain('solver');
     });
   });
 

@@ -28,8 +28,9 @@ export class StudioComponent implements OnDestroy {
   constructor() {
     effect(() => {
       const error = this.plotService.error();
+      const pythonErrorCode = this.plotService.pythonErrorCode();
       if (error !== null) {
-        this.notificationService.error(formatStudioError(error));
+        this.notificationService.error(formatStudioError(error, pythonErrorCode));
       }
     });
 
