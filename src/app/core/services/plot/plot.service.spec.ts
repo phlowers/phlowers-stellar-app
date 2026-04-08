@@ -8,7 +8,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
+import { PlotService } from './plot.service';
+import { checkIfProjectionNeedRefresh } from './plot-options.utils';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import {
@@ -1455,7 +1456,18 @@ describe('PlotService', () => {
 
     it('should set distances from result', async () => {
       const mockDist: Distance = {
-        obstacleUuid: 'x', points: [{ pointIndex: 0, linePoint: [0,0,0], virtualPointHorizontal: [0,0,0], virtualPointVertical: [0,0,0], distanceDiagonal: 1, distanceHorizontal: 2, distanceVertical: 3 }]
+        obstacleUuid: 'x',
+        points: [
+          {
+            pointIndex: 0,
+            linePoint: [0, 0, 0],
+            virtualPointHorizontal: [0, 0, 0],
+            virtualPointVertical: [0, 0, 0],
+            distanceDiagonal: 1,
+            distanceHorizontal: 2,
+            distanceVertical: 3
+          }
+        ]
       };
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [mockDist] },

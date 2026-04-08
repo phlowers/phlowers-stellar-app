@@ -5,6 +5,8 @@ import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { Section, Study } from '@shared/domain';
 import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { PlotResolutionService } from './plot-resolution.service';
+import { checkIfProjectionNeedRefresh } from './plot-options.utils';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
@@ -15,40 +17,6 @@ import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
-
-const MIN_RESOLUTION = 25;
-const RESOLUTION_STORAGE_KEY = 'plotResolution';
-
-/**
- * Checks whether a projection refresh is needed based on changed plot options.
- * @param oldOptions - Previous plot options
- * @param newOptions - New plot options
- * @param loading - Whether a calculation is currently in progress
- * @returns `true` if the projection should be refreshed
- */
-export const checkIfProjectionNeedRefresh = (oldOptions: PlotOptions, newOptions: PlotOptions, loading: boolean) => {
-  if (loading) {
-    return false;
-  }
-  const oldView = oldOptions.view;
-  const newView = newOptions.view;
-  const oldSide = oldOptions.side;
-  const newSide = newOptions.side;
-  if (oldView !== newView || oldSide !== newSide) {
-    return true;
-  }
-  if (newView !== '2d') {
-    return false;
-  }
-  const oldStartSupport = oldOptions.startSupport;
-  const oldEndSupport = oldOptions.endSupport;
-  const newStartSupport = newOptions.startSupport;
-  const newEndSupport = newOptions.endSupport;
-  if (oldStartSupport !== newStartSupport || oldEndSupport !== newEndSupport) {
-    return true;
-  }
-  return false;
-};
 
 /** Default plot options used when initializing or resetting the studio view. */
 const defaultPlotOptions: PlotOptions = {
@@ -81,10 +49,6 @@ export class PlotService {
     aspectMode: 'data'
   });
 
-  resolution = signal<number>(100);
-  appliedResolution = signal<number | null>(null);
-  /** Default resolution value loaded from Python engine configuration. Also used as maximum for the UI slider. */
-  defaultResolution = signal<number>(100);
   litData = signal<GetSectionOutput | null>(null);
   baseLitData = signal<GetSectionOutput | null>(null);
   loading = signal<boolean>(true);
@@ -104,6 +68,7 @@ export class PlotService {
     ...defaultSelectedDisplayOptions
   });
 
+  private readonly resolutionService = inject(PlotResolutionService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly cableService = inject(CablesService);
   private readonly sectionService = inject(SectionService);
@@ -112,30 +77,14 @@ export class PlotService {
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
 
-  constructor() {
-    const storedResolution = Number(localStorage.getItem(RESOLUTION_STORAGE_KEY));
-    if (Number.isFinite(storedResolution) && storedResolution >= MIN_RESOLUTION) {
-      // Clamp to minimum; will be re-clamped to max once worker loads config
-      this.resolution.set(storedResolution);
-    }
+  // Facade re-delegations — same signal references as PlotResolutionService
+  readonly resolution = this.resolutionService.resolution;
+  readonly appliedResolution = this.resolutionService.appliedResolution;
+  readonly defaultResolution = this.resolutionService.defaultResolution;
 
+  constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
-    });
-    effect(() => {
-      if (this.workerReady()) {
-        this.workerPythonService.runTask(Task.getConfig, undefined).then(({ result }) => {
-          if (result?.resolution) {
-            // Update default resolution from Python config
-            this.defaultResolution.set(result.resolution);
-            // Re-clamp current resolution if it exceeds the loaded value
-            const currentResolution = this.resolution();
-            if (currentResolution > result.resolution) {
-              this.setResolution(result.resolution);
-            }
-          }
-        });
-      }
     });
     effect(() => {
       if (this.isStudioActive() && this.workerReady() && this.section()) {
@@ -302,38 +251,12 @@ export class PlotService {
     this.axesNorms.set(norms);
   }
 
-  private normalizeResolution(value: number): number {
-    if (!Number.isFinite(value)) {
-      return this.defaultResolution();
-    }
-    const rounded = Math.round(value);
-    const max = this.defaultResolution();
-    return Math.max(MIN_RESOLUTION, Math.min(max, rounded));
-  }
-
   setResolution(value: number): void {
-    const normalizedResolution = this.normalizeResolution(value);
-    if (normalizedResolution === this.resolution()) {
-      return;
-    }
-    this.resolution.set(normalizedResolution);
-    localStorage.setItem(RESOLUTION_STORAGE_KEY, normalizedResolution.toString());
+    this.resolutionService.setResolution(value);
   }
 
   async applyResolution(value: number): Promise<void> {
-    if (!this.workerPythonService.ready) {
-      return;
-    }
-    const normalizedResolution = this.normalizeResolution(value);
-    if (this.appliedResolution() === normalizedResolution) {
-      return;
-    }
-    const { error } = await this.workerPythonService.runTask(Task.setResolution, {
-      resolution: normalizedResolution
-    });
-    if (!error) {
-      this.appliedResolution.set(normalizedResolution);
-    }
+    return this.resolutionService.applyResolution(value);
   }
 
   /**
