@@ -51,8 +51,6 @@ export class SectionPlotComponent {
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
-  private readonly logger = inject(LoggerService);
-  private readonly obstacleStateService = inject(ObstacleStateService);
 
   // Signals
   private readonly isPlotRefreshing = signal(false);
