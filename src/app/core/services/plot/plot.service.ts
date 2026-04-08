@@ -21,6 +21,7 @@ import { ChargeData } from '@shared/domain/models/charge.model';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 const MIN_RESOLUTION = 25;
 const RESOLUTION_STORAGE_KEY = 'plotResolution';
@@ -119,6 +120,7 @@ export class PlotService {
   private readonly sectionService = inject(SectionService);
   private readonly sideTabsService = inject(SideTabsService);
   private readonly obstaclesService = inject(ObstaclesService);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
     const storedResolution = Number(localStorage.getItem(RESOLUTION_STORAGE_KEY));
@@ -221,7 +223,7 @@ export class PlotService {
     this.baseLitData.set(null);
     this.section.set(section);
     if (!this.workerPythonService.ready || !section?.cable_name) {
-      console.error('refreshSection error');
+      this.logger.error('refreshSection error');
       this.error.set(DataError.NO_CABLE_FOUND);
       this.loading.set(false);
       return;
@@ -229,7 +231,7 @@ export class PlotService {
     this.loading.set(true);
     const cable = await this.cableService.getCable(section.cable_name);
     if (!cable) {
-      console.error('no cable found: ', section.cable_name);
+      this.logger.error('no cable found: ', section.cable_name);
       this.loading.set(false);
       this.error.set(DataError.NO_CABLE_FOUND);
       return;

@@ -6,6 +6,7 @@ import { MessageModule } from 'primeng/message';
 import plotly, { Data } from 'plotly.js-dist-min';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /**
  * Formatted text data for plot annotations.
@@ -74,6 +75,7 @@ export class SupportPlotComponent {
   selectedAttachmentSetNumber = input<number | undefined>(undefined);
 
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
     effect(() => {
@@ -131,7 +133,7 @@ export class SupportPlotComponent {
         attachmentSetPoints
       });
     } catch (error) {
-      console.error('Error refreshing plot:', error);
+      this.logger.error('Error refreshing plot:', error);
       this.clearPlot();
     }
   }

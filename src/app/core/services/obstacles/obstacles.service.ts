@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, firstValueFrom, of } from 'rxjs';
 import { CatalogObstacleTypeEntity } from '@infrastructure/database';
@@ -48,6 +49,7 @@ export class ObstaclesService {
 
   private readonly storageService = inject(StorageService);
   private readonly http = inject(HttpClient);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
     this.storageService.ready$.subscribe((value) => {
@@ -128,7 +130,7 @@ export class ObstaclesService {
         })
         .pipe(
           catchError((error) => {
-            console.error('Error importing obstacle types', error);
+            this.logger.error('Error importing obstacle types', error);
             return of('');
           })
         )

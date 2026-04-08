@@ -1,11 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DOCUMENT } from '@angular/common';
 import { IconComponent } from './icon.component';
 import { PossibleIconNames, ALL_ICONS } from '@shared/model/icon.model';
 
 describe('IconComponent', () => {
   let component: IconComponent;
   let fixture: ComponentFixture<IconComponent>;
-  let mockDocumentFonts: { check: vi.Mock; load: vi.Mock };
+  let mockDocumentFonts: { check: ReturnType<typeof vi.fn>; load: ReturnType<typeof vi.fn> };
+  let mockDocument: Pick<Document, 'fonts'>;
 
   beforeEach(async () => {
     mockDocumentFonts = {
@@ -13,15 +15,19 @@ describe('IconComponent', () => {
       load: vi.fn()
     };
 
-    Object.defineProperty(document, 'fonts', {
-      value: mockDocumentFonts,
-      writable: true
+    mockDocument = new Proxy(document, {
+      get(target, prop, _receiver) {
+        if (prop === 'fonts') return mockDocumentFonts as unknown as FontFaceSet;
+        const value = Reflect.get(target, prop, target);
+        return typeof value === 'function' ? value.bind(target) : value;
+      }
     });
 
     vi.spyOn(console, 'warn').mockImplementation(vi.fn());
 
     await TestBed.configureTestingModule({
-      imports: [IconComponent]
+      imports: [IconComponent],
+      providers: [{ provide: DOCUMENT, useValue: mockDocument }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(IconComponent);

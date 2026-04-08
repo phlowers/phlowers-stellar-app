@@ -27,6 +27,7 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { DividerModule } from 'primeng/divider';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { ProgressBarModule } from 'primeng/progressbar';
 
 /** Regex pattern for validating email addresses. */
@@ -81,6 +82,7 @@ export class AppComponent implements OnInit {
   private readonly chainsService = inject(ChainsService);
   private readonly attachmentService = inject(AttachmentService);
   private readonly obstacleTypesService = inject(ObstaclesService);
+  private readonly logger = inject(LoggerService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
   private readonly online = toSignal(this.onlineService.online$, { initialValue: false });
   private readonly storageReady = toSignal(this.storageService.ready$, { initialValue: false });
@@ -156,7 +158,7 @@ export class AppComponent implements OnInit {
     try {
       return await this.updateService.getLatestAssetList();
     } catch (error) {
-      console.warn('Unable to fetch latest asset manifest, using full catalog import fallback', error);
+      this.logger.warn('Unable to fetch latest asset manifest, using full catalog import fallback', error);
       return null;
     }
   }
@@ -173,7 +175,7 @@ export class AppComponent implements OnInit {
       try {
         await this.userService.createUser({ email: this.form.value.email! });
       } catch (err) {
-        console.error('Error creating user', err);
+        this.logger.error('Error creating user', err);
         this.notificationService.error($localize`Error creating user`);
         return;
       }
@@ -188,7 +190,7 @@ export class AppComponent implements OnInit {
       await this.storageService.setPersistentStorage();
       await this.storageService.createDatabase();
     } catch (err) {
-      console.error('Error creating database', err);
+      this.logger.error('Error creating database', err);
     }
   }
 

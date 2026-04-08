@@ -12,6 +12,7 @@ import { convertStringToNumber } from '@shared/helpers/convertStringToNumber';
 import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { NotificationService } from '@services/notification/notification.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -115,6 +116,7 @@ export class ImportStudyComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly cablesService = inject(CablesService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly logger = inject(LoggerService);
 
   async deleteStudy(uuid: string) {
     await this.studiesService.deleteStudy(uuid);
@@ -125,7 +127,7 @@ export class ImportStudyComponent {
     try {
       return atob(textContent);
     } catch (error: unknown) {
-      console.error('Error decoding base64', error);
+      this.logger.error('Error decoding base64', error);
       throw new Error('fileDecodeError');
     }
   }
@@ -134,7 +136,7 @@ export class ImportStudyComponent {
     try {
       return JSON.parse(jsonContent) as Record<string, unknown>;
     } catch (error: unknown) {
-      console.error('Error parsing JSON', error);
+      this.logger.error('Error parsing JSON', error);
       throw new Error('fileParseError');
     }
   }
@@ -210,14 +212,14 @@ export class ImportStudyComponent {
           if (error instanceof Error && error.message in errors) {
             reject(error);
           } else {
-            console.error('Error importing study', error);
+            this.logger.error('Error importing study', error);
             reject(new Error('studyImportError'));
           }
         }
       };
 
       reader.onerror = (e) => {
-        console.error('Error reading file', e);
+        this.logger.error('Error reading file', e);
         reject(new Error('fileReadError'));
       };
 
@@ -263,7 +265,7 @@ export class ImportStudyComponent {
       try {
         return atob(base64Content);
       } catch (decodeError: unknown) {
-        console.error('Error decoding base64', decodeError);
+        this.logger.error('Error decoding base64', decodeError);
         throw new Error('fileDecodeError');
       }
     }
@@ -304,7 +306,7 @@ export class ImportStudyComponent {
     reject: (error: Error) => void
   ): void {
     if (jsonResults.errors && jsonResults.errors.length > 0) {
-      console.error('Error parsing file', jsonResults.errors);
+      this.logger.error('Error parsing file', jsonResults.errors);
       reject(new Error('fileParseError'));
       return;
     }
@@ -334,7 +336,7 @@ export class ImportStudyComponent {
     reject: (error: Error) => void
   ): Promise<void> {
     if (!result) {
-      console.error('Error reading file', fileName);
+      this.logger.error('Error reading file', fileName);
       throw new Error('fileReadError');
     }
 
@@ -367,7 +369,7 @@ export class ImportStudyComponent {
           if (error instanceof Error && error.message in errors) {
             reject(error);
           } else {
-            console.error('Error importing study', error);
+            this.logger.error('Error importing study', error);
             reject(new Error('studyImportError'));
           }
         }
@@ -414,7 +416,7 @@ export class ImportStudyComponent {
 
   private handleFileError(fileError: unknown, fileName: string): void {
     const errorType = this.getErrorType(fileError);
-    console.error('Error importing file', fileError);
+    this.logger.error('Error importing file', fileError);
     this.notificationService.error(importErrorDetail(errorType));
     this.erroredFiles.set([...this.erroredFiles(), fileName]);
   }
@@ -438,7 +440,7 @@ export class ImportStudyComponent {
   }
 
   private handleLoadFilesError(error: unknown): void {
-    console.error('Error in loadFiles', error);
+    this.logger.error('Error in loadFiles', error);
     this.loading.set(false);
     const errorType = this.getErrorType(error);
     this.notificationService.error(importErrorDetail(errorType));

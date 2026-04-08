@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import { CatalogMaintenanceEntity } from '@infrastructure/database';
@@ -42,6 +43,7 @@ export class MaintenanceService {
 
   private readonly storageService = inject(StorageService);
   private readonly http = inject(HttpClient);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
     this.storageService.ready$.subscribe((value) => {
@@ -78,7 +80,7 @@ export class MaintenanceService {
       })
       .pipe(
         catchError((error) => {
-          console.error('Error importing maintenance teams', error);
+          this.logger.error('Error importing maintenance teams', error);
           return of('');
         })
       );
