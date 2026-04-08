@@ -6,7 +6,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
-import { Task, TaskError } from '@services/worker_python/tasks/types';
+import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
@@ -129,6 +129,49 @@ describe('VhlAndGuyingComponent', () => {
     const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
     component.onVisibleChange(true);
     expect(closeToolSpy).not.toHaveBeenCalled();
+  });
+
+  describe('isCalculating signal', () => {
+    it('should start as false', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true during onCalculate and false after', async () => {
+      let resolveTask!: (value: { result: TaskOutputs[Task.calculateGuying]; error: TaskError | null }) => void;
+      mockWorkerPythonService.runTask.mockReturnValueOnce(
+        new Promise((res) => {
+          resolveTask = res;
+        })
+      );
+
+      component.form.controls.altitude.setValue(10);
+      component.form.controls.horizontalDistance.setValue(5);
+      component.form.controls.selectedSpan.setValue({ index: 0, uuid: 'span-uuid-1' });
+      component.form.controls.selectedSupport.setValue('LEFT');
+
+      const calcPromise = component.onCalculate();
+      expect(component.isCalculating()).toBe(true);
+
+      resolveTask({
+        result: { tensionInGuy: 0, guyAngle: 0, chargeVUnderConsole: 0, chargeHUnderConsole: 0, chargeLIfPulley: 0 },
+        error: null
+      });
+      await calcPromise;
+
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should reset to false even when calculation throws', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('unexpected'));
+
+      component.form.controls.altitude.setValue(10);
+      component.form.controls.horizontalDistance.setValue(5);
+      component.form.controls.selectedSpan.setValue({ index: 0, uuid: 'span-uuid-1' });
+      component.form.controls.selectedSupport.setValue('LEFT');
+
+      await expect(component.onCalculate()).rejects.toThrow('unexpected');
+      expect(component.isCalculating()).toBe(false);
+    });
   });
 
   it('should calculate guying when all inputs are provided', async () => {

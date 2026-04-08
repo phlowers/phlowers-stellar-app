@@ -58,6 +58,7 @@ export class LoadMarkingComponent {
   readonly spansOptions = computed(() => {
     return this.plotService.getSpanOptions();
   });
+  readonly isCalculating = computed(() => this.plotService.loading());
 
   readonly supportsOptions = signal<SupportOption[]>([]);
 

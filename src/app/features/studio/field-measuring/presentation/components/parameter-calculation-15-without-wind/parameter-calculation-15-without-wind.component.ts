@@ -66,6 +66,7 @@ export class ParameterCalculation15WithoutWindComponent {
   });
 
   parameter15CError = signal<boolean>(false);
+  readonly isCalculating = signal(false);
 
   readonly updateModeOptions = [
     { label: $localize`Auto`, value: 'auto' },
@@ -149,18 +150,23 @@ export class ParameterCalculation15WithoutWindComponent {
       cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty || null
     };
     const dataToSend = isManual ? manualDataToSend : autoDataToSend;
-    const { result, error } = await this.workerPythonService.runTask(Task.calculateParameter15CWithoutWind, {
-      ...dataToSend,
-      span_index: data.span?.[0] ?? null
-    });
-    if (error) {
-      this.parameter15CError.set(true);
-      return;
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.calculateParameter15CWithoutWind, {
+        ...dataToSend,
+        span_index: data.span?.[0] ?? null
+      });
+      if (error) {
+        this.parameter15CError.set(true);
+        return;
+      }
+      this.measureData.update((d) => ({
+        ...d,
+        outputs: { ...d.outputs, parameter15C: result }
+      }));
+    } finally {
+      this.isCalculating.set(false);
     }
-    this.measureData.update((d) => ({
-      ...d,
-      outputs: { ...d.outputs, parameter15C: result }
-    }));
   }
 
   onCreateInitialCondition(type: 'minus' | 'nominal' | 'plus') {

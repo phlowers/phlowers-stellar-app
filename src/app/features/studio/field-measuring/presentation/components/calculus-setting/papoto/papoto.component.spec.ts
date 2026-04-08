@@ -8,7 +8,7 @@ import { PapotoComponent } from './papoto.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { LEFT_SUPPORT_OPTIONS_MOCK } from '@features/studio/field-measuring/presentation/mock-data';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError, GetSectionOutput } from '@services/worker_python/tasks/types';
+import { Task, TaskError, TaskOutputs, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { PlotService } from '@services/plot/plot.service';
 
 describe('Papoto component', () => {
@@ -91,6 +91,67 @@ describe('Papoto component', () => {
     component.openHelp();
 
     expect(component.papotoHelpDialog()).toBe(true);
+  });
+
+  describe('isCalculating signal', () => {
+    it('should start as false', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true during calculation and false after', async () => {
+      let resolveTask!: (value: { result: TaskOutputs[Task.calculatePapoto]; error: TaskError | null }) => void;
+      workerPythonServiceMock.runTask.mockReturnValueOnce(
+        new Promise((res) => {
+          resolveTask = res;
+        })
+      );
+
+      component.updateField('leftSupport', '12');
+      component.updateField('spanLength', 100);
+      component.updateField('measuredElevationDifference', 5);
+      component.updateField('HL', 10);
+      component.updateField('H1', 20);
+      component.updateField('H2', 30);
+      component.updateField('H3', 40);
+      component.updateField('HR', 50);
+      component.updateField('VL', 15);
+      component.updateField('V1', 25);
+      component.updateField('V2', 35);
+      component.updateField('V3', 45);
+      component.updateField('VR', 55);
+
+      const calcPromise = component.calculatePapoto();
+      expect(component.isCalculating()).toBe(true);
+
+      resolveTask({
+        result: { parameter: 0, parameter_1_2: 0, parameter_2_3: 0, parameter_1_3: 0, check_validity: true },
+        error: null
+      });
+      await calcPromise;
+
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should reset to false even when calculation throws', async () => {
+      workerPythonServiceMock.runTask.mockRejectedValue(new Error('unexpected'));
+
+      component.updateField('leftSupport', '12');
+      component.updateField('spanLength', 100);
+      component.updateField('measuredElevationDifference', 5);
+      component.updateField('HL', 10);
+      component.updateField('H1', 20);
+      component.updateField('H2', 30);
+      component.updateField('H3', 40);
+      component.updateField('HR', 50);
+      component.updateField('VL', 15);
+      component.updateField('V1', 25);
+      component.updateField('V2', 35);
+      component.updateField('V3', 45);
+      component.updateField('VR', 55);
+
+      await expect(component.calculatePapoto()).rejects.toThrow('unexpected');
+      expect(component.isCalculating()).toBe(false);
+    });
   });
 
   it('should calculate PAPOTO and show results', async () => {

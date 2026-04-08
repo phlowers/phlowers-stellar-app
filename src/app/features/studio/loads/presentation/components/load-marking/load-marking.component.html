@@ -7,7 +7,7 @@
   </div>
 
   <div class="relative">
-    <div class="flex items-baseline justify-between justify-between mb-0.5">
+    <div class="flex items-baseline justify-between mb-0.5">
       <label for="spanSelect" class="mb-0" i18n>Span</label>
 
       <button
@@ -107,6 +107,7 @@
       btnStyle="outlined"
       (click)="saveLoadCase()"
       [disabled]="isFormInvalid()"
+      [btnLoading]="isCalculating()"
       data-testid="save-load"
     >
       <app-icon icon="save" />
@@ -116,6 +117,7 @@
     <button
       app-btn
       [disabled]="isFormInvalid()"
+      [btnLoading]="isCalculating()"
       type="button"
       (click)="calculateLoadCase()"
       data-testid="calculate-load"

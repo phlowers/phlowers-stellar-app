@@ -101,6 +101,7 @@ export class VhlAndGuyingComponent {
   } | null>(null);
 
   readonly loading = computed(() => this.plotService.loading() || !this.plotService.litData());
+  readonly isCalculating = signal(false);
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -240,18 +241,23 @@ export class VhlAndGuyingComponent {
       return;
     }
     const formValue = this.form.value;
-    const { result, error } = await this.workerPythonService.runTask(Task.calculateGuying, {
-      altitude: formValue.altitude!,
-      horizontalDistance: formValue.horizontalDistance!,
-      hasPulley: formValue.hasPulley ?? false,
-      selectedSpanIndex: formValue.selectedSpan?.index || 0,
-      selectedSupport: formValue.selectedSupport || null
-    });
-    if (error) {
-      console.error(error);
-      return;
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.calculateGuying, {
+        altitude: formValue.altitude!,
+        horizontalDistance: formValue.horizontalDistance!,
+        hasPulley: formValue.hasPulley ?? false,
+        selectedSpanIndex: formValue.selectedSpan?.index || 0,
+        selectedSupport: formValue.selectedSupport || null
+      });
+      if (error) {
+        console.error(error);
+        return;
+      }
+      this.results.set(result);
+    } finally {
+      this.isCalculating.set(false);
     }
-    this.results.set(result);
   };
 
   onExportVhl(): void {

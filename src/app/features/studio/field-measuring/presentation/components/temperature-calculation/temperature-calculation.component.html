@@ -128,7 +128,13 @@
 </div>
 
 <div class="text-right">
-  <button app-btn (click)="calculateTemperature()" [disabled]="!isFormValid()" data-testid="calculate-temperature-btn">
+  <button
+    app-btn
+    (click)="calculateTemperature()"
+    [disabled]="!isFormValid()"
+    [btnLoading]="isCalculating()"
+    data-testid="calculate-temperature-btn"
+  >
     <app-icon icon="rocket_launch" />
     <ng-container i18n>Calculate</ng-container>
   </button>

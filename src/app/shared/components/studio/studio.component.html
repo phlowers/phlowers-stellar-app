@@ -1,5 +1,5 @@
 <div class="h-full relative">
-  @if (plotService.loading()) {
+  @if (plotService.loading() && !plotInitialized()) {
     <div class="absolute inset-0 flex justify-center items-center">
       <p-progress-spinner ariaLabel="loading" />
     </div>

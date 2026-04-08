@@ -240,13 +240,21 @@
       btnStyle="outlined"
       (click)="saveForm()"
       [disabled]="!isFormValid()"
+      [btnLoading]="isCalculating()"
       data-testid="save-btn"
     >
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>
 
-    <button app-btn type="button" (click)="calculateForm()" [disabled]="!isFormValid()" data-testid="calculate-btn">
+    <button
+      app-btn
+      type="button"
+      (click)="calculateForm()"
+      [disabled]="!isFormValid()"
+      [btnLoading]="isCalculating()"
+      data-testid="calculate-btn"
+    >
       <app-icon icon="rocket_launch" />
       <ng-container i18n>Calculate</ng-container>
     </button>

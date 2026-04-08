@@ -53,7 +53,8 @@ describe('LoadMarkingComponent', () => {
       getSupportIndex: vi.fn().mockReturnValue(0),
       getSupportOptions: vi.fn().mockReturnValue(mockSupportOptions),
       plotOptionsChange: vi.fn(),
-      temporaryLoadData: null
+      temporaryLoadData: null,
+      loading: signal(false)
     };
 
     mockLoadFormsService = {
@@ -80,6 +81,25 @@ describe('LoadMarkingComponent', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('isCalculating computed', () => {
+    it('should reflect plotService.loading() as false by default', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true when plotService.loading() is true', () => {
+      (mockPlotService['loading'] as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+    });
+
+    it('should go back to false when plotService.loading() returns to false', () => {
+      (mockPlotService['loading'] as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+
+      (mockPlotService['loading'] as ReturnType<typeof signal>).set(false);
+      expect(component.isCalculating()).toBe(false);
+    });
   });
 
   it('creates with default form state', () => {

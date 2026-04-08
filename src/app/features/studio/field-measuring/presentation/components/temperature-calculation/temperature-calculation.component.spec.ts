@@ -4,6 +4,7 @@ import { ComponentRef } from '@angular/core';
 import { TemperatureCalculationComponent } from './temperature-calculation.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
@@ -123,6 +124,44 @@ describe('TemperatureCalculationComponent', () => {
     it('should return false when skyCover is null', () => {
       component.updateField('skyCover', null);
       expect(component.isFormValid()).toBe(false);
+    });
+  });
+
+  describe('isCalculating signal', () => {
+    it('should start as false', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true during calculation and false after', async () => {
+      let resolveTask!: (value: { result: TaskOutputs[Task.temperatureCalculation]; error: TaskError | null }) => void;
+      workerPythonServiceMock.runTask.mockReturnValueOnce(
+        new Promise((res) => {
+          resolveTask = res;
+        })
+      );
+
+      component.updateField('cableName', 'ASTER570');
+      component.updateField('transit', 1000);
+      component.updateField('skyCover', 'N5');
+
+      const calcPromise = component.calculateTemperature();
+      expect(component.isCalculating()).toBe(true);
+
+      resolveTask({ result: { cableSolarFlux: 0, cableTemperature: 0, cableTemperatureUncertainty: 0 }, error: null });
+      await calcPromise;
+
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should reset to false even when calculation throws', async () => {
+      workerPythonServiceMock.runTask.mockRejectedValue(new Error('unexpected'));
+
+      component.updateField('cableName', 'ASTER570');
+      component.updateField('transit', 1000);
+      component.updateField('skyCover', 'N5');
+
+      await expect(component.calculateTemperature()).rejects.toThrow('unexpected');
+      expect(component.isCalculating()).toBe(false);
     });
   });
 
