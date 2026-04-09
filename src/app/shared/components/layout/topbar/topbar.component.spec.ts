@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TopbarComponent } from './topbar.component';
 import { PageTitleService } from '@shared/service/page-title/page-title.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '@services/auth/auth.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { signal } from '@angular/core';
