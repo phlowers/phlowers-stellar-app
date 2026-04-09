@@ -1,0 +1,321 @@
+<form
+  [formGroup]="form"
+  [attr.aria-busy]="isLoading()"
+  (ngSubmit)="saveForm()"
+  data-testid="cable-span-manip-form"
+>
+  <div>
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="zoomToSpan()"
+      [disabled]="isLoading()"
+      data-testid="cable-span-manip-zoom"
+    >
+      <app-icon icon="filter_center_focus" />
+      <ng-container i18n>Zoom</ng-container>
+    </button>
+
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="resetForm()"
+      [disabled]="isLoading()"
+      data-testid="cable-span-manip-reset"
+    >
+      <app-icon icon="refresh" />
+      <ng-container i18n>Reset</ng-container>
+    </button>
+  </div>
+
+  <div>
+    <label for="scope" i18n="@@manipulatedSpan">Manipulated span</label>
+    <!-- Portée manipulée -->
+    <p-select
+      inputId="scope"
+      fluid
+      [options]="spansOptions()"
+      formControlName="scope"
+      optionLabel="label"
+      optionValue="value"
+      [filter]="true"
+      (onChange)="onScopeChange($event.value)"
+      data-testid="cable-span-manip-scope"
+    />
+
+    <label for="referenceSupport" i18n="@@referenceSupport">Reference support</label>
+    <!-- Support de référence -->
+    <p-select
+      inputId="referenceSupport"
+      fluid
+      [options]="supportRefOptions()"
+      formControlName="referenceSupport"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="cable-span-manip-reference-support"
+    />
+  </div>
+
+  <div>
+    <label for="distanceToRefSupport" i18n="@@manipulatedPointCableDistRefSupport">
+      Manipulated point on the cable (Dist. to ref. support)
+      <!-- Point manipulé sur le câble (Dist. au supp. réf.) -->
+    </label>
+    <p-inputgroup>
+      <input
+        id="distanceToRefSupport"
+        type="number"
+        pInputText
+        step="0.01"
+        [attr.min]="distRefSupportMin()"
+        [attr.max]="distRefSupportMax()"
+        formControlName="distanceToRefSupport"
+        data-testid="cable-span-manip-dist-ref-support"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div>
+    <label for="cableManipType" i18n="@@cableManipType">Cable manipulation type</label>
+    <!-- Type de manip. du câble -->
+    <p-select
+      inputId="cableManipType"
+      fluid
+      [options]="cableManipTypeOptions"
+      formControlName="cableManipType"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="cable-span-manip-type"
+    />
+
+    <label for="cableManipMethod" i18n="@@cableManipMethod">Cable manipulation method</label>
+    <!-- Moyen de manip. du câble -->
+    <p-select
+      inputId="cableManipMethod"
+      fluid
+      [options]="cableManipMethodOptions"
+      formControlName="cableManipMethod"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="cable-span-manip-method"
+    />
+  </div>
+
+  <fieldset>
+    <legend i18n="@@manipFixedPointPosition">Manipulation fixed point position</legend>
+    <!-- Position du point fixe de manipulation -->
+
+    <div>
+      @if (isWithCrane()) {
+        <label for="longitudinalDistance" i18n="@@longitudinalDistance">Longitudinal dist.</label>
+        <!-- Dist. longitudinale -->
+        <p-inputgroup>
+          <input
+            type="number"
+            pInputText
+            id="longitudinalDistance"
+            step="0.01"
+            formControlName="longitudinalDistance"
+            data-testid="cable-span-manip-longitudinal-dist"
+          />
+          <p-inputgroup-addon>m</p-inputgroup-addon>
+        </p-inputgroup>
+      } @else {
+        <dl>
+          <dt class="label" i18n="@@longitudinalDistance">Longitudinal dist.</dt>
+          <dd class="read-only-info" data-testid="cable-span-manip-longitudinal-dist-readonly">- m</dd>
+        </dl>
+      }
+
+      <label for="lateralDistance" i18n="@@lateralDistance">Lateral dist.</label>
+      <!-- Dist. latérale -->
+      <p-inputgroup>
+        <input
+          type="number"
+          pInputText
+          id="lateralDistance"
+          step="0.01"
+          min="-100"
+          max="100"
+          formControlName="lateralDistance"
+          data-testid="cable-span-manip-lateral-dist"
+        />
+        <p-inputgroup-addon>m</p-inputgroup-addon>
+      </p-inputgroup>
+
+      <label for="altitude" i18n="@@altitude">Altitude</label>
+      <!-- Altitude -->
+      <p-inputgroup>
+        <input
+          type="number"
+          pInputText
+          id="altitude"
+          step="0.01"
+          min="-100"
+          max="9000"
+          formControlName="altitude"
+          data-testid="cable-span-manip-altitude"
+        />
+        <p-inputgroup-addon>m</p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+
+    <div>
+      <button
+        app-btn
+        type="button"
+        disabled
+        aria-disabled="true"
+        data-testid="cable-span-manip-dist-calc-btn"
+      >
+        <app-icon icon="rocket_launch" />
+        <ng-container i18n="@@distCalcBetweenPoints">Distance calculation between points</ng-container>
+        <!-- Calcul distance entre points -->
+      </button>
+
+      <dl>
+        <dt class="label" i18n="@@distance">Distance</dt>
+        <dd class="read-only-info" data-testid="cable-span-manip-dist-result">- m</dd>
+      </dl>
+    </div>
+  </fieldset>
+
+  <label for="anchoring" i18n="@@anchoring">Anchoring</label>
+  <!-- Accrochage -->
+  <p-select
+    inputId="anchoring"
+    fluid
+    [options]="anchoringOptions"
+    formControlName="anchoring"
+    optionLabel="label"
+    optionValue="value"
+    data-testid="cable-span-manip-anchoring"
+  />
+
+  @if (isWithChain()) {
+    <label for="chainName" i18n="@@chainName">Chain name</label>
+    <p-select
+      inputId="chainName"
+      fluid
+      [options]="chainNameOptions()"
+      formControlName="chainName"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="cable-span-manip-chain-name"
+    />
+
+    <div>
+      <label for="chainLength" i18n="@@chainLength">Chain length</label>
+      <p-inputgroup>
+        <input
+          type="number"
+          pInputText
+          id="chainLength"
+          step="0.01"
+          formControlName="chainLength"
+          data-testid="cable-span-manip-chain-length"
+        />
+        <p-inputgroup-addon>m</p-inputgroup-addon>
+      </p-inputgroup>
+
+      <label for="chainWeight" i18n="@@chainWeight">Chain weight</label>
+      <p-inputgroup>
+        <input
+          type="number"
+          pInputText
+          id="chainWeight"
+          step="0.01"
+          formControlName="chainWeight"
+          data-testid="cable-span-manip-chain-weight"
+        />
+        <p-inputgroup-addon>kg</p-inputgroup-addon>
+      </p-inputgroup>
+
+      <label for="chainSurface" i18n="@@chainSurface">Chain surface</label>
+      <p-inputgroup>
+        <input
+          type="number"
+          pInputText
+          id="chainSurface"
+          step="0.01"
+          formControlName="chainSurface"
+          data-testid="cable-span-manip-chain-surface"
+        />
+        <p-inputgroup-addon>m²</p-inputgroup-addon>
+      </p-inputgroup>
+
+      <label for="counterWeight" i18n="@@counterWeight">Counter weight</label>
+      <p-inputgroup>
+        <input
+          type="number"
+          pInputText
+          id="counterWeight"
+          step="0.01"
+          formControlName="counterWeight"
+          data-testid="cable-span-manip-counter-weight"
+        />
+        <p-inputgroup-addon>kg</p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+  } @else if (isWithSling()) {
+    <label for="slingLength" i18n="@@slingLength">Sling length</label>
+    <!-- longueur de l'élingue -->
+    <p-inputgroup>
+      <input
+        type="number"
+        pInputText
+        id="slingLength"
+        step="0.01"
+        min="0"
+        max="99"
+        formControlName="slingLength"
+        data-testid="cable-span-manip-sling-length"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  }
+
+  <div>
+    <button
+      app-btn
+      btnStyle="danger"
+      type="button"
+      aria-label="erase span's cable manipulation"
+      i18n-aria-label
+      (click)="deleteForm()"
+      [disabled]="hasSavedManipulation() || isLoading()"
+      data-testid="cable-span-manip-delete"
+    >
+      <app-icon icon="delete" />
+    </button>
+
+    <button
+      app-btn
+      type="submit"
+      btnStyle="outlined"
+      [disabled]="isFormInvalid() || isLoading() || !isDirtySinceLastSave()"
+      [btnLoading]="isCalculating()"
+      data-testid="cable-span-manip-save"
+    >
+      <app-icon icon="save" />
+      <ng-container i18n>Save</ng-container>
+    </button>
+
+    <button
+      app-btn
+      type="button"
+      [disabled]="isFormInvalid() || isLoading()"
+      [btnLoading]="isCalculating()"
+      (click)="calculate()"
+      data-testid="cable-span-manip-calculate"
+    >
+      <app-icon icon="rocket_launch" />
+      <ng-container i18n>Calculate</ng-container>
+    </button>
+  </div>
+</form>
