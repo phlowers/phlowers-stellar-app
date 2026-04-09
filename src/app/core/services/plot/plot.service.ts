@@ -1,12 +1,19 @@
-import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
-import { AxesNorms, PlotOptions, PLOT_ID, SpanOption } from '@shared/types/plot.types';
-import { DataError, GetSectionOutput, PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
-import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+import { effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { AxesNorms, PlotOptions, PLOT_ID } from '@shared/types/plot.types';
+import {
+  DataError,
+  GetSectionOutput,
+  ObstacleOutput,
+  PythonErrorCode,
+  Task,
+  TaskError
+} from '@services/worker_python/tasks/types';
 import { Section, Study } from '@shared/domain';
 import { Subscription } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
 import { PlotOptionsService } from './plot-options.service';
+import { PlotSpanService } from './plot-span.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import * as plotly from 'plotly.js-dist-min';
 import { Camera } from 'plotly.js-dist-min';
@@ -34,11 +41,10 @@ export class PlotService {
 
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
-  section = signal<Section | null>(null);
-  spanAmountChoice = signal<'single' | 'double' | 'all'>('all');
 
   private readonly resolutionService = inject(PlotResolutionService);
   private readonly plotOptionsService = inject(PlotOptionsService);
+  private readonly spanService = inject(PlotSpanService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly cableService = inject(CablesService);
   private readonly sectionService = inject(SectionService);
@@ -59,6 +65,12 @@ export class PlotService {
   readonly camera = this.plotOptionsService.camera;
   readonly isFreePositioningMode = this.plotOptionsService.isFreePositioningMode;
 
+  // Facade re-delegations — same signal/computed references as PlotSpanService
+  readonly section = this.spanService.section;
+  readonly spanAmountChoice = this.spanService.spanAmountChoice;
+  readonly getSpanOptions = this.spanService.getSpanOptions;
+  readonly getSpanOptionsWithIndex = this.spanService.getSpanOptionsWithIndex;
+
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
@@ -78,10 +90,10 @@ export class PlotService {
     this.baseLitData.set(null);
     this.loading.set(false);
     this.plotOptionsService.reset();
+    this.spanService.reset();
     this.isStudioActive.set(false);
     this.section.set(null);
     this.study.set(null);
-    this.spanAmountChoice.set('all');
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedObstacle(null, null);
     this.sideTabsService.sideTabs.set(null);
@@ -165,6 +177,11 @@ export class PlotService {
     this.loading.set(false);
   };
 
+  getSupportIndex = (supportUuid: string): number => this.spanService.getSupportIndex(supportUuid);
+
+  getSupportOptions = (supportUuid: string | null): { label: number; value: 'LEFT' | 'RIGHT' }[] =>
+    this.spanService.getSupportOptions(supportUuid);
+
   getCamera = (): Camera | null => this.plotOptionsService.getCamera();
 
   refreshCamera = (): Camera | null => this.plotOptionsService.refreshCamera();
@@ -208,61 +225,46 @@ export class PlotService {
     return this.resolutionService.applyResolution(value);
   }
 
-  /**
-   * Helper to compute the number of spans from supports count.
-   * A span exists between each adjacent pair of supports, so N supports = N-1 spans.
-   * @param supports Array of supports
-   * @returns Number of spans (always >= 0)
-   */
-  private getSpanCount(supports: Section['supports']): number {
-    return Math.max(supports.length - 1, 0);
+  async reapplyObstacles(): Promise<void> {
+    const section = untracked(() => this.section());
+    const obstacles = section?.obstacles ?? [];
+    const plotOptions = untracked(() => this.plotOptions());
+
+    let currentLitData = untracked(() => this.litData());
+
+    // Restore the load-applied base state before re-adding obstacles
+    if (this.temporaryLoadData) {
+      const { result: loadResult } = await this.workerPythonService.runTask(Task.changeState, {
+        climate: this.temporaryLoadData.climate,
+        spanLoads: this.temporaryLoadData.spanLoads
+      });
+      if (loadResult?.current) {
+        currentLitData = loadResult.current;
+        this.baseLitData.set(loadResult.base ?? null);
+      }
+    }
+    let currentObstacles: ObstacleOutput['obstacles'] = [];
+
+    if (obstacles.length) {
+      const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacles);
+      if (obstacleResult?.obstacles) {
+        currentObstacles = obstacleResult.obstacles;
+      }
+    }
+
+    if (obstacles.length) {
+      const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
+        startSupport: plotOptions.startSupport,
+        endSupport: plotOptions.endSupport,
+        view: plotOptions.view
+      });
+      this.obstacleStateService.setDistances(distances ?? []);
+    }
+
+    if (currentLitData && currentObstacles.length > 0) {
+      this.litData.set({ ...currentLitData, obstacles: currentObstacles });
+    } else {
+      this.litData.set(currentLitData);
+    }
   }
-
-  getSpanOptions = computed<SpanOption[]>(() => {
-    const supports = this.section()?.supports ?? [];
-    const spanCount = this.getSpanCount(supports);
-
-    return Array.from({ length: spanCount }, (_, index) => ({
-      label: `${formatSupportNumber(supports[index].number)} - ${formatSupportNumber(supports[index + 1].number)}`,
-      value: supports[index]?.uuid ?? null
-    }));
-  });
-
-  /**
-   * Get span options with both index and UUID for components that need the span index.
-   * @returns Array of span options with value as {index, uuid} objects
-   */
-  getSpanOptionsWithIndex = computed<{ label: string; value: { index: number; uuid: string } | null }[]>(() => {
-    const supports = this.section()?.supports ?? [];
-    const spanCount = this.getSpanCount(supports);
-
-    return Array.from({ length: spanCount }, (_, index) => ({
-      label: `${formatSupportNumber(supports[index].number)} - ${formatSupportNumber(supports[index + 1].number)}`,
-      value: supports[index]?.uuid && supports[index].uuid !== '' ? { index, uuid: supports[index].uuid } : null
-    }));
-  });
-
-  getSupportIndex = (supportUuid: string): number => {
-    return this.section()?.supports?.findIndex((s) => s.uuid === supportUuid) ?? -1;
-  };
-  getSupportOptions = (supportUuid: string | null): { label: string; value: 'LEFT' | 'RIGHT' }[] => {
-    const supports = this.section()?.supports;
-    if (supportUuid === null || !supports) {
-      return [];
-    }
-    const spanIndex = supports.findIndex((s) => s.uuid === supportUuid);
-    if (spanIndex >= 0 && spanIndex + 1 < supports.length) {
-      return [
-        {
-          label: formatSupportNumber(supports[spanIndex].number),
-          value: 'LEFT'
-        },
-        {
-          label: formatSupportNumber(supports[spanIndex + 1].number),
-          value: 'RIGHT'
-        }
-      ];
-    }
-    return [];
-  };
 }
