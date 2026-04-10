@@ -11,7 +11,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { PlotService } from './plot.service';
 import { PlotSpanService } from './plot-span.service';
 import { PlotOptionsService } from './plot-options.service';
-import { PlotResolutionService } from './plot-resolution.service';
 import { checkIfProjectionNeedRefresh } from './plot-options.utils';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -24,9 +23,8 @@ import {
   ObstacleOutput,
   Distance
 } from '@services/worker_python/tasks/types';
-import { CatalogCable, Section, Study, SymmetryType } from '@shared/domain';
+import { CatalogCable, Section, Study } from '@shared/domain';
 import { Obstacle, LateralDistanceType, ReferenceSupport } from '@shared/domain/models/obstacle.model';
-import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
@@ -49,7 +47,6 @@ describe('PlotService', () => {
   let service: PlotService;
   let spanService: PlotSpanService;
   let plotOptionsService: PlotOptionsService;
-  let resolutionService: PlotResolutionService;
   let mockWorkerPythonService: MockWorkerPythonService;
   let mockCablesService: vi.Mocked<CablesService>;
   let obstacleStateService: ObstacleStateService;
@@ -75,7 +72,11 @@ describe('PlotService', () => {
     L0: [],
     horizontal_distance: [],
     arc_length: [],
-    T_h: []
+    T_h: [],
+    slope_left: [],
+    slope_right: [],
+    sag: [],
+    sag_s2: []
   };
 
   const mockGetSectionWithBaseOutput: GetSectionWithBaseOutput = {
@@ -218,7 +219,9 @@ describe('PlotService', () => {
     selected_charge_uuid: null,
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    vtl_and_guying: undefined
+    vtl_and_guying: undefined,
+    cable_modifications: [],
+    selected_cable_modification_uuid: null
   };
 
   beforeEach(() => {
@@ -258,7 +261,6 @@ describe('PlotService', () => {
     service = TestBed.inject(PlotService);
     spanService = TestBed.inject(PlotSpanService);
     plotOptionsService = TestBed.inject(PlotOptionsService);
-    resolutionService = TestBed.inject(PlotResolutionService);
     obstacleStateService = TestBed.inject(ObstacleStateService);
   });
 
