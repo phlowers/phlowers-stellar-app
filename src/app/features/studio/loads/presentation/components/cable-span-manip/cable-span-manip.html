@@ -78,7 +78,7 @@
     <ng-container i18n>Minimum value:</ng-container>
     {{ distRefSupportMin() }}
   </p-message>
-  } @if (form.controls.distanceToRefSupport.errors?.['max']) {
+  } @else if (form.controls.distanceToRefSupport.errors?.['max']) {
   <p-message id="distanceToRefSupport-error-max" severity="error" size="small" variant="simple">
     <ng-container i18n>Maximum value:</ng-container>
     {{ distRefSupportMax() }}
@@ -148,7 +148,7 @@
         <ng-container i18n>Minimum value:</ng-container>
         -100
       </p-message>
-      } @if (form.controls.longitudinalDistance.errors?.['max']) {
+      } @else if (form.controls.longitudinalDistance.errors?.['max']) {
       <p-message
         id="longitudinalDistance-error-max"
         severity="error"
@@ -200,7 +200,7 @@
         <ng-container i18n>Minimum value:</ng-container>
         -100
       </p-message>
-      } @if (form.controls.lateralDistance.errors?.['max']) {
+      } @else if (form.controls.lateralDistance.errors?.['max']) {
       <p-message
         id="lateralDistance-error-max"
         severity="error"
@@ -235,7 +235,7 @@
         <ng-container i18n>Minimum value:</ng-container>
         -100
       </p-message>
-      } @if (form.controls.altitude.errors?.['max']) {
+      } @else if (form.controls.altitude.errors?.['max']) {
       <p-message id="altitude-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-3">
         <ng-container i18n>Maximum value:</ng-container>
         9000
@@ -359,7 +359,7 @@
     <ng-container i18n>Minimum value:</ng-container>
     0
   </p-message>
-  } @if (form.controls.slingLength.errors?.['max']) {
+  } @else if (form.controls.slingLength.errors?.['max']) {
   <p-message id="slingLength-error-max" severity="error" size="small" variant="simple">
     <ng-container i18n>Maximum value:</ng-container>
     99
