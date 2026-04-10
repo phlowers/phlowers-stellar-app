@@ -336,6 +336,9 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should update distRefSupportMin and distRefSupportMax from support data', () => {
+      // distRefSupportMin/Max are computed from the scope form control value and section signal,
+      // so both must be updated (as the real p-select does via formControlName + onChange).
+      component.form.controls.scope.setValue('support-uuid-1');
       component.onScopeChange('support-uuid-1');
       // armLength = 2, spanLength = 100 → min = -2, max = 102
       expect(component.distRefSupportMin()).toBe(-2);

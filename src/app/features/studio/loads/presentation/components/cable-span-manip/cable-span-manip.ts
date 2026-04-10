@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { merge, of } from 'rxjs';
@@ -45,11 +45,6 @@ export class CableSpanManipComponent {
   /** Whether a saved manipulation exists for the currently selected span. */
   readonly hasSavedManipulation = signal(true);
 
-  /** Dynamic min for distanceToRefSupport — updated on scope change. */
-  readonly distRefSupportMin = signal(0);
-  /** Dynamic max for distanceToRefSupport — updated on scope change. */
-  readonly distRefSupportMax = signal(0);
-
   readonly form = this.fb.group<CableSpanManipFormControls>({
     scope: new FormControl<string | null>(null, { validators: [Validators.required] }),
     referenceSupport: new FormControl<'LEFT' | 'RIGHT' | null>(
@@ -73,6 +68,27 @@ export class CableSpanManipComponent {
     chainSurface: new FormControl<number | null>(null),
     counterWeight: new FormControl<number | null>(null),
     slingLength: new FormControl<number | null>(5)
+  });
+
+  private readonly scopeValueSignal = toSignal(this.form.controls.scope.valueChanges, {
+    initialValue: this.form.controls.scope.value
+  });
+
+  /** Support data for the currently selected span's left support, reactive to section changes. */
+  private readonly selectedSupportData = computed(() => {
+    const uuid = this.scopeValueSignal();
+    if (!uuid) return null;
+    const supports = this.plotService.section()?.supports ?? [];
+    const index = supports.findIndex((s) => s.uuid === uuid);
+    return index >= 0 ? supports[index] : null;
+  });
+
+  /** Dynamic min for distanceToRefSupport — reactive to section and scope changes. */
+  readonly distRefSupportMin = computed(() => -Math.abs(this.selectedSupportData()?.armLength ?? 0));
+  /** Dynamic max for distanceToRefSupport — reactive to section and scope changes. */
+  readonly distRefSupportMax = computed(() => {
+    const support = this.selectedSupportData();
+    return (support?.spanLength ?? 0) + Math.abs(support?.armLength ?? 0);
   });
 
   readonly spansOptions = this.plotService.getSpanOptions;
@@ -128,6 +144,18 @@ export class CableSpanManipComponent {
         this.isDirtySinceLastSave.set(true);
       });
 
+    // Keep distanceToRefSupport validators in sync with the selected span's support data
+    effect(() => {
+      const min = this.distRefSupportMin();
+      const max = this.distRefSupportMax();
+      this.form.controls.distanceToRefSupport.setValidators([
+        Validators.required,
+        Validators.min(min),
+        Validators.max(max)
+      ]);
+      this.form.controls.distanceToRefSupport.updateValueAndValidity({ emitEvent: false });
+    });
+
     // Conditional validators: longitudinalDistance required only when using a crane
     merge(of(this.form.controls.cableManipType.value), this.form.controls.cableManipType.valueChanges)
       .pipe(takeUntilDestroyed())
@@ -161,22 +189,6 @@ export class CableSpanManipComponent {
 
     const index = untracked(() => this.plotService.getSupportIndex(uuid));
     if (index < 0) return;
-
-    const supports = untracked(() => this.plotService.section()?.supports ?? []);
-    const support = supports[index];
-    const armLength = Math.abs(support?.armLength ?? 0);
-    const spanLength = support?.spanLength ?? 0;
-    const min = -armLength;
-    const max = spanLength + armLength;
-
-    this.distRefSupportMin.set(min);
-    this.distRefSupportMax.set(max);
-    this.form.controls.distanceToRefSupport.setValidators([
-      Validators.required,
-      Validators.min(min),
-      Validators.max(max)
-    ]);
-    this.form.controls.distanceToRefSupport.updateValueAndValidity({ emitEvent: false });
 
     this.supportRefOptions.set(untracked(() => this.plotService.getSupportOptions(uuid)));
     this.form.controls.referenceSupport.enable({ emitEvent: false });
