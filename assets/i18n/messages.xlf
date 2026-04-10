@@ -2670,11 +2670,6 @@
         <source>NO VOLTAGE</source>
       </segment>
     </unit>
-    <unit id="3411835502741534903">
-      <segment>
-        <source>loading</source>
-      </segment>
-    </unit>
     <unit id="305142716106924307">
       <segment>
         <source>Author:</source>
@@ -2980,9 +2975,9 @@
         <source>Copy</source>
       </segment>
     </unit>
-    <unit id="1964106600703167330">
+    <unit id="361024812885364180">
       <segment>
-        <source>Cable manip. at span</source>
+        <source> Cable manip. at span </source>
       </segment>
     </unit>
     <unit id="2033387769986799452">

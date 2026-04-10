@@ -793,12 +793,6 @@
         <target>sélectionner ce canton d&apos;étude</target>
       </segment>
     </unit>
-    <unit id="3411835502741534903">
-      <segment state="initial">
-        <source>loading</source>
-        <target>chargement</target>
-      </segment>
-    </unit>
     <unit id="1724907302012419507">
       <segment state="initial">
         <source>There is no study description</source>
@@ -3621,10 +3615,10 @@
         <target> Charge / Marquage </target>
       </segment>
     </unit>
-    <unit id="1964106600703167330">
+    <unit id="361024812885364180">
       <segment state="initial">
-        <source>Cable manip. at span</source>
-        <target>Manip. câble dans la portée</target>
+        <source> Cable manip. at span </source>
+        <target> Manip. câble dans la portée </target>
       </segment>
     </unit>
     <unit id="314315645942131479">
