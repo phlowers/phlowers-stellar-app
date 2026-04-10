@@ -65,11 +65,18 @@
       step="0.01"
       [attr.min]="distRefSupportMin()"
       [attr.max]="distRefSupportMax()"
+      (input)="truncateDecimals($event)"
       formControlName="distanceToRefSupport"
       data-testid="cable-span-manip-dist-ref-support"
     />
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
+
+  <p>
+    min: {{distRefSupportMin()}}
+    <br />
+    max: {{distRefSupportMax()}}
+  </p>
 
   <div class="split-1-line">
     <label for="cableManipType" i18n="@@cableManipType" class="split-1-line__label-1"> Cable manipulation type </label>
@@ -113,6 +120,7 @@
           pInputText
           id="longitudinalDistance"
           step="0.01"
+          (input)="truncateDecimals($event)"
           formControlName="longitudinalDistance"
           data-testid="cable-span-manip-longitudinal-dist"
         />
@@ -140,6 +148,7 @@
           step="0.01"
           min="-100"
           max="100"
+          (input)="truncateDecimals($event)"
           formControlName="lateralDistance"
           data-testid="cable-span-manip-lateral-dist"
         />
@@ -155,6 +164,7 @@
           step="0.01"
           min="-100"
           max="9000"
+          (input)="truncateDecimals($event)"
           formControlName="altitude"
           data-testid="cable-span-manip-altitude"
         />
@@ -206,6 +216,7 @@
         pInputText
         id="chainLength"
         step="0.01"
+        (input)="truncateDecimals($event)"
         formControlName="chainLength"
         data-testid="cable-span-manip-chain-length"
       />
@@ -219,6 +230,7 @@
         pInputText
         id="chainWeight"
         step="0.01"
+        (input)="truncateDecimals($event)"
         formControlName="chainWeight"
         data-testid="cable-span-manip-chain-weight"
       />
@@ -232,6 +244,7 @@
         pInputText
         id="chainSurface"
         step="0.01"
+        (input)="truncateDecimals($event)"
         formControlName="chainSurface"
         data-testid="cable-span-manip-chain-surface"
       />
@@ -245,6 +258,7 @@
         pInputText
         id="counterWeight"
         step="0.01"
+        (input)="truncateDecimals($event)"
         formControlName="counterWeight"
         data-testid="cable-span-manip-counter-weight"
       />
@@ -261,6 +275,7 @@
       step="0.01"
       min="0"
       max="99"
+      (input)="truncateDecimals($event)"
       formControlName="slingLength"
       data-testid="cable-span-manip-sling-length"
     />

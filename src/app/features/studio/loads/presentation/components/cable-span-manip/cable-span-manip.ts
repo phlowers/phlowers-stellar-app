@@ -13,6 +13,7 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain';
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
 import { CableSpanManipFormControls } from './cable-span-manip.interfaces';
+import { truncateDecimals } from '@shared/helpers/truncateDecimals';
 
 @Component({
   selector: 'app-cable-span-manip',
@@ -104,6 +105,8 @@ export class CableSpanManipComponent {
   readonly isWithCrane = computed(() => this.cableManipTypeSignal() === 'with_a_crane');
   readonly isWithChain = computed(() => this.anchoringSignal() === 'with_chain');
   readonly isWithSling = computed(() => this.anchoringSignal() === 'with_sling');
+
+  readonly truncateDecimals = truncateDecimals;
 
   constructor() {
     // Track dirty state when user edits content fields
