@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChildren,
   ElementRef,
   inject,
   input,
@@ -37,6 +38,16 @@ export class ButtonComponent implements OnInit, OnDestroy {
   btnStyle = input<'base' | 'outlined' | 'text' | 'danger'>('base');
   /** Whether the button is in a loading state, disabling click events. */
   btnLoading = input<boolean>(false);
+
+  private readonly projectedIcons = contentChildren(IconComponent, { read: ElementRef });
+
+  readonly hasLeftIcon = computed(() =>
+    this.projectedIcons().some(el => !el.nativeElement.hasAttribute('iconRight'))
+  );
+
+  readonly hasRightIcon = computed(() =>
+    this.projectedIcons().some(el => el.nativeElement.hasAttribute('iconRight'))
+  );
 
   classesList = computed(() => {
     const classes: string[] = [`app-btn-${this.btnSize()}`, `app-btn-${this.btnStyle()}`];
