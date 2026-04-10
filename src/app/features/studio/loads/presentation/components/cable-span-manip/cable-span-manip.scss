@@ -5,6 +5,10 @@ p-inputgroup {
   @apply mb-3;
 }
 
+p-message {
+  @apply relative bottom-3;
+}
+
 .header-btns {
   @apply flex justify-between items-center mb-3;
 }
@@ -43,7 +47,8 @@ p-inputgroup {
   column-gap: 0.625rem;
   grid-template-areas:
     'label1 label2 label3'
-    'input1 input2 input3';
+    'input1 input2 input3'
+    'error1 error2 error3';
 
   &__label-1 {
     grid-area: label1;
@@ -63,6 +68,18 @@ p-inputgroup {
 
   &__input-3 {
     grid-area: input3;
+  }
+
+  &__error-1 {
+    grid-area: error1;
+  }
+
+  &__error-2 {
+    grid-area: error2;
+  }
+
+  &__error-3 {
+    grid-area: error3;
   }
 }
 

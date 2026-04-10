@@ -8,6 +8,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain';
@@ -24,6 +25,7 @@ import { truncateDecimals } from '@shared/helpers/truncateDecimals';
     InputGroupModule,
     InputGroupAddonModule,
     SelectModule,
+    MessageModule,
     ButtonComponent,
     IconComponent
   ],
@@ -400,7 +402,7 @@ export class CableSpanManipComponent {
   private updateLongitudinalDistanceValidators(type: CableManipType | null): void {
     const ctrl = this.form.controls.longitudinalDistance;
     if (type === 'with_a_crane') {
-      ctrl.setValidators([Validators.required]);
+      ctrl.setValidators([Validators.required, Validators.min(-100), Validators.max(5000)]);
     } else {
       ctrl.clearValidators();
     }
@@ -424,6 +426,13 @@ export class CableSpanManipComponent {
       this.form.controls.slingLength.setValidators([Validators.required, Validators.min(0), Validators.max(99)]);
       this.form.controls.slingLength.updateValueAndValidity({ emitEvent: false });
     }
+  }
+
+  getErrorIds(controlName: keyof CableSpanManipFormControls, errorTypes: string[]): string | null {
+    const control = this.form.get(controlName);
+    if (!control?.errors) return null;
+    const ids = errorTypes.filter((type) => control.errors?.[type]).map((type) => `${controlName}-error-${type}`);
+    return ids.length > 0 ? ids.join(' ') : null;
   }
 
   private async reloadSectionFromDb(): Promise<void> {

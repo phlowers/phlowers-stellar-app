@@ -68,9 +68,23 @@
       (input)="truncateDecimals($event)"
       formControlName="distanceToRefSupport"
       data-testid="cable-span-manip-dist-ref-support"
+      [attr.aria-invalid]="form.controls.distanceToRefSupport.invalid || null"
+      [attr.aria-errormessage]="getErrorIds('distanceToRefSupport', ['min', 'max'])"
     />
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
+  @if (form.controls.distanceToRefSupport.errors?.['min']) {
+    <p-message id="distanceToRefSupport-error-min" severity="error" size="small" variant="simple">
+      <ng-container i18n>Minimum value:</ng-container>
+      {{ distRefSupportMin() }}
+    </p-message>
+  }
+  @if (form.controls.distanceToRefSupport.errors?.['max']) {
+    <p-message id="distanceToRefSupport-error-max" severity="error" size="small" variant="simple">
+      <ng-container i18n>Maximum value:</ng-container>
+      {{ distRefSupportMax() }}
+    </p-message>
+  }
 
   <div class="split-1-line">
     <label for="cableManipType" i18n="@@cableManipType" class="split-1-line__label-1"> Cable manipulation type </label>
@@ -114,12 +128,28 @@
           pInputText
           id="longitudinalDistance"
           step="0.01"
+          min="-100"
+          max="5000"
           (input)="truncateDecimals($event)"
           formControlName="longitudinalDistance"
           data-testid="cable-span-manip-longitudinal-dist"
+          [attr.aria-invalid]="form.controls.longitudinalDistance.invalid || null"
+          [attr.aria-errormessage]="getErrorIds('longitudinalDistance', ['min', 'max'])"
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
+      @if (form.controls.longitudinalDistance.errors?.['min']) {
+        <p-message id="longitudinalDistance-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-1">
+          <ng-container i18n>Minimum value:</ng-container>
+          -100
+        </p-message>
+      }
+      @if (form.controls.longitudinalDistance.errors?.['max']) {
+        <p-message id="longitudinalDistance-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-1">
+          <ng-container i18n>Maximum value:</ng-container>
+          5000
+        </p-message>
+      }
       } @else {
       <dl class="contents">
         <dt class="label" i18n="@@longitudinalDistance" class="third-1-line__label-1">Longitudinal dist.</dt>
@@ -145,9 +175,23 @@
           (input)="truncateDecimals($event)"
           formControlName="lateralDistance"
           data-testid="cable-span-manip-lateral-dist"
+          [attr.aria-invalid]="form.controls.lateralDistance.invalid || null"
+          [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max'])"
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
+      @if (form.controls.lateralDistance.errors?.['min']) {
+        <p-message id="lateralDistance-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-2">
+          <ng-container i18n>Minimum value:</ng-container>
+          -100
+        </p-message>
+      }
+      @if (form.controls.lateralDistance.errors?.['max']) {
+        <p-message id="lateralDistance-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-2">
+          <ng-container i18n>Maximum value:</ng-container>
+          100
+        </p-message>
+      }
 
       <label for="altitude" i18n="@@altitude" class="third-1-line__label-3"> Altitude </label>
       <p-inputgroup class="third-1-line__input-3">
@@ -161,9 +205,23 @@
           (input)="truncateDecimals($event)"
           formControlName="altitude"
           data-testid="cable-span-manip-altitude"
+          [attr.aria-invalid]="form.controls.altitude.invalid || null"
+          [attr.aria-errormessage]="getErrorIds('altitude', ['min', 'max'])"
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
+      @if (form.controls.altitude.errors?.['min']) {
+        <p-message id="altitude-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-3">
+          <ng-container i18n>Minimum value:</ng-container>
+          -100
+        </p-message>
+      }
+      @if (form.controls.altitude.errors?.['max']) {
+        <p-message id="altitude-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-3">
+          <ng-container i18n>Maximum value:</ng-container>
+          9000
+        </p-message>
+      }
     </div>
 
     <div class="distance-calc-line">
@@ -272,9 +330,23 @@
       (input)="truncateDecimals($event)"
       formControlName="slingLength"
       data-testid="cable-span-manip-sling-length"
+      [attr.aria-invalid]="form.controls.slingLength.invalid || null"
+      [attr.aria-errormessage]="getErrorIds('slingLength', ['min', 'max'])"
     />
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
+  @if (form.controls.slingLength.errors?.['min']) {
+    <p-message id="slingLength-error-min" severity="error" size="small" variant="simple">
+      <ng-container i18n>Minimum value:</ng-container>
+      0
+    </p-message>
+  }
+  @if (form.controls.slingLength.errors?.['max']) {
+    <p-message id="slingLength-error-max" severity="error" size="small" variant="simple">
+      <ng-container i18n>Maximum value:</ng-container>
+      99
+    </p-message>
+  }
   }
 
   <div class="footer-btns">
