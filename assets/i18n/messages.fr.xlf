@@ -3651,19 +3651,19 @@
         <target>Une erreur s&apos;est produite</target>
       </segment>
     </unit>
-    <unit id="2656270638371326231">
+    <unit id="3016819249974962667">
       <segment state="initial">
         <source>Point alt.</source>
         <target>Alt. point</target>
       </segment>
     </unit>
-    <unit id="5122879481650738554">
+    <unit id="4381478989546864547">
       <segment state="initial">
         <source>Ref. support dist.</source>
         <target>Dist. supp. réf.</target>
       </segment>
     </unit>
-    <unit id="7382072301605955850">
+    <unit id="2702074512037019032">
       <segment state="initial">
         <source>Line axis dist.</source>
         <target>Dist. axe ligne.</target>
@@ -3672,19 +3672,19 @@
     <unit id="4303103723944581948">
       <segment state="translated">
         <source>A solver error occurred.</source>
-        <target>Une erreur de solveur s'est produite.</target>
+        <target>Une erreur de solveur s&apos;est produite.</target>
       </segment>
     </unit>
     <unit id="272496911380424275">
       <segment state="translated">
         <source>The insulator chain is suspected to have reversed (above horizontal position).</source>
-        <target>La chaîne d'isolateurs est suspectée d'avoir basculé (position au-dessus de l'horizontale).</target>
+        <target>La chaîne d&apos;isolateurs est suspectée d&apos;avoir basculé (position au-dessus de l&apos;horizontale).</target>
       </segment>
     </unit>
     <unit id="3239031258153870723">
       <segment state="translated">
         <source>The solver failed to converge.</source>
-        <target>Le solveur n'a pas convergé.</target>
+        <target>Le solveur n&apos;a pas convergé.</target>
       </segment>
     </unit>
     <unit id="4796814092512031875">
@@ -3702,13 +3702,163 @@
     <unit id="8058206957724761513">
       <segment state="translated">
         <source>A balance engine warning was raised.</source>
-        <target>Un avertissement du moteur d'équilibrage a été émis.</target>
+        <target>Un avertissement du moteur d&apos;équilibrage a été émis.</target>
       </segment>
     </unit>
     <unit id="1162997080399948086">
       <segment state="translated">
         <source>RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.</source>
         <target>Les données du catalogue RTS (rts_cable, rts_layer_*) sont absentes ou contiennent des valeurs NaN.</target>
+      </segment>
+    </unit>
+    <unit id="manipulatedSpan">
+      <segment state="initial">
+        <source> Manipulated span </source>
+        <target> Portée manipulée </target>
+      </segment>
+    </unit>
+    <unit id="referenceSupport">
+      <segment state="initial">
+        <source> Reference support </source>
+        <target> Support de référence </target>
+      </segment>
+    </unit>
+    <unit id="manipulatedPointCableDistRefSupport">
+      <segment state="initial">
+        <source> Manipulated point on the cable (Dist. to ref. support) </source>
+        <target> Point manipulé sur le câble (Dist. au supp. réf.) </target>
+      </segment>
+    </unit>
+    <unit id="cableManipType">
+      <segment state="initial">
+        <source> Cable manipulation type </source>
+        <target> Type de manip. du câble </target>
+      </segment>
+    </unit>
+    <unit id="cableManipMethod">
+      <segment state="initial">
+        <source> Cable manipulation method </source>
+        <target> Moyen de manip. du cable </target>
+      </segment>
+    </unit>
+    <unit id="manipFixedPointPosition">
+      <segment state="initial">
+        <source>Manipulation fixed point position</source>
+        <target>Position point fixe manipulation</target>
+      </segment>
+    </unit>
+    <unit id="longitudinalDistance">
+      <segment state="initial">
+        <source> Longitudinal dist. </source>
+        <target> Dist. longitudinale </target>
+      </segment>
+    </unit>
+    <unit id="lateralDistance">
+      <segment state="initial">
+        <source> Lateral dist. </source>
+        <target> Dist. latérale </target>
+      </segment>
+    </unit>
+    <unit id="altitude">
+      <segment state="initial">
+        <source> Altitude </source>
+        <target> Altitude </target>
+      </segment>
+    </unit>
+    <unit id="distCalcBetweenPoints">
+      <segment state="initial">
+        <source>Dist. calc. between points</source>
+        <target>Calcul distance entre points</target>
+      </segment>
+    </unit>
+    <unit id="distance">
+      <segment state="initial">
+        <source>Distance</source>
+        <target>Distance</target>
+      </segment>
+    </unit>
+    <unit id="anchoring">
+      <segment state="initial">
+        <source>Anchoring</source>
+        <target>Accrochage</target>
+      </segment>
+    </unit>
+    <unit id="chainName">
+      <segment state="initial">
+        <source>Chain name</source>
+        <target>Nom de la chaîne</target>
+      </segment>
+    </unit>
+    <unit id="chainLength">
+      <segment state="initial">
+        <source>Chain length</source>
+        <target>Longueur chaîne</target>
+      </segment>
+    </unit>
+    <unit id="chainWeight">
+      <segment state="initial">
+        <source>Chain weight</source>
+        <target>Poids chaîne</target>
+      </segment>
+    </unit>
+    <unit id="chainSurface">
+      <segment state="initial">
+        <source>Chain surface</source>
+        <target>Surface de chaîne</target>
+      </segment>
+    </unit>
+    <unit id="counterWeight">
+      <segment state="initial">
+        <source>Counter weight</source>
+        <target>Contrepoids</target>
+      </segment>
+    </unit>
+    <unit id="slingLength">
+      <segment state="initial">
+        <source>Sling length</source>
+        <target>Longueur de l&apos;élingue</target>
+      </segment>
+    </unit>
+    <unit id="5552885238769285726">
+      <segment state="initial">
+        <source>erase span&apos;s cable manipulation</source>
+        <target>supprimer la manipulation du câble dans la portée</target>
+      </segment>
+    </unit>
+    <unit id="7538726695771189991">
+      <segment state="initial">
+        <source>With a crane</source>
+        <target>À la grue</target>
+      </segment>
+    </unit>
+    <unit id="8935057406125868491">
+      <segment state="initial">
+        <source>Temporary support</source>
+        <target>Support provisoire</target>
+      </segment>
+    </unit>
+    <unit id="6667965603420020393">
+      <segment state="initial">
+        <source>Clamp</source>
+        <target>Pince</target>
+      </segment>
+    </unit>
+    <unit id="4021521782447475905">
+      <segment state="initial">
+        <source>Pulley</source>
+        <target>Poulie</target>
+      </segment>
+    </unit>
+    <unit id="4351133266457573059">
+      <segment state="initial">
+        <source>With sling</source>
+        <target>Avec élingue</target>
+      </segment>
+    </unit>
+    <unit id="4044156232805548048">
+      <segment state="initial">
+        <source>With chain</source>
+        <target>Avec chaîne</target>
       </segment>
     </unit>
   </file>

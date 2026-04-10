@@ -28,10 +28,7 @@
   </div>
 
   <div class="split-1-line">
-    <label for="scope" i18n="@@manipulatedSpan" class="split-1-line__label-1">
-      Manipulated span
-      <!-- Portée manipulée -->
-    </label>
+    <label for="scope" i18n="@@manipulatedSpan" class="split-1-line__label-1"> Manipulated span </label>
     <p-select
       inputId="scope"
       fluid
@@ -44,10 +41,7 @@
       class="split-1-line__input-1"
     />
 
-    <label for="referenceSupport" i18n="@@referenceSupport" class="split-1-line__label-2">
-      Reference support
-      <!-- Support de référence -->
-    </label>
+    <label for="referenceSupport" i18n="@@referenceSupport" class="split-1-line__label-2"> Reference support </label>
     <p-select
       inputId="referenceSupport"
       fluid
@@ -62,7 +56,6 @@
 
   <label for="distanceToRefSupport" i18n="@@manipulatedPointCableDistRefSupport">
     Manipulated point on the cable (Dist. to ref. support)
-    <!-- Point manipulé sur le câble (Dist. au supp. réf.) -->
   </label>
   <p-inputgroup>
     <input
@@ -79,10 +72,7 @@
   </p-inputgroup>
 
   <div class="split-1-line">
-    <label for="cableManipType" i18n="@@cableManipType" class="split-1-line__label-1">
-      Cable manipulation type
-      <!-- Type de manip. du câble -->
-    </label>
+    <label for="cableManipType" i18n="@@cableManipType" class="split-1-line__label-1"> Cable manipulation type </label>
     <p-select
       inputId="cableManipType"
       fluid
@@ -96,7 +86,6 @@
 
     <label for="cableManipMethod" i18n="@@cableManipMethod" class="split-1-line__label-2">
       Cable manipulation method
-      <!-- Moyen de manip. du câble -->
     </label>
     <p-select
       inputId="cableManipMethod"
@@ -112,13 +101,11 @@
 
   <fieldset>
     <legend i18n="@@manipFixedPointPosition" class="legend">Manipulation fixed point position</legend>
-    <!-- Position du point fixe de manipulation -->
 
     <div class="third-1-line">
       @if (isWithCrane()) {
       <label for="longitudinalDistance" i18n="@@longitudinalDistance" class="third-1-line__label-1">
         Longitudinal dist.
-        <!-- Dist. longitudinale -->
       </label>
       <p-inputgroup class="third-1-line__input-1">
         <input
@@ -144,10 +131,7 @@
       </dl>
       }
 
-      <label for="lateralDistance" i18n="@@lateralDistance" class="third-1-line__label-2">
-        Lateral dist.
-        <!-- Dist. latérale -->
-      </label>
+      <label for="lateralDistance" i18n="@@lateralDistance" class="third-1-line__label-2"> Lateral dist. </label>
       <p-inputgroup class="third-1-line__input-2">
         <input
           type="number"
@@ -162,10 +146,7 @@
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
 
-      <label for="altitude" i18n="@@altitude" class="third-1-line__label-3">
-        Altitude
-        <!-- Altitude -->
-      </label>
+      <label for="altitude" i18n="@@altitude" class="third-1-line__label-3"> Altitude </label>
       <p-inputgroup class="third-1-line__input-3">
         <input
           type="number"
@@ -185,7 +166,6 @@
       <button app-btn type="button" disabled aria-disabled="true" data-testid="cable-span-manip-dist-calc-btn">
         <app-icon icon="rocket_launch" />
         <ng-container i18n="@@distCalcBetweenPoints">Dist. calc. between points</ng-container>
-        <!-- Calcul distance entre points -->
       </button>
 
       <dl>
@@ -196,7 +176,6 @@
   </fieldset>
 
   <label for="anchoring" i18n="@@anchoring">Anchoring</label>
-  <!-- Accrochage -->
   <p-select
     inputId="anchoring"
     fluid
@@ -274,7 +253,6 @@
   </div>
   } @else if (isWithSling()) {
   <label for="slingLength" i18n="@@slingLength">Sling length</label>
-  <!-- longueur de l'élingue -->
   <p-inputgroup>
     <input
       type="number"
