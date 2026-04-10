@@ -232,7 +232,13 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should disable save button when form is valid but not dirty', () => {
-      component.form.patchValue({ scope: 'support-uuid-1', distanceToRefSupport: 0, lateralDistance: 0, altitude: 0, slingLength: 5 });
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        distanceToRefSupport: 0,
+        lateralDistance: 0,
+        altitude: 0,
+        slingLength: 5
+      });
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
       component.isDirtySinceLastSave.set(false);
@@ -242,7 +248,13 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should enable save button when form is valid and dirty', () => {
-      component.form.patchValue({ scope: 'support-uuid-1', distanceToRefSupport: 0, lateralDistance: 0, altitude: 0, slingLength: 5 });
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        distanceToRefSupport: 0,
+        lateralDistance: 0,
+        altitude: 0,
+        slingLength: 5
+      });
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
       component.isDirtySinceLastSave.set(true);
@@ -264,7 +276,13 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should disable buttons when isLoading is true', () => {
-      component.form.patchValue({ scope: 'support-uuid-1', distanceToRefSupport: 0, lateralDistance: 0, altitude: 0, slingLength: 5 });
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        distanceToRefSupport: 0,
+        lateralDistance: 0,
+        altitude: 0,
+        slingLength: 5
+      });
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
       component.isDirtySinceLastSave.set(true);
@@ -449,7 +467,13 @@ describe('CableSpanManipComponent', () => {
   // ---------------------------------------------------------------------------
   describe('saveForm()', () => {
     beforeEach(() => {
-      component.form.patchValue({ scope: 'support-uuid-1', distanceToRefSupport: 5, lateralDistance: 0, altitude: 0, slingLength: 5 });
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        distanceToRefSupport: 5,
+        lateralDistance: 0,
+        altitude: 0,
+        slingLength: 5
+      });
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
       component.form.controls.distanceToRefSupport.setValidators([]);
@@ -557,7 +581,13 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should return false when all required fields are valid', () => {
-      component.form.patchValue({ scope: 'support-uuid-1', distanceToRefSupport: 0, lateralDistance: 0, altitude: 0, slingLength: 5 });
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        distanceToRefSupport: 0,
+        lateralDistance: 0,
+        altitude: 0,
+        slingLength: 5
+      });
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
       component.form.controls.distanceToRefSupport.setValidators([]);

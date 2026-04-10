@@ -42,11 +42,11 @@ export class ButtonComponent implements OnInit, OnDestroy {
   private readonly projectedIcons = contentChildren(IconComponent, { read: ElementRef });
 
   readonly hasLeftIcon = computed(() =>
-    this.projectedIcons().some(el => !el.nativeElement.hasAttribute('iconRight'))
+    this.projectedIcons().some((el) => !el.nativeElement.hasAttribute('iconRight'))
   );
 
   readonly hasRightIcon = computed(() =>
-    this.projectedIcons().some(el => el.nativeElement.hasAttribute('iconRight'))
+    this.projectedIcons().some((el) => el.nativeElement.hasAttribute('iconRight'))
   );
 
   classesList = computed(() => {

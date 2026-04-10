@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { ButtonComponent } from './button.component';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-icon',
@@ -28,6 +29,32 @@ class TestHostComponent {
   onButtonClick(): void {
     this.clickCount++;
   }
+}
+
+/** Host with real IconComponent so contentChildren(IconComponent) resolves correctly. */
+@Component({
+  standalone: true,
+  imports: [ButtonComponent, IconComponent],
+  template: `
+    <button app-btn [btnLoading]="loading">
+      <app-icon icon="close"></app-icon>
+      Button Text
+      <app-icon icon="close" iconRight></app-icon>
+    </button>
+  `
+})
+class TestHostWithIconsComponent {
+  loading = false;
+}
+
+/** Host with no icons to verify spinner is suppressed when no icon slot is filled. */
+@Component({
+  standalone: true,
+  imports: [ButtonComponent],
+  template: `<button app-btn [btnLoading]="loading">Button Text</button>`
+})
+class TestHostNoIconsComponent {
+  loading = false;
 }
 
 describe('ButtonComponent', () => {
@@ -201,39 +228,51 @@ describe('ButtonComponent', () => {
   });
 
   describe('Loading State Template', () => {
+    let iconsHostFixture: ComponentFixture<TestHostWithIconsComponent>;
+    let iconsHostComponent: TestHostWithIconsComponent;
+    let noIconsHostFixture: ComponentFixture<TestHostNoIconsComponent>;
+    let noIconsHostComponent: TestHostNoIconsComponent;
+
     beforeEach(() => {
-      hostFixture = TestBed.createComponent(TestHostComponent);
-      hostComponent = hostFixture.componentInstance;
+      iconsHostFixture = TestBed.createComponent(TestHostWithIconsComponent);
+      iconsHostComponent = iconsHostFixture.componentInstance;
+      noIconsHostFixture = TestBed.createComponent(TestHostNoIconsComponent);
+      noIconsHostComponent = noIconsHostFixture.componentInstance;
     });
 
     it('should show normal content when not loading', () => {
-      hostComponent.loading = false;
-      hostFixture.detectChanges();
+      iconsHostComponent.loading = false;
+      iconsHostFixture.detectChanges();
 
-      const buttonElement = hostFixture.nativeElement.querySelector('button');
-      expect(buttonElement.textContent).toContain('Button Text');
-      expect(buttonElement.textContent).toContain('Left Icon');
-      expect(buttonElement.textContent).toContain('Right Icon');
-      expect(buttonElement.textContent).not.toContain('loading');
+      const button = iconsHostFixture.nativeElement.querySelector('button');
+      expect(button.textContent).toContain('Button Text');
+      const spinners = button.querySelectorAll('app-icon[icon="progress_activity"]');
+      expect(spinners.length).toBe(0);
     });
 
-    it('should show loading content when loading', () => {
-      hostComponent.loading = true;
-      hostFixture.detectChanges();
+    it('should show progress activity icons in place of left and right icons when loading', () => {
+      iconsHostComponent.loading = true;
+      iconsHostFixture.detectChanges();
 
-      const buttonElement = hostFixture.nativeElement.querySelector('button');
-      expect(buttonElement.textContent).toContain('loading');
-      expect(buttonElement.textContent).not.toContain('Button Text');
-      expect(buttonElement.textContent).not.toContain('Left Icon');
-      expect(buttonElement.textContent).not.toContain('Right Icon');
+      const button = iconsHostFixture.nativeElement.querySelector('button');
+      const spinners = button.querySelectorAll('app-icon[icon="progress_activity"]');
+      expect(spinners.length).toBe(2);
     });
 
     it('should show progress activity icon when loading', () => {
-      hostComponent.loading = true;
-      hostFixture.detectChanges();
+      iconsHostComponent.loading = true;
+      iconsHostFixture.detectChanges();
 
-      const iconElement = hostFixture.nativeElement.querySelector('app-icon[icon="progress_activity"]');
+      const iconElement = iconsHostFixture.nativeElement.querySelector('app-icon[icon="progress_activity"]');
       expect(iconElement).toBeTruthy();
+    });
+
+    it('should not show progress activity icon when loading and no icons are projected', () => {
+      noIconsHostComponent.loading = true;
+      noIconsHostFixture.detectChanges();
+
+      const iconElement = noIconsHostFixture.nativeElement.querySelector('app-icon[icon="progress_activity"]');
+      expect(iconElement).toBeNull();
     });
   });
 
