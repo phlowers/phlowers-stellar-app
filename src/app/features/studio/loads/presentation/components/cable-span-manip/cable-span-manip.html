@@ -1,10 +1,5 @@
-<form
-  [formGroup]="form"
-  [attr.aria-busy]="isLoading()"
-  (ngSubmit)="saveForm()"
-  data-testid="cable-span-manip-form"
->
-  <div>
+<form [formGroup]="form" [attr.aria-busy]="isLoading()" (ngSubmit)="saveForm()" data-testid="cable-span-manip-form">
+  <div class="header-btns">
     <button
       app-btn
       type="button"
@@ -32,9 +27,11 @@
     </button>
   </div>
 
-  <div>
-    <label for="scope" i18n="@@manipulatedSpan">Manipulated span</label>
-    <!-- Portée manipulée -->
+  <div class="split-1-line">
+    <label for="scope" i18n="@@manipulatedSpan" class="split-1-line__label-1">
+      Manipulated span
+      <!-- Portée manipulée -->
+    </label>
     <p-select
       inputId="scope"
       fluid
@@ -42,13 +39,15 @@
       formControlName="scope"
       optionLabel="label"
       optionValue="value"
-      [filter]="true"
       (onChange)="onScopeChange($event.value)"
       data-testid="cable-span-manip-scope"
+      class="split-1-line__input-1"
     />
 
-    <label for="referenceSupport" i18n="@@referenceSupport">Reference support</label>
-    <!-- Support de référence -->
+    <label for="referenceSupport" i18n="@@referenceSupport" class="split-1-line__label-2">
+      Reference support
+      <!-- Support de référence -->
+    </label>
     <p-select
       inputId="referenceSupport"
       fluid
@@ -57,32 +56,33 @@
       optionLabel="label"
       optionValue="value"
       data-testid="cable-span-manip-reference-support"
+      class="split-1-line__input-2"
     />
   </div>
 
-  <div>
-    <label for="distanceToRefSupport" i18n="@@manipulatedPointCableDistRefSupport">
-      Manipulated point on the cable (Dist. to ref. support)
-      <!-- Point manipulé sur le câble (Dist. au supp. réf.) -->
-    </label>
-    <p-inputgroup>
-      <input
-        id="distanceToRefSupport"
-        type="number"
-        pInputText
-        step="0.01"
-        [attr.min]="distRefSupportMin()"
-        [attr.max]="distRefSupportMax()"
-        formControlName="distanceToRefSupport"
-        data-testid="cable-span-manip-dist-ref-support"
-      />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
-    </p-inputgroup>
-  </div>
+  <label for="distanceToRefSupport" i18n="@@manipulatedPointCableDistRefSupport">
+    Manipulated point on the cable (Dist. to ref. support)
+    <!-- Point manipulé sur le câble (Dist. au supp. réf.) -->
+  </label>
+  <p-inputgroup>
+    <input
+      id="distanceToRefSupport"
+      type="number"
+      pInputText
+      step="0.01"
+      [attr.min]="distRefSupportMin()"
+      [attr.max]="distRefSupportMax()"
+      formControlName="distanceToRefSupport"
+      data-testid="cable-span-manip-dist-ref-support"
+    />
+    <p-inputgroup-addon>m</p-inputgroup-addon>
+  </p-inputgroup>
 
-  <div>
-    <label for="cableManipType" i18n="@@cableManipType">Cable manipulation type</label>
-    <!-- Type de manip. du câble -->
+  <div class="split-1-line">
+    <label for="cableManipType" i18n="@@cableManipType" class="split-1-line__label-1">
+      Cable manipulation type
+      <!-- Type de manip. du câble -->
+    </label>
     <p-select
       inputId="cableManipType"
       fluid
@@ -91,10 +91,13 @@
       optionLabel="label"
       optionValue="value"
       data-testid="cable-span-manip-type"
+      class="split-1-line__input-1"
     />
 
-    <label for="cableManipMethod" i18n="@@cableManipMethod">Cable manipulation method</label>
-    <!-- Moyen de manip. du câble -->
+    <label for="cableManipMethod" i18n="@@cableManipMethod" class="split-1-line__label-2">
+      Cable manipulation method
+      <!-- Moyen de manip. du câble -->
+    </label>
     <p-select
       inputId="cableManipMethod"
       fluid
@@ -103,38 +106,49 @@
       optionLabel="label"
       optionValue="value"
       data-testid="cable-span-manip-method"
+      class="split-1-line__input-2"
     />
   </div>
 
   <fieldset>
-    <legend i18n="@@manipFixedPointPosition">Manipulation fixed point position</legend>
+    <legend i18n="@@manipFixedPointPosition" class="legend">Manipulation fixed point position</legend>
     <!-- Position du point fixe de manipulation -->
 
-    <div>
+    <div class="third-1-line">
       @if (isWithCrane()) {
-        <label for="longitudinalDistance" i18n="@@longitudinalDistance">Longitudinal dist.</label>
+      <label for="longitudinalDistance" i18n="@@longitudinalDistance" class="third-1-line__label-1">
+        Longitudinal dist.
         <!-- Dist. longitudinale -->
-        <p-inputgroup>
-          <input
-            type="number"
-            pInputText
-            id="longitudinalDistance"
-            step="0.01"
-            formControlName="longitudinalDistance"
-            data-testid="cable-span-manip-longitudinal-dist"
-          />
-          <p-inputgroup-addon>m</p-inputgroup-addon>
-        </p-inputgroup>
+      </label>
+      <p-inputgroup class="third-1-line__input-1">
+        <input
+          type="number"
+          pInputText
+          id="longitudinalDistance"
+          step="0.01"
+          formControlName="longitudinalDistance"
+          data-testid="cable-span-manip-longitudinal-dist"
+        />
+        <p-inputgroup-addon>m</p-inputgroup-addon>
+      </p-inputgroup>
       } @else {
-        <dl>
-          <dt class="label" i18n="@@longitudinalDistance">Longitudinal dist.</dt>
-          <dd class="read-only-info" data-testid="cable-span-manip-longitudinal-dist-readonly">- m</dd>
-        </dl>
+      <dl class="contents">
+        <dt class="label" i18n="@@longitudinalDistance" class="third-1-line__label-1">Longitudinal dist.</dt>
+        <dd
+          data-testid="cable-span-manip-longitudinal-dist-readonly"
+          class="third-1-line__input-1 read-only-info"
+          aria-live="assertive"
+        >
+          - m
+        </dd>
+      </dl>
       }
 
-      <label for="lateralDistance" i18n="@@lateralDistance">Lateral dist.</label>
-      <!-- Dist. latérale -->
-      <p-inputgroup>
+      <label for="lateralDistance" i18n="@@lateralDistance" class="third-1-line__label-2">
+        Lateral dist.
+        <!-- Dist. latérale -->
+      </label>
+      <p-inputgroup class="third-1-line__input-2">
         <input
           type="number"
           pInputText
@@ -148,9 +162,11 @@
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
 
-      <label for="altitude" i18n="@@altitude">Altitude</label>
-      <!-- Altitude -->
-      <p-inputgroup>
+      <label for="altitude" i18n="@@altitude" class="third-1-line__label-3">
+        Altitude
+        <!-- Altitude -->
+      </label>
+      <p-inputgroup class="third-1-line__input-3">
         <input
           type="number"
           pInputText
@@ -165,16 +181,10 @@
       </p-inputgroup>
     </div>
 
-    <div>
-      <button
-        app-btn
-        type="button"
-        disabled
-        aria-disabled="true"
-        data-testid="cable-span-manip-dist-calc-btn"
-      >
+    <div class="distance-calc-line">
+      <button app-btn type="button" disabled aria-disabled="true" data-testid="cable-span-manip-dist-calc-btn">
         <app-icon icon="rocket_launch" />
-        <ng-container i18n="@@distCalcBetweenPoints">Distance calculation between points</ng-container>
+        <ng-container i18n="@@distCalcBetweenPoints">Dist. calc. between points</ng-container>
         <!-- Calcul distance entre points -->
       </button>
 
@@ -198,89 +208,89 @@
   />
 
   @if (isWithChain()) {
-    <label for="chainName" i18n="@@chainName">Chain name</label>
-    <p-select
-      inputId="chainName"
-      fluid
-      [options]="chainNameOptions()"
-      formControlName="chainName"
-      optionLabel="label"
-      optionValue="value"
-      data-testid="cable-span-manip-chain-name"
-    />
+  <label for="chainName" i18n="@@chainName">Chain name</label>
+  <p-select
+    inputId="chainName"
+    fluid
+    [options]="chainNameOptions()"
+    formControlName="chainName"
+    optionLabel="label"
+    optionValue="value"
+    data-testid="cable-span-manip-chain-name"
+  />
 
-    <div>
-      <label for="chainLength" i18n="@@chainLength">Chain length</label>
-      <p-inputgroup>
-        <input
-          type="number"
-          pInputText
-          id="chainLength"
-          step="0.01"
-          formControlName="chainLength"
-          data-testid="cable-span-manip-chain-length"
-        />
-        <p-inputgroup-addon>m</p-inputgroup-addon>
-      </p-inputgroup>
-
-      <label for="chainWeight" i18n="@@chainWeight">Chain weight</label>
-      <p-inputgroup>
-        <input
-          type="number"
-          pInputText
-          id="chainWeight"
-          step="0.01"
-          formControlName="chainWeight"
-          data-testid="cable-span-manip-chain-weight"
-        />
-        <p-inputgroup-addon>kg</p-inputgroup-addon>
-      </p-inputgroup>
-
-      <label for="chainSurface" i18n="@@chainSurface">Chain surface</label>
-      <p-inputgroup>
-        <input
-          type="number"
-          pInputText
-          id="chainSurface"
-          step="0.01"
-          formControlName="chainSurface"
-          data-testid="cable-span-manip-chain-surface"
-        />
-        <p-inputgroup-addon>m²</p-inputgroup-addon>
-      </p-inputgroup>
-
-      <label for="counterWeight" i18n="@@counterWeight">Counter weight</label>
-      <p-inputgroup>
-        <input
-          type="number"
-          pInputText
-          id="counterWeight"
-          step="0.01"
-          formControlName="counterWeight"
-          data-testid="cable-span-manip-counter-weight"
-        />
-        <p-inputgroup-addon>kg</p-inputgroup-addon>
-      </p-inputgroup>
-    </div>
-  } @else if (isWithSling()) {
-    <label for="slingLength" i18n="@@slingLength">Sling length</label>
-    <!-- longueur de l'élingue -->
-    <p-inputgroup>
+  <div class="split-2-line">
+    <label for="chainLength" i18n="@@chainLength" class="split-2-line__label-1">Chain length</label>
+    <p-inputgroup class="split-2-line__input-1">
       <input
         type="number"
         pInputText
-        id="slingLength"
+        id="chainLength"
         step="0.01"
-        min="0"
-        max="99"
-        formControlName="slingLength"
-        data-testid="cable-span-manip-sling-length"
+        formControlName="chainLength"
+        data-testid="cable-span-manip-chain-length"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
+
+    <label for="chainWeight" i18n="@@chainWeight" class="split-2-line__label-2">Chain weight</label>
+    <p-inputgroup class="split-2-line__input-2">
+      <input
+        type="number"
+        pInputText
+        id="chainWeight"
+        step="0.01"
+        formControlName="chainWeight"
+        data-testid="cable-span-manip-chain-weight"
+      />
+      <p-inputgroup-addon>kg</p-inputgroup-addon>
+    </p-inputgroup>
+
+    <label for="chainSurface" i18n="@@chainSurface" class="split-2-line__label-3">Chain surface</label>
+    <p-inputgroup class="split-2-line__input-3">
+      <input
+        type="number"
+        pInputText
+        id="chainSurface"
+        step="0.01"
+        formControlName="chainSurface"
+        data-testid="cable-span-manip-chain-surface"
+      />
+      <p-inputgroup-addon>m²</p-inputgroup-addon>
+    </p-inputgroup>
+
+    <label for="counterWeight" i18n="@@counterWeight" class="split-2-line__label-4">Counter weight</label>
+    <p-inputgroup class="split-2-line__input-4">
+      <input
+        type="number"
+        pInputText
+        id="counterWeight"
+        step="0.01"
+        formControlName="counterWeight"
+        data-testid="cable-span-manip-counter-weight"
+      />
+      <p-inputgroup-addon>kg</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+  } @else if (isWithSling()) {
+  <label for="slingLength" i18n="@@slingLength">Sling length</label>
+  <!-- longueur de l'élingue -->
+  <p-inputgroup>
+    <input
+      type="number"
+      pInputText
+      id="slingLength"
+      step="0.01"
+      min="0"
+      max="99"
+      formControlName="slingLength"
+      data-testid="cable-span-manip-sling-length"
+    />
+    <p-inputgroup-addon>m</p-inputgroup-addon>
+  </p-inputgroup>
   }
 
-  <div>
+  <div class="footer-btns">
     <button
       app-btn
       btnStyle="danger"

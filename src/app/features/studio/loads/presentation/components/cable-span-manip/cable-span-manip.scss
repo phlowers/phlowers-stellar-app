@@ -1,0 +1,117 @@
+@use 'abstract.extracts' as app;
+
+p-select,
+p-inputgroup {
+  @apply mb-3;
+}
+
+.header-btns {
+  @apply flex justify-between items-center mb-3;
+}
+
+.split-1-line {
+  @apply grid grid-cols-2;
+  column-gap: 0.625rem;
+  grid-template-areas:
+    'label1 label2'
+    'input1 input2';
+
+  &__label-1 {
+    grid-area: label1;
+  }
+
+  &__label-2 {
+    grid-area: label2;
+  }
+
+  &__input-1 {
+    grid-area: input1;
+  }
+
+  &__input-2 {
+    grid-area: input2;
+  }
+}
+
+.legend {
+  @extend %heading-2xs;
+  @apply mb-3;
+}
+
+.third-1-line {
+  @apply grid grid-cols-3;
+  column-gap: 0.625rem;
+  grid-template-areas:
+    'label1 label2 label3'
+    'input1 input2 input3';
+
+  &__label-1 {
+    grid-area: label1;
+  }
+
+  &__label-2 {
+    grid-area: label2;
+  }
+
+  &__input-1 {
+    grid-area: input1;
+  }
+
+  &__input-2 {
+    grid-area: input2;
+  }
+
+  &__input-3 {
+    grid-area: input3;
+  }
+}
+
+.distance-calc-line {
+  @apply flex items-start gap-3 mb-2;
+}
+
+.split-2-line {
+  @apply grid grid-cols-2;
+  column-gap: 0.625rem;
+  grid-template-areas:
+    'label1 label2'
+    'input1 input2'
+    'label3 label4'
+    'input3 input4';
+
+  &__label-1 {
+    grid-area: label1;
+  }
+
+  &__input-1 {
+    grid-area: input1;
+  }
+
+  &__label-2 {
+    grid-area: label2;
+  }
+
+  &__input-2 {
+    grid-area: input2;
+  }
+
+  &__label-3 {
+    grid-area: label3;
+  }
+
+  &__input-3 {
+    grid-area: input3;
+  }
+
+  &__label-4 {
+    grid-area: label4;
+  }
+
+  &__input-4 {
+    grid-area: input4;
+  }
+}
+
+.footer-btns {
+  @apply flex justify-end items-center gap-4 pt-5 pr-2;
+}
