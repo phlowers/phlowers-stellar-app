@@ -74,16 +74,15 @@
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
   @if (form.controls.distanceToRefSupport.errors?.['min']) {
-    <p-message id="distanceToRefSupport-error-min" severity="error" size="small" variant="simple">
-      <ng-container i18n>Minimum value:</ng-container>
-      {{ distRefSupportMin() }}
-    </p-message>
-  }
-  @if (form.controls.distanceToRefSupport.errors?.['max']) {
-    <p-message id="distanceToRefSupport-error-max" severity="error" size="small" variant="simple">
-      <ng-container i18n>Maximum value:</ng-container>
-      {{ distRefSupportMax() }}
-    </p-message>
+  <p-message id="distanceToRefSupport-error-min" severity="error" size="small" variant="simple">
+    <ng-container i18n>Minimum value:</ng-container>
+    {{ distRefSupportMin() }}
+  </p-message>
+  } @if (form.controls.distanceToRefSupport.errors?.['max']) {
+  <p-message id="distanceToRefSupport-error-max" severity="error" size="small" variant="simple">
+    <ng-container i18n>Maximum value:</ng-container>
+    {{ distRefSupportMax() }}
+  </p-message>
   }
 
   <div class="split-1-line">
@@ -139,18 +138,28 @@
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
       @if (form.controls.longitudinalDistance.errors?.['min']) {
-        <p-message id="longitudinalDistance-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-1">
-          <ng-container i18n>Minimum value:</ng-container>
-          -100
-        </p-message>
-      }
-      @if (form.controls.longitudinalDistance.errors?.['max']) {
-        <p-message id="longitudinalDistance-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-1">
-          <ng-container i18n>Maximum value:</ng-container>
-          5000
-        </p-message>
-      }
-      } @else {
+      <p-message
+        id="longitudinalDistance-error-min"
+        severity="error"
+        size="small"
+        variant="simple"
+        class="third-1-line__error-1"
+      >
+        <ng-container i18n>Minimum value:</ng-container>
+        -100
+      </p-message>
+      } @if (form.controls.longitudinalDistance.errors?.['max']) {
+      <p-message
+        id="longitudinalDistance-error-max"
+        severity="error"
+        size="small"
+        variant="simple"
+        class="third-1-line__error-1"
+      >
+        <ng-container i18n>Maximum value:</ng-container>
+        5000
+      </p-message>
+      } } @else {
       <dl class="contents">
         <dt class="label" i18n="@@longitudinalDistance" class="third-1-line__label-1">Longitudinal dist.</dt>
         <dd
@@ -181,16 +190,27 @@
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
       @if (form.controls.lateralDistance.errors?.['min']) {
-        <p-message id="lateralDistance-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-2">
-          <ng-container i18n>Minimum value:</ng-container>
-          -100
-        </p-message>
-      }
-      @if (form.controls.lateralDistance.errors?.['max']) {
-        <p-message id="lateralDistance-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-2">
-          <ng-container i18n>Maximum value:</ng-container>
-          100
-        </p-message>
+      <p-message
+        id="lateralDistance-error-min"
+        severity="error"
+        size="small"
+        variant="simple"
+        class="third-1-line__error-2"
+      >
+        <ng-container i18n>Minimum value:</ng-container>
+        -100
+      </p-message>
+      } @if (form.controls.lateralDistance.errors?.['max']) {
+      <p-message
+        id="lateralDistance-error-max"
+        severity="error"
+        size="small"
+        variant="simple"
+        class="third-1-line__error-2"
+      >
+        <ng-container i18n>Maximum value:</ng-container>
+        100
+      </p-message>
       }
 
       <label for="altitude" i18n="@@altitude" class="third-1-line__label-3"> Altitude </label>
@@ -211,16 +231,15 @@
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
       @if (form.controls.altitude.errors?.['min']) {
-        <p-message id="altitude-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-3">
-          <ng-container i18n>Minimum value:</ng-container>
-          -100
-        </p-message>
-      }
-      @if (form.controls.altitude.errors?.['max']) {
-        <p-message id="altitude-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-3">
-          <ng-container i18n>Maximum value:</ng-container>
-          9000
-        </p-message>
+      <p-message id="altitude-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-3">
+        <ng-container i18n>Minimum value:</ng-container>
+        -100
+      </p-message>
+      } @if (form.controls.altitude.errors?.['max']) {
+      <p-message id="altitude-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-3">
+        <ng-container i18n>Maximum value:</ng-container>
+        9000
+      </p-message>
       }
     </div>
 
@@ -336,18 +355,16 @@
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
   @if (form.controls.slingLength.errors?.['min']) {
-    <p-message id="slingLength-error-min" severity="error" size="small" variant="simple">
-      <ng-container i18n>Minimum value:</ng-container>
-      0
-    </p-message>
-  }
-  @if (form.controls.slingLength.errors?.['max']) {
-    <p-message id="slingLength-error-max" severity="error" size="small" variant="simple">
-      <ng-container i18n>Maximum value:</ng-container>
-      99
-    </p-message>
-  }
-  }
+  <p-message id="slingLength-error-min" severity="error" size="small" variant="simple">
+    <ng-container i18n>Minimum value:</ng-container>
+    0
+  </p-message>
+  } @if (form.controls.slingLength.errors?.['max']) {
+  <p-message id="slingLength-error-max" severity="error" size="small" variant="simple">
+    <ng-container i18n>Maximum value:</ng-container>
+    99
+  </p-message>
+  } }
 
   <div class="footer-btns">
     <button

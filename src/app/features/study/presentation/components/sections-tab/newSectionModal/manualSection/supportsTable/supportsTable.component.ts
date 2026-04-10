@@ -191,6 +191,4 @@ export class SupportsTableComponent implements OnInit {
   isNumber(value: unknown) {
     return isNumber(value);
   }
-
-
 }
