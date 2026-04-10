@@ -27,6 +27,7 @@ import {
 import { FieldDatasComponent } from '../field-datas/field-datas.component';
 import { CalculusSettingComponent } from '../calculus-setting/calculus-setting.component';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TemperatureCalculationComponent } from '../temperature-calculation/temperature-calculation.component';
 import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
@@ -63,6 +64,7 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   public readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   initialConditionModalOpen = signal<boolean>(false);
 
   initialConditionInput = signal<InitialCondition>({
@@ -127,7 +129,7 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   isNameAlreadyTaken = computed(() => {
     return (
-      this.plotService
+      this.spanService
         .section()
         ?.field_measures?.some(
           (measure) => measure.name === this.measureData().name && measure.uuid !== this.measureData().uuid
@@ -166,7 +168,7 @@ export class FieldMeasuringComponent implements OnDestroy {
   });
 
   private async initializeMeasureData(): Promise<void> {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     const selectedFieldMeasure = section?.field_measures.find(
       (measure) => measure.uuid === section?.selected_field_measure_uuid
     );
@@ -223,7 +225,7 @@ export class FieldMeasuringComponent implements OnDestroy {
   }
 
   async onSave() {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     const measureData = this.measureData();
     if (!section || !measureData) {
       return;

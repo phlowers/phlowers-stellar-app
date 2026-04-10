@@ -10,8 +10,8 @@ import { Button } from 'primeng/button';
 import { InputNumberComponent } from '@shared/components/atoms/input-number/input-number.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@services/plot/plot.service';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
-import { Task } from '@core/services/worker_python/tasks/types';
+import { PlotResolutionService } from '@services/plot/plot-resolution.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { AxesNorms } from '@shared/types/plot.types';
 
 @Component({
@@ -35,16 +35,16 @@ export class ScaleViewComponent {
   readonly popover = viewChild<Popover>('popover');
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
-  private readonly workerPythonService = inject(WorkerPythonService);
-
+  private readonly resolutionService = inject(PlotResolutionService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   readonly popoverOpen = signal(false);
   get scaleMax(): number {
-    return this.plotService.defaultResolution();
+    return this.resolutionService.defaultResolution();
   }
   readonly scaleMin = 25;
 
-  readonly sliderControl = new FormControl<number>(this.plotService.resolution(), { nonNullable: true });
-  readonly pointsControl = new FormControl<number>(this.plotService.resolution(), { nonNullable: true });
+  readonly sliderControl = new FormControl<number>(this.resolutionService.resolution(), { nonNullable: true });
+  readonly pointsControl = new FormControl<number>(this.resolutionService.resolution(), { nonNullable: true });
 
   readonly formScaleView = this.fb.group({
     scale: ['auto', { nonNullable: true }],
@@ -53,11 +53,11 @@ export class ScaleViewComponent {
   });
 
   private readonly sliderValue = toSignal(this.formScaleView.get('sliderPointsCount')!.valueChanges, {
-    initialValue: this.plotService.resolution()
+    initialValue: this.resolutionService.resolution()
   });
 
   readonly pointsCountValue = toSignal(this.formScaleView.get('pointsCount')!.valueChanges, {
-    initialValue: this.plotService.resolution()
+    initialValue: this.resolutionService.resolution()
   });
 
   constructor() {
@@ -71,7 +71,7 @@ export class ScaleViewComponent {
       const val = this.sliderValue();
       if (val && val !== this.pointsControl.value) {
         this.pointsControl.setValue(val, { emitEvent: false });
-        this.plotService.setResolution(val);
+        this.resolutionService.setResolution(val);
       }
     });
 
@@ -80,14 +80,14 @@ export class ScaleViewComponent {
       const val = this.pointsCountValue();
       if (val && val !== this.sliderControl.value) {
         this.sliderControl.setValue(val, { emitEvent: false });
-        this.plotService.setResolution(val);
+        this.resolutionService.setResolution(val);
       }
     });
   }
 
   private setupResolutionSync(): void {
     effect(() => {
-      const resolution = this.plotService.resolution();
+      const resolution = this.resolutionService.resolution();
       if (resolution !== this.sliderControl.value) {
         this.sliderControl.setValue(resolution, { emitEvent: false });
       }
@@ -109,11 +109,8 @@ export class ScaleViewComponent {
     auto: { x: 1, y: 1, z: 1, aspectMode: 'data' }
   };
 
-  private async getScaleNorms(scale: string): Promise<AxesNorms> {
-    const scaleNorms = this.scaleNormsMap[scale] ?? { x: 1, y: 1, z: 1, aspectMode: 'data' };
-    const aspectMode = scaleNorms.aspectMode;
-    const { result: result, error } = await this.workerPythonService.runTask(Task.getAspectRatio, scaleNorms);
-    return error || !result ? scaleNorms : { ...result, aspectMode };
+  private getScaleNorms(scale: string): AxesNorms {
+    return this.scaleNormsMap[scale] ?? { x: 1, y: 1, z: 1, aspectMode: 'data' };
   }
 
   public async onValidate(): Promise<void> {
@@ -121,11 +118,11 @@ export class ScaleViewComponent {
 
     const resolution = this.pointsControl.value;
     const scale = this.formScaleView.get('scale')?.value as string;
-    this.plotService.setResolution(resolution);
-    await this.plotService.applyResolution(resolution);
+    this.resolutionService.setResolution(resolution);
+    await this.resolutionService.applyResolution(resolution);
 
-    const norms = await this.getScaleNorms(scale);
-    this.plotService.setAxesNorms(norms);
+    const norms = this.getScaleNorms(scale);
+    this.plotOptionsService.setAxesNorms(norms);
 
     await this.plotService.refreshProjection();
     this.popoverOpen.set(false);

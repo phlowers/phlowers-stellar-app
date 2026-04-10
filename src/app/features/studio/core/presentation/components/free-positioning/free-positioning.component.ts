@@ -28,6 +28,8 @@ import { Side } from '@shared/types/plot.types';
 import { GetSectionOutput, Task } from '@core/services/worker_python/tasks/types';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { formatStudioError } from '@shared/components/studio/helpers/errors';
 import { Support } from '@shared/domain';
@@ -123,6 +125,8 @@ export class FreePositioningComponent implements OnDestroy {
   // Dependencies
   private readonly workerPythonService = inject(WorkerPythonService);
   readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   readonly sideTabsService = inject(SideTabsService);
   readonly obstacleFormService = inject(ObstacleFormService);
   readonly obstaclesService = inject(ObstaclesService);
@@ -135,7 +139,7 @@ export class FreePositioningComponent implements OnDestroy {
     });
 
     effect(() => {
-      const plotOptions = this.plotService.plotOptions();
+      const plotOptions = this.plotOptionsService.plotOptions();
       const workerReady = this.plotService.workerReady();
       const litData = this.plotService.litData();
 
@@ -164,14 +168,14 @@ export class FreePositioningComponent implements OnDestroy {
 
   recreatePlots = debounce(async () => {
     this.destroyAllPlots();
-    const startSupport = this.plotService.plotOptions().startSupport;
+    const startSupport = this.plotOptionsService.plotOptions().startSupport;
     this.isLoading.set(true);
     const obstacle = this.obstacleFormService.buildObstacleFromForm();
-    const sectionObstacles = this.plotService.section()?.obstacles ?? [];
+    const sectionObstacles = this.spanService.section()?.obstacles ?? [];
     const allObstacles = sectionObstacles.some((o) => o.uuid === obstacle.uuid)
       ? sectionObstacles.map((o) => (o.uuid === obstacle.uuid ? obstacle : o))
       : [...sectionObstacles, obstacle];
-    const plotOptions = this.plotService.plotOptions();
+    const plotOptions = this.plotOptionsService.plotOptions();
     const filteredObstacles = allObstacles.filter(
       (o) => o.supportIndex >= plotOptions.startSupport && o.supportIndex < plotOptions.endSupport
     );
@@ -181,9 +185,11 @@ export class FreePositioningComponent implements OnDestroy {
       | ReferenceSupport
       | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
-    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(this.plotService.litData()!, referenceSupportIndex));
+    this.referenceSupportAltitudeNgf.set(
+      this.getSupportAltitudeNgf(this.plotService.litData()!, referenceSupportIndex)
+    );
 
-    const supports = this.plotService.section()?.supports ?? [];
+    const supports = this.spanService.section()?.supports ?? [];
     this.sharedYRange.set(null);
     await this.createPlot(this.plotService.litData()!, startSupport, 'face', supports);
     await this.createPlot(this.plotService.litData()!, startSupport, 'profile', supports);
@@ -543,7 +549,7 @@ export class FreePositioningComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     // Safety net: always leave the mode when this component is destroyed
-    this.plotService.isFreePositioningMode.set(false);
+    this.plotOptionsService.isFreePositioningMode.set(false);
     this.destroyAllPlots();
   }
 }

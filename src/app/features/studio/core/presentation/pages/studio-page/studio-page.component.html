@@ -2,7 +2,7 @@
 
 <app-studio-menu-bar
   (openNewChargeModal)="openNewChargeModal()"
-  [section]="plotService.section()"
+  [section]="spanService.section()"
   [study]="plotService.study()"
 ></app-studio-menu-bar>
 
@@ -10,7 +10,7 @@
 
 <div class="graph-tools">
   <div class="graph-tools__left">
-    @if (plotService.isFreePositioningMode()) {
+    @if (plotOptionsService.isFreePositioningMode()) {
       <app-free-positioning class="plot-view" />
     } @else {
       <app-studio class="plot-view" [isPreview]="false" />
@@ -203,9 +203,9 @@
           appendTo="body"
           class="supports-select__p-select"
           data-testid="support-select"
-          [disabled]="plotService.loading() || plotService.isFreePositioningMode()"
+          [disabled]="plotService.loading() || plotOptionsService.isFreePositioningMode()"
           [options]="spanAmountChoiceOptions()"
-          [ngModel]="plotService.spanAmountChoice()"
+          [ngModel]="spanService.spanAmountChoice()"
           (onChange)="onSelectSpanAmount($event.value)"
         />
 
@@ -222,11 +222,11 @@
       </div>
 
       <div class="slider-plot-cards">
-        @if (this.plotService.section()) {
+        @if (this.spanService.section()) {
           <ngx-slider
-            [class.inverted]="plotService.plotOptions().invert"
-            [value]="plotService.plotOptions().startSupport"
-            [highValue]="plotService.plotOptions().endSupport"
+            [class.inverted]="plotOptionsService.plotOptions().invert"
+            [value]="plotOptionsService.plotOptions().startSupport"
+            [highValue]="plotOptionsService.plotOptions().endSupport"
             (userChangeEnd)="updateSliderOptions($event)"
             [options]="sliderOptions()"
             class="block"
@@ -249,13 +249,13 @@
           data-testid="load-tabs"
         >
           <p-tablist>
-            <p-tab value="0" [disabled]="!plotService.section()?.selected_charge_uuid" class="climate" i18n>
+            <p-tab value="0" [disabled]="!spanService.section()?.selected_charge_uuid" class="climate" i18n>
               Climate condition
             </p-tab>
-            <p-tab value="1" [disabled]="!plotService.section()?.selected_charge_uuid" class="load-marking" i18n>
+            <p-tab value="1" [disabled]="!spanService.section()?.selected_charge_uuid" class="load-marking" i18n>
               Load / Marking
             </p-tab>
-            <p-tab value="2" [disabled]="!plotService.section()?.selected_charge_uuid" class="cable-length" i18n>
+            <p-tab value="2" [disabled]="!spanService.section()?.selected_charge_uuid" class="cable-length" i18n>
               Cable length change
             </p-tab>
             <p-tab value="3" [disabled]="true" class="cable-support" i18n>Cable manip. at support</p-tab>
@@ -264,7 +264,7 @@
             </p-tab>
           </p-tablist>
 
-          @if (!plotService.section()?.charges?.length) {
+          @if (!spanService.section()?.charges?.length) {
             <div class="flex items-center justify-center gap-1 my-4">
               <app-icon icon="info" />
               <p i18n>In order to add charges, you need to create a charge case.</p>
@@ -283,10 +283,10 @@
             </div>
           }
 
-          @if (plotService.section()?.selected_charge_uuid) {
+          @if (spanService.section()?.selected_charge_uuid) {
             <p-tabpanels>
               <p-tabpanel value="0">
-                <app-climate [chargeUuid]="plotService.section()?.selected_charge_uuid ?? ''" />
+                <app-climate [chargeUuid]="spanService.section()?.selected_charge_uuid ?? ''" />
               </p-tabpanel>
 
               <p-tabpanel value="1">

@@ -1,28 +1,21 @@
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
-import { AxesNorms, PlotOptions, PLOT_ID } from '@shared/types/plot.types';
-import {
-  DataError,
-  GetSectionOutput,
-  ObstacleOutput,
-  PythonErrorCode,
-  Task,
-  TaskError
-} from '@services/worker_python/tasks/types';
+import { DOCUMENT } from '@angular/common';
+import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
-import { Subscription } from 'rxjs';
+import { DataError, GetSectionOutput, ObstacleOutput, PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
 import { PlotOptionsService } from './plot-options.service';
 import { PlotSpanService } from './plot-span.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
-import * as plotly from 'plotly.js-dist-min';
-import { Camera } from 'plotly.js-dist-min';
+import { Subscription } from 'rxjs';
 import { SectionService } from '@services/section/section.service';
 import { ChargeData } from '@shared/domain/models/charge.model';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import * as plotly from 'plotly.js-dist-min';
 
 @Injectable({
   providedIn: 'root'
@@ -52,32 +45,15 @@ export class PlotService {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
-
-  // Facade re-delegations — same signal references as PlotResolutionService
-  readonly resolution = this.resolutionService.resolution;
-  readonly appliedResolution = this.resolutionService.appliedResolution;
-  readonly defaultResolution = this.resolutionService.defaultResolution;
-
-  // Facade re-delegations — same signal references as PlotOptionsService
-  readonly plotOptions = this.plotOptionsService.plotOptions;
-  readonly selectedDisplayOptions = this.plotOptionsService.selectedDisplayOptions;
-  readonly axesNorms = this.plotOptionsService.axesNorms;
-  readonly camera = this.plotOptionsService.camera;
-  readonly isFreePositioningMode = this.plotOptionsService.isFreePositioningMode;
-
-  // Facade re-delegations — same signal/computed references as PlotSpanService
-  readonly section = this.spanService.section;
-  readonly spanAmountChoice = this.spanService.spanAmountChoice;
-  readonly getSpanOptions = this.spanService.getSpanOptions;
-  readonly getSpanOptionsWithIndex = this.spanService.getSpanOptionsWithIndex;
+  private readonly document = inject(DOCUMENT);
 
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
     });
     effect(() => {
-      if (this.isStudioActive() && this.workerReady() && this.section()) {
-        this.refreshSection(this.section()!);
+      if (this.isStudioActive() && this.workerReady() && this.spanService.section()) {
+        this.refreshSection(this.spanService.section()!);
       }
     });
   }
@@ -92,7 +68,7 @@ export class PlotService {
     this.plotOptionsService.reset();
     this.spanService.reset();
     this.isStudioActive.set(false);
-    this.section.set(null);
+    this.spanService.section.set(null);
     this.study.set(null);
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedObstacle(null, null);
@@ -101,7 +77,7 @@ export class PlotService {
 
   modifySection = (sectionData: Partial<Section>) => {
     const study = this.study();
-    const section = this.section();
+    const section = this.spanService.section();
     if (!study || !section) {
       return;
     }
@@ -117,11 +93,11 @@ export class PlotService {
       const newOptions = { ...currentOptions, ...values };
       const diff = Math.abs(newOptions.endSupport - newOptions.startSupport);
       if (diff === 1) {
-        this.spanAmountChoice.set('single');
+        this.spanService.spanAmountChoice.set('single');
       } else if (diff === 2) {
-        this.spanAmountChoice.set('double');
+        this.spanService.spanAmountChoice.set('double');
       } else {
-        this.spanAmountChoice.set('all');
+        this.spanService.spanAmountChoice.set('all');
       }
     }
     this.plotOptionsService.plotOptionsChange(
@@ -136,7 +112,7 @@ export class PlotService {
     this.pythonErrorCode.set(null);
     this.litData.set(null);
     this.baseLitData.set(null);
-    this.section.set(section);
+    this.spanService.section.set(section);
     if (!this.workerPythonService.ready || !section?.cable_name) {
       this.logger.error('refreshSection error');
       this.error.set(DataError.NO_CABLE_FOUND);
@@ -167,7 +143,7 @@ export class PlotService {
     if (obstacles.length > 0 && sectionLitData) {
       const syncedOutput = await this.obstacleStateService.syncObstacles(
         obstacles,
-        untracked(() => this.plotOptions())
+        untracked(() => this.plotOptionsService.plotOptions())
       );
       this.litData.set({ ...sectionLitData, obstacles: syncedOutput?.obstacles ?? [] });
     } else {
@@ -177,21 +153,12 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  getSupportIndex = (supportUuid: string): number => this.spanService.getSupportIndex(supportUuid);
-
-  getSupportOptions = (supportUuid: string | null): { label: number; value: 'LEFT' | 'RIGHT' }[] =>
-    this.spanService.getSupportOptions(supportUuid);
-
-  getCamera = (): Camera | null => this.plotOptionsService.getCamera();
-
-  refreshCamera = (): Camera | null => this.plotOptionsService.refreshCamera();
-
   refreshProjection = async () => {
     this.loading.set(true);
     const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.refreshProjection, {
-      startSupport: this.plotOptions().startSupport,
-      endSupport: this.plotOptions().endSupport,
-      view: this.plotOptions().view
+      startSupport: this.plotOptionsService.plotOptions().startSupport,
+      endSupport: this.plotOptionsService.plotOptions().endSupport,
+      view: this.plotOptionsService.plotOptions().view
     });
     this.litData.set(result?.sectionOutput?.current ?? null);
     this.baseLitData.set(result?.sectionOutput?.base ?? null);
@@ -202,7 +169,7 @@ export class PlotService {
   };
 
   purgePlot = () => {
-    if (!document.getElementById(PLOT_ID)) {
+    if (!this.document.getElementById(PLOT_ID)) {
       return;
     }
     plotly.purge(PLOT_ID);
@@ -213,22 +180,10 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  public setAxesNorms(norms: AxesNorms): void {
-    this.plotOptionsService.setAxesNorms(norms);
-  }
-
-  setResolution(value: number): void {
-    this.resolutionService.setResolution(value);
-  }
-
-  async applyResolution(value: number): Promise<void> {
-    return this.resolutionService.applyResolution(value);
-  }
-
   async reapplyObstacles(): Promise<void> {
-    const section = untracked(() => this.section());
+    const section = untracked(() => this.spanService.section());
     const obstacles = section?.obstacles ?? [];
-    const plotOptions = untracked(() => this.plotOptions());
+    const plotOptions = untracked(() => this.plotOptionsService.plotOptions());
 
     let currentLitData = untracked(() => this.litData());
 

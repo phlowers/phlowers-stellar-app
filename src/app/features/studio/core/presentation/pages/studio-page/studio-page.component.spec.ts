@@ -15,6 +15,8 @@ import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TabsModule } from 'primeng/tabs';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { SectionService } from '@services/section/section.service';
@@ -41,20 +43,20 @@ function createSignalMock<T>(initialValue: T): SignalFn<T> {
 // PlotService mock shape used by the component
 class PlotServiceMock {
   isStudioActive: SignalFn<boolean> = createSignalMock<boolean>(false);
-  spanAmountChoice: SignalFn<'single' | 'double' | 'all'> = createSignalMock<'single' | 'double' | 'all'>('all');
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
-  // Real Angular signals so computed() in the component properly tracks them
-  section = signal<Section | null>(null);
   litData = signal<{ parameter?: number[]; utilization_rate?: number[] } | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
-  isFreePositioningMode: SignalFn<boolean> = createSignalMock<boolean>(false);
-  distanceType: SignalFn<'oblique' | 'vertical' | 'horizontal' | null> = createSignalMock<
-    'oblique' | 'vertical' | 'horizontal' | null
-  >(null);
   plotOptions = vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
   plotOptionsChange = vi.fn();
-  getSupportIndex = vi.fn().mockReturnValue(0);
   resetAll = vi.fn();
+}
+
+// SpanService mock
+class SpanServiceMock {
+  // Real Angular signal so computed() in the component properly tracks it
+  section = signal<Section | null>(null);
+  spanAmountChoice: SignalFn<'single' | 'double' | 'all'> = createSignalMock<'single' | 'double' | 'all'>('all');
+  getSupportIndex = vi.fn().mockReturnValue(0);
 }
 
 // StudiesService mock
@@ -70,6 +72,8 @@ describe('StudioPageComponent', () => {
   let router: Router;
   let route: ActivatedRoute;
   let plotService: PlotServiceMock;
+  let spanService: SpanServiceMock;
+  let plotOptionsServiceMock: { plotOptions: ReturnType<typeof vi.fn>; isFreePositioningMode: SignalFn<boolean> };
   let studiesService: StudiesServiceMock;
   let sectionService: vi.Mocked<SectionService>;
   let obstaclesService: ObstaclesService;
@@ -78,9 +82,17 @@ describe('StudioPageComponent', () => {
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
+    spanService = new SpanServiceMock();
+    plotOptionsServiceMock = {
+      plotOptions: vi.fn().mockReturnValue({ invert: false }),
+      isFreePositioningMode: createSignalMock<boolean>(false)
+    };
     studiesService = new StudiesServiceMock();
     sectionService = {} as unknown as vi.Mocked<SectionService>;
-    obstacleFormService = { setExistingObstacle: vi.fn(), clearPositions: vi.fn() } as unknown as vi.Mocked<ObstacleFormService>;
+    obstacleFormService = {
+      setExistingObstacle: vi.fn(),
+      clearPositions: vi.fn()
+    } as unknown as vi.Mocked<ObstacleFormService>;
     mockObstacleStateService = { distanceType: createSignalMock<'oblique' | 'vertical' | 'horizontal' | null>(null) };
 
     await TestBed.configureTestingModule({
@@ -97,6 +109,8 @@ describe('StudioPageComponent', () => {
           }
         },
         { provide: PlotService, useValue: plotService },
+        { provide: PlotSpanService, useValue: spanService },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: StudiesService, useValue: studiesService },
         { provide: SectionService, useValue: sectionService },
         { provide: ObstacleFormService, useValue: obstacleFormService },
@@ -168,7 +182,7 @@ describe('StudioPageComponent', () => {
 
     studiesService.getStudyAsObservable.mockReturnValue(of(study));
 
-    const sectionSetSpy = vi.spyOn(plotService.section, 'set');
+    const sectionSetSpy = vi.spyOn(spanService.section, 'set');
     const studySetSpy = vi.spyOn(plotService.study, 'set');
 
     component.ngOnInit();
@@ -218,7 +232,7 @@ describe('StudioPageComponent', () => {
 
   it('debounceUpdateSliderOptions should set supports to single when diff is 1', () => {
     vi.useFakeTimers();
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 2,
       endSupport: 3
@@ -227,12 +241,12 @@ describe('StudioPageComponent', () => {
     component.debounceUpdateSliderOptions('endSupport', 3);
     vi.advanceTimersByTime(300);
 
-    expect(plotService.spanAmountChoice()).toBe('single');
+    expect(spanService.spanAmountChoice()).toBe('single');
   });
 
   it('debounceUpdateSliderOptions should set spanAmountChoice to double when diff is 2', () => {
     vi.useFakeTimers();
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
       endSupport: 3
@@ -241,7 +255,7 @@ describe('StudioPageComponent', () => {
     component.debounceUpdateSliderOptions('endSupport', 3);
     vi.advanceTimersByTime(300);
 
-    expect(plotService.spanAmountChoice()).toBe('double');
+    expect(spanService.spanAmountChoice()).toBe('double');
   });
 
   it('sliderOptions translate callback should return value + 1 as string', () => {
@@ -265,7 +279,7 @@ describe('StudioPageComponent', () => {
 
   it('updateSliderOptions should debounce startSupport changes', () => {
     vi.useFakeTimers();
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 0,
       endSupport: 3
@@ -282,7 +296,7 @@ describe('StudioPageComponent', () => {
 
   it('updateSliderOptions should debounce endSupport changes', () => {
     vi.useFakeTimers();
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 0,
       endSupport: 3
@@ -299,7 +313,7 @@ describe('StudioPageComponent', () => {
 
   it('updateSliderOptions should not call debounce when values unchanged', () => {
     vi.useFakeTimers();
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 0,
       endSupport: 3
@@ -313,54 +327,54 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSelectSpanAmount should set single span offset', () => {
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
       endSupport: 5
     });
-    plotService.section.set({
+    spanService.section.set({
       supports: [1, 2, 3, 4, 5, 6]
     } as unknown as Section);
 
     component.onSelectSpanAmount('single');
 
-    expect(plotService.spanAmountChoice()).toBe('single');
+    expect(spanService.spanAmountChoice()).toBe('single');
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 2
     });
   });
 
   it('onSelectSpanAmount should set double span offset', () => {
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
       endSupport: 5
     });
-    plotService.section.set({
+    spanService.section.set({
       supports: [1, 2, 3, 4, 5, 6]
     } as unknown as Section);
 
     component.onSelectSpanAmount('double');
 
-    expect(plotService.spanAmountChoice()).toBe('double');
+    expect(spanService.spanAmountChoice()).toBe('double');
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 3
     });
   });
 
   it('onSelectSpanAmount should reset to all supports', () => {
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
       endSupport: 3
     });
-    plotService.section.set({
+    spanService.section.set({
       supports: [1, 2, 3, 4, 5, 6]
     } as unknown as Section);
 
     component.onSelectSpanAmount('all');
 
-    expect(plotService.spanAmountChoice()).toBe('all');
+    expect(spanService.spanAmountChoice()).toBe('all');
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       startSupport: 0,
       endSupport: 5
@@ -368,12 +382,12 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSelectSpanAmount single should clamp to maxSupport', () => {
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 4,
       endSupport: 5
     });
-    plotService.section.set({
+    spanService.section.set({
       supports: [1, 2, 3, 4, 5]
     } as unknown as Section);
 
@@ -385,8 +399,8 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick right should increment supports', () => {
-    plotService.spanAmountChoice.set('single');
-    plotService.plotOptions.mockReturnValue({
+    spanService.spanAmountChoice.set('single');
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 1,
       endSupport: 2
@@ -401,8 +415,8 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick left should decrement supports', () => {
-    plotService.spanAmountChoice.set('double');
-    plotService.plotOptions.mockReturnValue({
+    spanService.spanAmountChoice.set('double');
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 2,
       endSupport: 4
@@ -417,8 +431,8 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick left should clamp to zero', () => {
-    plotService.spanAmountChoice.set('single');
-    plotService.plotOptions.mockReturnValue({
+    spanService.spanAmountChoice.set('single');
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 0,
       endSupport: 1
@@ -433,7 +447,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick right with invert should decrement supports', () => {
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: true,
       startSupport: 2,
       endSupport: 4
@@ -448,7 +462,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick left with invert should increment supports', () => {
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: true,
       startSupport: 1,
       endSupport: 2
@@ -463,7 +477,7 @@ describe('StudioPageComponent', () => {
   });
 
   it('onSupportButtonClick right with invert should clamp to zero', () => {
-    plotService.plotOptions.mockReturnValue({
+    plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: true,
       startSupport: 0,
       endSupport: 1
@@ -513,8 +527,8 @@ describe('StudioPageComponent', () => {
     });
 
     it('should include only obstacles whose supportUuid falls within the slider range', () => {
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 2 });
-      plotService.section.set({
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 2 });
+      spanService.section.set({
         supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
         obstacles: [
           { uuid: 'obs-0', name: 'Obstacle A', supportUuid: 'sup-0' },
@@ -530,8 +544,8 @@ describe('StudioPageComponent', () => {
     });
 
     it('should exclude obstacles outside the slider range', () => {
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
-      plotService.section.set({
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
+      spanService.section.set({
         supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
         obstacles: [
           { uuid: 'obs-0', name: 'Obstacle A', supportUuid: 'sup-0' },
@@ -543,8 +557,8 @@ describe('StudioPageComponent', () => {
     });
 
     it('should always include the currently selected obstacle even when outside the slider range', () => {
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
-      plotService.section.set({
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
+      spanService.section.set({
         supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
         obstacles: [
           { uuid: 'obs-0', name: 'Obstacle A', supportUuid: 'sup-0' },
@@ -566,7 +580,7 @@ describe('StudioPageComponent', () => {
     });
 
     it('should return labeled point options for the selected obstacle', () => {
-      plotService.section.set({
+      spanService.section.set({
         supports: [],
         obstacles: [
           {
@@ -590,7 +604,7 @@ describe('StudioPageComponent', () => {
     });
 
     it('should return empty array when selected obstacle uuid does not match any obstacle', () => {
-      plotService.section.set({ supports: [], obstacles: [] } as unknown as Section);
+      spanService.section.set({ supports: [], obstacles: [] } as unknown as Section);
       obstaclesService.selectedObstacleUuid.set('non-existent');
 
       expect(component.obstaclePointOptions()).toEqual([]);
@@ -599,7 +613,7 @@ describe('StudioPageComponent', () => {
 
   describe('onObstacleSelect', () => {
     it('should auto-select point index 0 when obstacle has exactly one point', () => {
-      plotService.section.set({
+      spanService.section.set({
         supports: [],
         obstacles: [{ uuid: 'obs-1', name: 'Obstacle A', supportUuid: 'sup-0', positions: [{ x: 1, y: 2, z: 3 }] }]
       } as unknown as Section);
@@ -611,7 +625,7 @@ describe('StudioPageComponent', () => {
     });
 
     it('should set null point index when obstacle has multiple points', () => {
-      plotService.section.set({
+      spanService.section.set({
         supports: [],
         obstacles: [
           {
@@ -645,7 +659,7 @@ describe('StudioPageComponent', () => {
 
     it('should reset distanceType to null when selecting an obstacle', () => {
       mockObstacleStateService.distanceType.set('oblique');
-      plotService.section.set({
+      spanService.section.set({
         supports: [],
         obstacles: [{ uuid: 'obs-1', name: 'Obstacle A', supportUuid: 'sup-0', positions: [{ x: 1, y: 2, z: 3 }] }]
       } as unknown as Section);
@@ -664,7 +678,7 @@ describe('StudioPageComponent', () => {
     });
 
     it('should load the obstacle into the form when selected', () => {
-      plotService.section.set({
+      spanService.section.set({
         supports: [],
         obstacles: [{ uuid: 'obs-1', name: 'Obstacle A', supportUuid: 'sup-2', positions: [{ x: 1, y: 2, z: 3 }] }]
       } as unknown as Section);

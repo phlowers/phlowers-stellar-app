@@ -10,6 +10,8 @@ import { vi } from 'vitest';
 import { signal } from '@angular/core';
 import { CableLengthChangeComponent } from './cable-length-change';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { CableModificationsService } from '../../services/cableModifications.service';
 import { Section } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
@@ -37,6 +39,8 @@ describe('CableLengthChangeComponent', () => {
   let component: CableLengthChangeComponent;
   let fixture: ComponentFixture<CableLengthChangeComponent>;
   let mockPlotService: vi.Mocked<PlotService>;
+  let mockSpanService: vi.Mocked<PlotSpanService>;
+  let plotOptionsServiceMock: vi.Mocked<PlotOptionsService>;
   let mockCableModificationsService: vi.Mocked<CableModificationsService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
@@ -44,22 +48,26 @@ describe('CableLengthChangeComponent', () => {
 
   beforeEach(async () => {
     mockPlotService = {
-      section: createSignalMock<Partial<Section> | null>(mockSection),
       study: createSignalMock(null),
       loading: signal(false),
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
-      plotOptions: createSignalMock({ startSupport: 0, endSupport: 1 }),
-      refreshCamera: vi.fn(),
+      plotOptionsChange: vi.fn()
+    } as unknown as vi.Mocked<PlotService>;
+    mockSpanService = {
+      section: createSignalMock<Partial<Section> | null>(mockSection),
       getSupportIndex: vi.fn().mockReturnValue(0),
       getSupportOptions: vi.fn().mockReturnValue([
         { label: '1', value: 'LEFT' },
         { label: '2', value: 'RIGHT' }
       ]),
-      plotOptionsChange: vi.fn(),
       getSpanOptions: signal([{ label: '1 - 2', value: 'support-uuid-1' }])
-    } as unknown as vi.Mocked<PlotService>;
+    } as unknown as vi.Mocked<PlotSpanService>;
+    plotOptionsServiceMock = {
+      plotOptions: createSignalMock({ startSupport: 0, endSupport: 1 }),
+      refreshCamera: vi.fn()
+    } as unknown as vi.Mocked<PlotOptionsService>;
 
     mockCableModificationsService = {
       calculate: vi.fn().mockResolvedValue(undefined),
@@ -74,6 +82,8 @@ describe('CableLengthChangeComponent', () => {
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: CableModificationsService, useValue: mockCableModificationsService }
       ]
     }).compileComponents();
@@ -264,7 +274,7 @@ describe('CableLengthChangeComponent', () => {
     });
 
     it('should enable delete button when a modification is saved for the span', () => {
-      mockPlotService.section.set({
+      mockSpanService.section.set({
         ...mockSection,
         cable_modifications: [
           {
@@ -474,7 +484,7 @@ describe('CableLengthChangeComponent', () => {
   describe('deleteForm()', () => {
     it('should call cableModificationsService.delete when a modification exists for the selected span', () => {
       component.form.controls.scope.setValue('support-uuid-1');
-      mockPlotService.section.set({
+      mockSpanService.section.set({
         ...mockSection,
         cable_modifications: [
           {
@@ -495,7 +505,7 @@ describe('CableLengthChangeComponent', () => {
 
     it('should not call delete when no modification exists for the selected span', () => {
       component.form.controls.scope.setValue('support-uuid-1');
-      mockPlotService.section.set({
+      mockSpanService.section.set({
         ...mockSection,
         cable_modifications: []
       } as unknown as Section);

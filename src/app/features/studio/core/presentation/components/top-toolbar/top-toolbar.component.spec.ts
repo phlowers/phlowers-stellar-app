@@ -4,6 +4,9 @@ import { StudioTopToolbarComponent } from './top-toolbar.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { SelectedDisplayOptions } from '@shared/types/plot.types';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { Section } from '@shared/domain';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
@@ -20,6 +23,19 @@ describe('StudioTopToolbarComponent', () => {
   let component: StudioTopToolbarComponent;
   let fixture: ComponentFixture<StudioTopToolbarComponent>;
   let mockPlotService: vi.Mocked<PlotService>;
+  let mockSpanService: { section: ReturnType<typeof signal<unknown>> };
+  let plotOptionsServiceMock: {
+    plotOptions: ReturnType<typeof signal>;
+    isFreePositioningMode: ReturnType<typeof signal<boolean>>;
+    selectedDisplayOptions: ReturnType<typeof signal>;
+    setAxesNorms: ReturnType<typeof vi.fn>;
+  };
+  let resolutionServiceMock: {
+    resolution: ReturnType<typeof signal<number>>;
+    defaultResolution: ReturnType<typeof signal<number>>;
+    setResolution: ReturnType<typeof vi.fn>;
+    applyResolution: ReturnType<typeof vi.fn>;
+  };
   let mockToolbarDialogService: vi.Mocked<ToolbarDialogService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
@@ -28,23 +44,32 @@ describe('StudioTopToolbarComponent', () => {
   beforeEach(async () => {
     // Mock PlotService
     mockPlotService = {
+      loading: signal(false),
+      plotOptionsChange: vi.fn(),
+      refreshProjection: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<PlotService>;
+
+    mockSpanService = {
+      section: signal(null)
+    };
+
+    plotOptionsServiceMock = {
       plotOptions: signal({
         view: '3d',
         side: 'profile',
         invert: false
       }),
-      loading: signal(false),
       isFreePositioningMode: signal(false),
-      plotOptionsChange: vi.fn(),
       selectedDisplayOptions: signal({ loads: false }),
-      section: signal(null),
+      setAxesNorms: vi.fn()
+    };
+
+    resolutionServiceMock = {
       resolution: signal(100),
       defaultResolution: signal(100),
       setResolution: vi.fn(),
-      applyResolution: vi.fn().mockResolvedValue(undefined),
-      setAxesNorms: vi.fn(),
-      refreshProjection: vi.fn().mockResolvedValue(undefined)
-    } as unknown as vi.Mocked<PlotService>;
+      applyResolution: vi.fn().mockResolvedValue(undefined)
+    };
 
     // Mock ToolbarDialogService
     mockToolbarDialogService = {
@@ -67,6 +92,9 @@ describe('StudioTopToolbarComponent', () => {
       ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+        { provide: PlotResolutionService, useValue: resolutionServiceMock },
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService }
       ]
     }).compileComponents();
@@ -130,19 +158,19 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should disable Loads table when section has no charges', () => {
-      mockPlotService.section.set(null);
+      mockSpanService.section.set(null);
       const tables = component.tablesDropdown();
       expect(tables[0].disabled).toBe(true);
     });
 
     it('should disable Loads table when section has empty charges', () => {
-      mockPlotService.section.set({ charges: [] } as unknown as Section);
+      mockSpanService.section.set({ charges: [] } as unknown as Section);
       const tables = component.tablesDropdown();
       expect(tables[0].disabled).toBe(true);
     });
 
     it('should enable Loads table when section has charges', () => {
-      mockPlotService.section.set({
+      mockSpanService.section.set({
         charges: [{ uuid: '1', name: 'Charge 1' }]
       } as unknown as Section);
       const tables = component.tablesDropdown();
@@ -493,8 +521,8 @@ describe('StudioTopToolbarComponent', () => {
       expect(component.plotService).toBe(mockPlotService);
     });
 
-    it('should access plotService.plotOptions', () => {
-      const options = component.plotService.plotOptions();
+    it('should access plotOptionsService.plotOptions', () => {
+      const options = component.plotOptionsService.plotOptions();
       expect(options.view).toBe('3d');
       expect(options.side).toBe('profile');
       expect(options.invert).toBe(false);
@@ -503,7 +531,7 @@ describe('StudioTopToolbarComponent', () => {
 
   describe('selectedDisplayOptions computed', () => {
     it('should return mapped display options from plotService', () => {
-      mockPlotService.selectedDisplayOptions.set({
+      plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: true,
         baseState: false
       });
@@ -517,7 +545,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should handle empty display options', () => {
-      mockPlotService.selectedDisplayOptions.set({} as SelectedDisplayOptions);
+      plotOptionsServiceMock.selectedDisplayOptions.set({} as SelectedDisplayOptions);
 
       const options = component.selectedDisplayOptions();
 
@@ -527,7 +555,7 @@ describe('StudioTopToolbarComponent', () => {
 
   describe('selectedDisplayValues computed', () => {
     it('should return keys with truthy values', () => {
-      mockPlotService.selectedDisplayOptions.set({
+      plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: true,
         baseState: false
       });
@@ -538,7 +566,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should exclude keys with falsy values', () => {
-      mockPlotService.selectedDisplayOptions.set({
+      plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: false,
         baseState: false
       });
@@ -549,7 +577,7 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should handle mixed truthy and falsy values', () => {
-      mockPlotService.selectedDisplayOptions.set({
+      plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: true,
         mesh: false
       } as unknown as SelectedDisplayOptions);
@@ -565,7 +593,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should set loads to true when included in displayOptions', () => {
       component.setSelectedDisplayOptions(['loads']);
 
-      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+      expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: true,
         baseState: false
       });
@@ -574,7 +602,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should set loads to false when not included in displayOptions', () => {
       component.setSelectedDisplayOptions([]);
 
-      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+      expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: false,
         baseState: false
       });
@@ -583,7 +611,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should set loads to false when other options are selected', () => {
       component.setSelectedDisplayOptions(['mesh', 'ground']);
 
-      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+      expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: false,
         baseState: false
       });
@@ -592,7 +620,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should set baseState to true when included in displayOptions', () => {
       component.setSelectedDisplayOptions(['baseState']);
 
-      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+      expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: false,
         baseState: true
       });
@@ -601,7 +629,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should set both loads and baseState when both included', () => {
       component.setSelectedDisplayOptions(['loads', 'baseState']);
 
-      expect(mockPlotService.selectedDisplayOptions()).toEqual({
+      expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: true,
         baseState: true
       });

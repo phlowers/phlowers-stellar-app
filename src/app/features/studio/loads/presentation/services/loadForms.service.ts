@@ -1,4 +1,6 @@
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
@@ -22,22 +24,24 @@ export class LoadFormsService {
    * Initialize the temporary load data by getting the selected charge case and checking the span loads
    */
   initTemporaryLoadData = () => {
-    const currentChargeUuid = this.plotService.section()?.selected_charge_uuid;
+    const currentChargeUuid = this.spanService.section()?.selected_charge_uuid;
     if (!currentChargeUuid) {
       this.plotService.temporaryLoadData = null;
       return;
     }
-    const charge = this.plotService.section()?.charges?.find((c) => c.uuid === currentChargeUuid);
+    const charge = this.spanService.section()?.charges?.find((c) => c.uuid === currentChargeUuid);
     if (!charge) {
       this.plotService.temporaryLoadData = null;
       return;
     }
     const newData = cloneDeep(charge.data);
-    newData.spanLoads = recheckSpanLoads(newData.spanLoads || [], this.plotService.section()?.supports ?? []);
+    newData.spanLoads = recheckSpanLoads(newData.spanLoads || [], this.spanService.section()?.supports ?? []);
     this.plotService.temporaryLoadData = newData;
   };
 
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly chargesService = inject(ChargesService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly obstacleStateService = inject(ObstacleStateService);
@@ -54,16 +58,12 @@ export class LoadFormsService {
   saveTemporaryLoadDataInSection = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
     const studyUuid = this.plotService.study()?.uuid;
-    const section = this.plotService.section();
-    const sectionUuid = section?.uuid;
+    const section = this.spanService.section();
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid || !temporaryLoadData) {
       return;
     }
-    const chargeUuid = section.selected_charge_uuid;
-    if (!chargeUuid) {
-      return;
-    }
-    const currentCharge = section.charges?.find((c) => c.uuid === chargeUuid);
+    const currentCharge = await this.chargesService.getSelectedChargeCase(studyUuid, sectionUuid);
     if (!currentCharge) {
       return;
     }
@@ -81,10 +81,10 @@ export class LoadFormsService {
     if (!temporaryLoadData) {
       return;
     }
-    this.plotService.refreshCamera();
+    this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
 
-    const currentSection = this.plotService.section();
+    const currentSection = this.spanService.section();
     const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
     this.plotService.temporaryLoadData = {
       ...temporaryLoadData,
@@ -102,7 +102,10 @@ export class LoadFormsService {
 
     const obstacles = currentSection?.obstacles ?? [];
     if (obstacles.length > 0) {
-      const syncedOutput = await this.obstacleStateService.syncObstacles(obstacles, this.plotService.plotOptions());
+      const syncedOutput = await this.obstacleStateService.syncObstacles(
+        obstacles,
+        this.plotOptionsService.plotOptions()
+      );
       if (syncedOutput) {
         const current = this.plotService.litData();
         if (current) {
@@ -133,8 +136,8 @@ export class LoadFormsService {
    */
   deleteLoad() {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
-    const chargeUuid = this.plotService.section()?.selected_charge_uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid;
     if (!studyUuid || !sectionUuid || !chargeUuid) return;
     this.chargesService.deleteCharge(studyUuid, sectionUuid, chargeUuid);
   }

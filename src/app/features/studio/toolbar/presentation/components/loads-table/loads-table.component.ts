@@ -19,6 +19,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { TableModule } from 'primeng/table';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ClimateCharge, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
 
 /** Row data representing climate parameters in the loads table. */
@@ -64,6 +65,7 @@ export class LoadsTableComponent {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly chargesService = inject(ChargesService);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
 
   mode = signal<'view' | 'edit'>('view');
   name = signal<string>('');
@@ -97,7 +99,7 @@ export class LoadsTableComponent {
 
   spanLoadRows = computed<SpanLoadRow[]>(() => {
     const loads = this.spanLoads();
-    const supports = this.plotService.section()?.supports ?? [];
+    const supports = this.spanService.section()?.supports ?? [];
 
     return loads
       .filter((load) => {
@@ -158,7 +160,7 @@ export class LoadsTableComponent {
           this.chargeUuid.set(context.chargeUuid);
           await this.loadChargeData(context.chargeUuid);
         } else {
-          const selectedUuid = this.plotService.section()?.selected_charge_uuid;
+          const selectedUuid = this.spanService.section()?.selected_charge_uuid;
           if (selectedUuid) {
             this.mode.set('view');
             this.chargeUuid.set(selectedUuid);
@@ -172,7 +174,7 @@ export class LoadsTableComponent {
   private async loadChargeData(uuid: string): Promise<void> {
     const charge = await this.chargesService.getCharge(
       this.plotService.study()?.uuid ?? '',
-      this.plotService.section()?.uuid ?? '',
+      this.spanService.section()?.uuid ?? '',
       uuid
     );
     if (charge) {
@@ -210,7 +212,7 @@ export class LoadsTableComponent {
 
   async saveChanges(): Promise<void> {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     const uuid = this.chargeUuid();
 
     if (!studyUuid || !sectionUuid || !uuid) {
@@ -254,7 +256,7 @@ export class LoadsTableComponent {
   }
 
   isFormValid(): boolean {
-    const existingLoadCases = this.plotService.section()?.charges;
+    const existingLoadCases = this.spanService.section()?.charges;
     const currentUuid = this.chargeUuid();
     return this.nameLength() > 0 && !existingLoadCases?.some((c) => c.name === this.name() && c.uuid !== currentUuid);
   }

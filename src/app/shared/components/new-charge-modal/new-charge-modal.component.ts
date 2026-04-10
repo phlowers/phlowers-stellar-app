@@ -11,6 +11,7 @@ import { Charge } from '@shared/domain';
 import { v4 as uuidv4 } from 'uuid';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { defaultClimaticCharge } from '@features/studio/loads/presentation/components/climate/climate.component';
 
 /** Creates a new charge with default climate values and an auto-generated name. */
@@ -57,7 +58,7 @@ export class NewChargeModalComponent {
   descriptionLength = computed(() => this.description().length);
 
   isNameDuplicate = computed(() => {
-    const existingCharges = this.plotService.section()?.charges;
+    const existingCharges = this.spanService.section()?.charges;
     return !!existingCharges?.some((c) => c.name === this.name());
   });
 
@@ -65,11 +66,12 @@ export class NewChargeModalComponent {
   validate = output<Charge>();
   private readonly chargesService = inject(ChargesService);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
 
   constructor() {
     effect(() => {
       if (this.isOpen()) {
-        const emptyCase = newCharge(this.plotService.section()?.charges ?? []);
+        const emptyCase = newCharge(this.spanService.section()?.charges ?? []);
         this.name.set(emptyCase.name);
         this.personnelPresence.set(emptyCase.personnelPresence);
         this.description.set(emptyCase.description);
@@ -104,7 +106,7 @@ export class NewChargeModalComponent {
     this.validate.emit(charge);
 
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       throw new Error('Study or section not found');
     }

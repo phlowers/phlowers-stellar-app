@@ -9,6 +9,8 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { CableLengthChangeFormControls, CableWidthType } from './cable-length-change.interfaces';
 import { CableModificationsService } from '../../services/cableModifications.service';
 
@@ -31,6 +33,8 @@ import { CableModificationsService } from '../../services/cableModifications.ser
 export class CableLengthChangeComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly cableModificationsService = inject(CableModificationsService);
 
   readonly isLoading = signal(false);
@@ -55,7 +59,7 @@ export class CableLengthChangeComponent {
   });
 
   /** Span options per RG.LON-CAB.POR.1. */
-  readonly spansOptions = this.plotService.getSpanOptions;
+  readonly spansOptions = this.spanService.getSpanOptions;
 
   readonly supportRefOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
 
@@ -81,6 +85,27 @@ export class CableLengthChangeComponent {
       .subscribe(() => {
         this.isDirtySinceLastSave.set(true);
       });
+
+    // Auto-select the currently visible span when section loads or changes (RG.LON-CAB.POR.5)
+    effect(() => {
+      const section = this.spanService.section();
+      if (!section) {
+        untracked(() => {
+          this.resetForm();
+          this.previousSectionUuid = null;
+        });
+        return;
+      }
+      if (section.uuid === this.previousSectionUuid) return;
+      this.previousSectionUuid = section.uuid;
+
+      const startIndex = untracked(() => this.plotOptionsService.plotOptions().startSupport);
+      const defaultUuid = section.supports?.[startIndex]?.uuid ?? section.supports?.[0]?.uuid ?? null;
+      untracked(() => {
+        this.form.controls.scope.setValue(defaultUuid, { emitEvent: false });
+        if (defaultUuid) this.onScopeChange(defaultUuid);
+      });
+    });
   }
 
   onScopeChange(uuid: string | null): void {
@@ -91,14 +116,18 @@ export class CableLengthChangeComponent {
       this.isDirtySinceLastSave.set(false);
       return;
     }
-    const index = untracked(() => this.plotService.getSupportIndex(uuid));
+    const index = untracked(() => this.spanService.getSupportIndex(uuid));
     if (index < 0) return;
 
-    this.supportRefOptions.set(untracked(() => this.plotService.getSupportOptions(uuid)));
+    this.supportRefOptions.set(untracked(() => this.spanService.getSupportOptions(uuid)));
     this.form.controls.supportRef.enable({ emitEvent: false });
     this.form.controls.supportRef.setValue('LEFT', { emitEvent: false });
+    this.plotService.plotOptionsChange({
+      startSupport: index,
+      endSupport: index + 1
+    });
 
-    const savedMod = untracked(() => this.plotService.section()?.cable_modifications?.find((m) => m.spanUuid === uuid));
+    const savedMod = untracked(() => this.spanService.section()?.cable_modifications?.find((m) => m.spanUuid === uuid));
     if (savedMod) {
       this.hasSavedModification.set(false);
       this.form.patchValue(
@@ -148,16 +177,16 @@ export class CableLengthChangeComponent {
     this.form.controls.supportRef.markAsUntouched();
   }
 
-  /** Reload section from DB and update plotService.section signal */
+  /** Reload section from DB and update spanService.section signal */
   private async reloadSectionFromDb(): Promise<void> {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) return;
     const study = await this.cableModificationsService.getStudy(studyUuid);
     if (!study) return;
     const section = study.sections.find((s) => s?.uuid === sectionUuid);
     if (section) {
-      this.plotService.section.set(section);
+      this.spanService.section.set(section);
     }
   }
 
@@ -214,7 +243,7 @@ export class CableLengthChangeComponent {
   deleteForm(): void {
     const spanUuid = this.form.controls.scope.value;
     const uuid = spanUuid
-      ? (this.plotService.section()?.cable_modifications?.find((m) => m.spanUuid === spanUuid)?.uuid ?? null)
+      ? (this.spanService.section()?.cable_modifications?.find((m) => m.spanUuid === spanUuid)?.uuid ?? null)
       : null;
     if (uuid) {
       this.cableModificationsService.delete(uuid).then(async () => {

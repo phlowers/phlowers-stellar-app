@@ -8,6 +8,8 @@ import { createPlotData } from './helpers/createPlotData';
 import { Data, PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { PlotOptions, SelectedDisplayOptions } from '@shared/types/plot.types';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
@@ -206,17 +208,21 @@ describe('SectionPlotComponent', () => {
   const mockPlotService = {
     litData: litDataSignal,
     baseLitData: baseLitDataSignal,
+    temporaryLoadData: null as ChargeData | null | undefined,
+    plotOptionsChange: noopMock
+  };
+
+  const mockSpanService = {
+    section: sectionSignal
+  };
+
+  const plotOptionsServiceMock = {
     plotOptions: plotOptionsSignal,
     selectedDisplayOptions: selectedDisplayOptionsSignal,
-    section: sectionSignal,
     camera: cameraSignal,
     isFreePositioningMode: isFreePositioningModeSignal,
     axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
-    temporaryLoadData: null as ChargeData | null | undefined,
-    plotOptionsChange: noopMock,
-    refreshCamera: noopMock,
-    distances: signal([]),
-    distanceType: signal<'oblique' | 'vertical' | 'horizontal'>('oblique')
+    refreshCamera: noopMock
   };
 
   const mockSideTabsService = {
@@ -277,6 +283,8 @@ describe('SectionPlotComponent', () => {
       imports: [SectionPlotComponent],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: SideTabsService, useValue: mockSideTabsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
         { provide: ObstaclesService, useValue: mockObstaclesService },

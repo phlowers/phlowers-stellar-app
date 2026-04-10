@@ -38,6 +38,8 @@ import { LoadMarkingComponent } from '@features/studio/loads/presentation/compon
 import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
@@ -124,40 +126,40 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   );
   isGlobalCutStrand = signal<boolean>(false);
 
-  private readonly maxSupportIndex = computed(() => (this.plotService.section()?.supports?.length ?? 0) - 1);
+  private readonly maxSupportIndex = computed(() => (this.spanService.section()?.supports?.length ?? 0) - 1);
 
   isPreviousDisabled = computed(() => {
-    const { invert, startSupport, endSupport } = this.plotService.plotOptions();
+    const { invert, startSupport, endSupport } = this.plotOptionsService.plotOptions();
     return this.plotService.loading() || (invert ? endSupport === this.maxSupportIndex() : startSupport === 0);
   });
 
   isNextDisabled = computed(() => {
-    const { invert, startSupport, endSupport } = this.plotService.plotOptions();
+    const { invert, startSupport, endSupport } = this.plotOptionsService.plotOptions();
     return this.plotService.loading() || (invert ? startSupport === 0 : endSupport === this.maxSupportIndex());
   });
 
   sliderOptions = computed<Options>(() => {
     return {
       floor: 0,
-      ceil: this.plotService.section()?.supports?.length ? this.plotService.section()!.supports.length - 1 : undefined,
+      ceil: this.spanService.section()?.supports?.length ? this.spanService.section()!.supports.length - 1 : undefined,
       step: 1,
       showTicks: true,
       showTicksValues: true,
       animate: false,
       animateOnMove: false,
-      disabled: this.plotService.loading() || this.plotService.isFreePositioningMode(),
+      disabled: this.plotService.loading() || this.plotOptionsService.isFreePositioningMode(),
       translate: (value: number) => {
         const num = this.plotService.section()?.supports?.[value]?.number;
         return num ? formatSupportNumber(num) : String(value + 1);
       },
-      rightToLeft: this.plotService.plotOptions().invert
+      rightToLeft: this.plotOptionsService.plotOptions().invert
     };
   });
 
   filteredObstaclesOptions = computed(() => {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!section) return [];
-    const { startSupport, endSupport } = this.plotService.plotOptions();
+    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
     const visibleSupportUuids = new Set(section.supports.slice(startSupport, endSupport).map((s) => s.uuid));
     const options = section.obstacles
       .filter((o) => visibleSupportUuids.has(o.supportUuid))
@@ -174,7 +176,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   obstaclePointOptions = computed(() => {
     const uuid = this.obstaclesService.selectedObstacleUuid();
     if (!uuid) return [];
-    const obstacle = this.plotService.section()?.obstacles.find((o) => o.uuid === uuid);
+    const obstacle = this.spanService.section()?.obstacles.find((o) => o.uuid === uuid);
     if (!obstacle) return [];
     return obstacle.positions.map((_, index) => ({ label: $localize`Point ${index + 1}`, value: index }));
   });
@@ -185,6 +187,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   readonly plotService = inject(PlotService);
+  readonly spanService = inject(PlotSpanService);
+  readonly plotOptionsService = inject(PlotOptionsService);
   readonly loadFormsService = inject(LoadFormsService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
@@ -231,7 +235,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
           this.plotService.study.set(study);
           const section = study.sections.find((s) => s.uuid === sectionUuid);
           if (section) {
-            this.plotService.section.set(section);
+            this.spanService.section.set(section);
             if (this.previousSectionUuid() !== section.uuid) {
               this.plotService.plotOptionsChange({
                 endSupport: section.supports.length - 1,
@@ -257,10 +261,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {
     this.plotService.plotOptionsChange({ [key]: value });
-    const options = this.plotService.plotOptions();
+    const options = this.plotOptionsService.plotOptions();
     const diff = Math.abs(options.endSupport - options.startSupport);
     const spanAmount = this.getSpanAmount(diff);
-    this.plotService.spanAmountChoice.set(spanAmount);
+    this.spanService.spanAmountChoice.set(spanAmount);
   }, STUDIO_PLOT_DEBOUNCE_DELAY);
 
   private getSpanAmount(diff: number): SpanAmountChoice {
@@ -270,7 +274,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   updateSliderOptions({ value, highValue }: { value?: number; highValue?: number }) {
-    const options = this.plotService.plotOptions();
+    const options = this.plotOptionsService.plotOptions();
     [
       { val: value, key: 'startSupport' as const, opt: options.startSupport },
       { val: highValue, key: 'endSupport' as const, opt: options.endSupport }
@@ -286,9 +290,9 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onSelectSpanAmount(value: string) {
-    this.plotService.spanAmountChoice.set(value as SpanAmountChoice);
-    const startSupport = this.plotService.plotOptions().startSupport;
-    const maxSupport = (this.plotService.section()?.supports.length ?? 0) - 1;
+    this.spanService.spanAmountChoice.set(value as 'single' | 'double' | 'all');
+    const startSupport = this.plotOptionsService.plotOptions().startSupport;
+    const maxSupport = (this.spanService.section()?.supports.length ?? 0) - 1;
     if (value === 'all') {
       this.plotService.plotOptionsChange({
         startSupport: 0,
@@ -304,7 +308,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   onObstacleSelect(uuid: string | null) {
     this.obstacleStateService.distanceType.set(null);
-    const obstacle = uuid ? this.plotService.section()?.obstacles.find((o) => o.uuid === uuid) : null;
+    const obstacle = uuid ? this.spanService.section()?.obstacles.find((o) => o.uuid === uuid) : null;
     const pointIndex = obstacle?.positions.length === 1 ? 0 : null;
     this.obstaclesService.setSelectedObstacle(uuid, pointIndex);
     if (obstacle) {
@@ -314,8 +318,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   onSupportButtonClick(direction: 'left' | 'right') {
     let increment = direction === 'left' ? -1 : 1;
-    increment = this.plotService.plotOptions().invert ? -increment : increment;
-    const options = this.plotService.plotOptions();
+    increment = this.plotOptionsService.plotOptions().invert ? -increment : increment;
+    const options = this.plotOptionsService.plotOptions();
     this.plotService.plotOptionsChange({
       startSupport: Math.max(options.startSupport + increment, 0),
       endSupport: Math.max(options.endSupport + increment, 0)

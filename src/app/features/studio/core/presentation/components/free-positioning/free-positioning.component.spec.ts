@@ -4,6 +4,8 @@ import { FormArray, FormBuilder } from '@angular/forms';
 import { FreePositioningComponent } from './free-positioning.component';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
@@ -54,16 +56,22 @@ describe('FreePositioningComponent', () => {
   const loadingSignal = signal(false);
 
   const mockPlotService = {
-    plotOptions: plotOptionsSignal,
     workerReady: workerReadySignal,
     litData: litDataSignal,
-    section: sectionSignal,
     error: errorSignal,
     pythonErrorCode: pythonErrorCodeSignal,
     loading: loadingSignal,
-    camera: signal(null),
-    isFreePositioningMode: signal(false),
     temporaryLoadData: null
+  };
+
+  const mockSpanService = {
+    section: sectionSignal
+  };
+
+  const mockPlotOptionsService = {
+    plotOptions: plotOptionsSignal,
+    camera: signal(null),
+    isFreePositioningMode: signal(false)
   };
 
   const mockWorkerPythonService = {
@@ -157,6 +165,8 @@ describe('FreePositioningComponent', () => {
       providers: [
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: SideTabsService, useValue: mockSideTabsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
         { provide: ObstaclesService, useValue: mockObstaclesService }
@@ -723,7 +733,8 @@ describe('FreePositioningComponent', () => {
 
     it('should use left support altitude when referenceSupport is null', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] }, error: null
+        result: { obstacles: [] },
+        error: null
       });
       litDataSignal.set(litDataWithTwoSupports);
       mockObstacleFormService.form.get('referenceSupport')?.setValue(null);
@@ -736,7 +747,8 @@ describe('FreePositioningComponent', () => {
 
     it('should use left support altitude when referenceSupport is LEFT', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] }, error: null
+        result: { obstacles: [] },
+        error: null
       });
       litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
@@ -751,7 +763,8 @@ describe('FreePositioningComponent', () => {
 
     it('should use right support altitude when referenceSupport is RIGHT', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] }, error: null
+        result: { obstacles: [] },
+        error: null
       });
       litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(

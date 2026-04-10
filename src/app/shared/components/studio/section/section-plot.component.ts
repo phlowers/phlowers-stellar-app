@@ -9,6 +9,8 @@ import { PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot
 import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SpanLoad } from '@shared/domain';
 import { LoadType, SpanLoadAnnotationData } from './helpers/createLoadAnnotations';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
@@ -45,6 +47,8 @@ export class SectionPlotComponent {
 
   // Services
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly sideTabsService = inject(SideTabsService);
   private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly obstaclesService = inject(ObstaclesService);
@@ -77,9 +81,9 @@ export class SectionPlotComponent {
   private readonly plotState = computed(() => ({
     litData: this.litData(),
     baseLitData: this.plotService.baseLitData(),
-    plotOptions: this.plotService.plotOptions(),
-    displayOptions: this.plotService.selectedDisplayOptions(),
-    axesNorms: this.plotService.axesNorms(),
+    plotOptions: this.plotOptionsService.plotOptions(),
+    displayOptions: this.plotOptionsService.selectedDisplayOptions(),
+    axesNorms: this.plotOptionsService.axesNorms(),
     selectedObstacleUuid: this.obstaclesService.selectedObstacleUuid(),
     activePointIndex: this.obstaclesService.activePointIndex(),
     sideTabs: this.sideTabsService.sideTabs(),
@@ -114,7 +118,7 @@ export class SectionPlotComponent {
     selectedDisplayOptions: SelectedDisplayOptions,
     plotOptions: PlotOptions
   ): (SpanLoad | null)[] {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
 
     if (!selectedDisplayOptions.loads || !section) {
       return [];
@@ -136,7 +140,7 @@ export class SectionPlotComponent {
 
   private buildObstacleList(): Obstacle[] {
     const currentObstacle = this.obstacleFormService.form.value as Obstacle;
-    const existingObstacles = this.plotService.section()?.obstacles ?? [];
+    const existingObstacles = this.spanService.section()?.obstacles ?? [];
     return appendExistingObstaclesWithFormObstacle(existingObstacles, currentObstacle);
   }
 
@@ -147,11 +151,11 @@ export class SectionPlotComponent {
 
     try {
       this.isPlotRefreshing.set(true);
-      const plotOptions = this.plotService.plotOptions();
-      const selectedDisplayOptions = this.plotService.selectedDisplayOptions();
+      const plotOptions = this.plotOptionsService.plotOptions();
+      const selectedDisplayOptions = this.plotOptionsService.selectedDisplayOptions();
       const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
       const obstacles = this.buildObstacleList();
-      const supports = this.plotService.section()?.supports ?? [];
+      const supports = this.spanService.section()?.supports ?? [];
       let plotData = createPlotData(litData, plotOptions, supports);
 
       if (selectedDisplayOptions.baseState && this.plotService.baseLitData()) {
@@ -159,10 +163,10 @@ export class SectionPlotComponent {
         plotData = [...(shadowData as typeof plotData), ...plotData];
       }
 
-      const camera = this.plotService.camera();
+      const camera = this.plotOptionsService.camera();
       const currentObstacleUuid = this.obstaclesService.selectedObstacleUuid();
       const currentObstaclePointIndex = this.obstaclesService.activePointIndex() ?? 0;
-      const axesNorms = this.plotService.axesNorms();
+      const axesNorms = this.plotOptionsService.axesNorms();
 
       const distances = this.obstacleStateService.distances();
       const distanceType = this.obstacleStateService.distanceType();
@@ -208,7 +212,7 @@ export class SectionPlotComponent {
     plotEl.removeAllListeners('plotly_clickannotation');
     plotEl.on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
-        const section = this.plotService.section();
+        const section = this.spanService.section();
         const payload = getObstacleClickPayload(
           event?.annotation?.data as ObstacleAnnotationData,
           section?.obstacles ?? [],
@@ -231,7 +235,7 @@ export class SectionPlotComponent {
         on(e: 'plotly_relayout', fn: () => void): void;
       }
     ).on('plotly_relayout', () => {
-      this.plotService.refreshCamera();
+      this.plotOptionsService.refreshCamera();
     });
   };
 }

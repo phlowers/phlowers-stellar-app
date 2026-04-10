@@ -5,26 +5,34 @@ import { signal } from '@angular/core';
 import { InitComponent } from './init.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { Section } from '@shared/domain';
 
 describe('Init component', () => {
   let component: InitComponent;
   let fixture: ComponentFixture<InitComponent>;
   let mockPlotService: Partial<PlotService>;
+  let mockSpanService: { section: ReturnType<typeof signal<Section | null>> };
+  let mockPlotOptionsService: { plotOptions: ReturnType<typeof signal> };
   let toolbarDialogService: ToolbarDialogService;
 
   beforeEach(async () => {
     mockPlotService = {
-      section: signal<Section | null>(null),
+      modifySection: vi.fn().mockResolvedValue(undefined)
+    } as unknown as PlotService;
+    mockSpanService = {
+      section: signal<Section | null>(null)
+    };
+    mockPlotOptionsService = {
       plotOptions: signal({
         view: '3d',
         side: 'profile',
         startSupport: 0,
         endSupport: 10,
         invert: false
-      }),
-      modifySection: vi.fn().mockResolvedValue(undefined)
-    } as unknown as PlotService;
+      })
+    };
 
     await TestBed.configureTestingModule({
       imports: [InitComponent],
@@ -32,7 +40,9 @@ describe('Init component', () => {
         ToolbarDialogService,
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: PlotService, useValue: mockPlotService }
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: mockPlotOptionsService }
       ]
     }).compileComponents();
 
@@ -52,7 +62,7 @@ describe('Init component', () => {
         uuid: 'test-section-uuid',
         field_measures: []
       };
-      mockPlotService.section = signal<Section | null>(mockSection as Section);
+      mockSpanService.section = signal<Section | null>(mockSection as Section);
 
       component.newMeasureNameControl.setValue('Test Measure');
       component.newMeasureNameControl.markAsTouched();
@@ -76,7 +86,7 @@ describe('Init component', () => {
         uuid: 'test-section-uuid',
         field_measures: []
       };
-      mockPlotService.section = signal<Section | null>(mockSection as Section);
+      mockSpanService.section = signal<Section | null>(mockSection as Section);
       const proceedSpy = vi.spyOn(toolbarDialogService, 'proceedToMainComponent');
 
       component.newMeasureNameControl.setValue('Valid Measure');
@@ -92,7 +102,7 @@ describe('Init component', () => {
         uuid: 'test-section-uuid',
         field_measures: []
       };
-      mockPlotService.section = signal<Section | null>(mockSection as Section);
+      mockSpanService.section = signal<Section | null>(mockSection as Section);
       const proceedSpy = vi.spyOn(toolbarDialogService, 'proceedToMainComponent');
 
       component.newMeasureNameControl.setValue('');

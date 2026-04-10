@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SideTabsComponent } from './side-tabs.component';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { SideTabComponent } from './side-tab/side-tab.component';
 
@@ -18,18 +18,18 @@ class TestHostComponent {}
 
 describe('SideTabsComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
-  let plotServiceMock: { refreshCamera: vi.Mock };
+  let plotOptionsServiceMock: { refreshCamera: ReturnType<typeof vi.fn> };
   let sideTabsService: SideTabsService;
   const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
   beforeEach(async () => {
-    plotServiceMock = {
+    plotOptionsServiceMock = {
       refreshCamera: vi.fn()
     };
 
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [{ provide: PlotService, useValue: plotServiceMock }, SideTabsService]
+      providers: [{ provide: PlotOptionsService, useValue: plotOptionsServiceMock }, SideTabsService]
     }).compileComponents();
 
     sideTabsService = TestBed.inject(SideTabsService);
@@ -198,6 +198,6 @@ describe('SideTabsComponent', () => {
     fixture.detectChanges();
 
     await wait(450);
-    expect(plotServiceMock.refreshCamera).toHaveBeenCalled();
+    expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalled();
   });
 });

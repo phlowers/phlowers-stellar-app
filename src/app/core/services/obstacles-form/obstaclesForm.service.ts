@@ -1,6 +1,8 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
@@ -21,6 +23,8 @@ import { ObstacleOutput } from '@services/worker_python/tasks/types';
 export class ObstacleFormService {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly sectionService = inject(SectionService);
@@ -148,7 +152,8 @@ export class ObstacleFormService {
 
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
     if (supportUuid) {
-      this.supportsOptions.set(this.plotService.getSupportOptions(supportUuid));
+      const supports = this.spanService.getSupportOptions(supportUuid);
+      this.supportsOptions.set(supports.map((s) => ({ label: String(s.label), value: s.value })));
     } else {
       this.supportsOptions.set([]);
       // Clear supportUuid and emit value to ensure the re-slection of the same span won't block support selection.
@@ -162,7 +167,13 @@ export class ObstacleFormService {
     if (!supportUuid) {
       return;
     }
-    this.supportsOptions.set(this.plotService.getSupportOptions(supportUuid));
+    const supports = this.spanService.getSupportOptions(supportUuid);
+    this.supportsOptions.set(
+      supports.map((s) => ({
+        label: String(s.label),
+        value: s.value
+      }))
+    );
   }
 
   private resetForm(supportUuid: string | null) {
@@ -186,7 +197,7 @@ export class ObstacleFormService {
   }
 
   private findObstacle(uuid: string): Obstacle | undefined {
-    return this.plotService.section()?.obstacles?.find((o) => o.uuid === uuid);
+    return this.spanService.section()?.obstacles?.find((o) => o.uuid === uuid);
   }
 
   private patchFormFromObstacle(uuid: string, obstacle: Obstacle): void {
@@ -194,7 +205,7 @@ export class ObstacleFormService {
     if (!support) {
       return;
     }
-    const isInSpanOptions = this.plotService.getSpanOptions().some((s) => s.value === obstacle.supportUuid);
+    const isInSpanOptions = this.spanService.getSpanOptions().some((s) => s.value === obstacle.supportUuid);
     if (!isInSpanOptions) {
       return;
     }
@@ -206,7 +217,7 @@ export class ObstacleFormService {
   }
 
   private findSupportForObstacle(obstacle: Obstacle) {
-    return this.plotService.section()?.supports?.find((s) => s.uuid === obstacle.supportUuid);
+    return this.spanService.section()?.supports?.find((s) => s.uuid === obstacle.supportUuid);
   }
 
   deletePoint(index?: number): void {
@@ -228,7 +239,7 @@ export class ObstacleFormService {
 
   private async removeObstacleFromSection(obstacleUuid: string): Promise<void> {
     const study = this.plotService.study();
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!study || !section) {
       return;
     }
@@ -243,7 +254,7 @@ export class ObstacleFormService {
 
     const obstacleOutput = await this.obstacleStateService.deleteObstacle(obstacleUuid);
     this.applyObstacleOutputToLitData(obstacleOutput);
-    await this.obstacleStateService.calculateDistances(this.plotService.plotOptions());
+    await this.obstacleStateService.calculateDistances(this.plotOptionsService.plotOptions());
 
     this.messageService.add({
       severity: 'success',
@@ -269,10 +280,13 @@ export class ObstacleFormService {
 
     // 1. Merge new/updated obstacle into the in-memory section
     this.upsertObstacleInSection(obstacle);
-    const allObstacles = this.plotService.section()?.obstacles ?? [obstacle];
+    const allObstacles = this.spanService.section()?.obstacles ?? [obstacle];
 
     // 2. Register all obstacles in Python worker — get computed render positions for current span
-    const obstacleOutput = await this.obstacleStateService.addObstacle(allObstacles, this.plotService.plotOptions());
+    const obstacleOutput = await this.obstacleStateService.addObstacle(
+      allObstacles,
+      this.plotOptionsService.plotOptions()
+    );
 
     // 3. Update rendering (litData.obstacles)
     this.applyObstacleOutputToLitData(obstacleOutput);
@@ -281,7 +295,7 @@ export class ObstacleFormService {
     await this.saveSection();
 
     // 5. Recalculate distances
-    await this.obstacleStateService.calculateDistances(this.plotService.plotOptions());
+    await this.obstacleStateService.calculateDistances(this.plotOptionsService.plotOptions());
 
     // 5. Update UI selection
     const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
@@ -308,7 +322,7 @@ export class ObstacleFormService {
     return {
       uuid,
       supportUuid,
-      supportIndex: this.plotService.getSupportIndex(supportUuid),
+      supportIndex: this.spanService.getSupportIndex(supportUuid),
       name: formValue.name ?? '',
       type: formValue.type ?? '',
       altitudeType: formValue.altitudeType ?? '',
@@ -319,7 +333,7 @@ export class ObstacleFormService {
   }
 
   private upsertObstacleInSection(obstacle: Obstacle): void {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!section) {
       return;
     }
@@ -336,7 +350,7 @@ export class ObstacleFormService {
 
   private async saveSection(): Promise<void> {
     const study = this.plotService.study();
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!study || !section) {
       return;
     }
@@ -362,13 +376,13 @@ export class ObstacleFormService {
     if (!supportUuid) {
       return;
     }
-    const supportIndex = this.plotService.getSupportIndex(supportUuid);
+    const supportIndex = this.spanService.getSupportIndex(supportUuid);
     if (supportIndex >= 0) {
       this.plotService.plotOptionsChange({
         startSupport: supportIndex,
         endSupport: supportIndex + 1
       });
-      this.plotService.spanAmountChoice.set('single');
+      this.spanService.spanAmountChoice.set('single');
     }
   }
 }

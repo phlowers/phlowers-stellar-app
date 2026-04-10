@@ -29,8 +29,8 @@ src/app/core/services/plot/
 ├── plot-resolution.service.spec.ts ✅ DONE — 21 tests
 ├── plot-options.service.ts         ✅ DONE — Phase 2
 ├── plot-options.service.spec.ts    ✅ DONE — 28 tests
-├── plot-span.service.ts            ← Phase 3 (renamed from PlotNavigationService)
-└── plot-span.service.spec.ts
+├── plot-span.service.ts            ✅ DONE — Phase 3
+└── plot-span.service.spec.ts       ✅ DONE — 22 tests
 ```
 
 ---
@@ -80,7 +80,7 @@ src/app/core/services/plot/
 
 ---
 
-## Phase 3 — `PlotSpanService` (low risk, pure computed) ← NEXT
+## ✅ Phase 3 — `PlotSpanService` (low risk, pure computed) — DONE
 
 **Create** `src/app/core/services/plot/plot-span.service.ts`
 
@@ -100,7 +100,9 @@ src/app/core/services/plot/
 
 ---
 
-## Phase 4 — `PlotService` slim (data layer orchestrator)
+## ✅ Phase 4 — `PlotService` slim (data layer orchestrator) — DONE
+
+> **Note:** `console.error` → `LoggerService` deferred: `LoggerService` is defined on the `dev` branch (commit `8481249`) but not yet merged into this branch. Apply after merge.
 
 After phases 1–3, `PlotService` contains only:
 
@@ -161,18 +163,17 @@ export const checkIfProjectionNeedRefresh = (
 - [x] Create `.spec.ts` for each new service (28 tests)
 - [x] Run `npm run test` — 152 tests, no regression
 
-**Phase 3** ⏳
-- [ ] Run `npm run test` baseline — all tests green
-- [ ] Implement phase
-- [ ] Create `.spec.ts` for each new service
-- [ ] Run `npm run test` — no regression
-- [ ] Run `npm run lint` — no errors
+**Phase 3** ✅
+- [x] Run `npm run test` baseline — 152 tests green
+- [x] Implement phase
+- [x] Create `.spec.ts` for each new service (22 tests)
+- [x] Run `npm run test` — 174 tests, no regression
 
-**Phase 4** ⏳
-- [ ] Run `npm run test` baseline — all tests green
-- [ ] Implement phase
-- [ ] Run `npm run test` — no regression
-- [ ] Run `npm run lint` — no errors
+**Phase 4** ✅
+- [x] Run `npm run test` baseline — 174 tests green
+- [x] Implement phase (`DOCUMENT` token in `purgePlot`)
+- [x] Run `npm run test` — 174 tests, no regression
+- [ ] `console.error` → `LoggerService` — deferred until `LoggerService` is merged from `dev`
 
 ---
 
@@ -180,15 +181,15 @@ export const checkIfProjectionNeedRefresh = (
 
 | # | Point | Where |
 |---|---|---|
-| Extracted services | `PlotResolutionService`, `PlotOptionsService`, `PlotSpanService` | Phases 1–3 |
+| Extracted services | `PlotResolutionService` ✅ `PlotOptionsService` ✅ `PlotSpanService` ✅ | Phases 1–3 |
 | Pure utility | `checkIfProjectionNeedRefresh` in `plot-options.utils.ts` | ✅ Phase 1 |
 | No circular dependency | `plotOptionsChange` callback pattern | ✅ Phase 2 |
-| Unit tests | Spec file per new service | ✅ Phase 1 (21) ✅ Phase 2 (28) ⏳ Phase 3 |
-| `resetAll` coordination | `plotOptionsService.reset()` called from `PlotService` | ✅ Phase 2 |
-| `DOCUMENT` token | `getCamera()` in `PlotOptionsService` ✅ · `purgePlot()` in Phase 4 |
-| `temporaryLoadData` | Stays in `PlotService` | Phase 4 |
+| Unit tests | Spec file per new service | ✅ P1 (21) ✅ P2 (28) ✅ P3 (22) — 174 total |
+| `resetAll` coordination | `plotOptionsService.reset()` + `spanService.reset()` | ✅ Phases 2–3 |
+| `DOCUMENT` token | `getCamera()` ✅ `purgePlot()` ✅ | Phase 4 |
+| `temporaryLoadData` | Stays in `PlotService` | ✅ Phase 4 |
 | `subscription` memory leak | `OnDestroy` in `PlotResolutionService` | ✅ Phase 1 |
-| `console.error` → logger | `LoggerService` in `PlotService` | Phase 4 |
+| `console.error` → logger | `LoggerService` — deferred (not on branch yet) | After merge from dev |
 | `localStorage` → `globalThis` | `PlotResolutionService` | ✅ Phase 1 |
 
 ---

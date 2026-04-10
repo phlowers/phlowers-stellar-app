@@ -10,6 +10,8 @@ import { MenuItem } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ScaleViewComponent } from './scale-view/scale-view.component';
@@ -42,7 +44,10 @@ export class StudioTopToolbarComponent implements OnInit {
   items = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
 
-  private readonly hasCharges = computed(() => !!this.plotService.section()?.charges?.length);
+  private readonly spanService = inject(PlotSpanService);
+  readonly plotOptionsService = inject(PlotOptionsService);
+
+  private readonly hasCharges = computed(() => !!this.spanService.section()?.charges?.length);
 
   tablesDropdown = computed<MenuItem[]>(() => [
     {
@@ -135,7 +140,7 @@ export class StudioTopToolbarComponent implements OnInit {
   ]);
 
   selectedDisplayOptions = computed(() =>
-    Object.keys(this.plotService.selectedDisplayOptions()).map((key) => ({
+    Object.keys(this.plotOptionsService.selectedDisplayOptions()).map((key) => ({
       label: key,
       value: key
     }))
@@ -143,7 +148,7 @@ export class StudioTopToolbarComponent implements OnInit {
 
   selectedDisplayValues = computed(() => {
     const values = [];
-    const options = this.plotService.selectedDisplayOptions();
+    const options = this.plotOptionsService.selectedDisplayOptions();
     for (const key in options) {
       if (options[key as keyof typeof options]) {
         values.push(key);
@@ -153,7 +158,7 @@ export class StudioTopToolbarComponent implements OnInit {
   });
 
   setSelectedDisplayOptions(selectedDisplayOptions: string[]): void {
-    this.plotService.selectedDisplayOptions.set({
+    this.plotOptionsService.selectedDisplayOptions.set({
       loads: selectedDisplayOptions.includes('loads'),
       baseState: selectedDisplayOptions.includes('baseState')
     });
