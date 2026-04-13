@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { recheckSpanLoads } from './span-loads.helpers';
+import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
 import { SpanLoad, LoadType } from '@shared/domain/models/charge.model';
 import { Support } from '@shared/domain/models/support.model';
 
@@ -78,13 +78,15 @@ describe('recheckSpanLoads', () => {
     expect(loads).toHaveLength(originalLength);
   });
 
-  it('should handle duplicate supportUuids in loads by keeping the first occurrence', () => {
+  it('should preserve all entries when loads contain duplicate supportUuids', () => {
     const loads = [makeLoad('s1', { loadWeight: 10 }), makeLoad('s1', { loadWeight: 99 })];
     const supports = [makeSupport('s1')];
 
     const result = recheckSpanLoads(loads, supports);
 
-    // Both entries pass the filter since they share the same uuid; result has 2 entries
-    expect(result.every((l) => l.supportUuid === 's1')).toBe(true);
+    // Both entries pass the filter since supportUuid 's1' exists in supports
+    expect(result).toHaveLength(2);
+    expect(result[0].loadWeight).toBe(10);
+    expect(result[1].loadWeight).toBe(99);
   });
 });

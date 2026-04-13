@@ -413,6 +413,22 @@ describe('CableLengthChangeComponent', () => {
 
       expect(component.isDirtySinceLastSave()).toBe(false);
     });
+
+    it('should reset isLoading to false even if calculate throws', async () => {
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        widthCable: 'shortening',
+        sizeCable: 2,
+        distanceSupportRef: 8
+      });
+      component.form.controls.supportRef.enable();
+      component.form.controls.supportRef.setValue('LEFT');
+      mockCableModificationsService.calculate.mockRejectedValue(new Error('worker error'));
+
+      await expect(component.saveForm()).rejects.toThrow('worker error');
+
+      expect(component.isLoading()).toBe(false);
+    });
   });
 
   // ---------------------------------------------------------------------------

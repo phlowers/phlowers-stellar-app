@@ -163,11 +163,16 @@
 
 ---
 
-## 11. `loadObstacle` / `patchFormFromObstacle` / `findObstacle` — `src/app/core/services/obstacles-form/obstaclesForm.service.ts`
+## 12. `clearPersistedFormData()` — `src/app/features/studio/loads/presentation/services/cableModifications.service.ts`
 
-| | |
-|---|---|
-| 📍 Source | `src/app/core/services/obstacles-form/obstaclesForm.service.ts` |
+- **Type**: method
+- **Reason**: No-op placeholder with no body. Called by `CableLengthChangeComponent.deleteForm()` but has no observable side effects. Component-level tests already verify the call sites; no meaningful unit test can be written for the service method itself until a real implementation is added.
+- **Detected on**: 2026-04-13
+- **Status**: ⏳ PENDING REVIEW
+
+---
+
+## 13. `loadObstacle` / `patchFormFromObstacle` / `findObstacle` — `src/app/core/services/obstacles-form/obstaclesForm.service.ts`
 | Code | Public `loadObstacle(uuid)` + private helpers `patchFormFromObstacle` and `findObstacle` |
 | 🔍 Preuve | `loadObstacle` is never called from any component or service — only referenced in its own spec file. Its logic partially duplicates `setExistingObstacle`. The two private helpers are only reachable via `loadObstacle`. |
 | ⚠️ Confiance | **HIGH** |

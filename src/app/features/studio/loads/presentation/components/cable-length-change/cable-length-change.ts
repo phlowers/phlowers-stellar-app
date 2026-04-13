@@ -195,21 +195,21 @@ export class CableLengthChangeComponent {
     const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = this.form.getRawValue();
     if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
     this.isLoading.set(true);
-    await this.calculate({ scope, supportRef, widthCable, sizeCable, distanceSupportRef });
-    await this.cableModificationsService
-      .save({
+    try {
+      await this.calculate({ scope, supportRef, widthCable, sizeCable, distanceSupportRef });
+      await this.cableModificationsService.save({
         spanUuid: scope,
         supportRef,
         widthCable,
         sizeCable,
         distanceSupportRef
-      })
-      .finally(() => {
-        this.isLoading.set(false);
-        this.hasSavedModification.set(false);
       });
-    await this.reloadSectionFromDb();
-    this.isDirtySinceLastSave.set(false);
+      this.hasSavedModification.set(false);
+      await this.reloadSectionFromDb();
+      this.isDirtySinceLastSave.set(false);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   async calculate(params?: {
