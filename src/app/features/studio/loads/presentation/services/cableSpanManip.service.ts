@@ -16,7 +16,6 @@ import { CableSpanManipulation } from '@shared/domain';
 /** Service coordinating cable span manipulation persistence and deletion. */
 export class CableSpanManipService {
   private readonly plotService = inject(PlotService);
-  // Accessed via bracket notation in the component for section reloading
   private readonly studiesService = inject(StudiesService);
 
   /**
@@ -33,15 +32,9 @@ export class CableSpanManipService {
    * @param manip The cable span manipulation to save
    */
   save = async (manip: Omit<CableSpanManipulation, 'uuid'> & { uuid?: string }): Promise<void> => {
-    const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
-    if (!studyUuid || !sectionUuid) return;
-
-    const study = await this.studiesService.getStudy(studyUuid);
-    if (!study) return;
-
-    const section = study.sections.find((s) => s?.uuid === sectionUuid);
-    if (!section) return;
+    const current = await this.fetchCurrentSection();
+    if (!current) return;
+    const { study, section } = current;
 
     const existingForSpan = section.cable_span_manipulations?.find((m) => m.spanUuid === manip.spanUuid);
 
@@ -68,15 +61,9 @@ export class CableSpanManipService {
    * @param uuid UUID of the cable span manipulation to delete
    */
   delete = async (uuid: string): Promise<void> => {
-    const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
-    if (!studyUuid || !sectionUuid) return;
-
-    const study = await this.studiesService.getStudy(studyUuid);
-    if (!study) return;
-
-    const section = study.sections.find((s) => s?.uuid === sectionUuid);
-    if (!section) return;
+    const current = await this.fetchCurrentSection();
+    if (!current) return;
+    const { study, section } = current;
 
     section.cable_span_manipulations = (section.cable_span_manipulations ?? []).filter((m) => m.uuid !== uuid);
     if (section.selected_cable_span_manipulation_uuid === uuid) {
@@ -85,4 +72,26 @@ export class CableSpanManipService {
 
     await this.studiesService.updateStudy(study);
   };
+
+  /**
+   * Reload the current section from the database and update the plot service state.
+   * Call this after any mutation (save, delete) to keep the UI in sync.
+   */
+  async reloadSection(): Promise<void> {
+    const current = await this.fetchCurrentSection();
+    if (!current) return;
+    this.plotService.section.set(current.section);
+  }
+
+  /** Fetch the active study and section from the database. Returns null if either is unavailable. */
+  private async fetchCurrentSection() {
+    const studyUuid = this.plotService.study()?.uuid;
+    const sectionUuid = this.plotService.section()?.uuid;
+    if (!studyUuid || !sectionUuid) return null;
+    const study = await this.studiesService.getStudy(studyUuid);
+    if (!study) return null;
+    const section = study.sections.find((s) => s?.uuid === sectionUuid);
+    if (!section) return null;
+    return { study, section };
+  }
 }

@@ -28,7 +28,7 @@
   </div>
 
   <div class="split-1-line">
-    <label for="scope" i18n="@@manipulatedSpan" class="split-1-line__label-1"> Manipulated span </label>
+    <label for="scope" i18n="@@manipulatedSpan" class="split-1-line__label-1">Manipulated span</label>
     <p-select
       inputId="scope"
       fluid
@@ -41,7 +41,7 @@
       class="split-1-line__input-1"
     />
 
-    <label for="referenceSupport" i18n="@@referenceSupport" class="split-1-line__label-2"> Reference support </label>
+    <label for="referenceSupport" i18n="@@referenceSupport" class="split-1-line__label-2">Reference support</label>
     <p-select
       inputId="referenceSupport"
       fluid
@@ -86,7 +86,7 @@
   }
 
   <div class="split-1-line">
-    <label for="cableManipType" i18n="@@cableManipType" class="split-1-line__label-1"> Cable manipulation type </label>
+    <label for="cableManipType" i18n="@@cableManipType" class="split-1-line__label-1">Cable manipulation type</label>
     <p-select
       inputId="cableManipType"
       fluid
@@ -161,7 +161,7 @@
       </p-message>
       } } @else {
       <dl class="contents">
-        <dt class="label" i18n="@@longitudinalDistance" class="third-1-line__label-1">Longitudinal dist.</dt>
+        <dt class="label third-1-line__label-1" i18n="@@longitudinalDistance">Longitudinal dist.</dt>
         <dd
           data-testid="cable-span-manip-longitudinal-dist-readonly"
           class="third-1-line__input-1 read-only-info"
@@ -172,7 +172,7 @@
       </dl>
       }
 
-      <label for="lateralDistance" i18n="@@lateralDistance" class="third-1-line__label-2"> Lateral dist. </label>
+      <label for="lateralDistance" i18n="@@lateralDistance" class="third-1-line__label-2">Lateral dist.</label>
       <p-inputgroup class="third-1-line__input-2">
         <input
           type="number"
@@ -213,7 +213,7 @@
       </p-message>
       }
 
-      <label for="altitude" i18n="@@altitude" class="third-1-line__label-3"> Altitude </label>
+      <label for="altitude" i18n="@@altitude" class="third-1-line__label-3">Altitude</label>
       <p-inputgroup class="third-1-line__input-3">
         <input
           type="number"
@@ -374,7 +374,7 @@
       aria-label="erase span's cable manipulation"
       i18n-aria-label
       (click)="deleteForm()"
-      [disabled]="hasSavedManipulation() || isLoading()"
+      [disabled]="!hasSavedManipulation() || isLoading()"
       data-testid="cable-span-manip-delete"
     >
       <app-icon icon="delete" />

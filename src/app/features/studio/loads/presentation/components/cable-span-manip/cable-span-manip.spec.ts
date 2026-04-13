@@ -56,7 +56,7 @@ describe('CableSpanManipComponent', () => {
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
       clearPersistedFormData: vi.fn(),
-      studiesService: { getStudy: vi.fn().mockResolvedValue(null) }
+      reloadSection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<CableSpanManipService>;
 
     mockChainsService = {
@@ -269,7 +269,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should enable delete button when a manipulation is saved', () => {
-      component.hasSavedManipulation.set(false);
+      component.hasSavedManipulation.set(true);
       fixture.detectChanges();
       const btn = getByTestId('cable-span-manip-delete') as HTMLButtonElement;
       expect(btn.disabled).toBe(false);
@@ -416,7 +416,7 @@ describe('CableSpanManipComponent', () => {
       expect(component.form.controls.referenceSupport.value).toBe('RIGHT');
       expect(component.form.controls.distanceToRefSupport.value).toBe(10);
       expect(component.form.controls.slingLength.value).toBe(3);
-      expect(component.hasSavedManipulation()).toBe(false);
+      expect(component.hasSavedManipulation()).toBe(true);
     });
   });
 
@@ -509,9 +509,9 @@ describe('CableSpanManipComponent', () => {
       expect(component.isDirtySinceLastSave()).toBe(false);
     });
 
-    it('should set hasSavedManipulation to false after save', async () => {
+    it('should set hasSavedManipulation to true after save', async () => {
       await component.saveForm();
-      expect(component.hasSavedManipulation()).toBe(false);
+      expect(component.hasSavedManipulation()).toBe(true);
     });
   });
 
@@ -559,10 +559,10 @@ describe('CableSpanManipComponent', () => {
       expect(mockCableSpanManipService.delete).not.toHaveBeenCalled();
     });
 
-    it('should set hasSavedManipulation to true after deletion', () => {
-      component.hasSavedManipulation.set(false);
+    it('should set hasSavedManipulation to false after deletion', () => {
+      component.hasSavedManipulation.set(true);
       component.deleteForm();
-      expect(component.hasSavedManipulation()).toBe(true);
+      expect(component.hasSavedManipulation()).toBe(false);
     });
 
     it('should reset form fields to defaults after deletion', () => {

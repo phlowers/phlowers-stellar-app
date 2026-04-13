@@ -28,6 +28,8 @@
   --p-tabs-tabpanel-padding: 1rem;
   --p-tabs-tabpanel-background: rgb(255, 255, 255, 0);
 
+  height: calc(100% - #{app.$studio-sidetab-header-height});
+
   .p-tablist-tab-list {
     @apply grid;
     grid-template-columns: calc(50% - 0.0625rem) calc(50% - 0.0625rem);
@@ -63,6 +65,25 @@
 
   .p-tablist-active-bar {
     @apply hidden;
+  }
+
+  .p-tabpanels {
+    overflow-y: auto;
+
+    @supports not selector(::-webkit-scrollbar) {
+      scrollbar-width: thin;
+    }
+
+    @supports selector(::-webkit-scrollbar) {
+      &::-webkit-scrollbar {
+        @apply h-full w-1;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        @apply rounded;
+        background-color: var(--star-dust-600);
+      }
+    }
   }
 
   .climate {
