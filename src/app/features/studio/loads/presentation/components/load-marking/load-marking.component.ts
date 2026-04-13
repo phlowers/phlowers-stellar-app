@@ -130,9 +130,10 @@ export class LoadMarkingComponent {
     this.loadFormsService.deleteLoad();
   }
 
-  saveLoadCase() {
+  async saveLoadCase() {
     if (this.form.invalid) return;
-    this.loadFormsService.saveTemporaryLoadDataInSection();
+    await this.loadFormsService.calculateLoad();
+    await this.loadFormsService.saveTemporaryLoadDataInSection();
   }
 
   async calculateLoadCase() {

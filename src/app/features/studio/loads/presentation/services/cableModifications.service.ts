@@ -35,6 +35,9 @@ export class CableModificationsService {
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly studiesService = inject(StudiesService);
 
+  /** Fetch a study by UUID from IndexedDB. */
+  getStudy = (studyUuid: string) => this.studiesService.getStudy(studyUuid);
+
   /**
    * Run the cable modification calculation via the Python worker and update the plot state.
    * @param params Cable modification input parameters

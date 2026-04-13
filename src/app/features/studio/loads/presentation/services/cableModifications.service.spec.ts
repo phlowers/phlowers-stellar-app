@@ -474,4 +474,13 @@ describe('CableModificationsService', () => {
       expect(section?.selected_cable_modification_uuid).toBe(otherId);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // clearPersistedFormData()
+  // ---------------------------------------------------------------------------
+  describe('clearPersistedFormData()', () => {
+    it('should be callable without throwing', () => {
+      expect(() => service.clearPersistedFormData('some-span-uuid')).not.toThrow();
+    });
+  });
 });

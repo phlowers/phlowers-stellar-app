@@ -218,9 +218,10 @@ export class ClimateComponent {
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.plotService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
-      throw new Error('Study or section not found');
+      return;
     }
-    this.loadFormsService.saveTemporaryLoadDataInSection();
+    await this.loadFormsService.calculateLoad();
+    await this.loadFormsService.saveTemporaryLoadDataInSection();
   }
 
   async calculateForm() {

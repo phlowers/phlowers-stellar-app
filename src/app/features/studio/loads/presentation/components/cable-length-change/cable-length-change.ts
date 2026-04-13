@@ -182,7 +182,7 @@ export class CableLengthChangeComponent {
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.plotService.section()?.uuid;
     if (!studyUuid || !sectionUuid) return;
-    const study = await this.cableModificationsService['studiesService'].getStudy(studyUuid);
+    const study = await this.cableModificationsService.getStudy(studyUuid);
     if (!study) return;
     const section = study.sections.find((s) => s?.uuid === sectionUuid);
     if (section) {
@@ -195,6 +195,7 @@ export class CableLengthChangeComponent {
     const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = this.form.getRawValue();
     if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
     this.isLoading.set(true);
+    await this.calculate({ scope, supportRef, widthCable, sizeCable, distanceSupportRef });
     await this.cableModificationsService
       .save({
         spanUuid: scope,
@@ -211,23 +212,27 @@ export class CableLengthChangeComponent {
     this.isDirtySinceLastSave.set(false);
   }
 
-  calculate(): void {
-    if (this.form.invalid) return;
-    const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = this.form.getRawValue();
+  async calculate(params?: {
+    scope: string;
+    supportRef: 'LEFT' | 'RIGHT';
+    widthCable: CableWidthType;
+    sizeCable: number;
+    distanceSupportRef: number;
+  }): Promise<void> {
+    const values = params ?? this.form.getRawValue();
+    const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = values;
+    if (this.form.invalid && !params) return;
     if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
     this.error.set(null);
-    this.cableModificationsService
-      .calculate({
-        spanUuid: scope,
-        supportRef,
-        widthCable,
-        sizeCable,
-        distanceSupportRef
-      })
-      .then(() => {
-        const workerError = this.plotService.error();
-        this.error.set(workerError ? String(workerError) : null);
-      });
+    await this.cableModificationsService.calculate({
+      spanUuid: scope,
+      supportRef,
+      widthCable,
+      sizeCable: sizeCable ?? 0,
+      distanceSupportRef: distanceSupportRef ?? 0
+    });
+    const workerError = this.plotService.error();
+    this.error.set(workerError ? String(workerError) : null);
   }
 
   deleteForm(): void {
