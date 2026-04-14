@@ -35,6 +35,7 @@ export class CableLengthChangeComponent {
 
   readonly isLoading = signal(false);
   readonly isCalculating = computed(() => this.plotService.loading());
+  readonly isCalculatingOnly = signal(false);
   readonly error = signal<string | null>(null);
   /** Whether the form has been modified since the last save (RG.LON-CAB.ENR-BTN.1). */
   readonly isDirtySinceLastSave = signal(false);
@@ -194,16 +195,21 @@ export class CableLengthChangeComponent {
     const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = values;
     if (this.form.invalid && !params) return;
     if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
+    if (!params) this.isCalculatingOnly.set(true);
     this.error.set(null);
-    await this.cableModificationsService.calculate({
-      spanUuid: scope,
-      supportRef,
-      widthCable,
-      sizeCable: sizeCable ?? 0,
-      distanceSupportRef: distanceSupportRef ?? 0
-    });
-    const workerError = this.plotService.error();
-    this.error.set(workerError ? String(workerError) : null);
+    try {
+      await this.cableModificationsService.calculate({
+        spanUuid: scope,
+        supportRef,
+        widthCable,
+        sizeCable: sizeCable ?? 0,
+        distanceSupportRef: distanceSupportRef ?? 0
+      });
+      const workerError = this.plotService.error();
+      this.error.set(workerError ? String(workerError) : null);
+    } finally {
+      if (!params) this.isCalculatingOnly.set(false);
+    }
   }
 
   deleteForm(): void {

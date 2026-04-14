@@ -529,6 +529,53 @@ describe('ClimateComponent', () => {
     });
   });
 
+  describe('isSaving signal', () => {
+    it('should be false by default', () => {
+      expect(component.isSaving()).toBe(false);
+    });
+
+    it('should be true during saveForm then false after', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      let resolveTask!: () => void;
+      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockResolvedValue(undefined);
+
+      const promise = component.saveForm();
+      expect(component.isSaving()).toBe(true);
+      resolveTask();
+      await promise;
+      expect(component.isSaving()).toBe(false);
+    });
+  });
+
+  describe('isCalculatingLoad signal', () => {
+    it('should be false by default', () => {
+      expect(component.isCalculatingLoad()).toBe(false);
+    });
+
+    it('should be true during calculateForm then false after', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      let resolveTask!: () => void;
+      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+
+      const promise = component.calculateForm();
+      expect(component.isCalculatingLoad()).toBe(true);
+      resolveTask();
+      await promise;
+      expect(component.isCalculatingLoad()).toBe(false);
+    });
+  });
+
   describe('UC: climate form rendering', () => {
     it('UC-LC1: should render the climate form', () => {
       const form = getByTestId('climate-form');

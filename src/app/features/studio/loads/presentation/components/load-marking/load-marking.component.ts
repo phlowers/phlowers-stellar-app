@@ -59,6 +59,8 @@ export class LoadMarkingComponent {
     return this.plotService.getSpanOptions();
   });
   readonly isCalculating = computed(() => this.plotService.loading());
+  readonly isSaving = signal(false);
+  readonly isCalculatingLoad = signal(false);
 
   readonly supportsOptions = signal<SupportOption[]>([]);
 
@@ -125,20 +127,35 @@ export class LoadMarkingComponent {
     this.loadFormsService.initTemporaryLoadData();
   }
 
-  deleteCharge() {
-    this.resetForm();
-    this.loadFormsService.deleteLoad();
+  async deleteCharge(): Promise<void> {
+    const spanUuid = this.form.controls.spanSelect.value;
+    if (!spanUuid) return;
+    this.loadFormsService.deleteSpanLoad(spanUuid);
+    await this.loadFormsService.calculateLoad();
+    await this.loadFormsService.saveTemporaryLoadDataInSection();
+    this.form.reset();
+    this.form.controls.referenceSupport.disable();
   }
 
   async saveLoadCase() {
     if (this.form.invalid) return;
-    await this.loadFormsService.calculateLoad();
-    await this.loadFormsService.saveTemporaryLoadDataInSection();
+    this.isSaving.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+      await this.loadFormsService.saveTemporaryLoadDataInSection();
+    } finally {
+      this.isSaving.set(false);
+    }
   }
 
   async calculateLoadCase() {
     if (this.form.invalid) return;
-    this.loadFormsService.calculateLoad();
+    this.isCalculatingLoad.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+    } finally {
+      this.isCalculatingLoad.set(false);
+    }
   }
 
   isFormInvalid(): boolean {

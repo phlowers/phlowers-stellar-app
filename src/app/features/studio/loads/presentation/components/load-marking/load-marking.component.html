@@ -107,7 +107,7 @@
       btnStyle="outlined"
       (click)="saveLoadCase()"
       [disabled]="isFormInvalid()"
-      [btnLoading]="isCalculating()"
+      [btnLoading]="isSaving()"
       data-testid="save-load"
     >
       <app-icon icon="save" />
@@ -117,7 +117,7 @@
     <button
       app-btn
       [disabled]="isFormInvalid()"
-      [btnLoading]="isCalculating()"
+      [btnLoading]="isCalculatingLoad()"
       type="button"
       (click)="calculateLoadCase()"
       data-testid="calculate-load"

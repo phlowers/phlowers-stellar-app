@@ -245,24 +245,38 @@ export class PlotService {
     if (error) {
       this.distances.set([]);
       this.distanceType.set(null);
-    } else if (!section.obstacles?.length) {
-      this.distances.set([]);
-    } else if (currentLitData) {
-      // Re-add obstacles from the section so that annotations and distance traces are preserved
-      // across section reloads (e.g. re-opening the study or after a save).
-      for (const obstacle of section.obstacles) {
-        const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
-        if (obstacleResult?.current) {
-          currentLitData = obstacleResult.current;
+    } else {
+      // Apply temporary load data if a charge case is active
+      if (this.temporaryLoadData && currentLitData) {
+        const { result: loadResult } = await this.workerPythonService.runTask(Task.changeState, {
+          climate: this.temporaryLoadData.climate,
+          spanLoads: this.temporaryLoadData.spanLoads
+        });
+        if (loadResult?.current) {
+          currentLitData = loadResult.current;
+          this.baseLitData.set(loadResult.base ?? null);
         }
       }
-      const options = untracked(() => this.plotOptions());
-      const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
-        startSupport: options.startSupport,
-        endSupport: options.endSupport,
-        view: options.view
-      });
-      this.distances.set(distances ?? []);
+
+      if (!section.obstacles?.length) {
+        this.distances.set([]);
+      } else if (currentLitData) {
+        // Re-add obstacles from the section so that annotations and distance traces are preserved
+        // across section reloads (e.g. re-opening the study or after a save).
+        for (const obstacle of section.obstacles) {
+          const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
+          if (obstacleResult?.current) {
+            currentLitData = obstacleResult.current;
+          }
+        }
+        const options = untracked(() => this.plotOptions());
+        const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
+          startSupport: options.startSupport,
+          endSupport: options.endSupport,
+          view: options.view
+        });
+        this.distances.set(distances ?? []);
+      }
     }
 
     this.litData.set(currentLitData);

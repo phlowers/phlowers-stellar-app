@@ -109,6 +109,61 @@ describe('CableLengthChangeComponent', () => {
     });
   });
 
+  describe('isCalculatingOnly signal', () => {
+    it('should be false by default', () => {
+      expect(component.isCalculatingOnly()).toBe(false);
+    });
+
+    it('should be true during calculate() without params then false after', async () => {
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        widthCable: 'lengthening',
+        sizeCable: 1,
+        distanceSupportRef: 5
+      });
+      component.form.controls.supportRef.enable();
+      component.form.controls.supportRef.setValue('LEFT');
+
+      let resolveTask!: () => void;
+      mockCableModificationsService.calculate.mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+
+      const promise = component.calculate();
+      expect(component.isCalculatingOnly()).toBe(true);
+      resolveTask();
+      await promise;
+      expect(component.isCalculatingOnly()).toBe(false);
+    });
+
+    it('should NOT set isCalculatingOnly when calculate() is called with params', async () => {
+      const params = {
+        scope: 'support-uuid-1',
+        supportRef: 'LEFT' as const,
+        widthCable: 'lengthening' as const,
+        sizeCable: 1,
+        distanceSupportRef: 5
+      };
+
+      let resolveTask!: () => void;
+      mockCableModificationsService.calculate.mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+
+      const promise = component.calculate(params);
+      expect(component.isCalculatingOnly()).toBe(false);
+      resolveTask();
+      await promise;
+      expect(component.isCalculatingOnly()).toBe(false);
+    });
+  });
+
   // ---------------------------------------------------------------------------
   // HTML rendering — structure
   // ---------------------------------------------------------------------------
