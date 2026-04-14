@@ -31,6 +31,7 @@ import { StudioMenuBarComponent } from '../../components/menu-bar/menu-bar.compo
 import { SectionPlotCardsComponent } from '../../components/cards/section-plot-cards.component';
 import { SideTabsComponent } from '../../components/side-tabs/side-tabs.component';
 import { SideTabComponent } from '../../components/side-tabs/side-tab/side-tab.component';
+import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
 import { ClimateComponent } from '@features/studio/loads/presentation/components/climate/climate.component';
 import { LoadMarkingComponent } from '@features/studio/loads/presentation/components/load-marking/load-marking.component';
 import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
@@ -38,10 +39,10 @@ import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/co
 import { PlotService } from '@services/plot/plot.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
-import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
 
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
@@ -68,7 +69,8 @@ import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
     NewChargeModalComponent,
     ToolbarDialogComponent,
     ObstaclesFormComponent,
-    FreePositioningComponent
+    FreePositioningComponent,
+    CableSpanManipComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',

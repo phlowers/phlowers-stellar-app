@@ -1,12 +1,15 @@
 @if (!btnLoading()) {
-  <ng-content select="app-icon:not([iconRight]), .app-icon:not([iconRight])" />
+  <ng-content select="app-icon:not([iconRight])" />
+} @else if (hasLeftIcon()) {
+  <app-icon icon="progress_activity" />
+}
 
-  <span class="app-btn-label">
-    <ng-content />
-  </span>
+<span class="app-btn-label">
+  <ng-content />
+</span>
 
-  <ng-content select="app-icon[iconRight], .app-icon[iconRight]" />
-} @else if (btnLoading()) {
-  <span class="app-btn-label" i18n>loading</span>
+@if (!btnLoading()) {
+  <ng-content select="app-icon[iconRight]" />
+} @else if (hasRightIcon()) {
   <app-icon icon="progress_activity" />
 }

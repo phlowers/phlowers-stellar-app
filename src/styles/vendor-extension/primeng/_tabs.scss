@@ -16,6 +16,7 @@
 .p-tabs.p-tabs.load-tabs {
   --p-tabs-tablist-border-color: transparent;
   --p-tabs-tablist-border-width: 0rem;
+  --p-tabs-tablist-background: rgb(255 255 255 / 0);
   --p-tabs-tab-background: var(--primary-100);
   --p-tabs-tab-hover-background: var(--primary-200);
   --p-tabs-tab-active-background: var(--grey-0);
@@ -25,6 +26,9 @@
   --p-tabs-tab-padding: 0.625rem 0.75rem;
   --p-tabs-tab-margin: 0rem;
   --p-tabs-tabpanel-padding: 1rem;
+  --p-tabs-tabpanel-background: rgb(255 255 255 / 0);
+
+  height: calc(100% - #{app.$studio-sidetab-header-height});
 
   .p-tablist-tab-list {
     @apply grid;
@@ -61,6 +65,25 @@
 
   .p-tablist-active-bar {
     @apply hidden;
+  }
+
+  .p-tabpanels {
+    overflow-y: auto;
+
+    @supports not selector(::-webkit-scrollbar) {
+      scrollbar-width: thin;
+    }
+
+    @supports selector(::-webkit-scrollbar) {
+      &::-webkit-scrollbar {
+        @apply h-full w-1;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        @apply rounded;
+        background-color: var(--star-dust-600);
+      }
+    }
   }
 
   .climate {
