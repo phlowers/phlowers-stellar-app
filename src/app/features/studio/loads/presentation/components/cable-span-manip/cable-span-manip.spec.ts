@@ -513,6 +513,26 @@ describe('CableSpanManipComponent', () => {
       await component.saveForm();
       expect(component.hasSavedManipulation()).toBe(true);
     });
+
+    it('should not set hasSavedManipulation to true when save rejects', async () => {
+      mockCableSpanManipService.save.mockRejectedValue(new Error('save failed'));
+      component.hasSavedManipulation.set(false);
+      await component.saveForm().catch((_err: unknown) => undefined);
+      expect(component.hasSavedManipulation()).toBe(false);
+    });
+
+    it('should always clear isLoading even when save rejects', async () => {
+      mockCableSpanManipService.save.mockRejectedValue(new Error('save failed'));
+      await component.saveForm().catch((_err: unknown) => undefined);
+      expect(component.isLoading()).toBe(false);
+    });
+
+    it('should not reset isDirtySinceLastSave when save rejects', async () => {
+      mockCableSpanManipService.save.mockRejectedValue(new Error('save failed'));
+      component.isDirtySinceLastSave.set(true);
+      await component.saveForm().catch((_err: unknown) => undefined);
+      expect(component.isDirtySinceLastSave()).toBe(true);
+    });
   });
 
   // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 @if (!btnLoading()) {
-  <ng-content select="app-icon:not([iconRight]), .app-icon:not([iconRight])" />
+  <ng-content select="app-icon:not([iconRight])" />
 } @else if (hasLeftIcon()) {
   <app-icon icon="progress_activity" />
 }
@@ -9,7 +9,7 @@
 </span>
 
 @if (!btnLoading()) {
-  <ng-content select="app-icon[iconRight], .app-icon[iconRight]" />
+  <ng-content select="app-icon[iconRight]" />
 } @else if (hasRightIcon()) {
   <app-icon icon="progress_activity" />
 }

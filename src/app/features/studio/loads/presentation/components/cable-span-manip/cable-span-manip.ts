@@ -251,8 +251,8 @@ export class CableSpanManipComponent implements OnInit {
     // form.invalid guard above ensures required fields are non-null;
     // disabled controls (cableManipType, cableManipMethod, anchoring) are always initialised.
     this.isLoading.set(true);
-    await this.cableSpanManipService
-      .save({
+    try {
+      await this.cableSpanManipService.save({
         spanUuid: raw.scope!,
         referenceSupport: raw.referenceSupport!,
         distanceToRefSupport: raw.distanceToRefSupport!,
@@ -268,13 +268,13 @@ export class CableSpanManipComponent implements OnInit {
         chainSurface: raw.chainSurface,
         counterWeight: raw.counterWeight,
         slingLength: raw.slingLength!
-      })
-      .finally(() => {
-        this.isLoading.set(false);
-        this.hasSavedManipulation.set(true);
       });
-    await this.cableSpanManipService.reloadSection();
-    this.isDirtySinceLastSave.set(false);
+      this.hasSavedManipulation.set(true);
+      await this.cableSpanManipService.reloadSection();
+      this.isDirtySinceLastSave.set(false);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   deleteForm(): void {
