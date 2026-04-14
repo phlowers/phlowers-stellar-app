@@ -2670,11 +2670,6 @@
         <source>NO VOLTAGE</source>
       </segment>
     </unit>
-    <unit id="3411835502741534903">
-      <segment>
-        <source>loading</source>
-      </segment>
-    </unit>
     <unit id="305142716106924307">
       <segment>
         <source>Author:</source>
@@ -2980,9 +2975,9 @@
         <source>Copy</source>
       </segment>
     </unit>
-    <unit id="1964106600703167330">
+    <unit id="361024812885364180">
       <segment>
-        <source>Cable manip. at span</source>
+        <source> Cable manip. at span </source>
       </segment>
     </unit>
     <unit id="2033387769986799452">
@@ -3020,17 +3015,17 @@
         <source>An error occurred</source>
       </segment>
     </unit>
-    <unit id="2656270638371326231">
+    <unit id="3016819249974962667">
       <segment>
         <source>Point alt.</source>
       </segment>
     </unit>
-    <unit id="5122879481650738554">
+    <unit id="4381478989546864547">
       <segment>
         <source>Ref. support dist.</source>
       </segment>
     </unit>
-    <unit id="7382072301605955850">
+    <unit id="2702074512037019032">
       <segment>
         <source>Line axis dist.</source>
       </segment>
@@ -3068,6 +3063,131 @@
     <unit id="1162997080399948086">
       <segment>
         <source>RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.</source>
+      </segment>
+    </unit>
+    <unit id="4021521782447475905">
+      <segment>
+        <source>Pulley</source>
+      </segment>
+    </unit>
+    <unit id="4044156232805548048">
+      <segment>
+        <source>With chain</source>
+      </segment>
+    </unit>
+    <unit id="4351133266457573059">
+      <segment>
+        <source>With sling</source>
+      </segment>
+    </unit>
+    <unit id="5552885238769285726">
+      <segment>
+        <source>erase span&apos;s cable manipulation</source>
+      </segment>
+    </unit>
+    <unit id="6667965603420020393">
+      <segment>
+        <source>Clamp</source>
+      </segment>
+    </unit>
+    <unit id="7538726695771189991">
+      <segment>
+        <source>With a crane</source>
+      </segment>
+    </unit>
+    <unit id="8935057406125868491">
+      <segment>
+        <source>Temporary support</source>
+      </segment>
+    </unit>
+    <unit id="altitude">
+      <segment>
+        <source> Altitude </source>
+      </segment>
+    </unit>
+    <unit id="anchoring">
+      <segment>
+        <source>Anchoring</source>
+      </segment>
+    </unit>
+    <unit id="cableManipMethod">
+      <segment>
+        <source> Cable manipulation method </source>
+      </segment>
+    </unit>
+    <unit id="cableManipType">
+      <segment>
+        <source> Cable manipulation type </source>
+      </segment>
+    </unit>
+    <unit id="chainLength">
+      <segment>
+        <source>Chain length</source>
+      </segment>
+    </unit>
+    <unit id="chainName">
+      <segment>
+        <source>Chain name</source>
+      </segment>
+    </unit>
+    <unit id="chainSurface">
+      <segment>
+        <source>Chain surface</source>
+      </segment>
+    </unit>
+    <unit id="chainWeight">
+      <segment>
+        <source>Chain weight</source>
+      </segment>
+    </unit>
+    <unit id="counterWeight">
+      <segment>
+        <source>Counter weight</source>
+      </segment>
+    </unit>
+    <unit id="distance">
+      <segment>
+        <source>Distance</source>
+      </segment>
+    </unit>
+    <unit id="distCalcBetweenPoints">
+      <segment>
+        <source>Dist. calc. between points</source>
+      </segment>
+    </unit>
+    <unit id="lateralDistance">
+      <segment>
+        <source> Lateral dist. </source>
+      </segment>
+    </unit>
+    <unit id="longitudinalDistance">
+      <segment>
+        <source> Longitudinal dist. </source>
+      </segment>
+    </unit>
+    <unit id="manipFixedPointPosition">
+      <segment>
+        <source>Manipulation fixed point position</source>
+      </segment>
+    </unit>
+    <unit id="manipulatedPointCableDistRefSupport">
+      <segment>
+        <source> Manipulated point on the cable (Dist. to ref. support) </source>
+      </segment>
+    </unit>
+    <unit id="manipulatedSpan">
+      <segment>
+        <source> Manipulated span </source>
+      </segment>
+    </unit>
+    <unit id="referenceSupport">
+      <segment>
+        <source> Reference support </source>
+      </segment>
+    </unit>
+    <unit id="slingLength">
+      <segment>
+        <source>Sling length</source>
       </segment>
     </unit>
   </file>

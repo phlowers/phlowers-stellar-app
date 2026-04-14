@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { merge } from 'rxjs';
@@ -69,9 +69,6 @@ export class CableLengthChangeComponent {
     return this.hasSavedModification();
   });
 
-  /** UUID of the section last seen — used to reset the form when the section changes. */
-  private previousSectionUuid: string | null = null;
-
   constructor() {
     // Track dirty state when user edits content fields (RG.LON-CAB.ENR-BTN.1)
     merge(
@@ -84,27 +81,6 @@ export class CableLengthChangeComponent {
       .subscribe(() => {
         this.isDirtySinceLastSave.set(true);
       });
-
-    // Auto-select the currently visible span when section loads or changes (RG.LON-CAB.POR.5)
-    effect(() => {
-      const section = this.plotService.section();
-      if (!section) {
-        untracked(() => {
-          this.resetForm();
-          this.previousSectionUuid = null;
-        });
-        return;
-      }
-      if (section.uuid === this.previousSectionUuid) return;
-      this.previousSectionUuid = section.uuid;
-
-      const startIndex = untracked(() => this.plotService.plotOptions().startSupport);
-      const defaultUuid = section.supports?.[startIndex]?.uuid ?? section.supports?.[0]?.uuid ?? null;
-      untracked(() => {
-        this.form.controls.scope.setValue(defaultUuid, { emitEvent: false });
-        if (defaultUuid) this.onScopeChange(defaultUuid);
-      });
-    });
   }
 
   onScopeChange(uuid: string | null): void {
@@ -121,11 +97,6 @@ export class CableLengthChangeComponent {
     this.supportRefOptions.set(untracked(() => this.plotService.getSupportOptions(uuid)));
     this.form.controls.supportRef.enable({ emitEvent: false });
     this.form.controls.supportRef.setValue('LEFT', { emitEvent: false });
-
-    this.plotService.plotOptionsChange({
-      startSupport: index,
-      endSupport: index + 1
-    });
 
     const savedMod = untracked(() => this.plotService.section()?.cable_modifications?.find((m) => m.spanUuid === uuid));
     if (savedMod) {

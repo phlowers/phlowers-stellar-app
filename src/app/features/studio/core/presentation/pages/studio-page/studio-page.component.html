@@ -185,7 +185,9 @@
               Cable length change
             </p-tab>
             <p-tab value="3" [disabled]="true" class="cable-support" i18n>Cable manip. at support</p-tab>
-            <p-tab value="4" [disabled]="true" class="cable-span" i18n>Cable manip. at span</p-tab>
+            <p-tab value="4" [disabled]="!plotService.section()?.selected_charge_uuid" class="cable-span" i18n>
+              Cable manip. at span
+            </p-tab>
           </p-tablist>
 
           @if (!plotService.section()?.charges?.length) {
@@ -218,7 +220,7 @@
               </p-tabpanel>
 
               <p-tabpanel value="2">
-                <app-cable-length-change></app-cable-length-change>
+                <app-cable-length-change />
               </p-tabpanel>
 
               <p-tabpanel value="3">
@@ -230,11 +232,7 @@
               </p-tabpanel>
 
               <p-tabpanel value="4">
-                <p class="m-0">
-                  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cumque consequuntur vero, iste ducimus ipsam
-                  soluta ab libero maxime, excepturi quia, veniam nostrum. Debitis necessitatibus veritatis mollitia
-                  numquam? Optio, minus cum.
-                </p>
+                <app-cable-span-manip />
               </p-tabpanel>
             </p-tabpanels>
           }

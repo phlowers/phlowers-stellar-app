@@ -41,3 +41,7 @@ sup.mandatory {
   color: var(--grey-900);
   padding: 0.4375rem 0.5rem 0.4375rem 0.625rem;
 }
+
+.label {
+  @extend %label-style;
+}

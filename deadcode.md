@@ -164,7 +164,6 @@
 ---
 
 ## 12. `clearPersistedFormData()` — `src/app/features/studio/loads/presentation/services/cableModifications.service.ts`
-
 - **Type**: method
 - **Reason**: No-op placeholder with no body. Called by `CableLengthChangeComponent.deleteForm()` but has no observable side effects. Component-level tests already verify the call sites; no meaningful unit test can be written for the service method itself until a real implementation is added.
 - **Detected on**: 2026-04-13
@@ -179,3 +178,19 @@
 | Impact suppression | Remove `loadObstacle`, `patchFormFromObstacle`, `findSupportForObstacle`, and `findObstacle` (~30 lines) and their spec coverage |
 | Status | ⏳ PENDING REVIEW |
 | Detected on | 2026-03-26 |
+
+---
+
+## 14. `recheckSpanLoads` — `src/app/features/studio/loads/presentation/helpers.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/loads/presentation/helpers.ts` |
+| **Type** | function |
+| 🔍 Preuve | Removed in PR `feat/694/base-form--cable-span-manipulation` as unused/duplicate. No remaining references in the codebase after removal. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Function deleted from `helpers.ts`; confirm no callers exist before closing the PR |
+| Status | ⏳ PENDING REVIEW |
+| Detected on | 2026-04-13 |
+
+---
