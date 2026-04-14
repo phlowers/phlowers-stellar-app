@@ -127,17 +127,24 @@ describe('createPlotDataObject', () => {
       expect((result[0] as Partial<PlotData>).text).toEqual(['', '42']);
     });
 
-    it('should return empty strings when no support is provided', () => {
+    it('should return "-" strings when no support is provided', () => {
       const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
-      expect((result[0] as Partial<PlotData>).text).toEqual(['', '']);
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', '-']);
     });
 
-    it('should return empty strings when support number is null', () => {
+    it('should return "-" at the highest point when support number is null', () => {
       const supports = [createMockSupport({ uuid: 'uuid-1', number: null })];
       const result = createDataObject(testData, 0, 0, 'supports', '2d', 'profile', supports);
 
-      expect((result[0] as Partial<PlotData>).text).toEqual(['', '']);
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', '-']);
+    });
+
+    it('should truncate support number longer than 5 characters', () => {
+      const supports = [createMockSupport({ uuid: 'uuid-1', number: 'ABCDEFGH' })];
+      const result = createDataObject(testData, 0, 0, 'supports', '2d', 'profile', supports);
+
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', 'ABCDE']);
     });
 
     it('should return empty array for non-supports type', () => {

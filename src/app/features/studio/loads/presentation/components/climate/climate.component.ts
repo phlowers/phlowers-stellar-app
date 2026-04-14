@@ -19,6 +19,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
 
 /** Validator that rejects non-integer numeric values. */
@@ -159,8 +160,8 @@ export class ClimateComponent {
   async initForm() {
     const supports = this.plotService.section()?.supports;
     const frontierSupportOptions =
-      supports?.map((_, index) => ({
-        label: (index + 1).toString(),
+      supports?.map((support, index) => ({
+        label: formatSupportNumber(support.number),
         value: index + 1
       })) ?? [];
     frontierSupportOptions.shift();
