@@ -8,7 +8,7 @@ import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
 import { StudiesService } from '@services/studies/studies.service';
-import { CableSpanManipulation } from '@shared/domain';
+import { CableSpanManipulation, Section } from '@shared/domain';
 
 @Injectable({
   providedIn: 'root'
@@ -32,27 +32,21 @@ export class CableSpanManipService {
    * @param manip The cable span manipulation to save
    */
   save = async (manip: Omit<CableSpanManipulation, 'uuid'> & { uuid?: string }): Promise<void> => {
-    const current = await this.fetchCurrentSection();
-    if (!current) return;
-    const { study, section } = current;
-
-    const existingForSpan = section.cable_span_manipulations?.find((m) => m.spanUuid === manip.spanUuid);
-
-    const toSave: CableSpanManipulation = {
-      ...manip,
-      uuid: existingForSpan?.uuid ?? manip.uuid ?? uuidv4()
-    };
-
-    if (existingForSpan) {
-      section.cable_span_manipulations = section.cable_span_manipulations.map((m) =>
-        m.spanUuid === toSave.spanUuid ? toSave : m
-      );
-    } else {
-      section.cable_span_manipulations = [toSave, ...(section.cable_span_manipulations ?? [])];
-    }
-    section.selected_cable_span_manipulation_uuid = toSave.uuid;
-
-    await this.studiesService.updateStudy(study);
+    await this.mutateCurrentSection((section) => {
+      const existingForSpan = section.cable_span_manipulations?.find((m) => m.spanUuid === manip.spanUuid);
+      const toSave: CableSpanManipulation = {
+        ...manip,
+        uuid: existingForSpan?.uuid ?? manip.uuid ?? uuidv4()
+      };
+      if (existingForSpan) {
+        section.cable_span_manipulations = section.cable_span_manipulations.map((m) =>
+          m.spanUuid === toSave.spanUuid ? toSave : m
+        );
+      } else {
+        section.cable_span_manipulations = [toSave, ...(section.cable_span_manipulations ?? [])];
+      }
+      section.selected_cable_span_manipulation_uuid = toSave.uuid;
+    });
   };
 
   /**
@@ -61,16 +55,12 @@ export class CableSpanManipService {
    * @param uuid UUID of the cable span manipulation to delete
    */
   delete = async (uuid: string): Promise<void> => {
-    const current = await this.fetchCurrentSection();
-    if (!current) return;
-    const { study, section } = current;
-
-    section.cable_span_manipulations = (section.cable_span_manipulations ?? []).filter((m) => m.uuid !== uuid);
-    if (section.selected_cable_span_manipulation_uuid === uuid) {
-      section.selected_cable_span_manipulation_uuid = section.cable_span_manipulations[0]?.uuid ?? null;
-    }
-
-    await this.studiesService.updateStudy(study);
+    await this.mutateCurrentSection((section) => {
+      section.cable_span_manipulations = (section.cable_span_manipulations ?? []).filter((m) => m.uuid !== uuid);
+      if (section.selected_cable_span_manipulation_uuid === uuid) {
+        section.selected_cable_span_manipulation_uuid = section.cable_span_manipulations[0]?.uuid ?? null;
+      }
+    });
   };
 
   /**
@@ -81,6 +71,15 @@ export class CableSpanManipService {
     const current = await this.fetchCurrentSection();
     if (!current) return;
     this.plotService.section.set(current.section);
+  }
+
+  /** Apply a synchronous mutation to the current section and persist the updated study. */
+  private async mutateCurrentSection(mutate: (section: Section) => void): Promise<void> {
+    const current = await this.fetchCurrentSection();
+    if (!current) return;
+    const { study, section } = current;
+    mutate(section);
+    await this.studiesService.updateStudy(study);
   }
 
   /** Fetch the active study and section from the database. Returns null if either is unavailable. */

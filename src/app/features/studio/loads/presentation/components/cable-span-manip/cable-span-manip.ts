@@ -79,9 +79,7 @@ export class CableSpanManipComponent implements OnInit {
   private readonly selectedSupportData = computed(() => {
     const uuid = this.scopeValueSignal();
     if (!uuid) return null;
-    const supports = this.plotService.section()?.supports ?? [];
-    const index = supports.findIndex((s) => s.uuid === uuid);
-    return index >= 0 ? supports[index] : null;
+    return this.plotService.section()?.supports?.find((s) => s.uuid === uuid) ?? null;
   });
 
   /** Dynamic min for distanceToRefSupport — reactive to section and scope changes. */
