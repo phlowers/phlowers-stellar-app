@@ -51,7 +51,16 @@
 
 ---
 
-## 4. `ServerStatus` — `core/services/news/news.service.ts`
+## 4. `recheckSpanLoads` — `src/app/features/studio/loads/presentation/helpers.ts`
+
+- **Type**: function
+- **Reason**: `loadForms.service.ts` now imports `recheckSpanLoads` from `@shared/domain/helpers/span-loads.helpers` (the improved, immutable version). The local `helpers.ts` export is never imported anywhere. Note: `emptySpanLoad` from the same file IS still used by `load-marking.component.ts`.
+- **Detected on**: 2026-04-13
+- **Status**: ⏳ PENDING REVIEW
+
+---
+
+## 5. `ServerStatus` — `core/services/news/news.service.ts`
 
 | | |
 |---|---|
@@ -64,7 +73,7 @@
 
 ---
 
-## 5. `ServerStatus` — `core/services/changelog/changelog.service.ts`
+## 6. `ServerStatus` — `core/services/changelog/changelog.service.ts`
 
 | | |
 |---|---|
@@ -77,7 +86,7 @@
 
 ---
 
-## 6. Stale UI component files after DDD migration
+## 7. Stale UI component files after DDD migration
 
 ### `FieldMeasuringComponent` — `ui/pages/studio/toolbar-dialog/field-measuring/field-measuring.component.ts`
 
@@ -154,11 +163,16 @@
 
 ---
 
-## 11. `loadObstacle` / `patchFormFromObstacle` / `findObstacle` — `src/app/core/services/obstacles-form/obstaclesForm.service.ts`
+## 12. `clearPersistedFormData()` — `src/app/features/studio/loads/presentation/services/cableModifications.service.ts`
 
-| | |
-|---|---|
-| 📍 Source | `src/app/core/services/obstacles-form/obstaclesForm.service.ts` |
+- **Type**: method
+- **Reason**: No-op placeholder with no body. Called by `CableLengthChangeComponent.deleteForm()` but has no observable side effects. Component-level tests already verify the call sites; no meaningful unit test can be written for the service method itself until a real implementation is added.
+- **Detected on**: 2026-04-13
+- **Status**: ⏳ PENDING REVIEW
+
+---
+
+## 13. `loadObstacle` / `patchFormFromObstacle` / `findObstacle` — `src/app/core/services/obstacles-form/obstaclesForm.service.ts`
 | Code | Public `loadObstacle(uuid)` + private helpers `patchFormFromObstacle` and `findObstacle` |
 | 🔍 Preuve | `loadObstacle` is never called from any component or service — only referenced in its own spec file. Its logic partially duplicates `setExistingObstacle`. The two private helpers are only reachable via `loadObstacle`. |
 | ⚠️ Confiance | **HIGH** |
