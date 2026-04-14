@@ -488,6 +488,47 @@ describe('ClimateComponent', () => {
     });
   });
 
+  describe('saveForm', () => {
+    it('should call calculateLoad then saveTemporaryLoadDataInSection when study and section exist', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      const callOrder: string[] = [];
+      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(() => {
+        callOrder.push('calculate');
+        return Promise.resolve();
+      });
+      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockImplementation(() => {
+        callOrder.push('save');
+        return Promise.resolve();
+      });
+
+      await component.saveForm();
+
+      expect(callOrder).toEqual(['calculate', 'save']);
+    });
+
+    it('should return early when study is missing', async () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.study as ReturnType<typeof signal<{ uuid: string } | null>>).set(null);
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      const calculateSpy = vi.spyOn(loadFormsService, 'calculateLoad');
+
+      await component.saveForm();
+
+      expect(calculateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should return early when section is missing', async () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.section as ReturnType<typeof signal<{ uuid: string } | null>>).set(null);
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      const calculateSpy = vi.spyOn(loadFormsService, 'calculateLoad');
+
+      await component.saveForm();
+
+      expect(calculateSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('UC: climate form rendering', () => {
     it('UC-LC1: should render the climate form', () => {
       const form = getByTestId('climate-form');

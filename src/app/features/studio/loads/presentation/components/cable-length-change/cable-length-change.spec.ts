@@ -64,7 +64,8 @@ describe('CableLengthChangeComponent', () => {
       calculate: vi.fn().mockResolvedValue(undefined),
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
-      clearPersistedFormData: vi.fn()
+      clearPersistedFormData: vi.fn(),
+      getStudy: vi.fn().mockResolvedValue(null)
     } as unknown as vi.Mocked<CableModificationsService>;
 
     await TestBed.configureTestingModule({
@@ -358,7 +359,7 @@ describe('CableLengthChangeComponent', () => {
       expect(mockCableModificationsService.save).not.toHaveBeenCalled();
     });
 
-    it('should call cableModificationsService.save with form values', async () => {
+    it('should call calculate then save with form values', async () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
         widthCable: 'shortening',
@@ -368,8 +369,26 @@ describe('CableLengthChangeComponent', () => {
       component.form.controls.supportRef.enable();
       component.form.controls.supportRef.setValue('RIGHT');
 
+      const callOrder: string[] = [];
+      mockCableModificationsService.calculate.mockImplementation(() => {
+        callOrder.push('calculate');
+        return Promise.resolve();
+      });
+      mockCableModificationsService.save.mockImplementation(() => {
+        callOrder.push('save');
+        return Promise.resolve();
+      });
+
       await component.saveForm();
 
+      expect(callOrder).toEqual(['calculate', 'save']);
+      expect(mockCableModificationsService.calculate).toHaveBeenCalledWith({
+        spanUuid: 'support-uuid-1',
+        supportRef: 'RIGHT',
+        widthCable: 'shortening',
+        sizeCable: 2,
+        distanceSupportRef: 8
+      });
       expect(mockCableModificationsService.save).toHaveBeenCalledWith({
         spanUuid: 'support-uuid-1',
         supportRef: 'RIGHT',
@@ -393,6 +412,22 @@ describe('CableLengthChangeComponent', () => {
       await component.saveForm();
 
       expect(component.isDirtySinceLastSave()).toBe(false);
+    });
+
+    it('should reset isLoading to false even if calculate throws', async () => {
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        widthCable: 'shortening',
+        sizeCable: 2,
+        distanceSupportRef: 8
+      });
+      component.form.controls.supportRef.enable();
+      component.form.controls.supportRef.setValue('LEFT');
+      mockCableModificationsService.calculate.mockRejectedValue(new Error('worker error'));
+
+      await expect(component.saveForm()).rejects.toThrow('worker error');
+
+      expect(component.isLoading()).toBe(false);
     });
   });
 
@@ -479,6 +514,85 @@ describe('CableLengthChangeComponent', () => {
     it('should reset isDirtySinceLastSave', () => {
       component.isDirtySinceLastSave.set(true);
       component.resetForm();
+      expect(component.isDirtySinceLastSave()).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // onScopeChange()
+  // ---------------------------------------------------------------------------
+  describe('onScopeChange()', () => {
+    it('should clear supportRefOptions, reset supportRef and set isDirtySinceLastSave to false when uuid is null', () => {
+      component.supportRefOptions.set([{ label: '1', value: 'LEFT' }]);
+      component.isDirtySinceLastSave.set(true);
+
+      component.onScopeChange(null);
+
+      expect(component.supportRefOptions()).toEqual([]);
+      expect(component.form.controls.supportRef.disabled).toBe(true);
+      expect(component.isDirtySinceLastSave()).toBe(false);
+    });
+
+    it('should return early without calling plotOptionsChange when getSupportIndex returns -1', () => {
+      mockPlotService.getSupportIndex.mockReturnValue(-1);
+      mockPlotService.plotOptionsChange.mockClear();
+
+      component.onScopeChange('support-uuid-1');
+
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+    });
+
+    it('should populate supportRefOptions, enable supportRef and call plotOptionsChange for a valid span', () => {
+      component.onScopeChange('support-uuid-1');
+
+      expect(component.supportRefOptions()).toEqual([
+        { label: '1', value: 'LEFT' },
+        { label: '2', value: 'RIGHT' }
+      ]);
+      expect(component.form.controls.supportRef.enabled).toBe(true);
+      expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 1 });
+    });
+
+    it('should load saved modification values when one exists for the span', () => {
+      mockPlotService.section.set({
+        ...mockSection,
+        cable_modifications: [
+          {
+            uuid: 'mod-uuid',
+            spanUuid: 'support-uuid-1',
+            supportRef: 'RIGHT',
+            widthCable: 'shortening',
+            sizeCable: 3,
+            distanceSupportRef: 7
+          }
+        ]
+      });
+
+      component.onScopeChange('support-uuid-1');
+
+      expect(component.form.controls.supportRef.value).toBe('RIGHT');
+      expect(component.form.controls.widthCable.value).toBe('shortening');
+      expect(component.form.controls.sizeCable.value).toBe(3);
+      expect(component.form.controls.distanceSupportRef.value).toBe(7);
+      expect(component.hasSavedModification()).toBe(false);
+    });
+
+    it('should reset form to defaults and set hasSavedModification to true when no saved modification exists', () => {
+      mockPlotService.section.set({ ...mockSection, cable_modifications: [] });
+
+      component.onScopeChange('support-uuid-1');
+
+      expect(component.form.controls.widthCable.value).toBe('lengthening');
+      expect(component.form.controls.sizeCable.value).toBe(0);
+      expect(component.form.controls.distanceSupportRef.value).toBe(0);
+      expect(component.hasSavedModification()).toBe(true);
+    });
+
+    it('should always set isDirtySinceLastSave to false after scope change', () => {
+      component.isDirtySinceLastSave.set(true);
+
+      component.onScopeChange('support-uuid-1');
+
       expect(component.isDirtySinceLastSave()).toBe(false);
     });
   });

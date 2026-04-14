@@ -185,21 +185,32 @@ describe('LoadMarkingComponent', () => {
   });
 
   describe('saveLoadCase', () => {
-    it('does not save when form is invalid', () => {
-      component.saveLoadCase();
+    it('does not save when form is invalid', async () => {
+      await component.saveLoadCase();
 
+      expect(mockLoadFormsService['calculateLoad']).not.toHaveBeenCalled();
       expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).not.toHaveBeenCalled();
     });
 
-    it('saves when form is valid', () => {
+    it('calculates then saves when form is valid', async () => {
       component.form.controls.spanSelect.setValue('support-1');
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
       fixture.detectChanges();
 
-      component.saveLoadCase();
+      const callOrder: string[] = [];
+      mockLoadFormsService['calculateLoad'].mockImplementation(() => {
+        callOrder.push('calculate');
+        return Promise.resolve();
+      });
+      mockLoadFormsService['saveTemporaryLoadDataInSection'].mockImplementation(() => {
+        callOrder.push('save');
+        return Promise.resolve();
+      });
 
-      expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).toHaveBeenCalled();
+      await component.saveLoadCase();
+
+      expect(callOrder).toEqual(['calculate', 'save']);
     });
   });
 
