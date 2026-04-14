@@ -12,25 +12,8 @@ import { PlotService } from '@services/plot/plot.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain';
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
-import { CableSpanManipFormControls } from './cable-span-manip.interfaces';
+import { CABLE_SPAN_MANIP_DEFAULTS, CableSpanManipFormControls } from './cable-span-manip.interfaces';
 import { truncateDecimals } from '@shared/helpers/truncateDecimals';
-
-const CABLE_SPAN_MANIP_DEFAULTS = {
-  referenceSupport: 'LEFT' as 'LEFT' | 'RIGHT',
-  distanceToRefSupport: 0,
-  cableManipType: 'with_a_crane' as CableManipType,
-  cableManipMethod: 'clamp' as CableManipMethod,
-  longitudinalDistance: 0,
-  lateralDistance: 0,
-  altitude: 0,
-  anchoring: 'with_sling' as AnchoringType,
-  chainName: null as string | null,
-  chainLength: null as number | null,
-  chainWeight: null as number | null,
-  chainSurface: null as number | null,
-  counterWeight: null as number | null,
-  slingLength: 5
-};
 
 @Component({
   selector: 'app-cable-span-manip',

@@ -1,6 +1,23 @@
 import { FormControl } from '@angular/forms';
 import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain';
 
+export const CABLE_SPAN_MANIP_DEFAULTS = {
+  referenceSupport: 'LEFT' as 'LEFT' | 'RIGHT',
+  distanceToRefSupport: 0,
+  cableManipType: 'with_a_crane' as CableManipType,
+  cableManipMethod: 'clamp' as CableManipMethod,
+  longitudinalDistance: 0,
+  lateralDistance: 0,
+  altitude: 0,
+  anchoring: 'with_sling' as AnchoringType,
+  chainName: null as string | null,
+  chainLength: null as number | null,
+  chainWeight: null as number | null,
+  chainSurface: null as number | null,
+  counterWeight: null as number | null,
+  slingLength: 5
+};
+
 /** Typed form controls for the cable span manipulation form. */
 export interface CableSpanManipFormControls {
   /** Selected span UUID. */
