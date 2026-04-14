@@ -83,13 +83,13 @@ def add_obstacles(js_inputs):
 def delete_obstacle(js_inputs):
     # TODO: implement deletion in stellar_engine obstacles module
     global engine, plt_line
-    return obstacles.add_obstacles({}, engine, plt_line)
+    return obstacles.add_obstacles([], engine, plt_line)
 
 
 def clear_obstacles():
     # TODO: implement clear in stellar_engine obstacles module
     global engine, plt_line
-    return obstacles.add_obstacles({}, engine, plt_line)
+    return obstacles.add_obstacles([], engine, plt_line)
 
 
 def calculate_obstacles_distances(js_inputs):

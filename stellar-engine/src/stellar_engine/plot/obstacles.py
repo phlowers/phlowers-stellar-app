@@ -13,7 +13,8 @@ import pandas as pd
 
 
 def change_obstacles_coordinates(df: pd.DataFrame, balance_engine: BalanceEngine):
-
+    if df.empty:
+        return df
 
     span_index = df['span_index'].iloc[0]
     span_length = balance_engine.section_array.data.span_length
@@ -58,7 +59,7 @@ def add_obstacles(inputs: list, balance_engine: BalanceEngine, plot_engine: Plot
     obs = plot_engine.obstacles_dict()
     result = [{"uuid": key, "points": value.tolist()} for key, value in obs.items()]
     print(f"Obstacles after addition: {result}")
-    return result
+    return {"obstacles": result}
 
 def compute_distances(inputs: dict):
     result = [
