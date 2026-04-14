@@ -182,16 +182,16 @@ describe('PlotSpanService', () => {
       service.section.set({ supports: mockSupports } as unknown as Section);
       const options = service.getSupportOptions('support-uuid-1');
       expect(options).toHaveLength(2);
-      expect(options[0]).toEqual({ label: 1, value: 'LEFT' });
-      expect(options[1]).toEqual({ label: 2, value: 'RIGHT' });
+      expect(options[0]).toEqual({ label: '1', value: 'LEFT' });
+      expect(options[1]).toEqual({ label: '2', value: 'RIGHT' });
     });
 
     it('should return correct labels for the second support', () => {
       service.section.set({ supports: mockSupports } as unknown as Section);
       const options = service.getSupportOptions('support-uuid-2');
       expect(options).toHaveLength(2);
-      expect(options[0]).toEqual({ label: 2, value: 'LEFT' });
-      expect(options[1]).toEqual({ label: 3, value: 'RIGHT' });
+      expect(options[0]).toEqual({ label: '2', value: 'LEFT' });
+      expect(options[1]).toEqual({ label: '3', value: 'RIGHT' });
     });
 
     it('should return empty array when uuid does not match any support', () => {

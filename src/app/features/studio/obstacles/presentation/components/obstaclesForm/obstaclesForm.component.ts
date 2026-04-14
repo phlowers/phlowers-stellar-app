@@ -26,6 +26,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from '@shared/domain/obstacles/obstacle-form.constants';
 import { distinctUntilChanged, filter } from 'rxjs';
+import { PlotService } from '@services/plot/plot.service';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -53,6 +54,7 @@ export class ObstaclesFormComponent {
   public readonly plotOptionsService = inject(PlotOptionsService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
+  private readonly plotService = inject(PlotService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);

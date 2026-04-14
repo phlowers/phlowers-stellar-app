@@ -52,15 +52,15 @@ export class PlotSpanService {
   }
 
   /** Return LEFT/RIGHT options for the span adjacent to the given support UUID. */
-  getSupportOptions(supportUuid: string | null): { label: number; value: 'LEFT' | 'RIGHT' }[] {
+  getSupportOptions(supportUuid: string | null): { label: string; value: 'LEFT' | 'RIGHT' }[] {
     if (supportUuid === null) {
       return [];
     }
     const spanIndex = this.section()?.supports?.findIndex((s) => s.uuid === supportUuid);
     if (spanIndex !== undefined && spanIndex >= 0) {
       return [
-        { label: spanIndex + 1, value: 'LEFT' },
-        { label: spanIndex + 2, value: 'RIGHT' }
+        { label: String(spanIndex + 1), value: 'LEFT' },
+        { label: String(spanIndex + 2), value: 'RIGHT' }
       ];
     }
     return [];
