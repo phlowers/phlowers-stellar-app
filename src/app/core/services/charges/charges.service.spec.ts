@@ -194,8 +194,7 @@ describe('ChargesService', () => {
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
-        detail: expect.any(String),
-        life: 500
+        detail: expect.any(String)
       });
     });
 
@@ -229,8 +228,7 @@ describe('ChargesService', () => {
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
-        detail: expect.any(String),
-        life: 500
+        detail: expect.any(String)
       });
     });
 
@@ -279,7 +277,7 @@ describe('ChargesService', () => {
       });
     });
 
-    it('should set selected_charge_uuid to the first remaining charge when deleting selected charge', async () => {
+    it('should set selected_charge_uuid to null when deleting the selected charge', async () => {
       const secondCharge: Charge = {
         uuid: 'charge-uuid-2',
         name: 'Charge 2',
@@ -320,7 +318,7 @@ describe('ChargesService', () => {
             expect.objectContaining({
               uuid: 'section-uuid-1',
               charges: [secondCharge],
-              selected_charge_uuid: 'charge-uuid-2'
+              selected_charge_uuid: null
             })
           ])
         })

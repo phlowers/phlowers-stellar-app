@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -98,7 +98,8 @@ export class ClimateComponent {
   private readonly destroyRef = inject(DestroyRef);
   readonly constraints = climateConstraints;
 
-  readonly isCalculating = computed(() => this.plotService.loading());
+  readonly isSaving = signal(false);
+  readonly isCalculatingLoad = signal(false);
 
   form: FormGroup<{
     windPressure: FormControl<number | null>;
@@ -220,12 +221,22 @@ export class ClimateComponent {
     if (!studyUuid || !sectionUuid) {
       return;
     }
-    await this.loadFormsService.calculateLoad();
-    await this.loadFormsService.saveTemporaryLoadDataInSection();
+    this.isSaving.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+      await this.loadFormsService.saveTemporaryLoadDataInSection();
+    } finally {
+      this.isSaving.set(false);
+    }
   }
 
   async calculateForm() {
-    await this.loadFormsService.calculateLoad();
+    this.isCalculatingLoad.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+    } finally {
+      this.isCalculatingLoad.set(false);
+    }
   }
 
   isFormValid(): boolean {

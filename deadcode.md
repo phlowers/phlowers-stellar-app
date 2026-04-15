@@ -47,7 +47,7 @@
 
 ---
 
-*Dernière mise à jour : 12/03/2026 — Audit Phase 3A*
+*Last updated: 2026-04-14 — Fix bug charge delete*
 
 ---
 
@@ -192,5 +192,14 @@
 | Impact suppression | Function deleted from `helpers.ts`; confirm no callers exist before closing the PR |
 | Status | ⏳ PENDING REVIEW |
 | Detected on | 2026-04-13 |
+
+---
+
+## 15 `deleteLoad()` — `src/app/features/studio/loads/presentation/services/loadForms.service.ts`
+
+- **Type**: method
+- **Reason**: After the fix for bug #526, `deleteCharge()` in `load-marking.component.ts` no longer calls `deleteLoad()`. No other caller exists in the codebase.
+- **Detected on**: 2026-04-14
+- **Status**: ⏳ PENDING REVIEW
 
 ---

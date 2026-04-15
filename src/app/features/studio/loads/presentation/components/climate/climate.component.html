@@ -239,8 +239,8 @@
       type="submit"
       btnStyle="outlined"
       (click)="saveForm()"
-      [disabled]="!isFormValid()"
-      [btnLoading]="isCalculating()"
+      [disabled]="!isFormValid() || isSaving()"
+      [btnLoading]="isSaving()"
       data-testid="save-btn"
     >
       <app-icon icon="save" />
@@ -251,8 +251,8 @@
       app-btn
       type="button"
       (click)="calculateForm()"
-      [disabled]="!isFormValid()"
-      [btnLoading]="isCalculating()"
+      [disabled]="!isFormValid() || isCalculatingLoad()"
+      [btnLoading]="isCalculatingLoad()"
       data-testid="calculate-btn"
     >
       <app-icon icon="rocket_launch" />

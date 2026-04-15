@@ -200,6 +200,36 @@ describe('LoadFormsService', () => {
       expect(mockPlotService.temporaryLoadData).toBeDefined();
       expect(mockPlotService.temporaryLoadData?.climate).toEqual(mockChargeData.climate);
     });
+
+    it('should use empty array as fallback when charge spanLoads is null', () => {
+      const chargeWithNullSpanLoads = {
+        ...mockCharge,
+        data: { ...mockChargeData, spanLoads: null as unknown as typeof mockChargeData.spanLoads }
+      };
+      mockPlotService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [chargeWithNullSpanLoads]
+      } as Section);
+
+      service.initTemporaryLoadData();
+
+      expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
+      expect(Array.isArray(mockPlotService.temporaryLoadData?.spanLoads)).toBe(true);
+    });
+
+    it('should use empty supports array when section has no supports', () => {
+      mockPlotService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge],
+        supports: undefined as unknown as typeof mockSection.supports
+      } as Section);
+
+      service.initTemporaryLoadData();
+
+      expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
+    });
   });
 
   describe('saveTemporaryLoadDataInSection', () => {
@@ -208,7 +238,7 @@ describe('LoadFormsService', () => {
 
       await service.saveTemporaryLoadDataInSection();
 
-      expect(mockChargesService.getSelectedChargeCase).not.toHaveBeenCalled();
+      expect(mockChargesService.createOrUpdateCharge).not.toHaveBeenCalled();
     });
 
     it('should return early when studyUuid is missing', async () => {
@@ -218,7 +248,7 @@ describe('LoadFormsService', () => {
 
       await service.saveTemporaryLoadDataInSection();
 
-      expect(mockChargesService.getSelectedChargeCase).not.toHaveBeenCalled();
+      expect(mockChargesService.createOrUpdateCharge).not.toHaveBeenCalled();
     });
 
     it('should return early when sectionUuid is missing', async () => {
@@ -228,14 +258,23 @@ describe('LoadFormsService', () => {
 
       await service.saveTemporaryLoadDataInSection();
 
-      expect(mockChargesService.getSelectedChargeCase).not.toHaveBeenCalled();
+      expect(mockChargesService.createOrUpdateCharge).not.toHaveBeenCalled();
     });
 
-    it('should return early when currentCharge is null', async () => {
+    it('should return early when selected_charge_uuid is null', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue(mockSection);
-      mockChargesService.getSelectedChargeCase.mockResolvedValue(null);
+      mockPlotService.section.mockReturnValue({ ...mockSection, selected_charge_uuid: null });
+
+      await service.saveTemporaryLoadDataInSection();
+
+      expect(mockChargesService.createOrUpdateCharge).not.toHaveBeenCalled();
+    });
+
+    it('should return early when charge is not found in section', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
+      mockPlotService.section.mockReturnValue({ ...mockSection, selected_charge_uuid: 'charge-uuid-1', charges: [] });
 
       await service.saveTemporaryLoadDataInSection();
 
@@ -245,14 +284,20 @@ describe('LoadFormsService', () => {
     it('should save temporaryLoadData to charge', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue(mockSection);
-      mockChargesService.getSelectedChargeCase.mockResolvedValue(mockCharge);
+      mockPlotService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: mockCharge.uuid,
+        charges: [mockCharge]
+      } as Section);
       mockChargesService.createOrUpdateCharge.mockResolvedValue(undefined);
 
       await service.saveTemporaryLoadDataInSection();
 
-      expect(mockChargesService.getSelectedChargeCase).toHaveBeenCalled();
-      expect(mockChargesService.createOrUpdateCharge).toHaveBeenCalled();
+      expect(mockChargesService.createOrUpdateCharge).toHaveBeenCalledWith(
+        'study-uuid',
+        mockSection.uuid,
+        expect.objectContaining({ uuid: mockCharge.uuid, data: mockChargeData })
+      );
     });
   });
 
@@ -295,6 +340,28 @@ describe('LoadFormsService', () => {
 
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
+    });
+
+    it('should use empty array for supports when section has no supports', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockPlotService.section.mockReturnValue({
+        ...mockSection,
+        supports: undefined as unknown as typeof mockSection.supports
+      });
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+      expect(Array.isArray(mockPlotService.temporaryLoadData?.spanLoads)).toBe(true);
+    });
+
+    it('should use empty array for supports when section is null', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockPlotService.section.mockReturnValue(null);
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
     });
   });
 
@@ -339,6 +406,48 @@ describe('LoadFormsService', () => {
       service.deleteLoad();
 
       expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid', 'section-uuid-1', 'charge-uuid-1');
+    });
+  });
+
+  describe('deleteSpanLoad', () => {
+    it('should return early when temporaryLoadData is null', () => {
+      mockPlotService.temporaryLoadData = null;
+
+      service.deleteSpanLoad('support-uuid-1');
+
+      expect(mockPlotService.temporaryLoadData).toBeNull();
+    });
+
+    it('should return early when supportUuid is not found in spanLoads', () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+
+      service.deleteSpanLoad('non-existent-uuid');
+
+      expect(mockPlotService.temporaryLoadData?.spanLoads[0].supportUuid).toBe('support-uuid-1');
+    });
+
+    it('should reset the SpanLoad to emptySpanLoad values while preserving supportUuid', () => {
+      mockPlotService.temporaryLoadData = {
+        ...mockChargeData,
+        spanLoads: [
+          {
+            supportUuid: 'support-uuid-1',
+            loadPosition: 5,
+            loadWeight: 100,
+            type: LoadType.MARKING,
+            referenceSupport: 'RIGHT'
+          }
+        ]
+      };
+
+      service.deleteSpanLoad('support-uuid-1');
+
+      const spanLoad = mockPlotService.temporaryLoadData?.spanLoads[0];
+      expect(spanLoad?.supportUuid).toBe('support-uuid-1');
+      expect(spanLoad?.loadPosition).toBe(0);
+      expect(spanLoad?.loadWeight).toBe(0);
+      expect(spanLoad?.type).toBe(LoadType.PUNCTUAL);
+      expect(spanLoad?.referenceSupport).toBe('LEFT');
     });
   });
 });

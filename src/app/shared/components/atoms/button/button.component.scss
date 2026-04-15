@@ -122,6 +122,10 @@ a.app-btn {
   &.disabled,
   &[disabled] {
     box-shadow: inset 0 0 0 0.0625rem var(--grey-200);
+
+    &.app-btn-loading {
+      box-shadow: 0 0 0 0.0625rem var(--grey-200);
+    }
   }
 }
 
@@ -145,6 +149,10 @@ a.app-btn {
   &.disabled,
   &[disabled] {
     box-shadow: inset 0 0 0 0.0625rem var(--grey-200);
+
+    &.app-btn-loading {
+      box-shadow: 0 0 0 0.0625rem var(--grey-200);
+    }
   }
 }
 

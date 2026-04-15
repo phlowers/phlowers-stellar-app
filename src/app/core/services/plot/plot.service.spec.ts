@@ -719,6 +719,81 @@ describe('PlotService', () => {
         expect(service.distances()).toEqual([]);
       });
     });
+
+    describe('with temporaryLoadData set', () => {
+      const mockChargeData: ChargeData = {
+        climate: {
+          windPressure: 100,
+          cableTemperature: 20,
+          symmetryType: SymmetryType.SYMMETRIC,
+          iceThickness: null,
+          frontierSupportNumber: null,
+          iceThicknessBefore: null,
+          iceThicknessAfter: null
+        },
+        spanLoads: [
+          {
+            supportUuid: 'support-uuid-1',
+            loadPosition: 0.5,
+            loadWeight: 50,
+            type: LoadType.PUNCTUAL,
+            referenceSupport: 'LEFT'
+          }
+        ]
+      };
+
+      const mockLoadOutput: GetSectionOutput = {
+        ...mockGetSectionOutput,
+        loads_coords: { 'support-uuid-1': [[0, 0, 10]] }
+      };
+
+      beforeEach(() => {
+        mockWorkerPythonService.setReady?.(true);
+        mockCablesService.getCable.mockResolvedValue(mockCable);
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.getLit) {
+            return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: null });
+          }
+          if (task === Task.changeState) {
+            return Promise.resolve({ result: { current: mockLoadOutput, base: mockGetSectionOutput }, error: null });
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+        service.temporaryLoadData = mockChargeData;
+      });
+
+      afterEach(() => {
+        service.temporaryLoadData = null;
+      });
+
+      it('should call Task.changeState with temporaryLoadData climate and spanLoads', async () => {
+        await service.refreshSection(mockSection);
+
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
+          climate: mockChargeData.climate,
+          spanLoads: mockChargeData.spanLoads
+        });
+      });
+
+      it('should set litData to the changeState result', async () => {
+        await service.refreshSection(mockSection);
+
+        expect(service.litData()).toEqual(mockLoadOutput);
+      });
+
+      it('should not call Task.changeState when getLit returns an error', async () => {
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.getLit) {
+            return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: TaskError.CALCULATION_ERROR });
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+
+        await service.refreshSection(mockSection);
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.changeState, expect.anything());
+      });
+    });
   });
 
   describe('purgePlot', () => {

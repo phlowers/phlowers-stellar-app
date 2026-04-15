@@ -237,7 +237,7 @@ export class PlotService {
       return;
     }
     const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
-    let currentLitData = result?.current ?? null;
+    let currentLitData: GetSectionOutput | null = result?.current ?? null;
     this.baseLitData.set(result?.base ?? null);
     this.error.set(error);
     this.pythonErrorCode.set(pythonErrorCode ?? null);
@@ -245,29 +245,71 @@ export class PlotService {
     if (error) {
       this.distances.set([]);
       this.distanceType.set(null);
-    } else if (!section.obstacles?.length) {
-      this.distances.set([]);
-    } else if (currentLitData) {
-      // Re-add obstacles from the section so that annotations and distance traces are preserved
-      // across section reloads (e.g. re-opening the study or after a save).
-      for (const obstacle of section.obstacles) {
-        const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
-        if (obstacleResult?.current) {
-          currentLitData = obstacleResult.current;
-        }
-      }
-      const options = untracked(() => this.plotOptions());
-      const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
-        startSupport: options.startSupport,
-        endSupport: options.endSupport,
-        view: options.view
-      });
-      this.distances.set(distances ?? []);
+    } else {
+      currentLitData = await this.applyTemporaryLoad(currentLitData);
+      currentLitData = await this.applySectionObstacles(section, currentLitData);
     }
 
     this.litData.set(currentLitData);
     this.loading.set(false);
   };
+
+  /**
+   * Applies the active load case (temporaryLoadData) on top of the given lit data.
+   * If no load data is active, or if currentLitData is null, returns the input unchanged.
+   * @param currentLitData - The current section output to apply the load onto (may be null)
+   * @returns Updated section output with the load state applied, or the original if nothing to apply
+   */
+  private async applyTemporaryLoad(currentLitData: GetSectionOutput | null): Promise<GetSectionOutput | null> {
+    if (!this.temporaryLoadData || !currentLitData) {
+      return currentLitData;
+    }
+    const { result: loadResult } = await this.workerPythonService.runTask(Task.changeState, {
+      climate: this.temporaryLoadData.climate,
+      spanLoads: this.temporaryLoadData.spanLoads
+    });
+    if (loadResult?.current) {
+      this.baseLitData.set(loadResult.base ?? null);
+      return loadResult.current;
+    }
+    return currentLitData;
+  }
+
+  /**
+   * Re-adds all obstacles from the section and refreshes the distances signal.
+   * If the section has no obstacles, resets the distances to an empty array.
+   * @param section - The section whose obstacles should be applied
+   * @param currentLitData - The current section output to layer obstacles onto (may be null)
+   * @returns Updated section output after obstacle application, or the original value if no obstacles
+   */
+  private async applySectionObstacles(
+    section: Section,
+    currentLitData: GetSectionOutput | null
+  ): Promise<GetSectionOutput | null> {
+    if (!section.obstacles?.length) {
+      this.distances.set([]);
+      return currentLitData;
+    }
+    if (!currentLitData) {
+      return currentLitData;
+    }
+    // Re-add obstacles from the section so that annotations and distance traces are preserved
+    // across section reloads (e.g. re-opening the study or after a save).
+    for (const obstacle of section.obstacles) {
+      const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
+      if (obstacleResult?.current) {
+        currentLitData = obstacleResult.current;
+      }
+    }
+    const options = untracked(() => this.plotOptions());
+    const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
+      startSupport: options.startSupport,
+      endSupport: options.endSupport,
+      view: options.view
+    });
+    this.distances.set(distances ?? []);
+    return currentLitData;
+  }
 
   getCamera = () => {
     const plot = document.getElementById(PLOT_ID);

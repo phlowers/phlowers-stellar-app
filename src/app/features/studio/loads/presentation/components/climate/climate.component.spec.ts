@@ -250,27 +250,6 @@ describe('ClimateComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('isCalculating computed', () => {
-    it('should reflect plotService.loading() as false by default', () => {
-      expect(component.isCalculating()).toBe(false);
-    });
-
-    it('should be true when plotService.loading() is true', () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.loading as ReturnType<typeof signal>).set(true);
-      expect(component.isCalculating()).toBe(true);
-    });
-
-    it('should go back to false when plotService.loading() returns to false', () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.loading as ReturnType<typeof signal>).set(true);
-      expect(component.isCalculating()).toBe(true);
-
-      (plotService.loading as ReturnType<typeof signal>).set(false);
-      expect(component.isCalculating()).toBe(false);
-    });
-  });
-
   it('should initialize form with default values', () => {
     expect(component.form.value).toEqual({
       windPressure: 0,
@@ -529,6 +508,53 @@ describe('ClimateComponent', () => {
     });
   });
 
+  describe('isSaving signal', () => {
+    it('should be false by default', () => {
+      expect(component.isSaving()).toBe(false);
+    });
+
+    it('should be true during saveForm then false after', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      let resolveTask!: () => void;
+      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockResolvedValue(undefined);
+
+      const promise = component.saveForm();
+      expect(component.isSaving()).toBe(true);
+      resolveTask();
+      await promise;
+      expect(component.isSaving()).toBe(false);
+    });
+  });
+
+  describe('isCalculatingLoad signal', () => {
+    it('should be false by default', () => {
+      expect(component.isCalculatingLoad()).toBe(false);
+    });
+
+    it('should be true during calculateForm then false after', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      let resolveTask!: () => void;
+      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+
+      const promise = component.calculateForm();
+      expect(component.isCalculatingLoad()).toBe(true);
+      resolveTask();
+      await promise;
+      expect(component.isCalculatingLoad()).toBe(false);
+    });
+  });
+
   describe('UC: climate form rendering', () => {
     it('UC-LC1: should render the climate form', () => {
       const form = getByTestId('climate-form');
@@ -559,6 +585,34 @@ describe('ClimateComponent', () => {
       const calcBtn = getByTestId('calculate-btn') as HTMLButtonElement;
       expect(saveBtn.disabled).toBe(true);
       expect(calcBtn.disabled).toBe(true);
+    });
+  });
+
+  describe('initForm', () => {
+    it('should build frontierSupportOptions when section has supports', async () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        supports: [{ uuid: 's1' }, { uuid: 's2' }, { uuid: 's3' }]
+      });
+
+      await component.initForm();
+
+      // shift removes first, pop removes last → 1 option remains from 3 supports
+      expect(component.frontierSupportOptions().length).toBe(1);
+    });
+
+    it('should build no frontierSupportOptions when section has fewer than 3 supports', async () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        supports: [{ uuid: 's1' }, { uuid: 's2' }]
+      });
+
+      await component.initForm();
+
+      // shift removes first, pop removes last → 0 options remain from 2 supports
+      expect(component.frontierSupportOptions().length).toBe(0);
     });
   });
 });
