@@ -2,6 +2,7 @@ import { Dash, Data, PlotData } from 'plotly.js-dist-min';
 import { SPAN_COLOR } from './plot.constants';
 import { PlotObjectsType, Side, View } from '@shared/types/plot.types';
 import { Support } from '@shared/domain/models/support.model';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 /**
  * Returns line styling for a given plot object type and view mode.
@@ -38,10 +39,15 @@ const getMode = (type: PlotObjectsType): PlotData['mode'] => {
   return 'lines+markers';
 };
 
-const getText = (type: PlotObjectsType, points: number[][], support: Support | undefined): string[] => {
+const getText = (
+  type: PlotObjectsType,
+  points: number[][],
+  support: Support | undefined,
+  fallbackIndex: number
+): string[] => {
   if (type !== 'supports') return [];
   const highestPointIndex = points.findIndex((point) => point[2] === Math.max(...points.map((p) => p[2])));
-  const label = support?.number ?? '';
+  const label = formatSupportNumber(support?.number || String(fallbackIndex));
   return points.map((_, index) => (index === highestPointIndex ? label : ''));
 };
 
@@ -100,7 +106,7 @@ export const createDataObject = (
       line: getLine(type, view),
       textposition: 'top center',
       marker: getMarker(type, view),
-      text: getText(type, points, supports[startSupport + index]),
+      text: getText(type, points, supports[startSupport + index], startSupport + index + 1),
       name: type,
       supportUuid: supports[startSupport + index]?.uuid
     };
