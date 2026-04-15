@@ -12,6 +12,7 @@ import { CableLengthChangeComponent } from './cable-length-change';
 import { PlotService } from '@services/plot/plot.service';
 import { CableModificationsService } from '../../services/cableModifications.service';
 import { Section } from '@shared/domain';
+import { Study } from '@shared/domain/models/study.model';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
@@ -90,22 +91,58 @@ describe('CableLengthChangeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('isCalculating computed', () => {
-    it('should reflect plotService.loading() as false by default', () => {
-      expect(component.isCalculating()).toBe(false);
+  describe('isCalculatingOnly signal', () => {
+    it('should be false by default', () => {
+      expect(component.isCalculatingOnly()).toBe(false);
     });
 
-    it('should be true when plotService.loading() is true', () => {
-      mockPlotService.loading.set(true);
-      expect(component.isCalculating()).toBe(true);
+    it('should be true during calculate() without params then false after', async () => {
+      component.form.patchValue({
+        scope: 'support-uuid-1',
+        widthCable: 'lengthening',
+        sizeCable: 1,
+        distanceSupportRef: 5
+      });
+      component.form.controls.supportRef.enable();
+      component.form.controls.supportRef.setValue('LEFT');
+
+      let resolveTask!: () => void;
+      mockCableModificationsService.calculate.mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+
+      const promise = component.calculate();
+      expect(component.isCalculatingOnly()).toBe(true);
+      resolveTask();
+      await promise;
+      expect(component.isCalculatingOnly()).toBe(false);
     });
 
-    it('should go back to false when plotService.loading() returns to false', () => {
-      mockPlotService.loading.set(true);
-      expect(component.isCalculating()).toBe(true);
+    it('should NOT set isCalculatingOnly when calculate() is called with params', async () => {
+      const params = {
+        scope: 'support-uuid-1',
+        supportRef: 'LEFT' as const,
+        widthCable: 'lengthening' as const,
+        sizeCable: 1,
+        distanceSupportRef: 5
+      };
 
-      mockPlotService.loading.set(false);
-      expect(component.isCalculating()).toBe(false);
+      let resolveTask!: () => void;
+      mockCableModificationsService.calculate.mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+
+      const promise = component.calculate(params);
+      expect(component.isCalculatingOnly()).toBe(false);
+      resolveTask();
+      await promise;
+      expect(component.isCalculatingOnly()).toBe(false);
     });
   });
 
@@ -594,6 +631,101 @@ describe('CableLengthChangeComponent', () => {
       component.onScopeChange('support-uuid-1');
 
       expect(component.isDirtySinceLastSave()).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // hasActiveModification computed
+  // ---------------------------------------------------------------------------
+  describe('hasActiveModification', () => {
+    it('should return true by default', () => {
+      expect(component.hasActiveModification()).toBe(true);
+    });
+
+    it('should reflect hasSavedModification signal', () => {
+      component.hasSavedModification.set(false);
+      expect(component.hasActiveModification()).toBe(false);
+
+      component.hasSavedModification.set(true);
+      expect(component.hasActiveModification()).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // deleteForm() — null scope branch (line 247)
+  // ---------------------------------------------------------------------------
+  describe('deleteForm() — null scope', () => {
+    it('should not call delete or clearPersistedFormData when scope is null', () => {
+      component.form.controls.scope.setValue(null);
+
+      component.deleteForm();
+
+      expect(mockCableModificationsService.delete).not.toHaveBeenCalled();
+      expect(mockCableModificationsService.clearPersistedFormData).not.toHaveBeenCalled();
+      expect(component.hasSavedModification()).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // reloadSectionFromDb (private) — success path
+  // ---------------------------------------------------------------------------
+  describe('reloadSectionFromDb()', () => {
+    it('should call plotService.section.set when study and section are found', async () => {
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid-1' } as unknown as Study);
+      const updatedSection: Partial<Section> = { ...mockSection, cable_modifications: [] };
+      mockCableModificationsService.getStudy.mockResolvedValue({
+        sections: [updatedSection]
+      } as unknown as Awaited<ReturnType<CableModificationsService['getStudy']>>);
+
+      await (component as unknown as { reloadSectionFromDb(): Promise<void> }).reloadSectionFromDb();
+
+      expect(mockPlotService.section.set).toHaveBeenCalledWith(updatedSection);
+    });
+
+    it('should not call plotService.section.set when study is not found', async () => {
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid-1' } as unknown as Study);
+      mockCableModificationsService.getStudy.mockResolvedValue(undefined);
+
+      await (component as unknown as { reloadSectionFromDb(): Promise<void> }).reloadSectionFromDb();
+
+      expect(mockPlotService.section.set).not.toHaveBeenCalled();
+    });
+
+    it('should not call plotService.section.set when studyUuid is missing', async () => {
+      mockPlotService.study.mockReturnValue(null);
+
+      await (component as unknown as { reloadSectionFromDb(): Promise<void> }).reloadSectionFromDb();
+
+      expect(mockCableModificationsService.getStudy).not.toHaveBeenCalled();
+      expect(mockPlotService.section.set).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Constructor effect — null section resets form
+  // ---------------------------------------------------------------------------
+  describe('constructor effect — null section', () => {
+    let nullSectionComponent: CableLengthChangeComponent;
+    let nullSectionFixture: ComponentFixture<CableLengthChangeComponent>;
+
+    beforeEach(async () => {
+      // Override section to return null before creating the component so the effect fires with null
+      mockPlotService.section = createSignalMock<Partial<Section> | null>(
+        null
+      ) as unknown as vi.Mocked<PlotService>['section'];
+
+      nullSectionFixture = TestBed.createComponent(CableLengthChangeComponent);
+      nullSectionComponent = nullSectionFixture.componentInstance;
+      nullSectionFixture.detectChanges();
+      await nullSectionFixture.whenStable();
+    });
+
+    it('should create the component without errors when section is null', () => {
+      expect(nullSectionComponent).toBeTruthy();
+    });
+
+    it('should have form in reset state when section is null', () => {
+      expect(nullSectionComponent.isDirtySinceLastSave()).toBe(false);
     });
   });
 });

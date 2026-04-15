@@ -3,6 +3,7 @@ import { effect, inject, Injectable, signal } from '@angular/core';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
+import { emptySpanLoad } from '../helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -48,16 +49,23 @@ export class LoadFormsService {
   saveTemporaryLoadDataInSection = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const section = this.plotService.section();
+    const sectionUuid = section?.uuid;
     if (!studyUuid || !sectionUuid || !temporaryLoadData) {
       return;
     }
-    const currentCharge = await this.chargesService.getSelectedChargeCase(studyUuid, sectionUuid);
+    const chargeUuid = section.selected_charge_uuid;
+    if (!chargeUuid) {
+      return;
+    }
+    const currentCharge = section.charges?.find((c) => c.uuid === chargeUuid);
     if (!currentCharge) {
       return;
     }
-    currentCharge.data = temporaryLoadData;
-    await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, currentCharge);
+    await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, {
+      ...currentCharge,
+      data: temporaryLoadData
+    });
   };
 
   /**
@@ -83,6 +91,20 @@ export class LoadFormsService {
 
     this.plotService.loading.set(false);
   };
+
+  /**
+   * Reset the span load for the given support UUID to its empty state.
+   */
+  deleteSpanLoad(supportUuid: string): void {
+    const temporaryLoadData = this.plotService.temporaryLoadData;
+    if (!temporaryLoadData) return;
+
+    const spanLoad = temporaryLoadData.spanLoads.find((s) => s.supportUuid === supportUuid);
+    if (!spanLoad) return;
+
+    const reset = { ...emptySpanLoad, supportUuid };
+    Object.assign(spanLoad, reset);
+  }
 
   /**
    * Delete the load by deleting the charge case

@@ -272,6 +272,21 @@ describe('CableModificationsService', () => {
       expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
     });
 
+    it('should return early when section is not found in study', async () => {
+      const studyWithoutSection: StudyEntity = { ...mockStudy, sections: [] };
+      mockStudiesService.getStudy.mockResolvedValue(studyWithoutSection);
+
+      await service.save({
+        spanUuid: 'su',
+        supportRef: 'LEFT',
+        widthCable: 'lengthening',
+        sizeCable: 1,
+        distanceSupportRef: 5
+      });
+
+      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+    });
+
     it('should add new cable modification and call updateStudy', async () => {
       const modification = {
         spanUuid: 'support-uuid-1',
@@ -403,6 +418,26 @@ describe('CableModificationsService', () => {
       expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
     });
 
+    it('should return early when study is not found', async () => {
+      mockStudiesService.getStudy.mockResolvedValue(undefined);
+
+      await service.delete('some-uuid');
+
+      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+    });
+
+    it('should return early when section is not found in study', async () => {
+      const studyWithoutMatchingSection: StudyEntity = {
+        ...mockStudy,
+        sections: []
+      };
+      mockStudiesService.getStudy.mockResolvedValue(studyWithoutMatchingSection);
+
+      await service.delete('some-uuid');
+
+      expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+    });
+
     it('should remove the modification from section and call updateStudy', async () => {
       const uuid = 'mod-to-delete';
       const studyWithMod: StudyEntity = {
@@ -472,6 +507,15 @@ describe('CableModificationsService', () => {
       const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
       const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.selected_cable_modification_uuid).toBe(otherId);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // clearPersistedFormData()
+  // ---------------------------------------------------------------------------
+  describe('clearPersistedFormData()', () => {
+    it('should execute without throwing', () => {
+      expect(() => service.clearPersistedFormData('some-span-uuid')).not.toThrow();
     });
   });
 });
