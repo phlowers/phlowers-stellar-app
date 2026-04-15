@@ -48,7 +48,6 @@ def change_state(js_inputs: dict):
     climate = ClimateCharge(**change_state_inputs["climate"])
     # print(change_state_inputs)
     logger.debug("python_inputs: ", change_state_inputs)
-    print(climate)
     wind_pressure = climate.windPressure
     cable_temperature = climate.cableTemperature
 
@@ -66,7 +65,13 @@ def change_state(js_inputs: dict):
         ice_thickness[-1] = np.nan
     elif climate.symmetryType == "symmetric":
         ice_thickness = climate.iceThickness
-    ice_thickness = units(ice_thickness, "cm").to("m").magnitude # in meters in the engine
+    else:
+        raise ValueError(
+            f"Unsupported symmetryType: {climate.symmetryType}. Expected 'dis_symmetric' or 'symmetric'"
+        )
+    ice_thickness = (
+        units(ice_thickness, "cm").to("m").magnitude
+    )  # in meters in the engine
     apply_span_loads(change_state_inputs["spanLoads"])
 
     engine.solve_adjustment()

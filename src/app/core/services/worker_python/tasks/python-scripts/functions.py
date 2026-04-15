@@ -438,7 +438,6 @@ def init_section(js_inputs: dict):
         # Duplicated code with change_state
         climate_data = ClimateCharge(**climate)
 
-        print(climate_data)
         section_length = len(engine.section_array.data)
         ice_thickness: float | np.ndarray
         if climate_data.symmetryType == "dis_symmetric":
@@ -453,7 +452,13 @@ def init_section(js_inputs: dict):
             ice_thickness[-1] = np.nan
         elif climate_data.symmetryType == "symmetric":
             ice_thickness = climate_data.iceThickness
-        ice_thickness = units(ice_thickness, "cm").to("m").magnitude # in meters in the engine
+        else:
+            raise ValueError(
+                f"Unsupported symmetryType: {climate_data.symmetryType}. Expected 'dis_symmetric' or 'symmetric'"
+            )
+        ice_thickness = (
+            units(ice_thickness, "cm").to("m").magnitude
+        )  # in meters in the engine
 
         engine.solve_change_state(
             ice_thickness=ice_thickness,
