@@ -25,7 +25,7 @@ def example_obstacle_inputs():
             'altitudeType': 'absolute',
             'lateralDistanceType': 'SPAN_AXIS',
             'referenceSupport': 'LEFT',
-            'positions': [{'x': 100, 'y': 15, 'z': 1955}]
+            'positions': [{'x': 100, 'y': 15, 'z': 1955}],
         },
         {
             'uuid': '4bbb2465-f175-47e9-b309-0cc2984eae0f',
@@ -36,9 +36,10 @@ def example_obstacle_inputs():
             'altitudeType': 'absolute',
             'lateralDistanceType': 'SPAN_AXIS',
             'referenceSupport': 'LEFT',
-            'positions': [{'x': 100, 'y': 15, 'z': 2300}]
+            'positions': [{'x': 100, 'y': 15, 'z': 2300}],
         },
     ]
+
 
 @pytest.fixture
 def default_section_array_three_spans() -> SectionArray:
@@ -61,9 +62,11 @@ def default_section_array_three_spans() -> SectionArray:
     section_array.add_units({"line_angle": "deg"})
     return section_array
 
+
 @pytest.fixture
 def cable_array_AM600() -> CableArray:
     return sample_cable_catalog.get_as_object(["ASTER600"])
+
 
 @pytest.fixture
 def balance_engine_base_test(cable_array_AM600: CableArray) -> BalanceEngine:
@@ -95,13 +98,24 @@ def balance_engine_base_test(cable_array_AM600: CableArray) -> BalanceEngine:
     be.solve_adjustment()
     return be
 
+
 @pytest.fixture
-def plot_engine_base_test(balance_engine_base_test: BalanceEngine) -> PlotEngine:
+def plot_engine_base_test(
+    balance_engine_base_test: BalanceEngine,
+) -> PlotEngine:
     return PlotEngine(engine=balance_engine_base_test)
 
 
-def test_obstacle_addition(example_obstacle_inputs, balance_engine_base_test: BalanceEngine, plot_engine_base_test: PlotEngine):
-    result = obstacles.add_obstacles(example_obstacle_inputs, balance_engine_base_test, plot_engine_base_test)
+def test_obstacle_addition(
+    example_obstacle_inputs,
+    balance_engine_base_test: BalanceEngine,
+    plot_engine_base_test: PlotEngine,
+):
+    result = obstacles.add_obstacles(
+        example_obstacle_inputs,
+        balance_engine_base_test,
+        plot_engine_base_test,
+    )
 
     assert 'obstacles' in result
     assert len(result['obstacles']) == len(example_obstacle_inputs)
@@ -109,4 +123,3 @@ def test_obstacle_addition(example_obstacle_inputs, balance_engine_base_test: Ba
         assert 'uuid' in obs
         assert 'points' in obs
         assert len(obs['points']) > 0
-    

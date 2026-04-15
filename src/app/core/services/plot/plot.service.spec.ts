@@ -587,7 +587,9 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, [mockObstacle]);
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle,
+          expect.objectContaining({ obstacles: [mockObstacle] })
+        );
       });
 
       it('should call Task.addObstacle once with all obstacles when section has multiple', async () => {
@@ -599,7 +601,9 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, [mockObstacle, secondObstacle]);
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle,
+          expect.objectContaining({ obstacles: [mockObstacle, secondObstacle] })
+        );
       });
 
       it('should call Task.calculateObstaclesDistances after adding obstacles', async () => {
@@ -1240,7 +1244,7 @@ describe('PlotService', () => {
     it('should call workerPythonService with correct task params', async () => {
       service.plotOptionsChange({ view: '2d', startSupport: 2, endSupport: 5 });
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [] },
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: [], distances: [] },
         error: null
       });
 
@@ -1262,7 +1266,7 @@ describe('PlotService', () => {
 
     it('should set litData directly from sectionOutput.current', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [] },
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: [], distances: [] },
         error: null
       });
 
@@ -1287,7 +1291,7 @@ describe('PlotService', () => {
         ]
       };
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [mockDist] },
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: [], distances: [mockDist] },
         error: null
       });
 
@@ -1297,24 +1301,21 @@ describe('PlotService', () => {
     });
 
     it('should include obstacle coordinates returned by Python in litData', async () => {
-      const sectionOutputWithObstacles: GetSectionOutput = {
-        ...mockGetSectionOutput,
-        obstacles: [{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] }]
-      };
+      const obstacleCoords = [{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] as [number, number, number][] }];
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: sectionOutputWithObstacles, base: mockGetSectionOutput }, distances: [] },
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: obstacleCoords, distances: [] },
         error: null
       });
 
       await service.refreshProjection();
 
-      expect(service.litData()).toEqual(sectionOutputWithObstacles);
-      expect(service.litData()?.obstacles).toEqual([{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] }]);
+      expect(service.litData()).toEqual({ ...mockGetSectionOutput, obstacles: obstacleCoords });
+      expect(service.litData()?.obstacles).toEqual(obstacleCoords);
     });
 
     it('should NOT call Task.addObstacle — obstacle coordinates come from sectionOutput', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, distances: [] },
+        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: [], distances: [] },
         error: null
       });
 

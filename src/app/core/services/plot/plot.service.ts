@@ -1,6 +1,6 @@
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
+import { AxesNorms, PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
 import {
   DataError,
@@ -57,13 +57,19 @@ export class PlotService {
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly document = inject(DOCUMENT);
 
+  /** UUID of the section currently loaded in the Python engine — used to skip redundant refreshSection calls. */
+  private currentSectionUuid: string | null = null;
+
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
       this.workerReady.set(value);
     });
     effect(() => {
-      if (this.isStudioActive() && this.workerReady() && this.spanService.section()) {
-        this.refreshSection(this.spanService.section()!);
+      const section = this.spanService.section();
+      if (this.isStudioActive() && this.workerReady() && section) {
+        if (section.uuid !== this.currentSectionUuid) {
+          this.refreshSection(section);
+        }
       }
     });
   }
@@ -80,6 +86,7 @@ export class PlotService {
     this.isStudioActive.set(false);
     this.spanService.section.set(null);
     this.study.set(null);
+    this.currentSectionUuid = null;
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedObstacle(null, null);
     this.sideTabsService.sideTabs.set(null);
@@ -118,6 +125,7 @@ export class PlotService {
   }
 
   refreshSection = async (section: Section) => {
+    this.currentSectionUuid = section?.uuid ?? null;
     this.error.set(null);
     this.pythonErrorCode.set(null);
     this.litData.set(null);
@@ -148,6 +156,10 @@ export class PlotService {
       return;
     }
 
+    const plotOptions = untracked(() => this.plotOptionsService.plotOptions());
+    const currentNorms = untracked(() => this.plotOptionsService.axesNorms());
+    await this.updateAxesNorms(currentNorms, plotOptions);
+
     const sectionLitData = result?.current ?? null;
     const obstacles = section.obstacles ?? [];
     if (obstacles.length > 0 && sectionLitData) {
@@ -165,16 +177,26 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
+    const plotOptions = this.plotOptionsService.plotOptions();
     const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.refreshProjection, {
-      startSupport: this.plotOptionsService.plotOptions().startSupport,
-      endSupport: this.plotOptionsService.plotOptions().endSupport,
-      view: this.plotOptionsService.plotOptions().view
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
     });
     this.litData.set(result?.sectionOutput?.current ?? null);
     this.baseLitData.set(result?.sectionOutput?.base ?? null);
+    const currentLitData = result?.sectionOutput?.current ?? null;
+    const obstacles = result?.obstacles ?? [];
+    if (currentLitData && obstacles.length > 0) {
+      this.litData.set({ ...currentLitData, obstacles });
+    }
     this.obstacleStateService.setDistances(result?.distances ?? []);
     this.error.set(error);
     this.pythonErrorCode.set(pythonErrorCode ?? null);
+
+    const currentNorms = untracked(() => this.plotOptionsService.axesNorms());
+    await this.updateAxesNorms(currentNorms, plotOptions);
+
     this.loading.set(false);
   };
 
@@ -189,6 +211,18 @@ export class PlotService {
     this.pythonErrorCode.set(null);
     this.loading.set(false);
   };
+
+  private async updateAxesNorms(currentNorms: AxesNorms, plotOptions: PlotOptions): Promise<void> {
+    const { result } = await this.workerPythonService.runTask(Task.getAspectRatio, {
+      ...currentNorms,
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
+    });
+    if (result) {
+      this.plotOptionsService.setAxesNorms({ ...result, aspectMode: currentNorms.aspectMode });
+    }
+  }
 
   async reapplyObstacles(): Promise<void> {
     const section = untracked(() => this.spanService.section());
@@ -211,7 +245,12 @@ export class PlotService {
     let currentObstacles: ObstacleOutput['obstacles'] = [];
 
     if (obstacles.length) {
-      const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, obstacles);
+      const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, {
+        obstacles,
+        startSupport: plotOptions.startSupport,
+        endSupport: plotOptions.endSupport,
+        view: plotOptions.view
+      });
       if (obstacleResult?.obstacles) {
         currentObstacles = obstacleResult.obstacles;
       }
@@ -219,6 +258,7 @@ export class PlotService {
 
     if (obstacles.length) {
       const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
+        obstacles,
         startSupport: plotOptions.startSupport,
         endSupport: plotOptions.endSupport,
         view: plotOptions.view

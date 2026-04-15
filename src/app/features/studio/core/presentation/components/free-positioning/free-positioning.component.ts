@@ -179,7 +179,12 @@ export class FreePositioningComponent implements OnDestroy {
     const filteredObstacles = allObstacles.filter(
       (o) => o.supportIndex >= plotOptions.startSupport && o.supportIndex < plotOptions.endSupport
     );
-    const litData = await this.workerPythonService.runTask(Task.addObstacle, filteredObstacles);
+    const litData = await this.workerPythonService.runTask(Task.addObstacle, {
+      obstacles: filteredObstacles,
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
+    });
 
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
       | ReferenceSupport

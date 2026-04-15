@@ -1,31 +1,45 @@
 import numpy as np
 import pandas as pd
-from mechaphlowers.entities.arrays import SectionArray, CableArray
+from mechaphlowers.entities.arrays import SectionArray, CableArray, ObstacleArray
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
 from typing import Optional
-from dataclasses import dataclass
 import logging
 from importlib.metadata import version
 import sys
 
 from stellar_engine.entities.inputs import ClimateCharge
+from stellar_engine.plot import obstacles as obst
+from stellar_engine.entities.inputs import Support, Cable, InitialCondition
+from stellar_engine.core.section import generate_section_array
 
 RESOLUTION = 100
-# init a logger to print to stdout
-logger = logging.getLogger("mechaphlowers")
-# Set logger level to INFO so info messages are shown
-logger.setLevel(logging.WARNING)
 
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
+
+# mechaphlowers logger — reset any handlers set by the library on import
+mph_logger = logging.getLogger("mechaphlowers")
+mph_logger.handlers.clear()
+mph_logger.propagate = True
+mph_logger.setLevel(logging.WARNING)
+mph_logger.addHandler(handler)
+
+# stellar_engine logger
+stellar_logger = logging.getLogger("stellar_engine")
+stellar_logger.setLevel(logging.WARNING)
+stellar_logger.addHandler(handler)
+
+# logger for this file
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 logger.addHandler(handler)
 
-logger.info(f"mechaphlowers version: {version('mechaphlowers')}")
 
-logger.info(f"stellar_engine version: {version('stellar_engine')}")
+
+
 
 
 def init_config():
@@ -59,8 +73,13 @@ def set_log_level(js_inputs: dict):
     python_inputs = js_to_python(js_inputs)
     log_level = python_inputs["activateDebugLogs"]
 
-    print("log_level: ", log_level)
-    logger.setLevel(logging.DEBUG if log_level else logging.WARNING)
+    level = logging.DEBUG if log_level else logging.WARNING
+    mph_logger.setLevel(level)
+    stellar_logger.setLevel(level)
+    logger.setLevel(level)
+    logger.info(f"Python version: {sys.version}" )
+    mph_logger.info(f"mechaphlowers version: {version('mechaphlowers')}")
+    stellar_logger.info(f"stellar_engine version: {version('stellar_engine')}")
     return {"success": True}
 
 
@@ -75,137 +94,118 @@ def get_config():
     return {"resolution": RESOLUTION}
 
 
-@dataclass
-class Support:
-    uuid: str
-    number: Optional[float] = None
-    name: Optional[str] = None
-    spanLength: Optional[float] = None
-    spanAngle: Optional[float] = None
-    attachmentSet: Optional[str] = None
-    attachmentHeight: Optional[float] = None
-    heightBelowConsole: Optional[float] = None
-    cableType: Optional[str] = None
-    armLength: Optional[float] = None
-    chainName: Optional[str] = None
-    towerModel: Optional[str] = None
-    chainLength: Optional[float] = None
-    chainWeight: Optional[float] = None
-    chainV: Optional[bool] = None
-    counterWeight: Optional[float] = None
-    supportFootAltitude: Optional[float] = None
-    attachmentPosition: Optional[str] = None
-    chainSurface: Optional[float] = None
+# @dataclass
+# class Support:
+#     uuid: str
+#     number: Optional[float] = None
+#     name: Optional[str] = None
+#     spanLength: Optional[float] = None
+#     spanAngle: Optional[float] = None
+#     attachmentSet: Optional[str] = None
+#     attachmentHeight: Optional[float] = None
+#     heightBelowConsole: Optional[float] = None
+#     cableType: Optional[str] = None
+#     armLength: Optional[float] = None
+#     chainName: Optional[str] = None
+#     towerModel: Optional[str] = None
+#     chainLength: Optional[float] = None
+#     chainWeight: Optional[float] = None
+#     chainV: Optional[bool] = None
+#     counterWeight: Optional[float] = None
+#     supportFootAltitude: Optional[float] = None
+#     attachmentPosition: Optional[str] = None
+#     chainSurface: Optional[float] = None
 
 
-@dataclass
-class InitialCondition:
-    uuid: str
-    name: str
-    base_parameters: float
-    base_temperature: float
-    cable_pretension: float
-    min_temperature: float
-    max_wind_pressure: float
-    max_frost_width: float
+# @dataclass
+# class InitialCondition:
+#     uuid: str
+#     name: str
+#     base_parameters: float
+#     base_temperature: float
+#     cable_pretension: float
+#     min_temperature: float
+#     max_wind_pressure: float
+#     max_frost_width: float
 
 
-@dataclass
-class Cable:
-    id: str
-    name: str
-    data_source: str
-    section: float
-    diameter: float
-    young_modulus: float
-    linear_mass: float
-    dilatation_coefficient: float
-    temperature_reference: float
-    stress_strain_a0: float
-    stress_strain_a1: float
-    stress_strain_a2: float
-    stress_strain_a3: float
-    stress_strain_a4: float
-    stress_strain_b0: float
-    stress_strain_b1: float
-    stress_strain_b2: float
-    stress_strain_b3: float
-    stress_strain_b4: float
-    is_polynomial: bool
-    is_bimetallic: bool
-    diameter_heart: float
-    section_conductor: float
-    section_heart: float
-    solar_absorption: float
-    emissivity: float
-    electric_resistance_20: float
-    linear_resistance_temperature_coef: float
-    radial_thermal_conductivity: float
-    has_magnetic_heart: bool
-    rts_cable: float
-    rts_layer_1: float
-    nb_strand_layer_1: float
-    rts_layer_2: float
-    nb_strand_layer_2: float
-    rts_layer_3: float
-    nb_strand_layer_3: float
-    rts_layer_4: float
-    nb_strand_layer_4: float
-    rts_layer_5: float
-    nb_strand_layer_5: float
-    rts_layer_6: float
-    nb_strand_layer_6: float
-    rts_layer_7: float
-    nb_strand_layer_7: float
-    rts_layer_8: float
-    nb_strand_layer_8: float
-    safety_coefficient: float
+# @dataclass
+# class Cable:
+#     id: str
+#     name: str
+#     data_source: str
+#     section: float
+#     diameter: float
+#     young_modulus: float
+#     linear_mass: float
+#     dilatation_coefficient: float
+#     temperature_reference: float
+#     stress_strain_a0: float
+#     stress_strain_a1: float
+#     stress_strain_a2: float
+#     stress_strain_a3: float
+#     stress_strain_a4: float
+#     stress_strain_b0: float
+#     stress_strain_b1: float
+#     stress_strain_b2: float
+#     stress_strain_b3: float
+#     stress_strain_b4: float
+#     is_polynomial: bool
+#     diameter_heart: float
+#     section_conductor: float
+#     section_heart: float
+#     solar_absorption: float
+#     emissivity: float
+#     electric_resistance_20: float
+#     linear_resistance_temperature_coef: float
+#     radial_thermal_conductivity: float
+#     has_magnetic_heart: bool
 
 
-def generate_section_array(supports: list[Support]):
-    # Generate a SectionArray
-    name = []
-    suspension = []
-    altitude = []
-    crossarm_length = []
-    line_angle = []
-    insulator_length = []
-    span_length = []
-    insulator_mass = []
-    load_mass = []
-    load_position = []
-    ground_altitude = []
+# def generate_section_array(supports: list[Support]):
+#     # Generate a SectionArray
+#     name = []
+#     suspension = []
+#     altitude = []
+#     crossarm_length = []
+#     line_angle = []
+#     insulator_length = []
+#     span_length = []
+#     insulator_mass = []
+#     load_mass = []
+#     load_position = []
+#     ground_altitude = []
 
-    for index, support in enumerate(supports):
-        name.append(support.name or f"Support {index}")
-        if index == 0 or index == len(supports) - 1:
-            suspension.append(False)
-        else:
-            suspension.append(True)
-        altitude.append(support.attachmentHeight)
-        crossarm_length.append(support.armLength or 0)
-        insulator_length.append(support.chainLength or 1)
-        span_length.append(support.spanLength)
-        line_angle.append(support.spanAngle)
-        insulator_mass.append(support.chainWeight or 0)
-        load_mass.append(0)
-        load_position.append(0)
-        ground_altitude.append(support.supportFootAltitude)
+#     for index, support in enumerate(supports):
+#         name.append(support.name or f"Support {index}")
+#         if index == 0 or index == len(supports) - 1:
+#             suspension.append(False)
+#         else:
+#             suspension.append(True)
+#         altitude.append(support.attachmentHeight)
+#         crossarm_length.append(support.armLength or 0)
+#         insulator_length.append(support.chainLength or 1)
+#         span_length.append(support.spanLength)
+#         line_angle.append(support.spanAngle)
+#         insulator_mass.append(support.chainWeight or 0)
+#         load_mass.append(0)
+#         load_position.append(0)
+#         ground_altitude.append(support.supportFootAltitude)
 
-    section_data = {
-        "name": name,
-        "suspension": suspension,
-        "conductor_attachment_altitude": altitude,
-        "crossarm_length": crossarm_length,
-        "insulator_length": insulator_length,
-        "insulator_mass": insulator_mass,
-        "load_mass": load_mass,
-        "load_position": load_position,
-        "span_length": span_length,
-        "line_angle": line_angle,
-        "ground_altitude": ground_altitude,
-    }
-    return pd.DataFrame(section_data)
+#     section_data = {
+#         "name": name,
+#         "suspension": suspension,
+#         "conductor_attachment_altitude": altitude,
+#         "crossarm_length": crossarm_length,
+#         "insulator_length": insulator_length,
+#         "insulator_mass": insulator_mass,
+#         "load_mass": load_mass,
+#         "load_position": load_position,
+#         "span_length": span_length,
+#         "line_angle": line_angle,
+#         "ground_altitude": ground_altitude,
+#     }
+#     return pd.DataFrame(section_data)
 
 
 engine: BalanceEngine
@@ -300,6 +300,7 @@ def get_coordinates(
     start_support: int = 0,
     end_support: int = 0,
 ):
+    
     middle_span = get_section_middle_span(start_support, end_support)
     span, supports, insulators = plt_line.section_pts.get_points_for_plot(
         project=project, frame_index=middle_span
@@ -332,8 +333,11 @@ def get_coordinates(
 
 
 def init_section(js_inputs: dict):
+    logger.debug("===> init_section triggered")
     global engine, plt_line, base_engine, base_plt_line
+
     python_inputs = js_to_python(js_inputs)
+    logger.debug(f"Initializing section with inputs: {python_inputs}")
     input_section = python_inputs["section"]
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
@@ -436,6 +440,20 @@ def init_section(js_inputs: dict):
     engine.solve_adjustment()
     engine.solve_change_state()
 
+    plt_line.position_engine.add_obstacles(
+        obstacles_array=ObstacleArray(
+            pd.DataFrame(
+                {
+                    "name": [],
+                    "point_index": [],
+                    "span_index": [],
+                    "x": [],
+                    "y": [],
+                    "z": [],
+                    "object_type": [],
+                }
+                )))
+
     # Create base engine state (before any climate changes)
     # by creating a separate BalanceEngine with same initial params
 
@@ -516,6 +534,7 @@ def init_section(js_inputs: dict):
 
 
 def refresh_projection(js_inputs: dict):
+    logger.debug("===> refresh_projection triggered")
     global plt_line, base_plt_line
     python_inputs = js_to_python(js_inputs)
     start_support = python_inputs["startSupport"]
@@ -529,10 +548,13 @@ def refresh_projection(js_inputs: dict):
         if base_plt_line
         else None
     )
+    middle_span = get_section_middle_span(start_support, end_support)
+    obstacles = obst.get_current_obstacles(plt_line, project=False, support_index=middle_span)
 
     return {
         "sectionOutput": {"current": current_coords, "base": base_coords},
-        "distances": [],
+        "obstacles": obstacles,
+        "distances": obst.compute_distances(inputs=obstacles, project=project, plot_engine=plt_line, support_index=get_section_middle_span(start_support, end_support)),
     }
 
 

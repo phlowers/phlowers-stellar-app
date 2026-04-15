@@ -168,7 +168,7 @@ export interface GetSectionOutput {
   // sag S1 and S2
   sag: number[];
   sag_s2: number[];
-  // obstacles coordinates
+  // obstacles coordinates (merged from obstacle tasks or refreshProjection)
   obstacles?: {
     uuid: string;
     points: [number, number, number][];
@@ -295,13 +295,24 @@ export interface TaskInputs {
   /** Inputs for getConfig task: no inputs */
   [Task.getConfig]: undefined;
   // Inputs for addObstacle task: all current obstacles to register at once
-  [Task.addObstacle]: Obstacle[];
+  [Task.addObstacle]: {
+    obstacles: Obstacle[];
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
   // Inputs for deleteObstacle task
-  [Task.deleteObstacle]: { uuid: string };
+  [Task.deleteObstacle]: {
+    uuid: string;
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
   // Inputs for calculateObstaclesDistances task
   [Task.calculateObstaclesDistances]: {
+    obstacles: Obstacle[];
     startSupport: number;
     endSupport: number;
     view: View;
@@ -314,10 +325,14 @@ export interface TaskInputs {
     distanceSupportRef: number;
     supportRef: 'LEFT' | 'RIGHT';
   };
-  [Task.getAspectRatio]: AxesNorms;
   [Task.getWindIncidence]: {
     azimuth: number;
     windDirection: string;
+  };
+  [Task.getAspectRatio]: AxesNorms & {
+    startSupport: number;
+    endSupport: number;
+    view: View;
   };
 }
 
@@ -372,6 +387,7 @@ export interface TaskOutputs {
   /** Output from refreshProjection task: reprojected geometry with optional base state */
   [Task.refreshProjection]: {
     sectionOutput: GetSectionWithBaseOutput;
+    obstacles: ObstacleOutput['obstacles'];
     distances: Distance[];
   };
 

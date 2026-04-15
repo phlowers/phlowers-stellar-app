@@ -526,6 +526,8 @@ describe('ObstacleFormService', () => {
       await service.deleteObstacle();
       expect(section.obstacles.length).toBe(0);
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
+      expect(mockObstacleStateService.deleteObstacle).toHaveBeenCalledWith('obs-1', plotOptionsServiceMock.plotOptions());
+      expect(mockObstacleStateService.addObstacle).toHaveBeenCalledWith([], plotOptionsServiceMock.plotOptions());
       expect(mockMessageService.add).toHaveBeenCalledWith(
         expect.objectContaining({
           severity: 'success',

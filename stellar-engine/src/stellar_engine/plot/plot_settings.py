@@ -6,22 +6,32 @@
 
 from mechaphlowers import PlotEngine
 from mechaphlowers.plotting.utils import compute_aspect_ratio
+from mechaphlowers.core.geometry.points import Points
 
 
 def get_aspect_ratio(
-    inputs: dict, plot_engine: PlotEngine
+    inputs: dict, plot_engine: PlotEngine, start_support: int, end_support: int
 ) -> dict[str, float]:
+    print(f"Calculating aspect ratio with inputs: {inputs}, start_support: {start_support}, end_support: {end_support}")
     x_scale = inputs["x"]
     y_scale = inputs["y"]
     z_scale = inputs["z"]
     span, supports, insulators = plot_engine.get_points_for_plot()
-    result = compute_aspect_ratio(
-        span,
-        supports,
-        insulators,
-        x_scale=x_scale,
-        y_scale=y_scale,
-        z_scale=z_scale,
-    )
-    print(result)
+    obstacles = plot_engine.position_engine.obstacles_dict()
+    print(obstacles)
+
+
+    try:
+        result = compute_aspect_ratio(
+            Points(span.coords[start_support:end_support]),
+            Points(supports.coords[start_support:end_support]),
+            Points(insulators.coords[start_support:end_support]),
+            x_scale=x_scale,
+            y_scale=y_scale,
+            z_scale=z_scale,
+        )
+        print(result)
+    except Exception as e:
+        logger.error(f"Error computing aspect ratio: {e}")
+
     return result

@@ -88,33 +88,27 @@ describe('ObstacleStateService', () => {
   });
 
   describe('addObstacle', () => {
-    it('should dispatch Task.addObstacle with the filtered obstacles array', async () => {
+    it('should dispatch Task.addObstacle with obstacles and plotOptions', async () => {
       await service.addObstacle([mockObstacle], mockPlotOptions);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, [mockObstacle]);
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, {
+        obstacles: [mockObstacle],
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d'
+      });
     });
 
-    it('should dispatch Task.addObstacle with multiple obstacles when all are in range', async () => {
+    it('should dispatch Task.addObstacle with multiple obstacles and plotOptions', async () => {
       const secondObstacle = { ...mockObstacle, uuid: 'obs-2' };
       await service.addObstacle([mockObstacle, secondObstacle], mockPlotOptions);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, [mockObstacle, secondObstacle]);
-    });
-
-    it('should filter out obstacles outside the support range', async () => {
-      const outsideObstacle = { ...mockObstacle, uuid: 'obs-outside', supportIndex: 5 };
-      await service.addObstacle([mockObstacle, outsideObstacle], mockPlotOptions);
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, [mockObstacle]);
-    });
-
-    it('should return empty ObstacleOutput without calling Python when all obstacles are outside range', async () => {
-      const outsideObstacle = { ...mockObstacle, uuid: 'obs-outside', supportIndex: 5 };
-
-      const result = await service.addObstacle([outsideObstacle], mockPlotOptions);
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.addObstacle, expect.anything());
-      expect(result).toEqual({ obstacles: [] });
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, {
+        obstacles: [mockObstacle, secondObstacle],
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d'
+      });
     });
 
     it('should return the obstacle output on success', async () => {
@@ -133,14 +127,19 @@ describe('ObstacleStateService', () => {
   });
 
   describe('deleteObstacle', () => {
-    it('should dispatch Task.deleteObstacle with the UUID', async () => {
-      await service.deleteObstacle('obs-uuid-1');
+    it('should dispatch Task.deleteObstacle with UUID and plotOptions', async () => {
+      await service.deleteObstacle('obs-uuid-1', mockPlotOptions);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.deleteObstacle, { uuid: 'obs-uuid-1' });
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.deleteObstacle, {
+        uuid: 'obs-uuid-1',
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d'
+      });
     });
 
     it('should return the obstacle output on success', async () => {
-      const result = await service.deleteObstacle('obs-uuid-1');
+      const result = await service.deleteObstacle('obs-uuid-1', mockPlotOptions);
 
       expect(result).toEqual(mockObstacleOutput);
     });
@@ -148,7 +147,7 @@ describe('ObstacleStateService', () => {
     it('should return null when task returns null result', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null });
 
-      const result = await service.deleteObstacle('obs-uuid-1');
+      const result = await service.deleteObstacle('obs-uuid-1', mockPlotOptions);
 
       expect(result).toBeNull();
     });
@@ -181,9 +180,10 @@ describe('ObstacleStateService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({ result: [mockDistance], error: null });
       const plotOptions = { startSupport: 0, endSupport: 2, view: '3d' as const, side: 'profile' as const, invert: false };
 
-      await service.calculateDistances(plotOptions);
+      await service.calculateDistances([mockObstacle], plotOptions);
 
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.calculateObstaclesDistances, {
+        obstacles: [mockObstacle],
         startSupport: 0,
         endSupport: 2,
         view: '3d'
@@ -194,7 +194,7 @@ describe('ObstacleStateService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({ result: [mockDistance], error: null });
       const plotOptions = { startSupport: 0, endSupport: 1, view: '3d' as const, side: 'profile' as const, invert: false };
 
-      await service.calculateDistances(plotOptions);
+      await service.calculateDistances([mockObstacle], plotOptions);
 
       expect(service.distances()).toEqual([mockDistance]);
     });
@@ -204,7 +204,7 @@ describe('ObstacleStateService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null });
       const plotOptions = { startSupport: 0, endSupport: 1, view: '3d' as const, side: 'profile' as const, invert: false };
 
-      await service.calculateDistances(plotOptions);
+      await service.calculateDistances([mockObstacle], plotOptions);
 
       expect(service.distances()).toEqual([]);
     });
@@ -230,7 +230,7 @@ describe('ObstacleStateService', () => {
 
       await service.syncObstacles([mockObstacle], plotOptions);
 
-      expect(calcSpy).toHaveBeenCalledWith(plotOptions);
+      expect(calcSpy).toHaveBeenCalledWith([mockObstacle], plotOptions);
     });
 
     it('should NOT call addObstacle or calculateDistances when obstacles array is empty', async () => {

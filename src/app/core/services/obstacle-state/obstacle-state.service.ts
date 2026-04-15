@@ -49,13 +49,12 @@ export class ObstacleStateService {
    * @returns Rendered obstacle positions after the operation, or `null` on error.
    */
   async addObstacle(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<ObstacleOutput | null> {
-    const filtered = obstacles.filter(
-      (o) => o.supportIndex >= plotOptions.startSupport && o.supportIndex < plotOptions.endSupport
-    );
-    if (filtered.length === 0) {
-      return { obstacles: [] };
-    }
-    const { result } = await this.workerPythonService.runTask(Task.addObstacle, filtered);
+    const { result } = await this.workerPythonService.runTask(Task.addObstacle, {
+      obstacles,
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
+    });
     return result ?? null;
   }
 
@@ -65,8 +64,13 @@ export class ObstacleStateService {
    * @param uuid - UUID of the obstacle to remove.
    * @returns Rendered obstacle positions after the removal, or `null` on error.
    */
-  async deleteObstacle(uuid: string): Promise<ObstacleOutput | null> {
-    const { result } = await this.workerPythonService.runTask(Task.deleteObstacle, { uuid });
+  async deleteObstacle(uuid: string, plotOptions: PlotOptions): Promise<ObstacleOutput | null> {
+    const { result } = await this.workerPythonService.runTask(Task.deleteObstacle, {
+      uuid,
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
+    });
     return result ?? null;
   }
 
@@ -97,7 +101,7 @@ export class ObstacleStateService {
     }
 
     const result = await this.addObstacle(obstacles, plotOptions);
-    await this.calculateDistances(plotOptions);
+    await this.calculateDistances(obstacles, plotOptions);
     return result;
   }
 
@@ -106,10 +110,12 @@ export class ObstacleStateService {
    *
    * Updates the `distances` signal on success.
    *
+   * @param obstacles - All obstacles from the section.
    * @param plotOptions - Current view options (startSupport, endSupport, view).
    */
-  async calculateDistances(plotOptions: PlotOptions): Promise<void> {
+  async calculateDistances(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<void> {
     const { result } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
+      obstacles,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
       view: plotOptions.view

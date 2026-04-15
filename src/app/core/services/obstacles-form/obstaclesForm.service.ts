@@ -252,9 +252,12 @@ export class ObstacleFormService {
     section.obstacles = obstacles;
     await this.sectionService.createOrUpdateSection(study, section);
 
-    const obstacleOutput = await this.obstacleStateService.deleteObstacle(obstacleUuid);
+    await this.obstacleStateService.deleteObstacle(obstacleUuid, this.plotOptionsService.plotOptions());
+
+    // Re-register remaining obstacles to get accurate render positions
+    const obstacleOutput = await this.obstacleStateService.addObstacle(obstacles, this.plotOptionsService.plotOptions());
     this.applyObstacleOutputToLitData(obstacleOutput);
-    await this.obstacleStateService.calculateDistances(this.plotOptionsService.plotOptions());
+    await this.obstacleStateService.calculateDistances(obstacles, this.plotOptionsService.plotOptions());
 
     this.messageService.add({
       severity: 'success',
@@ -295,7 +298,7 @@ export class ObstacleFormService {
     await this.saveSection();
 
     // 5. Recalculate distances
-    await this.obstacleStateService.calculateDistances(this.plotOptionsService.plotOptions());
+    await this.obstacleStateService.calculateDistances(allObstacles, this.plotOptionsService.plotOptions());
 
     // 5. Update UI selection
     const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
