@@ -84,25 +84,6 @@ describe('LoadMarkingComponent', () => {
     vi.clearAllMocks();
   });
 
-  describe('isCalculating computed', () => {
-    it('should reflect plotService.loading() as false by default', () => {
-      expect(component.isCalculating()).toBe(false);
-    });
-
-    it('should be true when plotService.loading() is true', () => {
-      (mockPlotService['loading'] as ReturnType<typeof signal>).set(true);
-      expect(component.isCalculating()).toBe(true);
-    });
-
-    it('should go back to false when plotService.loading() returns to false', () => {
-      (mockPlotService['loading'] as ReturnType<typeof signal>).set(true);
-      expect(component.isCalculating()).toBe(true);
-
-      (mockPlotService['loading'] as ReturnType<typeof signal>).set(false);
-      expect(component.isCalculating()).toBe(false);
-    });
-  });
-
   it('creates with default form state', () => {
     expect(component).toBeTruthy();
     expect(component.form.controls.spanSelect.value).toBeNull();
@@ -137,6 +118,15 @@ describe('LoadMarkingComponent', () => {
 
       expect(component.supportsOptions()).toEqual([]);
       expect(component.form.controls.referenceSupport.disabled).toBe(true);
+    });
+
+    it('does nothing when getSupportIndex returns -1 for selected span', () => {
+      (mockPlotService['getSupportIndex'] as ReturnType<typeof vi.fn>).mockReturnValue(-1);
+
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+
+      expect(component.supportsOptions()).toEqual([]);
     });
 
     it('applies existing load values when span is selected', () => {
@@ -321,6 +311,37 @@ describe('LoadMarkingComponent', () => {
 
       expect(temporaryLoadData.spanLoads[0].loadWeight).toBe(0);
       expect(component.form.controls.loadWeight.value).toBe(0);
+    });
+
+    it('resets type to default when type value is null', () => {
+      const temporaryLoadData = createTemporaryLoadData({ type: LoadType.MARKING });
+      mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+
+      component.form.controls.type.setValue(null);
+      fixture.detectChanges();
+
+      expect(temporaryLoadData.spanLoads[0].type).toBe(LoadType.PUNCTUAL);
+    });
+
+    it('resets referenceSupport to default when value is null', () => {
+      const temporaryLoadData = createTemporaryLoadData({ referenceSupport: 'RIGHT' });
+      mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+
+      // Emit 'RIGHT' first so the signal transitions from null → 'RIGHT'
+      component.form.controls.referenceSupport.setValue('RIGHT');
+      fixture.detectChanges();
+
+      // Now emit null: signal transitions from 'RIGHT' → null, triggering the else branch
+      component.form.controls.referenceSupport.setValue(null);
+      fixture.detectChanges();
+
+      expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('LEFT');
     });
   });
 
@@ -552,6 +573,19 @@ describe('LoadMarkingComponent', () => {
       btn.click();
 
       expect(mockPlotService['plotOptionsChange']).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('externalSpanSelectionEffect', () => {
+    it('should set spanSelect value and clear selectedSpanSupportUuid when a uuid is provided', async () => {
+      (mockLoadFormsService['selectedSpanSupportUuid'] as ReturnType<typeof signal<string | null>>).set('support-2');
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.form.controls.spanSelect.value).toBe('support-2');
+      expect(
+        (mockLoadFormsService['selectedSpanSupportUuid'] as ReturnType<typeof signal<string | null>>)()
+      ).toBeNull();
     });
   });
 });

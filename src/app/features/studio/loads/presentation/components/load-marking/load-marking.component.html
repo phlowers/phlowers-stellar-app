@@ -106,7 +106,7 @@
       type="submit"
       btnStyle="outlined"
       (click)="saveLoadCase()"
-      [disabled]="isFormInvalid()"
+      [disabled]="isFormInvalid() || isSaving()"
       [btnLoading]="isSaving()"
       data-testid="save-load"
     >
@@ -116,7 +116,7 @@
 
     <button
       app-btn
-      [disabled]="isFormInvalid()"
+      [disabled]="isFormInvalid() || isCalculatingLoad()"
       [btnLoading]="isCalculatingLoad()"
       type="button"
       (click)="calculateLoadCase()"

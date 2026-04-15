@@ -58,7 +58,6 @@ export class LoadMarkingComponent {
   readonly spansOptions = computed(() => {
     return this.plotService.getSpanOptions();
   });
-  readonly isCalculating = computed(() => this.plotService.loading());
   readonly isSaving = signal(false);
   readonly isCalculatingLoad = signal(false);
 
@@ -128,9 +127,9 @@ export class LoadMarkingComponent {
   }
 
   async deleteCharge(): Promise<void> {
-    const spanUuid = this.form.controls.spanSelect.value;
-    if (!spanUuid) return;
-    this.loadFormsService.deleteSpanLoad(spanUuid);
+    const supportUuid = this.form.controls.spanSelect.value;
+    if (!supportUuid) return;
+    this.loadFormsService.deleteSpanLoad(supportUuid);
     await this.loadFormsService.calculateLoad();
     await this.loadFormsService.saveTemporaryLoadDataInSection();
     this.form.reset();

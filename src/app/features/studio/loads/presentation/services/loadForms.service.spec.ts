@@ -200,6 +200,36 @@ describe('LoadFormsService', () => {
       expect(mockPlotService.temporaryLoadData).toBeDefined();
       expect(mockPlotService.temporaryLoadData?.climate).toEqual(mockChargeData.climate);
     });
+
+    it('should use empty array as fallback when charge spanLoads is null', () => {
+      const chargeWithNullSpanLoads = {
+        ...mockCharge,
+        data: { ...mockChargeData, spanLoads: null as unknown as typeof mockChargeData.spanLoads }
+      };
+      mockPlotService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [chargeWithNullSpanLoads]
+      } as Section);
+
+      service.initTemporaryLoadData();
+
+      expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
+      expect(Array.isArray(mockPlotService.temporaryLoadData?.spanLoads)).toBe(true);
+    });
+
+    it('should use empty supports array when section has no supports', () => {
+      mockPlotService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge],
+        supports: undefined as unknown as typeof mockSection.supports
+      } as Section);
+
+      service.initTemporaryLoadData();
+
+      expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
+    });
   });
 
   describe('saveTemporaryLoadDataInSection', () => {
@@ -310,6 +340,28 @@ describe('LoadFormsService', () => {
 
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
+    });
+
+    it('should use empty array for supports when section has no supports', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockPlotService.section.mockReturnValue({
+        ...mockSection,
+        supports: undefined as unknown as typeof mockSection.supports
+      });
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+      expect(Array.isArray(mockPlotService.temporaryLoadData?.spanLoads)).toBe(true);
+    });
+
+    it('should use empty array for supports when section is null', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockPlotService.section.mockReturnValue(null);
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
     });
   });
 

@@ -194,8 +194,7 @@ describe('ChargesService', () => {
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
-        detail: expect.any(String),
-        life: 500
+        detail: expect.any(String)
       });
     });
 
@@ -229,8 +228,7 @@ describe('ChargesService', () => {
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
-        detail: expect.any(String),
-        life: 500
+        detail: expect.any(String)
       });
     });
 

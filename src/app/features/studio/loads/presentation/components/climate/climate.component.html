@@ -239,7 +239,7 @@
       type="submit"
       btnStyle="outlined"
       (click)="saveForm()"
-      [disabled]="!isFormValid()"
+      [disabled]="!isFormValid() || isSaving()"
       [btnLoading]="isSaving()"
       data-testid="save-btn"
     >
@@ -251,7 +251,7 @@
       app-btn
       type="button"
       (click)="calculateForm()"
-      [disabled]="!isFormValid()"
+      [disabled]="!isFormValid() || isCalculatingLoad()"
       [btnLoading]="isCalculatingLoad()"
       data-testid="calculate-btn"
     >

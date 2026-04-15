@@ -47,7 +47,7 @@
 
 ---
 
-*Dernière mise à jour : 14/04/2026 — Fix bug charge delete*
+*Last updated: 2026-04-14 — Fix bug charge delete*
 
 ---
 
@@ -56,15 +56,6 @@
 - **Type**: function
 - **Reason**: `loadForms.service.ts` now imports `recheckSpanLoads` from `@shared/domain/helpers/span-loads.helpers` (the improved, immutable version). The local `helpers.ts` export is never imported anywhere. Note: `emptySpanLoad` from the same file IS still used by `load-marking.component.ts`.
 - **Detected on**: 2026-04-13
-- **Status**: ⏳ PENDING REVIEW
-
----
-
-## 10. `deleteLoad()` — `src/app/features/studio/loads/presentation/services/loadForms.service.ts`
-
-- **Type**: method
-- **Reason**: After the fix for bug #526, `deleteCharge()` in `load-marking.component.ts` no longer calls `deleteLoad()`. No other caller exists in the codebase.
-- **Detected on**: 2026-04-14
 - **Status**: ⏳ PENDING REVIEW
 
 ---
@@ -201,5 +192,14 @@
 | Impact suppression | Function deleted from `helpers.ts`; confirm no callers exist before closing the PR |
 | Status | ⏳ PENDING REVIEW |
 | Detected on | 2026-04-13 |
+
+---
+
+## 15 `deleteLoad()` — `src/app/features/studio/loads/presentation/services/loadForms.service.ts`
+
+- **Type**: method
+- **Reason**: After the fix for bug #526, `deleteCharge()` in `load-marking.component.ts` no longer calls `deleteLoad()`. No other caller exists in the codebase.
+- **Detected on**: 2026-04-14
+- **Status**: ⏳ PENDING REVIEW
 
 ---

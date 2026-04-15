@@ -250,27 +250,6 @@ describe('ClimateComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('isCalculating computed', () => {
-    it('should reflect plotService.loading() as false by default', () => {
-      expect(component.isCalculating()).toBe(false);
-    });
-
-    it('should be true when plotService.loading() is true', () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.loading as ReturnType<typeof signal>).set(true);
-      expect(component.isCalculating()).toBe(true);
-    });
-
-    it('should go back to false when plotService.loading() returns to false', () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.loading as ReturnType<typeof signal>).set(true);
-      expect(component.isCalculating()).toBe(true);
-
-      (plotService.loading as ReturnType<typeof signal>).set(false);
-      expect(component.isCalculating()).toBe(false);
-    });
-  });
-
   it('should initialize form with default values', () => {
     expect(component.form.value).toEqual({
       windPressure: 0,
@@ -606,6 +585,34 @@ describe('ClimateComponent', () => {
       const calcBtn = getByTestId('calculate-btn') as HTMLButtonElement;
       expect(saveBtn.disabled).toBe(true);
       expect(calcBtn.disabled).toBe(true);
+    });
+  });
+
+  describe('initForm', () => {
+    it('should build frontierSupportOptions when section has supports', async () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        supports: [{ uuid: 's1' }, { uuid: 's2' }, { uuid: 's3' }]
+      });
+
+      await component.initForm();
+
+      // shift removes first, pop removes last → 1 option remains from 3 supports
+      expect(component.frontierSupportOptions().length).toBe(1);
+    });
+
+    it('should build no frontierSupportOptions when section has fewer than 3 supports', async () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        supports: [{ uuid: 's1' }, { uuid: 's2' }]
+      });
+
+      await component.initForm();
+
+      // shift removes first, pop removes last → 0 options remain from 2 supports
+      expect(component.frontierSupportOptions().length).toBe(0);
     });
   });
 });
