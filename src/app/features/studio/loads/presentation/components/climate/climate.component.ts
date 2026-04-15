@@ -17,7 +17,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '@services/plot/plot.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LoadFormsService } from '../../services/loadForms.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
@@ -160,10 +160,13 @@ export class ClimateComponent {
   async initForm() {
     const supports = this.plotService.section()?.supports;
     const frontierSupportOptions =
-      supports?.map((support, index) => ({
-        label: formatSupportNumber(support.number),
-        value: index + 1
-      })) ?? [];
+      supports?.map((support, index) => {
+        const num = support.number;
+        return {
+          label: num ? formatSupportNumber(num) : String(index + 1),
+          value: index + 1
+        };
+      }) ?? [];
     frontierSupportOptions.shift();
     frontierSupportOptions.pop();
     this.frontierSupportOptions.set(frontierSupportOptions);
