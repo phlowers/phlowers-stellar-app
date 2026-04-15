@@ -5,8 +5,8 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
-from mechaphlowers import BalanceEngine, PlotEngine, units
 import numpy as np
+from mechaphlowers import BalanceEngine, PlotEngine, units
 
 
 def get_coordinates(
@@ -48,7 +48,7 @@ def get_coordinates(
         "load_angle": balance_engine.cable_loads.load_angle.tolist(),
         "span_length": balance_engine.section_array.data.span_length.tolist(),
         "loads_coords": loads_coords,
-        "utilization_rate": np.linspace(40,90, len(balance_engine) - 1)
+        "utilization_rate": np.linspace(40, 90, len(balance_engine) - 1),
     }
     result_spans = balance_engine.get_data_spans()
     result.update(result_spans)
