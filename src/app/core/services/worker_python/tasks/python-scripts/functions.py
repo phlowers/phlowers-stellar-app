@@ -303,6 +303,7 @@ def get_coordinates(
         "load_angle": engine.cable_loads.load_angle.tolist(),
         "span_length": engine.section_array.data.span_length.tolist(),
         "loads_coords": loads_coords,
+        "utilization_rate": np.linspace(40,90, len(engine) - 1)
     }
     result_spans = engine.get_data_spans()
     result.update(result_spans)
