@@ -127,17 +127,34 @@ describe('createPlotDataObject', () => {
       expect((result[0] as Partial<PlotData>).text).toEqual(['', '42']);
     });
 
-    it('should return empty strings when no support is provided', () => {
+    it('should use index-based fallback label when no support is provided', () => {
       const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
-      expect((result[0] as Partial<PlotData>).text).toEqual(['', '']);
+      // startSupport=0, index=0 → fallback = '1'
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', '1']);
     });
 
-    it('should return empty strings when support number is null', () => {
+    it('should use index-based fallback label when support number is null', () => {
       const supports = [createMockSupport({ uuid: 'uuid-1', number: null })];
       const result = createDataObject(testData, 0, 0, 'supports', '2d', 'profile', supports);
 
-      expect((result[0] as Partial<PlotData>).text).toEqual(['', '']);
+      // startSupport=0, index=0 → fallback = '1'
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', '1']);
+    });
+
+    it('should use index-based fallback label when support number is an empty string', () => {
+      const supports = [createMockSupport({ uuid: 'uuid-1', number: '' })];
+      const result = createDataObject(testData, 0, 0, 'supports', '2d', 'profile', supports);
+
+      // startSupport=0, index=0 → fallback = '1'
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', '1']);
+    });
+
+    it('should truncate support number longer than 5 characters', () => {
+      const supports = [createMockSupport({ uuid: 'uuid-1', number: 'ABCDEFGH' })];
+      const result = createDataObject(testData, 0, 0, 'supports', '2d', 'profile', supports);
+
+      expect((result[0] as Partial<PlotData>).text).toEqual(['', 'ABCDE']);
     });
 
     it('should return empty array for non-supports type', () => {
