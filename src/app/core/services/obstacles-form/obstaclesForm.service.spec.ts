@@ -18,8 +18,8 @@ import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.se
 const mockSupports: Support[] = [
   {
     uuid: 'sup-1',
-    number: '1',
-    name: 'Support 1',
+    number: '10',
+    name: 'Support 10',
     spanLength: 0,
     spanAngle: 0,
     attachmentSet: 0,
@@ -39,8 +39,8 @@ const mockSupports: Support[] = [
   },
   {
     uuid: 'sup-2',
-    number: '2',
-    name: 'Support 2',
+    number: '20',
+    name: 'Support 20',
     spanLength: 0,
     spanAngle: 0,
     attachmentSet: 0,
@@ -178,10 +178,10 @@ describe('ObstacleFormService', () => {
     mockSpanService = {
       getSupportIndex: vi.fn().mockReturnValue(0),
       getSupportOptions: vi.fn().mockReturnValue([
-        { label: '1', value: 'LEFT' },
-        { label: '2', value: 'RIGHT' }
+        { label: '10', value: 'LEFT' },
+        { label: '20', value: 'RIGHT' }
       ]),
-      getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'sup-1' }]),
+      getSpanOptions: vi.fn().mockReturnValue([{ label: '10 - 20', value: 'sup-1' }]),
       spanAmountChoice: spanAmountChoiceSignal,
       section: sectionSignal
     };
@@ -306,8 +306,8 @@ describe('ObstacleFormService', () => {
       expect(service.form.get('uuid')?.value).toBe('obs-1');
       expect(service.form.get('name')?.value).toBe('Obstacle 1');
       expect(service.supportsOptions()).toEqual([
-        { label: '1', value: 'LEFT' },
-        { label: '2', value: 'RIGHT' }
+        { label: '10', value: 'LEFT' },
+        { label: '20', value: 'RIGHT' }
       ]);
       expect(service.positions.length).toBe(1);
       expect(service.positions.at(0).get('x')?.value).toBe(1);
@@ -333,15 +333,15 @@ describe('ObstacleFormService', () => {
       service.resetFormForNewObstacle('sup-1');
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
       expect(service.supportsOptions()).toEqual([
-        { label: '1', value: 'LEFT' },
-        { label: '2', value: 'RIGHT' }
+        { label: '10', value: 'LEFT' },
+        { label: '20', value: 'RIGHT' }
       ]);
     });
     it('should clear supportsOptions when supportUuid is null', () => {
       // Pre-populate so we can verify the clear
       service.supportsOptions.set([
-        { label: '1', value: 'LEFT' },
-        { label: '2', value: 'RIGHT' }
+        { label: '10', value: 'LEFT' },
+        { label: '20', value: 'RIGHT' }
       ]);
       service.resetFormForNewObstacle(null);
       expect(mockSpanService.getSupportOptions).not.toHaveBeenCalled();
@@ -353,8 +353,8 @@ describe('ObstacleFormService', () => {
       service.form.get('supportUuid')?.setValue('sup-1');
       service.resetFormForNewObstacle('sup-1');
       expect(service.supportsOptions()).toEqual([
-        { label: '1', value: 'LEFT' },
-        { label: '2', value: 'RIGHT' }
+        { label: '10', value: 'LEFT' },
+        { label: '20', value: 'RIGHT' }
       ]);
 
       // Step 2: click "create new obstacle" — clears options and must immediately null supportUuid
@@ -368,8 +368,8 @@ describe('ObstacleFormService', () => {
       // after detecting the null → 'sup-1' transition
       service.resetFormForNewObstacle('sup-1');
       expect(service.supportsOptions()).toEqual([
-        { label: '1', value: 'LEFT' },
-        { label: '2', value: 'RIGHT' }
+        { label: '10', value: 'LEFT' },
+        { label: '20', value: 'RIGHT' }
       ]);
 
       tick(DEBOUNCED_UPDATE_POINT_DELAY);

@@ -15,8 +15,8 @@ describe('PlotSpanService', () => {
   const mockSupports: Section['supports'] = [
     {
       uuid: 'support-uuid-1',
-      number: '1',
-      name: 'Support 1',
+      number: '10',
+      name: 'Support 10',
       spanLength: 100,
       spanAngle: 0,
       attachmentSet: 1,
@@ -36,8 +36,8 @@ describe('PlotSpanService', () => {
     },
     {
       uuid: 'support-uuid-2',
-      number: '2',
-      name: 'Support 2',
+      number: '20',
+      name: 'Support 20',
       spanLength: 150,
       spanAngle: 0,
       attachmentSet: 1,
@@ -57,8 +57,8 @@ describe('PlotSpanService', () => {
     },
     {
       uuid: 'support-uuid-3',
-      number: '3',
-      name: 'Support 3',
+      number: '30',
+      name: 'Support 30',
       spanLength: 120,
       spanAngle: 0,
       attachmentSet: 1,
@@ -120,15 +120,26 @@ describe('PlotSpanService', () => {
       service.section.set({ supports: mockSupports.slice(0, 2) } as unknown as Section);
       const spans = service.getSpanOptions();
       expect(spans).toHaveLength(1);
-      expect(spans[0]).toEqual({ label: '1 - 2', value: 'support-uuid-1' });
+      expect(spans[0]).toEqual({ label: '10 - 20', value: 'support-uuid-1' });
     });
 
     it('should return two spans for three supports', () => {
       service.section.set({ supports: mockSupports } as unknown as Section);
       const spans = service.getSpanOptions();
       expect(spans).toHaveLength(2);
+      expect(spans[0]).toEqual({ label: '10 - 20', value: 'support-uuid-1' });
+      expect(spans[1]).toEqual({ label: '20 - 30', value: 'support-uuid-2' });
+    });
+
+    it('should fallback to 1-based index when support number is null', () => {
+      const supportsWithNullNumber = [
+        { ...mockSupports[0], number: null },
+        { ...mockSupports[1], number: null }
+      ];
+      service.section.set({ supports: supportsWithNullNumber } as unknown as Section);
+      const spans = service.getSpanOptions();
+      expect(spans).toHaveLength(1);
       expect(spans[0]).toEqual({ label: '1 - 2', value: 'support-uuid-1' });
-      expect(spans[1]).toEqual({ label: '2 - 3', value: 'support-uuid-2' });
     });
   });
 
@@ -141,8 +152,8 @@ describe('PlotSpanService', () => {
       service.section.set({ supports: mockSupports } as unknown as Section);
       const spans = service.getSpanOptionsWithIndex();
       expect(spans).toHaveLength(2);
-      expect(spans[0]).toEqual({ label: '1 - 2', value: { index: 0, uuid: 'support-uuid-1' } });
-      expect(spans[1]).toEqual({ label: '2 - 3', value: { index: 1, uuid: 'support-uuid-2' } });
+      expect(spans[0]).toEqual({ label: '10 - 20', value: { index: 0, uuid: 'support-uuid-1' } });
+      expect(spans[1]).toEqual({ label: '20 - 30', value: { index: 1, uuid: 'support-uuid-2' } });
     });
 
     it('should return null value when support uuid is empty string', () => {
@@ -182,16 +193,29 @@ describe('PlotSpanService', () => {
       service.section.set({ supports: mockSupports } as unknown as Section);
       const options = service.getSupportOptions('support-uuid-1');
       expect(options).toHaveLength(2);
-      expect(options[0]).toEqual({ label: '1', value: 'LEFT' });
-      expect(options[1]).toEqual({ label: '2', value: 'RIGHT' });
+      expect(options[0]).toEqual({ label: '10', value: 'LEFT' });
+      expect(options[1]).toEqual({ label: '20', value: 'RIGHT' });
     });
 
     it('should return correct labels for the second support', () => {
       service.section.set({ supports: mockSupports } as unknown as Section);
       const options = service.getSupportOptions('support-uuid-2');
       expect(options).toHaveLength(2);
-      expect(options[0]).toEqual({ label: '2', value: 'LEFT' });
-      expect(options[1]).toEqual({ label: '3', value: 'RIGHT' });
+      expect(options[0]).toEqual({ label: '20', value: 'LEFT' });
+      expect(options[1]).toEqual({ label: '30', value: 'RIGHT' });
+    });
+
+    it('should fallback to 1-based index when support number is null', () => {
+      const supportsWithNullNumber = [
+        { ...mockSupports[0], number: null },
+        { ...mockSupports[1], number: null },
+        { ...mockSupports[2], number: null }
+      ];
+      service.section.set({ supports: supportsWithNullNumber } as unknown as Section);
+      const options = service.getSupportOptions('support-uuid-1');
+      expect(options).toHaveLength(2);
+      expect(options[0]).toEqual({ label: '1', value: 'LEFT' });
+      expect(options[1]).toEqual({ label: '2', value: 'RIGHT' });
     });
 
     it('should return empty array when uuid does not match any support', () => {

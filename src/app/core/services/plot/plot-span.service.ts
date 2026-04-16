@@ -8,6 +8,8 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { SpanOption } from '@shared/types/plot.types';
 import { Section } from '@shared/domain';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+import { Support } from '@shared/domain/models/support.model';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +28,7 @@ export class PlotSpanService {
     const spanCount = this.getSpanCount(supports);
 
     return Array.from({ length: spanCount }, (_, index) => ({
-      label: `${index + 1} - ${index + 2}`,
+      label: `${this.supportLabel(supports[index], index)} - ${this.supportLabel(supports[index + 1], index + 1)}`,
       value: supports[index]?.uuid ?? null
     }));
   });
@@ -40,7 +42,7 @@ export class PlotSpanService {
       const spanCount = this.getSpanCount(supports);
 
       return Array.from({ length: spanCount }, (_, index) => ({
-        label: `${index + 1} - ${index + 2}`,
+        label: `${this.supportLabel(supports[index], index)} - ${this.supportLabel(supports[index + 1], index + 1)}`,
         value: supports[index]?.uuid && supports[index].uuid !== '' ? { index, uuid: supports[index].uuid } : null
       }));
     }
@@ -56,11 +58,12 @@ export class PlotSpanService {
     if (supportUuid === null) {
       return [];
     }
-    const spanIndex = this.section()?.supports?.findIndex((s) => s.uuid === supportUuid);
-    if (spanIndex !== undefined && spanIndex >= 0) {
+    const supports = this.section()?.supports;
+    const spanIndex = supports?.findIndex((s) => s.uuid === supportUuid);
+    if (spanIndex !== undefined && spanIndex >= 0 && supports) {
       return [
-        { label: String(spanIndex + 1), value: 'LEFT' },
-        { label: String(spanIndex + 2), value: 'RIGHT' }
+        { label: this.supportLabel(supports[spanIndex], spanIndex), value: 'LEFT' },
+        { label: this.supportLabel(supports[spanIndex + 1], spanIndex + 1), value: 'RIGHT' }
       ];
     }
     return [];
@@ -77,5 +80,10 @@ export class PlotSpanService {
    */
   private getSpanCount(supports: Section['supports']): number {
     return Math.max(supports.length - 1, 0);
+  }
+
+  /** Return a display label for a support: its number if available, otherwise the 1-based index. */
+  private supportLabel(support: Support | undefined, index: number): string {
+    return support?.number ? formatSupportNumber(support.number) : String(index + 1);
   }
 }
