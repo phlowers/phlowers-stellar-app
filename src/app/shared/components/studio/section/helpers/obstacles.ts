@@ -99,11 +99,17 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
   const { litData, obstacles, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
   const is2d = view === '2d';
 
-  if (!litData?.obstacles?.length) {
+  if (!litData?.obstacles?.length || !currentObstacleUuid) {
     return [];
   }
 
-  return litData.obstacles.flatMap((litObstacle) => {
+  // Only show the selected obstacle
+  const selectedLitObstacle = litData.obstacles.find((o) => o.uuid === currentObstacleUuid);
+  if (!selectedLitObstacle) {
+    return [];
+  }
+
+  return [selectedLitObstacle].flatMap((litObstacle) => {
     // Resolve display name from the domain obstacle matching by UUID
     const obstacleUuid = litObstacle.uuid;
     const formObstacle = obstacles.find((o) => o.uuid === litObstacle.uuid);

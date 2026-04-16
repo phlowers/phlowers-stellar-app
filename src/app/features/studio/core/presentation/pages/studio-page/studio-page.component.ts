@@ -5,6 +5,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   OnDestroy,
   OnInit,
@@ -160,15 +161,12 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const section = this.spanService.section();
     if (!section) return [];
     const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
-    const visibleSupportUuids = new Set(section.supports.slice(startSupport, endSupport).map((s) => s.uuid));
-    const options = section.obstacles
+    const visibleSupportUuids = new Set(section.supports.slice(startSupport, endSupport + 1).map((s) => s.uuid));
+    const options: { label: string; value: string | null }[] = section.obstacles
       .filter((o) => visibleSupportUuids.has(o.supportUuid))
       .map((o) => ({ label: o.name, value: o.uuid }));
-    // Always include the currently selected obstacle so the label persists when navigating spans
-    const selectedUuid = this.obstaclesService.selectedObstacleUuid();
-    if (selectedUuid && !options.some((o) => o.value === selectedUuid)) {
-      const selected = section.obstacles.find((o) => o.uuid === selectedUuid);
-      if (selected) options.push({ label: selected.name, value: selected.uuid });
+    if (options.length) {
+      options.unshift({ label: $localize`No selected`, value: null });
     }
     return options;
   });
@@ -199,6 +197,24 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
 
   previousSectionUuid = signal<string | null>(null);
+  private previousStartSupport: number | null = null;
+  private previousEndSupport: number | null = null;
+
+  constructor() {
+    effect(() => {
+      const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
+      if (
+        this.previousStartSupport !== null &&
+        this.previousEndSupport !== null &&
+        (this.previousStartSupport !== startSupport || this.previousEndSupport !== endSupport)
+      ) {
+        this.obstaclesService.setSelectedObstacle(null, null);
+        this.obstacleStateService.distanceType.set(null);
+      }
+      this.previousStartSupport = startSupport;
+      this.previousEndSupport = endSupport;
+    });
+  }
 
   private resolveGlobalValue(values: number[] | undefined): number | null {
     if (!values || values.length === 0) return null;

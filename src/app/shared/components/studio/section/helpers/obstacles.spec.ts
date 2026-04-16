@@ -154,7 +154,7 @@ describe('createObstaclesAnnotations', () => {
     startSupport: 0,
     endSupport: 1,
     obstacles: [],
-    currentObstacleUuid: null,
+    currentObstacleUuid: 'obs-1',
     currentObstaclePointIndex: 0,
     supports: [],
     distances: [],
@@ -164,9 +164,36 @@ describe('createObstaclesAnnotations', () => {
 
   it('should return empty array when there are no obstacles', () => {
     const params = basePlotParams({
+      currentObstacleUuid: null,
       data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)]
     });
     expect(createObstaclesAnnotations(params)).toEqual([]);
+  });
+
+  it('should return empty array when no obstacle is selected', () => {
+    const obstacle = makeObstacle({ supportUuid: 'sup-1' });
+    const params = basePlotParams({
+      currentObstacleUuid: null,
+      obstacles: [obstacle],
+      litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 3]] }])
+    });
+    expect(createObstaclesAnnotations(params)).toEqual([]);
+  });
+
+  it('should only show the selected obstacle on the chart', () => {
+    const obstacleA = makeObstacle({ uuid: 'obs-A', supportUuid: 'sup-1', name: 'A' });
+    const obstacleB = makeObstacle({ uuid: 'obs-B', supportUuid: 'sup-1', name: 'B' });
+    const params = basePlotParams({
+      currentObstacleUuid: 'obs-A',
+      obstacles: [obstacleA, obstacleB],
+      litData: makeLitData([
+        { uuid: 'obs-A', points: [[1, 2, 3]] },
+        { uuid: 'obs-B', points: [[10, 20, 30]] }
+      ])
+    });
+    const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
+    expect(annotations).toHaveLength(2);
+    expect(annotations.every((a) => a.data?.obstacleUuid === 'obs-A')).toBe(true);
   });
 
   it('should return empty array when obstacle support is the last support (excluded)', () => {
@@ -177,6 +204,41 @@ describe('createObstaclesAnnotations', () => {
     });
     // sup-2 is the last support and should be sliced off
     expect(createObstaclesAnnotations(params)).toEqual([]);
+  });
+
+  it('should only show annotations for obstacles on visible supports', () => {
+    const visibleObstacle = makeObstacle({ uuid: 'obs-visible', supportUuid: 'sup-1', name: 'Visible' });
+    const hiddenObstacle = makeObstacle({ uuid: 'obs-hidden', supportUuid: 'sup-3', name: 'Hidden' });
+    const params = basePlotParams({
+      startSupport: 0,
+      endSupport: 1,
+      currentObstacleUuid: 'obs-visible',
+      supports: [makeSupport('sup-1'), makeSupport('sup-2'), makeSupport('sup-3')],
+      obstacles: [visibleObstacle, hiddenObstacle],
+      litData: makeLitData([
+        { uuid: 'obs-visible', points: [[1, 2, 3]] },
+        { uuid: 'obs-hidden', points: [[10, 20, 30]] }
+      ])
+    });
+    const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
+    // Only the visible obstacle should produce annotations (marker + label = 2)
+    expect(annotations).toHaveLength(2);
+    expect(annotations.every((a) => a.data?.obstacleUuid === 'obs-visible')).toBe(true);
+  });
+
+  it('should include obstacles on the endSupport (inclusive)', () => {
+    const obstacle = makeObstacle({ uuid: 'obs-end', supportUuid: 'sup-2', name: 'End' });
+    const params = basePlotParams({
+      startSupport: 0,
+      endSupport: 1,
+      currentObstacleUuid: 'obs-end',
+      supports: [makeSupport('sup-1'), makeSupport('sup-2'), makeSupport('sup-3')],
+      obstacles: [obstacle],
+      litData: makeLitData([{ uuid: 'obs-end', points: [[5, 5, 5]] }])
+    });
+    const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
+    expect(annotations).toHaveLength(2);
+    expect(annotations[0].data?.obstacleUuid).toBe('obs-end');
   });
 
   it('should create annotation for obstacle with valid position in 3d', () => {
@@ -550,6 +612,7 @@ describe('createObstaclesAnnotations', () => {
   it('should fall back to left support when only one support data object exists', () => {
     // Python computes: rightBase = sup-3 (200, 80, 90), altitude = 10 + 90 = 100, x = 200 - 5 = 195, y = 80 + 3 = 83
     const params = basePlotParams({
+      currentObstacleUuid: 'obs-edge',
       obstacles: [
         makeObstacle({
           uuid: 'obs-edge',
@@ -559,7 +622,7 @@ describe('createObstaclesAnnotations', () => {
           positions: [{ x: 5, y: 3, z: 10 }]
         })
       ],
-      litData: makeLitData([{ uuid: 'obs-1', points: [[195, 83, 100]] }]),
+      litData: makeLitData([{ uuid: 'obs-edge', points: [[195, 83, 100]] }]),
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
@@ -606,6 +669,7 @@ describe('createObstaclesAnnotations', () => {
     });
     // Python computes LEFT: x=5, y=2, z=40; RIGHT: x=95, y=2, z=80
     const params = basePlotParams({
+      currentObstacleUuid: 'obs-left',
       obstacles: [leftObstacle, rightObstacle],
       litData: makeLitData([
         { uuid: 'obs-left', points: [[5, 2, 40]] },
@@ -614,18 +678,14 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    // 2 obstacles × 1 position × 2 annotations each = 4
-    expect(annotations).toHaveLength(4);
+    // Only the selected obstacle is shown: 1 obstacle × 1 position × 2 annotations = 2
+    expect(annotations).toHaveLength(2);
 
     const leftMarker = annotations.find(
       (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-left'
     ) as ObstacleAnnotation;
-    const rightMarker = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-right'
-    ) as ObstacleAnnotation;
 
     expect(leftMarker).toMatchObject({ x: 5, y: 2, z: 40 });
-    expect(rightMarker).toMatchObject({ x: 95, y: 2, z: 80 });
   });
 
   it('should use right support altitude for RIGHT reference with relative altitude in 2d face view', () => {
