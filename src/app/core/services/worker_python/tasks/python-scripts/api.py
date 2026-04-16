@@ -12,7 +12,7 @@ from stellar_engine.tools import (
     temperature,
     papoto,
 )
-from stellar_engine.plot import plot_settings, supports_coords 
+from stellar_engine.plot import plot_settings, supports_coords
 
 # duplicate from functions.py
 
@@ -63,6 +63,7 @@ def get_support_coordinates(js_inputs):
 #     global plt_line, base_plt_line
 #     python_inputs = js_to_python(js_inputs)
 #     return plot_2d.refresh_projection(python_inputs, engine, plt_line, base_plt_line)
+
 
 def get_aspect_ratio(js_inputs):
     python_inputs = js_to_python(js_inputs)
