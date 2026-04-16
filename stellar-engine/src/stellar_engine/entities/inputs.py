@@ -51,7 +51,7 @@ class ClimateCharge:
     cableTemperature: float
     symmetryType: str
     iceThickness: float
-    frontierSupportNumber: float
+    frontierSupportNumber: int
     iceThicknessBefore: float
     iceThicknessAfter: float
 

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-
+from mechaphlowers import units
 import logging
+
+import numpy as np
 
 logger = logging.getLogger("mechaphlowers")
 # Set logger level to WARNING so info messages are shown
@@ -13,7 +15,7 @@ class ClimateCharge:
     cableTemperature: float
     symmetryType: str
     iceThickness: float
-    frontierSupportNumber: float
+    frontierSupportNumber: int
     iceThicknessBefore: float
     iceThicknessAfter: float
 
@@ -48,8 +50,28 @@ def change_state(js_inputs: dict):
     logger.debug("python_inputs: ", change_state_inputs)
     wind_pressure = climate.windPressure
     cable_temperature = climate.cableTemperature
-    ice_thickness = climate.iceThickness / 100  # in meters in the engine
 
+    section_length = len(engine.section_array.data)
+    ice_thickness: float | np.ndarray
+    if climate.symmetryType == "dis_symmetric":
+        support_frontier = (
+            climate.frontierSupportNumber - 1
+        )  # indexation in js starts at 1
+        ice_before = climate.iceThicknessBefore
+        ice_after = climate.iceThicknessAfter
+        ice_thickness = np.empty(section_length)
+        ice_thickness[:support_frontier] = ice_before
+        ice_thickness[support_frontier:-1] = ice_after
+        ice_thickness[-1] = np.nan
+    elif climate.symmetryType == "symmetric":
+        ice_thickness = climate.iceThickness
+    else:
+        raise ValueError(
+            f"Unsupported symmetryType: {climate.symmetryType}. Expected 'dis_symmetric' or 'symmetric'"
+        )
+    ice_thickness = (
+        units(ice_thickness, "cm").to("m").magnitude
+    )  # in meters in the engine
     apply_span_loads(change_state_inputs["spanLoads"])
 
     engine.solve_adjustment()
@@ -59,7 +81,6 @@ def change_state(js_inputs: dict):
         wind_pressure=wind_pressure,
         wind_sense="clockwise",
     )
-    section_length = len(engine.section_array.data)
     base_section_length = (
         len(base_engine.section_array.data) if base_engine else section_length
     )
