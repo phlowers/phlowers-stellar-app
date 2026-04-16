@@ -475,6 +475,48 @@ describe('ObstacleFormService', () => {
       service.deletePoint();
       expect(mockObstaclesService.setCurrentPointIndex).toHaveBeenCalled();
     });
+    it('should remove point from litData.obstacles for the matching obstacle', () => {
+      const obstacleUuid = 'obs-lit-1';
+      service.form.patchValue({ uuid: obstacleUuid });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      service.addPosition({ x: 4, y: 5, z: 6 });
+
+      const litData = {
+        obstacles: [
+          {
+            uuid: obstacleUuid,
+            points: [[10, 20, 30] as [number, number, number], [40, 50, 60] as [number, number, number]]
+          },
+          { uuid: 'other-obs', points: [[70, 80, 90] as [number, number, number]] }
+        ]
+      };
+      mockPlotService.litData.set(litData);
+
+      service.deletePoint(0);
+
+      const updatedLitData = mockPlotService.litData();
+      expect(updatedLitData.obstacles[0].points).toEqual([[40, 50, 60]]);
+      expect(updatedLitData.obstacles[1].points).toEqual([[70, 80, 90]]);
+    });
+    it('should not update litData when litData is null', () => {
+      service.form.patchValue({ uuid: 'obs-1' });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      mockPlotService.litData.set(null);
+
+      service.deletePoint(0);
+
+      expect(mockPlotService.litData()).toBeNull();
+    });
+    it('should not update litData when obstacle uuid is empty', () => {
+      service.form.patchValue({ uuid: null });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      const litData = { obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3] as [number, number, number]] }] };
+      mockPlotService.litData.set(litData);
+
+      service.deletePoint(0);
+
+      expect(mockPlotService.litData()).toEqual(litData);
+    });
   });
 
   describe('deleteObstacle', () => {
@@ -526,7 +568,10 @@ describe('ObstacleFormService', () => {
       await service.deleteObstacle();
       expect(section.obstacles.length).toBe(0);
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
-      expect(mockObstacleStateService.deleteObstacle).toHaveBeenCalledWith('obs-1', plotOptionsServiceMock.plotOptions());
+      expect(mockObstacleStateService.deleteObstacle).toHaveBeenCalledWith(
+        'obs-1',
+        plotOptionsServiceMock.plotOptions()
+      );
       expect(mockObstacleStateService.addObstacle).toHaveBeenCalledWith([], plotOptionsServiceMock.plotOptions());
       expect(mockMessageService.add).toHaveBeenCalledWith(
         expect.objectContaining({

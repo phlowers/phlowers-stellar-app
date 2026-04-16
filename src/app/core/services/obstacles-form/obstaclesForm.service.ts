@@ -223,8 +223,28 @@ export class ObstacleFormService {
   deletePoint(index?: number): void {
     const pointIndex = index ?? this.obstaclesService.activePointIndex() ?? 0;
     this.removePosition(pointIndex);
+    this.removePointFromLitData(pointIndex);
     const newIndex = Math.max(0, this.positions.length - 1);
     this.obstaclesService.setCurrentPointIndex(newIndex);
+  }
+
+  /** Remove a point from litData.obstacles so Plotly stays in sync with the form. */
+  private removePointFromLitData(pointIndex: number): void {
+    const currentLitData = this.plotService.litData();
+    const obstacleUuid = this.form.value.uuid;
+    if (!currentLitData?.obstacles?.length || !obstacleUuid) {
+      return;
+    }
+    const updatedObstacles = currentLitData.obstacles.map((litObstacle) => {
+      if (litObstacle.uuid !== obstacleUuid) {
+        return litObstacle;
+      }
+      return {
+        ...litObstacle,
+        points: litObstacle.points.filter((_, i) => i !== pointIndex)
+      };
+    });
+    this.plotService.litData.set({ ...currentLitData, obstacles: updatedObstacles });
   }
 
   async deleteObstacle(): Promise<void> {
@@ -255,7 +275,10 @@ export class ObstacleFormService {
     await this.obstacleStateService.deleteObstacle(obstacleUuid, this.plotOptionsService.plotOptions());
 
     // Re-register remaining obstacles to get accurate render positions
-    const obstacleOutput = await this.obstacleStateService.addObstacle(obstacles, this.plotOptionsService.plotOptions());
+    const obstacleOutput = await this.obstacleStateService.addObstacle(
+      obstacles,
+      this.plotOptionsService.plotOptions()
+    );
     this.applyObstacleOutputToLitData(obstacleOutput);
     await this.obstacleStateService.calculateDistances(obstacles, this.plotOptionsService.plotOptions());
 
