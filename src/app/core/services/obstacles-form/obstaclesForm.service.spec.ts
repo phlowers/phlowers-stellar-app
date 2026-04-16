@@ -186,7 +186,8 @@ describe('ObstacleFormService', () => {
       section: sectionSignal
     };
     plotOptionsServiceMock = {
-      plotOptions: signal({ startSupport: 0, endSupport: 1, view: '3d' })
+      plotOptions: signal({ startSupport: 0, endSupport: 1, view: '3d' }),
+      camera: signal(null)
     };
     mockObstaclesService = {
       activePointIndex: signal<number | null>(null),
@@ -1082,6 +1083,13 @@ describe('ObstacleFormService', () => {
         startSupport: 0,
         endSupport: 1
       });
+    });
+    it('should reset camera to null before changing plot options', () => {
+      mockSpanService.getSupportIndex.mockReturnValue(0);
+      service.form.patchValue({ supportUuid: 'sup-1' });
+      plotOptionsServiceMock.camera.set({ eye: { x: 1, y: -2, z: 0.5 } });
+      service.returnToSpan();
+      expect(plotOptionsServiceMock.camera()).toBeNull();
     });
   });
 });
