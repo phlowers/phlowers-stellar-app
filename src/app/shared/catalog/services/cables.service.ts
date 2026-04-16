@@ -127,7 +127,26 @@ export class CablesService {
           electric_resistance_20: convertStringToNumber(item.electric_resistance_20),
           linear_resistance_temperature_coef: convertStringToNumber(item.linear_resistance_temperature_coef),
           radial_thermal_conductivity: convertStringToNumber(item.radial_thermal_conductivity),
-          has_magnetic_heart: item.has_magnetic_heart === 'true'
+          has_magnetic_heart: item.has_magnetic_heart === 'true',
+          is_bimetallic: item.is_bimetallic === 'true' || item.is_bimetallic === 'True',
+          rts_cable: convertStringToNumber(item.rts_cable),
+          rts_layer_1: convertStringToNumber(item.rts_layer_1),
+          nb_strand_layer_1: convertStringToNumber(item.nb_strand_layer_1),
+          rts_layer_2: convertStringToNumber(item.rts_layer_2),
+          nb_strand_layer_2: convertStringToNumber(item.nb_strand_layer_2),
+          rts_layer_3: convertStringToNumber(item.rts_layer_3),
+          nb_strand_layer_3: convertStringToNumber(item.nb_strand_layer_3),
+          rts_layer_4: convertStringToNumber(item.rts_layer_4),
+          nb_strand_layer_4: convertStringToNumber(item.nb_strand_layer_4),
+          rts_layer_5: convertStringToNumber(item.rts_layer_5),
+          nb_strand_layer_5: convertStringToNumber(item.nb_strand_layer_5),
+          rts_layer_6: convertStringToNumber(item.rts_layer_6),
+          nb_strand_layer_6: convertStringToNumber(item.nb_strand_layer_6),
+          rts_layer_7: convertStringToNumber(item.rts_layer_7),
+          nb_strand_layer_7: convertStringToNumber(item.nb_strand_layer_7),
+          rts_layer_8: convertStringToNumber(item.rts_layer_8),
+          nb_strand_layer_8: convertStringToNumber(item.nb_strand_layer_8),
+          safety_coefficient: convertStringToNumber(item.safety_coefficient)
         }))
         .filter((item) => item.name);
     };
