@@ -9,6 +9,8 @@ import logging
 from importlib.metadata import version
 import sys
 
+from stellar_engine.entities.inputs import ClimateCharge
+
 RESOLUTION = 100
 # init a logger to print to stdout
 logger = logging.getLogger("mechaphlowers")
@@ -322,6 +324,7 @@ def get_coordinates(
         "load_angle": engine.cable_loads.load_angle.tolist(),
         "span_length": engine.section_array.data.span_length.tolist(),
         "loads_coords": loads_coords,
+        "utilization_rate": np.linspace(40, 90, len(engine) - 1).tolist(),
     }
     result_spans = engine.get_data_spans()
     result.update(result_spans)
@@ -470,11 +473,35 @@ def init_section(js_inputs: dict):
         engine.solve_adjustment()
 
     if climate:
+        # Duplicated code with change_state
+        climate_data = ClimateCharge(**climate)
+
+        section_length = len(engine.section_array.data)
+        ice_thickness: float | np.ndarray
+        if climate_data.symmetryType == "dis_symmetric":
+            support_frontier = (
+                climate_data.frontierSupportNumber - 1
+            )  # indexation in js starts at 1
+            ice_before = climate_data.iceThicknessBefore
+            ice_after = climate_data.iceThicknessAfter
+            ice_thickness = np.empty(section_length)
+            ice_thickness[:support_frontier] = ice_before
+            ice_thickness[support_frontier:-1] = ice_after
+            ice_thickness[-1] = np.nan
+        elif climate_data.symmetryType == "symmetric":
+            ice_thickness = climate_data.iceThickness
+        else:
+            raise ValueError(
+                f"Unsupported symmetryType: {climate_data.symmetryType}. Expected 'dis_symmetric' or 'symmetric'"
+            )
+        ice_thickness = (
+            units(ice_thickness, "cm").to("m").magnitude
+        )  # in meters in the engine
+
         engine.solve_change_state(
-            # convert cm into m
-            ice_thickness=climate["iceThickness"] / 100,
-            new_temperature=climate["cableTemperature"],
-            wind_pressure=climate["windPressure"],
+            ice_thickness=ice_thickness,
+            new_temperature=climate_data.cableTemperature,
+            wind_pressure=climate_data.windPressure,
             wind_sense="clockwise",
         )
     elif has_span_loads:

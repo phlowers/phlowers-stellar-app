@@ -167,6 +167,7 @@ export interface GetSectionOutput {
     name: string;
     points: [number, number, number][];
   }[];
+  utilization_rate: number[];
 }
 
 /**
