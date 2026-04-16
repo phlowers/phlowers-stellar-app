@@ -582,6 +582,33 @@ describe('ObstacleFormService', () => {
       );
       expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith(null, null);
     });
+
+    it('should clear litData.obstacles when addObstacle returns null after deletion', async () => {
+      const obstacles: Obstacle[] = [
+        {
+          uuid: 'obs-1',
+          supportUuid: 'sup-1',
+          name: 'Obstacle 1',
+          type: 'House',
+          altitudeType: 'absolute',
+          lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+          referenceSupport: ReferenceSupport.LEFT,
+          positions: []
+        }
+      ];
+      const section = { ...mockSection, obstacles: [...obstacles] } as Section;
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      mockPlotService.litData.set({
+        obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3] as [number, number, number]] }]
+      });
+      mockObstacleStateService.addObstacle.mockResolvedValue(null);
+      service.form.patchValue({ uuid: 'obs-1' });
+
+      await service.deleteObstacle();
+
+      expect(mockPlotService.litData().obstacles).toEqual([]);
+    });
   });
 
   describe('saveObstacle', () => {

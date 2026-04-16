@@ -330,10 +330,12 @@ export class ObstacleFormService {
   }
 
   private applyObstacleOutputToLitData(obstacleOutput: ObstacleOutput | null): void {
-    if (!obstacleOutput) return;
     const current = this.plotService.litData();
     if (!current) return;
-    this.plotService.litData.set({ ...current, obstacles: obstacleOutput.obstacles });
+    this.plotService.litData.set({
+      ...current,
+      obstacles: obstacleOutput?.obstacles ?? []
+    });
   }
 
   buildObstacleFromForm(): Obstacle {
