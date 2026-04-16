@@ -21,17 +21,18 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { StudioComponent } from '@shared/components/studio/studio.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { StudioTopToolbarComponent } from '../../components/top-toolbar/top-toolbar.component';
-import { StudioMenuBarComponent } from '../../components/menu-bar/menu-bar.component';
-import { SectionPlotCardsComponent } from '../../components/cards/section-plot-cards.component';
-import { SideTabsComponent } from '../../components/side-tabs/side-tabs.component';
-import { SideTabComponent } from '../../components/side-tabs/side-tab/side-tab.component';
-import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
+import { StudioTopToolbarComponent } from '@features/studio/core/presentation/components/top-toolbar/top-toolbar.component';
+import { StudioMenuBarComponent } from '@features/studio/core/presentation/components/menu-bar/menu-bar.component';
+import { SectionPlotCardsComponent } from '@features/studio/core/presentation/components/cards/section-plot-cards.component';
+import { SideTabsComponent } from '@features/studio/core/presentation/components/side-tabs/side-tabs.component';
+import { SideTabComponent } from '@features/studio/core/presentation/components/side-tabs/side-tab/side-tab.component';
+import { FreePositioningComponent } from '@features/studio/core/presentation/components/free-positioning/free-positioning.component';
 import { ClimateComponent } from '@features/studio/loads/presentation/components/climate/climate.component';
 import { LoadMarkingComponent } from '@features/studio/loads/presentation/components/load-marking/load-marking.component';
 import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
@@ -54,6 +55,7 @@ import { CableSpanManipComponent } from '@features/studio/loads/presentation/com
     InputNumberModule,
     RadioButtonModule,
     SelectModule,
+    SelectButtonModule,
     TabsModule,
     StudioComponent,
     ButtonComponent,
@@ -100,6 +102,16 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   ]);
   isNewChargeModalOpen = signal(false);
   isFreePositioningToolOpen = signal(false);
+
+  // graph global param.
+  stateOptions = [
+    { label: $localize`Span`, value: 'span' },
+    { label: $localize`Max section`, value: 'max_section' }
+  ];
+  // mock
+  state = signal<string>('span');
+  stressRatePercentage = signal<number>(43.5);
+  isCutStrand = signal<boolean>(false);
 
   private readonly maxSupportIndex = computed(() => (this.plotService.section()?.supports?.length ?? 0) - 1);
 

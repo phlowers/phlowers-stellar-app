@@ -11,7 +11,7 @@ import { LoggerService } from '@core/services/logger/logger.service';
     role: 'img',
     class: 'app-icon',
     '[class.filled]': 'fill()',
-    '[attr.aria-label]': 'icon()',
+    '[attr.aria-label]': 'ariaLabel() ? ariaLabel() : icon()',
     '[class.symbols-loading]': '!symbolsReady()'
   },
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,6 +22,8 @@ export class IconComponent implements OnInit {
   icon = input.required<PossibleIconNames | undefined>();
   /** Whether to render the icon in its filled variant. */
   fill = input<boolean>(false);
+  /** Optional aria label for the icon. */
+  ariaLabel = input<string | null>(null);
 
   symbolsReady = signal(false);
   private readonly document = inject(DOCUMENT);
