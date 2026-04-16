@@ -127,6 +127,9 @@ export class ObstaclesFormComponent {
       return;
     }
     this.obstacleFormService.resetFormForNewObstacle(supportUuid);
+    if (supportUuid) {
+      untracked(() => this.obstacleFormService.returnToSpan());
+    }
   });
 
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {
