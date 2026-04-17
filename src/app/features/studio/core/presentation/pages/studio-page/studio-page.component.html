@@ -19,17 +19,18 @@
     <section class="graph-tools-cards">
       <div class="graph-tools-cards__item global-params">
         <p-selectbutton
-          [options]="stateOptions"
+          [options]="globalStateOptions"
           optionLabel="label"
           optionValue="value"
-          [ngModel]="state()"
+          [ngModel]="globalState()"
+          (ngModelChange)="globalState.set($event)"
           class="global-params__select-button"
         />
 
         <dl class="global-params__list">
           <div class="global-params__list__item">
             <dt class="global-params__list__title" i18n>Parameter</dt>
-            <dd class="global-params__list__value">123 m</dd>
+            <dd class="global-params__list__value">{{ globalParameter() !== null ? globalParameter() : '-' }} m</dd>
           </div>
 
           <hr class="global-params__separator" />
@@ -37,22 +38,23 @@
           <div class="global-params__list__item">
             <dt class="global-params__list__title" i18n>Working load</dt>
             <dd class="global-params__list__value global-params__list__value--items-center">
-              {{ stressRatePercentage() }}&nbsp;%
-              @if (stressRatePercentage() <= 75) {
+              @let stressRate = globalStressRate();
+              {{ stressRate !== null ? stressRate : '-' }}&nbsp;%
+              @if (stressRate !== null && stressRate <= 75) {
                 <app-icon
                   icon="check"
                   class="global-params__list__load-status global-params__list__load-status--success"
                   ariaLabel="working load is fine"
                   i18n-ariaLabel
                 />
-              } @else if (stressRatePercentage() > 75 && stressRatePercentage() <= 100) {
+              } @else if (stressRate !== null && stressRate > 75 && stressRate <= 100) {
                 <app-icon
                   icon="priority_high"
                   class="global-params__list__load-status global-params__list__load-status--warning"
                   ariaLabel="working load is at risk"
                   i18n-ariaLabel
                 />
-              } @else if (stressRatePercentage() > 100) {
+              } @else if (stressRate !== null && stressRate > 100) {
                 <app-icon
                   icon="close_small"
                   class="global-params__list__load-status global-params__list__load-status--error"
@@ -72,7 +74,9 @@
                 icon="content_cut"
                 class="global-params__list__cut-status"
                 [class]="
-                  isCutStrand() ? 'global-params__list__cut-status--cut' : 'global-params__list__cut-status--uncut'
+                  isGlobalCutStrand()
+                    ? 'global-params__list__cut-status--cut'
+                    : 'global-params__list__cut-status--uncut'
                 "
               />
             </dd>

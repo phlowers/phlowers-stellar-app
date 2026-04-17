@@ -15,7 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, from, switchMap } from 'rxjs';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { debounce } from 'lodash';
+import { debounce, round } from 'lodash';
 import { StudiesService } from '@services/studies/studies.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
@@ -44,6 +44,7 @@ import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/he
 import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
+import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
@@ -104,14 +105,17 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   isFreePositioningToolOpen = signal(false);
 
   // graph global param.
-  stateOptions = [
+  globalStateOptions = [
     { label: $localize`Span`, value: 'span' },
     { label: $localize`Max section`, value: 'max_section' }
   ];
-  // mock
-  state = signal<string>('span');
-  stressRatePercentage = signal<number>(43.5);
-  isCutStrand = signal<boolean>(false);
+
+  globalState = signal<string>('max_section');
+  globalParameter = computed<number | null>(() => this.resolveGlobalValue(this.plotService.litData()?.parameter));
+  globalStressRate = computed<number | null>(() =>
+    this.resolveGlobalValue(this.plotService.litData()?.utilization_rate)
+  );
+  isGlobalCutStrand = signal<boolean>(false);
 
   private readonly maxSupportIndex = computed(() => (this.plotService.section()?.supports?.length ?? 0) - 1);
 
@@ -183,6 +187,21 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
 
   previousSectionUuid = signal<string | null>(null);
+
+  private resolveGlobalValue(values: number[] | undefined): number | null {
+    if (!values || values.length === 0) return null;
+
+    if (this.globalState() === 'max_section') {
+      const max = Math.max(...values);
+      return Number.isFinite(max) ? round(max, 2) : null;
+    }
+
+    // 'span' mode: use middle span index
+    const { startSupport, endSupport } = this.plotService.plotOptions();
+    const [middleSpanIndex] = findMiddleSpan(startSupport, endSupport);
+    const value = values[middleSpanIndex];
+    return value === undefined ? null : round(value, 2);
+  }
 
   ngOnInit() {
     const studyUuid = this.route.snapshot.paramMap.get('uuid');
