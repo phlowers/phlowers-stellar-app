@@ -3707,14 +3707,14 @@
     </unit>
     <unit id="manipulatedSpan">
       <segment state="initial">
-        <source> Manipulated span </source>
-        <target> Portée manipulée </target>
+        <source>Manipulated span</source>
+        <target>Portée manipulée</target>
       </segment>
     </unit>
     <unit id="referenceSupport">
       <segment state="initial">
-        <source> Reference support </source>
-        <target> Support de référence </target>
+        <source>Reference support</source>
+        <target>Support de référence</target>
       </segment>
     </unit>
     <unit id="manipulatedPointCableDistRefSupport">
@@ -3725,8 +3725,8 @@
     </unit>
     <unit id="cableManipType">
       <segment state="initial">
-        <source> Cable manipulation type </source>
-        <target> Type de manip. du câble </target>
+        <source>Cable manipulation type</source>
+        <target>Type de manip. du câble</target>
       </segment>
     </unit>
     <unit id="cableManipMethod">
@@ -3749,14 +3749,14 @@
     </unit>
     <unit id="lateralDistance">
       <segment state="initial">
-        <source> Lateral dist. </source>
-        <target> Dist. latérale </target>
+        <source>Lateral dist.</source>
+        <target>Dist. latérale</target>
       </segment>
     </unit>
     <unit id="altitude">
       <segment state="initial">
-        <source> Altitude </source>
-        <target> Altitude </target>
+        <source>Altitude</source>
+        <target>Altitude</target>
       </segment>
     </unit>
     <unit id="distCalcBetweenPoints">
@@ -3853,6 +3853,54 @@
       <segment state="initial">
         <source>With chain</source>
         <target>Avec chaîne</target>
+      </segment>
+    </unit>
+    <unit id="6362609002121607636">
+      <segment state="initial">
+        <source>Working load</source>
+        <target>Taux de travail</target>
+      </segment>
+    </unit>
+    <unit id="2093118893864037907">
+      <segment state="initial">
+        <source>working load is fine</source>
+        <target>le taux de travail est correct</target>
+      </segment>
+    </unit>
+    <unit id="2444192565233629568">
+      <segment state="initial">
+        <source>working load is at risk</source>
+        <target>le taux de travail est à risque</target>
+      </segment>
+    </unit>
+    <unit id="2250406333539669727">
+      <segment state="initial">
+        <source>working load is too high</source>
+        <target>le taux de travail est trop élevé</target>
+      </segment>
+    </unit>
+    <unit id="2990892512247067172">
+      <segment state="initial">
+        <source>working load is unknown</source>
+        <target>le taux de travail est inconnu</target>
+      </segment>
+    </unit>
+    <unit id="3324641849641959859">
+      <segment state="initial">
+        <source>strand is cut</source>
+        <target>le brin est coupé</target>
+      </segment>
+    </unit>
+    <unit id="3643941097771362577">
+      <segment state="initial">
+        <source>strand is not cut</source>
+        <target>le brin n'est pas coupé</target>
+      </segment>
+    </unit>
+    <unit id="1964966931243862246">
+      <segment state="initial">
+        <source>Max section</source>
+        <target>Max canton</target>
       </segment>
     </unit>
   </file>

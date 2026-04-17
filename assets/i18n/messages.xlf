@@ -3102,7 +3102,7 @@
     </unit>
     <unit id="altitude">
       <segment>
-        <source> Altitude </source>
+        <source>Altitude</source>
       </segment>
     </unit>
     <unit id="anchoring">
@@ -3117,7 +3117,7 @@
     </unit>
     <unit id="cableManipType">
       <segment>
-        <source> Cable manipulation type </source>
+        <source>Cable manipulation type</source>
       </segment>
     </unit>
     <unit id="chainLength">
@@ -3157,7 +3157,7 @@
     </unit>
     <unit id="lateralDistance">
       <segment>
-        <source> Lateral dist. </source>
+        <source>Lateral dist.</source>
       </segment>
     </unit>
     <unit id="longitudinalDistance">
@@ -3177,17 +3177,57 @@
     </unit>
     <unit id="manipulatedSpan">
       <segment>
-        <source> Manipulated span </source>
+        <source>Manipulated span</source>
       </segment>
     </unit>
     <unit id="referenceSupport">
       <segment>
-        <source> Reference support </source>
+        <source>Reference support</source>
       </segment>
     </unit>
     <unit id="slingLength">
       <segment>
         <source>Sling length</source>
+      </segment>
+    </unit>
+    <unit id="1964966931243862246">
+      <segment>
+        <source>Max section</source>
+      </segment>
+    </unit>
+    <unit id="2093118893864037907">
+      <segment>
+        <source>working load is fine</source>
+      </segment>
+    </unit>
+    <unit id="2250406333539669727">
+      <segment>
+        <source>working load is too high</source>
+      </segment>
+    </unit>
+    <unit id="2444192565233629568">
+      <segment>
+        <source>working load is at risk</source>
+      </segment>
+    </unit>
+    <unit id="2990892512247067172">
+      <segment>
+        <source>working load is unknown</source>
+      </segment>
+    </unit>
+    <unit id="3324641849641959859">
+      <segment>
+        <source>strand is cut</source>
+      </segment>
+    </unit>
+    <unit id="3643941097771362577">
+      <segment>
+        <source>strand is not cut</source>
+      </segment>
+    </unit>
+    <unit id="6362609002121607636">
+      <segment>
+        <source>Working load</source>
       </segment>
     </unit>
   </file>
