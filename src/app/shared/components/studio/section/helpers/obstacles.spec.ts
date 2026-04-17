@@ -170,17 +170,20 @@ describe('createObstaclesAnnotations', () => {
     expect(createObstaclesAnnotations(params)).toEqual([]);
   });
 
-  it('should return empty array when no obstacle is selected', () => {
+  it('should render all obstacles in black when no obstacle is selected', () => {
     const obstacle = makeObstacle({ supportUuid: 'sup-1' });
     const params = basePlotParams({
       currentObstacleUuid: null,
       obstacles: [obstacle],
       litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 3]] }])
     });
-    expect(createObstaclesAnnotations(params)).toEqual([]);
+    const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
+    expect(annotations).toHaveLength(2);
+    const marker = annotations.find((a) => a.text === '●') as ObstacleAnnotation;
+    expect(marker.font!.color).toBe('black');
   });
 
-  it('should only show the selected obstacle on the chart', () => {
+  it('should show all obstacles and highlight selected in red, others in black', () => {
     const obstacleA = makeObstacle({ uuid: 'obs-A', supportUuid: 'sup-1', name: 'A' });
     const obstacleB = makeObstacle({ uuid: 'obs-B', supportUuid: 'sup-1', name: 'B' });
     const params = basePlotParams({
@@ -192,8 +195,16 @@ describe('createObstaclesAnnotations', () => {
       ])
     });
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
-    expect(annotations).toHaveLength(2);
-    expect(annotations.every((a) => a.data?.obstacleUuid === 'obs-A')).toBe(true);
+    // 2 obstacles × 1 point × 2 annotations = 4
+    expect(annotations).toHaveLength(4);
+    const markerA = annotations.find(
+      (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-A'
+    ) as ObstacleAnnotation;
+    const markerB = annotations.find(
+      (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-B'
+    ) as ObstacleAnnotation;
+    expect(markerA.font!.color).toBe('red');
+    expect(markerB.font!.color).toBe('black');
   });
 
   it('should return empty array when obstacle support is the last support (excluded)', () => {
@@ -206,7 +217,7 @@ describe('createObstaclesAnnotations', () => {
     expect(createObstaclesAnnotations(params)).toEqual([]);
   });
 
-  it('should only show annotations for obstacles on visible supports', () => {
+  it('should show all obstacles from litData regardless of visible supports', () => {
     const visibleObstacle = makeObstacle({ uuid: 'obs-visible', supportUuid: 'sup-1', name: 'Visible' });
     const hiddenObstacle = makeObstacle({ uuid: 'obs-hidden', supportUuid: 'sup-3', name: 'Hidden' });
     const params = basePlotParams({
@@ -221,9 +232,16 @@ describe('createObstaclesAnnotations', () => {
       ])
     });
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
-    // Only the visible obstacle should produce annotations (marker + label = 2)
-    expect(annotations).toHaveLength(2);
-    expect(annotations.every((a) => a.data?.obstacleUuid === 'obs-visible')).toBe(true);
+    // Both obstacles from litData are rendered (2 obstacles × 1 point × 2 annotations = 4)
+    expect(annotations).toHaveLength(4);
+    const markerVisible = annotations.find(
+      (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-visible'
+    ) as ObstacleAnnotation;
+    const markerHidden = annotations.find(
+      (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-hidden'
+    ) as ObstacleAnnotation;
+    expect(markerVisible.font!.color).toBe('red');
+    expect(markerHidden.font!.color).toBe('black');
   });
 
   it('should include obstacles on the endSupport (inclusive)', () => {
@@ -296,7 +314,7 @@ describe('createObstaclesAnnotations', () => {
     expect(annotations).toHaveLength(2);
   });
 
-  it('should highlight current obstacle position in red', () => {
+  it('should highlight all points of selected obstacle in red', () => {
     const obstacle = makeObstacle({
       supportUuid: 'sup-1',
       positions: [
@@ -327,7 +345,8 @@ describe('createObstaclesAnnotations', () => {
     const marker1 = annotations.find(
       (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 1
     ) as ObstacleAnnotation;
-    expect(marker0.font!.color).toBe('black');
+    // All points of the selected obstacle are red
+    expect(marker0.font!.color).toBe('red');
     expect(marker1.font!.color).toBe('red');
   });
 
@@ -678,14 +697,20 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    // Only the selected obstacle is shown: 1 obstacle × 1 position × 2 annotations = 2
-    expect(annotations).toHaveLength(2);
+    // Both obstacles are shown: 2 obstacles × 1 position × 2 annotations = 4
+    expect(annotations).toHaveLength(4);
 
     const leftMarker = annotations.find(
       (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-left'
     ) as ObstacleAnnotation;
+    const rightMarker = annotations.find(
+      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-right'
+    ) as ObstacleAnnotation;
 
     expect(leftMarker).toMatchObject({ x: 5, y: 2, z: 40 });
+    expect(leftMarker.font!.color).toBe('red');
+    expect(rightMarker).toMatchObject({ x: 95, y: 2, z: 80 });
+    expect(rightMarker.font!.color).toBe('black');
   });
 
   it('should use right support altitude for RIGHT reference with relative altitude in 2d face view', () => {
@@ -729,7 +754,7 @@ describe('createObstaclesAnnotations', () => {
     expect(marker).toMatchObject({ x: 92, y: 15, z: 15 });
   });
 
-  it('should highlight RIGHT-referenced obstacle position in red when selected', () => {
+  it('should highlight all RIGHT-referenced obstacle points in red when selected', () => {
     const obstacle = makeObstacle({
       uuid: 'obs-right',
       referenceSupport: ReferenceSupport.RIGHT,
@@ -761,8 +786,9 @@ describe('createObstaclesAnnotations', () => {
     const marker1 = annotations.find(
       (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 1
     ) as ObstacleAnnotation;
+    // All points of the selected obstacle are red
     expect(marker0.font!.color).toBe('red');
-    expect(marker1.font!.color).toBe('black');
+    expect(marker1.font!.color).toBe('red');
   });
 
   it('should place obstacle at right support when position.x is 0', () => {

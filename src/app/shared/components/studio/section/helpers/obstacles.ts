@@ -82,10 +82,8 @@ export const appendExistingObstaclesWithFormObstacle = (
 
 const getHighlightColor = (
   obstacleUuid: string,
-  positionIndex: number,
-  currentObstacleUuid: string | null,
-  currentObstaclePointIndex: number
-): string => (obstacleUuid === currentObstacleUuid && positionIndex === currentObstaclePointIndex ? 'red' : 'black');
+  currentObstacleUuid: string | null
+): string => (obstacleUuid === currentObstacleUuid ? 'red' : 'black');
 
 /**
  * Creates Plotly annotation objects for all obstacle points returned by Python (`litData.obstacles`).
@@ -96,20 +94,14 @@ const getHighlightColor = (
  * @returns An array of partial Plotly annotation objects representing obstacles.
  */
 export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const { litData, obstacles, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
+  const { litData, obstacles, view, side, currentObstacleUuid } = plotParams;
   const is2d = view === '2d';
 
-  if (!litData?.obstacles?.length || !currentObstacleUuid) {
+  if (!litData?.obstacles?.length) {
     return [];
   }
 
-  // Only show the selected obstacle
-  const selectedLitObstacle = litData.obstacles.find((o) => o.uuid === currentObstacleUuid);
-  if (!selectedLitObstacle) {
-    return [];
-  }
-
-  return [selectedLitObstacle].flatMap((litObstacle) => {
+  return litData.obstacles.flatMap((litObstacle) => {
     // Resolve display name from the domain obstacle matching by UUID
     const obstacleUuid = litObstacle.uuid;
     const formObstacle = obstacles.find((o) => o.uuid === litObstacle.uuid);
@@ -121,7 +113,7 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
       const py = is2d ? cz : cy;
       const pz = cz;
 
-      const color = getHighlightColor(obstacleUuid, pointIndex, currentObstacleUuid, currentObstaclePointIndex);
+      const color = getHighlightColor(obstacleUuid, currentObstacleUuid);
       const annotationData = {
         obstacleUuid,
         obstaclePositionIndex: pointIndex,

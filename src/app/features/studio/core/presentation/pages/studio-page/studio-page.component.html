@@ -125,7 +125,7 @@
                 value="oblique"
                 inputId="oblique-distance"
                 [(ngModel)]="obstacleStateService.distanceType"
-                [disabled]="!filteredObstaclesOptions().length"
+                [disabled]="!obstaclesService.selectedObstacleUuid()"
                 data-testid="oblique-distance-radio"
               />
             </dt>
@@ -146,7 +146,7 @@
                 value="vertical"
                 inputId="vertical-distance"
                 [(ngModel)]="obstacleStateService.distanceType"
-                [disabled]="!filteredObstaclesOptions().length"
+                [disabled]="!obstaclesService.selectedObstacleUuid()"
                 data-testid="vertical-distance-radio"
               />
             </dt>
@@ -167,7 +167,7 @@
                 value="horizontal"
                 inputId="horizontal-distance"
                 [(ngModel)]="obstacleStateService.distanceType"
-                [disabled]="!filteredObstaclesOptions().length"
+                [disabled]="!obstaclesService.selectedObstacleUuid()"
                 data-testid="horizontal-distance-radio"
               />
             </dt>
