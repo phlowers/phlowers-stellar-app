@@ -4,6 +4,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+from typing import Literal
+
 from mechaphlowers import (
     BalanceEngine,
 )
@@ -17,12 +19,15 @@ from stellar_engine.entities.inputs import (
 def calculate_guying(inputs: dict, engine: BalanceEngine):
     guying_inputs = GuyingInputs(**inputs)
     guying = Guying(engine)
+    side: Literal["left", "right"] = (
+        "left" if guying_inputs.selectedSupport == "LEFT" else "right"
+    )
     guying_results = guying.compute(
         index=guying_inputs.selectedSpanIndex,
         with_pulley=guying_inputs.hasPulley,
         altitude=guying_inputs.altitude,
         horizontal_distance=guying_inputs.horizontalDistance,
-        side=guying_inputs.selectedSupport.lower(),
+        side=side,
         view="span",
     )
 

@@ -5,8 +5,11 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
-import numpy as np
+import logging
+
 from mechaphlowers import BalanceEngine, PlotEngine, units
+
+logger = logging.getLogger("mechaphlowers")
 
 
 def get_coordinates(
@@ -30,6 +33,9 @@ def get_coordinates(
         project=project, frame_index=middle_span
     )
     line_angle_rad = balance_engine.section_array.data.line_angle.to_numpy()
+    tension_max, _ = balance_engine.span_model.tensions_sup_inf()
+    utilization_rate = balance_engine.cable_array.utilization_rate(tension_max)
+    logger.debug(f"utilization rate: {utilization_rate}")
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
@@ -48,9 +54,7 @@ def get_coordinates(
         "load_angle": balance_engine.cable_loads.load_angle.tolist(),
         "span_length": balance_engine.section_array.data.span_length.tolist(),
         "loads_coords": loads_coords,
-        "utilization_rate": np.linspace(
-            40, 90, len(balance_engine) - 1
-        ).tolist(),
+        "utilization_rate": utilization_rate.tolist(),
     }
     result_spans = balance_engine.get_data_spans()
     result.update(result_spans)
