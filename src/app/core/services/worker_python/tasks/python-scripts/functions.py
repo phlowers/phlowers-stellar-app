@@ -351,7 +351,7 @@ def init_section(js_inputs: dict):
         supports_data.append(Support(**support_js))
     df = generate_section_array(supports_data)
 
-    section = SectionArray(df)
+    section = SectionArray(df, bundle_number=input_section["cables_amount"])
     section.angles_sense = "clockwise"
     # set sagging parameter and temperatur
     if initial_condition:
