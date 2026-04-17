@@ -32,14 +32,15 @@ class PlotServiceMock {
   isStudioActive: SignalFn<boolean> = createSignalMock<boolean>(false);
   spanAmountChoice: SignalFn<'single' | 'double' | 'all'> = createSignalMock<'single' | 'double' | 'all'>('all');
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
-  // Real Angular signal so computed() in the component properly tracks it
+  // Real Angular signals so computed() in the component properly tracks them
   section = signal<Section | null>(null);
+  litData = signal<{ parameter?: number[]; utilization_rate?: number[] } | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
   isFreePositioningMode: SignalFn<boolean> = createSignalMock<boolean>(false);
   distanceType: SignalFn<'oblique' | 'vertical' | 'horizontal' | null> = createSignalMock<
     'oblique' | 'vertical' | 'horizontal' | null
   >(null);
-  plotOptions = vi.fn().mockReturnValue({ invert: false });
+  plotOptions = vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
   plotOptionsChange = vi.fn();
   getSupportIndex = vi.fn().mockReturnValue(0);
   resetAll = vi.fn();
@@ -657,6 +658,110 @@ describe('StudioPageComponent', () => {
       component.onObstacleSelect('obs-1');
 
       expect(obstacleFormService.setExistingObstacle).toHaveBeenCalled();
+    });
+  });
+
+  describe('globalState', () => {
+    it('should default to max_section', () => {
+      expect(component.globalState()).toBe('max_section');
+    });
+  });
+
+  describe('globalParameter', () => {
+    it('should return null when litData is null', () => {
+      plotService.litData.set(null);
+      expect(component.globalParameter()).toBeNull();
+    });
+
+    it('should return null when parameter array is empty', () => {
+      plotService.litData.set({ parameter: [] });
+      expect(component.globalParameter()).toBeNull();
+    });
+
+    it('should return the max value across all spans in max_section mode', () => {
+      component.globalState.set('max_section');
+      plotService.litData.set({ parameter: [100, 250.789, 180] });
+      expect(component.globalParameter()).toBe(250.79);
+    });
+
+    it('should return the middle span value in span mode', () => {
+      component.globalState.set('span');
+      // startSupport=0, endSupport=4 → findMiddleSpan(0,4) = [2,3] → middleSpanIndex=2
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
+      plotService.litData.set({ parameter: [100, 150, 200, 250, 300] });
+      expect(component.globalParameter()).toBe(200);
+    });
+
+    it('should return null when middle span index is out of bounds in span mode', () => {
+      component.globalState.set('span');
+      // startSupport=8, endSupport=10 → findMiddleSpan(8,10) = [9,10] → index 9 is out of bounds
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 8, endSupport: 10 });
+      plotService.litData.set({ parameter: [100, 150] });
+      expect(component.globalParameter()).toBeNull();
+    });
+
+    it('should return the same span value for a single span in span mode', () => {
+      component.globalState.set('span');
+      // startSupport=2, endSupport=3 → findMiddleSpan(2,3) = [2,3] → middleSpanIndex=2
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 2, endSupport: 3 });
+      plotService.litData.set({ parameter: [100, 150, 200, 250] });
+      expect(component.globalParameter()).toBe(200);
+    });
+
+    it('should round to 2 decimal places', () => {
+      component.globalState.set('max_section');
+      plotService.litData.set({ parameter: [123.4567] });
+      expect(component.globalParameter()).toBe(123.46);
+    });
+
+    it('should recompute when globalState changes', () => {
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
+      plotService.litData.set({ parameter: [10, 20, 30, 40, 50] });
+
+      component.globalState.set('max_section');
+      expect(component.globalParameter()).toBe(50);
+
+      component.globalState.set('span');
+      // findMiddleSpan(0,4) = [2,3] → index 2 → 30
+      expect(component.globalParameter()).toBe(30);
+    });
+  });
+
+  describe('globalStressRate', () => {
+    it('should return null when litData is null', () => {
+      plotService.litData.set(null);
+      expect(component.globalStressRate()).toBeNull();
+    });
+
+    it('should return null when utilization_rate array is empty', () => {
+      plotService.litData.set({ utilization_rate: [] });
+      expect(component.globalStressRate()).toBeNull();
+    });
+
+    it('should return the max value across all spans in max_section mode', () => {
+      component.globalState.set('max_section');
+      plotService.litData.set({ utilization_rate: [40, 90.456, 65] });
+      expect(component.globalStressRate()).toBe(90.46);
+    });
+
+    it('should return the middle span value in span mode', () => {
+      component.globalState.set('span');
+      // startSupport=0, endSupport=4 → findMiddleSpan(0,4) = [2,3] → middleSpanIndex=2
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
+      plotService.litData.set({ utilization_rate: [40, 55, 70, 85, 95] });
+      expect(component.globalStressRate()).toBe(70);
+    });
+
+    it('should recompute when globalState changes', () => {
+      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
+      plotService.litData.set({ utilization_rate: [10, 20, 30, 40, 50] });
+
+      component.globalState.set('max_section');
+      expect(component.globalStressRate()).toBe(50);
+
+      component.globalState.set('span');
+      // findMiddleSpan(0,4) = [2,3] → index 2 → 30
+      expect(component.globalStressRate()).toBe(30);
     });
   });
 });
