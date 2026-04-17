@@ -29,6 +29,7 @@ describe('StudioTopToolbarComponent', () => {
     isFreePositioningMode: ReturnType<typeof signal<boolean>>;
     selectedDisplayOptions: ReturnType<typeof signal>;
     setAxesNorms: ReturnType<typeof vi.fn>;
+    setBaseScaleFactors: ReturnType<typeof vi.fn>;
   };
   let resolutionServiceMock: {
     resolution: ReturnType<typeof signal<number>>;
@@ -61,7 +62,8 @@ describe('StudioTopToolbarComponent', () => {
       }),
       isFreePositioningMode: signal(false),
       selectedDisplayOptions: signal({ loads: false }),
-      setAxesNorms: vi.fn()
+      setAxesNorms: vi.fn(),
+      setBaseScaleFactors: vi.fn()
     };
 
     resolutionServiceMock = {

@@ -34,6 +34,7 @@ export class PlotOptionsService {
   readonly plotOptions = signal<PlotOptions>({ ...defaultPlotOptions });
   readonly selectedDisplayOptions = signal<SelectedDisplayOptions>({ ...defaultSelectedDisplayOptions });
   readonly axesNorms = signal<AxesNorms>({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+  readonly baseScaleFactors = signal<AxesNorms>({ x: 1, y: 1, z: 1, aspectMode: 'data' });
   readonly camera = signal<Camera | null>(null);
   readonly isFreePositioningMode = signal<boolean>(false);
 
@@ -90,11 +91,17 @@ export class PlotOptionsService {
     this.axesNorms.set(norms);
   }
 
+  /** Update the base scale factors used as input for aspect ratio computation. */
+  setBaseScaleFactors(norms: AxesNorms): void {
+    this.baseScaleFactors.set(norms);
+  }
+
   /** Reset all view options and camera state to their initial defaults. */
   reset(): void {
     this.plotOptions.set({ ...defaultPlotOptions });
     this.camera.set(null);
     this.isFreePositioningMode.set(false);
     this.axesNorms.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    this.baseScaleFactors.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
   }
 }

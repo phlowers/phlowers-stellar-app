@@ -51,6 +51,11 @@ describe('PlotOptionsService', () => {
       expect(norms).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     });
 
+    it('should initialize baseScaleFactors with default values', () => {
+      const factors = service.baseScaleFactors();
+      expect(factors).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    });
+
     it('should initialize camera to null', () => {
       expect(service.camera()).toBeNull();
     });
@@ -70,6 +75,19 @@ describe('PlotOptionsService', () => {
     it('should replace previous norms entirely', () => {
       service.setAxesNorms({ x: 5, y: 5, z: 5, aspectMode: 'cube' });
       service.setAxesNorms({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+      expect(service.axesNorms()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    });
+  });
+
+  describe('setBaseScaleFactors', () => {
+    it('should update the baseScaleFactors signal', () => {
+      const newFactors: AxesNorms = { x: 0.2, y: 1, z: 1, aspectMode: 'manual' };
+      service.setBaseScaleFactors(newFactors);
+      expect(service.baseScaleFactors()).toEqual(newFactors);
+    });
+
+    it('should not affect axesNorms', () => {
+      service.setBaseScaleFactors({ x: 0.2, y: 1, z: 1, aspectMode: 'manual' });
       expect(service.axesNorms()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     });
   });
@@ -214,6 +232,12 @@ describe('PlotOptionsService', () => {
       service.axesNorms.set({ x: 5, y: 5, z: 5, aspectMode: 'cube' });
       service.reset();
       expect(service.axesNorms()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    });
+
+    it('should reset baseScaleFactors to defaults', () => {
+      service.setBaseScaleFactors({ x: 0.2, y: 1, z: 1, aspectMode: 'manual' });
+      service.reset();
+      expect(service.baseScaleFactors()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     });
 
     it('should reset plotOptions even when called multiple times', () => {

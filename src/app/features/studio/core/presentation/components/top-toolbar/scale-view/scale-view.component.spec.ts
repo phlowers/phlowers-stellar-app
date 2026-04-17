@@ -19,7 +19,7 @@ describe('ScaleViewComponent', () => {
     setResolution: ReturnType<typeof vi.fn>;
     applyResolution: ReturnType<typeof vi.fn>;
   };
-  let plotOptionsServiceMock: { setAxesNorms: ReturnType<typeof vi.fn> };
+  let plotOptionsServiceMock: { setAxesNorms: ReturnType<typeof vi.fn>; setBaseScaleFactors: ReturnType<typeof vi.fn> };
   let mockPopover: { toggle: vi.Mock };
   let mockWorkerPythonService: { runTask: vi.Mock };
 
@@ -36,7 +36,8 @@ describe('ScaleViewComponent', () => {
       applyResolution: vi.fn().mockResolvedValue(undefined)
     };
     plotOptionsServiceMock = {
-      setAxesNorms: vi.fn()
+      setAxesNorms: vi.fn(),
+      setBaseScaleFactors: vi.fn()
     };
 
     mockPopover = { toggle: vi.fn() };
@@ -237,6 +238,19 @@ describe('ScaleViewComponent', () => {
         await component.onValidate();
 
         expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
+          x: 0.2,
+          y: 1,
+          z: 1,
+          aspectMode: 'manual'
+        });
+      });
+
+      it('should call setBaseScaleFactors with plan norms when scale is "plan"', async () => {
+        component.formScaleView.get('scale')?.setValue('plan');
+
+        await component.onValidate();
+
+        expect(plotOptionsServiceMock.setBaseScaleFactors).toHaveBeenCalledWith({
           x: 0.2,
           y: 1,
           z: 1,

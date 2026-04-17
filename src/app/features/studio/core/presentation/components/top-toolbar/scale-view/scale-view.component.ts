@@ -122,6 +122,7 @@ export class ScaleViewComponent {
     await this.resolutionService.applyResolution(resolution);
 
     const norms = this.getScaleNorms(scale);
+    this.plotOptionsService.setBaseScaleFactors(norms);
     this.plotOptionsService.setAxesNorms(norms);
 
     await this.plotService.refreshProjection();
