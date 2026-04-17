@@ -73,7 +73,7 @@ const basePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotPa
   startSupport: 0,
   endSupport: 1,
   obstacles: [],
-  currentObstacleUuid: null,
+  currentObstacleUuid: 'obstacle_mock',
   currentObstaclePointIndex: 0,
   distances: [makeDistance()],
   distanceType: 'oblique',
@@ -97,6 +97,23 @@ describe('createDistanceTraces', () => {
       litData.obstacles = [];
       const result = createDistanceTraces(basePlotParams({ litData }));
       expect(result).toEqual([]);
+    });
+
+    it('should return empty array when currentObstacleUuid is null', () => {
+      const result = createDistanceTraces(basePlotParams({ currentObstacleUuid: null }));
+      expect(result).toEqual([]);
+    });
+
+    it('should only show distance traces for the selected obstacle', () => {
+      const otherDistance = makeDistance({ obstacleUuid: 'other_obstacle' });
+      const result = createDistanceTraces(
+        basePlotParams({
+          currentObstacleUuid: 'obstacle_mock',
+          distances: [makeDistance(), otherDistance]
+        })
+      );
+      const lines = result.filter((t: DataObject) => t.name === 'distance-line');
+      expect(lines).toHaveLength(1);
     });
 
     it('should return empty array when obstacle UUID does not match', () => {

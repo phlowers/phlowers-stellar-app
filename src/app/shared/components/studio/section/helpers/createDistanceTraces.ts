@@ -214,13 +214,14 @@ const buildDistanceVisuals = (
 export const createDistanceVisuals = (
   plotParams: CreatePlotParams
 ): { traces: DataObject[]; annotations: Partial<Plotly.Annotations>[] } => {
-  const { distances, distanceType, litData, view, side } = plotParams;
+  const { distances, distanceType, litData, view, side, currentObstacleUuid } = plotParams;
 
-  if (!distances?.length || !litData?.obstacles?.length || !distanceType) {
+  if (!distances?.length || !litData?.obstacles?.length || !distanceType || !currentObstacleUuid) {
     return { traces: [], annotations: [] };
   }
 
-  return buildDistanceVisuals(distances, distanceType, litData, view, side);
+  const selectedDistances = distances.filter((d) => d.obstacleUuid === currentObstacleUuid);
+  return buildDistanceVisuals(selectedDistances, distanceType, litData, view, side);
 };
 
 /**

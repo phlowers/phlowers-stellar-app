@@ -1,13 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { StudioPageComponent } from './studio-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import { DecimalPipe } from '@angular/common';
 import { ElementRef, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -898,5 +899,139 @@ describe('StudioPageComponent - HTML rendering', () => {
       const el = getByTestId('global-state-select');
       expect(el).toBeTruthy();
     });
+  });
+});
+
+describe('HTML rendering - distance radio buttons disabled state', () => {
+  let fixture: ComponentFixture<StudioPageComponent>;
+  let obstaclesService: ObstaclesService;
+
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+  beforeEach(async () => {
+    const plotServiceMock = new PlotServiceMock();
+    const spanServiceMock = new SpanServiceMock();
+    const plotOptionsServiceMock = {
+      plotOptions: vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 0 }),
+      isFreePositioningMode: createSignalMock<boolean>(false)
+    };
+    const studiesServiceMock = new StudiesServiceMock();
+    const mockObstacleStateService = {
+      distanceType: createSignalMock<'oblique' | 'vertical' | 'horizontal' | null>(null),
+      distances: createSignalMock([])
+    };
+    const obstacleFormServiceMock = {
+      setExistingObstacle: vi.fn(),
+      clearPositions: vi.fn(),
+      results: createSignalMock({ oblique: null, vertical: null, horizontal: null }),
+      formValue: createSignalMock({ uuid: null })
+    };
+    const loadFormsServiceMock = {
+      activeLoadTab: createSignalMock('0'),
+      selectedSpanSupportUuid: createSignalMock(null)
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [StudioPageComponent],
+      providers: [
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: { get: vi.fn().mockReturnValue('study-1') },
+              queryParamMap: { get: vi.fn().mockReturnValue('section-1') }
+            }
+          }
+        },
+        { provide: PlotService, useValue: plotServiceMock },
+        { provide: PlotSpanService, useValue: spanServiceMock },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+        { provide: StudiesService, useValue: studiesServiceMock },
+        { provide: SectionService, useValue: {} },
+        { provide: ObstacleFormService, useValue: obstacleFormServiceMock },
+        { provide: ObstacleStateService, useValue: mockObstacleStateService },
+        { provide: LoadFormsService, useValue: loadFormsServiceMock },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ElementRef,
+          useValue: {
+            nativeElement: {
+              querySelector: vi.fn().mockReturnValue(null)
+            }
+          }
+        }
+      ]
+    })
+      .overrideComponent(StudioPageComponent, {
+        set: {
+          imports: [FormsModule, RadioButtonModule, SelectModule, DecimalPipe],
+          schemas: [CUSTOM_ELEMENTS_SCHEMA]
+        }
+      })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(StudioPageComponent);
+    obstaclesService = TestBed.inject(ObstaclesService);
+    fixture.detectChanges();
+  });
+
+  it('should render the three distance radio buttons', () => {
+    expect(getByTestId('oblique-distance-radio')).toBeTruthy();
+    expect(getByTestId('vertical-distance-radio')).toBeTruthy();
+    expect(getByTestId('horizontal-distance-radio')).toBeTruthy();
+  });
+
+  it('should disable all distance radio buttons when no obstacle is selected', () => {
+    obstaclesService.selectedObstacleUuid.set(null);
+    fixture.detectChanges();
+
+    const obliqueInput = getByTestId('oblique-distance-radio')?.querySelector(
+      'input[type="radio"]'
+    ) as HTMLInputElement;
+    const verticalInput = getByTestId('vertical-distance-radio')?.querySelector(
+      'input[type="radio"]'
+    ) as HTMLInputElement;
+    const horizontalInput = getByTestId('horizontal-distance-radio')?.querySelector(
+      'input[type="radio"]'
+    ) as HTMLInputElement;
+
+    expect(obliqueInput?.disabled).toBe(true);
+    expect(verticalInput?.disabled).toBe(true);
+    expect(horizontalInput?.disabled).toBe(true);
+  });
+
+  it('should enable all distance radio buttons when an obstacle is selected', () => {
+    obstaclesService.selectedObstacleUuid.set('obs-1');
+    fixture.detectChanges();
+
+    const obliqueInput = getByTestId('oblique-distance-radio')?.querySelector(
+      'input[type="radio"]'
+    ) as HTMLInputElement;
+    const verticalInput = getByTestId('vertical-distance-radio')?.querySelector(
+      'input[type="radio"]'
+    ) as HTMLInputElement;
+    const horizontalInput = getByTestId('horizontal-distance-radio')?.querySelector(
+      'input[type="radio"]'
+    ) as HTMLInputElement;
+
+    expect(obliqueInput?.disabled).toBe(false);
+    expect(verticalInput?.disabled).toBe(false);
+    expect(horizontalInput?.disabled).toBe(false);
+  });
+
+  it('should disable radio buttons when obstacle is deselected', () => {
+    obstaclesService.selectedObstacleUuid.set('obs-1');
+    fixture.detectChanges();
+
+    obstaclesService.selectedObstacleUuid.set(null);
+    fixture.detectChanges();
+
+    const obliqueInput = getByTestId('oblique-distance-radio')?.querySelector(
+      'input[type="radio"]'
+    ) as HTMLInputElement;
+    expect(obliqueInput?.disabled).toBe(true);
   });
 });
