@@ -15,23 +15,24 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, from, switchMap } from 'rxjs';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { debounce } from 'lodash';
+import { debounce, round } from 'lodash';
 import { StudiesService } from '@services/studies/studies.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { StudioComponent } from '@shared/components/studio/studio.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { StudioTopToolbarComponent } from '../../components/top-toolbar/top-toolbar.component';
-import { StudioMenuBarComponent } from '../../components/menu-bar/menu-bar.component';
-import { SectionPlotCardsComponent } from '../../components/cards/section-plot-cards.component';
-import { SideTabsComponent } from '../../components/side-tabs/side-tabs.component';
-import { SideTabComponent } from '../../components/side-tabs/side-tab/side-tab.component';
-import { FreePositioningComponent } from '../../components/free-positioning/free-positioning.component';
+import { StudioTopToolbarComponent } from '@features/studio/core/presentation/components/top-toolbar/top-toolbar.component';
+import { StudioMenuBarComponent } from '@features/studio/core/presentation/components/menu-bar/menu-bar.component';
+import { SectionPlotCardsComponent } from '@features/studio/core/presentation/components/cards/section-plot-cards.component';
+import { SideTabsComponent } from '@features/studio/core/presentation/components/side-tabs/side-tabs.component';
+import { SideTabComponent } from '@features/studio/core/presentation/components/side-tabs/side-tab/side-tab.component';
+import { FreePositioningComponent } from '@features/studio/core/presentation/components/free-positioning/free-positioning.component';
 import { ClimateComponent } from '@features/studio/loads/presentation/components/climate/climate.component';
 import { LoadMarkingComponent } from '@features/studio/loads/presentation/components/load-marking/load-marking.component';
 import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
@@ -43,6 +44,13 @@ import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/he
 import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
+import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
+
+/** Display mode for global section parameters: middle span or section maximum. */
+type GlobalStateMode = 'span' | 'max_section';
+
+/** Number of spans displayed in the section view. */
+type SpanAmountChoice = 'single' | 'double' | 'all';
 
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
@@ -54,6 +62,7 @@ import { CableSpanManipComponent } from '@features/studio/loads/presentation/com
     InputNumberModule,
     RadioButtonModule,
     SelectModule,
+    SelectButtonModule,
     TabsModule,
     StudioComponent,
     ButtonComponent,
@@ -91,7 +100,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   spanAmountChoiceOptions = signal<
     {
       label: string;
-      value: string;
+      value: SpanAmountChoice;
     }[]
   >([
     { label: $localize`One span`, value: 'single' },
@@ -100,6 +109,19 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   ]);
   isNewChargeModalOpen = signal(false);
   isFreePositioningToolOpen = signal(false);
+
+  // graph global param.
+  globalStateOptions = [
+    { label: $localize`Span`, value: 'span' },
+    { label: $localize`Max section`, value: 'max_section' }
+  ];
+
+  globalState = signal<GlobalStateMode>('max_section');
+  globalParameter = computed<number | null>(() => this.resolveGlobalValue(this.plotService.litData()?.parameter));
+  globalStressRate = computed<number | null>(() =>
+    this.resolveGlobalValue(this.plotService.litData()?.utilization_rate)
+  );
+  isGlobalCutStrand = signal<boolean>(false);
 
   private readonly maxSupportIndex = computed(() => (this.plotService.section()?.supports?.length ?? 0) - 1);
 
@@ -172,6 +194,21 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   previousSectionUuid = signal<string | null>(null);
 
+  private resolveGlobalValue(values: number[] | undefined): number | null {
+    if (!values || values.length === 0) return null;
+
+    if (this.globalState() === 'max_section') {
+      const max = Math.max(...values);
+      return Number.isFinite(max) ? round(max, 2) : null;
+    }
+
+    // 'span' mode: use middle span index
+    const { startSupport, endSupport } = this.plotService.plotOptions();
+    const [middleSpanIndex] = findMiddleSpan(startSupport, endSupport);
+    const value = values[middleSpanIndex];
+    return value === undefined ? null : round(value, 2);
+  }
+
   ngOnInit() {
     const studyUuid = this.route.snapshot.paramMap.get('uuid');
     const sectionUuid = this.route.snapshot.queryParamMap.get('sectionUuid');
@@ -223,7 +260,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.plotService.spanAmountChoice.set(spanAmount);
   }, STUDIO_PLOT_DEBOUNCE_DELAY);
 
-  private getSpanAmount(diff: number): 'single' | 'double' | 'all' {
+  private getSpanAmount(diff: number): SpanAmountChoice {
     if (diff === 1) return 'single';
     if (diff === 2) return 'double';
     return 'all';
@@ -246,7 +283,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onSelectSpanAmount(value: string) {
-    this.plotService.spanAmountChoice.set(value as 'single' | 'double' | 'all');
+    this.plotService.spanAmountChoice.set(value as SpanAmountChoice);
     const startSupport = this.plotService.plotOptions().startSupport;
     const maxSupport = (this.plotService.section()?.supports.length ?? 0) - 1;
     if (value === 'all') {
