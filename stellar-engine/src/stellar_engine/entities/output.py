@@ -5,12 +5,11 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
-import numpy as np
-from mechaphlowers import BalanceEngine, PlotEngine, units
-
 import logging
 
-logger = logging.getLogger("stellar-engine")
+from mechaphlowers import BalanceEngine, PlotEngine, units
+
+logger = logging.getLogger("mechaphlowers")
 
 
 def get_coordinates(
