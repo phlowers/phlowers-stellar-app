@@ -128,7 +128,10 @@ export class CablesService {
           linear_resistance_temperature_coef: convertStringToNumber(item.linear_resistance_temperature_coef),
           radial_thermal_conductivity: convertStringToNumber(item.radial_thermal_conductivity),
           has_magnetic_heart: item.has_magnetic_heart === 'true',
-          is_bimetallic: item.is_bimetallic === 'true' || item.is_bimetallic === 'True',
+          is_bimetallic:
+            item.is_bimetallic == null || item.is_bimetallic.trim() === ''
+              ? undefined
+              : item.is_bimetallic.toLowerCase() === 'true',
           rts_cable: convertStringToNumber(item.rts_cable),
           rts_layer_1: convertStringToNumber(item.rts_layer_1),
           nb_strand_layer_1: convertStringToNumber(item.nb_strand_layer_1),
