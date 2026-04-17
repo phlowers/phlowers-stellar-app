@@ -8,7 +8,21 @@
 import numpy as np
 from mechaphlowers import BalanceEngine, ThermalEngine, units
 
-from stellar_engine.entities.inputs import TemperatureCalculationInputs
+from stellar_engine.entities.inputs import (
+    TemperatureCalculationInputs,
+    WindAngleCalculationInputs,
+)
+
+DIRECTION_MAP = {
+    'North': 0,
+    'North-East': 45,
+    'East': 90,
+    'South-East': 135,
+    'South': 180,
+    'South-West': 225,
+    'West': 270,
+    'North-West': 315,
+}
 
 
 def temperature_calculation(inputs: dict, engine: BalanceEngine):
@@ -20,17 +34,7 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         .to("m/s")
         .m
     )
-    direction_map = {
-        'North': 0,
-        'North-East': 45,
-        'East': 90,
-        'South-East': 135,
-        'South': 180,
-        'South-West': 225,
-        'West': 270,
-        'North-West': 315,
-    }
-    wind_angle = direction_map[temp_inputs.windDirection]
+    wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
     thermal_engine.set(
         cable_array=engine.cable_array,
         latitude=np.array([temp_inputs.latitude]),
@@ -51,3 +55,11 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         "cableTemperature": temperature_result.data["t_core"].iloc[0],
         "cableTemperatureUncertainty": 0,
     }
+
+
+def get_wind_attack_angle(inputs: dict):
+    wind_inputs = WindAngleCalculationInputs(**inputs)
+    wind_azimuth = DIRECTION_MAP[wind_inputs.windDirection]
+    return ThermalEngine.compute_wind_attack_angle(
+        wind_inputs.azimuth, wind_azimuth
+    )

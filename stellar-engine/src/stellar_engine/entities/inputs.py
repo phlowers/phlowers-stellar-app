@@ -46,6 +46,12 @@ class TemperatureCalculationInputs:
 
 
 @dataclass
+class WindAngleCalculationInputs:
+    azimuth: float
+    windDirection: str
+
+
+@dataclass
 class ClimateCharge:
     windPressure: float
     cableTemperature: float

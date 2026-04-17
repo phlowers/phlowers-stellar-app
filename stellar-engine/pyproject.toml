@@ -25,7 +25,7 @@ authors = [
 keywords = ["stellar", "phlowers", "mechaphlowers"]
 
 dependencies = [
-    "mechaphlowers==0.7.0",
+    "mechaphlowers==0.8.0",
 ]
 
 [project.urls]

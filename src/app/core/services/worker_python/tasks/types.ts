@@ -51,7 +51,9 @@ export enum Task {
   /** Apply a cable length modification (lengthen or shorten) on a span */
   cableModification = 'cableModification',
   // get aspect ratio for plotting scale
-  getAspectRatio = 'getAspectRatio'
+  getAspectRatio = 'getAspectRatio',
+  // get wind incidence angle for cable temperature calculation 
+  getWindIncidence = 'getWindIncidence'
 }
 
 /**
@@ -305,6 +307,10 @@ export interface TaskInputs {
     supportRef: 'LEFT' | 'RIGHT';
   };
   [Task.getAspectRatio]: AxesNorms;
+  [Task.getWindIncidence]: {
+    azimuth: number;
+    windDirection: string;
+  };
 }
 
 export interface DistancePoint {
@@ -399,5 +405,8 @@ export interface TaskOutputs {
     x: number;
     y: number;
     z: number;
+  };
+  [Task.getWindIncidence]: {
+    windIndidence: number;
   };
 }

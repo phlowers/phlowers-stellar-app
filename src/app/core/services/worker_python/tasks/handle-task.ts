@@ -81,6 +81,10 @@ const tasks: Record<
   [Task.getAspectRatio]: {
     function: 'get_aspect_ratio',
     externalPackages: []
+  },
+  [Task.getWindIncidence]: {
+    function: 'get_wind_incidence',
+    externalPackages: []
   }
 };
 
