@@ -1,6 +1,16 @@
-// ***** PLOTLY overrides for JS generated content (non ng scopped)
-.js-plotly-plot {
-  svg {
-    display: inline-block;
+// ***** PLOTLY overrides for JS generated content (non ng scoped)
+.js-plotly-plot.js-plotly-plot {
+  $_btn-p: 0.25rem;
+  $_btn-sz: 1.5rem;
+
+  .plotly .modebar-btn {
+    height: $_btn-p * 2 + $_btn-sz;
+    padding: $_btn-p;
+
+    svg {
+      display: inline-block;
+      width: $_btn-sz;
+      height: $_btn-sz;
+    }
   }
 }
