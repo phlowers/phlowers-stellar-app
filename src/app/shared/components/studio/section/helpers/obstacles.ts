@@ -113,14 +113,28 @@ const getMarkerAppearance = (
  * @returns An array of partial Plotly annotation objects representing obstacles.
  */
 export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const { litData, obstacles, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
+  const { litData, obstacles, view, side, currentObstacleUuid, currentObstaclePointIndex, supports, startSupport, endSupport } = plotParams;
   const is2d = view === '2d';
 
   if (!litData?.obstacles?.length) {
     return [];
   }
 
+  // Only render obstacles whose support is within the visible span window.
+  // An obstacle attached to a support starts a span to the right, so the
+  // endSupport itself belongs to the *next* span and must be excluded.
+  const visibleSupportUuids = new Set(
+    (supports ?? []).slice(startSupport, endSupport).map((s) => s.uuid)
+  );
+  const visibleObstacleUuids = new Set(
+    obstacles.filter((o) => visibleSupportUuids.has(o.supportUuid)).map((o) => o.uuid)
+  );
+
   return litData.obstacles.flatMap((litObstacle) => {
+    if (!visibleObstacleUuids.has(litObstacle.uuid)) {
+      return [];
+    }
+
     // Resolve display name from the domain obstacle matching by UUID
     const obstacleUuid = litObstacle.uuid;
     const formObstacle = obstacles.find((o) => o.uuid === litObstacle.uuid);

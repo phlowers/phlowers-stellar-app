@@ -161,7 +161,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const section = this.spanService.section();
     if (!section) return [];
     const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
-    const visibleSupportUuids = new Set(section.supports.slice(startSupport, endSupport + 1).map((s) => s.uuid));
+    const visibleSupportUuids = new Set(section.supports.slice(startSupport, endSupport).map((s) => s.uuid));
     const options: { label: string; value: string | null }[] = section.obstacles
       .filter((o) => visibleSupportUuids.has(o.supportUuid))
       .map((o) => ({ label: o.name, value: o.uuid }));

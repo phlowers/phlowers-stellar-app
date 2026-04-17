@@ -527,8 +527,8 @@ describe('StudioPageComponent', () => {
       expect(component.filteredObstaclesOptions()).toEqual([]);
     });
 
-    it('should include only obstacles whose supportUuid falls within the slider range (endSupport inclusive)', () => {
-      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 2 });
+    it('should include only obstacles whose supportUuid falls within the slider range (endSupport exclusive)', () => {
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 3 });
       spanService.section.set({
         supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
         obstacles: [
@@ -547,7 +547,7 @@ describe('StudioPageComponent', () => {
     });
 
     it('should exclude obstacles outside the slider range', () => {
-      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 3 });
       spanService.section.set({
         supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
         obstacles: [
@@ -563,7 +563,7 @@ describe('StudioPageComponent', () => {
     });
 
     it('should not include selected obstacle when it is outside the visible slider range', () => {
-      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 3 });
       spanService.section.set({
         supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
         obstacles: [
@@ -578,12 +578,28 @@ describe('StudioPageComponent', () => {
         { label: 'Obstacle B', value: 'obs-1' }
       ]);
     });
+
+    it('should exclude obstacles attached to endSupport (they belong to the next span)', () => {
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 1 });
+      spanService.section.set({
+        supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
+        obstacles: [
+          { uuid: 'obs-0', name: 'Obstacle A', supportUuid: 'sup-0' },
+          { uuid: 'obs-1', name: 'Obstacle B', supportUuid: 'sup-1' }
+        ]
+      } as unknown as Section);
+
+      expect(component.filteredObstaclesOptions()).toEqual([
+        { label: 'No selected', value: null },
+        { label: 'Obstacle A', value: 'obs-0' }
+      ]);
+    });
   });
 
   describe('obstacle selection reset on span change', () => {
     it('should reset obstacle selection when startSupport or endSupport change', async () => {
       // Setup: select an obstacle
-      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 2 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 3 });
       spanService.section.set({
         supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }, { uuid: 'sup-2' }],
         obstacles: [{ uuid: 'obs-0', name: 'Obstacle A', supportUuid: 'sup-0', positions: [{ x: 0, y: 0, z: 0 }] }]
@@ -592,7 +608,7 @@ describe('StudioPageComponent', () => {
       expect(obstaclesService.selectedObstacleUuid()).toBe('obs-0');
 
       // Simulate span change — obstacle is now outside visible range
-      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 2 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 3 });
 
       // Verify filtered options no longer include the obstacle from sup-0
       expect(component.filteredObstaclesOptions()).toEqual([]);

@@ -1,4 +1,5 @@
 import { LateralDistanceType, Obstacle, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { Support } from '@shared/domain/models/support.model';
 import {
   ObstacleAnnotationData,
   getObstacleClickPayload,
@@ -28,7 +29,8 @@ const makeObstacle = (overrides: Partial<Obstacle> = {}): Obstacle => ({
   ...overrides
 });
 
-const makeSupport = (uuid: string) => ({ uuid });
+const makeSupport = (uuid: string) =>
+  ({ uuid, number: null, name: null, spanLength: null, spanAngle: null, attachmentSet: null, attachmentHeight: null, heightBelowConsole: null, towerModel: null, cableType: null, armLength: null, chainName: null, chainLength: null, chainWeight: null, chainV: null, counterWeight: null, supportFootAltitude: null, attachmentPosition: null, chainSurface: null }) satisfies Support;
 
 describe('getObstacleClickPayload', () => {
   const obstacles = [makeObstacle(), makeObstacle({ uuid: 'obs-2', supportUuid: 'sup-2' })];
@@ -156,7 +158,7 @@ describe('createObstaclesAnnotations', () => {
     obstacles: [],
     currentObstacleUuid: 'obs-1',
     currentObstaclePointIndex: 0,
-    supports: [],
+    supports: [makeSupport('sup-1'), makeSupport('sup-2')],
     distances: [],
     distanceType: 'oblique' as const,
     ...overrides
@@ -207,17 +209,20 @@ describe('createObstaclesAnnotations', () => {
     expect(markerB.font!.color).toBe('black');
   });
 
-  it('should return empty array when obstacle support is the last support (excluded)', () => {
-    const obstacle = makeObstacle({ supportUuid: 'sup-2' });
+  it('should return empty array when obstacle support is outside visible span', () => {
+    const obstacle = makeObstacle({ supportUuid: 'sup-3' });
     const params = basePlotParams({
-      data: [makeSupportDataObject('sup-1', 0, 0, 0), makeSupportDataObject('sup-2', 10, 0, 0)],
-      obstacles: [obstacle]
+      startSupport: 0,
+      endSupport: 1,
+      supports: [makeSupport('sup-1'), makeSupport('sup-2'), makeSupport('sup-3')],
+      obstacles: [obstacle],
+      litData: makeLitData([{ uuid: 'obs-1', points: [[5, 5, 5]] }])
     });
-    // sup-2 is the last support and should be sliced off
+    // sup-3 is outside [startSupport, endSupport] and must be hidden
     expect(createObstaclesAnnotations(params)).toEqual([]);
   });
 
-  it('should show all obstacles from litData regardless of visible supports', () => {
+  it('should only show obstacles within visible support range', () => {
     const visibleObstacle = makeObstacle({ uuid: 'obs-visible', supportUuid: 'sup-1', name: 'Visible' });
     const hiddenObstacle = makeObstacle({ uuid: 'obs-hidden', supportUuid: 'sup-3', name: 'Hidden' });
     const params = basePlotParams({
@@ -232,19 +237,16 @@ describe('createObstaclesAnnotations', () => {
       ])
     });
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
-    // Both obstacles from litData are rendered (2 obstacles × 1 point × 2 annotations = 4)
-    expect(annotations).toHaveLength(4);
+    // Only obs-visible is within [startSupport, endSupport]: 1 obstacle × 1 point × 2 annotations = 2
+    expect(annotations).toHaveLength(2);
     const markerVisible = annotations.find(
       (a) => a.text === '◆' && a.data?.obstacleUuid === 'obs-visible'
     ) as ObstacleAnnotation;
-    const markerHidden = annotations.find(
-      (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-hidden'
-    ) as ObstacleAnnotation;
     expect(markerVisible.font!.color).toBe('red');
-    expect(markerHidden.font!.color).toBe('black');
+    expect(annotations.some((a) => a.data?.obstacleUuid === 'obs-hidden')).toBe(false);
   });
 
-  it('should include obstacles on the endSupport (inclusive)', () => {
+  it('should not show obstacles on the endSupport (they belong to the next span)', () => {
     const obstacle = makeObstacle({ uuid: 'obs-end', supportUuid: 'sup-2', name: 'End' });
     const params = basePlotParams({
       startSupport: 0,
@@ -255,8 +257,30 @@ describe('createObstaclesAnnotations', () => {
       litData: makeLitData([{ uuid: 'obs-end', points: [[5, 5, 5]] }])
     });
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
+    // sup-2 is the endSupport and belongs to the next span
+    expect(annotations).toHaveLength(0);
+  });
+
+  it('should not show obstacles attached to endSupport (they belong to the next span)', () => {
+    // Span 0 = support 0→1, obstacles on support 1 are on span 1 (next span)
+    const obstacleOnCurrentSpan = makeObstacle({ uuid: 'obs-span0', supportUuid: 'sup-1', name: 'Span0' });
+    const obstacleOnNextSpan = makeObstacle({ uuid: 'obs-span1', supportUuid: 'sup-2', name: 'Span1' });
+    const params = basePlotParams({
+      startSupport: 0,
+      endSupport: 1,
+      currentObstacleUuid: null,
+      supports: [makeSupport('sup-1'), makeSupport('sup-2'), makeSupport('sup-3')],
+      obstacles: [obstacleOnCurrentSpan, obstacleOnNextSpan],
+      litData: makeLitData([
+        { uuid: 'obs-span0', points: [[1, 2, 3]] },
+        { uuid: 'obs-span1', points: [[10, 20, 30]] }
+      ])
+    });
+    const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
+    // Only obs-span0 should appear; obs-span1 is on the next span
     expect(annotations).toHaveLength(2);
-    expect(annotations[0].data?.obstacleUuid).toBe('obs-end');
+    expect(annotations[0].data?.obstacleUuid).toBe('obs-span0');
+    expect(annotations.some((a) => a.data?.obstacleUuid === 'obs-span1')).toBe(false);
   });
 
   it('should create annotation for obstacle with valid position in 3d', () => {
@@ -634,6 +658,8 @@ describe('createObstaclesAnnotations', () => {
     // Python computes: rightBase = sup-3 (200, 80, 90), altitude = 10 + 90 = 100, x = 200 - 5 = 195, y = 80 + 3 = 83
     const params = basePlotParams({
       currentObstacleUuid: 'obs-edge',
+      supports: [makeSupport('sup-1'), makeSupport('sup-2'), makeSupport('sup-3')],
+      endSupport: 2,
       obstacles: [
         makeObstacle({
           uuid: 'obs-edge',
@@ -661,6 +687,8 @@ describe('createObstaclesAnnotations', () => {
     });
     // Python computes: rightBase = sup-3 (200, 40, 80), altitude = 4 + 80 = 84, x = 200 - 3 = 197, y = 40 + 1 = 41
     const params = basePlotParams({
+      supports: [makeSupport('sup-1'), makeSupport('sup-2'), makeSupport('sup-3')],
+      endSupport: 2,
       obstacles: [obstacle],
       litData: makeLitData([{ uuid: 'obs-1', points: [[197, 41, 84]] }]),
       view: '3d'
