@@ -198,7 +198,7 @@ describe('createObstaclesAnnotations', () => {
     // 2 obstacles × 1 point × 2 annotations = 4
     expect(annotations).toHaveLength(4);
     const markerA = annotations.find(
-      (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-A'
+      (a) => a.text === '◆' && a.data?.obstacleUuid === 'obs-A'
     ) as ObstacleAnnotation;
     const markerB = annotations.find(
       (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-B'
@@ -235,7 +235,7 @@ describe('createObstaclesAnnotations', () => {
     // Both obstacles from litData are rendered (2 obstacles × 1 point × 2 annotations = 4)
     expect(annotations).toHaveLength(4);
     const markerVisible = annotations.find(
-      (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-visible'
+      (a) => a.text === '◆' && a.data?.obstacleUuid === 'obs-visible'
     ) as ObstacleAnnotation;
     const markerHidden = annotations.find(
       (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-hidden'
@@ -271,7 +271,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     const label = annotations.find((a) => (a as ObstacleAnnotation).text === 'Obstacle 1') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 11, y: 22, z: 3 });
     expect(label).toMatchObject({ x: 11, y: 22, z: 3, text: 'Obstacle 1' });
@@ -291,7 +291,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 11, y: 22, z: 33 });
   });
 
@@ -314,7 +314,7 @@ describe('createObstaclesAnnotations', () => {
     expect(annotations).toHaveLength(2);
   });
 
-  it('should highlight all points of selected obstacle in red', () => {
+  it('should use diamond for non-active selected points and open circle for the active point', () => {
     const obstacle = makeObstacle({
       supportUuid: 'sup-1',
       positions: [
@@ -339,14 +339,16 @@ describe('createObstaclesAnnotations', () => {
     const annotations = createObstaclesAnnotations(params);
     // 2 points => 4 annotations (marker + label for each)
     expect(annotations).toHaveLength(4);
+    // point 0 is non-active — should use open circle
     const marker0 = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 0
+      (a: ObstacleAnnotation) => a.text === '○' && a.data?.obstaclePositionIndex === 0
     ) as ObstacleAnnotation;
+    // point 1 is the active point — should use diamond
     const marker1 = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 1
+      (a: ObstacleAnnotation) => a.text === '◆' && a.data?.obstaclePositionIndex === 1
     ) as ObstacleAnnotation;
-    // All points of the selected obstacle are red
-    expect(marker0.font!.color).toBe('red');
+    // Non-active point uses inactive color, active point uses active color
+    expect(marker0.font!.color).toBe('#922911');
     expect(marker1.font!.color).toBe('red');
   });
 
@@ -364,7 +366,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 3, z: 3 });
   });
 
@@ -384,7 +386,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 33, z: 33 });
   });
 
@@ -401,7 +403,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker.z).toBe(105);
   });
 
@@ -418,7 +420,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker.z).toBe(170);
   });
 
@@ -436,7 +438,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker.z).toBe(125);
   });
 
@@ -453,7 +455,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker.z).toBe(205);
   });
 
@@ -470,7 +472,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker.z).toBe(205);
   });
 
@@ -488,7 +490,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker.z).toBe(185);
   });
 
@@ -502,7 +504,7 @@ describe('createObstaclesAnnotations', () => {
       litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 3]] }])
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     const label = annotations.find((a) => (a as ObstacleAnnotation).text === 'Obstacle 1') as ObstacleAnnotation;
     expect(marker.data).toEqual({ obstacleUuid: 'obs-1', obstaclePositionIndex: 0, type: 'obstacle' });
     expect(label.data).toEqual({ obstacleUuid: 'obs-1', obstaclePositionIndex: 0, type: 'obstacle' });
@@ -520,7 +522,7 @@ describe('createObstaclesAnnotations', () => {
     });
 
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
-    const marker = annotations.find((a) => a.text === '●');
+    const marker = annotations.find((a) => a.text === '◆');
     const label = annotations.find((a) => a.text === 'Obstacle 1');
 
     expect(marker!.captureevents).toBe(true);
@@ -546,7 +548,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 48, y: 43, z: 85 });
   });
 
@@ -567,7 +569,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 48, y: 85, z: 85 });
   });
 
@@ -585,7 +587,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker.x).toBe(95);
   });
 
@@ -605,7 +607,7 @@ describe('createObstaclesAnnotations', () => {
       side: 'face'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 52, y: 7, z: 7 });
   });
 
@@ -624,7 +626,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 49, z: 83 });
   });
 
@@ -646,7 +648,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 195, y: 83, z: 100 });
   });
 
@@ -665,7 +667,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 197, y: 41, z: 84 });
   });
 
@@ -701,7 +703,7 @@ describe('createObstaclesAnnotations', () => {
     expect(annotations).toHaveLength(4);
 
     const leftMarker = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-left'
+      (a: ObstacleAnnotation) => a.text === '◆' && a.data?.obstacleUuid === 'obs-left'
     ) as ObstacleAnnotation;
     const rightMarker = annotations.find(
       (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-right'
@@ -730,7 +732,7 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 52, y: 85, z: 85 });
   });
 
@@ -750,7 +752,7 @@ describe('createObstaclesAnnotations', () => {
       side: 'profile'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 92, y: 15, z: 15 });
   });
 
@@ -780,15 +782,17 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(4);
+    // point 0 is the active point — diamond
     const marker0 = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 0
+      (a: ObstacleAnnotation) => a.text === '◆' && a.data?.obstaclePositionIndex === 0
     ) as ObstacleAnnotation;
+    // point 1 is a non-active point of the selected obstacle — open circle
     const marker1 = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstaclePositionIndex === 1
+      (a: ObstacleAnnotation) => a.text === '○' && a.data?.obstaclePositionIndex === 1
     ) as ObstacleAnnotation;
-    // All points of the selected obstacle are red
+    // Active point uses active color, non-active uses inactive color
     expect(marker0.font!.color).toBe('red');
-    expect(marker1.font!.color).toBe('red');
+    expect(marker1.font!.color).toBe('#922911');
   });
 
   it('should place obstacle at right support when position.x is 0', () => {
@@ -805,7 +809,7 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '●') as ObstacleAnnotation;
+    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
     expect(marker.x).toBe(100);
   });
 
@@ -839,7 +843,8 @@ describe('createObstaclesAnnotations', () => {
     // 3 positions × 2 annotations = 6
     expect(annotations).toHaveLength(6);
 
-    const markers = annotations.filter((a: ObstacleAnnotation) => a.text === '●') as ObstacleAnnotation[];
+    // marker symbols: point 0 is active (○), points 1 and 2 are non-active (◆)
+    const markers = annotations.filter((a: ObstacleAnnotation) => a.captureevents) as ObstacleAnnotation[];
     expect(markers[0]).toMatchObject({ x: 190, y: 1, z: 5 });
     expect(markers[1]).toMatchObject({ x: 180, y: 2, z: 8 });
     expect(markers[2]).toMatchObject({ x: 170, y: 3, z: 12 });

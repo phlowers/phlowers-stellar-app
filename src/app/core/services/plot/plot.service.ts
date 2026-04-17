@@ -157,8 +157,8 @@ export class PlotService {
     }
 
     const plotOptions = untracked(() => this.plotOptionsService.plotOptions());
-    const baseScaleFactors = untracked(() => this.plotOptionsService.baseScaleFactors());
-    await this.updateAxesNorms(baseScaleFactors, plotOptions);
+    const currentNorms = untracked(() => this.plotOptionsService.axesNorms());
+    await this.updateAxesNorms(currentNorms, plotOptions);
 
     const sectionLitData = result?.current ?? null;
     const obstacles = section.obstacles ?? [];
@@ -194,8 +194,8 @@ export class PlotService {
     this.error.set(error);
     this.pythonErrorCode.set(pythonErrorCode ?? null);
 
-    const baseScaleFactors = untracked(() => this.plotOptionsService.baseScaleFactors());
-    await this.updateAxesNorms(baseScaleFactors, plotOptions);
+    const currentNorms = untracked(() => this.plotOptionsService.axesNorms());
+    await this.updateAxesNorms(currentNorms, plotOptions);
 
     this.loading.set(false);
   };
@@ -212,15 +212,15 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  private async updateAxesNorms(baseScaleFactors: AxesNorms, plotOptions: PlotOptions): Promise<void> {
+  private async updateAxesNorms(currentNorms: AxesNorms, plotOptions: PlotOptions): Promise<void> {
     const { result } = await this.workerPythonService.runTask(Task.getAspectRatio, {
-      ...baseScaleFactors,
+      ...currentNorms,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
       view: plotOptions.view
     });
     if (result) {
-      this.plotOptionsService.setAxesNorms({ ...result, aspectMode: baseScaleFactors.aspectMode });
+      this.plotOptionsService.setAxesNorms({ ...result, aspectMode: currentNorms.aspectMode });
     }
   }
 

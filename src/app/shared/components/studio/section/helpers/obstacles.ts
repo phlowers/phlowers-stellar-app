@@ -80,10 +80,29 @@ export const appendExistingObstaclesWithFormObstacle = (
   return [...remaining, formObstacle];
 };
 
+const OBSTACLE_COLOR_UNSELECTED = 'black';
+const OBSTACLE_COLOR_ACTIVE_POINT = 'red';
+const OBSTACLE_COLOR_INACTIVE_POINT = '#922911';
+
 const getHighlightColor = (
   obstacleUuid: string,
   currentObstacleUuid: string | null
-): string => (obstacleUuid === currentObstacleUuid ? 'red' : 'black');
+): string => (obstacleUuid === currentObstacleUuid ? OBSTACLE_COLOR_ACTIVE_POINT : OBSTACLE_COLOR_UNSELECTED);
+
+const getMarkerAppearance = (
+  obstacleUuid: string,
+  pointIndex: number,
+  currentObstacleUuid: string | null,
+  currentObstaclePointIndex: number
+): { symbol: string; color: string } => {
+  if (obstacleUuid !== currentObstacleUuid) {
+    return { symbol: '\u25cf', color: OBSTACLE_COLOR_UNSELECTED }; // ● filled circle
+  }
+  if (pointIndex === currentObstaclePointIndex) {
+    return { symbol: '\u25c6', color: OBSTACLE_COLOR_ACTIVE_POINT }; // ◆ diamond
+  }
+  return { symbol: '\u25cb', color: OBSTACLE_COLOR_INACTIVE_POINT }; // ○ open circle
+};
 
 /**
  * Creates Plotly annotation objects for all obstacle points returned by Python (`litData.obstacles`).
@@ -94,7 +113,7 @@ const getHighlightColor = (
  * @returns An array of partial Plotly annotation objects representing obstacles.
  */
 export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const { litData, obstacles, view, side, currentObstacleUuid } = plotParams;
+  const { litData, obstacles, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
   const is2d = view === '2d';
 
   if (!litData?.obstacles?.length) {
@@ -114,6 +133,7 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
       const pz = cz;
 
       const color = getHighlightColor(obstacleUuid, currentObstacleUuid);
+      const { symbol, color: markerColor } = getMarkerAppearance(obstacleUuid, pointIndex, currentObstacleUuid, currentObstaclePointIndex);
       const annotationData = {
         obstacleUuid,
         obstaclePositionIndex: pointIndex,
@@ -127,8 +147,8 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
         x: px,
         y: py,
         z: pz,
-        text: '●',
-        font: { ...BASE_ANNOTATION.font, color, size: 14 },
+        text: symbol,
+        font: { ...BASE_ANNOTATION.font, color: markerColor, size: 14 },
         hovertext,
         data: annotationData
       } as Partial<Plotly.Annotations>;
