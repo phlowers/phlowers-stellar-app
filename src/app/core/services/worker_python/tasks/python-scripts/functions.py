@@ -318,15 +318,12 @@ def init_section(js_inputs: dict):
     input_section = python_inputs["section"]
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
-    input_initial_condition = (
-        None
-        if not input_initial_conditions
-        else next(
+    input_initial_condition = next(
             condition
             for condition in input_initial_conditions
             if condition["uuid"] == input_section["selected_initial_condition_uuid"]
         )
-    )
+    
     input_charges = input_section["charges"] if "charges" in input_section else []
     input_charge = (
         None
@@ -337,9 +334,7 @@ def init_section(js_inputs: dict):
             if charge["uuid"] == input_section["selected_charge_uuid"]
         )
     )
-    initial_condition = (
-        InitialCondition(**input_initial_condition) if input_initial_condition else None
-    )
+    initial_condition = InitialCondition(**input_initial_condition)
     cable = Cable(**input_cable)
 
     if not input_section["supports"]:
@@ -351,14 +346,12 @@ def init_section(js_inputs: dict):
         supports_data.append(Support(**support_js))
     df = generate_section_array(supports_data)
 
-    section = SectionArray(df, bundle_number=input_section["cables_amount"])
+    section = SectionArray(
+        df,
+        sagging_parameter=initial_condition.base_parameters,
+        sagging_temperature=initial_condition.base_temperature,
+        bundle_number=input_section["cables_amount"])
     section.angles_sense = "clockwise"
-    # set sagging parameter and temperatur
-    if initial_condition:
-        section.sagging_parameter = initial_condition.base_parameters
-    section.sagging_temperature = (
-        initial_condition.base_temperature if initial_condition else 15
-    )
 
     cable_array = CableArray(
         pd.DataFrame(
@@ -408,7 +401,14 @@ def init_section(js_inputs: dict):
 
     # Create base engine state (before any climate changes)
     # by creating a separate BalanceEngine with same initial params
-    base_section = SectionArray(df.copy())
+
+    # TODO: replace this by section.copy() later
+    base_section = SectionArray(
+        df.copy(),
+        sagging_parameter=initial_condition.base_parameters,
+        sagging_temperature=initial_condition.base_temperature,
+        bundle_number=input_section["cables_amount"])
+    
     if initial_condition:
         base_section.sagging_parameter = initial_condition.base_parameters
     base_section.sagging_temperature = (
