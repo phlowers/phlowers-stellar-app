@@ -85,4 +85,42 @@ export interface CatalogCable {
   radial_thermal_conductivity: number | undefined;
   /** Whether the cable has a magnetic (steel) core */
   has_magnetic_heart: boolean | undefined;
+  /** Whether the cable is bimetallic */
+  is_bimetallic: boolean | undefined;
+  /** Rated tensile strength of the whole cable in N */
+  rts_cable: number | undefined;
+  /** Rated tensile strength of layer 1 in N */
+  rts_layer_1: number | undefined;
+  /** Number of strands in layer 1 */
+  nb_strand_layer_1: number | undefined;
+  /** Rated tensile strength of layer 2 in N */
+  rts_layer_2: number | undefined;
+  /** Number of strands in layer 2 */
+  nb_strand_layer_2: number | undefined;
+  /** Rated tensile strength of layer 3 in N */
+  rts_layer_3: number | undefined;
+  /** Number of strands in layer 3 */
+  nb_strand_layer_3: number | undefined;
+  /** Rated tensile strength of layer 4 in N */
+  rts_layer_4: number | undefined;
+  /** Number of strands in layer 4 */
+  nb_strand_layer_4: number | undefined;
+  /** Rated tensile strength of layer 5 in N */
+  rts_layer_5: number | undefined;
+  /** Number of strands in layer 5 */
+  nb_strand_layer_5: number | undefined;
+  /** Rated tensile strength of layer 6 in N */
+  rts_layer_6: number | undefined;
+  /** Number of strands in layer 6 */
+  nb_strand_layer_6: number | undefined;
+  /** Rated tensile strength of layer 7 in N */
+  rts_layer_7: number | undefined;
+  /** Number of strands in layer 7 */
+  nb_strand_layer_7: number | undefined;
+  /** Rated tensile strength of layer 8 in N */
+  rts_layer_8: number | undefined;
+  /** Number of strands in layer 8 */
+  nb_strand_layer_8: number | undefined;
+  /** Safety coefficient applied to the cable RTS */
+  safety_coefficient: number | undefined;
 }

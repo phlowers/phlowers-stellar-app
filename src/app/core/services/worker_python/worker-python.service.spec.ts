@@ -123,7 +123,26 @@ describe('WorkerService', () => {
     electric_resistance_20: undefined,
     linear_resistance_temperature_coef: undefined,
     radial_thermal_conductivity: undefined,
-    has_magnetic_heart: undefined
+    has_magnetic_heart: undefined,
+    is_bimetallic: undefined,
+    rts_cable: undefined,
+    rts_layer_1: undefined,
+    nb_strand_layer_1: undefined,
+    rts_layer_2: undefined,
+    nb_strand_layer_2: undefined,
+    rts_layer_3: undefined,
+    nb_strand_layer_3: undefined,
+    rts_layer_4: undefined,
+    nb_strand_layer_4: undefined,
+    rts_layer_5: undefined,
+    nb_strand_layer_5: undefined,
+    rts_layer_6: undefined,
+    nb_strand_layer_6: undefined,
+    rts_layer_7: undefined,
+    nb_strand_layer_7: undefined,
+    rts_layer_8: undefined,
+    nb_strand_layer_8: undefined,
+    safety_coefficient: undefined
   });
 
   beforeEach(() => {

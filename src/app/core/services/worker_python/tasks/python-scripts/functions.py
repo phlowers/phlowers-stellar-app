@@ -132,6 +132,7 @@ class Cable:
     stress_strain_b3: float
     stress_strain_b4: float
     is_polynomial: bool
+    is_bimetallic: bool
     diameter_heart: float
     section_conductor: float
     section_heart: float
@@ -141,6 +142,24 @@ class Cable:
     linear_resistance_temperature_coef: float
     radial_thermal_conductivity: float
     has_magnetic_heart: bool
+    rts_cable: float
+    rts_layer_1: float
+    nb_strand_layer_1: float
+    rts_layer_2: float
+    nb_strand_layer_2: float
+    rts_layer_3: float
+    nb_strand_layer_3: float
+    rts_layer_4: float
+    nb_strand_layer_4: float
+    rts_layer_5: float
+    nb_strand_layer_5: float
+    rts_layer_6: float
+    nb_strand_layer_6: float
+    rts_layer_7: float
+    nb_strand_layer_7: float
+    rts_layer_8: float
+    nb_strand_layer_8: float
+    safety_coefficient: float
 
 
 def generate_section_array(supports: list[Support]):
@@ -391,6 +410,24 @@ def init_section(js_inputs: dict):
                 "radial_thermal_conductivity": [cable.radial_thermal_conductivity],
                 "has_magnetic_heart": [cable.has_magnetic_heart],
                 "is_polynomial": [cable.is_polynomial],
+                "rts_cable": [cable.rts_cable],
+                "rts_layer_1": [cable.rts_layer_1],
+                "nb_strand_layer_1": [cable.nb_strand_layer_1],
+                "rts_layer_2": [cable.rts_layer_2],
+                "nb_strand_layer_2": [cable.nb_strand_layer_2],
+                "rts_layer_3": [cable.rts_layer_3],
+                "nb_strand_layer_3": [cable.nb_strand_layer_3],
+                "rts_layer_4": [cable.rts_layer_4],
+                "nb_strand_layer_4": [cable.nb_strand_layer_4],
+                "rts_layer_5": [cable.rts_layer_5],
+                "nb_strand_layer_5": [cable.nb_strand_layer_5],
+                "rts_layer_6": [cable.rts_layer_6],
+                "nb_strand_layer_6": [cable.nb_strand_layer_6],
+                "rts_layer_7": [cable.rts_layer_7],
+                "nb_strand_layer_7": [cable.nb_strand_layer_7],
+                "rts_layer_8": [cable.rts_layer_8],
+                "nb_strand_layer_8": [cable.nb_strand_layer_8],
+                "safety_coefficient": [cable.safety_coefficient],
             }
         )
     )
@@ -400,7 +437,7 @@ def init_section(js_inputs: dict):
             "dilatation_coefficient": "1/K",
         }
     )
-
+    logger.debug(f"cable rrts test - rts overage: {cable_array.rts_coverage()}")
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
     plt_line = PlotEngine(engine)
     engine.solve_adjustment()

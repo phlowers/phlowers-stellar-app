@@ -75,4 +75,42 @@ export interface CableCsvDto {
   radial_thermal_conductivity: string;
   /** Whether the core is magnetic steel */
   has_magnetic_heart: string;
+  /** Whether the cable is bimetallic */
+  is_bimetallic: string;
+  /** Rated tensile strength of the whole cable */
+  rts_cable: string | undefined;
+  /** Rated tensile strength of layer 1 */
+  rts_layer_1: string | undefined;
+  /** Number of strands in layer 1 */
+  nb_strand_layer_1: string | undefined;
+  /** Rated tensile strength of layer 2 */
+  rts_layer_2: string | undefined;
+  /** Number of strands in layer 2 */
+  nb_strand_layer_2: string | undefined;
+  /** Rated tensile strength of layer 3 */
+  rts_layer_3: string | undefined;
+  /** Number of strands in layer 3 */
+  nb_strand_layer_3: string | undefined;
+  /** Rated tensile strength of layer 4 */
+  rts_layer_4: string | undefined;
+  /** Number of strands in layer 4 */
+  nb_strand_layer_4: string | undefined;
+  /** Rated tensile strength of layer 5 */
+  rts_layer_5: string | undefined;
+  /** Number of strands in layer 5 */
+  nb_strand_layer_5: string | undefined;
+  /** Rated tensile strength of layer 6 */
+  rts_layer_6: string | undefined;
+  /** Number of strands in layer 6 */
+  nb_strand_layer_6: string | undefined;
+  /** Rated tensile strength of layer 7 */
+  rts_layer_7: string | undefined;
+  /** Number of strands in layer 7 */
+  nb_strand_layer_7: string | undefined;
+  /** Rated tensile strength of layer 8 */
+  rts_layer_8: string | undefined;
+  /** Number of strands in layer 8 */
+  nb_strand_layer_8: string | undefined;
+  /** Safety coefficient applied to the cable RTS */
+  safety_coefficient: string | undefined;
 }

@@ -69,6 +69,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     - EEL_DESIGNATION
 
 3. cables data should be put inside a `public/data/cables.csv` file with the following columns:
+    - cable_id
     - name
     - data_source
     - section
@@ -77,6 +78,8 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     - linear_mass
     - dilatation_coefficient
     - temperature_reference
+    - section_conductor
+    - section_heart
     - stress_strain_a0
     - stress_strain_a1
     - stress_strain_a2
@@ -88,6 +91,32 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     - stress_strain_b3
     - stress_strain_b4
     - is_polynomial
+    - is_bimetallic
+    - diameter_heart
+    - has_magnetic_heart
+    - electric_resistance_20
+    - linear_resistance_temperature_coef
+    - emissivity
+    - solar_absorption
+    - radial_thermal_conductivity
+    - rts_cable
+    - rts_layer_1
+    - nb_strand_layer_1
+    - rts_layer_2
+    - nb_strand_layer_2
+    - rts_layer_3
+    - nb_strand_layer_3
+    - rts_layer_4
+    - nb_strand_layer_4
+    - rts_layer_5
+    - nb_strand_layer_5
+    - rts_layer_6
+    - nb_strand_layer_6
+    - rts_layer_7
+    - nb_strand_layer_7
+    - rts_layer_8
+    - nb_strand_layer_8
+    - safety_coefficient
 
 4. chains data should be put inside a `public/data/chains.csv` file with the following columns:
     - name
