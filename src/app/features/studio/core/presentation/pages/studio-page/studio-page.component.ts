@@ -46,6 +46,12 @@ import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 
+/** Display mode for global section parameters: middle span or section maximum. */
+type GlobalStateMode = 'span' | 'max_section';
+
+/** Number of spans displayed in the section view. */
+type SpanAmountChoice = 'single' | 'double' | 'all';
+
 /** Main studio page component orchestrating section visualization, loads, obstacles, and toolbars. */
 @Component({
   selector: 'app-studio-page',
@@ -94,7 +100,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   spanAmountChoiceOptions = signal<
     {
       label: string;
-      value: string;
+      value: SpanAmountChoice;
     }[]
   >([
     { label: $localize`One span`, value: 'single' },
@@ -110,7 +116,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     { label: $localize`Max section`, value: 'max_section' }
   ];
 
-  globalState = signal<string>('max_section');
+  globalState = signal<GlobalStateMode>('max_section');
   globalParameter = computed<number | null>(() => this.resolveGlobalValue(this.plotService.litData()?.parameter));
   globalStressRate = computed<number | null>(() =>
     this.resolveGlobalValue(this.plotService.litData()?.utilization_rate)
@@ -254,7 +260,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.plotService.spanAmountChoice.set(spanAmount);
   }, STUDIO_PLOT_DEBOUNCE_DELAY);
 
-  private getSpanAmount(diff: number): 'single' | 'double' | 'all' {
+  private getSpanAmount(diff: number): SpanAmountChoice {
     if (diff === 1) return 'single';
     if (diff === 2) return 'double';
     return 'all';
@@ -277,7 +283,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onSelectSpanAmount(value: string) {
-    this.plotService.spanAmountChoice.set(value as 'single' | 'double' | 'all');
+    this.plotService.spanAmountChoice.set(value as SpanAmountChoice);
     const startSupport = this.plotService.plotOptions().startSupport;
     const maxSupport = (this.plotService.section()?.supports.length ?? 0) - 1;
     if (value === 'all') {

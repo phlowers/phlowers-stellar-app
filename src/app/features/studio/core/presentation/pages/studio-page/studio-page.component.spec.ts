@@ -2,14 +2,24 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StudioPageComponent } from './studio-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
+import { DecimalPipe } from '@angular/common';
 import { ElementRef, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { FormsModule } from '@angular/forms';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { SelectModule } from 'primeng/select';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { TabsModule } from 'primeng/tabs';
 import { PlotService } from '@services/plot/plot.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { SectionService } from '@services/section/section.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { Section, Study } from '@shared/domain';
 
 interface SignalFn<T> {
@@ -762,6 +772,89 @@ describe('StudioPageComponent', () => {
       component.globalState.set('span');
       // findMiddleSpan(0,4) = [2,3] → index 2 → 30
       expect(component.globalStressRate()).toBe(30);
+    });
+  });
+});
+
+describe('StudioPageComponent - HTML rendering', () => {
+  let fixture: ComponentFixture<StudioPageComponent>;
+
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+  beforeEach(async () => {
+    const mockPlotService = {
+      isFreePositioningMode: signal(false),
+      section: signal<Section | null>(null),
+      litData: signal(null),
+      loading: signal(false),
+      distanceType: signal<'oblique' | 'vertical' | 'horizontal' | null>(null),
+      plotOptions: vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 }),
+      plotOptionsChange: vi.fn(),
+      spanAmountChoice: signal<'single' | 'double' | 'all'>('all'),
+      study: signal(null),
+      isStudioActive: signal(false),
+      resetAll: vi.fn()
+    };
+
+    const mockLoadFormsService = {
+      activeLoadTab: signal('0')
+    };
+
+    const mockObstacleFormService = {
+      setExistingObstacle: vi.fn(),
+      results: signal({ oblique: null, vertical: null, horizontal: null })
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [StudioPageComponent],
+      providers: [
+        provideNoopAnimations(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: { get: vi.fn().mockReturnValue('study-1') },
+              queryParamMap: { get: vi.fn().mockReturnValue('section-1') }
+            }
+          }
+        },
+        { provide: PlotService, useValue: mockPlotService },
+        {
+          provide: StudiesService,
+          useValue: { ready: new Subject<boolean>(), getStudyAsObservable: vi.fn() }
+        },
+        { provide: ObstacleFormService, useValue: mockObstacleFormService },
+        { provide: LoadFormsService, useValue: mockLoadFormsService }
+      ]
+    })
+      .overrideComponent(StudioPageComponent, {
+        set: {
+          imports: [
+            DecimalPipe,
+            FormsModule,
+            NgxSliderModule,
+            InputNumberModule,
+            RadioButtonModule,
+            SelectModule,
+            SelectButtonModule,
+            TabsModule
+          ]
+        }
+      })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(StudioPageComponent);
+    fixture.detectChanges();
+  });
+
+  describe('HTML rendering - global-state-select', () => {
+    it('should render global-state-select', () => {
+      const el = getByTestId('global-state-select');
+      expect(el).toBeTruthy();
     });
   });
 });

@@ -25,6 +25,7 @@
           [ngModel]="globalState()"
           (ngModelChange)="globalState.set($event)"
           class="global-params__select-button"
+          data-testid="global-state-select"
         />
 
         <dl class="global-params__list">
@@ -70,15 +71,21 @@
                 />
               }
 
-              <app-icon
-                icon="content_cut"
-                class="global-params__list__cut-status"
-                [class]="
-                  isGlobalCutStrand()
-                    ? 'global-params__list__cut-status--cut'
-                    : 'global-params__list__cut-status--uncut'
-                "
-              />
+              @if (isGlobalCutStrand()) {
+                <app-icon
+                  icon="content_cut"
+                  class="global-params__list__cut-status global-params__list__cut-status--cut"
+                  ariaLabel="strand is cut"
+                  i18n-ariaLabel
+                />
+              } @else {
+                <app-icon
+                  icon="content_cut"
+                  class="global-params__list__cut-status global-params__list__cut-status--uncut"
+                  ariaLabel="strand is not cut"
+                  i18n-ariaLabel
+                />
+              }
             </dd>
           </div>
         </dl>
