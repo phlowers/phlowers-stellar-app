@@ -142,27 +142,47 @@ def compute_distances(inputs: dict, plot_engine: PlotEngine, project: bool, supp
             x_axis_end=sea_level_groud_coords_end,
         )
     # Compute the distance from a point to the curve
-        distance_result: DistanceResult = (
-            plot_engine.position_engine.distance_engine.plane_distance(np.array([obstacle['x'], obstacle['y'], obstacle['z']]))
-        )
-        u_proj, v_proj = distance_result.projection_points(
-                distance_result.point_base
+        try:
+            distance_result: DistanceResult = (
+                plot_engine.position_engine.distance_engine.plane_distance(np.array([obstacle['x'], obstacle['y'], obstacle['z']]))
             )
-        result.append(
-            {
-                "obstacleUuid": obstacle["name"],
-                "points": [
-                    {
-                        "pointIndex": obstacle["point_index"],
-                        "linePoint": distance_result.point_target.tolist(),
-                        "virtualPointHorizontal": u_proj.tolist(),
-                        "virtualPointVertical": v_proj.tolist(),
-                        "distanceDiagonal": distance_result.distance_3d,
-                        "distanceHorizontal": distance_result.distance_projection_u,
-                        "distanceVertical": distance_result.distance_projection_v,
-                    }
-                ],
-            }
-        )
+            u_proj, v_proj = distance_result.projection_points(
+                    distance_result.point_base
+                )
+            result.append(
+                {
+                    "obstacleUuid": obstacle["name"],
+                    "points": [
+                        {
+                            "pointIndex": obstacle["point_index"],
+                            "linePoint": distance_result.point_target.tolist(),
+                            "virtualPointHorizontal": u_proj.tolist(),
+                            "virtualPointVertical": v_proj.tolist(),
+                            "distanceDiagonal": distance_result.distance_3d,
+                            "distanceHorizontal": distance_result.distance_projection_u,
+                            "distanceVertical": distance_result.distance_projection_v,
+                        }
+                    ],
+                }
+            )
 
+        except ValueError as e:
+            logger.error(f"Error computing distance for obstacle {obstacle['name']}: {e}")
+            result.append(
+                {
+                    "obstacleUuid": obstacle["name"],
+                    "points": [
+                        {
+                            "pointIndex": obstacle["point_index"],
+                            "linePoint":[],
+                            "virtualPointHorizontal":[],
+                            "virtualPointVertical":[],
+                            "distanceDiagonal":[],
+                            "distanceHorizontal":[],
+                            "distanceVertical":[],
+                        }
+                    ],
+                }
+            )
+            continue
     return result
