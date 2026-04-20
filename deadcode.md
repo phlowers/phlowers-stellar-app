@@ -47,7 +47,20 @@
 
 ---
 
-*Last updated: 2026-04-14 — Fix bug charge delete*
+*Last updated: 2026-04-20 — Remove dead saveUser login flow*
+
+---
+
+## 4. AppComponent — `saveUser()` + `submitted` signal (removed login flow)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/app.component.ts` lines 134-145 (`saveUser`), line 57 (`submitted`) |
+| Code | `saveUser()` method referencing `this.form`, `this.userService`, `this.userDialog` — none of which existed on the component. `submitted` signal only used inside `saveUser()`. |
+| 🔍 Preuve | Build errors (TS2339). Test at line 165 confirmed: "should not have userDialog or saveUser (login flow removed)". No references in template. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed method, signal, and related dead tests (user dialog, email validation, saveUser calls). |
+| ✅ Validé | 🗑️ SUPPRIMÉ — 2026-04-20 |
 
 ---
 

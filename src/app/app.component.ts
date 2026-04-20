@@ -54,7 +54,6 @@ export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
   readonly isUpdateDialogOpen = signal(false);
 
-  readonly submitted = signal(false);
   private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
@@ -127,21 +126,6 @@ export class AppComponent implements OnInit {
   private async importAllCatalogs(): Promise<void> {
     for (const importFn of Object.values(this.csvImporters)) {
       await importFn();
-    }
-  }
-
-  async saveUser() {
-    this.submitted.set(true);
-    if (this.form.valid) {
-      try {
-        await this.userService.createUser({ email: this.form.value.email! });
-      } catch (err) {
-        this.logger.error('Error creating user', err);
-        this.notificationService.error($localize`Error creating user`);
-        return;
-      }
-      this.notificationService.success($localize`User info set`);
-      this.userDialog.set(false);
     }
   }
 
