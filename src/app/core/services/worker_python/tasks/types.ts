@@ -52,7 +52,7 @@ export enum Task {
   cableModification = 'cableModification',
   // get aspect ratio for plotting scale
   getAspectRatio = 'getAspectRatio',
-  // get wind incidence angle for cable temperature calculation 
+  // get wind incidence angle for cable temperature calculation
   getWindIncidence = 'getWindIncidence'
 }
 
@@ -407,6 +407,6 @@ export interface TaskOutputs {
     z: number;
   };
   [Task.getWindIncidence]: {
-    windIndidence: number;
+    windIncidence: number;
   };
 }

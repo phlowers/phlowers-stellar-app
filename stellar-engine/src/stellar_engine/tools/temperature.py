@@ -60,6 +60,7 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
 def get_wind_attack_angle(inputs: dict):
     wind_inputs = WindAngleCalculationInputs(**inputs)
     wind_azimuth = DIRECTION_MAP[wind_inputs.windDirection]
-    return ThermalEngine.compute_wind_attack_angle(
-        wind_inputs.azimuth, wind_azimuth
+    wind_incidence = ThermalEngine.compute_wind_attack_angle(
+        np.array(wind_inputs.azimuth), np.array(wind_azimuth)
     )
+    return {"windIncidence": wind_incidence}
