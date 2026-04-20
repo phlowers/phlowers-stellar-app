@@ -6,11 +6,34 @@
 
 import numpy as np
 
-from stellar_engine.tools.temperature import get_wind_attack_angle
+from stellar_engine.tools.papoto import calculate_papoto
 
 
 def test_papoto():
-    inputs = {"azimuth": 90, "windDirection": "North-East"}
-    result = get_wind_attack_angle(inputs)
-    assert "windIncidence" in result
-    np.testing.assert_all_close(result["windIncidence"], 45)
+    inputs = {
+        "spanLength": 498.565922913587,
+        "HL": 0.0,
+        "VL": 97.4327311161033,
+        "HR": 162.614599621714,
+        "VR": 88.6907631859419,
+        "H1": 5.1134354937127,
+        "V1": 98.4518011880176,
+        "H2": 19.6314054626454,
+        "V2": 97.6289296721015,
+        "H3": 97.1475339907774,
+        "V3": 87.9335010245142,
+    }
+    result = calculate_papoto(inputs)
+    expected_keys = {
+        "parameter",
+        "parameter_1_2",
+        "parameter_2_3",
+        "parameter_1_3",
+        "checkValidity",
+        "uncertainty",
+    }
+    assert expected_keys == set(result.keys())
+
+    np.testing.assert_allclose(result["parameter"], 2000, atol=1.0)
+    assert result["checkValidity"]
+    assert isinstance(result["uncertainty"], float)
